@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 /**
- * Language Definitions Service - Predefined language configurations
+ * Language Presets - Predefined language configurations
  *
  * This class replaces the legacy langdefs.php file and provides
  * access to predefined language configurations loaded from JSON.
@@ -8,29 +8,29 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Language\Infrastructure
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\Language\Infrastructure;
 
 /**
- * Service class for predefined language definitions.
+ * Infrastructure class for predefined language definitions.
  *
  * Provides access to default language configurations including
  * ISO codes, regex patterns, and display settings.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Language\Infrastructure
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
-class LanguageDefinitions
+class LanguagePresets
 {
     /**
      * Cached language definitions.
@@ -44,7 +44,7 @@ class LanguageDefinitions
      *
      * @var string
      */
-    private static string $jsonPath = __DIR__ . '/../Core/Language/langdefs.json';
+    private static string $jsonPath = __DIR__ . '/../../../backend/Core/Language/langdefs.json';
 
     /**
      * Get all language definitions in legacy array format.

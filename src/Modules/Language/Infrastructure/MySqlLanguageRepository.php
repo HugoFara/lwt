@@ -1,24 +1,28 @@
 <?php declare(strict_types=1);
 /**
- * Language Repository
+ * MySQL Language Repository
+ *
+ * Infrastructure adapter for language persistence using MySQL.
  *
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Core\Repository
+ * @package  Lwt\Modules\Language\Infrastructure
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Core\Repository;
+namespace Lwt\Modules\Language\Infrastructure;
 
-use Lwt\Core\Entity\Language;
-use Lwt\Core\Entity\ValueObject\LanguageId;
+use Lwt\Core\Repository\AbstractRepository;
+use Lwt\Modules\Language\Domain\Language;
+use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
+use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 
 /**
- * Repository for Language entities.
+ * MySQL implementation of LanguageRepositoryInterface.
  *
  * Provides database access for language management operations.
  *
@@ -26,7 +30,7 @@ use Lwt\Core\Entity\ValueObject\LanguageId;
  *
  * @since 3.0.0
  */
-class LanguageRepository extends AbstractRepository
+class MySqlLanguageRepository extends AbstractRepository implements LanguageRepositoryInterface
 {
     /**
      * @var string Table name without prefix

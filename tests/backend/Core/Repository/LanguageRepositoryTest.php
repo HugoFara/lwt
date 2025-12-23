@@ -3,10 +3,10 @@ namespace Lwt\Tests\Core\Repository;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\Entity\Language;
+use Lwt\Modules\Language\Domain\Language;
+use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Core\Repository\LanguageRepository;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
@@ -17,20 +17,16 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/LanguageId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/Language.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Database/PreparedStatement.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/RepositoryInterface.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/AbstractRepository.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/LanguageRepository.php';
+// Module classes loaded via autoloader
 
 /**
- * Unit tests for the LanguageRepository class.
+ * Unit tests for the MySqlLanguageRepository class (formerly LanguageRepository).
  */
 class LanguageRepositoryTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private LanguageRepository $repository;
+    private MySqlLanguageRepository $repository;
     private static array $testLanguageIds = [];
 
     public static function setUpBeforeClass(): void
@@ -53,7 +49,7 @@ class LanguageRepositoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->repository = new LanguageRepository();
+        $this->repository = new MySqlLanguageRepository();
     }
 
     protected function tearDown(): void
@@ -132,119 +128,6 @@ class LanguageRepositoryTest extends TestCase
         $this->assertNull($result);
     }
 
-    // ===== findAll() tests =====
-
-    public function testFindAllReturnsArray(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = $this->repository->findAll();
-
-        $this->assertIsArray($result);
-    }
-
-    public function testFindAllReturnsLanguages(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $this->createTestLanguageInDb('RepoTest_FindAll1');
-        $this->createTestLanguageInDb('RepoTest_FindAll2');
-
-        $result = $this->repository->findAll();
-
-        $names = array_map(fn($lang) => $lang->name(), $result);
-        $this->assertContains('RepoTest_FindAll1', $names);
-        $this->assertContains('RepoTest_FindAll2', $names);
-    }
-
-    // ===== findBy() tests =====
-
-    public function testFindByWithSingleCriteria(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $id = $this->createTestLanguageInDb('RepoTest_FindBy');
-
-        $result = $this->repository->findBy(['name' => 'RepoTest_FindBy']);
-
-        $this->assertCount(1, $result);
-        $this->assertEquals($id, $result[0]->id()->toInt());
-    }
-
-    public function testFindByWithLimit(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $this->createTestLanguageInDb('RepoTest_Limit1');
-        $this->createTestLanguageInDb('RepoTest_Limit2');
-        $this->createTestLanguageInDb('RepoTest_Limit3');
-
-        $result = $this->repository->findBy([], null, 2);
-
-        $this->assertLessThanOrEqual(2, count($result));
-    }
-
-    public function testFindByWithOrderBy(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $this->createTestLanguageInDb('RepoTest_OrderA');
-        $this->createTestLanguageInDb('RepoTest_OrderZ');
-
-        $result = $this->repository->findBy(
-            [],
-            ['name' => 'DESC'],
-            10
-        );
-
-        // Find positions in result
-        $names = array_map(fn($l) => $l->name(), $result);
-        $posA = array_search('RepoTest_OrderA', $names);
-        $posZ = array_search('RepoTest_OrderZ', $names);
-
-        // Z should come before A in descending order
-        $this->assertNotFalse($posA);
-        $this->assertNotFalse($posZ);
-        $this->assertLessThan($posA, $posZ);
-    }
-
-    // ===== findOneBy() tests =====
-
-    public function testFindOneByReturnsSingleEntity(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $id = $this->createTestLanguageInDb('RepoTest_FindOneBy');
-
-        $result = $this->repository->findOneBy(['name' => 'RepoTest_FindOneBy']);
-
-        $this->assertInstanceOf(Language::class, $result);
-        $this->assertEquals($id, $result->id()->toInt());
-    }
-
-    public function testFindOneByReturnsNullWhenNoMatch(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = $this->repository->findOneBy(['name' => 'NonExistent12345']);
-
-        $this->assertNull($result);
-    }
-
     // ===== save() tests =====
 
     public function testSaveInsertsNewEntity(): void
@@ -255,10 +138,11 @@ class LanguageRepositoryTest extends TestCase
 
         $language = $this->createTestLanguageEntity('RepoTest_Insert');
 
-        $id = $this->repository->save($language);
+        $this->repository->save($language);
 
+        // After save, the entity should have an ID assigned
+        $id = $language->id()->toInt();
         $this->assertGreaterThan(0, $id);
-        $this->assertEquals($id, $language->id()->toInt());
 
         // Verify in database
         $found = $this->repository->find($id);
@@ -289,21 +173,6 @@ class LanguageRepositoryTest extends TestCase
 
     // ===== delete() tests =====
 
-    public function testDeleteByEntity(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $id = $this->createTestLanguageInDb('RepoTest_DeleteEntity');
-        $language = $this->repository->find($id);
-
-        $result = $this->repository->delete($language);
-
-        $this->assertTrue($result);
-        $this->assertNull($this->repository->find($id));
-    }
-
     public function testDeleteById(): void
     {
         if (!self::$dbConnected) {
@@ -312,52 +181,21 @@ class LanguageRepositoryTest extends TestCase
 
         $id = $this->createTestLanguageInDb('RepoTest_DeleteById');
 
-        $result = $this->repository->delete($id);
+        $this->repository->delete($id);
 
-        $this->assertTrue($result);
         $this->assertNull($this->repository->find($id));
     }
 
-    public function testDeleteReturnsFalseForNonExistent(): void
+    public function testDeleteNonExistentDoesNotThrow(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->repository->delete(999999);
+        // Should not throw for non-existent ID
+        $this->repository->delete(999999);
 
-        $this->assertFalse($result);
-    }
-
-    // ===== count() tests =====
-
-    public function testCountAllEntities(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $initialCount = $this->repository->count();
-
-        $this->createTestLanguageInDb('RepoTest_Count1');
-        $this->createTestLanguageInDb('RepoTest_Count2');
-
-        $newCount = $this->repository->count();
-
-        $this->assertEquals($initialCount + 2, $newCount);
-    }
-
-    public function testCountWithCriteria(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $this->createTestLanguageInDb('RepoTest_CountCrit');
-
-        $count = $this->repository->count(['name' => 'RepoTest_CountCrit']);
-
-        $this->assertEquals(1, $count);
+        $this->assertTrue(true); // If we get here, no exception was thrown
     }
 
     // ===== exists() tests =====

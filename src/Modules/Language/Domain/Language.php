@@ -12,10 +12,10 @@
  * @since    2.7.0
  */
 
-namespace Lwt\Core\Entity;
+namespace Lwt\Modules\Language\Domain;
 
 use InvalidArgumentException;
-use Lwt\Core\Entity\ValueObject\LanguageId;
+use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 
 /**
  * A language represented as a rich domain object.

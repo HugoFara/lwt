@@ -12,7 +12,7 @@
  * @since    3.0.0
  */
 
-namespace Lwt\Core\Entity\ValueObject;
+namespace Lwt\Modules\Language\Domain\ValueObject;
 
 use InvalidArgumentException;
 

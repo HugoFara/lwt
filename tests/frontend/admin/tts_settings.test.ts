@@ -4,6 +4,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   ttsSettings,
+  ttsSettingsApp,
   initTTSSettings,
   getLanguageCode,
   readingDemo,
@@ -14,6 +15,7 @@ import {
 
 // Use vi.hoisted to ensure mock function is available during hoisting
 const mockGetTTSSettingsWithMigration = vi.hoisted(() => vi.fn());
+const mockSaveTTSSettings = vi.hoisted(() => vi.fn());
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/core/cookies', () => ({
@@ -22,7 +24,7 @@ vi.mock('../../../src/frontend/js/core/cookies', () => ({
 
 vi.mock('../../../src/frontend/js/core/tts_storage', () => ({
   getTTSSettingsWithMigration: mockGetTTSSettingsWithMigration,
-  saveTTSSettings: vi.fn()
+  saveTTSSettings: mockSaveTTSSettings
 }));
 
 vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
@@ -50,10 +52,241 @@ describe('tts_settings.ts', () => {
   });
 
   // ===========================================================================
-  // ttsSettings.init Tests
+  // ttsSettingsApp Alpine Component Tests
   // ===========================================================================
 
-  describe('ttsSettings.init', () => {
+  describe('ttsSettingsApp (Alpine component)', () => {
+    beforeEach(() => {
+      // Mock speechSynthesis
+      (window as any).speechSynthesis = {
+        getVoices: vi.fn().mockReturnValue([]),
+        onvoiceschanged: null
+      };
+      // Mock location
+      delete (window as any).location;
+      (window as any).location = new URL('http://localhost/settings');
+    });
+
+    it('initializes with default config', () => {
+      const app = ttsSettingsApp();
+
+      expect(app.currentLanguage).toBe('');
+      expect(app.voices).toEqual([]);
+      expect(app.selectedVoice).toBe('');
+      expect(app.rate).toBe(1);
+      expect(app.pitch).toBe(1);
+      expect(app.demoText).toBe('Lorem ipsum dolor sit amet...');
+      expect(app.voicesLoading).toBe(true);
+    });
+
+    it('initializes with provided config', () => {
+      const app = ttsSettingsApp({ currentLanguageCode: 'en-US' });
+
+      expect(app.currentLanguage).toBe('en-US');
+    });
+
+    it('auto-sets language from URL parameter', () => {
+      (window as any).location = new URL('http://localhost/settings?lang=fr-FR');
+      const app = ttsSettingsApp({ currentLanguageCode: 'en-US' });
+
+      app.autoSetCurrentLanguage();
+
+      expect(app.currentLanguage).toBe('fr-FR');
+    });
+
+    it('loads saved settings from localStorage', () => {
+      mockGetTTSSettingsWithMigration.mockReturnValue({
+        voice: 'Google UK English',
+        rate: 1.5,
+        pitch: 0.8
+      });
+
+      const app = ttsSettingsApp({ currentLanguageCode: 'en-GB' });
+      app.loadSavedSettings();
+
+      expect(app.selectedVoice).toBe('Google UK English');
+      expect(app.rate).toBe(1.5);
+      expect(app.pitch).toBe(0.8);
+    });
+
+    it('does not load settings when no language is set', () => {
+      mockGetTTSSettingsWithMigration.mockReturnValue({
+        voice: 'Test Voice',
+        rate: 2,
+        pitch: 2
+      });
+
+      const app = ttsSettingsApp({ currentLanguageCode: '' });
+      app.loadSavedSettings();
+
+      expect(app.selectedVoice).toBe('');
+      expect(app.rate).toBe(1);
+      expect(app.pitch).toBe(1);
+    });
+
+    it('populates voice list from speechSynthesis', () => {
+      const mockVoices = [
+        { name: 'Google US English', lang: 'en-US', default: false },
+        { name: 'Google UK English', lang: 'en-US', default: false },
+        { name: 'Google French', lang: 'fr-FR', default: false }
+      ];
+      (window.speechSynthesis.getVoices as any).mockReturnValue(mockVoices);
+
+      const app = ttsSettingsApp({ currentLanguageCode: 'en-US' });
+      app.populateVoiceList();
+
+      expect(app.voices.length).toBe(2);
+      expect(app.voices[0].name).toBe('Google US English');
+      expect(app.voices[1].name).toBe('Google UK English');
+    });
+
+    it('shows all voices when no language matches', () => {
+      const mockVoices = [
+        { name: 'Google US English', lang: 'en-US', default: false },
+        { name: 'Google French', lang: 'fr-FR', default: false }
+      ];
+      (window.speechSynthesis.getVoices as any).mockReturnValue(mockVoices);
+
+      const app = ttsSettingsApp({ currentLanguageCode: 'de-DE' });
+      app.populateVoiceList();
+
+      // Should show all voices since none match
+      expect(app.voices.length).toBe(2);
+    });
+
+    it('includes default voice regardless of language', () => {
+      const mockVoices = [
+        { name: 'System Default', lang: 'en-US', default: true },
+        { name: 'Google French', lang: 'fr-FR', default: false }
+      ];
+      (window.speechSynthesis.getVoices as any).mockReturnValue(mockVoices);
+
+      const app = ttsSettingsApp({ currentLanguageCode: 'de-DE' });
+      app.populateVoiceList();
+
+      // Should include default voice even though language doesn't match
+      const defaultVoice = app.voices.find(v => v.isDefault);
+      expect(defaultVoice).toBeDefined();
+      expect(defaultVoice?.name).toBe('System Default');
+    });
+
+    it('plays demo with current settings', async () => {
+      const { readTextAloud } = await import('../../../src/frontend/js/core/user_interactions');
+
+      const app = ttsSettingsApp({ currentLanguageCode: 'en-US' });
+      app.demoText = 'Hello world';
+      app.rate = 1.2;
+      app.pitch = 0.9;
+      app.selectedVoice = 'Google US English';
+
+      app.playDemo();
+
+      expect(readTextAloud).toHaveBeenCalledWith(
+        'Hello world',
+        'en-US',
+        1.2,
+        0.9,
+        'Google US English'
+      );
+    });
+
+    it('plays demo with undefined voice when none selected', async () => {
+      const { readTextAloud } = await import('../../../src/frontend/js/core/user_interactions');
+
+      const app = ttsSettingsApp({ currentLanguageCode: 'en-US' });
+      app.selectedVoice = '';
+
+      app.playDemo();
+
+      expect(readTextAloud).toHaveBeenCalledWith(
+        expect.any(String),
+        'en-US',
+        expect.any(Number),
+        expect.any(Number),
+        undefined
+      );
+    });
+
+    it('saves settings to localStorage', () => {
+      const app = ttsSettingsApp({ currentLanguageCode: 'en-US' });
+      app.selectedVoice = 'Test Voice';
+      app.rate = 1.5;
+      app.pitch = 0.8;
+
+      app.saveSettings();
+
+      expect(mockSaveTTSSettings).toHaveBeenCalledWith('en-US', {
+        voice: 'Test Voice',
+        rate: 1.5,
+        pitch: 0.8
+      });
+    });
+
+    it('does not save when no language is set', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const app = ttsSettingsApp({ currentLanguageCode: '' });
+      app.saveSettings();
+
+      expect(mockSaveTTSSettings).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith('Cannot save TTS settings: no language selected');
+    });
+
+    it('handles cancel correctly', async () => {
+      const { lwtFormCheck } = await import('../../../src/frontend/js/forms/unloadformcheck');
+
+      const originalLocation = window.location;
+      delete (window as any).location;
+      (window as any).location = { href: '' };
+
+      const app = ttsSettingsApp({ currentLanguageCode: 'en-US' });
+      app.cancel();
+
+      expect(lwtFormCheck.resetDirty).toHaveBeenCalled();
+      expect(window.location.href).toBe('/admin/settings');
+
+      window.location = originalLocation;
+    });
+
+    it('getVoiceDisplayName returns correct label for default voice', () => {
+      const app = ttsSettingsApp();
+
+      expect(app.getVoiceDisplayName({ name: 'Test', lang: 'en', isDefault: true }))
+        .toBe('Test -- DEFAULT');
+    });
+
+    it('getVoiceDisplayName returns name for non-default voice', () => {
+      const app = ttsSettingsApp();
+
+      expect(app.getVoiceDisplayName({ name: 'Test', lang: 'en', isDefault: false }))
+        .toBe('Test');
+    });
+
+    it('onLanguageChange updates voices and reloads settings', () => {
+      const mockVoices = [
+        { name: 'Google French', lang: 'fr-FR', default: false }
+      ];
+      (window.speechSynthesis.getVoices as any).mockReturnValue(mockVoices);
+      mockGetTTSSettingsWithMigration.mockReturnValue({
+        voice: 'Google French',
+        rate: 1.2,
+        pitch: 1.1
+      });
+
+      const app = ttsSettingsApp({ currentLanguageCode: 'en-US' });
+      app.currentLanguage = 'fr-FR';
+      app.onLanguageChange();
+
+      expect(app.voices.length).toBe(1);
+      expect(app.selectedVoice).toBe('Google French');
+    });
+  });
+
+  // ===========================================================================
+  // Legacy ttsSettings Object Tests
+  // ===========================================================================
+
+  describe('ttsSettings.init (legacy)', () => {
     it('sets currentLanguage from config', () => {
       const config: TTSSettingsConfig = {
         currentLanguageCode: 'en-US'
@@ -75,15 +308,10 @@ describe('tts_settings.ts', () => {
     });
   });
 
-  // ===========================================================================
-  // ttsSettings.autoSetCurrentLanguage Tests
-  // ===========================================================================
-
-  describe('ttsSettings.autoSetCurrentLanguage', () => {
+  describe('ttsSettings.autoSetCurrentLanguage (legacy)', () => {
     const originalLocation = window.location;
 
     beforeEach(() => {
-      // Mock window.location
       delete (window as any).location;
     });
 
@@ -117,11 +345,7 @@ describe('tts_settings.ts', () => {
     });
   });
 
-  // ===========================================================================
-  // ttsSettings.getLanguageCode Tests
-  // ===========================================================================
-
-  describe('ttsSettings.getLanguageCode', () => {
+  describe('ttsSettings.getLanguageCode (legacy)', () => {
     it('returns value from #get-language select', () => {
       document.body.innerHTML = `
         <select id="get-language">
@@ -156,11 +380,7 @@ describe('tts_settings.ts', () => {
     });
   });
 
-  // ===========================================================================
-  // ttsSettings.readingDemo Tests
-  // ===========================================================================
-
-  describe('ttsSettings.readingDemo', () => {
+  describe('ttsSettings.readingDemo (legacy)', () => {
     it('calls readTextAloud with form values', async () => {
       const { readTextAloud } = await import('../../../src/frontend/js/core/user_interactions');
 
@@ -200,7 +420,6 @@ describe('tts_settings.ts', () => {
 
       ttsSettings.readingDemo();
 
-      // When rate/pitch inputs are empty, parseFloat('') || '1' gives '1', so parseFloat('1') = 1
       expect(readTextAloud).toHaveBeenCalledWith(
         '',
         '',
@@ -211,13 +430,8 @@ describe('tts_settings.ts', () => {
     });
   });
 
-  // ===========================================================================
-  // ttsSettings.presetTTSData Tests
-  // ===========================================================================
-
-  describe('ttsSettings.presetTTSData', () => {
+  describe('ttsSettings.presetTTSData (legacy)', () => {
     it('sets form values from localStorage', async () => {
-      // Mock getTTSSettingsWithMigration to return stored settings
       mockGetTTSSettingsWithMigration.mockReturnValue({
         voice: 'Google US English',
         rate: 1.5,
@@ -247,7 +461,6 @@ describe('tts_settings.ts', () => {
     });
 
     it('uses default values when localStorage is empty', async () => {
-      // Mock getTTSSettingsWithMigration to return empty object
       mockGetTTSSettingsWithMigration.mockReturnValue({});
 
       document.body.innerHTML = `
@@ -270,13 +483,8 @@ describe('tts_settings.ts', () => {
     });
   });
 
-  // ===========================================================================
-  // ttsSettings.populateVoiceList Tests
-  // ===========================================================================
-
-  describe('ttsSettings.populateVoiceList', () => {
+  describe('ttsSettings.populateVoiceList (legacy)', () => {
     beforeEach(() => {
-      // Mock speechSynthesis
       (window as any).speechSynthesis = {
         getVoices: vi.fn().mockReturnValue([])
       };
@@ -321,7 +529,6 @@ describe('tts_settings.ts', () => {
 
       ttsSettings.populateVoiceList();
 
-      // Default voice is always included regardless of language
       const options = document.querySelectorAll('#voice option');
       expect(options[0].textContent).toContain('-- DEFAULT');
     });
@@ -343,7 +550,6 @@ describe('tts_settings.ts', () => {
       ttsSettings.populateVoiceList();
 
       const options = document.querySelectorAll('#voice option');
-      // Only default voice should be included (doesn't match 'de')
       expect(options.length).toBe(1);
       expect(options[0].textContent).toContain('System Default');
     });
@@ -391,15 +597,10 @@ describe('tts_settings.ts', () => {
     });
   });
 
-  // ===========================================================================
-  // ttsSettings.clickCancel Tests
-  // ===========================================================================
-
-  describe('ttsSettings.clickCancel', () => {
+  describe('ttsSettings.clickCancel (legacy)', () => {
     it('resets form dirty state and redirects', async () => {
       const { lwtFormCheck } = await import('../../../src/frontend/js/forms/unloadformcheck');
 
-      // Mock location.href
       const originalLocation = window.location;
       delete (window as any).location;
       (window as any).location = { href: '' };
@@ -414,16 +615,14 @@ describe('tts_settings.ts', () => {
   });
 
   // ===========================================================================
-  // initTTSSettings Tests
+  // initTTSSettings Tests (legacy)
   // ===========================================================================
 
-  describe('initTTSSettings', () => {
+  describe('initTTSSettings (legacy)', () => {
     beforeEach(() => {
-      // Mock speechSynthesis
       (window as any).speechSynthesis = {
         getVoices: vi.fn().mockReturnValue([])
       };
-      // Mock location
       delete (window as any).location;
       (window as any).location = new URL('http://localhost/tts');
     });
@@ -506,7 +705,6 @@ describe('tts_settings.ts', () => {
       initTTSSettings();
 
       const populateSpy = vi.spyOn(ttsSettings, 'populateVoiceList');
-      // Dispatch native event to trigger the change listener
       const languageSelect = document.getElementById('get-language')!;
       languageSelect.dispatchEvent(new Event('change'));
 

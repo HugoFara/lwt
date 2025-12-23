@@ -3,7 +3,7 @@ namespace Lwt\Tests\Services;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\Entity\Language;
+use Lwt\Modules\Language\Domain\Language;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
@@ -17,8 +17,8 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Core/Entity/Language.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
+// Module classes loaded via autoloader
 
 /**
  * Unit tests for the LanguageService class.
