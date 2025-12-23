@@ -338,8 +338,8 @@ class TextServiceCrudTest extends TestCase
         $message = $this->service->archiveTexts([$textId1, $textId2]);
 
         $this->assertIsString($message);
-        // Message format is "Text(s) archived: N"
-        $this->assertStringContainsString('archived', $message);
+        // Message format is "Archived Text(s): N"
+        $this->assertStringContainsStringIgnoringCase('archived', $message);
 
         // Original texts should be gone
         $this->assertNull($this->service->getTextById($textId1));
@@ -685,8 +685,8 @@ class TextServiceCrudTest extends TestCase
         $message = $this->service->rebuildTexts([$textId]);
 
         $this->assertIsString($message);
-        // Message format is "Text(s) reparsed: N"
-        $this->assertStringContainsString('reparsed', $message);
+        // Message format is "Rebuilt Text(s): N" or similar
+        $this->assertStringContainsStringIgnoringCase('rebuilt', $message);
     }
 
     public function testRebuildTextsWithEmptyArray(): void

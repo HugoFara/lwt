@@ -48,11 +48,11 @@ interface TextRepositoryInterface
      *
      * Inserts if new, updates if existing.
      *
-     * @param Text $text The text entity to save
+     * @param Text $entity The text entity to save
      *
      * @return int The text ID (newly generated for inserts)
      */
-    public function save(Text $text): int;
+    public function save(Text $entity): int;
 
     /**
      * Delete a text by its ID.
