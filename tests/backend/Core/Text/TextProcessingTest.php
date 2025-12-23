@@ -31,6 +31,7 @@ require_once __DIR__ . '/../../../../src/backend/Services/WordStatusService.php'
 use Lwt\Core\StringUtils;
 use Lwt\Services\ExportService;
 use Lwt\Services\LanguageService;
+use Lwt\Services\TextStatisticsService;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\StatusHelper;
 
@@ -297,7 +298,8 @@ class TextProcessingTest extends TestCase
         }
 
         // Use a non-existent text ID
-        $count = todoWordsCount(999999);
+        $statsService = new TextStatisticsService();
+        $count = $statsService->getTodoWordsCount(999999);
         $this->assertEquals(0, $count);
     }
 
@@ -307,7 +309,8 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $count = todoWordsCount(1);
+        $statsService = new TextStatisticsService();
+        $count = $statsService->getTodoWordsCount(1);
         $this->assertIsInt($count);
         $this->assertGreaterThanOrEqual(0, $count);
     }
@@ -320,7 +323,8 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = returnTextWordCount('1');
+        $statsService = new TextStatisticsService();
+        $result = $statsService->getTextWordCount('1');
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('total', $result);
@@ -337,7 +341,8 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = returnTextWordCount('1,2');
+        $statsService = new TextStatisticsService();
+        $result = $statsService->getTextWordCount('1,2');
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('total', $result);
@@ -349,7 +354,8 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = returnTextWordCount('999999');
+        $statsService = new TextStatisticsService();
+        $result = $statsService->getTextWordCount('999999');
 
         $this->assertIsArray($result);
         // Should return empty arrays for each key

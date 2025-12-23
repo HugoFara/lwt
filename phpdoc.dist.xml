@@ -15,7 +15,8 @@
                 <path>.</path>
             </source>
             <ignore hidden="true" symlinks="true">
-                <path>vendor</path>
+                <path>vendor/*</path>
+                <path>.psalm/*</path>
             </ignore>
             <default-package-name>Lwt</default-package-name>
         </api>

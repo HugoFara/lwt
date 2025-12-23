@@ -19,6 +19,7 @@ use Lwt\Database\Settings;
 use Lwt\Database\TextParsing;
 use Lwt\Database\Validation;
 use Lwt\Services\SettingsService;
+use Lwt\Services\TextParsingService;
 use Lwt\Services\WordStatusService;
 use PHPUnit\Framework\TestCase;
 
@@ -27,7 +28,6 @@ EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
 
 /**
@@ -1244,10 +1244,12 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test find_latin_sentence_end function (callback for regex)
+     * Test TextParsingService::findLatinSentenceEnd method (callback for regex)
      */
     public function testFindLatinSentenceEnd(): void
     {
+        $service = new TextParsingService();
+
         // Test sentence ending detection
         // This function is used as a callback in text parsing
         // Test with typical sentence end
@@ -1261,12 +1263,12 @@ class DatabaseConnectTest extends TestCase
             6 => ' ',       // Following whitespace
             7 => 'World'    // Next word
         ];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         $this->assertIsString($result);
 
         // Test with exception (e.g., "Dr." should not split)
         $matches[1] = 'Dr';
-        $result = find_latin_sentence_end($matches, 'Dr|Mr|Mrs');
+        $result = $service->findLatinSentenceEnd($matches, 'Dr|Mr|Mrs');
         $this->assertIsString($result);
     }
 

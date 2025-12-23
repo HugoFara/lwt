@@ -74,22 +74,6 @@ define('LWT_BASE_PATH', __DIR__ . '/..');
 // =============================================================================
 
 // ---------------------------------------------------------------------------
-// From TextParsingService.php (global namespace section)
-// ---------------------------------------------------------------------------
-
-/**
- * @param array $matches
- * @param string $noSentenceEnd
- * @return string
- * @see \Lwt\Services\TextParsingService::findLatinSentenceEnd()
- */
-function find_latin_sentence_end($matches, $noSentenceEnd): string {}
-
-// ---------------------------------------------------------------------------
-// From MediaService.php (global namespace section)
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
 // From ExportService.php / export_helpers.php
 // ---------------------------------------------------------------------------
 
@@ -101,19 +85,6 @@ function find_latin_sentence_end($matches, $noSentenceEnd): string {}
  * @return string
  */
 function getWordTagList(int $wid, string $before = ' ', int $brack = 1, int $tohtml = 1): string {}
-
-/**
- * @param string $s
- * @param string $regexword
- * @return string
- */
-function maskTermInSentence($s, $regexword): string {}
-
-/**
- * @param string $s
- * @return string
- */
-function replTabNl($s): string {}
 
 /**
  * @param string $ann

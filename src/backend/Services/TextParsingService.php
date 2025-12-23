@@ -15,7 +15,7 @@
  * @since    3.0.0 Migrated from Core/Text/text_parsing.php
  */
 
-namespace Lwt\Services {
+namespace Lwt\Services;
 
 use Lwt\Core\Utils\ErrorHandler;
 
@@ -108,31 +108,3 @@ class TextParsingService
         return $matches[0] . "\r";
     }
 }
-
-} // End namespace Lwt\Services
-
-namespace {
-
-// =============================================================================
-// GLOBAL FUNCTION WRAPPERS (for backward compatibility)
-// =============================================================================
-
-use Lwt\Services\TextParsingService;
-
-/**
- * Find end-of-sentence characters in a sentence using latin alphabet.
- *
- * @param string[] $matches       All the matches from a capturing regex
- * @param string   $noSentenceEnd If different from '', can declare that a string is not the end of a sentence.
- *
- * @return string $matches[0] with ends of sentences marked with \t and \r.
- *
- * @see TextParsingService::findLatinSentenceEnd()
- */
-function find_latin_sentence_end(array $matches, string $noSentenceEnd): string
-{
-    $service = new TextParsingService();
-    return $service->findLatinSentenceEnd($matches, $noSentenceEnd);
-}
-
-} // End global namespace

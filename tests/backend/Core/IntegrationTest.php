@@ -15,8 +15,10 @@ use Lwt\Services\DictionaryService;
 use Lwt\Services\ExportService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\MediaService;
+use Lwt\Services\SentenceService;
 use Lwt\Services\TableSetService;
 use Lwt\Services\TagService;
+use Lwt\Services\TextStatisticsService;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
@@ -389,7 +391,8 @@ class IntegrationTest extends TestCase
         $text_res = Connection::query("SELECT TxID FROM texts LIMIT 1");
         if ($text_row = \mysqli_fetch_assoc($text_res)) {
             $text_id = (int)$text_row['TxID'];
-            $counts = returnTextWordCount($text_id);
+            $statsService = new TextStatisticsService();
+            $counts = $statsService->getTextWordCount((string)$text_id);
 
             $this->assertIsArray($counts);
             // Function returns: total, expr, stat, totalu, expru, statu
@@ -410,7 +413,8 @@ class IntegrationTest extends TestCase
         $text_res = Connection::query("SELECT TxID FROM texts LIMIT 1");
         if ($text_row = \mysqli_fetch_assoc($text_res)) {
             $text_id = (int)$text_row['TxID'];
-            $count = todoWordsCount($text_id);
+            $statsService = new TextStatisticsService();
+            $count = $statsService->getTodoWordsCount($text_id);
 
             $this->assertIsInt($count);
             $this->assertGreaterThanOrEqual(0, $count);
@@ -423,7 +427,8 @@ class IntegrationTest extends TestCase
 
     public function testSentencesContainingWordLcQuery(): void
     {
-        $query = sentencesContainingWordLcQuery('test', 1);
+        $service = new SentenceService();
+        $query = $service->buildSentencesContainingWordQuery('test', 1);
         $this->assertIsString($query);
         $this->assertStringContainsString('SELECT', strtoupper($query));
         $this->assertStringContainsString('SeID', $query);

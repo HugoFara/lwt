@@ -759,78 +759,6 @@ namespace {
 use Lwt\Services\SentenceService;
 
 /**
- * Return a SQL string to find sentences containing a word.
- *
- * @param string $wordlc Word to look for in lowercase
- * @param int    $lid    Language ID
- *
- * @return string Query in SQL format
- *
- * @see SentenceService::buildSentencesContainingWordQuery()
- */
-function sentencesContainingWordLcQuery(string $wordlc, int $lid): string
-{
-    $service = new SentenceService();
-    return $service->buildSentencesContainingWordQuery($wordlc, $lid);
-}
-
-
-/**
- * Perform a SQL query to find sentences containing a word.
- *
- * @param int|null $wid    Word ID or mode
- * @param string   $wordlc Word to look for in lowercase
- * @param int      $lid    Language ID
- * @param int      $limit  Maximum number of sentences to return
- *
- * @return \mysqli_result|false Query result or false on failure
- *
- * @see SentenceService::findSentencesFromWord()
- */
-function sentencesFromWord(?int $wid, string $wordlc, int $lid, int $limit = -1): \mysqli_result|false
-{
-    $service = new SentenceService();
-    return $service->findSentencesFromWord($wid, $wordlc, $lid, $limit);
-}
-
-/**
- * Format the sentence(s) $seid containing $wordlc highlighting $wordlc.
- *
- * @param int    $seid   Sentence ID
- * @param string $wordlc Term text in lower case
- * @param int    $mode   Mode for sentence context
- *
- * @return string[] [0]=html, word in bold, [1]=text, word in {}
- *
- * @see SentenceService::formatSentence()
- */
-function getSentence(int $seid, string $wordlc, int $mode): array
-{
-    $service = new SentenceService();
-    return $service->formatSentence($seid, $wordlc, $mode);
-}
-
-/**
- * Return sentences containing a word.
- *
- * @param int      $lang   Language ID
- * @param string   $wordlc Word to look for in lowercase
- * @param int|null $wid    Word ID
- * @param int|null $mode   Sentences to get
- * @param int      $limit  Maximum number of sentences to return
- *
- * @return string[][] Array of sentences found
- *
- * @see SentenceService::getSentencesWithWord()
- */
-function sentencesWithWord(int $lang, string $wordlc, ?int $wid, ?int $mode = 0, int $limit = 20): array
-{
-    $service = new SentenceService();
-    return $service->getSentencesWithWord($lang, $wordlc, $wid, $mode, $limit);
-}
-
-
-/**
  * Prepare the area for example sentences of a word.
  *
  * @param int    $lang     Language ID
@@ -844,26 +772,6 @@ function exampleSentencesArea(int $lang, string $termlc, string $selector, int $
 {
     $service = new SentenceService();
     echo $service->renderExampleSentencesArea($lang, $termlc, $selector, $wid);
-}
-
-
-/**
- * Show 20 sentences containing $wordlc.
- *
- * @param int      $lang      Language ID
- * @param string   $wordlc    Term in lower case.
- * @param int|null $wid       Word ID
- * @param string   $jsctlname Path for the textarea
- * @param int      $mode      Mode for sentence context
- *
- * @return string HTML-formatted string
- *
- * @see SentenceService::get20Sentences()
- */
-function get20Sentences(int $lang, string $wordlc, ?int $wid, string $jsctlname, int $mode): string
-{
-    $service = new SentenceService();
-    return $service->get20Sentences($lang, $wordlc, $wid, $jsctlname, $mode);
 }
 
 } // End global namespace

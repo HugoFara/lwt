@@ -15,13 +15,12 @@
 
 namespace Lwt\Database;
 
-require_once __DIR__ . '/../../Services/TextParsingService.php';
-
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\UserScopedQuery;
+use Lwt\Services\TextParsingService;
 
 /**
  * Text parsing and processing utilities.
@@ -514,13 +513,10 @@ class TextParsing
         string $termchar
     ): string {
         // "\r" => Sentence delimiter, "\t" and "\n" => Word delimiter
+        $service = new TextParsingService();
         $text = preg_replace_callback(
             "/(\S+)\s*((\.+)|([$splitSentence]))([]'`\"”)‘’‹›“„«»』」]*)(?=(\s*)(\S+|$))/u",
-            // Arrow functions were introduced in PHP 7.4
-            //fn ($matches) => find_latin_sentence_end($matches, $noSentenceEnd)
-            function ($matches) use ($noSentenceEnd) {
-                return \find_latin_sentence_end($matches, $noSentenceEnd);
-            },
+            fn ($matches) => $service->findLatinSentenceEnd($matches, $noSentenceEnd),
             $text
         );
         // Paragraph delimiters become a combination of ¶ and carriage return \r

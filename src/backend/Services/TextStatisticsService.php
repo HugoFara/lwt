@@ -219,65 +219,18 @@ namespace {
 use Lwt\Services\TextStatisticsService;
 
 /**
- * Return statistics about a list of text ID.
- *
- * @param string $textsId Texts ID separated by comma
- *
- * @return array Statistics data
- *
- * @see TextStatisticsService::getTextWordCount()
- */
-function returnTextWordCount(string|int $textsId): array
-{
-    $service = new TextStatisticsService();
-    return $service->getTextWordCount((string) $textsId);
-}
-
-/**
- * Return the number of words left to do in this text.
- *
- * @param int $textid Text ID
- *
- * @return int Number of words
- *
- * @see TextStatisticsService::getTodoWordsCount()
- */
-function todoWordsCount(int $textid): int
-{
-    $service = new TextStatisticsService();
-    return $service->getTodoWordsCount($textid);
-}
-
-/**
  * Prepare HTML interactions for the words left to do in this text.
  *
  * @param int $textid Text ID
  *
  * @return string HTML result
  *
- * @see TextStatisticsService::getTodoWordsContent()
+ * @see \Lwt\Services\TextStatisticsService::getTodoWordsContent()
  */
 function todoWordsContent(int $textid): string
 {
     $service = new TextStatisticsService();
     return $service->getTodoWordsContent($textid);
-}
-
-/**
- * Prepare HTML interactions for the words left to do in this text.
- *
- * @param string|int $textid Text ID
- *
- * @return string HTML result
- *
- * @deprecated Since 2.10.0, use todoWordsContent instead
- */
-function texttodocount2($textid): string
-{
-    if (is_string($textid)) {
-        $textid = (int) $textid;
-    }
-    return todoWordsContent($textid);
 }
 
 } // End global namespace

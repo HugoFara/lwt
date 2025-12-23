@@ -513,12 +513,12 @@ class TextParsingTest extends TestCase
     }
 
     /**
-     * Test find_latin_sentence_end function - comprehensive tests
+     * Test TextParsingService::findLatinSentenceEnd method - comprehensive tests
      *
-     * This function analyzes regex matches to determine if punctuation marks
+     * This method analyzes regex matches to determine if punctuation marks
      * end of sentence based on context (abbreviations, numbers, case, etc.)
      *
-     * Note: The function may return different markers (\r or \t) depending on context
+     * Note: The method may return different markers (\r or \t) depending on context
      */
     public function testFindLatinSentenceEnd(): void
     {

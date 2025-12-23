@@ -230,7 +230,7 @@ function getTextTitle(int $textId): string
  *
  * @return string Arrows to previous and next texts.
  *
- * @see TextNavigationService::getPreviousAndNextTextLinks()
+ * @see \Lwt\Services\TextNavigationService::getPreviousAndNextTextLinks()
  */
 function getPreviousAndNextTextLinks(int $textid, string $url, bool|int $onlyann, string $add): string
 {
