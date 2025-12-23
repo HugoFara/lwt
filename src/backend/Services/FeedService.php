@@ -1595,10 +1595,10 @@ class FeedService
     }
 
     /**
-     * Render feed loading interface using the modern TypeScript loader.
+     * Render feed loading interface using Alpine.js component.
      *
      * This method outputs JSON configuration that is consumed by the
-     * feed_loader.ts TypeScript module instead of inline JavaScript.
+     * feed_loader_component.ts Alpine component.
      *
      * @param int    $currentFeed     Feed ID to load
      * @param bool   $checkAutoupdate Whether checking auto-update
@@ -1613,7 +1613,7 @@ class FeedService
     ): void {
         $config = $this->getFeedLoadConfig($currentFeed, $checkAutoupdate);
 
-        // Output JSON config for TypeScript
+        // Output JSON config for Alpine component
         echo '<script type="application/json" id="feed-loader-config">';
         echo json_encode([
             'feeds' => $config['feeds'],
@@ -1621,20 +1621,23 @@ class FeedService
         ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
         echo '</script>';
 
+        // Alpine.js component wrapper
+        echo '<div x-data="feedLoader()">';
+
         // Show progress UI
         if ($config['count'] != 1) {
-            echo "<div class=\"msgblue\"><p>UPDATING <span id=\"feedcount\">0</span>/" .
-                $config['count'] . " FEEDS</p></div>";
+            echo '<div class="msgblue"><p>UPDATING <span x-text="loadedCount">0</span>/' .
+                $config['count'] . ' FEEDS</p></div>';
         }
 
-        // Create placeholder divs for each feed
-        foreach ($config['feeds'] as $feed) {
-            echo "<div id='feed_{$feed['id']}' class=\"msgblue\"><p>" .
-                htmlspecialchars($feed['name']) . ": waiting</p></div>";
-        }
+        // Create placeholder divs for each feed using Alpine templates
+        echo '<template x-for="feed in feeds" :key="feed.id">';
+        echo '<div :class="getStatusClass(feed.id)"><p x-text="feedMessages[feed.id]"></p></div>';
+        echo '</template>';
 
-        // Continue button (no inline onclick - handled by event delegation)
-        echo "<div class=\"center\"><button data-action=\"feed-continue\" data-url=\"" .
-            htmlspecialchars($redirectUrl) . "\">Continue</button></div>";
+        // Continue button with Alpine click handler
+        echo '<div class="center"><button @click="handleContinue()">Continue</button></div>';
+
+        echo '</div>';
     }
 }

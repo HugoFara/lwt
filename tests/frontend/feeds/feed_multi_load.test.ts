@@ -1,5 +1,5 @@
 /**
- * Tests for feed_multi_load.ts - Feed multi-load page functionality
+ * Tests for feed_multi_load_component.ts - Feed multi-load Alpine component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
@@ -8,256 +8,337 @@ vi.mock('../../../src/frontend/js/core/language_settings', () => ({
   setLang: vi.fn()
 }));
 
-// Mock ui_utilities module
-vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
-  markClick: vi.fn()
-}));
-
 import {
-  collectCheckedValues,
-  initFeedMultiLoad
-} from '../../../src/frontend/js/feeds/feed_multi_load';
+  feedMultiLoadData,
+  FeedMultiLoadConfig
+} from '../../../src/frontend/js/feeds/components/feed_multi_load_component';
 import { setLang } from '../../../src/frontend/js/core/language_settings';
 
-describe('feed_multi_load.ts', () => {
+describe('feed_multi_load_component.ts', () => {
+  let originalLocation: Location;
+
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
+    // Save original location
+    originalLocation = window.location;
     // Mock location.href
     Object.defineProperty(window, 'location', {
       value: { href: '' },
-      writable: true
+      writable: true,
+      configurable: true
     });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
+    // Restore original location
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+      configurable: true
+    });
   });
 
   // ===========================================================================
-  // collectCheckedValues Tests
+  // feedMultiLoadData Factory Function Tests
   // ===========================================================================
 
-  describe('collectCheckedValues', () => {
+  describe('feedMultiLoadData', () => {
+    it('creates component with default values', () => {
+      const component = feedMultiLoadData();
+
+      expect(component.cancelUrl).toBe('/feeds?selected_feed=0');
+      expect(component.filterUrl).toBe('/feeds/edit?multi_load_feed=1&page=1');
+    });
+
+    it('creates component with provided config values', () => {
+      const config: FeedMultiLoadConfig = {
+        cancelUrl: '/custom/cancel',
+        filterUrl: '/custom/filter'
+      };
+
+      const component = feedMultiLoadData(config);
+
+      expect(component.cancelUrl).toBe('/custom/cancel');
+      expect(component.filterUrl).toBe('/custom/filter');
+    });
+
+    it('allows partial config', () => {
+      const config: FeedMultiLoadConfig = {
+        cancelUrl: '/custom/cancel'
+      };
+
+      const component = feedMultiLoadData(config);
+
+      expect(component.cancelUrl).toBe('/custom/cancel');
+      expect(component.filterUrl).toBe('/feeds/edit?multi_load_feed=1&page=1');
+    });
+  });
+
+  // ===========================================================================
+  // init() Method Tests
+  // ===========================================================================
+
+  describe('init()', () => {
+    it('reads config from JSON script tag', () => {
+      document.body.innerHTML = `
+        <script type="application/json" id="feed-multi-load-config">
+          {"cancelUrl": "/json/cancel", "filterUrl": "/json/filter"}
+        </script>
+      `;
+
+      const component = feedMultiLoadData();
+      component.init();
+
+      expect(component.cancelUrl).toBe('/json/cancel');
+      expect(component.filterUrl).toBe('/json/filter');
+    });
+
+    it('keeps defaults if no JSON config element exists', () => {
+      const component = feedMultiLoadData();
+      component.init();
+
+      expect(component.cancelUrl).toBe('/feeds?selected_feed=0');
+      expect(component.filterUrl).toBe('/feeds/edit?multi_load_feed=1&page=1');
+    });
+
+    it('handles invalid JSON gracefully', () => {
+      document.body.innerHTML = `
+        <script type="application/json" id="feed-multi-load-config">
+          {invalid json}
+        </script>
+      `;
+
+      const component = feedMultiLoadData();
+
+      expect(() => component.init()).not.toThrow();
+      expect(component.cancelUrl).toBe('/feeds?selected_feed=0');
+    });
+  });
+
+  // ===========================================================================
+  // markAll() and markNone() Tests
+  // ===========================================================================
+
+  describe('markAll()', () => {
+    it('checks all markcheck checkboxes in form', () => {
+      document.body.innerHTML = `
+        <div id="container">
+          <form>
+            <input type="checkbox" class="markcheck" value="1" />
+            <input type="checkbox" class="markcheck" value="2" />
+            <input type="checkbox" class="markcheck" value="3" />
+          </form>
+        </div>
+      `;
+
+      const component = feedMultiLoadData();
+      const container = document.getElementById('container')!;
+
+      // Mock $el
+      (component as unknown as { $el: HTMLElement }).$el = container;
+
+      component.markAll();
+
+      const checkboxes = document.querySelectorAll<HTMLInputElement>('.markcheck');
+      checkboxes.forEach(cb => {
+        expect(cb.checked).toBe(true);
+      });
+    });
+
+    it('does nothing when form not found', () => {
+      document.body.innerHTML = '<div id="container"></div>';
+
+      const component = feedMultiLoadData();
+      const container = document.getElementById('container')!;
+
+      (component as unknown as { $el: HTMLElement }).$el = container;
+
+      expect(() => component.markAll()).not.toThrow();
+    });
+  });
+
+  describe('markNone()', () => {
+    it('unchecks all markcheck checkboxes in form', () => {
+      document.body.innerHTML = `
+        <div id="container">
+          <form>
+            <input type="checkbox" class="markcheck" value="1" checked />
+            <input type="checkbox" class="markcheck" value="2" checked />
+            <input type="checkbox" class="markcheck" value="3" checked />
+          </form>
+        </div>
+      `;
+
+      const component = feedMultiLoadData();
+      const container = document.getElementById('container')!;
+
+      (component as unknown as { $el: HTMLElement }).$el = container;
+
+      component.markNone();
+
+      const checkboxes = document.querySelectorAll<HTMLInputElement>('.markcheck');
+      checkboxes.forEach(cb => {
+        expect(cb.checked).toBe(false);
+      });
+    });
+  });
+
+  // ===========================================================================
+  // collectAndSubmit() Tests
+  // ===========================================================================
+
+  describe('collectAndSubmit()', () => {
     it('collects checked checkbox values into hidden field', () => {
       document.body.innerHTML = `
-        <form name="form1">
-          <input type="checkbox" value="1" checked />
-          <input type="checkbox" value="2" />
-          <input type="checkbox" value="3" checked />
-          <input type="checkbox" value="4" checked />
-        </form>
-        <input type="hidden" id="map" value="" />
+        <div id="container">
+          <form>
+            <input type="checkbox" value="1" checked />
+            <input type="checkbox" value="2" />
+            <input type="checkbox" value="3" checked />
+            <input type="hidden" id="map" value="" />
+          </form>
+        </div>
       `;
 
-      collectCheckedValues('form1', 'map');
+      const component = feedMultiLoadData();
+      const container = document.getElementById('container')!;
+
+      (component as unknown as { $el: HTMLElement }).$el = container;
+
+      component.collectAndSubmit();
 
       const hiddenField = document.getElementById('map') as HTMLInputElement;
-      expect(hiddenField.value).toBe('1, 3, 4');
-    });
-
-    it('returns empty string when no checkboxes are checked', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <input type="checkbox" value="1" />
-          <input type="checkbox" value="2" />
-        </form>
-        <input type="hidden" id="map" value="previous value" />
-      `;
-
-      collectCheckedValues('form1', 'map');
-
-      const hiddenField = document.getElementById('map') as HTMLInputElement;
-      expect(hiddenField.value).toBe('');
-    });
-
-    it('does nothing when form does not exist', () => {
-      document.body.innerHTML = `
-        <input type="hidden" id="map" value="original" />
-      `;
-
-      collectCheckedValues('nonexistent', 'map');
-
-      const hiddenField = document.getElementById('map') as HTMLInputElement;
-      expect(hiddenField.value).toBe('original');
-    });
-
-    it('does nothing when hidden field does not exist', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <input type="checkbox" value="1" checked />
-        </form>
-      `;
-
-      // Should not throw
-      expect(() => collectCheckedValues('form1', 'nonexistent')).not.toThrow();
+      expect(hiddenField.value).toBe('1, 3');
     });
 
     it('filters out empty checkbox values', () => {
       document.body.innerHTML = `
-        <form name="form1">
-          <input type="checkbox" value="" checked />
-          <input type="checkbox" value="1" checked />
-          <input type="checkbox" value="" checked />
-          <input type="checkbox" value="2" checked />
-        </form>
-        <input type="hidden" id="map" value="" />
+        <div id="container">
+          <form>
+            <input type="checkbox" value="" checked />
+            <input type="checkbox" value="1" checked />
+            <input type="checkbox" value="2" checked />
+            <input type="hidden" id="map" value="" />
+          </form>
+        </div>
       `;
 
-      collectCheckedValues('form1', 'map');
+      const component = feedMultiLoadData();
+      const container = document.getElementById('container')!;
+
+      (component as unknown as { $el: HTMLElement }).$el = container;
+
+      component.collectAndSubmit();
 
       const hiddenField = document.getElementById('map') as HTMLInputElement;
       expect(hiddenField.value).toBe('1, 2');
     });
 
-    it('handles form with no checkboxes', () => {
+    it('returns empty string when no checkboxes checked', () => {
       document.body.innerHTML = `
-        <form name="form1">
-          <input type="text" value="text" />
-        </form>
-        <input type="hidden" id="map" value="" />
+        <div id="container">
+          <form>
+            <input type="checkbox" value="1" />
+            <input type="checkbox" value="2" />
+            <input type="hidden" id="map" value="previous" />
+          </form>
+        </div>
       `;
 
-      collectCheckedValues('form1', 'map');
+      const component = feedMultiLoadData();
+      const container = document.getElementById('container')!;
+
+      (component as unknown as { $el: HTMLElement }).$el = container;
+
+      component.collectAndSubmit();
 
       const hiddenField = document.getElementById('map') as HTMLInputElement;
       expect(hiddenField.value).toBe('');
     });
+
+    it('does nothing when form not found', () => {
+      document.body.innerHTML = '<div id="container"></div>';
+
+      const component = feedMultiLoadData();
+      const container = document.getElementById('container')!;
+
+      (component as unknown as { $el: HTMLElement }).$el = container;
+
+      expect(() => component.collectAndSubmit()).not.toThrow();
+    });
+
+    it('does nothing when hidden field not found', () => {
+      document.body.innerHTML = `
+        <div id="container">
+          <form>
+            <input type="checkbox" value="1" checked />
+          </form>
+        </div>
+      `;
+
+      const component = feedMultiLoadData();
+      const container = document.getElementById('container')!;
+
+      (component as unknown as { $el: HTMLElement }).$el = container;
+
+      expect(() => component.collectAndSubmit()).not.toThrow();
+    });
   });
 
   // ===========================================================================
-  // initFeedMultiLoad Tests
+  // handleLanguageFilter() Tests
   // ===========================================================================
 
-  describe('initFeedMultiLoad', () => {
-    it('does nothing when form1 does not exist', () => {
-      expect(() => initFeedMultiLoad()).not.toThrow();
+  describe('handleLanguageFilter()', () => {
+    it('calls setLang with select element and filter URL', () => {
+      const component = feedMultiLoadData({
+        filterUrl: '/custom/filter'
+      });
+
+      const select = document.createElement('select');
+      const event = { target: select } as unknown as Event;
+
+      component.handleLanguageFilter(event);
+
+      expect(setLang).toHaveBeenCalledWith(select, '/custom/filter');
     });
 
-    it('sets up language filter change handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="filter-language" data-url="/feeds/edit?multi_load_feed=1&page=1">
-            <option value="1">English</option>
-          </select>
-        </form>
-      `;
+    it('uses default filter URL', () => {
+      const component = feedMultiLoadData();
 
-      initFeedMultiLoad();
+      const select = document.createElement('select');
+      const event = { target: select } as unknown as Event;
 
-      const select = document.querySelector<HTMLSelectElement>('[data-action="filter-language"]')!;
-      select.dispatchEvent(new Event('change'));
+      component.handleLanguageFilter(event);
 
       expect(setLang).toHaveBeenCalledWith(select, '/feeds/edit?multi_load_feed=1&page=1');
     });
+  });
 
-    it('uses default URL for language filter if not specified', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="filter-language">
-            <option value="1">English</option>
-          </select>
-        </form>
-      `;
+  // ===========================================================================
+  // cancel() Tests
+  // ===========================================================================
 
-      initFeedMultiLoad();
+  describe('cancel()', () => {
+    it('navigates to cancel URL', () => {
+      const component = feedMultiLoadData({
+        cancelUrl: '/custom/cancel'
+      });
 
-      const select = document.querySelector<HTMLSelectElement>('[data-action="filter-language"]')!;
-      select.dispatchEvent(new Event('change'));
+      component.cancel();
 
-      expect(setLang).toHaveBeenCalledWith(select, '/feeds/edit?multi_load_feed=1&page=1');
+      expect(window.location.href).toBe('/custom/cancel');
     });
 
-    it('sets up mark action button to collect checked values', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <input type="checkbox" value="feed_1" checked />
-          <input type="checkbox" value="feed_2" checked />
-          <input type="hidden" id="map" value="" />
-          <button id="markaction">Load Selected</button>
-        </form>
-      `;
+    it('uses default cancel URL', () => {
+      const component = feedMultiLoadData();
 
-      initFeedMultiLoad();
-
-      const button = document.getElementById('markaction') as HTMLButtonElement;
-      button.click();
-
-      const hiddenField = document.getElementById('map') as HTMLInputElement;
-      expect(hiddenField.value).toBe('feed_1, feed_2');
-    });
-
-    it('sets up cancel button handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="cancel" data-url="/feeds?selected_feed=0">Cancel</button>
-        </form>
-      `;
-
-      initFeedMultiLoad();
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="cancel"]')!;
-      button.click();
+      component.cancel();
 
       expect(window.location.href).toBe('/feeds?selected_feed=0');
-    });
-
-    it('uses default URL for cancel button if not specified', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="cancel">Cancel</button>
-        </form>
-      `;
-
-      initFeedMultiLoad();
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="cancel"]')!;
-      button.click();
-
-      expect(window.location.href).toBe('/feeds?selected_feed=0');
-    });
-
-    it('prevents default on cancel button click', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="cancel">Cancel</button>
-        </form>
-      `;
-
-      initFeedMultiLoad();
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="cancel"]')!;
-      const clickEvent = new MouseEvent('click', { cancelable: true, bubbles: true });
-      const preventDefaultSpy = vi.spyOn(clickEvent, 'preventDefault');
-
-      button.dispatchEvent(clickEvent);
-
-      expect(preventDefaultSpy).toHaveBeenCalled();
-    });
-
-    it('handles missing markaction button', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <input type="checkbox" value="1" checked />
-        </form>
-      `;
-
-      expect(() => initFeedMultiLoad()).not.toThrow();
-    });
-
-    it('handles missing map hidden field when markaction clicked', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <input type="checkbox" value="1" checked />
-          <button id="markaction">Load</button>
-        </form>
-      `;
-
-      initFeedMultiLoad();
-
-      const button = document.getElementById('markaction') as HTMLButtonElement;
-      expect(() => button.click()).not.toThrow();
     });
   });
 });

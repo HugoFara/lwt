@@ -1,264 +1,393 @@
 /**
- * Tests for feed_browse.ts - Feed browse page interactions
+ * Tests for feed_browse_component.ts - Feed browse Alpine component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-// Mock the language_settings module
+// Mock the dependencies before importing the module
 vi.mock('../../../src/frontend/js/core/language_settings', () => ({
   setLang: vi.fn(),
   resetAll: vi.fn()
 }));
 
-// Mock ui_utilities module
+vi.mock('../../../src/frontend/js/forms/bulk_actions', () => ({
+  selectToggle: vi.fn()
+}));
+
 vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
   markClick: vi.fn()
 }));
 
-import { initFeedBrowse, initNotFoundImages } from '../../../src/frontend/js/feeds/feed_browse';
+import {
+  feedBrowseData,
+  type FeedBrowseConfig
+} from '../../../src/frontend/js/feeds/components/feed_browse_component';
 import { setLang, resetAll } from '../../../src/frontend/js/core/language_settings';
+import { selectToggle } from '../../../src/frontend/js/forms/bulk_actions';
 import { markClick } from '../../../src/frontend/js/core/ui_utilities';
 
-describe('feed_browse.ts', () => {
+describe('feed_browse_component.ts', () => {
+  let originalLocation: Location;
+  let originalOpen: typeof window.open;
+
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
+    // Save original location and window.open
+    originalLocation = window.location;
+    originalOpen = window.open;
     // Mock location.href
     Object.defineProperty(window, 'location', {
       value: { href: '' },
-      writable: true
+      writable: true,
+      configurable: true
     });
+    // Mock window.open
+    window.open = vi.fn();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
+    // Restore original location and window.open
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+      configurable: true
+    });
+    window.open = originalOpen;
   });
 
   // ===========================================================================
-  // initFeedBrowse Tests
+  // feedBrowseData Factory Function Tests
   // ===========================================================================
 
-  describe('initFeedBrowse', () => {
-    it('does nothing when form1 does not exist', () => {
-      expect(() => initFeedBrowse()).not.toThrow();
+  describe('feedBrowseData', () => {
+    it('creates component with default values', () => {
+      const component = feedBrowseData();
+
+      expect(component.filterUrl).toBe('/feeds?page=1&selected_feed=0');
+      expect(component.resetUrl).toBe('/feeds');
+      expect(component.pageBaseUrl).toBe('/feeds');
+      expect(component.query).toBe('');
+      expect(component.queryMode).toBe('');
     });
 
-    it('sets up language filter change handler', () => {
+    it('creates component with provided config values', () => {
+      const config: FeedBrowseConfig = {
+        filterUrl: '/custom/filter',
+        resetUrl: '/custom/reset',
+        pageBaseUrl: '/custom/base',
+        currentQuery: 'test query',
+        currentQueryMode: 'title'
+      };
+
+      const component = feedBrowseData(config);
+
+      expect(component.filterUrl).toBe('/custom/filter');
+      expect(component.resetUrl).toBe('/custom/reset');
+      expect(component.pageBaseUrl).toBe('/custom/base');
+      expect(component.query).toBe('test query');
+      expect(component.queryMode).toBe('title');
+    });
+
+    it('allows partial config', () => {
+      const config: FeedBrowseConfig = {
+        currentQuery: 'search term'
+      };
+
+      const component = feedBrowseData(config);
+
+      expect(component.filterUrl).toBe('/feeds?page=1&selected_feed=0'); // Default
+      expect(component.query).toBe('search term');
+    });
+  });
+
+  // ===========================================================================
+  // init() Method Tests
+  // ===========================================================================
+
+  describe('init()', () => {
+    it('reads config from JSON script tag', () => {
       document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="filter-language" data-url="/feeds?page=1&selected_feed=0">
-            <option value="1">English</option>
-            <option value="2">French</option>
-          </select>
-        </form>
+        <script type="application/json" id="feed-browse-config">
+          {"filterUrl": "/json/filter", "currentQuery": "json query"}
+        </script>
       `;
 
-      initFeedBrowse();
+      const component = feedBrowseData();
+      component.init();
 
-      const select = document.querySelector<HTMLSelectElement>('[data-action="filter-language"]')!;
-      select.value = '2';
-      select.dispatchEvent(new Event('change'));
+      expect(component.filterUrl).toBe('/json/filter');
+      expect(component.query).toBe('json query');
+    });
+
+    it('keeps defaults if no JSON config element exists', () => {
+      const component = feedBrowseData();
+      component.init();
+
+      expect(component.filterUrl).toBe('/feeds?page=1&selected_feed=0');
+      expect(component.query).toBe('');
+    });
+
+    it('handles invalid JSON gracefully', () => {
+      document.body.innerHTML = `
+        <script type="application/json" id="feed-browse-config">
+          {invalid json}
+        </script>
+      `;
+
+      const component = feedBrowseData({ currentQuery: 'original' });
+
+      expect(() => component.init()).not.toThrow();
+      expect(component.query).toBe('original');
+    });
+  });
+
+  // ===========================================================================
+  // handleLanguageFilter() Tests
+  // ===========================================================================
+
+  describe('handleLanguageFilter()', () => {
+    it('calls setLang with select element and filter URL', () => {
+      const component = feedBrowseData({ filterUrl: '/custom/filter' });
+      const select = document.createElement('select');
+      const event = { target: select } as unknown as Event;
+
+      component.handleLanguageFilter(event);
+
+      expect(setLang).toHaveBeenCalledWith(select, '/custom/filter');
+    });
+
+    it('uses default filter URL', () => {
+      const component = feedBrowseData();
+      const select = document.createElement('select');
+      const event = { target: select } as unknown as Event;
+
+      component.handleLanguageFilter(event);
 
       expect(setLang).toHaveBeenCalledWith(select, '/feeds?page=1&selected_feed=0');
     });
+  });
 
-    it('uses default URL for language filter if not specified', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="filter-language">
-            <option value="1">English</option>
-          </select>
-        </form>
-      `;
+  // ===========================================================================
+  // handleQueryMode() Tests
+  // ===========================================================================
 
-      initFeedBrowse();
+  describe('handleQueryMode()', () => {
+    it('navigates to URL with query and mode', () => {
+      const component = feedBrowseData({ pageBaseUrl: '/feeds' });
+      component.query = 'test query';
 
-      const select = document.querySelector<HTMLSelectElement>('[data-action="filter-language"]')!;
-      select.dispatchEvent(new Event('change'));
-
-      expect(setLang).toHaveBeenCalledWith(select, '/feeds?page=1&selected_feed=0');
-    });
-
-    it('sets up query mode change handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <input type="text" name="query" value="test query" />
-          <select data-action="query-mode">
-            <option value="title">Title</option>
-            <option value="content">Content</option>
-          </select>
-        </form>
-      `;
-
-      initFeedBrowse();
-
-      const select = document.querySelector<HTMLSelectElement>('[data-action="query-mode"]')!;
+      const select = document.createElement('select');
+      const option = document.createElement('option');
+      option.value = 'content';
+      select.appendChild(option);
       select.value = 'content';
-      select.dispatchEvent(new Event('change'));
+      const event = { target: select } as unknown as Event;
+
+      component.handleQueryMode(event);
 
       expect(window.location.href).toBe('/feeds?page=1&query=test%20query&query_mode=content');
     });
 
-    it('sets up query filter button handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <input type="text" name="query" value="search term" />
-          <button data-action="filter-query">Filter</button>
-        </form>
-      `;
+    it('handles empty query', () => {
+      const component = feedBrowseData();
+      component.query = '';
 
-      initFeedBrowse();
+      const select = document.createElement('select');
+      const option = document.createElement('option');
+      option.value = 'title';
+      select.appendChild(option);
+      select.value = 'title';
+      const event = { target: select } as unknown as Event;
 
-      const button = document.querySelector<HTMLButtonElement>('[data-action="filter-query"]')!;
-      button.click();
-
-      expect(window.location.href).toBe('/feeds?page=1&query=search%20term');
-    });
-
-    it('sets up query clear button handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="clear-query">Clear</button>
-        </form>
-      `;
-
-      initFeedBrowse();
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="clear-query"]')!;
-      button.click();
-
-      expect(window.location.href).toBe('/feeds?page=1&query=');
-    });
-
-    it('sets up reset all button handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="reset-all" data-url="/feeds">Reset</button>
-        </form>
-      `;
-
-      initFeedBrowse();
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="reset-all"]')!;
-      button.click();
-
-      expect(resetAll).toHaveBeenCalledWith('/feeds');
-    });
-
-    it('uses default URL for reset all if not specified', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="reset-all">Reset</button>
-        </form>
-      `;
-
-      initFeedBrowse();
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="reset-all"]')!;
-      button.click();
-
-      expect(resetAll).toHaveBeenCalledWith('/feeds');
-    });
-
-    it('sets up feed select change handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="filter-feed">
-            <option value="0">All</option>
-            <option value="5">Feed 5</option>
-          </select>
-        </form>
-      `;
-
-      initFeedBrowse();
-
-      const select = document.querySelector<HTMLSelectElement>('[data-action="filter-feed"]')!;
-      select.value = '5';
-      select.dispatchEvent(new Event('change'));
-
-      expect(window.location.href).toBe('/feeds?page=1&selected_feed=5');
-    });
-
-    it('sets up sort select change handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="sort">
-            <option value="1">Newest</option>
-            <option value="2">Oldest</option>
-          </select>
-        </form>
-      `;
-
-      initFeedBrowse();
-
-      const select = document.querySelector<HTMLSelectElement>('[data-action="sort"]')!;
-      select.value = '2';
-      select.dispatchEvent(new Event('change'));
-
-      expect(window.location.href).toBe('/feeds?page=1&sort=2');
-    });
-
-    it('handles empty query input', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <input type="text" name="query" value="" />
-          <button data-action="filter-query">Filter</button>
-        </form>
-      `;
-
-      initFeedBrowse();
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="filter-query"]')!;
-      button.click();
-
-      expect(window.location.href).toBe('/feeds?page=1&query=');
-    });
-
-    it('handles missing query input for query mode', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="query-mode">
-            <option value="title">Title</option>
-          </select>
-        </form>
-      `;
-
-      initFeedBrowse();
-
-      const select = document.querySelector<HTMLSelectElement>('[data-action="query-mode"]')!;
-      select.dispatchEvent(new Event('change'));
+      component.handleQueryMode(event);
 
       expect(window.location.href).toBe('/feeds?page=1&query=&query_mode=title');
     });
   });
 
   // ===========================================================================
-  // initNotFoundImages Tests
+  // handleQueryFilter() Tests
   // ===========================================================================
 
-  describe('initNotFoundImages', () => {
-    it('replaces not_found image with checkbox on click', () => {
+  describe('handleQueryFilter()', () => {
+    it('navigates to URL with encoded query', () => {
+      const component = feedBrowseData({ pageBaseUrl: '/feeds' });
+      component.query = 'test search';
+
+      component.handleQueryFilter();
+
+      expect(window.location.href).toBe('/feeds?page=1&query=test%20search');
+    });
+
+    it('handles empty query', () => {
+      const component = feedBrowseData();
+      component.query = '';
+
+      component.handleQueryFilter();
+
+      expect(window.location.href).toBe('/feeds?page=1&query=');
+    });
+  });
+
+  // ===========================================================================
+  // handleClearQuery() Tests
+  // ===========================================================================
+
+  describe('handleClearQuery()', () => {
+    it('clears query and navigates', () => {
+      const component = feedBrowseData();
+      component.query = 'existing query';
+
+      component.handleClearQuery();
+
+      expect(component.query).toBe('');
+      expect(window.location.href).toBe('/feeds?page=1&query=');
+    });
+  });
+
+  // ===========================================================================
+  // handleReset() Tests
+  // ===========================================================================
+
+  describe('handleReset()', () => {
+    it('calls resetAll with configured URL', () => {
+      const component = feedBrowseData({ resetUrl: '/custom/reset' });
+
+      component.handleReset();
+
+      expect(resetAll).toHaveBeenCalledWith('/custom/reset');
+    });
+
+    it('uses default reset URL', () => {
+      const component = feedBrowseData();
+
+      component.handleReset();
+
+      expect(resetAll).toHaveBeenCalledWith('/feeds');
+    });
+  });
+
+  // ===========================================================================
+  // handleFeedSelect() Tests
+  // ===========================================================================
+
+  describe('handleFeedSelect()', () => {
+    it('navigates to URL with selected feed', () => {
+      const component = feedBrowseData({ pageBaseUrl: '/feeds' });
+      const select = document.createElement('select');
+      const option = document.createElement('option');
+      option.value = '5';
+      select.appendChild(option);
+      select.value = '5';
+      const event = { target: select } as unknown as Event;
+
+      component.handleFeedSelect(event);
+
+      expect(window.location.href).toBe('/feeds?page=1&selected_feed=5');
+    });
+  });
+
+  // ===========================================================================
+  // handleSort() Tests
+  // ===========================================================================
+
+  describe('handleSort()', () => {
+    it('navigates to URL with sort parameter', () => {
+      const component = feedBrowseData({ pageBaseUrl: '/feeds' });
+      const select = document.createElement('select');
+      const option = document.createElement('option');
+      option.value = '2';
+      select.appendChild(option);
+      select.value = '2';
+      const event = { target: select } as unknown as Event;
+
+      component.handleSort(event);
+
+      expect(window.location.href).toBe('/feeds?page=1&sort=2');
+    });
+  });
+
+  // ===========================================================================
+  // markAll() and markNone() Tests
+  // ===========================================================================
+
+  describe('markAll()', () => {
+    it('calls selectToggle with true and form2', () => {
+      const component = feedBrowseData();
+
+      component.markAll();
+
+      expect(selectToggle).toHaveBeenCalledWith(true, 'form2');
+    });
+  });
+
+  describe('markNone()', () => {
+    it('calls selectToggle with false and form2', () => {
+      const component = feedBrowseData();
+
+      component.markNone();
+
+      expect(selectToggle).toHaveBeenCalledWith(false, 'form2');
+    });
+  });
+
+  // ===========================================================================
+  // openPopup() Tests
+  // ===========================================================================
+
+  describe('openPopup()', () => {
+    it('opens audio popup with specific dimensions', () => {
+      const component = feedBrowseData();
+
+      component.openPopup('http://example.com/audio.mp3', 'audio');
+
+      expect(window.open).toHaveBeenCalledWith(
+        'http://example.com/audio.mp3',
+        'child',
+        'scrollbars,width=650,height=600'
+      );
+    });
+
+    it('opens external popup without dimensions', () => {
+      const component = feedBrowseData();
+
+      component.openPopup('http://example.com/article', 'external');
+
+      expect(window.open).toHaveBeenCalledWith('http://example.com/article');
+    });
+  });
+
+  // ===========================================================================
+  // handleNotFoundClick() Tests
+  // ===========================================================================
+
+  describe('handleNotFoundClick()', () => {
+    it('replaces not_found element with checkbox on click', () => {
       document.body.innerHTML = `
-        <img class="not_found" name="item_123" />
+        <span class="not_found" name="item_123">Error</span>
       `;
 
-      initNotFoundImages();
+      const component = feedBrowseData();
+      const span = document.querySelector('.not_found')!;
+      const event = { target: span } as unknown as Event;
 
-      const img = document.querySelector('img.not_found')!;
-      img.click();
+      component.handleNotFoundClick(event);
 
-      // Image should be replaced with checkbox
-      expect(document.querySelector('img.not_found')).toBeNull();
+      // Span should be replaced with checkbox
+      expect(document.querySelector('.not_found')).toBeNull();
       expect(document.querySelector('input[type="checkbox"]')).not.toBeNull();
     });
 
     it('creates checkbox with correct attributes', () => {
       document.body.innerHTML = `
-        <img class="not_found" name="item_456" />
+        <span class="not_found" name="item_456">Error</span>
       `;
 
-      initNotFoundImages();
-      document.querySelector('img.not_found')!.click();
+      const component = feedBrowseData();
+      const span = document.querySelector('.not_found')!;
+      component.handleNotFoundClick({ target: span } as unknown as Event);
 
       const checkbox = document.querySelector('input[type="checkbox"]') as HTMLInputElement;
       expect(checkbox).not.toBeNull();
@@ -270,11 +399,12 @@ describe('feed_browse.ts', () => {
 
     it('creates label for checkbox', () => {
       document.body.innerHTML = `
-        <img class="not_found" name="item_789" />
+        <span class="not_found" name="item_789">Error</span>
       `;
 
-      initNotFoundImages();
-      document.querySelector('img.not_found')!.click();
+      const component = feedBrowseData();
+      const span = document.querySelector('.not_found')!;
+      component.handleNotFoundClick({ target: span } as unknown as Event);
 
       const label = document.querySelector('label.wrap_checkbox');
       expect(label).not.toBeNull();
@@ -283,11 +413,12 @@ describe('feed_browse.ts', () => {
 
     it('calls markClick on checkbox change', () => {
       document.body.innerHTML = `
-        <img class="not_found" name="item_111" />
+        <span class="not_found" name="item_111">Error</span>
       `;
 
-      initNotFoundImages();
-      document.querySelector('img.not_found')!.click();
+      const component = feedBrowseData();
+      const span = document.querySelector('.not_found')!;
+      component.handleNotFoundClick({ target: span } as unknown as Event);
 
       const checkbox = document.querySelector('input[type="checkbox"]') as HTMLInputElement;
       checkbox.dispatchEvent(new Event('change'));
@@ -295,59 +426,30 @@ describe('feed_browse.ts', () => {
       expect(markClick).toHaveBeenCalled();
     });
 
-    it('handles missing markClick gracefully', () => {
+    it('ignores clicks on non-not_found elements', () => {
       document.body.innerHTML = `
-        <img class="not_found" name="item_222" />
+        <span class="regular_element" name="item_444">Normal</span>
       `;
 
-      delete (window as any).markClick;
+      const component = feedBrowseData();
+      const span = document.querySelector('.regular_element')!;
+      component.handleNotFoundClick({ target: span } as unknown as Event);
 
-      initNotFoundImages();
-      document.querySelector('img.not_found')!.click();
-
-      const checkbox = document.querySelector('input[type="checkbox"]') as HTMLInputElement;
-      expect(() => {
-        checkbox.dispatchEvent(new Event('change'));
-      }).not.toThrow();
-    });
-
-    it('updates tabindex on interactive elements', () => {
-      document.body.innerHTML = `
-        <input type="text" />
-        <img class="not_found" name="item_333" />
-        <button>Click</button>
-      `;
-
-      initNotFoundImages();
-      document.querySelector('img.not_found')!.click();
-
-      // Check that tabindex is set on elements
-      const elements = document.querySelectorAll('[tabindex]');
-      expect(elements.length).toBeGreaterThan(0);
-    });
-
-    it('ignores clicks on non-not_found images', () => {
-      document.body.innerHTML = `
-        <img class="regular_image" name="item_444" />
-      `;
-
-      initNotFoundImages();
-      document.querySelector('img.regular_image')!.click();
-
-      // Image should still exist
-      expect(document.querySelector('img.regular_image')).not.toBeNull();
+      // Span should still exist
+      expect(document.querySelector('.regular_element')).not.toBeNull();
       expect(document.querySelector('input[type="checkbox"]')).toBeNull();
     });
 
-    it('handles image with empty name attribute', () => {
+    it('handles element with empty name attribute', () => {
       document.body.innerHTML = `
-        <img class="not_found" name="" />
+        <span class="not_found" name="">Error</span>
       `;
 
-      initNotFoundImages();
+      const component = feedBrowseData();
+      const span = document.querySelector('.not_found')!;
 
       expect(() => {
-        document.querySelector('img.not_found')!.click();
+        component.handleNotFoundClick({ target: span } as unknown as Event);
       }).not.toThrow();
 
       const checkbox = document.querySelector('input[type="checkbox"]') as HTMLInputElement;

@@ -20,18 +20,18 @@
 namespace Lwt\Views\Feed;
 
 ?>
+<div x-data="feedMultiLoad()">
 <form name="form1" action="/feeds" data-auto-submit-button="querybutton">
 <table class="tab3" style="border-left: none;border-top: none; background-color:inherit" cellspacing="0" cellpadding="5">
 <tr>
 <th class="th1 borderleft" colspan="2">Language:<select name="filterlang"
-data-action="filter-language"
-data-url="/feeds/edit?multi_load_feed=1&amp;page=1">
+@change="handleLanguageFilter($event)">
     <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
 </select>
 </th>
 <th class="th1 borderright" colspan="2">
-<input type="button" value="Mark All" data-action="mark-all" />
-<input type="button" value="Mark None" data-action="mark-none" /></th>
+<input type="button" value="Mark All" @click="markAll()" />
+<input type="button" value="Mark None" @click="markNone()" /></th>
 </tr>
 <tr>
 <td colspan="4" style="padding-left: 0px;padding-right: 0px;border-bottom: none;width: 100%;border-left: none;background-color: transparent;"><table class="sortable tab2" cellspacing="0" cellpadding="5">
@@ -61,8 +61,10 @@ data-url="/feeds/edit?multi_load_feed=1&amp;page=1">
 <tr>
 <th class="th1 borderleft" colspan="3"><input id="map" type="hidden" name="selected_feed" value="" />
 <input type="hidden" name="load_feed" value="1" />
-<button id="markaction">Update Marked Newsfeeds</button></th>
+<button id="markaction" @click="collectAndSubmit()">Update Marked Newsfeeds</button></th>
 <th class="th1 borderright">
-    <input type="button" value="Cancel" data-action="cancel" data-url="/feeds?selected_feed=0" /></th></tr>
+    <input type="button" value="Cancel" @click="cancel()" /></th></tr>
 </table>
 </form>
+</div>
+<!-- Feed multi-load component: feeds/components/feed_multi_load_component.ts -->

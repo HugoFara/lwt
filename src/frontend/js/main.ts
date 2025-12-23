@@ -87,13 +87,13 @@ import './media/media_selection';
 import './media/html5_audio_player';
 import './media/audio_player_alpine';
 
-// Feeds
-import './feeds/feed_browse';
-import './feeds/feed_loader';
-import './feeds/feed_multi_load';
-import './feeds/feed_index';
-import './feeds/feed_form';
-import './feeds/feed_text_edit';
+// Feed Alpine.js components
+import './feeds/components/feed_form_component';
+import './feeds/components/feed_multi_load_component';
+import './feeds/components/feed_loader_component';
+import './feeds/components/feed_index_component';
+import './feeds/components/feed_browse_component';
+import './feeds/components/feed_text_edit_component';
 
 // Feed Wizard - Alpine.js components
 import './feeds/stores/feed_wizard_store';
@@ -107,8 +107,8 @@ import './feeds/stores/feed_manager_store';
 import './feeds/feed_manager_app';
 import './api/feeds';
 
-// Feed Wizard - Legacy XPath selection (still needed for core functionality)
-import './feeds/jq_feedwizard';
+// XPath utilities (exports to window for PHP views)
+import './feeds/utils/xpath_utils';
 
 // Texts
 import './texts/text_list';

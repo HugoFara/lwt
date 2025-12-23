@@ -480,3 +480,14 @@ export function parseSelectionList(listElement: HTMLElement | null): string[] {
 
   return xpaths;
 }
+
+// Export functions to window for backward compatibility with PHP views
+declare global {
+  interface Window {
+    xpathQuery: typeof xpathQuery;
+    isValidXPath: typeof isValidXPath;
+  }
+}
+
+window.xpathQuery = xpathQuery;
+window.isValidXPath = isValidXPath;

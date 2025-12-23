@@ -1,10 +1,9 @@
 /**
- * Tests for feed_index.ts - Feed index/management page functionality
+ * Tests for feed_index_component.ts - Feed index Alpine component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initFeedIndex } from '../../../src/frontend/js/feeds/feed_index';
 
-// Mock the dependencies
+// Mock the dependencies before importing the module
 vi.mock('../../../src/frontend/js/core/language_settings', () => ({
   setLang: vi.fn(),
   resetAll: vi.fn()
@@ -15,315 +14,373 @@ vi.mock('../../../src/frontend/js/forms/bulk_actions', () => ({
   multiActionGo: vi.fn()
 }));
 
+import {
+  feedIndexData,
+  type FeedIndexConfig
+} from '../../../src/frontend/js/feeds/components/feed_index_component';
 import { setLang, resetAll } from '../../../src/frontend/js/core/language_settings';
 import { selectToggle, multiActionGo } from '../../../src/frontend/js/forms/bulk_actions';
 
-describe('feed_index.ts', () => {
+describe('feed_index_component.ts', () => {
+  let originalLocation: Location;
+
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
+    // Save original location
+    originalLocation = window.location;
     // Mock location.href
     Object.defineProperty(window, 'location', {
       value: { href: '' },
-      writable: true
+      writable: true,
+      configurable: true
     });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
+    // Restore original location
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+      configurable: true
+    });
   });
 
   // ===========================================================================
-  // initFeedIndex Tests
+  // feedIndexData Factory Function Tests
   // ===========================================================================
 
-  describe('initFeedIndex', () => {
-    it('does nothing when form1 does not exist', () => {
-      expect(() => initFeedIndex()).not.toThrow();
+  describe('feedIndexData', () => {
+    it('creates component with default values', () => {
+      const component = feedIndexData();
+
+      expect(component.resetUrl).toBe('/feeds/edit');
+      expect(component.filterUrl).toBe('/feeds/edit?manage_feeds=1');
+      expect(component.pageBaseUrl).toBe('/feeds/edit');
+      expect(component.query).toBe('');
     });
 
-    it('prevents form submission and triggers query button click', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="filter-query">Filter</button>
-        </form>
-      `;
+    it('creates component with provided config values', () => {
+      const config: FeedIndexConfig = {
+        resetUrl: '/custom/reset',
+        filterUrl: '/custom/filter',
+        pageBaseUrl: '/custom/base',
+        currentQuery: 'test query'
+      };
 
-      initFeedIndex();
+      const component = feedIndexData(config);
 
-      const form = document.forms.namedItem('form1')!;
-      const filterButton = document.querySelector<HTMLButtonElement>('[data-action="filter-query"]')!;
-      const buttonClickSpy = vi.spyOn(filterButton, 'click');
-
-      const event = new Event('submit', { cancelable: true });
-      form.dispatchEvent(event);
-
-      expect(event.defaultPrevented).toBe(true);
-      expect(buttonClickSpy).toHaveBeenCalled();
+      expect(component.resetUrl).toBe('/custom/reset');
+      expect(component.filterUrl).toBe('/custom/filter');
+      expect(component.pageBaseUrl).toBe('/custom/base');
+      expect(component.query).toBe('test query');
     });
 
-    it('sets up reset all button handler', () => {
+    it('allows partial config', () => {
+      const config: FeedIndexConfig = {
+        currentQuery: 'search term'
+      };
+
+      const component = feedIndexData(config);
+
+      expect(component.resetUrl).toBe('/feeds/edit'); // Default
+      expect(component.query).toBe('search term');
+    });
+  });
+
+  // ===========================================================================
+  // init() Method Tests
+  // ===========================================================================
+
+  describe('init()', () => {
+    it('reads config from JSON script tag', () => {
       document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="reset-all" data-url="/feeds/edit">Reset</button>
-        </form>
+        <script type="application/json" id="feed-index-config">
+          {"resetUrl": "/json/reset", "currentQuery": "json query"}
+        </script>
       `;
 
-      initFeedIndex();
+      const component = feedIndexData();
+      component.init();
 
-      const button = document.querySelector<HTMLButtonElement>('[data-action="reset-all"]')!;
-      button.click();
+      expect(component.resetUrl).toBe('/json/reset');
+      expect(component.query).toBe('json query');
+    });
+
+    it('keeps defaults if no JSON config element exists', () => {
+      const component = feedIndexData();
+      component.init();
+
+      expect(component.resetUrl).toBe('/feeds/edit');
+      expect(component.query).toBe('');
+    });
+
+    it('handles invalid JSON gracefully', () => {
+      document.body.innerHTML = `
+        <script type="application/json" id="feed-index-config">
+          {invalid json}
+        </script>
+      `;
+
+      const component = feedIndexData({ currentQuery: 'original' });
+
+      expect(() => component.init()).not.toThrow();
+      expect(component.query).toBe('original');
+    });
+  });
+
+  // ===========================================================================
+  // handleReset() Tests
+  // ===========================================================================
+
+  describe('handleReset()', () => {
+    it('calls resetAll with configured URL', () => {
+      const component = feedIndexData({ resetUrl: '/custom/reset' });
+
+      component.handleReset();
+
+      expect(resetAll).toHaveBeenCalledWith('/custom/reset');
+    });
+
+    it('uses default reset URL', () => {
+      const component = feedIndexData();
+
+      component.handleReset();
 
       expect(resetAll).toHaveBeenCalledWith('/feeds/edit');
     });
+  });
 
-    it('uses default URL for reset all if not specified', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="reset-all">Reset</button>
-        </form>
-      `;
+  // ===========================================================================
+  // handleLanguageFilter() Tests
+  // ===========================================================================
 
-      initFeedIndex();
+  describe('handleLanguageFilter()', () => {
+    it('calls setLang with select element and filter URL', () => {
+      const component = feedIndexData({ filterUrl: '/custom/filter' });
+      const select = document.createElement('select');
+      const event = { target: select } as unknown as Event;
 
-      const button = document.querySelector<HTMLButtonElement>('[data-action="reset-all"]')!;
-      button.click();
+      component.handleLanguageFilter(event);
 
-      expect(resetAll).toHaveBeenCalledWith('/feeds/edit');
+      expect(setLang).toHaveBeenCalledWith(select, '/custom/filter');
     });
 
-    it('sets up language filter change handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="filter-language" data-url="/feeds/edit?manage_feeds=1">
-            <option value="1">English</option>
-          </select>
-        </form>
-      `;
+    it('uses default filter URL', () => {
+      const component = feedIndexData();
+      const select = document.createElement('select');
+      const event = { target: select } as unknown as Event;
 
-      initFeedIndex();
-
-      const select = document.querySelector<HTMLSelectElement>('[data-action="filter-language"]')!;
-      select.dispatchEvent(new Event('change'));
+      component.handleLanguageFilter(event);
 
       expect(setLang).toHaveBeenCalledWith(select, '/feeds/edit?manage_feeds=1');
     });
+  });
 
-    it('uses default URL for language filter if not specified', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="filter-language">
-            <option value="1">English</option>
-          </select>
-        </form>
-      `;
+  // ===========================================================================
+  // handleQueryFilter() Tests
+  // ===========================================================================
 
-      initFeedIndex();
+  describe('handleQueryFilter()', () => {
+    it('navigates to URL with encoded query', () => {
+      const component = feedIndexData({ pageBaseUrl: '/feeds/edit' });
+      component.query = 'test search';
 
-      const select = document.querySelector<HTMLSelectElement>('[data-action="filter-language"]')!;
-      select.dispatchEvent(new Event('change'));
-
-      expect(setLang).toHaveBeenCalledWith(select, '/feeds/edit?manage_feeds=1');
-    });
-
-    it('sets up query filter button handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <input type="text" name="query" value="test search" />
-          <button data-action="filter-query">Filter</button>
-        </form>
-      `;
-
-      initFeedIndex();
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="filter-query"]')!;
-      button.click();
+      component.handleQueryFilter();
 
       expect(window.location.href).toBe('/feeds/edit?page=1&query=test%20search');
     });
 
-    it('sets up query clear button handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="clear-query">Clear</button>
-        </form>
-      `;
+    it('handles empty query', () => {
+      const component = feedIndexData();
+      component.query = '';
 
-      initFeedIndex();
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="clear-query"]')!;
-      button.click();
+      component.handleQueryFilter();
 
       expect(window.location.href).toBe('/feeds/edit?page=1&query=');
     });
 
-    it('sets up mark all button handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="mark-all">Mark All</button>
-        </form>
-        <form name="form2"></form>
-      `;
+    it('handles special characters in query', () => {
+      const component = feedIndexData();
+      component.query = 'test&query=value';
 
-      initFeedIndex();
+      component.handleQueryFilter();
 
-      const button = document.querySelector<HTMLButtonElement>('[data-action="mark-all"]')!;
-      button.click();
+      expect(window.location.href).toBe('/feeds/edit?page=1&query=test%26query%3Dvalue');
+    });
+  });
+
+  // ===========================================================================
+  // handleClearQuery() Tests
+  // ===========================================================================
+
+  describe('handleClearQuery()', () => {
+    it('clears query and navigates', () => {
+      const component = feedIndexData();
+      component.query = 'existing query';
+
+      component.handleClearQuery();
+
+      expect(component.query).toBe('');
+      expect(window.location.href).toBe('/feeds/edit?page=1&query=');
+    });
+  });
+
+  // ===========================================================================
+  // markAll() and markNone() Tests
+  // ===========================================================================
+
+  describe('markAll()', () => {
+    it('calls selectToggle with true and form2', () => {
+      const component = feedIndexData();
+
+      component.markAll();
 
       expect(selectToggle).toHaveBeenCalledWith(true, 'form2');
     });
+  });
 
-    it('sets up mark none button handler', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <button data-action="mark-none">Mark None</button>
-        </form>
-        <form name="form2"></form>
-      `;
+  describe('markNone()', () => {
+    it('calls selectToggle with false and form2', () => {
+      const component = feedIndexData();
 
-      initFeedIndex();
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="mark-none"]')!;
-      button.click();
+      component.markNone();
 
       expect(selectToggle).toHaveBeenCalledWith(false, 'form2');
     });
+  });
 
-    it('sets up mark action select handler', () => {
+  // ===========================================================================
+  // handleMarkAction() Tests
+  // ===========================================================================
+
+  describe('handleMarkAction()', () => {
+    it('collects checked checkbox values into hidden field', () => {
       document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="mark-action">
-            <option value="">Select action</option>
-            <option value="del">Delete</option>
-          </select>
+        <div id="container">
+          <form name="form1"></form>
           <input type="hidden" id="map" value="" />
-        </form>
-        <input type="checkbox" class="markcheck" value="1" checked />
-        <input type="checkbox" class="markcheck" value="2" checked />
+          <input type="checkbox" class="markcheck" value="1" checked />
+          <input type="checkbox" class="markcheck" value="2" checked />
+          <input type="checkbox" class="markcheck" value="3" />
+        </div>
       `;
 
-      initFeedIndex();
+      const component = feedIndexData();
+      const container = document.getElementById('container')!;
+      (component as unknown as { $el: HTMLElement }).$el = container;
 
-      const select = document.querySelector<HTMLSelectElement>('[data-action="mark-action"]')!;
+      const select = document.createElement('select');
       select.value = 'del';
-      select.dispatchEvent(new Event('change'));
+      const event = { target: select } as unknown as Event;
 
-      // Hidden field should be populated with checked values
+      component.handleMarkAction.call(component as any, event);
+
       const hiddenField = document.getElementById('map') as HTMLInputElement;
       expect(hiddenField.value).toContain('1');
       expect(hiddenField.value).toContain('2');
+      expect(hiddenField.value).not.toContain('3');
+    });
 
-      // multiActionGo should be called
+    it('calls multiActionGo with form and select', () => {
+      document.body.innerHTML = `
+        <div id="container">
+          <form name="form1"></form>
+        </div>
+      `;
+
+      const component = feedIndexData();
+      const container = document.getElementById('container')!;
+      (component as unknown as { $el: HTMLElement }).$el = container;
+
+      const select = document.createElement('select');
+      const event = { target: select } as unknown as Event;
+
+      component.handleMarkAction.call(component as any, event);
+
       expect(multiActionGo).toHaveBeenCalled();
     });
 
-    it('sets up sort select handler', () => {
+    it('handles missing hidden field gracefully', () => {
       document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="sort">
-            <option value="1">Newest</option>
-            <option value="2">Oldest</option>
-          </select>
-        </form>
+        <div id="container">
+          <form name="form1"></form>
+        </div>
       `;
 
-      initFeedIndex();
+      const component = feedIndexData();
+      const container = document.getElementById('container')!;
+      (component as unknown as { $el: HTMLElement }).$el = container;
 
-      const select = document.querySelector<HTMLSelectElement>('[data-action="sort"]')!;
+      const select = document.createElement('select');
+      const event = { target: select } as unknown as Event;
+
+      expect(() => {
+        component.handleMarkAction.call(component as any, event);
+      }).not.toThrow();
+    });
+  });
+
+  // ===========================================================================
+  // handleSort() Tests
+  // ===========================================================================
+
+  describe('handleSort()', () => {
+    it('navigates to URL with sort parameter', () => {
+      const component = feedIndexData({ pageBaseUrl: '/feeds/edit' });
+      const select = document.createElement('select');
+      const option = document.createElement('option');
+      option.value = '2';
+      select.appendChild(option);
       select.value = '2';
-      select.dispatchEvent(new Event('change'));
+      const event = { target: select } as unknown as Event;
+
+      component.handleSort(event);
 
       expect(window.location.href).toBe('/feeds/edit?page=1&sort=2');
     });
 
-    it('sets up delete feed handler with confirmation', () => {
-      document.body.innerHTML = `
-        <form name="form1"></form>
-        <form name="form2">
-          <span data-action="delete-feed" data-feed-id="42">Delete</span>
-        </form>
-      `;
+    it('encodes special characters in sort value', () => {
+      const component = feedIndexData();
+      const select = document.createElement('select');
+      const option = document.createElement('option');
+      option.value = 'name&asc';
+      select.appendChild(option);
+      select.value = 'name&asc';
+      const event = { target: select } as unknown as Event;
 
-      // Mock confirm
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component.handleSort(event);
 
-      initFeedIndex();
+      expect(window.location.href).toBe('/feeds/edit?page=1&sort=name%26asc');
+    });
+  });
 
-      const deleteSpan = document.querySelector<HTMLElement>('[data-action="delete-feed"]')!;
-      deleteSpan.click();
+  // ===========================================================================
+  // confirmDelete() Tests
+  // ===========================================================================
 
-      expect(confirmSpy).toHaveBeenCalledWith('Are you sure?');
+  describe('confirmDelete()', () => {
+    it('navigates to delete URL when confirmed', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      const component = feedIndexData();
+
+      component.confirmDelete('42');
+
+      expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
       expect(window.location.href).toBe('/feeds/edit?markaction=del&selected_feed=42');
     });
 
-    it('does not delete feed if confirmation is cancelled', () => {
-      document.body.innerHTML = `
-        <form name="form1"></form>
-        <form name="form2">
-          <span data-action="delete-feed" data-feed-id="42">Delete</span>
-        </form>
-      `;
-
+    it('does not navigate when cancelled', () => {
       vi.spyOn(window, 'confirm').mockReturnValue(false);
 
-      initFeedIndex();
+      const component = feedIndexData();
 
-      const deleteSpan = document.querySelector<HTMLElement>('[data-action="delete-feed"]')!;
-      deleteSpan.click();
+      component.confirmDelete('42');
 
-      expect(window.location.href).toBe('');
-    });
-
-    it('handles empty query input', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <input type="text" name="query" value="" />
-          <button data-action="filter-query">Filter</button>
-        </form>
-      `;
-
-      initFeedIndex();
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="filter-query"]')!;
-      button.click();
-
-      expect(window.location.href).toBe('/feeds/edit?page=1&query=');
-    });
-
-    it('handles missing hidden map field', () => {
-      document.body.innerHTML = `
-        <form name="form1">
-          <select data-action="mark-action">
-            <option value="">Select action</option>
-            <option value="del">Delete</option>
-          </select>
-        </form>
-      `;
-
-      initFeedIndex();
-
-      const select = document.querySelector<HTMLSelectElement>('[data-action="mark-action"]')!;
-      select.value = 'del';
-
-      expect(() => {
-        select.dispatchEvent(new Event('change'));
-      }).not.toThrow();
-    });
-
-    it('ignores delete clicks outside form2', () => {
-      document.body.innerHTML = `
-        <form name="form1"></form>
-        <form name="form2"></form>
-        <span data-action="delete-feed" data-feed-id="99">Delete Outside</span>
-      `;
-
-      initFeedIndex();
-
-      const deleteSpan = document.querySelector<HTMLElement>('[data-action="delete-feed"]')!;
-      deleteSpan.click();
-
-      // Should not redirect since click is outside form2
+      expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
       expect(window.location.href).toBe('');
     });
   });
