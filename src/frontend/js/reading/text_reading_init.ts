@@ -3,7 +3,7 @@
  *
  * Handles initialization of the text reading interface including:
  * - Text-to-speech (TTS) setup
- * - Global LWT_DATA configuration
+ * - State module configuration
  * - Reading position saving
  * - Audio position saving
  *
@@ -47,11 +47,9 @@ interface TextHeaderConfig {
  * Configuration from text-reading-config JSON element.
  */
 interface TextReadingConfig {
-  LWT_DATA?: {
-    language?: Record<string, unknown>;
-    text?: Record<string, unknown>;
-    settings?: Record<string, unknown>;
-  };
+  language?: Record<string, unknown>;
+  text?: Record<string, unknown>;
+  settings?: Record<string, unknown>;
 }
 
 // Declare the global variables that PHP will set
@@ -62,8 +60,6 @@ declare global {
     _lwtLanguageCode?: string;
     _lwtVoiceApi?: string | null;
     _lwtTextId?: number;
-    // Legacy content view data (for backwards compatibility)
-    new_globals?: TextReadingConfig;
     // LANG global variable
     LANG?: string;
   }
@@ -186,39 +182,6 @@ export function saveTextStatus(): void {
 }
 
 /**
- * Deep merge PHP globals into window.LWT_DATA.
- * This merges values from new_globals into existing LWT_DATA.
- *
- * @param newGlobals Object containing values to merge
- */
-function mergeGlobals(newGlobals: Record<string, unknown>): void {
-  // Use type assertion via unknown to work around strict type checking
-  const win = window as unknown as Record<string, unknown>;
-  for (const key in newGlobals) {
-    if (typeof win[key] === 'undefined') {
-      win[key] = newGlobals[key];
-    } else if (typeof newGlobals[key] === 'object' && newGlobals[key] !== null) {
-      const subObj = newGlobals[key] as Record<string, unknown>;
-      for (const subkey1 in subObj) {
-        const parentObj = win[key] as Record<string, unknown>;
-        if (typeof parentObj[subkey1] === 'undefined') {
-          parentObj[subkey1] = subObj[subkey1];
-        } else if (typeof subObj[subkey1] === 'object' && subObj[subkey1] !== null) {
-          const subSubObj = subObj[subkey1] as Record<string, unknown>;
-          for (const subkey2 in subSubObj) {
-            (parentObj[subkey1] as Record<string, unknown>)[subkey2] = subSubObj[subkey2];
-          }
-        } else {
-          parentObj[subkey1] = subObj[subkey1];
-        }
-      }
-    } else {
-      win[key] = newGlobals[key];
-    }
-  }
-}
-
-/**
  * Save the current reading position.
  */
 function saveCurrentPosition(): void {
@@ -244,10 +207,9 @@ function saveCurrentPosition(): void {
 }
 
 /**
- * Load text reading configuration from JSON element or legacy window variable.
+ * Load text reading configuration from JSON element.
  */
 function loadTextReadingConfig(): TextReadingConfig | null {
-  // Try new JSON config first
   const configEl = document.getElementById('text-reading-config');
   if (configEl) {
     try {
@@ -255,11 +217,6 @@ function loadTextReadingConfig(): TextReadingConfig | null {
     } catch (e) {
       console.error('Failed to parse text-reading-config:', e);
     }
-  }
-
-  // Fall back to legacy window variable
-  if (window.new_globals) {
-    return window.new_globals;
   }
 
   return null;
@@ -270,49 +227,42 @@ function loadTextReadingConfig(): TextReadingConfig | null {
  * Called after LWT Vite bundle is loaded.
  */
 export function initTextReading(): void {
-  // Load and merge config into LWT_DATA (for backwards compatibility)
+  // Load config and initialize state modules
   const config = loadTextReadingConfig();
   if (config) {
-    mergeGlobals(config as unknown as Record<string, unknown>);
+    // Initialize language config
+    if (config.language) {
+      const lang = config.language;
+      initLanguageConfig({
+        id: (lang.id as number) || 0,
+        dictLink1: (lang.dict_link1 as string) || '',
+        dictLink2: (lang.dict_link2 as string) || '',
+        translatorLink: (lang.translator_link as string) || '',
+        delimiter: (lang.delimiter as string) || '',
+        wordParsing: lang.word_parsing as number | string || '',
+        rtl: (lang.rtl as boolean) || false,
+        ttsVoiceApi: (lang.ttsVoiceApi as string) || ''
+      });
+    }
 
-    // Also initialize new state modules from config
-    if (config.LWT_DATA) {
-      const lwtConfig = config.LWT_DATA;
+    // Initialize text config
+    if (config.text) {
+      const text = config.text;
+      initTextConfig({
+        id: (text.id as number) || 0,
+        annotations: text.annotations as Record<string, [unknown, string, string]> | number || 0
+      });
+    }
 
-      // Initialize language config
-      if (lwtConfig.language) {
-        const lang = lwtConfig.language as Record<string, unknown>;
-        initLanguageConfig({
-          id: (lang.id as number) || 0,
-          dictLink1: (lang.dict_link1 as string) || '',
-          dictLink2: (lang.dict_link2 as string) || '',
-          translatorLink: (lang.translator_link as string) || '',
-          delimiter: (lang.delimiter as string) || '',
-          wordParsing: lang.word_parsing as number | string || '',
-          rtl: (lang.rtl as boolean) || false,
-          ttsVoiceApi: (lang.ttsVoiceApi as string) || ''
-        });
-      }
-
-      // Initialize text config
-      if (lwtConfig.text) {
-        const text = lwtConfig.text as Record<string, unknown>;
-        initTextConfig({
-          id: (text.id as number) || 0,
-          annotations: text.annotations as Record<string, [unknown, string, string]> | number || 0
-        });
-      }
-
-      // Initialize settings config
-      if (lwtConfig.settings) {
-        const settings = lwtConfig.settings as Record<string, unknown>;
-        initSettingsConfig({
-          hts: (settings.hts as number) || 0,
-          wordStatusFilter: (settings.word_status_filter as string) || '',
-          annotationsMode: (settings.annotations_mode as number) || 1,
-          useFrameMode: (settings.use_frame_mode as boolean) || false
-        });
-      }
+    // Initialize settings config
+    if (config.settings) {
+      const settings = config.settings;
+      initSettingsConfig({
+        hts: (settings.hts as number) || 0,
+        wordStatusFilter: (settings.word_status_filter as string) || '',
+        annotationsMode: (settings.annotations_mode as number) || 1,
+        useFrameMode: (settings.use_frame_mode as boolean) || false
+      });
     }
   }
 
@@ -368,14 +318,14 @@ export function initTextReadingHeader(): void {
  * Detects which page we're on and initializes accordingly.
  */
 export function autoInit(): void {
-  // Check if we're on the text reading page (detect by config or legacy globals)
+  // Check if we're on the text reading page
   const hasTextReadingConfig = document.getElementById('text-reading-config') !== null;
   const thetext = document.getElementById('thetext');
-  if (thetext && (hasTextReadingConfig || window.new_globals)) {
+  if (thetext && hasTextReadingConfig) {
     initTextReading();
   }
 
-  // Check if we have header TTS data (detect by config or legacy globals)
+  // Check if we have header TTS data
   const hasHeaderConfig = document.getElementById('text-header-config') !== null;
   if (hasHeaderConfig || typeof window._lwtPhoneticText !== 'undefined') {
     initTextReadingHeader();

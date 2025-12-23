@@ -1,215 +1,291 @@
 /**
- * Tests for lwt_state.ts - LWT State Management and core data structures
+ * Tests for lwt_state.ts - LWT State Management and state modules
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings } from '../../../src/frontend/js/core/lwt_state';
 import {
-  LWT_DATA,
-  type LwtLanguage,
-  type LwtText,
-  type LwtWord,
-  type LwtTest,
-  type LwtSettings,
-  type LwtDataInterface,
+  // Language config
+  initLanguageConfig,
+  getLanguageConfig,
+  getLanguageId,
+  getDictionaryLinks,
+  isRtl,
+  getDelimiter,
+  getTtsVoiceApi,
+  setTtsVoiceApi,
+  resetLanguageConfig,
+  // Text config
+  initTextConfig,
+  getTextId,
+  setTextId,
+  getAnnotations,
+  setAnnotations,
+  hasAnnotations,
+  getAnnotation,
+  resetTextConfig,
+  // Settings config
+  initSettingsConfig,
+  getHtsMode,
+  isTtsOnHover,
+  isTtsOnClick,
+  getWordStatusFilter,
+  getAnnotationsMode,
+  isFrameModeEnabled,
+  isApiModeEnabled,
+  getSettingsConfig,
+  resetSettingsConfig,
+  // Reading state
+  getReadingPosition,
+  setReadingPosition,
+  resetReadingPosition,
+  hasReadingPosition,
+  // Test state
+  getCurrentWordId,
+  setCurrentWordId,
+  getTestSolution,
+  setTestSolution,
+  isAnswerOpened,
+  setAnswerOpened,
+  openAnswer,
+  resetAnswer,
+  resetTestState,
 } from '../../../src/frontend/js/core/lwt_state';
 
 describe('lwt_state.ts', () => {
   // ===========================================================================
-  // LWT_DATA Object Structure Tests
+  // Language Config Tests
   // ===========================================================================
 
-  describe('LWT_DATA structure', () => {
-    it('is defined and is an object', () => {
-      expect(LWT_DATA).toBeDefined();
-      expect(typeof LWT_DATA).toBe('object');
+  describe('Language Config', () => {
+    beforeEach(() => {
+      resetLanguageConfig();
     });
 
-    it('has all required top-level properties', () => {
-      expect(LWT_DATA).toHaveProperty('language');
-      expect(LWT_DATA).toHaveProperty('text');
-      expect(LWT_DATA).toHaveProperty('word');
-      expect(LWT_DATA).toHaveProperty('test');
-      expect(LWT_DATA).toHaveProperty('settings');
+    it('has correct initial values', () => {
+      const config = getLanguageConfig();
+      expect(config.id).toBe(0);
+      expect(config.dictLink1).toBe('');
+      expect(config.dictLink2).toBe('');
+      expect(config.translatorLink).toBe('');
+      expect(config.delimiter).toBe('');
+      expect(config.wordParsing).toBe('');
+      expect(config.rtl).toBe(false);
+      expect(config.ttsVoiceApi).toBe('');
+    });
+
+    it('initializes from config object', () => {
+      initLanguageConfig({
+        id: 42,
+        dictLink1: 'http://dict1.com',
+        dictLink2: 'http://dict2.com',
+        translatorLink: 'http://translator.com',
+        delimiter: ',',
+        rtl: true,
+        ttsVoiceApi: 'Google'
+      });
+
+      expect(getLanguageId()).toBe(42);
+      expect(isRtl()).toBe(true);
+      expect(getDelimiter()).toBe(',');
+      expect(getTtsVoiceApi()).toBe('Google');
+    });
+
+    it('getDictionaryLinks returns all links', () => {
+      initLanguageConfig({
+        dictLink1: 'http://dict1.com/###',
+        dictLink2: 'http://dict2.com/###',
+        translatorLink: 'http://translate.com/###'
+      });
+
+      const links = getDictionaryLinks();
+      expect(links.dict1).toBe('http://dict1.com/###');
+      expect(links.dict2).toBe('http://dict2.com/###');
+      expect(links.translator).toBe('http://translate.com/###');
+    });
+
+    it('allows setting TTS voice API', () => {
+      setTtsVoiceApi('Amazon Polly');
+      expect(getTtsVoiceApi()).toBe('Amazon Polly');
     });
   });
 
   // ===========================================================================
-  // LWT_DATA.language Tests
+  // Text Config Tests
   // ===========================================================================
 
-  describe('LWT_DATA.language', () => {
-    it('has correct initial structure', () => {
-      const lang = LWT_DATA.language;
-      expect(lang).toHaveProperty('id');
-      expect(lang).toHaveProperty('dict_link1');
-      expect(lang).toHaveProperty('dict_link2');
-      expect(lang).toHaveProperty('translator_link');
-      expect(lang).toHaveProperty('delimiter');
-      expect(lang).toHaveProperty('word_parsing');
-      expect(lang).toHaveProperty('rtl');
-      expect(lang).toHaveProperty('ttsVoiceApi');
+  describe('Text Config', () => {
+    beforeEach(() => {
+      resetTextConfig();
     });
 
     it('has correct initial values', () => {
-      expect(LWT_DATA.language.id).toBe(0);
-      expect(LWT_DATA.language.dict_link1).toBe('');
-      expect(LWT_DATA.language.dict_link2).toBe('');
-      expect(LWT_DATA.language.translator_link).toBe('');
-      expect(LWT_DATA.language.delimiter).toBe('');
-      expect(LWT_DATA.language.word_parsing).toBe('');
-      expect(LWT_DATA.language.rtl).toBe(false);
-      expect(LWT_DATA.language.ttsVoiceApi).toBe('');
+      expect(getTextId()).toBe(0);
+      expect(getAnnotations()).toBe(0);
     });
 
-    it('allows modification of language properties', () => {
-      const originalId = LWT_DATA.language.id;
-      LWT_DATA.language.id = 42;
-      expect(LWT_DATA.language.id).toBe(42);
-      // Reset
-      LWT_DATA.language.id = originalId;
-    });
+    it('initializes from config object', () => {
+      initTextConfig({
+        id: 100,
+        annotations: { '1': ['order', 'wid', 'translation'] }
+      });
 
-    it('allows setting dictionary links', () => {
-      const original = LWT_DATA.language.dict_link1;
-      LWT_DATA.language.dict_link1 = 'http://dict.example.com';
-      expect(LWT_DATA.language.dict_link1).toBe('http://dict.example.com');
-      LWT_DATA.language.dict_link1 = original;
-    });
-
-    it('allows setting rtl flag', () => {
-      const original = LWT_DATA.language.rtl;
-      LWT_DATA.language.rtl = true;
-      expect(LWT_DATA.language.rtl).toBe(true);
-      LWT_DATA.language.rtl = original;
-    });
-  });
-
-  // ===========================================================================
-  // LWT_DATA.text Tests
-  // ===========================================================================
-
-  describe('LWT_DATA.text', () => {
-    it('has correct initial structure', () => {
-      const text = LWT_DATA.text;
-      expect(text).toHaveProperty('id');
-      expect(text).toHaveProperty('reading_position');
-      expect(text).toHaveProperty('annotations');
-    });
-
-    it('has correct initial values', () => {
-      expect(LWT_DATA.text.id).toBe(0);
-      expect(LWT_DATA.text.reading_position).toBe(-1);
-      // annotations can be either a number (0) or a Record, starts as 0
-      expect(LWT_DATA.text.annotations).toBe(0);
+      expect(getTextId()).toBe(100);
+      expect(hasAnnotations()).toBe(true);
     });
 
     it('allows modification of text id', () => {
-      const originalId = LWT_DATA.text.id;
-      LWT_DATA.text.id = 100;
-      expect(LWT_DATA.text.id).toBe(100);
-      LWT_DATA.text.id = originalId;
+      setTextId(42);
+      expect(getTextId()).toBe(42);
     });
 
-    it('allows modification of reading position', () => {
-      const original = LWT_DATA.text.reading_position;
-      LWT_DATA.text.reading_position = 50;
-      expect(LWT_DATA.text.reading_position).toBe(50);
-      LWT_DATA.text.reading_position = original;
+    it('allows setting annotations', () => {
+      setAnnotations({
+        '1': ['order1', 'wid1', 'translation1'],
+        '2': ['order2', 'wid2', 'translation2']
+      });
+
+      expect(hasAnnotations()).toBe(true);
+      expect(getAnnotation('1')).toEqual(['order1', 'wid1', 'translation1']);
+      expect(getAnnotation('2')).toEqual(['order2', 'wid2', 'translation2']);
     });
 
-    it('allows adding annotations', () => {
-      const original = LWT_DATA.text.annotations;
-      // Set annotations to a Record
-      LWT_DATA.text.annotations = {};
-      LWT_DATA.text.annotations['1'] = { term: 'test', translation: 'prueba' };
-      expect(LWT_DATA.text.annotations['1']).toEqual({ term: 'test', translation: 'prueba' });
-      LWT_DATA.text.annotations = original;
+    it('returns undefined for missing annotation', () => {
+      setAnnotations({ '1': ['order', 'wid', 'trans'] });
+      expect(getAnnotation('999')).toBeUndefined();
+    });
+
+    it('hasAnnotations returns false for number', () => {
+      setAnnotations(0);
+      expect(hasAnnotations()).toBe(false);
     });
   });
 
   // ===========================================================================
-  // LWT_DATA.word Tests
+  // Settings Config Tests
   // ===========================================================================
 
-  describe('LWT_DATA.word', () => {
-    it('has correct initial structure', () => {
-      const word = LWT_DATA.word;
-      expect(word).toHaveProperty('id');
+  describe('Settings Config', () => {
+    beforeEach(() => {
+      resetSettingsConfig();
     });
 
     it('has correct initial values', () => {
-      expect(LWT_DATA.word.id).toBe(0);
+      const config = getSettingsConfig();
+      expect(config.hts).toBe(0);
+      expect(config.wordStatusFilter).toBe('');
+      expect(config.annotationsMode).toBe(1);
+      expect(config.useFrameMode).toBe(false);
     });
 
-    it('allows modification of word id', () => {
-      const originalId = LWT_DATA.word.id;
-      LWT_DATA.word.id = 999;
-      expect(LWT_DATA.word.id).toBe(999);
-      LWT_DATA.word.id = originalId;
+    it('initializes from config object', () => {
+      initSettingsConfig({
+        hts: 2,
+        wordStatusFilter: '1,2,3',
+        annotationsMode: 3,
+        useFrameMode: true
+      });
+
+      expect(getHtsMode()).toBe(2);
+      expect(getWordStatusFilter()).toBe('1,2,3');
+      expect(getAnnotationsMode()).toBe(3);
+      expect(isFrameModeEnabled()).toBe(true);
+      expect(isApiModeEnabled()).toBe(false);
+    });
+
+    it('isTtsOnHover returns true when hts is 2', () => {
+      initSettingsConfig({ hts: 2 });
+      expect(isTtsOnHover()).toBe(true);
+      expect(isTtsOnClick()).toBe(false);
+    });
+
+    it('isTtsOnClick returns true when hts is 3', () => {
+      initSettingsConfig({ hts: 3 });
+      expect(isTtsOnHover()).toBe(false);
+      expect(isTtsOnClick()).toBe(true);
     });
   });
 
   // ===========================================================================
-  // LWT_DATA.test Tests
+  // Reading State Tests
   // ===========================================================================
 
-  describe('LWT_DATA.test', () => {
-    it('has correct initial structure', () => {
-      const test = LWT_DATA.test;
-      expect(test).toHaveProperty('solution');
-      expect(test).toHaveProperty('answer_opened');
+  describe('Reading State', () => {
+    beforeEach(() => {
+      resetReadingPosition();
+    });
+
+    it('has correct initial value', () => {
+      expect(getReadingPosition()).toBe(-1);
+      expect(hasReadingPosition()).toBe(false);
+    });
+
+    it('allows setting reading position', () => {
+      setReadingPosition(100);
+      expect(getReadingPosition()).toBe(100);
+      expect(hasReadingPosition()).toBe(true);
+    });
+
+    it('resetReadingPosition sets to -1', () => {
+      setReadingPosition(50);
+      resetReadingPosition();
+      expect(getReadingPosition()).toBe(-1);
+      expect(hasReadingPosition()).toBe(false);
+    });
+  });
+
+  // ===========================================================================
+  // Test State Tests
+  // ===========================================================================
+
+  describe('Test State', () => {
+    beforeEach(() => {
+      resetTestState();
     });
 
     it('has correct initial values', () => {
-      expect(LWT_DATA.test.solution).toBe('');
-      expect(LWT_DATA.test.answer_opened).toBe(false);
+      expect(getCurrentWordId()).toBe(0);
+      expect(getTestSolution()).toBe('');
+      expect(isAnswerOpened()).toBe(false);
     });
 
-    it('allows modification of solution', () => {
-      const original = LWT_DATA.test.solution;
-      LWT_DATA.test.solution = 'correct answer';
-      expect(LWT_DATA.test.solution).toBe('correct answer');
-      LWT_DATA.test.solution = original;
+    it('allows setting word id', () => {
+      setCurrentWordId(999);
+      expect(getCurrentWordId()).toBe(999);
     });
 
-    it('allows modification of answer_opened', () => {
-      const original = LWT_DATA.test.answer_opened;
-      LWT_DATA.test.answer_opened = true;
-      expect(LWT_DATA.test.answer_opened).toBe(true);
-      LWT_DATA.test.answer_opened = original;
-    });
-  });
-
-  // ===========================================================================
-  // LWT_DATA.settings Tests
-  // ===========================================================================
-
-  describe('LWT_DATA.settings', () => {
-    it('has correct initial structure', () => {
-      const settings = LWT_DATA.settings;
-      expect(settings).toHaveProperty('hts');
-      expect(settings).toHaveProperty('word_status_filter');
+    it('allows setting test solution', () => {
+      setTestSolution('correct answer');
+      expect(getTestSolution()).toBe('correct answer');
     });
 
-    it('has correct initial values', () => {
-      expect(LWT_DATA.settings.hts).toBe(0);
-      expect(LWT_DATA.settings.word_status_filter).toBe('');
+    it('allows setting answer opened', () => {
+      setAnswerOpened(true);
+      expect(isAnswerOpened()).toBe(true);
     });
 
-    it('allows modification of hts (hover text-to-speech)', () => {
-      const original = LWT_DATA.settings.hts;
-      LWT_DATA.settings.hts = 2;
-      expect(LWT_DATA.settings.hts).toBe(2);
-      LWT_DATA.settings.hts = original;
+    it('openAnswer sets answer opened to true', () => {
+      openAnswer();
+      expect(isAnswerOpened()).toBe(true);
     });
 
-    it('allows modification of word_status_filter', () => {
-      const original = LWT_DATA.settings.word_status_filter;
-      LWT_DATA.settings.word_status_filter = '1,2,3';
-      expect(LWT_DATA.settings.word_status_filter).toBe('1,2,3');
-      LWT_DATA.settings.word_status_filter = original;
+    it('resetAnswer sets answer opened to false', () => {
+      openAnswer();
+      resetAnswer();
+      expect(isAnswerOpened()).toBe(false);
+    });
+
+    it('resetTestState resets all test state', () => {
+      setCurrentWordId(123);
+      setTestSolution('answer');
+      openAnswer();
+
+      resetTestState();
+
+      expect(getCurrentWordId()).toBe(0);
+      expect(getTestSolution()).toBe('');
+      expect(isAnswerOpened()).toBe(false);
     });
   });
-
 
   // ===========================================================================
   // Type Interface Tests
@@ -266,40 +342,6 @@ describe('lwt_state.ts', () => {
       expect(settings.hts).toBe(2);
       expect(settings.annotations_mode).toBe(1);
     });
-
-    it('LwtDataInterface type combines all sub-types', () => {
-      const data: LwtDataInterface = {
-        language: {
-          id: 1,
-          dict_link1: '',
-          dict_link2: '',
-          translator_link: '',
-          delimiter: '',
-          word_parsing: '',
-          rtl: false,
-          ttsVoiceApi: ''
-        },
-        text: {
-          id: 1,
-          reading_position: 0,
-          annotations: {}
-        },
-        word: {
-          id: 1
-        },
-        test: {
-          solution: '',
-          answer_opened: false
-        },
-        settings: {
-          hts: 0,
-          word_status_filter: ''
-        }
-      };
-      expect(data.language.id).toBe(1);
-      expect(data.text.id).toBe(1);
-      expect(data.word.id).toBe(1);
-    });
   });
 
   // ===========================================================================
@@ -307,47 +349,43 @@ describe('lwt_state.ts', () => {
   // ===========================================================================
 
   describe('Integration', () => {
-    it('LWT_DATA can be used to configure a complete reading session', () => {
-      // Save original state
-      const originalLang = { ...LWT_DATA.language };
-      const originalText = { ...LWT_DATA.text };
-      const originalSettings = { ...LWT_DATA.settings };
-
-      // Configure for a reading session
-      LWT_DATA.language.id = 1;
-      LWT_DATA.language.dict_link1 = 'http://dict.example.com/###';
-      LWT_DATA.language.rtl = false;
-      LWT_DATA.text.id = 42;
-      LWT_DATA.text.reading_position = 0;
-      LWT_DATA.settings.hts = 2;
-
-      // Verify configuration
-      expect(LWT_DATA.language.id).toBe(1);
-      expect(LWT_DATA.text.id).toBe(42);
-      expect(LWT_DATA.settings.hts).toBe(2);
-
-      // Restore original state
-      Object.assign(LWT_DATA.language, originalLang);
-      Object.assign(LWT_DATA.text, originalText);
-      Object.assign(LWT_DATA.settings, originalSettings);
+    beforeEach(() => {
+      resetLanguageConfig();
+      resetTextConfig();
+      resetSettingsConfig();
+      resetReadingPosition();
+      resetTestState();
     });
 
-    it('LWT_DATA annotations can store word-to-translation mappings', () => {
-      const originalAnnotations = LWT_DATA.text.annotations;
+    it('can configure a complete reading session', () => {
+      // Configure for a reading session
+      initLanguageConfig({
+        id: 1,
+        dictLink1: 'http://dict.example.com/###',
+        rtl: false
+      });
+      initTextConfig({ id: 42 });
+      initSettingsConfig({ hts: 2 });
+      setReadingPosition(0);
 
-      // Add some annotations (annotations is Record<string, [unknown, string, string]> | number)
-      LWT_DATA.text.annotations = {
+      // Verify configuration
+      expect(getLanguageId()).toBe(1);
+      expect(getTextId()).toBe(42);
+      expect(getHtsMode()).toBe(2);
+      expect(getReadingPosition()).toBe(0);
+    });
+
+    it('annotations can store word-to-translation mappings', () => {
+      setAnnotations({
         '1': ['order1', 'wid1', 'translation1'],
         '2': ['order2', 'wid2', 'translation2'],
         '10': ['order10', 'wid10', 'translation10']
-      };
+      });
 
-      expect(Object.keys(LWT_DATA.text.annotations)).toHaveLength(3);
-      expect(LWT_DATA.text.annotations['1']).toEqual(['order1', 'wid1', 'translation1']);
-
-      // Restore
-      LWT_DATA.text.annotations = originalAnnotations;
+      expect(hasAnnotations()).toBe(true);
+      expect(getAnnotation('1')).toEqual(['order1', 'wid1', 'translation1']);
+      expect(getAnnotation('2')).toEqual(['order2', 'wid2', 'translation2']);
+      expect(getAnnotation('10')).toEqual(['order10', 'wid10', 'translation10']);
     });
   });
-
 });

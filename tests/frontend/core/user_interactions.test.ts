@@ -499,55 +499,58 @@ describe('user_interactions.ts', () => {
   // ===========================================================================
 
   describe('goToLastPosition', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // Use fake timers to prevent setTimeout callbacks from firing
       // (overlib and cClick are called via setTimeout and would cause errors)
       vi.useFakeTimers();
-      // Mock LWT_DATA
-      (window as unknown as Record<string, unknown>).LWT_DATA = {
-        text: { reading_position: 0 },
-      };
       vi.spyOn(window, 'focus').mockImplementation(() => {});
+      // Dynamically import reading_state to set position
+      const { setReadingPosition } = await import('../../../src/frontend/js/core/reading_state');
+      setReadingPosition(0);
     });
 
     afterEach(() => {
       vi.useRealTimers();
     });
 
-    it('scrolls to position 0 when reading_position is 0', () => {
+    it('scrolls to position 0 when reading_position is 0', async () => {
+      const { setReadingPosition } = await import('../../../src/frontend/js/core/reading_state');
       document.body.innerHTML = `
         <span class="wsty" data_pos="100">Word</span>
       `;
-      (window as unknown as { LWT_DATA: { text: { reading_position: number } } }).LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       // Should not throw
       expect(() => goToLastPosition()).not.toThrow();
     });
 
-    it('finds element at exact reading position', () => {
+    it('finds element at exact reading position', async () => {
+      const { setReadingPosition } = await import('../../../src/frontend/js/core/reading_state');
       document.body.innerHTML = `
         <span class="wsty" data_pos="50">First</span>
         <span class="wsty" data_pos="100">Target</span>
         <span class="wsty" data_pos="150">Last</span>
       `;
-      (window as unknown as { LWT_DATA: { text: { reading_position: number } } }).LWT_DATA.text.reading_position = 100;
+      setReadingPosition(100);
 
       expect(() => goToLastPosition()).not.toThrow();
     });
 
-    it('finds closest element when exact position not found', () => {
+    it('finds closest element when exact position not found', async () => {
+      const { setReadingPosition } = await import('../../../src/frontend/js/core/reading_state');
       document.body.innerHTML = `
         <span class="wsty" data_pos="50">First</span>
         <span class="wsty" data_pos="150">Last</span>
       `;
-      (window as unknown as { LWT_DATA: { text: { reading_position: number } } }).LWT_DATA.text.reading_position = 100;
+      setReadingPosition(100);
 
       expect(() => goToLastPosition()).not.toThrow();
     });
 
-    it('handles no wsty elements', () => {
+    it('handles no wsty elements', async () => {
+      const { setReadingPosition } = await import('../../../src/frontend/js/core/reading_state');
       document.body.innerHTML = '<div>No words</div>';
-      (window as unknown as { LWT_DATA: { text: { reading_position: number } } }).LWT_DATA.text.reading_position = 100;
+      setReadingPosition(100);
 
       expect(() => goToLastPosition()).not.toThrow();
     });

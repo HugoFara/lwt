@@ -48,35 +48,28 @@ vi.mock('../../../src/frontend/js/reading/word_actions', () => ({
   incrementWordStatus: vi.fn().mockResolvedValue({ success: true }),
 }));
 
-// Mock LWT_DATA global
-const mockLWT_DATA = {
-  language: {
-    id: 1,
-    dict_link1: 'http://dict1.example.com/###',
-    dict_link2: 'http://dict2.example.com/###',
-    translator_link: 'http://translator.example.com/###',
-    delimiter: ',',
-    word_parsing: '',
-    rtl: false,
-    ttsVoiceApi: ''
-  },
-  text: {
-    id: 1,
-    reading_position: 0,
-    annotations: {}
-  },
-  word: { id: 0 },
-  test: { solution: '', answer_opened: false },
-  settings: { jQuery_tooltip: false, hts: 0, word_status_filter: '' }
-};
-
-// Set up LWT_DATA global
-(globalThis as unknown as Record<string, unknown>).LWT_DATA = mockLWT_DATA;
+import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
+import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/core/text_config';
+import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/core/settings_config';
 
 describe('overlib_interface.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
-    (globalThis as unknown as Record<string, unknown>).LWT_DATA = JSON.parse(JSON.stringify(mockLWT_DATA));
+    // Initialize state modules
+    resetLanguageConfig();
+    resetTextConfig();
+    resetSettingsConfig();
+    initLanguageConfig({
+      id: 1,
+      dictLink1: 'http://dict1.example.com/###',
+      dictLink2: 'http://dict2.example.com/###',
+      translatorLink: 'http://translator.example.com/###',
+      delimiter: ',',
+      rtl: false,
+      ttsVoiceApi: ''
+    });
+    initTextConfig({ id: 1 });
+    initSettingsConfig({ hts: 0 });
   });
 
   afterEach(() => {
@@ -546,7 +539,7 @@ describe('overlib_interface.ts', () => {
       expect(result).toContain('data-lucide="volume-2"');
       expect(result).toContain('speechDispatcher');
       expect(result).toContain("'hello'");
-      expect(result).toContain("'" + mockLWT_DATA.language.id + "'");
+      expect(result).toContain("'1'"); // Language ID is 1
     });
 
     it('escapes HTML characters in text', () => {

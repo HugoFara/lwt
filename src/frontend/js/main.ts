@@ -165,7 +165,6 @@ import './ui/footer';
 
 declare global {
   interface Window {
-    LWT_VITE_LOADED: boolean;
     Alpine: typeof Alpine;
   }
 }

@@ -37,43 +37,41 @@ function polyfillDialog() {
   }
 }
 
-// Mock LWT_DATA global
-const mockLWT_DATA = {
-  language: {
-    id: 1,
-    dict_link1: 'http://dict1.example.com/###',
-    dict_link2: 'http://dict2.example.com/###',
-    translator_link: 'http://translate.example.com/###',
-    delimiter: ',',
-    rtl: false,
-  },
-  text: {
-    id: 42,
-    reading_position: 0,
-    annotations: {},
-  },
-  settings: {
-    jQuery_tooltip: false,
-    hts: 0,
-    word_status_filter: '',
-    annotations_mode: 0,
-    use_frame_mode: true, // Use frame mode for legacy tests
-  },
-};
+// Import state modules
+import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
+import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/core/text_config';
+import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/core/settings_config';
 
 // Setup global mocks
 beforeEach(() => {
   polyfillDialog();
-  (window as unknown as Record<string, unknown>).LWT_DATA = mockLWT_DATA;
+  // Initialize state modules with test values
+  resetLanguageConfig();
+  resetTextConfig();
+  resetSettingsConfig();
+  initLanguageConfig({
+    id: 1,
+    dictLink1: 'http://dict1.example.com/###',
+    dictLink2: 'http://dict2.example.com/###',
+    translatorLink: 'http://translate.example.com/###',
+    delimiter: ',',
+    rtl: false,
+  });
+  initTextConfig({
+    id: 42
+  });
+  initSettingsConfig({
+    hts: 0,
+    wordStatusFilter: '',
+    annotationsMode: 0,
+    useFrameMode: true // Use frame mode for legacy tests
+  });
 });
 
 describe('text_events.ts', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
-    // Reset LWT_DATA settings
-    mockLWT_DATA.settings.jQuery_tooltip = false;
-    mockLWT_DATA.settings.hts = 0;
   });
 
   // ===========================================================================
@@ -226,20 +224,20 @@ describe('text_events.ts', () => {
       document.body.innerHTML = `
         <span class="word TERM123">Word</span>
       `;
-      mockLWT_DATA.settings.jQuery_tooltip = true;
+      // Native tooltips are always enabled now
 
       const word = document.querySelector('.word') as HTMLElement;
       word_hover_over.call(word);
 
       // The function should handle tooltip mode setting
-      expect(mockLWT_DATA.settings.jQuery_tooltip).toBe(true);
+      expect(true).toBe(true);
     });
 
     it('calls speechDispatcher when hts is 3', () => {
       document.body.innerHTML = `
         <span class="word TERM123">Hello</span>
       `;
-      mockLWT_DATA.settings.hts = 3;
+      initSettingsConfig({ hts: 3, useFrameMode: true });
 
       const speechDispatcherSpy = vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => {});
 
@@ -253,7 +251,7 @@ describe('text_events.ts', () => {
       document.body.innerHTML = `
         <span class="word TERM123">Hello</span>
       `;
-      mockLWT_DATA.settings.hts = 0;
+      initSettingsConfig({ hts: 0, useFrameMode: true });
 
       const speechDispatcherSpy = vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => {});
 
@@ -411,7 +409,7 @@ describe('text_events.ts', () => {
     });
 
     it('calls speechDispatcher when hts is 2', () => {
-      mockLWT_DATA.settings.hts = 2;
+      initSettingsConfig({ hts: 2, useFrameMode: true });
       document.body.innerHTML = `
         <span class="word" data_status="0" data_order="1">Hello</span>
       `;
@@ -423,7 +421,7 @@ describe('text_events.ts', () => {
     });
 
     it('does not call speechDispatcher when hts is not 2', () => {
-      mockLWT_DATA.settings.hts = 0;
+      initSettingsConfig({ hts: 0, useFrameMode: true });
       document.body.innerHTML = `
         <span class="word" data_status="0" data_order="1">Hello</span>
       `;
@@ -435,7 +433,7 @@ describe('text_events.ts', () => {
     });
 
     it('uses title attribute for hints when jQuery_tooltip is false', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = false;
+      // Native tooltips are always used now (jQuery tooltips removed)
       document.body.innerHTML = `
         <span class="word" data_status="3" data_order="1" data_wid="1" title="custom hint">Test</span>
       `;
@@ -515,7 +513,7 @@ describe('text_events.ts', () => {
     });
 
     it('calls speechDispatcher when hts is 2', () => {
-      mockLWT_DATA.settings.hts = 2;
+      initSettingsConfig({ hts: 2, useFrameMode: true });
       document.body.innerHTML = `
         <span class="mword" data_status="3" data_order="1">Hello World</span>
       `;
@@ -527,7 +525,7 @@ describe('text_events.ts', () => {
     });
 
     it('uses title attribute when jQuery_tooltip is false', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = false;
+      // Native tooltips are always used now (jQuery tooltips removed)
       document.body.innerHTML = `
         <span class="mword" data_status="3" data_order="1" title="mword title">Test</span>
       `;
@@ -657,7 +655,7 @@ describe('text_events.ts', () => {
     });
 
     it('word_click handles empty title attribute', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = false;
+      // Native tooltips are always used now
       vi.spyOn(overlibInterface, 'run_overlib_status_unknown').mockImplementation(() => {});
       vi.spyOn(frameManagement, 'loadModalFrame').mockImplementation(() => {});
 

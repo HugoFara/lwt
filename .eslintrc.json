@@ -12,7 +12,6 @@
         "semi": 0
     },
     "globals": {
-        "$": true,
-        "LWT_DATA": true
+        "$": true
     }
 }

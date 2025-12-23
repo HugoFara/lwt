@@ -67,8 +67,7 @@ export interface WordCounts {
 
 declare global {
   interface Window {
-    LWT_DATA: LwtData;
+    // LWT_VITE_LOADED is set when the Vite bundle has finished loading
+    LWT_VITE_LOADED?: boolean;
   }
-
-  const LWT_DATA: LwtData;
 }

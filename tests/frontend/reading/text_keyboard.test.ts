@@ -69,38 +69,14 @@ function createKeyEvent(keyCode: number): KeyboardEvent {
   } as KeyboardEventInit);
 }
 
-// Mock LWT_DATA global
-const mockLWT_DATA = {
-  language: {
-    id: 1,
-    dict_link1: 'http://dict1.example.com/###',
-    dict_link2: 'http://dict2.example.com/###',
-    translator_link: 'http://translator.example.com/###',
-    delimiter: ',',
-    rtl: false
-  },
-  text: {
-    id: 42,
-    reading_position: 0,
-    annotations: {}
-  },
-  settings: {
-    jQuery_tooltip: false,
-    hts: 0,
-    word_status_filter: '',
-    annotations_mode: 0
-  }
-};
-
-(window as Record<string, unknown>).LWT_DATA = mockLWT_DATA;
-
 describe('text_keyboard.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
-    // Set up legacy LWT_DATA for backward compatibility
-    (window as Record<string, unknown>).LWT_DATA = JSON.parse(JSON.stringify(mockLWT_DATA));
 
-    // Initialize new state modules
+    // Reset and initialize state modules
+    resetLanguageConfig();
+    resetTextConfig();
+    resetSettingsConfig();
     initLanguageConfig({
       id: 1,
       dictLink1: 'http://dict1.example.com/###',

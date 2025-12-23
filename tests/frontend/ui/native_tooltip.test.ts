@@ -11,21 +11,18 @@ beforeEach(() => {
   document.querySelectorAll('.lwt-tooltip, .ui-tooltip').forEach(el => el.remove());
 });
 
+import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
+
 // Dynamic import to reset module state
 async function importNativeTooltip() {
   vi.resetModules();
   return await import('../../../src/frontend/js/ui/native_tooltip');
 }
 
-// Setup mock LWT_DATA
-const mockLWT_DATA = {
-  language: {
-    delimiter: ',',
-  },
-};
-
 beforeEach(() => {
-  (window as unknown as Record<string, unknown>).LWT_DATA = mockLWT_DATA;
+  // Initialize language config with delimiter
+  resetLanguageConfig();
+  initLanguageConfig({ delimiter: ',' });
 });
 
 describe('native_tooltip.ts', () => {

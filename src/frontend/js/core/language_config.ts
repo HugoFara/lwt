@@ -1,18 +1,12 @@
 /**
  * Language Configuration Module - Provides type-safe access to language settings.
  *
- * This module replaces direct LWT_DATA.language access with explicit functions.
+ * This module provides explicit functions to access language configuration.
  * Configuration is loaded once from DOM data attributes or initial config.
- *
- * For backward compatibility, getter functions fall back to reading from
- * the legacy LWT_DATA global when this module hasn't been initialized.
  *
  * @license Unlicense <http://unlicense.org/>
  * @since 3.1.0
  */
-
-// Import LWT_DATA type from globals
-import type { LwtData } from '../types/globals.d';
 
 export interface LanguageConfig {
   id: number;
@@ -39,26 +33,6 @@ const defaultConfig: LanguageConfig = {
 
 let currentConfig: LanguageConfig = { ...defaultConfig };
 let isInitialized = false;
-
-/**
- * Get language config from legacy LWT_DATA for backward compatibility.
- */
-function getFromLegacy(): LanguageConfig {
-  const lwtData = typeof window !== 'undefined' ? (window as { LWT_DATA?: LwtData }).LWT_DATA : undefined;
-  if (lwtData?.language) {
-    return {
-      id: lwtData.language.id || 0,
-      dictLink1: lwtData.language.dict_link1 || '',
-      dictLink2: lwtData.language.dict_link2 || '',
-      translatorLink: lwtData.language.translator_link || '',
-      delimiter: lwtData.language.delimiter || '',
-      wordParsing: lwtData.language.word_parsing || '',
-      rtl: lwtData.language.rtl || false,
-      ttsVoiceApi: lwtData.language.ttsVoiceApi || ''
-    };
-  }
-  return defaultConfig;
-}
 
 /**
  * Initialize language configuration from a config object.
@@ -105,65 +79,52 @@ export function initLanguageConfigFromDOM(): void {
   initLanguageConfig(config);
 }
 
-/**
- * Get the effective config (module state or legacy fallback).
- */
-function getEffectiveConfig(): LanguageConfig {
-  return isInitialized ? currentConfig : getFromLegacy();
-}
 
 /**
  * Get the current language configuration.
  * Returns a copy to prevent external mutation.
- * Falls back to LWT_DATA if not initialized.
  */
 export function getLanguageConfig(): Readonly<LanguageConfig> {
-  return { ...getEffectiveConfig() };
+  return { ...currentConfig };
 }
 
 /**
  * Get the language ID.
- * Falls back to LWT_DATA.language.id if not initialized.
  */
 export function getLanguageId(): number {
-  return getEffectiveConfig().id;
+  return currentConfig.id;
 }
 
 /**
  * Get dictionary links.
- * Falls back to LWT_DATA.language if not initialized.
  */
 export function getDictionaryLinks(): { dict1: string; dict2: string; translator: string } {
-  const config = getEffectiveConfig();
   return {
-    dict1: config.dictLink1,
-    dict2: config.dictLink2,
-    translator: config.translatorLink
+    dict1: currentConfig.dictLink1,
+    dict2: currentConfig.dictLink2,
+    translator: currentConfig.translatorLink
   };
 }
 
 /**
  * Check if the language uses right-to-left script.
- * Falls back to LWT_DATA.language.rtl if not initialized.
  */
 export function isRtl(): boolean {
-  return getEffectiveConfig().rtl;
+  return currentConfig.rtl;
 }
 
 /**
  * Get the term translation delimiter.
- * Falls back to LWT_DATA.language.delimiter if not initialized.
  */
 export function getDelimiter(): string {
-  return getEffectiveConfig().delimiter;
+  return currentConfig.delimiter;
 }
 
 /**
  * Get the TTS voice API identifier.
- * Falls back to LWT_DATA.language.ttsVoiceApi if not initialized.
  */
 export function getTtsVoiceApi(): string {
-  return getEffectiveConfig().ttsVoiceApi;
+  return currentConfig.ttsVoiceApi;
 }
 
 /**

@@ -33,13 +33,7 @@ vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
   cleanupRightFrames: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/lwt_state', () => ({
-  LWT_DATA: {
-    settings: {
-      jQuery_tooltip: false
-    }
-  }
-}));
+import { resetSettingsConfig } from '../../../src/frontend/js/core/settings_config';
 
 describe('word_dom_updates.ts', () => {
   beforeEach(() => {
@@ -47,6 +41,8 @@ describe('word_dom_updates.ts', () => {
     vi.clearAllMocks();
     // Reset parent window mock
     delete (window as any).parent;
+    // Initialize settings config
+    resetSettingsConfig();
   });
 
   afterEach(() => {
@@ -129,13 +125,8 @@ describe('word_dom_updates.ts', () => {
     });
 
     it('returns true regardless of parent settings', () => {
-      (window as any).parent = {
-        LWT_DATA: {
-          settings: {
-            jQuery_tooltip: false
-          }
-        }
-      };
+      // Even with parent window mock, function returns true since jQuery tooltips were removed
+      (window as any).parent = {};
 
       const result = isJQueryTooltipEnabled();
 
@@ -178,13 +169,8 @@ describe('word_dom_updates.ts', () => {
     });
 
     it('returns empty string regardless of settings', () => {
-      (window as any).parent = {
-        LWT_DATA: {
-          settings: {
-            jQuery_tooltip: false
-          }
-        }
-      };
+      // Parent window mock without LWT_DATA
+      (window as any).parent = {};
 
       const result = generateTooltip('word', 'translation', 'romanization', 1);
 
@@ -566,13 +552,8 @@ describe('word_dom_updates.ts', () => {
     });
 
     it('sets title when jQuery tooltip is enabled', () => {
-      (window as any).parent = {
-        LWT_DATA: {
-          settings: {
-            jQuery_tooltip: true
-          }
-        }
-      };
+      // Parent window mock without LWT_DATA
+      (window as any).parent = {};
 
       document.body.innerHTML = `
         <span class="TERM48454c4c4f status0">hello</span>
@@ -580,7 +561,7 @@ describe('word_dom_updates.ts', () => {
 
       updateHoverSaveInDOM(666, '48454c4c4f', 1, 'quick trans', 'hello');
 
-      // When jQuery tooltip is enabled, make_tooltip is still called
+      // Title is set since native tooltips are always used
       expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBeTruthy();
     });
   });

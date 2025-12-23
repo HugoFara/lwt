@@ -1,16 +1,12 @@
 /**
  * Text Configuration Module - Provides access to current text settings.
  *
- * This module replaces direct LWT_DATA.text access with explicit functions.
- * For backward compatibility, getter functions fall back to reading from
- * the legacy LWT_DATA global when this module hasn't been initialized.
+ * This module provides explicit functions to access text configuration.
+ * Configuration must be initialized via initTextConfig() or initTextConfigFromDOM().
  *
  * @license Unlicense <http://unlicense.org/>
  * @since 3.1.0
  */
-
-// Import LWT_DATA type from globals
-import type { LwtData } from '../types/globals.d';
 
 export type AnnotationRecord = Record<string, [unknown, string, string]>;
 
@@ -25,28 +21,6 @@ const defaultConfig: TextConfig = {
 };
 
 let currentConfig: TextConfig = { ...defaultConfig };
-let isInitialized = false;
-
-/**
- * Get text config from legacy LWT_DATA for backward compatibility.
- */
-function getFromLegacy(): TextConfig {
-  const lwtData = typeof window !== 'undefined' ? (window as { LWT_DATA?: LwtData }).LWT_DATA : undefined;
-  if (lwtData?.text) {
-    return {
-      id: lwtData.text.id || 0,
-      annotations: lwtData.text.annotations || 0
-    };
-  }
-  return defaultConfig;
-}
-
-/**
- * Get the effective config (module state or legacy fallback).
- */
-function getEffectiveConfig(): TextConfig {
-  return isInitialized ? currentConfig : getFromLegacy();
-}
 
 /**
  * Initialize text configuration.
@@ -55,7 +29,6 @@ function getEffectiveConfig(): TextConfig {
  */
 export function initTextConfig(config: Partial<TextConfig>): void {
   currentConfig = { ...defaultConfig, ...config };
-  isInitialized = true;
 }
 
 /**
@@ -78,10 +51,9 @@ export function initTextConfigFromDOM(): void {
 
 /**
  * Get the current text ID.
- * Falls back to LWT_DATA.text.id if not initialized.
  */
 export function getTextId(): number {
-  return getEffectiveConfig().id;
+  return currentConfig.id;
 }
 
 /**
@@ -89,15 +61,13 @@ export function getTextId(): number {
  */
 export function setTextId(id: number): void {
   currentConfig.id = id;
-  isInitialized = true;
 }
 
 /**
  * Get the annotations for the current text.
- * Falls back to LWT_DATA.text.annotations if not initialized.
  */
 export function getAnnotations(): AnnotationRecord | number {
-  return getEffectiveConfig().annotations;
+  return currentConfig.annotations;
 }
 
 /**

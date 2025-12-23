@@ -53,12 +53,7 @@ interface ExpressionConfig {
  */
 function initMultiWordInteractable(config: MultiWordConfig): void {
   const term = config.attrs;
-  // Try text_config first, then fall back to parent window's LWT_DATA
-  let textId = getTextId();
-  if (!textId && window.parent) {
-    const parentWin = window.parent as { LWT_DATA?: { text?: { id?: number } } };
-    textId = parentWin.LWT_DATA?.text?.id || 0;
-  }
+  const textId = getTextId();
 
   if (!textId) {
     console.warn('Text ID not available for multi-word init');

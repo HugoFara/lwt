@@ -13,14 +13,9 @@ import {
   handleStatusChangeResult
 } from '../../../src/frontend/js/testing/test_ajax';
 
-// Mock dependencies
-vi.mock('../../../src/frontend/js/core/lwt_state', () => ({
-  LWT_DATA: {
-    test: { solution: '' },
-    word: { id: 0 },
-    language: { id: 1 }
-  }
-}));
+// Mock dependencies - use the actual test_state and language_config modules
+import { resetTestState } from '../../../src/frontend/js/core/test_state';
+import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
 
 vi.mock('../../../src/frontend/js/ui/word_popup', () => ({
   cClick: vi.fn()
@@ -46,6 +41,10 @@ describe('test_ajax.ts', () => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
     vi.useFakeTimers();
+    // Initialize state modules
+    resetTestState();
+    resetLanguageConfig();
+    initLanguageConfig({ id: 1 });
   });
 
   afterEach(() => {

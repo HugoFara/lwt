@@ -17,22 +17,16 @@ vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
 
 import { make_tooltip } from '../../../src/frontend/js/terms/word_status';
 import { newExpressionInteractable } from '../../../src/frontend/js/core/user_interactions';
+import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/core/text_config';
 
 describe('expression_interactable.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
 
-    // Setup window.parent mock
-    Object.defineProperty(window, 'parent', {
-      writable: true,
-      value: {
-        LWT_DATA: {
-          text: { id: 1 },
-          settings: {}
-        }
-      }
-    });
+    // Initialize text config with text ID
+    resetTextConfig();
+    initTextConfig({ id: 1 });
   });
 
   afterEach(() => {
@@ -101,13 +95,11 @@ describe('expression_interactable.ts', () => {
       expect(document.querySelector('[data-lwt-multiword-config]')).toBeNull();
     });
 
-    it('warns when LWT_DATA.text.id is not available', () => {
+    it('warns when text ID is not available', () => {
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-      Object.defineProperty(window, 'parent', {
-        writable: true,
-        value: { LWT_DATA: {} }
-      });
+      // Reset text config to have no text ID (id = 0)
+      resetTextConfig();
 
       document.body.innerHTML = `
         <script data-lwt-multiword-config type="application/json">

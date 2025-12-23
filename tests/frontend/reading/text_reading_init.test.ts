@@ -200,17 +200,20 @@ describe('text_reading_init.ts', () => {
   // ===========================================================================
 
   describe('initTextReading', () => {
-    it('merges new_globals into window', () => {
-      (window as any).new_globals = {
-        LWT_DATA: {
-          language: { id: 1, name: 'English' },
-          text: { id: 5, title: 'Test' }
-        }
-      };
+    it('loads config from text-reading-config JSON element', () => {
+      document.body.innerHTML = `
+        <div id="thetext"></div>
+        <script type="application/json" id="text-reading-config">
+          {
+            "language": { "id": 1, "name": "English" },
+            "text": { "id": 5 }
+          }
+        </script>
+      `;
 
       initTextReading();
 
-      // Configuration should be applied (new_globals are merged for backward compatibility)
+      // Configuration should be applied from JSON config
     });
 
     it('sets window.LANG from getLangFromDict', () => {

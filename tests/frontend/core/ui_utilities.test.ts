@@ -9,28 +9,7 @@ vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
   loadModalFrame: mockLoadModalFrame
 }));
 
-// Mock LWT_DATA global (needs to be set before import)
-const mockLWT_DATA = {
-  language: {
-    id: 1,
-    dict_link1: '',
-    dict_link2: '',
-    translator_link: '',
-    delimiter: ',',
-    word_parsing: '',
-    rtl: false,
-    ttsVoiceApi: ''
-  },
-  text: { id: 1, reading_position: 0, annotations: {} },
-  word: { id: 0 },
-  test: { solution: '', answer_opened: false },
-  settings: { hts: 0, word_status_filter: '' }
-};
-
-// Set up globals before import
-(window as Record<string, unknown>).LWT_DATA = mockLWT_DATA;
-
-// Now import the module (after globals are set)
+// Now import the module
 const ui_utilities = await import('../../../src/frontend/js/core/ui_utilities');
 const { markClick, confirmDelete, showAllwordsClick, noShowAfter3Secs, setTheFocus, wrapRadioButtons } = ui_utilities;
 
