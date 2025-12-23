@@ -39,6 +39,7 @@ echo PageLayoutHelper::buildActionCard([
     ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'],
 ]);
 ?>
+<div x-data="feedBrowse({currentQuery: '<?php echo addslashes($currentQuery); ?>', currentQueryMode: '<?php echo addslashes($currentQueryMode); ?>'})">
 
 <!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
      This search bar should support:
@@ -99,7 +100,7 @@ echo PageLayoutHelper::buildActionCard([
                         </div>
                         <div class="control">
                             <div class="select is-small">
-                                <select name="sort" data-action="sort">
+                                <select name="sort" @change="handleSort($event)">
                                     <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
                                 </select>
                             </div>
@@ -117,8 +118,8 @@ echo PageLayoutHelper::buildActionCard([
   <table class="tab2" cellspacing="0" cellpadding="5">
   <tr><th class="th1" colspan="2">Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?></th></tr>
   <tr><td class="td1 center feeds-filter-cell">
-  <input type="button" value="Mark All" data-action="mark-all" data-form="form2" />
-  <input type="button" value="Mark None" data-action="mark-none" data-form="form2" />
+  <input type="button" value="Mark All" @click="markAll()" />
+  <input type="button" value="Mark None" @click="markNone()" />
   </td><td class="td1 center">
   Marked Texts:&nbsp;
   <input id="markaction" type="submit" value="Get Marked Texts" />&nbsp;&nbsp;
@@ -139,7 +140,7 @@ echo PageLayoutHelper::buildActionCard([
             <td class="td1 center"><span title="archived"><?php echo IconHelper::render('circle-x', ['alt' => '-']); ?></span>
         <?php elseif (!empty($row['FlLink']) && str_starts_with((string)$row['FlLink'], ' ')): ?>
             <td class="td1 center">
-            <span class="not_found" name="<?php echo $row['FlID']; ?>" title="download error"><?php echo IconHelper::render('alert-circle', ['alt' => '-']); ?></span>
+            <span class="not_found" name="<?php echo $row['FlID']; ?>" title="download error" @click="handleNotFoundClick($event)"><?php echo IconHelper::render('alert-circle', ['alt' => '-']); ?></span>
         <?php else: ?>
             <td class="td1 center"><input type="checkbox" class="markcheck" name="marked_items[]" value="<?php echo $row['FlID']; ?>" />
         <?php endif; ?>
@@ -147,13 +148,13 @@ echo PageLayoutHelper::buildActionCard([
             <td class="td1 center">
             <span title="<?php echo htmlentities((string)$row['FlDescription'], ENT_QUOTES, 'UTF-8', false); ?>"><b><?php echo $row['FlTitle']; ?></b></span>
         <?php if ($row['FlAudio']): ?>
-            <a href="<?php echo $row['FlAudio']; ?>" data-action="popup-audio" target="_blank" rel="noopener">
+            <a href="<?php echo $row['FlAudio']; ?>" @click.prevent="openPopup('<?php echo $row['FlAudio']; ?>', 'audio')" target="_blank" rel="noopener">
             <?php echo IconHelper::render('volume-2', ['alt' => 'Audio']); ?></a>
         <?php endif; ?>
         </td>
             <td class="td1 center valign-middle">
         <?php if (!empty($row['FlLink']) && !str_starts_with(trim((string)$row['FlLink']), '#')): ?>
-            <a href="<?php echo trim((string)$row['FlLink']); ?>" title="<?php echo trim((string)$row['FlLink']); ?>" data-action="popup-external" target="_blank" rel="noopener">
+            <a href="<?php echo trim((string)$row['FlLink']); ?>" title="<?php echo trim((string)$row['FlLink']); ?>" @click.prevent="openPopup('<?php echo trim((string)$row['FlLink']); ?>', 'external')" target="_blank" rel="noopener">
             <?php echo IconHelper::render('external-link', ['alt' => '-']); ?></a>
         <?php endif; ?>
         </td><td class="td1 center"><?php echo $row['FlDate']; ?></td></tr>
@@ -172,4 +173,6 @@ echo PageLayoutHelper::buildActionCard([
 <?php else: ?>
 <p>No articles found.</p>
 <?php endif; ?>
+</div>
+<!-- Feed browse component: feeds/components/feed_browse_component.ts -->
 

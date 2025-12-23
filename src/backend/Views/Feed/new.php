@@ -31,16 +31,27 @@ $actions = [
 
 <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
+<script type="application/json" id="feed-form-config">
+<?php echo json_encode([
+    'editText' => true,
+    'autoUpdate' => false,
+    'autoUpdateValue' => '',
+    'autoUpdateUnit' => 'h',
+    'maxLinks' => false,
+    'maxLinksValue' => '',
+    'charset' => false,
+    'charsetValue' => '',
+    'maxTexts' => false,
+    'maxTextsValue' => '',
+    'tag' => false,
+    'tagValue' => '',
+    'articleSource' => false,
+    'articleSourceValue' => '',
+], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?>
+</script>
 <form class="validate" action="/feeds/edit" method="post"
-      x-data="{
-          editText: true,
-          autoUpdate: false,
-          maxLinks: false,
-          charset: false,
-          maxTexts: false,
-          tag: false,
-          articleSource: false
-      }">
+      x-data="feedForm()"
+      @submit="handleSubmit($event)">
     <input type="hidden" name="NfOptions" value="" />
     <input type="hidden" name="save_feed" value="1" />
 
@@ -183,16 +194,18 @@ $actions = [
                                 <div class="field has-addons mt-2" x-show="autoUpdate" x-transition>
                                     <div class="control">
                                         <input class="input is-small posintnumber"
+                                               :class="autoUpdate ? 'notempty' : ''"
                                                type="number"
                                                min="1"
                                                name="autoupdate"
                                                data_info="Auto Update Interval"
+                                               x-model="autoUpdateValue"
                                                style="width: 80px;"
                                                :disabled="!autoUpdate" />
                                     </div>
                                     <div class="control">
                                         <div class="select is-small">
-                                            <select name="autoupdate_unit" :disabled="!autoUpdate">
+                                            <select name="autoupdate_unit" x-model="autoUpdateUnit" :disabled="!autoUpdate">
                                                 <option value="h">Hour(s)</option>
                                                 <option value="d">Day(s)</option>
                                                 <option value="w">Week(s)</option>
@@ -210,11 +223,13 @@ $actions = [
                                 </label>
                                 <div class="control mt-2" x-show="maxLinks" x-transition>
                                     <input class="input is-small posintnumber maxint_300"
+                                           :class="maxLinks ? 'notempty' : ''"
                                            type="number"
                                            min="1"
                                            max="300"
                                            name="max_links"
                                            data_info="Max. Links"
+                                           x-model="maxLinksValue"
                                            style="width: 100px;"
                                            :disabled="!maxLinks" />
                                 </div>
@@ -228,9 +243,11 @@ $actions = [
                                 </label>
                                 <div class="control mt-2" x-show="charset" x-transition>
                                     <input class="input is-small"
+                                           :class="charset ? 'notempty' : ''"
                                            type="text"
                                            name="charset"
                                            data_info="Charset"
+                                           x-model="charsetValue"
                                            placeholder="e.g., UTF-8"
                                            :disabled="!charset" />
                                 </div>
@@ -244,11 +261,13 @@ $actions = [
                                 </label>
                                 <div class="control mt-2" x-show="maxTexts" x-transition>
                                     <input class="input is-small posintnumber maxint_30"
+                                           :class="maxTexts ? 'notempty' : ''"
                                            type="number"
                                            min="1"
                                            max="30"
                                            name="max_texts"
                                            data_info="Max. Texts"
+                                           x-model="maxTextsValue"
                                            style="width: 100px;"
                                            :disabled="!maxTexts" />
                                 </div>
@@ -262,9 +281,11 @@ $actions = [
                                 </label>
                                 <div class="control mt-2" x-show="tag" x-transition>
                                     <input class="input is-small"
+                                           :class="tag ? 'notempty' : ''"
                                            type="text"
                                            name="tag"
                                            data_info="Tag"
+                                           x-model="tagValue"
                                            placeholder="Tag name"
                                            :disabled="!tag" />
                                 </div>
@@ -278,9 +299,11 @@ $actions = [
                                 </label>
                                 <div class="control mt-2" x-show="articleSource" x-transition>
                                     <input class="input is-small"
+                                           :class="articleSource ? 'notempty' : ''"
                                            type="text"
                                            name="article_source"
                                            data_info="Article Source"
+                                           x-model="articleSourceValue"
                                            placeholder="Source identifier"
                                            :disabled="!articleSource" />
                                 </div>
@@ -312,4 +335,4 @@ $actions = [
         </div>
     </div>
 </form>
-<!-- Feed form interactions handled by feeds/feed_form.ts -->
+<!-- Feed form component: feeds/components/feed_form_component.ts -->

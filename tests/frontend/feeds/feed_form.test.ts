@@ -1,10 +1,10 @@
 /**
- * Tests for feed_form.ts - Feed form interactions
+ * Tests for feed_form_component.ts - Feed form Alpine component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initFeedForm } from '../../../src/frontend/js/feeds/feed_form';
+import { feedFormData, FeedFormConfig } from '../../../src/frontend/js/feeds/components/feed_form_component';
 
-describe('feed_form.ts', () => {
+describe('feed_form_component.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
@@ -16,472 +16,418 @@ describe('feed_form.ts', () => {
   });
 
   // ===========================================================================
-  // initFeedForm Tests
+  // feedFormData Factory Function Tests
   // ===========================================================================
 
-  describe('initFeedForm', () => {
-    it('does nothing when NfOptions field is missing', () => {
-      document.body.innerHTML = '<form><input type="text" name="other" /></form>';
+  describe('feedFormData', () => {
+    it('creates component with default values', () => {
+      const component = feedFormData();
 
-      expect(() => initFeedForm()).not.toThrow();
+      expect(component.editText).toBe(true); // Default to true
+      expect(component.autoUpdate).toBe(false);
+      expect(component.maxLinks).toBe(false);
+      expect(component.charset).toBe(false);
+      expect(component.maxTexts).toBe(false);
+      expect(component.tag).toBe(false);
+      expect(component.articleSource).toBe(false);
     });
 
-    it('initializes when NfOptions field exists', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <input type="checkbox" name="c_filter" />
-        </form>
-      `;
+    it('creates component with provided config values', () => {
+      const config: FeedFormConfig = {
+        editText: false,
+        autoUpdate: true,
+        autoUpdateValue: '24',
+        autoUpdateUnit: 'd',
+        maxLinks: true,
+        maxLinksValue: '50',
+        charset: true,
+        charsetValue: 'ISO-8859-1',
+        maxTexts: true,
+        maxTextsValue: '10',
+        tag: true,
+        tagValue: 'news',
+        articleSource: true,
+        articleSourceValue: 'content'
+      };
 
-      expect(() => initFeedForm()).not.toThrow();
+      const component = feedFormData(config);
+
+      expect(component.editText).toBe(false);
+      expect(component.autoUpdate).toBe(true);
+      expect(component.autoUpdateValue).toBe('24');
+      expect(component.autoUpdateUnit).toBe('d');
+      expect(component.maxLinks).toBe(true);
+      expect(component.maxLinksValue).toBe('50');
+      expect(component.charset).toBe(true);
+      expect(component.charsetValue).toBe('ISO-8859-1');
+      expect(component.maxTexts).toBe(true);
+      expect(component.maxTextsValue).toBe('10');
+      expect(component.tag).toBe(true);
+      expect(component.tagValue).toBe('news');
+      expect(component.articleSource).toBe(true);
+      expect(component.articleSourceValue).toBe('content');
+    });
+
+    it('uses default autoUpdateUnit value of h', () => {
+      const component = feedFormData();
+
+      expect(component.autoUpdateUnit).toBe('h');
+    });
+
+    it('allows partial config', () => {
+      const config: FeedFormConfig = {
+        autoUpdate: true,
+        autoUpdateValue: '12'
+      };
+
+      const component = feedFormData(config);
+
+      expect(component.editText).toBe(true); // Default
+      expect(component.autoUpdate).toBe(true);
+      expect(component.autoUpdateValue).toBe('12');
+      expect(component.autoUpdateUnit).toBe('h'); // Default
     });
   });
 
   // ===========================================================================
-  // Checkbox Change Handler Tests
+  // init() Method Tests
   // ===========================================================================
 
-  describe('Option Checkbox Change Handler', () => {
-    it('enables text input when checkbox is checked', () => {
+  describe('init()', () => {
+    it('reads config from JSON script tag', () => {
       document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_filter" />
-            <input type="text" name="filter" disabled />
-          </div>
-        </form>
+        <script type="application/json" id="feed-form-config">
+          {"editText": false, "autoUpdate": true, "autoUpdateValue": "48", "autoUpdateUnit": "w"}
+        </script>
       `;
 
-      initFeedForm();
+      const component = feedFormData();
+      component.init();
 
-      const checkbox = document.querySelector<HTMLInputElement>('[name="c_filter"]')!;
-      const textInput = document.querySelector<HTMLInputElement>('[name="filter"]')!;
-
-      checkbox.checked = true;
-      checkbox.dispatchEvent(new Event('change'));
-
-      expect(textInput.hasAttribute('disabled')).toBe(false);
+      expect(component.editText).toBe(false);
+      expect(component.autoUpdate).toBe(true);
+      expect(component.autoUpdateValue).toBe('48');
+      expect(component.autoUpdateUnit).toBe('w');
     });
 
-    it('disables text input when checkbox is unchecked', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_filter" checked />
-            <input type="text" name="filter" />
-          </div>
-        </form>
-      `;
+    it('keeps defaults if no JSON config element exists', () => {
+      const component = feedFormData();
+      component.init();
 
-      initFeedForm();
-
-      const checkbox = document.querySelector<HTMLInputElement>('[name="c_filter"]')!;
-      const textInput = document.querySelector<HTMLInputElement>('[name="filter"]')!;
-
-      checkbox.checked = false;
-      checkbox.dispatchEvent(new Event('change'));
-
-      expect(textInput.hasAttribute('disabled')).toBe(true);
+      expect(component.editText).toBe(true);
+      expect(component.autoUpdate).toBe(false);
     });
 
-    it('adds notempty class when checkbox is checked', () => {
+    it('handles invalid JSON gracefully', () => {
       document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_filter" />
-            <input type="text" name="filter" disabled />
-          </div>
-        </form>
+        <script type="application/json" id="feed-form-config">
+          {invalid json}
+        </script>
       `;
 
-      initFeedForm();
+      const component = feedFormData();
 
-      const checkbox = document.querySelector<HTMLInputElement>('[name="c_filter"]')!;
-      const textInput = document.querySelector<HTMLInputElement>('[name="filter"]')!;
-
-      checkbox.checked = true;
-      checkbox.dispatchEvent(new Event('change'));
-
-      expect(textInput.classList.contains('notempty')).toBe(true);
+      expect(() => component.init()).not.toThrow();
+      expect(component.editText).toBe(true); // Default value
     });
 
-    it('removes notempty class when checkbox is unchecked', () => {
+    it('handles empty JSON config', () => {
       document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_filter" checked />
-            <input type="text" name="filter" class="notempty" />
-          </div>
-        </form>
+        <script type="application/json" id="feed-form-config">
+          {}
+        </script>
       `;
 
-      initFeedForm();
+      const component = feedFormData();
+      component.init();
 
-      const checkbox = document.querySelector<HTMLInputElement>('[name="c_filter"]')!;
-      const textInput = document.querySelector<HTMLInputElement>('[name="filter"]')!;
-
-      checkbox.checked = false;
-      checkbox.dispatchEvent(new Event('change'));
-
-      expect(textInput.classList.contains('notempty')).toBe(false);
-    });
-
-    it('enables select when checkbox is checked', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_autoupdate" />
-            <input type="number" name="autoupdate" disabled />
-            <select name="autoupdate_unit" disabled>
-              <option value="h">Hours</option>
-              <option value="d">Days</option>
-            </select>
-          </div>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const checkbox = document.querySelector<HTMLInputElement>('[name="c_autoupdate"]')!;
-      const select = document.querySelector<HTMLSelectElement>('[name="autoupdate_unit"]')!;
-
-      checkbox.checked = true;
-      checkbox.dispatchEvent(new Event('change'));
-
-      expect(select.hasAttribute('disabled')).toBe(false);
-    });
-
-    it('disables select when checkbox is unchecked', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_autoupdate" checked />
-            <input type="number" name="autoupdate" />
-            <select name="autoupdate_unit">
-              <option value="h">Hours</option>
-            </select>
-          </div>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const checkbox = document.querySelector<HTMLInputElement>('[name="c_autoupdate"]')!;
-      const select = document.querySelector<HTMLSelectElement>('[name="autoupdate_unit"]')!;
-
-      checkbox.checked = false;
-      checkbox.dispatchEvent(new Event('change'));
-
-      expect(select.hasAttribute('disabled')).toBe(true);
-    });
-
-    it('handles number input same as text input', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_limit" />
-            <input type="number" name="limit" disabled />
-          </div>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const checkbox = document.querySelector<HTMLInputElement>('[name="c_limit"]')!;
-      const numberInput = document.querySelector<HTMLInputElement>('[name="limit"]')!;
-
-      checkbox.checked = true;
-      checkbox.dispatchEvent(new Event('change'));
-
-      expect(numberInput.hasAttribute('disabled')).toBe(false);
-      expect(numberInput.classList.contains('notempty')).toBe(true);
+      // Should keep defaults
+      expect(component.editText).toBe(true);
+      expect(component.autoUpdate).toBe(false);
     });
   });
 
   // ===========================================================================
-  // Serialize Feed Options Tests
+  // serializeOptions() Method Tests
   // ===========================================================================
 
-  describe('Serialize Feed Options', () => {
-    it('serializes checked options on submit button click', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_filter" checked />
-            <input type="text" name="filter" value="test" />
-          </div>
-          <button type="submit">Save</button>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const submitButton = document.querySelector<HTMLButtonElement>('[type="submit"]')!;
-      submitButton.click();
-
-      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      expect(nfOptions.value).toContain('filter=test');
-    });
-
-    it('includes edit_text option when checked', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <input type="checkbox" name="edit_text" checked />
-          <button type="submit">Save</button>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const submitButton = document.querySelector<HTMLButtonElement>('[type="submit"]')!;
-      submitButton.click();
-
-      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      expect(nfOptions.value).toContain('edit_text=1');
-    });
-
-    it('does not include edit_text when unchecked', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <input type="checkbox" name="edit_text" />
-          <button type="submit">Save</button>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const submitButton = document.querySelector<HTMLButtonElement>('[type="submit"]')!;
-      submitButton.click();
-
-      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      expect(nfOptions.value).not.toContain('edit_text');
-    });
-
-    it('includes select value for autoupdate option', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_autoupdate" checked />
-            <input type="number" name="autoupdate" value="24" />
-            <select name="autoupdate_unit">
-              <option value="h" selected>Hours</option>
-              <option value="d">Days</option>
-            </select>
-          </div>
-          <button type="submit">Save</button>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const submitButton = document.querySelector<HTMLButtonElement>('[type="submit"]')!;
-      submitButton.click();
-
-      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      expect(nfOptions.value).toContain('autoupdate=24h');
-    });
-
-    it('serializes multiple options', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <input type="checkbox" name="edit_text" checked />
-          <div>
-            <input type="checkbox" name="c_filter" checked />
-            <input type="text" name="filter" value="keyword" />
-          </div>
-          <div>
-            <input type="checkbox" name="c_limit" checked />
-            <input type="number" name="limit" value="10" />
-          </div>
-          <button type="submit">Save</button>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const submitButton = document.querySelector<HTMLButtonElement>('[type="submit"]')!;
-      submitButton.click();
-
-      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      expect(nfOptions.value).toContain('edit_text=1');
-      expect(nfOptions.value).toContain('filter=keyword');
-      expect(nfOptions.value).toContain('limit=10');
-    });
-
-    it('skips unchecked options', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_filter" />
-            <input type="text" name="filter" value="should-not-appear" />
-          </div>
-          <div>
-            <input type="checkbox" name="c_limit" checked />
-            <input type="number" name="limit" value="5" />
-          </div>
-          <button type="submit">Save</button>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const submitButton = document.querySelector<HTMLButtonElement>('[type="submit"]')!;
-      submitButton.click();
-
-      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      expect(nfOptions.value).not.toContain('filter=');
-      expect(nfOptions.value).toContain('limit=5');
-    });
-
-    it('handles empty input values', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_filter" checked />
-            <input type="text" name="filter" value="" />
-          </div>
-          <button type="submit">Save</button>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const submitButton = document.querySelector<HTMLButtonElement>('[type="submit"]')!;
-      submitButton.click();
-
-      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      expect(nfOptions.value).toContain('filter=,');
-    });
-
-    it('serializes on form submit event', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_filter" checked />
-            <input type="text" name="filter" value="via-submit" />
-          </div>
-          <button type="submit">Save</button>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const form = document.querySelector<HTMLFormElement>('form.validate')!;
-      form.dispatchEvent(new Event('submit'));
-
-      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      expect(nfOptions.value).toContain('filter=via-submit');
-    });
-  });
-
-  // ===========================================================================
-  // Edge Cases
-  // ===========================================================================
-
-  describe('Edge Cases', () => {
-    it('handles checkbox without parent container gracefully', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <input type="checkbox" name="c_orphan" />
-        </form>
-      `;
-
-      initFeedForm();
-
-      const checkbox = document.querySelector<HTMLInputElement>('[name="c_orphan"]')!;
-
-      // Should not throw even when there are no sibling inputs
-      expect(() => {
-        checkbox.checked = true;
-        checkbox.dispatchEvent(new Event('change'));
-      }).not.toThrow();
-    });
-
-    it('handles multiple text inputs in parent', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_multi" />
-            <input type="text" name="input1" disabled />
-            <input type="text" name="input2" disabled />
-          </div>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const checkbox = document.querySelector<HTMLInputElement>('[name="c_multi"]')!;
-
-      checkbox.checked = true;
-      checkbox.dispatchEvent(new Event('change'));
-
-      const inputs = document.querySelectorAll<HTMLInputElement>('input[type="text"]');
-      inputs.forEach(input => {
-        expect(input.hasAttribute('disabled')).toBe(false);
-        expect(input.classList.contains('notempty')).toBe(true);
+  describe('serializeOptions()', () => {
+    it('returns empty string with trailing comma for no options', () => {
+      const component = feedFormData({
+        editText: false,
+        autoUpdate: false,
+        maxLinks: false,
+        charset: false,
+        maxTexts: false,
+        tag: false,
+        articleSource: false
       });
+
+      const result = component.serializeOptions();
+      expect(result).toBe('');
     });
 
-    it('handles input without name attribute', () => {
+    it('includes edit_text=1 when editText is true', () => {
+      const component = feedFormData({ editText: true });
+
+      const result = component.serializeOptions();
+      expect(result).toContain('edit_text=1');
+    });
+
+    it('does not include edit_text when false', () => {
+      const component = feedFormData({ editText: false });
+
+      const result = component.serializeOptions();
+      expect(result).not.toContain('edit_text');
+    });
+
+    it('includes autoupdate with unit', () => {
+      const component = feedFormData({
+        editText: false,
+        autoUpdate: true,
+        autoUpdateValue: '24',
+        autoUpdateUnit: 'h'
+      });
+
+      const result = component.serializeOptions();
+      expect(result).toContain('autoupdate=24h');
+    });
+
+    it('uses different autoupdate units', () => {
+      const componentD = feedFormData({
+        editText: false,
+        autoUpdate: true,
+        autoUpdateValue: '7',
+        autoUpdateUnit: 'd'
+      });
+
+      const componentW = feedFormData({
+        editText: false,
+        autoUpdate: true,
+        autoUpdateValue: '2',
+        autoUpdateUnit: 'w'
+      });
+
+      expect(componentD.serializeOptions()).toContain('autoupdate=7d');
+      expect(componentW.serializeOptions()).toContain('autoupdate=2w');
+    });
+
+    it('does not include autoupdate when unchecked', () => {
+      const component = feedFormData({
+        editText: false,
+        autoUpdate: false,
+        autoUpdateValue: '24',
+        autoUpdateUnit: 'h'
+      });
+
+      const result = component.serializeOptions();
+      expect(result).not.toContain('autoupdate');
+    });
+
+    it('does not include autoupdate when value is empty', () => {
+      const component = feedFormData({
+        editText: false,
+        autoUpdate: true,
+        autoUpdateValue: '',
+        autoUpdateUnit: 'h'
+      });
+
+      const result = component.serializeOptions();
+      expect(result).not.toContain('autoupdate');
+    });
+
+    it('includes max_links when checked with value', () => {
+      const component = feedFormData({
+        editText: false,
+        maxLinks: true,
+        maxLinksValue: '100'
+      });
+
+      const result = component.serializeOptions();
+      expect(result).toContain('max_links=100');
+    });
+
+    it('includes charset when checked with value', () => {
+      const component = feedFormData({
+        editText: false,
+        charset: true,
+        charsetValue: 'UTF-8'
+      });
+
+      const result = component.serializeOptions();
+      expect(result).toContain('charset=UTF-8');
+    });
+
+    it('includes max_texts when checked with value', () => {
+      const component = feedFormData({
+        editText: false,
+        maxTexts: true,
+        maxTextsValue: '15'
+      });
+
+      const result = component.serializeOptions();
+      expect(result).toContain('max_texts=15');
+    });
+
+    it('includes tag when checked with value', () => {
+      const component = feedFormData({
+        editText: false,
+        tag: true,
+        tagValue: 'news-tag'
+      });
+
+      const result = component.serializeOptions();
+      expect(result).toContain('tag=news-tag');
+    });
+
+    it('includes article_source when checked with value', () => {
+      const component = feedFormData({
+        editText: false,
+        articleSource: true,
+        articleSourceValue: 'description'
+      });
+
+      const result = component.serializeOptions();
+      expect(result).toContain('article_source=description');
+    });
+
+    it('serializes multiple options correctly', () => {
+      const component = feedFormData({
+        editText: true,
+        autoUpdate: true,
+        autoUpdateValue: '12',
+        autoUpdateUnit: 'h',
+        maxLinks: true,
+        maxLinksValue: '50',
+        tag: true,
+        tagValue: 'imported'
+      });
+
+      const result = component.serializeOptions();
+      expect(result).toContain('edit_text=1');
+      expect(result).toContain('autoupdate=12h');
+      expect(result).toContain('max_links=50');
+      expect(result).toContain('tag=imported');
+    });
+
+    it('skips options when toggled on but value is empty', () => {
+      const component = feedFormData({
+        editText: false,
+        maxLinks: true,
+        maxLinksValue: '' // Empty value
+      });
+
+      const result = component.serializeOptions();
+      expect(result).not.toContain('max_links');
+    });
+
+    it('ends with comma when options are present', () => {
+      const component = feedFormData({ editText: true });
+
+      const result = component.serializeOptions();
+      expect(result.endsWith(',')).toBe(true);
+    });
+  });
+
+  // ===========================================================================
+  // handleSubmit() Method Tests
+  // ===========================================================================
+
+  describe('handleSubmit()', () => {
+    it('populates NfOptions hidden field on submit', () => {
       document.body.innerHTML = `
-        <form class="validate">
+        <form>
           <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_noname" checked />
-            <input type="text" value="value-without-name" />
-          </div>
-          <button type="submit">Save</button>
         </form>
       `;
 
-      initFeedForm();
+      const component = feedFormData({
+        editText: true,
+        maxLinks: true,
+        maxLinksValue: '75'
+      });
 
-      const submitButton = document.querySelector<HTMLButtonElement>('[type="submit"]')!;
-
-      // Should not throw
-      expect(() => submitButton.click()).not.toThrow();
-    });
-
-    it('handles select without value', () => {
-      document.body.innerHTML = `
-        <form class="validate">
-          <input type="hidden" name="NfOptions" value="" />
-          <div>
-            <input type="checkbox" name="c_autoupdate" checked />
-            <input type="number" name="autoupdate" value="12" />
-            <select name="autoupdate_unit">
-            </select>
-          </div>
-          <button type="submit">Save</button>
-        </form>
-      `;
-
-      initFeedForm();
-
-      const submitButton = document.querySelector<HTMLButtonElement>('[type="submit"]')!;
-      submitButton.click();
+      const form = document.querySelector('form')!;
+      const event = { target: form } as unknown as Event;
+      component.handleSubmit(event);
 
       const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      // Empty select value should result in just the number
-      expect(nfOptions.value).toContain('autoupdate=12');
+      expect(nfOptions.value).toContain('edit_text=1');
+      expect(nfOptions.value).toContain('max_links=75');
+    });
+
+    it('handles missing NfOptions field gracefully', () => {
+      document.body.innerHTML = `
+        <form></form>
+      `;
+
+      const component = feedFormData({ editText: true });
+      const form = document.querySelector('form')!;
+      const event = { target: form } as unknown as Event;
+
+      expect(() => component.handleSubmit(event)).not.toThrow();
+    });
+
+    it('clears previous NfOptions value', () => {
+      document.body.innerHTML = `
+        <form>
+          <input type="hidden" name="NfOptions" value="old_value" />
+        </form>
+      `;
+
+      const component = feedFormData({
+        editText: false,
+        autoUpdate: false,
+        maxLinks: false,
+        charset: false,
+        maxTexts: false,
+        tag: false,
+        articleSource: false
+      });
+
+      const form = document.querySelector('form')!;
+      const event = { target: form } as unknown as Event;
+      component.handleSubmit(event);
+
+      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
+      expect(nfOptions.value).toBe('');
+    });
+  });
+
+  // ===========================================================================
+  // Integration Tests
+  // ===========================================================================
+
+  describe('Integration', () => {
+    it('full workflow: init from config, modify, serialize', () => {
+      document.body.innerHTML = `
+        <script type="application/json" id="feed-form-config">
+          {"editText": true, "autoUpdate": true, "autoUpdateValue": "24", "autoUpdateUnit": "h"}
+        </script>
+        <form>
+          <input type="hidden" name="NfOptions" value="" />
+        </form>
+      `;
+
+      const component = feedFormData();
+      component.init();
+
+      // Verify initial state from config
+      expect(component.editText).toBe(true);
+      expect(component.autoUpdate).toBe(true);
+
+      // Simulate user modifying values
+      component.maxLinks = true;
+      component.maxLinksValue = '200';
+
+      // Submit
+      const form = document.querySelector('form')!;
+      component.handleSubmit({ target: form } as unknown as Event);
+
+      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
+      expect(nfOptions.value).toContain('edit_text=1');
+      expect(nfOptions.value).toContain('autoupdate=24h');
+      expect(nfOptions.value).toContain('max_links=200');
     });
   });
 });

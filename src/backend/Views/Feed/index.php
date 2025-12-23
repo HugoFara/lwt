@@ -32,6 +32,7 @@ echo PageLayoutHelper::buildActionCard([
     ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
 ]);
 ?>
+<div x-data="feedIndex({currentQuery: '<?php echo addslashes($currentQuery); ?>'})">
 <!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
      This search bar should support:
      - Search across feed names
@@ -84,7 +85,7 @@ echo PageLayoutHelper::buildActionCard([
                         </div>
                         <div class="control">
                             <div class="select is-small">
-                                <select name="sort" data-action="sort">
+                                <select name="sort" @change="handleSort($event)">
                                     <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
                                 </select>
                             </div>
@@ -107,10 +108,10 @@ echo PageLayoutHelper::buildActionCard([
     </th>
 </tr>
 <tr><td class="td1 center feeds-filter-cell">
-<input type="button" value="Mark All" data-action="mark-all" />
-<input type="button" value="Mark None" data-action="mark-none" />
+<input type="button" value="Mark All" @click="markAll()" />
+<input type="button" value="Mark None" @click="markNone()" />
 </td><td class="td1 center" colspan="2">Marked Newsfeeds:&nbsp;
-<select name="markaction" id="markaction" disabled="disabled" data-action="mark-action">
+<select name="markaction" id="markaction" disabled="disabled" @change="handleMarkAction($event)">
     <option value="">[Choose...]</option>
     <option disabled="disabled">------------</option>
     <option value="update">Update</option>
@@ -149,7 +150,7 @@ foreach ($feeds as $row):
         <a href="<?php echo $row['NfSourceURI']; ?>" data-action="open-window">
             <?php echo IconHelper::render('external-link', ['title' => 'Show Feed', 'alt' => 'Link']); ?>
         </a>&nbsp;
-        <span class="click" data-action="delete-feed" data-feed-id="<?php echo $row['NfID']; ?>">
+        <span class="click" @click="confirmDelete('<?php echo $row['NfID']; ?>')">
             <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
         </span>
     </td>
@@ -171,3 +172,5 @@ foreach ($feeds as $row):
 </form>
 <?php endif; ?>
 <?php endif; ?>
+</div>
+<!-- Feed index component: feeds/components/feed_index_component.ts -->
