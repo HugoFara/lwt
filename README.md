@@ -51,15 +51,15 @@ Then open <http://localhost:8010/lwt/> in your browser.
 
 **1. Import a text** — Paste any content you want to read, or import from RSS feeds.
 
-![Adding French text](https://github.com/HugoFara/lwt/raw/main/docs/assets/images/05.jpg)
+![Adding French text](https://github.com/HugoFara/lwt/raw/main/docs/assets/images/adding-text.jpg)
 
 **2. Read and learn** — Unknown words are highlighted. Click any word to see its translation and save it to your vocabulary.
 
-![Learning French text](https://github.com/HugoFara/lwt/raw/main/docs/assets/images/06.jpg)
+![Reading text](https://github.com/HugoFara/lwt/raw/main/docs/assets/images/reading-text.jpg)
 
 **3. Review with context** — Practice vocabulary with spaced repetition, always seeing words in their original context.
 
-![Reviewing French word](https://github.com/HugoFara/lwt/raw/main/docs/assets/images/07.jpg)
+![Reviewing word](https://github.com/HugoFara/lwt/raw/main/docs/assets/images/reviewing-word.jpg)
 
 Unlike flashcard apps like [Anki](https://apps.ankiweb.net/), LWT keeps words connected to the texts where you found them. We also include an Anki exporter if you want both.
 
