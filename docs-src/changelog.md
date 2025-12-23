@@ -18,6 +18,13 @@ ones are marked like "v1.0.0-fork".
   Added a dedicated "Notes" field to terms/words, allowing users to add personal
   notes separate from translations. Includes database migration, updated entity
   classes, service layer, UI forms, and API endpoints.
+* **Inline Markdown for Translations and Notes** ([#126](https://github.com/HugoFara/lwt/issues/126)):
+  Translations and notes now support inline Markdown formatting: `**bold**`,
+  `*italic*`, `~~strikethrough~~`, and `[links](url)`. Markdown is rendered in
+  the word modal, annotations (translations shown above/below words), word list,
+  test screens, and word detail views. Implemented with custom lightweight parsers
+  in both TypeScript and PHP with XSS protection (HTML escaped before parsing,
+  URLs sanitized to block javascript: schemes).
 * Official support for PHP 8.3 and 8.4.
 * **Multi-user support** ([#221](https://github.com/HugoFara/lwt/issues/221)):
   Users are now stored in a dedicated `users` table with proper foreign key

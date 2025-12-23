@@ -40,9 +40,19 @@ The `.env` file contains:
 - `DB_PASSWORD` - Database password
 - `DB_NAME` - Database name (default: learning-with-texts)
 - `DB_SOCKET` - Optional database socket
-- `DB_TABLE_PREFIX` - Optional table prefix for multiple instances
+- `MULTI_USER_ENABLED` - Enable user_id-based data isolation (default: false)
 
 ## Common Commands
+
+### Running the Application
+
+```bash
+# Docker (recommended for quick setup)
+docker compose up                # Start app at http://localhost:8010/lwt/
+
+# PHP built-in server (for development)
+php -S localhost:8000            # Start at http://localhost:8000/
+```
 
 ### Testing
 
@@ -64,6 +74,7 @@ npm run test:coverage            # Run with coverage
 
 # E2E tests (requires server on localhost:8000)
 npm run e2e                      # Run Cypress E2E tests
+npm run cy:open                  # Interactive Cypress test runner
 ```
 
 **When to run E2E tests:** Run `npm run e2e` after making changes to:
@@ -77,7 +88,8 @@ npm run e2e                      # Run Cypress E2E tests
 ### Code Quality
 
 ```bash
-./vendor/bin/psalm                                   # Static analysis
+./vendor/bin/psalm                                   # Static analysis (default level)
+composer psalm:level3                                # Stricter static analysis
 npm run lint                                         # ESLint for TypeScript/JS
 npm run lint:fix                                     # Auto-fix lint issues
 npm run typecheck                                    # TypeScript type checking
@@ -171,11 +183,14 @@ use Lwt\Core\Globals;
 
 // Database operations
 $db = Globals::getDbConnection();
-$prefix = Globals::getTablePrefix();
-$tableName = Globals::table('words');  // Returns prefixed table name
+$tableName = Globals::table('words');  // Returns table name
 
 // Query builder
 $words = Globals::query('words')->where('WoLgID', '=', 1)->get();
+
+// User context (for multi-user mode)
+$userId = Globals::getCurrentUserId();
+$userId = Globals::requireUserId();  // Throws if not authenticated
 ```
 
 ### REST API
@@ -203,10 +218,11 @@ Key endpoint groups (see `src/backend/Api/V1/Endpoints.php` for full list):
 
 ### Modifying PHP Code
 
-- Use `do_mysqli_query()` wrapper for database queries (automatic error handling)
-- Use `Globals::table('tablename')` for prefixed table names
+- Controllers extend `BaseController` which provides helper methods for input validation, rendering, and database access
+- Use prepared statements for database queries: `Connection::preparedFetchAll($sql, [$param1, $param2])`
+- Use `Globals::table('tablename')` for table names
 - Use `getSettingWithDefault()` for application settings
-- Controllers extend `BaseController` which provides helper methods
+- Use `InputValidator` for request parameter validation (accessed via `$this->param()`, `$this->paramInt()` in controllers)
 
 ### Modifying TypeScript
 
@@ -233,7 +249,7 @@ Key modules:
 - **Character Encoding:** UTF-8 throughout
 - **Namespaces:** PSR-4 autoloading with `Lwt\` prefix
 - **ID Columns:** `LgID` (language), `TxID`/`AtID` (text/archived), `WoID` (word)
-- **SQL Escaping:** Use `Globals::getDbConnection()` with prepared statements or `Escaping::toSqlSyntax()`
+- **Database Queries:** Prefer `Connection::preparedFetchAll()` and `Connection::preparedExecute()` over manual escaping
 
 ## Database Migrations
 
