@@ -28,13 +28,6 @@
             </errorLevel>
         </UndefinedGlobalVariable>
 
-        <!-- Views use $this from controller context when included -->
-        <InvalidScope>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-            </errorLevel>
-        </InvalidScope>
-
         <!-- Controllers pass variables to views, services have template vars -->
         <UnusedVariable>
             <errorLevel type="suppress">
@@ -50,15 +43,8 @@
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Services" />
                 <directory name="src/backend/View" />
-                <directory name="src/backend/Core" />
             </errorLevel>
         </PossiblyUnusedParam>
-
-        <UnusedParam>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Controllers" />
-            </errorLevel>
-        </UnusedParam>
 
         <!-- Public methods called via routing or kept for API completeness -->
         <PossiblyUnusedMethod>
@@ -71,22 +57,6 @@
             </errorLevel>
         </PossiblyUnusedMethod>
 
-        <!-- Properties set from database results or declared for future use -->
-        <PossiblyUnusedProperty>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Core/Entity" />
-                <directory name="src/backend/Controllers" />
-            </errorLevel>
-        </PossiblyUnusedProperty>
-
-        <!-- Classes instantiated by router or kept for API completeness -->
-        <UnusedClass>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Controllers" />
-                <directory name="src/backend/Core/Entity" />
-            </errorLevel>
-        </UnusedClass>
-
         <!-- Views call global functions that may be dynamically loaded -->
         <UndefinedFunction>
             <errorLevel type="suppress">
@@ -98,25 +68,15 @@
         <RedundantCondition>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
-                <directory name="src/backend/Services" />
-                <directory name="src/backend/Core" />
             </errorLevel>
         </RedundantCondition>
 
+        <!-- Views receive variables from controllers via extract(), psalm cannot infer types -->
         <TypeDoesNotContainType>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
             </errorLevel>
         </TypeDoesNotContainType>
-
-        <!-- Defensive casts for type safety with dynamic data -->
-        <RedundantCast>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-                <directory name="src/backend/Services" />
-                <directory name="src/backend/Core" />
-            </errorLevel>
-        </RedundantCast>
 
         <!-- Return value may not be used by callers -->
         <PossiblyUnusedReturnValue>
@@ -124,56 +84,5 @@
                 <directory name="src/backend/Services" />
             </errorLevel>
         </PossiblyUnusedReturnValue>
-
-        <!-- Services handle data from various sources with different types -->
-        <InvalidReturnType>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-            </errorLevel>
-        </InvalidReturnType>
-
-        <!-- Foreach values used for iteration control only -->
-        <UnusedForeachValue>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-                <directory name="src/backend/Controllers" />
-            </errorLevel>
-        </UnusedForeachValue>
-
-        <!-- DOMNameSpaceNode has attributes in practice -->
-        <UndefinedPropertyFetch>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-            </errorLevel>
-        </UndefinedPropertyFetch>
-
-        <!-- Dynamic array access patterns -->
-        <InvalidArrayOffset>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-            </errorLevel>
-        </InvalidArrayOffset>
-
-        <!-- Unused function calls that have side effects -->
-        <UnusedFunctionCall>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-            </errorLevel>
-        </UnusedFunctionCall>
-
-        <!-- Var annotations for clarity in views/controllers -->
-        <UnnecessaryVarAnnotation>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-                <directory name="src/backend/Controllers" />
-            </errorLevel>
-        </UnnecessaryVarAnnotation>
-
-        <!-- shell_exec used for feature detection (MeCab) -->
-        <ForbiddenCode>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-            </errorLevel>
-        </ForbiddenCode>
     </issueHandlers>
 </psalm>

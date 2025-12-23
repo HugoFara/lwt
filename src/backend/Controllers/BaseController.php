@@ -41,21 +41,11 @@ require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 abstract class BaseController
 {
     /**
-     * Database connection (may be null if session_utility.php not yet loaded)
-     *
-     * @var \mysqli|null
-     */
-    protected ?\mysqli $db = null;
-
-    /**
-     * Initialize controller with database connection.
-     *
-     * Note: The database connection may not be available until Globals are
-     * loaded by the controller action.
+     * Initialize controller.
      */
     public function __construct()
     {
-        $this->db = \Lwt\Core\Globals::getDbConnection();
+        // Base initialization - subclasses can override
     }
 
     /**

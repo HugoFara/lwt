@@ -23,11 +23,11 @@ namespace Lwt\Views\Word;
 use Lwt\Services\TextStatisticsService;
 
 ?>
-<p>OK, term deleted, now unknown (<?php echo htmlspecialchars($message ?? '', ENT_QUOTES, 'UTF-8'); ?>).</p>
+<p>OK, term deleted, now unknown (<?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?>).</p>
 
 <script type="application/json" data-lwt-delete-result-config>
 <?php echo json_encode([
-    'wid' => (int) $wid,
+    'wid' => $wid,
     'term' => $term,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
 ]); ?>

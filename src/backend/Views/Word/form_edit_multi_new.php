@@ -19,6 +19,8 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @psalm-suppress TypeDoesNotContainType Defensive null checks
  */
 
 namespace Lwt\Views\Word;

@@ -91,6 +91,7 @@ class MecabParser implements ParserInterface
 
         if (str_starts_with($os, 'LIN') || str_starts_with($os, 'DAR')) {
             // Linux or macOS
+            /** @psalm-suppress ForbiddenCode shell_exec is required to check MeCab availability */
             $result = @shell_exec("command -v mecab 2>/dev/null");
             if ($result !== null && trim($result) !== '') {
                 $this->mecabAvailable = true;
@@ -105,6 +106,7 @@ class MecabParser implements ParserInterface
                 'where mecab.exe 2>nul'
             ];
             foreach ($checks as $check) {
+                /** @psalm-suppress ForbiddenCode shell_exec is required to check MeCab availability */
                 $result = @shell_exec($check);
                 if ($result !== null && trim($result) !== '') {
                     $this->mecabAvailable = true;

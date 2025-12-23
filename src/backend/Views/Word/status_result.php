@@ -24,14 +24,14 @@ namespace Lwt\Views\Word;
 
 use Lwt\Services\TextStatisticsService;
 
-$todoContent = (new TextStatisticsService())->getTodoWordsContent((int) $textId);
+$todoContent = (new TextStatisticsService())->getTodoWordsContent($textId);
 ?>
 <p id='status_change_log'>Term status updating...</p>
 
 <script type="application/json" id="word-status-config">
 <?php echo json_encode([
-    'wid' => (int) $wid,
-    'status' => (int) $status,
+    'wid' => $wid,
+    'status' => $status,
     'term' => $term,
     'translation' => $translation,
     'romanization' => $romanization,

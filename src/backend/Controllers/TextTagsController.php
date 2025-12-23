@@ -36,6 +36,8 @@ require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @psalm-suppress UnusedClass - Used via string-based routing in routes.php
  */
 class TextTagsController extends AbstractCrudController
 {

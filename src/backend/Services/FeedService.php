@@ -896,7 +896,8 @@ class FeedService
 
         foreach ($xPath->query($redirect) as $node) {
             if (
-                empty(trim($node->localName))
+                !$node instanceof \DOMElement
+                || empty(trim($node->localName))
                 || $node->nodeType == XML_TEXT_NODE
                 || !$node->hasAttributes()
             ) {
@@ -971,7 +972,7 @@ class FeedService
         if ($header) {
             foreach ($header as $k => $v) {
                 if (strtolower($k) == 'content-type') {
-                    $contentType = is_array($v) ? $v[count($v) - 1] : $v;
+                    $contentType = is_array($v) ? (string)end($v) : $v;
                     $pos = strpos($contentType, 'charset=');
                     if ($pos !== false && strpos($contentType, 'text/html;') !== false) {
                         return substr($contentType, $pos + 8);
@@ -1011,8 +1012,10 @@ class FeedService
         }
 
         // Fallback to detection
-        mb_detect_order("ASCII,UTF-8,ISO-8859-1,windows-1252,iso-8859-15");
-        return mb_detect_encoding($htmlString) ?: 'UTF-8';
+        return mb_detect_encoding(
+            $htmlString,
+            ["ASCII", "UTF-8", "ISO-8859-1", "windows-1252", "iso-8859-15"]
+        ) ?: 'UTF-8';
     }
 
     /**

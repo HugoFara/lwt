@@ -161,7 +161,7 @@ class WordController extends BaseController
         $fromAnn = $this->param("fromAnn");
 
         if ($this->hasParam('op')) {
-            $this->handleEditOperation($fromAnn);
+            $this->handleEditOperation();
         } else {
             $wid = ($this->hasParam("wid") && is_numeric($this->param('wid')))
                 ? $this->paramInt('wid', -1)
@@ -177,11 +177,9 @@ class WordController extends BaseController
     /**
      * Handle save/update operation for word edit.
      *
-     * @param string $fromAnn From annotation flag
-     *
      * @return void
      */
-    private function handleEditOperation(string $fromAnn): void
+    private function handleEditOperation(): void
     {
         $textlc = trim(\Lwt\Database\Escaping::prepareTextdata($this->param("WoTextLC")));
         $text = trim(\Lwt\Database\Escaping::prepareTextdata($this->param("WoText")));
@@ -587,14 +585,7 @@ class WordController extends BaseController
 
         // Handle mark actions
         if ($this->hasParam('markaction')) {
-            $message = $this->handleMarkAction(
-                $listService,
-                $currenttext,
-                $whLang,
-                $whStat,
-                $whQuery,
-                $whTag
-            );
+            $message = $this->handleMarkAction($listService);
         }
 
         // Handle all actions
@@ -708,21 +699,11 @@ class WordController extends BaseController
      * Handle mark actions for selected words.
      *
      * @param WordListService $listService Service instance
-     * @param string          $textId      Current text filter
-     * @param string          $whLang      Language condition
-     * @param string          $whStat      Status condition
-     * @param string          $whQuery     Query condition
-     * @param string          $whTag       Tag condition
      *
      * @return string Result message
      */
     private function handleMarkAction(
-        WordListService $listService,
-        string $textId,
-        string $whLang,
-        string $whStat,
-        string $whQuery,
-        string $whTag
+        WordListService $listService
     ): string {
         $markaction = $this->param('markaction');
         $actiondata = $this->param('data');
@@ -1270,6 +1251,8 @@ class WordController extends BaseController
      * @param int    $len  Number of words
      *
      * @return void
+     *
+     * @psalm-suppress UnusedParam $len is used in included view file
      */
     private function displayNewMultiWordForm(string $text, int $tid, int $ord, int $len): void
     {
@@ -1707,6 +1690,8 @@ class WordController extends BaseController
      * @param bool  $cleanUp Whether to clean up right frames after save
      *
      * @return void
+     *
+     * @psalm-suppress UnusedParam $tid and $cleanUp are used in included view file
      */
     private function handleBulkSave(array $terms, int $tid, bool $cleanUp): void
     {

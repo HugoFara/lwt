@@ -250,7 +250,7 @@ class TagService
                 'cnt'
             );
         } else {
-            return (int) QueryBuilder::table($this->tableName)
+            return QueryBuilder::table($this->tableName)
                 ->count($this->colPrefix . 'ID');
         }
     }
@@ -321,11 +321,11 @@ class TagService
     public function getUsageCount(int $tagId): int
     {
         if ($this->tagType === 'text') {
-            return (int) QueryBuilder::table('texttags')
+            return QueryBuilder::table('texttags')
                 ->where('TtT2ID', '=', $tagId)
                 ->count();
         } else {
-            return (int) QueryBuilder::table('wordtags')
+            return QueryBuilder::table('wordtags')
                 ->where('WtTgID', '=', $tagId)
                 ->count();
         }
@@ -343,7 +343,7 @@ class TagService
         if ($this->tagType !== 'text') {
             return 0;
         }
-        return (int) QueryBuilder::table('archtexttags')
+        return QueryBuilder::table('archtexttags')
             ->where('AgT2ID', '=', $tagId)
             ->count();
     }

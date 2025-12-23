@@ -28,6 +28,6 @@ $termData = json_decode($termJson, true);
     'translation' => $termData['translation'],
     'romanization' => $termData['romanization'],
     'status' => (int) $termData['status'],
-    'oldStatus' => (int) $oldStatusValue
+    'oldStatus' => $oldStatusValue
 ]); ?>
 </script>

@@ -35,7 +35,11 @@ namespace Lwt\Core\Entity;
  */
 class GoogleTranslate
 {
-    /** @var ''|list<string>|false */
+    /**
+     * @var ''|list<string>|false
+     *
+     * @psalm-suppress PossiblyUnusedProperty - Public property for external access
+     */
     public array|string|false $lastResult = "";
 
     private ?string $langFrom = null;

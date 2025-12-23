@@ -203,6 +203,6 @@ use Lwt\View\Helper\PageLayoutHelper;
 </style>
 
 <script type="application/json" id="text-reader-config"><?php echo json_encode([
-    'textId' => (int) $textId,
+    'textId' => $textId,
     'langId' => $langId,
 ]); ?></script>

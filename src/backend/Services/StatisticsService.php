@@ -143,7 +143,7 @@ class StatisticsService
     /**
      * Get term counts grouped by language and status.
      *
-     * @return array<string, array<string, int>> Term counts
+     * @return array<string, array<int, int>> Term counts
      */
     private function getTermCountsByLanguageAndStatus(): array
     {
@@ -155,7 +155,7 @@ class StatisticsService
         $termStat = [];
         foreach ($results as $record) {
             $lgId = (string)$record['WoLgID'];
-            $status = (string)$record['WoStatus'];
+            $status = (int)$record['WoStatus'];
             $termStat[$lgId][$status] = (int)$record['term_count'];
         }
         return $termStat;
