@@ -15,7 +15,8 @@
     "autoload": {
         "psr-4": {
             "Lwt\\": "src/backend/",
-            "Lwt\\Database\\": "src/backend/Core/Database/"
+            "Lwt\\Database\\": "src/backend/Core/Database/",
+            "Lwt\\Modules\\": "src/Modules/"
         }
     },
     "autoload-dev": {
