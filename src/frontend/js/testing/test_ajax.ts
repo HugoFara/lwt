@@ -6,12 +6,13 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import { LWT_DATA } from '../core/lwt_state';
 import { cClick } from '../ui/word_popup';
 import { speechDispatcher } from '../core/user_interactions';
 import { word_click_event_do_test_test, keydown_event_do_test_test } from './test_mode';
 import { startElapsedTimer } from './elapsed_timer';
 import { ReviewApi } from '../api/review';
+import { setCurrentWordId, setTestSolution, setAnswerOpened } from '../core/test_state';
+import { getLanguageId, initLanguageConfig } from '../core/language_config';
 
 // Interface for review data
 interface ReviewData {
@@ -71,8 +72,8 @@ export function prepareWordReading(termText: string, langId: number): void {
  * @param group HTML content for the term
  */
 export function insertNewWord(wordId: number, solution: string, group: string): void {
-  LWT_DATA.test.solution = solution;
-  LWT_DATA.word.id = wordId;
+  setTestSolution(solution);
+  setCurrentWordId(wordId);
 
   const termTestEl = document.getElementById('term-test');
   if (termTestEl) {
@@ -144,7 +145,7 @@ export async function testQueryHandler(
     );
     const utteranceCheckbox = document.getElementById('utterance-allowed') as HTMLInputElement | null;
     if (utteranceCheckbox?.checked) {
-      prepareWordReading(currentTest.word_text, LWT_DATA.language.id);
+      prepareWordReading(currentTest.word_text, getLanguageId());
     }
   }
 }
@@ -369,17 +370,21 @@ export function initTestInteractionGlobals(config: {
   translateUri: string;
   langCode: string;
 }): void {
-  LWT_DATA.language.id = config.langId;
-  LWT_DATA.language.dict_link1 = config.dict1Uri;
-  LWT_DATA.language.dict_link2 = config.dict2Uri;
-  LWT_DATA.language.translator_link = config.translateUri;
+  initLanguageConfig({
+    id: config.langId,
+    dictLink1: config.dict1Uri,
+    dictLink2: config.dict2Uri,
+    translatorLink: config.translateUri,
+    delimiter: '',
+    rtl: false
+  });
 
   // Set html lang attribute if we have a valid language code
   if (config.langCode && config.langCode !== config.translateUri) {
     document.documentElement.setAttribute('lang', config.langCode);
   }
 
-  LWT_DATA.test.answer_opened = false;
+  setAnswerOpened(false);
 }
 
 /**

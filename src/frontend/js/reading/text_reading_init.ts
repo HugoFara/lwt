@@ -15,7 +15,6 @@ import { getLangFromDict } from '../terms/dictionary';
 import { prepareTextInteractions } from './text_events';
 import { goToLastPosition, saveReadingPosition, saveAudioPosition, readRawTextAloud } from '../core/user_interactions';
 import { getAudioPlayer } from '../media/html5_audio_player';
-import { LWT_DATA } from '../core/lwt_state';
 import { initNativeTooltips } from '../ui/native_tooltip';
 import { resetReadingPosition } from '../core/reading_state';
 import {
@@ -23,7 +22,7 @@ import {
   getDictionaryLinks,
   setTtsVoiceApi
 } from '../core/language_config';
-import { initTextConfig, getTextId, setAnnotations } from '../core/text_config';
+import { initTextConfig, getTextId } from '../core/text_config';
 import { initSettingsConfig } from '../core/settings_config';
 import { resetAnswer } from '../core/test_state';
 
@@ -123,11 +122,6 @@ export function initTTS(): void {
 
   // Update TTS voice API in language config
   setTtsVoiceApi(config.voiceApi || '');
-
-  // Also update legacy LWT_DATA for backwards compatibility
-  if (typeof LWT_DATA !== 'undefined' && LWT_DATA.language) {
-    LWT_DATA.language.ttsVoiceApi = config.voiceApi || '';
-  }
 
   // Store textId for later use
   window._lwtTextId = config.textId;
@@ -330,15 +324,9 @@ export function initTextReading(): void {
 
   // Reset reading position (will be set by goToLastPosition)
   resetReadingPosition();
-  if (LWT_DATA.text) {
-    LWT_DATA.text.reading_position = -1;
-  }
 
   // Initialize test answer state
   resetAnswer();
-  if (LWT_DATA.test) {
-    LWT_DATA.test.answer_opened = false;
-  }
 
   // Set the language of the current frame
   if (window.LANG && window.LANG !== dictLinks.translator) {

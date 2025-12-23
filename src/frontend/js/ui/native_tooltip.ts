@@ -7,7 +7,7 @@
  * @since 3.0.0
  */
 
-import { LWT_DATA } from '../core/lwt_state';
+import { getDelimiter } from '../core/language_config';
 
 // Tooltip configuration
 const TOOLTIP_CONFIG = {
@@ -39,7 +39,7 @@ function getAttr(el: HTMLElement, attr: string): string {
  * @returns HTML string for the tooltip content
  */
 export function generateWordTooltipContent(element: HTMLElement): string {
-  const delimiter = LWT_DATA.language?.delimiter || '';
+  const delimiter = getDelimiter();
   const re = new RegExp('([' + delimiter + '])(?! )', 'g');
 
   let title = '';

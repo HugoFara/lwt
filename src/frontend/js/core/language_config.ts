@@ -172,6 +172,24 @@ export function getTtsVoiceApi(): string {
  */
 export function setTtsVoiceApi(api: string): void {
   currentConfig.ttsVoiceApi = api;
+  isInitialized = true;
+}
+
+/**
+ * Set dictionary links.
+ * Used when initializing from page-specific configuration.
+ */
+export function setDictionaryLinks(links: { dict1?: string; dict2?: string; translator?: string }): void {
+  if (links.dict1 !== undefined) {
+    currentConfig.dictLink1 = links.dict1;
+  }
+  if (links.dict2 !== undefined) {
+    currentConfig.dictLink2 = links.dict2;
+  }
+  if (links.translator !== undefined) {
+    currentConfig.translatorLink = links.translator;
+  }
+  isInitialized = true;
 }
 
 /**

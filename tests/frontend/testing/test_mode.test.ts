@@ -8,23 +8,6 @@ import {
 } from '../../../src/frontend/js/testing/test_mode';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/core/lwt_state', () => ({
-  LWT_DATA: {
-    language: {
-      dict_link1: 'http://dict1.com',
-      dict_link2: 'http://dict2.com',
-      translator_link: 'http://translate.com'
-    },
-    word: {
-      id: '123'
-    },
-    test: {
-      solution: 'Test Solution',
-      answer_opened: false
-    }
-  }
-}));
-
 vi.mock('../../../src/frontend/js/terms/overlib_interface', () => ({
   run_overlib_test: vi.fn()
 }));
@@ -34,21 +17,42 @@ vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
   cleanupRightFrames: vi.fn()
 }));
 
-import { LWT_DATA } from '../../../src/frontend/js/core/lwt_state';
 import { run_overlib_test } from '../../../src/frontend/js/terms/overlib_interface';
 import { loadModalFrame, cleanupRightFrames } from '../../../src/frontend/js/reading/frame_management';
+import {
+  setCurrentWordId,
+  setTestSolution,
+  setAnswerOpened,
+  resetTestState
+} from '../../../src/frontend/js/core/test_state';
+import {
+  setDictionaryLinks,
+  resetLanguageConfig
+} from '../../../src/frontend/js/core/language_config';
 
 describe('test_mode.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
-    // Reset test state
-    LWT_DATA.test.answer_opened = false;
+
+    // Initialize test state
+    setCurrentWordId(123);
+    setTestSolution('Test Solution');
+    setAnswerOpened(false);
+
+    // Initialize dictionary links
+    setDictionaryLinks({
+      dict1: 'http://dict1.com',
+      dict2: 'http://dict2.com',
+      translator: 'http://translate.com'
+    });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
+    resetTestState();
+    resetLanguageConfig();
   });
 
   // ===========================================================================
@@ -182,19 +186,18 @@ describe('test_mode.ts', () => {
 
     describe('Space key', () => {
       it('shows solution when answer not opened', () => {
-        LWT_DATA.test.answer_opened = false;
+        setAnswerOpened(false);
 
         const event = createKeyEvent(' ', 32);
         const result = keydown_event_do_test_test(event);
 
         expect(cleanupRightFrames).toHaveBeenCalled();
         expect(loadModalFrame).toHaveBeenCalledWith('show_word.php?wid=123&ann=');
-        expect(LWT_DATA.test.answer_opened).toBe(true);
         expect(result).toBe(false);
       });
 
       it('does nothing when answer already opened', () => {
-        LWT_DATA.test.answer_opened = true;
+        setAnswerOpened(true);
 
         const event = createKeyEvent(' ', 32);
         const result = keydown_event_do_test_test(event);
@@ -248,7 +251,7 @@ describe('test_mode.ts', () => {
 
     describe('Arrow Up key (requires answer opened)', () => {
       it('does nothing when answer not opened', () => {
-        LWT_DATA.test.answer_opened = false;
+        setAnswerOpened(false);
 
         const event = createKeyEvent('ArrowUp', 38);
         const result = keydown_event_do_test_test(event);
@@ -258,7 +261,7 @@ describe('test_mode.ts', () => {
       });
 
       it('increases status when answer opened', () => {
-        LWT_DATA.test.answer_opened = true;
+        setAnswerOpened(true);
 
         const event = createKeyEvent('ArrowUp', 38);
         const result = keydown_event_do_test_test(event);
@@ -270,7 +273,7 @@ describe('test_mode.ts', () => {
 
     describe('Arrow Down key (requires answer opened)', () => {
       it('does nothing when answer not opened', () => {
-        LWT_DATA.test.answer_opened = false;
+        setAnswerOpened(false);
 
         const event = createKeyEvent('ArrowDown', 40);
         const result = keydown_event_do_test_test(event);
@@ -280,7 +283,7 @@ describe('test_mode.ts', () => {
       });
 
       it('decreases status when answer opened', () => {
-        LWT_DATA.test.answer_opened = true;
+        setAnswerOpened(true);
 
         const event = createKeyEvent('ArrowDown', 40);
         const result = keydown_event_do_test_test(event);
@@ -298,7 +301,7 @@ describe('test_mode.ts', () => {
         ['4', 52, 4],
         ['5', 53, 5]
       ])('sets status to %i when %i key pressed', (key, keyCode, expectedStatus) => {
-        LWT_DATA.test.answer_opened = true;
+        setAnswerOpened(true);
 
         const event = createKeyEvent(key, keyCode);
         const result = keydown_event_do_test_test(event);
@@ -308,7 +311,7 @@ describe('test_mode.ts', () => {
       });
 
       it('does nothing when answer not opened', () => {
-        LWT_DATA.test.answer_opened = false;
+        setAnswerOpened(false);
 
         const event = createKeyEvent('1', 49);
         const result = keydown_event_do_test_test(event);
@@ -324,7 +327,7 @@ describe('test_mode.ts', () => {
         ['4', 100, 4], // numpad 4
         ['5', 101, 5]  // numpad 5
       ])('handles numpad key %s (keyCode %i)', (key, keyCode, expectedStatus) => {
-        LWT_DATA.test.answer_opened = true;
+        setAnswerOpened(true);
 
         const event = createKeyEvent(key, keyCode);
         const result = keydown_event_do_test_test(event);

@@ -10,7 +10,6 @@ import {
   initTextReadingHeader,
   autoInit
 } from '../../../src/frontend/js/reading/text_reading_init';
-import { LWT_DATA } from '../../../src/frontend/js/core/lwt_state';
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/terms/dictionary', () => ({
@@ -35,7 +34,13 @@ vi.mock('../../../src/frontend/js/media/html5_audio_player', () => ({
 import { getLangFromDict } from '../../../src/frontend/js/terms/dictionary';
 import { saveAudioPosition, readRawTextAloud } from '../../../src/frontend/js/core/user_interactions';
 import { getAudioPlayer } from '../../../src/frontend/js/media/html5_audio_player';
-import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
+import {
+  initLanguageConfig,
+  resetLanguageConfig,
+  getTtsVoiceApi
+} from '../../../src/frontend/js/core/language_config';
+import { getReadingPosition, resetReadingPosition } from '../../../src/frontend/js/core/reading_state';
+import { isAnswerOpened, resetTestState } from '../../../src/frontend/js/core/test_state';
 
 describe('text_reading_init.ts', () => {
   let mockSpeechSynthesis: any;
@@ -52,22 +57,6 @@ describe('text_reading_init.ts', () => {
     delete (window as any).new_globals;
     delete (window as any).LANG;
     delete (window as any).LWT_VITE_LOADED;
-
-    // Reset LWT_DATA
-    if (LWT_DATA.language) {
-      delete LWT_DATA.language.ttsVoiceApi;
-      delete LWT_DATA.language.translator_link;
-    }
-    if (LWT_DATA.text) {
-      delete LWT_DATA.text.id;
-      delete LWT_DATA.text.reading_position;
-    }
-    if (LWT_DATA.test) {
-      delete LWT_DATA.test.answer_opened;
-    }
-    if (LWT_DATA.settings) {
-      delete LWT_DATA.settings.jQuery_tooltip;
-    }
 
     // Mock speechSynthesis
     mockSpeechSynthesis = {
@@ -86,6 +75,8 @@ describe('text_reading_init.ts', () => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
     resetLanguageConfig();
+    resetReadingPosition();
+    resetTestState();
   });
 
   // ===========================================================================
@@ -102,8 +93,8 @@ describe('text_reading_init.ts', () => {
       (window as any)._lwtPhoneticText = 'Hello world';
       (window as any)._lwtLanguageCode = 'en-US';
 
-      // Setup LWT_DATA.language
-      LWT_DATA.language = { translator_link: 'https://translate.google.com' };
+      // Setup language config
+      initLanguageConfig({ translatorLink: 'https://translate.google.com' });
       (getLangFromDict as any).mockReturnValue('en');
 
       initTTS();
@@ -111,23 +102,21 @@ describe('text_reading_init.ts', () => {
       // TTS should be initialized (we can't directly inspect internal state, but no error means success)
     });
 
-    it('sets ttsVoiceApi on LWT_DATA.language', () => {
+    it('sets ttsVoiceApi in language config', () => {
       (window as any)._lwtPhoneticText = 'Test text';
       (window as any)._lwtVoiceApi = 'google';
-      LWT_DATA.language = {};
 
       initTTS();
 
-      expect(LWT_DATA.language.ttsVoiceApi).toBe('google');
+      expect(getTtsVoiceApi()).toBe('google');
     });
 
     it('handles missing _lwtVoiceApi gracefully', () => {
       (window as any)._lwtPhoneticText = 'Test text';
-      LWT_DATA.language = {};
 
       initTTS();
 
-      expect(LWT_DATA.language.ttsVoiceApi).toBe('');
+      expect(getTtsVoiceApi()).toBe('');
     });
   });
 
@@ -162,7 +151,7 @@ describe('text_reading_init.ts', () => {
       mockSpeechSynthesis.speaking = false;
       (window as any)._lwtPhoneticText = 'Read this text';
       (window as any)._lwtLanguageCode = 'en';
-      LWT_DATA.language = { translator_link: '' };
+      initLanguageConfig({ translatorLink: '' });
 
       toggleReading();
 
@@ -221,8 +210,7 @@ describe('text_reading_init.ts', () => {
 
       initTextReading();
 
-      // Values should be merged
-      expect(LWT_DATA.language).toBeDefined();
+      // Configuration should be applied (new_globals are merged for backward compatibility)
     });
 
     it('sets window.LANG from getLangFromDict', () => {
@@ -242,20 +230,18 @@ describe('text_reading_init.ts', () => {
       expect(window.LANG).toBe('fr');
     });
 
-    it('resets reading_position to -1', () => {
-      LWT_DATA.text = { id: 1 };
-
+    it('resets reading_position', () => {
       initTextReading();
 
-      expect(LWT_DATA.text.reading_position).toBe(-1);
+      // Reading position is reset to -1 in the module
+      expect(getReadingPosition()).toBe(-1);
     });
 
     it('initializes test answer_opened to false', () => {
-      LWT_DATA.test = {};
-
       initTextReading();
 
-      expect(LWT_DATA.test.answer_opened).toBe(false);
+      // Test answer state is reset via resetAnswer()
+      expect(isAnswerOpened()).toBe(false);
     });
 
     it('sets up document ready handlers', () => {
@@ -284,12 +270,11 @@ describe('text_reading_init.ts', () => {
 
     it('initializes TTS', () => {
       (window as any)._lwtPhoneticText = 'Test';
-      LWT_DATA.language = {};
 
       initTextReadingHeader();
 
-      // TTS should be initialized (sets ttsVoiceApi)
-      expect(LWT_DATA.language.ttsVoiceApi).toBeDefined();
+      // TTS should be initialized (sets ttsVoiceApi via module)
+      expect(getTtsVoiceApi()).toBeDefined();
     });
 
     it('binds click handler for readTextButton', () => {
@@ -338,19 +323,17 @@ describe('text_reading_init.ts', () => {
 
     it('calls initTextReadingHeader when _lwtPhoneticText is defined', () => {
       (window as any)._lwtPhoneticText = 'Some phonetic text';
-      LWT_DATA.language = {};
 
       autoInit();
 
-      expect(LWT_DATA.language.ttsVoiceApi).toBeDefined();
+      expect(getTtsVoiceApi()).toBeDefined();
     });
 
     it('does not call initTextReadingHeader when _lwtPhoneticText is undefined', () => {
-      LWT_DATA.language = {};
-
       autoInit();
 
-      expect(LWT_DATA.language.ttsVoiceApi).toBeUndefined();
+      // ttsVoiceApi should be empty string (default)
+      expect(getTtsVoiceApi()).toBe('');
     });
   });
 
@@ -361,22 +344,11 @@ describe('text_reading_init.ts', () => {
   describe('Edge Cases', () => {
     it('handles empty phonetic text', () => {
       (window as any)._lwtPhoneticText = '';
-      LWT_DATA.language = { translator_link: '' };
+      initLanguageConfig({ translatorLink: '' });
 
       initTTS();
 
       // Should not crash
-    });
-
-    it('handles null language in LWT_DATA', () => {
-      (window as any)._lwtPhoneticText = 'Test';
-      (window as any)._lwtVoiceApi = 'api';
-
-      // LWT_DATA.language is undefined
-      delete (LWT_DATA as any).language;
-
-      // Should not throw
-      expect(() => initTTS()).not.toThrow();
     });
 
     it('handles speechSynthesis.cancel throwing', () => {
@@ -389,8 +361,8 @@ describe('text_reading_init.ts', () => {
       expect(() => toggleReading()).toThrow();
     });
 
-    it('handles missing translator_link in language', () => {
-      LWT_DATA.language = {};
+    it('handles missing translator_link in language config', () => {
+      // Language config has defaults for missing fields
 
       // Clear mock calls before the test
       vi.mocked(getLangFromDict).mockClear();

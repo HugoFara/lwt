@@ -16,43 +16,39 @@ vi.mock('../../../src/frontend/js/terms/word_status', () => ({
 }));
 
 import { make_tooltip } from '../../../src/frontend/js/terms/word_status';
-
-// Mock LWT_DATA global
-const createMockLWT_DATA = () => ({
-  language: {
-    id: 1,
-    dict_link1: 'http://dict1.example.com/###',
-    dict_link2: 'http://dict2.example.com/###',
-    translator_link: 'http://translate.example.com/###',
-    delimiter: ',',
-    rtl: false,
-  },
-  text: {
-    id: 42,
-    reading_position: 0,
-    annotations: {} as Record<string, [unknown, string, string]>,
-  },
-  settings: {
-    jQuery_tooltip: false,
-    hts: 0,
-    word_status_filter: '',
-    annotations_mode: 0,
-  },
-});
+import {
+  setAnnotations,
+  resetTextConfig
+} from '../../../src/frontend/js/core/text_config';
+import {
+  initLanguageConfig,
+  resetLanguageConfig
+} from '../../../src/frontend/js/core/language_config';
 
 describe('text_annotations.ts', () => {
-  let mockLWT_DATA: ReturnType<typeof createMockLWT_DATA>;
-
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
-    mockLWT_DATA = createMockLWT_DATA();
-    (window as any).LWT_DATA = mockLWT_DATA;
+
+    // Initialize language config with default delimiter
+    initLanguageConfig({
+      id: 1,
+      dictLink1: 'http://dict1.example.com/###',
+      dictLink2: 'http://dict2.example.com/###',
+      translatorLink: 'http://translate.example.com/###',
+      delimiter: ',',
+      rtl: false
+    });
+
+    // Reset annotations
+    setAnnotations({});
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
+    resetTextConfig();
+    resetLanguageConfig();
   });
 
   // ===========================================================================
@@ -122,11 +118,9 @@ describe('text_annotations.ts', () => {
 
   describe('word_each_do_text_text', () => {
     it('does not match annotation when wid is empty', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '10': [null, 'word123', 'note']
-      };
-      mockLWT_DATA.settings.jQuery_tooltip = true;  // Disable tooltip
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="word1" class="word" data_wid="" data_order="10" data_trans="translation" data_rom="rom" data_status="1">Hello</span>
@@ -140,10 +134,9 @@ describe('text_annotations.ts', () => {
     });
 
     it('adds annotation when wid matches annotation entry', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '10': [null, 'word123', 'note']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="word1" class="word" data_wid="word123" data_order="10" data_trans="translation" data_rom="rom" data_status="1">Hello</span>
@@ -156,10 +149,9 @@ describe('text_annotations.ts', () => {
     });
 
     it('combines annotation with translation when not duplicate', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '10': [null, 'word123', 'annotation']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="word1" class="word" data_wid="word123" data_order="10" data_trans="translation" data_rom="rom" data_status="1">Hello</span>
@@ -172,11 +164,10 @@ describe('text_annotations.ts', () => {
     });
 
     it('does not duplicate annotation in translation', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '10': [null, 'word123', 'hello']
-      };
-      mockLWT_DATA.language.delimiter = ',';
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
+      initLanguageConfig({ delimiter: ',' });
 
       document.body.innerHTML = `
         <span id="word1" class="word" data_wid="word123" data_order="10" data_trans="hello" data_rom="rom" data_status="1">Hello</span>
@@ -189,10 +180,7 @@ describe('text_annotations.ts', () => {
       expect(element.getAttribute('data_trans')).toBe('hello');
     });
 
-    it('sets tooltip when jQuery_tooltip is disabled', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = false;
-      (window as any).LWT_DATA = mockLWT_DATA;
-
+    it('sets tooltip (native tooltips always enabled)', () => {
       document.body.innerHTML = `
         <span id="word1" class="word" data_wid="word123" data_order="10" data_trans="translation" data_rom="romanization" data_status="2">Hello</span>
       `;
@@ -208,24 +196,7 @@ describe('text_annotations.ts', () => {
       );
     });
 
-    it('does not set tooltip when jQuery_tooltip is enabled', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = true;
-      (window as any).LWT_DATA = mockLWT_DATA;
-
-      document.body.innerHTML = `
-        <span id="word1" class="word" data_wid="word123" data_order="10" data_trans="translation" data_rom="rom" data_status="1">Hello</span>
-      `;
-      const element = document.getElementById('word1') as HTMLElement;
-
-      word_each_do_text_text.call(element);
-
-      expect(make_tooltip).not.toHaveBeenCalled();
-    });
-
     it('handles missing data_status by defaulting to 0', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = false;
-      (window as any).LWT_DATA = mockLWT_DATA;
-
       document.body.innerHTML = `
         <span id="word1" class="word" data_wid="word123" data_order="10" data_trans="translation" data_rom="rom">Hello</span>
       `;
@@ -242,10 +213,9 @@ describe('text_annotations.ts', () => {
     });
 
     it('does not match annotation when wid differs', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '10': [null, 'differentWord', 'note']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="word1" class="word" data_wid="word123" data_order="10" data_trans="translation" data_rom="rom" data_status="1">Hello</span>
@@ -258,10 +228,9 @@ describe('text_annotations.ts', () => {
     });
 
     it('handles annotation with special regex characters', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '10': [null, 'word123', 'note (test)']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="word1" class="word" data_wid="word123" data_order="10" data_trans="other" data_rom="rom" data_status="1">Hello</span>
@@ -303,10 +272,9 @@ describe('text_annotations.ts', () => {
 
     it('searches for annotation in even offsets (2, 4, 6...)', () => {
       // Annotation at offset +4 from order 10 = 14
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '14': [null, 'mword123', 'multi annotation']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="mword1" class="mword" data_wid="mword123" data_order="10" data_trans="translation" data_rom="rom" data_status="2" data_text="Multi Word">Multi Word</span>
@@ -319,11 +287,10 @@ describe('text_annotations.ts', () => {
     });
 
     it('stops searching after finding first matching annotation', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '12': [null, 'mword123', 'first annotation'],
         '14': [null, 'mword123', 'second annotation']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="mword1" class="mword" data_wid="mword123" data_order="10" data_trans="translation" data_rom="rom" data_status="2" data_text="Multi Word">Multi Word</span>
@@ -337,10 +304,9 @@ describe('text_annotations.ts', () => {
     });
 
     it('combines annotation with translation when not duplicate', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '12': [null, 'mword123', 'note']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="mword1" class="mword" data_wid="mword123" data_order="10" data_trans="original" data_rom="rom" data_status="2" data_text="Multi">Multi</span>
@@ -353,11 +319,10 @@ describe('text_annotations.ts', () => {
     });
 
     it('does not duplicate annotation in translation', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '12': [null, 'mword123', 'same']
-      };
-      mockLWT_DATA.language.delimiter = ',';
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
+      initLanguageConfig({ delimiter: ',' });
 
       document.body.innerHTML = `
         <span id="mword1" class="mword" data_wid="mword123" data_order="10" data_trans="same" data_rom="rom" data_status="2" data_text="Multi">Multi</span>
@@ -369,10 +334,7 @@ describe('text_annotations.ts', () => {
       expect(element.getAttribute('data_trans')).toBe('same');
     });
 
-    it('sets tooltip when jQuery_tooltip is disabled', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = false;
-      (window as any).LWT_DATA = mockLWT_DATA;
-
+    it('sets tooltip (native tooltips always enabled)', () => {
       document.body.innerHTML = `
         <span id="mword1" class="mword" data_wid="mword123" data_order="10" data_trans="trans" data_rom="rom" data_status="3" data_text="Multi Word">Multi Word</span>
       `;
@@ -388,24 +350,7 @@ describe('text_annotations.ts', () => {
       );
     });
 
-    it('does not set tooltip when jQuery_tooltip is enabled', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = true;
-      (window as any).LWT_DATA = mockLWT_DATA;
-
-      document.body.innerHTML = `
-        <span id="mword1" class="mword" data_wid="mword123" data_order="10" data_trans="trans" data_rom="rom" data_status="3" data_text="Multi">Multi</span>
-      `;
-      const element = document.getElementById('mword1') as HTMLElement;
-
-      mword_each_do_text_text.call(element);
-
-      expect(make_tooltip).not.toHaveBeenCalled();
-    });
-
     it('uses data_text for tooltip instead of element text', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = false;
-      (window as any).LWT_DATA = mockLWT_DATA;
-
       document.body.innerHTML = `
         <span id="mword1" class="mword" data_wid="mword123" data_order="10" data_trans="trans" data_rom="rom" data_status="3" data_text="Full Text">Short</span>
       `;
@@ -423,10 +368,9 @@ describe('text_annotations.ts', () => {
 
     it('searches up to offset 16', () => {
       // Annotation at offset +16 from order 10 = 26
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '26': [null, 'mword123', 'far annotation']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="mword1" class="mword" data_wid="mword123" data_order="10" data_trans="trans" data_rom="rom" data_status="2" data_text="Multi">Multi</span>
@@ -440,10 +384,9 @@ describe('text_annotations.ts', () => {
 
     it('does not find annotation beyond offset 16', () => {
       // Annotation at offset +18 from order 10 = 28 (beyond search range)
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '28': [null, 'mword123', 'too far']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="mword1" class="mword" data_wid="mword123" data_order="10" data_trans="trans" data_rom="rom" data_status="2" data_text="Multi">Multi</span>
@@ -455,10 +398,7 @@ describe('text_annotations.ts', () => {
       expect(element.getAttribute('data_ann')).toBeNull();
     });
 
-    it('handles missing data_status by defaulting to 0', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = false;
-      (window as any).LWT_DATA = mockLWT_DATA;
-
+    it('handles status 5 correctly', () => {
       document.body.innerHTML = `
         <span id="mword1" class="mword" data_wid="mword123" data_order="10" data_trans="trans" data_rom="rom" data_status="5" data_text="Multi">Multi</span>
       `;
@@ -490,10 +430,9 @@ describe('text_annotations.ts', () => {
     });
 
     it('word_each_do_text_text handles annotation with brackets', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '10': [null, 'word123', 'note [extra]']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="word1" class="word" data_wid="word123" data_order="10" data_trans="other [info]" data_rom="rom" data_status="1">Hello</span>
@@ -507,11 +446,10 @@ describe('text_annotations.ts', () => {
     });
 
     it('handles delimiter at start/end of translation', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '10': [null, 'word123', 'ann']
-      };
-      mockLWT_DATA.language.delimiter = ',';
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
+      initLanguageConfig({ delimiter: ',' });
 
       document.body.innerHTML = `
         <span id="word1" class="word" data_wid="word123" data_order="10" data_trans=",ann," data_rom="rom" data_status="1">Hello</span>
@@ -525,10 +463,9 @@ describe('text_annotations.ts', () => {
     });
 
     it('handles data_order with leading zeros', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '5': [null, 'word123', 'note']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="word1" class="word" data_wid="word123" data_order="05" data_trans="trans" data_rom="rom" data_status="1">Hello</span>
@@ -542,10 +479,9 @@ describe('text_annotations.ts', () => {
     });
 
     it('mword_each_do_text_text handles zero order value', () => {
-      mockLWT_DATA.text.annotations = {
+      setAnnotations({
         '2': [null, 'mword123', 'note']
-      };
-      (window as any).LWT_DATA = mockLWT_DATA;
+      });
 
       document.body.innerHTML = `
         <span id="mword1" class="mword" data_wid="mword123" data_order="0" data_trans="trans" data_rom="rom" data_status="2" data_text="Multi">Multi</span>

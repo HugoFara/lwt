@@ -9,30 +9,7 @@
 import { overlib, cClick } from '../ui/word_popup';
 import { scrollTo } from '../core/hover_intent';
 import { getTTSSettingsWithMigration, type TTSLanguageSettings } from './tts_storage';
-
-// Type for LWT_DATA global
-interface LwtLanguage {
-  id: number;
-  name: string;
-  abbreviation: string;
-  reading_mode?: string;
-  voiceapi?: string;
-}
-
-interface LwtText {
-  id: number;
-  reading_position: number;
-}
-
-interface LwtDataGlobal {
-  language: LwtLanguage;
-  text: LwtText;
-  settings: {
-    hts: number;
-  };
-}
-
-declare const LWT_DATA: LwtDataGlobal;
+import { getReadingPosition } from './reading_state';
 
 // Type for text dictionary in newExpressionInteractable
 interface TextDictionary {
@@ -203,7 +180,7 @@ export function newExpressionInteractable(
  */
 export function goToLastPosition(): void {
   // Last registered position to go to
-  const lookPos = LWT_DATA.text.reading_position;
+  const lookPos = getReadingPosition();
   // Element to scroll to
   let targetElement: HTMLElement | null = null;
   if (lookPos > 0) {

@@ -8,9 +8,9 @@
  * @since   3.0.0
  */
 
-import { LWT_DATA } from '../core/lwt_state';
 import { createTheDictUrl, owin } from '../terms/dictionary';
 import { selectToggle } from '../forms/bulk_actions';
+import { getDictionaryLinks, setDictionaryLinks } from '../core/language_config';
 
 declare global {
   interface Window {
@@ -40,14 +40,15 @@ declare global {
  * Opens the dictionary for the term in the same row.
  */
 export function clickDictionary(element: HTMLElement): void {
+  const dictLinks = getDictionaryLinks();
   let dictLink: string;
 
   if (element.classList.contains('dict1')) {
-    dictLink = LWT_DATA.language.dict_link1;
+    dictLink = dictLinks.dict1;
   } else if (element.classList.contains('dict2')) {
-    dictLink = LWT_DATA.language.dict_link2;
+    dictLink = dictLinks.dict2;
   } else if (element.classList.contains('dict3')) {
-    dictLink = LWT_DATA.language.translator_link;
+    dictLink = dictLinks.translator;
   } else {
     return;
   }
@@ -168,20 +169,21 @@ export function bulkInteractions(): void {
       });
 
       // Add dictionary links after each term
+      const dictConfig = getDictionaryLinks();
       document.querySelectorAll<HTMLElement>('.term').forEach(term => {
         const parent = term.parentElement;
         if (parent) {
           parent.style.position = 'relative';
         }
 
-        const dictLinks =
+        const dictLinksHtml =
           '<div class="dict">' +
-          (LWT_DATA.language.dict_link1 ? '<span class="dict1">D1</span>' : '') +
-          (LWT_DATA.language.dict_link2 ? '<span class="dict2">D2</span>' : '') +
-          (LWT_DATA.language.translator_link ? '<span class="dict3">Tr</span>' : '') +
+          (dictConfig.dict1 ? '<span class="dict1">D1</span>' : '') +
+          (dictConfig.dict2 ? '<span class="dict2">D2</span>' : '') +
+          (dictConfig.translator ? '<span class="dict3">Tr</span>' : '') +
           '</div>';
 
-        term.insertAdjacentHTML('afterend', dictLinks);
+        term.insertAdjacentHTML('afterend', dictLinksHtml);
       });
 
       // Clean up Google Translate elements
@@ -365,10 +367,12 @@ export function initBulkTranslate(dictionaries: {
   dict2: string;
   translate: string;
 }): void {
-  // Set dictionary links in LWT_DATA
-  LWT_DATA.language.dict_link1 = dictionaries.dict1;
-  LWT_DATA.language.dict_link2 = dictionaries.dict2;
-  LWT_DATA.language.translator_link = dictionaries.translate;
+  // Set dictionary links in language config
+  setDictionaryLinks({
+    dict1: dictionaries.dict1,
+    dict2: dictionaries.dict2,
+    translator: dictionaries.translate
+  });
 
   // Mark headers as not translatable
   document.querySelectorAll('h3, h4, title').forEach(el => {

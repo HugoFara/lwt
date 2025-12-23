@@ -6,9 +6,10 @@
  * @since   1.6.16-fork
  */
 
-import { LWT_DATA } from '../core/lwt_state';
 import { run_overlib_test } from '../terms/overlib_interface';
 import { loadModalFrame, cleanupRightFrames } from '../reading/frame_management';
+import { getCurrentWordId, getTestSolution, isAnswerOpened, openAnswer } from '../core/test_state';
+import { getDictionaryLinks } from '../core/language_config';
 
 /**
  * Helper to safely get an HTML attribute value as a string.
@@ -23,8 +24,9 @@ function getAttr(el: HTMLElement, attr: string): string {
  * @returns false
  */
 export function word_click_event_do_test_test(this: HTMLElement): boolean {
+  const dictLinks = getDictionaryLinks();
   run_overlib_test(
-    LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link,
+    dictLinks.dict1, dictLinks.dict2, dictLinks.translator,
     getAttr(this, 'data_wid'),
     getAttr(this, 'data_text'),
     getAttr(this, 'data_trans'),
@@ -35,7 +37,7 @@ export function word_click_event_do_test_test(this: HTMLElement): boolean {
   );
   const todoEl = document.querySelector('.todo');
   if (todoEl) {
-    todoEl.textContent = LWT_DATA.test.solution;
+    todoEl.textContent = getTestSolution();
   }
   return false;
 }
@@ -48,55 +50,56 @@ export function word_click_event_do_test_test(this: HTMLElement): boolean {
  */
 export function keydown_event_do_test_test(e: KeyboardEvent): boolean {
   const wordEl = document.querySelector('.word') as HTMLElement | null;
+  const wordId = getCurrentWordId();
 
-  if ((e.key === ' ' || e.key === 'Space' || e.which === 32) && !LWT_DATA.test.answer_opened) {
+  if ((e.key === ' ' || e.key === 'Space' || e.which === 32) && !isAnswerOpened()) {
     // space : show solution
     wordEl?.click();
     cleanupRightFrames();
     loadModalFrame('show_word.php?wid=' + wordEl?.getAttribute('data_wid') + '&ann=');
-    LWT_DATA.test.answer_opened = true;
+    openAnswer();
     return false;
   }
   if (e.key === 'Escape' || e.which === 27) {
     // esc : skip term, don't change status
     loadModalFrame(
-      'set_test_status.php?wid=' + LWT_DATA.word.id +
+      'set_test_status.php?wid=' + wordId +
       '&status=' + wordEl?.getAttribute('data_status')
     );
     return false;
   }
   if (e.key === 'I' || e.key === 'i' || e.which === 73) {
     // I : ignore, status=98
-    loadModalFrame('set_test_status.php?wid=' + LWT_DATA.word.id + '&status=98');
+    loadModalFrame('set_test_status.php?wid=' + wordId + '&status=98');
     return false;
   }
   if (e.key === 'W' || e.key === 'w' || e.which === 87) {
     // W : well known, status=99
-    loadModalFrame('set_test_status.php?wid=' + LWT_DATA.word.id + '&status=99');
+    loadModalFrame('set_test_status.php?wid=' + wordId + '&status=99');
     return false;
   }
   if (e.key === 'E' || e.key === 'e' || e.which === 69) {
     // E : edit
-    loadModalFrame('/word/edit-term?wid=' + LWT_DATA.word.id);
+    loadModalFrame('/word/edit-term?wid=' + wordId);
     return false;
   }
   // The next interactions should only be available with displayed solution
-  if (!LWT_DATA.test.answer_opened) { return true; }
+  if (!isAnswerOpened()) { return true; }
   if (e.key === 'ArrowUp' || e.which === 38) {
     // up : status+1
-    loadModalFrame('set_test_status.php?wid=' + LWT_DATA.word.id + '&stchange=1');
+    loadModalFrame('set_test_status.php?wid=' + wordId + '&stchange=1');
     return false;
   }
   if (e.key === 'ArrowDown' || e.which === 40) {
     // down : status-1
-    loadModalFrame('set_test_status.php?wid=' + LWT_DATA.word.id + '&stchange=-1');
+    loadModalFrame('set_test_status.php?wid=' + wordId + '&stchange=-1');
     return false;
   }
   for (let i = 0; i < 5; i++) {
     if (e.which === (49 + i) || e.which === (97 + i) || e.key === String(i + 1)) {
       // 1,.. : status=i
       loadModalFrame(
-        'set_test_status.php?wid=' + LWT_DATA.word.id + '&status=' + (i + 1)
+        'set_test_status.php?wid=' + wordId + '&status=' + (i + 1)
       );
       return false;
     }

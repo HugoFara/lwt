@@ -23,6 +23,7 @@ import { showRightFramesPanel } from '../reading/frame_management';
 import { speechDispatcher } from '../core/user_interactions';
 import type { MultiWordFormStoreState } from '../reading/stores/multi_word_form_store';
 import { parseInlineMarkdown } from '../core/inline_markdown';
+import { getLanguageId } from '../core/language_config';
 
 // Import the popup system
 import { overlib } from '../ui/word_popup';
@@ -43,17 +44,6 @@ export { overlib, cClick, nd } from '../ui/word_popup';
 // Note: The following functions are used in HTML string templates (onclick handlers)
 // and accessed via window at runtime: showRightFramesPanel, confirmDelete, successSound, failureSound
 // They are exported to window in globals.ts
-
-// Type for LWT_DATA global
-interface LwtLanguage {
-  id: number;
-}
-
-interface LwtDataGlobal {
-  language: LwtLanguage;
-}
-
-declare const LWT_DATA: LwtDataGlobal;
 
 /**************************************************************
  * Modern API-based popup content generators
@@ -401,7 +391,7 @@ function createAudioElement(text: string): HTMLElement {
   });
   icon.style.cursor = 'pointer';
   icon.addEventListener('click', () => {
-    speechDispatcher(text, LWT_DATA.language.id);
+    speechDispatcher(text, getLanguageId());
   });
 
   container.appendChild(icon);
@@ -1281,7 +1271,7 @@ export function make_overlib_audio(txt: string): string {
   icon.style.cursor = 'pointer';
   icon.setAttribute(
     'onclick',
-    "speechDispatcher('" + escape_html_chars(txt) + "', '" + LWT_DATA.language.id + "')"
+    "speechDispatcher('" + escape_html_chars(txt) + "', '" + getLanguageId() + "')"
   );
   return icon.outerHTML;
 }

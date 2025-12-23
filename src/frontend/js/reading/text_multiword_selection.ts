@@ -11,9 +11,10 @@
 import Alpine from 'alpinejs';
 import { loadModalFrame } from './frame_management';
 import type { MultiWordFormStoreState } from './stores/multi_word_form_store';
+import { getTextId as getTextIdFromConfig } from '../core/text_config';
 
 /**
- * Get text ID from URL (fallback when LWT_DATA is not available).
+ * Get text ID from URL (fallback when config is not available).
  */
 function getTextIdFromUrl(): number {
   // Try to get from URL path: /text/read/123
@@ -31,14 +32,12 @@ function getTextIdFromUrl(): number {
 }
 
 /**
- * Get the text ID from LWT_DATA or URL.
+ * Get the text ID from config or URL.
  */
 function getTextId(): number {
-  if (typeof window !== 'undefined') {
-    const win = window as unknown as { LWT_DATA?: { text?: { id?: number } } };
-    if (win.LWT_DATA?.text?.id) {
-      return win.LWT_DATA.text.id;
-    }
+  const configId = getTextIdFromConfig();
+  if (configId > 0) {
+    return configId;
   }
   return getTextIdFromUrl();
 }

@@ -122,7 +122,7 @@ describe('expression_interactable.ts', () => {
 
       autoInitExpressionInteractables();
 
-      expect(warnSpy).toHaveBeenCalledWith('LWT_DATA.text.id not available for multi-word init');
+      expect(warnSpy).toHaveBeenCalledWith('Text ID not available for multi-word init');
     });
 
     it('handles invalid JSON gracefully', () => {

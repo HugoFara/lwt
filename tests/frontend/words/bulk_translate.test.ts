@@ -13,16 +13,6 @@ import {
 } from '../../../src/frontend/js/words/bulk_translate';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/core/lwt_state', () => ({
-  LWT_DATA: {
-    language: {
-      dict_link1: 'https://dict1.example.com/',
-      dict_link2: 'https://dict2.example.com/',
-      translator_link: 'https://translate.example.com/'
-    }
-  }
-}));
-
 vi.mock('../../../src/frontend/js/terms/dictionary', () => ({
   createTheDictUrl: vi.fn((url, term) => `${url}?q=${encodeURIComponent(term)}`),
   owin: vi.fn()
@@ -32,21 +22,33 @@ vi.mock('../../../src/frontend/js/forms/bulk_actions', () => ({
   selectToggle: vi.fn()
 }));
 
-import { LWT_DATA } from '../../../src/frontend/js/core/lwt_state';
 import { createTheDictUrl, owin } from '../../../src/frontend/js/terms/dictionary';
 import { selectToggle } from '../../../src/frontend/js/forms/bulk_actions';
+import {
+  getDictionaryLinks,
+  setDictionaryLinks,
+  resetLanguageConfig
+} from '../../../src/frontend/js/core/language_config';
 
 describe('bulk_translate.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
     vi.useFakeTimers();
+
+    // Initialize language config with test dictionary links
+    setDictionaryLinks({
+      dict1: 'https://dict1.example.com/',
+      dict2: 'https://dict2.example.com/',
+      translator: 'https://translate.example.com/'
+    });
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
     vi.useRealTimers();
     document.body.innerHTML = '';
+    resetLanguageConfig();
   });
 
   // ===========================================================================
@@ -77,8 +79,9 @@ describe('bulk_translate.ts', () => {
 
       clickDictionary(dictSpan);
 
+      const dictLinks = getDictionaryLinks();
       expect(createTheDictUrl).toHaveBeenCalledWith(
-        LWT_DATA.language.dict_link1,
+        dictLinks.dict1,
         expect.any(String)
       );
     });
@@ -88,8 +91,9 @@ describe('bulk_translate.ts', () => {
 
       clickDictionary(dictSpan);
 
+      const dictLinks = getDictionaryLinks();
       expect(createTheDictUrl).toHaveBeenCalledWith(
-        LWT_DATA.language.dict_link2,
+        dictLinks.dict2,
         expect.any(String)
       );
     });
@@ -99,8 +103,9 @@ describe('bulk_translate.ts', () => {
 
       clickDictionary(dictSpan);
 
+      const dictLinks = getDictionaryLinks();
       expect(createTheDictUrl).toHaveBeenCalledWith(
-        LWT_DATA.language.translator_link,
+        dictLinks.translator,
         expect.any(String)
       );
     });
@@ -115,7 +120,7 @@ describe('bulk_translate.ts', () => {
     });
 
     it('opens popup for URLs starting with *', () => {
-      LWT_DATA.language.dict_link1 = '*https://popup.example.com/';
+      setDictionaryLinks({ dict1: '*https://popup.example.com/' });
 
       const dictSpan = document.querySelector('.dict1') as HTMLElement;
 
@@ -380,7 +385,7 @@ describe('bulk_translate.ts', () => {
   // ===========================================================================
 
   describe('initBulkTranslate', () => {
-    it('sets dictionary links in LWT_DATA', () => {
+    it('sets dictionary links in language config', () => {
       document.body.innerHTML = `
         <h3>Title</h3>
         <h4>Subtitle</h4>
@@ -392,9 +397,10 @@ describe('bulk_translate.ts', () => {
         translate: 'https://new-translate.com/'
       });
 
-      expect(LWT_DATA.language.dict_link1).toBe('https://new-dict1.com/');
-      expect(LWT_DATA.language.dict_link2).toBe('https://new-dict2.com/');
-      expect(LWT_DATA.language.translator_link).toBe('https://new-translate.com/');
+      const dictLinks = getDictionaryLinks();
+      expect(dictLinks.dict1).toBe('https://new-dict1.com/');
+      expect(dictLinks.dict2).toBe('https://new-dict2.com/');
+      expect(dictLinks.translator).toBe('https://new-translate.com/');
     });
 
     it('marks headers as notranslate', () => {
@@ -549,7 +555,7 @@ describe('bulk_translate.ts', () => {
     });
 
     it('handles URLs with lwt_popup parameter', () => {
-      LWT_DATA.language.dict_link1 = 'https://dict.example.com/?lwt_popup=1';
+      setDictionaryLinks({ dict1: 'https://dict.example.com/?lwt_popup=1' });
 
       document.body.innerHTML = `
         <td><span class="term">word</span></td>
