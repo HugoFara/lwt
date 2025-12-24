@@ -18,13 +18,10 @@ require_once __DIR__ . '/SentenceService.php';
 require_once __DIR__ . '/ExportService.php';
 require_once __DIR__ . '/WordStatusService.php';
 require_once __DIR__ . '/ExpressionService.php';
-require_once __DIR__ . '/../Core/Repository/RepositoryInterface.php';
-require_once __DIR__ . '/../Core/Repository/AbstractRepository.php';
-require_once __DIR__ . '/../Core/Repository/TermRepository.php';
 
-use Lwt\Core\Entity\Term;
+use Lwt\Modules\Vocabulary\Domain\Term;
 use Lwt\Core\Globals;
-use Lwt\Core\Repository\TermRepository;
+use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
@@ -55,23 +52,23 @@ class WordService
 {
     private ExpressionService $expressionService;
     private SentenceService $sentenceService;
-    private TermRepository $repository;
+    private MySqlTermRepository $repository;
 
     /**
      * Constructor - initialize dependencies.
      *
-     * @param ExpressionService|null $expressionService Expression service (optional for BC)
-     * @param SentenceService|null   $sentenceService   Sentence service (optional for BC)
-     * @param TermRepository|null    $repository        Term repository (optional for BC)
+     * @param ExpressionService|null    $expressionService Expression service (optional for BC)
+     * @param SentenceService|null      $sentenceService   Sentence service (optional for BC)
+     * @param MySqlTermRepository|null  $repository        Term repository (optional for BC)
      */
     public function __construct(
         ?ExpressionService $expressionService = null,
         ?SentenceService $sentenceService = null,
-        ?TermRepository $repository = null
+        ?MySqlTermRepository $repository = null
     ) {
         $this->expressionService = $expressionService ?? new ExpressionService();
         $this->sentenceService = $sentenceService ?? new SentenceService();
-        $this->repository = $repository ?? new TermRepository();
+        $this->repository = $repository ?? new MySqlTermRepository();
     }
 
     /**

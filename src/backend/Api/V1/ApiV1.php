@@ -46,7 +46,7 @@ use Lwt\Modules\Tags\Http\TagApiHandler;
 use Lwt\Api\V1\Handlers\SettingsHandler;
 use Lwt\Api\V1\Handlers\StatisticsHandler;
 use Lwt\Api\V1\Handlers\TermHandler;
-use Lwt\Api\V1\Handlers\TextHandler;
+use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Core\Globals;
 
 /**
@@ -69,7 +69,7 @@ class ApiV1
     private TagApiHandler $tagHandler;
     private StatisticsHandler $statisticsHandler;
     private TermHandler $termHandler;
-    private TextHandler $textHandler;
+    private TextApiHandler $textHandler;
 
     /**
      * Endpoints that do not require authentication.
@@ -96,7 +96,7 @@ class ApiV1
         $this->statisticsHandler = new StatisticsHandler();
         $this->tagHandler = new TagApiHandler();
         $this->termHandler = new TermHandler();
-        $this->textHandler = new TextHandler();
+        $this->textHandler = new TextApiHandler();
     }
 
     /**

@@ -29,7 +29,7 @@ require_once __DIR__ . '/../Api/V1/Handlers/ReviewHandler.php';
 require_once __DIR__ . '/../Api/V1/Handlers/SettingsHandler.php';
 require_once __DIR__ . '/../Api/V1/Handlers/StatisticsHandler.php';
 require_once __DIR__ . '/../Api/V1/Handlers/TermHandler.php';
-require_once __DIR__ . '/../Api/V1/Handlers/TextHandler.php';
+require_once __DIR__ . '/../../Modules/Text/Http/TextApiHandler.php';
 
 use Lwt\Api\V1\ApiV1;
 use Lwt\Services\TranslationService;

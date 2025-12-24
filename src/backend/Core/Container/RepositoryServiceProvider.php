@@ -16,8 +16,8 @@ namespace Lwt\Core\Container;
 
 use Lwt\Core\Repository\LanguageRepository;
 use Lwt\Core\Repository\RepositoryInterface;
-use Lwt\Core\Repository\TextRepository;
 use Lwt\Core\Repository\UserRepository;
+use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
 // Note: TermRepository is now registered by VocabularyServiceProvider
 
 /**
@@ -39,9 +39,9 @@ class RepositoryServiceProvider implements ServiceProviderInterface
             return new LanguageRepository();
         });
 
-        // Register TextRepository as a singleton
-        $container->singleton(TextRepository::class, function (Container $_c) {
-            return new TextRepository();
+        // Register MySqlTextRepository as a singleton
+        $container->singleton(MySqlTextRepository::class, function (Container $_c) {
+            return new MySqlTextRepository();
         });
 
         // Note: TermRepository is now registered by VocabularyServiceProvider

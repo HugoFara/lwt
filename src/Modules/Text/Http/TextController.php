@@ -191,7 +191,6 @@ class TextController extends BaseController
         require_once LWT_BACKEND_PATH . '/Services/WordStatusService.php';
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/start_session.php';
         require_once LWT_BACKEND_PATH . '/Core/Integration/text_from_yt.php';
-        require_once LWT_BACKEND_PATH . '/Core/Entity/Text.php';
 
         // Get filter parameters
         $currentLang = Validation::language(

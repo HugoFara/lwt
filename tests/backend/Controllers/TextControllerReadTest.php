@@ -3,7 +3,7 @@ namespace Lwt\Tests\Controllers;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Controllers\TextController;
+use Lwt\Modules\Text\Http\TextController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Services\TextService;
@@ -20,7 +20,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../src/backend/Services/MediaService.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/TextController.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Http/TextController.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
 
 /**

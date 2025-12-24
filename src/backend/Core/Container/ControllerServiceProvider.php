@@ -22,7 +22,7 @@ use Lwt\Controllers\HomeController;
 use Lwt\Modules\Language\Http\LanguageController;
 use Lwt\Controllers\TagsController;
 use Lwt\Controllers\TestController;
-use Lwt\Controllers\TextController;
+use Lwt\Modules\Text\Http\TextController;
 use Lwt\Controllers\TextPrintController;
 use Lwt\Controllers\TranslationController;
 use Lwt\Controllers\WordController;

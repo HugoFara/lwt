@@ -39,10 +39,10 @@ use Lwt\Services\WordListService;
 use Lwt\Services\WordPressService;
 use Lwt\Services\WordService;
 use Lwt\Services\WordUploadService;
-use Lwt\Core\Repository\TermRepository;
-use Lwt\Core\Repository\TextRepository;
 use Lwt\Core\Repository\UserRepository;
 use Lwt\Core\Parser\ParserRegistry;
+use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
+use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 use Lwt\Core\Parser\ParsingCoordinator;
 
 /**
@@ -185,7 +185,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         $container->singleton(TextService::class, function (Container $c) {
             return new TextService(
                 $c->get(SentenceService::class),
-                $c->get(TextRepository::class)
+                $c->get(MySqlTextRepository::class)
             );
         });
 
@@ -193,7 +193,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new WordService(
                 $c->get(ExpressionService::class),
                 $c->get(SentenceService::class),
-                $c->get(TermRepository::class)
+                $c->get(MySqlTermRepository::class)
             );
         });
     }

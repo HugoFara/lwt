@@ -18,8 +18,8 @@
 namespace Lwt\Services;
 
 use Lwt\Core\Http\UrlUtilities;
-use Lwt\Core\Repository\TextRepository;
 use Lwt\Core\StringUtils;
+use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\QueryBuilder;
@@ -32,9 +32,6 @@ use Lwt\Services\TagService;
 use Lwt\Services\ExportService;
 use Lwt\Services\SentenceService;
 
-require_once __DIR__ . '/../Core/Repository/RepositoryInterface.php';
-require_once __DIR__ . '/../Core/Repository/AbstractRepository.php';
-require_once __DIR__ . '/../Core/Repository/TextRepository.php';
 
 /**
  * Service class for managing texts (active and archived).
@@ -57,12 +54,12 @@ class TextService extends TextFacade
     /**
      * Constructor - initialize dependencies.
      *
-     * @param SentenceService|null $sentenceService Sentence service (optional)
-     * @param TextRepository|null  $repository      Text repository (optional)
+     * @param SentenceService|null       $sentenceService Sentence service (optional)
+     * @param MySqlTextRepository|null   $repository      Text repository (optional)
      */
     public function __construct(
         ?SentenceService $sentenceService = null,
-        ?TextRepository $repository = null
+        ?MySqlTextRepository $repository = null
     ) {
         $this->sentenceService = $sentenceService ?? new SentenceService();
 

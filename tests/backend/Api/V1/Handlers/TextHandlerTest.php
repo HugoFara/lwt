@@ -3,7 +3,7 @@ namespace Lwt\Tests\Api\V1\Handlers;
 
 require_once __DIR__ . '/../../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Api\V1\Handlers\TextHandler;
+use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
@@ -15,7 +15,7 @@ EnvLoader::load(__DIR__ . '/../../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 
 require_once __DIR__ . '/../../../../../src/backend/Api/V1/ApiV1.php';
-require_once __DIR__ . '/../../../../../src/backend/Api/V1/Handlers/TextHandler.php';
+require_once __DIR__ . '/../../../../../src/Modules/Text/Http/TextApiHandler.php';
 
 /**
  * Unit tests for the TextHandler class.
@@ -25,7 +25,7 @@ require_once __DIR__ . '/../../../../../src/backend/Api/V1/Handlers/TextHandler.
 class TextHandlerTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private TextHandler $handler;
+    private TextApiHandler $handler;
 
     public static function setUpBeforeClass(): void
     {
@@ -54,7 +54,7 @@ class TextHandlerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->handler = new TextHandler();
+        $this->handler = new TextApiHandler();
     }
 
     // ===== Class structure tests =====
@@ -64,7 +64,7 @@ class TextHandlerTest extends TestCase
      */
     public function testClassHasRequiredMethods(): void
     {
-        $reflection = new \ReflectionClass(TextHandler::class);
+        $reflection = new \ReflectionClass(TextApiHandler::class);
 
         // Business logic methods
         $this->assertTrue($reflection->hasMethod('saveTextPosition'));
@@ -117,7 +117,7 @@ class TextHandlerTest extends TestCase
      */
     public function testPublicMethods(): void
     {
-        $reflection = new \ReflectionClass(TextHandler::class);
+        $reflection = new \ReflectionClass(TextApiHandler::class);
         $publicMethods = array_filter(
             $reflection->getMethods(\ReflectionMethod::IS_PUBLIC),
             fn($m) => !$m->isConstructor()

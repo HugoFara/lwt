@@ -2,23 +2,20 @@
 
 namespace Lwt\Tests\Core\Entity;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TextId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TermId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TermStatus.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/Term.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/Text.php';
+require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Domain/Term.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Domain/Text.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/GoogleTranslate.php';
 
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Lwt\Core\Entity\GoogleTranslate;
 use Lwt\Modules\Language\Domain\Language;
-use Lwt\Core\Entity\Term;
-use Lwt\Core\Entity\Text;
+use Lwt\Modules\Vocabulary\Domain\Term;
+use Lwt\Modules\Text\Domain\Text;
 use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
-use Lwt\Core\Entity\ValueObject\TermId;
-use Lwt\Core\Entity\ValueObject\TermStatus;
-use Lwt\Core\Entity\ValueObject\TextId;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermId;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
+use Lwt\Modules\Text\Domain\ValueObject\TextId;
 use PHPUnit\Framework\TestCase;
 
 /**
