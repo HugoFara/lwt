@@ -333,7 +333,7 @@ class SelectOptionsBuilder
     /**
      * Build language select options from data array.
      *
-     * @param array<int, array{id: int, name: string}> $languages   Language data from LanguageService
+     * @param array<int, array{id: int, name: string}> $languages   Language data from LanguageFacade
      * @param int|string|null                          $selected    Selected language ID
      * @param string                                   $defaultText Default option text
      *

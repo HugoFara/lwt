@@ -28,8 +28,8 @@ namespace Lwt\Core\Container;
  * $container = new Container();
  *
  * // Register a singleton (created once, reused)
- * $container->singleton(LanguageService::class, function($c) {
- *     return new LanguageService($c->get(LanguageRepository::class));
+ * $container->singleton(LanguageFacade::class, function($c) {
+ *     return new LanguageFacade($c->get(LanguageRepositoryInterface::class));
  * });
  *
  * // Register a factory (new instance each time)
@@ -41,7 +41,7 @@ namespace Lwt\Core\Container;
  * $container->instance('config', $configArray);
  *
  * // Auto-wire a class (container resolves dependencies automatically)
- * $service = $container->get(LanguageService::class);
+ * $service = $container->get(LanguageFacade::class);
  * ```
  *
  * @since 3.0.0
