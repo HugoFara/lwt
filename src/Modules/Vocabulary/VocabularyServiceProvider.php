@@ -28,12 +28,24 @@ use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 // Use Cases
 use Lwt\Modules\Vocabulary\Application\UseCases\CreateTerm;
 use Lwt\Modules\Vocabulary\Application\UseCases\DeleteTerm;
+use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\UseCases\GetTermById;
 use Lwt\Modules\Vocabulary\Application\UseCases\UpdateTerm;
 use Lwt\Modules\Vocabulary\Application\UseCases\UpdateTermStatus;
 
+// Services
+use Lwt\Modules\Vocabulary\Application\Services\SimilarityCalculator;
+
+// Infrastructure
+use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+
 // Application
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
+
+// HTTP
+use Lwt\Modules\Vocabulary\Http\VocabularyController;
+use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler;
+use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 
 /**
  * Service provider for the Vocabulary module.
@@ -81,6 +93,22 @@ class VocabularyServiceProvider implements ServiceProviderInterface
             return new UpdateTermStatus($c->get(TermRepositoryInterface::class));
         });
 
+        // Register Services
+        $container->singleton(SimilarityCalculator::class, function (Container $_c) {
+            return new SimilarityCalculator();
+        });
+
+        $container->singleton(FindSimilarTerms::class, function (Container $c) {
+            return new FindSimilarTerms(
+                $c->get(TermRepositoryInterface::class),
+                $c->get(SimilarityCalculator::class)
+            );
+        });
+
+        $container->singleton(DictionaryAdapter::class, function (Container $_c) {
+            return new DictionaryAdapter();
+        });
+
         // Register Facade
         $container->singleton(VocabularyFacade::class, function (Container $c) {
             return new VocabularyFacade(
@@ -93,15 +121,29 @@ class VocabularyServiceProvider implements ServiceProviderInterface
             );
         });
 
-        // Register Controller (to be added in future migration)
-        // $container->singleton(VocabularyController::class, function (Container $c) {
-        //     return new VocabularyController($c->get(VocabularyFacade::class));
-        // });
+        // Register CreateTermFromHover Use Case
+        $container->singleton(CreateTermFromHover::class, function (Container $_c) {
+            return new CreateTermFromHover();
+        });
 
-        // Register API Handler (to be added in future migration)
-        // $container->singleton(VocabularyApiHandler::class, function (Container $c) {
-        //     return new VocabularyApiHandler($c->get(VocabularyFacade::class));
-        // });
+        // Register Controller
+        $container->singleton(VocabularyController::class, function (Container $c) {
+            return new VocabularyController(
+                $c->get(VocabularyFacade::class),
+                $c->get(CreateTermFromHover::class),
+                $c->get(FindSimilarTerms::class),
+                $c->get(DictionaryAdapter::class)
+            );
+        });
+
+        // Register API Handler
+        $container->singleton(VocabularyApiHandler::class, function (Container $c) {
+            return new VocabularyApiHandler(
+                $c->get(VocabularyFacade::class),
+                $c->get(FindSimilarTerms::class),
+                $c->get(DictionaryAdapter::class)
+            );
+        });
     }
 
     /**

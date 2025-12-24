@@ -531,13 +531,13 @@ class WordUploadTest extends TestCase
 
     public function testUploadFormViewFileExists(): void
     {
-        $viewFile = __DIR__ . '/../../../src/backend/Views/Word/upload_form.php';
+        $viewFile = __DIR__ . '/../../../src/Modules/Vocabulary/Views/upload_form.php';
         $this->assertFileExists($viewFile);
     }
 
     public function testUploadResultViewFileExists(): void
     {
-        $viewFile = __DIR__ . '/../../../src/backend/Views/Word/upload_result.php';
+        $viewFile = __DIR__ . '/../../../src/Modules/Vocabulary/Views/upload_result.php';
         $this->assertFileExists($viewFile);
     }
 

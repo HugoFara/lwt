@@ -33,12 +33,18 @@ require_once __DIR__ . '/../View/Helper/StatusHelper.php';
  *
  * Handles filtering, pagination, bulk operations on words list.
  *
- * @category Lwt
- * @package  Lwt\Services
- * @author   HugoFara <hugo.farajallah@protonmail.com>
- * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
- * @since    3.0.0
+ * @category   Lwt
+ * @package    Lwt\Services
+ * @author     HugoFara <hugo.farajallah@protonmail.com>
+ * @license    Unlicense <http://unlicense.org/>
+ * @link       https://hugofara.github.io/lwt/docs/php/
+ * @since      3.0.0
+ * @deprecated 3.0.0 Use Lwt\Modules\Vocabulary\Application\VocabularyFacade instead.
+ *             This class is maintained for backward compatibility and will be
+ *             removed in a future version. New code should use VocabularyFacade
+ *             methods like listTerms(), bulkUpdateStatus(), etc.
+ *
+ * @see \Lwt\Modules\Vocabulary\Application\VocabularyFacade
  */
 class WordListService
 {

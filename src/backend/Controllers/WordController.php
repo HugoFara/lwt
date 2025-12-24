@@ -232,7 +232,7 @@ class WordController extends BaseController
         $status = $this->param("WoStatus");
         $romanization = $this->param("WoRomanization");
 
-        include __DIR__ . '/../Views/Word/edit_result.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/edit_result.php';
     }
 
     /**
@@ -292,7 +292,7 @@ class WordController extends BaseController
             $langShort = array_key_exists($lgname, LanguagePresets::getAll()) ?
                 LanguagePresets::getAll()[$lgname][1] : '';
 
-            include __DIR__ . '/../Views/Word/form_edit_new.php';
+            include __DIR__ . '/../../Modules/Vocabulary/Views/form_edit_new.php';
         } else {
             // Edit existing word form
             $wordData = $this->wordService->findById($wid);
@@ -321,7 +321,7 @@ class WordController extends BaseController
                 ->where('TxID', '=', $textId)
                 ->valuePrepared('LgShowRomanization');
 
-            include __DIR__ . '/../Views/Word/form_edit_existing.php';
+            include __DIR__ . '/../../Modules/Vocabulary/Views/form_edit_existing.php';
         }
     }
 
@@ -446,7 +446,7 @@ class WordController extends BaseController
             $romanization = $woRomanization;
             $text = $woText;
 
-            include __DIR__ . '/../Views/Word/edit_term_result.php';
+            include __DIR__ . '/../../Modules/Vocabulary/Views/edit_term_result.php';
         }
     }
 
@@ -491,7 +491,7 @@ class WordController extends BaseController
         PageLayoutHelper::renderPageStartNobody($titletext);
         $scrdir = $this->languageService->getScriptDirectionTag($lang);
 
-        include __DIR__ . '/../Views/Word/form_edit_term.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/form_edit_term.php';
     }
 
     /**
@@ -676,7 +676,7 @@ class WordController extends BaseController
             true
         );
 
-        include __DIR__ . '/../Views/Word/list_alpine.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/list_alpine.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -935,7 +935,7 @@ class WordController extends BaseController
         $showRoman = $formData['showRoman'];
         $languageName = $this->languageService->getLanguageName($lgid);
 
-        include __DIR__ . '/../Views/Word/list_new_form.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/list_new_form.php';
     }
 
     /**
@@ -958,7 +958,7 @@ class WordController extends BaseController
         $showRoman = $word['LgShowRomanization'];
         $transl = $word['WoTranslation'];
 
-        include __DIR__ . '/../Views/Word/list_edit_form.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/list_edit_form.php';
     }
 
     /**
@@ -1070,7 +1070,7 @@ class WordController extends BaseController
         $texts = $this->textService->getTextsForSelect($langId);
 
         // Include filter view
-        include __DIR__ . '/../Views/Word/list_filter.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/list_filter.php';
 
         if ($recno == 0) {
             echo '<p>No terms found.</p>';
@@ -1095,7 +1095,7 @@ class WordController extends BaseController
         mysqli_free_result($res);
 
         // Include table view
-        include __DIR__ . '/../Views/Word/list_table.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/list_table.php';
     }
 
     /**
@@ -1196,7 +1196,7 @@ class WordController extends BaseController
             );
             $oldStatusValue = $oldStatus;
 
-            include __DIR__ . '/../Views/Word/edit_multi_update_result.php';
+            include __DIR__ . '/../../Modules/Vocabulary/Views/edit_multi_update_result.php';
         }
     }
 
@@ -1288,7 +1288,7 @@ class WordController extends BaseController
         ];
         $sentence = ExportService::replaceTabNewline($sent[1] ?? '');
 
-        include __DIR__ . '/../Views/Word/form_edit_multi_new.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/form_edit_multi_new.php';
     }
 
     /**
@@ -1343,7 +1343,7 @@ class WordController extends BaseController
         $romanization = $wordData['romanization'];
         $originalStatus = $wordData['status'];
 
-        include __DIR__ . '/../Views/Word/form_edit_multi_existing.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/form_edit_multi_existing.php';
     }
 
     /**
@@ -1378,7 +1378,7 @@ class WordController extends BaseController
         PageLayoutHelper::renderPageStart("Term: " . $term, false);
 
         $wid = $wordId;
-        include __DIR__ . '/../Views/Word/delete_result.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/delete_result.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -1412,7 +1412,7 @@ class WordController extends BaseController
         list($count, $wordsData) = $this->wordService->markAllWordsWithStatus($textId, $status);
         $useTooltips = \Lwt\Database\Settings::getWithDefault('set-tooltip-mode') == 1;
 
-        include __DIR__ . '/../Views/Word/all_wellknown_result.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/all_wellknown_result.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -1475,7 +1475,7 @@ class WordController extends BaseController
                     $success = true;
                     $message = $result['message'];
 
-                    include __DIR__ . '/../Views/Word/save_result.php';
+                    include __DIR__ . '/../../Modules/Vocabulary/Views/save_result.php';
                 }
             }
         } else {
@@ -1490,7 +1490,7 @@ class WordController extends BaseController
 
             PageLayoutHelper::renderPageStartNobody('');
 
-            include __DIR__ . '/../Views/Word/form_new.php';
+            include __DIR__ . '/../../Modules/Vocabulary/Views/form_new.php';
         }
 
         PageLayoutHelper::renderPageEnd();
@@ -1526,7 +1526,7 @@ class WordController extends BaseController
         $tags = TagService::getWordTagList((int) $wid, false);
         $scrdir = $this->languageService->getScriptDirectionTag($word['langId']);
 
-        include __DIR__ . '/../Views/Word/show.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/show.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -1565,7 +1565,7 @@ class WordController extends BaseController
         $term = $result['term'];
         $wid = $result['id'];
         $hex = $result['hex'];
-        include __DIR__ . '/../Views/Word/insert_wellknown_result.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/insert_wellknown_result.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -1604,7 +1604,7 @@ class WordController extends BaseController
         $term = $result['term'];
         $wid = $result['id'];
         $hex = $result['hex'];
-        include __DIR__ . '/../Views/Word/insert_ignore_result.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/insert_ignore_result.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -1712,7 +1712,7 @@ class WordController extends BaseController
             $newWords[] = $record;
         }
 
-        include __DIR__ . '/../Views/Word/bulk_save_result.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/bulk_save_result.php';
     }
 
     /**
@@ -1748,7 +1748,7 @@ class WordController extends BaseController
         // Calculate next offset if there are more terms
         $nextOffset = $hasMore ? $pos + $limit - 1 : null;
 
-        include __DIR__ . '/../Views/Word/bulk_translate_form.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/bulk_translate_form.php';
     }
 
     /**
@@ -1789,7 +1789,7 @@ class WordController extends BaseController
 
         PageLayoutHelper::renderPageStart("Term: $term", false);
 
-        include __DIR__ . '/../Views/Word/status_result.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/status_result.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -1829,7 +1829,7 @@ class WordController extends BaseController
         $currentLanguage = \Lwt\Database\Settings::get('currentlanguage');
         $languageService = new \Lwt\Services\LanguageService();
         $languages = $languageService->getLanguagesForSelect();
-        include __DIR__ . '/../Views/Word/upload_form.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/upload_form.php';
     }
 
     /**
@@ -1919,7 +1919,7 @@ class WordController extends BaseController
             // Display results
             $rtl = $uploadService->isRightToLeft($langId) ? 1 : 0;
             $recno = $uploadService->countImportedTerms($lastUpdate);
-            include __DIR__ . '/../Views/Word/upload_result.php';
+            include __DIR__ . '/../../Modules/Vocabulary/Views/upload_result.php';
         } elseif ($fields["tl"] > 0) {
             // Import tags only
             $uploadService->importTagsOnly($fields, $tabType, $fileName, $ignoreFirst);

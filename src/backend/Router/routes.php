@@ -130,6 +130,45 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
+    // Vocabulary module routes (new modular architecture)
+    $router->registerWithMiddleware(
+        '/vocabulary/similar-terms',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@similarTerms',
+        AUTH_MIDDLEWARE
+    );
+
+    // Vocabulary JSON API routes (for AJAX calls)
+    $router->registerWithMiddleware(
+        '/vocabulary/term',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@getTermJson',
+        AUTH_MIDDLEWARE,
+        'GET'
+    );
+    $router->registerWithMiddleware(
+        '/vocabulary/term',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@createJson',
+        AUTH_MIDDLEWARE,
+        'POST'
+    );
+    $router->registerWithMiddleware(
+        '/vocabulary/term',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@updateJson',
+        AUTH_MIDDLEWARE,
+        'PUT'
+    );
+    $router->registerWithMiddleware(
+        '/vocabulary/term/status',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@updateStatus',
+        AUTH_MIDDLEWARE,
+        'PUT'
+    );
+    $router->registerWithMiddleware(
+        '/vocabulary/term/delete',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@delete',
+        AUTH_MIDDLEWARE,
+        'POST'
+    );
+
     // Set word status
     // @deprecated 3.0.0 Use PUT /api/v1/terms/{id}/status/{status} instead.
     //             Kept for backward compatibility with frame-based mode.

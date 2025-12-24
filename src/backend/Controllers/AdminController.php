@@ -363,7 +363,7 @@ class AdminController extends BaseController
         /** @psalm-suppress UnusedVariable */
         $status = $status;
 
-        include __DIR__ . '/../Views/Word/hover_save_result.php';
+        include __DIR__ . '/../../Modules/Vocabulary/Views/hover_save_result.php';
 
         PageLayoutHelper::renderPageEnd();
     }

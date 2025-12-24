@@ -15,7 +15,10 @@
 namespace Lwt\Modules\Vocabulary\Http;
 
 use Lwt\Core\Http\InputValidator;
+use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
+use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
+use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../../../backend/View/Helper/PageLayoutHelper.php';
@@ -33,20 +36,40 @@ class VocabularyController
     private string $viewPath;
 
     /**
+     * Vocabulary facade.
+     */
+    private VocabularyFacade $facade;
+
+    /**
      * Use cases.
      */
     private CreateTermFromHover $createTermFromHover;
+    private FindSimilarTerms $findSimilarTerms;
+
+    /**
+     * Adapters.
+     */
+    private DictionaryAdapter $dictionaryAdapter;
 
     /**
      * Constructor.
      *
-     * @param CreateTermFromHover|null $createTermFromHover Create term from hover use case
+     * @param VocabularyFacade|null     $facade              Vocabulary facade
+     * @param CreateTermFromHover|null  $createTermFromHover Create term from hover use case
+     * @param FindSimilarTerms|null     $findSimilarTerms    Find similar terms use case
+     * @param DictionaryAdapter|null    $dictionaryAdapter   Dictionary adapter
      */
     public function __construct(
-        ?CreateTermFromHover $createTermFromHover = null
+        ?VocabularyFacade $facade = null,
+        ?CreateTermFromHover $createTermFromHover = null,
+        ?FindSimilarTerms $findSimilarTerms = null,
+        ?DictionaryAdapter $dictionaryAdapter = null
     ) {
         $this->viewPath = __DIR__ . '/../Views/';
+        $this->facade = $facade ?? new VocabularyFacade();
         $this->createTermFromHover = $createTermFromHover ?? new CreateTermFromHover();
+        $this->findSimilarTerms = $findSimilarTerms ?? new FindSimilarTerms();
+        $this->dictionaryAdapter = $dictionaryAdapter ?? new DictionaryAdapter();
     }
 
     /**
@@ -60,6 +83,10 @@ class VocabularyController
     {
         $this->viewPath = rtrim($path, '/') . '/';
     }
+
+    // =========================================================================
+    // Hover Actions (from text reading view)
+    // =========================================================================
 
     /**
      * Create a term from hover action in reading view.
@@ -95,26 +122,6 @@ class VocabularyController
             $sourceLang,
             $targetLang
         );
-    }
-
-    /**
-     * Render a view.
-     *
-     * @param string $view View name (without .php)
-     * @param array  $data View data
-     *
-     * @return void
-     */
-    public function render(string $view, array $data = []): void
-    {
-        $viewFile = $this->viewPath . $view . '.php';
-
-        if (!file_exists($viewFile)) {
-            throw new \RuntimeException("View not found: $view");
-        }
-
-        extract($data);
-        require $viewFile;
     }
 
     /**
@@ -165,5 +172,337 @@ class VocabularyController
         ]);
 
         PageLayoutHelper::renderPageEnd();
+    }
+
+    // =========================================================================
+    // Similar Terms
+    // =========================================================================
+
+    /**
+     * Get similar terms for a given term.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function similarTerms(array $params): void
+    {
+        $langId = InputValidator::getInt('lgid', 0);
+        $term = InputValidator::getString('term');
+
+        header('Content-Type: text/html; charset=utf-8');
+        echo $this->findSimilarTerms->getFormattedTerms($langId, $term);
+    }
+
+    // =========================================================================
+    // Dictionary Links
+    // =========================================================================
+
+    /**
+     * Get dictionary links for editing.
+     *
+     * @param int    $langId    Language ID
+     * @param string $word      Word to look up
+     * @param string $sentctlid Sentence control ID
+     * @param bool   $openFirst Open first dictionary
+     *
+     * @return string HTML dictionary links
+     */
+    public function getDictionaryLinks(
+        int $langId,
+        string $word,
+        string $sentctlid,
+        bool $openFirst = false
+    ): string {
+        return $this->dictionaryAdapter->createDictLinksInEditWin(
+            $langId,
+            $word,
+            $sentctlid,
+            $openFirst
+        );
+    }
+
+    // =========================================================================
+    // CRUD Operations (delegating to facade)
+    // =========================================================================
+
+    /**
+     * Show term edit form.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function edit(array $params): void
+    {
+        $termId = InputValidator::getInt('wid', 0);
+
+        if ($termId === 0) {
+            http_response_code(400);
+            echo 'Term ID required';
+            return;
+        }
+
+        $term = $this->facade->getTerm($termId);
+
+        if ($term === null) {
+            http_response_code(404);
+            echo 'Term not found';
+            return;
+        }
+
+        PageLayoutHelper::renderPageStart("Edit Term: " . $term->text(), false);
+
+        $this->render('form_edit', [
+            'term' => $term,
+            'dictionaryLinks' => $this->getDictionaryLinks(
+                $term->languageId()->toInt(),
+                $term->text(),
+                'sentence_textarea',
+                true
+            ),
+            'similarTermsHtml' => $this->findSimilarTerms->getFormattedTerms(
+                $term->languageId()->toInt(),
+                $term->textLowercase()
+            ),
+        ]);
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Show term details.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function show(array $params): void
+    {
+        $termId = InputValidator::getInt('wid', 0);
+
+        if ($termId === 0) {
+            http_response_code(400);
+            echo 'Term ID required';
+            return;
+        }
+
+        $term = $this->facade->getTerm($termId);
+
+        if ($term === null) {
+            http_response_code(404);
+            echo 'Term not found';
+            return;
+        }
+
+        PageLayoutHelper::renderPageStart("Term: " . $term->text(), false);
+
+        $this->render('show', [
+            'term' => $term,
+        ]);
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Update term status.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function updateStatus(array $params): void
+    {
+        $termId = InputValidator::getInt('wid', 0);
+        $status = InputValidator::getInt('status', 0);
+
+        if ($termId === 0 || $status === 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Term ID and status required']);
+            return;
+        }
+
+        $result = $this->facade->updateStatus($termId, $status);
+
+        header('Content-Type: application/json');
+        echo json_encode(['success' => $result]);
+    }
+
+    /**
+     * Delete term.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function delete(array $params): void
+    {
+        $termId = InputValidator::getInt('wid', 0);
+
+        if ($termId === 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Term ID required']);
+            return;
+        }
+
+        $result = $this->facade->deleteTerm($termId);
+
+        header('Content-Type: application/json');
+        echo json_encode(['deleted' => $result]);
+    }
+
+    // =========================================================================
+    // View Rendering
+    // =========================================================================
+
+    /**
+     * Render a view.
+     *
+     * @param string $view View name (without .php)
+     * @param array  $data View data
+     *
+     * @return void
+     */
+    public function render(string $view, array $data = []): void
+    {
+        $viewFile = $this->viewPath . $view . '.php';
+
+        if (!file_exists($viewFile)) {
+            throw new \RuntimeException("View not found: $view");
+        }
+
+        extract($data);
+        require $viewFile;
+    }
+
+    // =========================================================================
+    // JSON API Methods (for AJAX calls)
+    // =========================================================================
+
+    /**
+     * Get term data as JSON.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function getTermJson(array $params): void
+    {
+        $termId = InputValidator::getInt('wid', 0);
+
+        if ($termId === 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Term ID required']);
+            return;
+        }
+
+        $term = $this->facade->getTerm($termId);
+
+        if ($term === null) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Term not found']);
+            return;
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'id' => $term->id()->toInt(),
+            'text' => $term->text(),
+            'textLc' => $term->textLowercase(),
+            'translation' => $term->translation(),
+            'romanization' => $term->romanization(),
+            'sentence' => $term->sentence(),
+            'status' => $term->status()->toInt(),
+            'langId' => $term->languageId(),
+        ]);
+    }
+
+    /**
+     * Create term via AJAX.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function createJson(array $params): void
+    {
+        $langId = InputValidator::getInt('lgid', 0);
+        $text = InputValidator::getString('text');
+        $status = InputValidator::getInt('status', 1);
+        $translation = InputValidator::getString('translation');
+        $romanization = InputValidator::getString('romanization');
+        $sentence = InputValidator::getString('sentence');
+
+        if ($langId === 0 || $text === '') {
+            http_response_code(400);
+            echo json_encode(['error' => 'Language ID and text required']);
+            return;
+        }
+
+        try {
+            $term = $this->facade->createTerm(
+                $langId,
+                $text,
+                $status,
+                $translation ?: '*',
+                $romanization,
+                $sentence
+            );
+
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'id' => $term->id()->toInt(),
+                'text' => $term->text(),
+                'textLc' => $term->textLowercase(),
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Update term via AJAX.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function updateJson(array $params): void
+    {
+        $termId = InputValidator::getInt('wid', 0);
+        $translation = InputValidator::getString('translation');
+        $romanization = InputValidator::getString('romanization');
+        $sentence = InputValidator::getString('sentence');
+        $status = InputValidator::getInt('status', 0);
+
+        if ($termId === 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Term ID required']);
+            return;
+        }
+
+        try {
+            $statusVal = $status !== 0 ? $status : null;
+
+            $term = $this->facade->updateTerm(
+                $termId,
+                $statusVal,
+                $translation !== '' ? $translation : null,
+                $sentence !== '' ? $sentence : null,
+                null, // notes
+                $romanization !== '' ? $romanization : null
+            );
+
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'id' => $term->id()->toInt(),
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
     }
 }
