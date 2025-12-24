@@ -26,6 +26,7 @@ use Lwt\Database\UserScopedQuery;
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
 
+use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 
