@@ -37,6 +37,7 @@ use Lwt\Api\V1\Handlers\FeedHandler;
 use Lwt\Api\V1\Handlers\ImportHandler;
 use Lwt\Api\V1\Handlers\ImprovedTextHandler;
 use Lwt\Modules\Language\Http\LanguageApiHandler;
+use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Api\V1\Handlers\LocalDictionaryHandler;
 use Lwt\Api\V1\Handlers\MediaHandler;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
@@ -46,6 +47,7 @@ use Lwt\Api\V1\Handlers\StatisticsHandler;
 use Lwt\Api\V1\Handlers\TermHandler;
 use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Core\Globals;
+use Lwt\Core\Container\Container;
 
 /**
  * Main API V1 handler class.
@@ -83,7 +85,9 @@ class ApiV1
     public function __construct()
     {
         $this->authHandler = new AuthHandler();
-        $this->feedHandler = new FeedHandler();
+        $this->feedHandler = new FeedHandler(
+            Container::getInstance()->get(FeedFacade::class)
+        );
         $this->importHandler = new ImportHandler();
         $this->improvedTextHandler = new ImprovedTextHandler();
         $this->languageHandler = new LanguageApiHandler();

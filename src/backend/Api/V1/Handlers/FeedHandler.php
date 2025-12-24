@@ -4,7 +4,7 @@ namespace Lwt\Api\V1\Handlers;
 use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
-use Lwt\Services\FeedService;
+use Lwt\Modules\Feed\Application\FeedFacade;
 
 /**
  * Handler for RSS feed-related API operations.
@@ -13,11 +13,11 @@ use Lwt\Services\FeedService;
  */
 class FeedHandler
 {
-    private FeedService $feedService;
+    private FeedFacade $feedService;
 
-    public function __construct()
+    public function __construct(FeedFacade $feedService)
     {
-        $this->feedService = new FeedService();
+        $this->feedService = $feedService;
     }
     /**
      * Get the list of feeds and insert them into the database.

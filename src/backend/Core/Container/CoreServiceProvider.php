@@ -19,7 +19,6 @@ use Lwt\Services\BackupService;
 use Lwt\Services\DemoService;
 use Lwt\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
-use Lwt\Services\FeedService;
 use Lwt\Services\HomeService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\PasswordService;
@@ -89,10 +88,6 @@ class CoreServiceProvider implements ServiceProviderInterface
                 $c->get(PasswordService::class),
                 $c->get(MySqlUserRepository::class)
             );
-        });
-
-        $container->singleton(FeedService::class, function (Container $_c) {
-            return new FeedService();
         });
 
         $container->singleton(HomeService::class, function (Container $_c) {

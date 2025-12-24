@@ -168,11 +168,11 @@ class MySqlFeedRepository extends AbstractRepository implements FeedRepositoryIn
     /**
      * {@inheritdoc}
      *
-     * @psalm-suppress MoreSpecificImplementedParamType
-     * @psalm-suppress MethodSignatureMismatch
+     * @param Feed $entity
      */
-    public function save(Feed $entity): int
+    public function save(object $entity): int
     {
+        assert($entity instanceof Feed);
         $data = $this->mapToRow($entity);
 
         if ($entity->isNew()) {
@@ -193,13 +193,10 @@ class MySqlFeedRepository extends AbstractRepository implements FeedRepositoryIn
 
     /**
      * {@inheritdoc}
-     *
-     * @psalm-suppress MethodSignatureMismatch
-     * @psalm-suppress ParamNameMismatch
-     * @psalm-suppress MoreSpecificImplementedParamType
      */
-    public function delete(int $id): bool
+    public function delete(object|int $entityOrId): bool
     {
+        $id = is_int($entityOrId) ? $entityOrId : $this->getEntityId($entityOrId);
         $deleted = $this->query()
             ->where($this->primaryKey, '=', $id)
             ->delete();
@@ -232,13 +229,14 @@ class MySqlFeedRepository extends AbstractRepository implements FeedRepositoryIn
     }
 
     /**
-     * {@inheritdoc}
+     * Count feeds with optional filtering.
      *
-     * @psalm-suppress MethodSignatureMismatch
-     * @psalm-suppress ParamNameMismatch
-     * @psalm-suppress ImplementedParamTypeMismatch
+     * @param int|null    $languageId   Optional language ID filter
+     * @param string|null $queryPattern Optional search pattern
+     *
+     * @return int Count of matching feeds
      */
-    public function count(?int $languageId = null, ?string $queryPattern = null): int
+    public function countFeeds(?int $languageId = null, ?string $queryPattern = null): int
     {
         $query = $this->query();
 

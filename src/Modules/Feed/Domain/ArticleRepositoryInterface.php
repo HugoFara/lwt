@@ -117,11 +117,11 @@ interface ArticleRepositoryInterface
      *
      * Inserts if new, updates if existing.
      *
-     * @param Article $entity The article entity to save
+     * @param Article|object $entity The article entity to save
      *
      * @return int The article ID (newly generated for inserts)
      */
-    public function save(Article $entity): int;
+    public function save(object $entity): int;
 
     /**
      * Insert multiple articles in batch.
@@ -136,13 +136,13 @@ interface ArticleRepositoryInterface
     public function insertBatch(array $articles, int $feedId): array;
 
     /**
-     * Delete an article by its ID.
+     * Delete an article by its ID or entity.
      *
-     * @param int $id Article ID
+     * @param Article|int $entityOrId Article entity or ID
      *
      * @return bool True if deleted, false if not found
      */
-    public function delete(int $id): bool;
+    public function delete(object|int $entityOrId): bool;
 
     /**
      * Delete all articles for a feed.

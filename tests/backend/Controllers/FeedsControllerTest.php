@@ -6,7 +6,9 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Controllers\FeedsController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\FeedService;
+use Lwt\Modules\Feed\Application\FeedFacade;
+use Lwt\Core\Container\Container;
+use Lwt\Modules\Feed\FeedServiceProvider;
 use Lwt\Services\LanguageService;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
@@ -19,7 +21,6 @@ $config = EnvLoader::getDatabaseConfig();
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/FeedsController.php';
-require_once __DIR__ . '/../../../src/backend/Services/FeedService.php';
 
 /**
  * Unit tests for the FeedsController class.
@@ -141,13 +142,28 @@ class FeedsControllerTest extends TestCase
     }
 
     /**
+     * Helper method to get FeedFacade from container.
+     *
+     * @return FeedFacade
+     */
+    private function getFeedFacade(): FeedFacade
+    {
+        $container = Container::getInstance();
+        $provider = new FeedServiceProvider();
+        $provider->register($container);
+        $provider->boot($container);
+
+        return $container->get(FeedFacade::class);
+    }
+
+    /**
      * Helper method to create a FeedsController with its dependencies.
      *
      * @return FeedsController
      */
     private function createController(): FeedsController
     {
-        return new FeedsController(new FeedService(), new LanguageService());
+        return new FeedsController($this->getFeedFacade(), new LanguageService());
     }
 
     // ===== Constructor tests =====
@@ -171,8 +187,8 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        // Create a service instance directly (controller uses FeedService internally)
-        $service = new FeedService();
+        // Create a service instance directly (controller uses FeedFacade internally)
+        $service = $this->getFeedFacade();
 
         $feedId = $service->createFeed([
             'NfLgID' => self::$testLangId,
@@ -198,7 +214,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $feedId = $service->createFeed([
             'NfLgID' => self::$testLangId,
@@ -230,7 +246,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $feedId = $service->createFeed([
             'NfLgID' => self::$testLangId,
@@ -258,7 +274,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $feedId = $service->createFeed([
             'NfLgID' => self::$testLangId,
@@ -312,7 +328,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         // Test hours
         $this->assertEquals(3600, $service->parseAutoUpdateInterval('1h'));
@@ -335,7 +351,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $this->assertEquals('up to date', $service->formatLastUpdate(0));
         $this->assertEquals('last update: 1 minute ago', $service->formatLastUpdate(60));
@@ -350,7 +366,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
         $options = $service->getSortOptions();
 
         $this->assertIsArray($options);
@@ -366,7 +382,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         // Feedlinks prefix
         $this->assertEquals('FlTitle', $service->getSortColumn(1, 'Fl'));
@@ -385,7 +401,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         // Empty query returns empty string
         $this->assertEquals('', $service->buildQueryFilter('', 'title,desc,text', ''));
@@ -408,7 +424,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         // Empty is valid
         $this->assertTrue($service->validateRegexPattern(''));
@@ -427,7 +443,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
         $languages = $service->getLanguages();
 
         $this->assertIsArray($languages);
@@ -451,7 +467,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         // CREATE
         $feedId = $service->createFeed([
@@ -516,7 +532,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $initialCount = $service->countFeeds(self::$testLangId);
 
@@ -543,7 +559,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $feedId = $service->createFeed([
             'NfLgID' => self::$testLangId,
@@ -584,7 +600,7 @@ class FeedsControllerTest extends TestCase
         $this->assertTrue(method_exists($controller, 'getFeedService'));
     }
 
-    public function testGetFeedServiceReturnsFeedService(): void
+    public function testGetFeedServiceReturnsFeedFacade(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -593,7 +609,7 @@ class FeedsControllerTest extends TestCase
         $controller = $this->createController();
         $service = $controller->getFeedService();
 
-        $this->assertInstanceOf(FeedService::class, $service);
+        $this->assertInstanceOf(FeedFacade::class, $service);
     }
 
     public function testGetFeedServiceReturnsConsistentInstance(): void
@@ -617,7 +633,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         // Create a feed for testing
         $service->createFeed([
@@ -651,7 +667,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
         $feeds = $service->getFeeds(99999);
 
         $this->assertIsArray($feeds);
@@ -664,7 +680,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         // Create a feed for testing
         $service->createFeed([
@@ -699,7 +715,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $feedId = $service->createFeed([
             'NfLgID' => self::$testLangId,
@@ -729,7 +745,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $feedId = $service->createFeed([
             'NfLgID' => self::$testLangId,
@@ -765,7 +781,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $feedId = $service->createFeed([
             'NfLgID' => self::$testLangId,
@@ -800,7 +816,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $optionsStr = 'edit_text=1,max_texts=10,tag=News';
 
@@ -816,7 +832,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $optionsStr = 'edit_text=1,max_texts=10';
         $result = $service->getNfOption($optionsStr, 'all');
@@ -832,7 +848,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $optionsStr = 'edit_text=1,max_texts=10';
         $result = $service->getNfOption($optionsStr, '');
@@ -848,7 +864,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $feedId = $service->createFeed([
             'NfLgID' => self::$testLangId,
@@ -883,7 +899,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $feedId = $service->createFeed([
             'NfLgID' => self::$testLangId,

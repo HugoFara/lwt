@@ -6,6 +6,8 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Api\V1\ApiV1;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Core\Container\Container;
+use Lwt\Modules\Feed\FeedServiceProvider;
 use Lwt\Database\Configuration;
 use PHPUnit\Framework\TestCase;
 
@@ -52,6 +54,13 @@ class ApiV1Test extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Register FeedServiceProvider for FeedHandler dependency
+        $container = Container::getInstance();
+        $provider = new FeedServiceProvider();
+        $provider->register($container);
+        $provider->boot($container);
+
         $this->api = new ApiV1();
     }
 

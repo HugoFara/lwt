@@ -37,7 +37,7 @@ use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
-use Lwt\Services\FeedService;
+use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Services\LanguageService;
 use Lwt\Core\Http\InputValidator;
@@ -60,9 +60,9 @@ use Lwt\Core\Http\InputValidator;
 class FeedsController extends BaseController
 {
     /**
-     * @var FeedService Feed service instance
+     * @var FeedFacade Feed facade instance
      */
-    private FeedService $feedService;
+    private FeedFacade $feedService;
 
     /**
      * @var LanguageService Language service instance
@@ -72,10 +72,10 @@ class FeedsController extends BaseController
     /**
      * Create a new FeedsController.
      *
-     * @param FeedService     $feedService     Feed service for RSS feed operations
+     * @param FeedFacade      $feedService     Feed facade for RSS feed operations
      * @param LanguageService $languageService Language service for language operations
      */
-    public function __construct(FeedService $feedService, LanguageService $languageService)
+    public function __construct(FeedFacade $feedService, LanguageService $languageService)
     {
         parent::__construct();
         $this->feedService = $feedService;
@@ -83,11 +83,11 @@ class FeedsController extends BaseController
     }
 
     /**
-     * Get the FeedService instance for testing.
+     * Get the FeedFacade instance for testing.
      *
-     * @return FeedService
+     * @return FeedFacade
      */
-    public function getFeedService(): FeedService
+    public function getFeedService(): FeedFacade
     {
         return $this->feedService;
     }

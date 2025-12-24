@@ -66,20 +66,20 @@ interface FeedRepositoryInterface
      *
      * Inserts if new, updates if existing.
      *
-     * @param Feed $entity The feed entity to save
+     * @param Feed|object $entity The feed entity to save
      *
      * @return int The feed ID (newly generated for inserts)
      */
-    public function save(Feed $entity): int;
+    public function save(object $entity): int;
 
     /**
      * Delete a feed by its ID.
      *
-     * @param int $id Feed ID
+     * @param Feed|int $entityOrId Feed entity or ID
      *
      * @return bool True if deleted, false if not found
      */
-    public function delete(int $id): bool;
+    public function delete(object|int $entityOrId): bool;
 
     /**
      * Delete multiple feeds by IDs.
@@ -107,7 +107,7 @@ interface FeedRepositoryInterface
      *
      * @return int
      */
-    public function count(?int $languageId = null, ?string $queryPattern = null): int;
+    public function countFeeds(?int $languageId = null, ?string $queryPattern = null): int;
 
     /**
      * Update the last update timestamp for a feed.

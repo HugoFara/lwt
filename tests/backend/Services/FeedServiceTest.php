@@ -5,7 +5,9 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\FeedService;
+use Lwt\Modules\Feed\Application\FeedFacade;
+use Lwt\Core\Container\Container;
+use Lwt\Modules\Feed\FeedServiceProvider;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
@@ -16,18 +18,18 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/FeedService.php';
 
 /**
- * Unit tests for the FeedService class.
+ * Unit tests for the FeedFacade class.
  *
- * Tests feed/newsfeed CRUD operations through the service layer.
+ * Tests feed/newsfeed CRUD operations through the facade layer.
+ * Migrated from FeedServiceTest to use the new modular architecture.
  */
 class FeedServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
     private static int $testLangId = 0;
-    private FeedService $service;
+    private FeedFacade $service;
 
     public static function setUpBeforeClass(): void
     {
@@ -83,7 +85,13 @@ class FeedServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->service = new FeedService();
+        // Register FeedServiceProvider if not already registered
+        $container = Container::getInstance();
+        $provider = new FeedServiceProvider();
+        $provider->register($container);
+        $provider->boot($container);
+
+        $this->service = $container->get(FeedFacade::class);
     }
 
     protected function tearDown(): void

@@ -6,7 +6,9 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Controllers\FeedsController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\FeedService;
+use Lwt\Modules\Feed\Application\FeedFacade;
+use Lwt\Core\Container\Container;
+use Lwt\Modules\Feed\FeedServiceProvider;
 use Lwt\Services\LanguageService;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
@@ -19,7 +21,6 @@ $config = EnvLoader::getDatabaseConfig();
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/FeedsController.php';
-require_once __DIR__ . '/../../../src/backend/Services/FeedService.php';
 
 /**
  * Unit tests for the FeedsController wizard functionality.
@@ -84,7 +85,12 @@ class FeedsControllerWizardTest extends TestCase
             }
 
             // Create a test feed for wizard edit tests
-            $service = new FeedService();
+            $container = Container::getInstance();
+            $provider = new FeedServiceProvider();
+            $provider->register($container);
+            $provider->boot($container);
+            $service = $container->get(FeedFacade::class);
+
             self::$testFeedId = $service->createFeed([
                 'NfLgID' => self::$testLangId,
                 'NfName' => 'Wizard Test Feed',
@@ -148,13 +154,28 @@ class FeedsControllerWizardTest extends TestCase
     }
 
     /**
+     * Helper method to get FeedFacade from container.
+     *
+     * @return FeedFacade
+     */
+    private function getFeedFacade(): FeedFacade
+    {
+        $container = Container::getInstance();
+        $provider = new FeedServiceProvider();
+        $provider->register($container);
+        $provider->boot($container);
+
+        return $container->get(FeedFacade::class);
+    }
+
+    /**
      * Helper method to create a FeedsController with its dependencies.
      *
      * @return FeedsController
      */
     private function createController(): FeedsController
     {
-        return new FeedsController(new FeedService(), new LanguageService());
+        return new FeedsController($this->getFeedFacade(), new LanguageService());
     }
 
     // ===== Controller wizard method tests =====
@@ -178,7 +199,7 @@ class FeedsControllerWizardTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         // Test options string parsing
         $optionsStr = 'edit_text=1,autoupdate=2h,max_texts=10,tag=News';
@@ -196,7 +217,7 @@ class FeedsControllerWizardTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
         $feed = $service->getFeedById(self::$testFeedId);
 
         $this->assertNotNull($feed);
@@ -211,7 +232,7 @@ class FeedsControllerWizardTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
         $languages = $service->getLanguages();
 
         $this->assertIsArray($languages);
@@ -366,7 +387,7 @@ class FeedsControllerWizardTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $optionsStr = 'autoupdate=3h';
         $autoUpdate = $service->getNfOption($optionsStr, 'autoupdate');
@@ -387,7 +408,7 @@ class FeedsControllerWizardTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $optionsStr = 'autoupdate=2d';
         $autoUpdate = $service->getNfOption($optionsStr, 'autoupdate');
@@ -405,7 +426,7 @@ class FeedsControllerWizardTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         $optionsStr = 'autoupdate=1w';
         $autoUpdate = $service->getNfOption($optionsStr, 'autoupdate');
@@ -476,7 +497,7 @@ class FeedsControllerWizardTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
         $feed = $service->getFeedById(self::$testFeedId);
 
         // Simulate loading feed for edit
@@ -573,7 +594,7 @@ class FeedsControllerWizardTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         // Simulate wizard completion data
         $feedData = [
@@ -601,7 +622,7 @@ class FeedsControllerWizardTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new FeedService();
+        $service = $this->getFeedFacade();
 
         // Create a feed first
         $feedId = $service->createFeed([

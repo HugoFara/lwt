@@ -142,7 +142,7 @@ class FeedFacade
      */
     public function countFeeds(?int $langId = null, ?string $queryPattern = null): int
     {
-        return $this->feedRepository->count($langId, $queryPattern);
+        return $this->feedRepository->countFeeds($langId, $queryPattern);
     }
 
     /**
@@ -766,5 +766,232 @@ class FeedFacade
             'TxID' => $item['text_id'],
             'AtID' => $item['archived_id'],
         ];
+    }
+
+    // =========================================================================
+    // Legacy Wizard Methods
+    // =========================================================================
+
+    /**
+     * Save texts from feed wizard form data.
+     *
+     * Creates texts from parsed feed data, applies tags, and archives
+     * old texts if max_texts limit is exceeded.
+     *
+     * @param array $texts Array of text data from extractTextFromArticle()
+     *
+     * @return string Status message
+     */
+    public function saveTextsFromFeed(array $texts): string
+    {
+        $texts = array_reverse($texts);
+        $message1 = $message2 = $message3 = $message4 = 0;
+        $NfID = null;
+
+        foreach ($texts as $text) {
+            $NfID[] = $text['Nf_ID'];
+        }
+        $NfID = array_unique($NfID);
+
+        $NfTag = '';
+        $textItem = null;
+        $nfMaxTexts = null;
+
+        foreach ($NfID as $feedID) {
+            foreach ($texts as $text) {
+                if ($feedID == $text['Nf_ID']) {
+                    if ($NfTag != '"' . implode('","', $text['TagList']) . '"') {
+                        $NfTag = '"' . implode('","', $text['TagList']) . '"';
+
+                        // Ensure tags exist
+                        foreach ($text['TagList'] as $tag) {
+                            if (!in_array($tag, $_SESSION['TEXTTAGS'] ?? [])) {
+                                $bindings = [$tag];
+                                $sql = 'INSERT INTO tags2 (T2Text'
+                                    . \Lwt\Database\UserScopedQuery::insertColumn('tags2')
+                                    . ') VALUES (?'
+                                    . \Lwt\Database\UserScopedQuery::insertValuePrepared('tags2', $bindings)
+                                    . ')';
+                                \Lwt\Database\Connection::preparedExecute($sql, $bindings);
+                            }
+                        }
+                        $nfMaxTexts = $text['Nf_Max_Texts'];
+                    }
+
+                    // Create the text
+                    $id = \Lwt\Database\QueryBuilder::table('texts')
+                        ->insertPrepared([
+                            'TxLgID' => $text['TxLgID'],
+                            'TxTitle' => $text['TxTitle'],
+                            'TxText' => $text['TxText'],
+                            'TxAudioURI' => $text['TxAudioURI'],
+                            'TxSourceURI' => $text['TxSourceURI']
+                        ]);
+
+                    // Parse the text
+                    $bindings = [$id];
+                    $textContent = \Lwt\Database\Connection::preparedFetchValue(
+                        'SELECT TxText FROM texts WHERE TxID = ?'
+                        . \Lwt\Database\UserScopedQuery::forTablePrepared('texts', $bindings),
+                        $bindings,
+                        'TxText'
+                    );
+                    $textLgId = \Lwt\Database\Connection::preparedFetchValue(
+                        'SELECT TxLgID FROM texts WHERE TxID = ?'
+                        . \Lwt\Database\UserScopedQuery::forTablePrepared('texts', $bindings),
+                        $bindings,
+                        'TxLgID'
+                    );
+                    \Lwt\Core\Parser\TextParsing::parseAndSave($textContent, (int) $textLgId, $id);
+
+                    // Apply tags
+                    $bindings = [];
+                    \Lwt\Database\Connection::query(
+                        'INSERT INTO texttags (TtTxID, TtT2ID)
+                        SELECT ' . $id . ', T2ID FROM tags2
+                        WHERE T2Text IN (' . $NfTag . ')'
+                        . \Lwt\Database\UserScopedQuery::forTablePrepared('tags2', $bindings)
+                    );
+                }
+            }
+
+            // Refresh text tags
+            \Lwt\Modules\Tags\Application\TagsFacade::getAllTextTags(true);
+
+            // Get all texts with this tag
+            $bindings = [];
+            $result = \Lwt\Database\Connection::query(
+                "SELECT TtTxID FROM texttags
+                JOIN tags2 ON TtT2ID=T2ID
+                WHERE T2Text IN (" . $NfTag . ")"
+                . \Lwt\Database\UserScopedQuery::forTablePrepared('tags2', $bindings)
+            );
+
+            $textCount = 0;
+            while ($row = mysqli_fetch_assoc($result)) {
+                $textItem[$textCount++] = $row['TtTxID'];
+            }
+            mysqli_free_result($result);
+
+            // Archive excess texts
+            if ($textCount > $nfMaxTexts) {
+                sort($textItem, SORT_NUMERIC);
+                $textItem = array_slice($textItem, 0, $textCount - $nfMaxTexts);
+
+                foreach ($textItem as $textID) {
+                    $message3 += \Lwt\Database\QueryBuilder::table('textitems2')
+                        ->where('Ti2TxID', '=', $textID)
+                        ->delete();
+                    $message2 += \Lwt\Database\QueryBuilder::table('sentences')
+                        ->where('SeTxID', '=', $textID)
+                        ->delete();
+
+                    $bindings = [$textID];
+                    $message4 += (int)\Lwt\Database\Connection::execute(
+                        'INSERT INTO archivedtexts (
+                            AtLgID, AtTitle, AtText, AtAnnotatedText,
+                            AtAudioURI, AtSourceURI'
+                            . \Lwt\Database\UserScopedQuery::insertColumn('archivedtexts')
+                        . ') SELECT TxLgID, TxTitle, TxText, TxAnnotatedText,
+                        TxAudioURI, TxSourceURI'
+                            . \Lwt\Database\UserScopedQuery::insertValue('archivedtexts')
+                        . ' FROM texts
+                        WHERE TxID = ' . $textID
+                        . \Lwt\Database\UserScopedQuery::forTable('texts')
+                    );
+
+                    $archiveId = (int)\Lwt\Database\Connection::lastInsertId();
+                    \Lwt\Database\Connection::execute(
+                        'INSERT INTO archtexttags (AgAtID, AgT2ID)
+                        SELECT ' . $archiveId . ', TtT2ID FROM texttags
+                        WHERE TtTxID = ' . $textID
+                    );
+
+                    $message1 += \Lwt\Database\QueryBuilder::table('texts')
+                        ->where('TxID', '=', $textID)
+                        ->delete();
+
+                    \Lwt\Database\Maintenance::adjustAutoIncrement('texts', 'TxID');
+                    \Lwt\Database\Maintenance::adjustAutoIncrement('sentences', 'SeID');
+
+                    // Clean orphaned text tags
+                    \Lwt\Database\Connection::execute(
+                        "DELETE texttags
+                        FROM (texttags
+                            LEFT JOIN texts ON TtTxID = TxID
+                        ) WHERE TxID IS NULL"
+                    );
+                }
+            }
+        }
+
+        if ($message4 > 0 || $message1 > 0) {
+            return "Texts archived: " . $message1 .
+                " / Sentences deleted: " . $message2 .
+                " / Text items deleted: " . $message3;
+        }
+
+        return '';
+    }
+
+    /**
+     * Render feed loading interface using Alpine.js component.
+     *
+     * This method outputs JSON configuration that is consumed by the
+     * feed_loader_component.ts Alpine component.
+     *
+     * @param int    $currentFeed     Feed ID to load
+     * @param bool   $checkAutoupdate Whether checking auto-update
+     * @param string $redirectUrl     URL to redirect after completion
+     *
+     * @return void
+     */
+    public function renderFeedLoadInterfaceModern(
+        int $currentFeed,
+        bool $checkAutoupdate,
+        string $redirectUrl
+    ): void {
+        $config = $this->getFeedLoadConfig($currentFeed, $checkAutoupdate);
+
+        // Output JSON config for Alpine component
+        echo '<script type="application/json" id="feed-loader-config">';
+        echo json_encode([
+            'feeds' => $config['feeds'],
+            'redirectUrl' => $redirectUrl
+        ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        echo '</script>';
+
+        // Alpine.js component wrapper
+        echo '<div x-data="feedLoader()">';
+
+        // Show progress UI
+        if ($config['count'] != 1) {
+            echo '<div class="msgblue"><p>UPDATING <span x-text="loadedCount">0</span>/' .
+                $config['count'] . ' FEEDS</p></div>';
+        }
+
+        // Create placeholder divs for each feed using Alpine templates
+        echo '<template x-for="feed in feeds" :key="feed.id">';
+        echo '<div :class="getStatusClass(feed.id)"><p x-text="feedMessages[feed.id]"></p></div>';
+        echo '</template>';
+
+        // Continue button with Alpine click handler
+        echo '<div class="center"><button @click="handleContinue()">Continue</button></div>';
+
+        echo '</div>';
+    }
+
+    /**
+     * Get all languages for select dropdown.
+     *
+     * @return array Array of language records
+     */
+    public function getLanguages(): array
+    {
+        return \Lwt\Database\QueryBuilder::table('languages')
+            ->select(['LgID', 'LgName'])
+            ->where('LgName', '<>', '')
+            ->orderBy('LgName', 'ASC')
+            ->getPrepared();
     }
 }

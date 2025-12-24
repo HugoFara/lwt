@@ -288,11 +288,11 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
     /**
      * {@inheritdoc}
      *
-     * @psalm-suppress MoreSpecificImplementedParamType
-     * @psalm-suppress MethodSignatureMismatch
+     * @param Article $entity
      */
-    public function save(Article $entity): int
+    public function save(object $entity): int
     {
+        assert($entity instanceof Article);
         $data = $this->mapToRow($entity);
 
         if ($entity->isNew()) {
@@ -343,13 +343,10 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
 
     /**
      * {@inheritdoc}
-     *
-     * @psalm-suppress MethodSignatureMismatch
-     * @psalm-suppress ParamNameMismatch
-     * @psalm-suppress MoreSpecificImplementedParamType
      */
-    public function delete(int $id): bool
+    public function delete(object|int $entityOrId): bool
     {
+        $id = is_int($entityOrId) ? $entityOrId : $this->getEntityId($entityOrId);
         $deleted = $this->query()
             ->where($this->primaryKey, '=', $id)
             ->delete();

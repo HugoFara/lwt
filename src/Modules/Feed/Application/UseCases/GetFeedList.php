@@ -70,7 +70,7 @@ class GetFeedList
             $direction
         );
 
-        $total = $this->feedRepository->count($languageId, $queryPattern);
+        $total = $this->feedRepository->countFeeds($languageId, $queryPattern);
 
         // Get article counts for each feed
         $feedIds = array_map(

@@ -31,7 +31,7 @@ use Lwt\Services\BackupService;
 use Lwt\Services\DemoService;
 use Lwt\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
-use Lwt\Services\FeedService;
+use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Services\HomeService;
 use Lwt\Services\LanguageService;
 use Lwt\Modules\Language\Application\LanguageFacade;
@@ -123,7 +123,7 @@ class ControllerServiceProvider implements ServiceProviderInterface
         // Controllers with multiple service dependencies
         $container->bind(FeedsController::class, function (Container $c) {
             return new FeedsController(
-                $c->get(FeedService::class),
+                $c->get(FeedFacade::class),
                 $c->get(LanguageService::class)
             );
         });
