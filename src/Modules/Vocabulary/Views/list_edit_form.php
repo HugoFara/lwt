@@ -43,7 +43,7 @@ use Lwt\View\Helper\IconHelper;
 <tr>
    <td class="td1 right">Tags:</td>
    <td class="td1">
-       <?php echo \Lwt\Services\TagService::getWordTagsHtml((int)$word['WoID']); ?>
+       <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml((int)$word['WoID']); ?>
    </td>
 </tr>
 <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">

@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-24 (Service wrapper migrations: WordStatusService removed, TagService partially migrated)
+**Last Updated:** 2025-12-24 (Service wrapper migrations: WordStatusService removed, TagService static methods migrated to TagsFacade)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1376,7 +1376,7 @@ Apply the same pattern to other modules:
 | Review | TestService | 30 hours | ✅ DONE (2025-12-24) |
 | Feed | FeedService | 25 hours | ✅ DONE |
 | Admin | SettingsService, BackupService, StatisticsService, DatabaseWizardService | 35 hours | ⏳ PENDING |
-| Tags | TagService (partial) | 20 hours | 🔄 IN PROGRESS |
+| Tags | TagsFacade (static methods complete) | 20 hours | ✅ COMPLETE (static) |
 
 ### Service Wrapper Migration Status (2025-12-24)
 
@@ -1395,32 +1395,45 @@ All usages migrated to `Lwt\Modules\Vocabulary\Application\Services\TermStatusSe
 
 **Files updated:** 17 files migrated to use TermStatusService directly.
 
-#### TagService → TagsFacade 🔄 PARTIAL
+#### TagService → TagsFacade ✅ COMPLETE (Static Methods)
 
-**File retained:** `src/backend/Services/TagService.php` (still needed for some methods)
+**File retained:** `src/backend/Services/TagService.php` (still needed for instance-based tag management UI)
 
-**Methods migrated to TagsFacade (direct equivalents):**
+**All static methods migrated to TagsFacade:**
 
-| TagService Method | TagsFacade Method | Files Updated |
-|-------------------|-------------------|---------------|
-| `getAllTermTags()` | `TagsFacade::getAllTermTags()` | 4 files |
-| `getAllTextTags()` | `TagsFacade::getAllTextTags()` | 3 files |
-| `getWordTagList()` | `TagsFacade::getWordTagList()` | 5 files |
-| `getWordTagsHtml()` | `TagsFacade::getWordTagsHtml()` | (view files) |
-| `getTextTagsHtml()` | `TagsFacade::getTextTagsHtml()` | (view files) |
+| TagService Static Method | TagsFacade Method | Status |
+|--------------------------|-------------------|--------|
+| `getAllTermTags()` | `TagsFacade::getAllTermTags()` | ✅ |
+| `getAllTextTags()` | `TagsFacade::getAllTextTags()` | ✅ |
+| `getWordTagList()` | `TagsFacade::getWordTagList()` | ✅ |
+| `getWordTagsHtml()` | `TagsFacade::getWordTagsHtml()` | ✅ |
+| `getTextTagsHtml()` | `TagsFacade::getTextTagsHtml()` | ✅ |
+| `getArchivedTextTagsHtml()` | `TagsFacade::getArchivedTextTagsHtml()` | ✅ |
+| `addTagToWords()` | `TagsFacade::addTagToWords()` | ✅ |
+| `removeTagFromWords()` | `TagsFacade::removeTagFromWords()` | ✅ |
+| `addTagToTexts()` | `TagsFacade::addTagToTexts()` | ✅ |
+| `removeTagFromTexts()` | `TagsFacade::removeTagFromTexts()` | ✅ |
+| `addTagToArchivedTexts()` | `TagsFacade::addTagToArchivedTexts()` | ✅ |
+| `removeTagFromArchivedTexts()` | `TagsFacade::removeTagFromArchivedTexts()` | ✅ |
+| `saveWordTags(int)` | `TagsFacade::saveWordTagsFromForm()` | ✅ |
+| `saveTextTags(int)` | `TagsFacade::saveTextTagsFromForm()` | ✅ |
+| `saveArchivedTextTags(int)` | `TagsFacade::saveArchivedTextTagsFromForm()` | ✅ |
+| `saveWordTagsFromArray()` | `TagsFacade::saveWordTagsFromArray()` | ✅ |
+| `getTermTagSelectOptions()` | `TagsFacade::getTermTagSelectOptions()` | ✅ |
+| `getTextTagSelectOptions()` | `TagsFacade::getTextTagSelectOptions()` | ✅ |
+| `getTextTagSelectOptionsWithTextIds()` | `TagsFacade::getTextTagSelectOptionsWithTextIds()` | ✅ |
+| `getArchivedTextTagSelectOptions()` | `TagsFacade::getArchivedTextTagSelectOptions()` | ✅ |
 
-**Methods NOT yet in TagsFacade (TagService still required):**
+**Files updated:** 28+ files migrated to use TagsFacade static methods.
 
-| Method | Reason |
-|--------|--------|
-| `addTagToWords()`, `removeTagFromWords()` | Batch operations need module migration |
-| `addTagToTexts()`, `removeTagFromTexts()` | Batch operations need module migration |
-| `addTagToArchivedTexts()`, `removeTagFromArchivedTexts()` | Batch operations need module migration |
-| `saveWordTags(int)` | Reads from form input - needs form handling refactor |
-| `getTermTagSelectOptions()` | UI helper - needs module migration |
-| `getTextTagSelectOptions()` | UI helper - needs module migration |
+**TagService retained for:** Instance methods used by tag management UI (`TagsController`, `TermTagsController`, `TextTagsController`):
+- `getBaseUrl()`, `getSortOptions()`, `getSortColumn()`
+- `getList()`, `getById()`, `getCount()`, `getPagination()`
+- `create()`, `update()`, `delete()`, `deleteAll()`, `deleteMultiple()`
+- `getUsageCount()`, `getArchivedUsageCount()`
+- `buildWhereClause()`, `formatDuplicateError()`
 
-**Next steps:** Add missing methods to TagsFacade, then remove TagService.
+**Next steps:** Migrate tag controllers to use TagsFacade instance, then remove TagService.
 
 #### Stage 4: Remove Legacy (40 hours)
 
@@ -1455,7 +1468,7 @@ All usages migrated to `Lwt\Modules\Vocabulary\Application\Services\TermStatusSe
 - [x] 6 of 7 modules migrated to new structure (Admin pending)
 - [x] Zero circular dependencies between modules
 - [x] WordStatusService fully migrated and removed
-- [x] TagService partially migrated (direct equivalent methods moved to TagsFacade)
+- [x] TagService static methods fully migrated to TagsFacade (28+ files updated)
 - [ ] Domain layer has 100% unit test coverage
 - [ ] Frontend modules mirror backend structure
 - [x] `Legacy/` directory is empty and removed

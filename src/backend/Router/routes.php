@@ -49,7 +49,7 @@ function registerRoutes(Router $router): void
     // ==================== TEXT ROUTES (PROTECTED) ====================
 
     // Read text (Alpine.js - client-side rendering)
-    $router->registerWithMiddleware('/text/read', 'TextController@read', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/text/read', 'Lwt\\Modules\\Text\\Http\\TextController@read', AUTH_MIDDLEWARE);
 
     // Empty iframe placeholder (used in text read, test, and word pages)
     // These are static files, no auth needed
@@ -59,27 +59,27 @@ function registerRoutes(Router $router): void
     $router->register('/word/empty.html', 'src/backend/Core/empty.html');
 
     // Edit texts
-    $router->registerWithMiddleware('/text/edit', 'TextController@edit', AUTH_MIDDLEWARE);
-    $router->registerWithMiddleware('/texts', 'TextController@edit', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/text/edit', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/texts', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
 
     // Display improved text
-    $router->registerWithMiddleware('/text/display', 'TextController@display', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/text/display', 'Lwt\\Modules\\Text\\Http\\TextController@display', AUTH_MIDDLEWARE);
 
     // Print text (TextPrintController)
     $router->registerWithMiddleware('/text/print', 'TextPrintController@printAnnotated', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware('/text/print-plain', 'TextPrintController@printPlain', AUTH_MIDDLEWARE);
 
     // Import long text
-    $router->registerWithMiddleware('/text/import-long', 'TextController@importLong', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/text/import-long', 'Lwt\\Modules\\Text\\Http\\TextController@importLong', AUTH_MIDDLEWARE);
 
     // Set text mode
-    $router->registerWithMiddleware('/text/set-mode', 'TextController@setMode', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/text/set-mode', 'Lwt\\Modules\\Text\\Http\\TextController@setMode', AUTH_MIDDLEWARE);
 
     // Check text
-    $router->registerWithMiddleware('/text/check', 'TextController@check', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/text/check', 'Lwt\\Modules\\Text\\Http\\TextController@check', AUTH_MIDDLEWARE);
 
     // Archived texts
-    $router->registerWithMiddleware('/text/archived', 'TextController@archived', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/text/archived', 'Lwt\\Modules\\Text\\Http\\TextController@archived', AUTH_MIDDLEWARE);
 
     // ==================== WORD/TERM ROUTES (PROTECTED) ====================
 

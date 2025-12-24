@@ -5,14 +5,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Vocabulary\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\Vocabulary\Application\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
@@ -22,13 +22,7 @@ use Lwt\Database\Maintenance;
 use Lwt\Database\UserScopedQuery;
 use Lwt\View\Helper\StatusHelper;
 use Lwt\Services\ExportService;
-
-require_once __DIR__ . '/LanguageService.php';
-require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../View/Helper/StatusHelper.php';
-
-use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
-use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
+use Lwt\Services\LanguageService;
 
 /**
  * Service class for managing word list operations.
@@ -36,17 +30,11 @@ use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
  * Handles filtering, pagination, bulk operations on words list.
  *
  * @category   Lwt
- * @package    Lwt\Services
+ * @package    Lwt\Modules\Vocabulary\Application\Services
  * @author     HugoFara <hugo.farajallah@protonmail.com>
  * @license    Unlicense <http://unlicense.org/>
  * @link       https://hugofara.github.io/lwt/docs/php/
  * @since      3.0.0
- * @deprecated 3.0.0 Use Lwt\Modules\Vocabulary\Application\VocabularyFacade instead.
- *             This class is maintained for backward compatibility and will be
- *             removed in a future version. New code should use VocabularyFacade
- *             methods like listTerms(), bulkUpdateStatus(), etc.
- *
- * @see \Lwt\Modules\Vocabulary\Application\VocabularyFacade
  */
 class WordListService
 {

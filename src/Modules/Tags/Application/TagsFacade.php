@@ -17,8 +17,12 @@
 
 namespace Lwt\Modules\Tags\Application;
 
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
+use Lwt\Database\UserScopedQuery;
 use Lwt\Modules\Tags\Application\UseCases\CreateTag;
+use Lwt\View\Helper\FormHelper;
 use Lwt\Modules\Tags\Application\UseCases\DeleteTag;
 use Lwt\Modules\Tags\Application\UseCases\GetAllTagNames;
 use Lwt\Modules\Tags\Application\UseCases\GetTagById;
@@ -617,6 +621,57 @@ class TagsFacade
     }
 
     /**
+     * Save tags for a word from an array of tag names.
+     *
+     * @param int      $wordId   Word ID
+     * @param string[] $tagNames Array of tag name strings
+     *
+     * @return void
+     */
+    public static function saveWordTagsFromArray(int $wordId, array $tagNames): void
+    {
+        // Delete existing tags for this word
+        QueryBuilder::table('wordtags')
+            ->where('WtWoID', '=', $wordId)
+            ->delete();
+
+        if (empty($tagNames)) {
+            return;
+        }
+
+        // Refresh cache
+        self::getAllTermTags(true);
+
+        foreach ($tagNames as $tag) {
+            $tag = trim((string) $tag);
+            if ($tag === '') {
+                continue;
+            }
+
+            // Create tag if it doesn't exist
+            // Use INSERT IGNORE to handle race condition / stale cache (Issue #120)
+            if (!isset($_SESSION['TAGS']) || !in_array($tag, $_SESSION['TAGS'])) {
+                Connection::preparedExecute(
+                    'INSERT IGNORE INTO tags (TgText) VALUES (?)',
+                    [$tag]
+                );
+            }
+
+            // Link tag to word using raw SQL for INSERT...SELECT
+            Connection::preparedExecute(
+                "INSERT INTO wordtags (WtWoID, WtTgID)
+                SELECT ?, TgID
+                FROM tags
+                WHERE TgText = ?",
+                [$wordId, $tag]
+            );
+        }
+
+        // Refresh cache again after changes
+        self::getAllTermTags(true);
+    }
+
+    /**
      * Cleanup orphaned tag links.
      *
      * @return void
@@ -624,5 +679,728 @@ class TagsFacade
     public function cleanupOrphanedLinks(): void
     {
         $this->association->cleanupOrphanedLinks();
+    }
+
+    // =====================
+    // FORM-READING SAVE METHODS (backward compatibility)
+    // =====================
+
+    /**
+     * Save tags for a word from form input.
+     *
+     * Reads 'TermTags' from request and saves to word.
+     *
+     * @param int $wordId Word ID
+     *
+     * @return void
+     */
+    public static function saveWordTagsFromForm(int $wordId): void
+    {
+        $termTags = InputValidator::getArray('TermTags');
+        if (
+            empty($termTags)
+            || !isset($termTags['TagList'])
+            || !is_array($termTags['TagList'])
+        ) {
+            // Clear existing tags if no tags submitted
+            self::getWordAssociation()->setTagsByName($wordId, []);
+            return;
+        }
+
+        $tagNames = array_map('strval', $termTags['TagList']);
+        self::saveWordTags($wordId, $tagNames);
+    }
+
+    /**
+     * Save tags for a text from form input.
+     *
+     * @param int        $textId   Text ID
+     * @param array|null $textTags Optional tags array. If null, reads from request.
+     *
+     * @return void
+     */
+    public static function saveTextTagsFromForm(int $textId, ?array $textTags = null): void
+    {
+        if ($textTags === null) {
+            $textTags = InputValidator::getArray('TextTags');
+        }
+
+        if (
+            empty($textTags)
+            || !isset($textTags['TagList'])
+            || !is_array($textTags['TagList'])
+        ) {
+            // Clear existing tags if no tags submitted
+            self::getTextAssociation()->setTagsByName($textId, []);
+            return;
+        }
+
+        $tagNames = array_map('strval', $textTags['TagList']);
+        self::saveTextTags($textId, $tagNames);
+    }
+
+    /**
+     * Save tags for an archived text from form input.
+     *
+     * @param int $textId Archived text ID
+     *
+     * @return void
+     */
+    public static function saveArchivedTextTagsFromForm(int $textId): void
+    {
+        $textTags = InputValidator::getArray('TextTags');
+
+        if (
+            empty($textTags)
+            || !isset($textTags['TagList'])
+            || !is_array($textTags['TagList'])
+        ) {
+            // Clear existing tags if no tags submitted
+            self::getArchivedTextAssociation()->setTagsByName($textId, []);
+            return;
+        }
+
+        $tagNames = array_map('strval', $textTags['TagList']);
+        self::saveArchivedTextTags($textId, $tagNames);
+    }
+
+    // =====================
+    // BATCH OPERATIONS
+    // =====================
+
+    /**
+     * Add a tag to multiple words.
+     *
+     * @param string $tagText Tag text to add
+     * @param string $idList  SQL list of word IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function addTagToWords(string $tagText, string $idList): string
+    {
+        if ($idList === '()') {
+            return "Tag added in 0 Terms";
+        }
+
+        $tagId = self::getOrCreateTermTag($tagText);
+        if ($tagId === null) {
+            return "Failed to create tag";
+        }
+
+        // Use raw SQL for LEFT JOIN with dynamic IN clause
+        $sql = 'SELECT WoID
+            FROM words
+            LEFT JOIN wordtags ON WoID = WtWoID AND WtTgID = ' . $tagId . '
+            WHERE WtTgID IS NULL AND WoID IN ' . $idList
+            . UserScopedQuery::forTable('words');
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count += (int) Connection::execute(
+                'INSERT IGNORE INTO wordtags (WtWoID, WtTgID)
+                VALUES(' . $record['WoID'] . ', ' . $tagId . ')'
+            );
+        }
+        mysqli_free_result($res);
+
+        self::getAllTermTags(true);
+
+        return "Tag added in {$count} Terms";
+    }
+
+    /**
+     * Remove a tag from multiple words.
+     *
+     * @param string $tagText Tag text to remove
+     * @param string $idList  SQL list of word IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function removeTagFromWords(string $tagText, string $idList): string
+    {
+        if ($idList === '()') {
+            return "Tag removed in 0 Terms";
+        }
+
+        $tagId = Connection::preparedFetchValue(
+            'SELECT TgID FROM tags WHERE TgText = ?',
+            [$tagText],
+            'TgID'
+        );
+
+        if (!isset($tagId)) {
+            return "Tag " . $tagText . " not found";
+        }
+
+        $sql = 'SELECT WoID FROM words WHERE WoID IN ' . $idList
+            . UserScopedQuery::forTable('words');
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count++;
+            QueryBuilder::table('wordtags')
+                ->where('WtWoID', '=', (int)$record['WoID'])
+                ->where('WtTgID', '=', (int)$tagId)
+                ->delete();
+        }
+        mysqli_free_result($res);
+
+        return "Tag removed in {$count} Terms";
+    }
+
+    /**
+     * Add a tag to multiple texts.
+     *
+     * @param string $tagText Tag text to add
+     * @param string $idList  SQL list of text IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function addTagToTexts(string $tagText, string $idList): string
+    {
+        if ($idList === '()') {
+            return "Tag added in 0 Texts";
+        }
+
+        $tagId = self::getOrCreateTextTag($tagText);
+        if ($tagId === null) {
+            return "Failed to create tag";
+        }
+
+        $sql = 'SELECT TxID FROM texts
+            LEFT JOIN texttags ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
+            WHERE TtT2ID IS NULL AND TxID IN ' . $idList
+            . UserScopedQuery::forTable('texts');
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count += (int) Connection::execute(
+                'INSERT IGNORE INTO texttags (TtTxID, TtT2ID)
+                VALUES(' . $record['TxID'] . ', ' . $tagId . ')'
+            );
+        }
+        mysqli_free_result($res);
+
+        self::getAllTextTags(true);
+
+        return "Tag added in {$count} Texts";
+    }
+
+    /**
+     * Remove a tag from multiple texts.
+     *
+     * @param string $tagText Tag text to remove
+     * @param string $idList  SQL list of text IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function removeTagFromTexts(string $tagText, string $idList): string
+    {
+        if ($idList === '()') {
+            return "Tag removed in 0 Texts";
+        }
+
+        $tagId = Connection::preparedFetchValue(
+            'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+            [$tagText],
+            'T2ID'
+        );
+
+        if (!isset($tagId)) {
+            return "Tag " . $tagText . " not found";
+        }
+
+        $sql = 'SELECT TxID FROM texts WHERE TxID IN ' . $idList
+            . UserScopedQuery::forTable('texts');
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count++;
+            QueryBuilder::table('texttags')
+                ->where('TtTxID', '=', (int)$record['TxID'])
+                ->where('TtT2ID', '=', (int)$tagId)
+                ->delete();
+        }
+        mysqli_free_result($res);
+
+        return "Tag removed in {$count} Texts";
+    }
+
+    /**
+     * Add a tag to multiple archived texts.
+     *
+     * @param string $tagText Tag text to add
+     * @param string $idList  SQL list of archived text IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function addTagToArchivedTexts(string $tagText, string $idList): string
+    {
+        if ($idList === '()') {
+            return "Tag added in 0 Texts";
+        }
+
+        $tagId = self::getOrCreateTextTag($tagText);
+        if ($tagId === null) {
+            return "Failed to create tag";
+        }
+
+        $sql = 'SELECT AtID FROM archivedtexts
+            LEFT JOIN archtexttags ON AtID = AgAtID AND AgT2ID = ' . $tagId . '
+            WHERE AgT2ID IS NULL AND AtID IN ' . $idList
+            . UserScopedQuery::forTable('archivedtexts');
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count += (int) Connection::execute(
+                'INSERT IGNORE INTO archtexttags (AgAtID, AgT2ID)
+                VALUES(' . $record['AtID'] . ', ' . $tagId . ')'
+            );
+        }
+        mysqli_free_result($res);
+
+        self::getAllTextTags(true);
+
+        return "Tag added in {$count} Texts";
+    }
+
+    /**
+     * Remove a tag from multiple archived texts.
+     *
+     * @param string $tagText Tag text to remove
+     * @param string $idList  SQL list of archived text IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function removeTagFromArchivedTexts(
+        string $tagText,
+        string $idList
+    ): string {
+        if ($idList === '()') {
+            return "Tag removed in 0 Texts";
+        }
+
+        $tagId = Connection::preparedFetchValue(
+            'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+            [$tagText],
+            'T2ID'
+        );
+
+        if (!isset($tagId)) {
+            return "Tag " . $tagText . " not found";
+        }
+
+        $sql = 'SELECT AtID FROM archivedtexts WHERE AtID IN ' . $idList
+            . UserScopedQuery::forTable('archivedtexts');
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count++;
+            QueryBuilder::table('archtexttags')
+                ->where('AgAtID', '=', (int)$record['AtID'])
+                ->where('AgT2ID', '=', (int)$tagId)
+                ->delete();
+        }
+        mysqli_free_result($res);
+
+        return "Tag removed in {$count} Texts";
+    }
+
+    // =====================
+    // SELECT OPTIONS HELPERS
+    // =====================
+
+    /**
+     * Get term tag select options HTML for filtering.
+     *
+     * @param int|string|null $selected Currently selected value
+     * @param int|string      $langId   Language ID filter ('' for all)
+     *
+     * @return string HTML options
+     */
+    public static function getTermTagSelectOptions(
+        int|string|null $selected,
+        int|string $langId
+    ): string {
+        $selected = $selected ?? '';
+
+        $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
+        $html .= '[Filter off]</option>';
+
+        if ($langId === '') {
+            $rows = Connection::preparedFetchAll(
+                "SELECT TgID, TgText
+                FROM words, tags, wordtags
+                WHERE TgID = WtTgID AND WtWoID = WoID
+                GROUP BY TgID
+                ORDER BY UPPER(TgText)",
+                []
+            );
+        } else {
+            $rows = Connection::preparedFetchAll(
+                "SELECT TgID, TgText
+                FROM words, tags, wordtags
+                WHERE TgID = WtTgID AND WtWoID = WoID AND WoLgID = ?
+                GROUP BY TgID
+                ORDER BY UPPER(TgText)",
+                [$langId]
+            );
+        }
+
+        $count = 0;
+        foreach ($rows as $record) {
+            $count++;
+            $html .= '<option value="' . $record['TgID'] . '"' .
+                FormHelper::getSelected($selected, (int) $record['TgID']) . '>' .
+                htmlspecialchars($record['TgText'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
+        }
+
+        if ($count > 0) {
+            $html .= '<option disabled="disabled">--------</option>';
+            $html .= '<option value="-1"' . FormHelper::getSelected($selected, -1) . '>UNTAGGED</option>';
+        }
+
+        return $html;
+    }
+
+    /**
+     * Get text tag select options HTML for filtering.
+     *
+     * @param int|string|null $selected Currently selected value
+     * @param int|string      $langId   Language ID filter ('' for all)
+     *
+     * @return string HTML options
+     */
+    public static function getTextTagSelectOptions(
+        int|string|null $selected,
+        int|string $langId
+    ): string {
+        $selected = $selected ?? '';
+
+        $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
+        $html .= '[Filter off]</option>';
+
+        if ($langId === '') {
+            $rows = Connection::preparedFetchAll(
+                "SELECT T2ID, T2Text
+                FROM texts, tags2, texttags
+                WHERE T2ID = TtT2ID AND TtTxID = TxID
+                GROUP BY T2ID
+                ORDER BY UPPER(T2Text)",
+                []
+            );
+        } else {
+            $rows = Connection::preparedFetchAll(
+                "SELECT T2ID, T2Text
+                FROM texts, tags2, texttags
+                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxLgID = ?
+                GROUP BY T2ID
+                ORDER BY UPPER(T2Text)",
+                [$langId]
+            );
+        }
+
+        $count = 0;
+        foreach ($rows as $record) {
+            $count++;
+            $html .= '<option value="' . $record['T2ID'] . '"' .
+                FormHelper::getSelected($selected, (int) $record['T2ID']) . '>' .
+                htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
+        }
+
+        if ($count > 0) {
+            $html .= '<option disabled="disabled">--------</option>';
+            $html .= '<option value="-1"' . FormHelper::getSelected($selected, -1) . '>UNTAGGED</option>';
+        }
+
+        return $html;
+    }
+
+    /**
+     * Get text tag select options with text IDs for word list filtering.
+     *
+     * @param int|string      $langId   Language ID filter
+     * @param int|string|null $selected Currently selected value
+     *
+     * @return string HTML options
+     */
+    public static function getTextTagSelectOptionsWithTextIds(
+        int|string $langId,
+        int|string|null $selected
+    ): string {
+        $selected = $selected ?? '';
+        $untaggedOption = '';
+
+        $html = '<option value="&amp;texttag"' . FormHelper::getSelected($selected, '') . '>';
+        $html .= '[Filter off]</option>';
+
+        if ($langId) {
+            $rows = Connection::preparedFetchAll(
+                'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
+                GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
+                FROM texts
+                LEFT JOIN texttags ON TxID = TtTxID
+                LEFT JOIN tags2 ON TtT2ID = T2ID
+                WHERE TxLgID = ?
+                GROUP BY UPPER(TagName)',
+                [$langId]
+            );
+        } else {
+            $rows = Connection::preparedFetchAll(
+                'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
+                GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
+                FROM texts
+                LEFT JOIN texttags ON TxID = TtTxID
+                LEFT JOIN tags2 ON TtT2ID = T2ID
+                GROUP BY UPPER(TagName)',
+                []
+            );
+        }
+
+        foreach ($rows as $record) {
+            if ($record['TagName'] == 1) {
+                $untaggedOption = '<option disabled="disabled">--------</option>' .
+                    '<option value="' . $record['TextID'] . '&amp;texttag=-1"' .
+                    FormHelper::getSelected($selected, "-1") . '>UNTAGGED</option>';
+            } else {
+                $html .= '<option value="' . $record['TextID'] . '&amp;texttag=' .
+                    $record['TagID'] . '"' . FormHelper::getSelected($selected, (int) $record['TagID']) .
+                    '>' . $record['TagName'] . '</option>';
+            }
+        }
+
+        return $html . $untaggedOption;
+    }
+
+    /**
+     * Get archived text tag select options HTML for filtering.
+     *
+     * @param int|string|null $selected Currently selected value
+     * @param int|string      $langId   Language ID filter ('' for all)
+     *
+     * @return string HTML options
+     */
+    public static function getArchivedTextTagSelectOptions(
+        int|string|null $selected,
+        int|string $langId
+    ): string {
+        $selected = $selected ?? '';
+
+        $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
+        $html .= '[Filter off]</option>';
+
+        if ($langId === '') {
+            $rows = Connection::preparedFetchAll(
+                "SELECT T2ID, T2Text
+                FROM archivedtexts, tags2, archtexttags
+                WHERE T2ID = AgT2ID AND AgAtID = AtID
+                GROUP BY T2ID
+                ORDER BY UPPER(T2Text)",
+                []
+            );
+        } else {
+            $rows = Connection::preparedFetchAll(
+                "SELECT T2ID, T2Text
+                FROM archivedtexts, tags2, archtexttags
+                WHERE T2ID = AgT2ID AND AgAtID = AtID AND AtLgID = ?
+                GROUP BY T2ID
+                ORDER BY UPPER(T2Text)",
+                [$langId]
+            );
+        }
+
+        $count = 0;
+        foreach ($rows as $record) {
+            $count++;
+            $html .= '<option value="' . $record['T2ID'] . '"' .
+                FormHelper::getSelected($selected, (int) $record['T2ID']) . '>' .
+                htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
+        }
+
+        if ($count > 0) {
+            $html .= '<option disabled="disabled">--------</option>';
+            $html .= '<option value="-1"' . FormHelper::getSelected($selected, -1) . '>UNTAGGED</option>';
+        }
+
+        return $html;
+    }
+
+    // =====================
+    // HELPER METHODS
+    // =====================
+
+    /**
+     * Get or create a term tag, returning its ID.
+     *
+     * @param string $tagText Tag text
+     *
+     * @return int|null Tag ID or null on failure
+     */
+    private static function getOrCreateTermTag(string $tagText): ?int
+    {
+        $tagId = Connection::preparedFetchValue(
+            'SELECT TgID FROM tags WHERE TgText = ?',
+            [$tagText],
+            'TgID'
+        );
+
+        if (!isset($tagId)) {
+            QueryBuilder::table('tags')->insertPrepared(['TgText' => $tagText]);
+            $tagId = Connection::preparedFetchValue(
+                'SELECT TgID FROM tags WHERE TgText = ?',
+                [$tagText],
+                'TgID'
+            );
+        }
+
+        return isset($tagId) ? (int) $tagId : null;
+    }
+
+    /**
+     * Get or create a text tag, returning its ID.
+     *
+     * @param string $tagText Tag text
+     *
+     * @return int|null Tag ID or null on failure
+     */
+    private static function getOrCreateTextTag(string $tagText): ?int
+    {
+        $tagId = Connection::preparedFetchValue(
+            'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+            [$tagText],
+            'T2ID'
+        );
+
+        if (!isset($tagId)) {
+            QueryBuilder::table('tags2')->insertPrepared(['T2Text' => $tagText]);
+            $tagId = Connection::preparedFetchValue(
+                'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+                [$tagText],
+                'T2ID'
+            );
+        }
+
+        return isset($tagId) ? (int) $tagId : null;
+    }
+
+    /**
+     * Get formatted tag list as Bulma tag components for a word.
+     *
+     * @param int    $wordId  Word ID
+     * @param string $size    Bulma size class (e.g., 'is-small', 'is-normal')
+     * @param string $color   Bulma color class (e.g., 'is-info', 'is-primary')
+     * @param bool   $isLight Whether to use light variant
+     *
+     * @return string HTML for Bulma tags
+     */
+    public static function getWordTagListHtml(
+        int $wordId,
+        string $size = 'is-small',
+        string $color = 'is-info',
+        bool $isLight = true
+    ): string {
+        $tagList = self::getWordTagList($wordId, false);
+        return \Lwt\View\Helper\TagHelper::renderInline($tagList, $size, $color, $isLight);
+    }
+
+    /**
+     * Get formatted tag list string for a word.
+     *
+     * @param int    $wordId     Word ID
+     * @param string $before     String to prepend if tags exist
+     * @param bool   $brackets   Wrap tags in brackets
+     * @param bool   $escapeHtml Convert to HTML entities
+     *
+     * @return string Formatted tag list
+     *
+     * @deprecated Use getWordTagList() or getWordTagListHtml() instead
+     */
+    public static function getWordTagListFormatted(
+        int $wordId,
+        string $before = ' ',
+        bool $brackets = true,
+        bool $escapeHtml = true
+    ): string {
+        $lbrack = $brackets ? '[' : '';
+        $rbrack = $brackets ? ']' : '';
+
+        $result = Connection::preparedFetchValue(
+            "SELECT IFNULL(
+                GROUP_CONCAT(DISTINCT TgText ORDER BY TgText SEPARATOR ', '),
+                ''
+            ) AS taglist
+            FROM (
+                (
+                    words
+                    LEFT JOIN wordtags ON WoID = WtWoID
+                )
+                LEFT JOIN tags ON TgID = WtTgID
+            )
+            WHERE WoID = ?",
+            [$wordId],
+            'taglist'
+        );
+
+        if ($result != '') {
+            $result = $before . $lbrack . $result . $rbrack;
+        }
+
+        if ($escapeHtml) {
+            $result = htmlspecialchars($result ?? '', ENT_QUOTES, 'UTF-8');
+        }
+
+        return $result;
+    }
+
+    /**
+     * Build WHERE clause for query filtering.
+     *
+     * @param string $query Filter query string
+     *
+     * @return array{clause: string, params: array} Array with SQL clause and parameters
+     */
+    public function buildWhereClause(string $query): array
+    {
+        if ($query === '') {
+            return ['clause' => '', 'params' => []];
+        }
+
+        $prefix = $this->tagType === TagType::TEXT ? 'T2' : 'Tg';
+        $searchValue = str_replace("*", "%", $query);
+        $clause = ' AND (' . $prefix . 'Text LIKE ? OR ' .
+                  $prefix . 'Comment LIKE ?)';
+
+        return ['clause' => $clause, 'params' => [$searchValue, $searchValue]];
+    }
+
+    /**
+     * Format duplicate entry error message for display.
+     *
+     * @param string $message Original error message
+     *
+     * @return string Formatted error message
+     */
+    public function formatDuplicateError(string $message): string
+    {
+        $keyName = $this->tagType === TagType::TEXT ? 'T2Text' : 'TgText';
+
+        if (
+            substr($message, 0, 24) == "Error: Duplicate entry '"
+            && substr($message, -strlen("' for key '$keyName'")) == "' for key '$keyName'"
+        ) {
+            $tagName = substr($message, 24);
+            $tagName = substr($tagName, 0, strlen($tagName) - strlen("' for key '$keyName'"));
+            $tagTypeLabel = $this->tagType === TagType::TEXT ? 'Text Tag' : 'Term Tag';
+            return "Error: $tagTypeLabel '" . $tagName .
+                   "' already exists. Please go back and correct this!";
+        }
+
+        return $message;
     }
 }

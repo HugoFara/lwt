@@ -24,7 +24,6 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
-require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 // LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
@@ -33,13 +32,13 @@ require_once __DIR__ . '/../../Modules/Text/Application/TextFacade.php';
 use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\WordService;
-use Lwt\Services\WordListService;
+use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Services\WordUploadService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Services\ExportService;
 use Lwt\Services\SentenceService;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Services\LanguageService;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Text\Application\TextFacade;
@@ -225,7 +224,7 @@ class WordController extends BaseController
         $wid = $result['id'];
         $message = $result['message'];
 
-        TagService::saveWordTags($wid);
+        TagsFacade::saveWordTagsFromForm($wid);
 
         // Prepare view variables
         $textId = $this->paramInt('tid', 0) ?? 0;
@@ -415,7 +414,7 @@ class WordController extends BaseController
                 Connection::preparedExecute($sql, $bindings);
             }
             $wid = $woId;
-            TagService::saveWordTags($wid);
+            TagsFacade::saveWordTagsFromForm($wid);
 
             $message = 'Updated';
 
@@ -721,10 +720,10 @@ class WordController extends BaseController
                 $message = $listService->deleteByIdList($idList);
                 break;
             case 'addtag':
-                $message = TagService::addTagToWords($actiondata, $idList);
+                $message = TagsFacade::addTagToWords($actiondata, $idList);
                 break;
             case 'deltag':
-                TagService::removeTagFromWords($actiondata, $idList);
+                TagsFacade::removeTagFromWords($actiondata, $idList);
                 header("Location: /words/edit");
                 exit();
             case 'spl1':
@@ -811,11 +810,11 @@ class WordController extends BaseController
                         $cnt++;
                         break;
                     case 'addtagall':
-                        TagService::addTagToWords($actiondata, '(' . $id . ')');
+                        TagsFacade::addTagToWords($actiondata, '(' . $id . ')');
                         $cnt++;
                         break;
                     case 'deltagall':
-                        TagService::removeTagFromWords($actiondata, '(' . $id . ')');
+                        TagsFacade::removeTagFromWords($actiondata, '(' . $id . ')');
                         $cnt++;
                         break;
                     case 'spl1all':
@@ -910,12 +909,12 @@ class WordController extends BaseController
         if ($op == 'Save') {
             $message = $listService->saveNewWord($requestData);
             $wid = (int)Connection::lastInsertId();
-            TagService::saveWordTags($wid);
+            TagsFacade::saveWordTagsFromForm($wid);
             return $wid;
         } else {
             $message = $listService->updateWord($requestData);
             $wid = $this->paramInt("WoID", 0) ?? 0;
-            TagService::saveWordTags($wid);
+            TagsFacade::saveWordTagsFromForm($wid);
             return $wid;
         }
     }
@@ -1185,7 +1184,7 @@ class WordController extends BaseController
             $result = $this->wordService->updateMultiWord($wid, $data, $oldStatus, $newStatus);
 
             // Prepare data for view
-            $tagList = TagService::getWordTagList($wid, false);
+            $tagList = TagsFacade::getWordTagList($wid, false);
             $formattedTags = $tagList !== '' ? ' [' . $tagList . ']' : '';
             $termJson = $this->wordService->exportTermAsJson(
                 $wid,
@@ -1450,7 +1449,7 @@ class WordController extends BaseController
                 echo '<p>' . $message . '</p>';
             } else {
                 $wid = $result['id'];
-                TagService::saveWordTags($wid);
+                TagsFacade::saveWordTagsFromForm($wid);
                 \Lwt\Database\Maintenance::initWordCount();
 
                 echo '<p>' . $result['message'] . '</p>';
@@ -1523,7 +1522,7 @@ class WordController extends BaseController
             return;
         }
 
-        $tags = TagService::getWordTagList((int) $wid, false);
+        $tags = TagsFacade::getWordTagList((int) $wid, false);
         $scrdir = $this->languageService->getScriptDirectionTag($word['langId']);
 
         include __DIR__ . '/../../Modules/Vocabulary/Views/show.php';
@@ -1781,7 +1780,7 @@ class WordController extends BaseController
         }
 
         $term = $wordData['text'];
-        $tagList = TagService::getWordTagList($wordId, false);
+        $tagList = TagsFacade::getWordTagList($wordId, false);
         $formattedTags = $tagList !== '' ? ' [' . $tagList . ']' : '';
         $translation = $wordData['translation'] . $formattedTags;
         $romanization = $wordData['romanization'];

@@ -66,7 +66,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr>
         <td class="td1 right">Tags:</td>
         <td class="td1">
-            <?php echo \Lwt\Services\TagService::getWordTagsHtml($term->id); ?>
+            <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml($term->id); ?>
         </td>
     </tr>
     <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">

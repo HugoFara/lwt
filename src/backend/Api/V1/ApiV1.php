@@ -31,7 +31,6 @@ require_once __DIR__ . '/../../../Modules/Vocabulary/Application/Services/Expres
 require_once __DIR__ . '/../../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
 require_once __DIR__ . '/../../Services/MediaService.php';
 // Language module now loaded via autoloader
-require_once __DIR__ . '/../../Services/TagService.php';
 
 use Lwt\Api\V1\Handlers\AuthHandler;
 use Lwt\Api\V1\Handlers\FeedHandler;

@@ -32,7 +32,7 @@ use Lwt\Services\TextStatisticsService;
 <p><?php echo $message; ?></p>
 
 <?php if ($success && $len == 1):
-    $tagList = \Lwt\Services\TagService::getWordTagList($wid, false);
+    $tagList = \Lwt\Modules\Tags\Application\TagsFacade::getWordTagList($wid, false);
 ?>
 <script type="application/json" data-lwt-save-result-config>
 <?php echo json_encode([

@@ -17,10 +17,9 @@ namespace Lwt\Modules\Review\Application\UseCases;
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\TestConfiguration;
 use Lwt\Modules\Review\Domain\TestWord;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Services\ExportService;
 
-require_once __DIR__ . '/../../../../backend/Services/TagService.php';
 require_once __DIR__ . '/../../../../backend/Services/ExportService.php';
 
 /**
@@ -185,7 +184,7 @@ class GetNextTerm
 
         if ($baseType === 1) {
             // Show translation as solution
-            $tagList = TagService::getWordTagList($word->id, false);
+            $tagList = TagsFacade::getWordTagList($word->id, false);
             $tagFormatted = $tagList !== '' ? ' [' . $tagList . ']' : '';
             $trans = ExportService::replaceTabNewline($word->translation) . $tagFormatted;
             return $wordMode ? $trans : "[$trans]";

@@ -20,7 +20,7 @@ use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**
  * Handler for vocabulary/term-related API operations.
@@ -379,7 +379,7 @@ class VocabularyApiHandler
      */
     public function setTermTags(int $termId, array $tags): array
     {
-        TagService::saveWordTagsFromArray($termId, $tags);
+        TagsFacade::saveWordTagsFromArray($termId, $tags);
         return ['success' => true];
     }
 

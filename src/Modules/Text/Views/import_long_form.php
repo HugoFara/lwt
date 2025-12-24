@@ -228,7 +228,7 @@ $actions = [
         <div class="field">
             <label class="label" title="Organize texts with tags for easy filtering">Tags</label>
             <div class="control">
-                <?php echo \Lwt\Services\TagService::getTextTagsHtml(0); ?>
+                <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getTextTagsHtml(0); ?>
             </div>
             <p class="help">Optional. Add tags to categorize and filter your texts. Tags will be applied to all imported sections.</p>
         </div>

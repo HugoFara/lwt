@@ -27,10 +27,10 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Services\TextStatisticsService;
 
-$tagList = TagService::getWordTagList($wid, false);
+$tagList = TagsFacade::getWordTagList($wid, false);
 $tagFormatted = $tagList !== '' ? ' [' . str_replace(',', ', ', $tagList) . ']' : '';
 
 $config = [

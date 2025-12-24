@@ -134,17 +134,18 @@ class RoutesTest extends TestCase
 
     public static function textRoutesProvider(): array
     {
+        $textController = 'Lwt\\Modules\\Text\\Http\\TextController';
         return [
-            'text read' => ['/text/read', 'TextController@read'],
-            'text edit' => ['/text/edit', 'TextController@edit'],
-            'texts list' => ['/texts', 'TextController@edit'],
-            'text display' => ['/text/display', 'TextController@display'],
+            'text read' => ['/text/read', "{$textController}@read"],
+            'text edit' => ['/text/edit', "{$textController}@edit"],
+            'texts list' => ['/texts', "{$textController}@edit"],
+            'text display' => ['/text/display', "{$textController}@display"],
             'text print' => ['/text/print', 'TextPrintController@printAnnotated'],
             'text print-plain' => ['/text/print-plain', 'TextPrintController@printPlain'],
-            'text import-long' => ['/text/import-long', 'TextController@importLong'],
-            'text set-mode' => ['/text/set-mode', 'TextController@setMode'],
-            'text check' => ['/text/check', 'TextController@check'],
-            'text archived' => ['/text/archived', 'TextController@archived'],
+            'text import-long' => ['/text/import-long', "{$textController}@importLong"],
+            'text set-mode' => ['/text/set-mode', "{$textController}@setMode"],
+            'text check' => ['/text/check', "{$textController}@check"],
+            'text archived' => ['/text/archived', "{$textController}@archived"],
         ];
     }
 

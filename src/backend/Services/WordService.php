@@ -20,6 +20,7 @@ require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/Expressio
 
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
 use Lwt\Modules\Vocabulary\Domain\Term;
 use Lwt\Core\Globals;
@@ -1508,7 +1509,7 @@ class WordService
         $wid = (int) Connection::preparedInsert($sql, $bindings);
 
         \Lwt\Database\Maintenance::initWordCount();
-        TagService::saveWordTags($wid);
+        TagsFacade::saveWordTagsFromForm($wid);
         $this->expressionService->insertExpressions($data['textlc'], (int) $data['lgid'], $wid, (int) $data['wordcount'], 0);
 
         return [
@@ -1567,7 +1568,7 @@ class WordService
             Connection::preparedExecute($sql, $bindings);
         }
 
-        TagService::saveWordTags($wordId);
+        TagsFacade::saveWordTagsFromForm($wordId);
 
         return [
             'id' => $wordId,

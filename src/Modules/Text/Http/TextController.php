@@ -18,7 +18,7 @@ use Lwt\Controllers\BaseController;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextNavigationService;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Services\LanguageService;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Database\Settings;
@@ -39,7 +39,6 @@ require_once dirname(__DIR__) . '/Application/TextFacade.php';
 require_once LWT_BACKEND_PATH . '/View/Helper/PageLayoutHelper.php';
 require_once LWT_BACKEND_PATH . '/View/Helper/SelectOptionsBuilder.php';
 require_once LWT_BACKEND_PATH . '/Services/TextDisplayService.php';
-require_once LWT_BACKEND_PATH . '/Services/TagService.php';
 require_once LWT_BACKEND_PATH . '/Services/LanguageService.php';
 // LanguagePresets loaded via autoloader
 
@@ -281,11 +280,11 @@ class TextController extends BaseController
                 break;
 
             case 'addtag':
-                $message = TagService::addTagToTexts($actionData, $list);
+                $message = TagsFacade::addTagToTexts($actionData, $list);
                 break;
 
             case 'deltag':
-                TagService::removeTagFromTexts($actionData, $list);
+                TagsFacade::removeTagFromTexts($actionData, $list);
                 header("Location: /texts");
                 exit();
 
@@ -817,7 +816,7 @@ class TextController extends BaseController
                 $this->param('AtAudioURI'),
                 $this->param('AtSourceURI')
             );
-            TagService::saveArchivedTextTags($atId);
+            TagsFacade::saveArchivedTextTagsFromForm($atId);
         }
 
         // Display edit form or list
@@ -864,12 +863,12 @@ class TextController extends BaseController
 
             case 'addtag':
                 $list = "(" . implode(",", array_map('intval', $marked)) . ")";
-                $message = TagService::addTagToArchivedTexts($actionData, $list);
+                $message = TagsFacade::addTagToArchivedTexts($actionData, $list);
                 break;
 
             case 'deltag':
                 $list = "(" . implode(",", array_map('intval', $marked)) . ")";
-                TagService::removeTagFromArchivedTexts($actionData, $list);
+                TagsFacade::removeTagFromArchivedTexts($actionData, $list);
                 header("Location: /text/archived");
                 exit();
 

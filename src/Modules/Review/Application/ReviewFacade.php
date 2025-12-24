@@ -618,7 +618,7 @@ class ReviewFacade
         $baseType = $this->getBaseTestType($testType);
 
         if ($baseType === 1) {
-            $tagList = \Lwt\Services\TagService::getWordTagList((int) $wordData['WoID'], false);
+            $tagList = \Lwt\Modules\Tags\Application\TagsFacade::getWordTagList((int) $wordData['WoID'], false);
             $tagFormatted = $tagList !== '' ? ' [' . $tagList . ']' : '';
             $trans = \Lwt\Services\ExportService::replaceTabNewline($wordData['WoTranslation']) . $tagFormatted;
             return $wordMode ? $trans : "[$trans]";

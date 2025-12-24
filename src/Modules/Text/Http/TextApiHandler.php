@@ -23,7 +23,7 @@ use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Services\WordService;
 use Lwt\Services\ExportService;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Services\TextPrintService;
@@ -32,7 +32,6 @@ define('LWT_TEXT_API_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
 
 require_once LWT_TEXT_API_BACKEND_PATH . '/Services/WordService.php';
 require_once LWT_TEXT_API_BACKEND_PATH . '/Services/ExportService.php';
-require_once LWT_TEXT_API_BACKEND_PATH . '/Services/TagService.php';
 require_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
 require_once dirname(__DIR__) . '/Application/TextFacade.php';
 require_once LWT_TEXT_API_BACKEND_PATH . '/Services/TextPrintService.php';
@@ -421,7 +420,7 @@ class TextApiHandler
                     $wordData['notes'] = $record['WoNotes'] ?? '';
 
                     // Get tags
-                    $tags = TagService::getWordTagList((int)$record['WoID'], false);
+                    $tags = TagsFacade::getWordTagList((int)$record['WoID'], false);
                     if ($tags) {
                         $wordData['tags'] = $tags;
                     }

@@ -22,7 +22,7 @@
 namespace Lwt\Views\Word;
 
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
 
@@ -51,7 +51,7 @@ data-lwt-clear-frame="true">
         <tr>
             <td class="td1 right">Tags:</td>
             <td class="td1">
-            <?php echo TagService::getWordTagsHtml(0); ?>
+            <?php echo TagsFacade::getWordTagsHtml(0); ?>
         </td>
         </tr>
         <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">

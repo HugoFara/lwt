@@ -39,7 +39,7 @@ use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
 use Lwt\Services\ExportService;
 use Lwt\Services\SentenceService;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**
  * Facade for text module operations.
@@ -824,7 +824,7 @@ class TextFacade
             );
             $imported += $affected;
             $id = Connection::lastInsertId();
-            TagService::saveTextTags($id, $textTags);
+            TagsFacade::saveTextTagsFromForm($id, $textTags);
             TextParsing::parseAndSave($texts[$i], $langId, $id);
         }
 
@@ -953,7 +953,7 @@ class TextFacade
             );
         }
 
-        TagService::saveTextTags($textId);
+        TagsFacade::saveTextTagsFromForm($textId);
 
         $sentencesDeleted = QueryBuilder::table('sentences')
             ->where('SeTxID', '=', $textId)

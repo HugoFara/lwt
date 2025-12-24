@@ -34,7 +34,7 @@ use Lwt\Services\TextPrintService;
 use Lwt\Services\ThemeService;
 use Lwt\Services\TranslationService;
 use Lwt\Services\TtsService;
-use Lwt\Services\WordListService;
+use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Services\WordPressService;
 use Lwt\Services\WordService;
 use Lwt\Services\WordUploadService;

@@ -829,7 +829,7 @@ class TermHandler
         }
 
         // Get all term tags for autocomplete
-        $allTags = \Lwt\Services\TagService::getAllTermTags();
+        $allTags = \Lwt\Modules\Tags\Application\TagsFacade::getAllTermTags();
 
         // Build language info
         $language = [
@@ -1058,7 +1058,7 @@ class TermHandler
         // Save tags if provided
         $tags = $data['tags'] ?? [];
         if (!empty($tags) && is_array($tags)) {
-            \Lwt\Services\TagService::saveWordTagsFromArray($wordId, $tags);
+            \Lwt\Modules\Tags\Application\TagsFacade::saveWordTagsFromArray($wordId, $tags);
         }
 
         // Return complete term data
@@ -1144,7 +1144,7 @@ class TermHandler
         $tags = [];
         if (isset($data['tags']) && is_array($data['tags'])) {
             $tags = $data['tags'];
-            \Lwt\Services\TagService::saveWordTagsFromArray($termId, $tags);
+            \Lwt\Modules\Tags\Application\TagsFacade::saveWordTagsFromArray($termId, $tags);
         }
 
         // Return complete term data
@@ -1227,7 +1227,7 @@ class TermHandler
      */
     public function getWordList(array $params): array
     {
-        $listService = new \Lwt\Services\WordListService();
+        $listService = new \Lwt\Modules\Vocabulary\Application\Services\WordListService();
 
         // Parse parameters with defaults
         $page = max(1, (int) ($params['page'] ?? 1));
@@ -1356,7 +1356,7 @@ class TermHandler
             return ['success' => false, 'count' => 0, 'message' => 'No terms selected'];
         }
 
-        $listService = new \Lwt\Services\WordListService();
+        $listService = new \Lwt\Modules\Vocabulary\Application\Services\WordListService();
 
         // Sanitize word IDs
         $wordIds = array_filter(array_map('intval', $wordIds));
@@ -1411,14 +1411,14 @@ class TermHandler
                 if (empty($data)) {
                     return ['success' => false, 'count' => 0, 'message' => 'Tag name required'];
                 }
-                $message = \Lwt\Services\TagService::addTagToWords($data, $idList);
+                $message = \Lwt\Modules\Tags\Application\TagsFacade::addTagToWords($data, $idList);
                 break;
 
             case 'deltag':
                 if (empty($data)) {
                     return ['success' => false, 'count' => 0, 'message' => 'Tag name required'];
                 }
-                $message = \Lwt\Services\TagService::removeTagFromWords($data, $idList);
+                $message = \Lwt\Modules\Tags\Application\TagsFacade::removeTagFromWords($data, $idList);
                 break;
 
             default:
@@ -1439,7 +1439,7 @@ class TermHandler
      */
     public function allAction(array $filters, string $action, ?string $data = null): array
     {
-        $listService = new \Lwt\Services\WordListService();
+        $listService = new \Lwt\Modules\Vocabulary\Application\Services\WordListService();
 
         // Build filter conditions from params
         $lang = $filters['lang'] ?? '';

@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\WordListService;
+use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Services\WordService;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
@@ -21,7 +21,7 @@ require_once __DIR__ . '/../../../src/backend/Services/ExportService.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordService.php';
-require_once __DIR__ . '/../../../src/backend/Services/WordListService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/WordListService.php';
 
 /**
  * Unit tests for the WordListService class.
