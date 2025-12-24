@@ -35,6 +35,9 @@ use Lwt\View\Helper\FormHelper;
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @deprecated 3.0.0 Use \Lwt\Modules\Tags\Application\TagsFacade instead.
+ *             This class will be removed in a future version.
  */
 class TagService
 {

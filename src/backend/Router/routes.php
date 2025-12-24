@@ -123,6 +123,13 @@ function registerRoutes(Router $router): void
     // Bulk translate
     $router->registerWithMiddleware('/word/bulk-translate', 'WordController@bulkTranslate', AUTH_MIDDLEWARE);
 
+    // Create term from hover (Vocabulary module)
+    $router->registerWithMiddleware(
+        '/vocabulary/term-hover',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@hoverCreate',
+        AUTH_MIDDLEWARE
+    );
+
     // Set word status
     // @deprecated 3.0.0 Use PUT /api/v1/terms/{id}/status/{status} instead.
     //             Kept for backward compatibility with frame-based mode.
@@ -136,21 +143,21 @@ function registerRoutes(Router $router): void
 
     // ==================== TEST ROUTES (PROTECTED) ====================
 
-    // Test interface
-    $router->registerWithMiddleware('/test', 'TestController@index', AUTH_MIDDLEWARE);
+    // Test interface (Review module)
+    $router->registerWithMiddleware('/test', 'Lwt\\Modules\\Review\\Http\\TestController@index', AUTH_MIDDLEWARE);
 
     // ==================== LANGUAGE ROUTES (PROTECTED) ====================
 
-    // Edit languages
-    $router->registerWithMiddleware('/languages', 'LanguageController@index', AUTH_MIDDLEWARE);
+    // Edit languages (Language module)
+    $router->registerWithMiddleware('/languages', 'Lwt\\Modules\\Language\\Http\\LanguageController@index', AUTH_MIDDLEWARE);
 
     // ==================== TAG ROUTES (PROTECTED) ====================
 
-    // Term tags (TermTagsController - extends AbstractCrudController)
-    $router->registerWithMiddleware('/tags', 'TermTagsController@index', AUTH_MIDDLEWARE);
+    // Term tags (Tags module)
+    $router->registerWithMiddleware('/tags', 'Lwt\\Modules\\Tags\\Http\\TermTagController@index', AUTH_MIDDLEWARE);
 
-    // Text tags (TextTagsController - extends AbstractCrudController)
-    $router->registerWithMiddleware('/tags/text', 'TextTagsController@index', AUTH_MIDDLEWARE);
+    // Text tags (Tags module)
+    $router->registerWithMiddleware('/tags/text', 'Lwt\\Modules\\Tags\\Http\\TextTagController@index', AUTH_MIDDLEWARE);
 
     // ==================== FEED ROUTES (PROTECTED) ====================
 
@@ -197,6 +204,9 @@ function registerRoutes(Router $router): void
 
     // Settings
     $router->registerWithMiddleware('/admin/settings', 'AdminController@settings', AUTH_MIDDLEWARE);
+
+    // Settings hover - deprecated, use /vocabulary/term-hover instead
+    // @deprecated 3.0.0 Use /vocabulary/term-hover instead
     $router->registerWithMiddleware('/admin/settings/hover', 'AdminController@settingsHover', AUTH_MIDDLEWARE);
 
     // Server data

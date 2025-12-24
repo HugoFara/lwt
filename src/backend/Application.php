@@ -25,6 +25,10 @@ use Lwt\Core\Container\ServiceProviderInterface;
 use Lwt\Modules\Text\TextServiceProvider;
 use Lwt\Modules\Language\LanguageServiceProvider;
 use Lwt\Modules\Feed\FeedServiceProvider;
+use Lwt\Modules\Vocabulary\VocabularyServiceProvider;
+use Lwt\Modules\Tags\TagsServiceProvider;
+use Lwt\Modules\Review\ReviewServiceProvider;
+use Lwt\Modules\Admin\AdminServiceProvider;
 use Lwt\Core\Exception\ExceptionHandler;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Router\Router;
@@ -136,6 +140,10 @@ class Application
             new TextServiceProvider(),
             new LanguageServiceProvider(),
             new FeedServiceProvider(),
+            new VocabularyServiceProvider(),
+            new TagsServiceProvider(),
+            new ReviewServiceProvider(),
+            new AdminServiceProvider(),
         ];
 
         // Register phase: all providers register their bindings

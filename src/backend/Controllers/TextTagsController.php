@@ -37,6 +37,9 @@ require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  *
+ * @deprecated 3.0.0 Use \Lwt\Modules\Tags\Http\TextTagController instead.
+ *             This class will be removed in a future version.
+ *
  * @psalm-suppress UnusedClass - Used via string-based routing in routes.php
  */
 class TextTagsController extends AbstractCrudController

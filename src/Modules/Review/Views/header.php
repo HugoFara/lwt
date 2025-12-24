@@ -1,0 +1,55 @@
+<?php declare(strict_types=1);
+/**
+ * Test Header Navigation Row View
+ *
+ * Variables expected:
+ * - $textId: int|null - Text ID if testing from a text
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Views
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Views\Test;
+
+use Lwt\Services\AnnotationService;
+use Lwt\Services\TextNavigationService;
+use Lwt\View\Helper\PageLayoutHelper;
+
+?>
+<div class="flex-header">
+    <div>
+        <a href="/texts" target="_top">
+            <?php echo PageLayoutHelper::buildLogo(); ?>
+        </a>
+    </div>
+    <?php if ($textId !== null): ?>
+    <div>
+        <?php
+        echo (new TextNavigationService())->getPreviousAndNextTextLinks(
+            $textId,
+            '/test?text=',
+            false,
+            ''
+        );
+        ?>
+    </div>
+    <div>
+        <a href="/text/read?start=<?php echo $textId; ?>" target="_top">
+            <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['title' => 'Read', 'alt' => 'Read']); ?>
+        </a>
+        <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
+            <?php echo \Lwt\View\Helper\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
+        </a>
+        <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
+    </div>
+    <?php endif; ?>
+    <div>
+        <?php echo PageLayoutHelper::buildNavbar(); ?>
+    </div>
+</div>

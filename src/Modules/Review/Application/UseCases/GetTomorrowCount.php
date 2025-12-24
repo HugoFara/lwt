@@ -1,0 +1,56 @@
+<?php declare(strict_types=1);
+/**
+ * Get Tomorrow Count Use Case
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Modules\Review\Application\UseCases
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Modules\Review\Application\UseCases;
+
+use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
+use Lwt\Modules\Review\Domain\TestConfiguration;
+
+/**
+ * Use case for getting count of words due tomorrow.
+ *
+ * @since 3.0.0
+ */
+class GetTomorrowCount
+{
+    private ReviewRepositoryInterface $repository;
+
+    /**
+     * Constructor.
+     *
+     * @param ReviewRepositoryInterface $repository Review repository
+     */
+    public function __construct(ReviewRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
+     * Get count of words due tomorrow.
+     *
+     * @param TestConfiguration $config Test configuration
+     *
+     * @return array{count: int}
+     */
+    public function execute(TestConfiguration $config): array
+    {
+        if (!$config->isValid()) {
+            return ['count' => 0];
+        }
+
+        return [
+            'count' => $this->repository->getTomorrowCount($config)
+        ];
+    }
+}

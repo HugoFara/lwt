@@ -34,6 +34,7 @@ use Lwt\Services\ExportService;
 use Lwt\Services\ExpressionService;
 use Lwt\Services\FeedService;
 use Lwt\Services\HomeService;
+use Lwt\Services\LanguageService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\PasswordService;
 use Lwt\Services\ServerDataService;

@@ -41,7 +41,8 @@ use Lwt\Api\V1\Handlers\ImprovedTextHandler;
 use Lwt\Modules\Language\Http\LanguageApiHandler;
 use Lwt\Api\V1\Handlers\LocalDictionaryHandler;
 use Lwt\Api\V1\Handlers\MediaHandler;
-use Lwt\Api\V1\Handlers\ReviewHandler;
+use Lwt\Modules\Review\Http\ReviewApiHandler;
+use Lwt\Modules\Tags\Http\TagApiHandler;
 use Lwt\Api\V1\Handlers\SettingsHandler;
 use Lwt\Api\V1\Handlers\StatisticsHandler;
 use Lwt\Api\V1\Handlers\TermHandler;
@@ -63,8 +64,9 @@ class ApiV1
     private LanguageApiHandler $languageHandler;
     private LocalDictionaryHandler $localDictionaryHandler;
     private MediaHandler $mediaHandler;
-    private ReviewHandler $reviewHandler;
+    private ReviewApiHandler $reviewHandler;
     private SettingsHandler $settingsHandler;
+    private TagApiHandler $tagHandler;
     private StatisticsHandler $statisticsHandler;
     private TermHandler $termHandler;
     private TextHandler $textHandler;
@@ -89,9 +91,10 @@ class ApiV1
         $this->languageHandler = new LanguageApiHandler();
         $this->localDictionaryHandler = new LocalDictionaryHandler();
         $this->mediaHandler = new MediaHandler();
-        $this->reviewHandler = new ReviewHandler();
+        $this->reviewHandler = new ReviewApiHandler();
         $this->settingsHandler = new SettingsHandler();
         $this->statisticsHandler = new StatisticsHandler();
+        $this->tagHandler = new TagApiHandler();
         $this->termHandler = new TermHandler();
         $this->textHandler = new TextHandler();
     }
@@ -494,20 +497,7 @@ class ApiV1
 
     private function handleTagsGet(array $fragments): void
     {
-        switch ($fragments[1] ?? '') {
-            case 'term':
-                Response::success(\Lwt\Services\TagService::getAllTermTags());
-                break;
-            case 'text':
-                Response::success(\Lwt\Services\TagService::getAllTextTags());
-                break;
-            default:
-                // Return both tag types
-                Response::success([
-                    'term' => \Lwt\Services\TagService::getAllTermTags(),
-                    'text' => \Lwt\Services\TagService::getAllTextTags()
-                ]);
-        }
+        $this->tagHandler->handleGet(array_slice($fragments, 1));
     }
 
     private function handleTermsGet(array $fragments, array $params): void

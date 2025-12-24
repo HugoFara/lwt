@@ -196,7 +196,7 @@ class RoutesTest extends TestCase
     public static function reviewTestRoutesProvider(): array
     {
         return [
-            'test index' => ['/test', 'TestController@index'],
+            'test index' => ['/test', 'Lwt\\Modules\\Review\\Http\\TestController@index'],
         ];
     }
 
@@ -216,7 +216,7 @@ class RoutesTest extends TestCase
     public static function languageRoutesProvider(): array
     {
         return [
-            'languages list' => ['/languages', 'LanguageController@index'],
+            'languages list' => ['/languages', 'Lwt\\Modules\\Language\\Http\\LanguageController@index'],
         ];
     }
 
@@ -236,8 +236,8 @@ class RoutesTest extends TestCase
     public static function tagRoutesProvider(): array
     {
         return [
-            'tags list' => ['/tags', 'TermTagsController@index'],
-            'tags text' => ['/tags/text', 'TextTagsController@index'],
+            'tags list' => ['/tags', 'Lwt\\Modules\\Tags\\Http\\TermTagController@index'],
+            'tags text' => ['/tags/text', 'Lwt\\Modules\\Tags\\Http\\TextTagController@index'],
         ];
     }
 

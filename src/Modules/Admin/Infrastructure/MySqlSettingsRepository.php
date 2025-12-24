@@ -1,0 +1,82 @@
+<?php declare(strict_types=1);
+/**
+ * MySQL Settings Repository
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Modules\Admin\Infrastructure
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Modules\Admin\Infrastructure;
+
+use Lwt\Database\QueryBuilder;
+use Lwt\Database\Settings;
+use Lwt\Modules\Admin\Domain\SettingsRepositoryInterface;
+
+/**
+ * MySQL repository for settings operations.
+ *
+ * Provides database access for application settings.
+ *
+ * @since 3.0.0
+ */
+class MySqlSettingsRepository implements SettingsRepositoryInterface
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function get(string $key, string $default = ''): string
+    {
+        return Settings::getWithDefault($key);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function save(string $key, string $value): void
+    {
+        Settings::save($key, $value);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function deleteByPattern(string $pattern): int
+    {
+        return QueryBuilder::table('settings')
+            ->where('StKey', 'LIKE', $pattern)
+            ->delete();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAll(): array
+    {
+        $rows = QueryBuilder::table('settings')
+            ->select(['StKey', 'StValue'])
+            ->getPrepared();
+
+        $settings = [];
+        foreach ($rows as $row) {
+            $settings[$row['StKey']] = $row['StValue'] ?? '';
+        }
+
+        return $settings;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function exists(string $key): bool
+    {
+        return QueryBuilder::table('settings')
+            ->where('StKey', '=', $key)
+            ->existsPrepared();
+    }
+}
