@@ -31,7 +31,7 @@ require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimil
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../Core/Database/Restore.php';
 require_once __DIR__ . '/../Services/MediaService.php';
-require_once __DIR__ . '/../Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
@@ -39,7 +39,7 @@ use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Modules\Tags\Application\TagsFacade;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Core\Http\InputValidator;
 
 /**
@@ -65,17 +65,17 @@ class FeedsController extends BaseController
     private FeedFacade $feedService;
 
     /**
-     * @var LanguageService Language service instance
+     * @var LanguageFacade Language facade instance
      */
-    private LanguageService $languageService;
+    private LanguageFacade $languageService;
 
     /**
      * Create a new FeedsController.
      *
-     * @param FeedFacade      $feedService     Feed facade for RSS feed operations
-     * @param LanguageService $languageService Language service for language operations
+     * @param FeedFacade     $feedService     Feed facade for RSS feed operations
+     * @param LanguageFacade $languageService Language facade for language operations
      */
-    public function __construct(FeedFacade $feedService, LanguageService $languageService)
+    public function __construct(FeedFacade $feedService, LanguageFacade $languageService)
     {
         parent::__construct();
         $this->feedService = $feedService;

@@ -16,7 +16,7 @@
 namespace Lwt\Controllers;
 
 use Lwt\Services\HomeService;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 
@@ -32,8 +32,7 @@ require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimil
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../Core/Database/Restore.php';
 require_once __DIR__ . '/../Services/MediaService.php';
-require_once __DIR__ . '/../Services/LanguageService.php';
-// LanguagePresets loaded via autoloader
+// LanguageFacade and LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../Services/HomeService.php';
 
 /**
@@ -56,19 +55,19 @@ class HomeController extends BaseController
     private HomeService $homeService;
 
     /**
-     * Language service instance.
+     * Language facade instance.
      *
-     * @var LanguageService
+     * @var LanguageFacade
      */
-    private LanguageService $languageService;
+    private LanguageFacade $languageService;
 
     /**
      * Create a new HomeController.
      *
-     * @param HomeService     $homeService     Home service for dashboard data
-     * @param LanguageService $languageService Language service for language operations
+     * @param HomeService    $homeService     Home service for dashboard data
+     * @param LanguageFacade $languageService Language facade for language operations
      */
-    public function __construct(HomeService $homeService, LanguageService $languageService)
+    public function __construct(HomeService $homeService, LanguageFacade $languageService)
     {
         parent::__construct();
         $this->homeService = $homeService;

@@ -13,7 +13,7 @@ use Lwt\Database\Settings;
 use Lwt\Core\StringUtils;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Services\ExportService;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\MediaService;
 use Lwt\Services\SentenceService;
 use Lwt\Services\TableSetService;
@@ -46,7 +46,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
 require_once __DIR__ . '/../../../src/backend/Services/ExportService.php';
 require_once __DIR__ . '/../../../src/backend/Services/MediaService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
-require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 
 /**
  * Integration tests for core functionality.
@@ -56,7 +56,7 @@ require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
  */
 class IntegrationTest extends TestCase
 {
-    private static ?LanguageService $languageService = null;
+    private static ?LanguageFacade $languageService = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -92,7 +92,7 @@ class IntegrationTest extends TestCase
             Restore::restoreFile($handle, "Demo Database");
         }
 
-        self::$languageService = new LanguageService();
+        self::$languageService = new LanguageFacade();
     }
 
     public function testInstallDemoDB(): void

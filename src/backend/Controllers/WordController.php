@@ -24,8 +24,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
-require_once __DIR__ . '/../Services/LanguageService.php';
-// LanguagePresets loaded via autoloader
+// LanguageFacade and LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../Modules/Text/Application/TextFacade.php';
 
@@ -39,7 +38,7 @@ use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Services\ExportService;
 use Lwt\Services\SentenceService;
 use Lwt\Modules\Tags\Application\TagsFacade;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Core\Http\InputValidator;
@@ -63,7 +62,7 @@ use Lwt\Core\Http\InputValidator;
 class WordController extends BaseController
 {
     protected WordService $wordService;
-    protected LanguageService $languageService;
+    protected LanguageFacade $languageService;
     protected WordListService $listService;
     protected WordUploadService $uploadService;
     protected ExportService $exportService;
@@ -75,7 +74,7 @@ class WordController extends BaseController
      * Create a new WordController.
      *
      * @param WordService|null       $wordService       Word service for vocabulary operations
-     * @param LanguageService|null   $languageService   Language service for language operations
+     * @param LanguageFacade|null    $languageService   Language facade for language operations
      * @param WordListService|null   $listService       Word list service
      * @param WordUploadService|null $uploadService     Word upload service
      * @param ExportService|null     $exportService     Export service
@@ -85,7 +84,7 @@ class WordController extends BaseController
      */
     public function __construct(
         ?WordService $wordService = null,
-        ?LanguageService $languageService = null,
+        ?LanguageFacade $languageService = null,
         ?WordListService $listService = null,
         ?WordUploadService $uploadService = null,
         ?ExportService $exportService = null,
@@ -95,7 +94,7 @@ class WordController extends BaseController
     ) {
         parent::__construct();
         $this->wordService = $wordService ?? new WordService();
-        $this->languageService = $languageService ?? new LanguageService();
+        $this->languageService = $languageService ?? new LanguageFacade();
         $this->listService = $listService ?? new WordListService();
         $this->uploadService = $uploadService ?? new WordUploadService();
         $this->exportService = $exportService ?? new ExportService();
@@ -1826,7 +1825,7 @@ class WordController extends BaseController
     private function displayUploadForm(): void
     {
         $currentLanguage = \Lwt\Database\Settings::get('currentlanguage');
-        $languageService = new \Lwt\Services\LanguageService();
+        $languageService = new \Lwt\Modules\Language\Application\LanguageFacade();
         $languages = $languageService->getLanguagesForSelect();
         include __DIR__ . '/../../Modules/Vocabulary/Views/upload_form.php';
     }

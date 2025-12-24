@@ -19,7 +19,7 @@ use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\Database\Validation;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Services\LocalDictionaryService;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\DictionaryImport\CsvImporter;
 use Lwt\Services\DictionaryImport\JsonImporter;
 use Lwt\Services\DictionaryImport\StarDictImporter;
@@ -27,7 +27,7 @@ use RuntimeException;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
-require_once __DIR__ . '/../Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 
 /**
  * Controller for local dictionary management.
@@ -47,15 +47,15 @@ require_once __DIR__ . '/../Services/LanguageService.php';
 class LocalDictionaryController extends BaseController
 {
     private LocalDictionaryService $dictService;
-    private LanguageService $languageService;
+    private LanguageFacade $languageService;
 
     /**
      * Create a new LocalDictionaryController.
      *
      * @param LocalDictionaryService $dictService     Dictionary service
-     * @param LanguageService        $languageService Language service
+     * @param LanguageFacade         $languageService Language facade
      */
-    public function __construct(LocalDictionaryService $dictService, LanguageService $languageService)
+    public function __construct(LocalDictionaryService $dictService, LanguageFacade $languageService)
     {
         parent::__construct();
         $this->dictService = $dictService;

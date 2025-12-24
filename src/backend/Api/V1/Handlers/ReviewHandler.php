@@ -7,13 +7,13 @@ use Lwt\Database\QueryBuilder;
 use Lwt\Database\UserScopedQuery;
 use Lwt\Services\TestService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
 
 require_once __DIR__ . '/../../../Services/TestService.php';
-require_once __DIR__ . '/../../../Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../../../Services/ExportService.php';
 
 /**
@@ -396,7 +396,7 @@ class ReviewHandler
         $langSettings = $this->testService->getLanguageSettings($langIdFromSql);
 
         // Get language code for TTS
-        $languageService = new LanguageService();
+        $languageService = new LanguageFacade();
         $langCode = $languageService->getLanguageCode(
             $langIdFromSql,
             LanguagePresets::getAll()
@@ -475,7 +475,7 @@ class ReviewHandler
         $regexWord = $langSettings['regexWord'] ?? '';
 
         // Get language code for TTS
-        $languageService = new LanguageService();
+        $languageService = new LanguageFacade();
         $langCode = $languageService->getLanguageCode(
             $langIdFromSql,
             LanguagePresets::getAll()

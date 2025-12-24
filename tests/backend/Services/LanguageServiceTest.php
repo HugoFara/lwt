@@ -4,11 +4,11 @@ namespace Lwt\Tests\Services;
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Modules\Language\Domain\Language;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
-use Lwt\Services\LanguageService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -17,11 +17,10 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
-// Module classes loaded via autoloader
+// LanguageFacade and module classes loaded via autoloader
 
 /**
- * Unit tests for the LanguageService class.
+ * Unit tests for the LanguageFacade class.
  *
  * Tests language CRUD operations, text reparsing,
  * and related data count functionality.
@@ -29,7 +28,7 @@ require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 class LanguageServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private LanguageService $service;
+    private LanguageFacade $service;
     private static array $testLanguageIds = [];
 
     /** @var array<string, mixed> Original $_REQUEST for cleanup */
@@ -57,7 +56,7 @@ class LanguageServiceTest extends TestCase
     {
         $this->originalRequest = $_REQUEST;
         $_REQUEST = [];
-        $this->service = new LanguageService();
+        $this->service = new LanguageFacade();
     }
 
     protected function tearDown(): void

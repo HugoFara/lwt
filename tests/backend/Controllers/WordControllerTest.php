@@ -142,7 +142,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
 
         $this->assertInstanceOf(WordController::class, $controller);
     }
@@ -153,7 +153,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $this->assertInstanceOf(WordService::class, $service);
@@ -167,7 +167,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $data = [
@@ -190,7 +190,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create a word first
@@ -222,7 +222,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create multiple words
@@ -255,7 +255,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create words with status 1
@@ -289,7 +289,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create word with status 2
@@ -318,7 +318,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create word with status 4
@@ -347,7 +347,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create word with sentence
@@ -381,7 +381,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create word with mixed case
@@ -410,7 +410,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create word in lowercase
@@ -439,7 +439,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create word with well-known status (99)
@@ -464,7 +464,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create first word
@@ -496,7 +496,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
 
         $this->assertTrue(method_exists($controller, 'edit'));
         $this->assertTrue(method_exists($controller, 'listEdit'));
@@ -520,7 +520,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $count = $service->deleteMultiple([]);
@@ -534,7 +534,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $count = $service->updateStatusMultiple([], 5);
@@ -548,7 +548,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $count = $service->updateStatusDateMultiple([]);
@@ -562,7 +562,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $count = $service->deleteSentencesMultiple([]);
@@ -576,7 +576,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $count = $service->toLowercaseMultiple([]);
@@ -590,7 +590,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $count = $service->capitalizeMultiple([]);
@@ -606,7 +606,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
         $termHandler = new TermHandler();
 
@@ -634,7 +634,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
         $termHandler = new TermHandler();
 
@@ -660,7 +660,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
         $termHandler = new TermHandler();
 
@@ -688,7 +688,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $data = [
@@ -717,7 +717,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $result = $service->getWordData(999999);
@@ -733,7 +733,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $data = [
@@ -755,7 +755,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $result = $service->getWordText(999999);
@@ -787,7 +787,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
         $termHandler = new TermHandler();
 
@@ -848,7 +848,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
 
         $_REQUEST = [];
         ob_start();
@@ -866,7 +866,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
 
         $this->assertTrue(method_exists($controller, 'bulkTranslate'));
     }
@@ -877,7 +877,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $terms = [
@@ -903,7 +903,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Test with non-existent text (returns empty values)
@@ -922,7 +922,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Get max before
@@ -959,7 +959,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
 
         $this->assertTrue(method_exists($controller, 'editMulti'));
     }
@@ -970,7 +970,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $data = [
@@ -1004,7 +1004,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create first (buffer output)
@@ -1048,7 +1048,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create a multi-word (buffer output)
@@ -1081,7 +1081,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $json = $service->exportTermAsJson(
@@ -1109,7 +1109,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
 
         // Without wid, tid, ord, or op, should return early
         $_REQUEST = [];
@@ -1129,7 +1129,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $this->assertTrue(method_exists($controller, 'editTerm'));
     }
 
@@ -1141,7 +1141,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $this->assertTrue(method_exists($controller, 'listEdit'));
     }
 
@@ -1153,7 +1153,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
 
         $_REQUEST = [];
         ob_start();
@@ -1169,7 +1169,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $this->assertTrue(method_exists($controller, 'all'));
     }
 
@@ -1181,7 +1181,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create a word first
@@ -1216,7 +1216,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create a word first
@@ -1248,7 +1248,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
 
         $_POST = [
             'id' => 'invalid123',
@@ -1268,7 +1268,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create a word
@@ -1301,7 +1301,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $this->assertTrue(method_exists($controller, 'show'));
     }
 
@@ -1313,7 +1313,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $this->assertTrue(method_exists($controller, 'upload'));
     }
 
@@ -1323,7 +1323,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $uploadService = $controller->getUploadServiceForTest();
 
         $this->assertNotNull($uploadService);
@@ -1337,7 +1337,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $result = $service->findByText('nonexistent_word_xyz', self::$testLangId);
@@ -1351,7 +1351,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create a word
@@ -1375,7 +1375,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Non-existent text and ord should return null
@@ -1390,7 +1390,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $data = $service->getLanguageData(self::$testLangId);
@@ -1407,7 +1407,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $result = $service->getTextLanguageId(999999);
@@ -1421,7 +1421,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Empty filters should return all words
@@ -1436,7 +1436,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create some words
@@ -1462,7 +1462,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create a word with status 1
@@ -1497,7 +1497,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create first word
@@ -1522,7 +1522,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $result = $service->getSentenceForTerm(999999, 999999, 'test');
@@ -1536,7 +1536,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $hex = $service->textToClassName('hello');
@@ -1551,7 +1551,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $count = $service->getWordCount(999999);
@@ -1565,7 +1565,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // This should not throw an exception even with non-existent data
@@ -1581,7 +1581,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // This should return an array even for non-existent text
@@ -1596,7 +1596,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // This should not throw an exception
@@ -1612,7 +1612,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $result = $service->getWordAtPosition(999999, 999999);
@@ -1626,7 +1626,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create a word
@@ -1659,7 +1659,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $details = $service->getWordDetails(999999);
@@ -1673,7 +1673,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create a word with * translation (empty)
@@ -1697,7 +1697,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $result = $service->findMultiWordByText('nonexistent_multiword', self::$testLangId);
@@ -1711,7 +1711,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $result = $service->getLanguageIdFromText(999999);
@@ -1725,7 +1725,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $result = $service->getSentenceIdAtPosition(999999, 999999);
@@ -1739,7 +1739,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Should return false for non-existent text
@@ -1754,7 +1754,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         $result = $service->getMultiWordData(999999);
@@ -1768,7 +1768,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create a word with romanization
@@ -1799,7 +1799,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Should return an array even for non-existent text
@@ -1814,7 +1814,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $service = $controller->getWordService();
 
         // Create a multi-word (buffer output)
@@ -1848,7 +1848,7 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
         $this->assertTrue(method_exists($controller, 'create'));
     }
 }

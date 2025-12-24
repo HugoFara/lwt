@@ -18,12 +18,12 @@ namespace Lwt\Modules\Review\Http;
 
 use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Domain\TestConfiguration;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
 
-require_once __DIR__ . '/../../../backend/Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../../../backend/Services/ExportService.php';
 require_once __DIR__ . '/../../../backend/View/Helper/StatusHelper.php';
 
@@ -354,7 +354,7 @@ class ReviewApiHandler
         $langSettings = $this->reviewFacade->getLanguageSettings($langIdFromSql);
 
         // Get language code for TTS
-        $languageService = new LanguageService();
+        $languageService = new LanguageFacade();
         $langCode = $languageService->getLanguageCode(
             $langIdFromSql,
             LanguagePresets::getAll()
@@ -433,7 +433,7 @@ class ReviewApiHandler
         $regexWord = $langSettings['regexWord'] ?? '';
 
         // Get language code for TTS
-        $languageService = new LanguageService();
+        $languageService = new LanguageFacade();
         $langCode = $languageService->getLanguageCode(
             $langIdFromSql,
             LanguagePresets::getAll()

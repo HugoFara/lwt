@@ -22,7 +22,7 @@ use Lwt\Database\Maintenance;
 use Lwt\Database\UserScopedQuery;
 use Lwt\View\Helper\StatusHelper;
 use Lwt\Services\ExportService;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 
 /**
  * Service class for managing word list operations.
@@ -881,7 +881,7 @@ class WordListService
             'LgShowRomanization'
         );
 
-        $languageService = new LanguageService();
+        $languageService = new LanguageFacade();
         return [
             'showRoman' => $showRoman,
             'scrdir' => $languageService->getScriptDirectionTag($langId),

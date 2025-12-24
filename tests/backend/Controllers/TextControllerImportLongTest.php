@@ -7,7 +7,7 @@ use Lwt\Modules\Text\Http\TextController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Modules\Text\Application\TextFacade;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
@@ -18,7 +18,7 @@ EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../../../src/backend/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../src/backend/Services/SentenceService.php';
 require_once __DIR__ . '/../../../src/backend/Services/AnnotationService.php';
@@ -152,7 +152,7 @@ class TextControllerImportLongTest extends TestCase
         }
 
         $textService = new TextFacade();
-        $languageService = new LanguageService();
+        $languageService = new LanguageFacade();
         $controller = new TextController($textService, $languageService);
 
         $this->assertInstanceOf(TextController::class, $controller);
@@ -165,7 +165,7 @@ class TextControllerImportLongTest extends TestCase
         }
 
         $textService = new TextFacade();
-        $languageService = new LanguageService();
+        $languageService = new LanguageFacade();
         $controller = new TextController($textService, $languageService);
 
         $this->assertTrue(method_exists($controller, 'importLong'));

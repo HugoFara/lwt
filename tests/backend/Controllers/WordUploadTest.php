@@ -141,7 +141,7 @@ class WordUploadTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
 
         $this->assertTrue(method_exists($controller, 'upload'));
     }
@@ -152,7 +152,7 @@ class WordUploadTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Services\LanguageService());
+        $controller = new WordController(new \Lwt\Services\WordService(), new \Lwt\Modules\Language\Application\LanguageFacade());
 
         $this->assertTrue(method_exists($controller, 'getUploadServiceForTest'));
 

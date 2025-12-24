@@ -20,7 +20,7 @@ use Lwt\Services\DemoService;
 use Lwt\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Services\HomeService;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\PasswordService;
 use Lwt\Services\SentenceService;
 use Lwt\Services\ServerDataService;
@@ -79,9 +79,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             );
         });
 
-        $container->singleton(LanguageService::class, function (Container $_c) {
-            return new LanguageService();
-        });
+        // LanguageFacade is registered by LanguageServiceProvider
 
         $container->singleton(AuthService::class, function (Container $c) {
             return new AuthService(
@@ -172,7 +170,7 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $container->singleton(TtsService::class, function (Container $c) {
             return new TtsService(
-                $c->get(LanguageService::class)
+                $c->get(LanguageFacade::class)
             );
         });
 

@@ -9,7 +9,7 @@ use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Services\HomeService;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -88,7 +88,7 @@ class HomeControllerTest extends TestCase
      */
     private function createController(): HomeController
     {
-        return new HomeController(new HomeService(), new LanguageService());
+        return new HomeController(new HomeService(), new LanguageFacade());
     }
 
     // ===== Constructor tests =====

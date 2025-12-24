@@ -25,7 +25,7 @@ require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
-require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 
 /**
  * CRUD tests for the TextFacade class.

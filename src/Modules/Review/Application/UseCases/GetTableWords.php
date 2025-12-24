@@ -16,11 +16,11 @@ namespace Lwt\Modules\Review\Application\UseCases;
 
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\TestConfiguration;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\ExportService;
 
-require_once __DIR__ . '/../../../../backend/Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../../../../backend/Services/ExportService.php';
 
 /**
@@ -72,7 +72,7 @@ class GetTableWords
         $regexWord = $langSettings['regexWord'] ?? '';
 
         // Get language code for TTS
-        $languageService = new LanguageService();
+        $languageService = new LanguageFacade();
         $langCode = $languageService->getLanguageCode($langId, LanguagePresets::getAll());
 
         // Get words

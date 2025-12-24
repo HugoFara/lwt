@@ -41,7 +41,7 @@ require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimil
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../Core/Database/Restore.php';
 require_once __DIR__ . '/../Services/MediaService.php';
-require_once __DIR__ . '/../Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
 // LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../Services/BackupService.php';

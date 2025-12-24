@@ -15,10 +15,10 @@ Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/Http/UrlUtilities.php';
-require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../../../src/backend/Services/TtsService.php';
 
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 
 /**
@@ -30,7 +30,7 @@ class TtsServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
     private TtsService $service;
-    private static ?LanguageService $languageService = null;
+    private static ?LanguageFacade $languageService = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -48,7 +48,7 @@ class TtsServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$languageService = new LanguageService();
+        self::$languageService = new LanguageFacade();
     }
 
     protected function setUp(): void

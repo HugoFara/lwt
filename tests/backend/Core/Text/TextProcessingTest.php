@@ -25,11 +25,11 @@ require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/UseCases
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Database/Restore.php';
 require_once __DIR__ . '/../../../../src/backend/Services/ExportService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 
 use Lwt\Core\StringUtils;
 use Lwt\Services\ExportService;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\TextStatisticsService;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\StatusHelper;
@@ -43,7 +43,7 @@ use Lwt\View\Helper\StatusHelper;
 class TextProcessingTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static ?LanguageService $languageService = null;
+    private static ?LanguageFacade $languageService = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -61,7 +61,7 @@ class TextProcessingTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$languageService = new LanguageService();
+        self::$languageService = new LanguageFacade();
     }
 
     protected function tearDown(): void

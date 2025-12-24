@@ -17,9 +17,10 @@ namespace Lwt\Services;
 use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Settings;
+use Lwt\Modules\Language\Application\LanguageFacade;
 
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
-require_once __DIR__ . '/LanguageService.php';
+// LanguageFacade loaded via autoloader
 
 /**
  * Service class for Text-to-Speech settings.
@@ -34,20 +35,20 @@ require_once __DIR__ . '/LanguageService.php';
 class TtsService
 {
     /**
-     * Language service instance.
+     * Language facade instance.
      *
-     * @var LanguageService
+     * @var LanguageFacade
      */
-    private LanguageService $languageService;
+    private LanguageFacade $languageService;
 
     /**
      * Constructor - initialize dependencies.
      *
-     * @param LanguageService|null $languageService Language service (optional for BC)
+     * @param LanguageFacade|null $languageService Language facade (optional for BC)
      */
-    public function __construct(?LanguageService $languageService = null)
+    public function __construct(?LanguageFacade $languageService = null)
     {
-        $this->languageService = $languageService ?? new LanguageService();
+        $this->languageService = $languageService ?? new LanguageFacade();
     }
 
     /**

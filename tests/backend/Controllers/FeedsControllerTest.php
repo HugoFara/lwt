@@ -9,7 +9,7 @@ use Lwt\Core\Globals;
 use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Core\Container\Container;
 use Lwt\Modules\Feed\FeedServiceProvider;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
@@ -163,7 +163,7 @@ class FeedsControllerTest extends TestCase
      */
     private function createController(): FeedsController
     {
-        return new FeedsController($this->getFeedFacade(), new LanguageService());
+        return new FeedsController($this->getFeedFacade(), new LanguageFacade());
     }
 
     // ===== Constructor tests =====

@@ -19,7 +19,7 @@ use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextNavigationService;
 use Lwt\Modules\Tags\Application\TagsFacade;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
@@ -39,8 +39,7 @@ require_once dirname(__DIR__) . '/Application/TextFacade.php';
 require_once LWT_BACKEND_PATH . '/View/Helper/PageLayoutHelper.php';
 require_once LWT_BACKEND_PATH . '/View/Helper/SelectOptionsBuilder.php';
 require_once LWT_BACKEND_PATH . '/Services/TextDisplayService.php';
-require_once LWT_BACKEND_PATH . '/Services/LanguageService.php';
-// LanguagePresets loaded via autoloader
+// LanguageFacade and LanguagePresets loaded via autoloader
 
 /**
  * Controller for text management and reading interface.
@@ -61,24 +60,24 @@ require_once LWT_BACKEND_PATH . '/Services/LanguageService.php';
 class TextController extends BaseController
 {
     private TextFacade $textService;
-    private LanguageService $languageService;
+    private LanguageFacade $languageService;
     private TextDisplayService $displayService;
 
     /**
      * Create a new TextController.
      *
      * @param TextFacade|null         $textService     Text facade for text operations
-     * @param LanguageService|null    $languageService Language service for language operations
+     * @param LanguageFacade|null     $languageService Language facade for language operations
      * @param TextDisplayService|null $displayService  Text display service
      */
     public function __construct(
         ?TextFacade $textService = null,
-        ?LanguageService $languageService = null,
+        ?LanguageFacade $languageService = null,
         ?TextDisplayService $displayService = null
     ) {
         parent::__construct();
         $this->textService = $textService ?? new TextFacade();
-        $this->languageService = $languageService ?? new LanguageService();
+        $this->languageService = $languageService ?? new LanguageFacade();
         $this->displayService = $displayService ?? new TextDisplayService();
     }
 

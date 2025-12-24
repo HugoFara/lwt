@@ -17,10 +17,10 @@ namespace Lwt\Modules\Review\Application\UseCases;
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\TestConfiguration;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 
-require_once __DIR__ . '/../../../../backend/Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 
 /**
  * Use case for building test configuration from request parameters.
@@ -140,7 +140,7 @@ class GetTestConfiguration
         $langSettings = $this->repository->getLanguageSettings($langId);
 
         // Get language code for TTS
-        $languageService = new LanguageService();
+        $languageService = new LanguageFacade();
         $langCode = $languageService->getLanguageCode($langId, LanguagePresets::getAll());
 
         // Get test counts

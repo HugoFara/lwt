@@ -17,13 +17,12 @@ namespace Lwt\Controllers;
 
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\TestService;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Services/TestService.php';
-require_once __DIR__ . '/../Services/LanguageService.php';
-// LanguagePresets loaded via autoloader
+// LanguageFacade and LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../Services/TextNavigationService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
@@ -50,21 +49,21 @@ require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
 class TestController extends BaseController
 {
     private TestService $testService;
-    private LanguageService $languageService;
+    private LanguageFacade $languageService;
 
     /**
      * Create a new TestController.
      *
-     * @param TestService|null     $testService     Test service (optional for BC)
-     * @param LanguageService|null $languageService Language service (optional for BC)
+     * @param TestService|null    $testService     Test service (optional for BC)
+     * @param LanguageFacade|null $languageService Language facade (optional for BC)
      */
     public function __construct(
         ?TestService $testService = null,
-        ?LanguageService $languageService = null
+        ?LanguageFacade $languageService = null
     ) {
         parent::__construct();
         $this->testService = $testService ?? new TestService();
-        $this->languageService = $languageService ?? new LanguageService();
+        $this->languageService = $languageService ?? new LanguageFacade();
     }
 
     /**

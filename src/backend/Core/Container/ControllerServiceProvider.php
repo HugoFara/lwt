@@ -33,7 +33,6 @@ use Lwt\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Services\HomeService;
-use Lwt\Services\LanguageService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\PasswordService;
 use Lwt\Services\ServerDataService;
@@ -98,7 +97,7 @@ class ControllerServiceProvider implements ServiceProviderInterface
         $container->bind(TestController::class, function (Container $c) {
             return new TestController(
                 $c->get(TestService::class),
-                $c->get(LanguageService::class)
+                $c->get(LanguageFacade::class)
             );
         });
 
@@ -124,21 +123,21 @@ class ControllerServiceProvider implements ServiceProviderInterface
         $container->bind(FeedsController::class, function (Container $c) {
             return new FeedsController(
                 $c->get(FeedFacade::class),
-                $c->get(LanguageService::class)
+                $c->get(LanguageFacade::class)
             );
         });
 
         $container->bind(HomeController::class, function (Container $c) {
             return new HomeController(
                 $c->get(HomeService::class),
-                $c->get(LanguageService::class)
+                $c->get(LanguageFacade::class)
             );
         });
 
         $container->bind(TextController::class, function (Container $c) {
             return new TextController(
                 $c->get(TextFacade::class),
-                $c->get(LanguageService::class),
+                $c->get(LanguageFacade::class),
                 $c->get(TextDisplayService::class)
             );
         });
@@ -146,7 +145,7 @@ class ControllerServiceProvider implements ServiceProviderInterface
         $container->bind(WordController::class, function (Container $c) {
             return new WordController(
                 $c->get(WordService::class),
-                $c->get(LanguageService::class),
+                $c->get(LanguageFacade::class),
                 $c->get(WordListService::class),
                 $c->get(WordUploadService::class),
                 $c->get(ExportService::class),

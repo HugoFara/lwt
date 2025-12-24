@@ -20,12 +20,12 @@ use Lwt\Controllers\BaseController;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Domain\TestConfiguration;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../../../backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../../backend/Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../../../backend/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../backend/Services/AnnotationService.php';
 require_once __DIR__ . '/../../../backend/View/Helper/PageLayoutHelper.php';
@@ -52,21 +52,21 @@ require_once __DIR__ . '/../../../backend/Core/Bootstrap/start_session.php';
 class TestController extends BaseController
 {
     private ReviewFacade $reviewFacade;
-    private LanguageService $languageService;
+    private LanguageFacade $languageService;
 
     /**
      * Create a new TestController.
      *
-     * @param ReviewFacade|null    $reviewFacade    Review facade (optional for BC)
-     * @param LanguageService|null $languageService Language service (optional for BC)
+     * @param ReviewFacade|null   $reviewFacade    Review facade (optional for BC)
+     * @param LanguageFacade|null $languageService Language facade (optional for BC)
      */
     public function __construct(
         ?ReviewFacade $reviewFacade = null,
-        ?LanguageService $languageService = null
+        ?LanguageFacade $languageService = null
     ) {
         parent::__construct();
         $this->reviewFacade = $reviewFacade ?? new ReviewFacade();
-        $this->languageService = $languageService ?? new LanguageService();
+        $this->languageService = $languageService ?? new LanguageFacade();
     }
 
     /**

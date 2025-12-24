@@ -17,7 +17,7 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 
 /**
  * Tests for FeedFacade RSS feed operations.
