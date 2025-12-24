@@ -9,7 +9,7 @@
  * - $pagination: Array with 'pages', 'currentPage', 'perPage'
  * - $currentQuery: Current filter query
  * - $currentSort: Current sort index
- * - $service: TagService instance
+ * - $service: TagsFacade instance
  * - $isTextTag: boolean - true for text tags, false for term tags
  *
  * PHP version 8.1

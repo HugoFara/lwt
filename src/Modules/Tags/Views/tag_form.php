@@ -5,7 +5,7 @@
  * Variables expected:
  * - $mode: 'new' or 'edit'
  * - $tag: array with 'id', 'text', 'comment' (for edit mode, null for new)
- * - $service: TagService instance
+ * - $service: TagsFacade instance
  * - $formFieldPrefix: 'Tg' or 'T2'
  *
  * PHP version 8.1

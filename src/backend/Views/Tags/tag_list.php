@@ -9,7 +9,7 @@
  * - $pagination: Array with 'pages', 'currentPage', 'perPage'
  * - $currentQuery: Current filter query
  * - $currentSort: Current sort index
- * - $service: TagService instance
+ * - $service: TagsFacade instance
  * - $isTextTag: boolean - true for text tags, false for term tags
  *
  * PHP version 8.1
@@ -37,7 +37,7 @@ use Lwt\View\Helper\FormHelper;
 /** @var array $pagination */
 /** @var string $currentQuery */
 /** @var int $currentSort */
-/** @var \Lwt\Services\TagService $service */
+/** @var \Lwt\Modules\Tags\Application\TagsFacade $service */
 /** @var bool $isTextTag */
 
 $baseUrl = $service->getBaseUrl();

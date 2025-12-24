@@ -5,7 +5,7 @@
  * Variables expected:
  * - $mode: 'new' or 'edit'
  * - $tag: array with 'id', 'text', 'comment' (for edit mode, null for new)
- * - $service: TagService instance
+ * - $service: TagsFacade instance
  * - $formFieldPrefix: 'Tg' or 'T2'
  *
  * PHP version 8.1
@@ -24,7 +24,7 @@ namespace Lwt\Views\Tags;
 
 /** @var string $mode */
 /** @var array|null $tag */
-/** @var \Lwt\Services\TagService $service */
+/** @var \Lwt\Modules\Tags\Application\TagsFacade $service */
 /** @var string $formFieldPrefix */
 
 use Lwt\View\Helper\IconHelper;

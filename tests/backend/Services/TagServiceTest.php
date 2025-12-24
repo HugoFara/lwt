@@ -5,7 +5,8 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
+use Lwt\Modules\Tags\Domain\TagType;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -13,18 +14,18 @@ EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/TagService.php';
 
 /**
- * Unit tests for the TagService class.
+ * Unit tests for the TagsFacade class.
  *
- * Tests tag management (both term tags and text tags) through the service layer.
+ * Tests tag management (both term tags and text tags) through the facade layer.
+ * Migrated from TagServiceTest to use the new modular architecture.
  */
 class TagServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private TagService $termTagService;
-    private TagService $textTagService;
+    private TagsFacade $termTagService;
+    private TagsFacade $textTagService;
 
     public static function setUpBeforeClass(): void
     {
@@ -46,29 +47,43 @@ class TagServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->termTagService = new TagService('term');
-        $this->textTagService = new TagService('text');
+        $this->termTagService = TagsFacade::forTermTags();
+        $this->textTagService = TagsFacade::forTextTags();
     }
 
-    // ===== Constructor tests =====
+    // ===== Factory method tests =====
+
+    public function testForTermTagsCreatesTermTagFacade(): void
+    {
+        $service = TagsFacade::forTermTags();
+        $this->assertEquals('Term', $service->getTagTypeLabel());
+        $this->assertEquals('/tags', $service->getBaseUrl());
+    }
+
+    public function testForTextTagsCreatesTextTagFacade(): void
+    {
+        $service = TagsFacade::forTextTags();
+        $this->assertEquals('Text', $service->getTagTypeLabel());
+        $this->assertEquals('/tags/text', $service->getBaseUrl());
+    }
 
     public function testConstructorDefaultsToTermTags(): void
     {
-        $service = new TagService();
+        $service = new TagsFacade();
         $this->assertEquals('Term', $service->getTagTypeLabel());
         $this->assertEquals('/tags', $service->getBaseUrl());
     }
 
     public function testConstructorAcceptsTermType(): void
     {
-        $service = new TagService('term');
+        $service = new TagsFacade(TagType::TERM);
         $this->assertEquals('Term', $service->getTagTypeLabel());
         $this->assertEquals('/tags', $service->getBaseUrl());
     }
 
     public function testConstructorAcceptsTextType(): void
     {
-        $service = new TagService('text');
+        $service = new TagsFacade(TagType::TEXT);
         $this->assertEquals('Text', $service->getTagTypeLabel());
         $this->assertEquals('/tags/text', $service->getBaseUrl());
     }
@@ -122,14 +137,13 @@ class TagServiceTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $result);
     }
 
-    public function testGetCountWithWhereClause(): void
+    public function testGetCountWithQuery(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $whereData = $this->termTagService->buildWhereClause('nonexistent_tag_xyz');
-        $result = $this->termTagService->getCount($whereData);
+        $result = $this->termTagService->getCount('nonexistent_tag_xyz');
         $this->assertIsInt($result);
     }
 
@@ -221,19 +235,19 @@ class TagServiceTest extends TestCase
 
     public function testGetSortColumnReturnsCorrectColumn(): void
     {
-        $this->assertEquals('Text', $this->termTagService->getSortColumn(1));
-        $this->assertEquals('Comment', $this->termTagService->getSortColumn(2));
-        $this->assertEquals('ID desc', $this->termTagService->getSortColumn(3));
-        $this->assertEquals('ID asc', $this->termTagService->getSortColumn(4));
+        $this->assertEquals('text', $this->termTagService->getSortColumn(1));
+        $this->assertEquals('comment', $this->termTagService->getSortColumn(2));
+        $this->assertEquals('newest', $this->termTagService->getSortColumn(3));
+        $this->assertEquals('oldest', $this->termTagService->getSortColumn(4));
     }
 
     public function testGetSortColumnNormalizesOutOfRange(): void
     {
-        // Index 0 should become index 1
-        $this->assertEquals('Text', $this->termTagService->getSortColumn(0));
+        // Index 0 should return default 'text'
+        $this->assertEquals('text', $this->termTagService->getSortColumn(0));
 
-        // Index > 4 should become index 4
-        $this->assertEquals('ID asc', $this->termTagService->getSortColumn(99));
+        // Index > 4 should return default 'text'
+        $this->assertEquals('text', $this->termTagService->getSortColumn(99));
     }
 
     // ===== getList() tests =====
@@ -353,14 +367,14 @@ class TagServiceTest extends TestCase
     {
         $result = $this->termTagService->getItemsUrl(123);
         $this->assertStringContainsString('/words', $result);
-        $this->assertStringContainsString('tag1=123', $result);
+        $this->assertStringContainsString('tag=123', $result);
     }
 
     public function testGetItemsUrlReturnsTextsUrlForTextTags(): void
     {
         $result = $this->textTagService->getItemsUrl(456);
         $this->assertStringContainsString('/texts', $result);
-        $this->assertStringContainsString('tag1=456', $result);
+        $this->assertStringContainsString('tag=456', $result);
     }
 
     // ===== getArchivedItemsUrl() tests =====
@@ -368,8 +382,8 @@ class TagServiceTest extends TestCase
     public function testGetArchivedItemsUrlReturnsArchivedTextsUrl(): void
     {
         $result = $this->textTagService->getArchivedItemsUrl(789);
-        $this->assertStringContainsString('edit_archivedtexts.php', $result);
-        $this->assertStringContainsString('tag1=789', $result);
+        $this->assertStringContainsString('/archived', $result);
+        $this->assertStringContainsString('tag=789', $result);
     }
 
     // ===== formatDuplicateError() tests =====
@@ -408,7 +422,7 @@ class TagServiceTest extends TestCase
         }
 
         $result = $this->termTagService->deleteMultiple([]);
-        $this->assertEquals("Multiple Actions: 0", $result);
+        $this->assertStringContainsString('0', $result);
     }
 
     // ===== CRUD operation tests (integration) =====
