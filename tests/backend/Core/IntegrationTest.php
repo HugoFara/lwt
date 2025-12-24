@@ -11,13 +11,13 @@ use Lwt\Database\Connection;
 use Lwt\Database\Restore;
 use Lwt\Database\Settings;
 use Lwt\Core\StringUtils;
-use Lwt\Services\DictionaryService;
+use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Services\ExportService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\MediaService;
 use Lwt\Services\SentenceService;
 use Lwt\Services\TableSetService;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Services\TextNavigationService;
 use Lwt\Services\TextStatisticsService;
 use Lwt\View\Helper\FormHelper;
@@ -38,16 +38,15 @@ require_once __DIR__ . '/../../../src/backend/View/Helper/StatusHelper.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../src/backend/Services/SentenceService.php';
 require_once __DIR__ . '/../../../src/backend/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../src/backend/Services/SimilarTermsService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
-require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
 require_once __DIR__ . '/../../../src/backend/Services/ExportService.php';
 require_once __DIR__ . '/../../../src/backend/Services/MediaService.php';
-require_once __DIR__ . '/../../../src/backend/Services/DictionaryService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
-require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
 
 /**
  * Integration tests for core functionality.
@@ -580,7 +579,7 @@ class IntegrationTest extends TestCase
         );
 
         // Test getting tag list
-        $tag_list = TagService::getWordTagList($word_id);
+        $tag_list = TagsFacade::getWordTagList($word_id);
         $this->assertStringContainsString('testtag1', $tag_list);
 
         // Clean up
@@ -820,13 +819,13 @@ class IntegrationTest extends TestCase
      */
     public function testCreateDictLinksInEditWin(): void
     {
-        // Function signature: DictionaryService::createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst)
+        // Function signature: DictionaryAdapter::createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst)
         $lang = 1;
         $word = "test";
         $sentctljs = "javascript:void(0)";
         $openfirst = true;
 
-        $service = new DictionaryService();
+        $service = new DictionaryAdapter();
         $result = $service->createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst);
         $this->assertIsString($result);
     }

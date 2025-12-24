@@ -13,7 +13,7 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Services\SimilarTermsService;
+use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
 ?>
@@ -32,7 +32,7 @@ use Lwt\View\Helper\IconHelper;
     data_info="Term" type="text" name="WoText" id="WoText" value="" maxlength="250" />
     <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?></td>
 </tr>
-<?php echo (new SimilarTermsService())->printSimilarTermsTabRow(); ?>
+<?php echo (new FindSimilarTerms())->getTableRow(); ?>
 <tr>
 <td class="td1 right">Translation:</td>
 <td class="td1">

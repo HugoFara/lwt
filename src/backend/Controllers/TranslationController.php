@@ -18,14 +18,14 @@ namespace Lwt\Controllers;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Integration\GoogleTimeToken;
 use Lwt\Core\Utils\ErrorHandler;
-use Lwt\Services\DictionaryService;
+use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Services\TranslationService;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\IconHelper;
 
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
-require_once __DIR__ . '/../Services/DictionaryService.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
 require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
 require_once __DIR__ . '/../Services/TranslationService.php';
 
@@ -54,11 +54,11 @@ class TranslationController extends BaseController
     protected TranslationService $translationService;
 
     /**
-     * Dictionary service instance
+     * Dictionary adapter instance
      *
-     * @var DictionaryService
+     * @var DictionaryAdapter
      */
-    protected DictionaryService $dictionaryService;
+    protected DictionaryAdapter $dictionaryService;
 
     /**
      * Create a new TranslationController.
@@ -69,7 +69,7 @@ class TranslationController extends BaseController
     {
         parent::__construct();
         $this->translationService = $translationService;
-        $this->dictionaryService = new DictionaryService();
+        $this->dictionaryService = new DictionaryAdapter();
     }
 
     /**
@@ -157,7 +157,7 @@ class TranslationController extends BaseController
 
         // Build Google Translate link
         $ggLink = $this->dictionaryService->makeOpenDictStr(
-            DictionaryService::createTheDictLink(
+            DictionaryAdapter::createDictLink(
                 $this->translationService->buildGoogleTranslateUrl($text, $srcLang, $tgtLang),
                 $text
             ),

@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-24 (Review module migrated to modular monolith, 6/7 modules complete)
+**Last Updated:** 2025-12-24 (Service wrapper migrations: WordStatusService removed, TagService partially migrated)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -453,7 +453,7 @@ Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
 - [x] Controller pattern implemented (14 controllers, 8,223 lines)
 - [x] View layer organized (92 files in 10 directories, 8,499 lines)
 - [x] Entity classes exist (5 classes: GoogleTranslate, Language, Term, Text, User)
-- [x] Value Objects exist (5 classes: LanguageId, TextId, TermId, TermStatus, UserId)
+- [x] Value Objects migrated to modules (5 classes: LanguageId, TextId, TermId, TermStatus in `Modules/*/Domain/ValueObject/`; UserId in `Core/Entity/ValueObject/`)
 - [x] `Globals` class for configuration access
 - [x] `StringUtils` class for string utilities
 - [x] `InputValidator` class for input handling
@@ -968,7 +968,7 @@ These are intentionally kept inline as they are simpler than the overhead of a s
 **Elapsed Time:** ~12 months (estimated based on architecture changes)
 **Remaining Effort:** Minimal - Phase 3 effectively complete
 
-## Architecture Summary (2025-12-19)
+## Architecture Summary (2025-12-24)
 
 | Component | Count | Lines |
 |-----------|-------|-------|
@@ -976,14 +976,26 @@ These are intentionally kept inline as they are simpler than the overhead of a s
 | Services | 36 | 18,571 |
 | Repositories | 4 | ~3,000 |
 | Views | 92 | 8,499 |
-| Core Files | 40 | - |
+| Core Files | 37 | - |
 | API Handlers | 14 | - |
 | Entity Classes | 5 | - |
 | Value Objects | 5 | - |
 | Custom Exceptions | 6 | - |
 | Bootstrap Classes | 3 | - |
 | Utility Classes | 4 | - |
-| **Total PHP Files** | **207** | - |
+| **Total PHP Files** | **204** | - |
+
+**Value Object Locations (2025-12-24):**
+
+| Value Object | Location |
+|--------------|----------|
+| `LanguageId` | `Modules/Language/Domain/ValueObject/LanguageId.php` |
+| `TextId` | `Modules/Text/Domain/ValueObject/TextId.php` |
+| `TermId` | `Modules/Vocabulary/Domain/ValueObject/TermId.php` |
+| `TermStatus` | `Modules/Vocabulary/Domain/ValueObject/TermStatus.php` |
+| `UserId` | `Core/Entity/ValueObject/UserId.php` |
+
+*Note: Backward compatibility aliases removed 2025-12-24. All code now uses module namespaces directly.*
 
 **Namespace Adoption:**
 
@@ -1058,11 +1070,8 @@ src/
 │   │       ├── Container.php
 │   │       └── ServiceProviderInterface.php
 │   ├── Domain/
-│   │   └── ValueObjects/                # Shared value objects
-│   │       ├── TextId.php
-│   │       ├── TermId.php
-│   │       ├── LanguageId.php
-│   │       └── TermStatus.php
+│   │   └── ValueObjects/                # Shared value objects (UserId only)
+│   │       └── UserId.php               # Cross-module user identity
 │   └── UI/
 │       ├── Helpers/                     # PageLayoutHelper, FormHelper, etc.
 │       └── Assets/                      # ViteHelper, asset management
@@ -1073,7 +1082,8 @@ src/
 │   │   ├── Domain/                      # Business logic (framework-agnostic)
 │   │   │   ├── Text.php                 # Entity with behavior
 │   │   │   ├── TextRepositoryInterface.php  # Port (interface)
-│   │   │   └── TextStatus.php           # Value object
+│   │   │   └── ValueObject/
+│   │   │       └── TextId.php           # Text identity value object
 │   │   ├── Application/                 # Use cases (orchestration)
 │   │   │   ├── ImportText.php           # Single-purpose use case
 │   │   │   ├── ArchiveText.php
@@ -1095,8 +1105,10 @@ src/
 │   │   ├── Domain/
 │   │   │   ├── Term.php
 │   │   │   ├── TermRepositoryInterface.php
-│   │   │   ├── TermStatus.php
-│   │   │   └── Expression.php
+│   │   │   ├── Expression.php
+│   │   │   └── ValueObject/
+│   │   │       ├── TermId.php
+│   │   │       └── TermStatus.php
 │   │   ├── Application/
 │   │   │   ├── SaveTerm.php
 │   │   │   ├── UpdateTermStatus.php
@@ -1117,7 +1129,9 @@ src/
 │   │   ├── Domain/
 │   │   │   ├── Language.php
 │   │   │   ├── LanguageRepositoryInterface.php
-│   │   │   └── ParsingRules.php
+│   │   │   ├── ParsingRules.php
+│   │   │   └── ValueObject/
+│   │   │       └── LanguageId.php
 │   │   ├── Application/
 │   │   │   ├── CreateLanguage.php
 │   │   │   ├── GetLanguageSettings.php
@@ -1328,13 +1342,13 @@ Each frontend module contains:
 
 Move cross-cutting code to `Shared/`:
 
-| Current Location | Target Location |
-|------------------|-----------------|
-| `Core/Database/*` | `Shared/Infrastructure/Database/` |
-| `Core/Http/*` | `Shared/Infrastructure/Http/` |
-| `Core/Container/*` | `Shared/Infrastructure/Container/` |
-| `Core/Entity/ValueObject/*` | `Shared/Domain/ValueObjects/` |
-| `View/Helper/*` | `Shared/UI/Helpers/` |
+| Current Location | Target Location | Status |
+|------------------|-----------------|--------|
+| `Core/Database/*` | `Shared/Infrastructure/Database/` | Pending |
+| `Core/Http/*` | `Shared/Infrastructure/Http/` | Pending |
+| `Core/Container/*` | `Shared/Infrastructure/Container/` | Pending |
+| `Core/Entity/ValueObject/*` | `Modules/*/Domain/ValueObject/` | ✅ DONE (2025-12-24) |
+| `View/Helper/*` | `Shared/UI/Helpers/` | Pending |
 
 #### Stage 2: Pilot Module - Text (80 hours)
 
@@ -1357,12 +1371,56 @@ Apply the same pattern to other modules:
 
 | Module | Current Services | Estimated Effort | Status |
 |--------|------------------|------------------|--------|
-| Vocabulary | WordService, WordStatusService, WordListService, DictionaryService, SimilarTermsService | 60 hours | ✅ DONE |
+| Vocabulary | WordService, WordListService, SimilarTermsService, DictionaryAdapter | 60 hours | ✅ DONE |
 | Language | LanguageService, LanguageDefinitions | 30 hours | ✅ DONE |
 | Review | TestService | 30 hours | ✅ DONE (2025-12-24) |
 | Feed | FeedService | 25 hours | ✅ DONE |
 | Admin | SettingsService, BackupService, StatisticsService, DatabaseWizardService | 35 hours | ⏳ PENDING |
-| Tags | TagService | 20 hours | ✅ DONE |
+| Tags | TagService (partial) | 20 hours | 🔄 IN PROGRESS |
+
+### Service Wrapper Migration Status (2025-12-24)
+
+#### WordStatusService → TermStatusService ✅ COMPLETE
+
+**File removed:** `src/backend/Services/WordStatusService.php`
+
+All usages migrated to `Lwt\Modules\Vocabulary\Application\Services\TermStatusService`:
+
+| Method | Migrated To |
+|--------|-------------|
+| `getStatuses()` | `TermStatusService::getStatuses()` |
+| `makeScoreRandomInsertUpdate()` | `TermStatusService::makeScoreRandomInsertUpdate()` |
+| `SCORE_FORMULA_TODAY` | `TermStatusService::SCORE_FORMULA_TODAY` |
+| `SCORE_FORMULA_TOMORROW` | `TermStatusService::SCORE_FORMULA_TOMORROW` |
+
+**Files updated:** 17 files migrated to use TermStatusService directly.
+
+#### TagService → TagsFacade 🔄 PARTIAL
+
+**File retained:** `src/backend/Services/TagService.php` (still needed for some methods)
+
+**Methods migrated to TagsFacade (direct equivalents):**
+
+| TagService Method | TagsFacade Method | Files Updated |
+|-------------------|-------------------|---------------|
+| `getAllTermTags()` | `TagsFacade::getAllTermTags()` | 4 files |
+| `getAllTextTags()` | `TagsFacade::getAllTextTags()` | 3 files |
+| `getWordTagList()` | `TagsFacade::getWordTagList()` | 5 files |
+| `getWordTagsHtml()` | `TagsFacade::getWordTagsHtml()` | (view files) |
+| `getTextTagsHtml()` | `TagsFacade::getTextTagsHtml()` | (view files) |
+
+**Methods NOT yet in TagsFacade (TagService still required):**
+
+| Method | Reason |
+|--------|--------|
+| `addTagToWords()`, `removeTagFromWords()` | Batch operations need module migration |
+| `addTagToTexts()`, `removeTagFromTexts()` | Batch operations need module migration |
+| `addTagToArchivedTexts()`, `removeTagFromArchivedTexts()` | Batch operations need module migration |
+| `saveWordTags(int)` | Reads from form input - needs form handling refactor |
+| `getTermTagSelectOptions()` | UI helper - needs module migration |
+| `getTextTagSelectOptions()` | UI helper - needs module migration |
+
+**Next steps:** Add missing methods to TagsFacade, then remove TagService.
 
 #### Stage 4: Remove Legacy (40 hours)
 
@@ -1396,6 +1454,8 @@ Apply the same pattern to other modules:
 
 - [x] 6 of 7 modules migrated to new structure (Admin pending)
 - [x] Zero circular dependencies between modules
+- [x] WordStatusService fully migrated and removed
+- [x] TagService partially migrated (direct equivalent methods moved to TagsFacade)
 - [ ] Domain layer has 100% unit test coverage
 - [ ] Frontend modules mirror backend structure
 - [x] `Legacy/` directory is empty and removed

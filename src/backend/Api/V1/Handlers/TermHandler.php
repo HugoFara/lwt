@@ -8,7 +8,7 @@ use Lwt\Database\Escaping;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\UserScopedQuery;
 use Lwt\Services\WordService;
-use Lwt\Services\WordStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\View\Helper\StatusHelper;
 
 require_once __DIR__ . '/../../../Services/WordService.php';
@@ -40,8 +40,8 @@ class TermHandler
         $textlc = mb_strtolower($text, 'UTF-8');
 
         // Insert new word using prepared statement
-        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
-        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+        $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
         // Use raw SQL for complex INSERT with dynamic columns
         $bindings = [$lang, $textlc, $text, $data, '', ''];
@@ -145,7 +145,7 @@ class TermHandler
      */
     public function setWordStatus(int $wid, int $status): int
     {
-        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
 
         // Use raw SQL for dynamic score update
         $bindings = [$status, $wid];
@@ -539,7 +539,7 @@ class TermHandler
             'sentence' => (string)$record['WoSentence'],
             'notes' => (string)($record['WoNotes'] ?? ''),
             'tags' => $tags,
-            'statusLabel' => WordStatusService::getStatusName((int)$record['WoStatus'])
+            'statusLabel' => TermStatusService::getStatusName((int)$record['WoStatus'])
         ];
     }
 
@@ -943,8 +943,8 @@ class TermHandler
      */
     private function getSimilarTermsForEdit(int $langId, string $termLc, ?int $excludeId): array
     {
-        $similarService = new \Lwt\Services\SimilarTermsService();
-        $similarIds = $similarService->getSimilarTermsWeighted($langId, $termLc, 10, 0.33);
+        $similarService = new \Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms();
+        $similarIds = $similarService->execute($langId, $termLc, 10, 0.33);
 
         $result = [];
         foreach ($similarIds as $termId) {
@@ -1024,8 +1024,8 @@ class TermHandler
         $notes = trim($data['notes'] ?? '');
 
         // Insert the word
-        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
-        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+        $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
         // Use raw SQL for complex INSERT with dynamic columns
         $bindings = [$langId, $textLc, $wordText, $status, $translation, $sentence, $notes, $romanization];
@@ -1122,7 +1122,7 @@ class TermHandler
         $notes = trim($data['notes'] ?? '');
 
         // Update the word
-        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
 
         // Use raw SQL for dynamic score update
         $bindings = [$translation, $romanization, $sentence, $notes, $status, $termId];

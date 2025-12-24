@@ -3,10 +3,9 @@
 namespace Lwt\Tests\Core\Word;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
-require_once __DIR__ . '/../../../../src/backend/Services/WordStatusService.php';
 
 use Lwt\Core\Globals;
-use Lwt\Services\WordStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use PHPUnit\Framework\TestCase;
 
 Globals::initialize();
@@ -22,14 +21,14 @@ final class WordScoringTest extends TestCase
     public function testMakeScoreRandomInsertUpdate(): void
     {
         // Test 'iv' type - column names only
-        $result = WordStatusService::makeScoreRandomInsertUpdate('iv');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('iv');
         $this->assertStringContainsString('WoTodayScore', $result);
         $this->assertStringContainsString('WoTomorrowScore', $result);
         $this->assertStringContainsString('WoRandom', $result);
         $this->assertStringNotContainsString('=', $result);
 
         // Test 'id' type - values only (for INSERT)
-        $result = WordStatusService::makeScoreRandomInsertUpdate('id');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('id');
         $this->assertStringContainsString('RAND()', $result);
         $this->assertStringContainsString('GREATEST', $result);
         $this->assertStringContainsString('WoStatus', $result);
@@ -37,14 +36,14 @@ final class WordScoringTest extends TestCase
         // but not in assignment context (no "column = value")
 
         // Test 'u' type - key=value pairs for UPDATE
-        $result = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('u');
         $this->assertStringContainsString('WoTodayScore =', $result);
         $this->assertStringContainsString('WoTomorrowScore =', $result);
         $this->assertStringContainsString('WoRandom = RAND()', $result);
         $this->assertStringContainsString('GREATEST', $result);
 
         // Test default case (should return empty string)
-        $result = WordStatusService::makeScoreRandomInsertUpdate('anything_else');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('anything_else');
         $this->assertEquals('', $result);
     }
 }

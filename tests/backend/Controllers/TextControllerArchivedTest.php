@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Modules\Text\Http\TextController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\TextService;
+use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Services\LanguageService;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
@@ -22,14 +22,14 @@ require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../src/backend/Services/SentenceService.php';
 require_once __DIR__ . '/../../../src/backend/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../src/backend/Services/SimilarTermsService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
-require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 require_once __DIR__ . '/../../../src/Modules/Text/Http/TextController.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/TextFacade.php';
 
 /**
  * Unit tests for the TextController::archived() method and related functionality.
@@ -176,7 +176,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $textService = new TextService();
+        $textService = new TextFacade();
         $languageService = new LanguageService();
         $controller = new TextController($textService, $languageService);
 
@@ -189,7 +189,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $textService = new TextService();
+        $textService = new TextFacade();
         $languageService = new LanguageService();
         $controller = new TextController($textService, $languageService);
 
@@ -204,7 +204,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->getArchivedTextById(self::$testArchivedTextId);
 
@@ -219,7 +219,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->getArchivedTextById(999999);
 
@@ -232,7 +232,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $count = $service->getArchivedTextCount('', '', '');
 
@@ -246,7 +246,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $count = $service->getArchivedTextCount(' and AtLgID=' . self::$testLangId, '', '');
 
@@ -260,7 +260,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $texts = $service->getArchivedTextsList('', '', '', 1, 1, 10);
 
@@ -280,7 +280,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Sort by title ascending
         $texts = $service->getArchivedTextsList(' and AtLgID=' . self::$testLangId, '', '', 1, 1, 10);
@@ -295,7 +295,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $perPage = $service->getArchivedTextsPerPage();
 
@@ -311,7 +311,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->buildArchivedQueryWhereClause('', 'title', '');
 
@@ -324,7 +324,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->buildArchivedQueryWhereClause('test', 'title', '');
 
@@ -338,7 +338,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->buildArchivedQueryWhereClause('content', 'text', '');
 
@@ -352,7 +352,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->buildArchivedQueryWhereClause('search', 'title,text', '');
 
@@ -369,7 +369,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->buildArchivedTagHavingClause('', '', '');
 
@@ -384,7 +384,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Create a temporary archived text to update
         Connection::query(
@@ -419,7 +419,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Create a temporary archived text to delete
         Connection::query(
@@ -442,7 +442,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Create temporary archived texts to delete
         Connection::query(
@@ -475,7 +475,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Create a temporary archived text to unarchive
         Connection::query(
@@ -510,7 +510,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Create temporary archived texts to unarchive
         Connection::query(
@@ -583,7 +583,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Test different sort orders (1-4)
         foreach ([1, 2, 3, 4] as $sort) {
@@ -613,7 +613,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $totalCount = $service->getArchivedTextCount('', '', '');
         $perPage = $service->getArchivedTextsPerPage();
@@ -632,7 +632,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Test title,text mode (default)
         $result = $service->buildArchivedQueryWhereClause('content', 'title,text', '');
@@ -649,7 +649,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Test regex mode
         $result = $service->buildArchivedQueryWhereClause('test.*', 'title', 'r');
@@ -670,8 +670,8 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service1 = new TextService();
-        $service2 = new TextService();
+        $service1 = new TextFacade();
+        $service2 = new TextFacade();
 
         // Both should return same archived text
         $text1 = $service1->getArchivedTextById(self::$testArchivedTextId);

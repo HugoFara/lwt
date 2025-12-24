@@ -19,7 +19,7 @@ use Lwt\Database\Settings;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\SentenceService;
-use Lwt\Services\SimilarTermsService;
+use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 
 /**
  * Handler for language-related API operations.
@@ -39,9 +39,9 @@ class LanguageApiHandler
     private SentenceService $sentenceService;
 
     /**
-     * @var SimilarTermsService Similar terms service instance
+     * @var FindSimilarTerms Similar terms use case instance
      */
-    private SimilarTermsService $similarTermsService;
+    private FindSimilarTerms $similarTermsService;
 
     /**
      * Constructor - initialize services.
@@ -52,7 +52,7 @@ class LanguageApiHandler
     {
         $this->languageFacade = $languageFacade ?? new LanguageFacade();
         $this->sentenceService = new SentenceService();
-        $this->similarTermsService = new SimilarTermsService();
+        $this->similarTermsService = new FindSimilarTerms();
     }
 
     /**
@@ -117,7 +117,7 @@ class LanguageApiHandler
      */
     public function getSimilarTerms(int $langId, string $term): array
     {
-        return ["similar_terms" => $this->similarTermsService->printSimilarTerms($langId, $term)];
+        return ["similar_terms" => $this->similarTermsService->getFormattedTerms($langId, $term)];
     }
 
     /**

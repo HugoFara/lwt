@@ -14,7 +14,7 @@
 namespace Lwt\Views\Word;
 
 use Lwt\Services\SentenceService;
-use Lwt\Services\SimilarTermsService;
+use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
 ?>
@@ -33,7 +33,7 @@ use Lwt\View\Helper\IconHelper;
    <td class="td1"><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="WoText" value="<?php echo htmlspecialchars($word['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="40" /> <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
    </td>
 </tr>
-<?php echo (new SimilarTermsService())->printSimilarTermsTabRow(); ?>
+<?php echo (new FindSimilarTerms())->getTableRow(); ?>
 <tr>
    <td class="td1 right">Translation:</td>
    <td class="td1">
@@ -65,7 +65,7 @@ use Lwt\View\Helper\IconHelper;
 </tr>
 <tr>
    <td class="td1 right" colspan="2">  &nbsp;
-       <?php echo (new \Lwt\Services\DictionaryService())->createDictLinksInEditWin2((int)$word['WoLgID'], 'WoSentence', 'WoText'); ?>
+       <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin2((int)$word['WoLgID'], 'WoSentence', 'WoText'); ?>
        &nbsp; &nbsp;
        <input type="button" value="Cancel" data-action="cancel-navigate" data-url="/words/edit#rec<?php echo $word['WoID']; ?>" />
        <input type="submit" name="op" value="Change" />

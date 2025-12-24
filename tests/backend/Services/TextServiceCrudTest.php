@@ -7,7 +7,7 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
-use Lwt\Services\TextService;
+use Lwt\Modules\Text\Application\TextFacade;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -16,19 +16,19 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/TextFacade.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../src/backend/Services/SentenceService.php';
 require_once __DIR__ . '/../../../src/backend/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../src/backend/Services/SimilarTermsService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
-require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 
 /**
- * CRUD tests for the TextService class.
+ * CRUD tests for the TextFacade class.
  *
  * Tests create, read, update, delete, archive, and unarchive operations.
  */
@@ -36,7 +36,7 @@ class TextServiceCrudTest extends TestCase
 {
     private static bool $dbConnected = false;
     private static int $testLangId = 0;
-    private TextService $service;
+    private TextFacade $service;
     private array $createdTextIds = [];
     private array $createdArchivedTextIds = [];
 
@@ -91,7 +91,7 @@ class TextServiceCrudTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->service = new TextService();
+        $this->service = new TextFacade();
         $this->createdTextIds = [];
         $this->createdArchivedTextIds = [];
     }

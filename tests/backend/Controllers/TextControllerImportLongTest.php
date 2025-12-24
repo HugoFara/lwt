@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Modules\Text\Http\TextController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\TextService;
+use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Services\LanguageService;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
@@ -22,14 +22,14 @@ require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../src/backend/Services/SentenceService.php';
 require_once __DIR__ . '/../../../src/backend/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../src/backend/Services/SimilarTermsService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
-require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 require_once __DIR__ . '/../../../src/Modules/Text/Http/TextController.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/TextFacade.php';
 
 /**
  * Unit tests for the TextController::importLong() method and related functionality.
@@ -151,7 +151,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $textService = new TextService();
+        $textService = new TextFacade();
         $languageService = new LanguageService();
         $controller = new TextController($textService, $languageService);
 
@@ -164,7 +164,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $textService = new TextService();
+        $textService = new TextFacade();
         $languageService = new LanguageService();
         $controller = new TextController($textService, $languageService);
 
@@ -179,7 +179,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->prepareLongTextData(
             [],
@@ -197,7 +197,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Paragraph handling 1: every line break is a paragraph
         $result = $service->prepareLongTextData(
@@ -216,7 +216,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Paragraph handling 2: only double newlines are paragraphs
         $result = $service->prepareLongTextData(
@@ -234,7 +234,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->prepareLongTextData([], '', 1);
 
@@ -247,7 +247,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Windows line endings should be converted
         $result = $service->prepareLongTextData(
@@ -266,7 +266,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->prepareLongTextData(
             [],
@@ -285,7 +285,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $data = "First sentence. Second sentence. Third sentence.";
         $result = $service->splitLongText($data, self::$testLangId, 10);
@@ -300,7 +300,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Create data with many sentences
         $sentences = [];
@@ -324,7 +324,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $data = "First paragraph sentence.\n\nSecond paragraph sentence.";
         $result = $service->splitLongText($data, self::$testLangId, 10);
@@ -338,7 +338,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->splitLongText('', self::$testLangId, 10);
 
@@ -353,7 +353,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $texts = ["First sentence. Second sentence."];
 
@@ -387,7 +387,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $texts = [
             "First text content.",
@@ -423,7 +423,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $texts = ["First text.", "Second text."];
 
@@ -448,7 +448,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $texts = [
             "First part.",
@@ -490,7 +490,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->getLanguageTranslateUris();
 
@@ -506,7 +506,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Step 1: Prepare data
         $rawText = "First sentence of the long text. Second sentence.\n\nNew paragraph starts here. More content.";
@@ -556,7 +556,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         // Test with Unicode and special characters
         $result = $service->prepareLongTextData(
@@ -575,7 +575,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->prepareLongTextData(
             [],
@@ -593,7 +593,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $result = $service->saveLongTextImport(
             self::$testLangId,
@@ -652,8 +652,8 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service1 = new TextService();
-        $service2 = new TextService();
+        $service1 = new TextFacade();
+        $service2 = new TextFacade();
 
         $data = "Test sentence.";
 
@@ -671,7 +671,7 @@ class TextControllerImportLongTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TextService();
+        $service = new TextFacade();
 
         $input = "Line one.\nLine two.\n\nParagraph two.";
 

@@ -27,7 +27,7 @@
 namespace Lwt\Views\Word;
 
 use Lwt\Services\SentenceService;
-use Lwt\Services\SimilarTermsService;
+use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
 
@@ -55,7 +55,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1 right"><b>Edit Term:</b></td>
         <td class="td1"><input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="Term" type="text" name="WoText" id="wordfield" value="<?php echo htmlspecialchars($term, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" /> <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
     </td></tr>
-        <?php echo (new SimilarTermsService())->printSimilarTermsTabRow(); ?>
+        <?php echo (new FindSimilarTerms())->getTableRow(); ?>
     <tr>
         <td class="td1 right">Translation:</td>
         <td class="td1"><textarea name="WoTranslation" class="setfocus textarea-noreturn checklength checkoutsidebmp" data_maxlength="500" data_info="Translation" cols="35" rows="3"><?php echo htmlspecialchars($transl, ENT_QUOTES, 'UTF-8'); ?></textarea></td>
@@ -78,7 +78,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1 right">Notes:</td>
         <td class="td1"><textarea name="WoNotes" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Notes" cols="35" rows="3"><?php echo htmlspecialchars($notes, ENT_QUOTES, 'UTF-8'); ?></textarea></td>
     </tr>
-        <?php echo (new SimilarTermsService())->printSimilarTermsTabRow(); ?>
+        <?php echo (new FindSimilarTerms())->getTableRow(); ?>
     <tr>
         <td class="td1 right">Status:</td>
         <td class="td1">
@@ -87,7 +87,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     </tr>
     <tr>
         <td class="td1 right" colspan="2">
-            <?php echo (new \Lwt\Services\DictionaryService())->createDictLinksInEditWin($lang, $term, 'document.forms[0].WoSentence', true); ?>
+            <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin($lang, $term, 'document.forms[0].WoSentence', true); ?>
             &nbsp; &nbsp; &nbsp;
             <input type="submit" name="op" value="Change" />
         </td>

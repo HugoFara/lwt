@@ -6,14 +6,13 @@ use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\UserScopedQuery;
 use Lwt\Services\TestService;
-use Lwt\Services\WordStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Services\LanguageService;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
 
 require_once __DIR__ . '/../../../Services/TestService.php';
-require_once __DIR__ . '/../../../Services/WordStatusService.php';
 require_once __DIR__ . '/../../../Services/LanguageService.php';
 require_once __DIR__ . '/../../../Services/ExportService.php';
 
@@ -281,7 +280,7 @@ class ReviewHandler
         }
 
         // Update the status using raw SQL for dynamic score update
-        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $bindings = [$newStatus, $wordId];
         $result = Connection::preparedExecute(
             "UPDATE words

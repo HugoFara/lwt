@@ -18,14 +18,11 @@ use DateTimeImmutable;
 use Lwt\Core\Entity\User;
 use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
-use Lwt\Core\Repository\UserRepository;
+use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 
 require_once __DIR__ . '/../Core/Entity/User.php';
 require_once __DIR__ . '/../Core/Exception/AuthException.php';
 require_once __DIR__ . '/PasswordService.php';
-require_once __DIR__ . '/../Core/Repository/RepositoryInterface.php';
-require_once __DIR__ . '/../Core/Repository/AbstractRepository.php';
-require_once __DIR__ . '/../Core/Repository/UserRepository.php';
 
 /**
  * Service class for user authentication.
@@ -67,9 +64,9 @@ class AuthService
     /**
      * User repository instance.
      *
-     * @var UserRepository
+     * @var MySqlUserRepository
      */
-    private UserRepository $repository;
+    private MySqlUserRepository $repository;
 
     /**
      * Current authenticated user (cached).
@@ -81,15 +78,15 @@ class AuthService
     /**
      * Create a new AuthService.
      *
-     * @param PasswordService|null $passwordService Optional password service
-     * @param UserRepository|null  $repository      Optional user repository
+     * @param PasswordService|null      $passwordService Optional password service
+     * @param MySqlUserRepository|null  $repository      Optional user repository
      */
     public function __construct(
         ?PasswordService $passwordService = null,
-        ?UserRepository $repository = null
+        ?MySqlUserRepository $repository = null
     ) {
         $this->passwordService = $passwordService ?? new PasswordService();
-        $this->repository = $repository ?? new UserRepository();
+        $this->repository = $repository ?? new MySqlUserRepository();
     }
 
     /**

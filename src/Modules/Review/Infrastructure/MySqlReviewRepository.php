@@ -24,10 +24,9 @@ use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\TestConfiguration;
 use Lwt\Modules\Review\Domain\TestWord;
 use Lwt\Services\SentenceService;
-use Lwt\Services\WordStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 
 require_once __DIR__ . '/../../../backend/Services/SentenceService.php';
-require_once __DIR__ . '/../../../backend/Services/WordStatusService.php';
 
 /**
  * MySQL implementation of ReviewRepositoryInterface.
@@ -204,7 +203,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         Connection::execute(
             "UPDATE words
             SET WoStatus = $newStatus, WoStatusChanged = NOW(), " .
-            WordStatusService::makeScoreRandomInsertUpdate('u') . "
+            TermStatusService::makeScoreRandomInsertUpdate('u') . "
             WHERE WoID = $wordId"
         );
 

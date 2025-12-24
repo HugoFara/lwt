@@ -16,8 +16,10 @@ namespace Lwt\Services;
 
 require_once __DIR__ . '/SentenceService.php';
 require_once __DIR__ . '/ExportService.php';
-require_once __DIR__ . '/WordStatusService.php';
-require_once __DIR__ . '/ExpressionService.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
+
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 
 use Lwt\Modules\Vocabulary\Domain\Term;
 use Lwt\Core\Globals;
@@ -92,8 +94,8 @@ class WordService
         $translation = $this->normalizeTranslation($data['WoTranslation'] ?? '');
 
         try {
-            $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
-            $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+            $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+            $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
             $bindings = [
                 $data['WoLgID'],
@@ -157,7 +159,7 @@ class WordService
         $notes = ExportService::replaceTabNewline($data['WoNotes'] ?? '');
         $roman = $data['WoRomanization'] ?? '';
 
-        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
 
         $bindings = [$text, $translation, $sentence, $notes, $roman];
 
@@ -470,7 +472,7 @@ class WordService
         }
 
         $ids = array_map('intval', $wordIds);
-        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         if ($relative) {
@@ -515,7 +517,7 @@ class WordService
         }
 
         $ids = array_map('intval', $wordIds);
-        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         $sql = "UPDATE words
@@ -660,8 +662,8 @@ class WordService
             return ['id' => (int)$existingId, 'rows' => 0];
         }
 
-        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
-        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+        $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
         $bindings = [$langId, $term, $termlc, $status];
         $sql = "INSERT INTO words (
@@ -870,7 +872,7 @@ class WordService
      */
     public function setStatus(int $wordId, int $status): string
     {
-        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $bindings = [$status, $wordId];
         $sql = "UPDATE words SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate} WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings);
@@ -947,8 +949,8 @@ class WordService
             throw new \RuntimeException("Text ID $textId not found");
         }
 
-        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
-        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+        $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
         $bindings = [$langId, $term, $termlc, $status];
         $sql = "INSERT INTO words (
@@ -1163,8 +1165,8 @@ class WordService
         }
 
         try {
-            $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
-            $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+            $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+            $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
             $bindings = [$langId, $term, $termlc, $status];
             $sql = "INSERT INTO words (
@@ -1234,8 +1236,8 @@ class WordService
             'TxLgID'
         );
 
-        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
-        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+        $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
         $bindings = [$langId, $wordlc, $text, $status, $translation];
         $sql = "INSERT INTO words (
@@ -1340,8 +1342,8 @@ class WordService
             return $max;
         }
 
-        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
-        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+        $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
         // Insert each term using prepared statements for safety
         foreach ($terms as $row) {
@@ -1477,8 +1479,8 @@ class WordService
      */
     public function createMultiWord(array $data): array
     {
-        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
-        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+        $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
         $sentence = ExportService::replaceTabNewline($data['sentence']);
         $notes = ExportService::replaceTabNewline($data['notes'] ?? '');
@@ -1527,7 +1529,7 @@ class WordService
      */
     public function updateMultiWord(int $wordId, array $data, int $oldStatus, int $newStatus): array
     {
-        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $sentence = ExportService::replaceTabNewline($data['sentence']);
         $notes = ExportService::replaceTabNewline($data['notes'] ?? '');
 

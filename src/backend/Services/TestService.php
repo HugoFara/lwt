@@ -21,11 +21,12 @@ use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\UserScopedQuery;
 
-require_once __DIR__ . '/WordStatusService.php';
 require_once __DIR__ . '/ExportService.php';
-require_once __DIR__ . '/TagService.php';
 require_once __DIR__ . '/SentenceService.php';
 require_once __DIR__ . '/../Core/Utils/ErrorHandler.php';
+
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**
  * Service class for managing word tests/reviews.
@@ -448,7 +449,7 @@ class TestService
         Connection::execute(
             "UPDATE words
             SET WoStatus = $newStatus, WoStatusChanged = NOW(), " .
-            WordStatusService::makeScoreRandomInsertUpdate('u') . "
+            TermStatusService::makeScoreRandomInsertUpdate('u') . "
             WHERE WoID = $wordId"
         );
 
@@ -749,7 +750,7 @@ class TestService
         $baseType = $this->getBaseTestType($testType);
 
         if ($baseType == 1) {
-            $tagList = TagService::getWordTagList((int) $wordData['WoID'], false);
+            $tagList = TagsFacade::getWordTagList((int) $wordData['WoID'], false);
             $tagFormatted = $tagList !== '' ? ' [' . $tagList . ']' : '';
             $trans = ExportService::replaceTabNewline($wordData['WoTranslation']) . $tagFormatted;
             return $wordMode ? $trans : "[$trans]";

@@ -25,13 +25,12 @@ require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../Services/TextStatisticsService.php';
 require_once __DIR__ . '/../Services/SentenceService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';
-require_once __DIR__ . '/../Services/SimilarTermsService.php';
 require_once __DIR__ . '/../Services/TextNavigationService.php';
 require_once __DIR__ . '/../Services/TextParsingService.php';
-require_once __DIR__ . '/../Services/ExpressionService.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../Core/Database/Restore.php';
 require_once __DIR__ . '/../Services/MediaService.php';
-require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 
 use Lwt\Core\Utils\ErrorHandler;
@@ -39,7 +38,7 @@ use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 use Lwt\Services\FeedService;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Services\LanguageService;
 use Lwt\Core\Http\InputValidator;
 
@@ -267,7 +266,7 @@ class FeedsController extends BaseController
             ], $tagName);
         }
 
-        TagService::getAllTextTags(true);
+        TagsFacade::getAllTextTags(true);
 
         return $this->feedService->archiveOldTexts($tagName, $maxTexts);
     }

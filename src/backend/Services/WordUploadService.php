@@ -24,8 +24,10 @@ use Lwt\Database\TextParsing;
 use Lwt\Database\UserScopedQuery;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/WordStatusService.php';
-require_once __DIR__ . '/ExpressionService.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
+
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**
  * Service class for importing words/terms from files or text input.
@@ -272,7 +274,7 @@ class WordUploadService
                 'WoTextLC = LOWER(REPLACE(@wotext," ","")), WoText = REPLACE(@wotext, " ", "")' :
                 'WoTextLC = LOWER(WoText)') . ",
             WoStatus = ?, WoStatusChanged = NOW(), " .
-            WordStatusService::makeScoreRandomInsertUpdate('u');
+            TermStatusService::makeScoreRandomInsertUpdate('u');
 
         $stmt = Connection::prepare($sql);
         $stmt->bind('sis', $fileName, $langId, $status);
@@ -396,8 +398,8 @@ class WordUploadService
             $rowPlaceholders .= ', ?';
         }
         $rowPlaceholders .= ', ?, ?, NOW(), ' .  // WoLgID, WoStatus, WoStatusChanged
-            WordStatusService::SCORE_FORMULA_TODAY . ', ' .
-            WordStatusService::SCORE_FORMULA_TOMORROW . ', RAND()';
+            TermStatusService::SCORE_FORMULA_TODAY . ', ' .
+            TermStatusService::SCORE_FORMULA_TOMORROW . ', RAND()';
 
         if ($userId !== null) {
             $rowPlaceholders .= ', ?';
@@ -846,9 +848,9 @@ class WordUploadService
                 " INTO words (
                     WoTextLC, WoText, WoTranslation, WoRomanization, WoSentence,
                     WoStatus, WoStatusChanged, WoLgID,
-                    " . WordStatusService::makeScoreRandomInsertUpdate('iv') . "
+                    " . TermStatusService::makeScoreRandomInsertUpdate('iv') . "
                 )
-                SELECT *, $langId as LgID, " . WordStatusService::makeScoreRandomInsertUpdate('id') . "
+                SELECT *, $langId as LgID, " . TermStatusService::makeScoreRandomInsertUpdate('id') . "
                 FROM (
                     SELECT WoTextLC, WoText, WoTranslation, WoRomanization,
                     WoSentence, $status AS WoStatus,
@@ -958,7 +960,7 @@ class WordUploadService
 
         Connection::preparedExecute($sql, [$langId]);
 
-        TagService::getAllTermTags(true);
+        TagsFacade::getAllTermTags(true);
     }
 
     /**
@@ -1059,7 +1061,7 @@ class WordUploadService
                 ORDER BY WoTextLC, n) A");
 
         $this->cleanupTempTables();
-        TagService::getAllTermTags(true);
+        TagsFacade::getAllTermTags(true);
     }
 
     /**

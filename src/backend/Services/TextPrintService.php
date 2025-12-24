@@ -24,7 +24,7 @@ use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\UserScopedQuery;
 use Lwt\Services\AnnotationService;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**
  * Service class for managing text printing operations.
@@ -276,7 +276,7 @@ class TextPrintService
      */
     public function getWordTags(int $wordId): string
     {
-        return TagService::getWordTagList($wordId, false);
+        return TagsFacade::getWordTagList($wordId, false);
     }
 
     // ===========================

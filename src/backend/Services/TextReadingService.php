@@ -21,7 +21,7 @@ use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 use Lwt\Services\ExportService;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**
  * Service class for text reading display.
@@ -83,7 +83,7 @@ class TextReadingService
                     'data_wid' => $record['WoID'],
                     'data_trans' => htmlspecialchars(
                         ExportService::replaceTabNewline($record['WoTranslation'] ?? '') .
-                        (($tags = TagService::getWordTagList((int)$record['WoID'], false)) ? ' [' . $tags . ']' : ''),
+                        (($tags = TagsFacade::getWordTagList((int)$record['WoID'], false)) ? ' [' . $tags . ']' : ''),
                         ENT_QUOTES,
                         'UTF-8'
                     ),
@@ -124,7 +124,7 @@ class TextReadingService
                     'data_wid' => $record['WoID'],
                     'data_trans' => htmlspecialchars(
                         ExportService::replaceTabNewline($record['WoTranslation'] ?? '') .
-                        (($tags = TagService::getWordTagList((int)$record['WoID'], false)) ? ' [' . $tags . ']' : ''),
+                        (($tags = TagsFacade::getWordTagList((int)$record['WoID'], false)) ? ' [' . $tags . ']' : ''),
                         ENT_QUOTES,
                         'UTF-8'
                     ),

@@ -15,12 +15,10 @@
 
 namespace Lwt\Database;
 
-require_once __DIR__ . '/../../Services/WordStatusService.php';
-
 use Lwt\Core\ApplicationInfo;
 use Lwt\Core\Globals;
 use Lwt\Core\Utils\ErrorHandler;
-use Lwt\Services\WordStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 
 /**
  * Database migrations and initialization utilities.
@@ -330,7 +328,7 @@ class Migrations
             // Update word scores - complex SQL expression, use raw query
             Connection::execute(
                 "UPDATE words
-                SET " . WordStatusService::makeScoreRandomInsertUpdate('u') . "
+                SET " . TermStatusService::makeScoreRandomInsertUpdate('u') . "
                 WHERE WoTodayScore>=-100 AND WoStatus<98"
             );
             // Clean up orphaned wordtags (tags deleted)

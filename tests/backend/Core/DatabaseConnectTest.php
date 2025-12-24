@@ -20,7 +20,7 @@ use Lwt\Database\TextParsing;
 use Lwt\Database\Validation;
 use Lwt\Services\SettingsService;
 use Lwt\Services\TextParsingService;
-use Lwt\Services\WordStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -28,7 +28,6 @@ EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
 
 /**
  * @return string[]
@@ -1295,28 +1294,28 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test WordStatusService::makeScoreRandomInsertUpdate static method
+     * Test TermStatusService::makeScoreRandomInsertUpdate static method
      */
     public function testMakeScoreRandomInsertUpdate(): void
     {
         // Test insert variable mode (column names)
-        $result = WordStatusService::makeScoreRandomInsertUpdate('iv');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('iv');
         $this->assertIsString($result);
         $this->assertStringContainsString('WoTodayScore', $result);
         $this->assertStringContainsString('WoRandom', $result);
 
         // Test insert data mode (values)
-        $result = WordStatusService::makeScoreRandomInsertUpdate('id');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('id');
         $this->assertIsString($result);
         $this->assertStringContainsString('RAND()', $result);
 
         // Test update mode
-        $result = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('u');
         $this->assertIsString($result);
         $this->assertStringContainsString('WoTodayScore', $result);
 
         // Test with invalid mode (should return empty string)
-        $result = WordStatusService::makeScoreRandomInsertUpdate('x');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('x');
         $this->assertIsString($result);
         $this->assertEquals('', $result);
     }

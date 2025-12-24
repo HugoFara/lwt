@@ -25,7 +25,7 @@ use Lwt\Services\SettingsService;
 use Lwt\Services\StatisticsService;
 use Lwt\Services\ThemeService;
 use Lwt\Services\TtsService;
-use Lwt\Services\WordService;
+use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 
 use Lwt\View\Helper\PageLayoutHelper;
@@ -35,10 +35,10 @@ require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../Services/TextStatisticsService.php';
 require_once __DIR__ . '/../Services/SentenceService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';
-require_once __DIR__ . '/../Services/SimilarTermsService.php';
 require_once __DIR__ . '/../Services/TextNavigationService.php';
 require_once __DIR__ . '/../Services/TextParsingService.php';
-require_once __DIR__ . '/../Services/ExpressionService.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../Core/Database/Restore.php';
 require_once __DIR__ . '/../Services/MediaService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
@@ -50,7 +50,7 @@ require_once __DIR__ . '/../Services/ServerDataService.php';
 require_once __DIR__ . '/../Services/SettingsService.php';
 require_once __DIR__ . '/../Services/StatisticsService.php';
 require_once __DIR__ . '/../Services/TtsService.php';
-require_once __DIR__ . '/../Services/WordService.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/CreateTermFromHover.php';
 
 /**
  * Controller for administrative functions.
@@ -77,7 +77,7 @@ class AdminController extends BaseController
     private StatisticsService $statisticsService;
     private SettingsService $settingsService;
     private TtsService $ttsService;
-    private WordService $wordService;
+    private CreateTermFromHover $createTermFromHover;
     private DemoService $demoService;
     private ServerDataService $serverDataService;
     private ThemeService $themeService;
@@ -85,21 +85,21 @@ class AdminController extends BaseController
     /**
      * Constructor - initialize dependencies.
      *
-     * @param BackupService|null      $backupService      Backup service
-     * @param StatisticsService|null  $statisticsService  Statistics service
-     * @param SettingsService|null    $settingsService    Settings service
-     * @param TtsService|null         $ttsService         TTS service
-     * @param WordService|null        $wordService        Word service
-     * @param DemoService|null        $demoService        Demo service
-     * @param ServerDataService|null  $serverDataService  Server data service
-     * @param ThemeService|null       $themeService       Theme service
+     * @param BackupService|null       $backupService       Backup service
+     * @param StatisticsService|null   $statisticsService   Statistics service
+     * @param SettingsService|null     $settingsService     Settings service
+     * @param TtsService|null          $ttsService          TTS service
+     * @param CreateTermFromHover|null $createTermFromHover Create term use case
+     * @param DemoService|null         $demoService         Demo service
+     * @param ServerDataService|null   $serverDataService   Server data service
+     * @param ThemeService|null        $themeService        Theme service
      */
     public function __construct(
         ?BackupService $backupService = null,
         ?StatisticsService $statisticsService = null,
         ?SettingsService $settingsService = null,
         ?TtsService $ttsService = null,
-        ?WordService $wordService = null,
+        ?CreateTermFromHover $createTermFromHover = null,
         ?DemoService $demoService = null,
         ?ServerDataService $serverDataService = null,
         ?ThemeService $themeService = null
@@ -109,7 +109,7 @@ class AdminController extends BaseController
         $this->statisticsService = $statisticsService ?? new StatisticsService();
         $this->settingsService = $settingsService ?? new SettingsService();
         $this->ttsService = $ttsService ?? new TtsService();
-        $this->wordService = $wordService ?? new WordService();
+        $this->createTermFromHover = $createTermFromHover ?? new CreateTermFromHover();
         $this->demoService = $demoService ?? new DemoService();
         $this->serverDataService = $serverDataService ?? new ServerDataService();
         $this->themeService = $themeService ?? new ThemeService();
@@ -321,28 +321,19 @@ class AdminController extends BaseController
         $textId = $this->paramInt('tid', 0) ?? 0;
         $status = $this->paramInt('status', 1) ?? 1;
 
-        // Get translation if status is 1 (new word)
-        $translation = '*';
+        // Get translation language codes for status 1 (new word)
+        $tl = '';
+        $sl = '';
         if ($status === 1) {
             $tl = $this->get('tl');
             $sl = $this->get('sl');
-
-            if ($tl !== '' && $sl !== '') {
-                $tl_array = GoogleTranslate::staticTranslate($text, $sl, $tl);
-                if ($tl_array) {
-                    $translation = $tl_array[0];
-                }
-                if ($translation === $text) {
-                    $translation = '*';
-                }
-            }
 
             header('Pragma: no-cache');
             header('Expires: 0');
         }
 
-        // Create the word
-        $result = $this->wordService->createOnHover($textId, $text, $status, $translation);
+        // Create the word using the use case
+        $result = $this->createTermFromHover->execute($textId, $text, $status, $sl, $tl);
 
         // Render page
         PageLayoutHelper::renderPageStart("New Term: " . $result['word'], false);

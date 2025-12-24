@@ -7,7 +7,7 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
-use Lwt\Services\TextService;
+use Lwt\Modules\Text\Application\TextFacade;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -16,17 +16,17 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/TextFacade.php';
 
 /**
- * Unit tests for the TextService class.
+ * Unit tests for the TextFacade class.
  *
- * Tests text management (active and archived texts) through the service layer.
+ * Tests text management (active and archived texts) through the facade layer.
  */
 class TextServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private TextService $service;
+    private TextFacade $service;
 
     public static function setUpBeforeClass(): void
     {
@@ -48,14 +48,14 @@ class TextServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->service = new TextService();
+        $this->service = new TextFacade();
     }
 
     // ===== Constructor tests =====
 
     public function testServiceCanBeInstantiated(): void
     {
-        $this->assertInstanceOf(TextService::class, $this->service);
+        $this->assertInstanceOf(TextFacade::class, $this->service);
     }
 
     // ===== Method existence tests =====
@@ -722,11 +722,11 @@ class TextServiceTest extends TestCase
 
     public function testMultipleServiceInstances(): void
     {
-        $service1 = new TextService();
-        $service2 = new TextService();
+        $service1 = new TextFacade();
+        $service2 = new TextFacade();
 
-        $this->assertInstanceOf(TextService::class, $service1);
-        $this->assertInstanceOf(TextService::class, $service2);
+        $this->assertInstanceOf(TextFacade::class, $service1);
+        $this->assertInstanceOf(TextFacade::class, $service2);
         $this->assertNotSame($service1, $service2);
     }
 }

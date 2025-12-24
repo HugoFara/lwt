@@ -19,7 +19,7 @@
 namespace Lwt\Database;
 
 use Lwt\Core\Globals;
-use Lwt\Services\TagService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**
  * Database restore and truncation operations.
@@ -130,8 +130,8 @@ class Restore
             Migrations::checkAndUpdate();
             Migrations::reparseAllTexts();
             Maintenance::optimizeDatabase();
-            TagService::getAllTermTags(true);
-            TagService::getAllTextTags(true);
+            TagsFacade::getAllTermTags(true);
+            TagsFacade::getAllTextTags(true);
             $message = "Success: $title restored";
         } elseif ($message == "") {
             $message = "Error: $title NOT restored";
@@ -187,7 +187,7 @@ class Restore
             ->where('StKey', '=', 'currenttext')
             ->delete();
         Maintenance::optimizeDatabase();
-        TagService::getAllTermTags(true);
-        TagService::getAllTextTags(true);
+        TagsFacade::getAllTermTags(true);
+        TagsFacade::getAllTextTags(true);
     }
 }

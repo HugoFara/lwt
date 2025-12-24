@@ -24,9 +24,11 @@ use Lwt\View\Helper\StatusHelper;
 use Lwt\Services\ExportService;
 
 require_once __DIR__ . '/LanguageService.php';
-require_once __DIR__ . '/WordStatusService.php';
-require_once __DIR__ . '/ExpressionService.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../View/Helper/StatusHelper.php';
+
+use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 
 /**
  * Service class for managing word list operations.
@@ -455,7 +457,7 @@ class WordListService
      */
     public function updateStatusByIdList(string $idList, int $newStatus, bool $relative, string $actionType): string
     {
-        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
 
         if ($relative && $newStatus > 0) {
             // Status +1
@@ -495,7 +497,7 @@ class WordListService
     {
         return (string) Connection::execute(
             'update words
-            set WoStatusChanged = NOW(),' . WordStatusService::makeScoreRandomInsertUpdate('u') . '
+            set WoStatusChanged = NOW(),' . TermStatusService::makeScoreRandomInsertUpdate('u') . '
             where WoID in ' . $idList,
             "Updated Status Date (= Now)"
         );
@@ -959,8 +961,8 @@ class WordListService
         $sentence = ExportService::replaceTabNewline($data["WoSentence"] ?? '');
         $romanization = $data["WoRomanization"] ?? '';
 
-        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
-        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+        $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
         $bindings = [$data["WoLgID"], $textLc, $data["WoText"], $data["WoStatus"], $translation, $sentence, $romanization];
         $sql = "INSERT INTO words (WoLgID, WoTextLC, WoText, "
@@ -1024,7 +1026,7 @@ class WordListService
                 'UPDATE words
                 SET WoText = ?, WoTextLC = ?, WoTranslation = ?, WoSentence = ?,
                     WoRomanization = ?, WoStatus = ?, WoStatusChanged = NOW(),' .
-                WordStatusService::makeScoreRandomInsertUpdate('u') .
+                TermStatusService::makeScoreRandomInsertUpdate('u') .
                 ' WHERE WoID = ?'
                 . UserScopedQuery::forTablePrepared('words', $bindings),
                 $bindings
@@ -1035,7 +1037,7 @@ class WordListService
                 'UPDATE words
                 SET WoText = ?, WoTextLC = ?, WoTranslation = ?, WoSentence = ?,
                     WoRomanization = ?,' .
-                WordStatusService::makeScoreRandomInsertUpdate('u') .
+                TermStatusService::makeScoreRandomInsertUpdate('u') .
                 ' WHERE WoID = ?'
                 . UserScopedQuery::forTablePrepared('words', $bindings),
                 $bindings

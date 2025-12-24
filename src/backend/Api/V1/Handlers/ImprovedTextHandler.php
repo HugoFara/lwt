@@ -7,7 +7,7 @@ use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Services\AnnotationService;
-use Lwt\Services\DictionaryService;
+use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\View\Helper\IconHelper;
 
 /**
@@ -278,7 +278,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
                         '</span>
                     </td>
                     <td class="td1 center" nowrap="nowrap">' .
-                        (new DictionaryService())->makeDictLinks($langid, $vals[1]) .
+                        (new DictionaryAdapter())->makeDictLinks($langid, $vals[1]) .
                     '</td>
                     <td class="td1 center">
                         <span id="editlink' . $i . '">' . $wordLink . '</span>

@@ -1,67 +1,66 @@
 <?php declare(strict_types=1);
 /**
- * User Repository
+ * MySQL User Repository
+ *
+ * Infrastructure adapter for user persistence using MySQL.
  *
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Core\Repository
+ * @package  Lwt\Modules\User\Infrastructure
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Core\Repository;
+namespace Lwt\Modules\User\Infrastructure;
 
 use DateTimeImmutable;
 use Lwt\Core\Entity\User;
 use Lwt\Core\Entity\ValueObject\UserId;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
+use Lwt\Modules\User\Domain\UserRepositoryInterface;
 
 /**
- * Repository for User entities.
+ * MySQL implementation of UserRepositoryInterface.
  *
  * Provides database access for user management operations.
  * Handles authentication lookups and user CRUD.
  *
- * @extends AbstractRepository<User>
- *
  * @since 3.0.0
  */
-class UserRepository extends AbstractRepository
+class MySqlUserRepository implements UserRepositoryInterface
 {
     /**
      * @var string Table name without prefix
      */
-    protected string $tableName = 'users';
+    private string $tableName = 'users';
 
     /**
      * @var string Primary key column
      */
-    protected string $primaryKey = 'UsID';
+    private string $primaryKey = 'UsID';
 
     /**
-     * @var array<string, string> Property to column mapping
+     * Get a query builder for this repository's table.
+     *
+     * @return QueryBuilder
      */
-    protected array $columnMap = [
-        'id' => 'UsID',
-        'username' => 'UsUsername',
-        'email' => 'UsEmail',
-        'passwordHash' => 'UsPasswordHash',
-        'apiToken' => 'UsApiToken',
-        'apiTokenExpires' => 'UsApiTokenExpires',
-        'wordPressId' => 'UsWordPressId',
-        'created' => 'UsCreated',
-        'lastLogin' => 'UsLastLogin',
-        'isActive' => 'UsIsActive',
-        'role' => 'UsRole',
-    ];
+    private function query(): QueryBuilder
+    {
+        return QueryBuilder::table($this->tableName);
+    }
 
     /**
-     * {@inheritdoc}
+     * Map a database row to a User entity.
+     *
+     * @param array<string, mixed> $row Database row
+     *
+     * @return User
      */
-    protected function mapToEntity(array $row): User
+    private function mapToEntity(array $row): User
     {
         return User::reconstitute(
             (int) $row['UsID'],
@@ -79,13 +78,13 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * {@inheritdoc}
+     * Map a User entity to database row.
      *
-     * @param User $entity
+     * @param User $entity The user entity
      *
      * @return array<string, mixed>
      */
-    protected function mapToRow(object $entity): array
+    private function mapToRow(User $entity): array
     {
         return [
             'UsID' => $entity->id()->toInt(),
@@ -100,26 +99,6 @@ class UserRepository extends AbstractRepository
             'UsIsActive' => $entity->isActive() ? 1 : 0,
             'UsRole' => $entity->role(),
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param User $entity
-     */
-    protected function getEntityId(object $entity): int
-    {
-        return $entity->id()->toInt();
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param User $entity
-     */
-    protected function setEntityId(object $entity, int $id): void
-    {
-        $entity->setId(UserId::fromInt($id));
     }
 
     /**
@@ -153,11 +132,75 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Find a user by username.
-     *
-     * @param string $username The username
-     *
-     * @return User|null
+     * {@inheritdoc}
+     */
+    public function find(int $id): ?User
+    {
+        $row = $this->query()
+            ->where($this->primaryKey, '=', $id)
+            ->firstPrepared();
+
+        if ($row === null) {
+            return null;
+        }
+
+        return $this->mapToEntity($row);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function save(User $entity): int
+    {
+        $data = $this->mapToRow($entity);
+        $id = $entity->id()->toInt();
+
+        if ($id > 0 && !$entity->id()->isNew()) {
+            // Update existing
+            $this->query()
+                ->where($this->primaryKey, '=', $id)
+                ->updatePrepared($data);
+            return $id;
+        }
+
+        // Insert new
+        $insertData = $data;
+        unset($insertData[$this->primaryKey]);
+
+        $newId = (int) $this->query()->insertPrepared($insertData);
+        $entity->setId(UserId::fromInt($newId));
+
+        return $newId;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delete(int $id): bool
+    {
+        if ($id <= 0) {
+            return false;
+        }
+
+        $affected = $this->query()
+            ->where($this->primaryKey, '=', $id)
+            ->deletePrepared();
+
+        return $affected > 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function exists(int $id): bool
+    {
+        return $this->query()
+            ->where($this->primaryKey, '=', $id)
+            ->existsPrepared();
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function findByUsername(string $username): ?User
     {
@@ -169,11 +212,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Find a user by email.
-     *
-     * @param string $email The email address
-     *
-     * @return User|null
+     * {@inheritdoc}
      */
     public function findByEmail(string $email): ?User
     {
@@ -185,11 +224,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Find a user by API token.
-     *
-     * @param string $token The API token
-     *
-     * @return User|null
+     * {@inheritdoc}
      */
     public function findByApiToken(string $token): ?User
     {
@@ -201,11 +236,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Find a user by WordPress ID.
-     *
-     * @param int $wordPressId The WordPress user ID
-     *
-     * @return User|null
+     * {@inheritdoc}
      */
     public function findByWordPressId(int $wordPressId): ?User
     {
@@ -217,12 +248,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Check if a username exists.
-     *
-     * @param string   $username  Username to check
-     * @param int|null $excludeId User ID to exclude (for updates)
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function usernameExists(string $username, ?int $excludeId = null): bool
     {
@@ -237,12 +263,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Check if an email exists.
-     *
-     * @param string   $email     Email to check
-     * @param int|null $excludeId User ID to exclude (for updates)
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function emailExists(string $email, ?int $excludeId = null): bool
     {
@@ -257,9 +278,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Find all active users.
-     *
-     * @return User[]
+     * {@inheritdoc}
      */
     public function findActive(): array
     {
@@ -329,11 +348,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Update the last login timestamp.
-     *
-     * @param int $userId User ID
-     *
-     * @return bool True if updated
+     * {@inheritdoc}
      */
     public function updateLastLogin(int $userId): bool
     {
@@ -345,12 +360,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Update the password hash.
-     *
-     * @param int    $userId       User ID
-     * @param string $passwordHash New password hash
-     *
-     * @return bool True if updated
+     * {@inheritdoc}
      */
     public function updatePassword(int $userId, string $passwordHash): bool
     {
@@ -362,13 +372,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Update the API token.
-     *
-     * @param int                    $userId  User ID
-     * @param string|null            $token   API token (null to clear)
-     * @param DateTimeImmutable|null $expires Token expiration
-     *
-     * @return bool True if updated
+     * {@inheritdoc}
      */
     public function updateApiToken(int $userId, ?string $token, ?DateTimeImmutable $expires): bool
     {
@@ -383,11 +387,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Activate a user account.
-     *
-     * @param int $userId User ID
-     *
-     * @return bool True if updated
+     * {@inheritdoc}
      */
     public function activate(int $userId): bool
     {
@@ -399,11 +399,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Deactivate a user account.
-     *
-     * @param int $userId User ID
-     *
-     * @return bool True if updated
+     * {@inheritdoc}
      */
     public function deactivate(int $userId): bool
     {
@@ -465,11 +461,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Get users formatted for select dropdown options.
-     *
-     * @param int $maxNameLength Maximum username length before truncation
-     *
-     * @return array<int, array{id: int, username: string, email: string}>
+     * {@inheritdoc}
      */
     public function getForSelect(int $maxNameLength = 40): array
     {
@@ -497,11 +489,7 @@ class UserRepository extends AbstractRepository
     }
 
     /**
-     * Get basic user info (minimal data for lists).
-     *
-     * @param int $userId User ID
-     *
-     * @return array{id: int, username: string, email: string, is_active: bool, is_admin: bool}|null
+     * {@inheritdoc}
      */
     public function getBasicInfo(int $userId): ?array
     {
@@ -550,7 +538,6 @@ class UserRepository extends AbstractRepository
         $total = (clone $query)->countPrepared();
         $totalPages = $total > 0 ? (int) ceil($total / $perPage) : 0;
 
-        // Ensure page is within bounds
         $page = max(1, min($page, max(1, $totalPages)));
         $offset = ($page - 1) * $perPage;
 
@@ -751,5 +738,15 @@ class UserRepository extends AbstractRepository
         }
 
         return $counts;
+    }
+
+    /**
+     * Count all users.
+     *
+     * @return int
+     */
+    public function count(): int
+    {
+        return $this->query()->countPrepared();
     }
 }

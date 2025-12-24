@@ -24,8 +24,8 @@ use Lwt\Database\Settings;
 use Lwt\Services\WordService;
 use Lwt\Services\ExportService;
 use Lwt\Services\TagService;
-use Lwt\Services\DictionaryService;
-use Lwt\Services\TextService;
+use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Services\TextPrintService;
 
 define('LWT_TEXT_API_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
@@ -33,8 +33,8 @@ define('LWT_TEXT_API_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
 require_once LWT_TEXT_API_BACKEND_PATH . '/Services/WordService.php';
 require_once LWT_TEXT_API_BACKEND_PATH . '/Services/ExportService.php';
 require_once LWT_TEXT_API_BACKEND_PATH . '/Services/TagService.php';
-require_once LWT_TEXT_API_BACKEND_PATH . '/Services/DictionaryService.php';
-require_once LWT_TEXT_API_BACKEND_PATH . '/Services/TextService.php';
+require_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
+require_once dirname(__DIR__) . '/Application/TextFacade.php';
 require_once LWT_TEXT_API_BACKEND_PATH . '/Services/TextPrintService.php';
 
 /**
@@ -45,12 +45,12 @@ require_once LWT_TEXT_API_BACKEND_PATH . '/Services/TextPrintService.php';
 class TextApiHandler
 {
     private WordService $wordService;
-    private TextService $textService;
+    private TextFacade $textService;
 
     public function __construct()
     {
         $this->wordService = new WordService();
-        $this->textService = new TextService();
+        $this->textService = new TextFacade();
     }
     /**
      * Save the reading position of the text.

@@ -20,7 +20,6 @@ use Lwt\Controllers\AuthController;
 use Lwt\Controllers\FeedsController;
 use Lwt\Controllers\HomeController;
 use Lwt\Modules\Language\Http\LanguageController;
-use Lwt\Controllers\TagsController;
 use Lwt\Controllers\TestController;
 use Lwt\Modules\Text\Http\TextController;
 use Lwt\Controllers\TextPrintController;
@@ -31,7 +30,7 @@ use Lwt\Services\AuthService;
 use Lwt\Services\BackupService;
 use Lwt\Services\DemoService;
 use Lwt\Services\ExportService;
-use Lwt\Services\ExpressionService;
+use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Services\FeedService;
 use Lwt\Services\HomeService;
 use Lwt\Services\LanguageService;
@@ -43,7 +42,7 @@ use Lwt\Services\StatisticsService;
 use Lwt\Services\TestService;
 use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextPrintService;
-use Lwt\Services\TextService;
+use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Services\ThemeService;
 use Lwt\Services\TranslationService;
 use Lwt\Services\TtsService;
@@ -70,12 +69,6 @@ class ControllerServiceProvider implements ServiceProviderInterface
         // Controllers are registered as factories (new instance each time)
         // This ensures clean state for each request
         // Dependencies are injected from the container
-
-        // Controllers with optional dependencies (use fallback if not injected)
-        // TagsController uses parameterized TagService - leave to fallback
-        $container->bind(TagsController::class, function (Container $_c) {
-            return new TagsController();
-        });
 
         // Controllers with service dependencies
         $container->bind(ApiController::class, function (Container $c) {
@@ -144,7 +137,7 @@ class ControllerServiceProvider implements ServiceProviderInterface
 
         $container->bind(TextController::class, function (Container $c) {
             return new TextController(
-                $c->get(TextService::class),
+                $c->get(TextFacade::class),
                 $c->get(LanguageService::class),
                 $c->get(TextDisplayService::class)
             );
@@ -157,7 +150,7 @@ class ControllerServiceProvider implements ServiceProviderInterface
                 $c->get(WordListService::class),
                 $c->get(WordUploadService::class),
                 $c->get(ExportService::class),
-                $c->get(TextService::class),
+                $c->get(TextFacade::class),
                 $c->get(ExpressionService::class)
             );
         });

@@ -8,7 +8,7 @@ use Lwt\Core\Entity\User;
 use Lwt\Core\Entity\ValueObject\UserId;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Core\Repository\UserRepository;
+use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
@@ -22,20 +22,17 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/UserId.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/User.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Database/PreparedStatement.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/RepositoryInterface.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/AbstractRepository.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/UserRepository.php';
+require_once __DIR__ . '/../../../../src/Modules/User/Infrastructure/MySqlUserRepository.php';
 
 /**
- * Tests for the UserRepository class.
+ * Tests for the MySqlUserRepository class.
  *
- * @covers \Lwt\Core\Repository\UserRepository
- * @covers \Lwt\Core\Repository\AbstractRepository
+ * @covers \Lwt\Modules\User\Infrastructure\MySqlUserRepository
  */
 class UserRepositoryTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private UserRepository $repository;
+    private MySqlUserRepository $repository;
     private static array $testUserIds = [];
 
     public static function setUpBeforeClass(): void
@@ -69,7 +66,7 @@ class UserRepositoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->repository = new UserRepository();
+        $this->repository = new MySqlUserRepository();
     }
 
     protected function tearDown(): void

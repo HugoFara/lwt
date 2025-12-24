@@ -18,7 +18,7 @@ use Lwt\Services\AuthService;
 use Lwt\Services\BackupService;
 use Lwt\Services\DemoService;
 use Lwt\Services\ExportService;
-use Lwt\Services\ExpressionService;
+use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Services\FeedService;
 use Lwt\Services\HomeService;
 use Lwt\Services\LanguageService;
@@ -31,7 +31,6 @@ use Lwt\Services\TestService;
 use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextParsingService;
 use Lwt\Services\TextPrintService;
-use Lwt\Services\TextService;
 use Lwt\Services\ThemeService;
 use Lwt\Services\TranslationService;
 use Lwt\Services\TtsService;
@@ -39,9 +38,9 @@ use Lwt\Services\WordListService;
 use Lwt\Services\WordPressService;
 use Lwt\Services\WordService;
 use Lwt\Services\WordUploadService;
-use Lwt\Core\Repository\UserRepository;
 use Lwt\Core\Parser\ParserRegistry;
 use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
+use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 use Lwt\Core\Parser\ParsingCoordinator;
 
@@ -88,7 +87,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         $container->singleton(AuthService::class, function (Container $c) {
             return new AuthService(
                 $c->get(PasswordService::class),
-                $c->get(UserRepository::class)
+                $c->get(MySqlUserRepository::class)
             );
         });
 
@@ -182,12 +181,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             );
         });
 
-        $container->singleton(TextService::class, function (Container $c) {
-            return new TextService(
-                $c->get(SentenceService::class),
-                $c->get(MySqlTextRepository::class)
-            );
-        });
+        // Note: TextFacade is registered by TextServiceProvider in the Text module
 
         $container->singleton(WordService::class, function (Container $c) {
             return new WordService(

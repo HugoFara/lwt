@@ -29,7 +29,7 @@ namespace Lwt\Views\Word;
 
 use Lwt\Core\Http\InputValidator;
 use Lwt\Services\SentenceService;
-use Lwt\Services\SimilarTermsService;
+use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\View\Helper\IconHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 
@@ -60,7 +60,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
        </td>
    </tr>
-   <?php echo (new SimilarTermsService())->printSimilarTermsTabRow(); ?>
+   <?php echo (new FindSimilarTerms())->getTableRow(); ?>
    <tr>
        <td class="td1 right">Translation:</td>
        <td class="td1">
@@ -102,7 +102,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
            rows="3"></textarea>
        </td>
    </tr>
-   <?php echo (new SimilarTermsService())->printSimilarTermsTabRow(); ?>
+   <?php echo (new FindSimilarTerms())->getTableRow(); ?>
    <tr>
        <td class="td1 right">Status:</td>
        <td class="td1">
@@ -111,7 +111,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
    </tr>
    <tr>
        <td class="td1 right" colspan="2">
-           <?php echo (new \Lwt\Services\DictionaryService())->createDictLinksInEditWin(
+           <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin(
                $lang,
                $term,
                'document.forms[0].WoSentence',

@@ -27,22 +27,22 @@ require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
 require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 // LanguagePresets loaded via autoloader
-require_once __DIR__ . '/../Services/SimilarTermsService.php';
-require_once __DIR__ . '/../Services/TextService.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+require_once __DIR__ . '/../../Modules/Text/Application/TextFacade.php';
 
 use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\WordService;
 use Lwt\Services\WordListService;
 use Lwt\Services\WordUploadService;
-use Lwt\Services\WordStatusService;
-use Lwt\Services\ExpressionService;
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Services\ExportService;
 use Lwt\Services\SentenceService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
-use Lwt\Services\TextService;
+use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Core\Http\InputValidator;
 
 /**
@@ -68,7 +68,7 @@ class WordController extends BaseController
     protected WordListService $listService;
     protected WordUploadService $uploadService;
     protected ExportService $exportService;
-    protected TextService $textService;
+    protected TextFacade $textService;
     protected ExpressionService $expressionService;
     protected SentenceService $sentenceService;
 
@@ -80,7 +80,7 @@ class WordController extends BaseController
      * @param WordListService|null   $listService       Word list service
      * @param WordUploadService|null $uploadService     Word upload service
      * @param ExportService|null     $exportService     Export service
-     * @param TextService|null       $textService       Text service
+     * @param TextFacade|null        $textService       Text facade
      * @param ExpressionService|null $expressionService Expression service
      * @param SentenceService|null   $sentenceService   Sentence service
      */
@@ -90,7 +90,7 @@ class WordController extends BaseController
         ?WordListService $listService = null,
         ?WordUploadService $uploadService = null,
         ?ExportService $exportService = null,
-        ?TextService $textService = null,
+        ?TextFacade $textService = null,
         ?ExpressionService $expressionService = null,
         ?SentenceService $sentenceService = null
     ) {
@@ -100,7 +100,7 @@ class WordController extends BaseController
         $this->listService = $listService ?? new WordListService();
         $this->uploadService = $uploadService ?? new WordUploadService();
         $this->exportService = $exportService ?? new ExportService();
-        $this->textService = $textService ?? new TextService();
+        $this->textService = $textService ?? new TextFacade();
         $this->expressionService = $expressionService ?? new ExpressionService();
         $this->sentenceService = $sentenceService ?? new SentenceService();
     }
@@ -386,7 +386,7 @@ class WordController extends BaseController
             $woSentence = $this->param("WoSentence");
             $woRomanization = $this->param("WoRomanization");
 
-            $scoreRandomUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+            $scoreRandomUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
             $sentenceEscaped = ExportService::replaceTabNewline($woSentence);
 
             if ($oldstatus != $newstatus) {
@@ -1486,7 +1486,7 @@ class WordController extends BaseController
 
             $langData = $this->wordService->getLanguageData($lang);
             $showRoman = $langData['showRoman'];
-            $dictService = new \Lwt\Services\DictionaryService();
+            $dictService = new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter();
 
             PageLayoutHelper::renderPageStartNobody('');
 

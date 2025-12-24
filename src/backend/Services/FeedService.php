@@ -20,6 +20,7 @@ use Lwt\Database\Maintenance;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\TextParsing;
 use Lwt\Database\UserScopedQuery;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**
  * Service class for managing RSS feeds.
@@ -1457,7 +1458,7 @@ class FeedService
             }
 
             // Refresh text tags
-            TagService::getAllTextTags(true);
+            TagsFacade::getAllTextTags(true);
 
             // Get all texts with this tag - texttags inherits user context via TtTxID -> texts FK
             $bindings = [];

@@ -15,7 +15,7 @@
 namespace Lwt\Modules\Text\Http;
 
 use Lwt\Controllers\BaseController;
-use Lwt\Services\TextService;
+use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextNavigationService;
 use Lwt\Services\TagService;
@@ -35,7 +35,7 @@ define('LWT_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
 // Module views path
 define('LWT_TEXT_MODULE_VIEWS', dirname(__DIR__) . '/Views');
 
-require_once LWT_BACKEND_PATH . '/Services/TextService.php';
+require_once dirname(__DIR__) . '/Application/TextFacade.php';
 require_once LWT_BACKEND_PATH . '/View/Helper/PageLayoutHelper.php';
 require_once LWT_BACKEND_PATH . '/View/Helper/SelectOptionsBuilder.php';
 require_once LWT_BACKEND_PATH . '/Services/TextDisplayService.php';
@@ -61,24 +61,24 @@ require_once LWT_BACKEND_PATH . '/Services/LanguageService.php';
  */
 class TextController extends BaseController
 {
-    private TextService $textService;
+    private TextFacade $textService;
     private LanguageService $languageService;
     private TextDisplayService $displayService;
 
     /**
      * Create a new TextController.
      *
-     * @param TextService|null        $textService     Text service for text operations
+     * @param TextFacade|null         $textService     Text facade for text operations
      * @param LanguageService|null    $languageService Language service for language operations
      * @param TextDisplayService|null $displayService  Text display service
      */
     public function __construct(
-        ?TextService $textService = null,
+        ?TextFacade $textService = null,
         ?LanguageService $languageService = null,
         ?TextDisplayService $displayService = null
     ) {
         parent::__construct();
-        $this->textService = $textService ?? new TextService();
+        $this->textService = $textService ?? new TextFacade();
         $this->languageService = $languageService ?? new LanguageService();
         $this->displayService = $displayService ?? new TextDisplayService();
     }
@@ -182,13 +182,12 @@ class TextController extends BaseController
         require_once LWT_BACKEND_PATH . '/Services/TextStatisticsService.php';
         require_once LWT_BACKEND_PATH . '/Services/SentenceService.php';
         require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
-        require_once LWT_BACKEND_PATH . '/Services/SimilarTermsService.php';
         require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
         require_once LWT_BACKEND_PATH . '/Services/TextParsingService.php';
-        require_once LWT_BACKEND_PATH . '/Services/ExpressionService.php';
+        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
         require_once LWT_BACKEND_PATH . '/Core/Database/Restore.php';
         require_once LWT_BACKEND_PATH . '/Services/MediaService.php';
-        require_once LWT_BACKEND_PATH . '/Services/WordStatusService.php';
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/start_session.php';
         require_once LWT_BACKEND_PATH . '/Core/Integration/text_from_yt.php';
 
@@ -450,7 +449,7 @@ class TextController extends BaseController
      */
     private function showTextsList(string|int $currentLang, string $message): void
     {
-        $statuses = \Lwt\Services\WordStatusService::getStatuses();
+        $statuses = \Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses();
         $statuses[0]["name"] = 'Unknown';
         $statuses[0]["abbr"] = 'Ukn';
 
@@ -474,10 +473,10 @@ class TextController extends BaseController
         require_once LWT_BACKEND_PATH . '/Services/TextStatisticsService.php';
         require_once LWT_BACKEND_PATH . '/Services/SentenceService.php';
         require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
-        require_once LWT_BACKEND_PATH . '/Services/SimilarTermsService.php';
         require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
         require_once LWT_BACKEND_PATH . '/Services/TextParsingService.php';
-        require_once LWT_BACKEND_PATH . '/Services/ExpressionService.php';
+        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
         require_once LWT_BACKEND_PATH . '/Core/Database/Restore.php';
         require_once LWT_BACKEND_PATH . '/Services/MediaService.php';
 
@@ -775,10 +774,10 @@ class TextController extends BaseController
         require_once LWT_BACKEND_PATH . '/Services/TextStatisticsService.php';
         require_once LWT_BACKEND_PATH . '/Services/SentenceService.php';
         require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
-        require_once LWT_BACKEND_PATH . '/Services/SimilarTermsService.php';
         require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
         require_once LWT_BACKEND_PATH . '/Services/TextParsingService.php';
-        require_once LWT_BACKEND_PATH . '/Services/ExpressionService.php';
+        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
         require_once LWT_BACKEND_PATH . '/Core/Database/Restore.php';
 
         // Handle mark actions that skip pagestart

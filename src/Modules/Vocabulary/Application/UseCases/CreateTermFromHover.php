@@ -15,7 +15,11 @@
 namespace Lwt\Modules\Vocabulary\Application\UseCases;
 
 use Lwt\Core\Entity\GoogleTranslate;
-use Lwt\Services\WordService;
+use Lwt\Core\StringUtils;
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
+use Lwt\Database\UserScopedQuery;
+use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 
 /**
  * Use case for creating a term from the text reading hover action.
@@ -27,16 +31,16 @@ use Lwt\Services\WordService;
  */
 class CreateTermFromHover
 {
-    private WordService $wordService;
+    private VocabularyFacade $vocabularyFacade;
 
     /**
      * Constructor.
      *
-     * @param WordService|null $wordService Word service
+     * @param VocabularyFacade|null $vocabularyFacade Vocabulary facade
      */
-    public function __construct(?WordService $wordService = null)
+    public function __construct(?VocabularyFacade $vocabularyFacade = null)
     {
-        $this->wordService = $wordService ?? new WordService();
+        $this->vocabularyFacade = $vocabularyFacade ?? new VocabularyFacade();
     }
 
     /**
@@ -81,8 +85,49 @@ class CreateTermFromHover
             }
         }
 
-        // Create the word
-        return $this->wordService->createOnHover($textId, $wordText, $status, $translation);
+        // Get language ID from text
+        $wordlc = mb_strtolower($wordText, 'UTF-8');
+        $bindings = [$textId];
+        $langId = (int) Connection::preparedFetchValue(
+            "SELECT TxLgID FROM texts WHERE TxID = ?"
+            . UserScopedQuery::forTablePrepared('texts', $bindings),
+            $bindings,
+            'TxLgID'
+        );
+
+        // Create the term using VocabularyFacade
+        $term = $this->vocabularyFacade->createTerm(
+            $langId,
+            $wordText,
+            $status,
+            $translation,
+            '', // sentence
+            '', // notes
+            '', // romanization
+            1   // wordCount (single word)
+        );
+
+        $wid = $term->id()->toInt();
+
+        // Link to text items (cross-module operation)
+        Connection::preparedExecute(
+            "UPDATE textitems2 SET Ti2WoID = ?
+             WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
+            [$wid, $langId, $wordlc]
+        );
+
+        $hex = StringUtils::toClassName(
+            Escaping::prepareTextdata($wordlc)
+        );
+
+        return [
+            'wid' => $wid,
+            'word' => $wordText,
+            'wordRaw' => $wordText,
+            'translation' => $translation,
+            'status' => $status,
+            'hex' => $hex
+        ];
     }
 
     /**

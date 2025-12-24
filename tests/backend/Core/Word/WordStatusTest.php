@@ -3,10 +3,9 @@
 namespace Lwt\Tests\Core\Word;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
-require_once __DIR__ . '/../../../../src/backend/Services/WordStatusService.php';
 
 use Lwt\Core\Globals;
-use Lwt\Services\WordStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use PHPUnit\Framework\TestCase;
 
 Globals::initialize();
@@ -21,7 +20,7 @@ final class WordStatusTest extends TestCase
      */
     public function testGetStatuses(): void
     {
-        $statuses = WordStatusService::getStatuses();
+        $statuses = TermStatusService::getStatuses();
 
         // Test structure
         $this->assertIsArray($statuses);
@@ -55,7 +54,7 @@ final class WordStatusTest extends TestCase
      */
     public function testGetStatusesStructure(): void
     {
-        $statuses = WordStatusService::getStatuses();
+        $statuses = TermStatusService::getStatuses();
 
         // Each status should have 'name' and 'abbr' keys
         foreach ($statuses as $status => $data) {

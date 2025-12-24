@@ -18,8 +18,7 @@ $config = EnvLoader::getDatabaseConfig();
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Services/ExportService.php';
-require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
-require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/WordController.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordService.php';

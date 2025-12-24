@@ -433,7 +433,7 @@ class SelectOptionsBuilder
             $selected = 1;
         }
         $result = '';
-        $statuses = \Lwt\Services\WordStatusService::getStatuses();
+        $statuses = \Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses();
         foreach ($statuses as $n => $status) {
             $result .= '<span class="status' . $n . '" title="'
                     . htmlspecialchars($status['name'], ENT_QUOTES, 'UTF-8') . '">';
@@ -470,7 +470,7 @@ class SelectOptionsBuilder
             $result .= '<option value=""' . FormHelper::getSelected($selected, '')
                     . '>[Filter off]</option>';
         }
-        $statuses = \Lwt\Services\WordStatusService::getStatuses();
+        $statuses = \Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses();
         foreach ($statuses as $n => $status) {
             if ($not9899 && ($n == 98 || $n == 99)) {
                 continue;

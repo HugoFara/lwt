@@ -17,10 +17,11 @@
 namespace Lwt\Services;
 
 require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
-require_once __DIR__ . '/DictionaryService.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
 
 use Lwt\Core\Entity\GoogleTranslate;
 use Lwt\Core\Globals;
+use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
@@ -185,7 +186,7 @@ class TranslationService
         }
 
         // Create the dictionary link with the sentence
-        $url = DictionaryService::createTheDictLink($trans, $sentence);
+        $url = DictionaryAdapter::createDictLink($trans, $sentence);
 
         return [
             'url' => $url,
@@ -203,7 +204,7 @@ class TranslationService
      */
     public function createDictLink(string $dictUrl, string $term): string
     {
-        return DictionaryService::createTheDictLink($dictUrl, $term);
+        return DictionaryAdapter::createDictLink($dictUrl, $term);
     }
 
     /**
