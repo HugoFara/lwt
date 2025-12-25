@@ -63,9 +63,13 @@ class SentenceService
             ->select(['LgRegexpWordCharacters', 'LgRemoveSpaces'])
             ->where('LgID', '=', $lid)
             ->firstPrepared();
+        if ($record === null) {
+            return '';
+        }
         $removeSpaces = $record["LgRemoveSpaces"];
+        $regexpWordChars = (string)($record["LgRegexpWordCharacters"] ?? '');
 
-        if ('MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {
+        if ('MECAB' == strtoupper(trim($regexpWordChars))) {
             $mecab_file = sys_get_temp_dir() . "/lwt_mecab_to_db.txt";
             $mecab_args = ' -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n ';
             if (file_exists($mecab_file)) {
@@ -90,8 +94,12 @@ class SentenceService
             unlink($mecab_file);
             // Note: This method is deprecated and only kept for backward compatibility
             // It returns an unsafe SQL string. Use executeSentencesContainingWordQuery instead.
-            $wordlc_escaped = mysqli_real_escape_string(Globals::getDbConnection(), "%$wordlc%");
-            $mecab_str_escaped = mysqli_real_escape_string(Globals::getDbConnection(), "%$mecab_str%");
+            $dbConn = Globals::getDbConnection();
+            if ($dbConn === null) {
+                return '';
+            }
+            $wordlc_escaped = mysqli_real_escape_string($dbConn, "%$wordlc%");
+            $mecab_str_escaped = mysqli_real_escape_string($dbConn, "%$mecab_str%");
             $sql = "SELECT SeID, SeText,
                 concat(
                     '\\t',
@@ -111,11 +119,15 @@ class SentenceService
             if ($removeSpaces == 1) {
                 $pattern_value = $wordlc;
             } else {
-                $pattern_value = '(^|[^' . $record["LgRegexpWordCharacters"] . '])'
-                     . StringUtils::removeSpaces($wordlc, $removeSpaces)
-                     . '([^' . $record["LgRegexpWordCharacters"] . ']|$)';
+                $pattern_value = '(^|[^' . $regexpWordChars . '])'
+                     . StringUtils::removeSpaces($wordlc, (bool)$removeSpaces)
+                     . '([^' . $regexpWordChars . ']|$)';
             }
-            $pattern_escaped = mysqli_real_escape_string(Globals::getDbConnection(), $pattern_value);
+            $dbConn = Globals::getDbConnection();
+            if ($dbConn === null) {
+                return '';
+            }
+            $pattern_escaped = mysqli_real_escape_string($dbConn, $pattern_value);
             $sql = "SELECT DISTINCT SeID, SeText
                 FROM sentences
                 WHERE SeText RLIKE '$pattern_escaped' AND SeLgID = $lid
@@ -140,9 +152,13 @@ class SentenceService
             ->select(['LgRegexpWordCharacters', 'LgRemoveSpaces'])
             ->where('LgID', '=', $lid)
             ->firstPrepared();
+        if ($record === null) {
+            return [];
+        }
         $removeSpaces = $record["LgRemoveSpaces"];
+        $regexpWordChars = (string)($record["LgRegexpWordCharacters"] ?? '');
 
-        if ('MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {
+        if ('MECAB' == strtoupper(trim($regexpWordChars))) {
             $mecab_file = sys_get_temp_dir() . "/lwt_mecab_to_db.txt";
             $mecab_args = ' -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n ';
             if (file_exists($mecab_file)) {
@@ -181,9 +197,9 @@ class SentenceService
             if ($removeSpaces == 1) {
                 $pattern = $wordlc;
             } else {
-                $pattern = '(^|[^' . $record["LgRegexpWordCharacters"] . '])'
-                     . StringUtils::removeSpaces($wordlc, $removeSpaces)
-                     . '([^' . $record["LgRegexpWordCharacters"] . ']|$)';
+                $pattern = '(^|[^' . $regexpWordChars . '])'
+                     . StringUtils::removeSpaces($wordlc, (bool)$removeSpaces)
+                     . '([^' . $regexpWordChars . ']|$)';
             }
             $sql = "SELECT DISTINCT SeID, SeText
                 FROM sentences
@@ -267,21 +283,25 @@ class SentenceService
             AND Ti2Text != '¶'",
             [$seid]
         );
+        if ($record === null) {
+            return [$mode > 1 ? '' : $wordlc, $wordlc];
+        }
         $removeSpaces = (int)$record["LgRemoveSpaces"] == 1;
         $splitEachChar = (int)$record['LgSplitEachChar'] != 0;
         $txtid = $record["SeTxID"];
         $termchar = (string) $record["LgRegexpWordCharacters"];
+        $seText = $record["SeText"] ?? '';
 
         if (
             ($removeSpaces && !$splitEachChar)
             || 'MECAB' == strtoupper(trim($termchar))
         ) {
-            $text = $record["SeText"];
+            $text = $seText;
             $wordlc = '[​]*' . preg_replace('/(.)/u', "$1[​]*", $wordlc);
             $pattern = "/(?<=[​])($wordlc)(?=[​])/ui";
         } else {
             // Convert ZWS markers to proper spacing for non-remove-spaces languages
-            $text = $this->convertZwsToSpacing($record["SeText"], $termchar);
+            $text = $this->convertZwsToSpacing($seText, $termchar);
             if ($splitEachChar) {
                 $pattern = "/($wordlc)/ui";
             } else {

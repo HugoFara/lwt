@@ -181,7 +181,7 @@ class TextApiHandler
      * @param string $elem   Element selector
      * @param string $data   JSON-encoded data
      *
-     * @return array{save_impr_text?: string, error?: string}
+     * @return array{save_impr_text?: string|null, error?: string}
      */
     public function formatSetAnnotation(int $textId, string $elem, string $data): array
     {
@@ -189,7 +189,7 @@ class TextApiHandler
         if (array_key_exists("error", $result)) {
             return ["error" => $result["error"]];
         }
-        return ["save_impr_text" => $result["success"]];
+        return ["save_impr_text" => $result["success"] ?? null];
     }
 
     // =========================================================================

@@ -40,11 +40,11 @@ $varArray = [
             'dict_link2'      => $dictLink2,
             'translator_link' => $translatorLink,
             'delimiter'       => htmlspecialchars(
-                str_replace(
+                (string)str_replace(
                     ['\\',']','-','^'],
                     ['\\\\','\\]','\\-','\\^'],
                     $termDelimiter
-                ) ?? '',
+                ),
                 ENT_QUOTES,
                 'UTF-8'
             ),
@@ -54,7 +54,7 @@ $varArray = [
         'text' => [
             'id'               => $textId,
             'reading_position' => $textPosition,
-            'annotations'      => json_decode((new AnnotationService())->annotationToJson($annotatedText))
+            'annotations'      => json_decode((new AnnotationService())->annotationToJson($annotatedText) ?: '[]')
         ],
         'settings' => [
             'hts'                => $hts,

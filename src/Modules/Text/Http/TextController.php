@@ -478,7 +478,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
         require_once LWT_BACKEND_PATH . '/Services/MediaService.php';
 
-        $textId = $this->paramInt('text', 0);
+        $textId = $this->paramInt('text', 0) ?? 0;
 
         if ($textId === 0) {
             header("Location: /text/edit");

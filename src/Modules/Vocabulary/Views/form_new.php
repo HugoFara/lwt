@@ -26,8 +26,6 @@ use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-/** @var int $lang */
-
 $phpSelf = $_SERVER['PHP_SELF'] ?? '';
 ?>
 

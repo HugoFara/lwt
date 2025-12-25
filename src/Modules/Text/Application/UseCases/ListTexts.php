@@ -164,10 +164,12 @@ class ListTexts
 
         $res = Connection::query($sql);
         $texts = [];
-        while ($record = mysqli_fetch_assoc($res)) {
-            $texts[] = $record;
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $texts[] = $record;
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
         return $texts;
     }
 
@@ -238,10 +240,12 @@ class ListTexts
 
         $res = Connection::query($sql);
         $texts = [];
-        while ($record = mysqli_fetch_assoc($res)) {
-            $texts[] = $record;
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $texts[] = $record;
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
         return $texts;
     }
 

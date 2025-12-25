@@ -210,7 +210,7 @@ class ArchiveText
             $bindings3,
             'TxText'
         );
-        TextParsing::parseAndSave($textContent, (int) $lgId, $textId);
+        TextParsing::parseAndSave((string)($textContent ?? ''), (int) $lgId, (int)$textId);
 
         // Delete from archived
         $deleted = QueryBuilder::table('archivedtexts')
@@ -300,7 +300,7 @@ class ArchiveText
                 $bindings3,
                 'TxText'
             );
-            TextParsing::parseAndSave($textContent, (int) $record['AtLgID'], $id);
+            TextParsing::parseAndSave((string)($textContent ?? ''), (int) $record['AtLgID'], (int)$id);
 
             QueryBuilder::table('archivedtexts')
                 ->where('AtID', '=', $ida)

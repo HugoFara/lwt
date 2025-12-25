@@ -33,8 +33,6 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
-/** @var int $lang */
-
 $phpSelf = $_SERVER['PHP_SELF'] ?? '';
 ?>
 

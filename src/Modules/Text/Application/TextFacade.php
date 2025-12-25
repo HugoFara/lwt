@@ -823,9 +823,10 @@ class TextFacade
                 $bindings
             );
             $imported += $affected;
-            $id = Connection::lastInsertId();
+            $id = (int)Connection::lastInsertId();
             TagsFacade::saveTextTagsFromForm($id, $textTags);
-            TextParsing::parseAndSave($texts[$i], $langId, $id);
+            $textContent = is_string($texts[$i]) ? $texts[$i] : '';
+            TextParsing::parseAndSave($textContent, $langId, $id);
         }
 
         return [
