@@ -113,17 +113,13 @@ class TextServiceProvider implements ServiceProviderInterface
         });
 
         // ArchiveText use case
-        $container->singleton(ArchiveText::class, function (Container $c) {
-            return new ArchiveText(
-                $c->get(TextRepositoryInterface::class)
-            );
+        $container->singleton(ArchiveText::class, function (Container $_c) {
+            return new ArchiveText();
         });
 
         // DeleteText use case
-        $container->singleton(DeleteText::class, function (Container $c) {
-            return new DeleteText(
-                $c->get(TextRepositoryInterface::class)
-            );
+        $container->singleton(DeleteText::class, function (Container $_c) {
+            return new DeleteText();
         });
 
         // GetTextForReading use case
@@ -148,10 +144,8 @@ class TextServiceProvider implements ServiceProviderInterface
         });
 
         // ParseText use case
-        $container->singleton(ParseText::class, function (Container $c) {
-            return new ParseText(
-                $c->get(TextRepositoryInterface::class)
-            );
+        $container->singleton(ParseText::class, function (Container $_c) {
+            return new ParseText();
         });
 
         // BuildTextFilters use case (no dependencies)

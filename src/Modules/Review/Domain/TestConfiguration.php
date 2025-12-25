@@ -210,9 +210,8 @@ final readonly class TestConfiguration
         return match ($this->testKey) {
             self::KEY_LANG => "lang={$this->selection}",
             self::KEY_TEXT => "text={$this->selection}",
-            self::KEY_WORDS, self::KEY_TEXTS => "selection=" . (
-                $this->testKey === self::KEY_WORDS ? '2' : '3'
-            ),
+            self::KEY_WORDS => "selection=2",
+            self::KEY_TEXTS => "selection=3",
             default => ''
         };
     }

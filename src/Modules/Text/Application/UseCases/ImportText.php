@@ -85,7 +85,7 @@ class ImportText
         $textId = $this->textRepository->save($textEntity);
 
         // Parse text
-        $parseResult = TextParsing::parseAndSave($text, $languageId, $textId);
+        TextParsing::parseAndSave($text, $languageId, $textId);
 
         $bindings = [$textId];
         $sentenceCount = Connection::preparedFetchValue(

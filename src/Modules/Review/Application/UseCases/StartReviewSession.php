@@ -74,7 +74,7 @@ class StartReviewSession
         if (!$validation['valid']) {
             return [
                 'success' => false,
-                'error' => $validation['error']
+                'error' => $validation['error'] ?? 'Validation failed'
             ];
         }
 

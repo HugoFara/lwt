@@ -80,6 +80,8 @@ final class TestWord
     /**
      * Check if word has a sentence context.
      *
+     * @psalm-assert-if-true non-empty-string $this->sentence
+     *
      * @return bool
      */
     public function hasSentence(): bool

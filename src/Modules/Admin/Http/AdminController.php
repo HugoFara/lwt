@@ -182,7 +182,6 @@ class AdminController extends BaseController
                 $this->adminFacade->saveConnectionToEnv($conn);
                 // Redirect to home after saving
                 $this->redirect('/');
-                return;
             }
         } elseif ($this->adminFacade->envFileExists()) {
             $conn = $this->adminFacade->loadConnection();

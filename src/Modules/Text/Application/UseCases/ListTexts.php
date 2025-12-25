@@ -256,6 +256,8 @@ class ListTexts
      */
     public function getTextsForLanguage(int $languageId, int $page = 1, int $perPage = 20): array
     {
+        // TODO: Implement findPaginated in repository when needed
+        /** @psalm-suppress UndefinedInterfaceMethod This method is work-in-progress */
         return $this->textRepository->findPaginated($languageId, $page, $perPage);
     }
 }

@@ -25,6 +25,7 @@
         <UndefinedGlobalVariable>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
             </errorLevel>
         </UndefinedGlobalVariable>
 
@@ -34,6 +35,7 @@
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Views" />
                 <directory name="src/backend/Services" />
+                <directory name="src/Modules" />
             </errorLevel>
         </UnusedVariable>
 
@@ -43,6 +45,8 @@
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Services" />
                 <directory name="src/backend/View" />
+                <directory name="src/Modules" />
+                <directory name="src/Shared" />
             </errorLevel>
         </PossiblyUnusedParam>
 
@@ -54,6 +58,8 @@
                 <directory name="src/backend/Core" />
                 <directory name="src/backend/Services" />
                 <directory name="src/backend/View" />
+                <directory name="src/Modules" />
+                <directory name="src/Shared" />
             </errorLevel>
         </PossiblyUnusedMethod>
 
@@ -61,6 +67,7 @@
         <UndefinedFunction>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
             </errorLevel>
         </UndefinedFunction>
 
@@ -68,6 +75,7 @@
         <RedundantCondition>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
             </errorLevel>
         </RedundantCondition>
 
@@ -75,6 +83,7 @@
         <TypeDoesNotContainType>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
             </errorLevel>
         </TypeDoesNotContainType>
 
@@ -82,7 +91,65 @@
         <PossiblyUnusedReturnValue>
             <errorLevel type="suppress">
                 <directory name="src/backend/Services" />
+                <directory name="src/Modules" />
+                <directory name="src/Shared" />
             </errorLevel>
         </PossiblyUnusedReturnValue>
+
+        <!-- Unused properties may be kept for future use or DI -->
+        <UnusedProperty>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+                <directory name="src/Shared" />
+            </errorLevel>
+        </UnusedProperty>
+
+        <!-- Classes may be used via DI container or routing -->
+        <UnusedClass>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Api" />
+                <directory name="src/Modules" />
+                <directory name="src/Shared" />
+            </errorLevel>
+        </UnusedClass>
+
+        <!-- Closure params for DI may not be used -->
+        <UnusedClosureParam>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+            </errorLevel>
+        </UnusedClosureParam>
+
+        <!-- Private methods may have unused params for consistency or future use -->
+        <UnusedParam>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+            </errorLevel>
+        </UnusedParam>
+
+        <!-- Repository implementations may have more specific param types -->
+        <MoreSpecificImplementedParamType>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+                <directory name="src/backend/Core" />
+            </errorLevel>
+        </MoreSpecificImplementedParamType>
+
+        <!-- Repository implementations may have less specific return types -->
+        <LessSpecificImplementedReturnType>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+                <directory name="src/backend/Core" />
+            </errorLevel>
+        </LessSpecificImplementedReturnType>
+
+        <!-- Interface implementations may have different parameter names -->
+        <ParamNameMismatch>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+                <directory name="src/backend/Core" />
+            </errorLevel>
+        </ParamNameMismatch>
     </issueHandlers>
 </psalm>

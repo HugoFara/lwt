@@ -26,7 +26,6 @@ use Lwt\Modules\Text\Domain\ValueObject\TextId;
  * Handles both basic CRUD and text-specific queries.
  *
  * @extends AbstractRepository<Text>
- * @implements TextRepositoryInterface
  *
  * @since 3.0.0
  */
