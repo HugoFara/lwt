@@ -5,7 +5,7 @@
  * @since   3.0.0
  */
 
-import { apiGet, apiPost, apiPut, type ApiResponse } from '../core/api_client';
+import { apiGet, apiPost, apiPut, type ApiResponse } from '@shared/api/client';
 
 /**
  * Dictionary links for a language.

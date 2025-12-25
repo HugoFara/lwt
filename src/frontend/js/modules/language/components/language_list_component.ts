@@ -13,7 +13,7 @@ import {
   getLanguageStore,
   type LanguageStoreState
 } from '../stores/language_store';
-import type { LanguageListItem } from '../../api/languages';
+import type { LanguageListItem } from '@modules/language/api/languages_api';
 
 /**
  * Language list component data interface.

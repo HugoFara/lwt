@@ -13,7 +13,7 @@
  * @since   1.6.16-fork
  */
 
-import { closeParentPopup } from '../ui/word_popup';
+import { closeParentPopup } from '@modules/vocabulary/components/word_popup';
 
 /**
  * Animate an element's CSS property using requestAnimationFrame.

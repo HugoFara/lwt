@@ -16,152 +16,224 @@ import '../css/base/styles.css';
 import '../css/base/html5_audio_player.css';
 import '../css/base/icons.css';
 
-// Import TypeScript modules
+// =============================================================================
+// SHARED INFRASTRUCTURE
+// =============================================================================
 
-// Core utilities
-import './core/html_utils';
-import './core/cookies';
-import './core/tts_storage';
-import './core/lwt_state';
-import './core/app_data';
-import './core/api_client';
-import './core/ajax_utilities';
-import './core/ui_utilities';
-import './core/user_interactions';
-import './core/language_settings';
-import './core/simple_interactions';
-import { parseInlineMarkdown } from './core/inline_markdown';
+// Shared utilities
+import '@shared/utils/html_utils';
+import '@shared/utils/cookies';
+import '@shared/utils/tts_storage';
+import '@shared/utils/ajax_utilities';
+import '@shared/utils/ui_utilities';
+import '@shared/utils/user_interactions';
+import '@shared/utils/simple_interactions';
+import { parseInlineMarkdown } from '@shared/utils/inline_markdown';
 
-// API modules (Phase 1 - centralized API client)
-import './api/terms';
-import './api/texts';
-import './api/review';
-import './api/settings';
-import './api/words';
-import './api/languages';
+// Shared stores
+import '@shared/stores/lwt_state';
+import '@shared/stores/app_data';
 
-// Terms/vocabulary management
-import './terms/word_status';
-import './terms/dictionary';
-import './terms/translation_api';
-import './terms/translation_page';
-import './terms/overlib_interface';
-import './terms/term_operations';
+// Shared API client
+import '@shared/api/client';
 
-// Reading interface
-import './reading/stores/word_store';
-import './reading/stores/word_form_store';
-import './reading/stores/multi_word_form_store';
-import './reading/components/word_modal';
-import './reading/components/word_edit_form';
-import './reading/components/multi_word_modal';
-import './reading/components/text_reader';
-import './reading/text_renderer';
-import './reading/text_events';
-import './reading/text_display';
-import './reading/frame_management';
-import './reading/annotation_toggle';
-import './reading/set_mode_result';
-import './reading/text_reading_init';
-import './reading/annotation_interactions';
+// Shared components
+import '@shared/components/modal';
+import '@shared/components/sorttable';
+import '@shared/components/navbar';
+import '@shared/components/footer';
 
-// Forms
-import './forms/bulk_actions';
-import './forms/unloadformcheck';
-import './forms/form_validation';
-import './forms/form_initialization';
-import './forms/word_form_auto';
+// Shared icons
+import '@shared/icons/lucide_icons';
 
-// Testing - Legacy
-import './testing/test_mode';
-import './testing/test_header';
-import './testing/test_table';
-import './testing/test_ajax';
+// Shared forms
+import '@shared/forms/bulk_actions';
+import '@shared/forms/unloadformcheck';
+import '@shared/forms/form_validation';
+import '@shared/forms/form_initialization';
+import '@shared/forms/word_form_auto';
 
-// Testing - Bulma/Alpine components
-import './testing/stores/test_store';
-import './testing/components/test_view';
+// =============================================================================
+// FEATURE MODULES
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// VOCABULARY MODULE
+// -----------------------------------------------------------------------------
+
+// Vocabulary API
+import '@modules/vocabulary/api/terms_api';
+import '@modules/vocabulary/api/words_api';
+
+// Vocabulary stores
+import '@modules/vocabulary/stores/word_store';
+import '@modules/vocabulary/stores/word_form_store';
+import '@modules/vocabulary/stores/multi_word_form_store';
+import '@modules/vocabulary/stores/word_list_filter';
+import '@modules/vocabulary/stores/word_list_table';
+
+// Vocabulary components
+import '@modules/vocabulary/components/word_modal';
+import '@modules/vocabulary/components/word_edit_form';
+import '@modules/vocabulary/components/multi_word_modal';
+
+// Vocabulary services
+import '@modules/vocabulary/services/word_status';
+import '@modules/vocabulary/services/dictionary';
+import '@modules/vocabulary/services/translation_api';
+import '@modules/vocabulary/services/overlib_interface';
+import '@modules/vocabulary/services/term_operations';
+import '@modules/vocabulary/services/word_dom_updates';
+import '@modules/vocabulary/services/word_status_ajax';
+
+// Vocabulary pages
+import '@modules/vocabulary/pages/word_list_app';
+import '@modules/vocabulary/pages/bulk_translate';
+import '@modules/vocabulary/pages/word_upload';
+import '@modules/vocabulary/pages/expression_interactable';
+import '@modules/vocabulary/pages/word_result_init';
+import '@modules/vocabulary/pages/translation_page';
+
+// -----------------------------------------------------------------------------
+// TEXT MODULE
+// -----------------------------------------------------------------------------
+
+// Text API
+import '@modules/text/api/texts_api';
+
+// Text components
+import '@modules/text/components/text_reader';
+
+// Text pages - Reading interface
+import '@modules/text/pages/reading/text_renderer';
+import '@modules/text/pages/reading/text_events';
+import '@modules/text/pages/reading/text_display';
+import '@modules/text/pages/reading/frame_management';
+import '@modules/text/pages/reading/annotation_toggle';
+import '@modules/text/pages/reading/set_mode_result';
+import '@modules/text/pages/reading/text_reading_init';
+import '@modules/text/pages/reading/annotation_interactions';
+
+// Text pages - Text management
+import '@modules/text/pages/text_list';
+import '@modules/text/pages/texts_grouped_app';
+import '@modules/text/pages/archived_texts_grouped_app';
+import '@modules/text/pages/text_status_chart';
+import '@modules/text/pages/youtube_import';
+import '@modules/text/pages/text_check_display';
+import '@modules/text/pages/text_print_app';
+
+// -----------------------------------------------------------------------------
+// REVIEW MODULE
+// -----------------------------------------------------------------------------
+
+// Review API
+import '@modules/review/api/review_api';
+
+// Review stores
+import '@modules/review/stores/test_store';
+
+// Review components
+import '@modules/review/components/test_view';
+
+// Review pages
+import '@modules/review/pages/test_mode';
+import '@modules/review/pages/test_header';
+import '@modules/review/pages/test_table';
+import '@modules/review/pages/test_ajax';
+
+// -----------------------------------------------------------------------------
+// FEED MODULE
+// -----------------------------------------------------------------------------
+
+// Feed API
+import '@modules/feed/api/feeds_api';
+
+// Feed stores
+import '@modules/feed/stores/feed_wizard_store';
+import '@modules/feed/stores/feed_manager_store';
+
+// Feed components
+import '@modules/feed/components/feed_form_component';
+import '@modules/feed/components/feed_multi_load_component';
+import '@modules/feed/components/feed_loader_component';
+import '@modules/feed/components/feed_index_component';
+import '@modules/feed/components/feed_browse_component';
+import '@modules/feed/components/feed_text_edit_component';
+import '@modules/feed/components/feed_wizard_step1';
+import '@modules/feed/components/feed_wizard_step2';
+import '@modules/feed/components/feed_wizard_step3';
+import '@modules/feed/components/feed_wizard_step4';
+
+// Feed pages
+import '@modules/feed/pages/feed_manager_app';
+
+// Feed utils
+import '@modules/feed/utils/xpath_utils';
+
+// -----------------------------------------------------------------------------
+// LANGUAGE MODULE
+// -----------------------------------------------------------------------------
+
+// Language API
+import '@modules/language/api/languages_api';
+
+// Language stores
+import '@modules/language/stores/language_store';
+import '@modules/language/stores/language_form_store';
+import '@modules/language/stores/language_settings';
+
+// Language components
+import '@modules/language/components/language_list_component';
+import '@modules/language/components/language_wizard_modal';
+
+// Language pages
+import '@modules/language/pages/language_wizard';
+import '@modules/language/pages/language_form';
+import '@modules/language/pages/language_list';
+
+// -----------------------------------------------------------------------------
+// ADMIN MODULE
+// -----------------------------------------------------------------------------
+
+// Admin API
+import '@modules/admin/api/settings_api';
+
+// Admin pages
+import '@modules/admin/pages/server_data';
+import '@modules/admin/pages/tts_settings';
+import '@modules/admin/pages/table_management';
+import '@modules/admin/pages/settings_form';
+import '@modules/admin/pages/statistics_charts';
+import '@modules/admin/pages/backup_manager';
+
+// -----------------------------------------------------------------------------
+// TAGS MODULE
+// -----------------------------------------------------------------------------
+
+import '@modules/tags/pages/tag_list';
+
+// -----------------------------------------------------------------------------
+// AUTH MODULE
+// -----------------------------------------------------------------------------
+
+import '@modules/auth/pages/register_form';
+
+// =============================================================================
+// CROSS-CUTTING FEATURES (kept at root level)
+// =============================================================================
 
 // Media
 import './media/media_selection';
 import './media/html5_audio_player';
 import './media/audio_player_alpine';
 
-// Feed Alpine.js components
-import './feeds/components/feed_form_component';
-import './feeds/components/feed_multi_load_component';
-import './feeds/components/feed_loader_component';
-import './feeds/components/feed_index_component';
-import './feeds/components/feed_browse_component';
-import './feeds/components/feed_text_edit_component';
-
-// Feed Wizard - Alpine.js components
-import './feeds/stores/feed_wizard_store';
-import './feeds/components/feed_wizard_step1';
-import './feeds/components/feed_wizard_step2';
-import './feeds/components/feed_wizard_step3';
-import './feeds/components/feed_wizard_step4';
-
-// Feed Manager - Alpine.js SPA
-import './feeds/stores/feed_manager_store';
-import './feeds/feed_manager_app';
-import './api/feeds';
-
-// XPath utilities (exports to window for PHP views)
-import './feeds/utils/xpath_utils';
-
-// Texts
-import './texts/text_list';
-import './texts/texts_grouped_app';
-import './texts/archived_texts_grouped_app';
-import './texts/text_status_chart';
-import './texts/youtube_import';
-import './texts/text_check_display';
-import './texts/text_print_app';
-
-// Words
-import './words/word_list_app'; // Alpine.js SPA component
-import './words/word_list_filter';
-import './words/word_list_table';
-import './words/word_dom_updates';
-import './words/bulk_translate';
-import './words/word_status_ajax';
-import './words/word_upload';
-import './words/expression_interactable';
-import './words/word_result_init';
-
-// Tags
-import './tags/tag_list';
-
-// Languages
-import './languages/stores/language_store';
-import './languages/stores/language_form_store';
-import './languages/components/language_list_component';
-import './languages/components/language_wizard_modal';
-import './languages/language_wizard';
-import './languages/language_form';
-import './languages/language_list';
-
-// Admin
-import './admin/server_data';
-import './admin/tts_settings';
-import './admin/table_management';
-import './admin/settings_form';
-import './admin/statistics_charts';
-import './admin/backup_manager';
-
-// Auth
-import './auth/register_form';
-
 // Home
 import './home/home_app';
 
-// UI Components
-import './ui/modal';
-import './ui/sorttable';
-import './ui/lucide_icons';
-import './ui/navbar';
-import './ui/footer';
+// =============================================================================
+// ALPINE.JS INITIALIZATION
+// =============================================================================
 
 declare global {
   interface Window {

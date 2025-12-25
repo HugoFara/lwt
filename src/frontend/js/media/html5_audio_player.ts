@@ -7,7 +7,7 @@
  * @since 3.0.0
  */
 
-import { do_ajax_save_setting } from '../core/ajax_utilities';
+import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
 
 /**
  * HTML5 Audio Player class

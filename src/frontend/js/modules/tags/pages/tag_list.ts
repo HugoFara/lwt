@@ -10,8 +10,8 @@
  * @since   3.0.0
  */
 
-import { selectToggle, multiActionGo, allActionGo } from '../forms/bulk_actions';
-import { lwtFormCheck } from '../forms/unloadformcheck';
+import { selectToggle, multiActionGo, allActionGo } from '@shared/forms/bulk_actions';
+import { lwtFormCheck } from '@shared/forms/unloadformcheck';
 
 /**
  * Get the base URL from a data attribute or default.

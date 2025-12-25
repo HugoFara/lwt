@@ -9,7 +9,7 @@
  * @since   2.10.0-fork This file was refactored in a single object, use it instead
  */
 
-import { setupTagChangeTracking } from '../ui/tagify_tags';
+import { setupTagChangeTracking } from '@shared/components/tagify_tags';
 
 /**
  * Keeps track of a modified form.

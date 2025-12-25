@@ -12,7 +12,7 @@
 
 import Alpine from 'alpinejs';
 import Tagify from '@yaireo/tagify';
-import { fetchTextTags, getTextTagsSync } from '../../core/app_data';
+import { fetchTextTags, getTextTagsSync } from '@shared/stores/app_data';
 
 // Extend HTMLInputElement to include the _tagify property
 declare global {

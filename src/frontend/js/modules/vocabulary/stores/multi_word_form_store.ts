@@ -9,8 +9,8 @@
  */
 
 import Alpine from 'alpinejs';
-import { TermsApi, type MultiWordData, type MultiWordInput } from '../../api/terms';
-import { updateWordStatusInDOM } from '../text_renderer';
+import { TermsApi, type MultiWordData, type MultiWordInput } from '@modules/vocabulary/api/terms_api';
+import { updateWordStatusInDOM } from '@modules/text/pages/reading/text_renderer';
 
 /**
  * Form data structure for multi-word expressions.

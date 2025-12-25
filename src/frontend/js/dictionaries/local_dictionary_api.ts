@@ -8,7 +8,7 @@
  * @since   3.0.0
  */
 
-import { apiGet, type ApiResponse } from '../core/api_client';
+import { apiGet, type ApiResponse } from '@shared/api/client';
 
 /**
  * Result from a local dictionary lookup.

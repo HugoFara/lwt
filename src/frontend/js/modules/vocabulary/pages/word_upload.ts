@@ -11,9 +11,9 @@
  */
 
 import Alpine from 'alpinejs';
-import { escape_html_chars, renderTags } from '../core/html_utils';
-import { statuses } from '../core/app_data';
-import { iconHtml } from '../ui/icons';
+import { escape_html_chars, renderTags } from '@shared/utils/html_utils';
+import { statuses } from '@shared/stores/app_data';
+import { iconHtml } from '@shared/icons/icons';
 
 // Interface for imported term record
 interface ImportedTerm {

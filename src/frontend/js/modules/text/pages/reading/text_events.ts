@@ -11,15 +11,15 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { speechDispatcher } from '../core/user_interactions';
-import { hoverIntent } from '../core/hover_intent';
+import { speechDispatcher } from '@shared/utils/user_interactions';
+import { hoverIntent } from '@shared/utils/hover_intent';
 import {
   word_each_do_text_text,
   mword_each_do_text_text
 } from './text_annotations';
 import { keydown_event_do_text_text } from './text_keyboard';
 import { setupMultiWordSelection } from './text_multiword_selection';
-import { loadModalFrame } from './frame_management';
+import { loadModalFrame } from '@modules/text/pages/reading/frame_management';
 import {
   run_overlib_status_unknown,
   run_overlib_status_99,
@@ -29,19 +29,19 @@ import {
   buildKnownWordPopupContent,
   buildUnknownWordPopupContent,
   overlib
-} from '../terms/overlib_interface';
-import { getContextFromElement } from './word_actions';
+} from '@modules/vocabulary/services/overlib_interface';
+import { getContextFromElement } from '@modules/vocabulary/services/word_actions';
 import {
   getLanguageId,
   getDictionaryLinks,
   isRtl
-} from '../core/language_config';
-import { getTextId } from '../core/text_config';
+} from '@modules/language/stores/language_config';
+import { getTextId } from '@modules/text/stores/text_config';
 import {
   isTtsOnHover,
   isTtsOnClick,
   isFrameModeEnabled
-} from '../core/settings_config';
+} from '@shared/utils/settings_config';
 
 // Re-export from submodules
 export {
@@ -69,7 +69,7 @@ export {
   buildContext,
   type WordActionContext,
   type WordActionResult
-} from './word_actions';
+} from '@modules/vocabulary/services/word_actions';
 
 // Module-level flag for API mode (default: true since v3.0.0)
 // Can be disabled for backward compatibility with legacy frame-based mode

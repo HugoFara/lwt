@@ -8,7 +8,7 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
-import { markClick } from '../core/ui_utilities';
+import { markClick } from '@shared/utils/ui_utilities';
 
 export function selectToggle(toggle: boolean, form: string): void {
   const myForm = document.forms[form as unknown as number] as HTMLFormElement;

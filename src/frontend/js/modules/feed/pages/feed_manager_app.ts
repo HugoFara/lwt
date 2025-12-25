@@ -9,10 +9,10 @@
  */
 
 import Alpine from 'alpinejs';
-import { initFeedManagerStore, getFeedManagerStore } from './stores/feed_manager_store';
-import type { FeedManagerStoreState } from './stores/feed_manager_store';
-import type { Feed, Article } from '../api/feeds';
-import { getStatusBadgeClass, getStatusLabel, formatAutoUpdate } from '../api/feeds';
+import { initFeedManagerStore, getFeedManagerStore } from '../stores/feed_manager_store';
+import type { FeedManagerStoreState } from '../stores/feed_manager_store';
+import type { Feed, Article } from '@modules/feed/api/feeds_api';
+import { getStatusBadgeClass, getStatusLabel, formatAutoUpdate } from '@modules/feed/api/feeds_api';
 
 // ============================================================================
 // Component Definitions

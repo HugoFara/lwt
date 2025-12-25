@@ -6,10 +6,10 @@
  * @since   2.0.3-fork
  */
 
-import { overlib, cClick } from '../ui/word_popup';
-import { scrollTo } from '../core/hover_intent';
+import { overlib, cClick } from '@modules/vocabulary/components/word_popup';
+import { scrollTo } from '@shared/utils/hover_intent';
 import { getTTSSettingsWithMigration, type TTSLanguageSettings } from './tts_storage';
-import { getReadingPosition } from './reading_state';
+import { getReadingPosition } from '@modules/text/stores/reading_state';
 
 // Type for text dictionary in newExpressionInteractable
 interface TextDictionary {

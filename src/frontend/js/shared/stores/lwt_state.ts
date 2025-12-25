@@ -15,14 +15,14 @@
  */
 
 // Import types from globals.d.ts to ensure consistency
-import type { LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings } from '../types/globals.d';
+import type { LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings } from '@/types/globals.d';
 
 // Re-export new state modules for easier migration
-export * from './reading_state';
-export * from './language_config';
-export * from './text_config';
-export * from './settings_config';
-export * from './test_state';
+export * from '@modules/text/stores/reading_state';
+export * from '@modules/language/stores/language_config';
+export * from '@modules/text/stores/text_config';
+export * from '../utils/settings_config';
+export * from '@modules/review/stores/test_state';
 
 // Re-export types for backward compatibility
 export type { LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings };

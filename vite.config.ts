@@ -50,6 +50,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src/frontend/js'),
+      '@shared': resolve(__dirname, 'src/frontend/js/shared'),
+      '@modules': resolve(__dirname, 'src/frontend/js/modules'),
       '@css': resolve(__dirname, 'src/frontend/css'),
     }
   }

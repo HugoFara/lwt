@@ -7,9 +7,9 @@
  * @since   3.0.0
  */
 
-import { TermsApi } from '../api/terms';
-import { updateWordStatusInDOM } from './word_dom_updates';
-import { cleanupRightFrames } from '../reading/frame_management';
+import { TermsApi } from '@modules/vocabulary/api/terms_api';
+import { updateWordStatusInDOM } from '../services/word_dom_updates';
+import { cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
 
 export interface WordStatusUpdateData {
   wid: number;

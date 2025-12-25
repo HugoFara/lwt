@@ -9,7 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { ReviewApi } from '../../api/review';
+import { ReviewApi } from '@modules/review/api/review_api';
 
 /**
  * Language settings for the test.

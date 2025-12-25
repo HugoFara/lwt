@@ -9,9 +9,9 @@
  */
 
 import Alpine from 'alpinejs';
-import type { WordStoreState } from '../stores/word_store';
-import { renderText, updateWordStatusInDOM, type RenderSettings } from '../text_renderer';
-import { setupMultiWordSelection } from '../text_multiword_selection';
+import type { WordStoreState } from '@modules/vocabulary/stores/word_store';
+import { renderText, updateWordStatusInDOM, type RenderSettings } from '../pages/reading/text_renderer';
+import { setupMultiWordSelection } from '../pages/reading/text_multiword_selection';
 // speechDispatcher available when TTS is implemented
 
 /**
@@ -221,7 +221,7 @@ export function textReaderData(): TextReaderData {
       this.isLoading = true;
 
       try {
-        const { TextsApi } = await import('../../api/texts');
+        const { TextsApi } = await import('@modules/text/api/texts_api');
         const response = await TextsApi.markAllWellKnown(this.store.textId);
 
         if (response.error) {
@@ -254,7 +254,7 @@ export function textReaderData(): TextReaderData {
       this.isLoading = true;
 
       try {
-        const { TextsApi } = await import('../../api/texts');
+        const { TextsApi } = await import('@modules/text/api/texts_api');
         const response = await TextsApi.markAllIgnored(this.store.textId);
 
         if (response.error) {

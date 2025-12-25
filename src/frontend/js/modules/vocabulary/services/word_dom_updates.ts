@@ -9,8 +9,8 @@
  * @since   3.0.0
  */
 
-import { make_tooltip } from '../terms/word_status';
-import { cleanupRightFrames } from '../reading/frame_management';
+import { make_tooltip } from '@modules/vocabulary/services/word_status';
+import { cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
 
 /**
  * Get the parent document context (for frame-based layouts).

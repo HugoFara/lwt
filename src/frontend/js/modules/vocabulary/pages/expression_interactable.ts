@@ -8,9 +8,9 @@
  * @since 3.0.0
  */
 
-import { make_tooltip } from '../terms/word_status';
-import { newExpressionInteractable } from '../core/user_interactions';
-import { getTextId } from '../core/text_config';
+import { make_tooltip } from '@modules/vocabulary/services/word_status';
+import { newExpressionInteractable } from '@shared/utils/user_interactions';
+import { getTextId } from '@modules/text/stores/text_config';
 
 /**
  * Term attributes for multi-word expression.

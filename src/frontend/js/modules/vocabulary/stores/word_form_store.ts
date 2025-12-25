@@ -14,7 +14,7 @@ import {
   type SimilarTermForEdit,
   type TermCreateFullRequest,
   type TermUpdateFullRequest
-} from '../../api/terms';
+} from '@modules/vocabulary/api/terms_api';
 
 /**
  * Form data structure.

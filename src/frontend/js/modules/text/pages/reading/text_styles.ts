@@ -10,7 +10,7 @@
  * @since   3.0.0
  */
 
-import type { TextReadingConfig } from '../api/texts';
+import type { TextReadingConfig } from '@modules/text/api/texts_api';
 
 /**
  * Style element ID for dynamic text styles.

@@ -9,9 +9,9 @@
  * @since 3.0.0
  */
 
-import { getLibreTranslateTranslation } from '../terms/translation_api';
-import { deepFindValue, readTextWithExternal } from '../core/user_interactions';
-import { lwtFormCheck } from '../forms/unloadformcheck';
+import { getLibreTranslateTranslation } from '@modules/vocabulary/services/translation_api';
+import { deepFindValue, readTextWithExternal } from '@shared/utils/user_interactions';
+import { lwtFormCheck } from '@shared/forms/unloadformcheck';
 
 /**
  * Build a URL query string from an object (replaces $.param).

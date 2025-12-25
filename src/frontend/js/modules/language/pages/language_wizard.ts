@@ -13,8 +13,8 @@
  * @since 3.0.0
  */
 
-import { do_ajax_save_setting } from '../core/ajax_utilities';
-import { lwtFormCheck } from '../forms/unloadformcheck';
+import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
+import { lwtFormCheck } from '@shared/forms/unloadformcheck';
 import { languageForm } from './language_form';
 
 /**

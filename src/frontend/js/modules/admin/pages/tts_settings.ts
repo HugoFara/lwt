@@ -9,9 +9,9 @@
  */
 
 import Alpine from 'alpinejs';
-import { readTextAloud } from '../core/user_interactions';
-import { lwtFormCheck } from '../forms/unloadformcheck';
-import { getTTSSettingsWithMigration, saveTTSSettings } from '../core/tts_storage';
+import { readTextAloud } from '@shared/utils/user_interactions';
+import { lwtFormCheck } from '@shared/forms/unloadformcheck';
+import { getTTSSettingsWithMigration, saveTTSSettings } from '@shared/utils/tts_storage';
 
 /**
  * Configuration for TTS settings.

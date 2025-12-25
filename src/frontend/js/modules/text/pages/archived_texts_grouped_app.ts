@@ -13,9 +13,9 @@
 
 import Alpine from 'alpinejs';
 import { createIcons, icons } from 'lucide';
-import { apiGet } from '../core/api_client';
-import { confirmDelete } from '../core/ui_utilities';
-import { renderTags } from '../core/html_utils';
+import { apiGet } from '@shared/api/client';
+import { confirmDelete } from '@shared/utils/ui_utilities';
+import { renderTags } from '@shared/utils/html_utils';
 
 const STORAGE_KEY = 'lwt_collapsed_archived_languages';
 

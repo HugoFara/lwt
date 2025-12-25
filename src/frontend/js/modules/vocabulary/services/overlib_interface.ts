@@ -14,19 +14,19 @@
  */
 
 import Alpine from 'alpinejs';
-import { escape_html_chars, escape_html_chars_2 } from '../core/html_utils';
+import { escape_html_chars, escape_html_chars_2 } from '@shared/utils/html_utils';
 import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
 import { createTheDictLink, createSentLookupLink } from './dictionary';
-import { TermsApi, type TermDetails } from '../api/terms';
-import { iconHtml, createIcon, initLucideIcons } from '../ui/icons';
-import { showRightFramesPanel } from '../reading/frame_management';
-import { speechDispatcher } from '../core/user_interactions';
-import type { MultiWordFormStoreState } from '../reading/stores/multi_word_form_store';
-import { parseInlineMarkdown } from '../core/inline_markdown';
-import { getLanguageId } from '../core/language_config';
+import { TermsApi, type TermDetails } from '@modules/vocabulary/api/terms_api';
+import { iconHtml, createIcon, initLucideIcons } from '@shared/icons/icons';
+import { showRightFramesPanel } from '@modules/text/pages/reading/frame_management';
+import { speechDispatcher } from '@shared/utils/user_interactions';
+import type { MultiWordFormStoreState } from '@modules/vocabulary/stores/multi_word_form_store';
+import { parseInlineMarkdown } from '@shared/utils/inline_markdown';
+import { getLanguageId } from '@modules/language/stores/language_config';
 
 // Import the popup system
-import { overlib } from '../ui/word_popup';
+import { overlib } from '@modules/vocabulary/components/word_popup';
 
 // Import local dictionary API
 import {
@@ -35,7 +35,7 @@ import {
   hasLocalDictionaries,
   shouldUseOnline,
   type LocalDictResult
-} from '../dictionaries';
+} from '@/dictionaries';
 
 // Import API-based word actions
 import {
@@ -45,10 +45,10 @@ import {
   markIgnored,
   incrementWordStatus,
   type WordActionContext
-} from '../reading/word_actions';
+} from '@modules/vocabulary/services/word_actions';
 
 // Re-export for backward compatibility
-export { overlib, cClick, nd } from '../ui/word_popup';
+export { overlib, cClick, nd } from '@modules/vocabulary/components/word_popup';
 
 // Note: The following functions are used in HTML string templates (onclick handlers)
 // and accessed via window at runtime: showRightFramesPanel, confirmDelete, successSound, failureSound

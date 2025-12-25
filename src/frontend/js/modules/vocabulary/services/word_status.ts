@@ -8,7 +8,7 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
-import { statuses } from '../core/app_data';
+import { statuses } from '@shared/stores/app_data';
 
 /**
  * Return the name of a given status.

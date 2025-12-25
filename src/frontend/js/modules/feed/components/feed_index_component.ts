@@ -9,8 +9,8 @@
  */
 
 import Alpine from 'alpinejs';
-import { setLang, resetAll } from '../../core/language_settings';
-import { selectToggle, multiActionGo } from '../../forms/bulk_actions';
+import { setLang, resetAll } from '@modules/language/stores/language_settings';
+import { selectToggle, multiActionGo } from '@shared/forms/bulk_actions';
 
 /**
  * Configuration for the feed index component.

@@ -24,12 +24,12 @@ import {
   deleteMultiWordFromDOM,
   updateBulkWordInDOM,
   type BulkWordUpdateParams
-} from './word_dom_updates';
-import { make_tooltip } from '../terms/word_status';
-import { cleanupRightFrames } from '../reading/frame_management';
-import { do_ajax_edit_impr_text, editImprTextInOpener } from '../terms/term_operations';
-import { closeParentPopup } from '../ui/word_popup';
-import { escape_html_chars } from '../core/html_utils';
+} from '../services/word_dom_updates';
+import { make_tooltip } from '@modules/vocabulary/services/word_status';
+import { cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
+import { do_ajax_edit_impr_text, editImprTextInOpener } from '@modules/vocabulary/services/term_operations';
+import { closeParentPopup } from '@modules/vocabulary/components/word_popup';
+import { escape_html_chars } from '@shared/utils/html_utils';
 
 /**
  * Word data for all_wellknown_result view.

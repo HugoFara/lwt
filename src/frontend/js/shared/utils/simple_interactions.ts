@@ -13,13 +13,13 @@
  * @since   3.0.0
  */
 
-import { lwtFormCheck } from '../forms/unloadformcheck';
-import { showRightFramesPanel, hideRightFrames, loadModalFrame } from '../reading/frame_management';
+import { lwtFormCheck } from '@shared/forms/unloadformcheck';
+import { showRightFramesPanel, hideRightFrames, loadModalFrame } from '@modules/text/pages/reading/frame_management';
 import { showAllwordsClick } from './ui_utilities';
 import { quickMenuRedirection } from './user_interactions';
-import { deleteTranslation, addTranslation } from '../terms/translation_api';
-import { changeTableTestStatus } from '../terms/term_operations';
-import { showExportTemplateHelp } from '../ui/modal';
+import { deleteTranslation, addTranslation } from '@modules/vocabulary/services/translation_api';
+import { changeTableTestStatus } from '@modules/vocabulary/services/term_operations';
+import { showExportTemplateHelp } from '@shared/components/modal';
 
 /**
  * Navigate back in browser history.

@@ -8,9 +8,9 @@
  * @since 3.0.0
  */
 
-import { getLibreTranslateTranslation } from '../terms/translation_api';
-import { getPhoneticTextAsync } from '../core/user_interactions';
-import { getLangFromDict } from '../terms/dictionary';
+import { getLibreTranslateTranslation } from '@modules/vocabulary/services/translation_api';
+import { getPhoneticTextAsync } from '@shared/utils/user_interactions';
+import { getLangFromDict } from '@modules/vocabulary/services/dictionary';
 
 /**
  * Configuration for word form auto-translate.

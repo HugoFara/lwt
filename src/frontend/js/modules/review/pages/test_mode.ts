@@ -6,10 +6,10 @@
  * @since   1.6.16-fork
  */
 
-import { run_overlib_test } from '../terms/overlib_interface';
-import { loadModalFrame, cleanupRightFrames } from '../reading/frame_management';
-import { getCurrentWordId, getTestSolution, isAnswerOpened, openAnswer } from '../core/test_state';
-import { getDictionaryLinks } from '../core/language_config';
+import { run_overlib_test } from '@modules/vocabulary/services/overlib_interface';
+import { loadModalFrame, cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
+import { getCurrentWordId, getTestSolution, isAnswerOpened, openAnswer } from '@modules/review/stores/test_state';
+import { getDictionaryLinks } from '@modules/language/stores/language_config';
 
 /**
  * Helper to safely get an HTML attribute value as a string.

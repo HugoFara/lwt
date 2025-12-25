@@ -9,7 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { do_ajax_save_setting } from '../core/ajax_utilities';
+import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
 
 /**
  * Audio player configuration from PHP

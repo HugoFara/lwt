@@ -9,10 +9,10 @@
  */
 
 import Alpine from 'alpinejs';
-import { TermsApi } from '../../api/terms';
-import { TextsApi, type TextWord, type TextReadingConfig, type DictLinks } from '../../api/texts';
-import { injectTextStyles, generateParagraphStyles } from '../text_styles';
-import { renderText, updateWordStatusInDOM, updateWordTranslationInDOM, type RenderSettings } from '../text_renderer';
+import { TermsApi } from '@modules/vocabulary/api/terms_api';
+import { TextsApi, type TextWord, type TextReadingConfig, type DictLinks } from '@modules/text/api/texts_api';
+import { injectTextStyles, generateParagraphStyles } from '@modules/text/pages/reading/text_styles';
+import { renderText, updateWordStatusInDOM, updateWordTranslationInDOM, type RenderSettings } from '@modules/text/pages/reading/text_renderer';
 
 /**
  * Word data stored in the word store.

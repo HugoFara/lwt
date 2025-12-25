@@ -5,8 +5,8 @@
  * @since   3.0.0
  */
 
-import { SettingsApi } from '../api/settings';
-import { initIcons } from '../ui/lucide_icons';
+import { SettingsApi } from '@modules/admin/api/settings_api';
+import { initIcons } from '@shared/icons/lucide_icons';
 
 /**
  * Show a notification message on the languages page.

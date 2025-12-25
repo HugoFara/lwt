@@ -10,7 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { createIcons, icons } from 'lucide';
-import type { LanguageChangedEvent, TextStats } from '../core/language_settings';
+import type { LanguageChangedEvent, TextStats } from '@modules/language/stores/language_settings';
 
 const STORAGE_KEY = 'lwt_collapsed_menus';
 

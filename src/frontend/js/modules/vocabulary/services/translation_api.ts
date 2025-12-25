@@ -6,7 +6,7 @@
  * @since   1.6.16-fork
  */
 
-import { iconHtml } from '../ui/icons';
+import { iconHtml } from '@shared/icons/icons';
 
 // Type for the frame with form check
 interface LwtFormCheck {

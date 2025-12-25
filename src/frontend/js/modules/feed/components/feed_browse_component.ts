@@ -9,9 +9,9 @@
  */
 
 import Alpine from 'alpinejs';
-import { setLang, resetAll } from '../../core/language_settings';
-import { selectToggle } from '../../forms/bulk_actions';
-import { markClick } from '../../core/ui_utilities';
+import { setLang, resetAll } from '@modules/language/stores/language_settings';
+import { selectToggle } from '@shared/forms/bulk_actions';
+import { markClick } from '@shared/utils/ui_utilities';
 
 /**
  * Configuration for the feed browse component.

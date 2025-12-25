@@ -7,7 +7,7 @@
  * @since   3.0.0
  */
 
-import { apiGet, apiPost, apiPut, apiDelete, ApiResponse } from '../core/api_client';
+import { apiGet, apiPost, apiPut, apiDelete, ApiResponse } from '@shared/api/client';
 
 // ============================================================================
 // Types

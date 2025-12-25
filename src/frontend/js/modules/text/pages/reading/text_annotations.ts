@@ -5,9 +5,9 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { make_tooltip } from '../terms/word_status';
-import { getAnnotation } from '../core/text_config';
-import { getDelimiter } from '../core/language_config';
+import { make_tooltip } from '@modules/vocabulary/services/word_status';
+import { getAnnotation } from '@modules/text/stores/text_config';
+import { getDelimiter } from '@modules/language/stores/language_config';
 
 /**
  * Helper to safely get an HTML attribute value as a string.

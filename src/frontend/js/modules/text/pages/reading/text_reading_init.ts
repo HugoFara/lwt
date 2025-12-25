@@ -11,20 +11,20 @@
  * @since 3.0.0
  */
 
-import { getLangFromDict } from '../terms/dictionary';
+import { getLangFromDict } from '@modules/vocabulary/services/dictionary';
 import { prepareTextInteractions } from './text_events';
-import { goToLastPosition, saveReadingPosition, saveAudioPosition, readRawTextAloud } from '../core/user_interactions';
-import { getAudioPlayer } from '../media/html5_audio_player';
-import { initNativeTooltips } from '../ui/native_tooltip';
-import { resetReadingPosition } from '../core/reading_state';
+import { goToLastPosition, saveReadingPosition, saveAudioPosition, readRawTextAloud } from '@shared/utils/user_interactions';
+import { getAudioPlayer } from '@/media/html5_audio_player';
+import { initNativeTooltips } from '@shared/components/native_tooltip';
+import { resetReadingPosition } from '@modules/text/stores/reading_state';
 import {
   initLanguageConfig,
   getDictionaryLinks,
   setTtsVoiceApi
-} from '../core/language_config';
-import { initTextConfig, getTextId } from '../core/text_config';
-import { initSettingsConfig } from '../core/settings_config';
-import { resetAnswer } from '../core/test_state';
+} from '@modules/language/stores/language_config';
+import { initTextConfig, getTextId } from '@modules/text/stores/text_config';
+import { initSettingsConfig } from '@shared/utils/settings_config';
+import { resetAnswer } from '@modules/review/stores/test_state';
 
 // Type definitions for text reader
 interface TextReader {

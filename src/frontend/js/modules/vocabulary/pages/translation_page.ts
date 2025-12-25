@@ -9,8 +9,8 @@
  * @since 3.0.0
  */
 
-import { speechDispatcher } from '../core/user_interactions';
-import { getGlosbeTranslation } from './translation_api';
+import { speechDispatcher } from '@shared/utils/user_interactions';
+import { getGlosbeTranslation } from '../services/translation_api';
 
 // Type for frames collection
 interface FramesCollection {

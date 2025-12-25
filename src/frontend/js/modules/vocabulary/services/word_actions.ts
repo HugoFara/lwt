@@ -10,18 +10,18 @@
  * @since   3.0.0
  */
 
-import { TermsApi } from '../api/terms';
-import { ReviewApi } from '../api/review';
+import { TermsApi } from '@modules/vocabulary/api/terms_api';
+import { ReviewApi } from '@modules/review/api/review_api';
 import {
   updateWordStatusInDOM,
   deleteWordFromDOM,
   markWordWellKnownInDOM,
   markWordIgnoredInDOM,
   updateLearnStatus
-} from '../words/word_dom_updates';
-import { successSound, failureSound } from './frame_management';
-import { cClick } from '../ui/word_popup';
-import { showResultPanel, showErrorInPanel } from '../ui/result_panel';
+} from '@modules/vocabulary/services/word_dom_updates';
+import { successSound, failureSound } from '@modules/text/pages/reading/frame_management';
+import { cClick } from '@modules/vocabulary/components/word_popup';
+import { showResultPanel, showErrorInPanel } from '@modules/vocabulary/components/result_panel';
 
 /**
  * Context for word actions - contains all data needed to perform operations.

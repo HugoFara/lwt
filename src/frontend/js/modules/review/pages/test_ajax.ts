@@ -6,13 +6,13 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import { cClick } from '../ui/word_popup';
-import { speechDispatcher } from '../core/user_interactions';
+import { cClick } from '@modules/vocabulary/components/word_popup';
+import { speechDispatcher } from '@shared/utils/user_interactions';
 import { word_click_event_do_test_test, keydown_event_do_test_test } from './test_mode';
-import { startElapsedTimer } from './elapsed_timer';
-import { ReviewApi } from '../api/review';
-import { setCurrentWordId, setTestSolution, setAnswerOpened } from '../core/test_state';
-import { getLanguageId, initLanguageConfig } from '../core/language_config';
+import { startElapsedTimer } from '../utils/elapsed_timer';
+import { ReviewApi } from '@modules/review/api/review_api';
+import { setCurrentWordId, setTestSolution, setAnswerOpened } from '@modules/review/stores/test_state';
+import { getLanguageId, initLanguageConfig } from '@modules/language/stores/language_config';
 
 // Interface for review data
 interface ReviewData {

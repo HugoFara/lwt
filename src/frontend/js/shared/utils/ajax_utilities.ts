@@ -6,7 +6,7 @@
  * @since   1.6.16-fork
  */
 
-import { SettingsApi } from '../api/settings';
+import { SettingsApi } from '@modules/admin/api/settings_api';
 
 /**
  * Save a setting to the database.

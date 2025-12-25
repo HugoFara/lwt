@@ -9,7 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { setLang } from '../../core/language_settings';
+import { setLang } from '@modules/language/stores/language_settings';
 
 /**
  * Configuration for the multi-load component, passed from PHP.

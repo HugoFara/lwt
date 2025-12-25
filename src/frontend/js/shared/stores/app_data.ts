@@ -11,7 +11,7 @@
  * @since   3.0.0
  */
 
-import type { WordStatus } from '../types/globals';
+import type { WordStatus } from '@/types/globals';
 
 /**
  * Word statuses - static data that never changes.

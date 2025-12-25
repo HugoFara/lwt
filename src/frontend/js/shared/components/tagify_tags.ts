@@ -12,7 +12,7 @@
 import Tagify, { TagData } from '@yaireo/tagify';
 import '@yaireo/tagify/dist/tagify.css';
 
-import { containsCharacterOutsideBasicMultilingualPlane } from '../forms/form_validation';
+import { containsCharacterOutsideBasicMultilingualPlane } from '@shared/forms/form_validation';
 
 export interface TagifyInitOptions {
   /** Whitelist of available tags for autocomplete */

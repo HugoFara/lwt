@@ -11,8 +11,8 @@
 import Alpine from 'alpinejs';
 import type { WordStoreState, WordData } from '../stores/word_store';
 import type { WordFormStoreState } from '../stores/word_form_store';
-import { speechDispatcher } from '../../core/user_interactions';
-import { initIcons } from '../../ui/lucide_icons';
+import { speechDispatcher } from '@shared/utils/user_interactions';
+import { initIcons } from '@shared/icons/lucide_icons';
 
 /**
  * Status display information.

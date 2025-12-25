@@ -11,7 +11,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { selectToggle, multiActionGo, allActionGo } from '../forms/bulk_actions';
+import { selectToggle, multiActionGo, allActionGo } from '@shared/forms/bulk_actions';
 
 /**
  * Configuration for word list table component.

@@ -5,7 +5,7 @@
  * @since   3.0.0
  */
 
-import { apiGet, apiPut, type ApiResponse } from '../core/api_client';
+import { apiGet, apiPut, type ApiResponse } from '@shared/api/client';
 
 /**
  * Word test data returned from the API.

@@ -13,7 +13,7 @@ import {
   LanguagesApi,
   type LanguageListItem,
   type LanguageDefinition
-} from '../../api/languages';
+} from '@modules/language/api/languages_api';
 
 /**
  * Language store state interface.

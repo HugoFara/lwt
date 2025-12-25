@@ -11,8 +11,8 @@
 import Alpine from 'alpinejs';
 import type { TestStoreState, TestConfig, LangSettings } from '../stores/test_store';
 import { getTestStore } from '../stores/test_store';
-import { ReviewApi, type TableTestWord } from '../../api/review';
-import { speechDispatcher } from '../../core/user_interactions';
+import { ReviewApi, type TableTestWord } from '@modules/review/api/review_api';
+import { speechDispatcher } from '@shared/utils/user_interactions';
 
 /**
  * Test types configuration

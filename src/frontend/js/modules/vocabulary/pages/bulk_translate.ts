@@ -10,9 +10,9 @@
  */
 
 import Alpine from 'alpinejs';
-import { createTheDictUrl, owin } from '../terms/dictionary';
-import { selectToggle } from '../forms/bulk_actions';
-import { getDictionaryLinks, setDictionaryLinks } from '../core/language_config';
+import { createTheDictUrl, owin } from '@modules/vocabulary/services/dictionary';
+import { selectToggle } from '@shared/forms/bulk_actions';
+import { getDictionaryLinks, setDictionaryLinks } from '@modules/language/stores/language_config';
 
 declare global {
   interface Window {

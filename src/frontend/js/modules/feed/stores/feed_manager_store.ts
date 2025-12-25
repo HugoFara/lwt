@@ -18,8 +18,8 @@ import type {
   ArticleParams,
   FeedData,
   LoadFeedResponse
-} from '../../api/feeds';
-import * as feedsApi from '../../api/feeds';
+} from '@modules/feed/api/feeds_api';
+import * as feedsApi from '@modules/feed/api/feeds_api';
 
 // ============================================================================
 // Types

@@ -11,7 +11,7 @@ import {
   apiPut,
   apiDelete,
   type ApiResponse
-} from '../core/api_client';
+} from '@shared/api/client';
 
 // =========================================================================
 // Type Definitions

@@ -8,8 +8,8 @@
  * @since   3.0.0
  */
 
-import type { WordData } from './stores/word_store';
-import { parseInlineMarkdown } from '../core/inline_markdown';
+import type { WordData } from '@modules/vocabulary/stores/word_store';
+import { parseInlineMarkdown } from '@shared/utils/inline_markdown';
 
 /**
  * Render settings for text display.

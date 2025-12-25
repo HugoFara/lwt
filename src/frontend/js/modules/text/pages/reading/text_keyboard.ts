@@ -5,24 +5,24 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { getLangFromDict, createTheDictUrl, owin } from '../terms/dictionary';
-import { speechDispatcher } from '../core/user_interactions';
+import { getLangFromDict, createTheDictUrl, owin } from '@modules/vocabulary/services/dictionary';
+import { speechDispatcher } from '@shared/utils/user_interactions';
 import { getAttrElement } from './text_annotations';
-import { cClick } from '../ui/word_popup';
-import { loadModalFrame, loadDictionaryFrame } from './frame_management';
-import { get_position_from_id } from '../core/ajax_utilities';
-import { scrollTo } from '../core/hover_intent';
+import { cClick } from '@modules/vocabulary/components/word_popup';
+import { loadModalFrame, loadDictionaryFrame } from '@modules/text/pages/reading/frame_management';
+import { get_position_from_id } from '@shared/utils/ajax_utilities';
+import { scrollTo } from '@shared/utils/hover_intent';
 import {
   getReadingPosition,
   setReadingPosition,
   resetReadingPosition
-} from '../core/reading_state';
+} from '@modules/text/stores/reading_state';
 import {
   getLanguageId,
   getDictionaryLinks
-} from '../core/language_config';
-import { getTextId } from '../core/text_config';
-import { getWordStatusFilter } from '../core/settings_config';
+} from '@modules/language/stores/language_config';
+import { getTextId } from '@modules/text/stores/text_config';
+import { getWordStatusFilter } from '@shared/utils/settings_config';
 
 // Audio controller type for frame access
 // We only need the newPosition method for seeking audio

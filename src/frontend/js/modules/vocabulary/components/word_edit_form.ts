@@ -11,8 +11,8 @@
 import Alpine from 'alpinejs';
 import type { WordFormStoreState, SaveResult } from '../stores/word_form_store';
 import type { WordStoreState } from '../stores/word_store';
-import type { SimilarTermForEdit } from '../../api/terms';
-import { updateWordStatusInDOM, updateWordTranslationInDOM } from '../text_renderer';
+import type { SimilarTermForEdit } from '@modules/vocabulary/api/terms_api';
+import { updateWordStatusInDOM, updateWordTranslationInDOM } from '@modules/text/pages/reading/text_renderer';
 
 /**
  * Status display information.

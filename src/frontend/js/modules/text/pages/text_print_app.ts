@@ -14,14 +14,14 @@
 
 import Alpine from 'alpinejs';
 import { createIcons, icons } from 'lucide';
-import { apiPost } from '../core/api_client';
+import { apiPost } from '@shared/api/client';
 import {
   TextsApi,
   type PrintItem,
   type PrintConfig,
   type AnnotationItem,
   type AnnotationConfig
-} from '../api/texts';
+} from '@modules/text/api/texts_api';
 
 /**
  * Print mode types.

@@ -6,7 +6,7 @@
  * @since   2.10.0-fork Extracted from legacy/pgm.ts
  */
 
-import { loadModalFrame } from '../reading/frame_management';
+import { loadModalFrame } from '@modules/text/pages/reading/frame_management';
 
 /**
  * Statistics for a text showing word status counts.

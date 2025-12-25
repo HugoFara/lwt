@@ -6,14 +6,14 @@
  * @since   1.6.16-fork
  */
 
-import { check } from '../forms/form_validation';
-import { changeImprAnnText, changeImprAnnRadio, do_ajax_show_similar_terms } from '../terms/term_operations';
+import { check } from '@shared/forms/form_validation';
+import { changeImprAnnText, changeImprAnnRadio, do_ajax_show_similar_terms } from '@modules/vocabulary/services/term_operations';
 import { readRawTextAloud } from './user_interactions';
-import { initInlineEdit } from '../ui/inline_edit';
-import { initTermTags, initTextTags } from '../ui/tagify_tags';
-import { fetchTermTags, fetchTextTags } from './app_data';
-import { loadModalFrame } from '../reading/frame_management';
-import { spinnerHtml } from '../ui/icons';
+import { initInlineEdit } from '@shared/components/inline_edit';
+import { initTermTags, initTextTags } from '@shared/components/tagify_tags';
+import { fetchTermTags, fetchTextTags } from '../stores/app_data';
+import { loadModalFrame } from '@modules/text/pages/reading/frame_management';
+import { spinnerHtml } from '@shared/icons/icons';
 
 /**
  * Helper to safely get an HTML attribute value as a string.

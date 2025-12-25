@@ -10,7 +10,7 @@
 
 import Alpine from 'alpinejs';
 import type { MultiWordFormStoreState } from '../stores/multi_word_form_store';
-import { initIcons } from '../../ui/lucide_icons';
+import { initIcons } from '@shared/icons/lucide_icons';
 
 /**
  * Status display information.

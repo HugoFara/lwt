@@ -11,7 +11,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { setLang, resetAll } from '../core/language_settings';
+import { setLang, resetAll } from '@modules/language/stores/language_settings';
 
 /**
  * Configuration for word list filter component.

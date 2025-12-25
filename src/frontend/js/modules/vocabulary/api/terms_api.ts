@@ -12,7 +12,7 @@ import {
   apiDelete,
   apiPostForm,
   type ApiResponse
-} from '../core/api_client';
+} from '@shared/api/client';
 
 /**
  * Term/word data structure.

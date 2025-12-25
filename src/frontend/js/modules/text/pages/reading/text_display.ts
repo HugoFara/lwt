@@ -6,9 +6,9 @@
  * @since   1.6.16-fork
  */
 
-import { do_ajax_save_setting } from '../core/ajax_utilities';
-import { apiGet } from '../core/api_client';
-import { updateAllTextStatusCharts } from '../texts/text_status_chart';
+import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
+import { apiGet } from '@shared/api/client';
+import { updateAllTextStatusCharts } from '@modules/text/pages/text_status_chart';
 
 // Word counts data structure
 interface WordCounts {

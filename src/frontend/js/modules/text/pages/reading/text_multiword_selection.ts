@@ -9,9 +9,9 @@
  */
 
 import Alpine from 'alpinejs';
-import { loadModalFrame } from './frame_management';
-import type { MultiWordFormStoreState } from './stores/multi_word_form_store';
-import { getTextId as getTextIdFromConfig } from '../core/text_config';
+import { loadModalFrame } from '@modules/text/pages/reading/frame_management';
+import type { MultiWordFormStoreState } from '@modules/vocabulary/stores/multi_word_form_store';
+import { getTextId as getTextIdFromConfig } from '@modules/text/stores/text_config';
 
 /**
  * Get text ID from URL (fallback when config is not available).

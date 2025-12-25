@@ -15,9 +15,9 @@
  */
 
 import Alpine from 'alpinejs';
-import { setLang, resetAll } from '../core/language_settings';
-import { selectToggle, multiActionGo } from '../forms/bulk_actions';
-import { confirmDelete } from '../core/ui_utilities';
+import { setLang, resetAll } from '@modules/language/stores/language_settings';
+import { selectToggle, multiActionGo } from '@shared/forms/bulk_actions';
+import { confirmDelete } from '@shared/utils/ui_utilities';
 
 /**
  * Interface for text list manager Alpine.js component data.

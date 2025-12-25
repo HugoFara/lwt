@@ -10,7 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { createIcons, icons } from 'lucide';
-import { do_ajax_save_setting } from '../../core/ajax_utilities';
+import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
 import {
   getLanguageStore,
   type LanguageStoreState

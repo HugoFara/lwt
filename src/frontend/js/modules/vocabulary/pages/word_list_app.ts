@@ -19,7 +19,7 @@ import {
   type PaginationInfo,
   type FilterOptions,
   type WordListFilters
-} from '../api/words';
+} from '@modules/vocabulary/api/words_api';
 
 const STORAGE_KEY = 'lwt_word_list_filters';
 

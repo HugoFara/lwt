@@ -8,7 +8,7 @@
  * @since 3.0.0
  */
 
-import { spinnerHtml } from './icons';
+import { spinnerHtml } from '../icons/icons';
 
 export interface InlineEditOptions {
   /** URL to POST the edited value to */

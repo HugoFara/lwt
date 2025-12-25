@@ -6,7 +6,7 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import { do_ajax_save_setting } from '../core/ajax_utilities';
+import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
 
 /**
  * Update left border radius for visible columns.

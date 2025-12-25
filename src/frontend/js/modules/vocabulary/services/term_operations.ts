@@ -6,12 +6,12 @@
  * @since   1.6.16-fork
  */
 
-import { escape_html_chars } from '../core/html_utils';
-import { isInt } from '../forms/form_validation';
-import { scrollTo } from '../core/hover_intent';
-import { apiPost, apiGet } from '../core/api_client';
-import { TermsApi } from '../api/terms';
-import { iconHtml, spinnerHtml } from '../ui/icons';
+import { escape_html_chars } from '@shared/utils/html_utils';
+import { isInt } from '@shared/forms/form_validation';
+import { scrollTo } from '@shared/utils/hover_intent';
+import { apiPost, apiGet } from '@shared/api/client';
+import { TermsApi } from '@modules/vocabulary/api/terms_api';
+import { iconHtml, spinnerHtml } from '@shared/icons/icons';
 import { oewin } from './dictionary';
 
 // Interface for lwtFormCheck

@@ -13,10 +13,10 @@
 
 import Alpine from 'alpinejs';
 import { createIcons, icons } from 'lucide';
-import { apiGet } from '../core/api_client';
-import { TextsApi } from '../api/texts';
-import { confirmDelete } from '../core/ui_utilities';
-import { renderTags, renderStatusBarChart } from '../core/html_utils';
+import { apiGet } from '@shared/api/client';
+import { TextsApi } from '@modules/text/api/texts_api';
+import { confirmDelete } from '@shared/utils/ui_utilities';
+import { renderTags, renderStatusBarChart } from '@shared/utils/html_utils';
 
 const STORAGE_KEY = 'lwt_collapsed_languages';
 

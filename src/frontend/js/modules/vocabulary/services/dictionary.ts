@@ -8,7 +8,7 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
-import { showRightFramesPanel, loadDictionaryFrame } from '../reading/frame_management';
+import { showRightFramesPanel, loadDictionaryFrame } from '@modules/text/pages/reading/frame_management';
 
 /**
  * Open a window.

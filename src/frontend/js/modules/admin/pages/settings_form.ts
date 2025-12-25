@@ -8,7 +8,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { lwtFormCheck } from '../forms/unloadformcheck';
+import { lwtFormCheck } from '@shared/forms/unloadformcheck';
 
 /**
  * Alpine.js component for settings form management.

@@ -14,7 +14,7 @@ import {
   type LanguageDefinition,
   type LanguageCreateRequest,
   type LanguageUpdateRequest
-} from '../../api/languages';
+} from '@modules/language/api/languages_api';
 
 /**
  * Form data structure.

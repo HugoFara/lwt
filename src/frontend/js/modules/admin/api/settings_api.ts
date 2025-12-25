@@ -5,7 +5,7 @@
  * @since   3.0.0
  */
 
-import { apiGet, apiPostForm, type ApiResponse } from '../core/api_client';
+import { apiGet, apiPostForm, type ApiResponse } from '@shared/api/client';
 
 /**
  * Response for saving a setting.

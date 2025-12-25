@@ -7,7 +7,7 @@
  * @since 3.0.0
  */
 
-import { getDelimiter } from '../core/language_config';
+import { getDelimiter } from '@modules/language/stores/language_config';
 
 // Tooltip configuration
 const TOOLTIP_CONFIG = {
