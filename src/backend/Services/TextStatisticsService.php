@@ -17,11 +17,11 @@
 namespace Lwt\Services;
 
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
-use Lwt\Database\UserScopedQuery;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
  * Service class for text statistics operations.

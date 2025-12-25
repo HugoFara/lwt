@@ -137,7 +137,7 @@ namespace Lwt\Views\Text;
                   :disabled="!store.canSubmit"
                   @click="save"
                 >
-                  <?php echo \Lwt\View\Helper\IconHelper::render('save', ['size' => 16]); ?>
+                  <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('save', ['size' => 16]); ?>
                   <span class="ml-1">Save</span>
                 </button>
               </div>

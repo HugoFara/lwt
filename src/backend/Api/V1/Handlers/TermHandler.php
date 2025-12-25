@@ -3,10 +3,10 @@ namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
-use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Services\WordService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\View\Helper\StatusHelper;

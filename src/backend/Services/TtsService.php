@@ -15,11 +15,11 @@
 namespace Lwt\Services;
 
 use Lwt\Core\Globals;
-use Lwt\Core\Http\InputValidator;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Language\Application\LanguageFacade;
 
-require_once __DIR__ . '/../Core/Http/InputValidator.php';
+require_once __DIR__ . '/../../Shared/Infrastructure/Http/InputValidator.php';
 // LanguageFacade loaded via autoloader
 
 /**

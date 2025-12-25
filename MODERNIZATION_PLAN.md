@@ -1338,17 +1338,19 @@ Each frontend module contains:
 
 ### Migration Path
 
-#### Stage 1: Create Shared Infrastructure (40 hours)
+#### Stage 1: Create Shared Infrastructure (40 hours) ✅ COMPLETE (2025-12-25)
 
 Move cross-cutting code to `Shared/`:
 
 | Current Location | Target Location | Status |
 |------------------|-----------------|--------|
-| `Core/Database/*` | `Shared/Infrastructure/Database/` | Pending |
-| `Core/Http/*` | `Shared/Infrastructure/Http/` | Pending |
-| `Core/Container/*` | `Shared/Infrastructure/Container/` | Pending |
+| `Core/Database/*` | `Shared/Infrastructure/Database/` | ✅ DONE (2025-12-25) |
+| `Core/Http/*` | `Shared/Infrastructure/Http/` | ✅ DONE (2025-12-25) |
+| `Core/Container/*` | `Shared/Infrastructure/Container/` | ✅ DONE (2025-12-25) |
 | `Core/Entity/ValueObject/*` | `Modules/*/Domain/ValueObject/` | ✅ DONE (2025-12-24) |
-| `View/Helper/*` | `Shared/UI/Helpers/` | Pending |
+| `View/Helper/*` | `Shared/UI/Helpers/` | ✅ DONE (2025-12-25) |
+
+**Note:** StatusHelper remains in `Lwt\View\Helper` due to business logic dependencies (TermStatusService).
 
 #### Stage 2: Pilot Module - Text (80 hours)
 
@@ -1461,19 +1463,27 @@ All TagService functionality has been migrated to `TagsFacade`:
 - [x] `Legacy/` directory is empty and removed
 - [x] Documentation updated with new patterns
 
-### Namespace Updates
+### Namespace Updates ✅ COMPLETE (2025-12-25)
 
 ```json
 {
     "autoload": {
         "psr-4": {
+            "Lwt\\": "src/backend/",
             "Lwt\\Shared\\": "src/Shared/",
-            "Lwt\\Modules\\": "src/Modules/",
-            "Lwt\\Api\\": "src/Api/"
+            "Lwt\\Modules\\": "src/Modules/"
         }
     }
 }
 ```
+
+**Shared Infrastructure Namespaces:**
+- `Lwt\Shared\Infrastructure\Database\*` - Connection, DB, QueryBuilder, etc.
+- `Lwt\Shared\Infrastructure\Http\*` - InputValidator, SecurityHeaders, UrlUtilities
+- `Lwt\Shared\Infrastructure\Container\*` - Container, ServiceProviders
+- `Lwt\Shared\Domain\ValueObjects\UserId` - Cross-module user identity
+- `Lwt\Shared\UI\Helpers\*` - FormHelper, IconHelper, PageLayoutHelper, SelectOptionsBuilder, TagHelper
+- `Lwt\Shared\UI\Assets\ViteHelper` - Asset management
 
 ---
 

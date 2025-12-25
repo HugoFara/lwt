@@ -16,10 +16,10 @@
 
 namespace Lwt\Modules\Review\Infrastructure;
 
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\TestConfiguration;
 use Lwt\Modules\Review\Domain\TestWord;

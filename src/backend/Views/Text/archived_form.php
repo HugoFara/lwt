@@ -21,7 +21,7 @@
 namespace Lwt\Views\Text;
 
 use Lwt\Services\MediaService;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 /** @var int $textId */
 /** @var array $record */
@@ -43,7 +43,7 @@ use Lwt\View\Helper\IconHelper;
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
                             <select name="AtLgID" id="AtLgID" class="notempty setfocus" required>
-                                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $record['AtLgID'], '[Choose...]'); ?>
+                                <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languages, $record['AtLgID'], '[Choose...]'); ?>
                             </select>
                         </div>
                     </div>

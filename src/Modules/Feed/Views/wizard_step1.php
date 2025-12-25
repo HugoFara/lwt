@@ -19,7 +19,7 @@
 
 namespace Lwt\Views\Feed;
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Build JSON config
 $configJson = json_encode([
@@ -31,7 +31,7 @@ $configJson = json_encode([
 <script type="application/json" id="wizard-step1-config"><?php echo $configJson; ?></script>
 
 <div x-data="feedWizardStep1" x-cloak>
-    <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
+    <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildLogo(); ?>
 
     <h1 class="title is-4 is-flex is-align-items-center">
         <span class="icon mr-2">

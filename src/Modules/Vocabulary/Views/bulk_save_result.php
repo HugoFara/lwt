@@ -25,9 +25,9 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Services\TextStatisticsService;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 <p id="displ_message">

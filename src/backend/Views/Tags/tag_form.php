@@ -27,7 +27,7 @@ namespace Lwt\Views\Tags;
 /** @var \Lwt\Modules\Tags\Application\TagsFacade $service */
 /** @var string $formFieldPrefix */
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 $isEdit = $mode === 'edit';
 $pageTitle = $isEdit ? 'Edit Tag' : 'New Tag';

@@ -14,8 +14,8 @@
 
 namespace Lwt\Modules\Language\Http;
 
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\SentenceService;

@@ -17,9 +17,9 @@
 namespace Lwt\Modules\Tags\Http;
 
 use Lwt\Controllers\AbstractCrudController;
-use Lwt\Core\Http\InputValidator;
-use Lwt\Database\Maintenance;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Database\Maintenance;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Tags\Domain\TagType;
 

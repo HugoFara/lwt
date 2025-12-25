@@ -3,7 +3,7 @@
 namespace Lwt\Tests\Services;
 
 require_once __DIR__ . '/../../../src/backend/Core/Globals.php';
-require_once __DIR__ . '/../../../src/backend/Core/Entity/ValueObject/UserId.php';
+require_once __DIR__ . '/../../../src/Shared/Domain/ValueObjects/UserId.php';
 require_once __DIR__ . '/../../../src/backend/Core/Entity/User.php';
 require_once __DIR__ . '/../../../src/backend/Core/Exception/AuthException.php';
 require_once __DIR__ . '/../../../src/backend/Services/PasswordService.php';
@@ -81,7 +81,7 @@ class AuthServiceTest extends TestCase
     {
         $user = User::create('testuser', 'test@example.com', 'hashedpassword');
         // Simulate that user has been persisted
-        $user->setId(\Lwt\Core\Entity\ValueObject\UserId::fromInt(42));
+        $user->setId(\Lwt\Shared\Domain\ValueObjects\UserId::fromInt(42));
 
         $this->service->setCurrentUser($user);
 

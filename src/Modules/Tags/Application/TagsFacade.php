@@ -17,12 +17,12 @@
 
 namespace Lwt\Modules\Tags\Application;
 
-use Lwt\Core\Http\InputValidator;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Tags\Application\UseCases\CreateTag;
-use Lwt\View\Helper\FormHelper;
+use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Modules\Tags\Application\UseCases\DeleteTag;
 use Lwt\Modules\Tags\Application\UseCases\GetAllTagNames;
 use Lwt\Modules\Tags\Application\UseCases\GetTagById;
@@ -1306,7 +1306,7 @@ class TagsFacade
         bool $isLight = true
     ): string {
         $tagList = self::getWordTagList($wordId, false);
-        return \Lwt\View\Helper\TagHelper::renderInline($tagList, $size, $color, $isLight);
+        return \Lwt\Shared\UI\Helpers\TagHelper::renderInline($tagList, $size, $color, $isLight);
     }
 
     /**

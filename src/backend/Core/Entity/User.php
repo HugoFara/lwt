@@ -16,7 +16,7 @@ namespace Lwt\Core\Entity;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
-use Lwt\Core\Entity\ValueObject\UserId;
+use Lwt\Shared\Domain\ValueObjects\UserId;
 
 /**
  * A user represented as a rich domain object.

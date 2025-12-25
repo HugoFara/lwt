@@ -17,11 +17,11 @@
 
 namespace Lwt;
 
-use Lwt\Core\Container\Container;
-use Lwt\Core\Container\ControllerServiceProvider;
-use Lwt\Core\Container\CoreServiceProvider;
-use Lwt\Core\Container\RepositoryServiceProvider;
-use Lwt\Core\Container\ServiceProviderInterface;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Shared\Infrastructure\Container\ControllerServiceProvider;
+use Lwt\Shared\Infrastructure\Container\CoreServiceProvider;
+use Lwt\Shared\Infrastructure\Container\RepositoryServiceProvider;
+use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
 use Lwt\Modules\Text\TextServiceProvider;
 use Lwt\Modules\Language\LanguageServiceProvider;
 use Lwt\Modules\Feed\FeedServiceProvider;
@@ -35,7 +35,7 @@ use Lwt\Modules\Admin\Application\UseCases\Wizard\LoadConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\SaveConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\TestConnection;
 use Lwt\Core\Exception\ExceptionHandler;
-use Lwt\Core\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Router\Router;
 
 /**

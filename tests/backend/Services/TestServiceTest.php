@@ -6,8 +6,8 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Services\TestService;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -24,7 +24,7 @@ require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/UseCases/Fi
 require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
+require_once __DIR__ . '/../../../src/Shared/Infrastructure/Database/Restore.php';
 require_once __DIR__ . '/../../../src/backend/Services/TestService.php';
 
 /**

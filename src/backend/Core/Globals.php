@@ -210,13 +210,13 @@ class Globals
      *
      * @param string $tableName The base table name (e.g., 'words')
      *
-     * @return \Lwt\Database\QueryBuilder
+     * @return \Lwt\Shared\Infrastructure\Database\QueryBuilder
      *
      * @since 3.0.0
      */
-    public static function query(string $tableName): \Lwt\Database\QueryBuilder
+    public static function query(string $tableName): \Lwt\Shared\Infrastructure\Database\QueryBuilder
     {
-        return \Lwt\Database\QueryBuilder::table($tableName);
+        return \Lwt\Shared\Infrastructure\Database\QueryBuilder::table($tableName);
     }
 
     // =========================================================================

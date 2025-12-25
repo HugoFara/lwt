@@ -15,8 +15,8 @@
 namespace Lwt\Modules\Vocabulary\Infrastructure;
 
 use DateTimeImmutable;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Vocabulary\Domain\Term;
 use Lwt\Modules\Vocabulary\Domain\TermRepositoryInterface;
 use Lwt\Modules\Vocabulary\Domain\ValueObject\TermId;

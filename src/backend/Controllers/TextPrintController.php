@@ -18,15 +18,15 @@ namespace Lwt\Controllers;
 use Lwt\Services\TextPrintService;
 use Lwt\Services\AnnotationService;
 use Lwt\Api\V1\Handlers\ImprovedTextHandler;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 require_once __DIR__ . '/../Services/TextPrintService.php';
 require_once __DIR__ . '/../Services/TextNavigationService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';
 require_once __DIR__ . '/../Api/V1/Handlers/ImprovedTextHandler.php';
-require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
-require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
-require_once __DIR__ . '/../View/Helper/FormHelper.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/SelectOptionsBuilder.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/FormHelper.php';
 
 /**
  * Controller for text printing functionality.
@@ -94,7 +94,7 @@ class TextPrintController extends BaseController
         require_once __DIR__ . '/../Services/TextParsingService.php';
         require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
         require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
-        require_once __DIR__ . '/../Core/Database/Restore.php';
+        require_once __DIR__ . '/../../Shared/Infrastructure/Database/Restore.php';
 
         $textId = (int) $this->param('text', '0');
 
@@ -148,7 +148,7 @@ class TextPrintController extends BaseController
         require_once __DIR__ . '/../Services/TextParsingService.php';
         require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
         require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
-        require_once __DIR__ . '/../Core/Database/Restore.php';
+        require_once __DIR__ . '/../../Shared/Infrastructure/Database/Restore.php';
         require_once __DIR__ . '/../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
 
         $textId = (int) $this->param('text', '0');

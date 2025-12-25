@@ -15,15 +15,15 @@
 
 namespace Lwt\Controllers;
 
-use Lwt\Core\Http\InputValidator;
-use Lwt\Database\Connection;
-use Lwt\Database\DB;
-use Lwt\Database\Escaping;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../Core/Http/InputValidator.php';
-require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../../Shared/Infrastructure/Http/InputValidator.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
 
 /**
  * Abstract base controller providing common functionality for all controllers.

@@ -6,10 +6,10 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\Restore;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Restore;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Core\StringUtils;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Services\ExportService;
@@ -20,8 +20,8 @@ use Lwt\Services\TableSetService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Services\TextNavigationService;
 use Lwt\Services\TextStatisticsService;
-use Lwt\View\Helper\FormHelper;
-use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\FormHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Admin\Infrastructure\MySqlSettingsRepository;
@@ -35,8 +35,8 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/View/Helper/FormHelper.php';
-require_once __DIR__ . '/../../../src/backend/View/Helper/SelectOptionsBuilder.php';
+require_once __DIR__ . '/../../../src/Shared/UI/Helpers/FormHelper.php';
+require_once __DIR__ . '/../../../src/Shared/UI/Helpers/SelectOptionsBuilder.php';
 require_once __DIR__ . '/../../../src/backend/View/Helper/StatusHelper.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../src/backend/Services/SentenceService.php';
@@ -45,7 +45,7 @@ require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/UseCases/Fi
 require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
+require_once __DIR__ . '/../../../src/Shared/Infrastructure/Database/Restore.php';
 require_once __DIR__ . '/../../../src/backend/Services/ExportService.php';
 require_once __DIR__ . '/../../../src/backend/Services/MediaService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
@@ -650,7 +650,7 @@ class IntegrationTest extends TestCase
     public function testEchoLwtLogoExtended(): void
     {
         // Test that it outputs the logo HTML
-        $output = \Lwt\View\Helper\PageLayoutHelper::buildLogo();
+        $output = \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildLogo();
 
         $this->assertIsString($output);
         // Should contain logo image

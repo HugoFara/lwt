@@ -7,9 +7,9 @@ require_once __DIR__ . '/../../../../src/backend/Services/TextParsingService.php
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\TextParsing;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\TextParsing;
 use Lwt\Services\TextParsingService;
 use PHPUnit\Framework\TestCase;
 

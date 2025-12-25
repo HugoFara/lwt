@@ -15,7 +15,7 @@
 namespace Lwt\Modules\Vocabulary\Application\UseCases;
 
 use DateTimeImmutable;
-use Lwt\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Modules\Vocabulary\Domain\Term;
 use Lwt\Modules\Vocabulary\Domain\TermRepositoryInterface;
 

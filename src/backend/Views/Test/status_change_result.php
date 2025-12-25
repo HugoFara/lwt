@@ -21,7 +21,7 @@
 
 namespace Lwt\Views\Test;
 
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\View\Helper\StatusHelper;
 
 PageLayoutHelper::renderPageStart("Term: " . $wordText, false);

@@ -14,10 +14,10 @@
 
 namespace Lwt\Modules\Text\Application\UseCases;
 
-use Lwt\Database\Connection;
-use Lwt\Database\Maintenance;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Maintenance;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 
 /**
  * Use case for deleting texts.

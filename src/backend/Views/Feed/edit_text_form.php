@@ -26,7 +26,7 @@
 
 namespace Lwt\Views\Feed;
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 foreach ($texts as $text):
 ?>

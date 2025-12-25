@@ -23,7 +23,7 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 <script type="application/json" id="bulk-translate-config">

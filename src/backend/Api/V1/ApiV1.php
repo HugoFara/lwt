@@ -25,7 +25,7 @@ require_once __DIR__ . '/../../Services/SentenceService.php';
 require_once __DIR__ . '/../../Services/AnnotationService.php';
 require_once __DIR__ . '/../../Services/TextNavigationService.php';
 require_once __DIR__ . '/../../Services/TextParsingService.php';
-require_once __DIR__ . '/../../Core/Database/Restore.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
 require_once __DIR__ . '/../../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../../Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
@@ -47,7 +47,7 @@ use Lwt\Api\V1\Handlers\StatisticsHandler;
 use Lwt\Api\V1\Handlers\TermHandler;
 use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Core\Globals;
-use Lwt\Core\Container\Container;
+use Lwt\Shared\Infrastructure\Container\Container;
 
 /**
  * Main API V1 handler class.

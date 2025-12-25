@@ -20,10 +20,10 @@ namespace Lwt\Services {
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\UserScopedQuery;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
  * Service class for annotation management.

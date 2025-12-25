@@ -16,10 +16,10 @@ namespace Lwt\Core\Parser;
 
 use Lwt\Modules\Language\Domain\Language;
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 
 /**
  * Coordinates parsing operations, providing a facade for the parser system.

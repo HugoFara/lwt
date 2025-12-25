@@ -16,9 +16,9 @@ namespace Lwt\Modules\Vocabulary\Application\UseCases;
 
 use Lwt\Core\Entity\GoogleTranslate;
 use Lwt\Core\StringUtils;
-use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 
 /**

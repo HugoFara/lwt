@@ -14,8 +14,8 @@
 
 namespace Lwt\Router;
 
-use Lwt\Core\Container\Container;
-use Lwt\Core\Http\SecurityHeaders;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Shared\Infrastructure\Http\SecurityHeaders;
 use Lwt\Router\Middleware\MiddlewareInterface;
 
 /**

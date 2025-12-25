@@ -16,7 +16,7 @@ namespace Lwt\Modules\Admin\Application\UseCases\ServerData;
 
 use Lwt\Core\ApplicationInfo;
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Connection;
 
 /**
  * Use case for getting server and database information.

@@ -23,7 +23,7 @@ namespace Lwt\Views\Test;
 use Lwt\Core\StringUtils;
 use Lwt\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 $span1 = $rtl ? '<span dir="rtl">' : '';
 $span2 = $rtl ? '</span>' : '';

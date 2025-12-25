@@ -21,7 +21,7 @@
 
 namespace Lwt\Services;
 
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Connection;
 
 /**
  * Service class for exporting vocabulary data.

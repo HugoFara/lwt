@@ -2,8 +2,8 @@
 namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 
 /**
  * Handler for imported terms API operations.

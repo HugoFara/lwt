@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 namespace Lwt\Tests\Core\Http;
 
-use Lwt\Core\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Http/InputValidator.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Http/InputValidator.php';
 
 /**
  * Unit tests for the InputValidator class.

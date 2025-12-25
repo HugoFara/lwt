@@ -27,7 +27,7 @@ namespace Lwt\Views\Text;
 // $title, $audio, $sourceUri, $textLinks
 
 use Lwt\Services\MediaService;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 <h1><?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>

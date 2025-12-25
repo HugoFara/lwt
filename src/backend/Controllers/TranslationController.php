@@ -15,16 +15,16 @@
 
 namespace Lwt\Controllers;
 
-use Lwt\Core\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Core\Integration\GoogleTimeToken;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Services\TranslationService;
-use Lwt\Database\Settings;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
-require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
 require_once __DIR__ . '/../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
 require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
 require_once __DIR__ . '/../Services/TranslationService.php';

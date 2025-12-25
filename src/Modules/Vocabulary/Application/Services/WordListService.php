@@ -15,11 +15,11 @@
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
-use Lwt\Database\Maintenance;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Maintenance;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\View\Helper\StatusHelper;
 use Lwt\Services\ExportService;
 use Lwt\Modules\Language\Application\LanguageFacade;

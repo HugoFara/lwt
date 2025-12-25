@@ -31,9 +31,9 @@ namespace Lwt\Views\Text;
 /** @var array $languages */
 /** @var bool $isNew */
 
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Services\MediaService;
 
 

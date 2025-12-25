@@ -15,6 +15,8 @@
 
 namespace Lwt\View\Helper;
 
+use Lwt\Shared\UI\Helpers\IconHelper;
+
 /**
  * Helper class for word status-related display logic.
  *

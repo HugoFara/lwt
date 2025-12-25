@@ -5,9 +5,9 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Services\HomeService;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Admin\Infrastructure\MySqlSettingsRepository;

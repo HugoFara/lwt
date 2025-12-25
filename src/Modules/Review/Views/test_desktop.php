@@ -20,7 +20,7 @@ namespace Lwt\Views\Test;
 
 use Lwt\Core\StringUtils;
 
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 ?>
 <!-- Main navigation -->

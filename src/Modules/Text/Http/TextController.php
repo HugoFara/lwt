@@ -21,12 +21,12 @@ use Lwt\Services\TextNavigationService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
-use Lwt\Database\Settings;
-use Lwt\Database\Validation;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\Core\Http\InputValidator;
-use Lwt\Core\Http\UrlUtilities;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Validation;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Core\StringUtils;
 
 // Base path for legacy includes
@@ -36,8 +36,8 @@ define('LWT_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
 define('LWT_TEXT_MODULE_VIEWS', dirname(__DIR__) . '/Views');
 
 require_once dirname(__DIR__) . '/Application/TextFacade.php';
-require_once LWT_BACKEND_PATH . '/View/Helper/PageLayoutHelper.php';
-require_once LWT_BACKEND_PATH . '/View/Helper/SelectOptionsBuilder.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/SelectOptionsBuilder.php';
 require_once LWT_BACKEND_PATH . '/Services/TextDisplayService.php';
 // LanguageFacade and LanguagePresets loaded via autoloader
 
@@ -184,7 +184,7 @@ class TextController extends BaseController
         require_once LWT_BACKEND_PATH . '/Services/TextParsingService.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        require_once LWT_BACKEND_PATH . '/Core/Database/Restore.php';
+        require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
         require_once LWT_BACKEND_PATH . '/Services/MediaService.php';
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/start_session.php';
         require_once LWT_BACKEND_PATH . '/Core/Integration/text_from_yt.php';
@@ -475,7 +475,7 @@ class TextController extends BaseController
         require_once LWT_BACKEND_PATH . '/Services/TextParsingService.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        require_once LWT_BACKEND_PATH . '/Core/Database/Restore.php';
+        require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
         require_once LWT_BACKEND_PATH . '/Services/MediaService.php';
 
         $textId = $this->paramInt('text', 0);
@@ -747,7 +747,7 @@ class TextController extends BaseController
             $languages = $this->languageService->getLanguagesForSelect();
             $languagesOption = SelectOptionsBuilder::forLanguages(
                 $languages,
-                \Lwt\Database\Settings::get('currentlanguage'),
+                \Lwt\Shared\Infrastructure\Database\Settings::get('currentlanguage'),
                 '[Choose...]'
             );
 
@@ -776,7 +776,7 @@ class TextController extends BaseController
         require_once LWT_BACKEND_PATH . '/Services/TextParsingService.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        require_once LWT_BACKEND_PATH . '/Core/Database/Restore.php';
+        require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
 
         // Handle mark actions that skip pagestart
         $markAction = $this->param('markaction');

@@ -14,8 +14,8 @@
 
 namespace Lwt\Modules\Admin\Infrastructure;
 
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Admin\Domain\SettingsRepositoryInterface;
 
 /**

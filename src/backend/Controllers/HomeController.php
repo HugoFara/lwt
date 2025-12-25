@@ -17,12 +17,12 @@ namespace Lwt\Controllers;
 
 use Lwt\Services\HomeService;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
-require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/SelectOptionsBuilder.php';
 require_once __DIR__ . '/../Services/TextStatisticsService.php';
 require_once __DIR__ . '/../Services/SentenceService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';
@@ -30,7 +30,7 @@ require_once __DIR__ . '/../Services/TextNavigationService.php';
 require_once __DIR__ . '/../Services/TextParsingService.php';
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../Core/Database/Restore.php';
+require_once __DIR__ . '/../../Shared/Infrastructure/Database/Restore.php';
 require_once __DIR__ . '/../Services/MediaService.php';
 // LanguageFacade and LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../Services/HomeService.php';

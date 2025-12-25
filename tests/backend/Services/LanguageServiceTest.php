@@ -7,8 +7,8 @@ use Lwt\Modules\Language\Domain\Language;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database

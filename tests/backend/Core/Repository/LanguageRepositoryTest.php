@@ -7,8 +7,8 @@ use Lwt\Modules\Language\Domain\Language;
 use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -17,7 +17,7 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Database/PreparedStatement.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/PreparedStatement.php';
 // Module classes loaded via autoloader
 
 /**

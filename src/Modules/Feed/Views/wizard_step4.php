@@ -21,8 +21,8 @@
 
 namespace Lwt\Views\Feed;
 
-use Lwt\Core\Http\InputValidator;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Prepare languages array for JSON
 $languagesJson = array_map(function ($lang) {
@@ -72,7 +72,7 @@ $configJson = json_encode([
 <script type="application/json" id="wizard-step4-config"><?php echo $configJson; ?></script>
 
 <div x-data="feedWizardStep4" x-cloak>
-    <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
+    <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildLogo(); ?>
 
     <h1 class="title is-4 is-flex is-align-items-center">
         <span class="icon mr-2">

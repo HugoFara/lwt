@@ -20,9 +20,9 @@
 
 namespace Lwt\Views\Text;
 
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Core\StringUtils;
 
 /** @var string $message */
@@ -31,7 +31,7 @@ use Lwt\Core\StringUtils;
 ?>
 <link rel="stylesheet" type="text/css" href="<?php StringUtils::printFilePath('css/css_charts.css');?>" />
 
-<?php \Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false); ?>
+<?php \Lwt\Shared\UI\Helpers\PageLayoutHelper::renderMessage($message, false); ?>
 
 <?php
 echo PageLayoutHelper::buildActionCard([

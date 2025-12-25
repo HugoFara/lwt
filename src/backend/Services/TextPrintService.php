@@ -19,10 +19,10 @@ namespace Lwt\Services;
 require_once __DIR__ . '/../View/Helper/StatusHelper.php';
 
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Services\AnnotationService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 

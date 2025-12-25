@@ -20,7 +20,7 @@
 
 namespace Lwt\Views\Text;
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 /** @var string $languagesOption */
 /** @var array $languageData */

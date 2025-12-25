@@ -18,8 +18,8 @@
 
 namespace Lwt\Views\Admin;
 
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 <form class="validate" action="/admin/settings" method="post" data-lwt-settings-form>

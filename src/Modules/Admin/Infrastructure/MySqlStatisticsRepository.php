@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Admin\Infrastructure;
 
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 
 /**
  * MySQL repository for statistics queries.

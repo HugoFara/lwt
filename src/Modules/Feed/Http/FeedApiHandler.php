@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Feed\Http;
 
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Feed\Application\FeedFacade;
 
 /**

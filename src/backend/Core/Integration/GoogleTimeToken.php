@@ -15,7 +15,7 @@
 
 namespace Lwt\Core\Integration;
 
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Connection;
 
 /**
  * Google Translate time token manager.

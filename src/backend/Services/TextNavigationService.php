@@ -15,13 +15,13 @@
 namespace Lwt\Services;
 
 use Lwt\Core\Globals;
-use Lwt\Core\Http\InputValidator;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\UserScopedQuery;
-use Lwt\Database\Validation;
-use Lwt\Database\Settings;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Validation;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
  * Service class for text navigation.

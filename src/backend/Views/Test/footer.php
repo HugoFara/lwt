@@ -19,7 +19,7 @@
 
 namespace Lwt\Views\Test;
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 $total = $wrong + $correct + $remaining;
 $divisor = $total > 0 ? $total / 100.0 : 1.0;

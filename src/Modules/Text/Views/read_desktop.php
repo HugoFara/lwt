@@ -24,7 +24,7 @@
 namespace Lwt\Views\Text;
 
 use Lwt\Services\MediaService;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 ?>
 <!-- Main navigation -->
@@ -38,7 +38,7 @@ use Lwt\View\Helper\PageLayoutHelper;
         <div class="level-item">
           <strong x-text="title || 'Loading...'"></strong>
           <?php if (isset($sourceUri) && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')): ?>
-          <?php echo \Lwt\View\Helper\IconHelper::link('external-link', $sourceUri, ['alt' => 'Source'], ['target' => '_blank', 'rel' => 'noopener', 'class' => 'ml-2', 'title' => 'Source']); ?>
+          <?php echo \Lwt\Shared\UI\Helpers\IconHelper::link('external-link', $sourceUri, ['alt' => 'Source'], ['target' => '_blank', 'rel' => 'noopener', 'class' => 'ml-2', 'title' => 'Source']); ?>
           <?php endif; ?>
         </div>
       </div>

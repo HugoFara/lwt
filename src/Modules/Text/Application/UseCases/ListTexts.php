@@ -14,9 +14,9 @@
 
 namespace Lwt\Modules\Text\Application\UseCases;
 
-use Lwt\Database\Connection;
-use Lwt\Database\Settings;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 
 /**

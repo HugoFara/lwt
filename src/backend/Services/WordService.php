@@ -27,11 +27,11 @@ use Lwt\Core\Globals;
 use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
-use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\View\Helper\StatusHelper;
 
 /**
@@ -1072,7 +1072,7 @@ class WordService
             ->where('WoID', '=', $wordId)
             ->delete();
 
-        \Lwt\Database\Maintenance::adjustAutoIncrement('words', 'WoID');
+        \Lwt\Shared\Infrastructure\Database\Maintenance::adjustAutoIncrement('words', 'WoID');
 
         QueryBuilder::table('textitems2')
             ->where('Ti2WordCount', '>', 1)
@@ -1183,7 +1183,7 @@ class WordService
             $wid = (int) $stmt->insertId();
 
             if ($rows == 0) {
-                \Lwt\View\Helper\PageLayoutHelper::renderMessage(
+                \Lwt\Shared\UI\Helpers\PageLayoutHelper::renderMessage(
                     "WARNING: No rows modified!",
                     false
                 );
@@ -1508,7 +1508,7 @@ class WordService
 
         $wid = (int) Connection::preparedInsert($sql, $bindings);
 
-        \Lwt\Database\Maintenance::initWordCount();
+        \Lwt\Shared\Infrastructure\Database\Maintenance::initWordCount();
         TagsFacade::saveWordTagsFromForm($wid);
         $this->expressionService->insertExpressions($data['textlc'], (int) $data['lgid'], $wid, (int) $data['wordcount'], 0);
 

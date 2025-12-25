@@ -29,8 +29,8 @@
 
 namespace Lwt\Views\Feed;
 
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
@@ -90,7 +90,7 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
             </div>
             <div class="level-item">
-                <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form1'); ?>
+                <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form1'); ?>
             </div>
             <div class="level-right">
                 <div class="level-item">
@@ -101,7 +101,7 @@ echo PageLayoutHelper::buildActionCard([
                         <div class="control">
                             <div class="select is-small">
                                 <select name="sort" @change="handleSort($event)">
-                                    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
+                                    <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forTextSort($currentSort); ?>
                                 </select>
                             </div>
                         </div>
@@ -135,7 +135,7 @@ echo PageLayoutHelper::buildActionCard([
         <tr>
         <?php if ($row['TxID']): ?>
             <td class="td1 center"><a href="/text/read?start=<?php echo $row['TxID']; ?>" >
-            <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['title' => 'Read', 'alt' => '-']); ?></a>
+            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['title' => 'Read', 'alt' => '-']); ?></a>
         <?php elseif ($row['AtID']): ?>
             <td class="td1 center"><span title="archived"><?php echo IconHelper::render('circle-x', ['alt' => '-']); ?></span>
         <?php elseif (!empty($row['FlLink']) && str_starts_with((string)$row['FlLink'], ' ')): ?>
@@ -167,7 +167,7 @@ echo PageLayoutHelper::buildActionCard([
     <form name="form3" method="get" action ="">
         <table class="tab2" cellspacing="0" cellpadding="5">
         <tr><th class="th1 feeds-filter-cell"><?php echo $recno; ?></th><th class="th1">
-    <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form3'); ?>
+    <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form3'); ?>
         </th></tr></table></form>
 <?php endif; ?>
 <?php else: ?>

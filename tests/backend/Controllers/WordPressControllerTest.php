@@ -7,7 +7,7 @@ use Lwt\Controllers\WordPressController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Services\WordPressService;
-use Lwt\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Configuration;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database

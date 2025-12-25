@@ -7,9 +7,9 @@ use Lwt\Modules\Text\Http\TextController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Modules\Text\Application\TextFacade;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database

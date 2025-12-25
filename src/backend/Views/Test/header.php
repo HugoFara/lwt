@@ -19,7 +19,7 @@ namespace Lwt\Views\Test;
 
 use Lwt\Services\AnnotationService;
 use Lwt\Services\TextNavigationService;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 ?>
 <div class="flex-header">
@@ -41,10 +41,10 @@ use Lwt\View\Helper\PageLayoutHelper;
     </div>
     <div>
         <a href="/text/read?start=<?php echo $textId; ?>" target="_top">
-            <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['title' => 'Read', 'alt' => 'Read']); ?>
+            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['title' => 'Read', 'alt' => 'Read']); ?>
         </a>
         <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
-            <?php echo \Lwt\View\Helper\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
+            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
         <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
     </div>

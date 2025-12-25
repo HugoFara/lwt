@@ -17,12 +17,12 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\FormHelper;
-use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\FormHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\TagHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\TagHelper;
 use Lwt\Services\ExportService;
 ?>
 <?php if ($recno == 0): ?>

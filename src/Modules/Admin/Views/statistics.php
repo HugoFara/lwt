@@ -20,7 +20,7 @@
 
 namespace Lwt\Views\Admin;
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Prepare chart data as JSON for the Alpine/Chart.js module
 $intensityChartData = array_map(function ($lang) {

@@ -15,7 +15,7 @@
 namespace Lwt\Modules\Feed\Infrastructure;
 
 use Lwt\Core\Repository\AbstractRepository;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Feed\Domain\Feed;
 use Lwt\Modules\Feed\Domain\FeedRepositoryInterface;
 

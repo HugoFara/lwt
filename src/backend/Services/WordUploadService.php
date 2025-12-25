@@ -15,13 +15,13 @@
 namespace Lwt\Services;
 
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
-use Lwt\Database\Maintenance;
-use Lwt\Database\TextParsing;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Maintenance;
+use Lwt\Shared\Infrastructure\Database\TextParsing;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';

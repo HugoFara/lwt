@@ -19,8 +19,8 @@
 
 namespace Lwt\Views\Feed;
 
-use Lwt\Core\Http\InputValidator;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Prepare feed items for JSON
 $feedItemsJson = [];
@@ -163,7 +163,7 @@ $configJson = json_encode([
     </div>
 
     <div id="lwt_container" x-show="!isMinimized">
-        <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
+        <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildLogo(); ?>
 
         <h1 class="title is-4 is-flex is-align-items-center">
             <span class="icon mr-2">

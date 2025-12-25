@@ -26,9 +26,9 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 

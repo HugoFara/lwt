@@ -24,8 +24,8 @@
 
 namespace Lwt\Views\Feed;
 
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/feeds', 'label' => 'Feeds', 'icon' => 'list'],
@@ -75,7 +75,7 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
             </div>
             <div class="level-item">
-                <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form1'); ?>
+                <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form1'); ?>
             </div>
             <div class="level-right">
                 <div class="level-item">
@@ -86,7 +86,7 @@ echo PageLayoutHelper::buildActionCard([
                         <div class="control">
                             <div class="select is-small">
                                 <select name="sort" @change="handleSort($event)">
-                                    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
+                                    <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forTextSort($currentSort); ?>
                                 </select>
                             </div>
                         </div>
@@ -167,7 +167,7 @@ foreach ($feeds as $row):
 <form name="form3" method="get" action="">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr><th class="th1 feeds-filter-cell"><?php echo $totalFeeds; ?></th>
-<th class="th1"><?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form3'); ?></th>
+<th class="th1"><?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form3'); ?></th>
 </tr></table>
 </form>
 <?php endif; ?>

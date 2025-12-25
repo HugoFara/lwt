@@ -14,8 +14,8 @@
 
 namespace Lwt\Core\Repository;
 
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 
 /**
  * Abstract base class for repositories.

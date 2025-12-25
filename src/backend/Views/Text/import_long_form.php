@@ -17,8 +17,8 @@
 
 namespace Lwt\Views\Text;
 
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 $actions = [
     ['url' => '/texts?new=1', 'label' => 'Short Text Import', 'icon' => 'circle-plus', 'class' => 'is-primary'],

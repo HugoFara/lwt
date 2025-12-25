@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Admin\Application\Services;
 
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Settings;
 
 /**
  * Service for clearing session filters.

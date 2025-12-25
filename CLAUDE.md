@@ -143,30 +143,50 @@ All requests route through `index.php` → `Router` → `Controller` → `Servic
 ### Key Directories
 
 ```text
+src/Shared/                          # Cross-cutting infrastructure
+├── Infrastructure/
+│   ├── Database/                    # Connection, DB, QueryBuilder, PreparedStatement, etc.
+│   ├── Http/                        # InputValidator, SecurityHeaders, UrlUtilities
+│   └── Container/                   # DI Container, ServiceProviders
+├── Domain/
+│   └── ValueObjects/                # UserId (cross-module identity)
+└── UI/
+    ├── Helpers/                     # FormHelper, IconHelper, PageLayoutHelper, etc.
+    └── Assets/                      # ViteHelper
+
+src/Modules/                         # Feature modules (bounded contexts)
+├── Text/                            # Text reading/import module
+├── Vocabulary/                      # Terms/words module
+├── Language/                        # Language configuration module
+├── Review/                          # Spaced repetition testing module
+├── Feed/                            # RSS feed module
+├── Tags/                            # Tagging module
+└── Admin/                           # Admin/settings module
+
 src/backend/
-├── Controllers/     # MVC Controllers (14 classes)
-├── Services/        # Business logic layer (22 classes)
-├── Views/           # PHP templates organized by feature
-├── Router/          # URL routing (Router.php, routes.php)
-├── Api/V1/          # REST API handlers
-│   ├── Handlers/    # Endpoint handlers by resource
-│   ├── ApiV1.php    # Main API router
-│   └── Endpoints.php # Endpoint registry
-└── Core/            # Shared utilities
-    ├── Bootstrap/   # App initialization (EnvLoader, db_bootstrap)
-    ├── Database/    # DB classes (Connection, QueryBuilder, Settings)
-    ├── Entity/      # Domain entities (Language, Term, Text)
-    ├── Export/      # Export functionality (Anki, TSV)
-    └── Globals.php  # Type-safe global state access
+├── Controllers/                     # MVC Controllers
+├── Services/                        # Business logic layer
+├── Views/                           # PHP templates organized by feature
+├── Router/                          # URL routing (Router.php, routes.php)
+├── Api/V1/                          # REST API handlers
+│   ├── Handlers/                    # Endpoint handlers by resource
+│   ├── ApiV1.php                    # Main API router
+│   └── Endpoints.php                # Endpoint registry
+├── Core/                            # Core utilities
+│   ├── Bootstrap/                   # App initialization (EnvLoader, db_bootstrap)
+│   ├── Entity/                      # Domain entities (Language, Term, Text)
+│   ├── Export/                      # Export functionality (Anki, TSV)
+│   └── Globals.php                  # Type-safe global state access
+└── View/Helper/                     # StatusHelper (business logic dependency)
 
 src/frontend/
-├── js/              # TypeScript source (built with Vite)
-│   ├── main.ts      # Entry point
-│   ├── types/       # TypeScript declarations
-│   └── *.ts         # Feature modules
+├── js/                              # TypeScript source (built with Vite)
+│   ├── main.ts                      # Entry point
+│   ├── types/                       # TypeScript declarations
+│   └── *.ts                         # Feature modules
 └── css/
-    ├── base/        # Core styles
-    └── themes/      # Theme overrides
+    ├── base/                        # Core styles
+    └── themes/                      # Theme overrides
 ```
 
 ### Database Architecture
@@ -231,6 +251,12 @@ Key endpoint groups (see `src/backend/Api/V1/Endpoints.php` for full list):
 - Use `Globals::table('tablename')` for table names
 - Use `getSettingWithDefault()` for application settings
 - Use `InputValidator` for request parameter validation (accessed via `$this->param()`, `$this->paramInt()` in controllers)
+
+**Key Namespaces:**
+- Database: `Lwt\Shared\Infrastructure\Database\{Connection, DB, QueryBuilder}`
+- HTTP: `Lwt\Shared\Infrastructure\Http\{InputValidator, SecurityHeaders}`
+- Container: `Lwt\Shared\Infrastructure\Container\Container`
+- UI Helpers: `Lwt\Shared\UI\Helpers\{FormHelper, PageLayoutHelper, IconHelper}`
 
 ### Modifying TypeScript
 

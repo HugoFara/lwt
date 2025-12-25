@@ -29,11 +29,11 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Core\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 <form name="editword" class="validate" action="/word/edit-multi" method="post"

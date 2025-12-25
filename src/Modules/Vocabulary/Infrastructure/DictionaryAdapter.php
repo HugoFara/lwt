@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Vocabulary\Infrastructure;
 
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Services\LocalDictionaryService;
 
 /**

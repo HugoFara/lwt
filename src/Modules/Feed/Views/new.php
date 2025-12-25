@@ -18,8 +18,8 @@
 
 namespace Lwt\Views\Feed;
 
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 $actions = [
     ['url' => '/feeds?page=1', 'label' => 'Feeds', 'icon' => 'list'],

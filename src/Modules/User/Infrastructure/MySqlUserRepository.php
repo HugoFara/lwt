@@ -18,9 +18,9 @@ namespace Lwt\Modules\User\Infrastructure;
 
 use DateTimeImmutable;
 use Lwt\Core\Entity\User;
-use Lwt\Core\Entity\ValueObject\UserId;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Domain\ValueObjects\UserId;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\User\Domain\UserRepositoryInterface;
 
 /**

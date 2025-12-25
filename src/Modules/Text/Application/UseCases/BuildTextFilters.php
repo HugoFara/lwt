@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Text\Application\UseCases;
 
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Connection;
 
 /**
  * Use case for building text query filters.

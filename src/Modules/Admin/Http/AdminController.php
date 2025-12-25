@@ -17,13 +17,13 @@
 namespace Lwt\Modules\Admin\Http;
 
 use Lwt\Controllers\BaseController;
-use Lwt\Core\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\TtsService;
 
 require_once __DIR__ . '/../../../backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../../backend/View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
 
 /**
  * Controller for administrative functions.

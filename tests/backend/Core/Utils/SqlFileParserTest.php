@@ -2,9 +2,9 @@
 
 namespace Lwt\Tests\Core\Utils;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Database/SqlFileParser.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/SqlFileParser.php';
 
-use Lwt\Database\SqlFileParser;
+use Lwt\Shared\Infrastructure\Database\SqlFileParser;
 use PHPUnit\Framework\TestCase;
 
 /**

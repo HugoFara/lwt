@@ -21,8 +21,8 @@
 
 namespace Lwt\Views\LocalDictionary;
 
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 // Display messages
 $message = $_GET['message'] ?? '';

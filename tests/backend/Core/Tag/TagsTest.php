@@ -3,12 +3,12 @@
 namespace Lwt\Tests\Core\Tag;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Http/UrlUtilities.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Http/UrlUtilities.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use PHPUnit\Framework\TestCase;
 

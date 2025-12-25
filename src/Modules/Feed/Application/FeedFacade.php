@@ -808,18 +808,18 @@ class FeedFacade
                             if (!in_array($tag, $_SESSION['TEXTTAGS'] ?? [])) {
                                 $bindings = [$tag];
                                 $sql = 'INSERT INTO tags2 (T2Text'
-                                    . \Lwt\Database\UserScopedQuery::insertColumn('tags2')
+                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('tags2')
                                     . ') VALUES (?'
-                                    . \Lwt\Database\UserScopedQuery::insertValuePrepared('tags2', $bindings)
+                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValuePrepared('tags2', $bindings)
                                     . ')';
-                                \Lwt\Database\Connection::preparedExecute($sql, $bindings);
+                                \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute($sql, $bindings);
                             }
                         }
                         $nfMaxTexts = $text['Nf_Max_Texts'];
                     }
 
                     // Create the text
-                    $id = \Lwt\Database\QueryBuilder::table('texts')
+                    $id = \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('texts')
                         ->insertPrepared([
                             'TxLgID' => $text['TxLgID'],
                             'TxTitle' => $text['TxTitle'],
@@ -830,27 +830,27 @@ class FeedFacade
 
                     // Parse the text
                     $bindings = [$id];
-                    $textContent = \Lwt\Database\Connection::preparedFetchValue(
+                    $textContent = \Lwt\Shared\Infrastructure\Database\Connection::preparedFetchValue(
                         'SELECT TxText FROM texts WHERE TxID = ?'
-                        . \Lwt\Database\UserScopedQuery::forTablePrepared('texts', $bindings),
+                        . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('texts', $bindings),
                         $bindings,
                         'TxText'
                     );
-                    $textLgId = \Lwt\Database\Connection::preparedFetchValue(
+                    $textLgId = \Lwt\Shared\Infrastructure\Database\Connection::preparedFetchValue(
                         'SELECT TxLgID FROM texts WHERE TxID = ?'
-                        . \Lwt\Database\UserScopedQuery::forTablePrepared('texts', $bindings),
+                        . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('texts', $bindings),
                         $bindings,
                         'TxLgID'
                     );
-                    \Lwt\Core\Parser\TextParsing::parseAndSave($textContent, (int) $textLgId, $id);
+                    \Lwt\Shared\Infrastructure\Database\TextParsing::parseAndSave($textContent, (int) $textLgId, $id);
 
                     // Apply tags
                     $bindings = [];
-                    \Lwt\Database\Connection::query(
+                    \Lwt\Shared\Infrastructure\Database\Connection::query(
                         'INSERT INTO texttags (TtTxID, TtT2ID)
                         SELECT ' . $id . ', T2ID FROM tags2
                         WHERE T2Text IN (' . $NfTag . ')'
-                        . \Lwt\Database\UserScopedQuery::forTablePrepared('tags2', $bindings)
+                        . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('tags2', $bindings)
                     );
                 }
             }
@@ -860,11 +860,11 @@ class FeedFacade
 
             // Get all texts with this tag
             $bindings = [];
-            $result = \Lwt\Database\Connection::query(
+            $result = \Lwt\Shared\Infrastructure\Database\Connection::query(
                 "SELECT TtTxID FROM texttags
                 JOIN tags2 ON TtT2ID=T2ID
                 WHERE T2Text IN (" . $NfTag . ")"
-                . \Lwt\Database\UserScopedQuery::forTablePrepared('tags2', $bindings)
+                . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('tags2', $bindings)
             );
 
             $textCount = 0;
@@ -879,43 +879,43 @@ class FeedFacade
                 $textItem = array_slice($textItem, 0, $textCount - $nfMaxTexts);
 
                 foreach ($textItem as $textID) {
-                    $message3 += \Lwt\Database\QueryBuilder::table('textitems2')
+                    $message3 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('textitems2')
                         ->where('Ti2TxID', '=', $textID)
                         ->delete();
-                    $message2 += \Lwt\Database\QueryBuilder::table('sentences')
+                    $message2 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('sentences')
                         ->where('SeTxID', '=', $textID)
                         ->delete();
 
                     $bindings = [$textID];
-                    $message4 += (int)\Lwt\Database\Connection::execute(
+                    $message4 += (int)\Lwt\Shared\Infrastructure\Database\Connection::execute(
                         'INSERT INTO archivedtexts (
                             AtLgID, AtTitle, AtText, AtAnnotatedText,
                             AtAudioURI, AtSourceURI'
-                            . \Lwt\Database\UserScopedQuery::insertColumn('archivedtexts')
+                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('archivedtexts')
                         . ') SELECT TxLgID, TxTitle, TxText, TxAnnotatedText,
                         TxAudioURI, TxSourceURI'
-                            . \Lwt\Database\UserScopedQuery::insertValue('archivedtexts')
+                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValue('archivedtexts')
                         . ' FROM texts
                         WHERE TxID = ' . $textID
-                        . \Lwt\Database\UserScopedQuery::forTable('texts')
+                        . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTable('texts')
                     );
 
-                    $archiveId = (int)\Lwt\Database\Connection::lastInsertId();
-                    \Lwt\Database\Connection::execute(
+                    $archiveId = (int)\Lwt\Shared\Infrastructure\Database\Connection::lastInsertId();
+                    \Lwt\Shared\Infrastructure\Database\Connection::execute(
                         'INSERT INTO archtexttags (AgAtID, AgT2ID)
                         SELECT ' . $archiveId . ', TtT2ID FROM texttags
                         WHERE TtTxID = ' . $textID
                     );
 
-                    $message1 += \Lwt\Database\QueryBuilder::table('texts')
+                    $message1 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('texts')
                         ->where('TxID', '=', $textID)
                         ->delete();
 
-                    \Lwt\Database\Maintenance::adjustAutoIncrement('texts', 'TxID');
-                    \Lwt\Database\Maintenance::adjustAutoIncrement('sentences', 'SeID');
+                    \Lwt\Shared\Infrastructure\Database\Maintenance::adjustAutoIncrement('texts', 'TxID');
+                    \Lwt\Shared\Infrastructure\Database\Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
                     // Clean orphaned text tags
-                    \Lwt\Database\Connection::execute(
+                    \Lwt\Shared\Infrastructure\Database\Connection::execute(
                         "DELETE texttags
                         FROM (texttags
                             LEFT JOIN texts ON TtTxID = TxID
@@ -988,7 +988,7 @@ class FeedFacade
      */
     public function getLanguages(): array
     {
-        return \Lwt\Database\QueryBuilder::table('languages')
+        return \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('languages')
             ->select(['LgID', 'LgName'])
             ->where('LgName', '<>', '')
             ->orderBy('LgName', 'ASC')

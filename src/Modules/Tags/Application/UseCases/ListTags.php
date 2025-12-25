@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Tags\Application\UseCases;
 
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Tags\Domain\Tag;
 use Lwt\Modules\Tags\Domain\TagRepositoryInterface;
 

@@ -342,7 +342,7 @@ class ReviewFacade
             AND WoTranslation != '' AND WoTranslation != '*'
             ORDER BY WoTodayScore, WoRandom * RAND()";
 
-        return \Lwt\Database\Connection::query($sql);
+        return \Lwt\Shared\Infrastructure\Database\Connection::query($sql);
     }
 
     /**
@@ -661,7 +661,7 @@ class ReviewFacade
      */
     public function getWaitingTime(): int
     {
-        return (int) \Lwt\Database\Settings::getWithDefault('set-test-main-frame-waiting-time');
+        return (int) \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault('set-test-main-frame-waiting-time');
     }
 
     /**
@@ -671,6 +671,6 @@ class ReviewFacade
      */
     public function getEditFrameWaitingTime(): int
     {
-        return (int) \Lwt\Database\Settings::getWithDefault('set-test-edit-frame-waiting-time');
+        return (int) \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault('set-test-edit-frame-waiting-time');
     }
 }

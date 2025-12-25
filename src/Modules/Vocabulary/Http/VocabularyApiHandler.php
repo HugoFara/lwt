@@ -15,7 +15,7 @@
 namespace Lwt\Modules\Vocabulary\Http;
 
 use Lwt\Core\StringUtils;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;

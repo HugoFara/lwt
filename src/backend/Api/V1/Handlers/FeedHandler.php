@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Feed\Application\FeedFacade;
 
 /**

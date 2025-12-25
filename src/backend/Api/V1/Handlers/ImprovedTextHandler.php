@@ -3,12 +3,12 @@ namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Services\AnnotationService;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
  * Handler for improved/annotated text API operations.

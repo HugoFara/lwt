@@ -14,14 +14,14 @@
 
 namespace Lwt\Modules\Vocabulary\Http;
 
-use Lwt\Core\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
-require_once __DIR__ . '/../../../backend/View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
 
 /**
  * Controller for vocabulary/term management operations.

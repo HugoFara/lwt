@@ -15,9 +15,9 @@
 
 namespace Lwt\Controllers;
 
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\Database\Validation;
-use Lwt\Core\Http\InputValidator;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\Infrastructure\Database\Validation;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Services\LocalDictionaryService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\DictionaryImport\CsvImporter;
@@ -26,7 +26,7 @@ use Lwt\Services\DictionaryImport\StarDictImporter;
 use RuntimeException;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
 // LanguageFacade loaded via autoloader
 
 /**

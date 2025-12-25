@@ -35,20 +35,20 @@ Globals::initialize();
 // Database classes
 require_once __DIR__ . '/EnvLoader.php';
 require_once __DIR__ . '/DatabaseBootstrap.php';
-require_once __DIR__ . '/../Database/PreparedStatement.php';
-require_once __DIR__ . '/../Database/Connection.php';
-require_once __DIR__ . '/../Database/QueryBuilder.php';
-require_once __DIR__ . '/../Database/UserScopedQuery.php';
-require_once __DIR__ . '/../Database/DB.php';
-require_once __DIR__ . '/../Database/Escaping.php';
-require_once __DIR__ . '/../Database/Configuration.php';
-require_once __DIR__ . '/../Database/Settings.php';
-require_once __DIR__ . '/../Database/Validation.php';
-require_once __DIR__ . '/../Database/Maintenance.php';
-require_once __DIR__ . '/../Database/TextParsing.php';
-require_once __DIR__ . '/../Database/SqlFileParser.php';
-require_once __DIR__ . '/../Database/Migrations.php';
-require_once __DIR__ . '/../Database/Restore.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/PreparedStatement.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Connection.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/QueryBuilder.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/UserScopedQuery.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/DB.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Escaping.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Configuration.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Settings.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Validation.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Maintenance.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/TextParsing.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/SqlFileParser.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Migrations.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
 
 // Run bootstrap
 DatabaseBootstrap::bootstrap();

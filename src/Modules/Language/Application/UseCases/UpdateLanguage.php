@@ -14,8 +14,8 @@
 
 namespace Lwt\Modules\Language\Application\UseCases;
 
-use Lwt\Core\Http\InputValidator;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
 use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 

@@ -15,9 +15,9 @@
 namespace Lwt\Modules\Admin\Infrastructure;
 
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
-use Lwt\Database\Restore;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\Restore;
 use Lwt\Modules\Admin\Domain\BackupRepositoryInterface;
 
 /**

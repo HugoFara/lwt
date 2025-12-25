@@ -5,8 +5,8 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -14,7 +14,7 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/View/Helper/FormHelper.php';
+require_once __DIR__ . '/../../../../src/Shared/UI/Helpers/FormHelper.php';
 require_once __DIR__ . '/../../../../src/backend/View/Helper/StatusHelper.php';
 require_once __DIR__ . '/../../../../src/backend/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../../src/backend/Services/SentenceService.php';
@@ -23,7 +23,7 @@ require_once __DIR__ . '/../../../../src/backend/Services/TextNavigationService.
 require_once __DIR__ . '/../../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Database/Restore.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/Restore.php';
 require_once __DIR__ . '/../../../../src/backend/Services/ExportService.php';
 // LanguageFacade loaded via autoloader
 
@@ -31,7 +31,7 @@ use Lwt\Core\StringUtils;
 use Lwt\Services\ExportService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\TextStatisticsService;
-use Lwt\View\Helper\FormHelper;
+use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\View\Helper\StatusHelper;
 
 

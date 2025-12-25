@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Admin\Application\UseCases\Demo;
 
-use Lwt\Database\Restore;
+use Lwt\Shared\Infrastructure\Database\Restore;
 
 /**
  * Use case for installing demo database.

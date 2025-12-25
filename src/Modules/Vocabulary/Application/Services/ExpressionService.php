@@ -16,10 +16,10 @@ namespace Lwt\Modules\Vocabulary\Application\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
-use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Services\TextParsingService;
 
 /**

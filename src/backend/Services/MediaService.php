@@ -20,9 +20,9 @@
 namespace Lwt\Services {
 
 use Lwt\Core\StringUtils;
-use Lwt\Database\Settings;
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
  * Service class for media file handling and player generation.

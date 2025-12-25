@@ -8,9 +8,9 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -26,7 +26,7 @@ require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/UseCases/Fi
 require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
+require_once __DIR__ . '/../../../src/Shared/Infrastructure/Database/Restore.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 require_once __DIR__ . '/../../../src/Modules/Text/Http/TextController.php';
 require_once __DIR__ . '/../../../src/Modules/Text/Application/TextFacade.php';
@@ -560,8 +560,8 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $this->assertTrue(class_exists('Lwt\\Database\\Validation'));
-        $this->assertTrue(method_exists('Lwt\\Database\\Validation', 'archTextTag'));
+        $this->assertTrue(class_exists('Lwt\\Shared\\Infrastructure\\Database\\Validation'));
+        $this->assertTrue(method_exists('Lwt\\Shared\\Infrastructure\\Database\\Validation', 'archTextTag'));
     }
 
     public function testValidationArchTextTagWithEmpty(): void
@@ -570,7 +570,7 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = \Lwt\Database\Validation::archTextTag('', '');
+        $result = \Lwt\Shared\Infrastructure\Database\Validation::archTextTag('', '');
 
         $this->assertEquals('', $result);
     }

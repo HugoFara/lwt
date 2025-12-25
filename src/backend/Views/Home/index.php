@@ -21,7 +21,7 @@ namespace Lwt\Views\Home;
 
 use Lwt\Core\Globals;
 use Lwt\Services\TextStatisticsService;
-use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
 use Lwt\Core\ApplicationInfo;
 

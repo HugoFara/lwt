@@ -20,8 +20,8 @@
 
 namespace Lwt\Views\Feed;
 
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 

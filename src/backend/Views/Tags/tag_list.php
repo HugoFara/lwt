@@ -26,10 +26,10 @@
 
 namespace Lwt\Views\Tags;
 
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\FormHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\FormHelper;
 
 /** @var string $message */
 /** @var array $tags */

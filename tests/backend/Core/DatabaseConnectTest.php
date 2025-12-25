@@ -9,15 +9,15 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\DB;
-use Lwt\Database\Escaping;
-use Lwt\Database\Maintenance;
-use Lwt\Database\Migrations;
-use Lwt\Database\Settings;
-use Lwt\Database\TextParsing;
-use Lwt\Database\Validation;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\Maintenance;
+use Lwt\Shared\Infrastructure\Database\Migrations;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\TextParsing;
+use Lwt\Shared\Infrastructure\Database\Validation;
 use Lwt\Modules\Admin\Domain\SettingDefinitions;
 use Lwt\Services\TextParsingService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
@@ -1232,7 +1232,7 @@ class DatabaseConnectTest extends TestCase
             $temp_file, "-- Comment\nSELECT 1;\n\nSELECT 2;\n-- Another comment\nSELECT 3;"
         );
 
-        $queries = \Lwt\Database\SqlFileParser::parseFile($temp_file);
+        $queries = \Lwt\Shared\Infrastructure\Database\SqlFileParser::parseFile($temp_file);
         $this->assertIsArray($queries);
         $this->assertCount(3, $queries);
         $this->assertStringContainsString('SELECT 1', $queries[0]);

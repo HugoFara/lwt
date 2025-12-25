@@ -14,8 +14,8 @@
 
 namespace Lwt\Modules\Admin\Application\UseCases\Settings;
 
-use Lwt\Core\Http\InputValidator;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Database\Settings;
 
 /**
  * Use case for saving all application settings from form data.

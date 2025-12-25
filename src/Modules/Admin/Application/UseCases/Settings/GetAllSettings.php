@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Admin\Application\UseCases\Settings;
 
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Settings;
 
 /**
  * Use case for getting all application settings.

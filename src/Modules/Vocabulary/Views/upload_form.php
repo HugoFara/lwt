@@ -20,10 +20,10 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Database\Settings;
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 /** @var string $currentLanguage */
 /** @var array $languages */

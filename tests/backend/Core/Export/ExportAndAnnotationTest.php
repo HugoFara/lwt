@@ -5,10 +5,10 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\DB;
-use Lwt\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
+use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Services\AnnotationService;
 use Lwt\Services\ExportService;
 use PHPUnit\Framework\TestCase;
@@ -25,7 +25,7 @@ require_once __DIR__ . '/../../../../src/backend/Services/TextNavigationService.
 require_once __DIR__ . '/../../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Database/Restore.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/Restore.php';
 require_once __DIR__ . '/../../../../src/backend/Services/ExportService.php';
 // LanguageFacade loaded via autoloader
 

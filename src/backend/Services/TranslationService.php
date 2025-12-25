@@ -22,9 +22,9 @@ require_once __DIR__ . '/../../Modules/Vocabulary/Infrastructure/DictionaryAdapt
 use Lwt\Core\Entity\GoogleTranslate;
 use Lwt\Core\Globals;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
 
 /**
  * Service class for handling translation operations.

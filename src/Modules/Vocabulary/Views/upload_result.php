@@ -21,8 +21,8 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 // Action buttons for navigation
 $actions = [

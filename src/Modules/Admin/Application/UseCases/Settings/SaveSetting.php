@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Admin\Application\UseCases\Settings;
 
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Admin\Application\Services\SessionCleaner;
 
 /**

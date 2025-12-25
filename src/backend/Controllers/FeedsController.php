@@ -16,12 +16,12 @@
 namespace Lwt\Controllers;
 
 use Lwt\Core\Globals;
-use Lwt\Database\QueryBuilder;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
 require_once __DIR__ . '/../Services/TextStatisticsService.php';
 require_once __DIR__ . '/../Services/SentenceService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';
@@ -29,18 +29,18 @@ require_once __DIR__ . '/../Services/TextNavigationService.php';
 require_once __DIR__ . '/../Services/TextParsingService.php';
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../Core/Database/Restore.php';
+require_once __DIR__ . '/../../Shared/Infrastructure/Database/Restore.php';
 require_once __DIR__ . '/../Services/MediaService.php';
 // LanguageFacade loaded via autoloader
 
 use Lwt\Core\Utils\ErrorHandler;
-use Lwt\Database\Connection;
-use Lwt\Database\Settings;
-use Lwt\Database\Validation;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Validation;
 use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Core\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 
 /**
  * Controller for RSS feed management.

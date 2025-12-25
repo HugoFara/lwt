@@ -19,7 +19,7 @@
 
 namespace Lwt\Views\Admin;
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 <div class="container" x-data="serverDataApp()">

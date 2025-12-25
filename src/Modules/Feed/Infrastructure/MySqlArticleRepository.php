@@ -15,9 +15,9 @@
 namespace Lwt\Modules\Feed\Infrastructure;
 
 use Lwt\Core\Repository\AbstractRepository;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Feed\Domain\Article;
 use Lwt\Modules\Feed\Domain\ArticleRepositoryInterface;
 

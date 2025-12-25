@@ -15,8 +15,8 @@
 namespace Lwt\Modules\Admin\Http;
 
 use Lwt\Core\StringUtils;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Services\TextStatisticsService;
 

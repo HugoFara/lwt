@@ -21,7 +21,7 @@
 namespace Lwt\Views\Admin;
 
 use Lwt\Core\Globals;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 <div class="container" x-data="{ confirmed: false, installing: false }">

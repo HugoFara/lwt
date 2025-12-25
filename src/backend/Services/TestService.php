@@ -16,10 +16,10 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Core\Utils\ErrorHandler;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 
 require_once __DIR__ . '/ExportService.php';
 require_once __DIR__ . '/SentenceService.php';

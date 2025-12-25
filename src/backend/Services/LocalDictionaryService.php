@@ -17,8 +17,8 @@ namespace Lwt\Services;
 use DateTimeImmutable;
 use Lwt\Core\Entity\LocalDictionary;
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 
 /**
  * Service class for managing local dictionaries.

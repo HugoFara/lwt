@@ -16,14 +16,14 @@
 namespace Lwt\Controllers;
 
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\UserScopedQuery;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
-require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
-require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/SelectOptionsBuilder.php';
 // LanguageFacade and LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../Modules/Text/Application/TextFacade.php';
@@ -41,7 +41,7 @@ use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Text\Application\TextFacade;
-use Lwt\Core\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 
 /**
  * Controller for vocabulary/term management.
@@ -179,8 +179,8 @@ class WordController extends BaseController
      */
     private function handleEditOperation(): void
     {
-        $textlc = trim(\Lwt\Database\Escaping::prepareTextdata($this->param("WoTextLC")));
-        $text = trim(\Lwt\Database\Escaping::prepareTextdata($this->param("WoText")));
+        $textlc = trim(\Lwt\Shared\Infrastructure\Database\Escaping::prepareTextdata($this->param("WoTextLC")));
+        $text = trim(\Lwt\Shared\Infrastructure\Database\Escaping::prepareTextdata($this->param("WoText")));
 
         // Validate lowercase matches
         if (mb_strtolower($text, 'UTF-8') != $textlc) {
@@ -358,11 +358,11 @@ class WordController extends BaseController
     {
         $woTextLC = $this->param("WoTextLC");
         $woText = $this->param("WoText");
-        $textlc = trim(\Lwt\Database\Escaping::prepareTextdata($woTextLC));
-        $text = trim(\Lwt\Database\Escaping::prepareTextdata($woText));
+        $textlc = trim(\Lwt\Shared\Infrastructure\Database\Escaping::prepareTextdata($woTextLC));
+        $text = trim(\Lwt\Shared\Infrastructure\Database\Escaping::prepareTextdata($woText));
 
         if (mb_strtolower($text, 'UTF-8') != $textlc) {
-            $titletext = "New/Edit Term: " . htmlspecialchars(\Lwt\Database\Escaping::prepareTextdata($woTextLC), ENT_QUOTES, 'UTF-8');
+            $titletext = "New/Edit Term: " . htmlspecialchars(\Lwt\Shared\Infrastructure\Database\Escaping::prepareTextdata($woTextLC), ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
             $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
@@ -374,7 +374,7 @@ class WordController extends BaseController
 
         $op = $this->param('op');
         if ($op == 'Change') {
-            $titletext = "Edit Term: " . htmlspecialchars(\Lwt\Database\Escaping::prepareTextdata($woTextLC), ENT_QUOTES, 'UTF-8');
+            $titletext = "Edit Term: " . htmlspecialchars(\Lwt\Shared\Infrastructure\Database\Escaping::prepareTextdata($woTextLC), ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
@@ -397,7 +397,7 @@ class WordController extends BaseController
                     WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
                     WoStatus = ?, WoStatusChanged = NOW(), {$scoreRandomUpdate}
                     WHERE WoID = ?"
-                    . \Lwt\Database\UserScopedQuery::forTablePrepared('words', $bindings);
+                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('words', $bindings);
                 Connection::preparedExecute($sql, $bindings);
             } else {
                 // Status unchanged
@@ -409,7 +409,7 @@ class WordController extends BaseController
                     WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
                     {$scoreRandomUpdate}
                     WHERE WoID = ?"
-                    . \Lwt\Database\UserScopedQuery::forTablePrepared('words', $bindings);
+                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('words', $bindings);
                 Connection::preparedExecute($sql, $bindings);
             }
             $wid = $woId;
@@ -522,7 +522,7 @@ class WordController extends BaseController
         $listService = $this->getListService();
 
         // Process filter parameters
-        $currentlang = \Lwt\Database\Validation::language(
+        $currentlang = \Lwt\Shared\Infrastructure\Database\Validation::language(
             InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
         $currentsort = InputValidator::getIntWithDb("sort", 'currentwordsort', 1);
@@ -533,18 +533,18 @@ class WordController extends BaseController
             "currentwordquerymode",
             'term,rom,transl'
         );
-        $currentregexmode = \Lwt\Database\Settings::getWithDefault("set-regex-mode");
+        $currentregexmode = \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault("set-regex-mode");
         $currentstatus = InputValidator::getStringWithSession("status", "currentwordstatus");
-        $currenttext = \Lwt\Database\Validation::text(
+        $currenttext = \Lwt\Shared\Infrastructure\Database\Validation::text(
             InputValidator::getStringWithSession("text", "currentwordtext")
         );
         $currenttexttag = InputValidator::getStringWithSession("texttag", "currentwordtexttag");
         $currenttextmode = InputValidator::getStringWithSession("text_mode", "currentwordtextmode", '0');
-        $currenttag1 = \Lwt\Database\Validation::tag(
+        $currenttag1 = \Lwt\Shared\Infrastructure\Database\Validation::tag(
             InputValidator::getStringWithSession("tag1", "currentwordtag1"),
             $currentlang
         );
-        $currenttag2 = \Lwt\Database\Validation::tag(
+        $currenttag2 = \Lwt\Shared\Infrastructure\Database\Validation::tag(
             InputValidator::getStringWithSession("tag2", "currentwordtag2"),
             $currentlang
         );
@@ -659,11 +659,11 @@ class WordController extends BaseController
      */
     public function listEditAlpine(array $params): void
     {
-        $currentlang = \Lwt\Database\Validation::language(
+        $currentlang = \Lwt\Shared\Infrastructure\Database\Validation::language(
             InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
 
-        $perPage = (int) \Lwt\Database\Settings::getWithDefault('set-terms-per-page');
+        $perPage = (int) \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault('set-terms-per-page');
         if ($perPage < 1) {
             $perPage = 50;
         }
@@ -857,7 +857,7 @@ class WordController extends BaseController
                 return "Tag added in $cnt Terms";
             }
             if ($allaction == 'delall') {
-                \Lwt\Database\Maintenance::adjustAutoIncrement('words', 'WoID');
+                \Lwt\Shared\Infrastructure\Database\Maintenance::adjustAutoIncrement('words', 'WoID');
                 return "Deleted: $cnt Terms";
             }
             return "$cnt Terms changed";
@@ -878,7 +878,7 @@ class WordController extends BaseController
         if ($allaction == 'testall') {
             $sql = $listService->getTestWordIdsSql('', $textId, $whLang, $whStat, $whQuery, $whTag);
             $idList = [];
-            $res = \Lwt\Database\Connection::query($sql);
+            $res = \Lwt\Shared\Infrastructure\Database\Connection::query($sql);
             while ($record = mysqli_fetch_assoc($res)) {
                 $idList[] = $record['WoID'];
             }
@@ -1022,7 +1022,7 @@ class WordController extends BaseController
         $recno = $listService->countWords($currenttext, $whLang, $whStat, $whQuery, $whTag);
 
         // Calculate pagination
-        $maxperpage = (int) \Lwt\Database\Settings::getWithDefault('set-terms-per-page');
+        $maxperpage = (int) \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault('set-terms-per-page');
         $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 
         if ($currentpage < 1) {
@@ -1150,8 +1150,8 @@ class WordController extends BaseController
         $woSentence = $this->param("WoSentence");
         $woStatus = $this->paramInt("WoStatus", 0) ?? 0;
         $data = [
-            'text' => \Lwt\Database\Escaping::prepareTextdata($woText),
-            'textlc' => \Lwt\Database\Escaping::prepareTextdata($textlc),
+            'text' => \Lwt\Shared\Infrastructure\Database\Escaping::prepareTextdata($woText),
+            'textlc' => \Lwt\Shared\Infrastructure\Database\Escaping::prepareTextdata($textlc),
             'translation' => $translation,
             'roman' => $woRomanization,
             'sentence' => $woSentence,
@@ -1215,7 +1215,7 @@ class WordController extends BaseController
             $lgid = $this->wordService->getLanguageIdFromText($tid);
             $txtParam = $this->param('txt');
             $textlc = mb_strtolower(
-                \Lwt\Database\Escaping::prepareTextdata($txtParam),
+                \Lwt\Shared\Infrastructure\Database\Escaping::prepareTextdata($txtParam),
                 'UTF-8'
             );
 
@@ -1255,7 +1255,7 @@ class WordController extends BaseController
     private function displayNewMultiWordForm(string $text, int $tid, int $ord, int $len): void
     {
         $lgid = $this->wordService->getLanguageIdFromText($tid);
-        $termText = \Lwt\Database\Escaping::prepareTextdata($text);
+        $termText = \Lwt\Shared\Infrastructure\Database\Escaping::prepareTextdata($text);
         $textlc = mb_strtolower($termText, 'UTF-8');
 
         // Check if word already exists
@@ -1273,7 +1273,7 @@ class WordController extends BaseController
         $sent = $this->sentenceService->formatSentence(
             $seid,
             $textlc,
-            (int) \Lwt\Database\Settings::getWithDefault('set-term-sentence-count')
+            (int) \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault('set-term-sentence-count')
         );
         $showRoman = $this->wordService->shouldShowRomanization($tid);
 
@@ -1319,7 +1319,7 @@ class WordController extends BaseController
             $sent = $this->sentenceService->formatSentence(
                 $seid,
                 $textlc,
-                (int) \Lwt\Database\Settings::getWithDefault('set-term-sentence-count')
+                (int) \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault('set-term-sentence-count')
             );
             $sentence = ExportService::replaceTabNewline($sent[1] ?? '');
         }
@@ -1408,7 +1408,7 @@ class WordController extends BaseController
         }
 
         list($count, $wordsData) = $this->wordService->markAllWordsWithStatus($textId, $status);
-        $useTooltips = \Lwt\Database\Settings::getWithDefault('set-tooltip-mode') == 1;
+        $useTooltips = \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault('set-tooltip-mode') == 1;
 
         include __DIR__ . '/../../Modules/Vocabulary/Views/all_wellknown_result.php';
 
@@ -1449,7 +1449,7 @@ class WordController extends BaseController
             } else {
                 $wid = $result['id'];
                 TagsFacade::saveWordTagsFromForm($wid);
-                \Lwt\Database\Maintenance::initWordCount();
+                \Lwt\Shared\Infrastructure\Database\Maintenance::initWordCount();
 
                 echo '<p>' . $result['message'] . '</p>';
 
@@ -1695,7 +1695,7 @@ class WordController extends BaseController
     {
         $maxWoId = $this->wordService->bulkSaveTerms($terms);
 
-        $tooltipMode = \Lwt\Database\Settings::getWithDefault('set-tooltip-mode');
+        $tooltipMode = \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault('set-tooltip-mode');
         $res = $this->wordService->getNewWordsAfter($maxWoId);
 
         $this->wordService->linkNewWordsToTextItems($maxWoId);
@@ -1704,7 +1704,7 @@ class WordController extends BaseController
         $newWords = [];
         foreach ($res as $record) {
             $record['hex'] = StringUtils::toClassName(
-                \Lwt\Database\Escaping::prepareTextdata($record['WoTextLC'])
+                \Lwt\Shared\Infrastructure\Database\Escaping::prepareTextdata($record['WoTextLC'])
             );
             $record['translation'] = $record['WoTranslation'];
             $newWords[] = $record;
@@ -1725,7 +1725,7 @@ class WordController extends BaseController
      */
     private function displayBulkTranslateForm(int $tid, ?string $sl, ?string $tl, int $pos): void
     {
-        $limit = (int) \Lwt\Database\Settings::getWithDefault('set-ggl-translation-per-page') + 1;
+        $limit = (int) \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault('set-ggl-translation-per-page') + 1;
         $dictionaries = $this->wordService->getLanguageDictionaries($tid);
 
         $res = $this->wordService->getUnknownWordsForBulkTranslate($tid, $pos, $limit);
@@ -1824,7 +1824,7 @@ class WordController extends BaseController
      */
     private function displayUploadForm(): void
     {
-        $currentLanguage = \Lwt\Database\Settings::get('currentlanguage');
+        $currentLanguage = \Lwt\Shared\Infrastructure\Database\Settings::get('currentlanguage');
         $languageService = new \Lwt\Modules\Language\Application\LanguageFacade();
         $languages = $languageService->getLanguagesForSelect();
         include __DIR__ . '/../../Modules/Vocabulary/Views/upload_form.php';
@@ -1992,7 +1992,7 @@ class WordController extends BaseController
         }
 
         // Post-import processing
-        \Lwt\Database\Maintenance::initWordCount();
+        \Lwt\Shared\Infrastructure\Database\Maintenance::initWordCount();
         $uploadService->linkWordsToTextItems();
         $uploadService->handleMultiwords($langId, $lastUpdate);
     }

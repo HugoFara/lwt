@@ -10,9 +10,9 @@ use Lwt\Modules\Text\Domain\ValueObject\TextId;
 use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -22,7 +22,7 @@ Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/Modules/Text/Domain/Text.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Database/PreparedStatement.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/PreparedStatement.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Repository/RepositoryInterface.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Repository/AbstractRepository.php';
 require_once __DIR__ . '/../../../../src/Modules/Text/Infrastructure/MySqlTextRepository.php';

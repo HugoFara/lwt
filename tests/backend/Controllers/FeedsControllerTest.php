@@ -7,11 +7,11 @@ use Lwt\Controllers\FeedsController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Modules\Feed\Application\FeedFacade;
-use Lwt\Core\Container\Container;
+use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Modules\Feed\FeedServiceProvider;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database

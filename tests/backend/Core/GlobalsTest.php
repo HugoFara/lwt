@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Exception/AuthException.php';
 
 use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use PHPUnit\Framework\TestCase;
 
 /**

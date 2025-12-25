@@ -19,15 +19,15 @@ use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\TestService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 require_once __DIR__ . '/../Services/TestService.php';
 // LanguageFacade and LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../Services/TextNavigationService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';
-require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
 require_once __DIR__ . '/../View/Helper/StatusHelper.php';
-require_once __DIR__ . '/../View/Helper/FormHelper.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/FormHelper.php';
 require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
 
 /**

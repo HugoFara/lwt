@@ -16,20 +16,20 @@
 namespace Lwt\Modules\Language\Http;
 
 use Lwt\Controllers\BaseController;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\FormHelper;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\FormHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../backend/View/Helper/PageLayoutHelper.php';
-require_once __DIR__ . '/../../../backend/View/Helper/FormHelper.php';
-require_once __DIR__ . '/../../../backend/Core/Http/UrlUtilities.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/FormHelper.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Http/UrlUtilities.php';
 
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Domain\Language;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
-use Lwt\Core\Http\UrlUtilities;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Core\Parser\ParserRegistry;
 
 /**

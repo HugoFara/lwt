@@ -27,11 +27,11 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Core\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
 ?>
 

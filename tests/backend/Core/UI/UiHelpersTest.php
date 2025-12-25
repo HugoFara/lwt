@@ -5,10 +5,10 @@ namespace Lwt\Tests\Core\UI;
 require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../../src/backend/Core/StringUtils.php';
 require_once __DIR__ . '/../../../../src/backend/Core/ApplicationInfo.php';
-require_once __DIR__ . '/../../../../src/backend/View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../../../../src/Shared/UI/Helpers/PageLayoutHelper.php';
 
 use Lwt\Core\Globals;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use PHPUnit\Framework\TestCase;
 
 Globals::initialize();

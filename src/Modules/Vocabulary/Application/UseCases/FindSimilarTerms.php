@@ -14,11 +14,11 @@
 
 namespace Lwt\Modules\Vocabulary\Application\UseCases;
 
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Vocabulary\Application\Services\SimilarityCalculator;
 use Lwt\Modules\Vocabulary\Domain\TermRepositoryInterface;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
  * Use case for finding similar terms.

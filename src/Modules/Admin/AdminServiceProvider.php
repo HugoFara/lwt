@@ -16,8 +16,8 @@
 
 namespace Lwt\Modules\Admin;
 
-use Lwt\Core\Container\Container;
-use Lwt\Core\Container\ServiceProviderInterface;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
 
 // Domain
 use Lwt\Modules\Admin\Domain\SettingsRepositoryInterface;

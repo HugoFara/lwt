@@ -43,7 +43,7 @@ use Lwt\Services\TextStatisticsService;
 <div class="flex-header">
     <div>
     <a href="/texts" target="_top">
-        <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
+        <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildLogo(); ?>
     </a>
     </div>
     <div>
@@ -58,14 +58,14 @@ use Lwt\Services\TextStatisticsService;
     </div>
     <div>
         <a href="/test?text=<?php echo $textId; ?>" target="_top">
-            <?php echo \Lwt\View\Helper\IconHelper::render('circle-help', ['title' => 'Test', 'alt' => 'Test']); ?>
+            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('circle-help', ['title' => 'Test', 'alt' => 'Test']); ?>
         </a>
         <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
-            <?php echo \Lwt\View\Helper\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
+            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
         <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
         <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
-            <?php echo \Lwt\View\Helper\IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
+            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
         </a>
     </div>
     <div>
@@ -73,11 +73,11 @@ use Lwt\Services\TextStatisticsService;
             href="/word/new?text=<?php echo $textId; ?>&amp;lang=<?php echo $langId; ?>"
             target="ro" data-action="show-right-frames"
         >
-            <?php echo \Lwt\View\Helper\IconHelper::render('notepad-text-dashed', ['title' => 'New Term', 'alt' => 'New Term']); ?>
+            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('notepad-text-dashed', ['title' => 'New Term', 'alt' => 'New Term']); ?>
         </a>
     </div>
     <div>
-        <?php echo \Lwt\View\Helper\PageLayoutHelper::buildNavbar(); ?>
+        <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildNavbar(); ?>
     </div>
 </div>
 
@@ -87,7 +87,7 @@ use Lwt\Services\TextStatisticsService;
     if (isset($sourceUri) && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')) {
         ?>
     <a href="<?php echo $sourceUri ?>" target="_blank">
-        <?php echo \Lwt\View\Helper\IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']); ?>
+        <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']); ?>
     </a>
         <?php
     }
@@ -103,7 +103,7 @@ use Lwt\Services\TextStatisticsService;
     title="[Show All] = ON: ALL terms are shown, and all multi-word terms are shown as superscripts before the first word. The superscript indicates the number of words in the multi-word term.
 [Show All] = OFF: Multi-word terms now hide single words and shorter or overlapping multi-word terms.">
         <label for="showallwords">Show All</label>&nbsp;
-        <input type="checkbox" id="showallwords" <?php echo \Lwt\View\Helper\FormHelper::getChecked($showAll); ?>
+        <input type="checkbox" id="showallwords" <?php echo \Lwt\Shared\UI\Helpers\FormHelper::getChecked($showAll); ?>
         data-action="toggle-show-all" />
 </div>
     <div
@@ -111,7 +111,7 @@ use Lwt\Services\TextStatisticsService;
 [Learning Translations] = OFF: No translations are shown in the reading mode.">
         <label for="showlearningtranslations">Translations</label>&nbsp;
         <input type="checkbox" id="showlearningtranslations"
-        <?php echo \Lwt\View\Helper\FormHelper::getChecked($showLearning); ?> data-action="toggle-show-all" />
+        <?php echo \Lwt\Shared\UI\Helpers\FormHelper::getChecked($showLearning); ?> data-action="toggle-show-all" />
 </div>
     <div id="thetextid" class="hide"><?php echo $textId; ?></div>
     <div><button id="readTextButton">Read in browser</button></div>

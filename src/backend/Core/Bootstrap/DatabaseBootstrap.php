@@ -17,7 +17,7 @@ namespace Lwt\Core\Bootstrap;
 
 use Lwt\Core\Globals;
 use Lwt\Core\EnvLoader;
-use Lwt\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Configuration;
 
 /**
  * Database bootstrap utility class.
@@ -97,7 +97,7 @@ class DatabaseBootstrap
         Globals::setDatabaseName($dbname);
 
         // Run database migrations
-        \Lwt\Database\Migrations::checkAndUpdate();
+        \Lwt\Shared\Infrastructure\Database\Migrations::checkAndUpdate();
 
         // Configure multi-user mode from environment
         $multiUserEnabled = EnvLoader::getBool('MULTI_USER_ENABLED', false);

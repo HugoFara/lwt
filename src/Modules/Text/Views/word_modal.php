@@ -41,7 +41,7 @@ namespace Lwt\Views\Text;
             <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
               <span class="is-size-4 has-text-weight-bold" x-text="word.text"></span>
               <button class="button is-small is-rounded" @click="speakWord" title="Listen">
-                <?php echo \Lwt\View\Helper\IconHelper::render('volume-2', ['size' => 16]); ?>
+                <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('volume-2', ['size' => 16]); ?>
               </button>
             </div>
 
@@ -106,11 +106,11 @@ namespace Lwt\Views\Text;
                 <p class="is-size-7 has-text-grey mb-2">Quick actions:</p>
                 <div class="buttons">
                   <button class="button is-success" :disabled="isLoading" @click="markWellKnown">
-                    <?php echo \Lwt\View\Helper\IconHelper::render('check', ['size' => 16]); ?>
+                    <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('check', ['size' => 16]); ?>
                     <span class="ml-1">I know this well</span>
                   </button>
                   <button class="button is-warning" :disabled="isLoading" @click="markIgnored">
-                    <?php echo \Lwt\View\Helper\IconHelper::render('x', ['size' => 16]); ?>
+                    <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('x', ['size' => 16]); ?>
                     <span class="ml-1">Ignore</span>
                   </button>
                 </div>
@@ -122,11 +122,11 @@ namespace Lwt\Views\Text;
               <div class="mb-4">
                 <div class="buttons are-small">
                   <button class="button is-info is-outlined" @click="showEditForm" :disabled="isLoading">
-                    <?php echo \Lwt\View\Helper\IconHelper::render('edit', ['size' => 14]); ?>
+                    <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('edit', ['size' => 14]); ?>
                     <span class="ml-1">Edit</span>
                   </button>
                   <button class="button is-danger is-outlined" :disabled="isLoading" @click="deleteWord">
-                    <?php echo \Lwt\View\Helper\IconHelper::render('trash-2', ['size' => 14]); ?>
+                    <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('trash-2', ['size' => 14]); ?>
                     <span class="ml-1">Delete</span>
                   </button>
                 </div>
@@ -137,7 +137,7 @@ namespace Lwt\Views\Text;
             <template x-if="isUnknown">
               <div class="mb-4">
                 <button class="button is-info" @click="showEditForm" :disabled="isLoading">
-                  <?php echo \Lwt\View\Helper\IconHelper::render('edit', ['size' => 16]); ?>
+                  <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('edit', ['size' => 16]); ?>
                   <span class="ml-1">Add with translation</span>
                 </button>
               </div>
@@ -148,15 +148,15 @@ namespace Lwt\Views\Text;
               <p class="is-size-7 has-text-grey mb-2">Lookup:</p>
               <div class="buttons are-small">
                 <a :href="getDictUrl('dict1')" target="_blank" class="button is-outlined is-link" rel="noopener">
-                  <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['size' => 14]); ?>
+                  <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['size' => 14]); ?>
                   <span class="ml-1">Dict 1</span>
                 </a>
                 <a :href="getDictUrl('dict2')" target="_blank" class="button is-outlined is-link" rel="noopener">
-                  <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['size' => 14]); ?>
+                  <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['size' => 14]); ?>
                   <span class="ml-1">Dict 2</span>
                 </a>
                 <a :href="getDictUrl('translator')" target="_blank" class="button is-outlined is-link" rel="noopener">
-                  <?php echo \Lwt\View\Helper\IconHelper::render('languages', ['size' => 14]); ?>
+                  <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('languages', ['size' => 14]); ?>
                   <span class="ml-1">Translate</span>
                 </a>
               </div>
@@ -329,7 +329,7 @@ namespace Lwt\Views\Text;
                         title="Copy translation"
                         x-show="term.translation"
                       >
-                        <?php echo \Lwt\View\Helper\IconHelper::render('copy', ['size' => 12]); ?>
+                        <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('copy', ['size' => 12]); ?>
                       </button>
                     </div>
                   </template>
@@ -347,7 +347,7 @@ namespace Lwt\Views\Text;
                   :disabled="!formStore.canSubmit"
                   @click="save"
                 >
-                  <?php echo \Lwt\View\Helper\IconHelper::render('save', ['size' => 16]); ?>
+                  <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('save', ['size' => 16]); ?>
                   <span class="ml-1">Save</span>
                 </button>
               </div>

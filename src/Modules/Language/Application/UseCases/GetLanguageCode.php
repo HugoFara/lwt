@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Language\Application\UseCases;
 
-use Lwt\Core\Http\UrlUtilities;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
 use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 

@@ -26,7 +26,7 @@ namespace Lwt\Views\Feed;
 <tr>
 <th class="th1 borderleft" colspan="2">Language:<select name="filterlang"
 @change="handleLanguageFilter($event)">
-    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
+    <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
 </select>
 </th>
 <th class="th1 borderright" colspan="2">

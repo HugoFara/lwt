@@ -15,9 +15,9 @@
 namespace Lwt\Modules\Text\Application\UseCases;
 
 use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
-use Lwt\Database\Connection;
-use Lwt\Database\TextParsing;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\TextParsing;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Text\Domain\Text;
 use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 use Lwt\Modules\Text\Domain\ValueObject\TextId;

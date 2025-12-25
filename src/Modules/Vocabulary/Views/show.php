@@ -53,7 +53,7 @@ use Lwt\Core\StringUtils;
 <?php if ($tags !== '') : ?>
 <tr>
     <td class="td1 right">Tags:</td>
-    <td class="td1 word-show-value"><?php echo \Lwt\View\Helper\TagHelper::render($tags); ?></td>
+    <td class="td1 word-show-value"><?php echo \Lwt\Shared\UI\Helpers\TagHelper::render($tags); ?></td>
 </tr>
 <?php endif; ?>
 <?php if ($word['romanization'] !== '') : ?>

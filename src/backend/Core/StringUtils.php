@@ -17,7 +17,7 @@
 
 namespace Lwt\Core;
 
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Settings;
 
 /**
  * String manipulation utilities.

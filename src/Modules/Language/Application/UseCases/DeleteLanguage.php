@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Language\Application\UseCases;
 
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
 use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 

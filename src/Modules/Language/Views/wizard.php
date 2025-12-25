@@ -19,7 +19,7 @@
 
 namespace Lwt\Modules\Language\Views;
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 <script type="application/json" id="language-wizard-config">

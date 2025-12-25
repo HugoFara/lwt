@@ -20,10 +20,10 @@ namespace Lwt\Views\TextPrint;
 
 use Lwt\Services\AnnotationService;
 use Lwt\Services\TextNavigationService;
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\FormHelper;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\FormHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 
 $title = $viewData['title'] ?? '';

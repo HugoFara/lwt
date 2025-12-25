@@ -17,7 +17,7 @@
 
 namespace Lwt\Views\Test;
 
-use Lwt\View\Helper\FormHelper;
+use Lwt\Shared\UI\Helpers\FormHelper;
 
 ?>
 <p>

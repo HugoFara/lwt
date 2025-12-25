@@ -2,14 +2,14 @@
 
 namespace Lwt\Tests\Core\Entity;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/UserId.php';
+require_once __DIR__ . '/../../../../src/Shared/Domain/ValueObjects/UserId.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/User.php';
 
 use DateTimeImmutable;
 use InvalidArgumentException;
 use LogicException;
 use Lwt\Core\Entity\User;
-use Lwt\Core\Entity\ValueObject\UserId;
+use Lwt\Shared\Domain\ValueObjects\UserId;
 use PHPUnit\Framework\TestCase;
 
 /**

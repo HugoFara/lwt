@@ -16,9 +16,9 @@
 
 namespace Lwt\Modules\Tags\Infrastructure;
 
-use Lwt\Database\Connection;
-use Lwt\Database\Maintenance;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Maintenance;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Tags\Domain\Tag;
 use Lwt\Modules\Tags\Domain\TagRepositoryInterface;
 use Lwt\Modules\Tags\Domain\TagType;

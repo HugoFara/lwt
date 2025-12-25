@@ -17,15 +17,15 @@
 
 namespace Lwt\Modules\Text\Application;
 
-use Lwt\Core\Http\UrlUtilities;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Core\StringUtils;
-use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
-use Lwt\Database\Maintenance;
-use Lwt\Database\QueryBuilder;
-use Lwt\Database\Settings;
-use Lwt\Database\TextParsing;
-use Lwt\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\Maintenance;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\TextParsing;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Text\Application\UseCases\ArchiveText;
 use Lwt\Modules\Text\Application\UseCases\BuildTextFilters;
 use Lwt\Modules\Text\Application\UseCases\DeleteText;
