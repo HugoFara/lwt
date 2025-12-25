@@ -21,7 +21,7 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
-require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
 
 /**
  * Controller for vocabulary/term management operations.

@@ -28,9 +28,9 @@ require_once __DIR__ . '/../../../backend/Controllers/BaseController.php';
 // LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../../../backend/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../backend/Services/AnnotationService.php';
-require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
 require_once __DIR__ . '/../../../backend/View/Helper/StatusHelper.php';
-require_once __DIR__ . '/../../Shared/UI/Helpers/FormHelper.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/FormHelper.php';
 require_once __DIR__ . '/../../../backend/Core/Bootstrap/start_session.php';
 
 /**
