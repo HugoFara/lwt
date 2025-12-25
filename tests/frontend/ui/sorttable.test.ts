@@ -2,7 +2,7 @@
  * Tests for sorttable.ts - Table sorting component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { makeSortable, initSortable } from '../../../src/frontend/js/ui/sorttable';
+import { makeSortable, initSortable } from '../../../src/frontend/js/shared/components/sorttable';
 
 /**
  * Helper to create a sortable table for testing

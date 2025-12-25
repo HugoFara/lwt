@@ -6,7 +6,7 @@ import {
   getStatusName,
   getStatusAbbr,
   make_tooltip,
-} from '../../../src/frontend/js/terms/word_status';
+} from '../../../src/frontend/js/modules/vocabulary/services/word_status';
 import {
   getLangFromDict,
   createTheDictUrl,
@@ -14,21 +14,21 @@ import {
   createSentLookupLink,
   owin,
   oewin,
-} from '../../../src/frontend/js/terms/dictionary';
+} from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
 import {
   escape_html_chars,
   escape_html_chars_2,
   escape_apostrophes,
-} from '../../../src/frontend/js/core/html_utils';
+} from '../../../src/frontend/js/shared/utils/html_utils';
 import {
   getCookie,
   setCookie,
   deleteCookie,
   areCookiesEnabled,
-} from '../../../src/frontend/js/core/cookies';
+} from '../../../src/frontend/js/shared/utils/cookies';
 import {
   check_table_prefix,
-} from '../../../src/frontend/js/core/language_settings';
+} from '../../../src/frontend/js/modules/language/stores/language_settings';
 
 // Note: STATUSES is now hardcoded in app_data.ts, no need to mock
 describe('pgm.ts', () => {

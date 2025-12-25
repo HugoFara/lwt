@@ -2,11 +2,11 @@
  * Tests for api/languages.ts - Languages API operations
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { LanguagesApi } from '../../../src/frontend/js/api/languages';
-import * as apiClient from '../../../src/frontend/js/core/api_client';
+import { LanguagesApi } from '../../../src/frontend/js/modules/language/api/languages_api';
+import * as apiClient from '../../../src/frontend/js/shared/api/client';
 
 // Mock the api_client module
-vi.mock('../../../src/frontend/js/core/api_client', () => ({
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
   apiGet: vi.fn(),
   apiPost: vi.fn(),
   apiPut: vi.fn(),

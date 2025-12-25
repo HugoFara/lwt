@@ -35,7 +35,7 @@ import {
   initFrequencyChart,
   initStatisticsCharts,
   statisticsApp
-} from '../../../src/frontend/js/admin/statistics_charts';
+} from '../../../src/frontend/js/modules/admin/pages/statistics_charts';
 
 describe('statistics_charts.ts', () => {
   beforeEach(() => {

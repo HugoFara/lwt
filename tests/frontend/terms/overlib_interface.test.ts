@@ -36,11 +36,11 @@ import {
   createWellKnownButton,
   createIgnoreButton,
   createTestStatusButtons,
-} from '../../../src/frontend/js/terms/overlib_interface';
-import type { WordActionContext } from '../../../src/frontend/js/reading/word_actions';
+} from '../../../src/frontend/js/modules/vocabulary/services/overlib_interface';
+import type { WordActionContext } from '../../../src/frontend/js/modules/vocabulary/services/word_actions';
 
 // Mock the word_actions module
-vi.mock('../../../src/frontend/js/reading/word_actions', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_actions', () => ({
   changeWordStatus: vi.fn().mockResolvedValue({ success: true }),
   deleteWord: vi.fn().mockResolvedValue({ success: true }),
   markWellKnown: vi.fn().mockResolvedValue({ success: true }),
@@ -48,9 +48,9 @@ vi.mock('../../../src/frontend/js/reading/word_actions', () => ({
   incrementWordStatus: vi.fn().mockResolvedValue({ success: true }),
 }));
 
-import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
-import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/core/text_config';
-import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/core/settings_config';
+import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/modules/language/stores/language_config';
+import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/modules/text/stores/text_config';
+import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/shared/utils/settings_config';
 
 describe('overlib_interface.ts', () => {
   beforeEach(() => {
@@ -663,7 +663,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('handles click event on non-current status', async () => {
-      const { changeWordStatus } = await import('../../../src/frontend/js/reading/word_actions');
+      const { changeWordStatus } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       const btn = createStatusChangeButton(mockContext, 4);
 
       const clickEvent = new MouseEvent('click', { bubbles: true });
@@ -731,7 +731,7 @@ describe('overlib_interface.ts', () => {
 
     it('shows confirmation dialog when confirm is true', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-      const { deleteWord } = await import('../../../src/frontend/js/reading/word_actions');
+      const { deleteWord } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
 
       const btn = createDeleteButton(mockContext, true);
       btn.click();
@@ -743,7 +743,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('deletes without confirmation when confirm is false', async () => {
-      const { deleteWord } = await import('../../../src/frontend/js/reading/word_actions');
+      const { deleteWord } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(deleteWord).mockClear();
 
       const btn = createDeleteButton(mockContext, false);
@@ -755,7 +755,7 @@ describe('overlib_interface.ts', () => {
 
     it('calls deleteWord after confirmation', async () => {
       vi.spyOn(window, 'confirm').mockReturnValue(true);
-      const { deleteWord } = await import('../../../src/frontend/js/reading/word_actions');
+      const { deleteWord } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(deleteWord).mockClear();
 
       const btn = createDeleteButton(mockContext, true);
@@ -781,7 +781,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('calls markWellKnown on click', async () => {
-      const { markWellKnown } = await import('../../../src/frontend/js/reading/word_actions');
+      const { markWellKnown } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(markWellKnown).mockClear();
 
       const btn = createWellKnownButton(mockContext);
@@ -807,7 +807,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('calls markIgnored on click', async () => {
-      const { markIgnored } = await import('../../../src/frontend/js/reading/word_actions');
+      const { markIgnored } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(markIgnored).mockClear();
 
       const btn = createIgnoreButton(mockContext);
@@ -924,7 +924,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('calls incrementWordStatus up on Got it click', async () => {
-      const { incrementWordStatus } = await import('../../../src/frontend/js/reading/word_actions');
+      const { incrementWordStatus } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(incrementWordStatus).mockClear();
 
       const mockContext: WordActionContext = {
@@ -947,7 +947,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('calls incrementWordStatus down on Oops click', async () => {
-      const { incrementWordStatus } = await import('../../../src/frontend/js/reading/word_actions');
+      const { incrementWordStatus } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(incrementWordStatus).mockClear();
 
       const mockContext: WordActionContext = {

@@ -5,30 +5,30 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   word_click_event_do_test_test,
   keydown_event_do_test_test
-} from '../../../src/frontend/js/testing/test_mode';
+} from '../../../src/frontend/js/modules/review/pages/test_mode';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/terms/overlib_interface', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/overlib_interface', () => ({
   run_overlib_test: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   loadModalFrame: vi.fn(),
   cleanupRightFrames: vi.fn()
 }));
 
-import { run_overlib_test } from '../../../src/frontend/js/terms/overlib_interface';
-import { loadModalFrame, cleanupRightFrames } from '../../../src/frontend/js/reading/frame_management';
+import { run_overlib_test } from '../../../src/frontend/js/modules/vocabulary/services/overlib_interface';
+import { loadModalFrame, cleanupRightFrames } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
 import {
   setCurrentWordId,
   setTestSolution,
   setAnswerOpened,
   resetTestState
-} from '../../../src/frontend/js/core/test_state';
+} from '../../../src/frontend/js/modules/review/stores/test_state';
 import {
   setDictionaryLinks,
   resetLanguageConfig
-} from '../../../src/frontend/js/core/language_config';
+} from '../../../src/frontend/js/modules/language/stores/language_config';
 
 describe('test_mode.ts', () => {
   beforeEach(() => {

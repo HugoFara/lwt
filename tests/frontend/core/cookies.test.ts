@@ -7,7 +7,7 @@ import {
   setCookie,
   deleteCookie,
   areCookiesEnabled
-} from '../../../src/frontend/js/core/cookies';
+} from '../../../src/frontend/js/shared/utils/cookies';
 
 describe('core/cookies.ts', () => {
   beforeEach(() => {

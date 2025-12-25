@@ -4,15 +4,15 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the api_client module
-vi.mock('../../../src/frontend/js/core/api_client', () => ({
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
   apiGet: vi.fn(),
   apiPost: vi.fn(),
   apiPut: vi.fn(),
   apiDelete: vi.fn()
 }));
 
-import { TextsApi } from '../../../src/frontend/js/api/texts';
-import { apiGet, apiPost, apiPut } from '../../../src/frontend/js/core/api_client';
+import { TextsApi } from '../../../src/frontend/js/modules/text/api/texts_api';
+import { apiGet, apiPost, apiPut } from '../../../src/frontend/js/shared/api/client';
 
 describe('api/texts.ts', () => {
   beforeEach(() => {

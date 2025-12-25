@@ -6,7 +6,7 @@ import {
   fetchApiVersion,
   initServerDataAlpine,
   serverDataApp
-} from '../../../src/frontend/js/admin/server_data';
+} from '../../../src/frontend/js/modules/admin/pages/server_data';
 
 describe('server_data.ts', () => {
   beforeEach(() => {

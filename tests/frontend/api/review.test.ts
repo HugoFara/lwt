@@ -2,11 +2,11 @@
  * Tests for api/review.ts - Review API operations
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ReviewApi } from '../../../src/frontend/js/api/review';
-import * as apiClient from '../../../src/frontend/js/core/api_client';
+import { ReviewApi } from '../../../src/frontend/js/modules/review/api/review_api';
+import * as apiClient from '../../../src/frontend/js/shared/api/client';
 
 // Mock the api_client module
-vi.mock('../../../src/frontend/js/core/api_client', () => ({
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
   apiGet: vi.fn(),
   apiPut: vi.fn(),
 }));

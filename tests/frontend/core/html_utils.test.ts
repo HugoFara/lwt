@@ -8,7 +8,7 @@ import {
   escape_apostrophes,
   renderTags,
   renderStatusBarChart
-} from '../../../src/frontend/js/core/html_utils';
+} from '../../../src/frontend/js/shared/utils/html_utils';
 
 describe('core/html_utils.ts', () => {
   // ===========================================================================

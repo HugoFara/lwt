@@ -4,7 +4,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the api_client module
-vi.mock('../../../src/frontend/js/core/api_client', () => ({
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
   apiGet: vi.fn(),
   apiPost: vi.fn(),
   apiPut: vi.fn(),
@@ -12,14 +12,14 @@ vi.mock('../../../src/frontend/js/core/api_client', () => ({
   apiPostForm: vi.fn()
 }));
 
-import { TermsApi } from '../../../src/frontend/js/api/terms';
+import { TermsApi } from '../../../src/frontend/js/modules/vocabulary/api/terms_api';
 import {
   apiGet,
   apiPost,
   apiPut,
   apiDelete,
   apiPostForm
-} from '../../../src/frontend/js/core/api_client';
+} from '../../../src/frontend/js/shared/api/client';
 
 describe('api/terms.ts', () => {
   beforeEach(() => {

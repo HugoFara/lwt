@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 const mockDoAjaxSaveSetting = vi.hoisted(() => vi.fn());
 
 // Mock the ajax_utilities module
-vi.mock('../../../src/frontend/js/core/ajax_utilities', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
   do_ajax_save_setting: mockDoAjaxSaveSetting
 }));
 

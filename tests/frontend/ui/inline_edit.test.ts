@@ -2,7 +2,7 @@
  * Tests for inline_edit.ts - Click-to-edit functionality for text elements
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initInlineEdit } from '../../../src/frontend/js/ui/inline_edit';
+import { initInlineEdit } from '../../../src/frontend/js/shared/components/inline_edit';
 
 describe('inline_edit.ts', () => {
   beforeEach(() => {

@@ -22,18 +22,18 @@ import {
   completeWordOperation,
   type WordUpdateParams,
   type BulkWordUpdateParams
-} from '../../../src/frontend/js/words/word_dom_updates';
+} from '../../../src/frontend/js/modules/vocabulary/services/word_dom_updates';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/terms/word_status', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_status', () => ({
   make_tooltip: vi.fn((word, trans, rom, status) => `${word}|${trans}|${rom}|${status}`)
 }));
 
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   cleanupRightFrames: vi.fn()
 }));
 
-import { resetSettingsConfig } from '../../../src/frontend/js/core/settings_config';
+import { resetSettingsConfig } from '../../../src/frontend/js/shared/utils/settings_config';
 
 describe('word_dom_updates.ts', () => {
   beforeEach(() => {
@@ -592,7 +592,7 @@ describe('word_dom_updates.ts', () => {
 
   describe('completeWordOperation', () => {
     it('updates learn status and cleans up frames', async () => {
-      const { cleanupRightFrames } = await import('../../../src/frontend/js/reading/frame_management');
+      const { cleanupRightFrames } = await import('../../../src/frontend/js/modules/text/pages/reading/frame_management');
 
       document.body.innerHTML = `<div id="learnstatus">old</div>`;
 
@@ -603,7 +603,7 @@ describe('word_dom_updates.ts', () => {
     });
 
     it('skips cleanup when shouldCleanup is false', async () => {
-      const { cleanupRightFrames } = await import('../../../src/frontend/js/reading/frame_management');
+      const { cleanupRightFrames } = await import('../../../src/frontend/js/modules/text/pages/reading/frame_management');
 
       document.body.innerHTML = `<div id="learnstatus">old</div>`;
 

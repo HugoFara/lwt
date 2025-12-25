@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   tableManagementApp,
   initTableManagementAlpine
-} from '../../../src/frontend/js/admin/table_management';
+} from '../../../src/frontend/js/modules/admin/pages/table_management';
 
 describe('table_management.ts', () => {
   beforeEach(() => {

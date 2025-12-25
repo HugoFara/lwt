@@ -2,14 +2,14 @@
  * Tests for test_table.ts - Table test mode with column visibility toggles
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initTableTest } from '../../../src/frontend/js/testing/test_table';
+import { initTableTest } from '../../../src/frontend/js/modules/review/pages/test_table';
 
 // Mock ajax_utilities
-vi.mock('../../../src/frontend/js/core/ajax_utilities', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
   do_ajax_save_setting: vi.fn()
 }));
 
-import { do_ajax_save_setting } from '../../../src/frontend/js/core/ajax_utilities';
+import { do_ajax_save_setting } from '../../../src/frontend/js/shared/utils/ajax_utilities';
 
 describe('test_table.ts', () => {
   beforeEach(() => {

@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 const mockLoadModalFrame = vi.hoisted(() => vi.fn());
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   loadModalFrame: mockLoadModalFrame
 }));
 
@@ -16,7 +16,7 @@ import {
   resetAll,
   iknowall,
   check_table_prefix
-} from '../../../src/frontend/js/core/language_settings';
+} from '../../../src/frontend/js/modules/language/stores/language_settings';
 
 describe('core/language_settings.ts', () => {
   const originalLocation = window.location;

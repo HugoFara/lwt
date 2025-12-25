@@ -11,7 +11,7 @@ import {
   showLoadingInPanel,
   updatePanelContent,
   isPanelVisible
-} from '../../../src/frontend/js/ui/result_panel';
+} from '../../../src/frontend/js/modules/vocabulary/components/result_panel';
 
 describe('ui/result_panel.ts', () => {
   beforeEach(() => {

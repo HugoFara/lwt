@@ -14,7 +14,7 @@ vi.mock('@yaireo/tagify', () => {
 });
 
 // Mock app_data to provide text tags
-vi.mock('../../../src/frontend/js/core/app_data', () => ({
+vi.mock('../../../src/frontend/js/shared/stores/app_data', () => ({
   fetchTextTags: vi.fn().mockResolvedValue(['tag1', 'tag2', 'tag3']),
   getTextTagsSync: vi.fn().mockReturnValue(['tag1', 'tag2', 'tag3'])
 }));
@@ -22,7 +22,7 @@ vi.mock('../../../src/frontend/js/core/app_data', () => ({
 import {
   feedTextEditData,
   type FeedTextEditConfig
-} from '../../../src/frontend/js/feeds/components/feed_text_edit_component';
+} from '../../../src/frontend/js/modules/feed/components/feed_text_edit_component';
 
 describe('feed_text_edit_component.ts', () => {
   beforeEach(() => {

@@ -5,12 +5,12 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock frame_management module
 const mockLoadModalFrame = vi.fn();
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   loadModalFrame: mockLoadModalFrame
 }));
 
 // Now import the module
-const ui_utilities = await import('../../../src/frontend/js/core/ui_utilities');
+const ui_utilities = await import('../../../src/frontend/js/shared/utils/ui_utilities');
 const { markClick, confirmDelete, showAllwordsClick, noShowAfter3Secs, setTheFocus, wrapRadioButtons } = ui_utilities;
 
 describe('ui_utilities.ts', () => {

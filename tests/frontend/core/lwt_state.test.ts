@@ -2,7 +2,7 @@
  * Tests for lwt_state.ts - LWT State Management and state modules
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings } from '../../../src/frontend/js/core/lwt_state';
+import type { LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings } from '../../../src/frontend/js/shared/stores/lwt_state';
 import {
   // Language config
   initLanguageConfig,
@@ -49,7 +49,7 @@ import {
   openAnswer,
   resetAnswer,
   resetTestState,
-} from '../../../src/frontend/js/core/lwt_state';
+} from '../../../src/frontend/js/shared/stores/lwt_state';
 
 describe('lwt_state.ts', () => {
   // ===========================================================================

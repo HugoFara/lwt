@@ -2,15 +2,15 @@
  * Tests for word_list_filter.ts - Word list filter page functionality
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initWordListFilter } from '../../../src/frontend/js/words/word_list_filter';
+import { initWordListFilter } from '../../../src/frontend/js/modules/vocabulary/stores/word_list_filter';
 
 // Mock language_settings module
-vi.mock('../../../src/frontend/js/core/language_settings', () => ({
+vi.mock('../../../src/frontend/js/modules/language/stores/language_settings', () => ({
   setLang: vi.fn(),
   resetAll: vi.fn()
 }));
 
-import { setLang, resetAll } from '../../../src/frontend/js/core/language_settings';
+import { setLang, resetAll } from '../../../src/frontend/js/modules/language/stores/language_settings';
 
 describe('word_list_filter.ts', () => {
   // Store original location

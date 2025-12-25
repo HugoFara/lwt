@@ -10,25 +10,25 @@ import {
   markNone,
   changeTermToggles,
   initBulkTranslate
-} from '../../../src/frontend/js/words/bulk_translate';
+} from '../../../src/frontend/js/modules/vocabulary/pages/bulk_translate';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/terms/dictionary', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/dictionary', () => ({
   createTheDictUrl: vi.fn((url, term) => `${url}?q=${encodeURIComponent(term)}`),
   owin: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/forms/bulk_actions', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/bulk_actions', () => ({
   selectToggle: vi.fn()
 }));
 
-import { createTheDictUrl, owin } from '../../../src/frontend/js/terms/dictionary';
-import { selectToggle } from '../../../src/frontend/js/forms/bulk_actions';
+import { createTheDictUrl, owin } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
+import { selectToggle } from '../../../src/frontend/js/shared/forms/bulk_actions';
 import {
   getDictionaryLinks,
   setDictionaryLinks,
   resetLanguageConfig
-} from '../../../src/frontend/js/core/language_config';
+} from '../../../src/frontend/js/modules/language/stores/language_config';
 
 describe('bulk_translate.ts', () => {
   beforeEach(() => {

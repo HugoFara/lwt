@@ -14,7 +14,7 @@ import {
   initIconsIn,
   createIcon,
   replaceWithLucide
-} from '../../../src/frontend/js/ui/lucide_icons';
+} from '../../../src/frontend/js/shared/icons/lucide_icons';
 import { createIcons, icons } from 'lucide';
 
 describe('ui/lucide_icons.ts', () => {

@@ -14,48 +14,48 @@ const { mockLoadModalFrame, mockLoadDictionaryFrame, mockSpeechDispatcher, mockO
 }));
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/terms/dictionary', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/dictionary', () => ({
   getLangFromDict: vi.fn().mockReturnValue('en'),
   createTheDictUrl: vi.fn().mockReturnValue('http://dict.example.com/word'),
   owin: mockOwin
 }));
 
-vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   speechDispatcher: mockSpeechDispatcher
 }));
 
-vi.mock('../../../src/frontend/js/reading/text_annotations', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/text_annotations', () => ({
   getAttrElement: vi.fn((el: HTMLElement, attr: string) => {
     return el.getAttribute(attr) || '';
   })
 }));
 
-vi.mock('../../../src/frontend/js/ui/word_popup', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/components/word_popup', () => ({
   cClick: mockCClick
 }));
 
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   loadModalFrame: mockLoadModalFrame,
   loadDictionaryFrame: mockLoadDictionaryFrame
 }));
 
-vi.mock('../../../src/frontend/js/core/ajax_utilities', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
   get_position_from_id: vi.fn((id: string) => parseInt(id.replace(/\D/g, ''), 10) || 0)
 }));
 
-vi.mock('../../../src/frontend/js/core/hover_intent', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/hover_intent', () => ({
   scrollTo: mockScrollTo
 }));
 
-import { keydown_event_do_text_text } from '../../../src/frontend/js/reading/text_keyboard';
+import { keydown_event_do_text_text } from '../../../src/frontend/js/modules/text/pages/reading/text_keyboard';
 import {
   getReadingPosition,
   setReadingPosition,
   resetReadingPosition
-} from '../../../src/frontend/js/core/reading_state';
-import { initLanguageConfig, resetLanguageConfig, getLanguageId } from '../../../src/frontend/js/core/language_config';
-import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/core/text_config';
-import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/core/settings_config';
+} from '../../../src/frontend/js/modules/text/stores/reading_state';
+import { initLanguageConfig, resetLanguageConfig, getLanguageId } from '../../../src/frontend/js/modules/language/stores/language_config';
+import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/modules/text/stores/text_config';
+import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/shared/utils/settings_config';
 
 /**
  * Helper to create a KeyboardEvent

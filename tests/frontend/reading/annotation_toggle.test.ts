@@ -9,7 +9,7 @@ import {
   doShowAnnotations,
   closeWindow,
   initAnnotationToggles
-} from '../../../src/frontend/js/reading/annotation_toggle';
+} from '../../../src/frontend/js/modules/text/pages/reading/annotation_toggle';
 
 describe('annotation_toggle.ts', () => {
   beforeEach(() => {

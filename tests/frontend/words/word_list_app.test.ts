@@ -2,10 +2,10 @@
  * Tests for words/word_list_app.ts - Word List Alpine.js component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { wordListData, initWordListAlpine } from '../../../src/frontend/js/words/word_list_app';
+import { wordListData, initWordListAlpine } from '../../../src/frontend/js/modules/vocabulary/pages/word_list_app';
 
 // Mock the dependencies
-vi.mock('../../../src/frontend/js/api/words', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/api/words_api', () => ({
   WordsApi: {
     getList: vi.fn(),
     getFilterOptions: vi.fn(),
@@ -20,7 +20,7 @@ vi.mock('lucide', () => ({
   icons: {},
 }));
 
-import { WordsApi } from '../../../src/frontend/js/api/words';
+import { WordsApi } from '../../../src/frontend/js/modules/vocabulary/api/words_api';
 
 describe('words/word_list_app.ts', () => {
   let originalLocation: Location;

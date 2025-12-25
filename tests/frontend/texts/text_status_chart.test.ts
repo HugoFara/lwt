@@ -8,7 +8,7 @@ import {
   initTextStatusCharts,
   updateAllTextStatusCharts,
   destroyAllTextStatusCharts
-} from '../../../src/frontend/js/texts/text_status_chart';
+} from '../../../src/frontend/js/modules/text/pages/text_status_chart';
 
 // Mock Chart.js
 vi.mock('chart.js', () => {

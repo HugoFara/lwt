@@ -7,7 +7,7 @@ import {
   closeModal,
   openModalFromUrl,
   showExportTemplateHelp,
-} from '../../../src/frontend/js/ui/modal';
+} from '../../../src/frontend/js/shared/components/modal';
 
 describe('modal.ts', () => {
   beforeEach(() => {

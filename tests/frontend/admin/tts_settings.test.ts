@@ -11,27 +11,27 @@ import {
   presetTTSData,
   populateVoiceList,
   type TTSSettingsConfig
-} from '../../../src/frontend/js/admin/tts_settings';
+} from '../../../src/frontend/js/modules/admin/pages/tts_settings';
 
 // Use vi.hoisted to ensure mock function is available during hoisting
 const mockGetTTSSettingsWithMigration = vi.hoisted(() => vi.fn());
 const mockSaveTTSSettings = vi.hoisted(() => vi.fn());
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/core/cookies', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/cookies', () => ({
   getCookie: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/tts_storage', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/tts_storage', () => ({
   getTTSSettingsWithMigration: mockGetTTSSettingsWithMigration,
   saveTTSSettings: mockSaveTTSSettings
 }));
 
-vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   readTextAloud: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/unloadformcheck', () => ({
   lwtFormCheck: {
     resetDirty: vi.fn(),
     askBeforeExit: vi.fn()
@@ -171,7 +171,7 @@ describe('tts_settings.ts', () => {
     });
 
     it('plays demo with current settings', async () => {
-      const { readTextAloud } = await import('../../../src/frontend/js/core/user_interactions');
+      const { readTextAloud } = await import('../../../src/frontend/js/shared/utils/user_interactions');
 
       const app = ttsSettingsApp({ currentLanguageCode: 'en-US' });
       app.demoText = 'Hello world';
@@ -191,7 +191,7 @@ describe('tts_settings.ts', () => {
     });
 
     it('plays demo with undefined voice when none selected', async () => {
-      const { readTextAloud } = await import('../../../src/frontend/js/core/user_interactions');
+      const { readTextAloud } = await import('../../../src/frontend/js/shared/utils/user_interactions');
 
       const app = ttsSettingsApp({ currentLanguageCode: 'en-US' });
       app.selectedVoice = '';
@@ -233,7 +233,7 @@ describe('tts_settings.ts', () => {
     });
 
     it('handles cancel correctly', async () => {
-      const { lwtFormCheck } = await import('../../../src/frontend/js/forms/unloadformcheck');
+      const { lwtFormCheck } = await import('../../../src/frontend/js/shared/forms/unloadformcheck');
 
       const originalLocation = window.location;
       delete (window as any).location;
@@ -382,7 +382,7 @@ describe('tts_settings.ts', () => {
 
   describe('ttsSettings.readingDemo (legacy)', () => {
     it('calls readTextAloud with form values', async () => {
-      const { readTextAloud } = await import('../../../src/frontend/js/core/user_interactions');
+      const { readTextAloud } = await import('../../../src/frontend/js/shared/utils/user_interactions');
 
       document.body.innerHTML = `
         <select id="get-language">
@@ -408,7 +408,7 @@ describe('tts_settings.ts', () => {
     });
 
     it('uses default values when form elements are empty', async () => {
-      const { readTextAloud } = await import('../../../src/frontend/js/core/user_interactions');
+      const { readTextAloud } = await import('../../../src/frontend/js/shared/utils/user_interactions');
 
       document.body.innerHTML = `
         <select id="get-language"><option value="" selected></option></select>
@@ -599,7 +599,7 @@ describe('tts_settings.ts', () => {
 
   describe('ttsSettings.clickCancel (legacy)', () => {
     it('resets form dirty state and redirects', async () => {
-      const { lwtFormCheck } = await import('../../../src/frontend/js/forms/unloadformcheck');
+      const { lwtFormCheck } = await import('../../../src/frontend/js/shared/forms/unloadformcheck');
 
       const originalLocation = window.location;
       delete (window as any).location;
@@ -628,7 +628,7 @@ describe('tts_settings.ts', () => {
     });
 
     it('initializes from JSON config element', async () => {
-      const { getCookie } = await import('../../../src/frontend/js/core/cookies');
+      const { getCookie } = await import('../../../src/frontend/js/shared/utils/cookies');
       (getCookie as any).mockReturnValue('');
 
       document.body.innerHTML = `
@@ -647,7 +647,7 @@ describe('tts_settings.ts', () => {
     });
 
     it('falls back to form data attribute when config element is missing', async () => {
-      const { getCookie } = await import('../../../src/frontend/js/core/cookies');
+      const { getCookie } = await import('../../../src/frontend/js/shared/utils/cookies');
       (getCookie as any).mockReturnValue('');
 
       document.body.innerHTML = `
@@ -665,7 +665,7 @@ describe('tts_settings.ts', () => {
     });
 
     it('handles invalid JSON in config element', async () => {
-      const { getCookie } = await import('../../../src/frontend/js/core/cookies');
+      const { getCookie } = await import('../../../src/frontend/js/shared/utils/cookies');
       (getCookie as any).mockReturnValue('');
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -686,7 +686,7 @@ describe('tts_settings.ts', () => {
     });
 
     it('sets up language select change listener', async () => {
-      const { getCookie } = await import('../../../src/frontend/js/core/cookies');
+      const { getCookie } = await import('../../../src/frontend/js/shared/utils/cookies');
       (getCookie as any).mockReturnValue('');
 
       document.body.innerHTML = `
@@ -712,8 +712,8 @@ describe('tts_settings.ts', () => {
     });
 
     it('sets up demo button click listener', async () => {
-      const { getCookie } = await import('../../../src/frontend/js/core/cookies');
-      const { readTextAloud } = await import('../../../src/frontend/js/core/user_interactions');
+      const { getCookie } = await import('../../../src/frontend/js/shared/utils/cookies');
+      const { readTextAloud } = await import('../../../src/frontend/js/shared/utils/user_interactions');
       (getCookie as any).mockReturnValue('');
 
       document.body.innerHTML = `
@@ -736,8 +736,8 @@ describe('tts_settings.ts', () => {
     });
 
     it('sets up cancel button click listener', async () => {
-      const { getCookie } = await import('../../../src/frontend/js/core/cookies');
-      const { lwtFormCheck } = await import('../../../src/frontend/js/forms/unloadformcheck');
+      const { getCookie } = await import('../../../src/frontend/js/shared/utils/cookies');
+      const { lwtFormCheck } = await import('../../../src/frontend/js/shared/forms/unloadformcheck');
       (getCookie as any).mockReturnValue('');
 
       const originalLocation = window.location;
@@ -787,7 +787,7 @@ describe('tts_settings.ts', () => {
     });
 
     it('readingDemo calls ttsSettings.readingDemo', async () => {
-      const { readTextAloud } = await import('../../../src/frontend/js/core/user_interactions');
+      const { readTextAloud } = await import('../../../src/frontend/js/shared/utils/user_interactions');
 
       document.body.innerHTML = `
         <select id="get-language"><option value="en" selected></option></select>
@@ -803,7 +803,7 @@ describe('tts_settings.ts', () => {
     });
 
     it('presetTTSData calls ttsSettings.presetTTSData', async () => {
-      const { getCookie } = await import('../../../src/frontend/js/core/cookies');
+      const { getCookie } = await import('../../../src/frontend/js/shared/utils/cookies');
       (getCookie as any).mockReturnValue('');
 
       document.body.innerHTML = `

@@ -4,26 +4,26 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the dependencies before importing the module
-vi.mock('../../../src/frontend/js/core/language_settings', () => ({
+vi.mock('../../../src/frontend/js/modules/language/stores/language_settings', () => ({
   setLang: vi.fn(),
   resetAll: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/forms/bulk_actions', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/bulk_actions', () => ({
   selectToggle: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/ui_utilities', () => ({
   markClick: vi.fn()
 }));
 
 import {
   feedBrowseData,
   type FeedBrowseConfig
-} from '../../../src/frontend/js/feeds/components/feed_browse_component';
-import { setLang, resetAll } from '../../../src/frontend/js/core/language_settings';
-import { selectToggle } from '../../../src/frontend/js/forms/bulk_actions';
-import { markClick } from '../../../src/frontend/js/core/ui_utilities';
+} from '../../../src/frontend/js/modules/feed/components/feed_browse_component';
+import { setLang, resetAll } from '../../../src/frontend/js/modules/language/stores/language_settings';
+import { selectToggle } from '../../../src/frontend/js/shared/forms/bulk_actions';
+import { markClick } from '../../../src/frontend/js/shared/utils/ui_utilities';
 
 describe('feed_browse_component.ts', () => {
   let originalLocation: Location;

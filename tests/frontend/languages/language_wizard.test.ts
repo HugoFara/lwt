@@ -6,29 +6,29 @@ import {
   languageWizard,
   initLanguageWizard,
   type LanguageWizardConfig
-} from '../../../src/frontend/js/languages/language_wizard';
+} from '../../../src/frontend/js/modules/language/pages/language_wizard';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/core/ajax_utilities', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
   do_ajax_save_setting: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/unloadformcheck', () => ({
   lwtFormCheck: {
     askBeforeExit: vi.fn()
   }
 }));
 
-vi.mock('../../../src/frontend/js/languages/language_form', () => ({
+vi.mock('../../../src/frontend/js/modules/language/pages/language_form', () => ({
   languageForm: {
     reloadDictURLs: vi.fn(),
     checkLanguageChanged: vi.fn()
   }
 }));
 
-import { do_ajax_save_setting } from '../../../src/frontend/js/core/ajax_utilities';
-import { lwtFormCheck } from '../../../src/frontend/js/forms/unloadformcheck';
-import { languageForm } from '../../../src/frontend/js/languages/language_form';
+import { do_ajax_save_setting } from '../../../src/frontend/js/shared/utils/ajax_utilities';
+import { lwtFormCheck } from '../../../src/frontend/js/shared/forms/unloadformcheck';
+import { languageForm } from '../../../src/frontend/js/modules/language/pages/language_form';
 
 describe('language_wizard.ts', () => {
   beforeEach(() => {

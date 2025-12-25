@@ -9,14 +9,14 @@ import {
   checkDuplicateLanguage,
   initLanguageForm,
   type LanguageFormConfig
-} from '../../../src/frontend/js/languages/language_form';
+} from '../../../src/frontend/js/modules/language/pages/language_form';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/terms/translation_api', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/translation_api', () => ({
   getLibreTranslateTranslation: vi.fn().mockResolvedValue('translated')
 }));
 
-vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   deepFindValue: vi.fn((obj, key) => {
     // Simple implementation for testing
     if (typeof obj !== 'object' || obj === null) return null;
@@ -30,7 +30,7 @@ vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
   readTextWithExternal: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/unloadformcheck', () => ({
   lwtFormCheck: {
     resetDirty: vi.fn(),
     askBeforeExit: vi.fn()
@@ -558,7 +558,7 @@ describe('language_form.ts', () => {
     });
 
     it('returns true for valid JSON with lwt_term', async () => {
-      const { deepFindValue } = await import('../../../src/frontend/js/core/user_interactions');
+      const { deepFindValue } = await import('../../../src/frontend/js/shared/utils/user_interactions');
       (deepFindValue as any).mockReturnValue('lwt_term');
 
       const result = languageForm.checkVoiceAPI('{"text": "lwt_term"}');
@@ -779,7 +779,7 @@ describe('language_form.ts', () => {
     });
 
     it('sets up cancel button handler', async () => {
-      const { lwtFormCheck } = await import('../../../src/frontend/js/forms/unloadformcheck');
+      const { lwtFormCheck } = await import('../../../src/frontend/js/shared/forms/unloadformcheck');
 
       const originalLocation = window.location;
       delete (window as any).location;

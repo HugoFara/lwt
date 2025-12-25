@@ -4,36 +4,36 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the dependencies
-vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/unloadformcheck', () => ({
   lwtFormCheck: {
     resetDirty: vi.fn()
   }
 }));
 
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   showRightFramesPanel: vi.fn(),
   hideRightFrames: vi.fn(),
   loadModalFrame: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/ui_utilities', () => ({
   showAllwordsClick: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   quickMenuRedirection: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/terms/translation_api', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/translation_api', () => ({
   deleteTranslation: vi.fn(),
   addTranslation: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/terms/term_operations', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/term_operations', () => ({
   changeTableTestStatus: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/ui/modal', () => ({
+vi.mock('../../../src/frontend/js/shared/components/modal', () => ({
   showExportTemplateHelp: vi.fn()
 }));
 
@@ -44,14 +44,14 @@ import {
   cancelAndGoBack,
   confirmSubmit,
   initSimpleInteractions
-} from '../../../src/frontend/js/core/simple_interactions';
-import { lwtFormCheck } from '../../../src/frontend/js/forms/unloadformcheck';
-import { showRightFramesPanel, hideRightFrames, loadModalFrame } from '../../../src/frontend/js/reading/frame_management';
-import { showAllwordsClick } from '../../../src/frontend/js/core/ui_utilities';
-import { quickMenuRedirection } from '../../../src/frontend/js/core/user_interactions';
-import { deleteTranslation, addTranslation } from '../../../src/frontend/js/terms/translation_api';
-import { changeTableTestStatus } from '../../../src/frontend/js/terms/term_operations';
-import { showExportTemplateHelp } from '../../../src/frontend/js/ui/modal';
+} from '../../../src/frontend/js/shared/utils/simple_interactions';
+import { lwtFormCheck } from '../../../src/frontend/js/shared/forms/unloadformcheck';
+import { showRightFramesPanel, hideRightFrames, loadModalFrame } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
+import { showAllwordsClick } from '../../../src/frontend/js/shared/utils/ui_utilities';
+import { quickMenuRedirection } from '../../../src/frontend/js/shared/utils/user_interactions';
+import { deleteTranslation, addTranslation } from '../../../src/frontend/js/modules/vocabulary/services/translation_api';
+import { changeTableTestStatus } from '../../../src/frontend/js/modules/vocabulary/services/term_operations';
+import { showExportTemplateHelp } from '../../../src/frontend/js/shared/components/modal';
 
 describe('simple_interactions.ts', () => {
   let originalLocation: Location;

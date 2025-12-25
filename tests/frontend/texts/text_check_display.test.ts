@@ -6,7 +6,7 @@ import {
   displayStatistics,
   initTextCheckDisplay,
   initTextCheckWords
-} from '../../../src/frontend/js/texts/text_check_display';
+} from '../../../src/frontend/js/modules/text/pages/text_check_display';
 
 describe('text_check_display.ts', () => {
   beforeEach(() => {

@@ -9,18 +9,18 @@ import {
   initTextReading,
   initTextReadingHeader,
   autoInit
-} from '../../../src/frontend/js/reading/text_reading_init';
+} from '../../../src/frontend/js/modules/text/pages/reading/text_reading_init';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/terms/dictionary', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/dictionary', () => ({
   getLangFromDict: vi.fn().mockReturnValue('en')
 }));
 
-vi.mock('../../../src/frontend/js/reading/text_events', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/text_events', () => ({
   prepareTextInteractions: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   goToLastPosition: vi.fn(),
   saveReadingPosition: vi.fn(),
   saveAudioPosition: vi.fn(),
@@ -31,16 +31,16 @@ vi.mock('../../../src/frontend/js/media/html5_audio_player', () => ({
   getAudioPlayer: vi.fn()
 }));
 
-import { getLangFromDict } from '../../../src/frontend/js/terms/dictionary';
-import { saveAudioPosition, readRawTextAloud } from '../../../src/frontend/js/core/user_interactions';
+import { getLangFromDict } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
+import { saveAudioPosition, readRawTextAloud } from '../../../src/frontend/js/shared/utils/user_interactions';
 import { getAudioPlayer } from '../../../src/frontend/js/media/html5_audio_player';
 import {
   initLanguageConfig,
   resetLanguageConfig,
   getTtsVoiceApi
-} from '../../../src/frontend/js/core/language_config';
-import { getReadingPosition, resetReadingPosition } from '../../../src/frontend/js/core/reading_state';
-import { isAnswerOpened, resetTestState } from '../../../src/frontend/js/core/test_state';
+} from '../../../src/frontend/js/modules/language/stores/language_config';
+import { getReadingPosition, resetReadingPosition } from '../../../src/frontend/js/modules/text/stores/reading_state';
+import { isAnswerOpened, resetTestState } from '../../../src/frontend/js/modules/review/stores/test_state';
 
 describe('text_reading_init.ts', () => {
   let mockSpeechSynthesis: any;

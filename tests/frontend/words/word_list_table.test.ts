@@ -2,16 +2,16 @@
  * Tests for word_list_table.ts - Word list table functionality
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initWordListTable } from '../../../src/frontend/js/words/word_list_table';
+import { initWordListTable } from '../../../src/frontend/js/modules/vocabulary/stores/word_list_table';
 
 // Mock bulk_actions module
-vi.mock('../../../src/frontend/js/forms/bulk_actions', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/bulk_actions', () => ({
   selectToggle: vi.fn(),
   multiActionGo: vi.fn(),
   allActionGo: vi.fn()
 }));
 
-import { selectToggle, multiActionGo, allActionGo } from '../../../src/frontend/js/forms/bulk_actions';
+import { selectToggle, multiActionGo, allActionGo } from '../../../src/frontend/js/shared/forms/bulk_actions';
 
 describe('word_list_table.ts', () => {
   beforeEach(() => {

@@ -2,10 +2,10 @@
  * Tests for word_result_init.ts - Auto-initializes word result views
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { autoInitWordResults } from '../../../src/frontend/js/words/word_result_init';
+import { autoInitWordResults } from '../../../src/frontend/js/modules/vocabulary/pages/word_result_init';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/words/word_dom_updates', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates', () => ({
   updateNewWordInDOM: vi.fn(),
   updateExistingWordInDOM: vi.fn(),
   completeWordOperation: vi.fn(),
@@ -20,19 +20,19 @@ vi.mock('../../../src/frontend/js/words/word_dom_updates', () => ({
   updateBulkWordInDOM: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/terms/word_status', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_status', () => ({
   make_tooltip: vi.fn(() => 'tooltip text')
 }));
 
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   cleanupRightFrames: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/terms/term_operations', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/term_operations', () => ({
   do_ajax_edit_impr_text: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/html_utils', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/html_utils', () => ({
   escape_html_chars: vi.fn((s) => s)
 }));
 
@@ -47,8 +47,8 @@ import {
   updateBulkWordInDOM,
   updateLearnStatus,
   updateExistingWordInDOM
-} from '../../../src/frontend/js/words/word_dom_updates';
-import { cleanupRightFrames } from '../../../src/frontend/js/reading/frame_management';
+} from '../../../src/frontend/js/modules/vocabulary/services/word_dom_updates';
+import { cleanupRightFrames } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
 
 describe('word_result_init.ts', () => {
   beforeEach(() => {

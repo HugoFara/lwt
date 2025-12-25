@@ -2,7 +2,7 @@
  * Tests for elapsed_timer.ts - Elapsed time counter for test sessions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { startElapsedTimer } from '../../../src/frontend/js/testing/elapsed_timer';
+import { startElapsedTimer } from '../../../src/frontend/js/modules/review/utils/elapsed_timer';
 
 describe('elapsed_timer.ts', () => {
   beforeEach(() => {

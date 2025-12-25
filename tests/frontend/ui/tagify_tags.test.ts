@@ -8,7 +8,7 @@ import {
   initTextTags,
   getTagifyInstance,
   setupTagChangeTracking
-} from '../../../src/frontend/js/ui/tagify_tags';
+} from '../../../src/frontend/js/shared/components/tagify_tags';
 
 // Mock Tagify module
 vi.mock('@yaireo/tagify', () => {
@@ -28,12 +28,12 @@ vi.mock('@yaireo/tagify', () => {
 vi.mock('@yaireo/tagify/dist/tagify.css', () => ({}));
 
 // Mock form_validation
-vi.mock('../../../src/frontend/js/forms/form_validation', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/form_validation', () => ({
   containsCharacterOutsideBasicMultilingualPlane: vi.fn().mockReturnValue(false)
 }));
 
 import Tagify from '@yaireo/tagify';
-import { containsCharacterOutsideBasicMultilingualPlane } from '../../../src/frontend/js/forms/form_validation';
+import { containsCharacterOutsideBasicMultilingualPlane } from '../../../src/frontend/js/shared/forms/form_validation';
 
 describe('tagify_tags.ts', () => {
   beforeEach(() => {

@@ -2,7 +2,7 @@
  * Tests for ui/footer.ts - Footer Alpine.js component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { footerData, initFooterAlpine } from '../../../src/frontend/js/ui/footer';
+import { footerData, initFooterAlpine } from '../../../src/frontend/js/shared/components/footer';
 
 describe('ui/footer.ts', () => {
   beforeEach(() => {

@@ -7,16 +7,16 @@ import {
   scrollToAnchor,
   get_position_from_id,
   quick_select_to_input
-} from '../../../src/frontend/js/core/ajax_utilities';
+} from '../../../src/frontend/js/shared/utils/ajax_utilities';
 
 // Mock the SettingsApi module
-vi.mock('../../../src/frontend/js/api/settings', () => ({
+vi.mock('../../../src/frontend/js/modules/admin/api/settings_api', () => ({
   SettingsApi: {
     save: vi.fn().mockResolvedValue({ ok: true, data: {} })
   }
 }));
 
-import { SettingsApi } from '../../../src/frontend/js/api/settings';
+import { SettingsApi } from '../../../src/frontend/js/modules/admin/api/settings_api';
 
 describe('ajax_utilities.ts', () => {
   beforeEach(() => {

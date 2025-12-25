@@ -6,24 +6,24 @@ import {
   getAttr,
   word_each_do_text_text,
   mword_each_do_text_text
-} from '../../../src/frontend/js/reading/text_annotations';
+} from '../../../src/frontend/js/modules/text/pages/reading/text_annotations';
 
 // Mock word_status module
-vi.mock('../../../src/frontend/js/terms/word_status', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_status', () => ({
   make_tooltip: vi.fn((text, trans, rom, status) =>
     `${text} [${trans}] (${rom}) - Status: ${status}`
   )
 }));
 
-import { make_tooltip } from '../../../src/frontend/js/terms/word_status';
+import { make_tooltip } from '../../../src/frontend/js/modules/vocabulary/services/word_status';
 import {
   setAnnotations,
   resetTextConfig
-} from '../../../src/frontend/js/core/text_config';
+} from '../../../src/frontend/js/modules/text/stores/text_config';
 import {
   initLanguageConfig,
   resetLanguageConfig
-} from '../../../src/frontend/js/core/language_config';
+} from '../../../src/frontend/js/modules/language/stores/language_config';
 
 describe('text_annotations.ts', () => {
   beforeEach(() => {

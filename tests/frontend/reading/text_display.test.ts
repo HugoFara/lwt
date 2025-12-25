@@ -10,12 +10,12 @@ const { mockApiGet, mockDoAjaxSaveSetting } = vi.hoisted(() => ({
 }));
 
 // Mock the api_client module
-vi.mock('../../../src/frontend/js/core/api_client', () => ({
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
   apiGet: mockApiGet
 }));
 
 // Mock the ajax_utilities module
-vi.mock('../../../src/frontend/js/core/ajax_utilities', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
   do_ajax_save_setting: mockDoAjaxSaveSetting
 }));
 
@@ -25,7 +25,7 @@ import {
   word_count_click,
   lwt,
   _initTestState,
-} from '../../../src/frontend/js/reading/text_display';
+} from '../../../src/frontend/js/modules/text/pages/reading/text_display';
 
 // Mock WORDCOUNTS data structure
 const createMockWordCounts = () => ({

@@ -2,19 +2,19 @@
  * Tests for translation_page.ts - Auto-initialization for translation pages
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { autoInitTranslationPages } from '../../../src/frontend/js/terms/translation_page';
+import { autoInitTranslationPages } from '../../../src/frontend/js/modules/vocabulary/pages/translation_page';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   speechDispatcher: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/terms/translation_api', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/translation_api', () => ({
   getGlosbeTranslation: vi.fn()
 }));
 
-import { speechDispatcher } from '../../../src/frontend/js/core/user_interactions';
-import { getGlosbeTranslation } from '../../../src/frontend/js/terms/translation_api';
+import { speechDispatcher } from '../../../src/frontend/js/shared/utils/user_interactions';
+import { getGlosbeTranslation } from '../../../src/frontend/js/modules/vocabulary/services/translation_api';
 
 describe('translation_page.ts', () => {
   beforeEach(() => {

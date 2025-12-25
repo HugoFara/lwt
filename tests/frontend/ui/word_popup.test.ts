@@ -52,7 +52,7 @@ beforeEach(() => {
 async function importWordPopup() {
   // Reset the module registry for fresh imports
   vi.resetModules();
-  return await import('../../../src/frontend/js/ui/word_popup');
+  return await import('../../../src/frontend/js/modules/vocabulary/components/word_popup');
 }
 
 describe('word_popup.ts', () => {

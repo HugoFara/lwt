@@ -2,7 +2,7 @@
  * Tests for youtube_import.ts - Fetch text data from YouTube videos
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { getYtTextData, initYouTubeImport } from '../../../src/frontend/js/texts/youtube_import';
+import { getYtTextData, initYouTubeImport } from '../../../src/frontend/js/modules/text/pages/youtube_import';
 
 describe('youtube_import.ts', () => {
   beforeEach(() => {

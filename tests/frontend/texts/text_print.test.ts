@@ -2,16 +2,16 @@
  * Tests for text_print_app.ts - Alpine.js Text Print Component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { textPrintAppData, type TextPrintAppData } from '../../../src/frontend/js/texts/text_print_app';
+import { textPrintAppData, type TextPrintAppData } from '../../../src/frontend/js/modules/text/pages/text_print_app';
 
 // Mock the API client
-vi.mock('../../../src/frontend/js/core/api_client', () => ({
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
   apiGet: vi.fn(),
   apiPost: vi.fn().mockResolvedValue({ data: { success: true } })
 }));
 
 // Mock the texts API
-vi.mock('../../../src/frontend/js/api/texts', () => ({
+vi.mock('../../../src/frontend/js/modules/text/api/texts_api', () => ({
   TextsApi: {
     getPrintItems: vi.fn().mockResolvedValue({
       data: {
@@ -121,7 +121,7 @@ describe('text_print_app.ts', () => {
     });
 
     it('loads print items on init for plain mode', async () => {
-      const { TextsApi } = await import('../../../src/frontend/js/api/texts');
+      const { TextsApi } = await import('../../../src/frontend/js/modules/text/api/texts_api');
 
       await component.init();
 
@@ -138,7 +138,7 @@ describe('text_print_app.ts', () => {
       `;
 
       const comp = textPrintAppData();
-      const { TextsApi } = await import('../../../src/frontend/js/api/texts');
+      const { TextsApi } = await import('../../../src/frontend/js/modules/text/api/texts_api');
 
       await comp.init();
 
@@ -459,7 +459,7 @@ describe('text_print_app.ts', () => {
 
   describe('window exports', () => {
     it('exports textPrintAppData to window', async () => {
-      await import('../../../src/frontend/js/texts/text_print_app');
+      await import('../../../src/frontend/js/modules/text/pages/text_print_app');
 
       expect(typeof window.textPrintAppData).toBe('function');
     });

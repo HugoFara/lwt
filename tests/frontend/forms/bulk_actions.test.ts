@@ -6,14 +6,14 @@ import {
   selectToggle,
   multiActionGo,
   allActionGo
-} from '../../../src/frontend/js/forms/bulk_actions';
+} from '../../../src/frontend/js/shared/forms/bulk_actions';
 
 // Mock ui_utilities
-vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/ui_utilities', () => ({
   markClick: vi.fn()
 }));
 
-import { markClick } from '../../../src/frontend/js/core/ui_utilities';
+import { markClick } from '../../../src/frontend/js/shared/utils/ui_utilities';
 
 describe('bulk_actions.ts', () => {
   beforeEach(() => {

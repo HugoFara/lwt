@@ -16,7 +16,7 @@ import {
   hasClassInAncestry,
   parseXPathFromListItem,
   parseSelectionList
-} from '../../../../src/frontend/js/feeds/utils/xpath_utils';
+} from '../../../../src/frontend/js/modules/feed/utils/xpath_utils';
 
 describe('feeds/utils/xpath_utils.ts', () => {
   beforeEach(() => {

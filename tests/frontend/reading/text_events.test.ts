@@ -9,11 +9,11 @@ import {
   word_hover_over,
   word_hover_out,
   prepareTextInteractions,
-} from '../../../src/frontend/js/reading/text_events';
-import * as userInteractions from '../../../src/frontend/js/core/user_interactions';
-import * as overlibInterface from '../../../src/frontend/js/terms/overlib_interface';
-import * as frameManagement from '../../../src/frontend/js/reading/frame_management';
-import * as wordStatus from '../../../src/frontend/js/terms/word_status';
+} from '../../../src/frontend/js/modules/text/pages/reading/text_events';
+import * as userInteractions from '../../../src/frontend/js/shared/utils/user_interactions';
+import * as overlibInterface from '../../../src/frontend/js/modules/vocabulary/services/overlib_interface';
+import * as frameManagement from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
+import * as wordStatus from '../../../src/frontend/js/modules/vocabulary/services/word_status';
 
 // Polyfill HTMLDialogElement methods for JSDOM
 function polyfillDialog() {
@@ -38,9 +38,9 @@ function polyfillDialog() {
 }
 
 // Import state modules
-import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
-import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/core/text_config';
-import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/core/settings_config';
+import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/modules/language/stores/language_config';
+import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/modules/text/stores/text_config';
+import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/shared/utils/settings_config';
 
 // Setup global mocks
 beforeEach(() => {

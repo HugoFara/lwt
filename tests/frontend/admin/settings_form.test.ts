@@ -8,11 +8,11 @@ import {
   initConfirmSubmitForms,
   initNavigateButtons,
   initHistoryBackButtons,
-} from '../../../src/frontend/js/admin/settings_form';
-import * as unloadformcheck from '../../../src/frontend/js/forms/unloadformcheck';
+} from '../../../src/frontend/js/modules/admin/pages/settings_form';
+import * as unloadformcheck from '../../../src/frontend/js/shared/forms/unloadformcheck';
 
 // Mock the lwtFormCheck module
-vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/unloadformcheck', () => ({
   lwtFormCheck: {
     askBeforeExit: vi.fn(),
     resetDirty: vi.fn(),

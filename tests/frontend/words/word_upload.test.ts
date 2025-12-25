@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   updateImportMode,
   showImportedTerms
-} from '../../../src/frontend/js/words/word_upload';
+} from '../../../src/frontend/js/modules/vocabulary/pages/word_upload';
 
 describe('word_upload.ts', () => {
   beforeEach(() => {
@@ -643,7 +643,7 @@ describe('word_upload.ts', () => {
         </div>
       `;
 
-      await import('../../../src/frontend/js/words/word_upload');
+      await import('../../../src/frontend/js/modules/vocabulary/pages/word_upload');
 
       const select = document.querySelector<HTMLSelectElement>('[data-action="update-import-mode"]')!;
       select.value = '4';

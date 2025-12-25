@@ -14,11 +14,11 @@ import {
   translateWord,
   translateWord2,
   translateWord3,
-} from '../../../src/frontend/js/terms/dictionary';
-import * as frameManagement from '../../../src/frontend/js/reading/frame_management';
+} from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
+import * as frameManagement from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   showRightFramesPanel: vi.fn(),
   loadDictionaryFrame: vi.fn(),
 }));

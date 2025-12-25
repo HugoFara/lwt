@@ -10,15 +10,15 @@ import {
   failureSound,
   loadModalFrame,
   loadDictionaryFrame
-} from '../../../src/frontend/js/reading/frame_management';
+} from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
 
 // Mock word_popup module
-vi.mock('../../../src/frontend/js/ui/word_popup', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/components/word_popup', () => ({
   cClick: vi.fn(),
   closeParentPopup: vi.fn()
 }));
 
-import { closeParentPopup } from '../../../src/frontend/js/ui/word_popup';
+import { closeParentPopup } from '../../../src/frontend/js/modules/vocabulary/components/word_popup';
 
 describe('frame_management.ts', () => {
   // Store originals

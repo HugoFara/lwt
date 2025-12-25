@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   feedLoaderData,
   type FeedLoaderConfig
-} from '../../../src/frontend/js/feeds/components/feed_loader_component';
+} from '../../../src/frontend/js/modules/feed/components/feed_loader_component';
 
 describe('feed_loader_component.ts', () => {
   let originalLocation: Location;

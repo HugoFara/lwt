@@ -7,13 +7,13 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // Mock the dependencies
-vi.mock('../../../src/frontend/js/api/settings', () => ({
+vi.mock('../../../src/frontend/js/modules/admin/api/settings_api', () => ({
   SettingsApi: {
     save: vi.fn(),
   },
 }));
 
-vi.mock('../../../src/frontend/js/ui/lucide_icons', () => ({
+vi.mock('../../../src/frontend/js/shared/icons/lucide_icons', () => ({
   initIcons: vi.fn(),
 }));
 
@@ -24,6 +24,6 @@ describe('languages/language_list.ts', () => {
 
   it('module can be imported without error', async () => {
     // Just verify the module can be loaded
-    await expect(import('../../../src/frontend/js/languages/language_list')).resolves.not.toThrow();
+    await expect(import('../../../src/frontend/js/modules/language/pages/language_list')).resolves.not.toThrow();
   });
 });
