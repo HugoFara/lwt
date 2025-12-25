@@ -625,7 +625,11 @@ class FeedFacade
             ? str_replace('*', '%', mb_strtolower($query, 'UTF-8'))
             : $query;
 
-        $escaped = mysqli_real_escape_string(Globals::getDbConnection(), $searchValue);
+        $connection = Globals::getDbConnection();
+        if ($connection === null) {
+            return '';
+        }
+        $escaped = mysqli_real_escape_string($connection, $searchValue);
         $pattern = $regexMode . "LIKE '" . $escaped . "'";
 
         switch ($queryMode) {
@@ -651,9 +655,13 @@ class FeedFacade
             return true;
         }
 
-        $escaped = mysqli_real_escape_string(Globals::getDbConnection(), $pattern);
+        $connection = Globals::getDbConnection();
+        if ($connection === null) {
+            return false;
+        }
+        $escaped = mysqli_real_escape_string($connection, $pattern);
         $result = @mysqli_query(
-            Globals::getDbConnection(),
+            $connection,
             "SELECT 'test' RLIKE '" . $escaped . "'"
         );
 
@@ -786,7 +794,7 @@ class FeedFacade
     {
         $texts = array_reverse($texts);
         $message1 = $message2 = $message3 = $message4 = 0;
-        $NfID = null;
+        $NfID = [];
 
         foreach ($texts as $text) {
             $NfID[] = $text['Nf_ID'];
@@ -794,7 +802,8 @@ class FeedFacade
         $NfID = array_unique($NfID);
 
         $NfTag = '';
-        $textItem = null;
+        /** @var list<int|string> $textItem */
+        $textItem = [];
         $nfMaxTexts = null;
 
         foreach ($NfID as $feedID) {
@@ -842,7 +851,7 @@ class FeedFacade
                         $bindings,
                         'TxLgID'
                     );
-                    \Lwt\Shared\Infrastructure\Database\TextParsing::parseAndSave($textContent, (int) $textLgId, $id);
+                    \Lwt\Shared\Infrastructure\Database\TextParsing::parseAndSave($textContent, (int) $textLgId, (int) $id);
 
                     // Apply tags
                     $bindings = [];
@@ -860,7 +869,7 @@ class FeedFacade
 
             // Get all texts with this tag
             $bindings = [];
-            $result = \Lwt\Shared\Infrastructure\Database\Connection::query(
+            $result = \Lwt\Shared\Infrastructure\Database\Connection::querySelect(
                 "SELECT TtTxID FROM texttags
                 JOIN tags2 ON TtT2ID=T2ID
                 WHERE T2Text IN (" . $NfTag . ")"

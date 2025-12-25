@@ -95,9 +95,9 @@ class FileSystemEnvRepository
                 continue;
             }
 
-            list($key, $value) = explode('=', $line, 2);
-            $key = trim($key);
-            $value = trim($value);
+            $parts = explode('=', $line, 2);
+            $key = trim($parts[0]);
+            $value = trim($parts[1] ?? '');
 
             switch ($key) {
                 case 'DB_HOST':

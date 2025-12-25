@@ -121,10 +121,10 @@ class Settings
             ->deletePrepared();
         if (isset($dft[$k]) && $dft[$k]['num']) {
             $v = (int)$v;
-            if ($v < $dft[$k]['min']) {
+            if (isset($dft[$k]['min']) && $v < $dft[$k]['min']) {
                 $v = $dft[$k]['dft'];
             }
-            if ($v > $dft[$k]['max']) {
+            if (isset($dft[$k]['max']) && $v > $dft[$k]['max']) {
                 $v = $dft[$k]['dft'];
             }
         }

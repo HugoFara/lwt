@@ -196,6 +196,7 @@ class MySqlFeedRepository extends AbstractRepository implements FeedRepositoryIn
      */
     public function delete(object|int $entityOrId): bool
     {
+        /** @var \Lwt\Modules\Feed\Domain\Feed|int $entityOrId */
         $id = is_int($entityOrId) ? $entityOrId : $this->getEntityId($entityOrId);
         $deleted = $this->query()
             ->where($this->primaryKey, '=', $id)

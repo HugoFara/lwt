@@ -80,7 +80,9 @@ class MySqlBackupRepository implements BackupRepositoryInterface
             $row2 = mysqli_fetch_row(
                 Connection::querySelect("SHOW CREATE TABLE " . $table)
             );
-            $out .= str_replace("\n", " ", $row2[1]) . ";\n";
+            if ($row2 !== null && $row2 !== false && isset($row2[1])) {
+                $out .= str_replace("\n", " ", (string) $row2[1]) . ";\n";
+            }
 
             if ($table !== 'sentences' && $table !== 'textitems2') {
                 while ($row = mysqli_fetch_row($result)) {

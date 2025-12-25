@@ -174,15 +174,16 @@ final readonly class TestConfiguration
      */
     public function toSqlProjection(): string
     {
+        $selectionInt = is_int($this->selection) ? $this->selection : (int) (is_array($this->selection) ? ($this->selection[0] ?? 0) : $this->selection);
         return match ($this->testKey) {
-            self::KEY_LANG => " words WHERE WoLgID = {$this->selection} ",
+            self::KEY_LANG => " words WHERE WoLgID = {$selectionInt} ",
             self::KEY_TEXT => " words, textitems2
-                WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = {$this->selection} ",
+                WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = {$selectionInt} ",
             self::KEY_WORDS => " words WHERE WoID IN (" . implode(',', (array) $this->selection) . ") ",
             self::KEY_TEXTS => " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ("
                 . implode(',', (array) $this->selection) . ") ",
-            self::KEY_RAW_SQL => (string) $this->selection,
+            self::KEY_RAW_SQL => is_string($this->selection) ? $this->selection : '',
             default => throw new \InvalidArgumentException("Invalid test key: {$this->testKey}")
         };
     }
@@ -207,9 +208,10 @@ final readonly class TestConfiguration
      */
     public function toUrlProperty(): string
     {
+        $selectionStr = $this->getSelectionString();
         return match ($this->testKey) {
-            self::KEY_LANG => "lang={$this->selection}",
-            self::KEY_TEXT => "text={$this->selection}",
+            self::KEY_LANG => "lang={$selectionStr}",
+            self::KEY_TEXT => "text={$selectionStr}",
             self::KEY_WORDS => "selection=2",
             self::KEY_TEXTS => "selection=3",
             default => ''

@@ -488,7 +488,9 @@ class ArticleExtractor
                 continue;
             }
             foreach ($nodes as $node) {
-                $node->parentNode->removeChild($node);
+                if ($node instanceof \DOMNode && $node->parentNode !== null) {
+                    $node->parentNode->removeChild($node);
+                }
             }
         }
 
@@ -509,15 +511,16 @@ class ArticleExtractor
             }
 
             foreach ($queryResult as $textNode) {
-                if ($textNode->nodeValue !== '') {
+                $nodeValue = $textNode->nodeValue;
+                if ($nodeValue !== null && $nodeValue !== '') {
                     if ($isInlineText) {
                         $text .= mb_convert_encoding(
-                            $textNode->nodeValue,
+                            $nodeValue,
                             'HTML-ENTITIES',
                             'UTF-8'
                         );
                     } else {
-                        $text .= $textNode->nodeValue;
+                        $text .= $nodeValue;
                     }
                 }
             }
@@ -556,7 +559,9 @@ class ArticleExtractor
                 $toRemove[] = $domElement;
             }
             foreach ($toRemove as $node) {
-                $node->parentNode->removeChild($node);
+                if ($node->parentNode !== null) {
+                    $node->parentNode->removeChild($node);
+                }
             }
         }
 

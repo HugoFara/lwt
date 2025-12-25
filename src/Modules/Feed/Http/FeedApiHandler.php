@@ -49,7 +49,7 @@ class FeedApiHandler
     public function loadFeed(int $feedId, string $feedName, string $sourceUri, string $options): array
     {
         $articleSource = $this->feedFacade->getNfOption($options, 'article_source') ?? '';
-        $feed = $this->feedFacade->parseRssFeed($sourceUri, $articleSource);
+        $feed = $this->feedFacade->parseRssFeed($sourceUri, is_string($articleSource) ? $articleSource : '');
 
         if (empty($feed)) {
             return [

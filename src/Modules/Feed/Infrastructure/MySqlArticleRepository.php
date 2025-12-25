@@ -214,12 +214,7 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
         if (!empty($bindings)) {
             $rows = Connection::preparedFetchAll($sql, $bindings);
         } else {
-            $res = Connection::query($sql);
-            $rows = [];
-            while ($row = mysqli_fetch_assoc($res)) {
-                $rows[] = $row;
-            }
-            mysqli_free_result($res);
+            $rows = Connection::fetchAll($sql);
         }
 
         foreach ($rows as $row) {
@@ -346,6 +341,7 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
      */
     public function delete(object|int $entityOrId): bool
     {
+        /** @var Article|int $entityOrId */
         $id = is_int($entityOrId) ? $entityOrId : $this->getEntityId($entityOrId);
         $deleted = $this->query()
             ->where($this->primaryKey, '=', $id)
@@ -446,13 +442,12 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
 
         $sql .= " GROUP BY FlNfID";
 
-        $res = Connection::query($sql);
+        $rows = Connection::fetchAll($sql);
         $counts = [];
 
-        while ($row = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $row) {
             $counts[(int) $row['FlNfID']] = (int) $row['cnt'];
         }
-        mysqli_free_result($res);
 
         return $counts;
     }

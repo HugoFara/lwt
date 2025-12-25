@@ -577,12 +577,16 @@ class InputValidator
      * Validate that a string matches a regular expression pattern.
      *
      * @param string $value   Value to validate
-     * @param string $pattern Regular expression pattern
+     * @param string $pattern Regular expression pattern (empty pattern returns false)
      *
      * @return bool True if the value matches the pattern
      */
     public static function matchesPattern(string $value, string $pattern): bool
     {
+        if ($pattern === '') {
+            return false;
+        }
+        /** @var non-empty-string $pattern */
         return preg_match($pattern, $value) === 1;
     }
 

@@ -50,7 +50,9 @@ class MySqlStatisticsRepository
     /**
      * Get list of languages with IDs and names.
      *
-     * @return array<int, array{LgID: int, LgName: string}> Language records
+     * Returns records with LgID (int) and LgName (string) fields.
+     *
+     * @return array<int, array<string, mixed>> Language records
      */
     public function getLanguageList(): array
     {

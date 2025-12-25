@@ -217,10 +217,14 @@ class TextParsing
             // Special case for kazu (numbers)
             if ($last_node_type == 8 && $node_type == 8) {
                 $lastKey = array_key_last($values);
-                // Concatenate the previous value with the current term
-                $values[$lastKey - 1][3] = $values[$lastKey - 1][3] . $term;
-                // Remove last element to avoid repetition
-                array_pop($values);
+                // $lastKey is int<0, max> since we just added an element
+                // We need at least 2 elements to access previous
+                if ($lastKey > 0 && isset($values[$lastKey - 1][3])) {
+                    // Concatenate the previous value with the current term
+                    $values[$lastKey - 1][3] = $values[$lastKey - 1][3] . $term;
+                    // Remove last element to avoid repetition
+                    array_pop($values);
+                }
             }
             $last_node_type = $node_type;
         }
@@ -331,6 +335,9 @@ class TextParsing
         // LOAD DATA LOCAL INFILE does not support prepared statements for file path
         // We need to use Connection::query() here, but we escape the file path manually
         $connection = Globals::getDbConnection();
+        if ($connection === null) {
+            throw new \RuntimeException('Database connection not available');
+        }
         $escaped_file_name = mysqli_real_escape_string($connection, $file_name);
         $sql = "LOAD DATA LOCAL INFILE '$escaped_file_name'
         INTO TABLE temptextitems
@@ -801,7 +808,7 @@ class TextParsing
         );
         echo '<h4>Sentences</h4><ol>';
         foreach ($sentences as $record) {
-            echo "<li>" . \htmlspecialchars($record['Sent'] ?? '', ENT_QUOTES, 'UTF-8') . "</li>";
+            echo "<li>" . \htmlspecialchars((string) ($record['Sent'] ?? ''), ENT_QUOTES, 'UTF-8') . "</li>";
         }
         echo '</ol>';
         $bindings = [$lid];

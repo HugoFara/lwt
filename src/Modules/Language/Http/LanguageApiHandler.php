@@ -69,6 +69,16 @@ class LanguageApiHandler
             ->where('LgID', '=', $langId)
             ->firstPrepared();
 
+        if ($record === null) {
+            return [
+                "name" => "",
+                "voiceapi" => "",
+                "word_parsing" => "",
+                "abbreviation" => "",
+                "reading_mode" => "direct"
+            ];
+        }
+
         $abbr = $this->languageFacade->getLanguageCode($langId, LanguagePresets::getAll());
 
         if ($record["LgTTSVoiceAPI"] != '') {

@@ -196,13 +196,13 @@ class Maintenance
             ->getPrepared();
         foreach ($rows as $rec) {
             if ((int)$rec['LgSplitEachChar'] === 1) {
-                $textlc = preg_replace('/([^\s])/u', "$1 ", $rec['WoTextLC']);
+                $textlc = preg_replace('/([^\s])/u', "$1 ", (string) $rec['WoTextLC']);
             } else {
-                $textlc = $rec['WoTextLC'];
+                $textlc = (string) $rec['WoTextLC'];
             }
             $wordCount = preg_match_all(
                 '/([' . $rec['LgRegexpWordCharacters'] . ']+)/u',
-                $textlc,
+                $textlc ?? '',
                 $ma
             );
             // Ensure word count is at least 1 to avoid invalid SQL CASE statement

@@ -49,7 +49,7 @@ class AdminApiHandler
      * @param string $key   Setting name
      * @param string $value Setting value
      *
-     * @return array{error?: string, message?: string, last_text?: array}
+     * @return array{error?: string, message?: string, last_text?: array<string, mixed>|null}
      */
     public function saveSetting(string $key, string $value): array
     {
@@ -200,7 +200,7 @@ class AdminApiHandler
      * @param string $key   Setting key
      * @param string $value Setting value
      *
-     * @return array{error?: string, message?: string, last_text?: array|null}
+     * @return array{error?: string, message?: string, last_text?: array<string, mixed>|null}
      */
     public function formatSaveSetting(string $key, string $value): array
     {

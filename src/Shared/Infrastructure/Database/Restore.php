@@ -94,7 +94,8 @@ class Restore
         fclose($handle);
 
         // Now run all queries
-        if ($install_status["errors"] == 0) {
+        $connection = Globals::getDbConnection();
+        if ($install_status["errors"] == 0 && $connection !== null) {
             foreach ($queries_list as $query) {
                 $sql_line = trim(
                     str_replace("\r", "", str_replace("\n", "", $query))
@@ -102,7 +103,7 @@ class Restore
                 if ($sql_line != "") {
                     if (!str_starts_with($query, '-- ')) {
                         $res = mysqli_query(
-                            Globals::getDbConnection(),
+                            $connection,
                             $query
                         );
                         $install_status["queries"]++;
