@@ -155,13 +155,22 @@ src/Shared/                          # Cross-cutting infrastructure
     └── Assets/                      # ViteHelper
 
 src/Modules/                         # Feature modules (bounded contexts)
-├── Text/                            # Text reading/import module
-├── Vocabulary/                      # Terms/words module
+├── Admin/                           # Admin/settings module
+├── Feed/                            # RSS feed module
 ├── Language/                        # Language configuration module
 ├── Review/                          # Spaced repetition testing module
-├── Feed/                            # RSS feed module
 ├── Tags/                            # Tagging module
-└── Admin/                           # Admin/settings module
+├── Text/                            # Text reading/import module
+├── User/                            # User authentication module
+└── Vocabulary/                      # Terms/words module
+
+# Each module follows this structure:
+├── Application/                     # Use cases and application services
+├── Domain/                          # Entities, value objects, repository interfaces
+├── Http/                            # Controllers, request handling
+├── Infrastructure/                  # Repository implementations, external integrations
+├── Views/                           # Module-specific view templates
+└── [Module]ServiceProvider.php      # DI container registration
 
 src/backend/
 ├── Controllers/                     # MVC Controllers
