@@ -91,6 +91,41 @@ describe('Texts Management', () => {
       // Should redirect to texts list
       cy.url().should('match', /\/text/);
     });
+
+    it('should create a new text and open it for reading with Save & Open', () => {
+      cy.visit('/text/edit?new=1');
+
+      const uniqueTitle = `Save Open Test ${Date.now()}`;
+
+      // Fill in required fields
+      cy.get('input[name="TxTitle"]').type(uniqueTitle);
+
+      // Select first available language
+      cy.get('select[name="TxLgID"] option').should('have.length.greaterThan', 1);
+      cy.get('select[name="TxLgID"]').then(($select) => {
+        const options = $select.find('option');
+        const firstLangValue = options.eq(1).val();
+        cy.get('select[name="TxLgID"]').select(String(firstLangValue));
+      });
+
+      // Add text content
+      cy.get('textarea[name="TxText"]').type(
+        'This is a save and open test. It should redirect to the reading page.'
+      );
+
+      // Click "Save and Open" button
+      cy.get('button[name="op"][value="Save and Open"]').click();
+
+      // Should redirect to reading page
+      cy.url().should('include', '/text/read');
+      cy.url().should('match', /start=\d+/);
+
+      // Reading interface should load
+      cy.get('#thetext', { timeout: 10000 }).should('exist');
+
+      // Text content should be visible (spaces may be stripped depending on language config)
+      cy.get('#thetext').invoke('text').should('match', /save.*open.*test/i);
+    });
   });
 
   describe('Edit Text', () => {
