@@ -161,6 +161,13 @@ class ReviewApiHandler
             $params['test_key'],
             $this->parseSelection($params['test_key'], $params['selection'])
         );
+        if ($testSql === null) {
+            return [
+                "word_id" => 0,
+                "word_text" => '',
+                "group" => ''
+            ];
+        }
         return $this->getWordTestData(
             $testSql,
             filter_var($params['word_mode'], FILTER_VALIDATE_BOOLEAN),
@@ -181,6 +188,9 @@ class ReviewApiHandler
             $params['test_key'],
             $this->parseSelection($params['test_key'], $params['selection'])
         );
+        if ($testSql === null) {
+            return ["count" => 0];
+        }
         return [
             "count" => $this->reviewFacade->getTomorrowTestCount($testSql)
         ];
@@ -341,6 +351,10 @@ class ReviewApiHandler
             $testsql = $this->reviewFacade->getTestSql($identifier[0], $sel);
         }
 
+        if ($testsql === null) {
+            return ['error' => 'Unable to generate test SQL'];
+        }
+
         $testType = $this->reviewFacade->clampTestType($testType);
         $wordMode = $this->reviewFacade->isWordMode($testType);
         $baseType = $this->reviewFacade->getBaseTestType($testType);
@@ -417,6 +431,10 @@ class ReviewApiHandler
         $parsedSelection = $this->parseSelection($testKey, $selection);
         $testsql = $this->reviewFacade->getTestSql($testKey, $parsedSelection);
 
+        if ($testsql === null) {
+            return ['error' => 'Unable to generate test SQL'];
+        }
+
         // Validate single language
         $validation = $this->reviewFacade->validateTestSelection($testsql);
         if (!$validation['valid']) {
@@ -443,35 +461,37 @@ class ReviewApiHandler
         $wordsResult = $this->reviewFacade->getTableTestWords($testsql);
         $words = [];
 
-        while ($word = mysqli_fetch_assoc($wordsResult)) {
-            // Format sentence with highlighted word
-            $sent = htmlspecialchars(
-                ExportService::replaceTabNewline($word['WoSentence'] ?? ''),
-                ENT_QUOTES,
-                'UTF-8'
-            );
-            $sentenceHtml = str_replace(
-                "{",
-                ' <b>[',
-                str_replace(
-                    "}",
-                    ']</b> ',
-                    ExportService::maskTermInSentence($sent, $regexWord)
-                )
-            );
+        if ($wordsResult instanceof \mysqli_result) {
+            while ($word = mysqli_fetch_assoc($wordsResult)) {
+                // Format sentence with highlighted word
+                $sent = htmlspecialchars(
+                    ExportService::replaceTabNewline((string)($word['WoSentence'] ?? '')),
+                    ENT_QUOTES,
+                    'UTF-8'
+                );
+                $sentenceHtml = str_replace(
+                    "{",
+                    ' <b>[',
+                    str_replace(
+                        "}",
+                        ']</b> ',
+                        ExportService::maskTermInSentence($sent, $regexWord)
+                    )
+                );
 
-            $words[] = [
-                'id' => (int)$word['WoID'],
-                'text' => $word['WoText'] ?? '',
-                'translation' => $word['WoTranslation'] ?? '',
-                'romanization' => $word['WoRomanization'] ?? '',
-                'sentence' => $sent,
-                'sentenceHtml' => $sentenceHtml,
-                'status' => (int)($word['WoStatus'] ?? 1),
-                'score' => (int)($word['Score'] ?? 0)
-            ];
+                $words[] = [
+                    'id' => (int)$word['WoID'],
+                    'text' => $word['WoText'] ?? '',
+                    'translation' => $word['WoTranslation'] ?? '',
+                    'romanization' => $word['WoRomanization'] ?? '',
+                    'sentence' => $sent,
+                    'sentenceHtml' => $sentenceHtml,
+                    'status' => (int)($word['WoStatus'] ?? 1),
+                    'score' => (int)($word['Score'] ?? 0)
+                ];
+            }
+            mysqli_free_result($wordsResult);
         }
-        mysqli_free_result($wordsResult);
 
         return [
             'words' => $words,

@@ -115,10 +115,11 @@ class WordListService
 
         // Backward compatibility: build old-style SQL with embedded values
         // Using mysqli_real_escape_string directly instead of Escaping::toSqlSyntax()
-        $escapedValue = "'" . mysqli_real_escape_string(
-            Globals::getDbConnection(),
-            $queryValue
-        ) . "'";
+        $dbConn = Globals::getDbConnection();
+        if ($dbConn === null) {
+            return '';
+        }
+        $escapedValue = "'" . mysqli_real_escape_string($dbConn, $queryValue) . "'";
 
         $whQuery = "{$op} {$escapedValue}";
 
@@ -582,10 +583,12 @@ class WordListService
 
         $ids = [];
         $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
-            $ids[] = (int) $record['WoID'];
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $ids[] = (int) $record['WoID'];
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         return $ids;
     }
@@ -972,7 +975,7 @@ class WordListService
                 'WoWordCount'
             );
             if ($len > 1) {
-                (new ExpressionService())->insertExpressions($textLc, (int)$data["WoLgID"], $wid, $len, 1);
+                (new ExpressionService())->insertExpressions($textLc, (int)$data["WoLgID"], (int)$wid, $len, 1);
             } else {
                 Connection::preparedExecute(
                     'UPDATE textitems2

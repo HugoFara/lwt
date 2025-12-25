@@ -156,7 +156,8 @@ foreach ($words as $record):
     <td>
         <span<?php
         if (!empty($record['LgGoogleTranslateURI']) && strpos((string) $record['LgGoogleTranslateURI'], '&sl=') !== false) {
-            echo ' class="tts_' . preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']) . '"';
+            $langCode = preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']);
+            echo ' class="tts_' . (is_string($langCode) ? $langCode : '') . '"';
         }
         echo ($record['LgRightToLeft'] ? ' dir="rtl"' : '');
         ?>><strong><?php echo htmlspecialchars($record['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></strong></span>
@@ -216,7 +217,8 @@ foreach ($words as $record):
                 <div class="level-item">
                     <span<?php
                     if (!empty($record['LgGoogleTranslateURI']) && strpos((string) $record['LgGoogleTranslateURI'], '&sl=') !== false) {
-                        echo ' class="tts_' . preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']) . '"';
+                        $langCode = preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']);
+                        echo ' class="tts_' . (is_string($langCode) ? $langCode : '') . '"';
                     }
                     echo ($record['LgRightToLeft'] ? ' dir="rtl"' : '');
                     ?>><strong class="is-size-5"><?php echo htmlspecialchars($record['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></strong></span>

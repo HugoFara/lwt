@@ -33,6 +33,9 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
+/** @var int $lang */
+
+$phpSelf = $_SERVER['PHP_SELF'] ?? '';
 ?>
 
 <script type="application/json" id="word-form-config">
@@ -42,7 +45,7 @@ use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
     'lang' => $lang,
 ]); ?>
 </script>
-<form name="newword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"
+<form name="newword" class="validate" action="<?php echo $phpSelf; ?>" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="fromAnn" value="<?php echo $fromAnn; ?>" />
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />

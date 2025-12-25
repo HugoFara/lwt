@@ -796,13 +796,15 @@ class TagsFacade
         $res = Connection::query($sql);
 
         $count = 0;
-        while ($record = mysqli_fetch_assoc($res)) {
-            $count += (int) Connection::execute(
-                'INSERT IGNORE INTO wordtags (WtWoID, WtTgID)
-                VALUES(' . $record['WoID'] . ', ' . $tagId . ')'
-            );
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $count += (int) Connection::execute(
+                    'INSERT IGNORE INTO wordtags (WtWoID, WtTgID)
+                    VALUES(' . $record['WoID'] . ', ' . $tagId . ')'
+                );
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         self::getAllTermTags(true);
 
@@ -838,14 +840,16 @@ class TagsFacade
         $res = Connection::query($sql);
 
         $count = 0;
-        while ($record = mysqli_fetch_assoc($res)) {
-            $count++;
-            QueryBuilder::table('wordtags')
-                ->where('WtWoID', '=', (int)$record['WoID'])
-                ->where('WtTgID', '=', (int)$tagId)
-                ->delete();
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $count++;
+                QueryBuilder::table('wordtags')
+                    ->where('WtWoID', '=', (int)$record['WoID'])
+                    ->where('WtTgID', '=', (int)$tagId)
+                    ->delete();
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         return "Tag removed in {$count} Terms";
     }
@@ -876,13 +880,15 @@ class TagsFacade
         $res = Connection::query($sql);
 
         $count = 0;
-        while ($record = mysqli_fetch_assoc($res)) {
-            $count += (int) Connection::execute(
-                'INSERT IGNORE INTO texttags (TtTxID, TtT2ID)
-                VALUES(' . $record['TxID'] . ', ' . $tagId . ')'
-            );
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $count += (int) Connection::execute(
+                    'INSERT IGNORE INTO texttags (TtTxID, TtT2ID)
+                    VALUES(' . $record['TxID'] . ', ' . $tagId . ')'
+                );
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         self::getAllTextTags(true);
 
@@ -918,14 +924,16 @@ class TagsFacade
         $res = Connection::query($sql);
 
         $count = 0;
-        while ($record = mysqli_fetch_assoc($res)) {
-            $count++;
-            QueryBuilder::table('texttags')
-                ->where('TtTxID', '=', (int)$record['TxID'])
-                ->where('TtT2ID', '=', (int)$tagId)
-                ->delete();
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $count++;
+                QueryBuilder::table('texttags')
+                    ->where('TtTxID', '=', (int)$record['TxID'])
+                    ->where('TtT2ID', '=', (int)$tagId)
+                    ->delete();
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         return "Tag removed in {$count} Texts";
     }
@@ -956,13 +964,15 @@ class TagsFacade
         $res = Connection::query($sql);
 
         $count = 0;
-        while ($record = mysqli_fetch_assoc($res)) {
-            $count += (int) Connection::execute(
-                'INSERT IGNORE INTO archtexttags (AgAtID, AgT2ID)
-                VALUES(' . $record['AtID'] . ', ' . $tagId . ')'
-            );
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $count += (int) Connection::execute(
+                    'INSERT IGNORE INTO archtexttags (AgAtID, AgT2ID)
+                    VALUES(' . $record['AtID'] . ', ' . $tagId . ')'
+                );
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         self::getAllTextTags(true);
 
@@ -1000,14 +1010,16 @@ class TagsFacade
         $res = Connection::query($sql);
 
         $count = 0;
-        while ($record = mysqli_fetch_assoc($res)) {
-            $count++;
-            QueryBuilder::table('archtexttags')
-                ->where('AgAtID', '=', (int)$record['AtID'])
-                ->where('AgT2ID', '=', (int)$tagId)
-                ->delete();
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $count++;
+                QueryBuilder::table('archtexttags')
+                    ->where('AgAtID', '=', (int)$record['AtID'])
+                    ->where('AgT2ID', '=', (int)$tagId)
+                    ->delete();
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         return "Tag removed in {$count} Texts";
     }

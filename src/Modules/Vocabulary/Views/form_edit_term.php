@@ -43,8 +43,9 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 /** @var string $rom */
 /** @var int $status */
 
+$phpSelf = $_SERVER['PHP_SELF'] ?? '';
 ?>
-<form name="editword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"
+<form name="editword" class="validate" action="<?php echo $phpSelf; ?>" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />
 <input type="hidden" name="WoID" value="<?php echo $wid; ?>" />

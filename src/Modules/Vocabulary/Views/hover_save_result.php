@@ -25,6 +25,8 @@ namespace Lwt\Modules\Vocabulary\Views;
 
 use Lwt\Services\TextStatisticsService;
 
+/** @var int $status */
+
 ?>
 <p>Status: <?php echo get_colored_status_msg($status); ?></p><br />
 <?php if ($translation != '*'): ?>

@@ -142,6 +142,10 @@ class ExpressionService
             ->where('LgID', '=', $lid)
             ->getPrepared()[0] ?? null;
 
+        if ($record === null) {
+            return $occurrences;
+        }
+
         $removeSpaces = $record["LgRemoveSpaces"] == 1;
         $splitEachChar = $record['LgSplitEachChar'] != 0;
         $termchar = $record['LgRegexpWordCharacters'];
@@ -207,13 +211,14 @@ class ExpressionService
                     );
                     $pos = 2 * $cnt + (int) $record['SeFirstPos'];
                     $txt = '';
-                    if ($matches[1] != $textlc) {
-                        $txt = $splitEachChar ? $wis : $matches[1];
+                    $matchedTerm = $matches[1] ?? $textlc;
+                    if ($matchedTerm != $textlc) {
+                        $txt = $splitEachChar ? $wis : $matchedTerm;
                     }
                     if ($splitEachChar || $removeSpaces) {
                         $display = $wis;
                     } else {
-                        $display = $matches[1];
+                        $display = $matchedTerm;
                     }
                     $occurrences[] = [
                         "SeID" => (int) $record['SeID'],
@@ -296,9 +301,12 @@ class ExpressionService
                 // Legacy mode: return SQL text for external use
                 // Build the VALUES portion with escaped data
                 $sqlarr = [];
+                $dbConn = Globals::getDbConnection();
                 foreach ($occurrences as $occ) {
                     $txId = $occ["SeTxID"] ?? $occ["TxID"] ?? 0;
-                    $term = $occ["term"] === null ? 'NULL' : "'" . mysqli_real_escape_string(Globals::getDbConnection(), $occ["term"]) . "'";
+                    $term = $occ["term"] === null || $dbConn === null
+                        ? 'NULL'
+                        : "'" . mysqli_real_escape_string($dbConn, $occ["term"]) . "'";
                     $sqlarr[] = "($wid, $lid, $txId, {$occ["SeID"]}, {$occ["position"]}, $len, $term)";
                 }
                 return implode(',', $sqlarr);
@@ -331,13 +339,13 @@ class ExpressionService
             ->where('WoID', '=', $wid)
             ->getPrepared()[0] ?? null;
 
+        $woStatus = $record["WoStatus"] ?? 1;
         $attrs = [
-            "class" => "click mword {$showType}wsty TERM$hex word$wid status" .
-            $record["WoStatus"],
-            "data_trans" => $record["WoTranslation"],
-            "data_rom" => $record["WoRomanization"],
+            "class" => "click mword {$showType}wsty TERM$hex word$wid status" . $woStatus,
+            "data_trans" => $record["WoTranslation"] ?? '',
+            "data_rom" => $record["WoRomanization"] ?? '',
             "data_code" => $len,
-            "data_status" => $record["WoStatus"],
+            "data_status" => $woStatus,
             "data_wid" => $wid
         ];
 
@@ -373,13 +381,13 @@ class ExpressionService
             ->where('WoID', '=', $wid)
             ->getPrepared()[0] ?? null;
 
+        $woStatus = $record["WoStatus"] ?? 1;
         $attrs = [
-            "class" => "click mword {$showType}wsty TERM$hex word$wid status" .
-            $record["WoStatus"],
-            "data_trans" => $record["WoTranslation"],
-            "data_rom" => $record["WoRomanization"],
+            "class" => "click mword {$showType}wsty TERM$hex word$wid status" . $woStatus,
+            "data_trans" => $record["WoTranslation"] ?? '',
+            "data_rom" => $record["WoRomanization"] ?? '',
             "data_code" => $len,
-            "data_status" => $record["WoStatus"],
+            "data_status" => $woStatus,
             "data_wid" => $wid
         ];
 

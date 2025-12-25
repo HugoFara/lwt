@@ -35,8 +35,12 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+/** @var int $lang */
+/** @var int $status */
+
+$phpSelf = $_SERVER['PHP_SELF'] ?? '';
 ?>
-<form name="editword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"
+<form name="editword" class="validate" action="<?php echo $phpSelf; ?>" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />
 <input type="hidden" name="fromAnn" value="<?php echo $fromAnn; ?>" />
@@ -108,6 +112,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
    <tr>
        <td class="td1 right" colspan="2">
            <?php
+           /** @psalm-suppress PossiblyUndefinedVariable */
            if ($fromAnn !== '') {
                echo createDictLinksInEditWin2(
                    $lang,

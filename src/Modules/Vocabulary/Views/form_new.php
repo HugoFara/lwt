@@ -26,9 +26,12 @@ use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+/** @var int $lang */
+
+$phpSelf = $_SERVER['PHP_SELF'] ?? '';
 ?>
 
-<form name="newword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"
+<form name="newword" class="validate" action="<?php echo $phpSelf; ?>" method="post"
 data-lwt-clear-frame="true">
     <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />
     <input type="hidden" name="tid" value="<?php echo $textId; ?>" />

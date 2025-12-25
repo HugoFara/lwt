@@ -137,8 +137,8 @@ class VocabularyController
     public function hoverCreate(array $params): void
     {
         $text = InputValidator::getString('text');
-        $textId = InputValidator::getInt('tid', 0);
-        $status = InputValidator::getInt('status', 1);
+        $textId = InputValidator::getInt('tid', 0) ?? 0;
+        $status = InputValidator::getInt('status', 1) ?? 1;
         $targetLang = InputValidator::getString('tl');
         $sourceLang = InputValidator::getString('sl');
 
@@ -187,7 +187,7 @@ class VocabularyController
      */
     public function similarTerms(array $params): void
     {
-        $langId = InputValidator::getInt('lgid', 0);
+        $langId = InputValidator::getInt('lgid', 0) ?? 0;
         $term = InputValidator::getString('term');
 
         header('Content-Type: text/html; charset=utf-8');
@@ -235,7 +235,7 @@ class VocabularyController
      */
     public function edit(array $params): void
     {
-        $termId = InputValidator::getInt('wid', 0);
+        $termId = InputValidator::getInt('wid', 0) ?? 0;
 
         if ($termId === 0) {
             http_response_code(400);
@@ -279,7 +279,7 @@ class VocabularyController
      */
     public function show(array $params): void
     {
-        $termId = InputValidator::getInt('wid', 0);
+        $termId = InputValidator::getInt('wid', 0) ?? 0;
 
         if ($termId === 0) {
             http_response_code(400);
@@ -313,8 +313,8 @@ class VocabularyController
      */
     public function updateStatus(array $params): void
     {
-        $termId = InputValidator::getInt('wid', 0);
-        $status = InputValidator::getInt('status', 0);
+        $termId = InputValidator::getInt('wid', 0) ?? 0;
+        $status = InputValidator::getInt('status', 0) ?? 0;
 
         if ($termId === 0 || $status === 0) {
             http_response_code(400);
@@ -337,7 +337,7 @@ class VocabularyController
      */
     public function delete(array $params): void
     {
-        $termId = InputValidator::getInt('wid', 0);
+        $termId = InputValidator::getInt('wid', 0) ?? 0;
 
         if ($termId === 0) {
             http_response_code(400);
@@ -388,7 +388,7 @@ class VocabularyController
      */
     public function getTermJson(array $params): void
     {
-        $termId = InputValidator::getInt('wid', 0);
+        $termId = InputValidator::getInt('wid', 0) ?? 0;
 
         if ($termId === 0) {
             http_response_code(400);
@@ -426,9 +426,9 @@ class VocabularyController
      */
     public function createJson(array $params): void
     {
-        $langId = InputValidator::getInt('lgid', 0);
+        $langId = InputValidator::getInt('lgid', 0) ?? 0;
         $text = InputValidator::getString('text');
-        $status = InputValidator::getInt('status', 1);
+        $status = InputValidator::getInt('status', 1) ?? 1;
         $translation = InputValidator::getString('translation');
         $romanization = InputValidator::getString('romanization');
         $sentence = InputValidator::getString('sentence');
@@ -471,11 +471,11 @@ class VocabularyController
      */
     public function updateJson(array $params): void
     {
-        $termId = InputValidator::getInt('wid', 0);
+        $termId = InputValidator::getInt('wid', 0) ?? 0;
         $translation = InputValidator::getString('translation');
         $romanization = InputValidator::getString('romanization');
         $sentence = InputValidator::getString('sentence');
-        $status = InputValidator::getInt('status', 0);
+        $status = InputValidator::getInt('status', 0) ?? 0;
 
         if ($termId === 0) {
             http_response_code(400);

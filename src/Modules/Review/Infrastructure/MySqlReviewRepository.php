@@ -71,6 +71,9 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
                 LIMIT 1';
 
             $res = Connection::query($sql);
+            if (!$res instanceof \mysqli_result) {
+                continue;
+            }
             $record = mysqli_fetch_assoc($res);
             mysqli_free_result($res);
 
@@ -108,6 +111,9 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             LIMIT 1";
 
         $res = Connection::query($sql);
+        if (!$res instanceof \mysqli_result) {
+            return ['sentence' => null, 'found' => false];
+        }
         $record = mysqli_fetch_assoc($res);
         mysqli_free_result($res);
 
@@ -178,10 +184,12 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         $result = Connection::query($sql);
         $words = [];
 
-        while ($record = mysqli_fetch_assoc($result)) {
-            $words[] = TestWord::fromRecord($record);
+        if ($result instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($result)) {
+                $words[] = TestWord::fromRecord($record);
+            }
+            mysqli_free_result($result);
         }
-        mysqli_free_result($result);
 
         return $words;
     }

@@ -172,6 +172,11 @@ class TestController extends BaseController
         /** @psalm-suppress InvalidScalarArgument */
         $testsql = $this->reviewFacade->getTestSql($identifier[0], $identifier[1]);
 
+        if ($testsql === null) {
+            echo '<p>Sorry - Unable to generate test SQL</p>';
+            return;
+        }
+
         // Validate single language
         $validation = $this->reviewFacade->validateTestSelection($testsql);
         if (!$validation['valid']) {
@@ -202,10 +207,12 @@ class TestController extends BaseController
         $regexWord = $langSettings['regexWord'] ?? '';
         $rtl = $langSettings['rtl'] ?? false;
 
-        while ($word = mysqli_fetch_assoc($words)) {
-            include __DIR__ . '/../Views/table_test_row.php';
+        if ($words instanceof \mysqli_result) {
+            while ($word = mysqli_fetch_assoc($words)) {
+                include __DIR__ . '/../Views/table_test_row.php';
+            }
+            mysqli_free_result($words);
         }
-        mysqli_free_result($words);
 
         echo '</table>';
     }
@@ -276,6 +283,10 @@ class TestController extends BaseController
 
         /** @psalm-suppress InvalidScalarArgument */
         $testsql = $this->reviewFacade->getTestSql($identifier[0], $identifier[1]);
+        if ($testsql === null) {
+            $this->redirect('/text/edit');
+        }
+
         $testType = $isTableMode ? 1 : $this->reviewFacade->clampTestType((int) $testTypeParam);
         $wordMode = $this->reviewFacade->isWordMode($testType);
         $baseType = $this->reviewFacade->getBaseTestType($testType);
