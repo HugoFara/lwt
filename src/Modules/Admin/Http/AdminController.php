@@ -23,7 +23,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\TtsService;
 
 require_once __DIR__ . '/../../../backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
 
 /**
  * Controller for administrative functions.
