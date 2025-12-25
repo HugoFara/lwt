@@ -229,30 +229,30 @@ function registerRoutes(Router $router): void
 
     // ==================== ADMIN ROUTES (PROTECTED) ====================
 
-    // Backup & Restore
-    $router->registerWithMiddleware('/admin/backup', 'AdminController@backup', AUTH_MIDDLEWARE);
+    // Backup & Restore (Admin module)
+    $router->registerWithMiddleware('/admin/backup', 'Lwt\\Modules\\Admin\\Http\\AdminController@backup', AUTH_MIDDLEWARE);
 
-    // Database Wizard
-    $router->registerWithMiddleware('/admin/wizard', 'AdminController@wizard', AUTH_MIDDLEWARE);
+    // Database Wizard (Admin module)
+    $router->registerWithMiddleware('/admin/wizard', 'Lwt\\Modules\\Admin\\Http\\AdminController@wizard', AUTH_MIDDLEWARE);
 
-    // Statistics
-    $router->registerWithMiddleware('/admin/statistics', 'AdminController@statistics', AUTH_MIDDLEWARE);
+    // Statistics (Admin module)
+    $router->registerWithMiddleware('/admin/statistics', 'Lwt\\Modules\\Admin\\Http\\AdminController@statistics', AUTH_MIDDLEWARE);
 
-    // Install Demo
-    $router->registerWithMiddleware('/admin/install-demo', 'AdminController@installDemo', AUTH_MIDDLEWARE);
+    // Install Demo (Admin module)
+    $router->registerWithMiddleware('/admin/install-demo', 'Lwt\\Modules\\Admin\\Http\\AdminController@installDemo', AUTH_MIDDLEWARE);
 
-    // Settings
-    $router->registerWithMiddleware('/admin/settings', 'AdminController@settings', AUTH_MIDDLEWARE);
+    // Settings (Admin module)
+    $router->registerWithMiddleware('/admin/settings', 'Lwt\\Modules\\Admin\\Http\\AdminController@settings', AUTH_MIDDLEWARE);
 
     // Settings hover - deprecated, use /vocabulary/term-hover instead
     // @deprecated 3.0.0 Use /vocabulary/term-hover instead
-    $router->registerWithMiddleware('/admin/settings/hover', 'AdminController@settingsHover', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/admin/settings/hover', 'Lwt\\Modules\\Admin\\Http\\AdminController@settingsHover', AUTH_MIDDLEWARE);
 
-    // Server data
-    $router->registerWithMiddleware('/admin/server-data', 'AdminController@serverData', AUTH_MIDDLEWARE);
+    // Server data (Admin module)
+    $router->registerWithMiddleware('/admin/server-data', 'Lwt\\Modules\\Admin\\Http\\AdminController@serverData', AUTH_MIDDLEWARE);
 
-    // Save setting and redirect
-    $router->registerWithMiddleware('/admin/save-setting', 'AdminController@saveSetting', AUTH_MIDDLEWARE);
+    // Save setting and redirect (Admin module)
+    $router->registerWithMiddleware('/admin/save-setting', 'Lwt\\Modules\\Admin\\Http\\AdminController@saveSetting', AUTH_MIDDLEWARE);
 
     // ==================== AUTHENTICATION ROUTES (PUBLIC) ====================
 

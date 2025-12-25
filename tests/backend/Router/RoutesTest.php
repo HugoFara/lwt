@@ -280,13 +280,13 @@ class RoutesTest extends TestCase
     public static function adminRoutesProvider(): array
     {
         return [
-            'admin backup' => ['/admin/backup', 'AdminController@backup'],
-            'admin wizard' => ['/admin/wizard', 'AdminController@wizard'],
-            'admin statistics' => ['/admin/statistics', 'AdminController@statistics'],
-            'admin install-demo' => ['/admin/install-demo', 'AdminController@installDemo'],
-            'admin settings' => ['/admin/settings', 'AdminController@settings'],
-            'admin settings hover' => ['/admin/settings/hover', 'AdminController@settingsHover'],
-            'admin server-data' => ['/admin/server-data', 'AdminController@serverData'],
+            'admin backup' => ['/admin/backup', 'Lwt\\Modules\\Admin\\Http\\AdminController@backup'],
+            'admin wizard' => ['/admin/wizard', 'Lwt\\Modules\\Admin\\Http\\AdminController@wizard'],
+            'admin statistics' => ['/admin/statistics', 'Lwt\\Modules\\Admin\\Http\\AdminController@statistics'],
+            'admin install-demo' => ['/admin/install-demo', 'Lwt\\Modules\\Admin\\Http\\AdminController@installDemo'],
+            'admin settings' => ['/admin/settings', 'Lwt\\Modules\\Admin\\Http\\AdminController@settings'],
+            'admin settings hover' => ['/admin/settings/hover', 'Lwt\\Modules\\Admin\\Http\\AdminController@settingsHover'],
+            'admin server-data' => ['/admin/server-data', 'Lwt\\Modules\\Admin\\Http\\AdminController@serverData'],
         ];
     }
 

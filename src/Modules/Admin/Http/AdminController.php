@@ -2,6 +2,8 @@
 /**
  * Admin Controller
  *
+ * HTTP controller for administrative functions.
+ *
  * PHP version 8.1
  *
  * @category Lwt
@@ -14,10 +16,14 @@
 
 namespace Lwt\Modules\Admin\Http;
 
+use Lwt\Controllers\BaseController;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\TtsService;
+
+require_once __DIR__ . '/../../../backend/Controllers/BaseController.php';
+require_once __DIR__ . '/../../../backend/View/Helper/PageLayoutHelper.php';
 
 /**
  * Controller for administrative functions.
@@ -30,10 +36,18 @@ use Lwt\Services\TtsService;
  * - Install demo
  * - Server data
  *
- * @since 3.0.0
+ * @category Lwt
+ * @package  Lwt\Modules\Admin\Http
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
  */
-class AdminController
+class AdminController extends BaseController
 {
+    private AdminFacade $adminFacade;
+    private TtsService $ttsService;
+
     /**
      * View base path.
      */
@@ -42,280 +56,314 @@ class AdminController
     /**
      * Constructor.
      *
-     * @param AdminFacade $adminFacade Admin facade
-     * @param TtsService  $ttsService  TTS service (shared)
+     * @param AdminFacade|null $adminFacade Admin facade (optional for BC)
+     * @param TtsService|null  $ttsService  TTS service (optional for BC)
      */
     public function __construct(
-        private AdminFacade $adminFacade,
-        private TtsService $ttsService
+        ?AdminFacade $adminFacade = null,
+        ?TtsService $ttsService = null
     ) {
+        parent::__construct();
+        $this->adminFacade = $adminFacade ?? $this->createDefaultFacade();
+        $this->ttsService = $ttsService ?? new TtsService();
         $this->viewPath = __DIR__ . '/../Views/';
     }
 
     /**
-     * Get the AdminFacade instance.
+     * Create the default AdminFacade when not provided via DI.
      *
      * @return AdminFacade
      */
-    public function getFacade(): AdminFacade
+    private function createDefaultFacade(): AdminFacade
     {
-        return $this->adminFacade;
+        // Import required classes for fallback instantiation
+        require_once __DIR__ . '/../Domain/SettingsRepositoryInterface.php';
+        require_once __DIR__ . '/../Domain/BackupRepositoryInterface.php';
+        require_once __DIR__ . '/../Infrastructure/MySqlSettingsRepository.php';
+        require_once __DIR__ . '/../Infrastructure/MySqlBackupRepository.php';
+        require_once __DIR__ . '/../Application/AdminFacade.php';
+
+        $settingsRepo = new \Lwt\Modules\Admin\Infrastructure\MySqlSettingsRepository();
+        $backupRepo = new \Lwt\Modules\Admin\Infrastructure\MySqlBackupRepository();
+
+        return new AdminFacade($settingsRepo, $backupRepo);
     }
 
     /**
-     * Set custom view path.
+     * Backup and restore page.
      *
-     * @param string $path View path
+     * Handles:
+     * - restore=xxx: Restore from uploaded file
+     * - backup=xxx: Download backup
+     * - orig_backup=xxx: Download official format backup
+     * - empty=xxx: Empty the database
+     *
+     * @param array<string, string> $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function setViewPath(string $path): void
+    public function backup(array $params): void
     {
-        $this->viewPath = rtrim($path, '/') . '/';
-    }
-
-    // =========================================================================
-    // Backup Operations
-    // =========================================================================
-
-    /**
-     * Handle backup page operations and get view data.
-     *
-     * @param bool  $hasRestore     Has restore param
-     * @param bool  $hasBackup      Has backup param
-     * @param bool  $hasOrigBackup  Has orig_backup param
-     * @param bool  $hasEmpty       Has empty param
-     * @param array $files          $_FILES data
-     *
-     * @return array{message: string, prefinfo: string}
-     */
-    public function handleBackup(
-        bool $hasRestore,
-        bool $hasBackup,
-        bool $hasOrigBackup,
-        bool $hasEmpty,
-        array $files
-    ): array {
         $message = '';
 
-        if ($hasRestore) {
-            $message = $this->adminFacade->restoreFromUpload($files);
-        } elseif ($hasBackup) {
+        // Handle operations
+        if ($this->hasParam('restore')) {
+            $message = $this->adminFacade->restoreFromUpload($_FILES);
+        } elseif ($this->hasParam('backup')) {
             $this->adminFacade->downloadBackup();
             // downloadBackup exits, so we never reach here
-        } elseif ($hasOrigBackup) {
+        } elseif ($this->hasParam('orig_backup')) {
             $this->adminFacade->downloadOfficialBackup();
             // downloadOfficialBackup exits, so we never reach here
-        } elseif ($hasEmpty) {
+        } elseif ($this->hasParam('empty')) {
             $message = $this->adminFacade->emptyDatabase();
         }
 
-        return [
-            'message' => $message,
-            'prefinfo' => $this->adminFacade->getPrefixInfo(),
-        ];
+        // Get view data (used by included view)
+        $prefinfo = $this->adminFacade->getPrefixInfo();
+
+        // Render page
+        $this->render('Database Operations', true);
+        $this->message($message, true);
+
+        include $this->viewPath . 'backup.php';
+
+        $this->endRender();
     }
 
     /**
-     * Get database name for backup page.
+     * Database wizard page.
      *
-     * @return string Database name
+     * The wizard is a standalone page that can run without database connection.
+     * It uses its own self-contained HTML output.
+     *
+     * Handles:
+     * - op=Autocomplete: Auto-detect connection settings
+     * - op=Check: Test connection with provided settings
+     * - op=Change: Save new connection settings
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function getDatabaseName(): string
-    {
-        return $this->adminFacade->getDatabaseName();
-    }
-
-    // =========================================================================
-    // Wizard Operations
-    // =========================================================================
-
-    /**
-     * Handle wizard page operations.
-     *
-     * @param string $operation Operation (Autocomplete, Check, Change)
-     * @param array  $formData  Form data
-     *
-     * @return array{conn: mixed, errorMessage: string|null}
-     */
-    public function handleWizard(string $operation, array $formData): array
+    public function wizard(array $params): void
     {
         $conn = null;
         $errorMessage = null;
 
-        if ($operation === 'Autocomplete') {
-            $conn = $this->adminFacade->autocompleteConnection();
-        } elseif ($operation === 'Check') {
-            $conn = $this->adminFacade->createConnectionFromForm($formData);
-            $errorMessage = $this->adminFacade->testConnection($conn);
-        } elseif ($operation === 'Change') {
-            $conn = $this->adminFacade->createConnectionFromForm($formData);
-            $this->adminFacade->saveConnectionToEnv($conn);
-            // Controller should handle redirect
+        // Handle operations
+        $op = $this->param('op');
+        if ($op !== '') {
+            if ($op === "Autocomplete") {
+                $conn = $this->adminFacade->autocompleteConnection();
+            } elseif ($op === "Check") {
+                $formData = InputValidator::getMany([
+                    'hostname' => 'string',
+                    'login' => 'string',
+                    'password' => 'string',
+                    'dbname' => 'string',
+                    'tbpref' => 'string',
+                ]);
+                $conn = $this->adminFacade->createConnectionFromForm($formData);
+                $errorMessage = $this->adminFacade->testConnection($conn);
+            } elseif ($op === "Change") {
+                $formData = InputValidator::getMany([
+                    'hostname' => 'string',
+                    'login' => 'string',
+                    'password' => 'string',
+                    'dbname' => 'string',
+                    'tbpref' => 'string',
+                ]);
+                $conn = $this->adminFacade->createConnectionFromForm($formData);
+                $this->adminFacade->saveConnectionToEnv($conn);
+                // Redirect to home after saving
+                $this->redirect('/');
+                return;
+            }
         } elseif ($this->adminFacade->envFileExists()) {
             $conn = $this->adminFacade->loadConnection();
         } else {
             $conn = $this->adminFacade->createEmptyConnection();
         }
 
-        return [
-            'conn' => $conn,
-            'errorMessage' => $errorMessage,
-        ];
+        // The wizard view is standalone (includes its own HTML structure)
+        include $this->viewPath . 'wizard.php';
     }
 
     /**
-     * Check if .env file exists.
+     * Statistics page.
      *
-     * @return bool True if exists
-     */
-    public function envFileExists(): bool
-    {
-        return $this->adminFacade->envFileExists();
-    }
-
-    /**
-     * Get .env file path.
-     *
-     * @return string Path to .env
-     */
-    public function getEnvPath(): string
-    {
-        return $this->adminFacade->getEnvPath();
-    }
-
-    // =========================================================================
-    // Statistics Operations
-    // =========================================================================
-
-    /**
-     * Get statistics data for the page.
-     *
-     * @return array{intensityStats: array, frequencyStats: array}
-     */
-    public function getStatistics(): array
-    {
-        return [
-            'intensityStats' => $this->adminFacade->getIntensityStatistics(),
-            'frequencyStats' => $this->adminFacade->getFrequencyStatistics(),
-        ];
-    }
-
-    // =========================================================================
-    // Settings Operations
-    // =========================================================================
-
-    /**
-     * Handle settings page operations.
-     *
-     * @param string $operation Operation (Save or Reset)
-     *
-     * @return string Status message
-     */
-    public function handleSettingsOperation(string $operation): string
-    {
-        if ($operation === 'Save') {
-            return $this->adminFacade->saveAllSettings();
-        } elseif ($operation !== '') {
-            return $this->adminFacade->resetAllSettings();
-        }
-
-        return '';
-    }
-
-    /**
-     * Get settings form data.
-     *
-     * @return array Form data
-     */
-    public function getSettingsFormData(): array
-    {
-        return [
-            'settings' => $this->adminFacade->getAllSettings(),
-            'themes' => $this->adminFacade->getAvailableThemes(),
-            'languageOptions' => $this->ttsService->getLanguageOptions(LanguagePresets::getAll()),
-            'currentLanguageCode' => json_encode(
-                $this->ttsService->getCurrentLanguageCode(LanguagePresets::getAll())
-            ),
-        ];
-    }
-
-    /**
-     * Save a single setting and optionally clear session.
-     *
-     * @param string $key   Setting key
-     * @param string $value Setting value
+     * @param array<string, string> $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function saveSetting(string $key, string $value): void
+    public function statistics(array $params): void
     {
-        if ($key !== '') {
-            $this->adminFacade->saveAndClearSession($key, $value);
-        }
+        $intensityStats = $this->adminFacade->getIntensityStatistics();
+        $frequencyStats = $this->adminFacade->getFrequencyStatistics();
+
+        // Render page
+        $this->render('Statistics', true);
+
+        include $this->viewPath . 'statistics.php';
+
+        $this->endRender();
     }
 
-    // =========================================================================
-    // Demo Operations
-    // =========================================================================
-
     /**
-     * Handle install demo page operations.
+     * Settings page.
      *
-     * @param bool $hasInstall Has install param
+     * Handles:
+     * - op=Save: Save all settings
+     * - op=Reset: Reset to defaults
      *
-     * @return array{message: string, prefinfo: string, langcnt: int}
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function handleInstallDemo(bool $hasInstall): array
+    public function settings(array $params): void
     {
         $message = '';
 
-        if ($hasInstall) {
-            $message = $this->adminFacade->installDemo();
+        // Handle form submission
+        $op = $this->param('op');
+        if ($op !== '') {
+            if ($op === 'Save') {
+                $message = $this->adminFacade->saveAllSettings();
+            } else {
+                $message = $this->adminFacade->resetAllSettings();
+            }
         }
 
-        return [
-            'message' => $message,
-            'prefinfo' => $this->adminFacade->getPrefixInfo(),
-            'langcnt' => $this->adminFacade->getLanguageCount(),
-        ];
+        // Load current settings for the form (used by included view)
+        $settings = $this->adminFacade->getAllSettings();
+
+        // Get available themes for the dropdown (used by included view)
+        $themes = $this->adminFacade->getAvailableThemes();
+
+        // Get TTS data for the form (used by included view)
+        $languageOptions = $this->ttsService->getLanguageOptions(LanguagePresets::getAll());
+        $currentLanguageCode = json_encode(
+            $this->ttsService->getCurrentLanguageCode(LanguagePresets::getAll())
+        );
+
+        // Render page
+        $this->render('Settings/Preferences', true);
+        $this->message($message, true);
+
+        include $this->viewPath . 'settings_form.php';
+
+        $this->endRender();
     }
 
-    // =========================================================================
-    // Server Data Operations
-    // =========================================================================
-
     /**
-     * Get server data.
+     * Hover settings page - creates a word with status from text reading hover action.
      *
-     * @return array Server information
-     */
-    public function getServerData(): array
-    {
-        return $this->adminFacade->getServerData();
-    }
-
-    // =========================================================================
-    // View Rendering
-    // =========================================================================
-
-    /**
-     * Render a view.
+     * @deprecated 3.0.0 Use /vocabulary/term-hover instead
      *
-     * @param string $view View name (without .php)
-     * @param array  $data View data
+     * @param array<string, string> $params Route parameters
      *
      * @return void
      */
-    public function render(string $view, array $data = []): void
+    public function settingsHover(array $params): void
     {
-        $viewFile = $this->viewPath . $view . '.php';
+        // Redirect to the new Vocabulary module endpoint
+        $queryString = $_SERVER['QUERY_STRING'] ?? '';
+        $this->redirect('/vocabulary/term-hover' . ($queryString ? '?' . $queryString : ''));
+    }
 
-        if (!file_exists($viewFile)) {
-            throw new \RuntimeException("View not found: $view");
+    /**
+     * Install demo page.
+     *
+     * Handles:
+     * - install=xxx: Install the demo database
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    public function installDemo(array $params): void
+    {
+        $message = '';
+
+        // Handle install request
+        if ($this->hasParam('install')) {
+            $message = $this->adminFacade->installDemo();
         }
 
-        extract($data);
-        require $viewFile;
+        // Get view data (used by included view)
+        $prefinfo = $this->adminFacade->getPrefixInfo();
+        $langcnt = $this->adminFacade->getLanguageCount();
+
+        // Render page
+        $this->render('Install LWT Demo Database', true);
+        $this->message($message, true);
+
+        include $this->viewPath . 'install_demo.php';
+
+        $this->endRender();
+    }
+
+    /**
+     * Server data page.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    public function serverData(array $params): void
+    {
+        $data = $this->adminFacade->getServerData();
+
+        // Render page
+        $this->render("Server Data", true);
+
+        include $this->viewPath . 'server_data.php';
+
+        $this->endRender();
+    }
+
+    /**
+     * Save a setting and redirect to a URL.
+     *
+     * This endpoint replaces the legacy save_setting_redirect.php file.
+     *
+     * GET parameters:
+     * - k: Setting key
+     * - v: Setting value
+     * - u: Redirect URL (optional)
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function saveSetting(array $params): void
+    {
+        $key = $this->param('k');
+        $value = $this->param('v');
+        $url = $this->param('u');
+
+        // Save the setting if key is provided
+        if ($key !== '') {
+            $this->adminFacade->saveAndClearSession($key, $value);
+        }
+
+        // Redirect if URL is provided
+        if ($url !== '') {
+            header("Location: " . $url);
+            exit();
+        }
     }
 }

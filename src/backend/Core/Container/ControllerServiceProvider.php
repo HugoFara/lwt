@@ -14,7 +14,6 @@
 
 namespace Lwt\Core\Container;
 
-use Lwt\Controllers\AdminController;
 use Lwt\Controllers\ApiController;
 use Lwt\Controllers\AuthController;
 use Lwt\Controllers\FeedsController;
@@ -27,22 +26,16 @@ use Lwt\Controllers\TranslationController;
 use Lwt\Controllers\WordController;
 use Lwt\Controllers\WordPressController;
 use Lwt\Services\AuthService;
-use Lwt\Services\BackupService;
-use Lwt\Services\DemoService;
 use Lwt\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Services\HomeService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\PasswordService;
-use Lwt\Services\ServerDataService;
-use Lwt\Services\SettingsService;
-use Lwt\Services\StatisticsService;
 use Lwt\Services\TestService;
 use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextPrintService;
 use Lwt\Modules\Text\Application\TextFacade;
-use Lwt\Services\ThemeService;
 use Lwt\Services\TranslationService;
 use Lwt\Services\TtsService;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
@@ -87,11 +80,6 @@ class ControllerServiceProvider implements ServiceProviderInterface
             return new LanguageController(
                 $c->get(LanguageFacade::class)
             );
-        });
-
-        // Also bind the old namespace for backward compatibility
-        $container->bind(\Lwt\Controllers\LanguageController::class, function (Container $c) {
-            return $c->get(LanguageController::class);
         });
 
         $container->bind(TestController::class, function (Container $c) {
@@ -154,18 +142,7 @@ class ControllerServiceProvider implements ServiceProviderInterface
             );
         });
 
-        $container->bind(AdminController::class, function (Container $c) {
-            return new AdminController(
-                $c->get(BackupService::class),
-                $c->get(StatisticsService::class),
-                $c->get(SettingsService::class),
-                $c->get(TtsService::class),
-                $c->get(WordService::class),
-                $c->get(DemoService::class),
-                $c->get(ServerDataService::class),
-                $c->get(ThemeService::class)
-            );
-        });
+        // NOTE: AdminController is now in Modules/Admin and registered via AdminServiceProvider
     }
 
     /**

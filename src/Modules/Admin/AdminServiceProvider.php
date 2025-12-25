@@ -69,8 +69,8 @@ class AdminServiceProvider implements ServiceProviderInterface
             );
         });
 
-        // Register Controller
-        $container->singleton(AdminController::class, function (Container $c) {
+        // Register Controller (optional dependencies for BC)
+        $container->bind(AdminController::class, function (Container $c) {
             return new AdminController(
                 $c->get(AdminFacade::class),
                 $c->get(TtsService::class)
