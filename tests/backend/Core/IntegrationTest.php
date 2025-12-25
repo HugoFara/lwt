@@ -23,6 +23,9 @@ use Lwt\Services\TextStatisticsService;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Admin\Application\AdminFacade;
+use Lwt\Modules\Admin\Infrastructure\MySqlSettingsRepository;
+use Lwt\Modules\Admin\Infrastructure\MySqlBackupRepository;
 use PHPUnit\Framework\TestCase;
 
 
@@ -538,8 +541,10 @@ class IntegrationTest extends TestCase
     public function testGetThemesSelectOptions(): void
     {
         $current_theme = Settings::getWithDefault('set-theme-dir');
-        $themeService = new \Lwt\Services\ThemeService();
-        $themes = $themeService->getAvailableThemes();
+        $settingsRepo = new MySqlSettingsRepository();
+        $backupRepo = new MySqlBackupRepository();
+        $adminFacade = new AdminFacade($settingsRepo, $backupRepo);
+        $themes = $adminFacade->getAvailableThemes();
         $options = SelectOptionsBuilder::forThemes($themes, $current_theme);
         $this->assertStringContainsString('<option', $options);
     }

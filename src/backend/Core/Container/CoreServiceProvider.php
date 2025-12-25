@@ -15,22 +15,16 @@
 namespace Lwt\Core\Container;
 
 use Lwt\Services\AuthService;
-use Lwt\Services\BackupService;
-use Lwt\Services\DemoService;
 use Lwt\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Services\HomeService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\PasswordService;
 use Lwt\Services\SentenceService;
-use Lwt\Services\ServerDataService;
-use Lwt\Services\SettingsService;
-use Lwt\Services\StatisticsService;
 use Lwt\Services\TestService;
 use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextParsingService;
 use Lwt\Services\TextPrintService;
-use Lwt\Services\ThemeService;
 use Lwt\Services\TranslationService;
 use Lwt\Services\TtsService;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
@@ -108,29 +102,9 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new WordPressService();
         });
 
-        $container->singleton(BackupService::class, function (Container $_c) {
-            return new BackupService();
-        });
-
-        $container->singleton(StatisticsService::class, function (Container $_c) {
-            return new StatisticsService();
-        });
-
-        $container->singleton(SettingsService::class, function (Container $_c) {
-            return new SettingsService();
-        });
-
-        $container->singleton(DemoService::class, function (Container $_c) {
-            return new DemoService();
-        });
-
-        $container->singleton(ServerDataService::class, function (Container $_c) {
-            return new ServerDataService();
-        });
-
-        $container->singleton(ThemeService::class, function (Container $_c) {
-            return new ThemeService();
-        });
+        // NOTE: Admin services (BackupService, StatisticsService, SettingsService,
+        // DemoService, ServerDataService, ThemeService) are now in Modules/Admin
+        // and registered via AdminServiceProvider
 
         $container->singleton(PasswordService::class, function (Container $_c) {
             return new PasswordService();

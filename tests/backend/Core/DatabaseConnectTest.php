@@ -18,7 +18,7 @@ use Lwt\Database\Migrations;
 use Lwt\Database\Settings;
 use Lwt\Database\TextParsing;
 use Lwt\Database\Validation;
-use Lwt\Services\SettingsService;
+use Lwt\Modules\Admin\Domain\SettingDefinitions;
 use Lwt\Services\TextParsingService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use PHPUnit\Framework\TestCase;
@@ -1368,11 +1368,11 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test SettingsService::getDefinitions() function (formerly get_setting_data)
+     * Test SettingDefinitions::getAll() function (formerly get_setting_data)
      */
     public function testGetSettingData(): void
     {
-        $settings = SettingsService::getDefinitions();
+        $settings = SettingDefinitions::getAll();
         $this->assertIsArray($settings);
 
         // Should contain common settings

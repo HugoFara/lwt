@@ -9,7 +9,9 @@ use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 use Lwt\Services\HomeService;
-use Lwt\Services\ServerDataService;
+use Lwt\Modules\Admin\Application\AdminFacade;
+use Lwt\Modules\Admin\Infrastructure\MySqlSettingsRepository;
+use Lwt\Modules\Admin\Infrastructure\MySqlBackupRepository;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -28,7 +30,7 @@ class HomeServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
     private HomeService $service;
-    private ServerDataService $serverDataService;
+    private AdminFacade $adminFacade;
 
     public static function setUpBeforeClass(): void
     {
@@ -51,7 +53,9 @@ class HomeServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->service = new HomeService();
-        $this->serverDataService = new ServerDataService();
+        $settingsRepo = new MySqlSettingsRepository();
+        $backupRepo = new MySqlBackupRepository();
+        $this->adminFacade = new AdminFacade($settingsRepo, $backupRepo);
     }
 
     // ===== getCurrentTextInfo() tests =====
@@ -324,7 +328,7 @@ class HomeServiceTest extends TestCase
         $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
         $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-        $result = $this->serverDataService->getServerData();
+        $result = $this->adminFacade->getServerData();
 
         $this->assertIsArray($result);
     }
@@ -339,7 +343,7 @@ class HomeServiceTest extends TestCase
         $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
         $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-        $result = $this->serverDataService->getServerData();
+        $result = $this->adminFacade->getServerData();
 
         $expectedKeys = ['db_name', 'db_size', 'server_soft', 'apache', 'php', 'mysql', 'lwt_version', 'server_location'];
         foreach ($expectedKeys as $key) {
@@ -357,7 +361,7 @@ class HomeServiceTest extends TestCase
         $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
         $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-        $result = $this->serverDataService->getServerData();
+        $result = $this->adminFacade->getServerData();
 
         $this->assertIsFloat($result['db_size']);
     }
@@ -372,7 +376,7 @@ class HomeServiceTest extends TestCase
         $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
         $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-        $result = $this->serverDataService->getServerData();
+        $result = $this->adminFacade->getServerData();
 
         $this->assertIsString($result['server_soft']);
     }
@@ -387,7 +391,7 @@ class HomeServiceTest extends TestCase
         $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
         $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-        $result = $this->serverDataService->getServerData();
+        $result = $this->adminFacade->getServerData();
 
         $this->assertIsString($result['mysql']);
     }

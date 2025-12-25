@@ -29,10 +29,14 @@ use Lwt\Modules\Vocabulary\VocabularyServiceProvider;
 use Lwt\Modules\Tags\TagsServiceProvider;
 use Lwt\Modules\Review\ReviewServiceProvider;
 use Lwt\Modules\Admin\AdminServiceProvider;
+use Lwt\Modules\Admin\Application\DTO\DatabaseConnectionDTO;
+use Lwt\Modules\Admin\Application\UseCases\Wizard\AutocompleteConnection;
+use Lwt\Modules\Admin\Application\UseCases\Wizard\LoadConnection;
+use Lwt\Modules\Admin\Application\UseCases\Wizard\SaveConnection;
+use Lwt\Modules\Admin\Application\UseCases\Wizard\TestConnection;
 use Lwt\Core\Exception\ExceptionHandler;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Router\Router;
-use Lwt\Services\DatabaseWizardService;
 
 /**
  * Main application class that bootstraps and runs LWT.
@@ -309,40 +313,43 @@ class Application
     /**
      * Run the database wizard without requiring database connection.
      *
+     * Uses the Admin module's wizard use cases which work without database.
+     *
      * @psalm-suppress UnusedVariable Variables used by included wizard.php view
      *
      * @return void
      */
     private function runDatabaseWizard(): void
     {
-        require_once $this->basePath . '/src/backend/Services/DatabaseWizardService.php';
-        $wizardService = new DatabaseWizardService();
-
+        $loadConnection = new LoadConnection();
         $conn = null;
         $errorMessage = null;
 
         $op = InputValidator::getString('op');
         if ($op != '') {
             if ($op == "Autocomplete") {
-                $conn = $wizardService->autocompleteConnection();
+                $autocomplete = new AutocompleteConnection();
+                $conn = $autocomplete->execute();
             } elseif ($op == "Check") {
                 $formData = $this->getWizardFormData();
-                $conn = $wizardService->createConnectionFromForm($formData);
-                $errorMessage = $wizardService->testConnection($conn);
+                $conn = DatabaseConnectionDTO::fromFormData($formData);
+                $testConnection = new TestConnection();
+                $errorMessage = $testConnection->execute($conn);
             } elseif ($op == "Change") {
                 $formData = $this->getWizardFormData();
-                $conn = $wizardService->createConnectionFromForm($formData);
-                $wizardService->saveConnection($conn);
+                $conn = DatabaseConnectionDTO::fromFormData($formData);
+                $saveConnection = new SaveConnection();
+                $saveConnection->execute($conn);
                 header("Location: /");
                 exit;
             }
-        } elseif ($wizardService->envFileExists()) {
-            $conn = $wizardService->loadConnection();
+        } elseif ($loadConnection->envExists()) {
+            $conn = $loadConnection->execute();
         } else {
-            $conn = $wizardService->createEmptyConnection();
+            $conn = new DatabaseConnectionDTO();
         }
 
-        include $this->basePath . '/src/backend/Views/Admin/wizard.php';
+        include $this->basePath . '/src/Modules/Admin/Views/wizard.php';
     }
 
     /**

@@ -15,12 +15,10 @@
 
 namespace Lwt\Database;
 
-require_once __DIR__ . '/../../Services/SettingsService.php';
-
 use Lwt\Core\Globals;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\QueryBuilder;
-use Lwt\Services\SettingsService;
+use Lwt\Modules\Admin\Domain\SettingDefinitions;
 
 /**
  * Application settings management.
@@ -86,7 +84,7 @@ class Settings
      */
     public static function getWithDefault(string $key): string
     {
-        $dft = SettingsService::getDefinitions();
+        $dft = SettingDefinitions::getAll();
         $val = (string) QueryBuilder::table('settings')
             ->where('StKey', '=', $key)
             ->valuePrepared('StValue');
@@ -111,7 +109,7 @@ class Settings
      */
     public static function save(string $k, mixed $v): string
     {
-        $dft = SettingsService::getDefinitions();
+        $dft = SettingDefinitions::getAll();
         if (!isset($v)) {
             return 'Value is not set!';
         }
