@@ -17,6 +17,10 @@ require_once __DIR__ . '/../../../Services/WordService.php';
  * Handler for term/word-related API operations.
  *
  * Extracted from api_v1.php lines 27-258.
+ *
+ * @deprecated 3.0.0 Use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler instead.
+ *                   This class is no longer used by ApiV1.php and will be removed
+ *                   in a future version.
  */
 class TermHandler
 {

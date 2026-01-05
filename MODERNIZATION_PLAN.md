@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-05 (API handler consolidation - 4 of 5 duplicate handlers removed)
+**Last Updated:** 2026-01-05 (API handler consolidation - 5 of 5 duplicate handlers migrated)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1550,7 +1550,7 @@ The User module now has the standard modular structure:
 
 ### 5.2 Duplicate API Handler Pattern
 
-**Status:** MOSTLY COMPLETE (2026-01-05)
+**Status:** ✅ COMPLETE (2026-01-05)
 
 API handlers have been consolidated to module-based handlers:
 
@@ -1558,12 +1558,11 @@ API handlers have been consolidated to module-based handlers:
 |---------|-----------------|----------------|------------|
 | Feed | ~~`FeedHandler`~~ | `FeedApiHandler` | [x] CONSOLIDATED - FeedHandler removed |
 | Review | ~~`ReviewHandler`~~ | `ReviewApiHandler` | [x] CONSOLIDATED - ReviewHandler removed |
-| Terms | `TermHandler` | `VocabularyApiHandler` | [ ] DEFERRED - VocabularyApiHandler incomplete |
+| Terms | ~~`TermHandler`~~ | `VocabularyApiHandler` | [x] CONSOLIDATED (2026-01-05) - ApiV1 now uses VocabularyApiHandler |
 | Settings | ~~`SettingsHandler`~~ | `AdminApiHandler` | [x] CONSOLIDATED - SettingsHandler removed |
 | Statistics | ~~`StatisticsHandler`~~ | `AdminApiHandler` | [x] CONSOLIDATED - merged into AdminApiHandler |
 
-**Remaining Work:**
-- [ ] Migrate TermHandler functionality to VocabularyApiHandler (1690 lines, 20+ format* methods)
+**Completed:** All 5 API handlers migrated to module-based handlers.
 
 ### 5.3 Test Coverage Gaps
 
@@ -1652,12 +1651,12 @@ Mixed naming conventions detected:
 
 - [x] Fix all Psalm level 3 errors (2026-01-05)
 - [x] Complete User module (2026-01-05)
-- [~] Remove duplicate API handlers (use module handlers only) - **4 of 5 done** (2026-01-05)
+- [x] Remove duplicate API handlers (use module handlers only) - **5 of 5 done** (2026-01-05)
   - [x] ReviewHandler → ReviewApiHandler
   - [x] FeedHandler → FeedApiHandler
   - [x] SettingsHandler → AdminApiHandler
   - [x] StatisticsHandler → AdminApiHandler
-  - [ ] TermHandler → VocabularyApiHandler (deferred - VocabularyApiHandler incomplete)
+  - [x] TermHandler → VocabularyApiHandler (2026-01-05)
 - [ ] Migrate remaining controllers to modules OR create missing modules
 - [ ] Add tests for module facades (at least 80% coverage)
 - [ ] Remove deprecated routes and methods

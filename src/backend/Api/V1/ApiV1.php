@@ -44,7 +44,7 @@ use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Admin\Http\AdminApiHandler;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
 use Lwt\Modules\Tags\Http\TagApiHandler;
-use Lwt\Api\V1\Handlers\TermHandler;
+use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler;
 use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
@@ -67,7 +67,7 @@ class ApiV1
     private AdminApiHandler $adminHandler;
     private ReviewApiHandler $reviewHandler;
     private TagApiHandler $tagHandler;
-    private TermHandler $termHandler;
+    private VocabularyApiHandler $termHandler;
     private TextApiHandler $textHandler;
 
     /**
@@ -97,7 +97,7 @@ class ApiV1
         );
         $this->reviewHandler = new ReviewApiHandler();
         $this->tagHandler = new TagApiHandler();
-        $this->termHandler = new TermHandler();
+        $this->termHandler = new VocabularyApiHandler();
         $this->textHandler = new TextApiHandler();
     }
 
