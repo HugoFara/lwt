@@ -32,6 +32,17 @@ namespace Lwt\Views\Text;
 use Lwt\Services\AnnotationService;
 
 // Build variable array for JavaScript - will be merged into LWT_DATA by TypeScript
+// Prepare delimiter with escaped regex characters
+$delimiterEscaped = str_replace(
+    ['\\',']','-','^'],
+    ['\\\\','\\]','\\-','\\^'],
+    $termDelimiter
+);
+$delimiterStr = is_string($delimiterEscaped) ? $delimiterEscaped : '';
+
+// Get annotations JSON
+$annotationsJson = (new AnnotationService())->annotationToJson($annotatedText);
+
 $varArray = [
     'LWT_DATA' => [
         'language' => [
@@ -39,22 +50,14 @@ $varArray = [
             'dict_link1'      => $dictLink1,
             'dict_link2'      => $dictLink2,
             'translator_link' => $translatorLink,
-            'delimiter'       => htmlspecialchars(
-                str_replace(
-                    ['\\',']','-','^'],
-                    ['\\\\','\\]','\\-','\\^'],
-                    $termDelimiter
-                ) ?? '',
-                ENT_QUOTES,
-                'UTF-8'
-            ),
+            'delimiter'       => htmlspecialchars($delimiterStr, ENT_QUOTES, 'UTF-8'),
             'word_parsing'    => $regexpWordChars,
             'rtl'             => $rtlScript
         ],
         'text' => [
             'id'               => $textId,
             'reading_position' => $textPosition,
-            'annotations'      => json_decode((new AnnotationService())->annotationToJson($annotatedText))
+            'annotations'      => $annotationsJson !== false ? json_decode($annotationsJson) : null
         ],
         'settings' => [
             'hts'                => $hts,

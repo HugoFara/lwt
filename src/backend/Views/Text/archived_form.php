@@ -15,7 +15,7 @@
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  *
- * @psalm-suppress UndefinedVariable - Variables are set by the including controller
+ * @psalm-suppress UndefinedVariable, PossiblyUndefinedVariable - Variables are set by the including controller
  */
 
 namespace Lwt\Views\Text;
@@ -26,10 +26,11 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 /** @var int $textId */
 /** @var array $record */
 
+$phpSelf = $_SERVER['PHP_SELF'] ?? '';
 ?>
 <h2 class="title is-4">Edit Archived Text</h2>
 
-<form class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>#rec<?php echo $textId; ?>" method="post">
+<form class="validate" action="<?php echo $phpSelf; ?>#rec<?php echo $textId; ?>" method="post">
     <input type="hidden" name="AtID" value="<?php echo $textId; ?>" />
 
     <div class="box">
@@ -168,7 +169,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
             <div class="field-body">
                 <div class="field">
                     <div class="control">
-                        <?php echo getArchivedTextTags($textId); ?>
+                        <?php
+                        /** @psalm-suppress PossiblyUndefinedVariable */
+                        echo getArchivedTextTags($textId);
+                        ?>
                     </div>
                 </div>
             </div>

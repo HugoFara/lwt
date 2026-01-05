@@ -162,10 +162,10 @@ class WordController extends BaseController
             $this->handleEditOperation();
         } else {
             $wid = ($this->hasParam("wid") && is_numeric($this->param('wid')))
-                ? $this->paramInt('wid', -1)
+                ? ($this->paramInt('wid', -1) ?? -1)
                 : -1;
-            $textId = $this->paramInt("tid", 0);
-            $ord = $this->paramInt("ord", 0);
+            $textId = $this->paramInt("tid", 0) ?? 0;
+            $ord = $this->paramInt("ord", 0) ?? 0;
             $this->displayEditForm($wid, $textId, $ord, $fromAnn);
         }
 
@@ -879,10 +879,12 @@ class WordController extends BaseController
             $sql = $listService->getTestWordIdsSql('', $textId, $whLang, $whStat, $whQuery, $whTag);
             $idList = [];
             $res = \Lwt\Shared\Infrastructure\Database\Connection::query($sql);
-            while ($record = mysqli_fetch_assoc($res)) {
-                $idList[] = $record['WoID'];
+            if ($res instanceof \mysqli_result) {
+                while ($record = mysqli_fetch_assoc($res)) {
+                    $idList[] = $record['WoID'];
+                }
+                mysqli_free_result($res);
             }
-            mysqli_free_result($res);
             $_SESSION['testsql'] = "(" . implode(",", $idList) . ")";
             header("Location: /test?selection=2");
             return null;
@@ -1064,7 +1066,7 @@ class WordController extends BaseController
 
         // Get data for filter dropdowns
         $languages = $this->languageService->getLanguagesForSelect();
-        $langId = $currentlang !== '' ? (int)$currentlang : null;
+        $langId = $currentlang !== '' ? (int)$currentlang : 0;
         $texts = $this->textService->getTextsForSelect($langId);
 
         // Include filter view
@@ -1087,10 +1089,12 @@ class WordController extends BaseController
         $res = $listService->getWordsList($filters, $currentsort, $currentpage, $maxperpage);
 
         $words = [];
-        while ($record = mysqli_fetch_assoc($res)) {
-            $words[] = $record;
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $words[] = $record;
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         // Include table view
         include __DIR__ . '/../../Modules/Vocabulary/Views/list_table.php';
@@ -1205,8 +1209,8 @@ class WordController extends BaseController
      */
     private function displayMultiWordForm(): void
     {
-        $tid = $this->paramInt('tid', 0);
-        $ord = $this->paramInt('ord', 0);
+        $tid = $this->paramInt('tid', 0) ?? 0;
+        $ord = $this->paramInt('ord', 0) ?? 0;
         $strWid = $this->param('wid');
 
         // Determine if we're editing an existing word or creating new
@@ -1225,7 +1229,7 @@ class WordController extends BaseController
         if ($strWid === null) {
             // New multi-word
             $txtParam = $this->param('txt');
-            $len = $this->paramInt('len', 0);
+            $len = $this->paramInt('len', 0) ?? 0;
             PageLayoutHelper::renderPageStartNobody("New Term: " . $txtParam);
             $this->displayNewMultiWordForm($txtParam, $tid, $ord, $len);
         } else {
@@ -1269,7 +1273,7 @@ class WordController extends BaseController
         }
 
         $scrdir = $this->languageService->getScriptDirectionTag((int) $lgid);
-        $seid = $this->wordService->getSentenceIdAtPosition($tid, $ord);
+        $seid = $this->wordService->getSentenceIdAtPosition($tid, $ord) ?? 0;
         $sent = $this->sentenceService->formatSentence(
             $seid,
             $textlc,
@@ -1315,7 +1319,7 @@ class WordController extends BaseController
 
         $sentence = $wordData['sentence'];
         if ($sentence == '') {
-            $seid = $this->wordService->getSentenceIdAtPosition($tid, $ord);
+            $seid = $this->wordService->getSentenceIdAtPosition($tid, $ord) ?? 0;
             $sent = $this->sentenceService->formatSentence(
                 $seid,
                 $textlc,
@@ -1478,8 +1482,8 @@ class WordController extends BaseController
             }
         } else {
             // Display the new word form
-            $lang = $this->paramInt('lang', 0);
-            $textId = $this->paramInt('text', 0);
+            $lang = $this->paramInt('lang', 0) ?? 0;
+            $textId = $this->paramInt('text', 0) ?? 0;
             $scrdir = $this->languageService->getScriptDirectionTag($lang);
 
             $langData = $this->wordService->getLanguageData($lang);

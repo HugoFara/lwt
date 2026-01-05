@@ -105,7 +105,8 @@ class WordUploadService
         // Remove duplicates and keep unique
         $columns = array_unique($columns);
 
-        $max = max(array_keys($columns));
+        $keys = array_keys($columns);
+        $max = count($keys) > 0 ? max($keys) : 0;
         for ($j = 1; $j <= $max; $j++) {
             if (!isset($columns[$j])) {
                 $col[$j] = '@dummy';
@@ -305,6 +306,9 @@ class WordUploadService
         int $status,
         bool $ignoreFirst
     ): void {
+        if ($delimiter === '') {
+            return;
+        }
         $handle = fopen($fileName, 'r');
         if ($handle === false) {
             return;
@@ -576,6 +580,9 @@ class WordUploadService
         string $fileName,
         bool $ignoreFirst
     ): void {
+        if ($delimiter === '') {
+            return;
+        }
         $handle = fopen($fileName, 'r');
         if ($handle === false) {
             return;
@@ -1014,6 +1021,9 @@ class WordUploadService
             $placeholders = [];
             $i = 0;
             $realDelimiter = $this->getDelimiter($tabType);
+            if ($realDelimiter === '') {
+                return;
+            }
 
             foreach (explode(PHP_EOL, $dataText) as $line) {
                 if ($i++ == 0 && $ignoreFirst) {

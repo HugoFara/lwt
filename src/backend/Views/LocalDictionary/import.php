@@ -24,7 +24,8 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 // Error handling
-$error = $_GET['error'] ?? '';
+$errorRaw = $_GET['error'] ?? '';
+$error = is_string($errorRaw) ? $errorRaw : '';
 if (!empty($error)):
 ?>
 <div class="notification is-danger is-light mb-4">

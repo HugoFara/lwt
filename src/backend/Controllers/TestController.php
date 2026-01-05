@@ -169,6 +169,11 @@ class TestController extends BaseController
         /** @psalm-suppress InvalidScalarArgument - $identifier[1] type depends on $identifier[0] */
         $testsql = $this->testService->getTestSql($identifier[0], $identifier[1]);
 
+        if ($testsql === null) {
+            ErrorHandler::die("Invalid test selection");
+            return;
+        }
+
         // Validate single language
         $validation = $this->testService->validateTestSelection($testsql);
         if (!$validation['valid']) {
@@ -199,10 +204,12 @@ class TestController extends BaseController
         $regexWord = $langSettings['regexWord'] ?? '';
         $rtl = $langSettings['rtl'] ?? false;
 
-        while ($word = mysqli_fetch_assoc($words)) {
-            include __DIR__ . '/../Views/Test/table_test_row.php';
+        if ($words instanceof \mysqli_result) {
+            while ($word = mysqli_fetch_assoc($words)) {
+                include __DIR__ . '/../Views/Test/table_test_row.php';
+            }
+            mysqli_free_result($words);
         }
-        mysqli_free_result($words);
 
         echo '</table>';
     }
@@ -273,6 +280,14 @@ class TestController extends BaseController
 
         /** @psalm-suppress InvalidScalarArgument - $identifier[1] type depends on $identifier[0] */
         $testsql = $this->testService->getTestSql($identifier[0], $identifier[1]);
+
+        if ($testsql === null) {
+            PageLayoutHelper::renderPageStartNobody('Test', 'full-width');
+            include __DIR__ . '/../Views/Test/no_terms.php';
+            PageLayoutHelper::renderPageEnd();
+            return;
+        }
+
         $testType = $isTableMode ? 1 : $this->testService->clampTestType((int) $testTypeParam);
         $wordMode = $this->testService->isWordMode($testType);
         $baseType = $this->testService->getBaseTestType($testType);

@@ -397,6 +397,9 @@ class Router
      *
      * @return string Regex pattern
      */
+    /**
+     * @return non-empty-string
+     */
     private function convertPatternToRegex(string $pattern): string
     {
         // Escape slashes
@@ -548,7 +551,9 @@ class Router
     {
         // Check if it's a controller@method format
         if (str_contains($handler, '@')) {
-            list($controller, $method) = explode('@', $handler, 2);
+            $parts = explode('@', $handler, 2);
+            $controller = $parts[0];
+            $method = $parts[1] ?? '';
             $this->executeController($controller, $method, $params);
         } else {
             // It's a file path - include it

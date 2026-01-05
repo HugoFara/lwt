@@ -140,7 +140,7 @@ class ReviewHandler
      *                      type: int
      *                      }
      *
-     * @return array{word_id: int|string, solution?: string, word_text: string, group: string}
+     * @return array{word_id?: int|string, solution?: string, word_text?: string, group?: string, error?: string}
      */
     public function wordTestAjax(array $params): array
     {
@@ -148,6 +148,9 @@ class ReviewHandler
             $params['test_key'],
             $this->parseSelection($params['test_key'], $params['selection'])
         );
+        if ($testSql === null) {
+            return ['error' => 'Invalid test selection'];
+        }
         return $this->getWordTestData(
             $testSql,
             filter_var($params['word_mode'], FILTER_VALIDATE_BOOLEAN),
@@ -169,7 +172,7 @@ class ReviewHandler
             $this->parseSelection($params['test_key'], $params['selection'])
         );
         return [
-            "count" => $this->testService->getTomorrowTestCount($testSql)
+            "count" => $testSql !== null ? $this->testService->getTomorrowTestCount($testSql) : 0
         ];
     }
 
@@ -203,7 +206,7 @@ class ReviewHandler
      *
      * @param array $params Request parameters
      *
-     * @return array{word_id: int|string, solution?: string, word_text: string, group: string}
+     * @return array{word_id?: int|string, solution?: string, word_text?: string, group?: string, error?: string}
      */
     public function formatNextWord(array $params): array
     {
@@ -387,6 +390,10 @@ class ReviewHandler
         $wordMode = $this->testService->isWordMode($testType);
         $baseType = $this->testService->getBaseTestType($testType);
 
+        if ($testsql === null) {
+            return ['error' => 'Invalid test selection'];
+        }
+
         // Get language settings
         $langIdFromSql = $this->testService->getLanguageIdFromTestSql($testsql);
         if ($langIdFromSql === null) {
@@ -459,6 +466,10 @@ class ReviewHandler
         $parsedSelection = $this->parseSelection($testKey, $selection);
         $testsql = $this->testService->getTestSql($testKey, $parsedSelection);
 
+        if ($testsql === null) {
+            return ['error' => 'Invalid test selection'];
+        }
+
         // Validate single language
         $validation = $this->testService->validateTestSelection($testsql);
         if (!$validation['valid']) {
@@ -485,35 +496,37 @@ class ReviewHandler
         $wordsResult = $this->testService->getTableTestWords($testsql);
         $words = [];
 
-        while ($word = mysqli_fetch_assoc($wordsResult)) {
-            // Format sentence with highlighted word
-            $sent = htmlspecialchars(
-                ExportService::replaceTabNewline($word['WoSentence'] ?? ''),
-                ENT_QUOTES,
-                'UTF-8'
-            );
-            $sentenceHtml = str_replace(
-                "{",
-                ' <b>[',
-                str_replace(
-                    "}",
-                    ']</b> ',
-                    ExportService::maskTermInSentence($sent, $regexWord)
-                )
-            );
+        if ($wordsResult instanceof \mysqli_result) {
+            while ($word = mysqli_fetch_assoc($wordsResult)) {
+                // Format sentence with highlighted word
+                $sent = htmlspecialchars(
+                    ExportService::replaceTabNewline((string)($word['WoSentence'] ?? '')),
+                    ENT_QUOTES,
+                    'UTF-8'
+                );
+                $sentenceHtml = str_replace(
+                    "{",
+                    ' <b>[',
+                    str_replace(
+                        "}",
+                        ']</b> ',
+                        ExportService::maskTermInSentence($sent, $regexWord)
+                    )
+                );
 
-            $words[] = [
-                'id' => (int)$word['WoID'],
-                'text' => $word['WoText'] ?? '',
-                'translation' => $word['WoTranslation'] ?? '',
-                'romanization' => $word['WoRomanization'] ?? '',
-                'sentence' => $sent,
-                'sentenceHtml' => $sentenceHtml,
-                'status' => (int)($word['WoStatus'] ?? 1),
-                'score' => (int)($word['Score'] ?? 0)
-            ];
+                $words[] = [
+                    'id' => (int)$word['WoID'],
+                    'text' => $word['WoText'] ?? '',
+                    'translation' => $word['WoTranslation'] ?? '',
+                    'romanization' => $word['WoRomanization'] ?? '',
+                    'sentence' => $sent,
+                    'sentenceHtml' => $sentenceHtml,
+                    'status' => (int)($word['WoStatus'] ?? 1),
+                    'score' => (int)($word['Score'] ?? 0)
+                ];
+            }
+            mysqli_free_result($wordsResult);
         }
-        mysqli_free_result($wordsResult);
 
         return [
             'words' => $words,

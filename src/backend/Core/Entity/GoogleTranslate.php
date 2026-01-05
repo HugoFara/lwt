@@ -173,7 +173,7 @@ class GoogleTranslate
             array_unique(array_map("StrToLower", $array))
         );
     }
-    public function setLangFrom(string $lang): static
+    public function setLangFrom(?string $lang): static
     {
         $this->langFrom = $lang;
         return $this;
@@ -218,11 +218,12 @@ class GoogleTranslate
             $output = curl_exec($curl);
             unset($curl);
         } else {
+            $headerStr = self::$headers !== null ? implode("\r\n", self::$headers) . "\r\n" : "";
             $ctx = stream_context_create(
                 array(
                     "http" => array(
                         "method" => "GET",
-                        "header" => implode("\r\n", self::$headers) . "\r\n"
+                        "header" => $headerStr
                     )
                 )
             );
@@ -233,15 +234,20 @@ class GoogleTranslate
     /**
      * @return false|string[]
      *
-     * @psalm-return array<string>|false
+     * @psalm-return list<string>|false
      */
     public function translate(string $string): array|false
     {
-        return $this->lastResult = self::staticTranslate(
+        if ($this->langFrom === null || $this->langTo === null) {
+            return false;
+        }
+        $result = self::staticTranslate(
             $string,
             $this->langFrom,
             $this->langTo
         );
+        $this->lastResult = $result === false ? false : array_values($result);
+        return $this->lastResult;
     }
     /**
      * Returns an array of Translations
@@ -273,16 +279,18 @@ class GoogleTranslate
         $domain = self::DEFAULT_DOMAIN
     ): array|false {
         self::setDomain($domain);
+        // setDomain always sets $gglDomain to a non-null value
+        $gglDomain = self::$gglDomain ?? 'com';
         $url = sprintf(
             self::$urlFormat,
-            self::$gglDomain,
+            $gglDomain,
             rawurlencode($string),
             $from,
             $to,
             self::generateToken($string, $time_token)
         );
         $curlResult = self::makeCurl($url);
-        if ($curlResult === false) {
+        if ($curlResult === false || $curlResult === true) {
             return false;
         }
         $result = preg_replace('!([[,])(?=,)!', '$1[]', $curlResult);

@@ -259,7 +259,7 @@ class MediaService
             $online = true;
         }
 
-        if ($online) {
+        if ($online && $url !== null) {
             $this->renderOnlineVideoPlayer($url);
         } else {
             $this->renderLocalVideoPlayer($path);

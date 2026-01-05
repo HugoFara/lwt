@@ -1058,7 +1058,7 @@ class TermHandler
         // Save tags if provided
         $tags = $data['tags'] ?? [];
         if (!empty($tags) && is_array($tags)) {
-            \Lwt\Modules\Tags\Application\TagsFacade::saveWordTagsFromArray($wordId, $tags);
+            \Lwt\Modules\Tags\Application\TagsFacade::saveWordTagsFromArray((int)$wordId, $tags);
         }
 
         // Return complete term data
@@ -1276,7 +1276,7 @@ class TermHandler
         $result = $listService->getWordsList($filters, $sort, $page, $perPage);
         $words = [];
 
-        if ($result) {
+        if ($result instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($result)) {
                 $words[] = $this->formatWordRecord($record, $sort);
             }

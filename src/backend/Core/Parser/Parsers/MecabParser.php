@@ -290,6 +290,6 @@ class MecabParser implements ParserInterface
             $sentences = [''];
         }
 
-        return new ParserResult($sentences, $tokens);
+        return new ParserResult($sentences, array_values($tokens));
     }
 }

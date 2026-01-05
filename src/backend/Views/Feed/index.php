@@ -133,7 +133,8 @@ echo PageLayoutHelper::buildActionCard([
 </tr>
 <?php
 $time = time();
-foreach ($feeds as $row):
+$feedsArr = $feeds ?? [];
+foreach ($feedsArr as $row):
     $diff = $time - (int)$row['NfUpdate'];
 ?>
 <tr>
@@ -155,7 +156,7 @@ foreach ($feeds as $row):
         </span>
     </td>
     <td class="td1 center"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-    <td class="td1 center"><?php echo str_replace(',', ', ', $row['NfOptions']); ?></td>
+    <td class="td1 center"><?php echo str_replace(',', ', ', (string) ($row['NfOptions'] ?? '')); ?></td>
     <td class="td1 center" sorttable_customkey="<?php echo $diff; ?>">
         <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
     </td>

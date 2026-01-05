@@ -450,7 +450,7 @@ class SentenceService
             $text = str_replace('​', '', $record['SeText']);
         }
 
-        return trim($text);
+        return trim(is_string($text) ? $text : '');
     }
 
     /**

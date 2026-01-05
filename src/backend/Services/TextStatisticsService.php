@@ -69,12 +69,14 @@ class TextStatisticsService
             WHERE Ti2WordCount = 1 AND Ti2TxID IN($textsId)
             GROUP BY Ti2TxID";
         $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
-            $textId = (int) $record['text'];
-            $r["total"][$textId] = (int) $record['total'];
-            $r["totalu"][$textId] = (int) $record['unique_cnt'];
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $textId = (int) $record['text'];
+                $r["total"][$textId] = (int) $record['total'];
+                $r["totalu"][$textId] = (int) $record['unique_cnt'];
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         // Raw SQL needed for complex aggregation with DISTINCT
         // textitems2 inherits user context via Ti2TxID -> texts FK
@@ -84,12 +86,14 @@ class TextStatisticsService
             WHERE Ti2WordCount > 1 AND Ti2TxID IN({$textsId})
             GROUP BY Ti2TxID";
         $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
-            $textId = (int) $record['text'];
-            $r["expr"][$textId] = (int) $record['total'];
-            $r["expru"][$textId] = (int) $record['unique_cnt'];
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $textId = (int) $record['text'];
+                $r["expr"][$textId] = (int) $record['total'];
+                $r["expru"][$textId] = (int) $record['unique_cnt'];
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         // Raw SQL needed for complex aggregation with DISTINCT and implicit JOIN
         // textitems2 inherits user context via Ti2TxID -> texts FK
@@ -102,13 +106,15 @@ class TextStatisticsService
             . UserScopedQuery::forTablePrepared('words', $bindings, 'words') .
             " GROUP BY Ti2TxID, WoStatus";
         $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
-            $textId = (int) $record['text'];
-            $status = (int) $record['status'];
-            $r["stat"][$textId][$status] = (int) $record['total'];
-            $r["statu"][$textId][$status] = (int) $record['unique_cnt'];
+        if ($res instanceof \mysqli_result) {
+            while ($record = mysqli_fetch_assoc($res)) {
+                $textId = (int) $record['text'];
+                $status = (int) $record['status'];
+                $r["stat"][$textId][$status] = (int) $record['total'];
+                $r["statu"][$textId][$status] = (int) $record['unique_cnt'];
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         return $r;
     }

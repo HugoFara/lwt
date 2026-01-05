@@ -25,8 +25,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 // Display messages
-$message = $_GET['message'] ?? '';
-$error = $_GET['error'] ?? '';
+$messageRaw = $_GET['message'] ?? '';
+$message = is_string($messageRaw) ? $messageRaw : '';
+$errorRaw = $_GET['error'] ?? '';
+$error = is_string($errorRaw) ? $errorRaw : '';
 
 if (!empty($message)):
     $messageText = match ($message) {
@@ -149,12 +151,14 @@ echo PageLayoutHelper::buildActionCard([
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($dictionaries as $dict): ?>
+                <?php foreach ($dictionaries as $dict):
+                    $description = $dict->description();
+                ?>
                 <tr>
                     <td>
                         <strong><?php echo htmlspecialchars($dict->name(), ENT_QUOTES); ?></strong>
-                        <?php if ($dict->description()): ?>
-                        <br><span class="is-size-7 has-text-grey"><?php echo htmlspecialchars($dict->description(), ENT_QUOTES); ?></span>
+                        <?php if ($description): ?>
+                        <br><span class="is-size-7 has-text-grey"><?php echo htmlspecialchars($description, ENT_QUOTES); ?></span>
                         <?php endif; ?>
                     </td>
                     <td>

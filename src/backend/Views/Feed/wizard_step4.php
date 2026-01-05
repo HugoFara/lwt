@@ -29,31 +29,42 @@ $languagesJson = array_map(function ($lang) {
     return ['id' => (int)$lang['LgID'], 'name' => $lang['LgName']];
 }, $languages);
 
+// Helper to safely convert option to int
+$optionToInt = function (mixed $val): ?int {
+    if ($val === null) {
+        return null;
+    }
+    return is_numeric($val) ? (int) $val : null;
+};
+
 // Prepare options for JSON config
+$maxLinksRaw = $service->getNfOption($wizardData['options'], 'max_links');
+$maxTextsRaw = $service->getNfOption($wizardData['options'], 'max_texts');
+$charsetRaw = $service->getNfOption($wizardData['options'], 'charset');
+$tagRaw = $service->getNfOption($wizardData['options'], 'tag');
+
 $optionsConfig = [
     'editText' => $service->getNfOption($wizardData['options'], 'edit_text') !== null,
     'autoUpdate' => [
         'enabled' => $autoUpdI !== null,
-        'interval' => $autoUpdI !== null ? (int)$autoUpdI : null,
+        'interval' => is_numeric($autoUpdI) ? (int)$autoUpdI : null,
         'unit' => $autoUpdV ?? 'h'
     ],
     'maxLinks' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'max_links') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'max_links') !== null
-            ? (int)$service->getNfOption($wizardData['options'], 'max_links') : null
+        'enabled' => $maxLinksRaw !== null,
+        'value' => $optionToInt($maxLinksRaw)
     ],
     'maxTexts' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'max_texts') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'max_texts') !== null
-            ? (int)$service->getNfOption($wizardData['options'], 'max_texts') : null
+        'enabled' => $maxTextsRaw !== null,
+        'value' => $optionToInt($maxTextsRaw)
     ],
     'charset' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'charset') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'charset') ?? ''
+        'enabled' => $charsetRaw !== null,
+        'value' => is_string($charsetRaw) ? $charsetRaw : ''
     ],
     'tag' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'tag') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'tag') ?? ''
+        'enabled' => $tagRaw !== null,
+        'value' => is_string($tagRaw) ? $tagRaw : ''
     ]
 ];
 

@@ -32,9 +32,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 $isEdit = $mode === 'edit';
 $pageTitle = $isEdit ? 'Edit Tag' : 'New Tag';
 $formName = $isEdit ? 'edittag' : 'newtag';
+$phpSelf = $_SERVER['PHP_SELF'] ?? '';
 $actionUrl = $isEdit && $tag !== null ?
-    $_SERVER['PHP_SELF'] . '#rec' . $tag['id'] :
-    $_SERVER['PHP_SELF'];
+    $phpSelf . '#rec' . $tag['id'] :
+    $phpSelf;
 $cancelUrl = $isEdit && $tag !== null ?
     $service->getBaseUrl() . '#rec' . $tag['id'] :
     $service->getBaseUrl();

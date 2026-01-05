@@ -116,25 +116,27 @@ class TestService
         switch ($selector) {
             case 'words':
                 // Test words in a list of words ID
-                $idString = implode(",", $selection);
+                $idString = is_array($selection) ? implode(",", $selection) : (string)$selection;
                 $testsql = " words WHERE WoID IN ($idString) ";
                 // Note: Multi-language validation is done by caller via validateTestSelection()
                 break;
             case 'texts':
                 // Test text items from a list of texts ID
-                $idString = implode(",", $selection);
+                $idString = is_array($selection) ? implode(",", $selection) : (string)$selection;
                 $testsql = " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($idString) ";
                 // Note: Multi-language validation is done by caller via validateTestSelection()
                 break;
             case 'lang':
                 // Test words from a specific language
-                $testsql = " words WHERE WoLgID = $selection ";
+                $langId = is_array($selection) ? (int)($selection[0] ?? 0) : $selection;
+                $testsql = " words WHERE WoLgID = $langId ";
                 break;
             case 'text':
                 // Test text items from a specific text ID
+                $textId = is_array($selection) ? (int)($selection[0] ?? 0) : $selection;
                 $testsql = " words, textitems2
-                WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $selection ";
+                WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
                 break;
             default:
                 ErrorHandler::die("TestService::getTestSql called with wrong parameters");
@@ -321,11 +323,13 @@ class TestService
                 LIMIT 1';
 
             $res = Connection::query($sql);
-            $record = mysqli_fetch_assoc($res);
-            mysqli_free_result($res);
+            if ($res instanceof \mysqli_result) {
+                $record = mysqli_fetch_assoc($res);
+                mysqli_free_result($res);
 
-            if ($record) {
-                return $record;
+                if ($record) {
+                    return $record;
+                }
             }
         }
         return null;
@@ -364,8 +368,11 @@ class TestService
             LIMIT 1";
 
         $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = null;
+        if ($res instanceof \mysqli_result) {
+            $record = mysqli_fetch_assoc($res);
+            mysqli_free_result($res);
+        }
 
         if (!$record) {
             return ['sentence' => null, 'found' => false];

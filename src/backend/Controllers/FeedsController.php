@@ -191,21 +191,22 @@ class FeedsController extends BaseController
             $nfId = (int)$row['NfID'];
             $nfOptions = $row['NfOptions'];
 
-            $tagName = $this->feedService->getNfOption($nfOptions, 'tag');
-            if (!$tagName) {
-                $tagName = mb_substr($nfName, 0, 20, "utf-8");
-            }
+            $tagNameRaw = $this->feedService->getNfOption($nfOptions, 'tag');
+            $tagName = is_string($tagNameRaw) && $tagNameRaw !== '' ? $tagNameRaw : mb_substr($nfName, 0, 20, "utf-8");
 
-            $maxTexts = (int)$this->feedService->getNfOption($nfOptions, 'max_texts');
+            $maxTextsRaw = $this->feedService->getNfOption($nfOptions, 'max_texts');
+            $maxTexts = is_string($maxTextsRaw) ? (int)$maxTextsRaw : 0;
             if (!$maxTexts) {
                 $maxTexts = (int)Settings::getWithDefault('set-max-texts-per-feed');
             }
 
+            $charsetRaw = $this->feedService->getNfOption($nfOptions, 'charset');
+            $charset = is_string($charsetRaw) ? $charsetRaw : null;
             $texts = $this->feedService->extractTextFromArticle(
                 $doc,
                 $row['NfArticleSectionTags'],
                 $row['NfFilterTags'],
-                $this->feedService->getNfOption($nfOptions, 'charset')
+                $charset
             );
 
             if (isset($texts['error'])) {
@@ -220,7 +221,7 @@ class FeedsController extends BaseController
                 // Include edit form view
                 $scrdir = $this->languageService->getScriptDirectionTag((int)$row['NfLgID']);
                 include __DIR__ . '/../Views/Feed/edit_text_form.php';
-            } else {
+            } elseif (is_array($texts)) {
                 $result = $this->createTextsFromFeed($texts, $row, $tagName, $maxTexts);
                 $stats['archived'] += $result['archived'];
                 $stats['sentences'] += $result['sentences'];
@@ -603,7 +604,7 @@ class FeedsController extends BaseController
 
         // Parse auto-update interval
         $autoUpdateRaw = $this->feedService->getNfOption($feed['NfOptions'], 'autoupdate');
-        if ($autoUpdateRaw === null) {
+        if ($autoUpdateRaw === null || !is_string($autoUpdateRaw)) {
             $autoUpdateInterval = null;
             $autoUpdateUnit = null;
         } else {
@@ -834,8 +835,9 @@ class FeedsController extends BaseController
         }
 
         $autoUpdI = $this->feedService->getNfOption($_SESSION['wizard']['options'], 'autoupdate');
-        if ($autoUpdI == null) {
+        if ($autoUpdI === null || !is_string($autoUpdI)) {
             $autoUpdV = null;
+            $autoUpdI = null;
         } else {
             $autoUpdV = substr($autoUpdI, -1);
             $autoUpdI = substr($autoUpdI, 0, -1);
@@ -890,7 +892,7 @@ class FeedsController extends BaseController
         $_SESSION['wizard']['rss_url'] = $row['NfSourceURI'];
 
         // Parse article tags
-        $articleTags = explode('|', str_replace('!?!', '|', $row['NfArticleSectionTags']));
+        $articleTags = explode('|', str_replace('!?!', '|', (string)($row['NfArticleSectionTags'] ?? '')));
         $_SESSION['wizard']['article_tags'] = '';
         foreach ($articleTags as $tag) {
             if (substr_compare(trim($tag), "redirect", 0, 8) == 0) {
@@ -904,7 +906,7 @@ class FeedsController extends BaseController
         }
 
         // Parse filter tags
-        $filterTags = explode('|', str_replace('!?!', '|', $row['NfFilterTags']));
+        $filterTags = explode('|', str_replace('!?!', '|', (string)($row['NfFilterTags'] ?? '')));
         $_SESSION['wizard']['filter_tags'] = '';
         foreach ($filterTags as $tag) {
             if (trim($tag) != '') {
@@ -915,34 +917,43 @@ class FeedsController extends BaseController
             }
         }
 
-        $_SESSION['wizard']['feed'] = $this->feedService->detectAndParseFeed($row['NfSourceURI']);
-        if (empty($_SESSION['wizard']['feed'])) {
+        $feedData = $this->feedService->detectAndParseFeed($row['NfSourceURI']);
+        if (!is_array($feedData) || empty($feedData)) {
             unset($_SESSION['wizard']['feed']);
             header("Location: /feeds/wizard?step=1&err=1");
             exit();
         }
+        $_SESSION['wizard']['feed'] = $feedData;
 
         $_SESSION['wizard']['feed']['feed_title'] = $row['NfName'];
         $_SESSION['wizard']['options'] = $row['NfOptions'];
 
-        if (empty($_SESSION['wizard']['feed']['feed_text'])) {
+        $feedText = $_SESSION['wizard']['feed']['feed_text'] ?? '';
+        if (empty($feedText)) {
             $_SESSION['wizard']['feed']['feed_text'] = '';
             $_SESSION['wizard']['detected_feed'] = 'Detected: «Webpage Link»';
         } else {
-            $_SESSION['wizard']['detected_feed'] = 'Detected: «' . $_SESSION['wizard']['feed']['feed_text'] . '»';
+            $_SESSION['wizard']['detected_feed'] = 'Detected: «' . $feedText . '»';
         }
 
         $_SESSION['wizard']['lang'] = $row['NfLgID'];
 
         // Handle custom article source
-        if (
-            $_SESSION['wizard']['feed']['feed_text'] != $this->feedService->getNfOption($_SESSION['wizard']['options'], 'article_source')
-        ) {
-            $source = $this->feedService->getNfOption($_SESSION['wizard']['options'], 'article_source');
-            $_SESSION['wizard']['feed']['feed_text'] = $source;
-            $feedLen = count(array_filter(array_keys($_SESSION['wizard']['feed']), 'is_numeric'));
+        $articleSource = $this->feedService->getNfOption($_SESSION['wizard']['options'], 'article_source');
+        $articleSourceStr = is_string($articleSource) ? $articleSource : '';
+        /** @var array<string|int, mixed> $feedData */
+        $feedData = $_SESSION['wizard']['feed'] ?? [];
+        $currentFeedText = $feedData['feed_text'] ?? '';
+        if ($currentFeedText !== $articleSourceStr && $articleSourceStr !== '') {
+            $_SESSION['wizard']['feed']['feed_text'] = $articleSourceStr;
+            /** @var array<int|string, mixed> $feedArr */
+            $feedArr = $_SESSION['wizard']['feed'];
+            $feedLen = count(array_filter(array_keys($feedArr), 'is_numeric'));
             for ($i = 0; $i < $feedLen; $i++) {
-                $_SESSION['wizard']['feed'][$i]['text'] = $_SESSION['wizard']['feed'][$i][$source];
+                $itemData = $feedArr[$i] ?? null;
+                if (is_array($itemData) && isset($itemData[$articleSourceStr])) {
+                    $_SESSION['wizard']['feed'][$i]['text'] = $itemData[$articleSourceStr];
+                }
             }
         }
     }
@@ -1159,14 +1170,18 @@ class FeedsController extends BaseController
     private function getStep2FeedHtml(): string
     {
         $i = $_SESSION['wizard']['selected_feed'];
+        /** @var list<mixed> */
+        $aFeed = [];
 
         if (!isset($_SESSION['wizard']['feed'][$i]['html'])) {
-            $aFeed[0] = $_SESSION['wizard']['feed'][$i];
+            $aFeed = [$_SESSION['wizard']['feed'][$i]];
+            $charsetRaw = $this->feedService->getNfOption($_SESSION['wizard']['options'], 'charset');
+            $charset = is_string($charsetRaw) ? $charsetRaw : null;
             $_SESSION['wizard']['feed'][$i]['html'] = $this->feedService->extractTextFromArticle(
                 $aFeed,
                 $_SESSION['wizard']['redirect'] . 'new',
                 'iframe!?!script!?!noscript!?!head!?!meta!?!link!?!style',
-                $this->feedService->getNfOption($_SESSION['wizard']['options'], 'charset')
+                $charset
             );
         }
 
@@ -1181,14 +1196,18 @@ class FeedsController extends BaseController
     private function getStep3FeedHtml(): string
     {
         $i = $_SESSION['wizard']['selected_feed'];
+        /** @var list<mixed> */
+        $aFeed = [];
 
         if (!isset($_SESSION['wizard']['feed'][$i]['html'])) {
-            $aFeed[0] = $_SESSION['wizard']['feed'][$i];
+            $aFeed = [$_SESSION['wizard']['feed'][$i]];
+            $charsetRaw = $this->feedService->getNfOption($_SESSION['wizard']['options'], 'charset');
+            $charset = is_string($charsetRaw) ? $charsetRaw : null;
             $_SESSION['wizard']['feed'][$i]['html'] = $this->feedService->extractTextFromArticle(
                 $aFeed,
                 $_SESSION['wizard']['redirect'] . 'new',
                 'iframe!?!script!?!noscript!?!head!?!meta!?!link!?!style',
-                $this->feedService->getNfOption($_SESSION['wizard']['options'], 'charset')
+                $charset
             );
         }
 

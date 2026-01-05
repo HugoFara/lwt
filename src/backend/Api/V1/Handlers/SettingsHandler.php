@@ -21,7 +21,7 @@ class SettingsHandler
      * @param string $key   Setting name
      * @param string $value Setting value
      *
-     * @return array{error?: string, message?: string, last_text?: array}
+     * @return array{error?: string, message?: string, last_text?: array|null}
      */
     public function saveSetting(string $key, string $value): array
     {
