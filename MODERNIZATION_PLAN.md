@@ -1404,6 +1404,7 @@ All usages migrated to `Lwt\Modules\Vocabulary\Application\Services\TermStatusSe
 All TagService functionality has been migrated to `TagsFacade`:
 
 **Static methods migrated:**
+
 - `getAllTermTags()`, `getAllTextTags()`, `getWordTagList()`, `getWordTagsHtml()`
 - `getTextTagsHtml()`, `getArchivedTextTagsHtml()`
 - `addTagToWords()`, `removeTagFromWords()`, `addTagToTexts()`, `removeTagFromTexts()`
@@ -1413,6 +1414,7 @@ All TagService functionality has been migrated to `TagsFacade`:
 - `getTextTagSelectOptionsWithTextIds()`, `getArchivedTextTagSelectOptions()`
 
 **Instance methods migrated:**
+
 - `getBaseUrl()`, `getSortOptions()`, `getSortColumn()`
 - `getList()`, `getById()`, `getCount()`, `getPagination()`, `getMaxPerPage()`
 - `create()`, `update()`, `delete()`, `deleteAll()`, `deleteMultiple()`
@@ -1478,6 +1480,7 @@ All TagService functionality has been migrated to `TagsFacade`:
 ```
 
 **Shared Infrastructure Namespaces:**
+
 - `Lwt\Shared\Infrastructure\Database\*` - Connection, DB, QueryBuilder, etc.
 - `Lwt\Shared\Infrastructure\Http\*` - InputValidator, SecurityHeaders, UrlUtilities
 - `Lwt\Shared\Infrastructure\Container\*` - Container, ServiceProviders
@@ -1487,7 +1490,202 @@ All TagService functionality has been migrated to `TagsFacade`:
 
 ---
 
+## Phase 5: Release Readiness (Audit Findings - 2026-01-05)
+
+**Priority:** P1 (High)
+**Status:** IN PROGRESS
+**Audit Date:** 2026-01-05
+
+### Release Readiness Summary
+
+| Version | Status | Requirements |
+|---------|--------|--------------|
+| **v2.10.1** | READY | Test failure fixed |
+| **v2.11.0** | Ready with cleanup | Remove backup files, document breaking changes |
+| **v3.0.0** | NOT READY | Complete migration checklist below |
+
+### Quality Metrics
+
+| Metric | Status | Details |
+|--------|--------|---------|
+| Psalm Level 3 | FAIL | 173 errors |
+| PHPUnit Tests | PASS | 2436 tests, 5304 assertions |
+| TypeScript | PASS | No errors |
+| ESLint | PASS | No errors |
+| Deprecated Code | WARNING | 66 items marked for v3.0.0 removal |
+| TODO Comments | WARNING | 18 items |
+
+### 5.1 Incomplete Module Migration
+
+**User Module Status:** INCOMPLETE
+
+The User module lacks standard structure:
+
+- [ ] Missing `Application/` directory
+- [ ] Missing `Http/` directory
+- [ ] Missing `Views/` directory
+- [ ] Missing `UserServiceProvider.php`
+- Current structure: Only `Domain/` and `Infrastructure/` exist
+
+**Legacy Code Still Active:**
+
+| Category | Count | Location |
+|----------|-------|----------|
+| Controllers | 12 | `src/backend/Controllers/` |
+| Services | 20 | `src/backend/Services/` |
+| API Handlers | 10 | `src/backend/Api/V1/Handlers/` |
+
+**Controllers Not Yet Migrated to Modules:**
+
+1. `HomeController` - No module equivalent (Dashboard module needed?)
+2. `WordController` - Partially duplicates `VocabularyController`
+3. `FeedsController` - Partially duplicates `FeedController`
+4. `LocalDictionaryController` - No module equivalent
+5. `TextPrintController` - Text module lacks print functionality
+6. `TranslationController` - No module equivalent
+7. `AuthController` - User module incomplete
+8. `WordPressController` - No module equivalent
+9. `TestController` (legacy) - Review module has replacement
+10. `ApiController` - API entry point (may need to stay)
+
+### 5.2 Duplicate API Handler Pattern
+
+Both backend and module API handlers exist for the same features:
+
+| Feature | Backend Handler | Module Handler | Resolution |
+|---------|-----------------|----------------|------------|
+| Feed | `FeedHandler` | `FeedApiHandler` | [ ] Consolidate to module |
+| Review | `ReviewHandler` | `ReviewApiHandler` | [ ] Consolidate to module |
+| Terms | `TermHandler` | `VocabularyApiHandler` | [ ] Consolidate to module |
+| Settings | `SettingsHandler` | `AdminApiHandler` | [ ] Consolidate to module |
+
+**Action Required:** Update `ApiV1.php` to use module-based handlers exclusively.
+
+### 5.3 Test Coverage Gaps
+
+**Module Layer Coverage:**
+
+| Layer | Total | Tested | Gap |
+|-------|-------|--------|-----|
+| Module Facades | 7 | 1 | 86% |
+| Module Use Cases | 65 | 0 | 100% |
+| Module Application Services | 7 | 0 | 100% |
+| Module HTTP Handlers | 7 | 4 | 43% |
+| Module HTTP Controllers | 11 | 2 | 82% |
+
+**Critical Untested Paths:**
+
+- [ ] Text Import Pipeline: `ImportText → ParseText → sentence creation`
+- [ ] Feed Import: `LoadFeed → ImportArticles → TextCreationAdapter`
+- [ ] Review Session: `StartReviewSession → GetNextTerm → SubmitAnswer`
+- [ ] Export Operations: `ExportService` (Anki/TSV)
+
+**Priority Test Files Needed:**
+
+- `AdminFacadeTest.php`
+- `FeedFacadeTest.php`
+- `LanguageFacadeTest.php`
+- `ReviewFacadeTest.php`
+- `TextFacadeTest.php`
+- `VocabularyFacadeTest.php`
+- `SimilarityCalculatorTest.php`
+- `RssParserTest.php`
+
+### 5.4 Static Analysis (Psalm Level 3)
+
+**Current:** 173 errors, 262 info issues
+
+**Error Categories:**
+
+| Category | Count | Primary Files |
+|----------|-------|---------------|
+| PossiblyInvalidArgument | ~40 | View files |
+| PossiblyUndefinedVariable | ~30 | View files |
+| PossiblyUndefinedArrayOffset | ~25 | Controllers, Views |
+| Other type issues | ~78 | Various |
+
+**Primary Problem Areas:**
+
+- `src/backend/Views/Test/table_test_row.php`
+- `src/backend/Views/Text/archived_form.php`
+- `src/backend/Views/Text/read_text.php`
+- `src/backend/Views/Word/hover_save_result.php`
+
+### 5.5 API Parameter Inconsistencies
+
+Mixed naming conventions detected:
+
+- `lg_id` vs `lang_id` vs `language_id`
+- `texts_id` vs `ids` vs `textId` vs `tid`
+- `word_lc` vs other term references
+
+**Resolution:** Standardize on consistent parameter names across all endpoints.
+
+### 5.6 Cleanup Tasks
+
+**Backup Files to Remove:**
+
+- [ ] `phpunit.xml.bak`
+- [ ] `db/seeds/demo.sql.bak`
+
+**Critical TODOs to Resolve:**
+
+- [ ] `AuthController:312` - Persistent remember-me tokens
+- [ ] `ParseText.php:62` - `checkText()` method implementation
+- [ ] `ListTexts.php:263` - `findPaginated()` repository method
+
+**Environment Configuration:**
+
+- [ ] Move `YT_API_KEY` from view templates to `.env`
+- [ ] Document production password requirements
+
+### 5.7 Deprecated Code (66 items)
+
+**PHP Deprecations (23 items):**
+
+- Routes marked `@deprecated 3.0.0` in `routes.php`
+- `WordService` → Use `VocabularyFacade`
+- `Text::create()` → Use `reconstitute()`
+- `Language::parser()` → Use `parserType()`
+- `TextParsing` multiple methods
+
+**TypeScript Deprecations (43 items):**
+
+- `word_upload.ts` (7 items) - Should use Alpine components
+- `tts_settings.ts` (11 items) - Should use `ttsSettingsApp()`
+- `bulk_translate.ts` (7 items) - Should use `bulkTranslateApp()`
+- Various page modules marked for Alpine.js migration
+
+### v3.0.0 Release Checklist
+
+**Must Complete:**
+
+- [ ] Fix all 173 Psalm level 3 errors
+- [ ] Complete User module (or document as intentionally minimal)
+- [ ] Remove duplicate API handlers (use module handlers only)
+- [ ] Migrate remaining controllers to modules OR create missing modules
+- [ ] Add tests for module facades (at least 80% coverage)
+- [ ] Remove deprecated routes and methods
+- [ ] Clean up backup files
+- [ ] Standardize API parameter naming
+- [ ] Update API version from 0.1.1
+
+**Should Complete:**
+
+- [ ] Migrate backend services to module Application layers
+- [ ] Add tests for critical use cases
+- [ ] Resolve all critical TODOs
+- [ ] Remove deprecated TypeScript functions
+
+**Nice to Have:**
+
+- [ ] Achieve Psalm level 1 compliance
+- [ ] 100% test coverage for module domain layer
+- [ ] Refactor large files (WordController 2,034 lines, etc.)
+
+---
+
 **Document Owner:** LWT Maintainers
 **Review Cycle:** Quarterly
-**Last Review:** 2025-12-25
-**Next Review:** 2026-03-25
+**Last Review:** 2026-01-05
+**Next Review:** 2026-04-05

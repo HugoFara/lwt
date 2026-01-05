@@ -281,7 +281,11 @@ class GoogleTranslate
             $to,
             self::generateToken($string, $time_token)
         );
-        $result = preg_replace('!([[,])(?=,)!', '$1[]', self::makeCurl($url));
+        $curlResult = self::makeCurl($url);
+        if ($curlResult === false) {
+            return false;
+        }
+        $result = preg_replace('!([[,])(?=,)!', '$1[]', $curlResult);
         $resultArray = json_decode($result, true);
         $finalResult = [];
         if (!empty($resultArray[0])) {
