@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-25 (Admin module migration complete - all 7 modules migrated to modular monolith)
+**Last Updated:** 2026-01-05 (User module migration complete - all 8 modules migrated to modular monolith)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1020,7 +1020,7 @@ These are intentionally kept inline as they are simpler than the overhead of a s
 ## Phase 4: Future-Proof Architecture (Modular Monolith)
 
 **Priority:** P2 (Medium)
-**Status:** ✅ COMPLETE (7/7 modules migrated)
+**Status:** ✅ COMPLETE (8/8 modules migrated)
 **Effort:** X-Large (400+ hours)
 **Target:** Post-Phase 3 completion
 
@@ -1035,6 +1035,7 @@ These are intentionally kept inline as they are simpler than the overhead of a s
 | Tags | `TagsServiceProvider` | ✅ COMPLETE |
 | Review | `ReviewServiceProvider` | ✅ COMPLETE (2025-12-24) |
 | Admin | `AdminServiceProvider` | ✅ COMPLETE (2025-12-25) |
+| User | `UserServiceProvider` | ✅ COMPLETE (2026-01-05) |
 
 ### Rationale
 
@@ -1456,7 +1457,7 @@ All TagService functionality has been migrated to `TagsFacade`:
 
 ### Success Criteria
 
-- [x] 7 of 7 modules migrated to new structure ✅ COMPLETE (2025-12-25)
+- [x] 8 of 8 modules migrated to new structure ✅ COMPLETE (2026-01-05)
 - [x] Zero circular dependencies between modules
 - [x] WordStatusService fully migrated and removed
 - [x] TagService fully migrated to TagsFacade and removed (2025-12-25)
@@ -1508,7 +1509,7 @@ All TagService functionality has been migrated to `TagsFacade`:
 
 | Metric | Status | Details |
 |--------|--------|---------|
-| Psalm Level 3 | FAIL | 173 errors |
+| Psalm Level 3 | PASS | 0 errors (2026-01-05) |
 | PHPUnit Tests | PASS | 2436 tests, 5304 assertions |
 | TypeScript | PASS | No errors |
 | ESLint | PASS | No errors |
@@ -1517,15 +1518,14 @@ All TagService functionality has been migrated to `TagsFacade`:
 
 ### 5.1 Incomplete Module Migration
 
-**User Module Status:** INCOMPLETE
+**User Module Status:** ✅ COMPLETE (2026-01-05)
 
-The User module lacks standard structure:
+The User module now has the standard modular structure:
 
-- [ ] Missing `Application/` directory
-- [ ] Missing `Http/` directory
-- [ ] Missing `Views/` directory
-- [ ] Missing `UserServiceProvider.php`
-- Current structure: Only `Domain/` and `Infrastructure/` exist
+- [x] `Application/` - UserFacade, PasswordHasher service, 6 use cases
+- [x] `Http/` - UserController, UserApiHandler
+- [x] `Views/` - login.php, register.php
+- [x] `UserServiceProvider.php` - Registered in Application bootstrap
 
 **Legacy Code Still Active:**
 
@@ -1593,23 +1593,9 @@ Both backend and module API handlers exist for the same features:
 
 ### 5.4 Static Analysis (Psalm Level 3)
 
-**Current:** 173 errors, 262 info issues
+**Status:** ✅ COMPLETE (2026-01-05)
 
-**Error Categories:**
-
-| Category | Count | Primary Files |
-|----------|-------|---------------|
-| PossiblyInvalidArgument | ~40 | View files |
-| PossiblyUndefinedVariable | ~30 | View files |
-| PossiblyUndefinedArrayOffset | ~25 | Controllers, Views |
-| Other type issues | ~78 | Various |
-
-**Primary Problem Areas:**
-
-- `src/backend/Views/Test/table_test_row.php`
-- `src/backend/Views/Text/archived_form.php`
-- `src/backend/Views/Text/read_text.php`
-- `src/backend/Views/Word/hover_save_result.php`
+All Psalm level 3 errors have been resolved.
 
 ### 5.5 API Parameter Inconsistencies
 
@@ -1660,8 +1646,8 @@ Mixed naming conventions detected:
 
 **Must Complete:**
 
-- [ ] Fix all 173 Psalm level 3 errors
-- [ ] Complete User module (or document as intentionally minimal)
+- [x] Fix all Psalm level 3 errors (2026-01-05)
+- [x] Complete User module (2026-01-05)
 - [ ] Remove duplicate API handlers (use module handlers only)
 - [ ] Migrate remaining controllers to modules OR create missing modules
 - [ ] Add tests for module facades (at least 80% coverage)
