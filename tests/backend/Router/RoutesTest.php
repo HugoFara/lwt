@@ -164,20 +164,23 @@ class RoutesTest extends TestCase
 
     public static function wordRoutesProvider(): array
     {
+        $vocabularyController = 'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController';
         return [
-            'word edit' => ['/word/edit', 'WordController@edit'],
-            'words edit list' => ['/words/edit', 'WordController@listEditAlpine'],
-            'word edit-multi' => ['/word/edit-multi', 'WordController@editMulti'],
-            'word delete' => ['/word/delete', 'WordController@delete'],
-            'words list' => ['/words', 'WordController@listEditAlpine'],
-            'word new' => ['/word/new', 'WordController@create'],
-            'word show' => ['/word/show', 'WordController@show'],
-            'word insert-wellknown' => ['/word/insert-wellknown', 'WordController@insertWellknown'],
-            'word insert-ignore' => ['/word/insert-ignore', 'WordController@insertIgnore'],
-            'word inline-edit' => ['/word/inline-edit', 'WordController@inlineEdit'],
-            'word bulk-translate' => ['/word/bulk-translate', 'WordController@bulkTranslate'],
-            'word set-status' => ['/word/set-status', 'WordController@setStatus'],
-            'word upload' => ['/word/upload', 'WordController@upload'],
+            'word edit' => ['/word/edit', "{$vocabularyController}@editWord"],
+            'word edit-term' => ['/word/edit-term', "{$vocabularyController}@editTerm"],
+            'words edit list' => ['/words/edit', "{$vocabularyController}@listEditAlpine"],
+            'word edit-multi' => ['/word/edit-multi', "{$vocabularyController}@editMulti"],
+            'word delete' => ['/word/delete', "{$vocabularyController}@deleteWord"],
+            'words list' => ['/words', "{$vocabularyController}@listEditAlpine"],
+            'word new' => ['/word/new', "{$vocabularyController}@createWord"],
+            'word show' => ['/word/show', "{$vocabularyController}@showWord"],
+            'word insert-wellknown' => ['/word/insert-wellknown', "{$vocabularyController}@insertWellknown"],
+            'word insert-ignore' => ['/word/insert-ignore', "{$vocabularyController}@insertIgnore"],
+            'word inline-edit' => ['/word/inline-edit', "{$vocabularyController}@inlineEdit"],
+            'word bulk-translate' => ['/word/bulk-translate', "{$vocabularyController}@bulkTranslate"],
+            'word set-status' => ['/word/set-status', "{$vocabularyController}@setStatus"],
+            'word set-all-status' => ['/word/set-all-status', "{$vocabularyController}@markAllWords"],
+            'word upload' => ['/word/upload', "{$vocabularyController}@upload"],
         ];
     }
 

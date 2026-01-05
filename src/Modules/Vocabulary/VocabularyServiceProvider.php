@@ -46,6 +46,9 @@ use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Http\VocabularyController;
 use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler;
 use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
+use Lwt\Modules\Vocabulary\Application\Services\WordListService;
+use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
+use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 
 /**
  * Service provider for the Vocabulary module.
@@ -107,6 +110,19 @@ class VocabularyServiceProvider implements ServiceProviderInterface
 
         $container->singleton(DictionaryAdapter::class, function (Container $_c) {
             return new DictionaryAdapter();
+        });
+
+        // Register Module Services
+        $container->singleton(WordListService::class, function (Container $_c) {
+            return new WordListService();
+        });
+
+        $container->singleton(WordUploadService::class, function (Container $_c) {
+            return new WordUploadService();
+        });
+
+        $container->singleton(ExpressionService::class, function (Container $_c) {
+            return new ExpressionService();
         });
 
         // Register Facade

@@ -20,11 +20,16 @@ use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Controllers\WordController;
 
 require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
+require_once __DIR__ . '/../../../backend/Controllers/WordController.php';
 
 /**
  * Controller for vocabulary/term management operations.
+ *
+ * This controller now handles all word/term routes, delegating to the
+ * legacy WordController for complex operations during the migration period.
  *
  * @since 3.0.0
  */
@@ -52,6 +57,11 @@ class VocabularyController
     private DictionaryAdapter $dictionaryAdapter;
 
     /**
+     * Legacy WordController for delegation during migration.
+     */
+    private ?WordController $legacyController = null;
+
+    /**
      * Constructor.
      *
      * @param VocabularyFacade|null     $facade              Vocabulary facade
@@ -70,6 +80,19 @@ class VocabularyController
         $this->createTermFromHover = $createTermFromHover ?? new CreateTermFromHover();
         $this->findSimilarTerms = $findSimilarTerms ?? new FindSimilarTerms();
         $this->dictionaryAdapter = $dictionaryAdapter ?? new DictionaryAdapter();
+    }
+
+    /**
+     * Get the legacy WordController for delegation.
+     *
+     * @return WordController
+     */
+    private function getLegacyController(): WordController
+    {
+        if ($this->legacyController === null) {
+            $this->legacyController = new WordController();
+        }
+        return $this->legacyController;
     }
 
     /**
@@ -373,6 +396,178 @@ class VocabularyController
 
         extract($data);
         require $viewFile;
+    }
+
+    // =========================================================================
+    // Legacy Delegation Methods (delegating to WordController during migration)
+    // =========================================================================
+
+    /**
+     * Edit word form (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function editWord(array $params): void
+    {
+        $this->getLegacyController()->edit($params);
+    }
+
+    /**
+     * Edit term while testing (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function editTerm(array $params): void
+    {
+        $this->getLegacyController()->editTerm($params);
+    }
+
+    /**
+     * List/edit words - Alpine.js SPA version (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function listEditAlpine(array $params): void
+    {
+        $this->getLegacyController()->listEditAlpine($params);
+    }
+
+    /**
+     * Edit multi-word expression (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function editMulti(array $params): void
+    {
+        $this->getLegacyController()->editMulti($params);
+    }
+
+    /**
+     * Delete word (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function deleteWord(array $params): void
+    {
+        $this->getLegacyController()->delete($params);
+    }
+
+    /**
+     * Create new word form (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function createWord(array $params): void
+    {
+        $this->getLegacyController()->create($params);
+    }
+
+    /**
+     * Show word details (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function showWord(array $params): void
+    {
+        $this->getLegacyController()->show($params);
+    }
+
+    /**
+     * Insert well-known word (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function insertWellknown(array $params): void
+    {
+        $this->getLegacyController()->insertWellknown($params);
+    }
+
+    /**
+     * Insert ignored word (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function insertIgnore(array $params): void
+    {
+        $this->getLegacyController()->insertIgnore($params);
+    }
+
+    /**
+     * Inline edit word (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function inlineEdit(array $params): void
+    {
+        $this->getLegacyController()->inlineEdit($params);
+    }
+
+    /**
+     * Bulk translate words (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function bulkTranslate(array $params): void
+    {
+        $this->getLegacyController()->bulkTranslate($params);
+    }
+
+    /**
+     * Set word status (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function setStatus(array $params): void
+    {
+        $this->getLegacyController()->setStatus($params);
+    }
+
+    /**
+     * Mark all words with status (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function markAllWords(array $params): void
+    {
+        $this->getLegacyController()->all($params);
+    }
+
+    /**
+     * Upload words from file (legacy delegation).
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function upload(array $params): void
+    {
+        $this->getLegacyController()->upload($params);
     }
 
     // =========================================================================

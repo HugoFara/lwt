@@ -82,46 +82,95 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware('/text/archived', 'Lwt\\Modules\\Text\\Http\\TextController@archived', AUTH_MIDDLEWARE);
 
     // ==================== WORD/TERM ROUTES (PROTECTED) ====================
+    // All word/term routes now use VocabularyController from the Vocabulary module
 
     // Edit word
-    $router->registerWithMiddleware('/word/edit', 'WordController@edit', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/edit',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@editWord',
+        AUTH_MIDDLEWARE
+    );
 
     // Edit term while testing
-    $router->registerWithMiddleware('/word/edit-term', 'WordController@editTerm', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/edit-term',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@editTerm',
+        AUTH_MIDDLEWARE
+    );
 
     // Edit words (list) - Alpine.js SPA version
-    $router->registerWithMiddleware('/words/edit', 'WordController@listEditAlpine', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/words/edit',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@listEditAlpine',
+        AUTH_MIDDLEWARE
+    );
 
     // Edit multi-word
-    $router->registerWithMiddleware('/word/edit-multi', 'WordController@editMulti', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/edit-multi',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@editMulti',
+        AUTH_MIDDLEWARE
+    );
 
     // Delete word
     // @deprecated 3.0.0 Use DELETE /api/v1/terms/{id} instead.
     //             Kept for backward compatibility with frame-based mode.
-    $router->registerWithMiddleware('/word/delete', 'WordController@delete', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/delete',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@deleteWord',
+        AUTH_MIDDLEWARE
+    );
 
     // All words (list view) - Alpine.js SPA version
-    $router->registerWithMiddleware('/words', 'WordController@listEditAlpine', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/words',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@listEditAlpine',
+        AUTH_MIDDLEWARE
+    );
 
     // New word
-    $router->registerWithMiddleware('/word/new', 'WordController@create', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/new',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@createWord',
+        AUTH_MIDDLEWARE
+    );
 
     // Show word
-    $router->registerWithMiddleware('/word/show', 'WordController@show', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/show',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@showWord',
+        AUTH_MIDDLEWARE
+    );
 
     // Insert word (wellknown/ignore)
     // @deprecated 3.0.0 Use POST /api/v1/terms/quick with status=99 instead.
     //             Kept for backward compatibility with frame-based mode.
-    $router->registerWithMiddleware('/word/insert-wellknown', 'WordController@insertWellknown', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/insert-wellknown',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@insertWellknown',
+        AUTH_MIDDLEWARE
+    );
     // @deprecated 3.0.0 Use POST /api/v1/terms/quick with status=98 instead.
     //             Kept for backward compatibility with frame-based mode.
-    $router->registerWithMiddleware('/word/insert-ignore', 'WordController@insertIgnore', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/insert-ignore',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@insertIgnore',
+        AUTH_MIDDLEWARE
+    );
 
     // Inline edit
-    $router->registerWithMiddleware('/word/inline-edit', 'WordController@inlineEdit', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/inline-edit',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@inlineEdit',
+        AUTH_MIDDLEWARE
+    );
 
     // Bulk translate
-    $router->registerWithMiddleware('/word/bulk-translate', 'WordController@bulkTranslate', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/bulk-translate',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@bulkTranslate',
+        AUTH_MIDDLEWARE
+    );
 
     // Create term from hover (Vocabulary module)
     $router->registerWithMiddleware(
@@ -172,13 +221,25 @@ function registerRoutes(Router $router): void
     // Set word status
     // @deprecated 3.0.0 Use PUT /api/v1/terms/{id}/status/{status} instead.
     //             Kept for backward compatibility with frame-based mode.
-    $router->registerWithMiddleware('/word/set-status', 'WordController@setStatus', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/set-status',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@setStatus',
+        AUTH_MIDDLEWARE
+    );
 
     // Set all words status (wellknown/ignore)
-    $router->registerWithMiddleware('/word/set-all-status', 'WordController@all', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/set-all-status',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@markAllWords',
+        AUTH_MIDDLEWARE
+    );
 
     // Upload words
-    $router->registerWithMiddleware('/word/upload', 'WordController@upload', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/word/upload',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@upload',
+        AUTH_MIDDLEWARE
+    );
 
     // ==================== TEST ROUTES (PROTECTED) ====================
 

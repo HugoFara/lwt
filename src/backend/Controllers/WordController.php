@@ -52,12 +52,17 @@ use Lwt\Shared\Infrastructure\Http\InputValidator;
  * - Bulk operations (translate, status changes)
  * - Word import/upload
  *
- * @category Lwt
- * @package  Lwt
- * @author   HugoFara <hugo.farajallah@protonmail.com>
- * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
- * @since    3.0.0
+ * @category   Lwt
+ * @package    Lwt
+ * @author     HugoFara <hugo.farajallah@protonmail.com>
+ * @license    Unlicense <http://unlicense.org/>
+ * @link       https://hugofara.github.io/lwt/docs/php/
+ * @since      3.0.0
+ * @deprecated 3.0.0 Use Lwt\Modules\Vocabulary\Http\VocabularyController instead.
+ *             This class is kept for backward compatibility during the migration period.
+ *             All routes now delegate to VocabularyController which in turn delegates back
+ *             to this class. Once all functionality is migrated to the Vocabulary module,
+ *             this class will be removed.
  */
 class WordController extends BaseController
 {
