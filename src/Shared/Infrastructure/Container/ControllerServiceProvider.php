@@ -17,7 +17,7 @@ namespace Lwt\Shared\Infrastructure\Container;
 use Lwt\Controllers\ApiController;
 use Lwt\Controllers\AuthController;
 use Lwt\Controllers\FeedsController;
-use Lwt\Controllers\HomeController;
+// Note: HomeController moved to Modules/Home - registered by HomeServiceProvider
 use Lwt\Modules\Language\Http\LanguageController;
 use Lwt\Controllers\TestController;
 use Lwt\Modules\Text\Http\TextController;
@@ -29,7 +29,7 @@ use Lwt\Services\AuthService;
 use Lwt\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Feed\Application\FeedFacade;
-use Lwt\Services\HomeService;
+// Note: HomeService moved to Modules/Home as HomeFacade
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\PasswordService;
 use Lwt\Services\TestService;
@@ -115,12 +115,7 @@ class ControllerServiceProvider implements ServiceProviderInterface
             );
         });
 
-        $container->bind(HomeController::class, function (Container $c) {
-            return new HomeController(
-                $c->get(HomeService::class),
-                $c->get(LanguageFacade::class)
-            );
-        });
+        // Note: HomeController moved to Modules/Home - registered by HomeServiceProvider
 
         $container->bind(TextController::class, function (Container $c) {
             return new TextController(

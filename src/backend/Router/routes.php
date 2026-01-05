@@ -43,8 +43,8 @@ function registerRoutes(Router $router): void
 {
     // ==================== HOME PAGE (PROTECTED) ====================
 
-    $router->registerWithMiddleware('/', 'HomeController@index', AUTH_MIDDLEWARE);
-    $router->registerWithMiddleware('/index.php', 'HomeController@index', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/', 'Lwt\\Modules\\Home\\Http\\HomeController@index', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/index.php', 'Lwt\\Modules\\Home\\Http\\HomeController@index', AUTH_MIDDLEWARE);
 
     // ==================== TEXT ROUTES (PROTECTED) ====================
 

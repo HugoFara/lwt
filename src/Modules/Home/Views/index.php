@@ -3,27 +3,25 @@
  * Home Page View
  *
  * Variables expected:
- * - $dashboardData: array Dashboard data from HomeService
- * - $homeService: HomeService instance
+ * - $dashboardData: array Dashboard data from HomeFacade
+ * - $homeFacade: HomeFacade instance
  * - $languages: array Languages data for select dropdown
  *
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Views
+ * @package  Lwt\Modules\Home\Views
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Views\Home;
-
-use Lwt\Core\Globals;
-use Lwt\Services\TextStatisticsService;
-use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+namespace Lwt\Modules\Home\Views;
 
 use Lwt\Core\ApplicationInfo;
+use Lwt\Services\TextStatisticsService;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
 /**
  * When on a WordPress server, make a logout button.

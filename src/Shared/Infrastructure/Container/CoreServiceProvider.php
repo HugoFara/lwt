@@ -17,7 +17,7 @@ namespace Lwt\Shared\Infrastructure\Container;
 use Lwt\Services\AuthService;
 use Lwt\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
-use Lwt\Services\HomeService;
+// Note: HomeService was moved to Modules/Home - registered by HomeServiceProvider
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\PasswordService;
 use Lwt\Services\SentenceService;
@@ -82,9 +82,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             );
         });
 
-        $container->singleton(HomeService::class, function (Container $_c) {
-            return new HomeService();
-        });
+        // Note: HomeService moved to Modules/Home - now HomeFacade registered by HomeServiceProvider
 
         $container->singleton(TestService::class, function (Container $_c) {
             return new TestService();

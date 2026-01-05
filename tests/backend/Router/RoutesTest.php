@@ -87,14 +87,14 @@ class RoutesTest extends TestCase
     {
         $result = $this->simulateRequest('/');
         $this->assertEquals('handler', $result['type']);
-        $this->assertEquals('HomeController@index', $result['handler']);
+        $this->assertEquals('Lwt\\Modules\\Home\\Http\\HomeController@index', $result['handler']);
     }
 
     public function testIndexPhpRoute(): void
     {
         $result = $this->simulateRequest('/index.php');
         $this->assertEquals('handler', $result['type']);
-        $this->assertEquals('HomeController@index', $result['handler']);
+        $this->assertEquals('Lwt\\Modules\\Home\\Http\\HomeController@index', $result['handler']);
     }
 
     /**

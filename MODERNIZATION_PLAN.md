@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-05 (API handler consolidation - 5 of 5 duplicate handlers migrated)
+**Last Updated:** 2026-01-05 (Home module migration - 9 of 9 modules complete)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1020,7 +1020,7 @@ These are intentionally kept inline as they are simpler than the overhead of a s
 ## Phase 4: Future-Proof Architecture (Modular Monolith)
 
 **Priority:** P2 (Medium)
-**Status:** ✅ COMPLETE (8/8 modules migrated)
+**Status:** ✅ COMPLETE (9/9 modules migrated)
 **Effort:** X-Large (400+ hours)
 **Target:** Post-Phase 3 completion
 
@@ -1036,6 +1036,7 @@ These are intentionally kept inline as they are simpler than the overhead of a s
 | Review | `ReviewServiceProvider` | ✅ COMPLETE (2025-12-24) |
 | Admin | `AdminServiceProvider` | ✅ COMPLETE (2025-12-25) |
 | User | `UserServiceProvider` | ✅ COMPLETE (2026-01-05) |
+| Home | `HomeServiceProvider` | ✅ COMPLETE (2026-01-05) |
 
 ### Rationale
 
@@ -1457,7 +1458,7 @@ All TagService functionality has been migrated to `TagsFacade`:
 
 ### Success Criteria
 
-- [x] 8 of 8 modules migrated to new structure ✅ COMPLETE (2026-01-05)
+- [x] 9 of 9 modules migrated to new structure ✅ COMPLETE (2026-01-05)
 - [x] Zero circular dependencies between modules
 - [x] WordStatusService fully migrated and removed
 - [x] TagService fully migrated to TagsFacade and removed (2025-12-25)
@@ -1531,22 +1532,24 @@ The User module now has the standard modular structure:
 
 | Category | Count | Location |
 |----------|-------|----------|
-| Controllers | 12 | `src/backend/Controllers/` |
-| Services | 20 | `src/backend/Services/` |
+| Controllers | 11 | `src/backend/Controllers/` |
+| Services | 19 | `src/backend/Services/` |
 | API Handlers | 10 | `src/backend/Api/V1/Handlers/` |
 
 **Controllers Not Yet Migrated to Modules:**
 
-1. `HomeController` - No module equivalent (Dashboard module needed?)
-2. `WordController` - Partially duplicates `VocabularyController`
-3. `FeedsController` - Partially duplicates `FeedController`
-4. `LocalDictionaryController` - No module equivalent
-5. `TextPrintController` - Text module lacks print functionality
-6. `TranslationController` - No module equivalent
-7. `AuthController` - User module incomplete
-8. `WordPressController` - No module equivalent
-9. `TestController` (legacy) - Review module has replacement
-10. `ApiController` - API entry point (may need to stay)
+1. `WordController` - Partially duplicates `VocabularyController`
+2. `FeedsController` - Partially duplicates `FeedController`
+3. `LocalDictionaryController` - No module equivalent
+4. `TextPrintController` - Text module lacks print functionality
+5. `TranslationController` - No module equivalent
+6. `AuthController` - User module incomplete
+7. `WordPressController` - No module equivalent
+8. `TestController` (legacy) - Review module has replacement
+9. `ApiController` - API entry point (may need to stay)
+
+**Recently Migrated:**
+- `HomeController` → `Modules/Home/Http/HomeController` (2026-01-05)
 
 ### 5.2 Duplicate API Handler Pattern
 

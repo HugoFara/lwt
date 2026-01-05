@@ -30,6 +30,7 @@ use Lwt\Modules\Tags\TagsServiceProvider;
 use Lwt\Modules\Review\ReviewServiceProvider;
 use Lwt\Modules\Admin\AdminServiceProvider;
 use Lwt\Modules\User\UserServiceProvider;
+use Lwt\Modules\Home\HomeServiceProvider;
 use Lwt\Modules\Admin\Application\DTO\DatabaseConnectionDTO;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\AutocompleteConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\LoadConnection;
@@ -150,6 +151,7 @@ class Application
             new ReviewServiceProvider(),
             new AdminServiceProvider(),
             new UserServiceProvider(),
+            new HomeServiceProvider(),
         ];
 
         // Register phase: all providers register their bindings

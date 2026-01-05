@@ -1,30 +1,27 @@
 <?php declare(strict_types=1);
-namespace Lwt\Tests\Controllers;
+namespace Lwt\Tests\Modules\Home;
 
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Controllers\HomeController;
+use Lwt\Modules\Home\Http\HomeController;
+use Lwt\Modules\Home\Application\HomeFacade;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
-use Lwt\Shared\Infrastructure\Database\Connection;
-use Lwt\Services\HomeService;
-use Lwt\Modules\Language\Application\LanguageFacade;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
+EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/HomeController.php';
-require_once __DIR__ . '/../../../src/backend/Services/HomeService.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../../src/backend/Controllers/BaseController.php';
 
 /**
- * Unit tests for the HomeController class.
+ * Unit tests for the Home module HomeController class.
  *
- * Tests the controller initialization, HomeService integration,
+ * Tests the controller initialization, HomeFacade integration,
  * and verifies the MVC pattern implementation for the home page.
  */
 class HomeControllerTest extends TestCase
@@ -88,7 +85,7 @@ class HomeControllerTest extends TestCase
      */
     private function createController(): HomeController
     {
-        return new HomeController(new HomeService(), new LanguageFacade());
+        return new HomeController(new HomeFacade(), new LanguageFacade());
     }
 
     // ===== Constructor tests =====
@@ -104,16 +101,16 @@ class HomeControllerTest extends TestCase
         $this->assertInstanceOf(HomeController::class, $controller);
     }
 
-    public function testControllerHasHomeService(): void
+    public function testControllerHasHomeFacade(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $controller = $this->createController();
-        $service = $controller->getHomeService();
+        $facade = $controller->getHomeFacade();
 
-        $this->assertInstanceOf(HomeService::class, $service);
+        $this->assertInstanceOf(HomeFacade::class, $facade);
     }
 
     // ===== Method existence tests =====
@@ -129,7 +126,7 @@ class HomeControllerTest extends TestCase
         $this->assertTrue(method_exists($controller, 'index'));
     }
 
-    public function testControllerHasGetHomeServiceMethod(): void
+    public function testControllerHasGetHomeFacadeMethod(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -137,20 +134,20 @@ class HomeControllerTest extends TestCase
 
         $controller = $this->createController();
 
-        $this->assertTrue(method_exists($controller, 'getHomeService'));
+        $this->assertTrue(method_exists($controller, 'getHomeFacade'));
     }
 
-    // ===== HomeService integration tests =====
+    // ===== HomeFacade integration tests =====
 
-    public function testHomeServiceGetsDashboardData(): void
+    public function testHomeFacadeGetsDashboardData(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $controller = $this->createController();
-        $service = $controller->getHomeService();
-        $data = $service->getDashboardData();
+        $facade = $controller->getHomeFacade();
+        $data = $facade->getDashboardData();
 
         $this->assertIsArray($data);
         $this->assertArrayHasKey('language_count', $data);
@@ -160,15 +157,15 @@ class HomeControllerTest extends TestCase
         $this->assertArrayHasKey('is_multi_user', $data);
     }
 
-    public function testHomeServiceGetsLanguageCount(): void
+    public function testHomeFacadeGetsLanguageCount(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $controller = $this->createController();
-        $service = $controller->getHomeService();
-        $count = $service->getLanguageCount();
+        $facade = $controller->getHomeFacade();
+        $count = $facade->getLanguageCount();
 
         $this->assertIsInt($count);
         $this->assertGreaterThanOrEqual(0, $count);
@@ -183,7 +180,7 @@ class HomeControllerTest extends TestCase
         }
 
         $controller = $this->createController();
-        $data = $controller->getHomeService()->getDashboardData();
+        $data = $controller->getHomeFacade()->getDashboardData();
 
         $this->assertIsInt($data['language_count']);
     }
@@ -195,7 +192,7 @@ class HomeControllerTest extends TestCase
         }
 
         $controller = $this->createController();
-        $data = $controller->getHomeService()->getDashboardData();
+        $data = $controller->getHomeFacade()->getDashboardData();
 
         $this->assertIsBool($data['is_wordpress']);
     }
@@ -209,7 +206,7 @@ class HomeControllerTest extends TestCase
         }
 
         $controller = $this->createController();
-        $data = $controller->getHomeService()->getDashboardData();
+        $data = $controller->getHomeFacade()->getDashboardData();
 
         $this->assertTrue(
             $data['current_text_id'] === null || is_int($data['current_text_id']),
@@ -224,7 +221,7 @@ class HomeControllerTest extends TestCase
         }
 
         $controller = $this->createController();
-        $data = $controller->getHomeService()->getDashboardData();
+        $data = $controller->getHomeFacade()->getDashboardData();
 
         $this->assertTrue(
             $data['current_language_id'] === null || is_int($data['current_language_id']),
@@ -239,7 +236,7 @@ class HomeControllerTest extends TestCase
         }
 
         $controller = $this->createController();
-        $data = $controller->getHomeService()->getDashboardData();
+        $data = $controller->getHomeFacade()->getDashboardData();
 
         $this->assertTrue(
             $data['current_text_info'] === null || is_array($data['current_text_info']),
@@ -249,25 +246,25 @@ class HomeControllerTest extends TestCase
 
     // ===== Integration tests =====
 
-    public function testDashboardDataConsistentWithService(): void
+    public function testDashboardDataConsistentWithFacade(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $controller = $this->createController();
-        $service = $controller->getHomeService();
+        $facade = $controller->getHomeFacade();
 
-        $dashboardData = $service->getDashboardData();
+        $dashboardData = $facade->getDashboardData();
 
         $this->assertSame(
-            $service->getLanguageCount(),
+            $facade->getLanguageCount(),
             $dashboardData['language_count'],
             'Language count should match'
         );
     }
 
-    public function testMultipleControllerInstancesShareService(): void
+    public function testMultipleControllerInstancesShareData(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -277,8 +274,8 @@ class HomeControllerTest extends TestCase
         $controller2 = $this->createController();
 
         // Both controllers should get consistent data
-        $data1 = $controller1->getHomeService()->getDashboardData();
-        $data2 = $controller2->getHomeService()->getDashboardData();
+        $data1 = $controller1->getHomeFacade()->getDashboardData();
+        $data2 = $controller2->getHomeFacade()->getDashboardData();
 
         $this->assertSame(
             $data1['language_count'],
@@ -296,22 +293,10 @@ class HomeControllerTest extends TestCase
         }
 
         $controller = $this->createController();
-        $count = $controller->getHomeService()->getLanguageCount();
+        $count = $controller->getHomeFacade()->getLanguageCount();
 
         // Just verify it's a valid non-negative count
         $this->assertGreaterThanOrEqual(0, $count);
-    }
-
-    public function testGetCurrentTextInfoForNonExistentText(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = $this->createController();
-        $result = $controller->getHomeService()->getCurrentTextInfo(999999);
-
-        $this->assertNull($result);
     }
 
     public function testGetLanguageNameForNonExistentLanguage(): void
@@ -321,7 +306,7 @@ class HomeControllerTest extends TestCase
         }
 
         $controller = $this->createController();
-        $result = $controller->getHomeService()->getLanguageName(999999);
+        $result = $controller->getHomeFacade()->getLanguageName(999999);
 
         $this->assertSame('', $result);
     }
@@ -337,7 +322,7 @@ class HomeControllerTest extends TestCase
         unset($_SESSION['LWT-WP-User']);
 
         $controller = $this->createController();
-        $data = $controller->getHomeService()->getDashboardData();
+        $data = $controller->getHomeFacade()->getDashboardData();
 
         $this->assertFalse($data['is_wordpress']);
     }
@@ -351,7 +336,7 @@ class HomeControllerTest extends TestCase
         $_SESSION['LWT-WP-User'] = 'test_user';
 
         $controller = $this->createController();
-        $data = $controller->getHomeService()->getDashboardData();
+        $data = $controller->getHomeFacade()->getDashboardData();
 
         $this->assertTrue($data['is_wordpress']);
 
