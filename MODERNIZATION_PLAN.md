@@ -1510,7 +1510,7 @@ All TagService functionality has been migrated to `TagsFacade`:
 | Metric | Status | Details |
 |--------|--------|---------|
 | Psalm Level 3 | PASS | 0 errors (2026-01-05) |
-| PHPUnit Tests | PASS | 2436 tests, 5304 assertions |
+| PHPUnit Tests | PASS | 2978 tests, 6525 assertions |
 | TypeScript | PASS | No errors |
 | ESLint | PASS | No errors |
 | Deprecated Code | WARNING | 66 items marked for v3.0.0 removal |
@@ -1571,7 +1571,7 @@ API handlers have been consolidated to module-based handlers:
 
 | Layer | Total | Tested | Gap |
 |-------|-------|--------|-----|
-| Module Facades | 7 | 1 | 86% |
+| Module Facades | 8 | 5 | 38% |
 | Module Use Cases | 65 | 0 | 100% |
 | Module Application Services | 7 | 0 | 100% |
 | Module HTTP Handlers | 7 | 4 | 43% |
@@ -1586,14 +1586,14 @@ API handlers have been consolidated to module-based handlers:
 
 **Priority Test Files Needed:**
 
-- `AdminFacadeTest.php`
-- `FeedFacadeTest.php`
-- `LanguageFacadeTest.php`
-- `ReviewFacadeTest.php`
-- `TextFacadeTest.php`
-- `VocabularyFacadeTest.php`
-- `SimilarityCalculatorTest.php`
-- `RssParserTest.php`
+- [x] `AdminFacadeTest.php` - Added 2026-01-05 (45 tests)
+- [x] `FeedFacadeTest.php` - Added 2026-01-05 (96 tests)
+- [x] `LanguageFacadeTest.php` - Added 2026-01-05 (47 tests)
+- [x] `ReviewFacadeTest.php` - Added 2026-01-05 (51 tests)
+- [x] `TextFacadeTest.php` - Rewritten 2026-01-05 (95 tests, replaced 69 tests with 40 skipped)
+- [x] `VocabularyFacadeTest.php` - Added 2026-01-05 (77 tests)
+- [x] `SimilarityCalculatorTest.php` - Added 2026-01-05 (87 tests)
+- [x] `RssParserTest.php` - Added 2026-01-05 (44 tests)
 
 ### 5.4 Static Analysis (Psalm Level 3)
 
@@ -1615,8 +1615,8 @@ Mixed naming conventions detected:
 
 **Backup Files to Remove:**
 
-- [ ] `phpunit.xml.bak`
-- [ ] `db/seeds/demo.sql.bak`
+- [x] `phpunit.xml.bak` - Removed (2026-01-05)
+- [x] `db/seeds/demo.sql.bak` - Removed (2026-01-05)
 
 **Critical TODOs to Resolve:**
 
@@ -1661,7 +1661,7 @@ Mixed naming conventions detected:
 - [ ] Migrate remaining controllers to modules OR create missing modules
 - [ ] Add tests for module facades (at least 80% coverage)
 - [ ] Remove deprecated routes and methods
-- [ ] Clean up backup files
+- [x] Clean up backup files (2026-01-05)
 - [ ] Standardize API parameter naming
 - [ ] Update API version from 0.1.1
 
