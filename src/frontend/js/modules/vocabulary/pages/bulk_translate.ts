@@ -50,16 +50,6 @@ export interface BulkTranslateConfig {
   targetLanguage: string;
 }
 
-/**
- * Term data interface.
- */
-interface TermData {
-  id: number;
-  text: string;
-  checked: boolean;
-  translation: string;
-  status: number;
-}
 
 /**
  * Bulk translate Alpine component data interface.
@@ -447,13 +437,12 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
      * Setup Google Translate callback.
      */
     setupGoogleTranslateCallback(): void {
-      const self = this;
-      window.googleTranslateElementInit = function() {
+      window.googleTranslateElementInit = () => {
         if (typeof google !== 'undefined' && google.translate) {
           new google.translate.TranslateElement({
-            pageLanguage: self.sourceLanguage,
+            pageLanguage: this.sourceLanguage,
             layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-            includedLanguages: self.targetLanguage,
+            includedLanguages: this.targetLanguage,
             autoDisplay: false
           }, 'google_translate_element');
         }

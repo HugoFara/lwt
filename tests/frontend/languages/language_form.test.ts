@@ -394,8 +394,7 @@ describe('language_form.ts', () => {
         </form>
       `;
 
-      const input = document.querySelector('[name="LgDict1URI"]') as HTMLInputElement;
-      languageForm.checkDictionaryChanged(input);
+      languageForm.checkDictionaryChanged();
 
       // Popup setting is now in database, not detected from URL
       const checkbox = document.querySelector('[name="LgDict1PopUp"]') as HTMLInputElement;
@@ -410,9 +409,8 @@ describe('language_form.ts', () => {
         </form>
       `;
 
-      const input = document.querySelector('[name="LgDict1URI"]') as HTMLInputElement;
       // Should not throw - method is now a no-op
-      expect(() => languageForm.checkDictionaryChanged(input)).not.toThrow();
+      expect(() => languageForm.checkDictionaryChanged()).not.toThrow();
     });
 
     it('does nothing when input is empty', () => {
@@ -423,8 +421,7 @@ describe('language_form.ts', () => {
         </form>
       `;
 
-      const input = document.querySelector('[name="LgDict1URI"]') as HTMLInputElement;
-      languageForm.checkDictionaryChanged(input);
+      languageForm.checkDictionaryChanged();
 
       const checkbox = document.querySelector('[name="LgDict1PopUp"]') as HTMLInputElement;
       expect(checkbox.checked).toBe(false);
@@ -650,7 +647,7 @@ describe('language_form.ts', () => {
       checkTranslatorChanged(input);
 
       expect(statusSpy).toHaveBeenCalledWith('https://translate.com');
-      expect(dictSpy).toHaveBeenCalledWith(input);
+      expect(dictSpy).toHaveBeenCalled();
     });
   });
 

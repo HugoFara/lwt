@@ -32,9 +32,7 @@ import { overlib } from '@modules/vocabulary/components/word_popup';
 import {
   lookupLocal,
   formatResults,
-  hasLocalDictionaries,
-  shouldUseOnline,
-  type LocalDictResult
+  hasLocalDictionaries
 } from '@/dictionaries';
 
 // Import API-based word actions
@@ -176,7 +174,7 @@ export async function createLocalDictSection(
       empty.textContent = 'No local results found.';
       container.appendChild(empty);
     }
-  } catch (err) {
+  } catch {
     loading.remove();
     const error = document.createElement('div');
     error.className = 'local-dict-error';

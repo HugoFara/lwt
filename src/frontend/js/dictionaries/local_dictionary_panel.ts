@@ -14,7 +14,6 @@ import {
   formatResults,
   hasLocalDictionaries,
   shouldUseOnline,
-  DictionaryMode,
   type LocalDictResult
 } from './local_dictionary_api';
 
@@ -30,7 +29,7 @@ interface LocalDictPanelState {
   panelElement: HTMLElement | null;
 
   // Methods
-  show(langId: number, term: string, targetElement: HTMLElement): Promise<void>;
+  show(langId: number, term: string): Promise<void>;
   hide(): void;
   toggle(): void;
 }
@@ -109,7 +108,7 @@ export function registerPanelComponent(): void {
     error: null as string | null,
     panelElement: null as HTMLElement | null,
 
-    async show(langId: number, term: string, targetElement: HTMLElement) {
+    async show(langId: number, term: string) {
       this.term = term;
       this.loading = true;
       this.error = null;
@@ -184,7 +183,7 @@ export async function showLocalDictPanel(
 
   // Get the Alpine component instance and trigger lookup
   const panelData = Alpine.$data(panel) as LocalDictPanelState;
-  await panelData.show(langId, term, targetElement);
+  await panelData.show(langId, term);
 
   // Determine if online dictionaries should also be shown
   const showOnline = await shouldUseOnline(langId, panelData.results.length > 0);
@@ -262,7 +261,7 @@ export async function showInlineResults(
     const showOnline = await shouldUseOnline(langId, results.length > 0);
     return { results, showOnline };
 
-  } catch (err) {
+  } catch {
     loadingDiv.remove();
     const errorDiv = document.createElement('div');
     errorDiv.className = 'local-dict-error';
