@@ -7,6 +7,7 @@ use Lwt\Api\V1\ApiV1;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Modules\Admin\AdminServiceProvider;
 use Lwt\Modules\Feed\FeedServiceProvider;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use PHPUnit\Framework\TestCase;
@@ -55,11 +56,16 @@ class ApiV1Test extends TestCase
     {
         parent::setUp();
 
-        // Register FeedServiceProvider for FeedHandler dependency
+        // Register service providers for handler dependencies
         $container = Container::getInstance();
-        $provider = new FeedServiceProvider();
-        $provider->register($container);
-        $provider->boot($container);
+
+        $feedProvider = new FeedServiceProvider();
+        $feedProvider->register($container);
+        $feedProvider->boot($container);
+
+        $adminProvider = new AdminServiceProvider();
+        $adminProvider->register($container);
+        $adminProvider->boot($container);
 
         $this->api = new ApiV1();
     }
@@ -117,9 +123,8 @@ class ApiV1Test extends TestCase
             'improvedTextHandler',
             'languageHandler',
             'mediaHandler',
+            'adminHandler',  // Combined settings + statistics handler
             'reviewHandler',
-            'settingsHandler',
-            'statisticsHandler',
             'termHandler',
             'textHandler',
         ];

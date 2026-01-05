@@ -3,7 +3,8 @@ namespace Lwt\Tests\Api\V1\Handlers;
 
 require_once __DIR__ . '/../../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Api\V1\Handlers\SettingsHandler;
+use Lwt\Modules\Admin\Application\AdminFacade;
+use Lwt\Modules\Admin\Http\AdminApiHandler;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
@@ -16,17 +17,16 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../../src/backend/Api/V1/ApiV1.php';
-require_once __DIR__ . '/../../../../../src/backend/Api/V1/Handlers/SettingsHandler.php';
 
 /**
- * Unit tests for the SettingsHandler class.
+ * Unit tests for the AdminApiHandler class (settings functionality).
  *
  * Tests settings-related API operations.
  */
 class SettingsHandlerTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private SettingsHandler $handler;
+    private AdminApiHandler $handler;
 
     public static function setUpBeforeClass(): void
     {
@@ -55,7 +55,13 @@ class SettingsHandlerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->handler = new SettingsHandler();
+        // Create mock AdminFacade for testing
+        $mockFacade = $this->createMock(AdminFacade::class);
+        $mockFacade->method('getIntensityStatistics')->willReturn(['languages' => [], 'totals' => []]);
+        $mockFacade->method('getFrequencyStatistics')->willReturn(['languages' => [], 'totals' => []]);
+        $mockFacade->method('getServerData')->willReturn([]);
+
+        $this->handler = new AdminApiHandler($mockFacade);
     }
 
     protected function tearDown(): void
@@ -71,11 +77,11 @@ class SettingsHandlerTest extends TestCase
     // ===== Class structure tests =====
 
     /**
-     * Test that SettingsHandler class has the required methods.
+     * Test that AdminApiHandler class has the required methods.
      */
     public function testClassHasRequiredMethods(): void
     {
-        $reflection = new \ReflectionClass(SettingsHandler::class);
+        $reflection = new \ReflectionClass(AdminApiHandler::class);
 
         // Business logic methods
         $this->assertTrue($reflection->hasMethod('saveSetting'));
@@ -121,13 +127,13 @@ class SettingsHandlerTest extends TestCase
      */
     public function testPublicMethods(): void
     {
-        $reflection = new \ReflectionClass(SettingsHandler::class);
+        $reflection = new \ReflectionClass(AdminApiHandler::class);
         $publicMethods = array_filter(
             $reflection->getMethods(\ReflectionMethod::IS_PUBLIC),
             fn($m) => !$m->isConstructor()
         );
 
-        // Should have at least 4 public methods
+        // Should have at least 4 public methods (settings + statistics)
         $this->assertGreaterThanOrEqual(4, count($publicMethods));
     }
 }

@@ -33,17 +33,17 @@ require_once __DIR__ . '/../../Services/MediaService.php';
 // Language module now loaded via autoloader
 
 use Lwt\Api\V1\Handlers\AuthHandler;
-use Lwt\Api\V1\Handlers\FeedHandler;
 use Lwt\Api\V1\Handlers\ImportHandler;
 use Lwt\Api\V1\Handlers\ImprovedTextHandler;
 use Lwt\Modules\Language\Http\LanguageApiHandler;
 use Lwt\Modules\Feed\Application\FeedFacade;
+use Lwt\Modules\Feed\Http\FeedApiHandler;
 use Lwt\Api\V1\Handlers\LocalDictionaryHandler;
 use Lwt\Api\V1\Handlers\MediaHandler;
+use Lwt\Modules\Admin\Application\AdminFacade;
+use Lwt\Modules\Admin\Http\AdminApiHandler;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
 use Lwt\Modules\Tags\Http\TagApiHandler;
-use Lwt\Api\V1\Handlers\SettingsHandler;
-use Lwt\Api\V1\Handlers\StatisticsHandler;
 use Lwt\Api\V1\Handlers\TermHandler;
 use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Core\Globals;
@@ -58,16 +58,15 @@ class ApiV1
     private const RELEASE_DATE = "2023-12-29";
 
     private AuthHandler $authHandler;
-    private FeedHandler $feedHandler;
+    private FeedApiHandler $feedHandler;
     private ImportHandler $importHandler;
     private ImprovedTextHandler $improvedTextHandler;
     private LanguageApiHandler $languageHandler;
     private LocalDictionaryHandler $localDictionaryHandler;
     private MediaHandler $mediaHandler;
+    private AdminApiHandler $adminHandler;
     private ReviewApiHandler $reviewHandler;
-    private SettingsHandler $settingsHandler;
     private TagApiHandler $tagHandler;
-    private StatisticsHandler $statisticsHandler;
     private TermHandler $termHandler;
     private TextApiHandler $textHandler;
 
@@ -85,7 +84,7 @@ class ApiV1
     public function __construct()
     {
         $this->authHandler = new AuthHandler();
-        $this->feedHandler = new FeedHandler(
+        $this->feedHandler = new FeedApiHandler(
             Container::getInstance()->get(FeedFacade::class)
         );
         $this->importHandler = new ImportHandler();
@@ -93,9 +92,10 @@ class ApiV1
         $this->languageHandler = new LanguageApiHandler();
         $this->localDictionaryHandler = new LocalDictionaryHandler();
         $this->mediaHandler = new MediaHandler();
+        $this->adminHandler = new AdminApiHandler(
+            Container::getInstance()->get(AdminFacade::class)
+        );
         $this->reviewHandler = new ReviewApiHandler();
-        $this->settingsHandler = new SettingsHandler();
-        $this->statisticsHandler = new StatisticsHandler();
         $this->tagHandler = new TagApiHandler();
         $this->termHandler = new TermHandler();
         $this->textHandler = new TextApiHandler();
@@ -273,7 +273,7 @@ class ApiV1
                 break;
 
             case 'settings':
-                Response::success($this->settingsHandler->formatSaveSetting(
+                Response::success($this->adminHandler->formatSaveSetting(
                     $params['key'],
                     $params['value']
                 ));
@@ -491,7 +491,7 @@ class ApiV1
     private function handleSettingsGet(array $fragments, array $params): void
     {
         if (($fragments[1] ?? '') === 'theme-path') {
-            Response::success($this->settingsHandler->formatThemePath($params['path']));
+            Response::success($this->adminHandler->formatThemePath($params['path']));
         } else {
             Response::error('Endpoint Not Found: ' . ($fragments[1] ?? ''), 404);
         }
@@ -564,7 +564,7 @@ class ApiV1
                 Response::error('Missing required parameter: texts_id', 400);
                 return;
             }
-            Response::success($this->statisticsHandler->formatTextsStatistics($textsId));
+            Response::success($this->adminHandler->formatTextsStatistics($textsId));
         } elseif (($fragments[1] ?? '') === 'by-language') {
             // GET /texts/by-language/{langId} - get paginated texts for a language
             if (!isset($fragments[2]) || !ctype_digit($fragments[2])) {
