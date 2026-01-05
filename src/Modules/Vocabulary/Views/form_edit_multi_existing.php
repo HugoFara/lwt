@@ -102,8 +102,8 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr>
         <td class="td1 right" colspan="2">
             <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin(
-                $term->lgid,
-                $term->text,
+                $term->lgid ?? 0,
+                $term->text ?? '',
                 'document.forms[0].WoSentence',
                 !InputValidator::hasFromGet('nodict')
             ); ?>
@@ -115,5 +115,5 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 </form>
 <?php
 // Display example sentences button
-echo (new SentenceService())->renderExampleSentencesArea($term->lgid, $term->textlc, 'document.forms.editword.WoSentence', $term->id);
+echo (new SentenceService())->renderExampleSentencesArea($term->lgid ?? 0, $term->textlc, 'document.forms.editword.WoSentence', $term->id);
 ?>

@@ -81,14 +81,15 @@ class FeedHandler
             ->where('NfID', '=', $nfid)
             ->updatePrepared(['NfUpdate' => time()]);
 
-        $nfMaxLinks = $this->feedService->getNfOption($nfoptions, 'max_links');
-        if (!$nfMaxLinks) {
+        $nfMaxLinksRaw = $this->feedService->getNfOption($nfoptions, 'max_links');
+        if (!$nfMaxLinksRaw || is_array($nfMaxLinksRaw)) {
             if ($this->feedService->getNfOption($nfoptions, 'article_source')) {
-                $nfMaxLinks = Settings::getWithDefault('set-max-articles-with-text');
+                $nfMaxLinksRaw = Settings::getWithDefault('set-max-articles-with-text');
             } else {
-                $nfMaxLinks = Settings::getWithDefault('set-max-articles-without-text');
+                $nfMaxLinksRaw = Settings::getWithDefault('set-max-articles-without-text');
             }
         }
+        $nfMaxLinks = (int)$nfMaxLinksRaw;
 
         $msg = $nfname . ": ";
         if (!$importedFeed) {
@@ -113,7 +114,7 @@ class FeedHandler
             ->where('FlNfID', '=', $nfid)
             ->firstPrepared();
 
-        $to = ((int)$row['total'] - $nfMaxLinks);
+        $to = ($row !== null ? (int)$row['total'] : 0) - $nfMaxLinks;
         if ($to > 0) {
             QueryBuilder::table('feedlinks')
                 ->whereIn('FlNfID', [$nfid])
@@ -138,7 +139,7 @@ class FeedHandler
     public function loadFeed(string $nfname, int $nfid, string $nfsourceuri, string $nfoptions): array
     {
         $articleSource = $this->feedService->getNfOption($nfoptions, 'article_source');
-        $feed = $this->feedService->parseRssFeed($nfsourceuri, $articleSource ?? '');
+        $feed = $this->feedService->parseRssFeed($nfsourceuri, is_string($articleSource) ? $articleSource : '');
         if (empty($feed)) {
             return [
                 "error" => 'Could not load "' . $nfname . '"'
@@ -207,7 +208,7 @@ class FeedHandler
         }
         if (!empty($query)) {
             $whereConditions[] = "NfName LIKE ?";
-            $params[] = '%' . str_replace('*', '%', $query) . '%';
+            $params[] = '%' . str_replace('*', '%', (string)$query) . '%';
         }
 
         $where = implode(' AND ', $whereConditions);
@@ -482,7 +483,7 @@ class FeedHandler
         $queryParams = [$feedId];
 
         if (!empty($query)) {
-            $pattern = '%' . str_replace('*', '%', $query) . '%';
+            $pattern = '%' . str_replace('*', '%', (string)$query) . '%';
             $whereConditions[] = "(FlTitle LIKE ? OR FlDescription LIKE ?)";
             $queryParams[] = $pattern;
             $queryParams[] = $pattern;
@@ -633,12 +634,11 @@ class FeedHandler
             $nfOptions = $row['NfOptions'] ?? '';
             $nfName = (string)$row['NfName'];
 
-            $tagName = $this->feedService->getNfOption($nfOptions, 'tag');
-            if (!$tagName) {
-                $tagName = mb_substr($nfName, 0, 20, 'utf-8');
-            }
+            $tagNameRaw = $this->feedService->getNfOption($nfOptions, 'tag');
+            $tagName = is_string($tagNameRaw) && $tagNameRaw !== '' ? $tagNameRaw : mb_substr($nfName, 0, 20, 'utf-8');
 
-            $maxTexts = (int)$this->feedService->getNfOption($nfOptions, 'max_texts');
+            $maxTextsRaw = $this->feedService->getNfOption($nfOptions, 'max_texts');
+            $maxTexts = is_string($maxTextsRaw) ? (int)$maxTextsRaw : 0;
             if (!$maxTexts) {
                 $maxTexts = (int)Settings::getWithDefault('set-max-texts-per-feed');
             }
@@ -650,11 +650,13 @@ class FeedHandler
                 'text' => $row['FlText']
             ]];
 
+            $charsetRaw = $this->feedService->getNfOption($nfOptions, 'charset');
+            $charset = is_string($charsetRaw) ? $charsetRaw : null;
             $texts = $this->feedService->extractTextFromArticle(
                 $doc,
                 $row['NfArticleSectionTags'],
                 $row['NfFilterTags'],
-                $this->feedService->getNfOption($nfOptions, 'charset')
+                $charset
             );
 
             if (isset($texts['error'])) {
@@ -665,15 +667,17 @@ class FeedHandler
                 unset($texts['error']);
             }
 
-            foreach ($texts as $text) {
-                $this->feedService->createTextFromFeed([
-                    'TxLgID' => $row['NfLgID'],
-                    'TxTitle' => $text['TxTitle'],
-                    'TxText' => $text['TxText'],
-                    'TxAudioURI' => $text['TxAudioURI'] ?? '',
-                    'TxSourceURI' => $text['TxSourceURI'] ?? ''
-                ], $tagName);
-                $imported++;
+            if (is_array($texts)) {
+                foreach ($texts as $text) {
+                    $this->feedService->createTextFromFeed([
+                        'TxLgID' => $row['NfLgID'],
+                        'TxTitle' => $text['TxTitle'],
+                        'TxText' => $text['TxText'],
+                        'TxAudioURI' => $text['TxAudioURI'] ?? '',
+                        'TxSourceURI' => $text['TxSourceURI'] ?? ''
+                    ], $tagName);
+                    $imported++;
+                }
             }
 
             $this->feedService->archiveOldTexts($tagName, $maxTexts);

@@ -1161,7 +1161,7 @@ class ApiV1
      */
     public static function handleRequest(): void
     {
-        $method = $_SERVER['REQUEST_METHOD'];
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
         if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE'])) {
             Response::error('Method Not Allowed', 405);
@@ -1176,6 +1176,6 @@ class ApiV1
         }
 
         $api = new self();
-        $api->handle($method, $_SERVER['REQUEST_URI'], $bodyData);
+        $api->handle($method, $_SERVER['REQUEST_URI'] ?? '/', $bodyData);
     }
 }

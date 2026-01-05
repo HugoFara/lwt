@@ -278,6 +278,7 @@ class Container implements ContainerInterface
      */
     private function autoWire(string $class): object
     {
+        /** @var class-string $class */
         $reflector = new \ReflectionClass($class);
 
         if (!$reflector->isInstantiable()) {
@@ -296,6 +297,7 @@ class Container implements ContainerInterface
         $parameters = $constructor->getParameters();
         $dependencies = $this->resolveDependencies($parameters);
 
+        /** @var list<mixed> $dependencies */
         return $reflector->newInstanceArgs($dependencies);
     }
 

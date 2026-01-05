@@ -9,6 +9,8 @@
  * - $languageName: Language name
  *
  * PHP version 8.1
+ *
+ * @psalm-suppress PossiblyUndefinedVariable Variables passed from controller
  */
 
 namespace Lwt\Views\Word;
@@ -60,7 +62,9 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 </tr>
 <tr>
 <td class="td1 right" colspan="2">  &nbsp;
-<?php echo createDictLinksInEditWin2(
+<?php
+/** @psalm-suppress PossiblyUndefinedVariable */
+echo createDictLinksInEditWin2(
     $lgid,
     'WoSentence',
     'WoText'

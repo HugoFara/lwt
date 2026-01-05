@@ -40,10 +40,10 @@ $varArray = [
             'dict_link2'      => $dictLink2,
             'translator_link' => $translatorLink,
             'delimiter'       => htmlspecialchars(
-                (string)str_replace(
+                str_replace(
                     ['\\',']','-','^'],
                     ['\\\\','\\]','\\-','\\^'],
-                    $termDelimiter
+                    (string)$termDelimiter
                 ),
                 ENT_QUOTES,
                 'UTF-8'

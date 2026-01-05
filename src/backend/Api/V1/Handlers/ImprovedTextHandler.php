@@ -120,6 +120,9 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
             ->select(['TxLgID', 'TxAnnotatedText'])
             ->where('TxID', '=', $textid)
             ->firstPrepared();
+        if ($record === null) {
+            return ['error' => 'Text not found'];
+        }
         $langid = (int)$record['TxLgID'];
         $ann = (string)$record['TxAnnotatedText'];
         if (strlen($ann) > 0) {
@@ -196,6 +199,9 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
             ->select(['TxLgID', 'TxAnnotatedText'])
             ->where('TxID', '=', $textid)
             ->firstPrepared();
+        if ($record === null) {
+            return '<p>Text not found</p>';
+        }
         $langid = (int) $record['TxLgID'];
         $ann = (string) $record['TxAnnotatedText'];
         if (strlen($ann) > 0) {
@@ -203,15 +209,15 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
             $ann = $annotationService->recreateSaveAnnotation($textid, $ann);
         }
 
-        $record = QueryBuilder::table('languages')
+        $langRecord = QueryBuilder::table('languages')
             ->select(['LgTextSize', 'LgRightToLeft'])
             ->where('LgID', '=', $langid)
             ->firstPrepared();
-        $textsize = (int)$record['LgTextSize'];
+        $textsize = $langRecord !== null ? (int)$langRecord['LgTextSize'] : 100;
         if ($textsize > 100) {
             $textsize = intval($textsize * 0.8);
         }
-        $rtlScript = $record['LgRightToLeft'];
+        $rtlScript = $langRecord !== null ? $langRecord['LgRightToLeft'] : false;
 
         $r =
         '<form action="" method="post">
@@ -271,21 +277,22 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
                         ' . IconHelper::render('file-pen-line', ['title' => 'Edit Term', 'alt' => 'Edit Term']) . '
                     </span>';
                 }
+                $termText = $vals[1] ?? '';
                 $r .= '<tr>
                     <td class="td1 center" style="font-size:' . $textsize . '%;"' .
                     ($rtlScript ? ' dir="rtl"' : '') . '>
-                        <span id="term' . $i . '">' . htmlspecialchars($vals[1] ?? '', ENT_QUOTES, 'UTF-8') .
+                        <span id="term' . $i . '">' . htmlspecialchars($termText, ENT_QUOTES, 'UTF-8') .
                         '</span>
                     </td>
                     <td class="td1 center" nowrap="nowrap">' .
-                        (new DictionaryAdapter())->makeDictLinks($langid, $vals[1]) .
+                        (new DictionaryAdapter())->makeDictLinks($langid, $termText) .
                     '</td>
                     <td class="td1 center">
                         <span id="editlink' . $i . '">' . $wordLink . '</span>
                     </td>
                     <td class="td1" style="font-size:90%;">
                         <span id="transsel' . $i . '">' .
-                            $this->makeTrans($i, $wid, $trans, $vals[1], $langid) . '
+                            $this->makeTrans($i, $wid, $trans, $termText, $langid) . '
                         </span>
                     </td>
                 </tr>';

@@ -151,31 +151,31 @@ foreach ($words as $record):
         </div>
     </td>
     <?php if ($currentlang == ''): ?>
-    <td class="has-text-centered"><?php echo htmlspecialchars($record['LgName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+    <td class="has-text-centered"><?php echo htmlspecialchars((string)($record['LgName'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
     <?php endif; ?>
     <td>
         <span<?php
         if (!empty($record['LgGoogleTranslateURI']) && strpos((string) $record['LgGoogleTranslateURI'], '&sl=') !== false) {
-            $langCode = preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']);
+            $langCode = preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', (string)$record['LgGoogleTranslateURI']);
             echo ' class="tts_' . (is_string($langCode) ? $langCode : '') . '"';
         }
         echo ($record['LgRightToLeft'] ? ' dir="rtl"' : '');
-        ?>><strong><?php echo htmlspecialchars($record['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></strong></span>
+        ?>><strong><?php echo htmlspecialchars((string)($record['WoText'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></strong></span>
         <?php
         $romanization = $record['WoRomanization'] != ''
-            ? htmlspecialchars(ExportService::replaceTabNewline($record['WoRomanization']), ENT_QUOTES, 'UTF-8')
+            ? htmlspecialchars(ExportService::replaceTabNewline((string)$record['WoRomanization']), ENT_QUOTES, 'UTF-8')
             : '*';
         ?>
         <span class="has-text-grey"> / </span>
         <span id="roman<?php echo $record['WoID']; ?>" class="edit_area clickedit has-text-grey-dark"><?php echo $romanization; ?></span>
     </td>
     <td>
-        <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation']), ENT_QUOTES, 'UTF-8'); ?></span>
-        <?php echo TagHelper::renderInline($record['taglist'] ?? ''); ?>
+        <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline((string)($record['WoTranslation'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></span>
+        <?php echo TagHelper::renderInline((string)($record['taglist'] ?? '')); ?>
     </td>
     <td class="has-text-centered">
         <?php echo ($record['SentOK'] != 0
-            ? IconHelper::render('circle-check', ['title' => htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8'), 'alt' => 'Yes', 'class' => 'has-text-success'])
+            ? IconHelper::render('circle-check', ['title' => htmlspecialchars((string)($record['WoSentence'] ?? ''), ENT_QUOTES, 'UTF-8'), 'alt' => 'Yes', 'class' => 'has-text-success'])
             : IconHelper::render('circle-x', ['title' => '(No valid sentence)', 'alt' => 'No', 'class' => 'has-text-danger'])); ?>
     </td>
     <td class="has-text-centered" title="<?php echo htmlspecialchars($statusName, ENT_QUOTES, 'UTF-8'); ?>">
@@ -217,11 +217,11 @@ foreach ($words as $record):
                 <div class="level-item">
                     <span<?php
                     if (!empty($record['LgGoogleTranslateURI']) && strpos((string) $record['LgGoogleTranslateURI'], '&sl=') !== false) {
-                        $langCode = preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']);
+                        $langCode = preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', (string)$record['LgGoogleTranslateURI']);
                         echo ' class="tts_' . (is_string($langCode) ? $langCode : '') . '"';
                     }
                     echo ($record['LgRightToLeft'] ? ' dir="rtl"' : '');
-                    ?>><strong class="is-size-5"><?php echo htmlspecialchars($record['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></strong></span>
+                    ?>><strong class="is-size-5"><?php echo htmlspecialchars((string)($record['WoText'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></strong></span>
                 </div>
             </div>
             <div class="level-right">
@@ -236,22 +236,22 @@ foreach ($words as $record):
 
         <?php if ($record['WoRomanization'] != ''): ?>
         <p class="has-text-grey is-size-7 mb-1">
-            <span id="roman<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoRomanization']), ENT_QUOTES, 'UTF-8'); ?></span>
+            <span id="roman<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline((string)$record['WoRomanization']), ENT_QUOTES, 'UTF-8'); ?></span>
         </p>
         <?php endif; ?>
 
         <p class="mb-2">
-            <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation']), ENT_QUOTES, 'UTF-8'); ?></span>
+            <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline((string)($record['WoTranslation'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></span>
         </p>
 
         <div class="is-flex is-justify-content-space-between is-align-items-center">
             <div class="tags">
                 <?php if ($currentlang == '' && !empty($record['LgName'])): ?>
-                <span class="tag is-info is-light"><?php echo htmlspecialchars($record['LgName'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="tag is-info is-light"><?php echo htmlspecialchars((string)$record['LgName'], ENT_QUOTES, 'UTF-8'); ?></span>
                 <?php endif; ?>
-                <?php echo TagHelper::renderInline($record['taglist'] ?? ''); ?>
+                <?php echo TagHelper::renderInline((string)($record['taglist'] ?? '')); ?>
                 <?php if ($record['SentOK'] != 0): ?>
-                <span class="tag is-success is-light" title="<?php echo htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                <span class="tag is-success is-light" title="<?php echo htmlspecialchars((string)($record['WoSentence'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                     <?php echo IconHelper::render('message-square', ['alt' => 'Has sentence']); ?>
                 </span>
                 <?php endif; ?>

@@ -17,6 +17,8 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @psalm-suppress PossiblyUndefinedVariable Variables passed from controller
  */
 
 namespace Lwt\Views\Word;
@@ -81,7 +83,7 @@ data-lwt-clear-frame="true">
         </tr>
         <tr>
             <td class="td1 right" colspan="2">  &nbsp;
-                <?php echo $dictService->createDictLinksInEditWin3($lang, 'WoSentence', 'WoText'); ?>
+                <?php /** @psalm-suppress PossiblyUndefinedVariable */ echo $dictService->createDictLinksInEditWin3($lang, 'WoSentence', 'WoText'); ?>
                 &nbsp; &nbsp;
                 <input type="submit" name="op" value="Save" />
             </td>
