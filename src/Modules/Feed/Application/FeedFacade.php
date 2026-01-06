@@ -883,9 +883,9 @@ class FeedFacade
             mysqli_free_result($result);
 
             // Archive excess texts
-            if ($textCount > $nfMaxTexts) {
+            if ($textCount > (int)$nfMaxTexts) {
                 sort($textItem, SORT_NUMERIC);
-                $textItem = array_slice($textItem, 0, $textCount - $nfMaxTexts);
+                $textItem = array_slice($textItem, 0, $textCount - (int)$nfMaxTexts);
 
                 foreach ($textItem as $textID) {
                     $message3 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('textitems2')
@@ -905,7 +905,7 @@ class FeedFacade
                         TxAudioURI, TxSourceURI'
                             . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValue('archivedtexts')
                         . ' FROM texts
-                        WHERE TxID = ' . $textID
+                        WHERE TxID = ' . (int)$textID
                         . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTable('texts')
                     );
 
@@ -913,7 +913,7 @@ class FeedFacade
                     \Lwt\Shared\Infrastructure\Database\Connection::execute(
                         'INSERT INTO archtexttags (AgAtID, AgT2ID)
                         SELECT ' . $archiveId . ', TtT2ID FROM texttags
-                        WHERE TtTxID = ' . $textID
+                        WHERE TtTxID = ' . (int)$textID
                     );
 
                     $message1 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('texts')

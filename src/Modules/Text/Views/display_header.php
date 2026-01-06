@@ -30,7 +30,7 @@ use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
-<h1><?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
+<h1><?php echo \htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h1>
 <div class="flex-spaced">
     <div>
         <span id="hidet" class="click" data-action="hide-translations">

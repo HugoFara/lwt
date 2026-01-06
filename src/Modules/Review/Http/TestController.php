@@ -180,7 +180,7 @@ class TestController extends BaseController
         // Validate single language
         $validation = $this->reviewFacade->validateTestSelection($testsql);
         if (!$validation['valid']) {
-            echo '<p>Sorry - ' . $validation['error'] . '</p>';
+            echo '<p>Sorry - ' . ($validation['error'] ?? 'Unknown error') . '</p>';
             return;
         }
 

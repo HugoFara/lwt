@@ -101,11 +101,13 @@ class TagsServiceProvider implements ServiceProviderInterface
         });
 
         // Interface bindings with aliases for term/text discrimination
-        $container->singleton('tags.repository.term', function (Container $c) {
+        $container->singleton('tags.repository.term', function (Container $c): MySqlTermTagRepository {
+            /** @var MySqlTermTagRepository */
             return $c->get(MySqlTermTagRepository::class);
         });
 
-        $container->singleton('tags.repository.text', function (Container $c) {
+        $container->singleton('tags.repository.text', function (Container $c): MySqlTextTagRepository {
+            /** @var MySqlTextTagRepository */
             return $c->get(MySqlTextTagRepository::class);
         });
     }
@@ -141,15 +143,18 @@ class TagsServiceProvider implements ServiceProviderInterface
         });
 
         // Interface bindings with aliases
-        $container->singleton('tags.association.word', function (Container $c) {
+        $container->singleton('tags.association.word', function (Container $c): MySqlWordTagAssociation {
+            /** @var MySqlWordTagAssociation */
             return $c->get(MySqlWordTagAssociation::class);
         });
 
-        $container->singleton('tags.association.text', function (Container $c) {
+        $container->singleton('tags.association.text', function (Container $c): MySqlTextTagAssociation {
+            /** @var MySqlTextTagAssociation */
             return $c->get(MySqlTextTagAssociation::class);
         });
 
-        $container->singleton('tags.association.archived', function (Container $c) {
+        $container->singleton('tags.association.archived', function (Container $c): MySqlArchivedTextTagAssociation {
+            /** @var MySqlArchivedTextTagAssociation */
             return $c->get(MySqlArchivedTextTagAssociation::class);
         });
     }
@@ -248,7 +253,8 @@ class TagsServiceProvider implements ServiceProviderInterface
         });
 
         // Default TagsFacade binding (term tags)
-        $container->singleton(TagsFacade::class, function (Container $c) {
+        $container->singleton(TagsFacade::class, function (Container $c): TagsFacade {
+            /** @var TagsFacade */
             return $c->get('tags.facade.term');
         });
     }

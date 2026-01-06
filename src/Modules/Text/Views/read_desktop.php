@@ -90,7 +90,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
   </div>
 
   <!-- Audio player (if media available) -->
-  <?php if (isset($media) && $media !== ''): ?>
+  <?php if ($media !== ''): ?>
   <div class="box py-2 px-4 mb-0" style="border-radius: 0;">
     <?php (new MediaService())->renderMediaPlayer($media, $audioPosition); ?>
   </div>

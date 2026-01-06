@@ -172,7 +172,6 @@ class MySqlFeedRepository extends AbstractRepository implements FeedRepositoryIn
      */
     public function save(object $entity): int
     {
-        assert($entity instanceof Feed);
         $data = $this->mapToRow($entity);
 
         if ($entity->isNew()) {

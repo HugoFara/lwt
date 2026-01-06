@@ -46,7 +46,7 @@ class GetLanguageCode
     {
         if (is_int($id)) {
             $lg_id = $id;
-        } elseif (isset($id) && trim($id) != '' && ctype_digit($id)) {
+        } elseif (trim($id) != '' && ctype_digit($id)) {
             $lg_id = (int) $id;
         } else {
             return '';

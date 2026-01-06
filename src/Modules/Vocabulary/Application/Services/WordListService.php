@@ -199,7 +199,7 @@ class WordListService
         } elseif ($whTag2 !== null && $whTag1 === null) {
             return " having (" . $whTag2 . ') ';
         } else {
-            return " having ((" . $whTag1 . ($tag12 ? ') AND (' : ') OR (') . $whTag2 . ")) ";
+            return " having ((" . (string)$whTag1 . ($tag12 ? ') AND (' : ') OR (') . (string)$whTag2 . ")) ";
         }
     }
 
@@ -909,7 +909,7 @@ class WordListService
             $bindings
         );
 
-        if (!$record) {
+        if ($record === null) {
             return null;
         }
 

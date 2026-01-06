@@ -891,7 +891,7 @@ class WordService
             $bindings
         );
 
-        if (!$record) {
+        if ($record === null) {
             return null;
         }
 
@@ -1092,7 +1092,7 @@ class WordService
             $bindings
         );
 
-        if (!$record) {
+        if ($record === null) {
             return null;
         }
 
@@ -1587,7 +1587,7 @@ class WordService
             $bindings
         );
 
-        if (!$record) {
+        if ($record === null) {
             return null;
         }
 

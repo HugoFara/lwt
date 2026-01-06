@@ -76,7 +76,7 @@ class CreateTermFromHover
                 $sourceLang,
                 $targetLang
             );
-            if ($translationResult) {
+            if ($translationResult !== false && isset($translationResult[0])) {
                 $translation = $translationResult[0];
             }
             // Don't use word as its own translation

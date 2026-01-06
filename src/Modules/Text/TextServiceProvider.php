@@ -75,7 +75,8 @@ class TextServiceProvider implements ServiceProviderInterface
         });
 
         // Register MySqlTextRepository as concrete implementation
-        $container->singleton(MySqlTextRepository::class, function (Container $c) {
+        $container->singleton(MySqlTextRepository::class, function (Container $c): MySqlTextRepository {
+            /** @var MySqlTextRepository */
             return $c->get(TextRepositoryInterface::class);
         });
 

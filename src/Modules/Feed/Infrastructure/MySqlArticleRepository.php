@@ -287,7 +287,6 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
      */
     public function save(object $entity): int
     {
-        assert($entity instanceof Article);
         $data = $this->mapToRow($entity);
 
         if ($entity->isNew()) {

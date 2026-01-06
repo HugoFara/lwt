@@ -23,9 +23,6 @@ namespace Lwt\Views\Text;
 use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-/** @var int $textId */
-/** @var array $record */
-
 $phpSelf = $_SERVER['PHP_SELF'] ?? '';
 ?>
 <h2 class="title is-4">Edit Archived Text</h2>

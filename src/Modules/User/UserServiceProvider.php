@@ -106,7 +106,8 @@ class UserServiceProvider implements ServiceProviderInterface
         });
 
         // Also register concrete class for direct injection
-        $container->singleton(MySqlUserRepository::class, function (Container $c) {
+        $container->singleton(MySqlUserRepository::class, function (Container $c): MySqlUserRepository {
+            /** @var MySqlUserRepository */
             return $c->get(UserRepositoryInterface::class);
         });
     }

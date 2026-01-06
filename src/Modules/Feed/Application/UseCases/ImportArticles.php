@@ -123,7 +123,7 @@ class ImportArticles
         ];
 
         $options = $feed->options();
-        $tagName = $options->get('tag') ?? ('feed_' . $feed->id());
+        $tagName = $options->get('tag') ?? ('feed_' . (int)$feed->id());
         $maxTexts = (int) ($options->get('max_texts') ?? 100);
         $charset = $options->get('charset');
 

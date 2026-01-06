@@ -22,7 +22,6 @@ export * from './pages/reading/text_events';
 export * from './pages/reading/text_keyboard';
 export * from './pages/reading/text_multiword_selection';
 export * from './pages/reading/text_reading_init';
-export * from './pages/reading/frame_management';
 export * from './pages/reading/set_mode_result';
 export * from './pages/reading/annotation_toggle';
 export * from './pages/reading/annotation_interactions';

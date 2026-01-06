@@ -62,10 +62,10 @@ class ParseText
         $result = TextParsing::checkText($text, $languageId);
 
         return [
-            'sentences' => (int) ($result['sentences'] ?? 0),
-            'words' => (int) ($result['words'] ?? 0),
-            'unknownPercent' => (float) ($result['unknownPercent'] ?? 100.0),
-            'preview' => (string) ($result['preview'] ?? '')
+            'sentences' => $result['sentences'] ?? 0,
+            'words' => $result['words'] ?? 0,
+            'unknownPercent' => $result['unknownPercent'] ?? 100.0,
+            'preview' => $result['preview'] ?? ''
         ];
     }
 

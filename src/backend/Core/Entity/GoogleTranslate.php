@@ -57,14 +57,15 @@ class GoogleTranslate
 
     private static function setHeaders(): void
     {
+        $domain = self::$gglDomain ?? 'com';
         self::$headers = array(
             'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language: en-US,en',
             'Connection: keep-alive',
             'Cookie: OGPC=4061130-1:',
             'DNT: 1',
-            'Host: translate.google.' . self::$gglDomain,
-            'Referer: https://translate.google.' . self::$gglDomain . '/',
+            'Host: translate.google.' . $domain,
+            'Referer: https://translate.google.' . $domain . '/',
             'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1'
         );
     }

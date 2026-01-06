@@ -106,8 +106,8 @@ class BuildTextFilters
      * @return string SQL HAVING clause
      */
     public function buildTagHavingClause(
-        $tag1,
-        $tag2,
+        string|int $tag1,
+        string|int $tag2,
         string $tag12,
         string $tagIdCol = 'TtT2ID'
     ): string {

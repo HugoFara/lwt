@@ -800,7 +800,7 @@ class TagsFacade
             while ($record = mysqli_fetch_assoc($res)) {
                 $count += (int) Connection::execute(
                     'INSERT IGNORE INTO wordtags (WtWoID, WtTgID)
-                    VALUES(' . $record['WoID'] . ', ' . $tagId . ')'
+                    VALUES(' . (int)$record['WoID'] . ', ' . $tagId . ')'
                 );
             }
             mysqli_free_result($res);
@@ -884,7 +884,7 @@ class TagsFacade
             while ($record = mysqli_fetch_assoc($res)) {
                 $count += (int) Connection::execute(
                     'INSERT IGNORE INTO texttags (TtTxID, TtT2ID)
-                    VALUES(' . $record['TxID'] . ', ' . $tagId . ')'
+                    VALUES(' . (int)$record['TxID'] . ', ' . $tagId . ')'
                 );
             }
             mysqli_free_result($res);
@@ -968,7 +968,7 @@ class TagsFacade
             while ($record = mysqli_fetch_assoc($res)) {
                 $count += (int) Connection::execute(
                     'INSERT IGNORE INTO archtexttags (AgAtID, AgT2ID)
-                    VALUES(' . $record['AtID'] . ', ' . $tagId . ')'
+                    VALUES(' . (int)$record['AtID'] . ', ' . $tagId . ')'
                 );
             }
             mysqli_free_result($res);

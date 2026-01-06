@@ -202,7 +202,7 @@ class TextFacade
     /**
      * Build HAVING clause for archived text tag filtering.
      */
-    public function buildArchivedTagHavingClause($tag1, $tag2, string $tag12): string
+    public function buildArchivedTagHavingClause(string|int $tag1, string|int $tag2, string $tag12): string
     {
         return $this->buildTextFilters->buildArchivedTagHavingClause($tag1, $tag2, $tag12);
     }
@@ -221,7 +221,7 @@ class TextFacade
     /**
      * Build HAVING clause for text tag filtering.
      */
-    public function buildTextTagHavingClause($tag1, $tag2, string $tag12): string
+    public function buildTextTagHavingClause(string|int $tag1, string|int $tag2, string $tag12): string
     {
         return $this->buildTextFilters->buildTextTagHavingClause($tag1, $tag2, $tag12);
     }

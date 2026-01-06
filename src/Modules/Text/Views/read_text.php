@@ -31,6 +31,10 @@ namespace Lwt\Views\Text;
 
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 
+// Compute annotations JSON safely
+$annotationJson = (new AnnotationService())->annotationToJson($annotatedText);
+$annotations = json_decode($annotationJson !== false ? $annotationJson : '[]', true);
+
 // Build variable array for JavaScript - will be merged into LWT_DATA by TypeScript
 $varArray = [
     'LWT_DATA' => [
@@ -54,7 +58,7 @@ $varArray = [
         'text' => [
             'id'               => $textId,
             'reading_position' => $textPosition,
-            'annotations'      => json_decode((new AnnotationService())->annotationToJson($annotatedText) ?: '[]')
+            'annotations'      => $annotations
         ],
         'settings' => [
             'hts'                => $hts,

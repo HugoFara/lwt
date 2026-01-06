@@ -820,7 +820,7 @@ class TextController extends BaseController
         if ($chgId !== null) {
             $textId = $chgId;
             $record = $this->textService->getArchivedTextById($textId);
-            if ($record) {
+            if ($record !== null) {
                 $languages = $this->languageService->getLanguagesForSelect();
                 include LWT_TEXT_MODULE_VIEWS . '/archived_form.php';
             }

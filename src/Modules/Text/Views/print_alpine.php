@@ -30,8 +30,8 @@ $title = $viewData['title'] ?? '';
 $sourceUri = $viewData['sourceUri'] ?? '';
 $audioUri = $viewData['audioUri'] ?? '';
 $textSize = $viewData['textSize'] ?? 100;
-$rtlScript = $viewData['rtlScript'] ?? false;
-$hasAnnotation = $viewData['hasAnnotation'] ?? false;
+$rtlScript = (bool)($viewData['rtlScript'] ?? false);
+$hasAnnotation = (bool)($viewData['hasAnnotation'] ?? false);
 
 // Determine URLs based on mode
 $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';

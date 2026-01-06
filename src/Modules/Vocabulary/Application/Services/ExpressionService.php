@@ -75,8 +75,8 @@ class ExpressionService
             $arr = explode("\t", $row, 4);
             // Not a word (punctuation)
             if (
-                !empty($arr[0]) && $arr[0] != "EOP"
-                && in_array($arr[1], ["2", "6", "7"])
+                isset($arr[0]) && $arr[0] !== '' && $arr[0] !== "EOP"
+                && isset($arr[1]) && in_array($arr[1], ["2", "6", "7"])
             ) {
                 $parsed_text .= $arr[0] . ' ';
             }
@@ -98,8 +98,8 @@ class ExpressionService
                 $arr = explode("\t", $row, 4);
                 // Not a word (punctuation)
                 if (
-                    !empty($arr[0]) && $arr[0] != "EOP"
-                    && in_array($arr[1], ["2", "6", "7"])
+                    isset($arr[0]) && $arr[0] !== '' && $arr[0] !== "EOP"
+                    && isset($arr[1]) && in_array($arr[1], ["2", "6", "7"])
                 ) {
                     $parsed_sentence .= $arr[0] . ' ';
                 }
@@ -190,7 +190,7 @@ class ExpressionService
                     $string,
                     $ma
                 );
-                if (!empty($ma[1])) {
+                if (isset($ma[1]) && $ma[1] !== '') {
                     $textlc = trim($ma[1]);
                     $notermchar = "/[^$termchar]($textlc)[^$termchar]/ui";
                     $rSflag = true; // Pattern found, stop further processing
@@ -273,9 +273,9 @@ class ExpressionService
                     $appendtext[$txId][$occ['position']] = "&nbsp;$len&nbsp";
                 } else {
                     if ('MECAB' == strtoupper(trim($regexp))) {
-                        $appendtext[$txId][$occ['position']] = (string)($occ['term'] ?? '');
+                        $appendtext[$txId][$occ['position']] = $occ['term'] ?? '';
                     } else {
-                        $appendtext[$txId][$occ['position']] = (string)($occ['term_display'] ?? $occ['term'] ?? '');
+                        $appendtext[$txId][$occ['position']] = $occ['term_display'] ?? $occ['term'] ?? '';
                     }
                 }
             }

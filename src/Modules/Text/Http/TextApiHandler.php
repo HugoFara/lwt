@@ -331,7 +331,7 @@ class TextApiHandler
             ->where('TxID', '=', $textId)
             ->firstPrepared();
 
-        if (!$textInfo) {
+        if ($textInfo === null) {
             return ['error' => 'Text not found'];
         }
 
@@ -344,7 +344,7 @@ class TextApiHandler
             ->where('LgID', '=', $langId)
             ->firstPrepared();
 
-        if (!$langInfo) {
+        if ($langInfo === null) {
             return ['error' => 'Language not found'];
         }
 
@@ -693,8 +693,8 @@ class TextApiHandler
                 $r .= '<span class="nowrap">
                     <input class="impr-ann-radio" ' .
                     ($tt == $trans ? 'checked="checked" ' : '') . 'type="radio" name="rg' .
-                    $i . '" value="' . htmlspecialchars($tt ?? '', ENT_QUOTES, 'UTF-8') . '" />
-                    &nbsp;' . htmlspecialchars($tt ?? '', ENT_QUOTES, 'UTF-8') . '
+                    $i . '" value="' . htmlspecialchars($tt, ENT_QUOTES, 'UTF-8') . '" />
+                    &nbsp;' . htmlspecialchars($tt, ENT_QUOTES, 'UTF-8') . '
                 </span>
                 <br />';
             }
@@ -704,7 +704,7 @@ class TextApiHandler
         ($set ? 'checked="checked" ' : '') . 'value="" />
         &nbsp;
         <input class="impr-ann-text" type="text" name="tx' . $i .
-        '" id="tx' . $i . '" value="' . ($set ? htmlspecialchars($trans ?? '', ENT_QUOTES, 'UTF-8') : '') .
+        '" id="tx' . $i . '" value="' . ($set ? htmlspecialchars($trans, ENT_QUOTES, 'UTF-8') : '') .
         '" maxlength="50" size="40" />
          &nbsp;
 ' . IconHelper::render('eraser', ['title' => 'Erase Text Field', 'alt' => 'Erase Text Field', 'class' => 'click', 'data-action' => 'erase-field', 'data-target' => '#tx' . $i]) . '
@@ -861,7 +861,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         if ($textsize > 100) {
             $textsize = intval($textsize * 0.8);
         }
-        $rtlScript = $langRecord !== null ? $langRecord['LgRightToLeft'] : false;
+        $rtlScript = $langRecord !== null && !empty($langRecord['LgRightToLeft']);
 
         $dictionaryAdapter = new DictionaryAdapter();
 
@@ -946,7 +946,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
                 $nontermbuffer .= str_replace(
                     "¶",
                     '' . IconHelper::render('wrap-text', ['title' => 'New Line', 'alt' => 'New Line']) . '',
-                    htmlspecialchars(trim($vals[1] ?? '') ?? '', ENT_QUOTES, 'UTF-8')
+                    htmlspecialchars(trim($vals[1] ?? ''), ENT_QUOTES, 'UTF-8')
                 );
             }
         }

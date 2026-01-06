@@ -210,9 +210,9 @@ class RssParser
      * @param \DOMElement $node     Item node
      * @param array       $feedTags Tag mapping
      *
-     * @return array|null Parsed item or null if invalid
+     * @return array{title: string, desc: string, link: string, encoded?: string, description?: string, content?: string} Parsed item
      */
-    private function parseItemForDetection(\DOMElement $node, array $feedTags): ?array
+    private function parseItemForDetection(\DOMElement $node, array $feedTags): array
     {
         $titleNode = $node->getElementsByTagName($feedTags['title'])->item(0);
         $descNode = $node->getElementsByTagName($feedTags['description'])->item(0);

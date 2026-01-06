@@ -78,7 +78,8 @@ class WordUploadService
         }
 
         // Check PHP mysqli setting
-        if (!ini_get('mysqli.allow_local_infile')) {
+        $phpValue = ini_get('mysqli.allow_local_infile');
+        if ($phpValue === false || $phpValue === '' || $phpValue === '0') {
             return false;
         }
 

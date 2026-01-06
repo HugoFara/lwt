@@ -76,7 +76,7 @@ class Maintenance
         ) AND Name NOT LIKE "\\_%"';
         $rows = Connection::fetchAll($sql);
         foreach ($rows as $row) {
-            Connection::execute('OPTIMIZE TABLE ' . $row['Name']);
+            Connection::execute('OPTIMIZE TABLE ' . (string)$row['Name']);
         }
     }
 

@@ -233,7 +233,7 @@ class SentenceService
      */
     public function findSentencesFromWord(?int $wid, string $wordlc, int $lid, int $limit = -1): array
     {
-        if (empty($wid)) {
+        if ($wid === null) {
             $sql = "SELECT DISTINCT SeID, SeText
                 FROM sentences, textitems2
                 WHERE LOWER(Ti2Text) = ?
@@ -569,7 +569,7 @@ class SentenceService
         // Find the previous sentence boundary (before the target word)
         $textBefore = mb_substr($text, 0, $targetPos);
         $sentenceStart = 0;
-        if (preg_match_all($sentenceEndPattern, $textBefore, $matches, PREG_OFFSET_CAPTURE)) {
+        if (preg_match_all($sentenceEndPattern, $textBefore, $matches, PREG_OFFSET_CAPTURE) > 0) {
             // Get the last match - this is the end of the previous sentence
             $lastMatch = end($matches[0]);
             if ($lastMatch !== false) {
@@ -687,7 +687,7 @@ class SentenceService
         foreach ($res as $record) {
             if ($last != $record['SeText']) {
                 $sent = $this->formatSentence((int)$record['SeID'], $wordlc, $mode);
-                if (mb_strstr($sent[1], '}', false, 'UTF-8')) {
+                if (mb_strstr($sent[1], '}', false, 'UTF-8') !== false) {
                     $r[] = $sent;
                 }
             }

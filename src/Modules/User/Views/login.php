@@ -19,7 +19,7 @@
 namespace Lwt\Modules\User\Views;
 
 // Default variables
-$error = $error ?? null;
+$error = isset($error) && is_string($error) ? $error : null;
 $username = $username ?? '';
 ?>
 
@@ -44,7 +44,7 @@ $username = $username ?? '';
                     </div>
 
                     <!-- Error message -->
-                    <?php if ($error): ?>
+                    <?php if ($error !== null): ?>
                     <div class="notification is-danger is-light">
                         <button class="delete" onclick="this.parentElement.remove()"></button>
                         <?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?>

@@ -219,7 +219,7 @@ class WordPressAuthService
      */
     public function validateRedirectUrl(?string $redirectUrl): string
     {
-        if (empty($redirectUrl)) {
+        if ($redirectUrl === null || $redirectUrl === '') {
             return 'index.php';
         }
 

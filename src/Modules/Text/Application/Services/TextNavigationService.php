@@ -119,11 +119,11 @@ class TextNavigationService
                 }
             }
             if ($currenttag1 != '' && $currenttag2 == '') {
-                $wh_tag = " having (" . $wh_tag1 . ') ';
+                $wh_tag = " having (" . (string)$wh_tag1 . ') ';
             } elseif ($currenttag2 != '' && $currenttag1 == '') {
-                $wh_tag = " having (" . $wh_tag2 . ') ';
+                $wh_tag = " having (" . (string)$wh_tag2 . ') ';
             } else {
-                $wh_tag = " having ((" . $wh_tag1 . ($currenttag12 ? ') AND (' : ') OR (') . $wh_tag2 . ')) ';
+                $wh_tag = " having ((" . (string)$wh_tag1 . ($currenttag12 ? ') AND (' : ') OR (') . (string)$wh_tag2 . ')) ';
             }
         }
 

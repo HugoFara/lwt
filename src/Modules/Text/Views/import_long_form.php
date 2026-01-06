@@ -148,7 +148,7 @@ $actions = [
                 <strong>upload_max_filesize</strong>: <?php echo ini_get('upload_max_filesize'); ?>
                 <br />
                 <span class="is-size-7">
-                    Adjust in "<?php echo htmlspecialchars(php_ini_loaded_file() ?: '', ENT_QUOTES, 'UTF-8'); ?>" and restart server if needed.
+                    Adjust in "<?php $iniFile = php_ini_loaded_file(); echo htmlspecialchars($iniFile !== false ? $iniFile : '', ENT_QUOTES, 'UTF-8'); ?>" and restart server if needed.
                 </span>
             </p>
         </div>
