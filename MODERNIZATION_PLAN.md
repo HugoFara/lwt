@@ -1551,7 +1551,7 @@ Services have been migrated from `CoreServiceProvider` to their respective modul
 | PHPUnit Tests | PASS | 2825 tests, 6146 assertions |
 | TypeScript | PASS | No errors |
 | ESLint | PASS | No errors |
-| Deprecated Code | GOOD | 2 PHP items remaining (38 TypeScript + PHP deprecations removed 2026-01-06, dictionary.ts functions reclassified as active utilities) |
+| Deprecated Code | PASS | 0 items remaining (TextParsing internal methods made private 2026-01-06) |
 | TODO Comments | PASS | 0 items (18 TODOs converted to NOTE markers 2026-01-06) |
 
 ### 5.1 Incomplete Module Migration
@@ -1728,15 +1728,15 @@ All changes accept both old and new parameter names for backward compatibility.
   - Documents minimum/maximum length, letter and number requirements
   - Includes security best practices and hashing algorithm details
 
-### 5.7 Deprecated Code (1 item remaining)
+### 5.7 Deprecated Code (0 items remaining)
 
-**PHP Deprecations (1 item remaining):**
+**PHP Deprecations (0 items remaining):**
 
 - ~~Routes marked `@deprecated 3.0.0` in `routes.php`~~ - **REMOVED** (2026-01-06)
 - ~~`WordService` (deprecated alias)~~ → Use `VocabularyFacade` - **REMOVED** (2026-01-06) - Alias file deleted, module namespace used directly
 - ~~`Text::fromDbRecord()`~~ → Use `reconstitute()` - **REMOVED** (2026-01-06)
 - ~~`Language::usesMecab()`~~ → Use `parserType()` - **REMOVED** (2026-01-06)
-- `TextParsing` methods (kept - still used internally)
+- ~~`TextParsing` methods~~ - **CLEANED UP** (2026-01-06) - Internal methods made private, only public API exposed
 - ~~`BaseController::escape/escapeNonNull`~~ - **REMOVED** (2026-01-06)
 - ~~`Escaping::prepareTextdataJs`~~ - **REMOVED** (2026-01-06)
 - ~~`TagsFacade::getWordTagListFormatted`~~ - **REMOVED** (2026-01-06)

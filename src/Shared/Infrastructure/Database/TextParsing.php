@@ -68,7 +68,35 @@ class TextParsing
      */
     public static function parseAndDisplayPreview(string $text, int $lid): void
     {
-        self::splitCheck($text, $lid, -1);
+        $record = QueryBuilder::table('languages')
+            ->select(['LgRightToLeft'])
+            ->where('LgID', '=', $lid)
+            ->firstPrepared();
+
+        if ($record === null) {
+            ErrorHandler::die("Language data not found for ID: $lid");
+        }
+        $rtlScript = (bool)$record['LgRightToLeft'];
+
+        // Parse text and display preview HTML (id=-1 triggers preview display in prepare)
+        self::prepare($text, -1, $lid);
+
+        // Display sentences and word statistics
+        self::checkValid($lid);
+
+        // Get multi-word expressions
+        $wl = self::getMultiWordLengths($lid);
+
+        // Process multi-word expressions if any exist
+        if (!empty($wl)) {
+            self::checkExpressions($wl);
+        }
+
+        // Display statistics
+        self::displayStatistics($lid, $rtlScript, !empty($wl));
+
+        // Clean up
+        QueryBuilder::table('temptextitems')->truncate();
     }
 
     /**
@@ -92,7 +120,32 @@ class TextParsing
                 "Text ID must be positive, got: $textId"
             );
         }
-        self::splitCheck($text, $lid, $textId);
+
+        $record = QueryBuilder::table('languages')
+            ->select(['LgID'])
+            ->where('LgID', '=', $lid)
+            ->firstPrepared();
+
+        if ($record === null) {
+            ErrorHandler::die("Language data not found for ID: $lid");
+        }
+
+        // Parse text into temptextitems (id>0 uses MAX(SeID)+1 for sentence IDs)
+        self::prepare($text, $textId, $lid);
+
+        // Get multi-word expressions
+        $wl = self::getMultiWordLengths($lid);
+
+        // Process multi-word expressions if any exist
+        if (!empty($wl)) {
+            self::checkExpressions($wl);
+        }
+
+        // Register sentences and text items in database
+        self::registerSentencesTextItems($textId, $lid, !empty($wl));
+
+        // Clean up
+        QueryBuilder::table('temptextitems')->truncate();
     }
 
     /**
@@ -1049,6 +1102,29 @@ class TextParsing
     }
 
     /**
+     * Get all multi-word expression lengths for a language.
+     *
+     * @param int $lid Language ID
+     *
+     * @return int[] Array of distinct word counts (e.g., [2, 3] for 2-word and 3-word expressions)
+     */
+    private static function getMultiWordLengths(int $lid): array
+    {
+        $wl = [];
+        $rows = QueryBuilder::table('words')
+            ->select(['DISTINCT(WoWordCount) as WoWordCount'])
+            ->where('WoLgID', '=', $lid)
+            ->where('WoWordCount', '>', 1)
+            ->getPrepared();
+
+        foreach ($rows as $record) {
+            $wl[] = (int)$record['WoWordCount'];
+        }
+
+        return $wl;
+    }
+
+    /**
      * Check a language that contains expressions.
      *
      * @param int[] $wl All the different expression length in the language.
@@ -1172,7 +1248,9 @@ class TextParsing
      *
      * @psalm-suppress PossiblyUnusedReturnValue,UnusedReturnValue Return only used when $id = -2
      *
-     * @internal Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
+     * @deprecated 3.0.0 This method is no longer used by the public API.
+     *             Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
+     *             Kept for backward compatibility with tests.
      */
     private static function splitCheck(string $text, string|int $lid, int $id): ?array
     {
