@@ -1551,7 +1551,7 @@ Services have been migrated from `CoreServiceProvider` to their respective modul
 | PHPUnit Tests | PASS | 2825 tests, 6146 assertions |
 | TypeScript | PASS | No errors |
 | ESLint | PASS | No errors |
-| Deprecated Code | GOOD | 4 items remaining (38 TypeScript + PHP deprecations removed 2026-01-06) |
+| Deprecated Code | GOOD | 2 PHP items remaining (38 TypeScript + PHP deprecations removed 2026-01-06, dictionary.ts functions reclassified as active utilities) |
 | TODO Comments | WARNING | 18 items |
 
 ### 5.1 Incomplete Module Migration
@@ -1628,17 +1628,23 @@ API handlers have been consolidated to module-based handlers:
 | Layer | Total | Tested | Gap |
 |-------|-------|--------|-----|
 | Module Facades | 10 | 10 | 0% ✅ |
-| Module Use Cases | 65 | 0 | 100% |
-| Module Application Services | 7 | 0 | 100% |
+| Module Use Cases | 65 | 5 | 92% |
+| Module Application Services | 7 | 1 | 86% |
 | Module HTTP Handlers | 7 | 4 | 43% |
 | Module HTTP Controllers | 11 | 2 | 82% |
 
 **Critical Untested Paths:**
 
-- [ ] Text Import Pipeline: `ImportText → ParseText → sentence creation`
-- [ ] Feed Import: `LoadFeed → ImportArticles → TextCreationAdapter`
-- [ ] Review Session: `StartReviewSession → GetNextTerm → SubmitAnswer`
-- [ ] Export Operations: `ExportService` (Anki/TSV)
+- [x] Text Import Pipeline: `ImportText → ParseText → sentence creation` - **DONE** (2026-01-06)
+  - `ImportTextUseCaseTest.php` - 34 tests covering validation, splitting, data preparation
+  - `ParseTextUseCaseTest.php` - 31 tests covering validation, length info, term sentences
+- [x] Feed Import: `LoadFeed → ImportArticles → TextCreationAdapter` - **DONE** (2026-01-06)
+  - `LoadFeedUseCaseTest.php` - 13 tests covering RSS parsing, article insertion, timestamps
+  - `ImportArticlesUseCaseTest.php` - 14 tests covering extraction, deduplication, archival
+- [x] Review Session: `StartReviewSession → GetNextTerm → SubmitAnswer` - **DONE** (2026-01-06)
+  - `ReviewSessionUseCaseTest.php` - 28 tests covering session start, term retrieval, answer submission
+- [x] Export Operations: `ExportService` (Anki/TSV) - **DONE** (2026-01-06)
+  - `ExportServiceTest.php` - 42 tests covering text normalization, term masking, format generation
 
 **Priority Test Files Needed:**
 
@@ -1654,6 +1660,12 @@ API handlers have been consolidated to module-based handlers:
 - [x] `TagsFacadeTest.php` - Existing
 - [x] `SimilarityCalculatorTest.php` - Added 2026-01-05 (87 tests)
 - [x] `RssParserTest.php` - Added 2026-01-05 (44 tests)
+- [x] `ImportTextUseCaseTest.php` - 34 tests covering text import validation and splitting
+- [x] `ParseTextUseCaseTest.php` - Added 2026-01-06 (31 tests covering length info and validation)
+- [x] `LoadFeedUseCaseTest.php` - Added 2026-01-06 (13 tests covering RSS loading)
+- [x] `ImportArticlesUseCaseTest.php` - 14 tests covering article import pipeline
+- [x] `ReviewSessionUseCaseTest.php` - 28 tests covering review session workflow
+- [x] `ExportServiceTest.php` - 42 tests covering export formatting
 
 ### 5.4 Static Analysis (Psalm Level 3)
 
@@ -1716,7 +1728,7 @@ All changes accept both old and new parameter names for backward compatibility.
   - Documents minimum/maximum length, letter and number requirements
   - Includes security best practices and hashing algorithm details
 
-### 5.7 Deprecated Code (4 items remaining)
+### 5.7 Deprecated Code (2 items remaining)
 
 **PHP Deprecations (2 items remaining):**
 
@@ -1731,7 +1743,7 @@ All changes accept both old and new parameter names for backward compatibility.
 - ~~`PageLayoutHelper::buildQuickMenu`~~ - **REMOVED** (2026-01-06)
 - ~~`WordUploadService` wrapper~~ - **REMOVED** (2026-01-06)
 
-**TypeScript Deprecations (2 items remaining):**
+**TypeScript Deprecations (0 items remaining):**
 
 *Removed 2026-01-06 (38 functions):*
 - ~~`tts_settings.ts` (14 functions)~~ - **REMOVED** - View uses `ttsSettingsApp()` Alpine component
@@ -1743,8 +1755,10 @@ All changes accept both old and new parameter names for backward compatibility.
 - ~~`word_list_filter.ts` (2 functions: `navigateWithParams`, `initWordListFilter`)~~ - **REMOVED** (2026-01-06) - View uses `wordListApp()` Alpine component
 - ~~`table_management.ts` (1 function: `checkTablePrefix`)~~ - **REMOVED** (2026-01-06) - View uses `tableManagementApp()` Alpine component
 
-*Remaining (actively imported by other modules):*
-- `dictionary.ts` (2 functions: `createSentLookupLink`, `getLangFromDict`) - Still actively imported by `overlib_interface.ts`, `word_form_auto.ts`, `text_keyboard.ts`, `text_reading_init.ts`
+*Active utility functions (not deprecated):*
+- `dictionary.ts` (`createSentLookupLink`, `getLangFromDict`) - **NOT DEPRECATED** (2026-01-06): These serve legitimate purposes:
+  - `getLangFromDict`: Documented fallback for backward compatibility when `sourceLang` not stored in database
+  - `createSentLookupLink`: Active utility for sentence translation links in word popups
 
 ### v3.0.0 Release Checklist
 
@@ -1780,7 +1794,7 @@ All changes accept both old and new parameter names for backward compatibility.
   - CoreServiceProvider cleaned up: only ParserRegistry, ParsingCoordinator, and deprecated WordService remain
   - DictionaryImport services migrated to `Modules/Dictionary/Infrastructure/Import/`
   - All module services now registered in their respective ServiceProviders
-- [ ] Add tests for critical use cases
+- [x] Add tests for critical use cases - **DONE** (2026-01-06) - 162 tests across 6 use case test files
 - [ ] Resolve all critical TODOs
 - [x] Remove deprecated TypeScript functions - **DONE** (2026-01-06) - 38 functions removed from 8 files (including `initWordListTable`, `initWordListFilter`, `checkTablePrefix`)
 
