@@ -16,23 +16,25 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
- *
- * @psalm-suppress UndefinedVariable - Variables are set by the including controller
  */
 
 namespace Lwt\Views\Tags;
 
-/** @var string $mode */
-/** @var array|null $tag */
-/** @var \Lwt\Modules\Tags\Application\TagsFacade $service */
-/** @var string $formFieldPrefix */
-
 use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Modules\Tags\Application\TagsFacade;
+
+// Type assertions for variables from controller extract()
+$mode = (string) ($mode ?? 'new');
+/** @var array{id: int, text: string, comment: string|null}|null $tag */
+$tag = $tag ?? null;
+/** @var TagsFacade $service */
+$service = $service;
+$formFieldPrefix = (string) ($formFieldPrefix ?? 'Tg');
 
 $isEdit = $mode === 'edit';
 $pageTitle = $isEdit ? 'Edit Tag' : 'New Tag';
 $formName = $isEdit ? 'edittag' : 'newtag';
-$phpSelf = $_SERVER['PHP_SELF'] ?? '';
+$phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 $actionUrl = $isEdit && $tag !== null ?
     $phpSelf . '#rec' . $tag['id'] :
     $phpSelf;

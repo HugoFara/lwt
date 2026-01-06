@@ -21,6 +21,11 @@ namespace Lwt\Views\Language;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+// Type assertions for variables from controller extract()
+$languageDefsJson = (string) ($languageDefsJson ?? '{}');
+$languageOptions = (string) ($languageOptions ?? '');
+$languageOptionsEmpty = (string) ($languageOptionsEmpty ?? '');
+
 ?>
 <script type="application/json" id="language-wizard-config">
 <?php echo json_encode(['languageDefs' => json_decode($languageDefsJson, true)]); ?>

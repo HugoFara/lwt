@@ -17,13 +17,55 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
- *
- * @psalm-suppress TypeDoesNotContainType View included from different contexts
  */
 
 namespace Lwt\Views\Language;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
+
+/**
+ * @var object{
+ *   id: int|null,
+ *   name: string,
+ *   textsize: int,
+ *   parsertype: string,
+ *   dict1uri: string,
+ *   dict1popup: bool,
+ *   dict2uri: string,
+ *   dict2popup: bool,
+ *   translator: string,
+ *   translatorpopup: bool,
+ *   sourcelang: string,
+ *   targetlang: string,
+ *   localdictmode: int,
+ *   charactersubst: string,
+ *   regexpsplitsent: string,
+ *   exceptionsplitsent: string,
+ *   regexpwordchar: string,
+ *   spliteachchar: bool,
+ *   removespaces: bool,
+ *   rightoleft: bool,
+ *   showromanization: bool,
+ *   exporttemplate: string,
+ *   ttsvoiceapi: string
+ * } $language
+ */
+$language = $language;
+
+/** @var string $sourceLg */
+$sourceLg = $sourceLg ?? '';
+
+/** @var string $targetLg */
+$targetLg = $targetLg ?? '';
+
+/** @var bool $isNew */
+$isNew = $isNew ?? true;
+
+/** @var array<string, string> $allLanguages */
+$allLanguages = $allLanguages ?? [];
+
+/** @var array<string, array{available: bool, message: string, name: string}> $parserInfo */
+$parserInfo = $parserInfo ?? [];
 
 ?>
 <script type="application/json" id="language-form-config">
@@ -40,7 +82,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 <form class="validate" action="/languages" method="post" name="lg_form"
       x-data="{
           textSize: <?php echo $language->textsize ?: 100; ?>,
-          parserType: '<?php echo htmlspecialchars($language->parsertype ?? 'regex', ENT_QUOTES, 'UTF-8'); ?>',
+          parserType: '<?php echo htmlspecialchars($language->parsertype, ENT_QUOTES, 'UTF-8'); ?>',
           showJapaneseOptions: <?php echo ($language->name === 'Japanese') ? 'true' : 'false'; ?>,
           showTranslatorKey: false,
           sections: {
@@ -83,7 +125,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                        data_info="Study Language"
                        name="LgName"
                        id="LgName"
-                       value="<?php echo htmlspecialchars($language->name ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       value="<?php echo htmlspecialchars($language->name, ENT_QUOTES, 'UTF-8'); ?>"
                        maxlength="40"
                        @input="showJapaneseOptions = ($event.target.value === 'Japanese')"
                        required />
@@ -118,14 +160,14 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                     <input type="url"
                            class="input notempty checkdicturl checkoutsidebmp"
                            name="LgDict1URI"
-                           value="<?php echo htmlspecialchars($language->dict1uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($language->dict1uri, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="200"
                            data_info="Dictionary 1 URI"
                            required />
                 </div>
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgDict1PopUp" id="LgDict1PopUp" value="1"
-                           <?php echo (($language->dict1popup ?? false) === true) ? 'checked' : ''; ?> />
+                           <?php echo $language->dict1popup ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some dictionaries cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
@@ -139,13 +181,13 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                     <input type="url"
                            class="input checkdicturl checkoutsidebmp"
                            name="LgDict2URI"
-                           value="<?php echo htmlspecialchars($language->dict2uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($language->dict2uri, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="200"
                            data_info="Dictionary 2 URI" />
                 </div>
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgDict2PopUp" id="LgDict2PopUp" value="1"
-                           <?php echo (($language->dict2popup ?? false) === true) ? 'checked' : ''; ?> />
+                           <?php echo $language->dict2popup ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some dictionaries cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
@@ -173,7 +215,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                         <input type="url"
                                class="input checkdicturl checkoutsidebmp"
                                name="LgGoogleTranslateURI"
-                               value="<?php echo htmlspecialchars($language->translator ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo htmlspecialchars($language->translator, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
                                data_info="GoogleTranslate URI"
                                placeholder="Translator URI" />
@@ -192,7 +234,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgGoogleTranslatePopUp" id="LgGoogleTranslatePopUp" value="1"
-                           <?php echo (($language->translatorpopup ?? false) === true) ? 'checked' : ''; ?> />
+                           <?php echo $language->translatorpopup ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some translators cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
@@ -210,7 +252,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                                    class="input"
                                    name="LgSourceLang"
                                    id="LgSourceLang"
-                                   value="<?php echo htmlspecialchars($language->sourcelang ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php echo htmlspecialchars($language->sourcelang, ENT_QUOTES, 'UTF-8'); ?>"
                                    maxlength="10"
                                    placeholder="e.g., de, ja, zh" />
                         </div>
@@ -225,7 +267,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                                    class="input"
                                    name="LgTargetLang"
                                    id="LgTargetLang"
-                                   value="<?php echo htmlspecialchars($language->targetlang ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php echo htmlspecialchars($language->targetlang, ENT_QUOTES, 'UTF-8'); ?>"
                                    maxlength="10"
                                    placeholder="e.g., en" />
                         </div>
@@ -252,16 +294,16 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                 <div class="control">
                     <div class="select">
                         <select name="LgLocalDictMode" id="LgLocalDictMode">
-                            <option value="0" <?php echo ($language->localdictmode ?? 0) == 0 ? 'selected' : ''; ?>>
+                            <option value="0" <?php echo $language->localdictmode == 0 ? 'selected' : ''; ?>>
                                 Online dictionaries only
                             </option>
-                            <option value="1" <?php echo ($language->localdictmode ?? 0) == 1 ? 'selected' : ''; ?>>
+                            <option value="1" <?php echo $language->localdictmode == 1 ? 'selected' : ''; ?>>
                                 Local first, online fallback
                             </option>
-                            <option value="2" <?php echo ($language->localdictmode ?? 0) == 2 ? 'selected' : ''; ?>>
+                            <option value="2" <?php echo $language->localdictmode == 2 ? 'selected' : ''; ?>>
                                 Local dictionaries only
                             </option>
-                            <option value="3" <?php echo ($language->localdictmode ?? 0) == 3 ? 'selected' : ''; ?>>
+                            <option value="3" <?php echo $language->localdictmode == 3 ? 'selected' : ''; ?>>
                                 Combined (show both)
                             </option>
                         </select>
@@ -374,7 +416,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                            class="input checkoutsidebmp"
                            data_info="Character Substitutions"
                            name="LgCharacterSubstitutions"
-                           value="<?php echo htmlspecialchars($language->charactersubst ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($language->charactersubst, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="500" />
                 </div>
                 <p class="help">Replace characters before parsing (format: from=to, separated by |)</p>
@@ -391,7 +433,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                            class="input checkoutsidebmp"
                            :class="{ 'notempty': parserType === 'regex' }"
                            name="LgRegexpSplitSentences"
-                           value="<?php echo htmlspecialchars($language->regexpsplitsent ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($language->regexpsplitsent, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="500"
                            data_info="RegExp Split Sentences"
                            :required="parserType === 'regex'" />
@@ -407,7 +449,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                            class="input checkoutsidebmp"
                            data_info="Exceptions Split Sentences"
                            name="LgExceptionsSplitSentences"
-                           value="<?php echo htmlspecialchars($language->exceptionsplitsent ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($language->exceptionsplitsent, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="500" />
                 </div>
                 <p class="help">Words that should not trigger sentence splitting (e.g., Mr., Dr.)</p>
@@ -434,7 +476,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                            class="input notempty checkoutsidebmp"
                            data_info="RegExp Word Characters"
                            name="LgRegexpWordCharacters"
-                           value="<?php echo htmlspecialchars($language->regexpwordchar ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($language->regexpwordchar, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="500"
                            :required="parserType === 'regex'" />
                 </div>
@@ -541,7 +583,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                            class="input checkoutsidebmp"
                            data_info="Export Template"
                            name="LgExportTemplate"
-                           value="<?php echo htmlspecialchars($language->exporttemplate ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($language->exporttemplate, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="1000" />
                 </div>
                 <p class="help">Template for exporting terms (e.g., to Anki)</p>
@@ -564,7 +606,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                               name="LgTTSVoiceAPI"
                               maxlength="2048"
                               rows="4"
-                              placeholder="JSON configuration for TTS API"><?php echo htmlspecialchars($language->ttsvoiceapi ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                              placeholder="JSON configuration for TTS API"><?php echo htmlspecialchars($language->ttsvoiceapi, ENT_QUOTES, 'UTF-8'); ?></textarea>
                 </div>
                 <div class="buttons mt-3">
                     <button type="button"
