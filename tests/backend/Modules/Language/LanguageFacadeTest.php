@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Application\UseCases\CreateLanguage;
 use Lwt\Modules\Language\Application\UseCases\DeleteLanguage;
@@ -56,11 +57,30 @@ class LanguageFacadeTest extends TestCase
         } else {
             self::$dbConnected = true;
         }
+
+        if (self::$dbConnected) {
+            // Clean up any lingering test data from previous runs
+            Connection::query("DELETE FROM newsfeeds WHERE NfLgID IN (SELECT LgID FROM languages WHERE LgName LIKE 'TestLang_%' OR LgName LIKE 'DuplicateTest_%')");
+            Connection::query("DELETE FROM languages WHERE LgName LIKE 'TestLang_%' OR LgName LIKE 'DuplicateTest_%'");
+            // Also clean up orphaned feeds that reference non-existent languages
+            Connection::query("DELETE FROM newsfeeds WHERE NfLgID NOT IN (SELECT LgID FROM languages)");
+        }
     }
 
     protected function setUp(): void
     {
         $this->facade = new LanguageFacade();
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        if (!self::$dbConnected) {
+            return;
+        }
+
+        // Clean up any test languages created during tests
+        Connection::query("DELETE FROM newsfeeds WHERE NfLgID IN (SELECT LgID FROM languages WHERE LgName LIKE 'TestLang_%' OR LgName LIKE 'DuplicateTest_%')");
+        Connection::query("DELETE FROM languages WHERE LgName LIKE 'TestLang_%' OR LgName LIKE 'DuplicateTest_%'");
     }
 
     // ===== Constructor tests =====
