@@ -262,16 +262,16 @@ function registerRoutes(Router $router): void
     // ==================== FEED ROUTES (PROTECTED) ====================
 
     // Feeds SPA (new Alpine.js single page application)
-    $router->registerWithMiddleware('/feeds/manage', 'FeedsController@spa', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/feeds/manage', 'Lwt\\Modules\\Feed\\Http\\FeedController@spa', AUTH_MIDDLEWARE);
 
-    // Feeds list (legacy)
-    $router->registerWithMiddleware('/feeds', 'FeedsController@index', AUTH_MIDDLEWARE);
+    // Feeds list
+    $router->registerWithMiddleware('/feeds', 'Lwt\\Modules\\Feed\\Http\\FeedController@index', AUTH_MIDDLEWARE);
 
     // Edit feeds
-    $router->registerWithMiddleware('/feeds/edit', 'FeedsController@edit', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/feeds/edit', 'Lwt\\Modules\\Feed\\Http\\FeedController@edit', AUTH_MIDDLEWARE);
 
     // Feed wizard
-    $router->registerWithMiddleware('/feeds/wizard', 'FeedsController@wizard', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/feeds/wizard', 'Lwt\\Modules\\Feed\\Http\\FeedController@wizard', AUTH_MIDDLEWARE);
 
     // ==================== LOCAL DICTIONARY ROUTES (PROTECTED) ====================
 

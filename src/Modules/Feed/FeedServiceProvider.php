@@ -48,6 +48,9 @@ use Lwt\Modules\Feed\Application\UseCases\ResetErrorArticles;
 // Application
 use Lwt\Modules\Feed\Application\FeedFacade;
 
+// Language Module
+use Lwt\Modules\Language\Application\LanguageFacade;
+
 // Http
 use Lwt\Modules\Feed\Http\FeedController;
 use Lwt\Modules\Feed\Http\FeedApiHandler;
@@ -90,7 +93,8 @@ class FeedServiceProvider implements ServiceProviderInterface
         // Register Controller
         $container->singleton(FeedController::class, function (Container $c) {
             return new FeedController(
-                $c->get(FeedFacade::class)
+                $c->get(FeedFacade::class),
+                $c->get(LanguageFacade::class)
             );
         });
 

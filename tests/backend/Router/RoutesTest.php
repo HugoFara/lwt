@@ -261,9 +261,9 @@ class RoutesTest extends TestCase
     public static function feedRoutesProvider(): array
     {
         return [
-            'feeds index' => ['/feeds', 'FeedsController@index'],
-            'feeds edit' => ['/feeds/edit', 'FeedsController@edit'],
-            'feeds wizard' => ['/feeds/wizard', 'FeedsController@wizard'],
+            'feeds index' => ['/feeds', 'Lwt\\Modules\\Feed\\Http\\FeedController@index'],
+            'feeds edit' => ['/feeds/edit', 'Lwt\\Modules\\Feed\\Http\\FeedController@edit'],
+            'feeds wizard' => ['/feeds/wizard', 'Lwt\\Modules\\Feed\\Http\\FeedController@wizard'],
         ];
     }
 
