@@ -64,23 +64,23 @@ class AdminServiceProvider implements ServiceProviderInterface
         // Register Facade
         $container->singleton(AdminFacade::class, function (Container $c) {
             return new AdminFacade(
-                $c->get(SettingsRepositoryInterface::class),
-                $c->get(BackupRepositoryInterface::class)
+                $c->getTyped(SettingsRepositoryInterface::class),
+                $c->getTyped(BackupRepositoryInterface::class)
             );
         });
 
         // Register Controller (optional dependencies for BC)
         $container->bind(AdminController::class, function (Container $c) {
             return new AdminController(
-                $c->get(AdminFacade::class),
-                $c->get(TtsService::class)
+                $c->getTyped(AdminFacade::class),
+                $c->getTyped(TtsService::class)
             );
         });
 
         // Register API Handler
         $container->singleton(AdminApiHandler::class, function (Container $c) {
             return new AdminApiHandler(
-                $c->get(AdminFacade::class)
+                $c->getTyped(AdminFacade::class)
             );
         });
     }
@@ -100,7 +100,7 @@ class AdminServiceProvider implements ServiceProviderInterface
         });
 
         $container->singleton(MySqlSettingsRepository::class, function (Container $c): SettingsRepositoryInterface {
-            return $c->get(SettingsRepositoryInterface::class);
+            return $c->getTyped(SettingsRepositoryInterface::class);
         });
 
         // Backup Repository
@@ -109,7 +109,7 @@ class AdminServiceProvider implements ServiceProviderInterface
         });
 
         $container->singleton(MySqlBackupRepository::class, function (Container $c): BackupRepositoryInterface {
-            return $c->get(BackupRepositoryInterface::class);
+            return $c->getTyped(BackupRepositoryInterface::class);
         });
 
         // Statistics Repository (no interface needed, concrete only)
@@ -140,7 +140,7 @@ class AdminServiceProvider implements ServiceProviderInterface
         // TTS Service
         $container->singleton(TtsService::class, function (Container $c) {
             return new TtsService(
-                $c->get(\Lwt\Modules\Language\Application\LanguageFacade::class)
+                $c->getTyped(\Lwt\Modules\Language\Application\LanguageFacade::class)
             );
         });
     }

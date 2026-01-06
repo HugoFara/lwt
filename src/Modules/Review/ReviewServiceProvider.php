@@ -70,7 +70,7 @@ class ReviewServiceProvider implements ServiceProviderInterface
             /** @return MySqlReviewRepository */
             function (Container $c): MySqlReviewRepository {
                 /** @var MySqlReviewRepository */
-                return $c->get(ReviewRepositoryInterface::class);
+                return $c->getTyped(ReviewRepositoryInterface::class);
             }
         );
 
@@ -85,28 +85,28 @@ class ReviewServiceProvider implements ServiceProviderInterface
         // Register Facade
         $container->singleton(ReviewFacade::class, function (Container $c) {
             return new ReviewFacade(
-                $c->get(ReviewRepositoryInterface::class),
-                $c->get(SessionStateManager::class),
-                $c->get(GetNextTerm::class),
-                $c->get(GetTableWords::class),
-                $c->get(GetTestConfiguration::class),
-                $c->get(GetTomorrowCount::class),
-                $c->get(StartReviewSession::class),
-                $c->get(SubmitAnswer::class)
+                $c->getTyped(ReviewRepositoryInterface::class),
+                $c->getTyped(SessionStateManager::class),
+                $c->getTyped(GetNextTerm::class),
+                $c->getTyped(GetTableWords::class),
+                $c->getTyped(GetTestConfiguration::class),
+                $c->getTyped(GetTomorrowCount::class),
+                $c->getTyped(StartReviewSession::class),
+                $c->getTyped(SubmitAnswer::class)
             );
         });
 
         // Register Controller
         $container->singleton(TestController::class, function (Container $c) {
             return new TestController(
-                $c->get(ReviewFacade::class)
+                $c->getTyped(ReviewFacade::class)
             );
         });
 
         // Register API Handler
         $container->singleton(ReviewApiHandler::class, function (Container $c) {
             return new ReviewApiHandler(
-                $c->get(ReviewFacade::class)
+                $c->getTyped(ReviewFacade::class)
             );
         });
 
@@ -128,45 +128,45 @@ class ReviewServiceProvider implements ServiceProviderInterface
         // GetNextTerm use case
         $container->singleton(GetNextTerm::class, function (Container $c) {
             return new GetNextTerm(
-                $c->get(ReviewRepositoryInterface::class)
+                $c->getTyped(ReviewRepositoryInterface::class)
             );
         });
 
         // GetTableWords use case
         $container->singleton(GetTableWords::class, function (Container $c) {
             return new GetTableWords(
-                $c->get(ReviewRepositoryInterface::class)
+                $c->getTyped(ReviewRepositoryInterface::class)
             );
         });
 
         // GetTestConfiguration use case
         $container->singleton(GetTestConfiguration::class, function (Container $c) {
             return new GetTestConfiguration(
-                $c->get(ReviewRepositoryInterface::class),
-                $c->get(SessionStateManager::class)
+                $c->getTyped(ReviewRepositoryInterface::class),
+                $c->getTyped(SessionStateManager::class)
             );
         });
 
         // GetTomorrowCount use case
         $container->singleton(GetTomorrowCount::class, function (Container $c) {
             return new GetTomorrowCount(
-                $c->get(ReviewRepositoryInterface::class)
+                $c->getTyped(ReviewRepositoryInterface::class)
             );
         });
 
         // StartReviewSession use case
         $container->singleton(StartReviewSession::class, function (Container $c) {
             return new StartReviewSession(
-                $c->get(ReviewRepositoryInterface::class),
-                $c->get(SessionStateManager::class)
+                $c->getTyped(ReviewRepositoryInterface::class),
+                $c->getTyped(SessionStateManager::class)
             );
         });
 
         // SubmitAnswer use case
         $container->singleton(SubmitAnswer::class, function (Container $c) {
             return new SubmitAnswer(
-                $c->get(ReviewRepositoryInterface::class),
-                $c->get(SessionStateManager::class)
+                $c->getTyped(ReviewRepositoryInterface::class),
+                $c->getTyped(SessionStateManager::class)
             );
         });
     }

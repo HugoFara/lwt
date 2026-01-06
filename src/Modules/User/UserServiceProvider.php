@@ -65,22 +65,22 @@ class UserServiceProvider implements ServiceProviderInterface
         // Register Facade
         $container->singleton(UserFacade::class, function (Container $c) {
             return new UserFacade(
-                $c->get(UserRepositoryInterface::class),
-                $c->get(PasswordHasher::class)
+                $c->getTyped(UserRepositoryInterface::class),
+                $c->getTyped(PasswordHasher::class)
             );
         });
 
         // Register Controller
         $container->bind(UserController::class, function (Container $c) {
             return new UserController(
-                $c->get(UserFacade::class)
+                $c->getTyped(UserFacade::class)
             );
         });
 
         // Register API Handler
         $container->singleton(UserApiHandler::class, function (Container $c) {
             return new UserApiHandler(
-                $c->get(UserFacade::class)
+                $c->getTyped(UserFacade::class)
             );
         });
 
@@ -108,7 +108,7 @@ class UserServiceProvider implements ServiceProviderInterface
         // Also register concrete class for direct injection
         $container->singleton(MySqlUserRepository::class, function (Container $c): MySqlUserRepository {
             /** @var MySqlUserRepository */
-            return $c->get(UserRepositoryInterface::class);
+            return $c->getTyped(UserRepositoryInterface::class);
         });
     }
 
@@ -128,7 +128,7 @@ class UserServiceProvider implements ServiceProviderInterface
 
         // Password Hasher (wraps PasswordService for module use)
         $container->singleton(PasswordHasher::class, function (Container $c) {
-            return new PasswordHasher($c->get(PasswordService::class));
+            return new PasswordHasher($c->getTyped(PasswordService::class));
         });
     }
 
@@ -144,14 +144,14 @@ class UserServiceProvider implements ServiceProviderInterface
         // WordPress Auth Service
         $container->singleton(WordPressAuthService::class, function (Container $c) {
             return new WordPressAuthService(
-                $c->get(UserFacade::class)
+                $c->getTyped(UserFacade::class)
             );
         });
 
         // WordPress Controller
         $container->bind(WordPressController::class, function (Container $c) {
             return new WordPressController(
-                $c->get(WordPressAuthService::class)
+                $c->getTyped(WordPressAuthService::class)
             );
         });
     }
@@ -168,8 +168,8 @@ class UserServiceProvider implements ServiceProviderInterface
         // AuthService - uses UserRepository for database access
         $container->singleton(AuthService::class, function (Container $c) {
             return new AuthService(
-                $c->get(PasswordService::class),
-                $c->get(MySqlUserRepository::class)
+                $c->getTyped(PasswordService::class),
+                $c->getTyped(MySqlUserRepository::class)
             );
         });
     }

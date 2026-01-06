@@ -59,7 +59,7 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $container->singleton(ParsingCoordinator::class, function (Container $c) {
             return new ParsingCoordinator(
-                $c->get(ParserRegistry::class)
+                $c->getTyped(ParserRegistry::class)
             );
         });
 
@@ -69,9 +69,9 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $container->singleton(WordService::class, function (Container $c) {
             return new WordService(
-                $c->get(ExpressionService::class),
-                $c->get(SentenceService::class),
-                $c->get(MySqlTermRepository::class)
+                $c->getTyped(ExpressionService::class),
+                $c->getTyped(SentenceService::class),
+                $c->getTyped(MySqlTermRepository::class)
             );
         });
     }

@@ -74,7 +74,7 @@ class LanguageServiceProvider implements ServiceProviderInterface
             /** @return MySqlLanguageRepository */
             function (Container $c): MySqlLanguageRepository {
                 /** @var MySqlLanguageRepository */
-                return $c->get(LanguageRepositoryInterface::class);
+                return $c->getTyped(LanguageRepositoryInterface::class);
             }
         );
 
@@ -84,21 +84,21 @@ class LanguageServiceProvider implements ServiceProviderInterface
         // Register Facade
         $container->singleton(LanguageFacade::class, function (Container $c) {
             return new LanguageFacade(
-                $c->get(LanguageRepositoryInterface::class)
+                $c->getTyped(LanguageRepositoryInterface::class)
             );
         });
 
         // Register Controller
         $container->singleton(LanguageController::class, function (Container $c) {
             return new LanguageController(
-                $c->get(LanguageFacade::class)
+                $c->getTyped(LanguageFacade::class)
             );
         });
 
         // Register API Handler
         $container->singleton(LanguageApiHandler::class, function (Container $c) {
             return new LanguageApiHandler(
-                $c->get(LanguageFacade::class)
+                $c->getTyped(LanguageFacade::class)
             );
         });
     }
@@ -115,57 +115,57 @@ class LanguageServiceProvider implements ServiceProviderInterface
         // GetLanguageById use case
         $container->singleton(GetLanguageById::class, function (Container $c) {
             return new GetLanguageById(
-                $c->get(LanguageRepositoryInterface::class)
+                $c->getTyped(LanguageRepositoryInterface::class)
             );
         });
 
         // ListLanguages use case
         $container->singleton(ListLanguages::class, function (Container $c) {
             return new ListLanguages(
-                $c->get(LanguageRepositoryInterface::class)
+                $c->getTyped(LanguageRepositoryInterface::class)
             );
         });
 
         // CreateLanguage use case
         $container->singleton(CreateLanguage::class, function (Container $c) {
             return new CreateLanguage(
-                $c->get(LanguageRepositoryInterface::class)
+                $c->getTyped(LanguageRepositoryInterface::class)
             );
         });
 
         // ReparseLanguageTexts use case
         $container->singleton(ReparseLanguageTexts::class, function (Container $c) {
             return new ReparseLanguageTexts(
-                $c->get(LanguageRepositoryInterface::class)
+                $c->getTyped(LanguageRepositoryInterface::class)
             );
         });
 
         // UpdateLanguage use case (depends on ReparseLanguageTexts)
         $container->singleton(UpdateLanguage::class, function (Container $c) {
             return new UpdateLanguage(
-                $c->get(LanguageRepositoryInterface::class),
-                $c->get(ReparseLanguageTexts::class)
+                $c->getTyped(LanguageRepositoryInterface::class),
+                $c->getTyped(ReparseLanguageTexts::class)
             );
         });
 
         // DeleteLanguage use case
         $container->singleton(DeleteLanguage::class, function (Container $c) {
             return new DeleteLanguage(
-                $c->get(LanguageRepositoryInterface::class)
+                $c->getTyped(LanguageRepositoryInterface::class)
             );
         });
 
         // GetLanguageCode use case
         $container->singleton(GetLanguageCode::class, function (Container $c) {
             return new GetLanguageCode(
-                $c->get(LanguageRepositoryInterface::class)
+                $c->getTyped(LanguageRepositoryInterface::class)
             );
         });
 
         // GetPhoneticReading use case
         $container->singleton(GetPhoneticReading::class, function (Container $c) {
             return new GetPhoneticReading(
-                $c->get(LanguageRepositoryInterface::class)
+                $c->getTyped(LanguageRepositoryInterface::class)
             );
         });
     }

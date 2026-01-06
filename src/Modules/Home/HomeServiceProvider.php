@@ -55,8 +55,8 @@ class HomeServiceProvider implements ServiceProviderInterface
         // Register Controller
         $container->bind(HomeController::class, function (Container $c) {
             return new HomeController(
-                $c->get(HomeFacade::class),
-                $c->get(LanguageFacade::class)
+                $c->getTyped(HomeFacade::class),
+                $c->getTyped(LanguageFacade::class)
             );
         });
     }

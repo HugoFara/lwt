@@ -171,6 +171,41 @@ class Container implements ContainerInterface
      */
     public function get(string $id): mixed
     {
+        return $this->doGet($id);
+    }
+
+    /**
+     * Get a service with type inference for static analysis.
+     *
+     * This method is identical to get() but provides better type inference
+     * for static analysis tools like Psalm. Use this when retrieving services
+     * by their class name.
+     *
+     * @template T of object
+     * @param class-string<T> $id The service class name
+     * @return T The resolved service instance
+     *
+     * @throws NotFoundException  If service cannot be resolved
+     * @throws ContainerException If error while retrieving the entry
+     */
+    public function getTyped(string $id): object
+    {
+        $instance = $this->doGet($id);
+        /** @var T */
+        return $instance;
+    }
+
+    /**
+     * Internal service resolution logic.
+     *
+     * @param string $id The service identifier
+     * @return mixed The resolved service
+     *
+     * @throws NotFoundException  If service cannot be resolved
+     * @throws ContainerException If circular dependency detected
+     */
+    private function doGet(string $id): mixed
+    {
         // Resolve aliases
         $id = $this->resolveAlias($id);
 

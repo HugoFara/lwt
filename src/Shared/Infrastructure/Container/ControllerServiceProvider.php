@@ -63,7 +63,7 @@ class ControllerServiceProvider implements ServiceProviderInterface
 
         $container->bind(LanguageController::class, function (Container $c) {
             return new LanguageController(
-                $c->get(LanguageFacade::class)
+                $c->getTyped(LanguageFacade::class)
             );
         });
 
@@ -81,9 +81,9 @@ class ControllerServiceProvider implements ServiceProviderInterface
 
         $container->bind(TextController::class, function (Container $c) {
             return new TextController(
-                $c->get(TextFacade::class),
-                $c->get(LanguageFacade::class),
-                $c->get(TextDisplayService::class)
+                $c->getTyped(TextFacade::class),
+                $c->getTyped(LanguageFacade::class),
+                $c->getTyped(TextDisplayService::class)
             );
         });
 

@@ -102,13 +102,11 @@ class TagsServiceProvider implements ServiceProviderInterface
 
         // Interface bindings with aliases for term/text discrimination
         $container->singleton('tags.repository.term', function (Container $c): MySqlTermTagRepository {
-            /** @var MySqlTermTagRepository */
-            return $c->get(MySqlTermTagRepository::class);
+            return $c->getTyped(MySqlTermTagRepository::class);
         });
 
         $container->singleton('tags.repository.text', function (Container $c): MySqlTextTagRepository {
-            /** @var MySqlTextTagRepository */
-            return $c->get(MySqlTextTagRepository::class);
+            return $c->getTyped(MySqlTextTagRepository::class);
         });
     }
 
@@ -124,38 +122,35 @@ class TagsServiceProvider implements ServiceProviderInterface
         // Word Tag Association (for term tags)
         $container->singleton(MySqlWordTagAssociation::class, function (Container $c) {
             return new MySqlWordTagAssociation(
-                $c->get(MySqlTermTagRepository::class)
+                $c->getTyped(MySqlTermTagRepository::class)
             );
         });
 
         // Text Tag Association
         $container->singleton(MySqlTextTagAssociation::class, function (Container $c) {
             return new MySqlTextTagAssociation(
-                $c->get(MySqlTextTagRepository::class)
+                $c->getTyped(MySqlTextTagRepository::class)
             );
         });
 
         // Archived Text Tag Association
         $container->singleton(MySqlArchivedTextTagAssociation::class, function (Container $c) {
             return new MySqlArchivedTextTagAssociation(
-                $c->get(MySqlTextTagRepository::class)
+                $c->getTyped(MySqlTextTagRepository::class)
             );
         });
 
         // Interface bindings with aliases
         $container->singleton('tags.association.word', function (Container $c): MySqlWordTagAssociation {
-            /** @var MySqlWordTagAssociation */
-            return $c->get(MySqlWordTagAssociation::class);
+            return $c->getTyped(MySqlWordTagAssociation::class);
         });
 
         $container->singleton('tags.association.text', function (Container $c): MySqlTextTagAssociation {
-            /** @var MySqlTextTagAssociation */
-            return $c->get(MySqlTextTagAssociation::class);
+            return $c->getTyped(MySqlTextTagAssociation::class);
         });
 
         $container->singleton('tags.association.archived', function (Container $c): MySqlArchivedTextTagAssociation {
-            /** @var MySqlArchivedTextTagAssociation */
-            return $c->get(MySqlArchivedTextTagAssociation::class);
+            return $c->getTyped(MySqlArchivedTextTagAssociation::class);
         });
     }
 
@@ -170,57 +165,57 @@ class TagsServiceProvider implements ServiceProviderInterface
     {
         // Term tag use cases
         $container->singleton('tags.usecase.term.create', function (Container $c) {
-            return new CreateTag($c->get(MySqlTermTagRepository::class));
+            return new CreateTag($c->getTyped(MySqlTermTagRepository::class));
         });
 
         $container->singleton('tags.usecase.term.update', function (Container $c) {
-            return new UpdateTag($c->get(MySqlTermTagRepository::class));
+            return new UpdateTag($c->getTyped(MySqlTermTagRepository::class));
         });
 
         $container->singleton('tags.usecase.term.delete', function (Container $c) {
             return new DeleteTag(
-                $c->get(MySqlTermTagRepository::class),
-                $c->get(MySqlWordTagAssociation::class)
+                $c->getTyped(MySqlTermTagRepository::class),
+                $c->getTyped(MySqlWordTagAssociation::class)
             );
         });
 
         $container->singleton('tags.usecase.term.getById', function (Container $c) {
-            return new GetTagById($c->get(MySqlTermTagRepository::class));
+            return new GetTagById($c->getTyped(MySqlTermTagRepository::class));
         });
 
         $container->singleton('tags.usecase.term.list', function (Container $c) {
-            return new ListTags($c->get(MySqlTermTagRepository::class));
+            return new ListTags($c->getTyped(MySqlTermTagRepository::class));
         });
 
         // Text tag use cases
         $container->singleton('tags.usecase.text.create', function (Container $c) {
-            return new CreateTag($c->get(MySqlTextTagRepository::class));
+            return new CreateTag($c->getTyped(MySqlTextTagRepository::class));
         });
 
         $container->singleton('tags.usecase.text.update', function (Container $c) {
-            return new UpdateTag($c->get(MySqlTextTagRepository::class));
+            return new UpdateTag($c->getTyped(MySqlTextTagRepository::class));
         });
 
         $container->singleton('tags.usecase.text.delete', function (Container $c) {
             return new DeleteTag(
-                $c->get(MySqlTextTagRepository::class),
-                $c->get(MySqlTextTagAssociation::class)
+                $c->getTyped(MySqlTextTagRepository::class),
+                $c->getTyped(MySqlTextTagAssociation::class)
             );
         });
 
         $container->singleton('tags.usecase.text.getById', function (Container $c) {
-            return new GetTagById($c->get(MySqlTextTagRepository::class));
+            return new GetTagById($c->getTyped(MySqlTextTagRepository::class));
         });
 
         $container->singleton('tags.usecase.text.list', function (Container $c) {
-            return new ListTags($c->get(MySqlTextTagRepository::class));
+            return new ListTags($c->getTyped(MySqlTextTagRepository::class));
         });
 
         // Shared use case
         $container->singleton(GetAllTagNames::class, function (Container $c) {
             return new GetAllTagNames(
-                $c->get(MySqlTermTagRepository::class),
-                $c->get(MySqlTextTagRepository::class)
+                $c->getTyped(MySqlTermTagRepository::class),
+                $c->getTyped(MySqlTextTagRepository::class)
             );
         });
     }
@@ -238,8 +233,8 @@ class TagsServiceProvider implements ServiceProviderInterface
         $container->singleton('tags.facade.term', function (Container $c) {
             return new TagsFacade(
                 TagType::TERM,
-                $c->get(MySqlTermTagRepository::class),
-                $c->get(MySqlWordTagAssociation::class)
+                $c->getTyped(MySqlTermTagRepository::class),
+                $c->getTyped(MySqlWordTagAssociation::class)
             );
         });
 
@@ -247,8 +242,8 @@ class TagsServiceProvider implements ServiceProviderInterface
         $container->singleton('tags.facade.text', function (Container $c) {
             return new TagsFacade(
                 TagType::TEXT,
-                $c->get(MySqlTextTagRepository::class),
-                $c->get(MySqlTextTagAssociation::class)
+                $c->getTyped(MySqlTextTagRepository::class),
+                $c->getTyped(MySqlTextTagAssociation::class)
             );
         });
 
@@ -270,16 +265,16 @@ class TagsServiceProvider implements ServiceProviderInterface
     {
         // Term Tag Controller
         $container->singleton(TermTagController::class, function (Container $c) {
-            return new TermTagController(
-                $c->get('tags.facade.term')
-            );
+            /** @var TagsFacade $termFacade */
+            $termFacade = $c->get('tags.facade.term');
+            return new TermTagController($termFacade);
         });
 
         // Text Tag Controller
         $container->singleton(TextTagController::class, function (Container $c) {
-            return new TextTagController(
-                $c->get('tags.facade.text')
-            );
+            /** @var TagsFacade $textFacade */
+            $textFacade = $c->get('tags.facade.text');
+            return new TextTagController($textFacade);
         });
     }
 
@@ -293,10 +288,11 @@ class TagsServiceProvider implements ServiceProviderInterface
     private function registerApiHandler(Container $container): void
     {
         $container->singleton(TagApiHandler::class, function (Container $c) {
-            return new TagApiHandler(
-                $c->get('tags.facade.term'),
-                $c->get('tags.facade.text')
-            );
+            /** @var TagsFacade $termFacade */
+            $termFacade = $c->get('tags.facade.term');
+            /** @var TagsFacade $textFacade */
+            $textFacade = $c->get('tags.facade.text');
+            return new TagApiHandler($termFacade, $textFacade);
         });
     }
 

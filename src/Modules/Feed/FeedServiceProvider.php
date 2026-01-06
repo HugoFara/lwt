@@ -82,26 +82,26 @@ class FeedServiceProvider implements ServiceProviderInterface
         // Register Facade
         $container->singleton(FeedFacade::class, function (Container $c) {
             return new FeedFacade(
-                $c->get(FeedRepositoryInterface::class),
-                $c->get(ArticleRepositoryInterface::class),
-                $c->get(TextCreationInterface::class),
-                $c->get(RssParser::class),
-                $c->get(ArticleExtractor::class)
+                $c->getTyped(FeedRepositoryInterface::class),
+                $c->getTyped(ArticleRepositoryInterface::class),
+                $c->getTyped(TextCreationInterface::class),
+                $c->getTyped(RssParser::class),
+                $c->getTyped(ArticleExtractor::class)
             );
         });
 
         // Register Controller
         $container->singleton(FeedController::class, function (Container $c) {
             return new FeedController(
-                $c->get(FeedFacade::class),
-                $c->get(LanguageFacade::class)
+                $c->getTyped(FeedFacade::class),
+                $c->getTyped(LanguageFacade::class)
             );
         });
 
         // Register API Handler
         $container->singleton(FeedApiHandler::class, function (Container $c) {
             return new FeedApiHandler(
-                $c->get(FeedFacade::class)
+                $c->getTyped(FeedFacade::class)
             );
         });
     }
@@ -121,7 +121,7 @@ class FeedServiceProvider implements ServiceProviderInterface
         });
 
         $container->singleton(MySqlFeedRepository::class, function (Container $c): FeedRepositoryInterface {
-            return $c->get(FeedRepositoryInterface::class);
+            return $c->getTyped(FeedRepositoryInterface::class);
         });
 
         // Article Repository
@@ -130,7 +130,7 @@ class FeedServiceProvider implements ServiceProviderInterface
         });
 
         $container->singleton(MySqlArticleRepository::class, function (Container $c): ArticleRepositoryInterface {
-            return $c->get(ArticleRepositoryInterface::class);
+            return $c->getTyped(ArticleRepositoryInterface::class);
         });
 
         // Text Creation Adapter
@@ -139,7 +139,7 @@ class FeedServiceProvider implements ServiceProviderInterface
         });
 
         $container->singleton(TextCreationAdapter::class, function (Container $c): TextCreationInterface {
-            return $c->get(TextCreationInterface::class);
+            return $c->getTyped(TextCreationInterface::class);
         });
     }
 
@@ -173,78 +173,78 @@ class FeedServiceProvider implements ServiceProviderInterface
         // CreateFeed use case
         $container->singleton(CreateFeed::class, function (Container $c) {
             return new CreateFeed(
-                $c->get(FeedRepositoryInterface::class)
+                $c->getTyped(FeedRepositoryInterface::class)
             );
         });
 
         // UpdateFeed use case
         $container->singleton(UpdateFeed::class, function (Container $c) {
             return new UpdateFeed(
-                $c->get(FeedRepositoryInterface::class)
+                $c->getTyped(FeedRepositoryInterface::class)
             );
         });
 
         // DeleteFeeds use case
         $container->singleton(DeleteFeeds::class, function (Container $c) {
             return new DeleteFeeds(
-                $c->get(FeedRepositoryInterface::class),
-                $c->get(ArticleRepositoryInterface::class)
+                $c->getTyped(FeedRepositoryInterface::class),
+                $c->getTyped(ArticleRepositoryInterface::class)
             );
         });
 
         // LoadFeed use case
         $container->singleton(LoadFeed::class, function (Container $c) {
             return new LoadFeed(
-                $c->get(FeedRepositoryInterface::class),
-                $c->get(ArticleRepositoryInterface::class),
-                $c->get(RssParser::class)
+                $c->getTyped(FeedRepositoryInterface::class),
+                $c->getTyped(ArticleRepositoryInterface::class),
+                $c->getTyped(RssParser::class)
             );
         });
 
         // GetFeedList use case
         $container->singleton(GetFeedList::class, function (Container $c) {
             return new GetFeedList(
-                $c->get(FeedRepositoryInterface::class),
-                $c->get(ArticleRepositoryInterface::class)
+                $c->getTyped(FeedRepositoryInterface::class),
+                $c->getTyped(ArticleRepositoryInterface::class)
             );
         });
 
         // GetFeedById use case
         $container->singleton(GetFeedById::class, function (Container $c) {
             return new GetFeedById(
-                $c->get(FeedRepositoryInterface::class)
+                $c->getTyped(FeedRepositoryInterface::class)
             );
         });
 
         // GetArticles use case
         $container->singleton(GetArticles::class, function (Container $c) {
             return new GetArticles(
-                $c->get(ArticleRepositoryInterface::class)
+                $c->getTyped(ArticleRepositoryInterface::class)
             );
         });
 
         // ImportArticles use case
         $container->singleton(ImportArticles::class, function (Container $c) {
             return new ImportArticles(
-                $c->get(ArticleRepositoryInterface::class),
-                $c->get(FeedRepositoryInterface::class),
-                $c->get(TextCreationInterface::class),
-                $c->get(ArticleExtractor::class)
+                $c->getTyped(ArticleRepositoryInterface::class),
+                $c->getTyped(FeedRepositoryInterface::class),
+                $c->getTyped(TextCreationInterface::class),
+                $c->getTyped(ArticleExtractor::class)
             );
         });
 
         // DeleteArticles use case
         $container->singleton(DeleteArticles::class, function (Container $c) {
             return new DeleteArticles(
-                $c->get(ArticleRepositoryInterface::class),
-                $c->get(FeedRepositoryInterface::class)
+                $c->getTyped(ArticleRepositoryInterface::class),
+                $c->getTyped(FeedRepositoryInterface::class)
             );
         });
 
         // ResetErrorArticles use case
         $container->singleton(ResetErrorArticles::class, function (Container $c) {
             return new ResetErrorArticles(
-                $c->get(ArticleRepositoryInterface::class)
+                $c->getTyped(ArticleRepositoryInterface::class)
             );
         });
     }

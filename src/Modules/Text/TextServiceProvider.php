@@ -77,7 +77,7 @@ class TextServiceProvider implements ServiceProviderInterface
         // Register MySqlTextRepository as concrete implementation
         $container->singleton(MySqlTextRepository::class, function (Container $c): MySqlTextRepository {
             /** @var MySqlTextRepository */
-            return $c->get(TextRepositoryInterface::class);
+            return $c->getTyped(TextRepositoryInterface::class);
         });
 
         // Register Use Cases
@@ -86,7 +86,7 @@ class TextServiceProvider implements ServiceProviderInterface
         // Register Facade
         $container->singleton(TextFacade::class, function (Container $c) {
             return new TextFacade(
-                $c->get(TextRepositoryInterface::class)
+                $c->getTyped(TextRepositoryInterface::class)
             );
         });
 
@@ -127,14 +127,14 @@ class TextServiceProvider implements ServiceProviderInterface
         // ImportText use case
         $container->singleton(ImportText::class, function (Container $c) {
             return new ImportText(
-                $c->get(TextRepositoryInterface::class)
+                $c->getTyped(TextRepositoryInterface::class)
             );
         });
 
         // UpdateText use case
         $container->singleton(UpdateText::class, function (Container $c) {
             return new UpdateText(
-                $c->get(TextRepositoryInterface::class)
+                $c->getTyped(TextRepositoryInterface::class)
             );
         });
 
@@ -151,21 +151,21 @@ class TextServiceProvider implements ServiceProviderInterface
         // GetTextForReading use case
         $container->singleton(GetTextForReading::class, function (Container $c) {
             return new GetTextForReading(
-                $c->get(TextRepositoryInterface::class)
+                $c->getTyped(TextRepositoryInterface::class)
             );
         });
 
         // GetTextForEdit use case
         $container->singleton(GetTextForEdit::class, function (Container $c) {
             return new GetTextForEdit(
-                $c->get(TextRepositoryInterface::class)
+                $c->getTyped(TextRepositoryInterface::class)
             );
         });
 
         // ListTexts use case
         $container->singleton(ListTexts::class, function (Container $c) {
             return new ListTexts(
-                $c->get(TextRepositoryInterface::class)
+                $c->getTyped(TextRepositoryInterface::class)
             );
         });
 

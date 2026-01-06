@@ -74,28 +74,28 @@ class VocabularyServiceProvider implements ServiceProviderInterface
         // Register MySqlTermRepository as concrete implementation
         $container->singleton(MySqlTermRepository::class, function (Container $c): MySqlTermRepository {
             /** @var MySqlTermRepository */
-            return $c->get(TermRepositoryInterface::class);
+            return $c->getTyped(TermRepositoryInterface::class);
         });
 
         // Register Use Cases
         $container->singleton(CreateTerm::class, function (Container $c) {
-            return new CreateTerm($c->get(TermRepositoryInterface::class));
+            return new CreateTerm($c->getTyped(TermRepositoryInterface::class));
         });
 
         $container->singleton(GetTermById::class, function (Container $c) {
-            return new GetTermById($c->get(TermRepositoryInterface::class));
+            return new GetTermById($c->getTyped(TermRepositoryInterface::class));
         });
 
         $container->singleton(UpdateTerm::class, function (Container $c) {
-            return new UpdateTerm($c->get(TermRepositoryInterface::class));
+            return new UpdateTerm($c->getTyped(TermRepositoryInterface::class));
         });
 
         $container->singleton(DeleteTerm::class, function (Container $c) {
-            return new DeleteTerm($c->get(TermRepositoryInterface::class));
+            return new DeleteTerm($c->getTyped(TermRepositoryInterface::class));
         });
 
         $container->singleton(UpdateTermStatus::class, function (Container $c) {
-            return new UpdateTermStatus($c->get(TermRepositoryInterface::class));
+            return new UpdateTermStatus($c->getTyped(TermRepositoryInterface::class));
         });
 
         // Register Services
@@ -105,8 +105,8 @@ class VocabularyServiceProvider implements ServiceProviderInterface
 
         $container->singleton(FindSimilarTerms::class, function (Container $c) {
             return new FindSimilarTerms(
-                $c->get(TermRepositoryInterface::class),
-                $c->get(SimilarityCalculator::class)
+                $c->getTyped(TermRepositoryInterface::class),
+                $c->getTyped(SimilarityCalculator::class)
             );
         });
 
@@ -134,12 +134,12 @@ class VocabularyServiceProvider implements ServiceProviderInterface
         // Register Facade
         $container->singleton(VocabularyFacade::class, function (Container $c) {
             return new VocabularyFacade(
-                $c->get(TermRepositoryInterface::class),
-                $c->get(CreateTerm::class),
-                $c->get(GetTermById::class),
-                $c->get(UpdateTerm::class),
-                $c->get(DeleteTerm::class),
-                $c->get(UpdateTermStatus::class)
+                $c->getTyped(TermRepositoryInterface::class),
+                $c->getTyped(CreateTerm::class),
+                $c->getTyped(GetTermById::class),
+                $c->getTyped(UpdateTerm::class),
+                $c->getTyped(DeleteTerm::class),
+                $c->getTyped(UpdateTermStatus::class)
             );
         });
 
@@ -151,19 +151,19 @@ class VocabularyServiceProvider implements ServiceProviderInterface
         // Register Controller
         $container->singleton(VocabularyController::class, function (Container $c) {
             return new VocabularyController(
-                $c->get(VocabularyFacade::class),
-                $c->get(CreateTermFromHover::class),
-                $c->get(FindSimilarTerms::class),
-                $c->get(DictionaryAdapter::class)
+                $c->getTyped(VocabularyFacade::class),
+                $c->getTyped(CreateTermFromHover::class),
+                $c->getTyped(FindSimilarTerms::class),
+                $c->getTyped(DictionaryAdapter::class)
             );
         });
 
         // Register API Handler
         $container->singleton(VocabularyApiHandler::class, function (Container $c) {
             return new VocabularyApiHandler(
-                $c->get(VocabularyFacade::class),
-                $c->get(FindSimilarTerms::class),
-                $c->get(DictionaryAdapter::class)
+                $c->getTyped(VocabularyFacade::class),
+                $c->getTyped(FindSimilarTerms::class),
+                $c->getTyped(DictionaryAdapter::class)
             );
         });
     }

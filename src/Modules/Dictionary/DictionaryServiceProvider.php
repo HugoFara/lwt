@@ -62,15 +62,15 @@ class DictionaryServiceProvider implements ServiceProviderInterface
         // Register Facade
         $container->singleton(DictionaryFacade::class, function (Container $c) {
             return new DictionaryFacade(
-                $c->get(LocalDictionaryService::class)
+                $c->getTyped(LocalDictionaryService::class)
             );
         });
 
         // Register Controller
         $container->singleton(DictionaryController::class, function (Container $c) {
             return new DictionaryController(
-                $c->get(DictionaryFacade::class),
-                $c->get(LanguageFacade::class)
+                $c->getTyped(DictionaryFacade::class),
+                $c->getTyped(LanguageFacade::class)
             );
         });
 
@@ -82,7 +82,7 @@ class DictionaryServiceProvider implements ServiceProviderInterface
         // Register TranslationController
         $container->singleton(TranslationController::class, function (Container $c) {
             return new TranslationController(
-                $c->get(TranslationService::class)
+                $c->getTyped(TranslationService::class)
             );
         });
 
