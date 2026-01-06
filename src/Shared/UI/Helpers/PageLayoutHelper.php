@@ -362,7 +362,9 @@ HTML;
         echo '<meta name="apple-mobile-web-app-capable" content="yes" />';
 
         if (ViteHelper::shouldUse()) {
-            echo '<!-- Vite assets -->';
+            echo '<!-- Critical CSS for fast first paint -->';
+            echo ViteHelper::criticalCss();
+            echo '<!-- Vite assets (async CSS) -->';
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
@@ -410,7 +412,9 @@ HTML;
         echo '<meta name="apple-mobile-web-app-capable" content="yes" />';
 
         if (ViteHelper::shouldUse()) {
-            echo '<!-- Vite assets -->';
+            echo '<!-- Critical CSS for fast first paint -->';
+            echo ViteHelper::criticalCss();
+            echo '<!-- Vite assets (async CSS) -->';
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';

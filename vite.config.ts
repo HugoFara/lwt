@@ -22,9 +22,20 @@ export default defineConfig({
         chunkFileNames: 'js/vite/chunks/[name].[hash].js',
         assetFileNames: 'css/vite/[name].[hash][extname]',
         manualChunks: {
+          // Vendor chunks - loaded on demand
+          'alpine': ['alpinejs'],
           'chart': ['chart.js'],
           'tagify': ['@yaireo/tagify'],
+          'lucide': ['lucide'],
         },
+      },
+    },
+    // Enable minification for better compression
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
       },
     },
     chunkSizeWarningLimit: 400,

@@ -85,11 +85,12 @@ class ViteHelper
      * In development mode, loads assets from Vite dev server with HMR.
      * In production mode, loads assets from the manifest file.
      *
-     * @param string $entry The entry point path (e.g., 'js/main.ts')
+     * @param string $entry    The entry point path (e.g., 'js/main.ts')
+     * @param bool   $asyncCss Whether to load CSS asynchronously (non-render-blocking)
      *
      * @return string HTML script and link tags
      */
-    public static function assets(string $entry = 'js/main.ts'): string
+    public static function assets(string $entry = 'js/main.ts', bool $asyncCss = true): string
     {
         if (self::isDevServerRunning()) {
             return <<<HTML
@@ -109,7 +110,15 @@ HTML;
         // Load CSS files
         if (isset($entryData['css']) && is_array($entryData['css'])) {
             foreach ($entryData['css'] as $cssFile) {
-                $html .= '<link rel="stylesheet" href="/assets/' . htmlspecialchars($cssFile) . '">' . "\n";
+                $cssPath = '/assets/' . htmlspecialchars($cssFile);
+                if ($asyncCss) {
+                    // Async CSS loading using preload + onload pattern
+                    // This eliminates render-blocking while ensuring CSS loads
+                    $html .= '<link rel="preload" href="' . $cssPath . '" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">' . "\n";
+                    $html .= '<noscript><link rel="stylesheet" href="' . $cssPath . '"></noscript>' . "\n";
+                } else {
+                    $html .= '<link rel="stylesheet" href="' . $cssPath . '">' . "\n";
+                }
             }
         }
 
@@ -145,6 +154,35 @@ HTML;
 
         // Auto mode: use Vite if manifest exists
         return self::getManifest() !== null;
+    }
+
+    /**
+     * Get critical CSS for initial render.
+     *
+     * This returns inline CSS that should be included in the <head> to
+     * prevent Flash of Unstyled Content (FOUC) while the main CSS loads async.
+     *
+     * @return string Inline critical CSS wrapped in <style> tags
+     */
+    public static function criticalCss(): string
+    {
+        $criticalPath = __DIR__ . '/../../../../src/frontend/css/critical.css';
+        if (!file_exists($criticalPath)) {
+            return '';
+        }
+
+        $css = file_get_contents($criticalPath);
+        if ($css === false) {
+            return '';
+        }
+
+        // Minify: remove comments, extra whitespace
+        $css = preg_replace('/\/\*[\s\S]*?\*\//', '', $css);
+        $css = preg_replace('/\s+/', ' ', $css);
+        $css = str_replace([' {', '{ ', ' }', '} ', ': ', ' :', '; ', ' ;'], ['{', '{', '}', '}', ':', ':', ';', ';'], $css);
+        $css = trim($css);
+
+        return '<style>' . $css . '</style>';
     }
 
     /**
