@@ -101,8 +101,7 @@ class DictionaryApiHandler
      */
     public function createDictionary(array $data): array
     {
-        // Accept both language_id (new) and lang_id (legacy) for backward compatibility
-        $langId = (int)($data['language_id'] ?? $data['lang_id'] ?? 0);
+        $langId = (int)($data['language_id'] ?? 0);
         $name = trim($data['name'] ?? '');
         $description = isset($data['description']) ? trim($data['description']) : null;
         $sourceFormat = $data['source_format'] ?? 'csv';

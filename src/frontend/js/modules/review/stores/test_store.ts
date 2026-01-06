@@ -258,7 +258,7 @@ function createTestStore(): TestStoreState {
           return;
         }
 
-        if (!response.data || response.data.word_id === 0) {
+        if (!response.data || response.data.term_id === 0) {
           // No more words to test
           this.isFinished = true;
           this.stopTimer();
@@ -274,10 +274,10 @@ function createTestStore(): TestStoreState {
         } else {
           const data = response.data;
           this.currentWord = {
-            wordId: typeof data.word_id === 'string'
-              ? parseInt(data.word_id, 10)
-              : data.word_id,
-            text: data.word_text,
+            wordId: typeof data.term_id === 'string'
+              ? parseInt(data.term_id, 10)
+              : data.term_id,
+            text: data.term_text,
             translation: '', // Will be revealed with answer
             romanization: '',
             status: 1,

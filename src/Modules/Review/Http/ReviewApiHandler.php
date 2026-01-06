@@ -286,8 +286,7 @@ class ReviewApiHandler
      */
     public function formatUpdateStatus(array $params): array
     {
-        // Accept both term_id (new) and word_id (legacy) for backward compatibility
-        $termId = (int)($params['term_id'] ?? $params['word_id'] ?? 0);
+        $termId = (int)($params['term_id'] ?? 0);
         if ($termId === 0) {
             return ['error' => 'term_id is required'];
         }

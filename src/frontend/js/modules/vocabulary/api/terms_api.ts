@@ -324,7 +324,7 @@ export const TermsApi = {
   ): Promise<ApiResponse<TermTranslationResponse>> {
     return apiPost<TermTranslationResponse>('/terms', {
       text,
-      lg_id: langId,
+      language_id: langId,
       translation
     });
   },
@@ -363,7 +363,7 @@ export const TermsApi = {
   ): Promise<ApiResponse<SimilarTerm[]>> {
     return apiGet<SimilarTerm[]>('/similar-terms', {
       term: termText,
-      lg_id: langId
+      language_id: langId
     });
   },
 
@@ -380,7 +380,7 @@ export const TermsApi = {
   ): Promise<ApiResponse<SentenceWithTerm[]>> {
     return apiGet<SentenceWithTerm[]>('/sentences-with-term', {
       term_id: termId,
-      lg_id: langId
+      language_id: langId
     });
   },
 
@@ -431,7 +431,7 @@ export const TermsApi = {
     wordId?: number
   ): Promise<ApiResponse<MultiWordData>> {
     const params: Record<string, string> = {
-      tid: String(textId),
+      term_id: String(textId),
       ord: String(position)
     };
     if (text) {
@@ -489,7 +489,7 @@ export const TermsApi = {
     wordId?: number
   ): Promise<ApiResponse<TermForEditResponse>> {
     const params: Record<string, string> = {
-      tid: String(textId),
+      term_id: String(textId),
       ord: String(position)
     };
     if (wordId !== undefined && wordId !== null) {

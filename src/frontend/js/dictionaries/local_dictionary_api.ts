@@ -59,7 +59,7 @@ export async function lookupLocal(
 ): Promise<ApiResponse<LocalDictLookupResponse>> {
   return apiGet<LocalDictLookupResponse>(
     `/local-dictionaries/lookup`,
-    { lang_id: langId, term }
+    { language_id: langId, term }
   );
 }
 
@@ -78,7 +78,7 @@ export async function getLocalDictMode(langId: number): Promise<number> {
   // Fetch from API - we only need the mode, so lookup empty term
   const response = await apiGet<LocalDictLookupResponse>(
     `/local-dictionaries/lookup`,
-    { lang_id: langId, term: '__mode_check__' }
+    { language_id: langId, term: '__mode_check__' }
   );
 
   const mode = response.data?.mode ?? DictionaryMode.ONLINE_ONLY;

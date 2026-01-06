@@ -232,7 +232,7 @@ export const TextsApi = {
     textIds: number[] | string
   ): Promise<ApiResponse<TextStatistics>> {
     const ids = Array.isArray(textIds) ? textIds.join(',') : textIds;
-    return apiGet<TextStatistics>('/texts/statistics', { texts_id: ids });
+    return apiGet<TextStatistics>('/texts/statistics', { text_ids: ids });
   },
 
   /**
@@ -244,7 +244,7 @@ export const TextsApi = {
   async create(data: TextCreateRequest): Promise<ApiResponse<TextCreateResponse>> {
     return apiPost<TextCreateResponse>('/texts', {
       title: data.title,
-      lg_id: data.langId,
+      language_id: data.langId,
       text: data.text,
       source_uri: data.sourceUri,
       audio_uri: data.audioUri,

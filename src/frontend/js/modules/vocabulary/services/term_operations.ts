@@ -49,7 +49,7 @@ export interface TransData {
   ann_index: string;
   term_ord: string;
   term_lc: string;
-  lang_id: number;
+  language_id: number;
   translations: string[];
 }
 
@@ -301,7 +301,7 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
     </span>`;
   } else {
     translations_list +=
-    `<span class="click" onclick="addTermTranslation('#tx${trans_data.ann_index}',${trans_data.term_lc},${trans_data.lang_id});">
+    `<span class="click" onclick="addTermTranslation('#tx${trans_data.ann_index}',${trans_data.term_lc},${trans_data.language_id});">
       ${iconHtml('plus-button', { title: 'Save translation to new term', alt: 'Save translation to new term' })}
     </span>`;
   }
@@ -360,14 +360,14 @@ export async function do_ajax_edit_impr_text(pagepos: number, word: string, term
 /**
  * Send an AJAX request to get similar terms to a term.
  *
- * @param lg_id Language ID
+ * @param language_id Language ID
  * @param word_text Text to match
  * @returns Promise with similar terms data
  */
-export async function do_ajax_req_sim_terms(lg_id: number, word_text: string): Promise<{ similar_terms: string } | null> {
+export async function do_ajax_req_sim_terms(language_id: number, word_text: string): Promise<{ similar_terms: string } | null> {
   const response = await apiGet<{ similar_terms: string }>(
     '/similar-terms',
-    { lg_id, term: word_text }
+    { language_id, term: word_text }
   );
   return response.data || null;
 }
@@ -467,12 +467,12 @@ export async function do_ajax_show_sentences(lang: number, word: string, ctl: st
   if (isInt(String(woid)) && woid !== -1) {
     response = await apiGet<[string, string][]>(
       `/sentences-with-term/${woid}`,
-      { lg_id: lang, word_lc: word }
+      { language_id: lang, term_lc: word }
     );
   } else {
-    const params: { lg_id: number; word_lc: string; advanced_search?: boolean } = {
-      lg_id: lang,
-      word_lc: word
+    const params: { language_id: number; term_lc: string; advanced_search?: boolean } = {
+      language_id: lang,
+      term_lc: word
     };
     if (parseInt(String(woid), 10) === -1) {
       params.advanced_search = true;

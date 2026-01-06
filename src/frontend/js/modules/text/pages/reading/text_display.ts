@@ -54,7 +54,7 @@ export async function do_ajax_word_counts(): Promise<void> {
     .join(',');
 
   const response = await apiGet<WordCounts>('/texts/statistics', {
-    texts_id: textIds
+    text_ids: textIds
   });
 
   if (response.data) {

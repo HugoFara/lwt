@@ -255,7 +255,7 @@ export function getPhoneticTextAsync(
   const params = new URLSearchParams();
   params.append('text', text);
   if (typeof lang === 'number') {
-    params.append('lang_id', String(lang));
+    params.append('language_id', String(lang));
   } else {
     params.append('lang', lang);
   }
@@ -446,12 +446,12 @@ export function readTextAloud(
  *
  * @param language Reading configuration for the language
  * @param term Text to be read aloud
- * @param lang_id Language ID for API calls
+ * @param languageId Language ID for API calls
  */
 export function handleReadingConfiguration(
   language: ReadingConfiguration,
   term: string,
-  lang_id: number
+  languageId: number
 ): void {
   if (language.reading_mode === 'direct' || language.reading_mode === 'internal') {
     const lang_settings = cookieTTSSettings(language.name);
@@ -466,7 +466,7 @@ export function handleReadingConfiguration(
       );
     } else {
       // Server handled reparsing
-      getPhoneticTextAsync(term, lang_id)
+      getPhoneticTextAsync(term, languageId)
         .then(
           function (reparsed_text: { phonetic_reading: string }) {
             readRawTextAloud(
@@ -490,20 +490,20 @@ export function handleReadingConfiguration(
  * Fetches the reading configuration from the API and delegates to handleReadingConfiguration.
  *
  * @param term Text to be read aloud
- * @param lang_id Language ID
+ * @param languageId Language ID
  * @returns Promise resolving when the fetch completes
  */
 export function speechDispatcher(
   term: string,
-  lang_id: number
+  languageId: number
 ): Promise<ReadingConfiguration> {
   const params = new URLSearchParams();
-  params.append('lang_id', String(lang_id));
+  params.append('language_id', String(languageId));
 
-  return fetch('api.php/v1/languages/' + lang_id + '/reading-configuration?' + params.toString())
+  return fetch('api.php/v1/languages/' + languageId + '/reading-configuration?' + params.toString())
     .then(response => response.json())
     .then((data: ReadingConfiguration) => {
-      handleReadingConfiguration(data, term, lang_id);
+      handleReadingConfiguration(data, term, languageId);
       return data;
     });
 }

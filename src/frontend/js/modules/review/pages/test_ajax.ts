@@ -19,7 +19,7 @@ interface ReviewData {
   test_key: string;
   selection: string;
   word_mode: number;
-  lg_id: number;
+  language_id: number;
   word_regex: string;
   type: number;
   count: number;
@@ -28,10 +28,10 @@ interface ReviewData {
 
 // Interface for current test word
 interface CurrentTest {
-  word_id: number;
+  term_id: number;
   solution: string;
   group: string;
-  word_text: string;
+  term_text: string;
 }
 
 // Interface for time configuration
@@ -125,7 +125,7 @@ export async function testQueryHandler(
   testKey: string,
   selection: string
 ): Promise<void> {
-  if (currentTest.word_id === 0) {
+  if (currentTest.term_id === 0) {
     doTestFinished(totalTests);
     const response = await ReviewApi.getTomorrowCount(testKey, selection);
     if (response.data?.count) {
@@ -139,13 +139,13 @@ export async function testQueryHandler(
     }
   } else {
     insertNewWord(
-      currentTest.word_id,
+      currentTest.term_id,
       currentTest.solution,
       currentTest.group
     );
     const utteranceCheckbox = document.getElementById('utterance-allowed') as HTMLInputElement | null;
     if (utteranceCheckbox?.checked) {
-      prepareWordReading(currentTest.word_text, getLanguageId());
+      prepareWordReading(currentTest.term_text, getLanguageId());
     }
   }
 }
@@ -160,19 +160,19 @@ export async function queryNextTerm(reviewData: ReviewData): Promise<void> {
     testKey: reviewData.test_key,
     selection: reviewData.selection,
     wordMode: reviewData.word_mode === 1,
-    lgId: reviewData.lg_id,
+    lgId: reviewData.language_id,
     wordRegex: reviewData.word_regex,
     type: reviewData.type
   });
 
   if (response.data) {
     const data: CurrentTest = {
-      word_id: typeof response.data.word_id === 'string'
-        ? parseInt(response.data.word_id, 10)
-        : response.data.word_id,
+      term_id: typeof response.data.term_id === 'string'
+        ? parseInt(response.data.term_id, 10)
+        : response.data.term_id,
       solution: response.data.solution || '',
       group: response.data.group,
-      word_text: response.data.word_text
+      term_text: response.data.term_text
     };
     await testQueryHandler(
       data, reviewData.count, reviewData.test_key, reviewData.selection

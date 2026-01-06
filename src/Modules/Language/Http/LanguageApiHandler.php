@@ -169,8 +169,7 @@ class LanguageApiHandler
      */
     public function formatPhoneticReading(array $params): array
     {
-        // Accept both language_id (new) and lang_id (legacy) for backward compatibility
-        $languageId = $params['language_id'] ?? $params['lang_id'] ?? null;
+        $languageId = $params['language_id'] ?? null;
         if ($languageId !== null) {
             return $this->getPhoneticReading($params['text'], (int)$languageId);
         }

@@ -11,9 +11,9 @@ import { apiGet, apiPut, type ApiResponse } from '@shared/api/client';
  * Word test data returned from the API.
  */
 export interface WordTestData {
-  word_id: number | string;
+  term_id: number | string;
   solution?: string;
-  word_text: string;
+  term_text: string;
   group: string;
 }
 
@@ -130,7 +130,7 @@ export const ReviewApi = {
       test_key: params.testKey,
       selection: params.selection,
       word_mode: params.wordMode,
-      lg_id: params.lgId,
+      language_id: params.lgId,
       word_regex: params.wordRegex,
       type: params.type
     });
@@ -162,12 +162,12 @@ export const ReviewApi = {
    * @returns Promise with update result
    */
   async updateStatus(
-    wordId: number,
+    termId: number,
     status?: number,
     change?: number
   ): Promise<ApiResponse<ReviewStatusResponse>> {
     return apiPut<ReviewStatusResponse>('/review/status', {
-      word_id: wordId,
+      term_id: termId,
       status,
       change
     });
