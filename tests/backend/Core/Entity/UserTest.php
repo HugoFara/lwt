@@ -172,6 +172,7 @@ class UserTest extends TestCase
         $created = new DateTimeImmutable('2024-01-01');
         $lastLogin = new DateTimeImmutable('2024-01-15');
         $tokenExpires = new DateTimeImmutable('+1 hour');
+        $rememberExpires = new DateTimeImmutable('+30 days');
 
         $user = User::reconstitute(
             42,
@@ -180,6 +181,8 @@ class UserTest extends TestCase
             'hashedpassword',
             'token123',
             $tokenExpires,
+            'remember456',
+            $rememberExpires,
             null,
             $created,
             $lastLogin,
@@ -193,6 +196,8 @@ class UserTest extends TestCase
         $this->assertEquals('hashedpassword', $user->passwordHash());
         $this->assertEquals('token123', $user->apiToken());
         $this->assertSame($tokenExpires, $user->apiTokenExpires());
+        $this->assertEquals('remember456', $user->rememberToken());
+        $this->assertSame($rememberExpires, $user->rememberTokenExpires());
         $this->assertNull($user->wordPressId());
         $this->assertSame($created, $user->created());
         $this->assertSame($lastLogin, $user->lastLogin());
@@ -390,6 +395,8 @@ class UserTest extends TestCase
             'testuser',
             'test@example.com',
             'hashedpassword',
+            null,
+            null,
             null,
             null,
             null,

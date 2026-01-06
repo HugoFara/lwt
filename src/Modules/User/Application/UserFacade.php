@@ -201,6 +201,81 @@ class UserFacade
     }
 
     // =========================================================================
+    // Remember Token Operations
+    // =========================================================================
+
+    /**
+     * Set a remember-me token for a user.
+     *
+     * @param int $userId The user ID
+     * @param int $days   Number of days until expiration (default: 30)
+     *
+     * @return string The generated remember token
+     *
+     * @throws \InvalidArgumentException If user not found
+     */
+    public function setRememberToken(int $userId, int $days = 30): string
+    {
+        $user = $this->repository->find($userId);
+        if ($user === null) {
+            throw new \InvalidArgumentException("User not found: {$userId}");
+        }
+
+        $token = $this->passwordHasher->generateToken(32);
+        $expires = new \DateTimeImmutable("+{$days} days");
+
+        $user->setRememberToken($token, $expires);
+        $this->repository->save($user);
+
+        return $token;
+    }
+
+    /**
+     * Validate a remember-me token and return the associated user.
+     *
+     * @param string $token The remember token to validate
+     *
+     * @return User|null The user if token is valid, null otherwise
+     */
+    public function validateRememberToken(string $token): ?User
+    {
+        if (empty($token)) {
+            return null;
+        }
+
+        $user = $this->repository->findByRememberToken($token);
+        if ($user === null) {
+            return null;
+        }
+
+        if (!$user->hasValidRememberToken()) {
+            return null;
+        }
+
+        if (!$user->isActive()) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    /**
+     * Invalidate a user's remember-me token.
+     *
+     * @param int $userId The user ID
+     *
+     * @return void
+     */
+    public function invalidateRememberToken(int $userId): void
+    {
+        $user = $this->repository->find($userId);
+        if ($user !== null) {
+            $user->invalidateRememberToken();
+            $this->repository->save($user);
+        }
+    }
+
+    // =========================================================================
     // User Lookup Operations
     // =========================================================================
 

@@ -95,6 +95,93 @@ class TextParsing
         self::splitCheck($text, $lid, $textId);
     }
 
+    /**
+     * Check/preview text and return parsing statistics without saving.
+     *
+     * Use this method to get text statistics for preview purposes.
+     * Does not output any HTML or save to database.
+     *
+     * @param string $text Text to parse
+     * @param int    $lid  Language ID
+     *
+     * @return array{sentences: int, words: int, unknownPercent: float, preview: string}
+     */
+    public static function checkText(string $text, int $lid): array
+    {
+        $settings = self::getLanguageSettings($lid);
+
+        if ($settings === null) {
+            return [
+                'sentences' => 0,
+                'words' => 0,
+                'unknownPercent' => 100.0,
+                'preview' => ''
+            ];
+        }
+
+        // Prepare text into temptextitems
+        self::prepare($text, -1, $lid);
+
+        // Get sentence count
+        $sentences = Connection::fetchAll(
+            'SELECT GROUP_CONCAT(TiText ORDER BY TiOrder SEPARATOR "")
+            AS Sent FROM temptextitems GROUP BY TiSeID'
+        );
+        $sentenceCount = count($sentences);
+
+        // Build preview from first few sentences
+        $preview = '';
+        $previewSentences = array_slice($sentences, 0, 3);
+        foreach ($previewSentences as $record) {
+            if ($preview !== '') {
+                $preview .= ' ';
+            }
+            $preview .= (string) ($record['Sent'] ?? '');
+        }
+        if (count($sentences) > 3) {
+            $preview .= '...';
+        }
+
+        // Get word statistics
+        $bindings = [$lid];
+        $rows = Connection::preparedFetchAll(
+            "SELECT COUNT(`TiOrder`) AS cnt, IF(0=TiWordCount,0,1) AS len,
+            LOWER(TiText) AS word, WoTranslation
+            FROM temptextitems
+            LEFT JOIN words ON LOWER(TiText)=WoTextLC AND WoLgID=?"
+            . UserScopedQuery::forTablePrepared('words', $bindings, '')
+            . " GROUP BY LOWER(TiText)",
+            $bindings
+        );
+
+        $totalWords = 0;
+        $unknownWords = 0;
+
+        foreach ($rows as $record) {
+            if ($record['len'] == 1) {
+                $totalWords += (int) $record['cnt'];
+                // Word is unknown if it has no translation
+                if (empty($record['WoTranslation'])) {
+                    $unknownWords += (int) $record['cnt'];
+                }
+            }
+        }
+
+        $unknownPercent = $totalWords > 0
+            ? round(($unknownWords / $totalWords) * 100, 1)
+            : 100.0;
+
+        // Clean up temptextitems
+        QueryBuilder::table('temptextitems')->truncate();
+
+        return [
+            'sentences' => $sentenceCount,
+            'words' => $totalWords,
+            'unknownPercent' => $unknownPercent,
+            'preview' => $preview
+        ];
+    }
+
     // =========================================================================
     // INTERNAL HELPERS - Japanese text parsing
     // =========================================================================

@@ -243,7 +243,11 @@ class UserController extends BaseController
      */
     public function logout(): void
     {
-        // Clear remember me cookie
+        // Invalidate and clear remember me cookie
+        $currentUser = $this->userFacade->getCurrentUser();
+        if ($currentUser !== null) {
+            $this->userFacade->invalidateRememberToken($currentUser->id()->toInt());
+        }
         $this->clearRememberCookie();
 
         // Logout via user facade
@@ -251,6 +255,49 @@ class UserController extends BaseController
 
         // Redirect to login
         $this->redirect('/login');
+    }
+
+    /**
+     * Try to restore session from remember-me cookie.
+     *
+     * This method is called during session bootstrap to check if
+     * the user has a valid remember-me cookie and restore their session.
+     *
+     * @return bool True if session was restored, false otherwise
+     */
+    public function tryRestoreFromRememberCookie(): bool
+    {
+        // Check if already authenticated
+        if (Globals::isAuthenticated()) {
+            return true;
+        }
+
+        // Check for remember cookie
+        $token = $_COOKIE['lwt_remember'] ?? '';
+        if (empty($token)) {
+            return false;
+        }
+
+        // Validate token and get user
+        $user = $this->userFacade->validateRememberToken($token);
+        if ($user === null) {
+            // Invalid/expired token - clear the cookie
+            $this->clearRememberCookie();
+            return false;
+        }
+
+        // Restore the session
+        $this->userFacade->setCurrentUser($user);
+
+        // Regenerate session ID for security
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
+
+        // Optionally refresh the token and cookie to extend the session
+        $this->setRememberCookie($user->id()->toInt());
+
+        return true;
     }
 
     // =========================================================================
@@ -284,18 +331,22 @@ class UserController extends BaseController
     }
 
     /**
-     * Set a "remember me" cookie.
+     * Set a "remember me" cookie with persistent token storage.
+     *
+     * The token is stored in the database and set as a cookie.
+     * When the user returns, the token can be validated to restore the session.
      *
      * @param int $userId The user ID
      *
      * @return void
-     *
-     * @psalm-suppress UnusedParam - userId needed for future token storage
      */
     private function setRememberCookie(int $userId): void
     {
-        $token = $this->userFacade->generateToken(32);
-        $expires = time() + (30 * 24 * 60 * 60); // 30 days
+        $days = 30;
+        $expires = time() + ($days * 24 * 60 * 60);
+
+        // Generate and store token in database
+        $token = $this->userFacade->setRememberToken($userId, $days);
 
         // Set cookie with secure flags
         setcookie(

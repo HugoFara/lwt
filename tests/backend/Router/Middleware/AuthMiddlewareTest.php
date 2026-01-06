@@ -3,9 +3,9 @@
 namespace Tests\Router\Middleware;
 
 use Lwt\Core\Globals;
+use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Router\Middleware\AuthMiddleware;
 use Lwt\Router\Middleware\MiddlewareInterface;
-use Lwt\Services\AuthService;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../../../../src/backend/Router/Middleware/AuthMiddleware.php';
@@ -46,7 +46,8 @@ class AuthMiddlewareTest extends TestCase
 
     public function testImplementsMiddlewareInterface(): void
     {
-        $middleware = new AuthMiddleware();
+        $mockUserFacade = $this->createMock(UserFacade::class);
+        $middleware = new AuthMiddleware($mockUserFacade);
 
         $this->assertInstanceOf(MiddlewareInterface::class, $middleware);
     }
@@ -56,7 +57,8 @@ class AuthMiddlewareTest extends TestCase
         // Ensure multi-user mode is disabled (default)
         Globals::setMultiUserEnabled(false);
 
-        $middleware = new AuthMiddleware();
+        $mockUserFacade = $this->createMock(UserFacade::class);
+        $middleware = new AuthMiddleware($mockUserFacade);
         $result = $middleware->handle();
 
         // Should return true without checking authentication
@@ -70,7 +72,8 @@ class AuthMiddlewareTest extends TestCase
         // Set user as already authenticated in Globals
         Globals::setCurrentUserId(1);
 
-        $middleware = new AuthMiddleware();
+        $mockUserFacade = $this->createMock(UserFacade::class);
+        $middleware = new AuthMiddleware($mockUserFacade);
         $result = $middleware->handle();
 
         $this->assertTrue($result);
@@ -81,11 +84,11 @@ class AuthMiddlewareTest extends TestCase
         // Enable multi-user mode to test auth behavior
         Globals::setMultiUserEnabled(true);
 
-        // Create a mock AuthService that returns true for session validation
-        $mockAuthService = $this->createMock(AuthService::class);
-        $mockAuthService->method('validateSession')->willReturn(true);
+        // Create a mock UserFacade that returns true for session validation
+        $mockUserFacade = $this->createMock(UserFacade::class);
+        $mockUserFacade->method('validateSession')->willReturn(true);
 
-        $middleware = new AuthMiddleware($mockAuthService);
+        $middleware = new AuthMiddleware($mockUserFacade);
         $result = $middleware->handle();
 
         $this->assertTrue($result);
@@ -105,16 +108,16 @@ class AuthMiddlewareTest extends TestCase
 
     public function testIsApiRequestDetectsApiPath(): void
     {
-        // Create a mock AuthService
-        $mockAuthService = $this->createMock(AuthService::class);
-        $mockAuthService->method('validateSession')->willReturn(false);
-        $mockAuthService->method('validateApiToken')->willReturn(null);
+        // Create a mock UserFacade
+        $mockUserFacade = $this->createMock(UserFacade::class);
+        $mockUserFacade->method('validateSession')->willReturn(false);
+        $mockUserFacade->method('validateApiToken')->willReturn(null);
 
         // Simulate API request via path
         $_SERVER['REQUEST_URI'] = '/api/v1/users';
         $_SERVER['HTTP_ACCEPT'] = 'application/json';
 
-        $middleware = new AuthMiddleware($mockAuthService);
+        $middleware = new AuthMiddleware($mockUserFacade);
 
         // Use reflection to test the private method
         $reflection = new \ReflectionClass($middleware);
@@ -128,12 +131,12 @@ class AuthMiddlewareTest extends TestCase
 
     public function testIsApiRequestDetectsJsonAcceptHeader(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
+        $mockUserFacade = $this->createMock(UserFacade::class);
 
         $_SERVER['REQUEST_URI'] = '/some/page';
         $_SERVER['HTTP_ACCEPT'] = 'application/json';
 
-        $middleware = new AuthMiddleware($mockAuthService);
+        $middleware = new AuthMiddleware($mockUserFacade);
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('isApiRequest');
@@ -146,13 +149,13 @@ class AuthMiddlewareTest extends TestCase
 
     public function testIsApiRequestDetectsXhrRequest(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
+        $mockUserFacade = $this->createMock(UserFacade::class);
 
         $_SERVER['REQUEST_URI'] = '/some/page';
         $_SERVER['HTTP_ACCEPT'] = 'text/html';
         $_SERVER['HTTP_X_REQUESTED_WITH'] = 'XMLHttpRequest';
 
-        $middleware = new AuthMiddleware($mockAuthService);
+        $middleware = new AuthMiddleware($mockUserFacade);
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('isApiRequest');
@@ -165,13 +168,13 @@ class AuthMiddlewareTest extends TestCase
 
     public function testIsApiRequestReturnsFalseForWebRequest(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
+        $mockUserFacade = $this->createMock(UserFacade::class);
 
         $_SERVER['REQUEST_URI'] = '/some/page';
         $_SERVER['HTTP_ACCEPT'] = 'text/html';
         unset($_SERVER['HTTP_X_REQUESTED_WITH']);
 
-        $middleware = new AuthMiddleware($mockAuthService);
+        $middleware = new AuthMiddleware($mockUserFacade);
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('isApiRequest');
@@ -184,11 +187,11 @@ class AuthMiddlewareTest extends TestCase
 
     public function testExtractsBearerTokenFromAuthorizationHeader(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
+        $mockUserFacade = $this->createMock(UserFacade::class);
 
         $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer test_token_12345';
 
-        $middleware = new AuthMiddleware($mockAuthService);
+        $middleware = new AuthMiddleware($mockUserFacade);
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('extractBearerToken');
@@ -201,11 +204,11 @@ class AuthMiddlewareTest extends TestCase
 
     public function testExtractBearerTokenReturnsNullWhenNoHeader(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
+        $mockUserFacade = $this->createMock(UserFacade::class);
 
         unset($_SERVER['HTTP_AUTHORIZATION']);
 
-        $middleware = new AuthMiddleware($mockAuthService);
+        $middleware = new AuthMiddleware($mockUserFacade);
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('extractBearerToken');
@@ -218,11 +221,11 @@ class AuthMiddlewareTest extends TestCase
 
     public function testExtractBearerTokenReturnsNullForNonBearerAuth(): void
     {
-        $mockAuthService = $this->createMock(AuthService::class);
+        $mockUserFacade = $this->createMock(UserFacade::class);
 
         $_SERVER['HTTP_AUTHORIZATION'] = 'Basic dXNlcm5hbWU6cGFzc3dvcmQ=';
 
-        $middleware = new AuthMiddleware($mockAuthService);
+        $middleware = new AuthMiddleware($mockUserFacade);
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('extractBearerToken');

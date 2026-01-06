@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06 (Deprecated routes and methods removed - 15 PHP deprecations cleaned up)
+**Last Updated:** 2026-01-06 (Critical TODOs resolved - remember-me tokens, checkText, findPaginated)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1432,6 +1432,33 @@ All TagService functionality has been migrated to `TagsFacade`:
 
 **Test file moved:** `tests/backend/Services/TagServiceTest.php` → `tests/backend/Modules/Tags/TagsFacadeTest.php`
 
+#### Backend Service Migration to Module ServiceProviders ✅ IN PROGRESS (2026-01-06)
+
+Services have been migrated from `CoreServiceProvider` to their respective module ServiceProviders:
+
+| Service | From | To | Status |
+|---------|------|----|--------|
+| `AuthService` | `CoreServiceProvider` | `UserServiceProvider` | ✅ DONE |
+| `PasswordService` | `CoreServiceProvider` | `UserServiceProvider` | ✅ DONE |
+| `TestService` | `CoreServiceProvider` | `ReviewServiceProvider` | ✅ DONE |
+| `LocalDictionaryService` | `DictionaryServiceProvider` | `DictionaryServiceProvider` | ✅ Already in place |
+| `TextPrintService` | `CoreServiceProvider` | `TextServiceProvider` | ✅ DONE |
+| `TextDisplayService` | `CoreServiceProvider` | `TextServiceProvider` | ✅ DONE |
+
+**Key changes:**
+- `AuthMiddleware` now uses `UserFacade` instead of `AuthService`
+- All migrated services are registered in their respective module ServiceProviders
+- Legacy services kept for backward compatibility where needed
+
+**Remaining in CoreServiceProvider:**
+- `TextParsingService` - Shared parsing infrastructure
+- `SentenceService` - Used across Text/Vocabulary modules
+- `ExpressionService` - Used by Vocabulary module
+- `TtsService` - Used by Language module
+- `ExportService` - Used by Text module
+- `WordService` - Deprecated, use VocabularyFacade
+- `WordListService`, `WordUploadService` - Vocabulary module services
+
 #### Stage 4: Remove Legacy (40 hours)
 
 1. Delete empty `Legacy/` directory
@@ -1657,9 +1684,20 @@ All changes accept both old and new parameter names for backward compatibility.
 
 **Critical TODOs to Resolve:**
 
-- [ ] `AuthController:312` - Persistent remember-me tokens
-- [ ] `ParseText.php:62` - `checkText()` method implementation
-- [ ] `ListTexts.php:263` - `findPaginated()` repository method
+- [x] `AuthController:312` - Persistent remember-me tokens - **DONE** (2026-01-06)
+  - Added `UsRememberToken` and `UsRememberTokenExpires` columns to users table
+  - Implemented `setRememberToken()`, `invalidateRememberToken()`, `hasValidRememberToken()` in User entity
+  - Added `findByRememberToken()`, `updateRememberToken()` to UserRepositoryInterface and MySqlUserRepository
+  - Updated UserFacade with remember token methods
+  - Updated UserController to store tokens in database and validate on session restore
+  - Created migration: `20260106_000001_add_remember_token.sql`
+- [x] `ParseText.php:62` - `checkText()` method implementation - **DONE** (2026-01-06)
+  - Implemented `TextParsing::checkText()` static method
+  - Returns `{sentences, words, unknownPercent, preview}` without outputting HTML
+- [x] `ListTexts.php:263` - `findPaginated()` repository method - **DONE** (2026-01-06)
+  - Method already existed in MySqlTextRepository
+  - Added to TextRepositoryInterface
+  - Removed outdated TODO comment
 
 **Environment Configuration:**
 

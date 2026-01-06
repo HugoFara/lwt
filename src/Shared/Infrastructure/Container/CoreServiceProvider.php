@@ -14,17 +14,12 @@
 
 namespace Lwt\Shared\Infrastructure\Container;
 
-use Lwt\Services\AuthService;
 use Lwt\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 // Note: HomeService was moved to Modules/Home - registered by HomeServiceProvider
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Services\PasswordService;
 use Lwt\Services\SentenceService;
-use Lwt\Services\TestService;
-use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextParsingService;
-use Lwt\Services\TextPrintService;
 // Note: TranslationService moved to Modules/Dictionary - registered by DictionaryServiceProvider
 use Lwt\Services\TtsService;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
@@ -32,8 +27,6 @@ use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Services\WordService;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Core\Parser\ParserRegistry;
-use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
-use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 use Lwt\Core\Parser\ParsingCoordinator;
 
@@ -75,22 +68,13 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         // LanguageFacade is registered by LanguageServiceProvider
 
-        $container->singleton(AuthService::class, function (Container $c) {
-            return new AuthService(
-                $c->get(PasswordService::class),
-                $c->get(MySqlUserRepository::class)
-            );
-        });
+        // Note: AuthService moved to Modules/User - registered by UserServiceProvider
 
         // Note: HomeService moved to Modules/Home - now HomeFacade registered by HomeServiceProvider
 
-        $container->singleton(TestService::class, function (Container $_c) {
-            return new TestService();
-        });
+        // Note: TestService moved to Modules/Review - registered by ReviewServiceProvider
 
-        $container->singleton(TextPrintService::class, function (Container $_c) {
-            return new TextPrintService();
-        });
+        // Note: TextPrintService moved to Modules/Text - registered by TextServiceProvider
 
         // Note: TranslationService moved to Modules/Dictionary - registered by DictionaryServiceProvider
 
@@ -100,13 +84,9 @@ class CoreServiceProvider implements ServiceProviderInterface
         // DemoService, ServerDataService, ThemeService) are now in Modules/Admin
         // and registered via AdminServiceProvider
 
-        $container->singleton(PasswordService::class, function (Container $_c) {
-            return new PasswordService();
-        });
+        // Note: PasswordService moved to Modules/User - registered by UserServiceProvider
 
-        $container->singleton(TextDisplayService::class, function (Container $_c) {
-            return new TextDisplayService();
-        });
+        // Note: TextDisplayService moved to Modules/Text - registered by TextServiceProvider
 
         $container->singleton(WordListService::class, function (Container $_c) {
             return new WordListService();

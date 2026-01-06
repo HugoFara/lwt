@@ -69,6 +69,8 @@ class MySqlUserRepository implements UserRepositoryInterface
             $row['UsPasswordHash'] !== null ? (string) $row['UsPasswordHash'] : null,
             $row['UsApiToken'] !== null ? (string) $row['UsApiToken'] : null,
             $this->parseNullableDateTime($row['UsApiTokenExpires'] ?? null),
+            ($row['UsRememberToken'] ?? null) !== null ? (string) $row['UsRememberToken'] : null,
+            $this->parseNullableDateTime($row['UsRememberTokenExpires'] ?? null),
             $row['UsWordPressId'] !== null ? (int) $row['UsWordPressId'] : null,
             $this->parseDateTime($row['UsCreated'] ?? null),
             $this->parseNullableDateTime($row['UsLastLogin'] ?? null),
@@ -93,6 +95,8 @@ class MySqlUserRepository implements UserRepositoryInterface
             'UsPasswordHash' => $entity->passwordHash(),
             'UsApiToken' => $entity->apiToken(),
             'UsApiTokenExpires' => $entity->apiTokenExpires()?->format('Y-m-d H:i:s'),
+            'UsRememberToken' => $entity->rememberToken(),
+            'UsRememberTokenExpires' => $entity->rememberTokenExpires()?->format('Y-m-d H:i:s'),
             'UsWordPressId' => $entity->wordPressId(),
             'UsCreated' => $entity->created()->format('Y-m-d H:i:s'),
             'UsLastLogin' => $entity->lastLogin()?->format('Y-m-d H:i:s'),
@@ -230,6 +234,18 @@ class MySqlUserRepository implements UserRepositoryInterface
     {
         $row = $this->query()
             ->where('UsApiToken', '=', $token)
+            ->firstPrepared();
+
+        return $row !== null ? $this->mapToEntity($row) : null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findByRememberToken(string $token): ?User
+    {
+        $row = $this->query()
+            ->where('UsRememberToken', '=', $token)
             ->firstPrepared();
 
         return $row !== null ? $this->mapToEntity($row) : null;
@@ -381,6 +397,21 @@ class MySqlUserRepository implements UserRepositoryInterface
             ->updatePrepared([
                 'UsApiToken' => $token,
                 'UsApiTokenExpires' => $expires?->format('Y-m-d H:i:s'),
+            ]);
+
+        return $affected > 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function updateRememberToken(int $userId, ?string $token, ?DateTimeImmutable $expires): bool
+    {
+        $affected = $this->query()
+            ->where('UsID', '=', $userId)
+            ->updatePrepared([
+                'UsRememberToken' => $token,
+                'UsRememberTokenExpires' => $expires?->format('Y-m-d H:i:s'),
             ]);
 
         return $affected > 0;

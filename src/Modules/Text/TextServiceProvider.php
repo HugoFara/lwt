@@ -44,6 +44,10 @@ use Lwt\Modules\Text\Http\TextController;
 use Lwt\Modules\Text\Http\TextPrintController;
 use Lwt\Modules\Text\Http\TextApiHandler;
 
+// Legacy services (for backward compatibility)
+use Lwt\Services\TextPrintService;
+use Lwt\Services\TextDisplayService;
+
 /**
  * Service provider for the Text module.
  *
@@ -92,6 +96,15 @@ class TextServiceProvider implements ServiceProviderInterface
         // Register API Handler
         $container->singleton(TextApiHandler::class, function (Container $_c) {
             return new TextApiHandler();
+        });
+
+        // Register legacy services for backward compatibility
+        $container->singleton(TextPrintService::class, function (Container $_c) {
+            return new TextPrintService();
+        });
+
+        $container->singleton(TextDisplayService::class, function (Container $_c) {
+            return new TextDisplayService();
         });
     }
 

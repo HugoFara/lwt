@@ -59,8 +59,6 @@ class ParseText
         }
 
         // Parse text (preview only, no save)
-        // TODO: Implement TextParsing::checkText when needed
-        /** @psalm-suppress UndefinedMethod This method is work-in-progress */
         $result = TextParsing::checkText($text, $languageId);
 
         return [

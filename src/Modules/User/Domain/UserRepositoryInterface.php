@@ -93,6 +93,15 @@ interface UserRepositoryInterface
     public function findByApiToken(string $token): ?User;
 
     /**
+     * Find a user by remember-me token.
+     *
+     * @param string $token The remember token
+     *
+     * @return User|null
+     */
+    public function findByRememberToken(string $token): ?User;
+
+    /**
      * Find a user by WordPress ID.
      *
      * @param int $wordPressId The WordPress user ID
@@ -157,6 +166,17 @@ interface UserRepositoryInterface
      * @return bool True if updated
      */
     public function updateApiToken(int $userId, ?string $token, ?DateTimeImmutable $expires): bool;
+
+    /**
+     * Update the remember-me token.
+     *
+     * @param int                    $userId  User ID
+     * @param string|null            $token   Remember token (null to clear)
+     * @param DateTimeImmutable|null $expires Token expiration
+     *
+     * @return bool True if updated
+     */
+    public function updateRememberToken(int $userId, ?string $token, ?DateTimeImmutable $expires): bool;
 
     /**
      * Activate a user account.

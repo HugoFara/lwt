@@ -175,4 +175,23 @@ interface TextRepositoryInterface
      * @return array{id: int, title: string, language_id: int, has_media: bool, has_annotation: bool}|null
      */
     public function getBasicInfo(int $textId): ?array;
+
+    /**
+     * Get texts with pagination.
+     *
+     * @param int    $languageId Language ID (0 for all languages)
+     * @param int    $page       Page number (1-based)
+     * @param int    $perPage    Items per page
+     * @param string $orderBy    Column to order by
+     * @param string $direction  Sort direction (ASC/DESC)
+     *
+     * @return array{items: Text[], total: int, page: int, per_page: int, total_pages: int}
+     */
+    public function findPaginated(
+        int $languageId = 0,
+        int $page = 1,
+        int $perPage = 20,
+        string $orderBy = 'TxTitle',
+        string $direction = 'ASC'
+    ): array;
 }

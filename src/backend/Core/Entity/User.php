@@ -39,6 +39,8 @@ class User
     private ?string $passwordHash;
     private ?string $apiToken;
     private ?DateTimeImmutable $apiTokenExpires;
+    private ?string $rememberToken;
+    private ?DateTimeImmutable $rememberTokenExpires;
     private ?int $wordPressId;
     private DateTimeImmutable $created;
     private ?DateTimeImmutable $lastLogin;
@@ -55,6 +57,8 @@ class User
         ?string $passwordHash,
         ?string $apiToken,
         ?DateTimeImmutable $apiTokenExpires,
+        ?string $rememberToken,
+        ?DateTimeImmutable $rememberTokenExpires,
         ?int $wordPressId,
         DateTimeImmutable $created,
         ?DateTimeImmutable $lastLogin,
@@ -67,6 +71,8 @@ class User
         $this->passwordHash = $passwordHash;
         $this->apiToken = $apiToken;
         $this->apiTokenExpires = $apiTokenExpires;
+        $this->rememberToken = $rememberToken;
+        $this->rememberTokenExpires = $rememberTokenExpires;
         $this->wordPressId = $wordPressId;
         $this->created = $created;
         $this->lastLogin = $lastLogin;
@@ -101,6 +107,8 @@ class User
             $trimmedUsername,
             strtolower($trimmedEmail),
             $passwordHash,
+            null,
+            null,
             null,
             null,
             null,
@@ -144,6 +152,8 @@ class User
             null, // No password for WordPress users
             null,
             null,
+            null,
+            null,
             $wordPressId,
             new DateTimeImmutable(),
             null,
@@ -155,17 +165,19 @@ class User
     /**
      * Reconstitute a user from persistence.
      *
-     * @param int                    $id              The user ID
-     * @param string                 $username        The username
-     * @param string                 $email           The email
-     * @param string|null            $passwordHash    The password hash
-     * @param string|null            $apiToken        The API token
-     * @param DateTimeImmutable|null $apiTokenExpires When the API token expires
-     * @param int|null               $wordPressId     The WordPress user ID
-     * @param DateTimeImmutable      $created         When the user was created
-     * @param DateTimeImmutable|null $lastLogin       Last login time
-     * @param bool                   $isActive        Whether the user is active
-     * @param string                 $role            The user role
+     * @param int                    $id                   The user ID
+     * @param string                 $username             The username
+     * @param string                 $email                The email
+     * @param string|null            $passwordHash         The password hash
+     * @param string|null            $apiToken             The API token
+     * @param DateTimeImmutable|null $apiTokenExpires      When the API token expires
+     * @param string|null            $rememberToken        The remember-me token
+     * @param DateTimeImmutable|null $rememberTokenExpires When the remember token expires
+     * @param int|null               $wordPressId          The WordPress user ID
+     * @param DateTimeImmutable      $created              When the user was created
+     * @param DateTimeImmutable|null $lastLogin            Last login time
+     * @param bool                   $isActive             Whether the user is active
+     * @param string                 $role                 The user role
      *
      * @return self
      *
@@ -178,6 +190,8 @@ class User
         ?string $passwordHash,
         ?string $apiToken,
         ?DateTimeImmutable $apiTokenExpires,
+        ?string $rememberToken,
+        ?DateTimeImmutable $rememberTokenExpires,
         ?int $wordPressId,
         DateTimeImmutable $created,
         ?DateTimeImmutable $lastLogin,
@@ -191,6 +205,8 @@ class User
             $passwordHash,
             $apiToken,
             $apiTokenExpires,
+            $rememberToken,
+            $rememberTokenExpires,
             $wordPressId,
             $created,
             $lastLogin,
@@ -268,6 +284,31 @@ class User
     {
         $this->apiToken = null;
         $this->apiTokenExpires = null;
+    }
+
+    /**
+     * Set a new remember-me token.
+     *
+     * @param string            $token   The remember token
+     * @param DateTimeImmutable $expires When the token expires
+     *
+     * @return void
+     */
+    public function setRememberToken(string $token, DateTimeImmutable $expires): void
+    {
+        $this->rememberToken = $token;
+        $this->rememberTokenExpires = $expires;
+    }
+
+    /**
+     * Invalidate the remember-me token.
+     *
+     * @return void
+     */
+    public function invalidateRememberToken(): void
+    {
+        $this->rememberToken = null;
+        $this->rememberTokenExpires = null;
     }
 
     /**
@@ -393,6 +434,19 @@ class User
     }
 
     /**
+     * Check if the remember-me token is valid (not expired).
+     *
+     * @return bool
+     */
+    public function hasValidRememberToken(): bool
+    {
+        if ($this->rememberToken === null || $this->rememberTokenExpires === null) {
+            return false;
+        }
+        return $this->rememberTokenExpires > new DateTimeImmutable();
+    }
+
+    /**
      * Check if the user can log in.
      *
      * @return bool
@@ -483,6 +537,16 @@ class User
     public function apiTokenExpires(): ?DateTimeImmutable
     {
         return $this->apiTokenExpires;
+    }
+
+    public function rememberToken(): ?string
+    {
+        return $this->rememberToken;
+    }
+
+    public function rememberTokenExpires(): ?DateTimeImmutable
+    {
+        return $this->rememberTokenExpires;
     }
 
     public function wordPressId(): ?int
