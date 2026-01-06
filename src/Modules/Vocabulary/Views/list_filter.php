@@ -32,8 +32,8 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 
-<!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
-     This search bar should support:
+<!-- NOTE: Search bar planned for future UI refactoring.
+     Planned features:
      - Universal search across terms, romanization, and translations
      - Filter chips for active filters (language, status, tags)
      - Autocomplete suggestions

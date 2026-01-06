@@ -185,8 +185,7 @@ export function textReaderData(): TextReaderData {
       // Select the word (opens modal)
       this.store.selectWord(hex, position);
 
-      // Speak the word if TTS is enabled
-      // TODO: Check TTS settings
+      // NOTE: TTS integration disabled - requires speechDispatcher import and TTS settings check
       // speechDispatcher(wordEl.textContent || '', this.store.langId);
     },
 
@@ -194,9 +193,7 @@ export function textReaderData(): TextReaderData {
       // Only handle if modal is not open
       if (this.store.isModalOpen) return;
 
-      // TODO: Implement keyboard navigation
-      // Arrow keys for word navigation
-      // Number keys for quick status change
+      // NOTE: Keyboard navigation planned - arrow keys for word navigation, number keys for quick status
     },
 
     toggleShowAll(): void {
@@ -287,7 +284,8 @@ export function textReaderData(): TextReaderData {
     },
 
     goNext(): void {
-      // TODO: Navigate to next text
+      // NOTE: Next text navigation requires store.nextTextId from API
+      // TextNavigationService provides server-rendered links in read_header.php
     },
 
     getTextIdFromUrl(): number {

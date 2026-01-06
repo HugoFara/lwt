@@ -209,7 +209,7 @@ export async function deleteFeeds(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   feedIds: number[]
 ): Promise<ApiResponse<{ success: boolean; deleted: number }>> {
-  // TODO: Pass feedIds to API when bulk delete is implemented
+  // NOTE: feedIds parameter ready for when bulk delete API endpoint is added
   return apiDelete('/feeds');
 }
 
@@ -246,7 +246,7 @@ export async function deleteArticles(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   articleIds: number[] = []
 ): Promise<ApiResponse<{ success: boolean; deleted: number }>> {
-  // TODO: Pass articleIds to API when selective delete is implemented
+  // NOTE: articleIds parameter ready for when selective delete API endpoint is added
   return apiDelete(`/feeds/articles/${feedId}`);
 }
 

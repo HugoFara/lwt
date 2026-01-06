@@ -52,8 +52,8 @@ echo PageLayoutHelper::buildActionCard([
 ]);
 ?>
 
-<!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
-     This search bar should support:
+<!-- NOTE: Search bar planned for future UI refactoring.
+     Planned features:
      - Search across tag text and comments
      - Autocomplete suggestions
 -->

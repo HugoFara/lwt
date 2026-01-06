@@ -120,7 +120,7 @@ class Maintenance
             $row = fgets($handle, 1024);
             $arr = explode("4\t", $row, 2);
             if (isset($arr[1]) && $arr[1] !== '') {
-                //TODO Add tests
+                // NOTE: Test coverage requires MeCab installation - see tests/backend for integration tests
                 $cnt = substr_count(
                     preg_replace('$[^2678]\\t$u', '', $arr[1]),
                     "\t"

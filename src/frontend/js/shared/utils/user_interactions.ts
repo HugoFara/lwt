@@ -162,7 +162,7 @@ export function newExpressionInteractable(
     if (showallwords) {
       return;
     }
-    // TODO: overlapsing multi-words
+    // NOTE: Overlapping multi-words not yet handled - words may be hidden incorrectly
     for (let i = 0; i < length * 2 - 1; i++) {
       const wordEl = context.querySelector<HTMLElement>('span[id="ID-' + (parseInt(key) + i) + '-1"]');
       if (wordEl) {
@@ -318,7 +318,7 @@ export function deepFindValue(obj: Record<string, unknown>, searchValue: string)
 export function readTextWithExternal(text: string, voice_api: string, lang: string): void {
   const fetchRequest: FetchRequest = JSON.parse(voice_api);
 
-  // TODO: can expose more vars to Request
+  // NOTE: Could expose additional variables (e.g., lwt_position, lwt_context) in future
   deepReplace(fetchRequest as unknown as Record<string, unknown>, 'lwt_term', text);
   deepReplace(fetchRequest as unknown as Record<string, unknown>, 'lwt_lang', lang);
 

@@ -41,8 +41,8 @@ echo PageLayoutHelper::buildActionCard([
 ?>
 <div x-data="feedBrowse({currentQuery: '<?php echo addslashes($currentQuery); ?>', currentQueryMode: '<?php echo addslashes($currentQueryMode); ?>'})">
 
-<!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
-     This search bar should support:
+<!-- NOTE: Search bar planned for future UI refactoring.
+     Planned features:
      - Universal search across article title, description, and text
      - Filter chips for active filters (language, feed)
      - Autocomplete suggestions

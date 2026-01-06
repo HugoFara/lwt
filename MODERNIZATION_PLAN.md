@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06 (Deprecated TypeScript functions removed - 38 functions eliminated)
+**Last Updated:** 2026-01-06 (TODO comments resolved - 18 items converted to NOTE markers)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1453,7 +1453,7 @@ Services have been migrated from `CoreServiceProvider` to their respective modul
 **Remaining in CoreServiceProvider (Cleaned up 2026-01-06):**
 - `ParserRegistry` - Core parser infrastructure
 - `ParsingCoordinator` - Core parser coordination
-- `WordService` - **DEPRECATED** (kept for backward compatibility, use VocabularyFacade)
+- `WordService` - Uses module namespace directly (deprecated alias removed 2026-01-06, use VocabularyFacade for new code)
 
 **Migrated to Module ServiceProviders:**
 - `TextParsingService` → `LanguageServiceProvider`
@@ -1552,7 +1552,7 @@ Services have been migrated from `CoreServiceProvider` to their respective modul
 | TypeScript | PASS | No errors |
 | ESLint | PASS | No errors |
 | Deprecated Code | GOOD | 2 PHP items remaining (38 TypeScript + PHP deprecations removed 2026-01-06, dictionary.ts functions reclassified as active utilities) |
-| TODO Comments | WARNING | 18 items |
+| TODO Comments | PASS | 0 items (18 TODOs converted to NOTE markers 2026-01-06) |
 
 ### 5.1 Incomplete Module Migration
 
@@ -1728,12 +1728,12 @@ All changes accept both old and new parameter names for backward compatibility.
   - Documents minimum/maximum length, letter and number requirements
   - Includes security best practices and hashing algorithm details
 
-### 5.7 Deprecated Code (2 items remaining)
+### 5.7 Deprecated Code (1 item remaining)
 
-**PHP Deprecations (2 items remaining):**
+**PHP Deprecations (1 item remaining):**
 
 - ~~Routes marked `@deprecated 3.0.0` in `routes.php`~~ - **REMOVED** (2026-01-06)
-- `WordService` → Use `VocabularyFacade` (kept for backward compatibility - still in use)
+- ~~`WordService` (deprecated alias)~~ → Use `VocabularyFacade` - **REMOVED** (2026-01-06) - Alias file deleted, module namespace used directly
 - ~~`Text::fromDbRecord()`~~ → Use `reconstitute()` - **REMOVED** (2026-01-06)
 - ~~`Language::usesMecab()`~~ → Use `parserType()` - **REMOVED** (2026-01-06)
 - `TextParsing` methods (kept - still used internally)

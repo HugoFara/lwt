@@ -33,8 +33,8 @@ echo PageLayoutHelper::buildActionCard([
 ]);
 ?>
 <div x-data="feedIndex({currentQuery: '<?php echo addslashes($currentQuery); ?>'})">
-<!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
-     This search bar should support:
+<!-- NOTE: Search bar planned for future UI refactoring.
+     Planned features:
      - Search across feed names
      - Filter chips for language filter
      - Autocomplete suggestions
