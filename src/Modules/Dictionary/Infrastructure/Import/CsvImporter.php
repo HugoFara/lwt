@@ -49,6 +49,7 @@ class CsvImporter implements ImporterInterface
         $hasHeader = $options['hasHeader'] ?? true;
         /** @var array<string, int> $columnMap */
         $columnMap = $options['columnMap'] ?? self::DEFAULT_COLUMN_MAP;
+        /** @var string $encoding */
         $encoding = $options['encoding'] ?? 'UTF-8';
 
         $handle = fopen($filePath, 'r');
@@ -283,9 +284,13 @@ class CsvImporter implements ImporterInterface
      */
     private function mapRowToEntry(array $row, array $columnMap, string $encoding): ?array
     {
+        /** @var int $termIndex */
         $termIndex = $columnMap['term'] ?? 0;
+        /** @var int $defIndex */
         $defIndex = $columnMap['definition'] ?? 1;
+        /** @var int|null $readingIndex */
         $readingIndex = $columnMap['reading'] ?? null;
+        /** @var int|null $posIndex */
         $posIndex = $columnMap['pos'] ?? null;
 
         // Validate required columns exist

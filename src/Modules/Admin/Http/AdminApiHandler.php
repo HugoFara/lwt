@@ -273,6 +273,10 @@ class AdminApiHandler
             /** @var array<string, int> $statusCounts */
             $statusCounts = [];
             if (isset($raw['statu'][$textIdStr]) && is_array($raw['statu'][$textIdStr])) {
+                /**
+                 * @var int|string $status
+                 * @var int|string $count
+                 */
                 foreach ($raw['statu'][$textIdStr] as $status => $count) {
                     $countInt = is_int($count) ? $count : (int) $count;
                     $saved += $countInt;

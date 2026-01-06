@@ -43,6 +43,7 @@ class JsonImporter implements ImporterInterface
     {
         $this->validateFile($filePath);
 
+        /** @var array<string, string>|null $fieldMap */
         $fieldMap = $options['fieldMap'] ?? null;
 
         // Try streaming for large files
@@ -139,22 +140,28 @@ class JsonImporter implements ImporterInterface
 
         if (str_starts_with($content, '[')) {
             // Array of entries
+            /** @var array<int, array<string, mixed>>|null $data */
             $data = json_decode($content, true);
             if (is_array($data) && !empty($data) && is_array($data[0])) {
+                /** @var array<string> $fieldNames */
+                $fieldNames = array_keys($data[0]);
                 return [
                     'type' => 'array',
-                    'fieldNames' => array_keys($data[0]),
+                    'fieldNames' => $fieldNames,
                 ];
             }
         } elseif (str_starts_with($content, '{')) {
             // Object with term keys
+            /** @var array<string, array<string, mixed>>|null $data */
             $data = json_decode($content, true);
             if (is_array($data)) {
                 $firstKey = array_key_first($data);
                 if ($firstKey !== null && is_array($data[$firstKey])) {
+                    /** @var array<string> $fieldNames */
+                    $fieldNames = array_keys($data[$firstKey]);
                     return [
                         'type' => 'object',
-                        'fieldNames' => array_keys($data[$firstKey]),
+                        'fieldNames' => $fieldNames,
                     ];
                 }
             }
@@ -198,6 +205,7 @@ class JsonImporter implements ImporterInterface
             throw new RuntimeException("Cannot read file: $filePath");
         }
 
+        /** @var array<array-key, mixed>|null $data */
         $data = json_decode($content, true);
         if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
             throw new RuntimeException("Invalid JSON: " . json_last_error_msg());
@@ -207,6 +215,7 @@ class JsonImporter implements ImporterInterface
             // Check if it's an array of entries or object with term keys
             if (array_is_list($data)) {
                 // Array of entries: [{"term": "...", "definition": "..."}, ...]
+                /** @var array<string, mixed> $item */
                 foreach ($data as $item) {
                     if (is_array($item)) {
                         $entry = $this->mapItemToEntry($item, $fieldMap);
@@ -217,6 +226,7 @@ class JsonImporter implements ImporterInterface
                 }
             } else {
                 // Object with term keys: {"term1": {"definition": "..."}, ...}
+                /** @var mixed $value */
                 foreach ($data as $term => $value) {
                     $entry = $this->mapObjectEntryToEntry((string) $term, $value, $fieldMap);
                     if ($entry !== null) {
@@ -254,7 +264,9 @@ class JsonImporter implements ImporterInterface
      */
     private function mapItemToEntry(array $item, ?array $fieldMap): ?array
     {
+        /** @var string|null $term */
         $term = $this->findField($item, 'term', $fieldMap);
+        /** @var string|null $definition */
         $definition = $this->findField($item, 'definition', $fieldMap);
 
         if ($term === null || $definition === null) {
@@ -262,18 +274,20 @@ class JsonImporter implements ImporterInterface
         }
 
         $entry = [
-            'term' => (string) $term,
-            'definition' => (string) $definition,
+            'term' => $term,
+            'definition' => $definition,
         ];
 
+        /** @var string|null $reading */
         $reading = $this->findField($item, 'reading', $fieldMap);
         if ($reading !== null && $reading !== '') {
-            $entry['reading'] = (string) $reading;
+            $entry['reading'] = $reading;
         }
 
+        /** @var string|null $pos */
         $pos = $this->findField($item, 'pos', $fieldMap);
         if ($pos !== null && $pos !== '') {
-            $entry['pos'] = (string) $pos;
+            $entry['pos'] = $pos;
         }
 
         return $entry;
@@ -304,11 +318,14 @@ class JsonImporter implements ImporterInterface
 
         if (is_array($value)) {
             // Complex: {"term": {"definition": "...", ...}}
+            /** @var string|null $definition */
             $definition = $this->findField($value, 'definition', $fieldMap);
             if ($definition === null) {
                 // Try 'meaning' or first string value
+                /** @var string|null $definition */
                 $definition = $value['meaning'] ?? $value['gloss'] ?? null;
                 if ($definition === null && !empty($value)) {
+                    /** @var mixed $v */
                     foreach ($value as $v) {
                         if (is_string($v)) {
                             $definition = $v;
@@ -324,17 +341,19 @@ class JsonImporter implements ImporterInterface
 
             $entry = [
                 'term' => $term,
-                'definition' => (string) $definition,
+                'definition' => $definition,
             ];
 
+            /** @var string|null $reading */
             $reading = $this->findField($value, 'reading', $fieldMap);
             if ($reading !== null && $reading !== '') {
-                $entry['reading'] = (string) $reading;
+                $entry['reading'] = $reading;
             }
 
+            /** @var string|null $pos */
             $pos = $this->findField($value, 'pos', $fieldMap);
             if ($pos !== null && $pos !== '') {
-                $entry['pos'] = (string) $pos;
+                $entry['pos'] = $pos;
             }
 
             return $entry;

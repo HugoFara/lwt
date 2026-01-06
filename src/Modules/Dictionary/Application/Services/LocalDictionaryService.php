@@ -526,8 +526,12 @@ class LocalDictionaryService
             $values[] = (string) ($row['LeTerm'] ?? '');
             $values[] = (string) ($row['LeTermLc'] ?? '');
             $values[] = (string) ($row['LeDefinition'] ?? '');
-            $values[] = $row['LeReading'] ?? null;
-            $values[] = $row['LePartOfSpeech'] ?? null;
+            /** @var string|null $reading */
+            $reading = $row['LeReading'] ?? null;
+            $values[] = $reading;
+            /** @var string|null $pos */
+            $pos = $row['LePartOfSpeech'] ?? null;
+            $values[] = $pos;
         }
 
         $sql = "INSERT INTO " . Globals::table('local_dictionary_entries') .

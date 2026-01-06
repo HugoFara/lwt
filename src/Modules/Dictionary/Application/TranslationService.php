@@ -223,8 +223,9 @@ class TranslationService
             ->where('LgID', '=', $lgId)
             ->getPrepared();
 
+        /** @var string|null $ttsVoice */
         $ttsVoice = $result[0]['LgTTSVoiceAPI'] ?? null;
-        return $ttsVoice !== null ? (string) $ttsVoice : null;
+        return $ttsVoice;
     }
 
     /**
