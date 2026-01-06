@@ -192,7 +192,7 @@ describe('test_mode.ts', () => {
         const result = keydown_event_do_test_test(event);
 
         expect(cleanupRightFrames).toHaveBeenCalled();
-        expect(loadModalFrame).toHaveBeenCalledWith('show_word.php?wid=123&ann=');
+        expect(loadModalFrame).toHaveBeenCalledWith('/word/show?wid=123&ann=');
         expect(result).toBe(false);
       });
 
@@ -213,7 +213,7 @@ describe('test_mode.ts', () => {
         const result = keydown_event_do_test_test(event);
 
         expect(loadModalFrame).toHaveBeenCalledWith(
-          expect.stringContaining('set_test_status.php?wid=123&status=2')
+          expect.stringContaining('/word/set-test-status?wid=123&status=2')
         );
         expect(result).toBe(false);
       });
@@ -224,7 +224,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('I', 73);
         const result = keydown_event_do_test_test(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith('set_test_status.php?wid=123&status=98');
+        expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&status=98');
         expect(result).toBe(false);
       });
     });
@@ -234,7 +234,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('W', 87);
         const result = keydown_event_do_test_test(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith('set_test_status.php?wid=123&status=99');
+        expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&status=99');
         expect(result).toBe(false);
       });
     });
@@ -266,7 +266,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('ArrowUp', 38);
         const result = keydown_event_do_test_test(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith('set_test_status.php?wid=123&stchange=1');
+        expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&stchange=1');
         expect(result).toBe(false);
       });
     });
@@ -288,7 +288,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('ArrowDown', 40);
         const result = keydown_event_do_test_test(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith('set_test_status.php?wid=123&stchange=-1');
+        expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&stchange=-1');
         expect(result).toBe(false);
       });
     });
@@ -306,7 +306,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent(key, keyCode);
         const result = keydown_event_do_test_test(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith(`set_test_status.php?wid=123&status=${expectedStatus}`);
+        expect(loadModalFrame).toHaveBeenCalledWith(`/word/set-test-status?wid=123&status=${expectedStatus}`);
         expect(result).toBe(false);
       });
 
@@ -332,7 +332,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent(key, keyCode);
         const result = keydown_event_do_test_test(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith(`set_test_status.php?wid=123&status=${expectedStatus}`);
+        expect(loadModalFrame).toHaveBeenCalledWith(`/word/set-test-status?wid=123&status=${expectedStatus}`);
         expect(result).toBe(false);
       });
     });

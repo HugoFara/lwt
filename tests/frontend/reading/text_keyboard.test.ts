@@ -370,8 +370,8 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(49); // key '1'
       keydown_event_do_text_text(event);
 
-      // Known word gets set_word_status.php call
-      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('set_word_status.php'));
+      // Known word gets /word/set-status call
+      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/set-status'));
     });
 
     it('handles numpad keys (96-100)', () => {
@@ -548,7 +548,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(69);
       keydown_event_do_text_text(event);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('edit_word.php?wid=&tid='));
+      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/edit?wid=&tid='));
     });
   });
 

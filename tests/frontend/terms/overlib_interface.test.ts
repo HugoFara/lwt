@@ -278,7 +278,7 @@ describe('overlib_interface.ts', () => {
     it('returns link with new status when different', () => {
       const result = make_overlib_link_change_status(1, '5', 100, 3, 4);
 
-      expect(result).toContain('set_word_status.php');
+      expect(result).toContain('/word/set-status');
       expect(result).toContain('tid=1');
       expect(result).toContain('ord=5');
       expect(result).toContain('wid=100');
@@ -309,7 +309,7 @@ describe('overlib_interface.ts', () => {
     it('returns test status links for all levels', () => {
       const result = make_overlib_link_change_status_alltest(100, 2);
 
-      expect(result).toContain('set_test_status.php');
+      expect(result).toContain('/word/set-test-status');
       expect(result).toContain('wid=100');
       // Current status (2) should show diamond inside link
       expect(result).toContain('◆');
@@ -325,7 +325,7 @@ describe('overlib_interface.ts', () => {
       const result = make_overlib_link_change_status_test2(100, 3, 3);
 
       expect(result).toContain('◆');
-      expect(result).toContain('set_test_status.php');
+      expect(result).toContain('/word/set-test-status');
     });
 
     it('shows status abbreviation when status differs', () => {
@@ -344,7 +344,7 @@ describe('overlib_interface.ts', () => {
     it('creates link with positive change and success sound', () => {
       const result = make_overlib_link_change_status_test(100, 1, 'Got it!');
 
-      expect(result).toContain('set_test_status.php');
+      expect(result).toContain('/word/set-test-status');
       expect(result).toContain('wid=100');
       expect(result).toContain('stchange=1');
       expect(result).toContain('successSound()');
@@ -472,7 +472,7 @@ describe('overlib_interface.ts', () => {
     it('creates link to delete a word with confirmation', () => {
       const result = make_overlib_link_delete_word(1, 100);
 
-      expect(result).toContain('delete_word.php');
+      expect(result).toContain('/word/delete-term');
       expect(result).toContain('wid=100');
       expect(result).toContain('tid=1');
       expect(result).toContain('confirmDelete()');
@@ -488,7 +488,7 @@ describe('overlib_interface.ts', () => {
     it('creates link to delete a multiword with confirmation', () => {
       const result = make_overlib_link_delete_multiword(1, 100);
 
-      expect(result).toContain('delete_mword.php');
+      expect(result).toContain('/word/delete-multi');
       expect(result).toContain('wid=100');
       expect(result).toContain('tid=1');
       expect(result).toContain('confirmDelete()');
@@ -504,7 +504,7 @@ describe('overlib_interface.ts', () => {
     it('creates link to mark word as well-known', () => {
       const result = make_overlib_link_wellknown_word(1, '5');
 
-      expect(result).toContain('insert_word_wellknown.php');
+      expect(result).toContain('/word/insert-wellknown');
       expect(result).toContain('tid=1');
       expect(result).toContain('ord=5');
       expect(result).toContain('I know this term well');
@@ -519,7 +519,7 @@ describe('overlib_interface.ts', () => {
     it('creates link to ignore a word', () => {
       const result = make_overlib_link_ignore_word(1, '5');
 
-      expect(result).toContain('insert_word_ignore.php');
+      expect(result).toContain('/word/insert-ignore');
       expect(result).toContain('tid=1');
       expect(result).toContain('ord=5');
       expect(result).toContain('Ignore this term');

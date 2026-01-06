@@ -240,7 +240,7 @@ describe('ui_utilities.ts', () => {
 
       showAllwordsClick();
 
-      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('set_text_mode.php'));
+      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/text/set-mode'));
       expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('mode=1'));
       expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('text=42'));
     });

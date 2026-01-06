@@ -104,9 +104,17 @@ describe('user_interactions.ts', () => {
       expect(window.top!.location.href).toBe('/');
     });
 
-    it('falls back to .php for unknown values', () => {
+    it('logs error and does not navigate for unknown values', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const originalHref = window.top!.location.href;
+
       quickMenuRedirection('unknown_page');
-      expect(window.top!.location.href).toBe('unknown_page.php');
+
+      expect(window.top!.location.href).toBe(originalHref);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Quick menu: unknown value "unknown_page". Add it to quickMenuRoutes.'
+      );
+      consoleSpy.mockRestore();
     });
 
     it('resets quickmenu selectedIndex to 0', () => {

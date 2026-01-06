@@ -511,7 +511,7 @@ describe('simple_interactions.ts', () => {
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-        expect(window.location.href).toBe('all_words_wellknown.php?text=42');
+        expect(window.location.href).toBe('/word/set-all-status?text=42');
       });
 
       it('does nothing if cancelled', () => {
@@ -539,7 +539,7 @@ describe('simple_interactions.ts', () => {
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-        expect(window.location.href).toBe('all_words_wellknown.php?text=42&stat=98');
+        expect(window.location.href).toBe('/word/set-all-status?text=42&stat=98');
       });
     });
 

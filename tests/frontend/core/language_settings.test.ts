@@ -1,7 +1,7 @@
 /**
  * Tests for core/language_settings.ts - Language settings utilities
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 
 // Use vi.hoisted to ensure mock function is available during hoisting
 const mockLoadModalFrame = vi.hoisted(() => vi.fn());
@@ -13,23 +13,38 @@ vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', 
 
 import {
   setLang,
+  setLangAsync,
   resetAll,
+  resetAllAsync,
   iknowall,
   check_table_prefix
 } from '../../../src/frontend/js/modules/language/stores/language_settings';
 
 describe('core/language_settings.ts', () => {
   const originalLocation = window.location;
+  let locationHrefSpy: Mock;
+  let fetchMock: Mock;
 
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
 
-    // Mock window.location
+    // Mock fetch for API calls
+    fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ message: 'ok' })
+    });
+    global.fetch = fetchMock;
+
+    // Mock window.location with getter/setter for href
+    locationHrefSpy = vi.fn();
     delete (window as unknown as { location: Location }).location;
     window.location = {
       ...originalLocation,
-      href: 'http://localhost/',
+      href: '',
+      set href(value: string) {
+        locationHrefSpy(value);
+      },
       assign: vi.fn(),
       replace: vi.fn()
     } as unknown as Location;
@@ -46,7 +61,7 @@ describe('core/language_settings.ts', () => {
   // ===========================================================================
 
   describe('setLang', () => {
-    it('redirects to save-setting URL with selected language', () => {
+    it('calls API and redirects to specified URL', async () => {
       document.body.innerHTML = `
         <select id="lang-select">
           <option value="1">English</option>
@@ -56,14 +71,17 @@ describe('core/language_settings.ts', () => {
       `;
       const select = document.getElementById('lang-select') as HTMLSelectElement;
 
-      setLang(select, '/texts');
+      await setLang(select, '/texts');
 
-      expect(window.location.href).toBe(
-        '/admin/save-setting?k=currentlanguage&v=2&u=/texts'
-      );
+      expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'currentlanguage', value: '2' })
+      });
+      expect(locationHrefSpy).toHaveBeenCalledWith('/texts');
     });
 
-    it('uses first option when selected', () => {
+    it('uses first option when selected', async () => {
       document.body.innerHTML = `
         <select id="lang-select">
           <option value="1" selected>English</option>
@@ -72,14 +90,17 @@ describe('core/language_settings.ts', () => {
       `;
       const select = document.getElementById('lang-select') as HTMLSelectElement;
 
-      setLang(select, '/home');
+      await setLang(select, '/home');
 
-      expect(window.location.href).toBe(
-        '/admin/save-setting?k=currentlanguage&v=1&u=/home'
-      );
+      expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'currentlanguage', value: '1' })
+      });
+      expect(locationHrefSpy).toHaveBeenCalledWith('/home');
     });
 
-    it('handles empty value option', () => {
+    it('handles empty value option', async () => {
       document.body.innerHTML = `
         <select id="lang-select">
           <option value="" selected>All Languages</option>
@@ -88,14 +109,17 @@ describe('core/language_settings.ts', () => {
       `;
       const select = document.getElementById('lang-select') as HTMLSelectElement;
 
-      setLang(select, '/texts');
+      await setLang(select, '/texts');
 
-      expect(window.location.href).toBe(
-        '/admin/save-setting?k=currentlanguage&v=&u=/texts'
-      );
+      expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'currentlanguage', value: '' })
+      });
+      expect(locationHrefSpy).toHaveBeenCalledWith('/texts');
     });
 
-    it('handles different redirect URLs', () => {
+    it('handles different redirect URLs', async () => {
       document.body.innerHTML = `
         <select id="lang-select">
           <option value="5" selected>Japanese</option>
@@ -103,12 +127,12 @@ describe('core/language_settings.ts', () => {
       `;
       const select = document.getElementById('lang-select') as HTMLSelectElement;
 
-      setLang(select, '/words/list');
+      await setLang(select, '/words/list');
 
-      expect(window.location.href).toContain('u=/words/list');
+      expect(locationHrefSpy).toHaveBeenCalledWith('/words/list');
     });
 
-    it('handles URL with special characters', () => {
+    it('handles URL with special characters', async () => {
       document.body.innerHTML = `
         <select id="lang-select">
           <option value="1" selected>English</option>
@@ -116,9 +140,31 @@ describe('core/language_settings.ts', () => {
       `;
       const select = document.getElementById('lang-select') as HTMLSelectElement;
 
-      setLang(select, '/texts?filter=new');
+      await setLang(select, '/texts?filter=new');
 
-      expect(window.location.href).toContain('u=/texts?filter=new');
+      expect(locationHrefSpy).toHaveBeenCalledWith('/texts?filter=new');
+    });
+  });
+
+  // ===========================================================================
+  // setLangAsync Tests
+  // ===========================================================================
+
+  describe('setLangAsync', () => {
+    it('calls API with correct parameters', async () => {
+      await setLangAsync('5');
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'currentlanguage', value: '5' })
+      });
+    });
+
+    it('throws error on non-ok response', async () => {
+      fetchMock.mockResolvedValueOnce({ ok: false, status: 500 });
+
+      await expect(setLangAsync('1')).rejects.toThrow('HTTP error! status: 500');
     });
   });
 
@@ -127,32 +173,55 @@ describe('core/language_settings.ts', () => {
   // ===========================================================================
 
   describe('resetAll', () => {
-    it('redirects to save-setting with empty language value', () => {
-      resetAll('/texts');
+    it('calls API and redirects to specified URL', async () => {
+      await resetAll('/texts');
 
-      expect(window.location.href).toBe(
-        '/admin/save-setting?k=currentlanguage&v=&u=/texts'
-      );
+      expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'currentlanguage', value: '' })
+      });
+      expect(locationHrefSpy).toHaveBeenCalledWith('/texts');
     });
 
-    it('uses provided redirect URL', () => {
-      resetAll('/home');
+    it('uses provided redirect URL', async () => {
+      await resetAll('/home');
 
-      expect(window.location.href).toContain('u=/home');
+      expect(locationHrefSpy).toHaveBeenCalledWith('/home');
     });
 
-    it('handles root URL', () => {
-      resetAll('/');
+    it('handles root URL', async () => {
+      await resetAll('/');
 
-      expect(window.location.href).toBe(
-        '/admin/save-setting?k=currentlanguage&v=&u=/'
-      );
+      expect(locationHrefSpy).toHaveBeenCalledWith('/');
     });
 
-    it('handles complex URL', () => {
-      resetAll('/admin/settings?tab=languages');
+    it('handles complex URL', async () => {
+      await resetAll('/admin/settings?tab=languages');
 
-      expect(window.location.href).toContain('u=/admin/settings?tab=languages');
+      expect(locationHrefSpy).toHaveBeenCalledWith('/admin/settings?tab=languages');
+    });
+  });
+
+  // ===========================================================================
+  // resetAllAsync Tests
+  // ===========================================================================
+
+  describe('resetAllAsync', () => {
+    it('calls API with empty language value', async () => {
+      await resetAllAsync();
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'currentlanguage', value: '' })
+      });
+    });
+
+    it('throws error on non-ok response', async () => {
+      fetchMock.mockResolvedValueOnce({ ok: false, status: 500 });
+
+      await expect(resetAllAsync()).rejects.toThrow('HTTP error! status: 500');
     });
   });
 
@@ -174,7 +243,7 @@ describe('core/language_settings.ts', () => {
 
       iknowall(1);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=1');
+      expect(mockLoadModalFrame).toHaveBeenCalledWith('/word/set-all-status?text=1');
     });
 
     it('does not call loadModalFrame when cancelled', () => {
@@ -190,7 +259,7 @@ describe('core/language_settings.ts', () => {
 
       iknowall('42');
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=42');
+      expect(mockLoadModalFrame).toHaveBeenCalledWith('/word/set-all-status?text=42');
     });
 
     it('handles numeric text ID', () => {
@@ -198,7 +267,7 @@ describe('core/language_settings.ts', () => {
 
       iknowall(123);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=123');
+      expect(mockLoadModalFrame).toHaveBeenCalledWith('/word/set-all-status?text=123');
     });
   });
 
@@ -362,8 +431,15 @@ describe('core/language_settings.ts', () => {
       // Dispatch change event
       select.dispatchEvent(new Event('change', { bubbles: true }));
 
-      expect(window.location.href).toContain('v=2');
-      expect(window.location.href).toContain('u=/home');
+      // Wait for async operation including redirect to complete
+      await vi.waitFor(() => {
+        expect(locationHrefSpy).toHaveBeenCalledWith('/home');
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'currentlanguage', value: '2' })
+      });
     });
 
     it('uses default redirect when data-redirect is missing', async () => {
@@ -378,7 +454,11 @@ describe('core/language_settings.ts', () => {
       const select = document.querySelector('select') as HTMLSelectElement;
       select.dispatchEvent(new Event('change', { bubbles: true }));
 
-      expect(window.location.href).toContain('u=/');
+      // Wait for async operation including redirect to complete
+      await vi.waitFor(() => {
+        expect(locationHrefSpy).toHaveBeenCalledWith('/');
+      });
+      expect(fetchMock).toHaveBeenCalled();
     });
   });
 
@@ -387,13 +467,13 @@ describe('core/language_settings.ts', () => {
   // ===========================================================================
 
   describe('Edge Cases', () => {
-    it('setLang handles select with no options', () => {
+    it('setLang handles select with no options', async () => {
       document.body.innerHTML = '<select id="empty-select"></select>';
       const select = document.getElementById('empty-select') as HTMLSelectElement;
 
       // Will throw because selectedIndex returns -1 and options[-1] is undefined
       // This is expected behavior - test documents the behavior
-      expect(() => setLang(select, '/test')).toThrow();
+      await expect(setLang(select, '/test')).rejects.toThrow();
     });
 
     it('check_table_prefix handles boundary length 20', () => {
@@ -410,7 +490,7 @@ describe('core/language_settings.ts', () => {
 
       iknowall(0);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=0');
+      expect(mockLoadModalFrame).toHaveBeenCalledWith('/word/set-all-status?text=0');
     });
 
     it('check_table_prefix handles consecutive underscores', () => {
@@ -419,10 +499,10 @@ describe('core/language_settings.ts', () => {
       expect(result).toBe(true);
     });
 
-    it('resetAll handles empty string URL', () => {
-      resetAll('');
+    it('resetAll handles empty string URL', async () => {
+      await resetAll('');
 
-      expect(window.location.href).toContain('u=');
+      expect(locationHrefSpy).toHaveBeenCalledWith('');
     });
   });
 });
