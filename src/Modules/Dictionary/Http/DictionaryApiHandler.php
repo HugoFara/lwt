@@ -102,8 +102,9 @@ class DictionaryApiHandler
     public function createDictionary(array $data): array
     {
         $langId = (int)($data['language_id'] ?? 0);
-        $name = trim($data['name'] ?? '');
-        $description = isset($data['description']) ? trim($data['description']) : null;
+        $name = trim((string) ($data['name'] ?? ''));
+        $description = isset($data['description']) ? trim((string) $data['description']) : null;
+        /** @var string $sourceFormat */
         $sourceFormat = $data['source_format'] ?? 'csv';
 
         if ($langId <= 0) {
@@ -142,12 +143,12 @@ class DictionaryApiHandler
         }
 
         if (isset($data['name'])) {
-            $dictionary->rename(trim($data['name']));
+            $dictionary->rename(trim((string) $data['name']));
         }
 
         if (array_key_exists('description', $data)) {
             $dictionary->setDescription(
-                $data['description'] !== null ? trim($data['description']) : null
+                $data['description'] !== null ? trim((string) $data['description']) : null
             );
         }
 
@@ -251,7 +252,9 @@ class DictionaryApiHandler
         }
 
         $filePath = $data['file_path'] ?? '';
+        /** @var string $format */
         $format = $data['format'] ?? 'csv';
+        /** @var array<string, mixed> $options */
         $options = $data['options'] ?? [];
 
         if (!is_string($filePath) || $filePath === '' || !file_exists($filePath)) {
@@ -293,8 +296,10 @@ class DictionaryApiHandler
     public function previewFile(array $data): array
     {
         $filePath = $data['file_path'] ?? '';
+        /** @var string $format */
         $format = $data['format'] ?? 'csv';
         $limit = (int)($data['limit'] ?? 10);
+        /** @var array<string, mixed> $options */
         $options = $data['options'] ?? [];
 
         if (!is_string($filePath) || $filePath === '' || !file_exists($filePath)) {
@@ -419,10 +424,10 @@ class DictionaryApiHandler
             return ['success' => false, 'error' => 'Dictionary not found'];
         }
 
-        $term = trim($data['term'] ?? '');
-        $definition = trim($data['definition'] ?? '');
-        $reading = isset($data['reading']) ? trim($data['reading']) : null;
-        $pos = isset($data['pos']) ? trim($data['pos']) : null;
+        $term = trim((string) ($data['term'] ?? ''));
+        $definition = trim((string) ($data['definition'] ?? ''));
+        $reading = isset($data['reading']) ? trim((string) $data['reading']) : null;
+        $pos = isset($data['pos']) ? trim((string) $data['pos']) : null;
 
         if (empty($term)) {
             return ['success' => false, 'error' => 'Term is required'];
@@ -450,10 +455,10 @@ class DictionaryApiHandler
      */
     public function updateEntry(int $entryId, array $data): array
     {
-        $term = trim($data['term'] ?? '');
-        $definition = trim($data['definition'] ?? '');
-        $reading = isset($data['reading']) ? trim($data['reading']) : null;
-        $pos = isset($data['pos']) ? trim($data['pos']) : null;
+        $term = trim((string) ($data['term'] ?? ''));
+        $definition = trim((string) ($data['definition'] ?? ''));
+        $reading = isset($data['reading']) ? trim((string) $data['reading']) : null;
+        $pos = isset($data['pos']) ? trim((string) $data['pos']) : null;
 
         if (empty($term)) {
             return ['success' => false, 'error' => 'Term is required'];

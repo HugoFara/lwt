@@ -157,7 +157,7 @@ class TranslationService
             ];
         }
 
-        $sentence = $record['SeText'];
+        $sentence = isset($record['SeText']) ? (string) $record['SeText'] : '';
         $trans = isset($record['LgGoogleTranslateURI']) ?
             (string) $record['LgGoogleTranslateURI'] : "";
 
@@ -223,7 +223,8 @@ class TranslationService
             ->where('LgID', '=', $lgId)
             ->getPrepared();
 
-        return $result[0]['LgTTSVoiceAPI'] ?? null;
+        $ttsVoice = $result[0]['LgTTSVoiceAPI'] ?? null;
+        return $ttsVoice !== null ? (string) $ttsVoice : null;
     }
 
     /**

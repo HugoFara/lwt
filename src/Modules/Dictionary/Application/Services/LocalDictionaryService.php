@@ -194,13 +194,13 @@ class LocalDictionaryService
 
         $records = Connection::preparedFetchAll($sql, [$languageId, $termLc]);
 
-        return array_map(function ($row) {
+        return array_map(function ($row): array {
             return [
-                'term' => $row['LeTerm'],
-                'definition' => $row['LeDefinition'],
-                'reading' => $row['LeReading'],
-                'pos' => $row['LePartOfSpeech'],
-                'dictionary' => $row['LdName'],
+                'term' => (string) ($row['LeTerm'] ?? ''),
+                'definition' => (string) ($row['LeDefinition'] ?? ''),
+                'reading' => isset($row['LeReading']) ? (string) $row['LeReading'] : null,
+                'pos' => isset($row['LePartOfSpeech']) ? (string) $row['LePartOfSpeech'] : null,
+                'dictionary' => (string) ($row['LdName'] ?? ''),
             ];
         }, $records);
     }
@@ -227,10 +227,10 @@ class LocalDictionaryService
 
         $records = Connection::preparedFetchAll($sql, [$languageId, $prefixLc . '%', $limit]);
 
-        return array_map(function ($row) {
+        return array_map(function ($row): array {
             return [
-                'term' => $row['LeTerm'],
-                'definition' => $row['LeDefinition'],
+                'term' => (string) ($row['LeTerm'] ?? ''),
+                'definition' => (string) ($row['LeDefinition'] ?? ''),
             ];
         }, $records);
     }
@@ -496,7 +496,7 @@ class LocalDictionaryService
             (int) $record['LdEntryCount'],
             (int) $record['LdPriority'],
             (bool) $record['LdEnabled'],
-            new DateTimeImmutable($record['LdCreated']),
+            new DateTimeImmutable((string) $record['LdCreated']),
             $record['LdUsID'] !== null ? (int) $record['LdUsID'] : null
         );
     }
@@ -520,12 +520,14 @@ class LocalDictionaryService
 
         foreach ($batch as $row) {
             $placeholders[] = '(?, ?, ?, ?, ?, ?)';
-            $values[] = $row['LeLdID'];
-            $values[] = $row['LeTerm'];
-            $values[] = $row['LeTermLc'];
-            $values[] = $row['LeDefinition'];
-            $values[] = $row['LeReading'];
-            $values[] = $row['LePartOfSpeech'];
+            /** @var int $dictId */
+            $dictId = $row['LeLdID'];
+            $values[] = $dictId;
+            $values[] = (string) ($row['LeTerm'] ?? '');
+            $values[] = (string) ($row['LeTermLc'] ?? '');
+            $values[] = (string) ($row['LeDefinition'] ?? '');
+            $values[] = $row['LeReading'] ?? null;
+            $values[] = $row['LePartOfSpeech'] ?? null;
         }
 
         $sql = "INSERT INTO " . Globals::table('local_dictionary_entries') .

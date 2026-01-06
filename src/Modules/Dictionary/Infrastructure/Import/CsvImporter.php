@@ -43,8 +43,11 @@ class CsvImporter implements ImporterInterface
     {
         $this->validateFile($filePath);
 
+        /** @var string $delimiter */
         $delimiter = $options['delimiter'] ?? ',';
+        /** @var bool $hasHeader */
         $hasHeader = $options['hasHeader'] ?? true;
+        /** @var array<string, int> $columnMap */
         $columnMap = $options['columnMap'] ?? self::DEFAULT_COLUMN_MAP;
         $encoding = $options['encoding'] ?? 'UTF-8';
 

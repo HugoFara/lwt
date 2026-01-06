@@ -72,7 +72,7 @@ class GetFrequencyStatistics
             );
 
             $stats['id'] = $lgId;
-            $stats['name'] = $language['LgName'];
+            $stats['name'] = (string) ($language['LgName'] ?? '');
             $languageStats[] = $stats;
 
             foreach ($stats as $key => $value) {
