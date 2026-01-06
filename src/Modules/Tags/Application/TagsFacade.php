@@ -1322,55 +1322,6 @@ class TagsFacade
     }
 
     /**
-     * Get formatted tag list string for a word.
-     *
-     * @param int    $wordId     Word ID
-     * @param string $before     String to prepend if tags exist
-     * @param bool   $brackets   Wrap tags in brackets
-     * @param bool   $escapeHtml Convert to HTML entities
-     *
-     * @return string Formatted tag list
-     *
-     * @deprecated Use getWordTagList() or getWordTagListHtml() instead
-     */
-    public static function getWordTagListFormatted(
-        int $wordId,
-        string $before = ' ',
-        bool $brackets = true,
-        bool $escapeHtml = true
-    ): string {
-        $lbrack = $brackets ? '[' : '';
-        $rbrack = $brackets ? ']' : '';
-
-        $result = Connection::preparedFetchValue(
-            "SELECT IFNULL(
-                GROUP_CONCAT(DISTINCT TgText ORDER BY TgText SEPARATOR ', '),
-                ''
-            ) AS taglist
-            FROM (
-                (
-                    words
-                    LEFT JOIN wordtags ON WoID = WtWoID
-                )
-                LEFT JOIN tags ON TgID = WtTgID
-            )
-            WHERE WoID = ?",
-            [$wordId],
-            'taglist'
-        );
-
-        if ($result != '') {
-            $result = $before . $lbrack . $result . $rbrack;
-        }
-
-        if ($escapeHtml) {
-            $result = htmlspecialchars($result ?? '', ENT_QUOTES, 'UTF-8');
-        }
-
-        return $result;
-    }
-
-    /**
      * Build WHERE clause for query filtering.
      *
      * @param string $query Filter query string

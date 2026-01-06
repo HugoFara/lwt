@@ -33,44 +33,6 @@ use Lwt\Core\StringUtils;
 class PageLayoutHelper
 {
     /**
-     * Generate the quick menu dropdown HTML.
-     *
-     * @return string HTML select element for quick navigation
-     *
-     * @deprecated 3.0.0 Use buildNavbar() instead
-     */
-    public static function buildQuickMenu(): string
-    {
-        return <<<'HTML'
-<select id="quickmenu" data-action="quick-menu-redirect">
-    <option value="" selected="selected">[Menu]</option>
-    <option value="index">Home</option>
-    <optgroup label="Texts">
-        <option value="edit_texts">Texts</option>
-        <option value="edit_archivedtexts">Text Archive</option>
-        <option value="edit_texttags">Text Tags</option>
-        <option value="check_text">Text Check</option>
-        <option value="long_text_import">Long Text Import</option>
-    </optgroup>
-    <option value="edit_languages">Languages</option>
-    <optgroup label="Terms">
-        <option value="edit_words">Terms</option>
-        <option value="edit_tags">Term Tags</option>
-        <option value="upload_words">Term Import</option>
-    </optgroup>
-    <option value="statistics">Statistics</option>
-    <option value="rss_import">Newsfeed Import</option>
-    <optgroup label="Other">
-        <option value="backup_restore">Database Operations</option>
-        <option value="settings">Settings</option>
-        <option value="text_to_speech_settings">Text-to-Speech Settings</option>
-        <option value="INFO">Help</option>
-    </optgroup>
-</select>
-HTML;
-    }
-
-    /**
      * Generate the main navigation bar HTML using Alpine.js and Bulma.
      *
      * @param string $currentPage Optional identifier for the current page to highlight

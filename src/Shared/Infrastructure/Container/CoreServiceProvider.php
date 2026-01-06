@@ -30,7 +30,7 @@ use Lwt\Services\TtsService;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 // Note: WordPressService moved to Modules/User - registered by UserServiceProvider
 use Lwt\Services\WordService;
-use Lwt\Services\WordUploadService;
+use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Core\Parser\ParserRegistry;
 use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;

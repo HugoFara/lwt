@@ -264,22 +264,6 @@ class AdminController extends BaseController
     }
 
     /**
-     * Hover settings page - creates a word with status from text reading hover action.
-     *
-     * @deprecated 3.0.0 Use /vocabulary/term-hover instead
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return void
-     */
-    public function settingsHover(array $params): void
-    {
-        // Redirect to the new Vocabulary module endpoint
-        $queryString = $_SERVER['QUERY_STRING'] ?? '';
-        $this->redirect('/vocabulary/term-hover' . ($queryString ? '?' . $queryString : ''));
-    }
-
-    /**
      * Install demo page.
      *
      * Handles:

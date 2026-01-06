@@ -337,15 +337,6 @@ class ClassesTest extends TestCase
         $this->assertTrue($lang->hasTts());
     }
 
-    public function testLanguageUsesMecab(): void
-    {
-        $lang = Language::create('Japanese', '', '.!?', 'mecab');
-        $this->assertTrue($lang->usesMecab());
-
-        $lang2 = Language::create('English', '', '.!?', 'a-z');
-        $this->assertFalse($lang2->usesMecab());
-    }
-
     // =========================================================================
     // Term Entity Tests
     // =========================================================================
@@ -585,27 +576,6 @@ class ClassesTest extends TestCase
         $this->assertEquals('http://source.com', $text->sourceUri());
         $this->assertEquals(50, $text->position());
         $this->assertEquals(12.5, $text->audioPosition());
-    }
-
-    public function testTextFromDbRecord(): void
-    {
-        $record = [
-            'TxID' => 789,
-            'TxLgID' => 2,
-            'TxTitle' => 'Database Text',
-            'TxText' => 'Loaded from database.',
-            'TxAnnotatedText' => '<annotated>content</annotated>',
-            'TxAudioURI' => 'audio/file.mp3',
-            'TxSourceURI' => 'https://source.url',
-            'TxPosition' => 100,
-            'TxAudioPosition' => 5.75
-        ];
-
-        $text = Text::fromDbRecord($record);
-
-        $this->assertEquals(789, $text->id()->toInt());
-        $this->assertEquals(2, $text->languageId()->toInt());
-        $this->assertEquals('Database Text', $text->title());
     }
 
     public function testTextRename(): void

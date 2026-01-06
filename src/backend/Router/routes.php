@@ -112,15 +112,6 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
-    // Delete word
-    // @deprecated 3.0.0 Use DELETE /api/v1/terms/{id} instead.
-    //             Kept for backward compatibility with frame-based mode.
-    $router->registerWithMiddleware(
-        '/word/delete',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@deleteWord',
-        AUTH_MIDDLEWARE
-    );
-
     // All words (list view) - Alpine.js SPA version
     $router->registerWithMiddleware(
         '/words',
@@ -139,22 +130,6 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware(
         '/word/show',
         'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@showWord',
-        AUTH_MIDDLEWARE
-    );
-
-    // Insert word (wellknown/ignore)
-    // @deprecated 3.0.0 Use POST /api/v1/terms/quick with status=99 instead.
-    //             Kept for backward compatibility with frame-based mode.
-    $router->registerWithMiddleware(
-        '/word/insert-wellknown',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@insertWellknown',
-        AUTH_MIDDLEWARE
-    );
-    // @deprecated 3.0.0 Use POST /api/v1/terms/quick with status=98 instead.
-    //             Kept for backward compatibility with frame-based mode.
-    $router->registerWithMiddleware(
-        '/word/insert-ignore',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@insertIgnore',
         AUTH_MIDDLEWARE
     );
 
@@ -216,15 +191,6 @@ function registerRoutes(Router $router): void
         'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@delete',
         AUTH_MIDDLEWARE,
         'POST'
-    );
-
-    // Set word status
-    // @deprecated 3.0.0 Use PUT /api/v1/terms/{id}/status/{status} instead.
-    //             Kept for backward compatibility with frame-based mode.
-    $router->registerWithMiddleware(
-        '/word/set-status',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@setStatus',
-        AUTH_MIDDLEWARE
     );
 
     // Set all words status (wellknown/ignore)
@@ -305,10 +271,6 @@ function registerRoutes(Router $router): void
 
     // Settings (Admin module)
     $router->registerWithMiddleware('/admin/settings', 'Lwt\\Modules\\Admin\\Http\\AdminController@settings', AUTH_MIDDLEWARE);
-
-    // Settings hover - deprecated, use /vocabulary/term-hover instead
-    // @deprecated 3.0.0 Use /vocabulary/term-hover instead
-    $router->registerWithMiddleware('/admin/settings/hover', 'Lwt\\Modules\\Admin\\Http\\AdminController@settingsHover', AUTH_MIDDLEWARE);
 
     // Server data (Admin module)
     $router->registerWithMiddleware('/admin/server-data', 'Lwt\\Modules\\Admin\\Http\\AdminController@serverData', AUTH_MIDDLEWARE);

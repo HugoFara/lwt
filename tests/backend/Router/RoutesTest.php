@@ -171,15 +171,11 @@ class RoutesTest extends TestCase
             'word edit-term' => ['/word/edit-term', "{$vocabularyController}@editTerm"],
             'words edit list' => ['/words/edit', "{$vocabularyController}@listEditAlpine"],
             'word edit-multi' => ['/word/edit-multi', "{$vocabularyController}@editMulti"],
-            'word delete' => ['/word/delete', "{$vocabularyController}@deleteWord"],
             'words list' => ['/words', "{$vocabularyController}@listEditAlpine"],
             'word new' => ['/word/new', "{$vocabularyController}@createWord"],
             'word show' => ['/word/show', "{$vocabularyController}@showWord"],
-            'word insert-wellknown' => ['/word/insert-wellknown', "{$vocabularyController}@insertWellknown"],
-            'word insert-ignore' => ['/word/insert-ignore', "{$vocabularyController}@insertIgnore"],
             'word inline-edit' => ['/word/inline-edit', "{$vocabularyController}@inlineEdit"],
             'word bulk-translate' => ['/word/bulk-translate', "{$vocabularyController}@bulkTranslate"],
-            'word set-status' => ['/word/set-status', "{$vocabularyController}@setStatus"],
             'word set-all-status' => ['/word/set-all-status', "{$vocabularyController}@markAllWords"],
             'word upload' => ['/word/upload', "{$vocabularyController}@upload"],
         ];
@@ -289,7 +285,6 @@ class RoutesTest extends TestCase
             'admin statistics' => ['/admin/statistics', 'Lwt\\Modules\\Admin\\Http\\AdminController@statistics'],
             'admin install-demo' => ['/admin/install-demo', 'Lwt\\Modules\\Admin\\Http\\AdminController@installDemo'],
             'admin settings' => ['/admin/settings', 'Lwt\\Modules\\Admin\\Http\\AdminController@settings'],
-            'admin settings hover' => ['/admin/settings/hover', 'Lwt\\Modules\\Admin\\Http\\AdminController@settingsHover'],
             'admin server-data' => ['/admin/server-data', 'Lwt\\Modules\\Admin\\Http\\AdminController@serverData'],
         ];
     }
@@ -429,11 +424,8 @@ class RoutesTest extends TestCase
             // New routes should use hyphens for word separation
             '/text/import-long' => 'should use hyphens',
             '/word/edit-multi' => 'should use hyphens',
-            '/word/insert-wellknown' => 'should use hyphens',
-            '/word/insert-ignore' => 'should use hyphens',
             '/word/inline-edit' => 'should use hyphens',
             '/word/bulk-translate' => 'should use hyphens',
-            '/word/set-status' => 'should use hyphens',
             '/admin/install-demo' => 'should use hyphens',
             '/admin/server-data' => 'should use hyphens',
         ];

@@ -400,18 +400,6 @@ class Language
     }
 
     /**
-     * Check if the language uses MeCab for parsing.
-     *
-     * @return bool
-     *
-     * @deprecated Use parserType() or getEffectiveParserType() instead
-     */
-    public function usesMecab(): bool
-    {
-        return strtoupper(trim($this->regexpWordCharacters)) === 'MECAB';
-    }
-
-    /**
      * Get the explicitly set parser type.
      *
      * @return string|null Parser type or null if not set

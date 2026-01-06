@@ -174,52 +174,6 @@ class BaseControllerTest extends TestCase
         $this->assertFalse($this->controller->testIsGet());
     }
 
-    // ===== escape() tests =====
-
-    public function testEscapeHandlesQuotes(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $escaped = $this->controller->testEscape("test's value");
-        $this->assertStringContainsString("test\\'s value", $escaped);
-        $this->assertStringStartsWith("'", $escaped);
-        $this->assertStringEndsWith("'", $escaped);
-    }
-
-    public function testEscapeHandlesEmptyString(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $escaped = $this->controller->testEscape("");
-        $this->assertEquals('NULL', $escaped);
-    }
-
-    // ===== escapeNonNull() tests =====
-
-    public function testEscapeNonNullHandlesQuotes(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $escaped = $this->controller->testEscapeNonNull("test's value");
-        $this->assertStringContainsString("test\\'s value", $escaped);
-    }
-
-    public function testEscapeNonNullWithEmptyString(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $escaped = $this->controller->testEscapeNonNull("");
-        $this->assertEquals("''", $escaped);
-    }
-
     // ===== query() tests =====
 
     public function testQueryExecutesSelect(): void
@@ -335,16 +289,6 @@ class TestableController extends BaseController
     public function testIsGet(): bool
     {
         return $this->isGet();
-    }
-
-    public function testEscape(string $value): string
-    {
-        return $this->escape($value);
-    }
-
-    public function testEscapeNonNull(string $value): string
-    {
-        return $this->escapeNonNull($value);
     }
 
     public function testQuery(string $sql): \mysqli_result|bool

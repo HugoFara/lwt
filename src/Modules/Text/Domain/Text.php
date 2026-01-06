@@ -149,30 +149,6 @@ class Text
         );
     }
 
-    /**
-     * Load from a database record.
-     *
-     * @param array<string, mixed> $record Database record
-     *
-     * @return self
-     *
-     * @deprecated Use reconstitute() instead
-     */
-    public static function fromDbRecord(array $record): self
-    {
-        return self::reconstitute(
-            (int) $record['TxID'],
-            (int) $record['TxLgID'],
-            (string) $record['TxTitle'],
-            (string) $record['TxText'],
-            (string) ($record['TxAnnotatedText'] ?? ''),
-            (string) ($record['TxAudioURI'] ?? ''),
-            (string) ($record['TxSourceURI'] ?? ''),
-            (int) ($record['TxPosition'] ?? 0),
-            (float) ($record['TxAudioPosition'] ?? 0.0)
-        );
-    }
-
     // Domain behavior methods
 
     /**

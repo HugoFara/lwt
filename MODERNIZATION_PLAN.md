@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06 (All legacy API handlers migrated - ImportHandler→VocabularyApiHandler, ImprovedTextHandler→TextApiHandler, MediaHandler→AdminApiHandler)
+**Last Updated:** 2026-01-06 (Deprecated routes and methods removed - 15 PHP deprecations cleaned up)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1514,11 +1514,11 @@ All TagService functionality has been migrated to `TagsFacade`:
 
 | Metric | Status | Details |
 |--------|--------|---------|
-| Psalm Level 3 | PASS | 0 errors (2026-01-05) |
-| PHPUnit Tests | PASS | 2978 tests, 6525 assertions |
+| Psalm Level 3 | PASS | 0 errors (2026-01-06) |
+| PHPUnit Tests | PASS | 2825 tests, 6146 assertions |
 | TypeScript | PASS | No errors |
 | ESLint | PASS | No errors |
-| Deprecated Code | WARNING | 66 items marked for v3.0.0 removal |
+| Deprecated Code | WARNING | 51 items remaining (15 PHP deprecations removed 2026-01-06) |
 | TODO Comments | WARNING | 18 items |
 
 ### 5.1 Incomplete Module Migration
@@ -1594,7 +1594,7 @@ API handlers have been consolidated to module-based handlers:
 
 | Layer | Total | Tested | Gap |
 |-------|-------|--------|-----|
-| Module Facades | 8 | 5 | 38% |
+| Module Facades | 10 | 10 | 0% ✅ |
 | Module Use Cases | 65 | 0 | 100% |
 | Module Application Services | 7 | 0 | 100% |
 | Module HTTP Handlers | 7 | 4 | 43% |
@@ -1615,6 +1615,10 @@ API handlers have been consolidated to module-based handlers:
 - [x] `ReviewFacadeTest.php` - Added 2026-01-05 (51 tests)
 - [x] `TextFacadeTest.php` - Rewritten 2026-01-05 (95 tests, replaced 69 tests with 40 skipped)
 - [x] `VocabularyFacadeTest.php` - Added 2026-01-05 (77 tests)
+- [x] `DictionaryFacadeTest.php` - Added 2026-01-06 (42 tests, 87 assertions)
+- [x] `UserFacadeTest.php` - Added 2026-01-06 (44 tests, 76 assertions)
+- [x] `HomeFacadeTest.php` - Existing (27 tests)
+- [x] `TagsFacadeTest.php` - Existing
 - [x] `SimilarityCalculatorTest.php` - Added 2026-01-05 (87 tests)
 - [x] `RssParserTest.php` - Added 2026-01-05 (44 tests)
 
@@ -1652,15 +1656,20 @@ Mixed naming conventions detected:
 - [ ] Move `YT_API_KEY` from view templates to `.env`
 - [ ] Document production password requirements
 
-### 5.7 Deprecated Code (66 items)
+### 5.7 Deprecated Code (51 items remaining)
 
-**PHP Deprecations (23 items):**
+**PHP Deprecations (8 items remaining):**
 
-- Routes marked `@deprecated 3.0.0` in `routes.php`
-- `WordService` → Use `VocabularyFacade`
-- `Text::create()` → Use `reconstitute()`
-- `Language::parser()` → Use `parserType()`
-- `TextParsing` multiple methods
+- ~~Routes marked `@deprecated 3.0.0` in `routes.php`~~ - **REMOVED** (2026-01-06)
+- `WordService` → Use `VocabularyFacade` (kept for backward compatibility - still in use)
+- ~~`Text::fromDbRecord()`~~ → Use `reconstitute()` - **REMOVED** (2026-01-06)
+- ~~`Language::usesMecab()`~~ → Use `parserType()` - **REMOVED** (2026-01-06)
+- `TextParsing` methods (kept - still used internally)
+- ~~`BaseController::escape/escapeNonNull`~~ - **REMOVED** (2026-01-06)
+- ~~`Escaping::prepareTextdataJs`~~ - **REMOVED** (2026-01-06)
+- ~~`TagsFacade::getWordTagListFormatted`~~ - **REMOVED** (2026-01-06)
+- ~~`PageLayoutHelper::buildQuickMenu`~~ - **REMOVED** (2026-01-06)
+- ~~`WordUploadService` wrapper~~ - **REMOVED** (2026-01-06)
 
 **TypeScript Deprecations (43 items):**
 
@@ -1691,8 +1700,8 @@ Mixed naming conventions detected:
   - [x] TranslationController → TranslationController (Dictionary module) (2026-01-06)
   - [x] WordPressController → WordPressController (User module) (2026-01-06) - DELETED
   - [ ] Remaining: ApiController
-- [ ] Add tests for module facades (at least 80% coverage)
-- [ ] Remove deprecated routes and methods
+- [x] Add tests for module facades (at least 80% coverage) - **100% COMPLETE** (2026-01-06) - All 10 facades tested
+- [x] Remove deprecated routes and methods (2026-01-06) - 15 deprecated items removed
 - [x] Clean up backup files (2026-01-05)
 - [ ] Standardize API parameter naming
 - [ ] Update API version from 0.1.1
