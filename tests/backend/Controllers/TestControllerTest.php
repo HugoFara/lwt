@@ -3,7 +3,8 @@ namespace Lwt\Tests\Controllers;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Controllers\TestController;
+use Lwt\Modules\Review\Http\TestController;
+use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
@@ -17,13 +18,14 @@ $config = EnvLoader::getDatabaseConfig();
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/TestController.php';
+require_once __DIR__ . '/../../../src/Modules/Review/Http/TestController.php';
 require_once __DIR__ . '/../../../src/backend/Services/TestService.php';
 
 /**
  * Unit tests for the TestController class.
  *
- * Tests the word testing/review interface controller and TestService integration.
+ * Tests the word testing/review interface controller (from Review module)
+ * and TestService integration.
  */
 class TestControllerTest extends TestCase
 {
@@ -90,7 +92,7 @@ class TestControllerTest extends TestCase
      */
     private function createController(): TestController
     {
-        return new TestController(new TestService());
+        return new TestController(new ReviewFacade());
     }
 
     /**

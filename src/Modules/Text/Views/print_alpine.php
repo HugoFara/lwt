@@ -16,7 +16,7 @@
  * @since    3.0.0
  */
 
-namespace Lwt\Views\TextPrint;
+namespace Lwt\Modules\Text\Views;
 
 use Lwt\Services\AnnotationService;
 use Lwt\Services\TextNavigationService;

@@ -1,33 +1,29 @@
 <?php declare(strict_types=1);
 /**
- * \file
- * \brief Local Dictionary Controller - Dictionary management
+ * Dictionary Controller
  *
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt
+ * @package  Lwt\Modules\Dictionary\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/
- * @since   3.0.0
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
  */
 
-namespace Lwt\Controllers;
+namespace Lwt\Modules\Dictionary\Http;
 
-use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Controllers\BaseController;
+use Lwt\Modules\Dictionary\Application\DictionaryFacade;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Shared\Infrastructure\Database\Validation;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
-use Lwt\Services\LocalDictionaryService;
-use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Services\DictionaryImport\CsvImporter;
-use Lwt\Services\DictionaryImport\JsonImporter;
-use Lwt\Services\DictionaryImport\StarDictImporter;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use RuntimeException;
 
-require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
-// LanguageFacade loaded via autoloader
+require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
 
 /**
  * Controller for local dictionary management.
@@ -37,29 +33,24 @@ require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
  * - Dictionary creation and deletion
  * - Import wizard for dictionary files
  *
- * @category Lwt
- * @package  Lwt
- * @author   HugoFara <hugo.farajallah@protonmail.com>
- * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
- * @since    3.0.0
+ * @since 3.0.0
  */
-class LocalDictionaryController extends BaseController
+class DictionaryController extends BaseController
 {
-    private LocalDictionaryService $dictService;
-    private LanguageFacade $languageService;
+    private DictionaryFacade $dictionaryFacade;
+    private LanguageFacade $languageFacade;
 
     /**
-     * Create a new LocalDictionaryController.
+     * Create a new DictionaryController.
      *
-     * @param LocalDictionaryService $dictService     Dictionary service
-     * @param LanguageFacade         $languageService Language facade
+     * @param DictionaryFacade $dictionaryFacade Dictionary facade
+     * @param LanguageFacade   $languageFacade   Language facade
      */
-    public function __construct(LocalDictionaryService $dictService, LanguageFacade $languageService)
+    public function __construct(DictionaryFacade $dictionaryFacade, LanguageFacade $languageFacade)
     {
         parent::__construct();
-        $this->dictService = $dictService;
-        $this->languageService = $languageService;
+        $this->dictionaryFacade = $dictionaryFacade;
+        $this->languageFacade = $languageFacade;
     }
 
     /**
@@ -75,21 +66,21 @@ class LocalDictionaryController extends BaseController
             InputValidator::getStringWithDb('lang', 'currentlanguage')
         );
 
-        $langName = $this->languageService->getLanguageName($langId);
+        $langName = $this->languageFacade->getLanguageName($langId);
         PageLayoutHelper::renderPageStart($langName . ' - Local Dictionaries', true);
 
         // Handle form submissions
         $this->handleFormSubmissions($langId);
 
         // Get dictionaries
-        $dictionaries = $this->dictService->getAllForLanguage($langId);
-        $localDictMode = $this->dictService->getLocalDictMode($langId);
+        $dictionaries = $this->dictionaryFacade->getAllForLanguage($langId);
+        $localDictMode = $this->dictionaryFacade->getLocalDictMode($langId);
 
         // Get languages for dropdown
-        $languages = $this->languageService->getLanguagesForSelect();
+        $languages = $this->languageFacade->getLanguagesForSelect();
 
         // Include view
-        include __DIR__ . '/../Views/LocalDictionary/index.php';
+        include __DIR__ . '/../Views/index.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -108,20 +99,20 @@ class LocalDictionaryController extends BaseController
         );
         $dictId = $this->paramInt('dict_id');
 
-        $langName = $this->languageService->getLanguageName($langId);
+        $langName = $this->languageFacade->getLanguageName($langId);
         PageLayoutHelper::renderPageStart($langName . ' - Import Dictionary', true);
 
         // Get dictionary if specified
         $dictionary = null;
         if ($dictId !== null) {
-            $dictionary = $this->dictService->getById($dictId);
+            $dictionary = $this->dictionaryFacade->getById($dictId);
         }
 
         // Get or create dictionaries for this language
-        $dictionaries = $this->dictService->getAllForLanguage($langId);
+        $dictionaries = $this->dictionaryFacade->getAllForLanguage($langId);
 
         // Include view
-        include __DIR__ . '/../Views/LocalDictionary/import.php';
+        include __DIR__ . '/../Views/import.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -149,7 +140,7 @@ class LocalDictionaryController extends BaseController
             if (empty($dictName)) {
                 $dictName = 'Imported Dictionary ' . date('Y-m-d H:i');
             }
-            $dictId = $this->dictService->create($langId, $dictName, $format);
+            $dictId = $this->dictionaryFacade->create($langId, $dictName, $format);
         }
 
         // Process uploaded file
@@ -161,7 +152,7 @@ class LocalDictionaryController extends BaseController
         $originalName = $_FILES['file']['name'];
 
         try {
-            $importer = $this->getImporter($format, $originalName);
+            $importer = $this->dictionaryFacade->getImporter($format, $originalName);
 
             if (!$importer->canImport($filePath)) {
                 $this->redirect("/dictionaries/import?lang=$langId&dict_id=$dictId&error=invalid_file");
@@ -172,7 +163,7 @@ class LocalDictionaryController extends BaseController
 
             // Perform import
             $entries = $importer->parse($filePath, $options);
-            $count = $this->dictService->addEntriesBatch($dictId, $entries);
+            $count = $this->dictionaryFacade->addEntriesBatch($dictId, $entries);
 
             $this->redirect("/dictionaries?lang=$langId&message=imported_$count");
         } catch (RuntimeException $e) {
@@ -194,7 +185,7 @@ class LocalDictionaryController extends BaseController
         $langId = $this->paramInt('lang_id') ?? 0;
 
         if ($dictId !== null && $dictId > 0) {
-            $this->dictService->delete($dictId);
+            $this->dictionaryFacade->delete($dictId);
         }
 
         $this->redirect("/dictionaries?lang=$langId&message=deleted");
@@ -221,7 +212,7 @@ class LocalDictionaryController extends BaseController
         $originalName = $_FILES['file']['name'];
 
         try {
-            $importer = $this->getImporter($format, $originalName);
+            $importer = $this->dictionaryFacade->getImporter($format, $originalName);
 
             if (!$importer->canImport($filePath)) {
                 echo json_encode(['error' => 'Invalid file format']);
@@ -233,14 +224,17 @@ class LocalDictionaryController extends BaseController
             $result = ['success' => true, 'entries' => $entries];
 
             // Add structure info for CSV
-            if ($format === 'csv' && $importer instanceof CsvImporter) {
-                $delimiter = $importer->detectDelimiter($filePath);
-                $headers = $importer->detectHeaders($filePath, $delimiter);
-                $result['structure'] = [
-                    'delimiter' => $delimiter,
-                    'headers' => $headers,
-                    'suggested_mapping' => $importer->suggestColumnMap($headers),
-                ];
+            if ($format === 'csv') {
+                $csvImporter = $this->dictionaryFacade->getImporter('csv', '');
+                if ($csvImporter instanceof \Lwt\Services\DictionaryImport\CsvImporter) {
+                    $delimiter = $csvImporter->detectDelimiter($filePath);
+                    $headers = $csvImporter->detectHeaders($filePath, $delimiter);
+                    $result['structure'] = [
+                        'delimiter' => $delimiter,
+                        'headers' => $headers,
+                        'suggested_mapping' => $csvImporter->suggestColumnMap($headers),
+                    ];
+                }
             }
 
             echo json_encode($result);
@@ -262,7 +256,7 @@ class LocalDictionaryController extends BaseController
         if ($this->isPost() && $this->hasParam('create_dictionary')) {
             $name = $this->param('dict_name');
             if (!empty($name)) {
-                $this->dictService->create($langId, $name, 'csv');
+                $this->dictionaryFacade->create($langId, $name, 'csv');
             }
         }
 
@@ -270,7 +264,7 @@ class LocalDictionaryController extends BaseController
         if ($this->isPost() && $this->hasParam('delete_dictionary')) {
             $dictId = $this->paramInt('dict_id');
             if ($dictId !== null && $dictId > 0) {
-                $this->dictService->delete($dictId);
+                $this->dictionaryFacade->delete($dictId);
             }
         }
 
@@ -278,48 +272,17 @@ class LocalDictionaryController extends BaseController
         if ($this->isPost() && $this->hasParam('toggle_enabled')) {
             $dictId = $this->paramInt('dict_id');
             if ($dictId !== null) {
-                $dict = $this->dictService->getById($dictId);
+                $dict = $this->dictionaryFacade->getById($dictId);
                 if ($dict !== null) {
                     if ($dict->isEnabled()) {
                         $dict->disable();
                     } else {
                         $dict->enable();
                     }
-                    $this->dictService->update($dict);
+                    $this->dictionaryFacade->update($dict);
                 }
             }
         }
-    }
-
-    /**
-     * Get the appropriate importer for a format.
-     *
-     * @param string $format       Import format
-     * @param string $originalName Original filename for detection
-     *
-     * @return \Lwt\Services\DictionaryImport\ImporterInterface
-     *
-     * @throws RuntimeException If format is unsupported
-     */
-    private function getImporter(string $format, string $originalName = ''): \Lwt\Services\DictionaryImport\ImporterInterface
-    {
-        // Auto-detect format from extension if not specified
-        if ($format === 'auto' && !empty($originalName)) {
-            $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-            $format = match ($ext) {
-                'csv', 'tsv', 'txt' => 'csv',
-                'json' => 'json',
-                'ifo', 'idx', 'dict', 'dz' => 'stardict',
-                default => 'csv',
-            };
-        }
-
-        return match ($format) {
-            'csv', 'tsv' => new CsvImporter(),
-            'json' => new JsonImporter(),
-            'stardict', 'ifo' => new StarDictImporter(),
-            default => throw new RuntimeException("Unsupported format: $format"),
-        };
     }
 
     /**

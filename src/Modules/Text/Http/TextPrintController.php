@@ -1,32 +1,44 @@
 <?php declare(strict_types=1);
 /**
- * \file
- * \brief Text Print Controller - Text printing functionality
+ * Text Print Controller
+ *
+ * HTTP controller for text printing functionality.
  *
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt
+ * @package  Lwt\Modules\Text\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/src-php-controllers-textprintcontroller.html
- * @since   3.0.0
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
  */
 
-namespace Lwt\Controllers;
+namespace Lwt\Modules\Text\Http;
 
+use Lwt\Controllers\BaseController;
 use Lwt\Services\TextPrintService;
 use Lwt\Services\AnnotationService;
 use Lwt\Api\V1\Handlers\ImprovedTextHandler;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
-require_once __DIR__ . '/../Services/TextPrintService.php';
-require_once __DIR__ . '/../Services/TextNavigationService.php';
-require_once __DIR__ . '/../Services/AnnotationService.php';
-require_once __DIR__ . '/../Api/V1/Handlers/ImprovedTextHandler.php';
-require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
-require_once __DIR__ . '/../../Shared/UI/Helpers/SelectOptionsBuilder.php';
-require_once __DIR__ . '/../../Shared/UI/Helpers/FormHelper.php';
+// Base path for legacy includes
+if (!defined('LWT_BACKEND_PATH')) {
+    define('LWT_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
+}
+
+// Module views path
+if (!defined('LWT_TEXT_MODULE_VIEWS')) {
+    define('LWT_TEXT_MODULE_VIEWS', dirname(__DIR__) . '/Views');
+}
+
+require_once LWT_BACKEND_PATH . '/Services/TextPrintService.php';
+require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
+require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
+require_once LWT_BACKEND_PATH . '/Api/V1/Handlers/ImprovedTextHandler.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/SelectOptionsBuilder.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/FormHelper.php';
 
 /**
  * Controller for text printing functionality.
@@ -37,7 +49,7 @@ require_once __DIR__ . '/../../Shared/UI/Helpers/FormHelper.php';
  * - Annotation editing
  *
  * @category Lwt
- * @package  Lwt
+ * @package  Lwt\Modules\Text\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -55,12 +67,12 @@ class TextPrintController extends BaseController
     /**
      * Create a new TextPrintController.
      *
-     * @param TextPrintService $printService Print service for text printing operations
+     * @param TextPrintService|null $printService Print service for text printing operations
      */
-    public function __construct(TextPrintService $printService)
+    public function __construct(?TextPrintService $printService = null)
     {
         parent::__construct();
-        $this->printService = $printService;
+        $this->printService = $printService ?? new TextPrintService();
     }
 
     /**
@@ -86,15 +98,15 @@ class TextPrintController extends BaseController
      */
     public function printPlain(array $params): void
     {
-        require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Services/TextStatisticsService.php';
-        require_once __DIR__ . '/../Services/SentenceService.php';
-        require_once __DIR__ . '/../Services/AnnotationService.php';
-        require_once __DIR__ . '/../Services/TextNavigationService.php';
-        require_once __DIR__ . '/../Services/TextParsingService.php';
-        require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
-        require_once __DIR__ . '/../../Shared/Infrastructure/Database/Restore.php';
+        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        require_once LWT_BACKEND_PATH . '/Services/TextStatisticsService.php';
+        require_once LWT_BACKEND_PATH . '/Services/SentenceService.php';
+        require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
+        require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
+        require_once LWT_BACKEND_PATH . '/Services/TextParsingService.php';
+        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
+        require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
 
         $textId = (int) $this->param('text', '0');
 
@@ -122,7 +134,7 @@ class TextPrintController extends BaseController
         // Render the view
         PageLayoutHelper::renderPageStartNobody('Print');
 
-        include __DIR__ . '/../Views/TextPrint/print_alpine.php';
+        include LWT_TEXT_MODULE_VIEWS . '/print_alpine.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -140,16 +152,16 @@ class TextPrintController extends BaseController
      */
     public function printAnnotated(array $params): void
     {
-        require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Services/TextStatisticsService.php';
-        require_once __DIR__ . '/../Services/SentenceService.php';
-        require_once __DIR__ . '/../Services/AnnotationService.php';
-        require_once __DIR__ . '/../Services/TextNavigationService.php';
-        require_once __DIR__ . '/../Services/TextParsingService.php';
-        require_once __DIR__ . '/../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
-        require_once __DIR__ . '/../../Shared/Infrastructure/Database/Restore.php';
-        require_once __DIR__ . '/../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
+        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        require_once LWT_BACKEND_PATH . '/Services/TextStatisticsService.php';
+        require_once LWT_BACKEND_PATH . '/Services/SentenceService.php';
+        require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
+        require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
+        require_once LWT_BACKEND_PATH . '/Services/TextParsingService.php';
+        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
+        require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
+        require_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
 
         $textId = (int) $this->param('text', '0');
         $editMode = (int) $this->param('edit', '0');
@@ -208,9 +220,8 @@ class TextPrintController extends BaseController
         // Render the view
         PageLayoutHelper::renderPageStartNobody('Annotated Text');
 
-        include __DIR__ . '/../Views/TextPrint/print_alpine.php';
+        include LWT_TEXT_MODULE_VIEWS . '/print_alpine.php';
 
         PageLayoutHelper::renderPageEnd();
     }
-
 }

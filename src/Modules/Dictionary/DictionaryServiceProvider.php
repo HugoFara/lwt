@@ -1,0 +1,77 @@
+<?php declare(strict_types=1);
+/**
+ * Dictionary Module Service Provider
+ *
+ * Registers all services for the Dictionary module.
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Modules\Dictionary
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Modules\Dictionary;
+
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
+
+// Application
+use Lwt\Modules\Dictionary\Application\DictionaryFacade;
+
+// Http
+use Lwt\Modules\Dictionary\Http\DictionaryController;
+
+// Services (from legacy location)
+use Lwt\Services\LocalDictionaryService;
+
+// Language Module
+use Lwt\Modules\Language\Application\LanguageFacade;
+
+/**
+ * Service provider for the Dictionary module.
+ *
+ * Registers the facade, controller, and related services
+ * for the Dictionary module.
+ *
+ * @since 3.0.0
+ */
+class DictionaryServiceProvider implements ServiceProviderInterface
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function register(Container $container): void
+    {
+        // Register LocalDictionaryService (used by facade)
+        $container->singleton(LocalDictionaryService::class, function (Container $_c) {
+            return new LocalDictionaryService();
+        });
+
+        // Register Facade
+        $container->singleton(DictionaryFacade::class, function (Container $c) {
+            return new DictionaryFacade(
+                $c->get(LocalDictionaryService::class)
+            );
+        });
+
+        // Register Controller
+        $container->singleton(DictionaryController::class, function (Container $c) {
+            return new DictionaryController(
+                $c->get(DictionaryFacade::class),
+                $c->get(LanguageFacade::class)
+            );
+        });
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function boot(Container $container): void
+    {
+        // No bootstrap logic needed for the Dictionary module
+    }
+}

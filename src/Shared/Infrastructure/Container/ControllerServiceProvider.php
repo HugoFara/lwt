@@ -15,33 +15,25 @@
 namespace Lwt\Shared\Infrastructure\Container;
 
 use Lwt\Controllers\ApiController;
-use Lwt\Controllers\AuthController;
-use Lwt\Controllers\FeedsController;
+// Note: AuthController moved to Modules/User as UserController - registered by UserServiceProvider
+// Note: FeedsController moved to Modules/Feed as FeedController - registered by FeedServiceProvider
 // Note: HomeController moved to Modules/Home - registered by HomeServiceProvider
 use Lwt\Modules\Language\Http\LanguageController;
-use Lwt\Controllers\TestController;
+// Note: TestController moved to Modules/Review - registered by ReviewServiceProvider
 use Lwt\Modules\Text\Http\TextController;
-use Lwt\Controllers\TextPrintController;
+// Note: TextPrintController moved to Modules/Text - registered by TextServiceProvider
 use Lwt\Controllers\TranslationController;
-use Lwt\Controllers\WordController;
+// Note: WordController moved to Modules/Vocabulary as VocabularyController - registered by VocabularyServiceProvider
 use Lwt\Controllers\WordPressController;
-use Lwt\Services\AuthService;
-use Lwt\Services\ExportService;
-use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
-use Lwt\Modules\Feed\Application\FeedFacade;
+// Note: AuthService now primarily used via UserFacade in User module
 // Note: HomeService moved to Modules/Home as HomeFacade
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Services\PasswordService;
-use Lwt\Services\TestService;
+// Note: TestService now primarily used via ReviewFacade in Review module
 use Lwt\Services\TextDisplayService;
-use Lwt\Services\TextPrintService;
+// Note: TextPrintService now primarily used via TextPrintController in Text module
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Services\TranslationService;
-use Lwt\Services\TtsService;
-use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Services\WordPressService;
-use Lwt\Services\WordService;
-use Lwt\Services\WordUploadService;
 
 /**
  * Controller service provider that registers all controllers.
@@ -69,12 +61,7 @@ class ControllerServiceProvider implements ServiceProviderInterface
             );
         });
 
-        $container->bind(AuthController::class, function (Container $c) {
-            return new AuthController(
-                $c->get(AuthService::class),
-                $c->get(PasswordService::class)
-            );
-        });
+        // Note: AuthController removed - UserController is now registered by UserServiceProvider
 
         $container->bind(LanguageController::class, function (Container $c) {
             return new LanguageController(
@@ -82,18 +69,9 @@ class ControllerServiceProvider implements ServiceProviderInterface
             );
         });
 
-        $container->bind(TestController::class, function (Container $c) {
-            return new TestController(
-                $c->get(TestService::class),
-                $c->get(LanguageFacade::class)
-            );
-        });
+        // Note: TestController removed - now registered by ReviewServiceProvider
 
-        $container->bind(TextPrintController::class, function (Container $c) {
-            return new TextPrintController(
-                $c->get(TextPrintService::class)
-            );
-        });
+        // Note: TextPrintController removed - now registered by TextServiceProvider
 
         $container->bind(TranslationController::class, function (Container $c) {
             return new TranslationController(
@@ -107,13 +85,7 @@ class ControllerServiceProvider implements ServiceProviderInterface
             );
         });
 
-        // Controllers with multiple service dependencies
-        $container->bind(FeedsController::class, function (Container $c) {
-            return new FeedsController(
-                $c->get(FeedFacade::class),
-                $c->get(LanguageFacade::class)
-            );
-        });
+        // Note: FeedsController moved to Modules/Feed as FeedController - registered by FeedServiceProvider
 
         // Note: HomeController moved to Modules/Home - registered by HomeServiceProvider
 
@@ -125,17 +97,7 @@ class ControllerServiceProvider implements ServiceProviderInterface
             );
         });
 
-        $container->bind(WordController::class, function (Container $c) {
-            return new WordController(
-                $c->get(WordService::class),
-                $c->get(LanguageFacade::class),
-                $c->get(WordListService::class),
-                $c->get(WordUploadService::class),
-                $c->get(ExportService::class),
-                $c->get(TextFacade::class),
-                $c->get(ExpressionService::class)
-            );
-        });
+        // Note: WordController moved to Modules/Vocabulary as VocabularyController - registered by VocabularyServiceProvider
 
         // NOTE: AdminController is now in Modules/Admin and registered via AdminServiceProvider
     }

@@ -65,9 +65,9 @@ function registerRoutes(Router $router): void
     // Display improved text
     $router->registerWithMiddleware('/text/display', 'Lwt\\Modules\\Text\\Http\\TextController@display', AUTH_MIDDLEWARE);
 
-    // Print text (TextPrintController)
-    $router->registerWithMiddleware('/text/print', 'TextPrintController@printAnnotated', AUTH_MIDDLEWARE);
-    $router->registerWithMiddleware('/text/print-plain', 'TextPrintController@printPlain', AUTH_MIDDLEWARE);
+    // Print text (TextPrintController from Text module)
+    $router->registerWithMiddleware('/text/print', 'Lwt\\Modules\\Text\\Http\\TextPrintController@printAnnotated', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/text/print-plain', 'Lwt\\Modules\\Text\\Http\\TextPrintController@printPlain', AUTH_MIDDLEWARE);
 
     // Import long text
     $router->registerWithMiddleware('/text/import-long', 'Lwt\\Modules\\Text\\Http\\TextController@importLong', AUTH_MIDDLEWARE);
@@ -274,19 +274,20 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware('/feeds/wizard', 'Lwt\\Modules\\Feed\\Http\\FeedController@wizard', AUTH_MIDDLEWARE);
 
     // ==================== LOCAL DICTIONARY ROUTES (PROTECTED) ====================
+    // All dictionary routes use DictionaryController from the Dictionary module
 
     // Dictionaries list
-    $router->registerWithMiddleware('/dictionaries', 'LocalDictionaryController@index', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/dictionaries', 'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@index', AUTH_MIDDLEWARE);
 
     // Import wizard
-    $router->registerWithMiddleware('/dictionaries/import', 'LocalDictionaryController@import', AUTH_MIDDLEWARE, 'GET');
-    $router->registerWithMiddleware('/dictionaries/import', 'LocalDictionaryController@processImport', AUTH_MIDDLEWARE, 'POST');
+    $router->registerWithMiddleware('/dictionaries/import', 'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@import', AUTH_MIDDLEWARE, 'GET');
+    $router->registerWithMiddleware('/dictionaries/import', 'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@processImport', AUTH_MIDDLEWARE, 'POST');
 
     // Delete dictionary
-    $router->registerWithMiddleware('/dictionaries/delete', 'LocalDictionaryController@delete', AUTH_MIDDLEWARE, 'POST');
+    $router->registerWithMiddleware('/dictionaries/delete', 'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@delete', AUTH_MIDDLEWARE, 'POST');
 
     // Preview (AJAX)
-    $router->registerWithMiddleware('/dictionaries/preview', 'LocalDictionaryController@preview', AUTH_MIDDLEWARE, 'POST');
+    $router->registerWithMiddleware('/dictionaries/preview', 'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@preview', AUTH_MIDDLEWARE, 'POST');
 
     // ==================== ADMIN ROUTES (PROTECTED) ====================
 
@@ -316,17 +317,18 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware('/admin/save-setting', 'Lwt\\Modules\\Admin\\Http\\AdminController@saveSetting', AUTH_MIDDLEWARE);
 
     // ==================== AUTHENTICATION ROUTES (PUBLIC) ====================
+    // All auth routes use UserController from the User module
 
     // Login - no auth required
-    $router->register('/login', 'AuthController@loginForm', 'GET');
-    $router->register('/login', 'AuthController@login', 'POST');
+    $router->register('/login', 'Lwt\\Modules\\User\\Http\\UserController@loginForm', 'GET');
+    $router->register('/login', 'Lwt\\Modules\\User\\Http\\UserController@login', 'POST');
 
     // Registration - no auth required
-    $router->register('/register', 'AuthController@registerForm', 'GET');
-    $router->register('/register', 'AuthController@register', 'POST');
+    $router->register('/register', 'Lwt\\Modules\\User\\Http\\UserController@registerForm', 'GET');
+    $router->register('/register', 'Lwt\\Modules\\User\\Http\\UserController@register', 'POST');
 
     // Logout - technically needs auth but handles gracefully if not
-    $router->register('/logout', 'AuthController@logout');
+    $router->register('/logout', 'Lwt\\Modules\\User\\Http\\UserController@logout');
 
     // ==================== WORDPRESS INTEGRATION (PUBLIC) ====================
 

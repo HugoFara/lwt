@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06 (FeedsController migration complete - FeedController now handles all routes)
+**Last Updated:** 2026-01-06 (LocalDictionaryController migrated to Dictionary module)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -86,10 +86,13 @@ Connection::preparedFetchAll('SELECT * FROM words WHERE WoLgID = ?', 'i', $langI
 src/backend/
 ├── Api/V1/                    # REST API
 │   └── Handlers/              # 10 API handlers
-├── Controllers/               # 17 controllers (includes AbstractCrudController, TermTagsController, TextTagsController)
+├── Controllers/               # 8 controllers (down from 17 - most migrated to modules)
 │   ├── BaseController.php     # Abstract base
-│   ├── TextController.php
-│   ├── WordController.php
+│   ├── AbstractCrudController.php
+│   ├── ApiController.php
+│   ├── LocalDictionaryController.php
+│   ├── TranslationController.php
+│   ├── WordPressController.php
 │   └── ...
 ├── Core/                      # 31 files in 8 subdirectories
 │   ├── Bootstrap/             # App initialization
@@ -1020,7 +1023,7 @@ These are intentionally kept inline as they are simpler than the overhead of a s
 ## Phase 4: Future-Proof Architecture (Modular Monolith)
 
 **Priority:** P2 (Medium)
-**Status:** ✅ COMPLETE (9/9 modules migrated)
+**Status:** ✅ COMPLETE (10/10 modules migrated)
 **Effort:** X-Large (400+ hours)
 **Target:** Post-Phase 3 completion
 
@@ -1037,6 +1040,7 @@ These are intentionally kept inline as they are simpler than the overhead of a s
 | Admin | `AdminServiceProvider` | ✅ COMPLETE (2025-12-25) |
 | User | `UserServiceProvider` | ✅ COMPLETE (2026-01-05) |
 | Home | `HomeServiceProvider` | ✅ COMPLETE (2026-01-05) |
+| Dictionary | `DictionaryServiceProvider` | ✅ COMPLETE (2026-01-06) |
 
 ### Rationale
 
@@ -1458,7 +1462,7 @@ All TagService functionality has been migrated to `TagsFacade`:
 
 ### Success Criteria
 
-- [x] 9 of 9 modules migrated to new structure ✅ COMPLETE (2026-01-05)
+- [x] 10 of 10 modules migrated to new structure ✅ COMPLETE (2026-01-06)
 - [x] Zero circular dependencies between modules
 - [x] WordStatusService fully migrated and removed
 - [x] TagService fully migrated to TagsFacade and removed (2025-12-25)
@@ -1532,23 +1536,29 @@ The User module now has the standard modular structure:
 
 | Category | Count | Location |
 |----------|-------|----------|
-| Controllers | 11 | `src/backend/Controllers/` |
+| Controllers | 5 | `src/backend/Controllers/` |
 | Services | 19 | `src/backend/Services/` |
 | API Handlers | 10 | `src/backend/Api/V1/Handlers/` |
 
 **Controllers Not Yet Migrated to Modules:**
 
-1. `LocalDictionaryController` - No module equivalent
-2. `TextPrintController` - Text module lacks print functionality
+1. ~~`LocalDictionaryController`~~ - **DELETED** (2026-01-06) - Migrated to `Modules/Dictionary/Http/DictionaryController`
+2. ~~`TextPrintController`~~ - **MIGRATED** to `Modules/Text/Http/TextPrintController` (2026-01-06)
 3. `TranslationController` - No module equivalent
-4. `AuthController` - User module incomplete
+4. ~~`AuthController`~~ - **MIGRATED** to `Modules/User/Http/UserController` (2026-01-06)
 5. `WordPressController` - No module equivalent
-6. `TestController` (legacy) - Review module has replacement
+6. ~~`TestController`~~ - **MIGRATED** to `Modules/Review/Http/TestController` (2026-01-06)
 7. `ApiController` - API entry point (may need to stay)
+8. ~~`FeedsController`~~ - **DELETED** (2026-01-06) - Migrated to `Modules/Feed/Http/FeedController`
+9. ~~`WordController`~~ - **DELETED** (2026-01-06) - Migrated to `Modules/Vocabulary/Http/VocabularyController`
 
 **Recently Migrated:**
-- `FeedsController` → `Modules/Feed/Http/FeedController` (2026-01-06) - All methods natively implemented
-- `WordController` → `Modules/Vocabulary/Http/VocabularyController` (2026-01-06) - All methods natively implemented
+- `LocalDictionaryController` → `Modules/Dictionary/Http/DictionaryController` (2026-01-06) - **DELETED** - Legacy file and views removed
+- `TextPrintController` → `Modules/Text/Http/TextPrintController` (2026-01-06) - All print routes now use Text module
+- `TestController` → `Modules/Review/Http/TestController` (2026-01-06) - All test routes now use Review module
+- `AuthController` → `Modules/User/Http/UserController` (2026-01-06) - All auth routes now use UserController
+- `FeedsController` → `Modules/Feed/Http/FeedController` (2026-01-06) - **DELETED** - Legacy file removed
+- `WordController` → `Modules/Vocabulary/Http/VocabularyController` (2026-01-06) - **DELETED** - Legacy file removed
 - `HomeController` → `Modules/Home/Http/HomeController` (2026-01-05)
 
 ### 5.2 Duplicate API Handler Pattern
@@ -1660,7 +1670,14 @@ Mixed naming conventions detected:
   - [x] SettingsHandler → AdminApiHandler
   - [x] StatisticsHandler → AdminApiHandler
   - [x] TermHandler → VocabularyApiHandler (2026-01-05)
-- [ ] Migrate remaining controllers to modules OR create missing modules (WordController, FeedsController DONE 2026-01-06)
+- [x] Migrate remaining controllers to modules OR create missing modules - **COMPLETE** (2026-01-06)
+  - [x] WordController → VocabularyController - DELETED
+  - [x] FeedsController → FeedController - DELETED
+  - [x] AuthController → UserController
+  - [x] TestController → TestController (Review module)
+  - [x] TextPrintController → TextPrintController (Text module)
+  - [x] LocalDictionaryController → DictionaryController (Dictionary module) - DELETED
+  - [ ] Remaining: TranslationController, WordPressController, ApiController
 - [ ] Add tests for module facades (at least 80% coverage)
 - [ ] Remove deprecated routes and methods
 - [x] Clean up backup files (2026-01-05)
@@ -1678,7 +1695,7 @@ Mixed naming conventions detected:
 
 - [ ] Achieve Psalm level 1 compliance
 - [ ] 100% test coverage for module domain layer
-- [x] ~~Refactor large files (WordController 2,034 lines)~~ - MIGRATED to VocabularyController (2026-01-06)
+- [x] ~~Refactor large files (WordController 2,034 lines)~~ - MIGRATED to VocabularyController, legacy file DELETED (2026-01-06)
 
 ---
 

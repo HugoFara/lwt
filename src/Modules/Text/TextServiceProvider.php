@@ -41,6 +41,7 @@ use Lwt\Modules\Text\Application\TextFacade;
 
 // Http
 use Lwt\Modules\Text\Http\TextController;
+use Lwt\Modules\Text\Http\TextPrintController;
 use Lwt\Modules\Text\Http\TextApiHandler;
 
 /**
@@ -81,6 +82,11 @@ class TextServiceProvider implements ServiceProviderInterface
         // Register Controller
         $container->singleton(TextController::class, function (Container $_c) {
             return new TextController();
+        });
+
+        // Register Print Controller
+        $container->singleton(TextPrintController::class, function (Container $_c) {
+            return new TextPrintController();
         });
 
         // Register API Handler
