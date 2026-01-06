@@ -377,19 +377,19 @@ class FeedFacade
     /**
      * Extract text content from RSS feed article links.
      *
-     * @param array       $feedData       Array of feed items
+     * @param array<int|string, array{link: string, title: string, audio?: string, text?: string}> $feedData Array of feed items
      * @param string      $articleSection XPath selector(s) for article content
      * @param string      $filterTags     XPath selector(s) for elements to remove
      * @param string|null $charset        Override charset
      *
-     * @return array|string|null Extracted text data
+     * @return array<int|string, array<string, mixed>> Extracted text data
      */
     public function extractTextFromArticle(
         array $feedData,
         string $articleSection,
         string $filterTags,
         ?string $charset = null
-    ): array|string|null {
+    ): array {
         return $this->articleExtractor->extract(
             $feedData,
             $articleSection,
@@ -629,6 +629,7 @@ class FeedFacade
         if ($connection === null) {
             return '';
         }
+        /** @var string $escaped */
         $escaped = mysqli_real_escape_string($connection, $searchValue);
         $pattern = $regexMode . "LIKE '" . $escaped . "'";
 
@@ -659,6 +660,7 @@ class FeedFacade
         if ($connection === null) {
             return false;
         }
+        /** @var string $escaped */
         $escaped = mysqli_real_escape_string($connection, $pattern);
         $result = @mysqli_query(
             $connection,
@@ -757,15 +759,19 @@ class FeedFacade
     /**
      * Convert article result to legacy array format.
      *
-     * @param array $item Article result with status
+     * @param array{article: \Lwt\Modules\Feed\Domain\Article, text_id: int|null, archived_id: int|null, status?: string} $item Article result with status
      *
-     * @return array Legacy array format
+     * @return array{FlID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, TxID: int|null, AtID: int|null} Legacy array format
      */
     private function articleToLegacyArray(array $item): array
     {
         $article = $item['article'];
+        $id = $article->id();
+        if ($id === null) {
+            throw new \LogicException('Cannot convert unpersisted article to legacy format');
+        }
         return [
-            'FlID' => $article->id(),
+            'FlID' => $id,
             'FlTitle' => $article->title(),
             'FlLink' => $article->link(),
             'FlDescription' => $article->description(),
@@ -786,7 +792,16 @@ class FeedFacade
      * Creates texts from parsed feed data, applies tags, and archives
      * old texts if max_texts limit is exceeded.
      *
-     * @param array $texts Array of text data from extractTextFromArticle()
+     * @param array<int, array{
+     *     Nf_ID: int|string,
+     *     TagList: array<string>,
+     *     Nf_Max_Texts: int|null,
+     *     TxLgID: int,
+     *     TxTitle: string,
+     *     TxText: string,
+     *     TxAudioURI: string,
+     *     TxSourceURI: string
+     * }> $texts Array of text data from extractTextFromArticle()
      *
      * @return string Status message
      */
@@ -794,6 +809,7 @@ class FeedFacade
     {
         $texts = array_reverse($texts);
         $message1 = $message2 = $message3 = $message4 = 0;
+        /** @var list<int|string> $NfID */
         $NfID = [];
 
         foreach ($texts as $text) {
@@ -804,6 +820,7 @@ class FeedFacade
         $NfTag = '';
         /** @var list<int|string> $textItem */
         $textItem = [];
+        /** @var int|null $nfMaxTexts */
         $nfMaxTexts = null;
 
         foreach ($NfID as $feedID) {
@@ -813,8 +830,10 @@ class FeedFacade
                         $NfTag = '"' . implode('","', $text['TagList']) . '"';
 
                         // Ensure tags exist
+                        /** @var array<string> $sessionTextTags */
+                        $sessionTextTags = is_array($_SESSION['TEXTTAGS'] ?? null) ? $_SESSION['TEXTTAGS'] : [];
                         foreach ($text['TagList'] as $tag) {
-                            if (!in_array($tag, $_SESSION['TEXTTAGS'] ?? [])) {
+                            if (!in_array($tag, $sessionTextTags, true)) {
                                 $bindings = [$tag];
                                 $sql = 'INSERT INTO tags2 (T2Text'
                                     . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('tags2')
@@ -839,19 +858,23 @@ class FeedFacade
 
                     // Parse the text
                     $bindings = [$id];
-                    $textContent = \Lwt\Shared\Infrastructure\Database\Connection::preparedFetchValue(
+                    /** @var string|null $textContentRaw */
+                    $textContentRaw = \Lwt\Shared\Infrastructure\Database\Connection::preparedFetchValue(
                         'SELECT TxText FROM texts WHERE TxID = ?'
                         . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('texts', $bindings),
                         $bindings,
                         'TxText'
                     );
-                    $textLgId = \Lwt\Shared\Infrastructure\Database\Connection::preparedFetchValue(
+                    $textContent = is_string($textContentRaw) ? $textContentRaw : '';
+                    /** @var int|string|null $textLgIdRaw */
+                    $textLgIdRaw = \Lwt\Shared\Infrastructure\Database\Connection::preparedFetchValue(
                         'SELECT TxLgID FROM texts WHERE TxID = ?'
                         . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('texts', $bindings),
                         $bindings,
                         'TxLgID'
                     );
-                    \Lwt\Shared\Infrastructure\Database\TextParsing::parseAndSave($textContent, (int) $textLgId, (int) $id);
+                    $textLgId = is_numeric($textLgIdRaw) ? (int)$textLgIdRaw : 0;
+                    \Lwt\Shared\Infrastructure\Database\TextParsing::parseAndSave($textContent, $textLgId, (int) $id);
 
                     // Apply tags
                     $bindings = [];

@@ -39,12 +39,12 @@ class ArticleExtractor
      * - Charset detection and conversion
      * - XPath-based content extraction
      *
-     * @param array       $feedData       Array of feed items with link, title, etc.
+     * @param array<int|string, array{link: string, title: string, audio?: string, text?: string}> $feedData Array of feed items with link, title, etc.
      * @param string      $articleSection XPath selector(s) for article content
      * @param string      $filterTags     XPath selector(s) for elements to remove
      * @param string|null $charset        Override charset (null for auto-detect)
      *
-     * @return array Extracted text data with 'error' key for failed extractions
+     * @return array<int|string, array<string, mixed>> Extracted text data with 'error' key for failed extractions
      */
     public function extract(
         array $feedData,
@@ -67,7 +67,8 @@ class ArticleExtractor
                 if (!isset($data['error']['message'])) {
                     $data['error']['message'] = '';
                 }
-                $data['error']['message'] .= $this->formatErrorMessage($item);
+                $errorMsg = $this->formatErrorMessage($item);
+                $data['error']['message'] .= $errorMsg;
                 $data['error']['link'][] = $item['link'];
             } else {
                 $data[$key] = $result;
@@ -80,12 +81,12 @@ class ArticleExtractor
     /**
      * Extract content from a single article.
      *
-     * @param array       $item           Feed item data
+     * @param array{link: string, title: string, audio?: string, text?: string} $item Feed item data
      * @param string      $articleSection XPath selector(s)
      * @param string      $filterTags     Filter selectors
      * @param string|null $charset        Override charset
      *
-     * @return array|null Extracted data or null on failure
+     * @return array{TxTitle: string, TxAudioURI: string, TxText: string, TxSourceURI: string}|null Extracted data or null on failure
      */
     private function extractSingle(
         array $item,
@@ -466,10 +467,10 @@ class ArticleExtractor
     /**
      * Extract content using XPath selectors.
      *
-     * @param \DOMDocument $dom            DOM document
-     * @param string       $articleSection Article selectors
-     * @param array        $filterTags     Filter selectors
-     * @param bool         $isInlineText   Whether source is inline text
+     * @param \DOMDocument  $dom            DOM document
+     * @param string        $articleSection Article selectors
+     * @param array<string> $filterTags     Filter selectors
+     * @param bool          $isInlineText   Whether source is inline text
      *
      * @return string Extracted text
      */
@@ -536,10 +537,10 @@ class ArticleExtractor
     /**
      * Extract full HTML for 'new' article mode.
      *
-     * @param \DOMDocument $dom        DOM document
-     * @param array        $filterTags Tags to filter out
+     * @param \DOMDocument  $dom        DOM document
+     * @param array<string> $filterTags Tags to filter out
      *
-     * @return array Result with TxText containing cleaned HTML
+     * @return array{TxText: string} Result with TxText containing cleaned HTML
      */
     private function extractNewArticleHtml(\DOMDocument $dom, array $filterTags): array
     {
@@ -606,7 +607,7 @@ class ArticleExtractor
     /**
      * Format error message for failed extraction.
      *
-     * @param array $item Feed item
+     * @param array{link: string, title: string, audio?: string, text?: string} $item Feed item
      *
      * @return string Error message HTML
      */
