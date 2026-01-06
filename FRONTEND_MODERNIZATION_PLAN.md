@@ -1,9 +1,9 @@
 # Frontend Modernization Plan
 
 **Project:** Learning with Texts (LWT)
-**Document Version:** 8.0
-**Last Updated:** December 23, 2025
-**Status:** Phase 4 Complete - Full Alpine.js Component Architecture
+**Document Version:** 8.1
+**Last Updated:** January 6, 2026
+**Status:** Phase 5 In Progress - Performance & Accessibility Optimization
 
 ---
 
@@ -37,7 +37,10 @@ This document outlines the comprehensive plan to modernize the Learning with Tex
 - ✅ Adopt Alpine.js for reactive components - **COMPLETE**
 - ✅ Adopt Bulma CSS framework - **COMPLETE**
 - ✅ Component architecture refinement - **COMPLETE** (Phase 4)
-- 🎯 Performance optimization - **PLANNED** (Phase 5)
+- 🔄 Performance optimization - **IN PROGRESS** (Phase 5)
+  - ✅ Accessibility: 79 → 96 (WCAG 2.1 AA compliant)
+  - ✅ Async CSS loading (render-blocking eliminated)
+  - ✅ JS code splitting (main bundle: 1.1MB → 357KB)
 
 **Risk Level:** Low (phased approach proven successful)
 **Expected ROI:** High (improved DX, performance, maintainability)
@@ -193,6 +196,7 @@ src/frontend/js/
 
 ```text
 src/frontend/css/
+├── critical.css                  - Inlined critical CSS for fast first paint
 ├── base/
 │   ├── styles.css                - Main stylesheet (Bulma-based)
 │   ├── css_charts.css            - Chart visualizations
@@ -589,7 +593,7 @@ composer build                   # Alias for npm run build:all
 
 ---
 
-### Phase 5: Polish & Optimization 🎯 **PLANNED**
+### Phase 5: Polish & Optimization 🔄 **IN PROGRESS**
 
 **Goals:**
 
@@ -598,6 +602,36 @@ composer build                   # Alias for npm run build:all
 - Accessibility improvements (WCAG 2.1 AA)
 - Code splitting optimization
 - Bundle size optimization
+
+**Completed:**
+
+- ✅ Accessibility improvements (texts page: 79 → 96)
+  - Fixed color contrast for `.is-static` buttons and `.status` links
+  - Added `aria-label` to collapse buttons, checkboxes, and select elements
+  - Added `aria-expanded` state to collapsible sections
+- ✅ Async CSS loading (eliminates render-blocking)
+  - CSS loads via `rel="preload"` + `onload` pattern
+  - Critical CSS (~3KB) inlined in `<head>` for fast first paint
+- ✅ JavaScript code splitting
+  - Vendor chunks: Alpine (43KB), Chart.js (201KB), Lucide (335KB), Tagify (75KB)
+  - Main bundle reduced from 1.1MB to 357KB
+  - Terser minification with console removal
+- ✅ Build cleanup (removed 200+ old build artifacts)
+
+**Results:**
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| FCP | 10.0s | 6.5s | -35% |
+| TBT | 50ms | 0ms | -100% |
+| Render-blocking | 3,300ms | 0ms | Eliminated |
+| Accessibility (texts) | 79 | 96 | +17 |
+
+**Remaining:**
+
+- CSS modernization (consider Bulma tree-shaking)
+- Further Lighthouse performance improvements
+- Mobile performance optimization
 
 ---
 
@@ -639,9 +673,11 @@ composer build                   # Alias for npm run build:all
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
-| Lighthouse Performance | 90+ | TBD | Phase 5 |
-| Accessibility Score | 95+ | TBD | Phase 5 |
-| Alpine Migration | 100% | ✅ 100% | Complete |
+| Lighthouse Performance | 90+ | 58 | 🔄 In Progress (limited by dev server) |
+| Accessibility Score | 95+ | ✅ 96 | ✅ Complete |
+| Alpine Migration | 100% | ✅ 100% | ✅ Complete |
+| Render-blocking Resources | 0 | ✅ 0 | ✅ Eliminated |
+| Code Splitting | Yes | ✅ Yes | ✅ Complete |
 
 ---
 
@@ -662,7 +698,7 @@ composer build                   # Alias for npm run build:all
 
 | Phase | Milestone | Target |
 |-------|-----------|--------|
-| 5 | Performance optimization | TBD |
+| 5 | Performance optimization | 🔄 In Progress (Jan 2026) |
 
 ---
 
