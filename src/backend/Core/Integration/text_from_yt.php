@@ -13,40 +13,45 @@
  * @package  Lwt
  */
 
-namespace Lwt\Text_From_Youtube;
+namespace Lwt\Core\Integration;
 
-use Lwt\Core\EnvLoader;
-
-/**
- * Get the YouTube API key from environment.
- *
- * @return string|null The API key, or null if not configured
- */
-function getYouTubeApiKey(): ?string
-{
-    return EnvLoader::get('YT_API_KEY');
-}
+use Lwt\Core\Bootstrap\EnvLoader;
 
 /**
- * Check if the YouTube API is configured.
- *
- * @return bool True if the API key is set
+ * YouTube integration helper class.
  */
-function isYouTubeApiConfigured(): bool
+class YouTubeImport
 {
-    $key = getYouTubeApiKey();
-    return $key !== null && $key !== '';
-}
+    /**
+     * Get the YouTube API key from environment.
+     *
+     * @return string|null The API key, or null if not configured
+     */
+    public static function getApiKey(): ?string
+    {
+        return EnvLoader::get('YT_API_KEY');
+    }
 
-/**
- * Output the YouTube import form fragment.
- *
- * @return void
- */
-function doFormFragment(): void
-{
-    $apiKey = getYouTubeApiKey() ?? '';
-    ?>
+    /**
+     * Check if the YouTube API is configured.
+     *
+     * @return bool True if the API key is set
+     */
+    public static function isConfigured(): bool
+    {
+        $key = self::getApiKey();
+        return $key !== null && $key !== '';
+    }
+
+    /**
+     * Output the YouTube import form fragment.
+     *
+     * @return void
+     */
+    public static function renderFormFragment(): void
+    {
+        $apiKey = self::getApiKey() ?? '';
+        ?>
 <tr>
   <td class="td1 right">YouTube Video Id:</td>
   <td class="td1">
@@ -56,5 +61,47 @@ function doFormFragment(): void
     <p id="ytDataStatus"></p>
   </td>
 </tr>
-    <?php
+        <?php
+    }
+}
+
+// Backward compatibility functions
+namespace Lwt\Text_From_Youtube;
+
+use Lwt\Core\Integration\YouTubeImport;
+
+/**
+ * Get the YouTube API key from environment.
+ *
+ * @return string|null The API key, or null if not configured
+ *
+ * @deprecated Use YouTubeImport::getApiKey() instead
+ */
+function getYouTubeApiKey(): ?string
+{
+    return YouTubeImport::getApiKey();
+}
+
+/**
+ * Check if the YouTube API is configured.
+ *
+ * @return bool True if the API key is set
+ *
+ * @deprecated Use YouTubeImport::isConfigured() instead
+ */
+function isYouTubeApiConfigured(): bool
+{
+    return YouTubeImport::isConfigured();
+}
+
+/**
+ * Output the YouTube import form fragment.
+ *
+ * @return void
+ *
+ * @deprecated Use YouTubeImport::renderFormFragment() instead
+ */
+function doFormFragment(): void
+{
+    YouTubeImport::renderFormFragment();
 }

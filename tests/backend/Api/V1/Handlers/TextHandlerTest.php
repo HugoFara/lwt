@@ -4,7 +4,7 @@ namespace Lwt\Tests\Api\V1\Handlers;
 require_once __DIR__ . '/../../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Modules\Text\Http\TextApiHandler;
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;

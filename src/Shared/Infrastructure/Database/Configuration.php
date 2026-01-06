@@ -15,7 +15,7 @@
 
 namespace Lwt\Shared\Infrastructure\Database;
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Utils\ErrorHandler;
 
 /**

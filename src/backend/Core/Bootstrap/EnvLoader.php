@@ -16,7 +16,7 @@
  * @since   3.0.0
  */
 
-namespace Lwt\Core;
+namespace Lwt\Core\Bootstrap;
 
 /**
  * Simple .env file parser and loader.
@@ -26,7 +26,7 @@ namespace Lwt\Core;
  *
  * Usage:
  * ```php
- * use Lwt\Core\EnvLoader;
+ * use Lwt\Core\Bootstrap\EnvLoader;
  *
  * // Load .env file
  * EnvLoader::load('/path/to/.env');

@@ -4,7 +4,7 @@ namespace Lwt\Tests\Controllers;
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Modules\Text\Http\TextController;
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;

@@ -8,7 +8,7 @@ use Lwt\Modules\Text\Domain\Text;
 use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use Lwt\Modules\Text\Domain\ValueObject\TextId;
 use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;

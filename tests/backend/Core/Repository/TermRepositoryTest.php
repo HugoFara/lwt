@@ -9,7 +9,7 @@ use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use Lwt\Modules\Vocabulary\Domain\ValueObject\TermId;
 use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;

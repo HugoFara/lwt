@@ -16,7 +16,6 @@
 namespace Lwt\Core\Bootstrap;
 
 use Lwt\Core\Globals;
-use Lwt\Core\EnvLoader;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 
 /**

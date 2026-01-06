@@ -5,7 +5,7 @@ namespace Lwt\Tests\Core\Tag;
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Http/UrlUtilities.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;

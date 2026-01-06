@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\Entity\User;
 use Lwt\Shared\Domain\ValueObjects\UserId;
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 use Lwt\Shared\Infrastructure\Database\Configuration;

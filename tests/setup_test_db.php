@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace Lwt\Tests;
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 
 // Load environment configuration
 require_once __DIR__ . '/../src/backend/Core/Bootstrap/EnvLoader.php';
