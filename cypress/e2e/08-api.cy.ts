@@ -152,7 +152,7 @@ describe('REST API', () => {
     it('should get text statistics', () => {
       cy.request({
         url: `${apiBase}/texts/statistics`,
-        qs: { texts_id: '1' },
+        qs: { text_ids: '1' },
       }).then((response) => {
         expect(response.status).to.eq(200);
         expect(response.headers['content-type']).to.include('application/json');

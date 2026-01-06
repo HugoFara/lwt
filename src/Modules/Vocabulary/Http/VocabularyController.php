@@ -38,6 +38,7 @@ use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
+require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
 
 /**
