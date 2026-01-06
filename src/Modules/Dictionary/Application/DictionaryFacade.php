@@ -210,6 +210,8 @@ class DictionaryFacade
      * @return ImporterInterface
      *
      * @throws RuntimeException If format is unsupported
+     *
+     * @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace
      */
     public function getImporter(string $format, string $originalName = ''): ImporterInterface
     {

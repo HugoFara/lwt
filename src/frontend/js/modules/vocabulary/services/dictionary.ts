@@ -103,23 +103,23 @@ export function createTheDictLink(u: string, w: string, t: string, b: string, po
 /**
  * Create a sentence lookup link.
  *
- * @param torder Text order (unused, kept for compatibility)
- * @param txid   Text ID (unused, kept for compatibility)
+ * Creates an HTML link element for translator lookups. Unlike createTheDictLink,
+ * this does not modify the URL with term substitution.
+ *
  * @param url    Translator URL
- * @param txt    Word text
+ * @param txt    Link text
  * @param popup  Whether to open in popup window
  * @returns HTML-formatted link.
  *
- * @deprecated Use direct translator URLs instead. The trans.php gateway is removed.
  * @since 3.1.0 Added popup parameter, removed asterisk prefix and lwt_popup URL detection
+ * @since 3.2.0 Removed unused torder and txid parameters
  */
-export function createSentLookupLink(torder: number, txid: number, url: string, txt: string, popup = false): string {
+export function createSentLookupLink(url: string, txt: string, popup = false): string {
   url = url.trim();
   txt = txt.trim();
   if (url === '' || txt === '') {
     return '';
   }
-  // Use the translator URL directly instead of going through trans.php
   if (popup) {
     return ' <span class="click" data-action="dict-popup" data-url="' +
       url.replace(/"/g, '&quot;') + '">' + txt + '</span> ';
@@ -129,14 +129,20 @@ export function createSentLookupLink(torder: number, txid: number, url: string, 
 }
 
 /**
- * Get the language name from the Google Translate URL.
+ * Get the source language code from a translator URL.
  *
- * @param wblink3 Google Translate Dictionary URL
- * @returns Language name
+ * Parses the URL to extract the source language code (e.g., 'sl' parameter
+ * for Google Translate, 'source' for LibreTranslate).
  *
- * @since 2.7.0 Also works with a LibreTranslate URL
- * @deprecated Use the LgSourceLang database column instead of parsing URLs.
- *             This function will be removed in a future version.
+ * Note: Prefer using the stored sourceLang from LanguageConfig when available.
+ * This function serves as a fallback for backwards compatibility when the
+ * database value is not set.
+ *
+ * @param wblink3 Translator URL (Google Translate or LibreTranslate)
+ * @returns Language code (e.g., 'en', 'fr') or empty string if not found
+ *
+ * @since 2.7.0 Also works with LibreTranslate URLs
+ * @since 3.2.0 Clarified as fallback; prefer LanguageConfig.sourceLang
  */
 export function getLangFromDict(wblink3: string): string {
   if (wblink3.trim() === '') {

@@ -1015,7 +1015,7 @@ class ApiV1
             if ($languageId <= 0) {
                 Response::error('language_id is required', 400);
             }
-            if (empty($term)) {
+            if ($term === '') {
                 Response::error('term is required', 400);
             }
 
@@ -1140,7 +1140,7 @@ class ApiV1
     private static function parseJsonBody(): array
     {
         $input = file_get_contents('php://input');
-        if (empty($input)) {
+        if ($input === false || $input === '') {
             return [];
         }
         $data = json_decode($input, true);

@@ -72,7 +72,8 @@ class VocabularyServiceProvider implements ServiceProviderInterface
         });
 
         // Register MySqlTermRepository as concrete implementation
-        $container->singleton(MySqlTermRepository::class, function (Container $c) {
+        $container->singleton(MySqlTermRepository::class, function (Container $c): MySqlTermRepository {
+            /** @var MySqlTermRepository */
             return $c->get(TermRepositoryInterface::class);
         });
 

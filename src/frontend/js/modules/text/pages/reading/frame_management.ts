@@ -1,12 +1,14 @@
 /**
  * Frame Management - Right frames show/hide/cleanup operations
  *
- * @deprecated This module is deprecated as of v3.0.0.
- * The text reading interface at /text/read now uses Bulma + Alpine.js with
- * API-based word operations via the word_store and word_modal components
- * instead of iframes.
+ * Note: As of v3.0.0, the main text reading interface at /text/read uses
+ * Bulma + Alpine.js with API-based word operations via the word_store and
+ * word_modal components instead of iframes.
  *
- * This module is kept only for the test interface which still uses iframes.
+ * This module is retained for:
+ * - The test/review interface which still uses iframes
+ * - Dictionary frame loading and management
+ * - Legacy interfaces that haven't been migrated
  *
  * @license unlicense
  * @author  andreask7 <andreasks7@users.noreply.github.com>

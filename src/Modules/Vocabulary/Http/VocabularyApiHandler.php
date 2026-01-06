@@ -1013,7 +1013,7 @@ class VocabularyApiHandler
             ->where('WoWordCount', '>', 1)
             ->firstPrepared();
 
-        if ($existingWord) {
+        if ($existingWord !== null) {
             // Found existing multi-word term
             return [
                 'id' => (int) $existingWord['WoID'],
@@ -1349,7 +1349,7 @@ class VocabularyApiHandler
                 ->where('WoID', '=', $termId)
                 ->firstPrepared();
 
-            if ($record) {
+            if ($record !== null) {
                 $result[] = [
                     'id' => (int) $record['WoID'],
                     'text' => (string) $record['WoText'],
@@ -1449,7 +1449,7 @@ class VocabularyApiHandler
 
         // Save tags if provided
         $tags = $data['tags'] ?? [];
-        if (!empty($tags) && is_array($tags)) {
+        if (is_array($tags) && count($tags) > 0) {
             TagsFacade::saveWordTagsFromArray((int)$wordId, $tags);
         }
 
@@ -1721,7 +1721,7 @@ class VocabularyApiHandler
 
         // Extract TTS class from Google Translate URI
         $gtUri = $record['LgGoogleTranslateURI'] ?? '';
-        if (!empty($gtUri) && strpos($gtUri, '&sl=') !== false) {
+        if (is_string($gtUri) && $gtUri !== '' && strpos($gtUri, '&sl=') !== false) {
             $word['ttsClass'] = 'tts_' . preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $gtUri);
         }
 
@@ -1800,14 +1800,14 @@ class VocabularyApiHandler
                 break;
 
             case 'addtag':
-                if (empty($data)) {
+                if ($data === null || $data === '') {
                     return ['success' => false, 'count' => 0, 'message' => 'Tag name required'];
                 }
                 $message = TagsFacade::addTagToWords($data, $idList);
                 break;
 
             case 'deltag':
-                if (empty($data)) {
+                if ($data === null || $data === '') {
                     return ['success' => false, 'count' => 0, 'message' => 'Tag name required'];
                 }
                 $message = TagsFacade::removeTagFromWords($data, $idList);

@@ -49,7 +49,8 @@ class GetAvailableThemes
     public function execute(): array
     {
         $themes = [];
-        $themeDirs = glob('assets/themes/*', GLOB_ONLYDIR) ?: [];
+        $globResult = glob('assets/themes/*', GLOB_ONLYDIR);
+        $themeDirs = $globResult === false ? [] : $globResult;
 
         // Add Default first (uses base CSS)
         $themes[] = array_merge(

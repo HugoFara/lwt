@@ -154,6 +154,7 @@ class DictionaryController extends BaseController
         try {
             $importer = $this->dictionaryFacade->getImporter($format, $originalName);
 
+            /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
             if (!$importer->canImport($filePath)) {
                 $this->redirect("/dictionaries/import?lang=$langId&dict_id=$dictId&error=invalid_file");
             }
@@ -162,6 +163,7 @@ class DictionaryController extends BaseController
             $options = $this->getImportOptions($format);
 
             // Perform import
+            /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
             $entries = $importer->parse($filePath, $options);
             $count = $this->dictionaryFacade->addEntriesBatch($dictId, $entries);
 

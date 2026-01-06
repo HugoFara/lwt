@@ -708,7 +708,7 @@ class VocabularyController
         } else {
             // Get existing word data
             $wordData = $wordService->findById($wid);
-            if (!$wordData) {
+            if ($wordData === null) {
                 ErrorHandler::die("Cannot access Term and Language in edit_word.php");
             }
             $term = (string) $wordData['WoText'];
@@ -749,7 +749,7 @@ class VocabularyController
         } else {
             // Edit existing word form
             $wordData = $wordService->findById($wid);
-            if (!$wordData) {
+            if ($wordData === null) {
                 ErrorHandler::die("Cannot access word data");
             }
 
@@ -944,7 +944,7 @@ class VocabularyController
             ->select(['WoText', 'WoLgID', 'WoTranslation', 'WoSentence', 'WoNotes', 'WoRomanization', 'WoStatus'])
             ->where('WoID', '=', $wid)
             ->firstPrepared();
-        if ($record) {
+        if ($record !== null) {
             $term = (string) $record['WoText'];
             $lang = (int) $record['WoLgID'];
             $transl = ExportService::replaceTabNewline($record['WoTranslation']);
@@ -1352,6 +1352,8 @@ class VocabularyController
      *
      * @param array<string, string> $params Route parameters
      *
+     * @psalm-suppress UnresolvableInclude Path computed from viewPath property
+     *
      * @return void
      */
     public function listEditAlpine(array $params): void
@@ -1421,6 +1423,7 @@ class VocabularyController
      * @return void
      *
      * @psalm-suppress UnusedParam $tid and $cleanUp are used in included view file
+     * @psalm-suppress UnresolvableInclude Path computed from viewPath property
      */
     private function handleBulkSave(array $terms, int $tid, bool $cleanUp): void
     {
@@ -1452,6 +1455,8 @@ class VocabularyController
      * @param string|null $sl  Source language code
      * @param string|null $tl  Target language code
      * @param int         $pos Offset position
+     *
+     * @psalm-suppress UnresolvableInclude Path computed from viewPath property
      *
      * @return void
      */
@@ -1486,6 +1491,8 @@ class VocabularyController
      * Mark all words with status (well-known or ignore).
      *
      * @param array<string, string> $params Route parameters
+     *
+     * @psalm-suppress UnresolvableInclude Path computed from viewPath property
      *
      * @return void
      */
@@ -1537,6 +1544,8 @@ class VocabularyController
     /**
      * Display the word upload form.
      *
+     * @psalm-suppress UnresolvableInclude Path computed from viewPath property
+     *
      * @return void
      */
     private function displayUploadForm(): void
@@ -1548,6 +1557,8 @@ class VocabularyController
 
     /**
      * Handle the word import operation.
+     *
+     * @psalm-suppress UnresolvableInclude Path computed from viewPath property
      *
      * @return void
      */

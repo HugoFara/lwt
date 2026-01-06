@@ -125,7 +125,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                 </div>
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgDict1PopUp" id="LgDict1PopUp" value="1"
-                           <?php echo ($language->dict1popup ?? false) ? 'checked' : ''; ?> />
+                           <?php echo (($language->dict1popup ?? false) === true) ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some dictionaries cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
@@ -145,7 +145,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                 </div>
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgDict2PopUp" id="LgDict2PopUp" value="1"
-                           <?php echo ($language->dict2popup ?? false) ? 'checked' : ''; ?> />
+                           <?php echo (($language->dict2popup ?? false) === true) ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some dictionaries cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
@@ -192,7 +192,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgGoogleTranslatePopUp" id="LgGoogleTranslatePopUp" value="1"
-                           <?php echo ($language->translatorpopup ?? false) ? 'checked' : ''; ?> />
+                           <?php echo (($language->translatorpopup ?? false) === true) ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some translators cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>

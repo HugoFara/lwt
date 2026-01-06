@@ -199,7 +199,7 @@ class RssParser
 
         // Validate item
         $hasValidContent = $item['title'] !== '' &&
-            ($item['link'] !== '' || ($articleSection !== '' && !empty($item['text'])));
+            ($item['link'] !== '' || ($articleSection !== '' && isset($item['text']) && $item['text'] !== ''));
 
         return $hasValidContent ? $item : null;
     }

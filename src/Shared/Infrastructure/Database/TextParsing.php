@@ -216,7 +216,7 @@ class TextParsing
         $text = trim($text);
         echo '<div id="check_text" style="margin-right:50px;">
         <h2>Text</h2>
-        <p>' . str_replace("\n", "<br /><br />", \htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8')) . '</p>';
+        <p>' . str_replace("\n", "<br /><br />", \htmlspecialchars($text, ENT_QUOTES, 'UTF-8')) . '</p>';
     }
 
     /**

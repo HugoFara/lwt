@@ -18,6 +18,8 @@ export interface LanguageConfig {
   wordParsing: number | string;
   rtl: boolean;
   ttsVoiceApi: string;
+  /** BCP 47 source language code (e.g., 'en', 'fr'). Used for TTS and translation. */
+  sourceLang?: string;
 }
 
 const defaultConfig: LanguageConfig = {
@@ -125,6 +127,14 @@ export function getDelimiter(): string {
  */
 export function getTtsVoiceApi(): string {
   return currentConfig.ttsVoiceApi;
+}
+
+/**
+ * Get the source language code (BCP 47).
+ * Returns undefined if not set.
+ */
+export function getSourceLang(): string | undefined {
+  return currentConfig.sourceLang;
 }
 
 /**

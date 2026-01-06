@@ -254,17 +254,19 @@ class DictionaryApiHandler
         $format = $data['format'] ?? 'csv';
         $options = $data['options'] ?? [];
 
-        if (empty($filePath) || !file_exists($filePath)) {
+        if (!is_string($filePath) || $filePath === '' || !file_exists($filePath)) {
             return ['success' => false, 'error' => 'File not found'];
         }
 
         try {
             $importer = $this->facade->getImporter($format);
 
+            /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
             if (!$importer->canImport($filePath)) {
                 return ['success' => false, 'error' => 'Invalid file format'];
             }
 
+            /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
             $entries = $importer->parse($filePath, $options);
             $count = $this->facade->addEntriesBatch($dictId, $entries);
 
@@ -295,17 +297,19 @@ class DictionaryApiHandler
         $limit = (int)($data['limit'] ?? 10);
         $options = $data['options'] ?? [];
 
-        if (empty($filePath) || !file_exists($filePath)) {
+        if (!is_string($filePath) || $filePath === '' || !file_exists($filePath)) {
             return ['success' => false, 'error' => 'File not found'];
         }
 
         try {
             $importer = $this->facade->getImporter($format);
 
+            /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
             if (!$importer->canImport($filePath)) {
                 return ['success' => false, 'error' => 'Invalid file format'];
             }
 
+            /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
             $entries = $importer->preview($filePath, $limit, $options);
 
             $result = [
@@ -314,6 +318,7 @@ class DictionaryApiHandler
             ];
 
             // Add format-specific metadata
+            /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
             if ($format === 'csv' && $importer instanceof CsvImporter) {
                 $delimiter = $importer->detectDelimiter($filePath);
                 $headers = $importer->detectHeaders($filePath, $delimiter);

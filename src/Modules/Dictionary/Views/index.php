@@ -157,7 +157,7 @@ echo PageLayoutHelper::buildActionCard([
                 <tr>
                     <td>
                         <strong><?php echo htmlspecialchars($dict->name(), ENT_QUOTES); ?></strong>
-                        <?php if ($description): ?>
+                        <?php if ($description !== null && $description !== ''): ?>
                         <br><span class="is-size-7 has-text-grey"><?php echo htmlspecialchars($description, ENT_QUOTES); ?></span>
                         <?php endif; ?>
                     </td>

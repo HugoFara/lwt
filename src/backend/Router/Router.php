@@ -231,7 +231,7 @@ class Router
                     ? $methodRoutes[$matchedMethod]
                     : null;
 
-                if ($handler) {
+                if ($handler !== null) {
                     $middleware = $this->middleware[$pattern][$matchedMethod] ?? [];
                     return [
                         'type' => 'handler',
@@ -253,7 +253,7 @@ class Router
                     ? $methods[$matchedMethod]
                     : null;
 
-                if ($handler) {
+                if ($handler !== null) {
                     $middleware = $this->prefixMiddleware[$prefix][$matchedMethod] ?? [];
                     return [
                         'type' => 'handler',
@@ -600,7 +600,7 @@ class Router
     /**
      * Resolve a controller instance from the container or create directly.
      *
-     * @param string $controllerClass The fully qualified controller class name
+     * @param class-string $controllerClass The fully qualified controller class name
      *
      * @return object The controller instance
      */

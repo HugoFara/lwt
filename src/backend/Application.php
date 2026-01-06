@@ -225,13 +225,15 @@ class Application
     private function isDebugMode(): bool
     {
         // Check APP_DEBUG env variable
-        $appDebug = getenv('APP_DEBUG') ?: ($_ENV['APP_DEBUG'] ?? null);
+        $envDebug = getenv('APP_DEBUG');
+        $appDebug = ($envDebug !== false && $envDebug !== '') ? $envDebug : ($_ENV['APP_DEBUG'] ?? null);
         if ($appDebug !== null && $appDebug !== false) {
             return in_array(strtolower((string)$appDebug), ['true', '1', 'yes'], true);
         }
 
         // Check APP_ENV
-        $appEnv = getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? 'production');
+        $envAppEnv = getenv('APP_ENV');
+        $appEnv = ($envAppEnv !== false && $envAppEnv !== '') ? $envAppEnv : ($_ENV['APP_ENV'] ?? 'production');
         return in_array(strtolower($appEnv), ['development', 'local', 'dev'], true);
     }
 
@@ -259,6 +261,7 @@ class Application
      * Handles the incoming request through the router.
      *
      * @psalm-suppress UndefinedFunction Function loaded via require_once
+     * @psalm-suppress UnresolvableInclude Path computed from basePath
      *
      * @return void
      */
@@ -322,6 +325,7 @@ class Application
      * Uses the Admin module's wizard use cases which work without database.
      *
      * @psalm-suppress UnusedVariable Variables used by included wizard.php view
+     * @psalm-suppress UnresolvableInclude Path computed from basePath
      *
      * @return void
      */

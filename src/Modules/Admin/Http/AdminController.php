@@ -103,6 +103,7 @@ class AdminController extends BaseController
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
+     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
      */
     public function backup(array $params): void
     {
@@ -149,6 +150,7 @@ class AdminController extends BaseController
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
+     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
      */
     public function wizard(array $params): void
     {
@@ -201,6 +203,7 @@ class AdminController extends BaseController
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
+     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
      */
     public function statistics(array $params): void
     {
@@ -227,6 +230,7 @@ class AdminController extends BaseController
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
+     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
      */
     public function settings(array $params): void
     {
@@ -274,6 +278,7 @@ class AdminController extends BaseController
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
+     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
      */
     public function installDemo(array $params): void
     {
@@ -305,6 +310,7 @@ class AdminController extends BaseController
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
+     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
      */
     public function serverData(array $params): void
     {

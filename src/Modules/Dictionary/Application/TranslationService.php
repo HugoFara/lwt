@@ -149,7 +149,7 @@ class TranslationService
 
         $record = $result[0] ?? null;
 
-        if (!$record) {
+        if ($record === null) {
             return [
                 'url' => null,
                 'sentence' => null,
@@ -178,7 +178,7 @@ class TranslationService
         $parsedUrl = parse_url($trans, PHP_URL_PATH);
         if (
             substr($trans, 0, 7) === 'ggl.php'
-            || ($parsedUrl && str_ends_with($parsedUrl, 'ggl.php'))
+            || (is_string($parsedUrl) && str_ends_with($parsedUrl, 'ggl.php'))
         ) {
             $trans = str_replace('?', '?sent=1&', $trans);
         }

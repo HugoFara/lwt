@@ -20,7 +20,8 @@ import { resetReadingPosition } from '@modules/text/stores/reading_state';
 import {
   initLanguageConfig,
   getDictionaryLinks,
-  setTtsVoiceApi
+  setTtsVoiceApi,
+  getSourceLang
 } from '@modules/language/stores/language_config';
 import { initTextConfig, getTextId } from '@modules/text/stores/text_config';
 import { initSettingsConfig } from '@shared/utils/settings_config';
@@ -105,10 +106,12 @@ export function initTTS(): void {
     return;
   }
 
+  // Prefer sourceLang from config, fall back to parsing translator URL
   const dictLinks = getDictionaryLinks();
-  const langFromDict = typeof getLangFromDict === 'function'
+  const sourceLang = getSourceLang();
+  const langFromDict = sourceLang || (typeof getLangFromDict === 'function'
     ? getLangFromDict(dictLinks.translator || '')
-    : '';
+    : '');
 
   text_reader = {
     text: config.phoneticText || '',
@@ -137,10 +140,12 @@ function initReading(): void {
   if (!text_reader) {
     return;
   }
+  // Prefer sourceLang from config, fall back to parsing translator URL
   const dictLinks = getDictionaryLinks();
-  const langFromDict = typeof getLangFromDict === 'function'
+  const sourceLang = getSourceLang();
+  const langFromDict = sourceLang || (typeof getLangFromDict === 'function'
     ? getLangFromDict(dictLinks.translator || '')
-    : '';
+    : '');
   const lang = langFromDict || text_reader.lang;
   if (typeof readRawTextAloud === 'function') {
     readRawTextAloud(text_reader.text, lang);
@@ -266,9 +271,12 @@ export function initTextReading(): void {
     }
   }
 
-  // Set LANG global
+  // Set LANG global - prefer sourceLang from config
   const dictLinks = getDictionaryLinks();
-  if (typeof getLangFromDict === 'function' && dictLinks.translator) {
+  const sourceLang = getSourceLang();
+  if (sourceLang) {
+    window.LANG = sourceLang;
+  } else if (typeof getLangFromDict === 'function' && dictLinks.translator) {
     window.LANG = getLangFromDict(dictLinks.translator);
   }
 

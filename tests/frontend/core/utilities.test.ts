@@ -196,22 +196,22 @@ describe('pgm.ts', () => {
 
   describe('createSentLookupLink', () => {
     it('returns empty string for empty URL', () => {
-      expect(createSentLookupLink(1, 1, '', 'Translate')).toBe('');
+      expect(createSentLookupLink('', 'Translate')).toBe('');
     });
 
     it('returns empty string for empty text', () => {
-      expect(createSentLookupLink(1, 1, 'http://trans.com', '')).toBe('');
+      expect(createSentLookupLink('http://trans.com', '')).toBe('');
     });
 
     it('creates popup span when popup=true', () => {
       // Popup is now determined by boolean parameter, not URL prefix
-      const result = createSentLookupLink(10, 5, 'http://trans.com', 'Translate', true);
+      const result = createSentLookupLink('http://trans.com', 'Translate', true);
       expect(result).toContain('<span class="click"');
       expect(result).toContain('http://trans.com');
     });
 
     it('creates regular link for external URL', () => {
-      const result = createSentLookupLink(10, 5, 'http://trans.com', 'Translate');
+      const result = createSentLookupLink('http://trans.com', 'Translate');
       // Now uses the translator URL directly instead of trans.php
       expect(result).toContain('<a href="http://trans.com"');
       expect(result).toContain('target="ru"');

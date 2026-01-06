@@ -88,6 +88,8 @@ class PreparedStatement
      * @return $this For method chaining
      *
      * @throws \RuntimeException If binding fails
+     *
+     * @psalm-suppress UnsupportedReferenceUsage Required for mysqli_stmt::bind_param
      */
     public function bind(string $types, mixed ...$params): static
     {
@@ -235,7 +237,7 @@ class PreparedStatement
         $row = $result->fetch_assoc();
         $result->free();
 
-        return $row ?: null;
+        return $row !== false ? $row : null;
     }
 
     /**

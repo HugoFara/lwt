@@ -99,7 +99,7 @@ class AdminServiceProvider implements ServiceProviderInterface
             return new MySqlSettingsRepository();
         });
 
-        $container->singleton(MySqlSettingsRepository::class, function (Container $c) {
+        $container->singleton(MySqlSettingsRepository::class, function (Container $c): SettingsRepositoryInterface {
             return $c->get(SettingsRepositoryInterface::class);
         });
 
@@ -108,7 +108,7 @@ class AdminServiceProvider implements ServiceProviderInterface
             return new MySqlBackupRepository();
         });
 
-        $container->singleton(MySqlBackupRepository::class, function (Container $c) {
+        $container->singleton(MySqlBackupRepository::class, function (Container $c): BackupRepositoryInterface {
             return $c->get(BackupRepositoryInterface::class);
         });
 

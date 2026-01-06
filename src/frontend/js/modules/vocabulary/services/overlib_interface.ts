@@ -949,7 +949,7 @@ export function make_overlib_link_wb(
     createTheDictLink(wblink3, txt, 'Trans', '');
   if (Number(torder) > 0 && txid > 0) {
     s += '<br />Lookup Sentence: ' +
-      createSentLookupLink(Number(torder), txid, wblink3, 'Trans');
+      createSentLookupLink(wblink3, 'Trans');
   }
   return s;
 }
@@ -978,7 +978,7 @@ export function make_overlib_link_wbnl(
     createTheDictLink(wblink2, txt, 'Dict2', '') +
     createTheDictLink(wblink3, txt, 'Trans', '');
   if (Number(torder) > 0 && txid > 0) {
-    s += ' | Sentence: ' + createSentLookupLink(Number(torder), txid, wblink3, 'Trans');
+    s += ' | Sentence: ' + createSentLookupLink(wblink3, 'Trans');
   }
   return s;
 }

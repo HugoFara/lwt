@@ -282,7 +282,7 @@ class StringUtils
      */
     public static function removeSpaces(string $s, string|bool|int $remove): string
     {
-        if (!$remove) {
+        if ($remove === false || $remove === 0 || $remove === '' || $remove === '0') {
             return $s;
         }
         // '' contains &#x200B; (zero-width space)

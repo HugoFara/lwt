@@ -19,7 +19,8 @@ import {
 } from '@modules/text/stores/reading_state';
 import {
   getLanguageId,
-  getDictionaryLinks
+  getDictionaryLinks,
+  getSourceLang
 } from '@modules/language/stores/language_config';
 import { getTextId } from '@modules/text/stores/text_config';
 import { getWordStatusFilter } from '@shared/utils/settings_config';
@@ -203,10 +204,10 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
       if (stat === '0') {
         let statusVal: string | number = i;
         if (i === 1) {
-          /** @var sl Source language */
-          const sl = getLangFromDict(dictLinks.translator);
+          // Prefer sourceLang from config, fall back to parsing translator URL
+          const sl = getSourceLang() || getLangFromDict(dictLinks.translator);
           const tl = dictLinks.translator.replace(/.*[?&]tl=([a-zA-Z-]*)(&.*)*$/, '$1');
-          if (sl !== dictLinks.translator && tl !== dictLinks.translator) {
+          if (sl && sl !== dictLinks.translator && tl !== dictLinks.translator) {
             statusVal = i + '&sl=' + sl + '&tl=' + tl;
           }
         }

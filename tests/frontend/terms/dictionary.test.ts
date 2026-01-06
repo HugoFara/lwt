@@ -183,23 +183,23 @@ describe('dictionary.ts', () => {
 
   describe('createSentLookupLink', () => {
     it('returns empty string for empty URL', () => {
-      const result = createSentLookupLink(1, 1, '', 'Trans');
+      const result = createSentLookupLink('', 'Trans');
       expect(result).toBe('');
     });
 
     it('returns empty string for empty text', () => {
-      const result = createSentLookupLink(1, 1, 'http://trans.com', '');
+      const result = createSentLookupLink('http://trans.com', '');
       expect(result).toBe('');
     });
 
     it('creates popup link when popup=true', () => {
-      const result = createSentLookupLink(5, 10, 'http://translate.com', 'Trans', true);
+      const result = createSentLookupLink('http://translate.com', 'Trans', true);
       expect(result).toContain('data-action="dict-popup"');
       expect(result).toContain('http://translate.com');
     });
 
     it('creates frame link when popup=false', () => {
-      const result = createSentLookupLink(3, 7, 'http://translate.com', 'Translate', false);
+      const result = createSentLookupLink('http://translate.com', 'Translate', false);
       expect(result).toContain('<a href=');
       expect(result).toContain('http://translate.com');
       expect(result).toContain('target="ru"');
@@ -207,14 +207,14 @@ describe('dictionary.ts', () => {
 
     it('uses direct URL for non-popup links', () => {
       // URLs are now used directly, not through trans.php
-      const result = createSentLookupLink(1, 1, 'http://example.com', 'Trans');
+      const result = createSentLookupLink('http://example.com', 'Trans');
       expect(result).toContain('http://example.com');
       // Uses data-action instead of inline onclick
       expect(result).toContain('data-action="dict-frame"');
     });
 
     it('defaults to non-popup when popup not specified', () => {
-      const result = createSentLookupLink(1, 1, 'http://translate.com', 'Trans');
+      const result = createSentLookupLink('http://translate.com', 'Trans');
       expect(result).toContain('<a href=');
       expect(result).toContain('target="ru"');
     });

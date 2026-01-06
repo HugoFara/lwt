@@ -228,7 +228,7 @@ class ArticleExtractor
 
         $htmlString = @file_get_contents(trim($url), false, $context);
 
-        if (empty($htmlString)) {
+        if ($htmlString === false || $htmlString === '') {
             return '';
         }
 
@@ -257,7 +257,7 @@ class ArticleExtractor
      */
     public function detectCharset(string $url, string $htmlString, ?string $override = null): string
     {
-        if (!empty($override) && $override !== 'meta') {
+        if ($override !== null && $override !== '' && $override !== 'meta') {
             return $override;
         }
 
@@ -293,7 +293,7 @@ class ArticleExtractor
     private function detectCharsetFromHeaders(string $url): ?string
     {
         $header = @get_headers(trim($url), true);
-        if (!$header) {
+        if ($header === false) {
             return null;
         }
 

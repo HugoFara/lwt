@@ -121,7 +121,7 @@ class FindSimilarTerms
             ->select(['WoText', 'WoTranslation', 'WoRomanization'])
             ->where('WoID', '=', $termId)
             ->firstPrepared();
-        if ($record) {
+        if ($record !== null) {
             $term = htmlspecialchars($record["WoText"] ?? '', ENT_QUOTES, 'UTF-8');
             if (stripos($compare, $term) !== false) {
                 $term = '<span class="red3">' . $term . '</span>';

@@ -46,7 +46,7 @@ $email = $email ?? '';
                     </div>
 
                     <!-- Error message -->
-                    <?php if ($error): ?>
+                    <?php if ($error !== null && $error !== ''): ?>
                     <div class="notification is-danger is-light">
                         <button class="delete" onclick="this.parentElement.remove()"></button>
                         <?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?>

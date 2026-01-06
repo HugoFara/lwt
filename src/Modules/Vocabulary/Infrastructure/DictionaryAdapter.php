@@ -121,7 +121,7 @@ class DictionaryAdapter
 
         // Modes 0, 1, 3 include online dictionaries
         // Mode 1: only include online if local found nothing
-        if ($mode === 0 || $mode === 3 || ($mode === 1 && empty($results['local']))) {
+        if ($mode === 0 || $mode === 3 || ($mode === 1 && count($results['local']) === 0)) {
             $dicts = $this->getLanguageDictionaries($langId);
             $results['online'] = [
                 'dict1' => $dicts['dict1'],

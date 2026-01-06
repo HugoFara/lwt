@@ -339,7 +339,7 @@ class Container implements ContainerInterface
         if ($type instanceof \ReflectionUnionType || $type instanceof \ReflectionIntersectionType) {
             // Try each type in order
             foreach ($type->getTypes() as $subType) {
-                if ($subType instanceof \ReflectionNamedType && !$subType->isBuiltin()) {
+                if (!$subType->isBuiltin()) {
                     $typeName = $subType->getName();
                     if ($this->has($typeName)) {
                         return $this->get($typeName);

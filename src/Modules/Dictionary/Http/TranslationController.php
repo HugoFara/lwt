@@ -375,7 +375,7 @@ class TranslationController extends BaseController
         if ($type === 1) {
             $result = $this->translationService->getTranslatorUrl($i, $t);
 
-            if (!empty($result['url'])) {
+            if ($result['url'] !== null && $result['url'] !== '') {
                 $this->redirect($result['url']);
             }
             return;

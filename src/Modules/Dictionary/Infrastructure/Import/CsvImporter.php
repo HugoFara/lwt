@@ -57,7 +57,7 @@ class CsvImporter implements ImporterInterface
             $lineNumber = 0;
 
             // Skip header if present
-            if ($hasHeader) {
+            if ($hasHeader === true) {
                 fgetcsv($handle, 0, $delimiter);
                 $lineNumber++;
             }

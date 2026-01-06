@@ -43,7 +43,7 @@ class ViteHelper
      */
     public static function isDevServerRunning(): bool
     {
-        if (!getenv('VITE_DEV_MODE')) {
+        if (getenv('VITE_DEV_MODE') === false || getenv('VITE_DEV_MODE') === '') {
             return false;
         }
 
@@ -133,7 +133,8 @@ HTML;
      */
     public static function shouldUse(): bool
     {
-        $mode = getenv('LWT_ASSET_MODE') ?: 'auto';
+        $envMode = getenv('LWT_ASSET_MODE');
+        $mode = ($envMode === false || $envMode === '') ? 'auto' : $envMode;
 
         if ($mode === 'legacy') {
             return false;
