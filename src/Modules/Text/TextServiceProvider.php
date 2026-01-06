@@ -38,6 +38,7 @@ use Lwt\Modules\Text\Application\UseCases\BuildTextFilters;
 
 // Application
 use Lwt\Modules\Text\Application\TextFacade;
+use Lwt\Modules\Text\Application\Services\SentenceService;
 
 // Http
 use Lwt\Modules\Text\Http\TextController;
@@ -63,6 +64,11 @@ class TextServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
+        // Register SentenceService
+        $container->singleton(SentenceService::class, function (Container $_c) {
+            return new SentenceService();
+        });
+
         // Register Repository Interface binding
         $container->singleton(TextRepositoryInterface::class, function (Container $_c) {
             return new MySqlTextRepository();

@@ -19,7 +19,7 @@ use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\TextParsing;
 use Lwt\Shared\Infrastructure\Database\Validation;
 use Lwt\Modules\Admin\Domain\SettingDefinitions;
-use Lwt\Services\TextParsingService;
+use Lwt\Modules\Language\Application\Services\TextParsingService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use PHPUnit\Framework\TestCase;
 

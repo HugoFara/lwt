@@ -36,13 +36,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <form name="form1" action="/word/bulk-translate" method="post"
-      x-data="{
-          allChecked: true,
-          toggleAll(checked) {
-              this.allChecked = checked;
-              document.querySelectorAll('.markcheck').forEach(cb => cb.checked = checked);
-          }
-      }">
+      x-data="bulkTranslateApp()">
 
     <!-- Controls Panel -->
     <div class="box notranslate mb-4">
@@ -54,8 +48,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                     <div class="buttons are-small">
                         <button type="button"
                                 class="button is-info is-outlined"
-                                data-action="bulk-mark-all"
-                                @click="toggleAll(true)">
+                                @click="markAll()">
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('check-square', ['alt' => 'Mark All']); ?>
                             </span>
@@ -63,8 +56,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                         </button>
                         <button type="button"
                                 class="button is-outlined"
-                                data-action="bulk-mark-none"
-                                @click="toggleAll(false)">
+                                @click="markNone()">
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('square', ['alt' => 'Mark None']); ?>
                             </span>
@@ -82,7 +74,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                         </div>
                         <div class="control">
                             <div class="select is-small">
-                                <select data-action="bulk-term-toggles">
+                                <select @change="handleTermToggles($event.target.value); $event.target.selectedIndex = 0;">
                                     <option value="0" selected>[Choose...]</option>
                                     <optgroup label="Change Status">
                                         <option value="1">Set Status To [1]</option>
@@ -103,7 +95,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                                 <span class="icon is-small">
                                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                                 </span>
-                                <span>Save</span>
+                                <span x-text="submitButtonText">Save</span>
                             </button>
                         </div>
                     </div>

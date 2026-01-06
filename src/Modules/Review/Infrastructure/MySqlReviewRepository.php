@@ -23,10 +23,8 @@ use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\TestConfiguration;
 use Lwt\Modules\Review\Domain\TestWord;
-use Lwt\Services\SentenceService;
+use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
-
-require_once __DIR__ . '/../../../backend/Services/SentenceService.php';
 
 /**
  * MySQL implementation of ReviewRepositoryInterface.

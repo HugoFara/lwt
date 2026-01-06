@@ -73,22 +73,3 @@ export function initServerDataAlpine(): void {
 
 // Auto-register before Alpine.start() is called
 initServerDataAlpine();
-
-/**
- * Legacy function to fetch API version.
- * @deprecated Use serverDataApp() Alpine component instead.
- */
-export function fetchApiVersion(): void {
-  const state = serverDataApp();
-  state.fetchApiVersion().then(() => {
-    // Update DOM elements for backward compatibility
-    const versionEl = document.getElementById('rest-api-version');
-    const dateEl = document.getElementById('rest-api-release-date');
-    if (versionEl) {
-      versionEl.textContent = state.error || state.apiVersion;
-    }
-    if (dateEl) {
-      dateEl.textContent = state.apiReleaseDate;
-    }
-  });
-}

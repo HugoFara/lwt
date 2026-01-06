@@ -37,8 +37,8 @@ use Lwt\Modules\Text\Application\UseCases\ParseText;
 use Lwt\Modules\Text\Application\UseCases\UpdateText;
 use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
-use Lwt\Services\ExportService;
-use Lwt\Services\SentenceService;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
+use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**

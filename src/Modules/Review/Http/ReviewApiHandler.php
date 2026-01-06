@@ -20,11 +20,11 @@ use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Domain\TestConfiguration;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
-use Lwt\Services\ExportService;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
 
 // LanguageFacade loaded via autoloader
-require_once __DIR__ . '/../../../backend/Services/ExportService.php';
+require_once __DIR__ . '/../../Vocabulary/Application/Services/ExportService.php';
 require_once __DIR__ . '/../../../backend/View/Helper/StatusHelper.php';
 
 /**

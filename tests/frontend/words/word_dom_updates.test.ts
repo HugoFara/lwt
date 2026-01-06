@@ -5,7 +5,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   getParentContext,
   getFrameElement,
-  isJQueryTooltipEnabled,
   updateLearnStatus,
   generateTooltip,
   updateNewWordInDOM,
@@ -113,29 +112,6 @@ describe('word_dom_updates.ts', () => {
   });
 
   // ===========================================================================
-  // isJQueryTooltipEnabled Tests
-  // ===========================================================================
-
-  describe('isJQueryTooltipEnabled', () => {
-    it('always returns true since jQuery UI tooltips were removed', () => {
-      // The function now always returns true to use native tooltips
-      const result = isJQueryTooltipEnabled();
-
-      expect(result).toBe(true);
-    });
-
-    it('returns true regardless of parent settings', () => {
-      // Even with parent window mock, function returns true since jQuery tooltips were removed
-      (window as any).parent = {};
-
-      const result = isJQueryTooltipEnabled();
-
-      // Always returns true now
-      expect(result).toBe(true);
-    });
-  });
-
-  // ===========================================================================
   // updateLearnStatus Tests
   // ===========================================================================
 
@@ -160,22 +136,17 @@ describe('word_dom_updates.ts', () => {
   // ===========================================================================
 
   describe('generateTooltip', () => {
-    it('always returns empty string since isJQueryTooltipEnabled now returns true', () => {
-      // Since isJQueryTooltipEnabled() always returns true (jQuery UI tooltips removed),
-      // generateTooltip always returns empty string
+    it('generates tooltip with word, translation, romanization and status', () => {
       const result = generateTooltip('word', 'translation', 'romanization', 1);
 
-      expect(result).toBe('');
+      // make_tooltip is mocked to return formatted string
+      expect(result).toBe('word|translation|romanization|1');
     });
 
-    it('returns empty string regardless of settings', () => {
-      // Parent window mock without LWT_DATA
-      (window as any).parent = {};
+    it('handles different status values', () => {
+      const result = generateTooltip('test', 'translated', 'rom', 99);
 
-      const result = generateTooltip('word', 'translation', 'romanization', 1);
-
-      // Always empty since isJQueryTooltipEnabled always returns true
-      expect(result).toBe('');
+      expect(result).toBe('test|translated|rom|99');
     });
   });
 
@@ -229,7 +200,7 @@ describe('word_dom_updates.ts', () => {
       expect(document.querySelector('.TERM48454c4c4f')!.classList.contains('status0')).toBe(true);
     });
 
-    it('does not set title attribute since generateTooltip returns empty', () => {
+    it('sets title attribute with generated tooltip', () => {
       document.body.innerHTML = `
         <span class="TERM48454c4c4f status0">hello</span>
       `;
@@ -245,9 +216,8 @@ describe('word_dom_updates.ts', () => {
 
       updateNewWordInDOM(params);
 
-      // generateTooltip returns empty since isJQueryTooltipEnabled always returns true
-      // so title attribute is not set (or is empty)
-      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBe('');
+      // generateTooltip returns formatted tooltip string
+      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBe('hello|bonjour|bɔ̃ʒuʁ|2');
     });
   });
 
@@ -551,18 +521,15 @@ describe('word_dom_updates.ts', () => {
       expect(element.getAttribute('data_wid')).toBe('666');
     });
 
-    it('sets title when jQuery tooltip is enabled', () => {
-      // Parent window mock without LWT_DATA
-      (window as any).parent = {};
-
+    it('sets title with generated tooltip', () => {
       document.body.innerHTML = `
         <span class="TERM48454c4c4f status0">hello</span>
       `;
 
       updateHoverSaveInDOM(666, '48454c4c4f', 1, 'quick trans', 'hello');
 
-      // Title is set since native tooltips are always used
-      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBeTruthy();
+      // Title is set with formatted tooltip
+      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBe('hello|quick trans||1');
     });
   });
 

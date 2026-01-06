@@ -13,7 +13,7 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Services\SentenceService;
+use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;

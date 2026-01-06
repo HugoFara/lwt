@@ -14,10 +14,11 @@
 
 namespace Lwt\Services;
 
-require_once __DIR__ . '/SentenceService.php';
-require_once __DIR__ . '/ExportService.php';
+require_once __DIR__ . '/../../Modules/Text/Application/Services/SentenceService.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExportService.php';
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
 
+use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Tags\Application\TagsFacade;

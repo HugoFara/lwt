@@ -14,12 +14,12 @@
 
 namespace Lwt\Shared\Infrastructure\Container;
 
-use Lwt\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 // Note: HomeService was moved to Modules/Home - registered by HomeServiceProvider
+// Note: ExportService moved to Modules/Vocabulary - registered by VocabularyServiceProvider
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Services\SentenceService;
-use Lwt\Services\TextParsingService;
+use Lwt\Modules\Text\Application\Services\SentenceService;
+use Lwt\Modules\Language\Application\Services\TextParsingService;
 // Note: TranslationService moved to Modules/Dictionary - registered by DictionaryServiceProvider
 use Lwt\Services\TtsService;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
@@ -96,9 +96,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new WordUploadService();
         });
 
-        $container->singleton(ExportService::class, function (Container $_c) {
-            return new ExportService();
-        });
+        // Note: ExportService moved to Modules/Vocabulary - registered by VocabularyServiceProvider
 
         // =====================
         // Services with dependencies

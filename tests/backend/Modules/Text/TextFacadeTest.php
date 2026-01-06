@@ -19,7 +19,7 @@ use Lwt\Modules\Text\Application\UseCases\ParseText;
 use Lwt\Modules\Text\Application\UseCases\UpdateText;
 use Lwt\Modules\Text\Domain\Text;
 use Lwt\Modules\Text\Domain\TextRepositoryInterface;
-use Lwt\Services\SentenceService;
+use Lwt\Modules\Text\Application\Services\SentenceService;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 

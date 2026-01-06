@@ -65,81 +65,97 @@ echo PageLayoutHelper::buildActionCard($actions);
 </article>
 <?php endif; ?>
 
-<form name="form1" action="#"
-      class="box"
-      data-action="upload-result-form"
-      data-last-update="<?php echo htmlspecialchars($lastUpdate); ?>"
-      data-rtl="<?php echo $rtl ? 'true' : 'false'; ?>"
-      data-recno="<?php echo $recno; ?>">
+<div class="box"
+     x-data="wordUploadResultApp({
+         lastUpdate: '<?php echo htmlspecialchars($lastUpdate); ?>',
+         rtl: <?php echo $rtl ? 'true' : 'false'; ?>,
+         recno: <?php echo $recno; ?>
+     })">
 
-    <div id="res_data">
-        <!-- Pagination Navigation -->
-        <nav id="res_data-navigation" class="level mb-4" style="<?php echo $recno == 0 ? 'display: none;' : ''; ?>">
-            <div class="level-left">
-                <div class="level-item">
-                    <span class="tag is-medium is-info is-light">
-                        <span id="recno-display"><?php echo $recno; ?></span>&nbsp;Term<?php echo ($recno == 1 ? '' : 's'); ?>
-                    </span>
-                </div>
-            </div>
-            <div class="level-right">
-                <div class="level-item">
-                    <nav class="pagination is-small" role="navigation" aria-label="pagination">
-                        <span id="res_data-navigation-prev" class="pagination-previous" style="display: none;">
-                            <span id="res_data-navigation-prev-first" class="icon is-clickable" title="First Page">
-                                <?php echo IconHelper::render('chevrons-left', ['alt' => 'First Page']); ?>
-                            </span>
-                            <span id="res_data-navigation-prev-minus" class="icon is-clickable" title="Previous Page">
-                                <?php echo IconHelper::render('chevron-left', ['alt' => 'Previous Page']); ?>
-                            </span>
-                        </span>
-                        <span class="pagination-list">
-                            <span class="mr-2">Page</span>
-                            <span id="res_data-navigation-no_quick_nav">1</span>
-                            <select id="res_data-navigation-quick_nav" name="page" class="select is-small"></select>
-                            <span class="ml-1 mr-1">of</span>
-                            <span id="res_data-navigation-totalPages"></span>
-                        </span>
-                        <span id="res_data-navigation-next" class="pagination-next" style="display: none;">
-                            <span id="res_data-navigation-next-plus" class="icon is-clickable" title="Next Page">
-                                <?php echo IconHelper::render('chevron-right', ['alt' => 'Next Page']); ?>
-                            </span>
-                            <span id="res_data-navigation-next-last" class="icon is-clickable" title="Last Page">
-                                <?php echo IconHelper::render('chevrons-right', ['alt' => 'Last Page']); ?>
-                            </span>
-                        </span>
-                    </nav>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Results Table -->
-        <div class="table-container">
-            <table id="res_data-res_table" class="table is-striped is-hoverable is-fullwidth sortable">
-                <thead id="res_data-res_table-header">
-                    <tr>
-                        <th class="is-clickable">Term / Romanization</th>
-                        <th class="is-clickable">Translation</th>
-                        <th>Tags</th>
-                        <th class="has-text-centered" title="Sentence">Se.</th>
-                        <th class="has-text-centered is-clickable">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="res_data-res_table-body">
-                </tbody>
-            </table>
-        </div>
-
-        <p id="res_data-no_terms_imported" class="has-text-centered has-text-grey py-4" style="display: none;">
+    <!-- No terms message -->
+    <template x-if="!hasTerms && !isLoading">
+        <p class="has-text-centered has-text-grey py-4">
             No terms imported.
         </p>
-    </div>
-</form>
+    </template>
 
-<script type="application/json" data-lwt-upload-result-config>
-<?php echo json_encode([
-    'lastUpdate' => $lastUpdate,
-    'rtl' => $rtl,
-    'recno' => $recno
-]); ?>
-</script>
+    <!-- Loading indicator -->
+    <template x-if="isLoading">
+        <div class="has-text-centered py-4">
+            <span class="icon">
+                <?php echo IconHelper::render('loader-2', ['alt' => 'Loading', 'class' => 'animate-spin']); ?>
+            </span>
+            <span>Loading...</span>
+        </div>
+    </template>
+
+    <!-- Results content -->
+    <template x-if="hasTerms && !isLoading">
+        <div>
+            <!-- Pagination Navigation -->
+            <nav class="level mb-4">
+                <div class="level-left">
+                    <div class="level-item">
+                        <span class="tag is-medium is-info is-light">
+                            <span x-text="recno"></span>&nbsp;Term<span x-show="recno !== 1">s</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="level-right">
+                    <div class="level-item">
+                        <nav class="pagination is-small" role="navigation" aria-label="pagination">
+                            <span class="pagination-previous" x-show="currentPage > 1">
+                                <span class="icon is-clickable" title="First Page" @click="goFirst()">
+                                    <?php echo IconHelper::render('chevrons-left', ['alt' => 'First Page']); ?>
+                                </span>
+                                <span class="icon is-clickable" title="Previous Page" @click="goPrev()">
+                                    <?php echo IconHelper::render('chevron-left', ['alt' => 'Previous Page']); ?>
+                                </span>
+                            </span>
+                            <span class="pagination-list">
+                                <span class="mr-2">Page</span>
+                                <template x-if="totalPages <= 1">
+                                    <span>1</span>
+                                </template>
+                                <template x-if="totalPages > 1">
+                                    <select class="select is-small" x-model="currentPage" @change="goToPage(parseInt($event.target.value))">
+                                        <template x-for="p in totalPages" :key="p">
+                                            <option :value="p" x-text="p" :selected="p === currentPage"></option>
+                                        </template>
+                                    </select>
+                                </template>
+                                <span class="ml-1 mr-1">of</span>
+                                <span x-text="totalPages"></span>
+                            </span>
+                            <span class="pagination-next" x-show="currentPage < totalPages">
+                                <span class="icon is-clickable" title="Next Page" @click="goNext()">
+                                    <?php echo IconHelper::render('chevron-right', ['alt' => 'Next Page']); ?>
+                                </span>
+                                <span class="icon is-clickable" title="Last Page" @click="goLast()">
+                                    <?php echo IconHelper::render('chevrons-right', ['alt' => 'Last Page']); ?>
+                                </span>
+                            </span>
+                        </nav>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Results Table -->
+            <div class="table-container">
+                <table class="table is-striped is-hoverable is-fullwidth sortable">
+                    <thead>
+                        <tr>
+                            <th class="is-clickable">Term / Romanization</th>
+                            <th class="is-clickable">Translation</th>
+                            <th>Tags</th>
+                            <th class="has-text-centered" title="Sentence">Se.</th>
+                            <th class="has-text-centered is-clickable">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody x-html="terms.map(term => formatTermRow(term)).join('')">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </template>
+</div>

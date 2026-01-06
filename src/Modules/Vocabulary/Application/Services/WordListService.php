@@ -21,7 +21,7 @@ use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\View\Helper\StatusHelper;
-use Lwt\Services\ExportService;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 
 /**

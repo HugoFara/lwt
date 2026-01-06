@@ -21,10 +21,9 @@ namespace Lwt\Api\V1;
 // Load required dependencies for API handlers
 require_once __DIR__ . '/../../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../Services/TextStatisticsService.php';
-require_once __DIR__ . '/../../Services/SentenceService.php';
+require_once __DIR__ . '/../../../Modules/Text/Application/Services/SentenceService.php';
 require_once __DIR__ . '/../../Services/AnnotationService.php';
 require_once __DIR__ . '/../../Services/TextNavigationService.php';
-require_once __DIR__ . '/../../Services/TextParsingService.php';
 require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
 require_once __DIR__ . '/../../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../../Modules/Vocabulary/Application/Services/ExpressionService.php';

@@ -23,7 +23,7 @@ use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\TagHelper;
-use Lwt\Services\ExportService;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 ?>
 <?php if ($recno == 0): ?>
 <p class="has-text-grey">No terms found.</p>

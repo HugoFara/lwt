@@ -99,10 +99,9 @@ class TextPrintController extends BaseController
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         require_once LWT_BACKEND_PATH . '/Services/TextStatisticsService.php';
-        require_once LWT_BACKEND_PATH . '/Services/SentenceService.php';
+        require_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
         require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
         require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
-        require_once LWT_BACKEND_PATH . '/Services/TextParsingService.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
         require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
@@ -153,10 +152,9 @@ class TextPrintController extends BaseController
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         require_once LWT_BACKEND_PATH . '/Services/TextStatisticsService.php';
-        require_once LWT_BACKEND_PATH . '/Services/SentenceService.php';
+        require_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
         require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
         require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
-        require_once LWT_BACKEND_PATH . '/Services/TextParsingService.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
         require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';

@@ -16,7 +16,7 @@ namespace Lwt\Modules\Language\Application\UseCases;
 
 use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
 use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
-use Lwt\Services\TextParsingService;
+use Lwt\Modules\Language\Application\Services\TextParsingService;
 
 /**
  * Use case for converting text to phonetic representation.

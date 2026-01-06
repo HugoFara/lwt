@@ -8,14 +8,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0 Migrated from Core/Text/sentence_operations.php
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\Text\Application\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
@@ -23,12 +23,13 @@ use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Modules\Language\Application\Services\TextParsingService;
 
 /**
  * Service class for sentence operations.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

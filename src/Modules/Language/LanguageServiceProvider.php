@@ -37,6 +37,7 @@ use Lwt\Modules\Language\Application\UseCases\ReparseLanguageTexts;
 
 // Application
 use Lwt\Modules\Language\Application\LanguageFacade;
+use Lwt\Modules\Language\Application\Services\TextParsingService;
 
 // Http
 use Lwt\Modules\Language\Http\LanguageController;
@@ -57,6 +58,11 @@ class LanguageServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
+        // Register TextParsingService
+        $container->singleton(TextParsingService::class, function (Container $_c) {
+            return new TextParsingService();
+        });
+
         // Register Repository Interface binding
         $container->singleton(LanguageRepositoryInterface::class, function (Container $_c) {
             return new MySqlLanguageRepository();

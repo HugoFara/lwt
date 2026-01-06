@@ -20,7 +20,7 @@ use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
-use Lwt\Services\TextParsingService;
+use Lwt\Modules\Language\Application\Services\TextParsingService;
 
 /**
  * Text parsing and processing utilities.
@@ -236,7 +236,7 @@ class TextParsing
         // We use the format "word  num num" for all nodes
         $mecab_args = " -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n";
         $mecab_args .= " -o $file_name ";
-        $mecab = (new \Lwt\Services\TextParsingService())->getMecabPath($mecab_args);
+        $mecab = (new TextParsingService())->getMecabPath($mecab_args);
 
         // WARNING: \n is converted to PHP_EOL here!
         $handle = popen($mecab, 'w');

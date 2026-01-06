@@ -18,7 +18,7 @@ use Lwt\Core\Parser\ParserInterface;
 use Lwt\Core\Parser\ParserConfig;
 use Lwt\Core\Parser\ParserResult;
 use Lwt\Core\Parser\Token;
-use Lwt\Services\TextParsingService;
+use Lwt\Modules\Language\Application\Services\TextParsingService;
 
 /**
  * MeCab-based parser for Japanese language.

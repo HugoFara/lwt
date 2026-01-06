@@ -8,14 +8,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Language\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0 Migrated from Core/Text/text_parsing.php
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\Language\Application\Services;
 
 use Lwt\Core\Utils\ErrorHandler;
 
@@ -23,7 +23,7 @@ use Lwt\Core\Utils\ErrorHandler;
  * Service class for text parsing operations.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Language\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

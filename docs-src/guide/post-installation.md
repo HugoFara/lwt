@@ -58,3 +58,67 @@ To use it, please read the following steps:
 
 The Text-to-Speech may sound robotic with some languages or operating systems. A
 workaround is to download a Text-To-Speech (TTS) plugin such as [Read Aloud](https://readaloud.app/).
+
+## Multi-User Mode
+
+LWT supports a multi-user mode where each user has their own isolated data. This is useful for:
+
+* Sharing a single LWT instance among multiple learners
+* Securing data access in a shared environment
+* Enabling user registration and authentication
+
+### Enabling Multi-User Mode
+
+1. Edit your `.env` file and add:
+
+   ```env
+   MULTI_USER_ENABLED=true
+   ```
+
+2. Restart your web server.
+
+3. The first time you access LWT, you'll be prompted to create an admin account.
+
+### Password Requirements
+
+When creating accounts in multi-user mode, passwords must meet the following requirements:
+
+| Requirement | Description |
+|-------------|-------------|
+| **Minimum Length** | 8 characters |
+| **Maximum Length** | 128 characters |
+| **Letters** | At least one letter (a-z or A-Z) |
+| **Numbers** | At least one number (0-9) |
+
+::: tip Security Best Practices
+For production deployments, we recommend:
+- Use a strong, unique password (12+ characters with mixed case, numbers, and symbols)
+- Never reuse passwords from other services
+- Consider using a password manager
+- Always use HTTPS in production
+:::
+
+### Password Hashing
+
+LWT uses modern password hashing algorithms:
+- **Argon2ID** (preferred) - Memory-hard algorithm resistant to GPU attacks
+- **bcrypt** (fallback) - Used if Argon2ID is unavailable
+
+Passwords are never stored in plain text and cannot be recovered—only reset.
+
+## YouTube Import
+
+LWT can import captions from YouTube videos. To enable this feature:
+
+1. Create a Google Cloud project at [Google Cloud Console](https://console.cloud.google.com/)
+2. Enable the **YouTube Data API v3** for your project
+3. Create an API key in the Credentials section
+4. Add the key to your `.env` file:
+
+   ```env
+   YT_API_KEY=your_api_key_here
+   ```
+
+5. Restart your web server
+
+The YouTube import option will now appear when creating new texts.

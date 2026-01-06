@@ -35,17 +35,6 @@ export function getFrameElement(frameId: string): HTMLElement | null {
 }
 
 /**
- * Check if native tooltips are enabled.
- * Always returns true now that jQuery UI tooltips have been removed.
- *
- * @deprecated This function is kept for backward compatibility but always returns true.
- */
-export function isJQueryTooltipEnabled(): boolean {
-  // jQuery UI tooltips removed - always use native tooltips
-  return true;
-}
-
-/**
  * Update the learn status counter in the header frame.
  *
  * @param content The HTML content to display in the learn status element
@@ -59,13 +48,13 @@ export function updateLearnStatus(content: string): void {
 }
 
 /**
- * Generate a tooltip for a word if jQuery tooltips are enabled.
+ * Generate a native tooltip for a word.
  *
  * @param word The word text
  * @param translation The translation
  * @param romanization The romanization
  * @param status The word status
- * @returns The tooltip string, or empty string if tooltips are disabled
+ * @returns The tooltip string
  */
 export function generateTooltip(
   word: string,
@@ -73,9 +62,6 @@ export function generateTooltip(
   romanization: string,
   status: number | string
 ): string {
-  if (isJQueryTooltipEnabled()) {
-    return '';
-  }
   return make_tooltip(word, translation, romanization, status);
 }
 
@@ -173,14 +159,11 @@ export function deleteWordFromDOM(wid: number, term: string): void {
   const context = getParentContext();
 
   context.querySelectorAll<HTMLElement>(`.word${wid}`).forEach(elem => {
-    let title = '';
-    if (!isJQueryTooltipEnabled()) {
-      const ann = elem.getAttribute('data_ann') ?? '';
-      const trans = elem.getAttribute('data_trans') ?? '';
-      const rom = elem.getAttribute('data_rom') ?? '';
-      const combinedTrans = ann + (ann ? ' / ' : '') + trans;
-      title = make_tooltip(term, combinedTrans, rom, '0');
-    }
+    const ann = elem.getAttribute('data_ann') ?? '';
+    const trans = elem.getAttribute('data_trans') ?? '';
+    const rom = elem.getAttribute('data_rom') ?? '';
+    const combinedTrans = ann + (ann ? ' / ' : '') + trans;
+    const title = make_tooltip(term, combinedTrans, rom, '0');
 
     elem.classList.remove('status99', 'status98', 'status1', 'status2', 'status3', 'status4', 'status5', `word${wid}`);
     elem.classList.add('status0');
@@ -360,11 +343,7 @@ export function updateHoverSaveInDOM(
   wordRaw: string
 ): void {
   const context = getParentContext();
-
-  let title = '';
-  if (isJQueryTooltipEnabled()) {
-    title = make_tooltip(wordRaw, translation, '', String(status));
-  }
+  const title = make_tooltip(wordRaw, translation, '', String(status));
 
   context.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
     el.classList.remove('status0');

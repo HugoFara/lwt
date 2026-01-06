@@ -3,14 +3,14 @@
 namespace Lwt\Tests\Core\Text;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
-require_once __DIR__ . '/../../../../src/backend/Services/TextParsingService.php';
+require_once __DIR__ . '/../../../../src/Modules/Language/Application/Services/TextParsingService.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\TextParsing;
-use Lwt\Services\TextParsingService;
+use Lwt\Modules\Language\Application\Services\TextParsingService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database

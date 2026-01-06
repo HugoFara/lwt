@@ -36,6 +36,9 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Services\MediaService;
 
+use function Lwt\Text_From_Youtube\isYouTubeApiConfigured;
+use function Lwt\Text_From_Youtube\getYouTubeApiKey;
+
 
 // Build actions based on whether this is a new or existing text
 $actions = [];
@@ -231,7 +234,7 @@ if ($isNew) {
             </div>
         </div>
 
-        <?php if ($isNew && defined('YT_API_KEY') && YT_API_KEY != null): ?>
+        <?php if ($isNew && isYouTubeApiConfigured()): ?>
         <!-- YouTube Import -->
         <div class="field">
             <label class="label" for="ytVideoId">YouTube Video</label>
@@ -250,7 +253,7 @@ if ($isNew) {
                         </button>
                     </div>
                 </div>
-                <input type="hidden" id="ytApiKey" value="<?php echo YT_API_KEY ?>" />
+                <input type="hidden" id="ytApiKey" value="<?php echo htmlspecialchars(getYouTubeApiKey() ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
             </div>
             <p class="help">Optional. Enter a YouTube video ID to import its captions as text.</p>
             <p id="ytDataStatus" class="help"></p>

@@ -33,9 +33,9 @@ use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Services\WordService;
-use Lwt\Services\SentenceService;
+use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Services\TextStatisticsService;
-use Lwt\Services\ExportService;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';

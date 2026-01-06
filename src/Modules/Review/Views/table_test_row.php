@@ -21,7 +21,7 @@
 namespace Lwt\Views\Test;
 
 use Lwt\Core\StringUtils;
-use Lwt\Services\ExportService;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 

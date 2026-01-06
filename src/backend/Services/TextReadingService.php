@@ -20,7 +20,7 @@ use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
-use Lwt\Services\ExportService;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**

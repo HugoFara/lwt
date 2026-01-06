@@ -21,10 +21,11 @@ use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 
-require_once __DIR__ . '/ExportService.php';
-require_once __DIR__ . '/SentenceService.php';
+require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExportService.php';
+require_once __DIR__ . '/../../Modules/Text/Application/Services/SentenceService.php';
 require_once __DIR__ . '/../Core/Utils/ErrorHandler.php';
 
+use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 

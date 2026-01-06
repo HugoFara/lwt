@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06 (Critical TODOs resolved - remember-me tokens, checkText, findPaginated)
+**Last Updated:** 2026-01-06 (ApiController migration resolved - staying as intentional thin wrapper)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1561,11 +1561,11 @@ The User module now has the standard modular structure:
 
 **Legacy Code Still Active:**
 
-| Category | Count | Location |
-|----------|-------|----------|
-| Controllers | 3 | `src/backend/Controllers/` |
-| Services | 17 | `src/backend/Services/` |
-| API Handlers | 3 | `src/backend/Api/V1/Handlers/` |
+| Category | Count | Location | Notes |
+|----------|-------|----------|-------|
+| Controllers | 3 | `src/backend/Controllers/` | ApiController (intentional wrapper), BaseController + AbstractCrudController (abstract bases) |
+| Services | 17 | `src/backend/Services/` | Gradual migration to modules |
+| API Handlers | 0 | `src/backend/Api/V1/Handlers/` | All migrated to module handlers |
 
 **Controllers Not Yet Migrated to Modules:**
 
@@ -1575,7 +1575,7 @@ The User module now has the standard modular structure:
 4. ~~`AuthController`~~ - **MIGRATED** to `Modules/User/Http/UserController` (2026-01-06)
 5. ~~`WordPressController`~~ - **DELETED** (2026-01-06) - Migrated to `Modules/User/Http/WordPressController`
 6. ~~`TestController`~~ - **MIGRATED** to `Modules/Review/Http/TestController` (2026-01-06)
-7. `ApiController` - API entry point (may need to stay)
+7. `ApiController` - **STAYING** (2026-01-06) - Intentional: thin 65-line wrapper delegating to `ApiV1::handleRequest()`. All API logic is in module ApiHandlers.
 8. ~~`FeedsController`~~ - **DELETED** (2026-01-06) - Migrated to `Modules/Feed/Http/FeedController`
 9. ~~`WordController`~~ - **DELETED** (2026-01-06) - Migrated to `Modules/Vocabulary/Http/VocabularyController`
 
@@ -1701,8 +1701,14 @@ All changes accept both old and new parameter names for backward compatibility.
 
 **Environment Configuration:**
 
-- [ ] Move `YT_API_KEY` from view templates to `.env`
-- [ ] Document production password requirements
+- [x] Move `YT_API_KEY` from view templates to `.env` **DONE** (2026-01-06)
+  - Added `YT_API_KEY` to `.env.example` with documentation
+  - Updated `text_from_yt.php` to read from `EnvLoader`
+  - Updated view templates to use `isYouTubeApiConfigured()` and `getYouTubeApiKey()`
+- [x] Document production password requirements **DONE** (2026-01-06)
+  - Added to `docs-src/guide/post-installation.md`
+  - Documents minimum/maximum length, letter and number requirements
+  - Includes security best practices and hashing algorithm details
 
 ### 5.7 Deprecated Code (51 items remaining)
 
@@ -1747,7 +1753,7 @@ All changes accept both old and new parameter names for backward compatibility.
   - [x] LocalDictionaryController → DictionaryController (Dictionary module) - DELETED
   - [x] TranslationController → TranslationController (Dictionary module) (2026-01-06)
   - [x] WordPressController → WordPressController (User module) (2026-01-06) - DELETED
-  - [ ] Remaining: ApiController
+  - [x] ApiController - **STAYING** (2026-01-06) - Intentional thin wrapper for API routing
 - [x] Add tests for module facades (at least 80% coverage) - **100% COMPLETE** (2026-01-06) - All 10 facades tested
 - [x] Remove deprecated routes and methods (2026-01-06) - 15 deprecated items removed
 - [x] Clean up backup files (2026-01-05)

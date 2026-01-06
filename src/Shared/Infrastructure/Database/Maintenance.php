@@ -16,6 +16,7 @@
 namespace Lwt\Shared\Infrastructure\Database;
 
 use Lwt\Core\Globals;
+use Lwt\Modules\Language\Application\Services\TextParsingService;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 
 /**
@@ -91,7 +92,7 @@ class Maintenance
         // STEP 1: write the useful info to a file
         $db_to_mecab = tempnam(sys_get_temp_dir(), "db_to_mecab");
         $mecab_args = ' -F %m%t\\t -U %m%t\\t -E \\n ';
-        $mecab = (new \Lwt\Services\TextParsingService())->getMecabPath($mecab_args);
+        $mecab = (new TextParsingService())->getMecabPath($mecab_args);
 
         $rows = QueryBuilder::table('words')
             ->select(['WoID', 'WoTextLC'])
