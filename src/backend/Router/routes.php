@@ -207,6 +207,39 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
+    // Legacy PHP endpoint replacements (iframe-based status changes)
+    // These render HTML responses for display in iframes during text reading
+    $router->registerWithMiddleware(
+        '/word/set-status',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@setWordStatusView',
+        AUTH_MIDDLEWARE
+    );
+    $router->registerWithMiddleware(
+        '/word/set-test-status',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@setTestStatusView',
+        AUTH_MIDDLEWARE
+    );
+    $router->registerWithMiddleware(
+        '/word/delete-term',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@deleteWordView',
+        AUTH_MIDDLEWARE
+    );
+    $router->registerWithMiddleware(
+        '/word/delete-multi',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@deleteMultiWordView',
+        AUTH_MIDDLEWARE
+    );
+    $router->registerWithMiddleware(
+        '/word/insert-wellknown',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@insertWellknown',
+        AUTH_MIDDLEWARE
+    );
+    $router->registerWithMiddleware(
+        '/word/insert-ignore',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@insertIgnore',
+        AUTH_MIDDLEWARE
+    );
+
     // ==================== TEST ROUTES (PROTECTED) ====================
 
     // Test interface (Review module)

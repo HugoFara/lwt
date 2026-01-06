@@ -1854,4 +1854,269 @@ class VocabularyController
             echo json_encode(['error' => $e->getMessage()]);
         }
     }
+
+    // =========================================================================
+    // Legacy PHP Endpoint Replacements (iframe-based views)
+    // =========================================================================
+
+    /**
+     * Set word status (iframe view).
+     *
+     * Replaces set_word_status.php - sets status and renders result in iframe.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function setWordStatusView(array $params): void
+    {
+        $wid = InputValidator::getInt('wid', 0) ?? 0;
+        $textId = InputValidator::getInt('tid', 0) ?? 0;
+        $ord = InputValidator::getInt('ord', 0) ?? 0;
+        $status = InputValidator::getInt('status', 0) ?? 0;
+
+        if ($wid === 0 || $status === 0) {
+            PageLayoutHelper::renderPageStartNobody('Error');
+            echo '<p>Invalid parameters</p>';
+            PageLayoutHelper::renderPageEnd();
+            return;
+        }
+
+        // Update status
+        $this->facade->updateStatus($wid, $status);
+
+        // Get updated term info
+        $term = $this->facade->getTerm($wid);
+        if ($term === null) {
+            PageLayoutHelper::renderPageStartNobody('Error');
+            echo '<p>Term not found</p>';
+            PageLayoutHelper::renderPageEnd();
+            return;
+        }
+
+        PageLayoutHelper::renderPageStartNobody('Term Status');
+
+        $this->render('set_status_result', [
+            'wid' => $wid,
+            'textId' => $textId,
+            'ord' => $ord,
+            'status' => $status,
+            'term' => $term,
+        ]);
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Set test status (iframe view).
+     *
+     * Replaces set_test_status.php - sets status during testing and renders result.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function setTestStatusView(array $params): void
+    {
+        $wid = InputValidator::getInt('wid', 0) ?? 0;
+        $status = InputValidator::getInt('status');
+        $stchange = InputValidator::getInt('stchange');
+        $ajax = InputValidator::getString('ajax');
+
+        if ($wid === 0) {
+            PageLayoutHelper::renderPageStartNobody('Error');
+            echo '<p>Invalid word ID</p>';
+            PageLayoutHelper::renderPageEnd();
+            return;
+        }
+
+        $apiHandler = new VocabularyApiHandler();
+
+        // Handle status change (increment/decrement)
+        if ($stchange !== null) {
+            $up = $stchange > 0;
+            $result = $apiHandler->formatIncrementStatusHtml($wid, $up);
+
+            if ($ajax === '1') {
+                header('Content-Type: text/html; charset=utf-8');
+                echo $result['increment'] ?? '';
+                return;
+            }
+
+            PageLayoutHelper::renderPageStartNobody('Status Changed');
+            echo $result['increment'] ?? '<p>Status updated</p>';
+            PageLayoutHelper::renderPageEnd();
+            return;
+        }
+
+        // Handle direct status set
+        if ($status !== null) {
+            $apiHandler->formatSetStatus($wid, $status);
+
+            if ($ajax === '1') {
+                header('Content-Type: text/html; charset=utf-8');
+                echo 'OK';
+                return;
+            }
+
+            PageLayoutHelper::renderPageStartNobody('Status Set');
+            echo '<p>Status set to ' . $status . '</p>';
+            PageLayoutHelper::renderPageEnd();
+            return;
+        }
+
+        PageLayoutHelper::renderPageStartNobody('Error');
+        echo '<p>No status operation specified</p>';
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Delete word (iframe view).
+     *
+     * Replaces delete_word.php - deletes a word and renders confirmation.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function deleteWordView(array $params): void
+    {
+        $wid = InputValidator::getInt('wid', 0) ?? 0;
+        $textId = InputValidator::getInt('tid', 0) ?? 0;
+
+        if ($wid === 0) {
+            PageLayoutHelper::renderPageStartNobody('Error');
+            echo '<p>Invalid word ID</p>';
+            PageLayoutHelper::renderPageEnd();
+            return;
+        }
+
+        // Get term info before deletion for display
+        $term = $this->facade->getTerm($wid);
+        $termText = $term !== null ? $term->text() : '';
+        $termTextLc = $term !== null ? $term->textLowercase() : '';
+
+        // Delete the term
+        $result = $this->facade->deleteTerm($wid);
+
+        PageLayoutHelper::renderPageStartNobody('Term Deleted');
+
+        $this->render('delete_result', [
+            'wid' => $wid,
+            'textId' => $textId,
+            'deleted' => $result,
+            'term' => $termText,
+            'termLc' => $termTextLc,
+        ]);
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Delete multi-word expression (iframe view).
+     *
+     * Replaces delete_mword.php - deletes a multi-word and renders confirmation.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function deleteMultiWordView(array $params): void
+    {
+        $wid = InputValidator::getInt('wid', 0) ?? 0;
+        $textId = InputValidator::getInt('tid', 0) ?? 0;
+
+        if ($wid === 0) {
+            PageLayoutHelper::renderPageStartNobody('Error');
+            echo '<p>Invalid word ID</p>';
+            PageLayoutHelper::renderPageEnd();
+            return;
+        }
+
+        // Get term info before deletion
+        $term = $this->facade->getTerm($wid);
+        $showAll = (bool) \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault('set-show-all-words');
+
+        // Delete the multi-word
+        $result = $this->getWordService()->deleteMultiWord($wid);
+
+        PageLayoutHelper::renderPageStartNobody('Term Deleted');
+
+        $this->render('delete_multi_result', [
+            'wid' => $wid,
+            'textId' => $textId,
+            'deleted' => $result > 0,
+            'showAll' => $showAll,
+        ]);
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Insert word as well-known (iframe view).
+     *
+     * Replaces insert_word_wellknown.php - creates term with status 99.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function insertWellknown(array $params): void
+    {
+        $this->insertWordWithStatus($params, 99);
+    }
+
+    /**
+     * Insert word as ignored (iframe view).
+     *
+     * Replaces insert_word_ignore.php - creates term with status 98.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function insertIgnore(array $params): void
+    {
+        $this->insertWordWithStatus($params, 98);
+    }
+
+    /**
+     * Insert word with specified status.
+     *
+     * Common logic for insertWellknown and insertIgnore.
+     *
+     * @param array<string, string> $params Route parameters
+     * @param int                   $status Status to set (98 or 99)
+     *
+     * @return void
+     */
+    private function insertWordWithStatus(array $params, int $status): void
+    {
+        $textId = InputValidator::getInt('tid', 0) ?? 0;
+        $ord = InputValidator::getInt('ord', 0) ?? 0;
+        $text = InputValidator::getString('text');
+
+        if ($textId === 0 || $text === '') {
+            PageLayoutHelper::renderPageStartNobody('Error');
+            echo '<p>Invalid parameters</p>';
+            PageLayoutHelper::renderPageEnd();
+            return;
+        }
+
+        // Use hover create mechanism
+        $result = $this->createFromHover($textId, $text, $status);
+
+        PageLayoutHelper::renderPageStartNobody($status === 99 ? 'Well-Known' : 'Ignored');
+
+        $this->render('insert_status_result', [
+            'wid' => $result['wid'],
+            'textId' => $textId,
+            'ord' => $ord,
+            'status' => $status,
+            'hex' => $result['hex'],
+            'word' => $result['word'],
+        ]);
+
+        PageLayoutHelper::renderPageEnd();
+    }
 }

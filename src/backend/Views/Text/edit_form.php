@@ -173,7 +173,7 @@ if ($isNew) {
                         <button type="button"
                                 class="button is-small is-outlined"
                                 data-action="navigate"
-                                data-url="print_impr_text.php?edit=1&amp;text=<?php echo $textId; ?>">
+                                data-url="/text/print?edit=1&amp;text=<?php echo $textId; ?>">
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('plus', ['alt' => 'Create']); ?>
                             </span>

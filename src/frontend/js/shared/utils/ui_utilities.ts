@@ -60,7 +60,7 @@ export function showAllwordsClick(): void {
   const showLeaning = showLearningEl?.checked ? '1' : '0';
   const text = textEl?.textContent || '';
   // Navigate to set mode endpoint and reload
-  window.location.href = 'set_text_mode.php?mode=' + showAll + '&showLearning=' + showLeaning +
+  window.location.href = '/text/set-mode?mode=' + showAll + '&showLearning=' + showLeaning +
     '&text=' + text;
 }
 

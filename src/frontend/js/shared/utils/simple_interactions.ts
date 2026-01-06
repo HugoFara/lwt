@@ -192,7 +192,7 @@ export function initSimpleInteractions(): void {
       {
         const textId = el.dataset.textId;
         if (textId && confirm('Are you sure?')) {
-          window.location.href = 'all_words_wellknown.php?text=' + textId;
+          window.location.href = '/word/set-all-status?text=' + textId;
         }
       }
       break;
@@ -203,7 +203,7 @@ export function initSimpleInteractions(): void {
       {
         const textId = el.dataset.textId;
         if (textId && confirm('Are you sure?')) {
-          window.location.href = 'all_words_wellknown.php?text=' + textId + '&stat=98';
+          window.location.href = '/word/set-all-status?text=' + textId + '&stat=98';
         }
       }
       break;

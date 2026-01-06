@@ -51,15 +51,15 @@ export interface LanguageChangedEvent extends CustomEvent {
 }
 
 /**
- * Set the current language via redirect.
+ * Set the current language.
  *
  * @param ctl Current language selector element
  * @param url URL to redirect to
  */
-export function setLang(ctl: HTMLSelectElement, url: string): void {
-  location.href = '/admin/save-setting?k=currentlanguage&v=' +
-    ctl.options[ctl.selectedIndex].value +
-    '&u=' + url;
+export async function setLang(ctl: HTMLSelectElement, url: string): Promise<void> {
+  const languageId = ctl.options[ctl.selectedIndex].value;
+  await setLangAsync(languageId);
+  location.href = url;
 }
 
 /**
@@ -77,6 +77,30 @@ export async function setLangAsync(languageId: string): Promise<LanguageChangeRe
     body: JSON.stringify({
       key: 'currentlanguage',
       value: languageId
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Reset the current language setting via AJAX (no page refresh).
+ *
+ * @returns Promise with the API response
+ */
+export async function resetAllAsync(): Promise<LanguageChangeResponse> {
+  const response = await fetch('/api/v1/settings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      key: 'currentlanguage',
+      value: ''
     })
   });
 
@@ -118,11 +142,9 @@ function initSetLangEventDelegation(): void {
           document.dispatchEvent(event);
         } catch (error) {
           console.error('Failed to change language:', error);
-          // Fall back to redirect
-          setLang(selectEl, redirectUrl);
         }
       } else {
-        setLang(selectEl, redirectUrl);
+        await setLang(selectEl, redirectUrl);
       }
     }
   });
@@ -138,8 +160,9 @@ document.addEventListener('DOMContentLoaded', function () {
  *
  * @param url URL to redirect to
  */
-export function resetAll(url: string): void {
-  location.href = '/admin/save-setting?k=currentlanguage&v=&u=' + url;
+export async function resetAll(url: string): Promise<void> {
+  await resetAllAsync();
+  location.href = url;
 }
 
 /**
@@ -150,7 +173,7 @@ export function resetAll(url: string): void {
 export function iknowall(t: string | number): void {
   const answer = confirm('Are you sure?');
   if (answer) {
-    loadModalFrame('all_words_wellknown.php?text=' + t);
+    loadModalFrame('/word/set-all-status?text=' + t);
   }
 }
 

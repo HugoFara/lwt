@@ -73,9 +73,8 @@ export function quickMenuRedirection(value: string): void {
   if (route) {
     top!.location.href = route;
   } else {
-    // Fallback for any unmapped values
-    console.warn('Quick menu: unknown value "' + value + '", falling back to legacy URL');
-    top!.location.href = value + '.php';
+    // No fallback - all quick menu values should be mapped
+    console.error('Quick menu: unknown value "' + value + '". Add it to quickMenuRoutes.');
   }
 }
 

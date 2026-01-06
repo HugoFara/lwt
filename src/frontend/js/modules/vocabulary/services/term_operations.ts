@@ -596,7 +596,7 @@ function initImprovedTextEventDelegation(): void {
     if (action === 'back-to-print-mode') {
       const textid = actionEl.dataset.textid || '';
       if (textid) {
-        location.href = 'print_impr_text.php?text=' + textid;
+        location.href = '/text/print?text=' + textid;
       }
     }
 

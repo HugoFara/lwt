@@ -56,26 +56,26 @@ export function keydown_event_do_test_test(e: KeyboardEvent): boolean {
     // space : show solution
     wordEl?.click();
     cleanupRightFrames();
-    loadModalFrame('show_word.php?wid=' + wordEl?.getAttribute('data_wid') + '&ann=');
+    loadModalFrame('/word/show?wid=' + wordEl?.getAttribute('data_wid') + '&ann=');
     openAnswer();
     return false;
   }
   if (e.key === 'Escape' || e.which === 27) {
     // esc : skip term, don't change status
     loadModalFrame(
-      'set_test_status.php?wid=' + wordId +
+      '/word/set-test-status?wid=' + wordId +
       '&status=' + wordEl?.getAttribute('data_status')
     );
     return false;
   }
   if (e.key === 'I' || e.key === 'i' || e.which === 73) {
     // I : ignore, status=98
-    loadModalFrame('set_test_status.php?wid=' + wordId + '&status=98');
+    loadModalFrame('/word/set-test-status?wid=' + wordId + '&status=98');
     return false;
   }
   if (e.key === 'W' || e.key === 'w' || e.which === 87) {
     // W : well known, status=99
-    loadModalFrame('set_test_status.php?wid=' + wordId + '&status=99');
+    loadModalFrame('/word/set-test-status?wid=' + wordId + '&status=99');
     return false;
   }
   if (e.key === 'E' || e.key === 'e' || e.which === 69) {
@@ -87,19 +87,19 @@ export function keydown_event_do_test_test(e: KeyboardEvent): boolean {
   if (!isAnswerOpened()) { return true; }
   if (e.key === 'ArrowUp' || e.which === 38) {
     // up : status+1
-    loadModalFrame('set_test_status.php?wid=' + wordId + '&stchange=1');
+    loadModalFrame('/word/set-test-status?wid=' + wordId + '&stchange=1');
     return false;
   }
   if (e.key === 'ArrowDown' || e.which === 40) {
     // down : status-1
-    loadModalFrame('set_test_status.php?wid=' + wordId + '&stchange=-1');
+    loadModalFrame('/word/set-test-status?wid=' + wordId + '&stchange=-1');
     return false;
   }
   for (let i = 0; i < 5; i++) {
     if (e.which === (49 + i) || e.which === (97 + i) || e.key === String(i + 1)) {
       // 1,.. : status=i
       loadModalFrame(
-        'set_test_status.php?wid=' + wordId + '&status=' + (i + 1)
+        '/word/set-test-status?wid=' + wordId + '&status=' + (i + 1)
       );
       return false;
     }

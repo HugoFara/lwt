@@ -101,7 +101,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
     loadModalFrame(
-      'show_word.php?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
+      '/word/show?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
         encodeURIComponent(ann)
     );
     return false;
@@ -114,7 +114,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
     loadModalFrame(
-      'show_word.php?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
+      '/word/show?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
         encodeURIComponent(ann)
     );
     return false;
@@ -144,7 +144,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
     loadModalFrame(
-      'show_word.php?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
+      '/word/show?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
         encodeURIComponent(ann)
     );
     return false;
@@ -175,7 +175,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
     loadModalFrame(
-      'show_word.php?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
+      '/word/show?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
         encodeURIComponent(ann)
     );
     return false;
@@ -212,11 +212,11 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
           }
         }
         loadModalFrame(
-          'set_word_on_hover.php?text=' + txt + '&tid=' + textId + '&status=' + statusVal
+          '/vocabulary/term-hover?text=' + txt + '&tid=' + textId + '&status=' + statusVal
         );
       } else {
         loadModalFrame(
-          'set_word_status.php?wid=' + wid + '&tid=' + textId + '&ord=' + ord +
+          '/word/set-status?wid=' + wid + '&tid=' + textId + '&ord=' + ord +
             '&status=' + i
         );
         return false;
@@ -226,12 +226,12 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   if (keyCode === 73) { // I : status=98
     if (stat === '0') {
       loadModalFrame(
-        'set_word_on_hover.php?text=' + txt + '&tid=' + textId +
+        '/vocabulary/term-hover?text=' + txt + '&tid=' + textId +
           '&status=98'
       );
     } else {
       loadModalFrame(
-        'set_word_status.php?wid=' + wid + '&tid=' + textId +
+        '/word/set-status?wid=' + wid + '&tid=' + textId +
           '&ord=' + ord + '&status=98'
       );
       return false;
@@ -240,11 +240,11 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   if (keyCode === 87) { // W : status=99
     if (stat === '0') {
       loadModalFrame(
-        'set_word_on_hover.php?text=' + txt + '&tid=' + textId + '&status=99'
+        '/vocabulary/term-hover?text=' + txt + '&tid=' + textId + '&status=99'
       );
     } else {
       loadModalFrame(
-        'set_word_status.php?wid=' + wid + '&tid=' + textId + '&ord=' + ord +
+        '/word/set-status?wid=' + wid + '&tid=' + textId + '&ord=' + ord +
           '&status=99'
       );
     }

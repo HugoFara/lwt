@@ -763,8 +763,8 @@ export function run_overlib_status_unknown(
 ): boolean {
   return overlib(
     make_overlib_audio(txt) + '<b>' + escape_html_chars(hints) + '</b><br /> ' +
-    make_overlib_link_wellknown_word(txid, torder) + ' <br /> ' +
-    make_overlib_link_ignore_word(txid, torder) +
+    make_overlib_link_wellknown_word(txid, torder, txt) + ' <br /> ' +
+    make_overlib_link_ignore_word(txid, torder, txt) +
     make_overlib_link_new_multiword(txid, torder, multi_words, rtl) + ' <br /> ' +
     make_overlib_link_wb(wblink1, wblink2, wblink3, txt, txid, torder),
     'New Word'
@@ -1075,7 +1075,7 @@ export function make_overlib_link_change_status(
     return '<span title="' +
       getStatusName(oldstat) + '">◆</span>';
   }
-  return ' <a href="set_word_status.php?tid=' + txid +
+  return ' <a href="/word/set-status?tid=' + txid +
     '&amp;ord=' + torder +
     '&amp;wid=' + wid +
     '&amp;status=' + newstat + '" target="ro" onclick="showRightFramesPanel();">' +
@@ -1096,7 +1096,7 @@ export function make_overlib_link_change_status_test2(
   oldstat: string | number,
   newstat: number
 ): string {
-  let output = ' <a href="set_test_status.php?wid=' + wid +
+  let output = ' <a href="/word/set-test-status?wid=' + wid +
     '&amp;status=' + newstat + '&amp;ajax=1" target="ro" onclick="showRightFramesPanel();">' +
     '<span title="' + getStatusName(newstat) + '">[';
   output += (Number(oldstat) === newstat) ? '◆' : getStatusAbbr(newstat);
@@ -1118,7 +1118,7 @@ export function make_overlib_link_change_status_test(
   plusminus: number,
   text: string
 ): string {
-  return ' <a href="set_test_status.php?wid=' + wid +
+  return ' <a href="/word/set-test-status?wid=' + wid +
     '&amp;stchange=' + plusminus +
     '&amp;ajax=1" target="ro" onclick="showRightFramesPanel();' +
     (plusminus > 0 ? 'successSound()' : 'failureSound()') + ';">' +
@@ -1301,7 +1301,7 @@ export function make_overlib_link_delete_word(
   wid: string | number
 ): string {
   return ' <a onclick="showRightFramesPanel(); return confirmDelete();" ' +
-    'href="delete_word.php?wid=' + wid + '&amp;tid=' + txid +
+    'href="/word/delete-term?wid=' + wid + '&amp;tid=' + txid +
     '" target="ro">Delete term</a> ';
 }
 
@@ -1317,39 +1317,45 @@ export function make_overlib_link_delete_multiword(
   wid: string | number
 ): string {
   return ' <a onclick="showRightFramesPanel(); return confirmDelete();" ' +
-    'href="delete_mword.php?wid=' + wid + '&amp;tid=' + txid +
+    'href="/word/delete-multi?wid=' + wid + '&amp;tid=' + txid +
     '" target="ro">Delete term</a> ';
 }
 
 /**
  * Return a link to a word well-known.
  *
- * @param txid
- * @param torder
+ * @param txid   Text ID
+ * @param torder Word order position
+ * @param txt    Word text
  * @returns HTML link to mark the word well knwown
  */
 export function make_overlib_link_wellknown_word(
   txid: number,
-  torder: string | number
+  torder: string | number,
+  txt?: string
 ): string {
-  return ' <a href="insert_word_wellknown.php?tid=' +
-    txid + '&amp;ord=' + torder +
+  const textParam = txt ? '&amp;text=' + encodeURIComponent(txt) : '';
+  return ' <a href="/word/insert-wellknown?tid=' +
+    txid + '&amp;ord=' + torder + textParam +
     '" target="ro" onclick="showRightFramesPanel();">I know this term well</a> ';
 }
 
 /**
  * Return a link to ignore a word.
  *
- * @param txid
- * @param torder
+ * @param txid   Text ID
+ * @param torder Word order position
+ * @param txt    Word text
  * @returns HTML string to ignore the word
  */
 export function make_overlib_link_ignore_word(
   txid: number,
-  torder: string | number
+  torder: string | number,
+  txt?: string
 ): string {
-  return ' <a href="insert_word_ignore.php?tid=' + txid +
-    '&amp;ord=' + torder +
+  const textParam = txt ? '&amp;text=' + encodeURIComponent(txt) : '';
+  return ' <a href="/word/insert-ignore?tid=' + txid +
+    '&amp;ord=' + torder + textParam +
     '" target="ro" onclick="showRightFramesPanel();">Ignore this term</a> ';
 }
 
