@@ -19,6 +19,7 @@ require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExportSer
 require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExpressionService.php';
 
 use Lwt\Modules\Text\Application\Services\SentenceService;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Tags\Application\TagsFacade;

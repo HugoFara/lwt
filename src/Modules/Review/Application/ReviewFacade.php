@@ -27,6 +27,7 @@ use Lwt\Modules\Review\Domain\ReviewSession;
 use Lwt\Modules\Review\Domain\TestConfiguration;
 use Lwt\Modules\Review\Infrastructure\MySqlReviewRepository;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 
 /**
  * Facade for review module operations.

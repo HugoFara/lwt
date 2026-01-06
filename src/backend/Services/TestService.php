@@ -26,6 +26,7 @@ require_once __DIR__ . '/../../Modules/Text/Application/Services/SentenceService
 require_once __DIR__ . '/../Core/Utils/ErrorHandler.php';
 
 use Lwt\Modules\Text\Application\Services\SentenceService;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 
