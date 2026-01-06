@@ -34,7 +34,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Services\WordService;
 use Lwt\Modules\Text\Application\Services\SentenceService;
-use Lwt\Services\TextStatisticsService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 

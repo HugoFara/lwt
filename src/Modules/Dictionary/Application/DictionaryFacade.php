@@ -15,7 +15,7 @@
 namespace Lwt\Modules\Dictionary\Application;
 
 use Lwt\Core\Entity\LocalDictionary;
-use Lwt\Services\LocalDictionaryService;
+use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 use Lwt\Services\DictionaryImport\ImporterInterface;
 use Lwt\Services\DictionaryImport\CsvImporter;
 use Lwt\Services\DictionaryImport\JsonImporter;

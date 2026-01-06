@@ -27,10 +27,10 @@
 
 namespace Lwt\Views\Text;
 
-use Lwt\Services\AnnotationService;
-use Lwt\Services\MediaService;
-use Lwt\Services\TextNavigationService;
-use Lwt\Services\TextStatisticsService;
+use Lwt\Modules\Text\Application\Services\AnnotationService;
+use Lwt\Modules\Admin\Application\Services\MediaService;
+use Lwt\Modules\Text\Application\Services\TextNavigationService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
 ?>
 <script type="application/json" id="text-header-config"><?php echo json_encode([

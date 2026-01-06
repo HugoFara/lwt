@@ -26,7 +26,7 @@
 namespace Lwt\Views\Word;
 
 use Lwt\Shared\Infrastructure\Database\Escaping;
-use Lwt\Services\TextStatisticsService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>

@@ -27,8 +27,8 @@ use Lwt\Modules\Dictionary\Application\TranslationService;
 use Lwt\Modules\Dictionary\Http\DictionaryController;
 use Lwt\Modules\Dictionary\Http\TranslationController;
 
-// Services (from legacy location)
-use Lwt\Services\LocalDictionaryService;
+// Application Services
+use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 
 // Language Module
 use Lwt\Modules\Language\Application\LanguageFacade;

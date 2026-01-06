@@ -2,7 +2,7 @@
 /**
  * Password Hasher Service
  *
- * Wrapper around the legacy PasswordService for the User module.
+ * Wrapper around PasswordService for the User module.
  *
  * PHP version 8.1
  *
@@ -16,13 +16,11 @@
 
 namespace Lwt\Modules\User\Application\Services;
 
-use Lwt\Services\PasswordService;
-
 /**
  * Service for password hashing and verification.
  *
  * This is a thin wrapper around PasswordService to provide
- * a module-local interface for password operations.
+ * a convenient interface for common password operations.
  *
  * @since 3.0.0
  */

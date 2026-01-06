@@ -16,10 +16,10 @@ $config = EnvLoader::getDatabaseConfig();
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/Shared/UI/Helpers/FormHelper.php';
 require_once __DIR__ . '/../../../../src/backend/View/Helper/StatusHelper.php';
-require_once __DIR__ . '/../../../../src/backend/Services/TextStatisticsService.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/SentenceService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/TextNavigationService.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/AnnotationService.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../../src/Modules/Language/Application/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
@@ -30,7 +30,7 @@ require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services
 use Lwt\Core\StringUtils;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Services\TextStatisticsService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\View\Helper\StatusHelper;
 

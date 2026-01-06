@@ -5,14 +5,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\User\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\User\Application\Services;
 
 /**
  * Service class for password hashing and verification.
@@ -21,7 +21,7 @@ namespace Lwt\Services;
  * or bcrypt as fallback for older PHP versions.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\User\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

@@ -8,14 +8,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0 Migrated from Core/Text/annotation_management.php
  */
 
-namespace Lwt\Services {
+namespace Lwt\Modules\Text\Application\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
@@ -29,7 +29,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
  * Service class for annotation management.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -273,5 +273,3 @@ class AnnotationService
         return $json_data;
     }
 }
-
-} // End namespace Lwt\Services

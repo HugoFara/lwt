@@ -7,30 +7,29 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\Text\Application\Services;
 
-require_once __DIR__ . '/../View/Helper/StatusHelper.php';
+require_once __DIR__ . '/../../../../backend/View/Helper/StatusHelper.php';
 
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
-use Lwt\Services\AnnotationService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**
  * Service class for managing text printing operations.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

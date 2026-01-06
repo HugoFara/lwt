@@ -23,7 +23,7 @@
 
 namespace Lwt\Modules\Vocabulary\Views;
 
-use Lwt\Services\TextStatisticsService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
 /** @var int $status */
 

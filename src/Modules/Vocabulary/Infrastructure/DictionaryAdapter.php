@@ -15,7 +15,7 @@
 namespace Lwt\Modules\Vocabulary\Infrastructure;
 
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
-use Lwt\Services\LocalDictionaryService;
+use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 
 /**
  * Adapter for external dictionary services.

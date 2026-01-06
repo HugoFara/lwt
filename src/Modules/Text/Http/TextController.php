@@ -16,8 +16,8 @@ namespace Lwt\Modules\Text\Http;
 
 use Lwt\Controllers\BaseController;
 use Lwt\Modules\Text\Application\TextFacade;
-use Lwt\Services\TextDisplayService;
-use Lwt\Services\TextNavigationService;
+use Lwt\Modules\Text\Application\Services\TextDisplayService;
+use Lwt\Modules\Text\Application\Services\TextNavigationService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
@@ -38,7 +38,7 @@ define('LWT_TEXT_MODULE_VIEWS', dirname(__DIR__) . '/Views');
 require_once dirname(__DIR__) . '/Application/TextFacade.php';
 require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
 require_once __DIR__ . '/../../../Shared/UI/Helpers/SelectOptionsBuilder.php';
-require_once LWT_BACKEND_PATH . '/Services/TextDisplayService.php';
+require_once dirname(__DIR__) . '/Application/Services/TextDisplayService.php';
 // LanguageFacade and LanguagePresets loaded via autoloader
 
 /**
@@ -95,7 +95,7 @@ class TextController extends BaseController
     public function read(array $params): void
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        require_once LWT_BACKEND_PATH . '/Services/MediaService.php';
+        require_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
 
         // Get text ID from request
         $textId = $this->getTextIdFromRequest();
@@ -177,14 +177,14 @@ class TextController extends BaseController
     public function edit(array $params): void
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        require_once LWT_BACKEND_PATH . '/Services/TextStatisticsService.php';
+        require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
         require_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
-        require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
+        require_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        require_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
         require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-        require_once LWT_BACKEND_PATH . '/Services/MediaService.php';
+        require_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/start_session.php';
         require_once LWT_BACKEND_PATH . '/Core/Integration/text_from_yt.php';
 
@@ -467,14 +467,14 @@ class TextController extends BaseController
     public function display(array $params): void
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        require_once LWT_BACKEND_PATH . '/Services/TextStatisticsService.php';
+        require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
         require_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
-        require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
+        require_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        require_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
         require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-        require_once LWT_BACKEND_PATH . '/Services/MediaService.php';
+        require_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
 
         $textId = $this->paramInt('text', 0) ?? 0;
 
@@ -767,10 +767,10 @@ class TextController extends BaseController
     public function archived(array $params): void
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        require_once LWT_BACKEND_PATH . '/Services/TextStatisticsService.php';
+        require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
         require_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
-        require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
+        require_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        require_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
         require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
         require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';

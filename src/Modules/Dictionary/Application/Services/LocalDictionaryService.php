@@ -5,14 +5,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Dictionary\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\Dictionary\Application\Services;
 
 use DateTimeImmutable;
 use Lwt\Core\Entity\LocalDictionary;
@@ -27,7 +27,7 @@ use Lwt\Shared\Infrastructure\Database\QueryBuilder;
  * as well as term lookups.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Dictionary\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

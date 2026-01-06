@@ -15,7 +15,7 @@
 namespace Lwt\Modules\Dictionary\Http;
 
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
-use Lwt\Services\LocalDictionaryService;
+use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 use Lwt\Services\DictionaryImport\CsvImporter;
 use Lwt\Services\DictionaryImport\JsonImporter;
 use Lwt\Services\DictionaryImport\StarDictImporter;

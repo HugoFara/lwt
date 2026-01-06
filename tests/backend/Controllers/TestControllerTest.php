@@ -9,7 +9,7 @@ use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
-use Lwt\Services\TestService;
+use Lwt\Modules\Review\Application\Services\TestService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -19,7 +19,7 @@ $config = EnvLoader::getDatabaseConfig();
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 require_once __DIR__ . '/../../../src/Modules/Review/Http/TestController.php';
-require_once __DIR__ . '/../../../src/backend/Services/TestService.php';
+require_once __DIR__ . '/../../../src/Modules/Review/Application/Services/TestService.php';
 
 /**
  * Unit tests for the TestController class.

@@ -41,8 +41,8 @@ use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Http\TestController;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
 
-// Legacy services (for backward compatibility)
-use Lwt\Services\TestService;
+// Application Services
+use Lwt\Modules\Review\Application\Services\TestService;
 
 /**
  * Service provider for the Review module.
@@ -105,8 +105,7 @@ class ReviewServiceProvider implements ServiceProviderInterface
             );
         });
 
-        // Register legacy TestService for backward compatibility
-        // New code should use ReviewFacade instead
+        // Register TestService
         $container->singleton(TestService::class, function (Container $_c) {
             return new TestService();
         });

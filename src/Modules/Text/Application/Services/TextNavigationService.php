@@ -5,14 +5,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0 Migrated from Core/Text/text_navigation.php
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\Text\Application\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
@@ -27,7 +27,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
  * Service class for text navigation.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

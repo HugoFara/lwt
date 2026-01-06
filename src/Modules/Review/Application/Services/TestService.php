@@ -5,14 +5,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Review\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\Review\Application\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Core\Utils\ErrorHandler;
@@ -20,10 +20,6 @@ use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
-
-require_once __DIR__ . '/../../Modules/Vocabulary/Application/Services/ExportService.php';
-require_once __DIR__ . '/../../Modules/Text/Application/Services/SentenceService.php';
-require_once __DIR__ . '/../Core/Utils/ErrorHandler.php';
 
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
@@ -37,7 +33,7 @@ use Lwt\Modules\Tags\Application\TagsFacade;
  * and progress tracking for vocabulary testing.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Review\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

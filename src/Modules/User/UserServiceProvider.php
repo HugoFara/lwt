@@ -37,9 +37,9 @@ use Lwt\Modules\User\Http\WordPressController;
 // WordPress integration
 use Lwt\Modules\User\Application\Services\WordPressAuthService;
 
-// Legacy services (for backward compatibility)
-use Lwt\Services\PasswordService;
-use Lwt\Services\AuthService;
+// Application Services
+use Lwt\Modules\User\Application\Services\PasswordService;
+use Lwt\Modules\User\Application\Services\AuthService;
 
 /**
  * Service provider for the User module.
@@ -87,8 +87,8 @@ class UserServiceProvider implements ServiceProviderInterface
         // Register WordPress integration services
         $this->registerWordPressServices($container);
 
-        // Register legacy AuthService for backward compatibility
-        $this->registerLegacyServices($container);
+        // Register authentication services
+        $this->registerAuthServices($container);
     }
 
     /**
@@ -156,13 +156,13 @@ class UserServiceProvider implements ServiceProviderInterface
     }
 
     /**
-     * Register legacy services for backward compatibility.
+     * Register authentication services.
      *
      * @param Container $container The DI container
      *
      * @return void
      */
-    private function registerLegacyServices(Container $container): void
+    private function registerAuthServices(Container $container): void
     {
         // AuthService - uses UserRepository for database access
         $container->singleton(AuthService::class, function (Container $c) {

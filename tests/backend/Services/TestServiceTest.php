@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\TestService;
+use Lwt\Modules\Review\Application\Services\TestService;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
@@ -17,15 +17,15 @@ Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExportService.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextStatisticsService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/SentenceService.php';
-require_once __DIR__ . '/../../../src/backend/Services/AnnotationService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/AnnotationService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../src/Modules/Language/Application/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Database/Restore.php';
-require_once __DIR__ . '/../../../src/backend/Services/TestService.php';
+require_once __DIR__ . '/../../../src/Modules/Review/Application/Services/TestService.php';
 
 /**
  * Unit tests for the TestService class.

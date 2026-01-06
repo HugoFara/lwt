@@ -5,24 +5,20 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\User\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\User\Application\Services;
 
 use DateTimeImmutable;
 use Lwt\Core\Entity\User;
 use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
-
-require_once __DIR__ . '/../Core/Entity/User.php';
-require_once __DIR__ . '/../Core/Exception/AuthException.php';
-require_once __DIR__ . '/PasswordService.php';
 
 /**
  * Service class for user authentication.
@@ -31,7 +27,7 @@ require_once __DIR__ . '/PasswordService.php';
  * and API token authentication.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\User\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

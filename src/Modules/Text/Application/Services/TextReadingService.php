@@ -7,14 +7,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0 Migrated from Core/Text/text_display.php
  */
 
-namespace Lwt\Services {
+namespace Lwt\Modules\Text\Application\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
@@ -27,7 +27,7 @@ use Lwt\Modules\Tags\Application\TagsFacade;
  * Service class for text reading display.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -307,9 +307,3 @@ class TextReadingService
         echo '<span id="totalcharcount" class="hide">' . $currcharcount . '</span>';
     }
 }
-
-} // End namespace Lwt\Services
-
-namespace {
-
-} // End global namespace

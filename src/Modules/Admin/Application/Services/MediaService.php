@@ -10,14 +10,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Admin\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services {
+namespace Lwt\Modules\Admin\Application\Services;
 
 use Lwt\Core\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Settings;
@@ -28,7 +28,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
  * Service class for media file handling and player generation.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Admin\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -524,6 +524,3 @@ allowfullscreen type="text/html">
     }
 
 }
-
-} // End of Lwt\Services namespace
-

@@ -2,9 +2,9 @@
 
 namespace Lwt\Tests\Services;
 
-require_once __DIR__ . '/../../../src/backend/Services/PasswordService.php';
+require_once __DIR__ . '/../../../src/Modules/User/Application/Services/PasswordService.php';
 
-use Lwt\Services\PasswordService;
+use Lwt\Modules\User\Application\Services\PasswordService;
 use PHPUnit\Framework\TestCase;
 
 /**

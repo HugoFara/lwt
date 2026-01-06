@@ -9,7 +9,7 @@ use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\DB;
 use Lwt\Shared\Infrastructure\Database\Escaping;
-use Lwt\Services\AnnotationService;
+use Lwt\Modules\Text\Application\Services\AnnotationService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use PHPUnit\Framework\TestCase;
 
@@ -18,10 +18,10 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/Services/TextStatisticsService.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/SentenceService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/TextNavigationService.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/AnnotationService.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../../src/Modules/Language/Application/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';

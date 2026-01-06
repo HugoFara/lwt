@@ -26,7 +26,7 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Services\TextStatisticsService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
 ?>
 <p><?php echo $message; ?></p>

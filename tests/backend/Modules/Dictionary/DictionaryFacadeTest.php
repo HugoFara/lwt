@@ -21,7 +21,7 @@ use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Core\Entity\LocalDictionary;
-use Lwt\Services\LocalDictionaryService;
+use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 use Lwt\Services\DictionaryImport\CsvImporter;
 use Lwt\Services\DictionaryImport\JsonImporter;
 use Lwt\Services\DictionaryImport\StarDictImporter;

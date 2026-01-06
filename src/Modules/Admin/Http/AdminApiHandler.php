@@ -18,8 +18,8 @@ use Lwt\Core\StringUtils;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Admin\Application\AdminFacade;
-use Lwt\Services\TextStatisticsService;
-use Lwt\Services\MediaService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
+use Lwt\Modules\Admin\Application\Services\MediaService;
 
 /**
  * API handler for admin-related operations.

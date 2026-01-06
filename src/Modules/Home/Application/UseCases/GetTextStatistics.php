@@ -14,7 +14,7 @@
 
 namespace Lwt\Modules\Home\Application\UseCases;
 
-use Lwt\Services\TextStatisticsService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
 /**
  * Use case for retrieving text statistics for home page display.

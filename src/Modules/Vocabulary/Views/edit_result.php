@@ -28,7 +28,7 @@
 namespace Lwt\Views\Word;
 
 use Lwt\Modules\Tags\Application\TagsFacade;
-use Lwt\Services\TextStatisticsService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
 $tagList = TagsFacade::getWordTagList($wid, false);
 $tagFormatted = $tagList !== '' ? ' [' . str_replace(',', ', ', $tagList) . ']' : '';

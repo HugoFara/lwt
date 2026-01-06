@@ -20,7 +20,7 @@
 namespace Lwt\Modules\Home\Views;
 
 use Lwt\Core\ApplicationInfo;
-use Lwt\Services\TextStatisticsService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
 /**
