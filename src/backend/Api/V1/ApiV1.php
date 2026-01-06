@@ -502,7 +502,7 @@ class ApiV1
             Response::success($this->termHandler->formatGetWordList($params));
         } elseif (($fragments[1] ?? '') === 'filter-options') {
             // GET /terms/filter-options - get filter dropdown options
-            $langId = isset($params['lang']) && $params['lang'] !== '' ? (int)$params['lang'] : null;
+            $langId = isset($params['language_id']) && $params['language_id'] !== '' ? (int)$params['language_id'] : null;
             Response::success($this->termHandler->formatGetFilterOptions($langId));
         } elseif (($fragments[1] ?? '') === 'imported') {
             Response::success($this->termHandler->formatImportedTerms(
@@ -656,7 +656,7 @@ class ApiV1
         } elseif (($fragments[1] ?? '') === 'quick') {
             // POST /terms/quick - quick create term with status (98 or 99)
             Response::success($this->termHandler->formatQuickCreate(
-                (int)$params['textId'],
+                (int)$params['text_id'],
                 (int)$params['position'],
                 (int)$params['status']
             ));

@@ -198,7 +198,7 @@ export const WordsApi = {
   async getFilterOptions(langId?: number | null): Promise<ApiResponse<FilterOptions>> {
     const params: Record<string, string | number | boolean | undefined> = {};
     if (langId !== null && langId !== undefined) {
-      params.lang = langId;
+      params.language_id = langId;
     }
     return apiGet<FilterOptions>('/terms/filter-options', params);
   },

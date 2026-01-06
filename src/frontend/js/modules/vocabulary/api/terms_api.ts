@@ -344,7 +344,7 @@ export const TermsApi = {
     status: 98 | 99
   ): Promise<ApiResponse<TermQuickCreateResponse>> {
     return apiPost<TermQuickCreateResponse>('/terms/quick', {
-      textId,
+      text_id: textId,
       position,
       status
     });

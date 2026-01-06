@@ -205,7 +205,7 @@ describe('api/words.ts', () => {
 
       await WordsApi.getFilterOptions(1);
 
-      expect(apiClient.apiGet).toHaveBeenCalledWith('/terms/filter-options', { lang: 1 });
+      expect(apiClient.apiGet).toHaveBeenCalledWith('/terms/filter-options', { language_id: 1 });
     });
 
     it('returns filter options', async () => {

@@ -294,7 +294,7 @@ describe('api/terms.ts', () => {
       await TermsApi.createQuick(1, 5, 99);
 
       expect(apiPost).toHaveBeenCalledWith('/terms/quick', {
-        textId: 1,
+        text_id: 1,
         position: 5,
         status: 99
       });
@@ -306,7 +306,7 @@ describe('api/terms.ts', () => {
       await TermsApi.createQuick(1, 5, 98);
 
       expect(apiPost).toHaveBeenCalledWith('/terms/quick', {
-        textId: 1,
+        text_id: 1,
         position: 5,
         status: 98
       });
@@ -334,7 +334,7 @@ describe('api/terms.ts', () => {
       await TermsApi.createQuick(42, 5, 99);
 
       expect(apiPost).toHaveBeenCalledWith('/terms/quick', expect.objectContaining({
-        textId: 42
+        text_id: 42
       }));
     });
   });
