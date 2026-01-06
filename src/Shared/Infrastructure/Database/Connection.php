@@ -224,6 +224,9 @@ class Connection
      * @param string $value The value to escape
      *
      * @return string The escaped string
+     *
+     * @psalm-suppress MixedReturnStatement Psalm's mysqli stub lacks return type
+     * @psalm-suppress MixedInferredReturnType Psalm's mysqli stub lacks return type
      */
     public static function escape(string $value): string
     {

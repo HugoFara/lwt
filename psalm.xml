@@ -7,6 +7,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    errorBaseline="psalm-baseline-level1.xml"
 >
     <projectFiles>
         <directory name="." />
@@ -28,6 +29,14 @@
                 <directory name="src/Modules" />
             </errorLevel>
         </UndefinedGlobalVariable>
+
+        <!-- Views receive variables via extract(), psalm cannot verify they are defined -->
+        <PossiblyUndefinedVariable>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
+            </errorLevel>
+        </PossiblyUndefinedVariable>
 
         <!-- Controllers pass variables to views, services have template vars -->
         <UnusedVariable>

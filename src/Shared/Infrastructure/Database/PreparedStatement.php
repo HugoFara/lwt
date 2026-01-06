@@ -90,6 +90,8 @@ class PreparedStatement
      * @throws \RuntimeException If binding fails
      *
      * @psalm-suppress UnsupportedReferenceUsage Required for mysqli_stmt::bind_param
+     * @psalm-suppress MixedAssignment Params are intentionally mixed for DB binding
+     * @psalm-suppress MixedArgument Params are intentionally mixed for DB binding
      */
     public function bind(string $types, mixed ...$params): static
     {
@@ -133,6 +135,7 @@ class PreparedStatement
      * @return $this For method chaining
      *
      * @psalm-suppress PossiblyUnusedReturnValue Return value available for method chaining
+     * @psalm-suppress MixedAssignment Params are intentionally mixed for DB binding
      */
     public function bindValues(array $params): static
     {
