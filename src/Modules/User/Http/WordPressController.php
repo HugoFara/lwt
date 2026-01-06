@@ -1,22 +1,24 @@
 <?php declare(strict_types=1);
 /**
- * \file
- * \brief WordPress Controller - WordPress integration
+ * WordPress Controller
+ *
+ * Controller for WordPress integration endpoints.
  *
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt
+ * @package  Lwt\Modules\User\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/src-php-controllers-wordpresscontroller.html
- * @since   3.0.0
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
  */
 
-namespace Lwt\Controllers;
+namespace Lwt\Modules\User\Http;
 
+use Lwt\Controllers\BaseController;
 use Lwt\Core\Utils\ErrorHandler;
-use Lwt\Services\WordPressService;
+use Lwt\Modules\User\Application\Services\WordPressAuthService;
 
 /**
  * Controller for WordPress integration.
@@ -25,39 +27,34 @@ use Lwt\Services\WordPressService;
  * - WordPress start (login flow)
  * - WordPress stop (logout flow)
  *
- * @category Lwt
- * @package  Lwt
- * @author   HugoFara <hugo.farajallah@protonmail.com>
- * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
- * @since    3.0.0
+ * @since 3.0.0
  */
 class WordPressController extends BaseController
 {
     /**
-     * @var WordPressService WordPress service instance
+     * @var WordPressAuthService WordPress auth service instance
      */
-    protected WordPressService $wordPressService;
+    protected WordPressAuthService $wordPressAuthService;
 
     /**
      * Create a new WordPressController.
      *
-     * @param WordPressService $wordPressService WordPress service for import operations
+     * @param WordPressAuthService $wordPressAuthService WordPress auth service
      */
-    public function __construct(WordPressService $wordPressService)
+    public function __construct(WordPressAuthService $wordPressAuthService)
     {
         parent::__construct();
-        $this->wordPressService = $wordPressService;
+        $this->wordPressAuthService = $wordPressAuthService;
     }
 
     /**
-     * Get the WordPress service instance.
+     * Get the WordPress auth service instance.
      *
-     * @return WordPressService
+     * @return WordPressAuthService
      */
-    public function getWordPressService(): WordPressService
+    public function getWordPressAuthService(): WordPressAuthService
     {
-        return $this->wordPressService;
+        return $this->wordPressAuthService;
     }
 
     /**
@@ -70,7 +67,7 @@ class WordPressController extends BaseController
      * The LWT installation must be in sub directory "lwt" under
      * the WordPress main directory.
      *
-     * @param array $params Route parameters
+     * @param array<string, mixed> $params Route parameters
      *
      * @return void
      */
@@ -78,10 +75,9 @@ class WordPressController extends BaseController
     {
         $redirectUrl = $this->param('rd');
 
-        $result = $this->wordPressService->handleStart($redirectUrl);
+        $result = $this->wordPressAuthService->handleStart($redirectUrl);
 
         if (!$result['success'] && $result['error'] !== null) {
-            require_once __DIR__ . '/../Core/Utils/ErrorHandler.php';
             ErrorHandler::die($result['error']);
         }
 
@@ -94,13 +90,13 @@ class WordPressController extends BaseController
      * To properly log out from both WordPress and LWT, use:
      * http://...path-to-wp-blog.../lwt/wp_lwt_stop.php
      *
-     * @param array $params Route parameters
+     * @param array<string, mixed> $params Route parameters
      *
      * @return void
      */
     public function stop(array $params): void
     {
-        $result = $this->wordPressService->handleStop();
+        $result = $this->wordPressAuthService->handleStop();
 
         $this->redirect($result['redirect']);
     }

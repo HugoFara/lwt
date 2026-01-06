@@ -310,8 +310,8 @@ class RoutesTest extends TestCase
     public static function wordpressRoutesProvider(): array
     {
         return [
-            'wordpress start' => ['/wordpress/start', 'WordPressController@start'],
-            'wordpress stop' => ['/wordpress/stop', 'WordPressController@stop'],
+            'wordpress start' => ['/wordpress/start', 'Lwt\\Modules\\User\\Http\\WordPressController@start'],
+            'wordpress stop' => ['/wordpress/stop', 'Lwt\\Modules\\User\\Http\\WordPressController@stop'],
         ];
     }
 
@@ -332,9 +332,9 @@ class RoutesTest extends TestCase
     {
         return [
             'api v1' => ['/api/v1', 'ApiController@v1'],
-            'api translate' => ['/api/translate', 'ApiController@translate'],
-            'api google' => ['/api/google', 'ApiController@google'],
-            'api glosbe' => ['/api/glosbe', 'ApiController@glosbe'],
+            'api translate' => ['/api/translate', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@translate'],
+            'api google' => ['/api/google', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@google'],
+            'api glosbe' => ['/api/glosbe', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@glosbe'],
         ];
     }
 

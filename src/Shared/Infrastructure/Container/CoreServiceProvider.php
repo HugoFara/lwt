@@ -25,10 +25,10 @@ use Lwt\Services\TestService;
 use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextParsingService;
 use Lwt\Services\TextPrintService;
-use Lwt\Services\TranslationService;
+// Note: TranslationService moved to Modules/Dictionary - registered by DictionaryServiceProvider
 use Lwt\Services\TtsService;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
-use Lwt\Services\WordPressService;
+// Note: WordPressService moved to Modules/User - registered by UserServiceProvider
 use Lwt\Services\WordService;
 use Lwt\Services\WordUploadService;
 use Lwt\Core\Parser\ParserRegistry;
@@ -92,13 +92,9 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new TextPrintService();
         });
 
-        $container->singleton(TranslationService::class, function (Container $_c) {
-            return new TranslationService();
-        });
+        // Note: TranslationService moved to Modules/Dictionary - registered by DictionaryServiceProvider
 
-        $container->singleton(WordPressService::class, function (Container $_c) {
-            return new WordPressService();
-        });
+        // Note: WordPressService moved to Modules/User - registered by UserServiceProvider
 
         // NOTE: Admin services (BackupService, StatisticsService, SettingsService,
         // DemoService, ServerDataService, ThemeService) are now in Modules/Admin

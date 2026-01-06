@@ -22,9 +22,9 @@ use Lwt\Modules\Language\Http\LanguageController;
 // Note: TestController moved to Modules/Review - registered by ReviewServiceProvider
 use Lwt\Modules\Text\Http\TextController;
 // Note: TextPrintController moved to Modules/Text - registered by TextServiceProvider
-use Lwt\Controllers\TranslationController;
+// Note: TranslationController moved to Modules/Dictionary - registered by DictionaryServiceProvider
 // Note: WordController moved to Modules/Vocabulary as VocabularyController - registered by VocabularyServiceProvider
-use Lwt\Controllers\WordPressController;
+// Note: WordPressController moved to Modules/User - registered by UserServiceProvider
 // Note: AuthService now primarily used via UserFacade in User module
 // Note: HomeService moved to Modules/Home as HomeFacade
 use Lwt\Modules\Language\Application\LanguageFacade;
@@ -32,8 +32,8 @@ use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\TextDisplayService;
 // Note: TextPrintService now primarily used via TextPrintController in Text module
 use Lwt\Modules\Text\Application\TextFacade;
-use Lwt\Services\TranslationService;
-use Lwt\Services\WordPressService;
+// Note: TranslationService moved to Modules/Dictionary - registered by DictionaryServiceProvider
+// Note: WordPressService moved to Modules/User - registered by UserServiceProvider
 
 /**
  * Controller service provider that registers all controllers.
@@ -55,10 +55,8 @@ class ControllerServiceProvider implements ServiceProviderInterface
         // Dependencies are injected from the container
 
         // Controllers with service dependencies
-        $container->bind(ApiController::class, function (Container $c) {
-            return new ApiController(
-                $c->get(TranslationController::class)
-            );
+        $container->bind(ApiController::class, function (Container $_c) {
+            return new ApiController();
         });
 
         // Note: AuthController removed - UserController is now registered by UserServiceProvider
@@ -73,17 +71,9 @@ class ControllerServiceProvider implements ServiceProviderInterface
 
         // Note: TextPrintController removed - now registered by TextServiceProvider
 
-        $container->bind(TranslationController::class, function (Container $c) {
-            return new TranslationController(
-                $c->get(TranslationService::class)
-            );
-        });
+        // Note: TranslationController removed - now registered by DictionaryServiceProvider
 
-        $container->bind(WordPressController::class, function (Container $c) {
-            return new WordPressController(
-                $c->get(WordPressService::class)
-            );
-        });
+        // Note: WordPressController removed - now registered by UserServiceProvider
 
         // Note: FeedsController moved to Modules/Feed as FeedController - registered by FeedServiceProvider
 

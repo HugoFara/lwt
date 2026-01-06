@@ -1,31 +1,32 @@
 <?php declare(strict_types=1);
-namespace Lwt\Tests\Services;
+namespace Lwt\Tests\Modules\User\Application\Services;
 
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\WordPressService;
+use Lwt\Modules\User\Application\Services\WordPressAuthService;
+use Lwt\Modules\User\Application\UserFacade;
+use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
+EnvLoader::load(__DIR__ . '/../../../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/WordPressService.php';
+require_once __DIR__ . '/../../../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 
 /**
- * Unit tests for the WordPressService class.
+ * Unit tests for the WordPressAuthService class.
  *
  * Tests WordPress integration service methods.
  * Note: Full integration tests require WordPress to be installed.
  */
-class WordPressServiceTest extends TestCase
+class WordPressAuthServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private WordPressService $service;
+    private WordPressAuthService $service;
     private array $originalSession;
 
     public static function setUpBeforeClass(): void
@@ -50,7 +51,10 @@ class WordPressServiceTest extends TestCase
     {
         $this->originalSession = $_SESSION ?? [];
         $_SESSION = [];
-        $this->service = new WordPressService();
+
+        $repository = new MySqlUserRepository();
+        $userFacade = new UserFacade($repository);
+        $this->service = new WordPressAuthService($userFacade);
     }
 
     protected function tearDown(): void
@@ -282,8 +286,10 @@ class WordPressServiceTest extends TestCase
 
     public function testMultipleServiceInstances(): void
     {
-        $service1 = new WordPressService();
-        $service2 = new WordPressService();
+        $repository = new MySqlUserRepository();
+        $userFacade = new UserFacade($repository);
+        $service1 = new WordPressAuthService($userFacade);
+        $service2 = new WordPressAuthService($userFacade);
 
         // Both should work independently but share session
         $service1->setSessionUser(100);

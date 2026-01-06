@@ -32,6 +32,10 @@ use Lwt\Modules\User\Application\Services\PasswordHasher;
 // Http
 use Lwt\Modules\User\Http\UserController;
 use Lwt\Modules\User\Http\UserApiHandler;
+use Lwt\Modules\User\Http\WordPressController;
+
+// WordPress integration
+use Lwt\Modules\User\Application\Services\WordPressAuthService;
 
 // Legacy services (for backward compatibility)
 use Lwt\Services\PasswordService;
@@ -80,6 +84,9 @@ class UserServiceProvider implements ServiceProviderInterface
             );
         });
 
+        // Register WordPress integration services
+        $this->registerWordPressServices($container);
+
         // Register legacy AuthService for backward compatibility
         $this->registerLegacyServices($container);
     }
@@ -121,6 +128,30 @@ class UserServiceProvider implements ServiceProviderInterface
         // Password Hasher (wraps PasswordService for module use)
         $container->singleton(PasswordHasher::class, function (Container $c) {
             return new PasswordHasher($c->get(PasswordService::class));
+        });
+    }
+
+    /**
+     * Register WordPress integration services.
+     *
+     * @param Container $container The DI container
+     *
+     * @return void
+     */
+    private function registerWordPressServices(Container $container): void
+    {
+        // WordPress Auth Service
+        $container->singleton(WordPressAuthService::class, function (Container $c) {
+            return new WordPressAuthService(
+                $c->get(UserFacade::class)
+            );
+        });
+
+        // WordPress Controller
+        $container->bind(WordPressController::class, function (Container $c) {
+            return new WordPressController(
+                $c->get(WordPressAuthService::class)
+            );
         });
     }
 

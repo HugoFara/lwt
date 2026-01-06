@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06 (LocalDictionaryController migrated to Dictionary module)
+**Last Updated:** 2026-01-06 (WordPressController migrated to User module)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1536,23 +1536,25 @@ The User module now has the standard modular structure:
 
 | Category | Count | Location |
 |----------|-------|----------|
-| Controllers | 5 | `src/backend/Controllers/` |
-| Services | 19 | `src/backend/Services/` |
+| Controllers | 4 | `src/backend/Controllers/` |
+| Services | 18 | `src/backend/Services/` |
 | API Handlers | 10 | `src/backend/Api/V1/Handlers/` |
 
 **Controllers Not Yet Migrated to Modules:**
 
 1. ~~`LocalDictionaryController`~~ - **DELETED** (2026-01-06) - Migrated to `Modules/Dictionary/Http/DictionaryController`
 2. ~~`TextPrintController`~~ - **MIGRATED** to `Modules/Text/Http/TextPrintController` (2026-01-06)
-3. `TranslationController` - No module equivalent
+3. ~~`TranslationController`~~ - **MIGRATED** to `Modules/Dictionary/Http/TranslationController` (2026-01-06)
 4. ~~`AuthController`~~ - **MIGRATED** to `Modules/User/Http/UserController` (2026-01-06)
-5. `WordPressController` - No module equivalent
+5. ~~`WordPressController`~~ - **DELETED** (2026-01-06) - Migrated to `Modules/User/Http/WordPressController`
 6. ~~`TestController`~~ - **MIGRATED** to `Modules/Review/Http/TestController` (2026-01-06)
 7. `ApiController` - API entry point (may need to stay)
 8. ~~`FeedsController`~~ - **DELETED** (2026-01-06) - Migrated to `Modules/Feed/Http/FeedController`
 9. ~~`WordController`~~ - **DELETED** (2026-01-06) - Migrated to `Modules/Vocabulary/Http/VocabularyController`
 
 **Recently Migrated:**
+- `WordPressController` → `Modules/User/Http/WordPressController` (2026-01-06) - **DELETED** - WordPress integration moved to User module with WordPressAuthService
+- `TranslationController` → `Modules/Dictionary/Http/TranslationController` (2026-01-06) - Translation APIs now use Dictionary module
 - `LocalDictionaryController` → `Modules/Dictionary/Http/DictionaryController` (2026-01-06) - **DELETED** - Legacy file and views removed
 - `TextPrintController` → `Modules/Text/Http/TextPrintController` (2026-01-06) - All print routes now use Text module
 - `TestController` → `Modules/Review/Http/TestController` (2026-01-06) - All test routes now use Review module
@@ -1677,7 +1679,9 @@ Mixed naming conventions detected:
   - [x] TestController → TestController (Review module)
   - [x] TextPrintController → TextPrintController (Text module)
   - [x] LocalDictionaryController → DictionaryController (Dictionary module) - DELETED
-  - [ ] Remaining: TranslationController, WordPressController, ApiController
+  - [x] TranslationController → TranslationController (Dictionary module) (2026-01-06)
+  - [x] WordPressController → WordPressController (User module) (2026-01-06) - DELETED
+  - [ ] Remaining: ApiController
 - [ ] Add tests for module facades (at least 80% coverage)
 - [ ] Remove deprecated routes and methods
 - [x] Clean up backup files (2026-01-05)

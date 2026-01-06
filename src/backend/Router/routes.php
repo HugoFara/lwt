@@ -333,8 +333,8 @@ function registerRoutes(Router $router): void
     // ==================== WORDPRESS INTEGRATION (PUBLIC) ====================
 
     // WordPress routes are public - they handle their own auth via WP tokens
-    $router->register('/wordpress/start', 'WordPressController@start');
-    $router->register('/wordpress/stop', 'WordPressController@stop');
+    $router->register('/wordpress/start', 'Lwt\\Modules\\User\\Http\\WordPressController@start');
+    $router->register('/wordpress/stop', 'Lwt\\Modules\\User\\Http\\WordPressController@stop');
 
     // ==================== API ROUTES ====================
 
@@ -346,7 +346,7 @@ function registerRoutes(Router $router): void
     $router->registerPrefix('/api.php/v1', 'ApiController@v1');
 
     // Translation APIs (PROTECTED) - used by authenticated users
-    $router->registerWithMiddleware('/api/translate', 'ApiController@translate', AUTH_MIDDLEWARE);
-    $router->registerWithMiddleware('/api/google', 'ApiController@google', AUTH_MIDDLEWARE);
-    $router->registerWithMiddleware('/api/glosbe', 'ApiController@glosbe', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/api/translate', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@translate', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/api/google', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@google', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/api/glosbe', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@glosbe', AUTH_MIDDLEWARE);
 }

@@ -1,37 +1,33 @@
 <?php declare(strict_types=1);
 /**
- * WordPress Service - Business logic for WordPress integration
+ * WordPress Authentication Service
+ *
+ * Business logic for WordPress integration and authentication.
  *
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\User\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\User\Application\Services;
 
 use Lwt\Core\Globals;
-
-require_once __DIR__ . '/AuthService.php';
+use Lwt\Modules\User\Application\UserFacade;
 
 /**
- * Service class for WordPress integration.
+ * Service class for WordPress authentication integration.
  *
  * Handles WordPress authentication and session management.
  * Links WordPress users to LWT users for multi-user support.
  *
- * @category Lwt
- * @package  Lwt\Services
- * @author   HugoFara <hugo.farajallah@protonmail.com>
- * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
- * @since    3.0.0
+ * @since 3.0.0
  */
-class WordPressService
+class WordPressAuthService
 {
     /**
      * Session key for WordPress user ID.
@@ -39,9 +35,19 @@ class WordPressService
     private const SESSION_KEY = 'LWT-WP-User';
 
     /**
-     * @var AuthService|null Auth service for LWT user management
+     * @var UserFacade User facade for LWT user management
      */
-    private ?AuthService $authService = null;
+    private UserFacade $userFacade;
+
+    /**
+     * Create a new WordPressAuthService.
+     *
+     * @param UserFacade $userFacade User facade for user management
+     */
+    public function __construct(UserFacade $userFacade)
+    {
+        $this->userFacade = $userFacade;
+    }
 
     /**
      * Check if WordPress is available and load it.
@@ -69,7 +75,7 @@ class WordPressService
      */
     private function getWordPressLoadPath(): string
     {
-        return dirname(__DIR__, 3) . '/wp-load.php';
+        return dirname(__DIR__, 5) . '/wp-load.php';
     }
 
     /**
@@ -133,19 +139,6 @@ class WordPressService
             'username' => $current_user->user_login ?? 'wp_user_' . $current_user->ID,
             'email' => $current_user->user_email ?? 'wp_user_' . $current_user->ID . '@localhost'
         ];
-    }
-
-    /**
-     * Get the AuthService instance (lazy initialization).
-     *
-     * @return AuthService
-     */
-    private function getAuthService(): AuthService
-    {
-        if ($this->authService === null) {
-            $this->authService = new AuthService();
-        }
-        return $this->authService;
     }
 
     /**
@@ -354,13 +347,12 @@ class WordPressService
         // Link WordPress user to LWT user (for multi-user support)
         if (Globals::isMultiUserEnabled()) {
             try {
-                $authService = $this->getAuthService();
-                $lwtUser = $authService->findOrCreateWordPressUser(
+                $lwtUser = $this->userFacade->findOrCreateWordPressUser(
                     $wpUserInfo['id'],
                     $wpUserInfo['username'],
                     $wpUserInfo['email']
                 );
-                $authService->setCurrentUser($lwtUser);
+                $this->userFacade->setCurrentUser($lwtUser);
             } catch (\Exception $e) {
                 return [
                     'success' => false,
@@ -394,7 +386,7 @@ class WordPressService
 
         // Clear LWT user context if multi-user mode is enabled
         if (Globals::isMultiUserEnabled()) {
-            $this->getAuthService()->logout();
+            $this->userFacade->logout();
         }
 
         // Logout from WordPress and destroy session
