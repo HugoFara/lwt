@@ -67,8 +67,8 @@ class TtsService
     /**
      * Get language ID from two-letter code or BCP 47 tag.
      *
-     * @param string $code      Two letters, or four letters separated with caret
-     * @param array  $langArray Languages array from langdefs
+     * @param string                        $code      Two letters, or four letters separated with caret
+     * @param array<string, array<string>>  $langArray Languages array from langdefs
      *
      * @return int Language ID if found, -1 otherwise.
      */

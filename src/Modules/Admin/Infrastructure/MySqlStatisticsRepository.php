@@ -80,9 +80,12 @@ class MySqlStatisticsRepository
             ->groupBy(['WoLgID', 'Created'])
             ->getPrepared();
 
+        /** @var array<int, array<int, int>> $termCreated */
         $termCreated = [];
         foreach ($results as $record) {
-            $termCreated[$record['WoLgID']][$record['Created']] = $record['value'];
+            $lgId = (int) ($record['WoLgID'] ?? 0);
+            $created = (int) ($record['Created'] ?? 0);
+            $termCreated[$lgId][$created] = (int) ($record['value'] ?? 0);
         }
 
         return $termCreated;
@@ -105,16 +108,19 @@ class MySqlStatisticsRepository
             ->groupBy(['WoLgID', 'WoStatus', 'WoStatusChanged'])
             ->getPrepared();
 
+        /** @var array<int, array<int, int>> $termActive */
         $termActive = [];
+        /** @var array<int, array<int, int>> $termKnown */
         $termKnown = [];
 
         foreach ($results as $record) {
-            if (!empty($record['WoStatus'])) {
-                $lgId = $record['WoLgID'];
-                $changed = $record['Changed'];
-                $value = (int) $record['value'];
+            $status = (int) ($record['WoStatus'] ?? 0);
+            if ($status > 0) {
+                $lgId = (int) ($record['WoLgID'] ?? 0);
+                $changed = (int) ($record['Changed'] ?? 0);
+                $value = (int) ($record['value'] ?? 0);
 
-                if ($record['WoStatus'] == 5 || $record['WoStatus'] == 99) {
+                if ($status == 5 || $status == 99) {
                     if (!isset($termKnown[$lgId][$changed])) {
                         $termKnown[$lgId][$changed] = 0;
                     }
@@ -124,7 +130,7 @@ class MySqlStatisticsRepository
                         $termActive[$lgId][$changed] = 0;
                     }
                     $termActive[$lgId][$changed] += $value;
-                } elseif ($record['WoStatus'] > 0 && $record['WoStatus'] < 5) {
+                } elseif ($status > 0 && $status < 5) {
                     if (!isset($termActive[$lgId][$changed])) {
                         $termActive[$lgId][$changed] = 0;
                     }

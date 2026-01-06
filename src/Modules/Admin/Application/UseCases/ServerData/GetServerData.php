@@ -76,6 +76,7 @@ class GetServerData
         $placeholders = implode(', ', array_fill(0, count($prefixedTables), '?'));
         $bindings = array_merge([$dbname], $prefixedTables);
 
+        /** @var float|int|string|null $temp_size */
         $temp_size = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS size_mb
             FROM information_schema.TABLES
@@ -89,7 +90,7 @@ class GetServerData
             return 0.0;
         }
 
-        return floatval($temp_size);
+        return (float) $temp_size;
     }
 
     /**

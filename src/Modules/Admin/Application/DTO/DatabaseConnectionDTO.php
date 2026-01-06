@@ -76,18 +76,18 @@ class DatabaseConnectionDTO
     /**
      * Create DTO from form data array.
      *
-     * @param array $formData Form input data
+     * @param array<string, mixed> $formData Form input data
      *
      * @return self New DTO instance
      */
     public static function fromFormData(array $formData): self
     {
         return new self(
-            $formData['server'] ?? '',
-            $formData['userid'] ?? '',
-            $formData['passwd'] ?? '',
-            $formData['dbname'] ?? '',
-            $formData['socket'] ?? ''
+            (string) ($formData['server'] ?? ''),
+            (string) ($formData['userid'] ?? ''),
+            (string) ($formData['passwd'] ?? ''),
+            (string) ($formData['dbname'] ?? ''),
+            (string) ($formData['socket'] ?? '')
         );
     }
 

@@ -54,7 +54,7 @@ class TestConnection
     /**
      * Execute with form data array.
      *
-     * @param array $formData Form input data
+     * @param array<string, mixed> $formData Form input data
      *
      * @return string Status message
      */

@@ -62,9 +62,11 @@ class MySqlSettingsRepository implements SettingsRepositoryInterface
             ->select(['StKey', 'StValue'])
             ->getPrepared();
 
+        /** @var array<string, string> $settings */
         $settings = [];
         foreach ($rows as $row) {
-            $settings[$row['StKey']] = $row['StValue'] ?? '';
+            $key = (string) ($row['StKey'] ?? '');
+            $settings[$key] = (string) ($row['StValue'] ?? '');
         }
 
         return $settings;

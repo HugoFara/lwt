@@ -199,12 +199,13 @@ class AdminFacade
     /**
      * Restore database from uploaded file.
      *
-     * @param array $fileData $_FILES data
+     * @param array<non-empty-string, array{error: int<0, 8>, full_path: string, name: string, size: int<0, max>, tmp_name: string, type: string}> $fileData $_FILES data
      *
      * @return string Status message
      */
     public function restoreFromUpload(array $fileData): string
     {
+        /** @var array{thefile?: array{tmp_name?: string, error?: int}} $fileData */
         return $this->restoreFromUpload->execute($fileData);
     }
 
@@ -405,7 +406,7 @@ class AdminFacade
     /**
      * Create connection DTO from form data.
      *
-     * @param array $formData Form input
+     * @param array<string, mixed> $formData Form input
      *
      * @return DatabaseConnectionDTO Connection DTO
      */

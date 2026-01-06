@@ -76,7 +76,7 @@ class GetFrequencyStatistics
             $languageStats[] = $stats;
 
             foreach ($stats as $key => $value) {
-                if (isset($totals[$key])) {
+                if (isset($totals[$key]) && is_int($value)) {
                     $totals[$key] += $value;
                 }
             }
@@ -91,11 +91,11 @@ class GetFrequencyStatistics
     /**
      * Calculate frequency statistics for a single language.
      *
-     * @param array $termCreated Terms created data
-     * @param array $termActive  Terms active data
-     * @param array $termKnown   Terms known data
+     * @param array<int, int> $termCreated Terms created data
+     * @param array<int, int> $termActive  Terms active data
+     * @param array<int, int> $termKnown   Terms known data
      *
-     * @return array Frequency statistics
+     * @return array<string, int|string> Frequency statistics
      */
     private function calculateFrequencyForLanguage(
         array $termCreated,
@@ -109,7 +109,7 @@ class GetFrequencyStatistics
         $call = 0;
 
         foreach ($termCreated as $created => $val) {
-            if ($created === '0') {
+            if ($created === 0) {
                 $cw += $val;
             } elseif ($created > 364) {
                 $call += $val;
@@ -135,7 +135,7 @@ class GetFrequencyStatistics
         $aall = 0;
 
         foreach ($termActive as $active => $val) {
-            if ($active === '0') {
+            if ($active === 0) {
                 $aw += $val;
             } elseif ($active > 364) {
                 $aall += $val;
@@ -161,7 +161,7 @@ class GetFrequencyStatistics
         $kall = 0;
 
         foreach ($termKnown as $known => $val) {
-            if ($known === '0') {
+            if ($known === 0) {
                 $kw += $val;
             } elseif ($known > 364) {
                 $kall += $val;

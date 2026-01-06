@@ -50,7 +50,7 @@ class AdminApiHandler
      * @param string $key   Setting name
      * @param string $value Setting value
      *
-     * @return array{error?: string, message?: string, last_text?: array<string, mixed>|null}
+     * @return array{error?: string, message?: string, last_text?: array<array-key, mixed>|null}
      */
     public function saveSetting(string $key, string $value): array
     {
@@ -78,7 +78,7 @@ class AdminApiHandler
      *
      * @param int $languageId Language ID
      *
-     * @return array|null Last text data or null if none exists
+     * @return array<string, mixed>|null Last text data or null if none exists
      */
     private function getLastTextForLanguage(int $languageId): ?array
     {
@@ -113,6 +113,7 @@ class AdminApiHandler
         }
 
         // Get language name
+        /** @var string|null $languageName */
         $languageName = QueryBuilder::table('languages')
             ->where('LgID', '=', $languageId)
             ->valuePrepared('LgName');
@@ -201,7 +202,7 @@ class AdminApiHandler
      * @param string $key   Setting key
      * @param string $value Setting value
      *
-     * @return array{error?: string, message?: string, last_text?: array<string, mixed>|null}
+     * @return array{error?: string, message?: string, last_text?: array<array-key, mixed>|null}
      */
     public function formatSaveSetting(string $key, string $value): array
     {
@@ -269,11 +270,13 @@ class AdminApiHandler
 
             // Sum saved words from status counts (statu)
             $saved = 0;
+            /** @var array<string, int> $statusCounts */
             $statusCounts = [];
-            if (isset($raw['statu'][$textIdStr])) {
+            if (isset($raw['statu'][$textIdStr]) && is_array($raw['statu'][$textIdStr])) {
                 foreach ($raw['statu'][$textIdStr] as $status => $count) {
-                    $saved += (int) $count;
-                    $statusCounts[(string) $status] = (int) $count;
+                    $countInt = is_int($count) ? $count : (int) $count;
+                    $saved += $countInt;
+                    $statusCounts[(string) $status] = $countInt;
                 }
             }
 

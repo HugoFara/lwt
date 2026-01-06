@@ -38,7 +38,7 @@ class RestoreFromUpload
     /**
      * Execute the use case.
      *
-     * @param array $fileData $_FILES data for uploaded file
+     * @param array{thefile?: array{tmp_name?: string, error?: int}} $fileData $_FILES data for uploaded file
      *
      * @return string Status message
      */
@@ -46,7 +46,9 @@ class RestoreFromUpload
     {
         if (
             !isset($fileData["thefile"]) ||
+            !isset($fileData["thefile"]["tmp_name"]) ||
             $fileData["thefile"]["tmp_name"] == "" ||
+            !isset($fileData["thefile"]["error"]) ||
             $fileData["thefile"]["error"] != 0
         ) {
             return "Error: No Restore file specified";
