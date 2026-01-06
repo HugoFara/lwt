@@ -47,7 +47,7 @@ describe('api/review.ts', () => {
         test_key: 'abc123',
         selection: 'all',
         word_mode: true,
-        lg_id: 1,
+        language_id: 1,
         word_regex: '.*',
         type: 1,
       });
@@ -73,7 +73,7 @@ describe('api/review.ts', () => {
         test_key: 'key',
         selection: 'selected',
         word_mode: false,
-        lg_id: 2,
+        language_id: 2,
         word_regex: '[a-z]+',
         type: 2,
       });
@@ -129,14 +129,14 @@ describe('api/review.ts', () => {
       const result = await ReviewApi.updateStatus(123, 3, undefined);
 
       expect(apiClient.apiPut).toHaveBeenCalledWith('/review/status', {
-        word_id: 123,
+        term_id: 123,
         status: 3,
         change: undefined,
       });
       expect(result.data?.status).toBe(3);
     });
 
-    it('calls apiPut with word_id and change', async () => {
+    it('calls apiPut with term_id and change', async () => {
       const mockResponse = {
         data: { status: 4 },
         error: undefined,
@@ -146,7 +146,7 @@ describe('api/review.ts', () => {
       await ReviewApi.updateStatus(456, undefined, 1);
 
       expect(apiClient.apiPut).toHaveBeenCalledWith('/review/status', {
-        word_id: 456,
+        term_id: 456,
         status: undefined,
         change: 1,
       });
@@ -159,7 +159,7 @@ describe('api/review.ts', () => {
       await ReviewApi.updateStatus(789, undefined, -1);
 
       expect(apiClient.apiPut).toHaveBeenCalledWith('/review/status', {
-        word_id: 789,
+        term_id: 789,
         status: undefined,
         change: -1,
       });
@@ -184,7 +184,7 @@ describe('api/review.ts', () => {
       await ReviewApi.updateStatus(100, 5, 1);
 
       expect(apiClient.apiPut).toHaveBeenCalledWith('/review/status', {
-        word_id: 100,
+        term_id: 100,
         status: 5,
         change: 1,
       });

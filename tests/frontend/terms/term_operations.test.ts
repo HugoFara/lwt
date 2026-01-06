@@ -637,7 +637,7 @@ describe('term_operations.ts', () => {
 
       expect(mockApiGet).toHaveBeenCalledWith(
         '/similar-terms',
-        { lg_id: 5, term: 'hello' }
+        { language_id: 5, term: 'hello' }
       );
     });
 
@@ -740,7 +740,7 @@ describe('term_operations.ts', () => {
 
       expect(mockApiGet).toHaveBeenCalledWith(
         '/sentences-with-term/42',
-        expect.objectContaining({ lg_id: 1, word_lc: 'word' })
+        expect.objectContaining({ language_id: 1, term_lc: 'word' })
       );
     });
 
@@ -752,8 +752,8 @@ describe('term_operations.ts', () => {
       expect(mockApiGet).toHaveBeenCalledWith(
         '/sentences-with-term',
         expect.objectContaining({
-          lg_id: 1,
-          word_lc: 'word',
+          language_id: 1,
+          term_lc: 'word',
           advanced_search: true,
         })
       );
@@ -766,7 +766,7 @@ describe('term_operations.ts', () => {
 
       expect(mockApiGet).toHaveBeenCalledWith(
         '/sentences-with-term',
-        expect.objectContaining({ lg_id: 1, word_lc: 'word' })
+        expect.objectContaining({ language_id: 1, term_lc: 'word' })
       );
     });
   });

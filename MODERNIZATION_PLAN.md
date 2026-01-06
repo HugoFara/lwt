@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06 (ApiController migration resolved - staying as intentional thin wrapper)
+**Last Updated:** 2026-01-06 (TypeScript deprecations removed - 34 functions eliminated)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1545,7 +1545,7 @@ Services have been migrated from `CoreServiceProvider` to their respective modul
 | PHPUnit Tests | PASS | 2825 tests, 6146 assertions |
 | TypeScript | PASS | No errors |
 | ESLint | PASS | No errors |
-| Deprecated Code | WARNING | 51 items remaining (15 PHP deprecations removed 2026-01-06) |
+| Deprecated Code | WARNING | 17 items remaining (15 PHP + 34 TypeScript deprecations removed 2026-01-06) |
 | TODO Comments | WARNING | 18 items |
 
 ### 5.1 Incomplete Module Migration
@@ -1710,7 +1710,7 @@ All changes accept both old and new parameter names for backward compatibility.
   - Documents minimum/maximum length, letter and number requirements
   - Includes security best practices and hashing algorithm details
 
-### 5.7 Deprecated Code (51 items remaining)
+### 5.7 Deprecated Code (17 items remaining)
 
 **PHP Deprecations (8 items remaining):**
 
@@ -1725,12 +1725,21 @@ All changes accept both old and new parameter names for backward compatibility.
 - ~~`PageLayoutHelper::buildQuickMenu`~~ - **REMOVED** (2026-01-06)
 - ~~`WordUploadService` wrapper~~ - **REMOVED** (2026-01-06)
 
-**TypeScript Deprecations (43 items):**
+**TypeScript Deprecations (9 items remaining):**
 
-- `word_upload.ts` (7 items) - Should use Alpine components
-- `tts_settings.ts` (11 items) - Should use `ttsSettingsApp()`
-- `bulk_translate.ts` (7 items) - Should use `bulkTranslateApp()`
-- Various page modules marked for Alpine.js migration
+*Removed 2026-01-06 (34 functions):*
+- ~~`tts_settings.ts` (14 functions)~~ - **REMOVED** - View uses `ttsSettingsApp()` Alpine component
+- ~~`word_upload.ts` (8 functions)~~ - **REMOVED** - View uses `wordUploadResultApp()` Alpine component
+- ~~`bulk_translate.ts` (10 functions)~~ - **REMOVED** - View uses `bulkTranslateApp()` Alpine component
+- ~~`word_dom_updates.ts` (1 function: `isJQueryTooltipEnabled`)~~ - **REMOVED** - Native tooltips only
+- ~~`server_data.ts` (1 function: `fetchApiVersion`)~~ - **REMOVED** - View uses `serverDataApp()` Alpine component
+
+*Remaining (views not yet migrated to Alpine):*
+- `dictionary.ts` (2 functions: `createSentLookupLink`, `getLangFromDict`) - Still actively imported
+- `word_list_table.ts` (1 function: `initWordListTable`) - View uses window export
+- `word_list_filter.ts` (2 functions: `navigateWithParams`, `initWordListFilter`) - View uses window export
+- `table_management.ts` (1 function: `checkTablePrefix`) - View uses window export
+- Various page modules marked for Alpine.js migration (3 items)
 
 ### v3.0.0 Release Checklist
 
@@ -1765,7 +1774,7 @@ All changes accept both old and new parameter names for backward compatibility.
 - [ ] Migrate backend services to module Application layers
 - [ ] Add tests for critical use cases
 - [ ] Resolve all critical TODOs
-- [ ] Remove deprecated TypeScript functions
+- [x] Remove deprecated TypeScript functions - **DONE** (2026-01-06) - 34 functions removed from 5 files
 
 **Nice to Have:**
 

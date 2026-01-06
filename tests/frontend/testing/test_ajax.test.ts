@@ -169,9 +169,9 @@ describe('test_ajax.ts', () => {
       `;
     });
 
-    it('calls doTestFinished when word_id is 0', () => {
+    it('calls doTestFinished when term_id is 0', () => {
       testQueryHandler(
-        { word_id: 0, solution: '', group: '', word_text: '' },
+        { term_id: 0, solution: '', group: '', term_text: '' },
         10,
         'test_key',
         'selection'
@@ -181,9 +181,9 @@ describe('test_ajax.ts', () => {
       expect(termTest.style.display).toBe('none');
     });
 
-    it('inserts new word when word_id is not 0', () => {
+    it('inserts new word when term_id is not 0', () => {
       testQueryHandler(
-        { word_id: 123, solution: 'sol', group: '<span>Group</span>', word_text: 'word' },
+        { term_id: 123, solution: 'sol', group: '<span>Group</span>', term_text: 'word' },
         10,
         'test_key',
         'selection'
@@ -197,7 +197,7 @@ describe('test_ajax.ts', () => {
       checkbox.checked = true;
 
       testQueryHandler(
-        { word_id: 123, solution: 'sol', group: '<span class="word">Word</span>', word_text: 'word' },
+        { term_id: 123, solution: 'sol', group: '<span class="word">Word</span>', term_text: 'word' },
         10,
         'test_key',
         'selection'

@@ -250,7 +250,7 @@ describe('api/terms.ts', () => {
 
       expect(apiPost).toHaveBeenCalledWith('/terms', {
         text: 'hello',
-        lg_id: 1,
+        language_id: 1,
         translation: 'bonjour'
       });
     });
@@ -278,7 +278,7 @@ describe('api/terms.ts', () => {
       await TermsApi.addWithTranslation('test', 5, 'translation');
 
       expect(apiPost).toHaveBeenCalledWith('/terms', expect.objectContaining({
-        lg_id: 5
+        language_id: 5
       }));
     });
   });
@@ -351,7 +351,7 @@ describe('api/terms.ts', () => {
 
       expect(apiGet).toHaveBeenCalledWith('/similar-terms', {
         term: 'hello',
-        lg_id: 1
+        language_id: 1
       });
     });
 
@@ -391,7 +391,7 @@ describe('api/terms.ts', () => {
 
       expect(apiGet).toHaveBeenCalledWith('/similar-terms', {
         term: 'こんにちは',
-        lg_id: 2
+        language_id: 2
       });
     });
   });
@@ -408,7 +408,7 @@ describe('api/terms.ts', () => {
 
       expect(apiGet).toHaveBeenCalledWith('/sentences-with-term', {
         term_id: 100,
-        lg_id: 1
+        language_id: 1
       });
     });
 
@@ -549,7 +549,7 @@ describe('api/terms.ts', () => {
 
       expect(apiGet).toHaveBeenCalledWith('/similar-terms', {
         term: '',
-        lg_id: 1
+        language_id: 1
       });
     });
 

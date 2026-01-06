@@ -33,7 +33,7 @@ describe('api/texts.ts', () => {
 
       await TextsApi.getStatistics([1]);
 
-      expect(apiGet).toHaveBeenCalledWith('/texts/statistics', { texts_id: '1' });
+      expect(apiGet).toHaveBeenCalledWith('/texts/statistics', { text_ids: '1' });
     });
 
     it('calls apiGet with comma-separated IDs for multiple texts', async () => {
@@ -41,7 +41,7 @@ describe('api/texts.ts', () => {
 
       await TextsApi.getStatistics([1, 2, 3]);
 
-      expect(apiGet).toHaveBeenCalledWith('/texts/statistics', { texts_id: '1,2,3' });
+      expect(apiGet).toHaveBeenCalledWith('/texts/statistics', { text_ids: '1,2,3' });
     });
 
     it('accepts string parameter directly', async () => {
@@ -49,7 +49,7 @@ describe('api/texts.ts', () => {
 
       await TextsApi.getStatistics('5,6,7');
 
-      expect(apiGet).toHaveBeenCalledWith('/texts/statistics', { texts_id: '5,6,7' });
+      expect(apiGet).toHaveBeenCalledWith('/texts/statistics', { text_ids: '5,6,7' });
     });
 
     it('returns statistics data on success', async () => {
@@ -86,7 +86,7 @@ describe('api/texts.ts', () => {
 
       await TextsApi.getStatistics([]);
 
-      expect(apiGet).toHaveBeenCalledWith('/texts/statistics', { texts_id: '' });
+      expect(apiGet).toHaveBeenCalledWith('/texts/statistics', { text_ids: '' });
     });
   });
 
@@ -118,7 +118,7 @@ describe('api/texts.ts', () => {
 
       expect(apiPost).toHaveBeenCalledWith('/texts', {
         title: 'Test Text',
-        lg_id: 1,
+        language_id: 1,
         text: 'Hello world',
         source_uri: undefined,
         audio_uri: undefined,
@@ -140,7 +140,7 @@ describe('api/texts.ts', () => {
 
       expect(apiPost).toHaveBeenCalledWith('/texts', {
         title: 'Test Text',
-        lg_id: 1,
+        language_id: 1,
         text: 'Hello world',
         source_uri: 'https://example.com/source',
         audio_uri: 'https://example.com/audio.mp3',
@@ -355,7 +355,7 @@ describe('api/texts.ts', () => {
       await TextsApi.getStatistics(ids);
 
       expect(apiGet).toHaveBeenCalledWith('/texts/statistics', {
-        texts_id: ids.join(',')
+        text_ids: ids.join(',')
       });
     });
 
