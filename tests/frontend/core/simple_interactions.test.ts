@@ -46,7 +46,6 @@ import {
   initSimpleInteractions
 } from '../../../src/frontend/js/shared/utils/simple_interactions';
 import { lwtFormCheck } from '../../../src/frontend/js/shared/forms/unloadformcheck';
-import { showRightFramesPanel, hideRightFrames, loadModalFrame } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
 import { showAllwordsClick } from '../../../src/frontend/js/shared/utils/ui_utilities';
 import { quickMenuRedirection } from '../../../src/frontend/js/shared/utils/user_interactions';
 import { deleteTranslation, addTranslation } from '../../../src/frontend/js/modules/vocabulary/services/translation_api';

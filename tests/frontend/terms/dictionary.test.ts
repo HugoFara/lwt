@@ -15,7 +15,6 @@ import {
   translateWord2,
   translateWord3,
 } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
-import * as frameManagement from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
