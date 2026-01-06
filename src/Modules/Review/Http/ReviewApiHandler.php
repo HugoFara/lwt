@@ -53,15 +53,15 @@ class ReviewApiHandler
      * @param bool   $wordMode Test is in word mode
      * @param int    $testtype Test type
      *
-     * @return array{word_id: int|string, solution?: string, word_text: string, group: string}
+     * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
      */
     public function getWordTestData(string $testsql, bool $wordMode, int $testtype): array
     {
         $wordRecord = $this->reviewFacade->getNextWord($testsql);
         if (empty($wordRecord)) {
             return [
-                "word_id" => 0,
-                "word_text" => '',
+                "term_id" => 0,
+                "term_text" => '',
                 "group" => ''
             ];
         }
@@ -93,9 +93,9 @@ class ReviewApiHandler
         );
 
         return [
-            "word_id" => $wordRecord['WoID'],
+            "term_id" => $wordRecord['WoID'],
             "solution" => $solution,
-            "word_text" => $save,
+            "term_text" => $save,
             "group" => $htmlSentence
         ];
     }
@@ -153,7 +153,7 @@ class ReviewApiHandler
      *
      * @param array $params Request parameters
      *
-     * @return array{word_id: int|string, solution?: string, word_text: string, group: string}
+     * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
      */
     public function wordTestAjax(array $params): array
     {
@@ -163,8 +163,8 @@ class ReviewApiHandler
         );
         if ($testSql === null) {
             return [
-                "word_id" => 0,
-                "word_text" => '',
+                "term_id" => 0,
+                "term_text" => '',
                 "group" => ''
             ];
         }
@@ -286,15 +286,16 @@ class ReviewApiHandler
      */
     public function formatUpdateStatus(array $params): array
     {
-        $wordId = (int)($params['word_id'] ?? 0);
-        if ($wordId === 0) {
-            return ['error' => 'word_id is required'];
+        // Accept both term_id (new) and word_id (legacy) for backward compatibility
+        $termId = (int)($params['term_id'] ?? $params['word_id'] ?? 0);
+        if ($termId === 0) {
+            return ['error' => 'term_id is required'];
         }
 
         $status = isset($params['status']) ? (int)$params['status'] : null;
         $change = isset($params['change']) ? (int)$params['change'] : null;
 
-        return $this->updateReviewStatus($wordId, $status, $change);
+        return $this->updateReviewStatus($termId, $status, $change);
     }
 
     /**

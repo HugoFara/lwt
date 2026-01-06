@@ -758,7 +758,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
      * @param string $wordlc Term in lower case
      * @param int    $textid Text ID
      *
-     * @return array{term_lc?: string, wid?: int|null, trans?: string, ann_index?: int, term_ord?: int, translations?: string[], lang_id?: int, error?: string}
+     * @return array{term_lc?: string, wid?: int|null, trans?: string, ann_index?: int, term_ord?: int, translations?: string[], language_id?: int, error?: string}
      */
     public function getTermTranslations(string $wordlc, int $textid): array
     {
@@ -828,7 +828,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         if (count($vals) > 3) {
             $annData["trans"] = $vals[3];
         }
-        $annData["lang_id"] = $langid;
+        $annData["language_id"] = $langid;
         return $annData;
     }
 
@@ -985,7 +985,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
      * @param string $termLc Term in lowercase
      * @param int    $textId Text ID
      *
-     * @return array{term_lc?: string, wid?: int|null, trans?: string, ann_index?: int, term_ord?: int, translations?: string[], lang_id?: int, error?: string}
+     * @return array{term_lc?: string, wid?: int|null, trans?: string, ann_index?: int, term_ord?: int, translations?: string[], language_id?: int, error?: string}
      */
     public function formatTermTranslations(string $termLc, int $textId): array
     {

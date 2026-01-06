@@ -212,7 +212,7 @@ class ApiV1
 
             case 'similar-terms':
                 Response::success($this->languageHandler->formatSimilarTerms(
-                    (int)$params["lg_id"],
+                    (int)($params["language_id"] ?? $params["lg_id"] ?? 0),
                     (string)$params["term"]
                 ));
                 break;
@@ -464,16 +464,19 @@ class ApiV1
 
     private function handleSentencesGet(array $fragments, array $params): void
     {
+        $languageId = (int)($params["language_id"] ?? $params["lg_id"] ?? 0);
+        $termLc = $params["term_lc"] ?? $params["word_lc"] ?? '';
+
         if (isset($fragments[1]) && ctype_digit($fragments[1])) {
             Response::success($this->languageHandler->formatSentencesWithRegisteredTerm(
-                (int)$params["lg_id"],
-                $params["word_lc"],
+                $languageId,
+                $termLc,
                 (int)$fragments[1]
             ));
         } else {
             Response::success($this->languageHandler->formatSentencesWithNewTerm(
-                (int)$params["lg_id"],
-                $params["word_lc"],
+                $languageId,
+                $termLc,
                 array_key_exists("advanced_search", $params)
             ));
         }
@@ -511,14 +514,14 @@ class ApiV1
         } elseif (($fragments[1] ?? '') === 'for-edit') {
             // GET /terms/for-edit - get term data for editing in modal
             Response::success($this->termHandler->formatGetTermForEdit(
-                (int)($params['tid'] ?? 0),
+                (int)($params['term_id'] ?? $params['tid'] ?? 0),
                 (int)($params['ord'] ?? 0),
                 isset($params['wid']) && $params['wid'] !== '' ? (int)$params['wid'] : null
             ));
         } elseif (($fragments[1] ?? '') === 'multi') {
             // GET /terms/multi - get multi-word expression data for editing
             Response::success($this->termHandler->formatGetMultiWord(
-                (int)($params['tid'] ?? 0),
+                (int)($params['term_id'] ?? $params['tid'] ?? 0),
                 (int)($params['ord'] ?? 0),
                 $params['txt'] ?? null,
                 isset($params['wid']) ? (int)$params['wid'] : null
@@ -550,12 +553,12 @@ class ApiV1
     private function handleTextsGet(array $fragments, array $params): void
     {
         if (($fragments[1] ?? '') === 'statistics') {
-            $textsId = $params["texts_id"] ?? $params["ids"] ?? null;
-            if ($textsId === null) {
-                Response::error('Missing required parameter: texts_id', 400);
+            $textIds = $params["text_ids"] ?? $params["texts_id"] ?? $params["ids"] ?? null;
+            if ($textIds === null) {
+                Response::error('Missing required parameter: text_ids', 400);
                 return;
             }
-            Response::success($this->adminHandler->formatTextsStatistics($textsId));
+            Response::success($this->adminHandler->formatTextsStatistics($textIds));
         } elseif (($fragments[1] ?? '') === 'by-language') {
             // GET /texts/by-language/{langId} - get paginated texts for a language
             if (!isset($fragments[2]) || !ctype_digit($fragments[2])) {
@@ -648,7 +651,7 @@ class ApiV1
         } elseif (($fragments[1] ?? '') === 'new') {
             Response::success($this->termHandler->formatAddTranslation(
                 $params['term_text'],
-                (int)$params['lg_id'],
+                (int)($params['language_id'] ?? $params['lg_id'] ?? 0),
                 $params['translation']
             ));
         } elseif (($fragments[1] ?? '') === 'quick') {
@@ -1007,17 +1010,17 @@ class ApiV1
     {
         // GET /local-dictionaries/lookup - look up a term
         if (($fragments[1] ?? '') === 'lookup') {
-            $langId = (int)($params['lang_id'] ?? 0);
+            $languageId = (int)($params['language_id'] ?? $params['lang_id'] ?? 0);
             $term = $params['term'] ?? '';
 
-            if ($langId <= 0) {
-                Response::error('lang_id is required', 400);
+            if ($languageId <= 0) {
+                Response::error('language_id is required', 400);
             }
             if (empty($term)) {
                 Response::error('term is required', 400);
             }
 
-            Response::success($this->localDictionaryHandler->formatLookup($langId, $term));
+            Response::success($this->localDictionaryHandler->formatLookup($languageId, $term));
             return;
         }
 
@@ -1033,13 +1036,13 @@ class ApiV1
             return;
         }
 
-        // GET /local-dictionaries?lang_id=N - list dictionaries for language
-        $langId = (int)($params['lang_id'] ?? 0);
-        if ($langId <= 0) {
-            Response::error('lang_id is required', 400);
+        // GET /local-dictionaries?language_id=N - list dictionaries for language
+        $languageId = (int)($params['language_id'] ?? $params['lang_id'] ?? 0);
+        if ($languageId <= 0) {
+            Response::error('language_id is required', 400);
         }
 
-        Response::success($this->localDictionaryHandler->formatGetDictionaries($langId));
+        Response::success($this->localDictionaryHandler->formatGetDictionaries($languageId));
     }
 
     /**

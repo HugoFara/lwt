@@ -163,14 +163,16 @@ class LanguageApiHandler
     /**
      * Format response for phonetic reading.
      *
-     * @param array $params Request parameters with 'text' and either 'lang_id' or 'lang'
+     * @param array $params Request parameters with 'text' and either 'language_id' or 'lang'
      *
      * @return array{phonetic_reading: string}
      */
     public function formatPhoneticReading(array $params): array
     {
-        if (array_key_exists("lang_id", $params)) {
-            return $this->getPhoneticReading($params['text'], (int)$params['lang_id']);
+        // Accept both language_id (new) and lang_id (legacy) for backward compatibility
+        $languageId = $params['language_id'] ?? $params['lang_id'] ?? null;
+        if ($languageId !== null) {
+            return $this->getPhoneticReading($params['text'], (int)$languageId);
         }
         return $this->getPhoneticReading($params['text'], null, $params['lang']);
     }

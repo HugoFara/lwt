@@ -92,7 +92,7 @@ class DictionaryApiHandler
      * Create a new dictionary.
      *
      * @param array $data Dictionary data:
-     *                    - lang_id: int (required)
+     *                    - language_id: int (required)
      *                    - name: string (required)
      *                    - description: string (optional)
      *                    - source_format: string (optional, default: 'csv')
@@ -101,7 +101,8 @@ class DictionaryApiHandler
      */
     public function createDictionary(array $data): array
     {
-        $langId = (int)($data['lang_id'] ?? 0);
+        // Accept both language_id (new) and lang_id (legacy) for backward compatibility
+        $langId = (int)($data['language_id'] ?? $data['lang_id'] ?? 0);
         $name = trim($data['name'] ?? '');
         $description = isset($data['description']) ? trim($data['description']) : null;
         $sourceFormat = $data['source_format'] ?? 'csv';
@@ -641,7 +642,7 @@ class DictionaryApiHandler
     {
         return [
             'id' => $dictionary->id(),
-            'lang_id' => $dictionary->languageId(),
+            'language_id' => $dictionary->languageId(),
             'name' => $dictionary->name(),
             'description' => $dictionary->description(),
             'source_format' => $dictionary->sourceFormat(),
