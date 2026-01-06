@@ -21,7 +21,7 @@ use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Language\Application\Services\TextParsingService;
 // Note: TranslationService moved to Modules/Dictionary - registered by DictionaryServiceProvider
-use Lwt\Services\TtsService;
+// Note: TtsService moved to Modules/Admin - registered by AdminServiceProvider
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 // Note: WordPressService moved to Modules/User - registered by UserServiceProvider
 use Lwt\Services\WordService;
@@ -114,11 +114,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             );
         });
 
-        $container->singleton(TtsService::class, function (Container $c) {
-            return new TtsService(
-                $c->get(LanguageFacade::class)
-            );
-        });
+        // Note: TtsService moved to Modules/Admin - registered by AdminServiceProvider
 
         // Note: TextFacade is registered by TextServiceProvider in the Text module
 

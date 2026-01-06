@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\TtsService;
+use Lwt\Modules\Admin\Application\Services\TtsService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -16,7 +16,7 @@ Globals::setDatabaseName("test_" . $config['dbname']);
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Http/UrlUtilities.php';
 // LanguageFacade loaded via autoloader
-require_once __DIR__ . '/../../../src/backend/Services/TtsService.php';
+require_once __DIR__ . '/../../../src/Modules/Admin/Application/Services/TtsService.php';
 
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;

@@ -5,28 +5,28 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Admin\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\Admin\Application\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Language\Application\LanguageFacade;
 
-require_once __DIR__ . '/../../Shared/Infrastructure/Http/InputValidator.php';
+require_once __DIR__ . '/../../../../Shared/Infrastructure/Http/InputValidator.php';
 // LanguageFacade loaded via autoloader
 
 /**
  * Service class for Text-to-Speech settings.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Admin\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

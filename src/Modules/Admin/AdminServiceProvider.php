@@ -37,8 +37,8 @@ use Lwt\Modules\Admin\Application\Services\SessionCleaner;
 use Lwt\Modules\Admin\Http\AdminController;
 use Lwt\Modules\Admin\Http\AdminApiHandler;
 
-// Shared Services
-use Lwt\Services\TtsService;
+// Application Services
+use Lwt\Modules\Admin\Application\Services\TtsService;
 
 /**
  * Service provider for the Admin module.
@@ -135,6 +135,13 @@ class AdminServiceProvider implements ServiceProviderInterface
         // Session Cleaner
         $container->singleton(SessionCleaner::class, function (Container $_c) {
             return new SessionCleaner();
+        });
+
+        // TTS Service
+        $container->singleton(TtsService::class, function (Container $c) {
+            return new TtsService(
+                $c->get(\Lwt\Modules\Language\Application\LanguageFacade::class)
+            );
         });
     }
 

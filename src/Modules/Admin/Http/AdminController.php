@@ -20,7 +20,7 @@ use Lwt\Controllers\BaseController;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
-use Lwt\Services\TtsService;
+use Lwt\Modules\Admin\Application\Services\TtsService;
 
 require_once __DIR__ . '/../../../backend/Controllers/BaseController.php';
 require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
