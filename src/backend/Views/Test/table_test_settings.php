@@ -19,6 +19,10 @@ namespace Lwt\Views\Test;
 
 use Lwt\Shared\UI\Helpers\FormHelper;
 
+// Type assertions for view variables
+/** @var array{edit: bool, status: bool, term: bool, trans: bool, rom: bool, sentence: bool} $settings */
+$settings = $settings ?? ['edit' => false, 'status' => false, 'term' => false, 'trans' => false, 'rom' => false, 'sentence' => false];
+
 ?>
 <p>
     <input type="checkbox" id="cbEdit" <?php echo FormHelper::getChecked($settings['edit']); ?> />

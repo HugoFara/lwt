@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
-use Lwt\Services\WordService;
+use Lwt\Modules\Vocabulary\Application\Services\WordService;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
@@ -20,7 +20,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExportService.php';
 // LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../src/backend/Services/WordService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/WordService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/WordListService.php';
 
 /**

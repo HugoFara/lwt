@@ -4,7 +4,7 @@
  *
  * Variables expected:
  * - $textId: int - Text ID (0 for new text)
- * - $text: Lwt\Classes\Text - Text object
+ * - $text: object{id?: int, lgid?: int, title?: string, text?: string, source?: string, media_uri?: string} - Text data
  * - $annotated: bool - Whether the text has annotations
  * - $languageData: array - Mapping of language ID to language code
  * - $isNew: bool - Whether this is a new text
@@ -24,19 +24,27 @@
 
 namespace Lwt\Views\Text;
 
-/** @var int $textId */
-/** @var \Lwt\Classes\Text $text */
-/** @var bool $annotated */
-/** @var array $languageData */
-/** @var array $languages */
-/** @var bool $isNew */
-
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Core\Integration\YouTubeImport;
 
+// Type assertions for view variables
+$textId = (int) ($textId ?? 0);
+/**
+ * Text data object passed from controller.
+ * @psalm-suppress MixedAssignment, MixedPropertyFetch, RedundantCastGivenDocblockType, DocblockTypeContradiction
+ */
+$text = isset($text) && is_object($text) ? $text : new \stdClass();
+$textLgid = (int) ($text->lgid ?? 0);
+$textTitle = (string) ($text->title ?? '');
+$textContent = (string) ($text->text ?? '');
+$textSource = (string) ($text->source ?? '');
+$textMediaUri = (string) ($text->media_uri ?? '');
+/** @var array<int, array{id: int, name: string}> $languages */
+$languages = $languages ?? [];
+$scrdir = (string) ($scrdir ?? '');
 
 // Build actions based on whether this is a new or existing text
 $actions = [];
@@ -84,7 +92,7 @@ if ($isNew) {
                             data-action="change-language"
                             title="Select the language of your text"
                             required>
-                        <?php echo SelectOptionsBuilder::forLanguages($languages, $text->lgid, "[Choose...]"); ?>
+                        <?php echo SelectOptionsBuilder::forLanguages($languages, $textLgid, "[Choose...]"); ?>
                     </select>
                 </div>
             </div>
@@ -105,7 +113,7 @@ if ($isNew) {
                        data_info="Title"
                        name="TxTitle"
                        id="TxTitle"
-                       value="<?php echo \htmlspecialchars($text->title ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       value="<?php echo \htmlspecialchars($textTitle, ENT_QUOTES, 'UTF-8'); ?>"
                        maxlength="200"
                        placeholder="Enter a descriptive title for your text"
                        title="A short, memorable title to identify this text"
@@ -131,7 +139,7 @@ if ($isNew) {
                           rows="15"
                           placeholder="Paste or type your text here..."
                           title="The text you want to study"
-                          required><?php echo \htmlspecialchars($text->text ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                          required><?php echo \htmlspecialchars($textContent, ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
             <p class="help">Maximum 65,000 bytes. For longer texts, use the Long Text Import feature.</p>
         </div>
@@ -195,7 +203,7 @@ if ($isNew) {
                        data_info="Source URI"
                        name="TxSourceURI"
                        id="TxSourceURI"
-                       value="<?php echo \htmlspecialchars($text->source ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       value="<?php echo \htmlspecialchars($textSource, ENT_QUOTES, 'UTF-8'); ?>"
                        maxlength="1000"
                        placeholder="https://example.com/article"
                        title="Link to the original source of this text" />
@@ -222,7 +230,7 @@ if ($isNew) {
                        name="TxAudioURI"
                        id="TxAudioURI"
                        maxlength="2048"
-                       value="<?php echo \htmlspecialchars($text->media_uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       value="<?php echo \htmlspecialchars($textMediaUri, ENT_QUOTES, 'UTF-8'); ?>"
                        placeholder="media/audio.mp3 or https://example.com/video.mp4"
                        title="Audio or video file to play while reading" />
             </div>

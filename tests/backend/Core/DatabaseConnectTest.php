@@ -1014,35 +1014,6 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test check_text_valid function
-     */
-    public function testCheckTextValid(): void
-    {
-        
-        // Ensure DB connection exists
-        if (!Globals::getDbConnection()) {
-            list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
-            );
-            Globals::setDbConnection($connection);
-        }
-
-        // Test with non-existent language (returns null when language doesn't exist)
-        // check_text_valid outputs HTML, so we need to capture it
-        ob_start();
-        $result = TextParsing::checkValid(99999);
-        ob_end_clean();
-        $this->assertNull($result, 'Non-existent language should return null');
-
-        // Test with empty language
-        ob_start();
-        $result = TextParsing::checkValid(0);
-        ob_end_clean();
-        $this->assertTrue($result === null || $result === false, 'Empty language ID should return null or false');
-    }
-
-    /**
      * Test get_first_value function
      */
     public function testGetFirstValue(): void

@@ -26,6 +26,13 @@ namespace Lwt\Views\Text;
 use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
+// Type assertions for view variables
+$textId = (int) ($textId ?? 0);
+$langId = (int) ($langId ?? 0);
+$sourceUri = (string) ($sourceUri ?? '');
+$media = (string) ($media ?? '');
+$audioPosition = (int) ($audioPosition ?? 0);
+
 ?>
 <!-- Main navigation -->
 <?php echo PageLayoutHelper::buildNavbar('texts'); ?>

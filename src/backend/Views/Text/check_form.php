@@ -22,8 +22,8 @@ namespace Lwt\Views\Text;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-/** @var string $languagesOption */
-/** @var array $languageData */
+// Type assertions for view variables
+$languagesOption = (string) ($languagesOption ?? '');
 
 ?>
 <script type="application/json" id="language-data-config"><?php echo json_encode($languageData); ?></script>

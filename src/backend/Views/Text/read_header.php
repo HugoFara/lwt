@@ -32,9 +32,17 @@ use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Modules\Text\Application\Services\TextNavigationService;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
+// Type assertions for view variables
+$textId = (int) ($textId ?? 0);
+$langId = (int) ($langId ?? 0);
+$title = (string) ($title ?? '');
+$sourceUri = (string) ($sourceUri ?? '');
+$media = (string) ($media ?? '');
+$audioPosition = (int) ($audioPosition ?? 0);
+
 ?>
 <script type="application/json" id="text-header-config"><?php echo json_encode([
-    'textId' => (int) $textId,
+    'textId' => $textId,
     'phoneticText' => $phoneticText,
     'languageCode' => $languageCode,
     'voiceApi' => $voiceApi
@@ -83,7 +91,7 @@ use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
 <h1>READ &#x25B6;
     <?php
-    echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8');
+    echo \htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
     if (isset($sourceUri) && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')) {
         ?>
     <a href="<?php echo $sourceUri ?>" target="_blank">
@@ -117,4 +125,4 @@ use Lwt\Modules\Text\Application\Services\TextStatisticsService;
     <div><button id="readTextButton">Read in browser</button></div>
 </div>
 
-<?php (new MediaService())->renderMediaPlayer($media, (int) $audioPosition); ?>
+<?php (new MediaService())->renderMediaPlayer($media, $audioPosition); ?>

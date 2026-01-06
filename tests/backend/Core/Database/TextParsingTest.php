@@ -323,29 +323,9 @@ class TextParsingTest extends TestCase
         $this->assertStringContainsString('Test sentence', $output, 'Output should contain the text');
     }
 
-    // ===== checkValid() tests =====
+    // ===== parseAndSave() tests =====
 
-    public function testCheckValidOutputsHtml(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        // First, prepare some text to populate temptextitems using parseAndDisplayPreview
-        $this->callParseAndDisplayPreview("Hello world. Test sentence.", self::$testLanguageId);
-
-        ob_start();
-        TextParsing::checkValid(self::$testLanguageId);
-        $output = ob_get_clean();
-
-        // Should contain HTML elements
-        $this->assertStringContainsString('<h4>Sentences</h4>', $output);
-        $this->assertStringContainsString('<ol>', $output);
-    }
-
-    // ===== registerSentencesTextItems() tests =====
-
-    public function testRegisterSentencesTextItemsCreatesRecords(): void
+    public function testParseAndSaveCreatesSentencesAndTextItems(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -380,77 +360,6 @@ class TextParsingTest extends TestCase
         Connection::query("DELETE FROM $textitems2 WHERE Ti2TxID = $textId");
         Connection::query("DELETE FROM $sentences WHERE SeTxID = $textId");
         Connection::query("DELETE FROM $texts WHERE TxID = $textId");
-    }
-
-    // ===== displayStatistics() tests =====
-
-    public function testDisplayStatisticsOutputsJson(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        ob_start();
-        TextParsing::displayStatistics(self::$testLanguageId, false, false);
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('<script type="application/json"', $output);
-        $this->assertStringContainsString('text-check-config', $output);
-        $this->assertStringContainsString('multiWords', $output);
-        $this->assertStringContainsString('rtlScript', $output);
-    }
-
-    public function testDisplayStatisticsWithRtl(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        ob_start();
-        TextParsing::displayStatistics(self::$testLanguageId, true, false);
-        $output = ob_get_clean();
-
-        // RTL setting is now passed as JSON data for TypeScript to handle
-        $this->assertStringContainsString('"rtlScript":true', $output, 'RTL script flag should be true in JSON');
-    }
-
-    // ===== checkExpressions() tests =====
-
-    public function testCheckExpressionsWithEmptyArray(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        // Empty word length array should be handled gracefully
-        // This would cause issues with implode, so it shouldn't be called with empty array
-        // Just verify the function signature exists
-        $this->assertTrue(method_exists(TextParsing::class, 'checkExpressions'));
-    }
-
-    public function testCheckExpressionsCreatesTemporaryTable(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $tempexprs = Globals::table('tempexprs');
-
-        // First prepare some text using parseAndDisplayPreview to populate temptextitems
-        $this->callParseAndDisplayPreview("Hello world test.", self::$testLanguageId);
-
-        // Call checkExpressions with word lengths
-        TextParsing::checkExpressions([2, 3]);
-
-        // Check that tempexprs table exists and has been used
-        $result = Connection::query("SHOW TABLES LIKE '$tempexprs'");
-        $exists = mysqli_num_rows($result) > 0;
-        mysqli_free_result($result);
-
-        $this->assertTrue($exists, 'tempexprs table should exist');
-
-        // Clean up
-        Connection::query("TRUNCATE TABLE $tempexprs");
     }
 
     // ===== Edge cases =====

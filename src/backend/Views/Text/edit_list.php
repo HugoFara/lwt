@@ -25,8 +25,8 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Core\StringUtils;
 
-/** @var string $message */
-/** @var array $statuses */
+// Type assertions for view variables
+$message = (string) ($message ?? '');
 
 ?>
 <link rel="stylesheet" type="text/css" href="<?php StringUtils::printFilePath('css/css_charts.css');?>" />

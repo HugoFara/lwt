@@ -31,6 +31,11 @@ namespace Lwt\Views\Text;
 
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 
+// Type assertions for view variables
+$textId = (int) ($textId ?? 0);
+$termDelimiter = (string) ($termDelimiter ?? '');
+$annotatedText = (string) ($annotatedText ?? '');
+
 // Build variable array for JavaScript - will be merged into LWT_DATA by TypeScript
 // Prepare delimiter with escaped regex characters
 $delimiterEscaped = str_replace(
@@ -38,7 +43,7 @@ $delimiterEscaped = str_replace(
     ['\\\\','\\]','\\-','\\^'],
     $termDelimiter
 );
-$delimiterStr = is_string($delimiterEscaped) ? $delimiterEscaped : '';
+$delimiterStr = $delimiterEscaped;
 
 // Get annotations JSON
 $annotationsJson = (new AnnotationService())->annotationToJson($annotatedText);

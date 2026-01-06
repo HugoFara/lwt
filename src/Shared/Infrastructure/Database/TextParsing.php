@@ -395,7 +395,7 @@ class TextParsing
      *
      * @return void
      */
-    public static function saveWithSql(string $text, int $id): void
+    private static function saveWithSql(string $text, int $id): void
     {
         $file_name = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "tmpti.txt";
         $fp = fopen($file_name, 'w');
@@ -886,7 +886,7 @@ class TextParsing
      *
      * @return void
      */
-    public static function checkValid(int $lid): void
+    private static function checkValid(int $lid): void
     {
         $wo = $nw = array();
         $sentences = Connection::fetchAll(
@@ -943,7 +943,7 @@ class TextParsing
      *
      * @return void
      */
-    public static function registerSentencesTextItems(int $tid, int $lid, bool $hasmultiword): void
+    private static function registerSentencesTextItems(int $tid, int $lid, bool $hasmultiword): void
     {
         // STEP 1: Insert sentences FIRST to satisfy FK constraint.
         // TiSeID values in temptextitems are pre-computed to match the SeID
@@ -1013,7 +1013,7 @@ class TextParsing
      *
      * @return void
      */
-    public static function displayStatistics(int $lid, bool $rtlScript, bool $multiwords): void
+    private static function displayStatistics(int $lid, bool $rtlScript, bool $multiwords): void
     {
         $mw = array();
         if ($multiwords) {
@@ -1055,7 +1055,7 @@ class TextParsing
      *
      * @return void
      */
-    public static function checkExpressions(array $wl): void
+    private static function checkExpressions(array $wl): void
     {
         $wl_max = 0;
         $mw_sql = '';

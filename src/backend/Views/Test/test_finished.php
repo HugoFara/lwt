@@ -19,6 +19,10 @@
 
 namespace Lwt\Views\Test;
 
+// Type assertions for view variables
+$tomorrowTests = (int) ($tomorrowTests ?? 0);
+$totalTests = (int) ($totalTests ?? 0);
+
 $display = $hidden ? 'none' : 'inherit';
 ?>
 <p id="test-finished-area" class="center" style="display: <?php echo $display; ?>;">

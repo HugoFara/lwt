@@ -20,6 +20,12 @@ namespace Lwt\Views\Text;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
+// Type assertions for view variables
+/** @var array<int, string> $languageData */
+$languageData = $languageData ?? [];
+$languagesOption = (string) ($languagesOption ?? '');
+$maxInputVars = (int) ($maxInputVars ?? 1000);
+
 $actions = [
     ['url' => '/texts?new=1', 'label' => 'Short Text Import', 'icon' => 'circle-plus', 'class' => 'is-primary'],
     ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'],

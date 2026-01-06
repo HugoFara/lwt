@@ -24,6 +24,9 @@ use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+// Type assertions for view variables
+$message = (string) ($message ?? '');
+
 PageLayoutHelper::renderMessage($message, false);
 
 echo PageLayoutHelper::buildActionCard([

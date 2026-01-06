@@ -23,8 +23,24 @@ namespace Lwt\Views\Text;
 use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-/** @var int $textId */
-/** @var array $record */
+// Type assertions for view variables
+$textId = (int) ($textId ?? 0);
+/** @var array $recordInput */
+$recordInput = $record ?? [];
+/** @var array<string, mixed> $recordMerged */
+$recordMerged = array_merge([
+    'AtLgID' => 0, 'AtTitle' => '', 'AtText' => '',
+    'AtAudioURI' => '', 'AtSourceURI' => '', 'annotlen' => 0
+], $recordInput);
+// Extract typed values
+$recordAtLgId = (int) $recordMerged['AtLgID'];
+$recordAtTitle = (string) $recordMerged['AtTitle'];
+$recordAtText = (string) $recordMerged['AtText'];
+$recordAtAudioUri = (string) $recordMerged['AtAudioURI'];
+$recordAtSourceUri = (string) $recordMerged['AtSourceURI'];
+$recordAnnotLen = (int) $recordMerged['annotlen'];
+/** @var array<int, array{id: int, name: string}> $languages */
+$languages = $languages ?? [];
 
 $phpSelf = $_SERVER['PHP_SELF'] ?? '';
 ?>
@@ -44,7 +60,7 @@ $phpSelf = $_SERVER['PHP_SELF'] ?? '';
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
                             <select name="AtLgID" id="AtLgID" class="notempty setfocus" required>
-                                <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languages, $record['AtLgID'], '[Choose...]'); ?>
+                                <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languages, $recordAtLgId, '[Choose...]'); ?>
                             </select>
                         </div>
                     </div>
@@ -70,7 +86,7 @@ $phpSelf = $_SERVER['PHP_SELF'] ?? '';
                                data_info="Title"
                                name="AtTitle"
                                id="AtTitle"
-                               value="<?php echo htmlspecialchars($record['AtTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo htmlspecialchars($recordAtTitle, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
                                required />
                     </div>
@@ -97,7 +113,7 @@ $phpSelf = $_SERVER['PHP_SELF'] ?? '';
                                   data_maxlength="65000"
                                   data_info="Text"
                                   rows="15"
-                                  required><?php echo htmlspecialchars($record['AtText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                  required><?php echo htmlspecialchars($recordAtText, ENT_QUOTES, 'UTF-8'); ?></textarea>
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
@@ -116,7 +132,7 @@ $phpSelf = $_SERVER['PHP_SELF'] ?? '';
             <div class="field-body">
                 <div class="field">
                     <div class="control">
-                        <?php if ($record['annotlen']): ?>
+                        <?php if ($recordAnnotLen > 0): ?>
                         <div class="notification is-info is-light">
                             <span class="icon-text">
                                 <span class="icon has-text-success">
@@ -153,7 +169,7 @@ $phpSelf = $_SERVER['PHP_SELF'] ?? '';
                                data_info="Source URI"
                                name="AtSourceURI"
                                id="AtSourceURI"
-                               value="<?php echo htmlspecialchars($record['AtSourceURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo htmlspecialchars($recordAtSourceUri, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="1000"
                                placeholder="https://..." />
                     </div>
@@ -170,8 +186,7 @@ $phpSelf = $_SERVER['PHP_SELF'] ?? '';
                 <div class="field">
                     <div class="control">
                         <?php
-                        /** @psalm-suppress PossiblyUndefinedVariable */
-                        echo getArchivedTextTags($textId);
+                        echo (string) getArchivedTextTags($textId);
                         ?>
                     </div>
                 </div>
@@ -191,7 +206,7 @@ $phpSelf = $_SERVER['PHP_SELF'] ?? '';
                                data_info="Audio-URI"
                                name="AtAudioURI"
                                id="AtAudioURI"
-                               value="<?php echo htmlspecialchars($record['AtAudioURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo htmlspecialchars($recordAtAudioUri, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
                                placeholder="Path to audio file or URL" />
                     </div>

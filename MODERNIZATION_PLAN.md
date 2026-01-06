@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06 (TODO comments resolved - 18 items converted to NOTE markers)
+**Last Updated:** 2026-01-06 (WordService deprecated alias removed, tests migrated to module namespace)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 

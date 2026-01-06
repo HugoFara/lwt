@@ -22,6 +22,16 @@ namespace Lwt\Views\Text;
 
 // JavaScript moved to forms/form_initialization.ts (uses data-lwt-form-check and data-lwt-dirty)
 
+// Type assertions for view variables
+$langId = (int) ($langId ?? 0);
+$title = (string) ($title ?? '');
+$sourceUri = (string) ($sourceUri ?? '');
+$textTags = isset($textTags) ? (string) $textTags : null;
+/** @var array<int, array<int, string>> $texts */
+$texts = $texts ?? [];
+$textCount = (int) ($textCount ?? 0);
+$scrdir = (string) ($scrdir ?? '');
+
 $plural = ($textCount == 1 ? '' : 's');
 $shorter = ($textCount == 1 ? ' ' : ' shorter ');
 ?>

@@ -21,6 +21,9 @@ use Lwt\Modules\Text\Application\Services\AnnotationService;
 use Lwt\Modules\Text\Application\Services\TextNavigationService;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
+// Type assertions for view variables
+$textId = isset($textId) ? (int) $textId : null;
+
 ?>
 <div class="flex-header">
     <div>

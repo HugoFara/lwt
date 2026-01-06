@@ -27,13 +27,17 @@ namespace Lwt\Views\Word;
 
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
+// Type assertions for view variables
+$status = (int) ($status ?? 0);
+$translation = (string) ($translation ?? '');
+$textId = (int) ($textId ?? 0);
+
 ?>
 <p>Status: <?php
-/** @psalm-suppress PossiblyUndefinedVariable */
-echo get_colored_status_msg($status);
+echo (string) get_colored_status_msg($status);
 ?></p><br />
 <?php if ($translation != '*'): ?>
-<p>Translation: <b><?php echo htmlspecialchars($translation ?? '', ENT_QUOTES, 'UTF-8'); ?></b></p>
+<p>Translation: <b><?php echo htmlspecialchars($translation, ENT_QUOTES, 'UTF-8'); ?></b></p>
 <?php endif; ?>
 
 <script type="application/json" data-lwt-hover-save-result-config>
