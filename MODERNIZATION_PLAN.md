@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06 (WordController migration complete - VocabularyController now handles all routes)
+**Last Updated:** 2026-01-06 (FeedsController migration complete - FeedController now handles all routes)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1538,16 +1538,16 @@ The User module now has the standard modular structure:
 
 **Controllers Not Yet Migrated to Modules:**
 
-1. `FeedsController` - Partially duplicates `FeedController`
-2. `LocalDictionaryController` - No module equivalent
-3. `TextPrintController` - Text module lacks print functionality
-4. `TranslationController` - No module equivalent
-5. `AuthController` - User module incomplete
-6. `WordPressController` - No module equivalent
-7. `TestController` (legacy) - Review module has replacement
-8. `ApiController` - API entry point (may need to stay)
+1. `LocalDictionaryController` - No module equivalent
+2. `TextPrintController` - Text module lacks print functionality
+3. `TranslationController` - No module equivalent
+4. `AuthController` - User module incomplete
+5. `WordPressController` - No module equivalent
+6. `TestController` (legacy) - Review module has replacement
+7. `ApiController` - API entry point (may need to stay)
 
 **Recently Migrated:**
+- `FeedsController` → `Modules/Feed/Http/FeedController` (2026-01-06) - All methods natively implemented
 - `WordController` → `Modules/Vocabulary/Http/VocabularyController` (2026-01-06) - All methods natively implemented
 - `HomeController` → `Modules/Home/Http/HomeController` (2026-01-05)
 
@@ -1660,7 +1660,7 @@ Mixed naming conventions detected:
   - [x] SettingsHandler → AdminApiHandler
   - [x] StatisticsHandler → AdminApiHandler
   - [x] TermHandler → VocabularyApiHandler (2026-01-05)
-- [ ] Migrate remaining controllers to modules OR create missing modules (WordController DONE 2026-01-06)
+- [ ] Migrate remaining controllers to modules OR create missing modules (WordController, FeedsController DONE 2026-01-06)
 - [ ] Add tests for module facades (at least 80% coverage)
 - [ ] Remove deprecated routes and methods
 - [x] Clean up backup files (2026-01-05)
