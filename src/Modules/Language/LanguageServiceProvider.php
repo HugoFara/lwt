@@ -69,9 +69,14 @@ class LanguageServiceProvider implements ServiceProviderInterface
         });
 
         // Register MySqlLanguageRepository as concrete implementation
-        $container->singleton(MySqlLanguageRepository::class, function (Container $c) {
-            return $c->get(LanguageRepositoryInterface::class);
-        });
+        $container->singleton(
+            MySqlLanguageRepository::class,
+            /** @return MySqlLanguageRepository */
+            function (Container $c): MySqlLanguageRepository {
+                /** @var MySqlLanguageRepository */
+                return $c->get(LanguageRepositoryInterface::class);
+            }
+        );
 
         // Register Use Cases
         $this->registerUseCases($container);

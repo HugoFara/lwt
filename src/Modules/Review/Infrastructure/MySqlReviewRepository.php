@@ -75,7 +75,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             $record = mysqli_fetch_assoc($res);
             mysqli_free_result($res);
 
-            if ($record) {
+            if ($record !== null && $record !== false) {
                 return TestWord::fromRecord($record);
             }
         }
@@ -115,7 +115,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         $record = mysqli_fetch_assoc($res);
         mysqli_free_result($res);
 
-        if (!$record) {
+        if ($record === null || $record === false) {
             return ['sentence' => null, 'found' => false];
         }
 
@@ -251,7 +251,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             ->where('LgID', '=', $langId)
             ->firstPrepared();
 
-        if (!$record) {
+        if ($record === null) {
             return [
                 'name' => '',
                 'dict1Uri' => '',

@@ -92,7 +92,7 @@ class MySqlTextTagAssociation implements TagAssociationInterface
 
         // Insert new associations
         foreach ($tagIds as $tagId) {
-            $this->addTag($itemId, (int) $tagId);
+            $this->addTag($itemId, $tagId);
         }
     }
 
@@ -106,7 +106,7 @@ class MySqlTextTagAssociation implements TagAssociationInterface
 
         // Create/get tags and associate them
         foreach ($tagNames as $tagName) {
-            $tagName = trim((string) $tagName);
+            $tagName = trim($tagName);
             if ($tagName === '') {
                 continue;
             }
@@ -164,7 +164,7 @@ class MySqlTextTagAssociation implements TagAssociationInterface
 
         $count = 0;
         foreach ($itemIds as $itemId) {
-            if ($this->addTag((int) $itemId, $tagId)) {
+            if ($this->addTag($itemId, $tagId)) {
                 $count++;
             }
         }

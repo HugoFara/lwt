@@ -25,9 +25,13 @@ use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Prepare languages array for JSON
-$languagesJson = array_map(function ($lang) {
-    return ['id' => (int)$lang['LgID'], 'name' => $lang['LgName']];
-}, $languages);
+$languagesJson = array_map(
+    /** @param array{LgID: int|string, LgName: string} $lang */
+    function (array $lang): array {
+        return ['id' => (int)$lang['LgID'], 'name' => $lang['LgName']];
+    },
+    $languages
+);
 
 // Prepare options for JSON config
 $optionsConfig = [

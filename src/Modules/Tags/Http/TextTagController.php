@@ -34,13 +34,13 @@ class TextTagController extends AbstractCrudController
     private TagsFacade $facade;
 
     /** @var string */
-    private string $currentQuery;
+    private string $currentQuery = '';
 
     /** @var int */
-    private int $currentSort;
+    private int $currentSort = 1;
 
     /** @var int */
-    private int $currentPage;
+    private int $currentPage = 1;
 
     /**
      * Constructor.

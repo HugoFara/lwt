@@ -224,8 +224,8 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
 
             $result[] = [
                 'article' => $article,
-                'text_id' => $textId ?: null,
-                'archived_id' => $archivedId ?: null,
+                'text_id' => $textId,
+                'archived_id' => $archivedId,
                 'status' => $article->determineStatus($textId, $archivedId),
             ];
         }

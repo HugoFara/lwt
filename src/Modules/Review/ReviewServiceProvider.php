@@ -65,9 +65,14 @@ class ReviewServiceProvider implements ServiceProviderInterface
         });
 
         // Register MySqlReviewRepository as concrete implementation
-        $container->singleton(MySqlReviewRepository::class, function (Container $c) {
-            return $c->get(ReviewRepositoryInterface::class);
-        });
+        $container->singleton(
+            MySqlReviewRepository::class,
+            /** @return MySqlReviewRepository */
+            function (Container $c): MySqlReviewRepository {
+                /** @var MySqlReviewRepository */
+                return $c->get(ReviewRepositoryInterface::class);
+            }
+        );
 
         // Register Infrastructure
         $container->singleton(SessionStateManager::class, function (Container $_c) {

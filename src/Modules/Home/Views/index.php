@@ -84,16 +84,16 @@ if ($currentTextInfo !== null && $currenttext !== null) {
     $textStats = $textStatsService->getTextWordCount((string)$currenttext);
     $todoCount = $textStatsService->getTodoWordsCount($currenttext);
 
-    // Build statistics array with status counts (cast to int for JSON)
+    // Build statistics array with status counts
     $stats = [
         'unknown' => $todoCount,
-        's1' => (int)($textStats['statu'][$currenttext][1] ?? 0),
-        's2' => (int)($textStats['statu'][$currenttext][2] ?? 0),
-        's3' => (int)($textStats['statu'][$currenttext][3] ?? 0),
-        's4' => (int)($textStats['statu'][$currenttext][4] ?? 0),
-        's5' => (int)($textStats['statu'][$currenttext][5] ?? 0),
-        's98' => (int)($textStats['statu'][$currenttext][98] ?? 0),
-        's99' => (int)($textStats['statu'][$currenttext][99] ?? 0),
+        's1' => $textStats['statu'][$currenttext][1] ?? 0,
+        's2' => $textStats['statu'][$currenttext][2] ?? 0,
+        's3' => $textStats['statu'][$currenttext][3] ?? 0,
+        's4' => $textStats['statu'][$currenttext][4] ?? 0,
+        's5' => $textStats['statu'][$currenttext][5] ?? 0,
+        's98' => $textStats['statu'][$currenttext][98] ?? 0,
+        's99' => $textStats['statu'][$currenttext][99] ?? 0,
     ];
     $stats['total'] = $stats['unknown'] + $stats['s1'] + $stats['s2'] + $stats['s3']
         + $stats['s4'] + $stats['s5'] + $stats['s98'] + $stats['s99'];

@@ -643,7 +643,7 @@ class TagsFacade
         self::getAllTermTags(true);
 
         foreach ($tagNames as $tag) {
-            $tag = trim((string) $tag);
+            $tag = trim($tag);
             if ($tag === '') {
                 continue;
             }

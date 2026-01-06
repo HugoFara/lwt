@@ -25,8 +25,9 @@ use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-$span1 = $rtl ? '<span dir="rtl">' : '';
-$span2 = $rtl ? '</span>' : '';
+$isRtl = (bool)$rtl;
+$span1 = $isRtl ? '<span dir="rtl">' : '';
+$span2 = $isRtl ? '</span>' : '';
 
 $sent = htmlspecialchars(ExportService::replaceTabNewline((string)($word['WoSentence'] ?? '')), ENT_QUOTES, 'UTF-8');
 $sent1 = str_replace(

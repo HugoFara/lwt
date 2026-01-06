@@ -58,7 +58,7 @@ class ReviewApiHandler
     public function getWordTestData(string $testsql, bool $wordMode, int $testtype): array
     {
         $wordRecord = $this->reviewFacade->getNextWord($testsql);
-        if (empty($wordRecord)) {
+        if ($wordRecord === null || $wordRecord === []) {
             return [
                 "term_id" => 0,
                 "term_text" => '',

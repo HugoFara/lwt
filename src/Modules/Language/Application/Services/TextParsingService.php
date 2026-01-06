@@ -48,7 +48,7 @@ class TextParsingService
         $mecabArgs = escapeshellcmd($mecabArgs);
         if (str_starts_with($os, 'LIN') || str_starts_with($os, 'DAR')) {
             /** @psalm-suppress ForbiddenCode - Necessary for MeCab detection */
-            if (shell_exec("command -v mecab")) {
+            if (shell_exec("command -v mecab") !== null) {
                 return 'mecab' . $mecabArgs;
             }
             ErrorHandler::die(
@@ -58,15 +58,15 @@ class TextParsingService
         }
         if (str_starts_with($os, 'WIN')) {
             /** @psalm-suppress ForbiddenCode - Necessary for MeCab detection */
-            if (shell_exec('where /R "%ProgramFiles%\\MeCab\\bin" mecab.exe')) {
+            if (shell_exec('where /R "%ProgramFiles%\\MeCab\\bin" mecab.exe') !== null) {
                 return '"%ProgramFiles%\\MeCab\\bin\\mecab.exe"' . $mecabArgs;
             }
             /** @psalm-suppress ForbiddenCode - Necessary for MeCab detection */
-            if (shell_exec('where /R "%ProgramFiles(x86)%\\MeCab\\bin" mecab.exe')) {
+            if (shell_exec('where /R "%ProgramFiles(x86)%\\MeCab\\bin" mecab.exe') !== null) {
                 return '"%ProgramFiles(x86)%\\MeCab\\bin\\mecab.exe"' . $mecabArgs;
             }
             /** @psalm-suppress ForbiddenCode - Necessary for MeCab detection */
-            if (shell_exec('where mecab.exe')) {
+            if (shell_exec('where mecab.exe') !== null) {
                 return 'mecab.exe' . $mecabArgs;
             }
             ErrorHandler::die(

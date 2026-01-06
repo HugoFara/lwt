@@ -127,12 +127,12 @@ class TestService
                 break;
             case 'lang':
                 // Test words from a specific language
-                $langId = is_array($selection) ? (int)($selection[0] ?? 0) : $selection;
+                $langId = is_array($selection) ? ($selection[0] ?? 0) : $selection;
                 $testsql = " words WHERE WoLgID = $langId ";
                 break;
             case 'text':
                 // Test text items from a specific text ID
-                $textId = is_array($selection) ? (int)($selection[0] ?? 0) : $selection;
+                $textId = is_array($selection) ? ($selection[0] ?? 0) : $selection;
                 $testsql = " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
                 break;
@@ -325,7 +325,7 @@ class TestService
                 $record = mysqli_fetch_assoc($res);
                 mysqli_free_result($res);
 
-                if ($record) {
+                if ($record !== null && $record !== false) {
                     return $record;
                 }
             }
@@ -372,7 +372,7 @@ class TestService
             mysqli_free_result($res);
         }
 
-        if (!$record) {
+        if ($record === null || $record === false) {
             return ['sentence' => null, 'found' => false];
         }
 
@@ -399,7 +399,7 @@ class TestService
             ->where('LgID', '=', $langId)
             ->firstPrepared();
 
-        if (!$record) {
+        if ($record === null) {
             return [];
         }
 
