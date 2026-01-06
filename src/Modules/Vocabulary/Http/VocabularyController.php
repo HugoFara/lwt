@@ -32,7 +32,7 @@ use Lwt\Shared\Infrastructure\Database\Validation;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Tags\Application\TagsFacade;
-use Lwt\Services\WordService;
+use Lwt\Modules\Vocabulary\Application\Services\WordService;
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;

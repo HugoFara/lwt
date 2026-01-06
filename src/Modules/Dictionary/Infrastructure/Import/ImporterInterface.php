@@ -5,14 +5,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services\DictionaryImport
+ * @package  Lwt\Modules\Dictionary\Infrastructure\Import
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services\DictionaryImport;
+namespace Lwt\Modules\Dictionary\Infrastructure\Import;
 
 /**
  * Interface for dictionary importers.

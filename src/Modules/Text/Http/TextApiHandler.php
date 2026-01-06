@@ -21,7 +21,7 @@ use Lwt\Core\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
-use Lwt\Services\WordService;
+use Lwt\Modules\Vocabulary\Application\Services\WordService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 use Lwt\Modules\Tags\Application\TagsFacade;
@@ -30,9 +30,7 @@ use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Modules\Text\Application\Services\TextPrintService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-define('LWT_TEXT_API_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
-
-require_once LWT_TEXT_API_BACKEND_PATH . '/Services/WordService.php';
+require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/WordService.php';
 require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExportService.php';
 require_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
 require_once dirname(__DIR__) . '/Application/TextFacade.php';

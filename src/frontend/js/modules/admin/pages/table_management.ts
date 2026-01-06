@@ -105,28 +105,11 @@ export function initTableManagementAlpine(): void {
 // Auto-register before Alpine.start() is called
 initTableManagementAlpine();
 
-// Legacy exports for backward compatibility
+// Export to window for potential external use
 declare global {
   interface Window {
-    initTableManagement: typeof initTableManagementAlpine;
-    check_table_prefix: (value: string) => boolean;
-    checkTablePrefix: (value: string) => boolean;
+    tableManagementApp: typeof tableManagementApp;
   }
 }
 
-/**
- * Legacy function for checking table prefix validity.
- * @deprecated Use tableManagementApp().validatePrefix() instead
- */
-function checkTablePrefix(value: string): boolean {
-  const error = getValidationError(value);
-  if (error) {
-    alert(error);
-    return false;
-  }
-  return true;
-}
-
-window.initTableManagement = initTableManagementAlpine;
-window.check_table_prefix = checkTablePrefix;
-window.checkTablePrefix = checkTablePrefix;
+window.tableManagementApp = tableManagementApp;

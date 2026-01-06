@@ -16,9 +16,9 @@ namespace Lwt\Modules\Dictionary\Http;
 
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
 use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
-use Lwt\Services\DictionaryImport\CsvImporter;
-use Lwt\Services\DictionaryImport\JsonImporter;
-use Lwt\Services\DictionaryImport\StarDictImporter;
+use Lwt\Modules\Dictionary\Infrastructure\Import\CsvImporter;
+use Lwt\Modules\Dictionary\Infrastructure\Import\JsonImporter;
+use Lwt\Modules\Dictionary\Infrastructure\Import\StarDictImporter;
 use RuntimeException;
 
 /**

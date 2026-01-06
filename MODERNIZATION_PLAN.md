@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06 (TypeScript deprecations removed - 34 functions eliminated)
+**Last Updated:** 2026-01-06 (Deprecated TypeScript functions removed - 38 functions eliminated)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -1450,14 +1450,20 @@ Services have been migrated from `CoreServiceProvider` to their respective modul
 - All migrated services are registered in their respective module ServiceProviders
 - Legacy services kept for backward compatibility where needed
 
-**Remaining in CoreServiceProvider:**
-- `TextParsingService` - Shared parsing infrastructure
-- `SentenceService` - Used across Text/Vocabulary modules
-- `ExpressionService` - Used by Vocabulary module
-- `TtsService` - Used by Language module
-- `ExportService` - Used by Text module
-- `WordService` - Deprecated, use VocabularyFacade
-- `WordListService`, `WordUploadService` - Vocabulary module services
+**Remaining in CoreServiceProvider (Cleaned up 2026-01-06):**
+- `ParserRegistry` - Core parser infrastructure
+- `ParsingCoordinator` - Core parser coordination
+- `WordService` - **DEPRECATED** (kept for backward compatibility, use VocabularyFacade)
+
+**Migrated to Module ServiceProviders:**
+- `TextParsingService` → `LanguageServiceProvider`
+- `SentenceService` → `TextServiceProvider`
+- `ExpressionService`, `WordListService`, `WordUploadService`, `ExportService` → `VocabularyServiceProvider`
+- `TtsService` → `AdminServiceProvider`
+
+**DictionaryImport migrated (2026-01-06):**
+- `CsvImporter`, `JsonImporter`, `StarDictImporter` → `Modules/Dictionary/Infrastructure/Import/`
+- Registered in `DictionaryServiceProvider`
 
 #### Stage 4: Remove Legacy (40 hours)
 
@@ -1545,7 +1551,7 @@ Services have been migrated from `CoreServiceProvider` to their respective modul
 | PHPUnit Tests | PASS | 2825 tests, 6146 assertions |
 | TypeScript | PASS | No errors |
 | ESLint | PASS | No errors |
-| Deprecated Code | WARNING | 17 items remaining (15 PHP + 34 TypeScript deprecations removed 2026-01-06) |
+| Deprecated Code | GOOD | 4 items remaining (38 TypeScript + PHP deprecations removed 2026-01-06) |
 | TODO Comments | WARNING | 18 items |
 
 ### 5.1 Incomplete Module Migration
@@ -1710,9 +1716,9 @@ All changes accept both old and new parameter names for backward compatibility.
   - Documents minimum/maximum length, letter and number requirements
   - Includes security best practices and hashing algorithm details
 
-### 5.7 Deprecated Code (17 items remaining)
+### 5.7 Deprecated Code (4 items remaining)
 
-**PHP Deprecations (8 items remaining):**
+**PHP Deprecations (2 items remaining):**
 
 - ~~Routes marked `@deprecated 3.0.0` in `routes.php`~~ - **REMOVED** (2026-01-06)
 - `WordService` → Use `VocabularyFacade` (kept for backward compatibility - still in use)
@@ -1725,21 +1731,20 @@ All changes accept both old and new parameter names for backward compatibility.
 - ~~`PageLayoutHelper::buildQuickMenu`~~ - **REMOVED** (2026-01-06)
 - ~~`WordUploadService` wrapper~~ - **REMOVED** (2026-01-06)
 
-**TypeScript Deprecations (9 items remaining):**
+**TypeScript Deprecations (2 items remaining):**
 
-*Removed 2026-01-06 (34 functions):*
+*Removed 2026-01-06 (38 functions):*
 - ~~`tts_settings.ts` (14 functions)~~ - **REMOVED** - View uses `ttsSettingsApp()` Alpine component
 - ~~`word_upload.ts` (8 functions)~~ - **REMOVED** - View uses `wordUploadResultApp()` Alpine component
 - ~~`bulk_translate.ts` (10 functions)~~ - **REMOVED** - View uses `bulkTranslateApp()` Alpine component
 - ~~`word_dom_updates.ts` (1 function: `isJQueryTooltipEnabled`)~~ - **REMOVED** - Native tooltips only
 - ~~`server_data.ts` (1 function: `fetchApiVersion`)~~ - **REMOVED** - View uses `serverDataApp()` Alpine component
+- ~~`word_list_table.ts` (1 function: `initWordListTable`)~~ - **REMOVED** (2026-01-06) - View uses `wordListApp()` Alpine component
+- ~~`word_list_filter.ts` (2 functions: `navigateWithParams`, `initWordListFilter`)~~ - **REMOVED** (2026-01-06) - View uses `wordListApp()` Alpine component
+- ~~`table_management.ts` (1 function: `checkTablePrefix`)~~ - **REMOVED** (2026-01-06) - View uses `tableManagementApp()` Alpine component
 
-*Remaining (views not yet migrated to Alpine):*
-- `dictionary.ts` (2 functions: `createSentLookupLink`, `getLangFromDict`) - Still actively imported
-- `word_list_table.ts` (1 function: `initWordListTable`) - View uses window export
-- `word_list_filter.ts` (2 functions: `navigateWithParams`, `initWordListFilter`) - View uses window export
-- `table_management.ts` (1 function: `checkTablePrefix`) - View uses window export
-- Various page modules marked for Alpine.js migration (3 items)
+*Remaining (actively imported by other modules):*
+- `dictionary.ts` (2 functions: `createSentLookupLink`, `getLangFromDict`) - Still actively imported by `overlib_interface.ts`, `word_form_auto.ts`, `text_keyboard.ts`, `text_reading_init.ts`
 
 ### v3.0.0 Release Checklist
 
@@ -1771,10 +1776,13 @@ All changes accept both old and new parameter names for backward compatibility.
 
 **Should Complete:**
 
-- [ ] Migrate backend services to module Application layers
+- [x] Migrate backend services to module Application layers - **DONE** (2026-01-06)
+  - CoreServiceProvider cleaned up: only ParserRegistry, ParsingCoordinator, and deprecated WordService remain
+  - DictionaryImport services migrated to `Modules/Dictionary/Infrastructure/Import/`
+  - All module services now registered in their respective ServiceProviders
 - [ ] Add tests for critical use cases
 - [ ] Resolve all critical TODOs
-- [x] Remove deprecated TypeScript functions - **DONE** (2026-01-06) - 34 functions removed from 5 files
+- [x] Remove deprecated TypeScript functions - **DONE** (2026-01-06) - 38 functions removed from 8 files (including `initWordListTable`, `initWordListFilter`, `checkTablePrefix`)
 
 **Nice to Have:**
 

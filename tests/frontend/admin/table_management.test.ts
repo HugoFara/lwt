@@ -1,5 +1,5 @@
 /**
- * Tests for table_management.ts - Table set management page functionality
+ * Tests for table_management.ts - Table set management Alpine component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
@@ -16,88 +16,6 @@ describe('table_management.ts', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
-  });
-
-  // ===========================================================================
-  // checkTablePrefix Tests (via window global)
-  // ===========================================================================
-
-  describe('checkTablePrefix', () => {
-    it('returns false for empty string', () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      const result = window.checkTablePrefix('');
-
-      expect(result).toBe(false);
-      expect(alertSpy).toHaveBeenCalledWith('Table Set Name must not be empty');
-    });
-
-    it('returns false for whitespace only', () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      const result = window.checkTablePrefix('   ');
-
-      expect(result).toBe(false);
-      expect(alertSpy).toHaveBeenCalledWith('Table Set Name must not be empty');
-    });
-
-    it('returns false for invalid characters', () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      const result = window.checkTablePrefix('test-prefix');
-
-      expect(result).toBe(false);
-      expect(alertSpy).toHaveBeenCalledWith(
-        'Only letters, numbers, and underscores allowed'
-      );
-    });
-
-    it('returns false for special characters', () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      const result = window.checkTablePrefix('test@prefix');
-
-      expect(result).toBe(false);
-      expect(alertSpy).toHaveBeenCalledWith(
-        'Only letters, numbers, and underscores allowed'
-      );
-    });
-
-    it('returns false for name exceeding 20 characters', () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      const result = window.checkTablePrefix('this_is_a_very_long_prefix_name');
-
-      expect(result).toBe(false);
-      expect(alertSpy).toHaveBeenCalledWith('Maximum 20 characters');
-    });
-
-    it('returns true for valid alphanumeric prefix', () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      const result = window.checkTablePrefix('test_prefix_123');
-
-      expect(result).toBe(true);
-      expect(alertSpy).not.toHaveBeenCalled();
-    });
-
-    it('returns true for valid prefix with underscores', () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      const result = window.checkTablePrefix('my_table_set');
-
-      expect(result).toBe(true);
-      expect(alertSpy).not.toHaveBeenCalled();
-    });
-
-    it('returns true for exactly 20 characters', () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      const result = window.checkTablePrefix('12345678901234567890');
-
-      expect(result).toBe(true);
-      expect(alertSpy).not.toHaveBeenCalled();
-    });
   });
 
   // ===========================================================================
@@ -146,6 +64,22 @@ describe('table_management.ts', () => {
 
         expect(app.validatePrefix()).toBe(false);
         expect(app.createError).toBe('Maximum 20 characters');
+      });
+
+      it('returns true for valid alphanumeric prefix', () => {
+        const app = tableManagementApp();
+        app.newPrefix = 'test_prefix_123';
+
+        expect(app.validatePrefix()).toBe(true);
+        expect(app.createError).toBeNull();
+      });
+
+      it('returns true for exactly 20 characters', () => {
+        const app = tableManagementApp();
+        app.newPrefix = '12345678901234567890';
+
+        expect(app.validatePrefix()).toBe(true);
+        expect(app.createError).toBeNull();
       });
     });
 
@@ -237,16 +171,8 @@ describe('table_management.ts', () => {
   // ===========================================================================
 
   describe('window exports', () => {
-    it('exports initTableManagement to window', () => {
-      expect(typeof window.initTableManagement).toBe('function');
-    });
-
-    it('exports checkTablePrefix to window', () => {
-      expect(typeof window.checkTablePrefix).toBe('function');
-    });
-
-    it('exports check_table_prefix (legacy) to window', () => {
-      expect(typeof window.check_table_prefix).toBe('function');
+    it('exports tableManagementApp to window', () => {
+      expect(typeof window.tableManagementApp).toBe('function');
     });
   });
 });

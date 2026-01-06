@@ -30,6 +30,12 @@ use Lwt\Modules\Dictionary\Http\TranslationController;
 // Application Services
 use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 
+// Infrastructure - Dictionary Importers
+use Lwt\Modules\Dictionary\Infrastructure\Import\ImporterInterface;
+use Lwt\Modules\Dictionary\Infrastructure\Import\CsvImporter;
+use Lwt\Modules\Dictionary\Infrastructure\Import\JsonImporter;
+use Lwt\Modules\Dictionary\Infrastructure\Import\StarDictImporter;
+
 // Language Module
 use Lwt\Modules\Language\Application\LanguageFacade;
 
@@ -78,6 +84,19 @@ class DictionaryServiceProvider implements ServiceProviderInterface
             return new TranslationController(
                 $c->get(TranslationService::class)
             );
+        });
+
+        // Register Dictionary Importers
+        $container->singleton(CsvImporter::class, function (Container $_c) {
+            return new CsvImporter();
+        });
+
+        $container->singleton(JsonImporter::class, function (Container $_c) {
+            return new JsonImporter();
+        });
+
+        $container->singleton(StarDictImporter::class, function (Container $_c) {
+            return new StarDictImporter();
         });
     }
 

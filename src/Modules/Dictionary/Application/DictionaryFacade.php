@@ -16,10 +16,10 @@ namespace Lwt\Modules\Dictionary\Application;
 
 use Lwt\Core\Entity\LocalDictionary;
 use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
-use Lwt\Services\DictionaryImport\ImporterInterface;
-use Lwt\Services\DictionaryImport\CsvImporter;
-use Lwt\Services\DictionaryImport\JsonImporter;
-use Lwt\Services\DictionaryImport\StarDictImporter;
+use Lwt\Modules\Dictionary\Infrastructure\Import\ImporterInterface;
+use Lwt\Modules\Dictionary\Infrastructure\Import\CsvImporter;
+use Lwt\Modules\Dictionary\Infrastructure\Import\JsonImporter;
+use Lwt\Modules\Dictionary\Infrastructure\Import\StarDictImporter;
 use RuntimeException;
 
 /**

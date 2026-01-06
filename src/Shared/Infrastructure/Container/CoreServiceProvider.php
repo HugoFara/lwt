@@ -2,6 +2,9 @@
 /**
  * Core Service Provider
  *
+ * Registers cross-cutting infrastructure services that are shared across modules.
+ * Module-specific services are registered by their respective ServiceProviders.
+ *
  * PHP version 8.1
  *
  * @category Lwt
@@ -14,27 +17,28 @@
 
 namespace Lwt\Shared\Infrastructure\Container;
 
-use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
-// Note: HomeService was moved to Modules/Home - registered by HomeServiceProvider
-// Note: ExportService moved to Modules/Vocabulary - registered by VocabularyServiceProvider
-use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Modules\Text\Application\Services\SentenceService;
-use Lwt\Modules\Language\Application\Services\TextParsingService;
-// Note: TranslationService moved to Modules/Dictionary - registered by DictionaryServiceProvider
-// Note: TtsService moved to Modules/Admin - registered by AdminServiceProvider
-use Lwt\Modules\Vocabulary\Application\Services\WordListService;
-// Note: WordPressService moved to Modules/User - registered by UserServiceProvider
-use Lwt\Services\WordService;
-use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Core\Parser\ParserRegistry;
-use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 use Lwt\Core\Parser\ParsingCoordinator;
+use Lwt\Modules\Vocabulary\Application\Services\WordService;
+use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
+use Lwt\Modules\Text\Application\Services\SentenceService;
+use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 
 /**
- * Core service provider that registers essential application services.
+ * Core service provider that registers essential cross-cutting services.
  *
- * Services are registered as singletons to avoid creating multiple
- * instances during a single request.
+ * This provider only registers:
+ * - Parser infrastructure (ParserRegistry, ParsingCoordinator)
+ * - Legacy deprecated services (WordService) for backward compatibility
+ *
+ * Module-specific services are registered by their respective ServiceProviders:
+ * - TextParsingService → LanguageServiceProvider
+ * - SentenceService → TextServiceProvider
+ * - WordListService, WordUploadService, ExpressionService, ExportService → VocabularyServiceProvider
+ * - AuthService, PasswordService → UserServiceProvider
+ * - TtsService, BackupService, StatisticsService, etc. → AdminServiceProvider
+ * - TranslationService → DictionaryServiceProvider
+ * - TestService → ReviewServiceProvider
  *
  * @since 3.0.0
  */
@@ -45,16 +49,9 @@ class CoreServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
-        // Register core services as singletons
-        // These are the most commonly used services throughout the application
-
         // =====================
-        // Base services (no dependencies)
+        // Parser Infrastructure (core cross-cutting services)
         // =====================
-
-        $container->singleton(TextParsingService::class, function (Container $_c) {
-            return new TextParsingService();
-        });
 
         $container->singleton(ParserRegistry::class, function (Container $_c) {
             return new ParserRegistry();
@@ -66,57 +63,9 @@ class CoreServiceProvider implements ServiceProviderInterface
             );
         });
 
-        // LanguageFacade is registered by LanguageServiceProvider
-
-        // Note: AuthService moved to Modules/User - registered by UserServiceProvider
-
-        // Note: HomeService moved to Modules/Home - now HomeFacade registered by HomeServiceProvider
-
-        // Note: TestService moved to Modules/Review - registered by ReviewServiceProvider
-
-        // Note: TextPrintService moved to Modules/Text - registered by TextServiceProvider
-
-        // Note: TranslationService moved to Modules/Dictionary - registered by DictionaryServiceProvider
-
-        // Note: WordPressService moved to Modules/User - registered by UserServiceProvider
-
-        // NOTE: Admin services (BackupService, StatisticsService, SettingsService,
-        // DemoService, ServerDataService, ThemeService) are now in Modules/Admin
-        // and registered via AdminServiceProvider
-
-        // Note: PasswordService moved to Modules/User - registered by UserServiceProvider
-
-        // Note: TextDisplayService moved to Modules/Text - registered by TextServiceProvider
-
-        $container->singleton(WordListService::class, function (Container $_c) {
-            return new WordListService();
-        });
-
-        $container->singleton(WordUploadService::class, function (Container $_c) {
-            return new WordUploadService();
-        });
-
-        // Note: ExportService moved to Modules/Vocabulary - registered by VocabularyServiceProvider
-
         // =====================
-        // Services with dependencies
+        // Vocabulary Services
         // =====================
-
-        $container->singleton(SentenceService::class, function (Container $c) {
-            return new SentenceService(
-                $c->get(TextParsingService::class)
-            );
-        });
-
-        $container->singleton(ExpressionService::class, function (Container $c) {
-            return new ExpressionService(
-                $c->get(TextParsingService::class)
-            );
-        });
-
-        // Note: TtsService moved to Modules/Admin - registered by AdminServiceProvider
-
-        // Note: TextFacade is registered by TextServiceProvider in the Text module
 
         $container->singleton(WordService::class, function (Container $c) {
             return new WordService(
@@ -132,10 +81,7 @@ class CoreServiceProvider implements ServiceProviderInterface
      */
     public function boot(Container $container): void
     {
-        // No bootstrap logic needed for services
-        // Services are lazily instantiated when first requested
+        // No bootstrap logic needed for core services
     }
 }
 
-// Note: Services not registered here will be auto-wired on demand by the container
-// if they have constructors with type-hinted dependencies that are also registered.

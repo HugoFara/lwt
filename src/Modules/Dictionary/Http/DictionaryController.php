@@ -226,7 +226,7 @@ class DictionaryController extends BaseController
             // Add structure info for CSV
             if ($format === 'csv') {
                 $csvImporter = $this->dictionaryFacade->getImporter('csv', '');
-                if ($csvImporter instanceof \Lwt\Services\DictionaryImport\CsvImporter) {
+                if ($csvImporter instanceof \Lwt\Modules\Dictionary\Infrastructure\Import\CsvImporter) {
                     $delimiter = $csvImporter->detectDelimiter($filePath);
                     $headers = $csvImporter->detectHeaders($filePath, $delimiter);
                     $result['structure'] = [

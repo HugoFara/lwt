@@ -24,7 +24,7 @@ use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Modules\Tags\Application\TagsFacade;
-use Lwt\Services\WordService;
+use Lwt\Modules\Vocabulary\Application\Services\WordService;
 use Lwt\View\Helper\StatusHelper;
 
 /**
