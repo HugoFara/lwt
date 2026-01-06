@@ -96,10 +96,6 @@ class RssParser
         foreach ($rss->getElementsByTagName($feedTags['item']) as $node) {
             $item = $this->parseItemForDetection($node, $feedTags);
 
-            if ($item === null) {
-                continue;
-            }
-
             // Count text lengths for source detection
             if ($feedTags['item'] === 'item') {
                 $counts = $this->countTextLengths($item, 'desc', 'encoded');
