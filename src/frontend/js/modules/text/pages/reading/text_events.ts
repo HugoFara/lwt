@@ -19,7 +19,6 @@ import {
 } from './text_annotations';
 import { keydown_event_do_text_text } from './text_keyboard';
 import { setupMultiWordSelection } from './text_multiword_selection';
-import { loadModalFrame } from '@modules/text/pages/reading/frame_management';
 import {
   run_overlib_status_unknown,
   run_overlib_status_99,
@@ -198,9 +197,7 @@ function word_click_event_frame_mode(
       dictLinks.dict1, dictLinks.dict2, dictLinks.translator, hints,
       textId, order, text, multi_words, rtl
     );
-    loadModalFrame(
-      '/word/edit?tid=' + textId + '&ord=' + order + '&wid='
-    );
+    // Popup provides "Learn term" link to access edit form
   } else if (statusNum === 99) {
     run_overlib_status_99(
       dictLinks.dict1, dictLinks.dict2, dictLinks.translator, hints,
@@ -250,11 +247,7 @@ function word_click_event_api_mode(
       multi_words,
       rtl
     );
-
-    // Also open the edit form in the right frame for unknown words
-    loadModalFrame(
-      '/word/edit?tid=' + context.textId + '&ord=' + context.position + '&wid='
-    );
+    // Popup provides "Learn term" link to access edit form
   } else if (statusNum === 99 || statusNum === 98) {
     // Well-known or ignored - show edit/delete options
     content = buildKnownWordPopupContent(

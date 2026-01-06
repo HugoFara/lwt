@@ -8,7 +8,7 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
-import { showRightFramesPanel, loadDictionaryFrame } from '@modules/text/pages/reading/frame_management';
+// All dictionary functions now open in popup windows.
 
 /**
  * Open a window.
@@ -173,7 +173,7 @@ export function translateSentence(url: string, sentctl: HTMLTextAreaElement | un
   if (sentctl !== undefined && url !== '') {
     const text = sentctl.value;
     if (typeof text === 'string') {
-      loadDictionaryFrame(createTheDictUrl(url, text.replace(/[{}]/g, '')));
+      owin(createTheDictUrl(url, text.replace(/[{}]/g, '')));
     }
   }
 }
@@ -204,7 +204,7 @@ export function translateWord(url: string, wordctl: HTMLInputElement | undefined
   if (wordctl !== undefined && url !== '') {
     const text = wordctl.value;
     if (typeof text === 'string') {
-      loadDictionaryFrame(createTheDictUrl(url, text));
+      owin(createTheDictUrl(url, text));
     }
   }
 }
@@ -254,9 +254,14 @@ function initDictionaryEventDelegation(): void {
       return;
     }
 
-    // Handle dict-frame: open dictionary in right frame
-    if (target.closest('[data-action="dict-frame"]')) {
-      showRightFramesPanel();
+    // Handle dict-frame: open dictionary (legacy action, now opens in popup)
+    const dictFrame = target.closest<HTMLAnchorElement>('[data-action="dict-frame"]');
+    if (dictFrame) {
+      const url = dictFrame.href;
+      if (url) {
+        e.preventDefault();
+        owin(url);
+      }
       return;
     }
 
@@ -327,11 +332,11 @@ function initDictionaryEventDelegation(): void {
     }
   });
 
-  // Handle dict-auto-frame: auto-open dictionary in frame on page load
+  // Handle dict-auto-frame: auto-open dictionary (legacy action, now opens in popup)
   document.querySelectorAll<HTMLElement>('[data-action="dict-auto-frame"]').forEach(el => {
     const url = el.dataset.url;
     if (url) {
-      loadDictionaryFrame(url);
+      owin(url);
     }
   });
 }

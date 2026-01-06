@@ -1,14 +1,16 @@
 /**
  * Frame Management - Right frames show/hide/cleanup operations
  *
- * Note: As of v3.0.0, the main text reading interface at /text/read uses
- * Bulma + Alpine.js with API-based word operations via the word_store and
- * word_modal components instead of iframes.
+ * Note: The iframe-based reading interface has been replaced with
+ * Bulma + Alpine.js using API-based word operations via word_store
+ * and word_modal components.
  *
- * This module is retained for:
- * - The test/review interface which still uses iframes
- * - Dictionary frame loading and management
- * - Legacy interfaces that haven't been migrated
+ * The frame functions (loadModalFrame, loadDictionaryFrame, etc.) are
+ * kept for backward compatibility but return false when frames are not
+ * present (which is the default in modern templates).
+ *
+ * Sound functions (successSound, failureSound) are still used.
+ * Consider using audio_feedback.ts for new code.
  *
  * @license unlicense
  * @author  andreask7 <andreasks7@users.noreply.github.com>

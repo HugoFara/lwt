@@ -19,7 +19,7 @@ import {
   markWordIgnoredInDOM,
   updateLearnStatus
 } from '@modules/vocabulary/services/word_dom_updates';
-import { successSound, failureSound } from '@modules/text/pages/reading/frame_management';
+import { successSound, failureSound } from '@shared/utils/audio_feedback';
 import { cClick } from '@modules/vocabulary/components/word_popup';
 import { showResultPanel, showErrorInPanel } from '@modules/vocabulary/components/result_panel';
 

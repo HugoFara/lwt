@@ -276,28 +276,34 @@ describe('dictionary.ts', () => {
 
   describe('translateSentence', () => {
     it('does nothing when sentctl is undefined', () => {
+      const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+
       translateSentence('http://translate.com/lwt_term', undefined);
 
-      expect(frameManagement.loadDictionaryFrame).not.toHaveBeenCalled();
+      expect(openSpy).not.toHaveBeenCalled();
     });
 
     it('does nothing when URL is empty', () => {
+      const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
       const textarea = document.createElement('textarea');
       textarea.value = 'Hello world';
 
       translateSentence('', textarea);
 
-      expect(frameManagement.loadDictionaryFrame).not.toHaveBeenCalled();
+      expect(openSpy).not.toHaveBeenCalled();
     });
 
     it('translates sentence and removes curly braces', () => {
+      const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
       const textarea = document.createElement('textarea');
       textarea.value = 'Hello {world}';
 
       translateSentence('http://translate.com/lwt_term', textarea);
 
-      expect(frameManagement.loadDictionaryFrame).toHaveBeenCalledWith(
-        'http://translate.com/Hello%20world'
+      expect(openSpy).toHaveBeenCalledWith(
+        'http://translate.com/Hello%20world',
+        'dictwin',
+        expect.any(String)
       );
     });
   });
@@ -336,19 +342,24 @@ describe('dictionary.ts', () => {
 
   describe('translateWord', () => {
     it('does nothing when wordctl is undefined', () => {
+      const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+
       translateWord('http://dict.com/lwt_term', undefined);
 
-      expect(frameManagement.loadDictionaryFrame).not.toHaveBeenCalled();
+      expect(openSpy).not.toHaveBeenCalled();
     });
 
-    it('translates word in right frame', () => {
+    it('translates word in popup window', () => {
+      const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
       const input = document.createElement('input');
       input.value = 'bonjour';
 
       translateWord('http://dict.com/lwt_term', input);
 
-      expect(frameManagement.loadDictionaryFrame).toHaveBeenCalledWith(
-        'http://dict.com/bonjour'
+      expect(openSpy).toHaveBeenCalledWith(
+        'http://dict.com/bonjour',
+        'dictwin',
+        expect.any(String)
       );
     });
   });
@@ -425,6 +436,7 @@ describe('dictionary.ts', () => {
     });
 
     it('handles translate-word data action', () => {
+      const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
       document.body.innerHTML = `
         <input type="text" id="wordInput" value="hola" />
         <button
@@ -439,7 +451,11 @@ describe('dictionary.ts', () => {
       const button = document.querySelector('button') as HTMLButtonElement;
       button.click();
 
-      expect(frameManagement.loadDictionaryFrame).toHaveBeenCalled();
+      expect(openSpy).toHaveBeenCalledWith(
+        'http://dict.com/hola',
+        'dictwin',
+        expect.any(String)
+      );
     });
 
     it('handles translate-word-popup data action', () => {

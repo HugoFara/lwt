@@ -307,28 +307,30 @@ describe('simple_interactions.ts', () => {
     });
 
     describe('data-action="show-right-frames"', () => {
-      it('shows the right frames panel', () => {
+      it('is a legacy no-op action', () => {
+        // This action is kept for backward compatibility but does nothing
+        // since iframes were removed
         document.body.innerHTML = `
           <button data-action="show-right-frames">Show Frames</button>
         `;
 
         const button = document.querySelector('[data-action="show-right-frames"]') as HTMLElement;
-        button.dispatchEvent(new Event('click', { bubbles: true }));
-
-        expect(showRightFramesPanel).toHaveBeenCalled();
+        // Should not throw
+        expect(() => button.dispatchEvent(new Event('click', { bubbles: true }))).not.toThrow();
       });
     });
 
     describe('data-action="hide-right-frames"', () => {
-      it('hides the right frames panel', () => {
+      it('is a legacy no-op action', () => {
+        // This action is kept for backward compatibility but does nothing
+        // since iframes were removed
         document.body.innerHTML = `
           <button data-action="hide-right-frames">Hide Frames</button>
         `;
 
         const button = document.querySelector('[data-action="hide-right-frames"]') as HTMLElement;
-        button.dispatchEvent(new Event('click', { bubbles: true }));
-
-        expect(hideRightFrames).toHaveBeenCalled();
+        // Should not throw
+        expect(() => button.dispatchEvent(new Event('click', { bubbles: true }))).not.toThrow();
       });
     });
 
@@ -499,7 +501,7 @@ describe('simple_interactions.ts', () => {
     });
 
     describe('data-action="know-all"', () => {
-      it('shows right frames for all words well-known', () => {
+      it('navigates to mark all well-known', () => {
         vi.spyOn(window, 'confirm').mockReturnValue(true);
         document.body.innerHTML = `
           <button data-action="know-all" data-text-id="42">Know All</button>
@@ -509,11 +511,12 @@ describe('simple_interactions.ts', () => {
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-        expect(loadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=42');
+        expect(window.location.href).toBe('all_words_wellknown.php?text=42');
       });
 
       it('does nothing if cancelled', () => {
         vi.spyOn(window, 'confirm').mockReturnValue(false);
+        const originalHref = window.location.href;
         document.body.innerHTML = `
           <button data-action="know-all" data-text-id="42">Know All</button>
         `;
@@ -521,12 +524,12 @@ describe('simple_interactions.ts', () => {
         const button = document.querySelector('[data-action="know-all"]') as HTMLElement;
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
-        expect(loadModalFrame).not.toHaveBeenCalled();
+        expect(window.location.href).toBe(originalHref);
       });
     });
 
     describe('data-action="ignore-all"', () => {
-      it('shows right frames for all words ignored', () => {
+      it('navigates to mark all ignored', () => {
         vi.spyOn(window, 'confirm').mockReturnValue(true);
         document.body.innerHTML = `
           <button data-action="ignore-all" data-text-id="42">Ignore All</button>
@@ -536,12 +539,12 @@ describe('simple_interactions.ts', () => {
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-        expect(loadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=42&stat=98');
+        expect(window.location.href).toBe('all_words_wellknown.php?text=42&stat=98');
       });
     });
 
     describe('data-action="bulk-translate"', () => {
-      it('shows right frames with URL', () => {
+      it('navigates to bulk translate URL', () => {
         document.body.innerHTML = `
           <button data-action="bulk-translate" data-url="/bulk/translate">Bulk</button>
         `;
@@ -549,7 +552,7 @@ describe('simple_interactions.ts', () => {
         const button = document.querySelector('[data-action="bulk-translate"]') as HTMLElement;
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
-        expect(loadModalFrame).toHaveBeenCalledWith('/bulk/translate');
+        expect(window.location.href).toBe('/bulk/translate');
       });
     });
 

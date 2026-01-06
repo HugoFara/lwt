@@ -12,7 +12,6 @@ import { readRawTextAloud } from './user_interactions';
 import { initInlineEdit } from '@shared/components/inline_edit';
 import { initTermTags, initTextTags } from '@shared/components/tagify_tags';
 import { fetchTermTags, fetchTextTags } from '../stores/app_data';
-import { loadModalFrame } from '@modules/text/pages/reading/frame_management';
 import { spinnerHtml } from '@shared/icons/icons';
 
 /**
@@ -60,14 +59,9 @@ export function showAllwordsClick(): void {
   const showAll = showAllEl?.checked ? '1' : '0';
   const showLeaning = showLearningEl?.checked ? '1' : '0';
   const text = textEl?.textContent || '';
-  // Timeout necessary because the button is clicked on the left (would hide frames)
-  setTimeout(function () {
-    loadModalFrame(
-      'set_text_mode.php?mode=' + showAll + '&showLearning=' + showLeaning +
-      '&text=' + text
-    );
-  }, 500);
-  setTimeout(function () { window.location.reload(); }, 4000);
+  // Navigate to set mode endpoint and reload
+  window.location.href = 'set_text_mode.php?mode=' + showAll + '&showLearning=' + showLeaning +
+    '&text=' + text;
 }
 
 /**

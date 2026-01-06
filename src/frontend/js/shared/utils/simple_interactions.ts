@@ -14,7 +14,6 @@
  */
 
 import { lwtFormCheck } from '@shared/forms/unloadformcheck';
-import { showRightFramesPanel, hideRightFrames, loadModalFrame } from '@modules/text/pages/reading/frame_management';
 import { showAllwordsClick } from './ui_utilities';
 import { quickMenuRedirection } from './user_interactions';
 import { deleteTranslation, addTranslation } from '@modules/vocabulary/services/translation_api';
@@ -143,14 +142,14 @@ export function initSimpleInteractions(): void {
       break;
 
     case 'show-right-frames':
-      // Show the right frames panel
-      showRightFramesPanel();
+      // Legacy action - right frames panel was removed in v3.2.0
+      // This action is now a no-op
       break;
 
     case 'hide-right-frames':
-      // Hide the right frames panel
+      // Legacy action - right frames panel was removed in v3.2.0
+      // This action is now a no-op
       e.preventDefault();
-      hideRightFrames();
       break;
 
     case 'toggle-show-all':
@@ -193,7 +192,7 @@ export function initSimpleInteractions(): void {
       {
         const textId = el.dataset.textId;
         if (textId && confirm('Are you sure?')) {
-          loadModalFrame('all_words_wellknown.php?text=' + textId);
+          window.location.href = 'all_words_wellknown.php?text=' + textId;
         }
       }
       break;
@@ -204,16 +203,16 @@ export function initSimpleInteractions(): void {
       {
         const textId = el.dataset.textId;
         if (textId && confirm('Are you sure?')) {
-          loadModalFrame('all_words_wellknown.php?text=' + textId + '&stat=98');
+          window.location.href = 'all_words_wellknown.php?text=' + textId + '&stat=98';
         }
       }
       break;
 
     case 'bulk-translate':
-      // Open bulk translate in right frames
+      // Open bulk translate page
       e.preventDefault();
       if (url) {
-        loadModalFrame(url);
+        window.location.href = url;
       }
       break;
 

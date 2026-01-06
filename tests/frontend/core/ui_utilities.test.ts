@@ -200,7 +200,38 @@ describe('ui_utilities.ts', () => {
   // ===========================================================================
 
   describe('showAllwordsClick', () => {
-    it('calls loadModalFrame with correct parameters', () => {
+    let locationHrefSpy: ReturnType<typeof vi.fn>;
+    let originalLocation: Location;
+
+    beforeEach(() => {
+      originalLocation = window.location;
+      locationHrefSpy = vi.fn();
+      // Mock window.location to capture href assignments
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...originalLocation,
+          href: '',
+          set href(value: string) {
+            locationHrefSpy(value);
+          },
+          get href() {
+            return locationHrefSpy.mock.calls[locationHrefSpy.mock.calls.length - 1]?.[0] || '';
+          }
+        },
+        writable: true,
+        configurable: true
+      });
+    });
+
+    afterEach(() => {
+      Object.defineProperty(window, 'location', {
+        value: originalLocation,
+        writable: true,
+        configurable: true
+      });
+    });
+
+    it('navigates to set mode endpoint with correct parameters', () => {
       document.body.innerHTML = `
         <input type="checkbox" id="showallwords" checked />
         <input type="checkbox" id="showlearningtranslations" />
@@ -209,10 +240,9 @@ describe('ui_utilities.ts', () => {
 
       showAllwordsClick();
 
-      // Advance timers
-      vi.advanceTimersByTime(500);
-
-      expect(mockLoadModalFrame).toHaveBeenCalled();
+      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('set_text_mode.php'));
+      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('mode=1'));
+      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('text=42'));
     });
 
     it('sends mode=0 when showallwords is unchecked', () => {
@@ -224,10 +254,7 @@ describe('ui_utilities.ts', () => {
 
       showAllwordsClick();
 
-      vi.advanceTimersByTime(500);
-
-      const call = mockLoadModalFrame.mock.calls[0];
-      expect(call[0]).toContain('mode=0');
+      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('mode=0'));
     });
 
     it('includes showLearning parameter', () => {
@@ -239,30 +266,14 @@ describe('ui_utilities.ts', () => {
 
       showAllwordsClick();
 
-      vi.advanceTimersByTime(500);
-
-      const call = mockLoadModalFrame.mock.calls[0];
-      expect(call[0]).toContain('showLearning=1');
+      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('showLearning=1'));
     });
 
-    it('schedules page reload after 4 seconds', () => {
-      document.body.innerHTML = `
-        <input type="checkbox" id="showallwords" checked />
-        <input type="checkbox" id="showlearningtranslations" />
-        <span id="thetextid">42</span>
-      `;
+    it('handles missing elements gracefully', () => {
+      document.body.innerHTML = '';
 
-      const reloadSpy = vi.fn();
-      Object.defineProperty(window, 'location', {
-        value: { reload: reloadSpy },
-        writable: true
-      });
-
-      showAllwordsClick();
-
-      vi.advanceTimersByTime(4000);
-
-      expect(reloadSpy).toHaveBeenCalled();
+      // Should not throw
+      expect(() => showAllwordsClick()).not.toThrow();
     });
   });
 

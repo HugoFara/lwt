@@ -27,8 +27,7 @@ vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates',
   updateLearnStatus: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
-  cleanupRightFrames: vi.fn(),
+vi.mock('../../../src/frontend/js/shared/utils/audio_feedback', () => ({
   successSound: vi.fn(),
   failureSound: vi.fn()
 }));
@@ -63,7 +62,7 @@ import {
   markWordIgnoredInDOM,
   updateLearnStatus
 } from '../../../src/frontend/js/modules/vocabulary/services/word_dom_updates';
-import { successSound, failureSound } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
+import { successSound, failureSound } from '../../../src/frontend/js/shared/utils/audio_feedback';
 import { cClick } from '../../../src/frontend/js/modules/vocabulary/components/word_popup';
 import { showResultPanel, showErrorInPanel } from '../../../src/frontend/js/modules/vocabulary/components/result_panel';
 
