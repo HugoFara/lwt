@@ -102,8 +102,9 @@ class FeedApiHandler
             ->updatePrepared(['NfUpdate' => time()]);
 
         $nfMaxLinksRaw = $this->feedFacade->getNfOption($nfoptions, 'max_links');
-        if (!$nfMaxLinksRaw || is_array($nfMaxLinksRaw)) {
-            if ($this->feedFacade->getNfOption($nfoptions, 'article_source')) {
+        if ($nfMaxLinksRaw === null || $nfMaxLinksRaw === '' || is_array($nfMaxLinksRaw)) {
+            $articleSource = $this->feedFacade->getNfOption($nfoptions, 'article_source');
+            if ($articleSource !== null && $articleSource !== '' && !is_array($articleSource)) {
                 $nfMaxLinksRaw = Settings::getWithDefault('set-max-articles-with-text');
             } else {
                 $nfMaxLinksRaw = Settings::getWithDefault('set-max-articles-without-text');
@@ -160,7 +161,7 @@ class FeedApiHandler
     {
         $articleSource = $this->feedFacade->getNfOption($nfoptions, 'article_source');
         $feed = $this->feedFacade->parseRssFeed($nfsourceuri, is_string($articleSource) ? $articleSource : '');
-        if (empty($feed)) {
+        if (!is_array($feed) || count($feed) === 0) {
             return [
                 "error" => 'Could not load "' . $nfname . '"'
             ];
@@ -226,9 +227,9 @@ class FeedApiHandler
             $whereConditions[] = "NfLgID = ?";
             $queryParams[] = $langId;
         }
-        if (!empty($query)) {
+        if (is_string($query) && $query !== '') {
             $whereConditions[] = "NfName LIKE ?";
-            $queryParams[] = '%' . str_replace('*', '%', (string)$query) . '%';
+            $queryParams[] = '%' . str_replace('*', '%', $query) . '%';
         }
 
         $where = implode(' AND ', $whereConditions);
@@ -362,7 +363,7 @@ class FeedApiHandler
             ->select(['LgName'])
             ->where('LgID', '=', (int)$feed['NfLgID'])
             ->firstPrepared();
-        if ($langResult) {
+        if ($langResult !== null) {
             $feed['LgName'] = $langResult['LgName'];
         }
 
@@ -371,7 +372,7 @@ class FeedApiHandler
             ->select(['COUNT(*) AS cnt'])
             ->where('FlNfID', '=', $feedId)
             ->firstPrepared();
-        if ($countResult) {
+        if ($countResult !== null) {
             $feed['articleCount'] = (int)$countResult['cnt'];
         }
 
@@ -502,8 +503,8 @@ class FeedApiHandler
         $whereConditions = ["FlNfID = ?"];
         $queryParams = [$feedId];
 
-        if (!empty($query)) {
-            $pattern = '%' . str_replace('*', '%', (string)$query) . '%';
+        if (is_string($query) && $query !== '') {
+            $pattern = '%' . str_replace('*', '%', $query) . '%';
             $whereConditions[] = "(FlTitle LIKE ? OR FlDescription LIKE ?)";
             $queryParams[] = $pattern;
             $queryParams[] = $pattern;
@@ -640,7 +641,7 @@ class FeedApiHandler
     public function importArticles(array $data): array
     {
         $articleIds = $data['article_ids'] ?? [];
-        if (empty($articleIds)) {
+        if (!is_array($articleIds) || count($articleIds) === 0) {
             return ['success' => false, 'imported' => 0, 'errors' => ['No articles selected']];
         }
 

@@ -120,7 +120,7 @@ class FeedServiceProvider implements ServiceProviderInterface
             return new MySqlFeedRepository();
         });
 
-        $container->singleton(MySqlFeedRepository::class, function (Container $c) {
+        $container->singleton(MySqlFeedRepository::class, function (Container $c): FeedRepositoryInterface {
             return $c->get(FeedRepositoryInterface::class);
         });
 
@@ -129,7 +129,7 @@ class FeedServiceProvider implements ServiceProviderInterface
             return new MySqlArticleRepository();
         });
 
-        $container->singleton(MySqlArticleRepository::class, function (Container $c) {
+        $container->singleton(MySqlArticleRepository::class, function (Container $c): ArticleRepositoryInterface {
             return $c->get(ArticleRepositoryInterface::class);
         });
 
@@ -138,7 +138,7 @@ class FeedServiceProvider implements ServiceProviderInterface
             return new TextCreationAdapter();
         });
 
-        $container->singleton(TextCreationAdapter::class, function (Container $c) {
+        $container->singleton(TextCreationAdapter::class, function (Container $c): TextCreationInterface {
             return $c->get(TextCreationInterface::class);
         });
     }

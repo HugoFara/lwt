@@ -654,6 +654,7 @@ class FeedController
             if ($requiresEdit) {
                 // Include edit form view
                 $scrdir = $this->languageFacade->getScriptDirectionTag((int)$row['NfLgID']);
+                /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
                 include $this->viewPath . 'edit_text_form.php';
             } elseif (is_array($texts)) {
                 $result = $this->createTextsFromFeed($texts, $row, $tagName, $maxTexts);
@@ -669,6 +670,7 @@ class FeedController
         }
 
         if ($editText == 1) {
+            /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
             include $this->viewPath . 'edit_text_footer.php';
         }
 
@@ -821,7 +823,7 @@ class FeedController
 
         // Format last update for view
         $lastUpdateFormatted = null;
-        if ($feedTime) {
+        if ($feedTime !== null && $feedTime !== '' && $feedTime !== 0) {
             $diff = time() - (int)$feedTime;
             $lastUpdateFormatted = $this->feedFacade->formatLastUpdate($diff);
         }
@@ -831,6 +833,7 @@ class FeedController
         $languages = $this->languageFacade->getLanguagesForSelect();
 
         // Include browse view
+        /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
         include $this->viewPath . 'browse.php';
     }
 
@@ -1018,11 +1021,14 @@ class FeedController
      * Show the new feed form.
      *
      * @return void
+     *
+     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
      */
     private function showNewForm(): void
     {
         $languages = $this->feedFacade->getLanguages();
 
+        /** @psalm-suppress UnresolvableInclude */
         include $this->viewPath . 'new.php';
     }
 
@@ -1037,7 +1043,7 @@ class FeedController
     {
         $feed = $this->feedFacade->getFeedById($feedId);
 
-        if (!$feed) {
+        if ($feed === null) {
             echo '<p class="red">Feed not found.</p>';
             return;
         }
@@ -1060,6 +1066,7 @@ class FeedController
             $autoUpdateInterval = substr($autoUpdateRaw, 0, -1);
         }
 
+        /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
         include $this->viewPath . 'edit.php';
     }
 
@@ -1078,6 +1085,7 @@ class FeedController
         $feedService = $this->feedFacade;
         $languages = $this->languageFacade->getLanguagesForSelect();
 
+        /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
         include $this->viewPath . 'multi_load.php';
     }
 
@@ -1149,6 +1157,7 @@ class FeedController
         $feedService = $this->feedFacade;
         $languages = $this->languageFacade->getLanguagesForSelect();
 
+        /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
         include $this->viewPath . 'index.php';
     }
 
@@ -1192,6 +1201,8 @@ class FeedController
      * Wizard Step 1: Insert Feed URI.
      *
      * @return void
+     *
+     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
      */
     private function wizardStep1(): void
     {
@@ -1242,6 +1253,7 @@ class FeedController
         $wizardData = &$_SESSION['wizard'];
         $feedHtml = $this->getStep2FeedHtml();
 
+        /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
         include $this->viewPath . 'wizard_step2.php';
 
         PageLayoutHelper::renderPageEnd();
@@ -1263,6 +1275,7 @@ class FeedController
         $wizardData = &$_SESSION['wizard'];
         $feedHtml = $this->getStep3FeedHtml();
 
+        /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
         include $this->viewPath . 'wizard_step3.php';
 
         PageLayoutHelper::renderPageEnd();
@@ -1295,6 +1308,7 @@ class FeedController
         $languages = $this->feedFacade->getLanguages();
         $service = $this->feedFacade;
 
+        /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
         include $this->viewPath . 'wizard_step4.php';
 
         // Clear wizard session after step 4
@@ -1331,7 +1345,7 @@ class FeedController
     {
         $row = $this->feedFacade->getFeedById($feedId);
 
-        if (!$row) {
+        if ($row === null) {
             header("Location: /feeds/wizard?step=1&err=1");
             exit();
         }
@@ -1377,7 +1391,7 @@ class FeedController
         $_SESSION['wizard']['options'] = $row['NfOptions'];
 
         $feedText = $_SESSION['wizard']['feed']['feed_text'] ?? '';
-        if (empty($feedText)) {
+        if ($feedText === '' || $feedText === false) {
             $_SESSION['wizard']['feed']['feed_text'] = '';
             $_SESSION['wizard']['detected_feed'] = 'Detected: «Webpage Link»';
         } else {
@@ -1426,7 +1440,7 @@ class FeedController
         $_SESSION['wizard']['feed'] = $this->feedFacade->detectAndParseFeed($rssUrl);
         $_SESSION['wizard']['rss_url'] = $rssUrl;
 
-        if (empty($_SESSION['wizard']['feed'])) {
+        if ($_SESSION['wizard']['feed'] === false || (is_array($_SESSION['wizard']['feed']) && count($_SESSION['wizard']['feed']) === 0)) {
             unset($_SESSION['wizard']['feed']);
             header("Location: /feeds/wizard?step=1&err=1");
             exit();
@@ -1674,10 +1688,13 @@ class FeedController
      * @param array<string, string> $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
      */
     public function spa(array $params): void
     {
         PageLayoutHelper::renderPageStart('Feed Manager', true);
+        /** @psalm-suppress UnresolvableInclude */
         include $this->viewPath . 'spa.php';
         PageLayoutHelper::renderPageEnd();
     }
