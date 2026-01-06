@@ -1630,13 +1630,23 @@ All Psalm level 3 errors have been resolved.
 
 ### 5.5 API Parameter Inconsistencies
 
-Mixed naming conventions detected:
+**Status:** ✅ COMPLETE (2026-01-06)
 
-- `lg_id` vs `lang_id` vs `language_id`
-- `texts_id` vs `ids` vs `textId` vs `tid`
-- `word_lc` vs other term references
+Standardized API parameter naming with backward compatibility:
 
-**Resolution:** Standardize on consistent parameter names across all endpoints.
+| Old Names | New Standard | Endpoints Updated |
+|-----------|--------------|-------------------|
+| `lg_id`, `lang_id` | `language_id` | 9 endpoints |
+| `texts_id` | `text_ids` | 1 endpoint |
+| `tid` | `term_id` | 2 endpoints |
+| `word_id` | `term_id` | 1 endpoint |
+| `word_lc` | `term_lc` | 2 endpoints |
+
+Response field standardizations:
+- `word_id` → `term_id`, `word_text` → `term_text` in review responses
+- `lang_id` → `language_id` in dictionary/text responses
+
+All changes accept both old and new parameter names for backward compatibility.
 
 ### 5.6 Cleanup Tasks
 
@@ -1703,7 +1713,7 @@ Mixed naming conventions detected:
 - [x] Add tests for module facades (at least 80% coverage) - **100% COMPLETE** (2026-01-06) - All 10 facades tested
 - [x] Remove deprecated routes and methods (2026-01-06) - 15 deprecated items removed
 - [x] Clean up backup files (2026-01-05)
-- [ ] Standardize API parameter naming
+- [x] Standardize API parameter naming (2026-01-06) - 15 parameters standardized
 - [ ] Update API version from 0.1.1
 
 **Should Complete:**
