@@ -357,7 +357,7 @@ class TextParsing
     }
 
     // =========================================================================
-    // DEPRECATED METHODS - Kept for backwards compatibility
+    // INTERNAL METHODS - Called by public API methods
     // =========================================================================
 
     /**
@@ -371,9 +371,9 @@ class TextParsing
      *
      * @psalm-return non-empty-list<string>|null
      *
-     * @deprecated Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
+     * @internal Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
      */
-    public static function parseJapanese(string $text, int $id): ?array
+    private static function parseJapanese(string $text, int $id): ?array
     {
         if ($id == -2) {
             return self::splitJapaneseSentences($text);
@@ -787,9 +787,9 @@ class TextParsing
      *
      * @psalm-return non-empty-list<string>|null
      *
-     * @deprecated Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
+     * @internal Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
      */
-    public static function parseStandard(string $text, int $id, int $lid): ?array
+    private static function parseStandard(string $text, int $id, int $lid): ?array
     {
         $settings = self::getLanguageSettings($lid);
 
@@ -845,9 +845,9 @@ class TextParsing
      *
      * @psalm-return non-empty-list<string>|null
      *
-     * @deprecated Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
+     * @internal Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
      */
-    public static function prepare(string $text, int $id, int $lid): ?array
+    private static function prepare(string $text, int $id, int $lid): ?array
     {
         $record = QueryBuilder::table('languages')
             ->where('LgID', '=', $lid)
@@ -1170,11 +1170,11 @@ class TextParsing
      *
      * @psalm-return non-empty-list<string>|null
      *
-     * @psalm-suppress PossiblyUnusedReturnValue Return only used when $id = -2
+     * @psalm-suppress PossiblyUnusedReturnValue,UnusedReturnValue Return only used when $id = -2
      *
-     * @deprecated Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
+     * @internal Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
      */
-    public static function splitCheck(string $text, string|int $lid, int $id): ?array
+    private static function splitCheck(string $text, string|int $lid, int $id): ?array
     {
         $wl = array();
         $lid = (int) $lid;

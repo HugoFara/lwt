@@ -519,55 +519,78 @@ class TextParsingTest extends TestCase
      * When a text ends without punctuation, the last word should still be
      * recognized as a word (WordCount=1), not as a non-word (WordCount=0).
      *
-     * Note: This test calls internal methods directly to validate temptextitems table
-     * population behavior. Uses prepare() which is deprecated but still public for
-     * backward compatibility and internal testing.
+     * This test verifies the behavior through the public parseAndSave() API
+     * and checks the final textitems2 table for correct word recognition.
      */
-    public function testInternalParseLastWordRecognizedWithoutPunctuation(): void
+    public function testParseAndSaveLastWordRecognizedWithoutPunctuation(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $temptextitems = 'temptextitems';
-        Connection::query("DROP TEMPORARY TABLE IF EXISTS $temptextitems");
-        Connection::query("CREATE TEMPORARY TABLE $temptextitems (
-            TiSeID INT,
-            TiCount INT,
-            TiOrder INT,
-            TiText VARCHAR(250),
-            TiWordCount INT
-        )");
+        $texts = Globals::table('texts');
+        $sentences = Globals::table('sentences');
+        $textitems2 = Globals::table('textitems2');
 
         // Test text WITHOUT punctuation
-        Connection::query("TRUNCATE $temptextitems");
-        TextParsing::prepare("Hello world", 1, self::$testLanguageId);
-        $result = Connection::fetchAll(
-            "SELECT TiText, TiWordCount FROM $temptextitems ORDER BY TiOrder"
+        $sql = "INSERT INTO $texts (TxLgID, TxTitle, TxText, TxAudioURI)
+                VALUES (" . self::$testLanguageId . ", 'Issue 114 Test NoPunct', 'Hello world', '')";
+        Connection::query($sql);
+        $textIdNoPunct = mysqli_insert_id(Globals::getDbConnection());
+
+        TextParsing::parseAndSave("Hello world", self::$testLanguageId, $textIdNoPunct);
+
+        // Query textitems2 to check word recognition
+        $resultNoPunct = Connection::fetchAll(
+            "SELECT Ti2Text, Ti2WordCount FROM $textitems2
+             WHERE Ti2TxID = $textIdNoPunct ORDER BY Ti2Order"
         );
 
-        // Both "Hello" and "world" should be recognized as words (WordCount=1)
-        $this->assertCount(2, $result, 'Should have 2 words');
-        $this->assertEquals('Hello', $result[0]['TiText']);
-        $this->assertEquals(1, (int)$result[0]['TiWordCount'], 'First word should have WordCount=1');
-        $this->assertEquals('world', $result[1]['TiText']);
-        $this->assertEquals(1, (int)$result[1]['TiWordCount'], 'Last word should have WordCount=1 even without trailing punctuation');
+        // Filter to only word items (Ti2WordCount > 0)
+        $wordsNoPunct = array_filter($resultNoPunct, fn($r) => (int)$r['Ti2WordCount'] > 0);
+        $wordsNoPunct = array_values($wordsNoPunct); // Re-index
+
+        // Both "Hello" and "world" should be recognized as words
+        $this->assertCount(2, $wordsNoPunct, 'Should have 2 words without punctuation');
+        $this->assertEquals('Hello', $wordsNoPunct[0]['Ti2Text']);
+        $this->assertEquals(1, (int)$wordsNoPunct[0]['Ti2WordCount'], 'First word should have WordCount=1');
+        $this->assertEquals('world', $wordsNoPunct[1]['Ti2Text']);
+        $this->assertEquals(1, (int)$wordsNoPunct[1]['Ti2WordCount'], 'Last word should have WordCount=1 even without trailing punctuation');
 
         // Test text WITH punctuation for comparison
-        Connection::query("TRUNCATE $temptextitems");
-        TextParsing::prepare("Hello world.", 1, self::$testLanguageId);
+        $sql = "INSERT INTO $texts (TxLgID, TxTitle, TxText, TxAudioURI)
+                VALUES (" . self::$testLanguageId . ", 'Issue 114 Test WithPunct', 'Hello world.', '')";
+        Connection::query($sql);
+        $textIdWithPunct = mysqli_insert_id(Globals::getDbConnection());
+
+        TextParsing::parseAndSave("Hello world.", self::$testLanguageId, $textIdWithPunct);
+
         $resultWithPunct = Connection::fetchAll(
-            "SELECT TiText, TiWordCount FROM $temptextitems ORDER BY TiOrder"
+            "SELECT Ti2Text, Ti2WordCount FROM $textitems2
+             WHERE Ti2TxID = $textIdWithPunct ORDER BY Ti2Order"
         );
 
-        // Both words should still be recognized, plus the period as non-word
-        $this->assertCount(3, $resultWithPunct, 'Should have 2 words + 1 punctuation');
-        $this->assertEquals('Hello', $resultWithPunct[0]['TiText']);
-        $this->assertEquals(1, (int)$resultWithPunct[0]['TiWordCount']);
-        $this->assertEquals('world', $resultWithPunct[1]['TiText']);
-        $this->assertEquals(1, (int)$resultWithPunct[1]['TiWordCount']);
-        $this->assertEquals('.', $resultWithPunct[2]['TiText']);
-        $this->assertEquals(0, (int)$resultWithPunct[2]['TiWordCount'], 'Punctuation should have WordCount=0');
+        // Filter to only word items
+        $wordsWithPunct = array_filter($resultWithPunct, fn($r) => (int)$r['Ti2WordCount'] > 0);
+        $wordsWithPunct = array_values($wordsWithPunct);
+
+        // Both words should be recognized
+        $this->assertCount(2, $wordsWithPunct, 'Should have 2 words with punctuation');
+        $this->assertEquals('Hello', $wordsWithPunct[0]['Ti2Text']);
+        $this->assertEquals(1, (int)$wordsWithPunct[0]['Ti2WordCount']);
+        $this->assertEquals('world', $wordsWithPunct[1]['Ti2Text']);
+        $this->assertEquals(1, (int)$wordsWithPunct[1]['Ti2WordCount']);
+
+        // Check that punctuation is also stored (as non-word)
+        $punctuation = array_filter($resultWithPunct, fn($r) => $r['Ti2Text'] === '.');
+        $this->assertNotEmpty($punctuation, 'Punctuation should be stored');
+        $punctItem = array_values($punctuation)[0];
+        $this->assertEquals(0, (int)$punctItem['Ti2WordCount'], 'Punctuation should have WordCount=0');
+
+        // Clean up
+        Connection::query("DELETE FROM $textitems2 WHERE Ti2TxID IN ($textIdNoPunct, $textIdWithPunct)");
+        Connection::query("DELETE FROM $sentences WHERE SeTxID IN ($textIdNoPunct, $textIdWithPunct)");
+        Connection::query("DELETE FROM $texts WHERE TxID IN ($textIdNoPunct, $textIdWithPunct)");
     }
 
     // ===== Character substitution tests =====
