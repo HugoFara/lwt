@@ -1,33 +1,33 @@
 <?php declare(strict_types=1);
 /**
- * \file
- * \brief Translation Controller - Handles translation API endpoints
+ * Translation Controller - Handles translation API endpoints
  *
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Controllers
+ * @package  Lwt\Modules\Dictionary\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Controllers;
+namespace Lwt\Modules\Dictionary\Http;
 
+use Lwt\Controllers\BaseController;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Core\Integration\GoogleTimeToken;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
-use Lwt\Services\TranslationService;
+use Lwt\Modules\Dictionary\Application\TranslationService;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
-require_once __DIR__ . '/../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
-require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
-require_once __DIR__ . '/../Services/TranslationService.php';
+require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
+require_once __DIR__ . '/../../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
+require_once __DIR__ . '/../../../backend/Core/Entity/GoogleTranslate.php';
 
 /**
  * Controller for translation API endpoints.
@@ -38,7 +38,7 @@ require_once __DIR__ . '/../Services/TranslationService.php';
  * - Generic translation (/api/translate)
  *
  * @category Lwt
- * @package  Lwt\Controllers
+ * @package  Lwt\Modules\Dictionary\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

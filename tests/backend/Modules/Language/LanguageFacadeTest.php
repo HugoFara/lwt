@@ -596,6 +596,8 @@ class LanguageFacadeTest extends TestCase
         $counts = $this->facade->getRelatedDataCounts($langId);
         $this->assertEquals(0, $counts['texts']);
         $this->assertEquals(0, $counts['words']);
+        $this->assertEquals(0, $counts['archivedTexts']);
+        $this->assertEquals(0, $counts['feeds']);
 
         // Can delete (should be true - no related data)
         $this->assertTrue($this->facade->canDelete($langId));

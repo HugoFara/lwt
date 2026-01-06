@@ -1,23 +1,23 @@
 <?php declare(strict_types=1);
-namespace Lwt\Tests\Controllers;
+namespace Lwt\Tests\Modules\Dictionary;
 
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Controllers\TranslationController;
+use Lwt\Modules\Dictionary\Http\TranslationController;
+use Lwt\Modules\Dictionary\Application\TranslationService;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\TranslationService;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
+EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/TranslationController.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../../src/backend/Controllers/BaseController.php';
+require_once __DIR__ . '/../../../../src/Modules/Dictionary/Http/TranslationController.php';
 
 /**
  * Unit tests for the TranslationController class.
@@ -131,7 +131,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $this->assertInstanceOf(TranslationController::class, $controller);
     }
@@ -142,7 +142,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
         $service = $controller->getTranslationService();
 
         $this->assertInstanceOf(TranslationService::class, $service);
@@ -156,7 +156,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $this->assertTrue(method_exists($controller, 'google'));
         $this->assertTrue(method_exists($controller, 'glosbe'));
@@ -172,7 +172,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         // Without 'text' GET parameter, should return early
         $_GET = [];
@@ -191,7 +191,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_GET = ['text' => ''];
 
@@ -209,7 +209,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_GET = ['text' => '   '];
 
@@ -229,7 +229,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_REQUEST = [
             'from' => 'en',
@@ -252,7 +252,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_REQUEST = [
             'from' => '',
@@ -274,7 +274,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_REQUEST = [
             'from' => 'en',
@@ -296,7 +296,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_REQUEST = [];
 
@@ -316,7 +316,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_REQUEST = [];
 
@@ -334,7 +334,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_REQUEST = ['x' => 'invalid'];
 
@@ -352,7 +352,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_REQUEST = [
             'x' => '3', // Invalid type (not 1 or 2)
@@ -376,7 +376,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
         $service = $controller->getTranslationService();
 
         // Test that service methods work correctly
@@ -396,7 +396,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
         $service = $controller->getTranslationService();
 
         // Test empty language validation
@@ -418,7 +418,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_REQUEST = [
             'from' => 'en',
@@ -444,7 +444,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_GET = ['text' => ''];
 
@@ -464,7 +464,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_REQUEST = [
             'from' => 'de',
@@ -486,7 +486,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_REQUEST = [
             'from' => 'ja',
@@ -508,7 +508,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         // TranslationController should have BaseController methods
         $this->assertTrue(method_exists($controller, 'param'));
@@ -524,7 +524,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         // Test with POST data in REQUEST
         $_REQUEST = [
@@ -549,7 +549,7 @@ class TranslationControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
+        $controller = new TranslationController(new TranslationService());
 
         $_REQUEST = [
             'x' => '1',

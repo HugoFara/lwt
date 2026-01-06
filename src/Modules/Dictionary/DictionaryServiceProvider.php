@@ -21,9 +21,11 @@ use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
 
 // Application
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
+use Lwt\Modules\Dictionary\Application\TranslationService;
 
 // Http
 use Lwt\Modules\Dictionary\Http\DictionaryController;
+use Lwt\Modules\Dictionary\Http\TranslationController;
 
 // Services (from legacy location)
 use Lwt\Services\LocalDictionaryService;
@@ -63,6 +65,18 @@ class DictionaryServiceProvider implements ServiceProviderInterface
             return new DictionaryController(
                 $c->get(DictionaryFacade::class),
                 $c->get(LanguageFacade::class)
+            );
+        });
+
+        // Register TranslationService
+        $container->singleton(TranslationService::class, function (Container $_c) {
+            return new TranslationService();
+        });
+
+        // Register TranslationController
+        $container->singleton(TranslationController::class, function (Container $c) {
+            return new TranslationController(
+                $c->get(TranslationService::class)
             );
         });
     }

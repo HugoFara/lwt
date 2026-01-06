@@ -7,22 +7,20 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Dictionary\Application
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Services;
+namespace Lwt\Modules\Dictionary\Application;
 
-require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
-require_once __DIR__ . '/../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
+require_once __DIR__ . '/../../../backend/Core/Entity/GoogleTranslate.php';
+require_once __DIR__ . '/../../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
 
 use Lwt\Core\Entity\GoogleTranslate;
-use Lwt\Core\Globals;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
-use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 
@@ -33,7 +31,7 @@ use Lwt\Shared\Infrastructure\Database\Settings;
  * including Google Translate and Glosbe API.
  *
  * @category Lwt
- * @package  Lwt\Services
+ * @package  Lwt\Modules\Dictionary\Application
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
