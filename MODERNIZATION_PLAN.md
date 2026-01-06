@@ -98,7 +98,7 @@ Modules/[Module]/
 | Metric | Status | Details |
 |--------|--------|---------|
 | Psalm Level 3 | PASS | 0 errors |
-| PHPUnit Tests | PASS | 2825 tests, 6146 assertions |
+| PHPUnit Tests | PASS | 3259 tests, 6865 assertions |
 | TypeScript | PASS | No errors |
 | ESLint | PASS | No errors |
 | Deprecated Code | PASS | 0 items remaining |
@@ -135,7 +135,7 @@ All 10 modules complete with ServiceProviders:
 
 **Nice to Have:**
 - [ ] Achieve Psalm level 1 compliance
-- [ ] 100% test coverage for module domain layer
+- [x] 100% test coverage for module domain layer (value objects, entities, enums)
 
 ### Future Improvements
 - [ ] Migrate away from `unsafe-inline` in CSP
@@ -147,6 +147,9 @@ All 10 modules complete with ServiceProviders:
 | Layer | Total | Tested | Coverage |
 |-------|-------|--------|----------|
 | Module Facades | 10 | 10 | 100% |
+| Module Domain Value Objects | 7 | 7 | 100% |
+| Module Domain Entities | 2 | 2 | 100% |
+| Module Domain Enums | 1 | 1 | 100% |
 | Module Use Cases | 65 | 5 | 8% |
 | Module Application Services | 7 | 1 | 14% |
 | Module HTTP Handlers | 7 | 4 | 57% |
@@ -156,6 +159,9 @@ Key test files added (2026-01-06):
 - All 10 facade tests (AdminFacade, DictionaryFacade, FeedFacade, HomeFacade, LanguageFacade, ReviewFacade, TagsFacade, TextFacade, UserFacade, VocabularyFacade)
 - Use case tests: ImportText, ParseText, LoadFeed, ImportArticles, ReviewSession
 - Service tests: ExportService, SimilarityCalculator, RssParser
+- Domain Value Object tests: TermStatus, TermId, TextId, LanguageId, TagId, UserId, TestConfiguration
+- Domain Entity tests: Tag
+- Domain Enum tests: TagType
 
 ---
 
