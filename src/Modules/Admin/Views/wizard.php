@@ -21,6 +21,26 @@
 
 namespace Lwt\Views\Admin;
 
+/**
+ * @psalm-suppress MixedAssignment
+ * @psalm-suppress MixedPropertyFetch
+ */
+$errorMessageRaw = $errorMessage ?? null;
+$errorMessage = is_string($errorMessageRaw) ? $errorMessageRaw : null;
+
+/**
+ * Database connection configuration object
+ * @psalm-suppress MixedAssignment
+ * @psalm-suppress MixedPropertyFetch
+ */
+$connRaw = $conn ?? null;
+$connObj = is_object($connRaw) ? $connRaw : (object)['server' => '', 'userid' => '', 'passwd' => '', 'dbname' => '', 'socket' => ''];
+$connServer = $connObj->server ?? '';
+$connUserid = $connObj->userid ?? '';
+$connPasswd = $connObj->passwd ?? '';
+$connDbname = $connObj->dbname ?? '';
+$connSocket = $connObj->socket ?? '';
+
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,7 +83,7 @@ namespace Lwt\Views\Admin;
                                class="input"
                                name="server"
                                id="server"
-                               value="<?php echo htmlspecialchars($conn->server ?? ''); ?>"
+                               value="<?php echo htmlspecialchars($connServer); ?>"
                                placeholder="localhost" />
                         <span class="icon is-left">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
@@ -80,7 +100,7 @@ namespace Lwt\Views\Admin;
                                class="input"
                                name="userid"
                                id="userid"
-                               value="<?php echo htmlspecialchars($conn->userid ?? ''); ?>"
+                               value="<?php echo htmlspecialchars($connUserid); ?>"
                                placeholder="root" />
                         <span class="icon is-left">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -97,7 +117,7 @@ namespace Lwt\Views\Admin;
                                    class="input"
                                    name="passwd"
                                    id="passwd"
-                                   value="<?php echo htmlspecialchars($conn->passwd ?? ''); ?>"
+                                   value="<?php echo htmlspecialchars($connPasswd); ?>"
                                    placeholder="Enter password" />
                             <span class="icon is-left">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -129,7 +149,7 @@ namespace Lwt\Views\Admin;
                                class="input"
                                name="dbname"
                                id="dbname"
-                               value="<?php echo htmlspecialchars($conn->dbname ?? ''); ?>"
+                               value="<?php echo htmlspecialchars($connDbname); ?>"
                                placeholder="learning-with-texts" />
                         <span class="icon is-left">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
@@ -149,7 +169,7 @@ namespace Lwt\Views\Admin;
                                class="input"
                                name="socket"
                                id="socket"
-                               value="<?php echo htmlspecialchars($conn->socket ?? ''); ?>"
+                               value="<?php echo htmlspecialchars($connSocket); ?>"
                                placeholder="/var/run/mysql.sock" />
                         <span class="icon is-left">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>

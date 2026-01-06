@@ -42,10 +42,10 @@ class TranslationService
     /**
      * Translate text using Google Translate.
      *
-     * @param string     $text      Text to translate
-     * @param string     $srcLang   Source language code (e.g., "es")
-     * @param string     $tgtLang   Target language code (e.g., "en")
-     * @param array|null $timeToken Optional time token for Google API
+     * @param string              $text      Text to translate
+     * @param string              $srcLang   Source language code (e.g., "es")
+     * @param string              $tgtLang   Target language code (e.g., "en")
+     * @param array<int>|null $timeToken Optional time token for Google API
      *
      * @return array{success: bool, translations: string[], error?: string}
      */

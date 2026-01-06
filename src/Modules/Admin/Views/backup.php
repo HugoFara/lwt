@@ -23,6 +23,8 @@ namespace Lwt\Views\Admin;
 use Lwt\Core\Globals;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+$prefinfo = (string)($prefinfo ?? '');
+
 $escapedDbName = htmlspecialchars(Globals::getDatabaseName(), ENT_QUOTES, 'UTF-8');
 $iniFile = php_ini_loaded_file();
 $escapedIniFile = htmlspecialchars($iniFile === false ? '' : $iniFile, ENT_QUOTES, 'UTF-8');

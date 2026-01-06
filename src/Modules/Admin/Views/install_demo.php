@@ -23,6 +23,9 @@ namespace Lwt\Views\Admin;
 use Lwt\Core\Globals;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+$prefinfo = (string)($prefinfo ?? '');
+$langcnt = (int)($langcnt ?? 0);
+
 ?>
 <div class="container" x-data="{ confirmed: false, installing: false }">
     <div class="box">

@@ -21,6 +21,37 @@ namespace Lwt\Views\Admin;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+/**
+ * @var array<string, string> $settings Current settings values
+ * @psalm-suppress MixedArgument
+ */
+$settings = array_map(
+    /**
+     * @param mixed $v
+     * @return string
+     */
+    static fn($v): string => (string)($v ?? ''),
+    is_array($settings ?? null) ? $settings : []
+);
+
+/**
+ * @var array<int, array{
+ *     name: string,
+ *     path: string,
+ *     description?: string,
+ *     mode?: string,
+ *     highlighting?: string,
+ *     wordBreaking?: string
+ * }> $themes Available themes from ThemeService
+ */
+$themes = is_array($themes ?? null) ? $themes : [];
+
+/** @var string $currentLanguageCode Current language code for TTS settings */
+$currentLanguageCode = is_string($currentLanguageCode ?? null) ? json_encode($currentLanguageCode) : 'null';
+
+/** @var string $languageOptions HTML options for language select */
+$languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
+
 ?>
 <form class="validate" action="/admin/settings" method="post" data-lwt-settings-form>
 

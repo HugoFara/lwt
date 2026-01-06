@@ -21,6 +21,20 @@ namespace Lwt\Views\Admin;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+/**
+ * @var array{
+ *     lwt_version?: string,
+ *     server_soft?: string,
+ *     apache?: string,
+ *     server_location?: string,
+ *     php?: string,
+ *     db_name?: string,
+ *     db_size?: float|int|string,
+ *     mysql?: string
+ * } $data Server data from ServerDataService::getServerData()
+ */
+$data = is_array($data ?? null) ? $data : [];
+
 ?>
 <div class="container" x-data="serverDataApp()">
     <p class="mb-4">This page shows server information useful for debugging and issue reports.</p>

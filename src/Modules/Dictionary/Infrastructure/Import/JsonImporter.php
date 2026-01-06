@@ -318,8 +318,10 @@ class JsonImporter implements ImporterInterface
 
         if (is_array($value)) {
             // Complex: {"term": {"definition": "...", ...}}
+            /** @var array<string, mixed> $valueTyped */
+            $valueTyped = $value;
             /** @var string|null $definition */
-            $definition = $this->findField($value, 'definition', $fieldMap);
+            $definition = $this->findField($valueTyped, 'definition', $fieldMap);
             if ($definition === null) {
                 // Try 'meaning' or first string value
                 /** @var string|null $definition */
@@ -345,13 +347,13 @@ class JsonImporter implements ImporterInterface
             ];
 
             /** @var string|null $reading */
-            $reading = $this->findField($value, 'reading', $fieldMap);
+            $reading = $this->findField($valueTyped, 'reading', $fieldMap);
             if ($reading !== null && $reading !== '') {
                 $entry['reading'] = $reading;
             }
 
             /** @var string|null $pos */
-            $pos = $this->findField($value, 'pos', $fieldMap);
+            $pos = $this->findField($valueTyped, 'pos', $fieldMap);
             if ($pos !== null && $pos !== '') {
                 $entry['pos'] = $pos;
             }
@@ -385,9 +387,10 @@ class JsonImporter implements ImporterInterface
                 return $item[$pattern];
             }
             // Try case-insensitive
-            foreach ($item as $key => $value) {
+            foreach ($item as $key => $itemVal) {
+                /** @var mixed $itemVal */
                 if (strtolower($key) === strtolower($pattern)) {
-                    return $value;
+                    return $itemVal;
                 }
             }
         }

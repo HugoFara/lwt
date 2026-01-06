@@ -204,11 +204,12 @@ class CsvImporter implements ImporterInterface
 
         foreach ($headers as $index => $header) {
             $headerLower = strtolower(trim($header));
+            $intIndex = (int)$index;
 
             if ($columnMap['term'] === null) {
                 foreach ($termPatterns as $pattern) {
                     if (str_contains($headerLower, $pattern)) {
-                        $columnMap['term'] = $index;
+                        $columnMap['term'] = $intIndex;
                         break;
                     }
                 }
@@ -217,7 +218,7 @@ class CsvImporter implements ImporterInterface
             if ($columnMap['definition'] === null) {
                 foreach ($defPatterns as $pattern) {
                     if (str_contains($headerLower, $pattern)) {
-                        $columnMap['definition'] = $index;
+                        $columnMap['definition'] = $intIndex;
                         break;
                     }
                 }
@@ -226,7 +227,7 @@ class CsvImporter implements ImporterInterface
             if ($columnMap['reading'] === null) {
                 foreach ($readingPatterns as $pattern) {
                     if (str_contains($headerLower, $pattern)) {
-                        $columnMap['reading'] = $index;
+                        $columnMap['reading'] = $intIndex;
                         break;
                     }
                 }
@@ -235,7 +236,7 @@ class CsvImporter implements ImporterInterface
             if ($columnMap['pos'] === null) {
                 foreach ($posPatterns as $pattern) {
                     if (str_contains($headerLower, $pattern)) {
-                        $columnMap['pos'] = $index;
+                        $columnMap['pos'] = $intIndex;
                         break;
                     }
                 }
