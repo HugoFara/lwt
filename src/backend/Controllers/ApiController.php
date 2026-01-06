@@ -18,12 +18,7 @@ namespace Lwt\Controllers;
 require_once __DIR__ . '/../Api/V1/Response.php';
 require_once __DIR__ . '/../Api/V1/Endpoints.php';
 require_once __DIR__ . '/../Api/V1/ApiV1.php';
-require_once __DIR__ . '/../Api/V1/Handlers/ImportHandler.php';
-require_once __DIR__ . '/../Api/V1/Handlers/ImprovedTextHandler.php';
-// LanguageApiHandler now in Modules/Language/Http/
-require_once __DIR__ . '/../Api/V1/Handlers/MediaHandler.php';
-require_once __DIR__ . '/../Api/V1/Handlers/TermHandler.php';
-require_once __DIR__ . '/../../Modules/Text/Http/TextApiHandler.php';
+// API handlers now in Modules (loaded via autoloader)
 
 use Lwt\Api\V1\ApiV1;
 

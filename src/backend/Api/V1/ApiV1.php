@@ -32,18 +32,15 @@ require_once __DIR__ . '/../../../Modules/Vocabulary/Infrastructure/DictionaryAd
 require_once __DIR__ . '/../../Services/MediaService.php';
 // Language module now loaded via autoloader
 
-use Lwt\Api\V1\Handlers\AuthHandler;
-use Lwt\Api\V1\Handlers\ImportHandler;
-use Lwt\Api\V1\Handlers\ImprovedTextHandler;
+use Lwt\Modules\Dictionary\Http\DictionaryApiHandler;
 use Lwt\Modules\Language\Http\LanguageApiHandler;
 use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Modules\Feed\Http\FeedApiHandler;
-use Lwt\Api\V1\Handlers\LocalDictionaryHandler;
-use Lwt\Api\V1\Handlers\MediaHandler;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Admin\Http\AdminApiHandler;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
 use Lwt\Modules\Tags\Http\TagApiHandler;
+use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler;
 use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Core\Globals;
@@ -57,13 +54,10 @@ class ApiV1
     private const VERSION = "0.1.1";
     private const RELEASE_DATE = "2023-12-29";
 
-    private AuthHandler $authHandler;
+    private UserApiHandler $authHandler;
     private FeedApiHandler $feedHandler;
-    private ImportHandler $importHandler;
-    private ImprovedTextHandler $improvedTextHandler;
     private LanguageApiHandler $languageHandler;
-    private LocalDictionaryHandler $localDictionaryHandler;
-    private MediaHandler $mediaHandler;
+    private DictionaryApiHandler $localDictionaryHandler;
     private AdminApiHandler $adminHandler;
     private ReviewApiHandler $reviewHandler;
     private TagApiHandler $tagHandler;
@@ -83,15 +77,12 @@ class ApiV1
 
     public function __construct()
     {
-        $this->authHandler = new AuthHandler();
+        $this->authHandler = new UserApiHandler();
         $this->feedHandler = new FeedApiHandler(
             Container::getInstance()->get(FeedFacade::class)
         );
-        $this->importHandler = new ImportHandler();
-        $this->improvedTextHandler = new ImprovedTextHandler();
         $this->languageHandler = new LanguageApiHandler();
-        $this->localDictionaryHandler = new LocalDictionaryHandler();
-        $this->mediaHandler = new MediaHandler();
+        $this->localDictionaryHandler = new DictionaryApiHandler();
         $this->adminHandler = new AdminApiHandler(
             Container::getInstance()->get(AdminFacade::class)
         );
@@ -200,7 +191,7 @@ class ApiV1
                 break;
 
             case 'media-files':
-                Response::success($this->mediaHandler->formatMediaFiles());
+                Response::success($this->adminHandler->formatMediaFiles());
                 break;
 
             case 'phonetic-reading':
@@ -512,7 +503,7 @@ class ApiV1
             $langId = isset($params['lang']) && $params['lang'] !== '' ? (int)$params['lang'] : null;
             Response::success($this->termHandler->formatGetFilterOptions($langId));
         } elseif (($fragments[1] ?? '') === 'imported') {
-            Response::success($this->importHandler->formatImportedTerms(
+            Response::success($this->termHandler->formatImportedTerms(
                 $params["last_update"],
                 (int)$params["page"],
                 (int)$params["count"]
@@ -535,7 +526,7 @@ class ApiV1
         } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
             $termId = (int)$fragments[1];
             if (($fragments[2] ?? '') === 'translations') {
-                Response::success($this->improvedTextHandler->formatTermTranslations(
+                Response::success($this->textHandler->formatTermTranslations(
                     (string)$params["term_lc"],
                     (int)$params["text_id"]
                 ));

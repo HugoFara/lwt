@@ -19,6 +19,7 @@ use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Services\TextStatisticsService;
+use Lwt\Services\MediaService;
 
 /**
  * API handler for admin-related operations.
@@ -332,5 +333,30 @@ class AdminApiHandler
     public function getServerData(): array
     {
         return $this->adminFacade->getServerData();
+    }
+
+    // =========================================================================
+    // Media Operations
+    // =========================================================================
+
+    /**
+     * List the audio and video files in the media folder.
+     *
+     * @return array{base_path: string, paths?: string[], folders?: string[], error?: string}
+     */
+    public function getMediaFiles(): array
+    {
+        $mediaService = new MediaService();
+        return $mediaService->getMediaPaths();
+    }
+
+    /**
+     * Format response for media files list.
+     *
+     * @return array{base_path: string, paths?: string[], folders?: string[], error?: string}
+     */
+    public function formatMediaFiles(): array
+    {
+        return $this->getMediaFiles();
     }
 }

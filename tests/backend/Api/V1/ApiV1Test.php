@@ -117,16 +117,18 @@ class ApiV1Test extends TestCase
         $reflection = new \ReflectionClass(ApiV1::class);
 
         // Get all private handler properties
+        // Note: importHandler, improvedTextHandler, and mediaHandler have been
+        // consolidated into their respective module handlers (termHandler, textHandler, adminHandler)
         $expectedHandlers = [
             'feedHandler',
-            'importHandler',
-            'improvedTextHandler',
             'languageHandler',
-            'mediaHandler',
-            'adminHandler',  // Combined settings + statistics handler
+            'localDictionaryHandler',
+            'adminHandler',  // Combined settings + statistics + media handler
             'reviewHandler',
-            'termHandler',
-            'textHandler',
+            'tagHandler',
+            'termHandler',   // Also handles import functionality
+            'textHandler',   // Also handles improved text functionality
+            'authHandler',
         ];
 
         foreach ($expectedHandlers as $handlerName) {

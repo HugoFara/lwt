@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06 (WordPressController migrated to User module)
+**Last Updated:** 2026-01-06 (All legacy API handlers migrated - ImportHandler→VocabularyApiHandler, ImprovedTextHandler→TextApiHandler, MediaHandler→AdminApiHandler)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -85,7 +85,7 @@ Connection::preparedFetchAll('SELECT * FROM words WHERE WoLgID = ?', 'i', $langI
 ```text
 src/backend/
 ├── Api/V1/                    # REST API
-│   └── Handlers/              # 10 API handlers
+│   └── Handlers/              # Legacy handlers (migrated to modules)
 ├── Controllers/               # 8 controllers (down from 17 - most migrated to modules)
 │   ├── BaseController.php     # Abstract base
 │   ├── AbstractCrudController.php
@@ -980,7 +980,7 @@ These are intentionally kept inline as they are simpler than the overhead of a s
 | Repositories | 4 | ~3,000 |
 | Views | 92 | 8,499 |
 | Core Files | 37 | - |
-| API Handlers | 14 | - |
+| API Handlers (Modules) | 14 | - |
 | Entity Classes | 5 | - |
 | Value Objects | 5 | - |
 | Custom Exceptions | 6 | - |
@@ -1536,9 +1536,9 @@ The User module now has the standard modular structure:
 
 | Category | Count | Location |
 |----------|-------|----------|
-| Controllers | 4 | `src/backend/Controllers/` |
-| Services | 18 | `src/backend/Services/` |
-| API Handlers | 10 | `src/backend/Api/V1/Handlers/` |
+| Controllers | 3 | `src/backend/Controllers/` |
+| Services | 17 | `src/backend/Services/` |
+| API Handlers | 3 | `src/backend/Api/V1/Handlers/` |
 
 **Controllers Not Yet Migrated to Modules:**
 
@@ -1565,7 +1565,7 @@ The User module now has the standard modular structure:
 
 ### 5.2 Duplicate API Handler Pattern
 
-**Status:** ✅ COMPLETE (2026-01-05)
+**Status:** ✅ COMPLETE (2026-01-06)
 
 API handlers have been consolidated to module-based handlers:
 
@@ -1573,11 +1573,20 @@ API handlers have been consolidated to module-based handlers:
 |---------|-----------------|----------------|------------|
 | Feed | ~~`FeedHandler`~~ | `FeedApiHandler` | [x] CONSOLIDATED - FeedHandler removed |
 | Review | ~~`ReviewHandler`~~ | `ReviewApiHandler` | [x] CONSOLIDATED - ReviewHandler removed |
-| Terms | ~~`TermHandler`~~ | `VocabularyApiHandler` | [x] CONSOLIDATED (2026-01-05) - ApiV1 now uses VocabularyApiHandler |
+| Terms | ~~`TermHandler`~~ | `VocabularyApiHandler` | [x] CONSOLIDATED (2026-01-06) - TermHandler.php DELETED |
 | Settings | ~~`SettingsHandler`~~ | `AdminApiHandler` | [x] CONSOLIDATED - SettingsHandler removed |
 | Statistics | ~~`StatisticsHandler`~~ | `AdminApiHandler` | [x] CONSOLIDATED - merged into AdminApiHandler |
+| Auth | ~~`AuthHandler`~~ | `UserApiHandler` | [x] CONSOLIDATED (2026-01-06) - AuthHandler.php DELETED |
+| Dictionary | ~~`LocalDictionaryHandler`~~ | `DictionaryApiHandler` | [x] CONSOLIDATED (2026-01-06) - Migrated to Dictionary module |
 
-**Completed:** All 5 API handlers migrated to module-based handlers.
+**Completed:** All 10 API handlers migrated to module-based handlers.
+
+**Final Migration (2026-01-06):**
+- `ImportHandler.php` - **DELETED** → Term import list functionality moved to `VocabularyApiHandler`
+- `ImprovedTextHandler.php` - **DELETED** → Text annotation features moved to `TextApiHandler`
+- `MediaHandler.php` - **DELETED** → Media file listing moved to `AdminApiHandler`
+
+**Remaining in `src/backend/Api/V1/Handlers/`:** Only test stubs (SettingsHandlerTest.php, TextHandlerTest.php).
 
 ### 5.3 Test Coverage Gaps
 

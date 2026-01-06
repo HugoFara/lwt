@@ -19,7 +19,7 @@ namespace Lwt\Modules\Text\Http;
 use Lwt\Controllers\BaseController;
 use Lwt\Services\TextPrintService;
 use Lwt\Services\AnnotationService;
-use Lwt\Api\V1\Handlers\ImprovedTextHandler;
+use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 // Base path for legacy includes
@@ -35,7 +35,6 @@ if (!defined('LWT_TEXT_MODULE_VIEWS')) {
 require_once LWT_BACKEND_PATH . '/Services/TextPrintService.php';
 require_once LWT_BACKEND_PATH . '/Services/TextNavigationService.php';
 require_once LWT_BACKEND_PATH . '/Services/AnnotationService.php';
-require_once LWT_BACKEND_PATH . '/Api/V1/Handlers/ImprovedTextHandler.php';
 require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
 require_once __DIR__ . '/../../../Shared/UI/Helpers/SelectOptionsBuilder.php';
 require_once __DIR__ . '/../../../Shared/UI/Helpers/FormHelper.php';
@@ -212,7 +211,7 @@ class TextPrintController extends BaseController
                 $annExists = strlen($ann) > 0;
             }
             if ($annExists) {
-                $handler = new ImprovedTextHandler();
+                $handler = new TextApiHandler();
                 $editFormHtml = $handler->editTermForm($textId);
             }
         }

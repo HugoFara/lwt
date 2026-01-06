@@ -1,19 +1,20 @@
 <?php declare(strict_types=1);
 /**
- * Local Dictionary API Handler
+ * Dictionary API Handler
  *
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Api\V1\Handlers
+ * @package  Lwt\Modules\Dictionary\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
-namespace Lwt\Api\V1\Handlers;
+namespace Lwt\Modules\Dictionary\Http;
 
+use Lwt\Modules\Dictionary\Application\DictionaryFacade;
 use Lwt\Services\LocalDictionaryService;
 use Lwt\Services\DictionaryImport\CsvImporter;
 use Lwt\Services\DictionaryImport\JsonImporter;
@@ -21,7 +22,7 @@ use Lwt\Services\DictionaryImport\StarDictImporter;
 use RuntimeException;
 
 /**
- * Handler for local dictionary-related API operations.
+ * API handler for dictionary operations.
  *
  * Provides endpoints for:
  * - Listing dictionaries for a language
@@ -29,20 +30,22 @@ use RuntimeException;
  * - Importing dictionary entries from files
  * - Looking up terms
  *
- * @category Lwt
- * @package  Lwt\Api\V1\Handlers
- * @author   HugoFara <hugo.farajallah@protonmail.com>
- * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
- * @since    3.0.0
+ * @since 3.0.0
  */
-class LocalDictionaryHandler
+class DictionaryApiHandler
 {
+    private DictionaryFacade $facade;
     private LocalDictionaryService $dictService;
 
-    public function __construct()
+    /**
+     * Create a new DictionaryApiHandler.
+     *
+     * @param DictionaryFacade|null $facade Facade instance (optional for BC)
+     */
+    public function __construct(?DictionaryFacade $facade = null)
     {
         $this->dictService = new LocalDictionaryService();
+        $this->facade = $facade ?? new DictionaryFacade($this->dictService);
     }
 
     // =========================================================================
@@ -58,8 +61,8 @@ class LocalDictionaryHandler
      */
     public function getDictionaries(int $langId): array
     {
-        $dictionaries = $this->dictService->getAllForLanguage($langId);
-        $mode = $this->dictService->getLocalDictMode($langId);
+        $dictionaries = $this->facade->getAllForLanguage($langId);
+        $mode = $this->facade->getLocalDictMode($langId);
 
         return [
             'dictionaries' => array_map([$this, 'formatDictionary'], $dictionaries),
@@ -76,7 +79,7 @@ class LocalDictionaryHandler
      */
     public function getDictionary(int $dictId): array
     {
-        $dictionary = $this->dictService->getById($dictId);
+        $dictionary = $this->facade->getById($dictId);
 
         if ($dictionary === null) {
             return ['error' => 'Dictionary not found'];
@@ -111,8 +114,8 @@ class LocalDictionaryHandler
             return ['success' => false, 'error' => 'Dictionary name is required'];
         }
 
-        $dictId = $this->dictService->create($langId, $name, $sourceFormat, $description);
-        $dictionary = $this->dictService->getById($dictId);
+        $dictId = $this->facade->create($langId, $name, $sourceFormat, $description);
+        $dictionary = $this->facade->getById($dictId);
 
         $result = ['success' => true];
         if ($dictionary !== null) {
@@ -132,7 +135,7 @@ class LocalDictionaryHandler
      */
     public function updateDictionary(int $dictId, array $data): array
     {
-        $dictionary = $this->dictService->getById($dictId);
+        $dictionary = $this->facade->getById($dictId);
 
         if ($dictionary === null) {
             return ['success' => false, 'error' => 'Dictionary not found'];
@@ -160,7 +163,7 @@ class LocalDictionaryHandler
             }
         }
 
-        $this->dictService->update($dictionary);
+        $this->facade->update($dictionary);
 
         return [
             'success' => true,
@@ -177,7 +180,7 @@ class LocalDictionaryHandler
      */
     public function deleteDictionary(int $dictId): array
     {
-        $deleted = $this->dictService->delete($dictId);
+        $deleted = $this->facade->delete($dictId);
 
         if (!$deleted) {
             return ['success' => false, 'error' => 'Dictionary not found'];
@@ -200,8 +203,8 @@ class LocalDictionaryHandler
      */
     public function lookup(int $langId, string $term): array
     {
-        $results = $this->dictService->lookup($langId, $term);
-        $mode = $this->dictService->getLocalDictMode($langId);
+        $results = $this->facade->lookup($langId, $term);
+        $mode = $this->facade->getLocalDictMode($langId);
 
         return [
             'results' => $results,
@@ -220,7 +223,7 @@ class LocalDictionaryHandler
      */
     public function lookupPrefix(int $langId, string $prefix, int $limit = 10): array
     {
-        $results = $this->dictService->lookupPrefix($langId, $prefix, $limit);
+        $results = $this->facade->lookupPrefix($langId, $prefix, $limit);
 
         return ['results' => $results];
     }
@@ -242,7 +245,7 @@ class LocalDictionaryHandler
      */
     public function importFile(int $dictId, array $data): array
     {
-        $dictionary = $this->dictService->getById($dictId);
+        $dictionary = $this->facade->getById($dictId);
         if ($dictionary === null) {
             return ['success' => false, 'error' => 'Dictionary not found'];
         }
@@ -256,14 +259,14 @@ class LocalDictionaryHandler
         }
 
         try {
-            $importer = $this->getImporter($format);
+            $importer = $this->facade->getImporter($format);
 
             if (!$importer->canImport($filePath)) {
                 return ['success' => false, 'error' => 'Invalid file format'];
             }
 
             $entries = $importer->parse($filePath, $options);
-            $count = $this->dictService->addEntriesBatch($dictId, $entries);
+            $count = $this->facade->addEntriesBatch($dictId, $entries);
 
             return [
                 'success' => true,
@@ -297,7 +300,7 @@ class LocalDictionaryHandler
         }
 
         try {
-            $importer = $this->getImporter($format);
+            $importer = $this->facade->getImporter($format);
 
             if (!$importer->canImport($filePath)) {
                 return ['success' => false, 'error' => 'Invalid file format'];
@@ -342,7 +345,7 @@ class LocalDictionaryHandler
      */
     public function clearEntries(int $dictId): array
     {
-        $dictionary = $this->dictService->getById($dictId);
+        $dictionary = $this->facade->getById($dictId);
         if ($dictionary === null) {
             return ['success' => false, 'error' => 'Dictionary not found'];
         }
@@ -371,7 +374,7 @@ class LocalDictionaryHandler
      */
     public function getEntries(int $dictId, array $params = []): array
     {
-        $dictionary = $this->dictService->getById($dictId);
+        $dictionary = $this->facade->getById($dictId);
         if ($dictionary === null) {
             return ['error' => 'Dictionary not found'];
         }
@@ -379,7 +382,7 @@ class LocalDictionaryHandler
         $page = max(1, (int)($params['page'] ?? 1));
         $perPage = max(1, min(100, (int)($params['per_page'] ?? 50)));
 
-        $result = $this->dictService->getEntries($dictId, $page, $perPage);
+        $result = $this->facade->getEntries($dictId, $page, $perPage);
 
         return [
             'entries' => $result['entries'],
@@ -406,7 +409,7 @@ class LocalDictionaryHandler
      */
     public function addEntry(int $dictId, array $data): array
     {
-        $dictionary = $this->dictService->getById($dictId);
+        $dictionary = $this->facade->getById($dictId);
         if ($dictionary === null) {
             return ['success' => false, 'error' => 'Dictionary not found'];
         }
@@ -647,33 +650,5 @@ class LocalDictionaryHandler
             'enabled' => $dictionary->isEnabled(),
             'created' => $dictionary->created()->format('Y-m-d H:i:s'),
         ];
-    }
-
-    /**
-     * Get the appropriate importer for a format.
-     *
-     * @param string $format Import format (csv, json, stardict)
-     *
-     * @return \Lwt\Services\DictionaryImport\ImporterInterface
-     *
-     * @throws RuntimeException If format is unsupported
-     */
-    private function getImporter(string $format): \Lwt\Services\DictionaryImport\ImporterInterface
-    {
-        switch ($format) {
-            case 'csv':
-            case 'tsv':
-                return new CsvImporter();
-
-            case 'json':
-                return new JsonImporter();
-
-            case 'stardict':
-            case 'ifo':
-                return new StarDictImporter();
-
-            default:
-                throw new RuntimeException("Unsupported format: $format");
-        }
     }
 }
