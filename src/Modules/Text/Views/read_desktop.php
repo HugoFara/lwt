@@ -23,7 +23,7 @@
 
 namespace Lwt\Views\Text;
 
-use Lwt\Services\MediaService;
+use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 ?>

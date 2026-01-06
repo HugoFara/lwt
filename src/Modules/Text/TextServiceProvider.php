@@ -45,9 +45,9 @@ use Lwt\Modules\Text\Http\TextController;
 use Lwt\Modules\Text\Http\TextPrintController;
 use Lwt\Modules\Text\Http\TextApiHandler;
 
-// Legacy services (for backward compatibility)
-use Lwt\Services\TextPrintService;
-use Lwt\Services\TextDisplayService;
+// Module services
+use Lwt\Modules\Text\Application\Services\TextPrintService;
+use Lwt\Modules\Text\Application\Services\TextDisplayService;
 
 /**
  * Service provider for the Text module.

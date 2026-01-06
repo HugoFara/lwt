@@ -186,7 +186,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
         require_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/start_session.php';
-        require_once LWT_BACKEND_PATH . '/Core/Integration/text_from_yt.php';
+        require_once LWT_BACKEND_PATH . '/Core/Integration/YouTubeImport.php';
 
         // Get filter parameters
         $currentLang = Validation::language(

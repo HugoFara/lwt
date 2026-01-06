@@ -26,7 +26,7 @@ namespace Lwt\Views\Text;
 // Variables injected from text_display_header.php:
 // $title, $audio, $sourceUri, $textLinks
 
-use Lwt\Services\MediaService;
+use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>

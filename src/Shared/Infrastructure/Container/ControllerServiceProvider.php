@@ -29,7 +29,7 @@ use Lwt\Modules\Text\Http\TextController;
 // Note: HomeService moved to Modules/Home as HomeFacade
 use Lwt\Modules\Language\Application\LanguageFacade;
 // Note: TestService now primarily used via ReviewFacade in Review module
-use Lwt\Services\TextDisplayService;
+use Lwt\Modules\Text\Application\Services\TextDisplayService;
 // Note: TextPrintService now primarily used via TextPrintController in Text module
 use Lwt\Modules\Text\Application\TextFacade;
 // Note: TranslationService moved to Modules/Dictionary - registered by DictionaryServiceProvider

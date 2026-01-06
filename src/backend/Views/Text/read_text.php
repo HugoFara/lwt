@@ -29,7 +29,7 @@
 
 namespace Lwt\Views\Text;
 
-use Lwt\Services\AnnotationService;
+use Lwt\Modules\Text\Application\Services\AnnotationService;
 
 // Build variable array for JavaScript - will be merged into LWT_DATA by TypeScript
 // Prepare delimiter with escaped regex characters

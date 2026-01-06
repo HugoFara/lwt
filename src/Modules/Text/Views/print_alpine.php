@@ -18,8 +18,8 @@
 
 namespace Lwt\Modules\Text\Views;
 
-use Lwt\Services\AnnotationService;
-use Lwt\Services\TextNavigationService;
+use Lwt\Modules\Text\Application\Services\AnnotationService;
+use Lwt\Modules\Text\Application\Services\TextNavigationService;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
