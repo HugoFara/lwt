@@ -50,14 +50,19 @@ class SentenceService
     }
 
     /**
-     * Return a SQL string to find sentences containing a word.
+     * Build a prepared statement query to find sentences containing a word.
+     *
+     * Returns an array with 'sql' (with placeholders) and 'params' for use
+     * with prepared statements.
      *
      * @param string $wordlc Word to look for in lowercase
      * @param int    $lid    Language ID
      *
-     * @return string Query in SQL format
+     * @return array{sql: string, params: array} Query SQL and parameters
+     *
+     * @deprecated Use executeSentencesContainingWordQuery() for direct execution
      */
-    public function buildSentencesContainingWordQuery(string $wordlc, int $lid): string
+    public function buildSentencesContainingWordQuery(string $wordlc, int $lid): array
     {
         $mecab_str = null;
         $record = QueryBuilder::table('languages')
@@ -65,7 +70,7 @@ class SentenceService
             ->where('LgID', '=', $lid)
             ->firstPrepared();
         if ($record === null) {
-            return '';
+            return ['sql' => '', 'params' => []];
         }
         $removeSpaces = $record["LgRemoveSpaces"];
         $regexpWordChars = (string)($record["LgRegexpWordCharacters"] ?? '');
@@ -93,14 +98,6 @@ class SentenceService
             }
             pclose($handle);
             unlink($mecab_file);
-            // Note: This method is deprecated and only kept for backward compatibility
-            // It returns an unsafe SQL string. Use executeSentencesContainingWordQuery instead.
-            $dbConn = Globals::getDbConnection();
-            if ($dbConn === null) {
-                return '';
-            }
-            $wordlc_escaped = mysqli_real_escape_string($dbConn, "%$wordlc%");
-            $mecab_str_escaped = mysqli_real_escape_string($dbConn, "%$mecab_str%");
             $sql = "SELECT SeID, SeText,
                 concat(
                     '\\t',
@@ -108,33 +105,26 @@ class SentenceService
                     '\\t'
                 ) val
                 FROM sentences, textitems2
-                WHERE lower(SeText)
-                LIKE '$wordlc_escaped'
-                AND SeID = Ti2SeID AND SeLgID = $lid AND Ti2WordCount<2
-                GROUP BY SeID HAVING val
-                LIKE '$mecab_str_escaped'
+                WHERE lower(SeText) LIKE ?
+                AND SeID = Ti2SeID AND SeLgID = ? AND Ti2WordCount<2
+                GROUP BY SeID HAVING val LIKE ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
+            $params = ["%$wordlc%", $lid, "%$mecab_str%"];
         } else {
-            // Note: This method is deprecated and only kept for backward compatibility
-            // It returns an unsafe SQL string. Use executeSentencesContainingWordQuery instead.
             if ($removeSpaces == 1) {
-                $pattern_value = $wordlc;
+                $pattern = $wordlc;
             } else {
-                $pattern_value = '(^|[^' . $regexpWordChars . '])'
+                $pattern = '(^|[^' . $regexpWordChars . '])'
                      . StringUtils::removeSpaces($wordlc, (bool)$removeSpaces)
                      . '([^' . $regexpWordChars . ']|$)';
             }
-            $dbConn = Globals::getDbConnection();
-            if ($dbConn === null) {
-                return '';
-            }
-            $pattern_escaped = mysqli_real_escape_string($dbConn, $pattern_value);
             $sql = "SELECT DISTINCT SeID, SeText
                 FROM sentences
-                WHERE SeText RLIKE '$pattern_escaped' AND SeLgID = $lid
+                WHERE SeText RLIKE ? AND SeLgID = ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
+            $params = [$pattern, $lid];
         }
-        return $sql;
+        return ['sql' => $sql, 'params' => $params];
     }
 
     /**

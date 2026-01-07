@@ -431,10 +431,12 @@ class IntegrationTest extends TestCase
     public function testSentencesContainingWordLcQuery(): void
     {
         $service = new SentenceService();
-        $query = $service->buildSentencesContainingWordQuery('test', 1);
-        $this->assertIsString($query);
-        $this->assertStringContainsString('SELECT', strtoupper($query));
-        $this->assertStringContainsString('SeID', $query);
+        $result = $service->buildSentencesContainingWordQuery('test', 1);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('sql', $result);
+        $this->assertArrayHasKey('params', $result);
+        $this->assertStringContainsString('SELECT', strtoupper($result['sql']));
+        $this->assertStringContainsString('SeID', $result['sql']);
     }
 
     public function testMaskTermInSentenceV2(): void
