@@ -151,7 +151,25 @@ interface ReviewRepositoryInterface
     /**
      * Get table test visibility settings.
      *
-     * @return array{edit: int, status: int, term: int, trans: int, rom: int, sentence: int}
+     * @return array{edit: int, status: int, term: int, trans: int, rom: int, sentence: int, contextRom: int, contextTrans: int}
      */
     public function getTableTestSettings(): array;
+
+    /**
+     * Get sentence with annotations for surrounding words.
+     *
+     * Returns the sentence containing the word, along with translation and
+     * romanization data for all known words in the sentence.
+     *
+     * @param int    $wordId Word ID
+     * @param string $wordLc Lowercase word text
+     *
+     * @return array{
+     *     sentence: string|null,
+     *     sentenceId: int|null,
+     *     found: bool,
+     *     annotations: array<int, array{text: string, romanization: string|null, translation: string|null, isTarget: bool}>
+     * }
+     */
+    public function getSentenceWithAnnotations(int $wordId, string $wordLc): array;
 }

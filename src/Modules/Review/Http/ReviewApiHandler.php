@@ -66,22 +66,40 @@ class ReviewApiHandler
             ];
         }
 
+        // Check context annotation settings
+        $settings = $this->reviewFacade->getTableTestSettings();
+        $showContextRom = (bool) ($settings['contextRom'] ?? 0);
+        $showContextTrans = (bool) ($settings['contextTrans'] ?? 0);
+        $useAnnotations = !$wordMode && ($showContextRom || $showContextTrans);
+
         // Get sentence context
         if ($wordMode) {
             $sent = "{" . $wordRecord['WoText'] . "}";
+            $annotations = [];
+        } elseif ($useAnnotations) {
+            $sentenceData = $this->reviewFacade->getSentenceWithAnnotations(
+                (int)$wordRecord['WoID'],
+                $wordRecord['WoTextLC']
+            );
+            $sent = $sentenceData['sentence'] ?? "{" . $wordRecord['WoText'] . "}";
+            $annotations = $sentenceData['annotations'] ?? [];
         } else {
             $sentenceData = $this->reviewFacade->getSentenceForWord(
                 (int)$wordRecord['WoID'],
                 $wordRecord['WoTextLC']
             );
             $sent = $sentenceData['sentence'] ?? "{" . $wordRecord['WoText'] . "}";
+            $annotations = [];
         }
 
         // Format term for test display
         list($htmlSentence, $save) = $this->formatTermForTest(
             $wordRecord,
             $sent,
-            $testtype
+            $testtype,
+            $useAnnotations ? $annotations : [],
+            $showContextRom,
+            $showContextTrans
         );
 
         // Get solution
@@ -103,16 +121,22 @@ class ReviewApiHandler
     /**
      * Format term for test display.
      *
-     * @param array  $wordRecord Word database record
-     * @param string $sentence   Sentence containing the word (word marked with {})
-     * @param int    $testType   Test type (1-5)
+     * @param array  $wordRecord      Word database record
+     * @param string $sentence        Sentence containing the word (word marked with {})
+     * @param int    $testType        Test type (1-5)
+     * @param array  $annotations     Word annotations (keyed by order)
+     * @param bool   $showContextRom  Show romanization on context words
+     * @param bool   $showContextTrans Show translation on context words
      *
      * @return array{0: string, 1: string} [HTML display, plain word text]
      */
     private function formatTermForTest(
         array $wordRecord,
         string $sentence,
-        int $testType
+        int $testType,
+        array $annotations = [],
+        bool $showContextRom = false,
+        bool $showContextTrans = false
     ): array {
         $baseType = $this->reviewFacade->getBaseTestType($testType);
         $wordText = $wordRecord['WoText'];
@@ -124,28 +148,112 @@ class ReviewApiHandler
             $markedWord = $wordText;
         }
 
-        // Build display HTML based on test type
-        if ($baseType == 1) {
-            // Type 1: Show term, guess translation
-            $displayHtml = str_replace(
-                '{' . $markedWord . '}',
-                '<span class="word-test">' . htmlspecialchars($markedWord, ENT_QUOTES, 'UTF-8') . '</span>',
-                $sentence
+        // If we have annotations, build HTML with ruby elements
+        if (!empty($annotations) && ($showContextRom || $showContextTrans)) {
+            $displayHtml = $this->buildAnnotatedSentenceHtml(
+                $annotations,
+                $markedWord,
+                $baseType,
+                $showContextRom,
+                $showContextTrans
             );
-        } elseif ($baseType == 2) {
-            // Type 2: Show translation, guess term (hide term)
-            $hiddenSpan = '<span class="word-test-hidden">[...]</span>';
-            $displayHtml = str_replace('{' . $markedWord . '}', $hiddenSpan, $sentence);
         } else {
-            // Type 3: Show sentence with hidden term
-            $hiddenSpan = '<span class="word-test-hidden">[...]</span>';
-            $displayHtml = str_replace('{' . $markedWord . '}', $hiddenSpan, $sentence);
+            // Build display HTML based on test type (legacy path)
+            if ($baseType == 1) {
+                // Type 1: Show term, guess translation
+                $displayHtml = str_replace(
+                    '{' . $markedWord . '}',
+                    '<span class="word-test">' . htmlspecialchars($markedWord, ENT_QUOTES, 'UTF-8') . '</span>',
+                    $sentence
+                );
+            } elseif ($baseType == 2) {
+                // Type 2: Show translation, guess term (hide term)
+                $hiddenSpan = '<span class="word-test-hidden">[...]</span>';
+                $displayHtml = str_replace('{' . $markedWord . '}', $hiddenSpan, $sentence);
+            } else {
+                // Type 3: Show sentence with hidden term
+                $hiddenSpan = '<span class="word-test-hidden">[...]</span>';
+                $displayHtml = str_replace('{' . $markedWord . '}', $hiddenSpan, $sentence);
+            }
+
+            // Clean up any remaining braces
+            $displayHtml = str_replace(['{', '}'], '', $displayHtml);
         }
 
-        // Clean up any remaining braces
-        $displayHtml = str_replace(['{', '}'], '', $displayHtml);
-
         return [$displayHtml, $markedWord];
+    }
+
+    /**
+     * Build HTML for a sentence with ruby annotations.
+     *
+     * @param array  $annotations     Word annotations keyed by order
+     * @param string $targetWord      The target word being tested
+     * @param int    $baseType        Test type (1=show term, 2=hide term, 3=hide term)
+     * @param bool   $showRom         Show romanization
+     * @param bool   $showTrans       Show translation
+     *
+     * @return string HTML with ruby annotations
+     */
+    private function buildAnnotatedSentenceHtml(
+        array $annotations,
+        string $targetWord,
+        int $baseType,
+        bool $showRom,
+        bool $showTrans
+    ): string {
+        // Sort annotations by order
+        ksort($annotations);
+
+        $html = '<span class="annotated-sentence">';
+        $targetWordLc = mb_strtolower($targetWord, 'UTF-8');
+
+        foreach ($annotations as $ann) {
+            $text = $ann['text'];
+            $textLc = mb_strtolower($text, 'UTF-8');
+            $isTarget = $textLc === $targetWordLc;
+            $rom = $ann['romanization'] ?? null;
+            $trans = $ann['translation'] ?? null;
+            $escapedText = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+
+            // Handle the target word based on test type
+            if ($isTarget) {
+                if ($baseType == 1) {
+                    // Show term highlighted
+                    $html .= '<span class="word-test">' . $escapedText . '</span>';
+                } else {
+                    // Hide term (type 2 and 3)
+                    $html .= '<span class="word-test-hidden">[...]</span>';
+                }
+                continue;
+            }
+
+            // Check if this is a word with annotations to show
+            $hasAnnotation = ($showRom && $rom !== null) || ($showTrans && $trans !== null);
+
+            if ($hasAnnotation) {
+                // Build ruby annotation
+                $rubyText = '';
+                if ($showRom && $rom !== null) {
+                    $rubyText .= htmlspecialchars($rom, ENT_QUOTES, 'UTF-8');
+                }
+                if ($showTrans && $trans !== null) {
+                    if ($rubyText !== '') {
+                        $rubyText .= ' ';
+                    }
+                    $rubyText .= '<span class="context-trans">' .
+                        htmlspecialchars($trans, ENT_QUOTES, 'UTF-8') . '</span>';
+                }
+
+                $html .= '<ruby class="context-word">' . $escapedText .
+                    '<rp>(</rp><rt>' . $rubyText . '</rt><rp>)</rp></ruby>';
+            } else {
+                // Plain text (punctuation or unknown word)
+                $html .= $escapedText;
+            }
+        }
+
+        $html .= '</span>';
+        return $html;
     }
 
     /**

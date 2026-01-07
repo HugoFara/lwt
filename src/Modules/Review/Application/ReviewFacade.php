@@ -221,6 +221,24 @@ class ReviewFacade
     }
 
     /**
+     * Get sentence for word with annotations for surrounding words.
+     *
+     * @param int    $wordId Word ID
+     * @param string $wordlc Lowercase word text
+     *
+     * @return array{
+     *     sentence: string|null,
+     *     sentenceId: int|null,
+     *     found: bool,
+     *     annotations: array<int, array{text: string, romanization: string|null, translation: string|null, isTarget: bool}>
+     * }
+     */
+    public function getSentenceWithAnnotations(int $wordId, string $wordlc): array
+    {
+        return $this->repository->getSentenceWithAnnotations($wordId, $wordlc);
+    }
+
+    /**
      * Update word status.
      *
      * @param int $wordId    Word ID

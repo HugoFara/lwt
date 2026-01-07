@@ -313,6 +313,18 @@ function buildTableTest(): string {
           <label class="checkbox"><input type="checkbox" x-model="hideTransContent" @change="saveColumnSettings"> Hide translations</label>
         </div>
       </div>
+      <!-- Context annotation toggles (affects sentence mode tests) -->
+      <div class="field is-grouped is-grouped-multiline mb-4">
+        <div class="control">
+          <span class="has-text-grey-dark is-size-7 mr-2">Sentence context annotations:</span>
+        </div>
+        <div class="control">
+          <label class="checkbox"><input type="checkbox" x-model="contextAnnotations.rom" @change="saveContextAnnotationSettings"> Romanization</label>
+        </div>
+        <div class="control">
+          <label class="checkbox"><input type="checkbox" x-model="contextAnnotations.trans" @change="saveContextAnnotationSettings"> Translation</label>
+        </div>
+      </div>
 
       <div class="table-container">
         <table class="table is-striped is-hoverable is-fullwidth">
@@ -479,6 +491,23 @@ function buildStyles(): string {
 
       .word-test { font-weight: bold; text-decoration: underline; }
       .word-test-hidden { background-color: #e0e0e0; padding: 0 0.5em; border-radius: 3px; }
+
+      /* Context annotation styles */
+      .annotated-sentence { line-height: 2.5; }
+      .annotated-sentence ruby { ruby-position: over; }
+      .annotated-sentence ruby rt {
+        font-size: 0.65em;
+        color: #666;
+        font-weight: normal;
+      }
+      .annotated-sentence ruby .context-trans {
+        color: #888;
+        font-style: italic;
+      }
+      .context-word {
+        display: inline-block;
+        text-align: center;
+      }
 
       .cell-hidden {
         color: transparent !important;
@@ -685,12 +714,14 @@ function registerTableTestComponent(): void {
     columns: { edit: true, status: true, term: true, trans: true, rom: false, sentence: true },
     hideTermContent: false,
     hideTransContent: false,
+    contextAnnotations: { rom: false, trans: false },
     revealedTerms: {} as Record<number, boolean>,
     revealedTrans: {} as Record<number, boolean>,
     isLoading: false,
 
     async init() {
       this.loadColumnSettings();
+      this.loadContextAnnotationSettings();
       await this.loadWords();
     },
 
@@ -747,6 +778,27 @@ function registerTableTestComponent(): void {
           if (s.columns) this.columns = { ...this.columns, ...s.columns };
           if (typeof s.hideTermContent === 'boolean') this.hideTermContent = s.hideTermContent;
           if (typeof s.hideTransContent === 'boolean') this.hideTransContent = s.hideTransContent;
+        } catch { /* ignore */ }
+      }
+    },
+
+    saveContextAnnotationSettings() {
+      // Save to server via AJAX
+      import('@shared/utils/ajax_utilities').then(({ do_ajax_save_setting }) => {
+        do_ajax_save_setting('currenttabletestsetting7', this.contextAnnotations.rom ? '1' : '0');
+        do_ajax_save_setting('currenttabletestsetting8', this.contextAnnotations.trans ? '1' : '0');
+      });
+      // Also save to localStorage for quick reload
+      localStorage.setItem('lwt-context-annotations', JSON.stringify(this.contextAnnotations));
+    },
+
+    loadContextAnnotationSettings() {
+      const saved = localStorage.getItem('lwt-context-annotations');
+      if (saved) {
+        try {
+          const s = JSON.parse(saved);
+          if (typeof s.rom === 'boolean') this.contextAnnotations.rom = s.rom;
+          if (typeof s.trans === 'boolean') this.contextAnnotations.trans = s.trans;
         } catch { /* ignore */ }
       }
     }
