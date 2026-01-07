@@ -21,8 +21,17 @@
 
 namespace Lwt\Modules\Dictionary\Views;
 
+use Lwt\Core\Entity\LocalDictionary;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+
+/**
+ * @var int $langId
+ * @var string $langName
+ * @var array<LocalDictionary> $dictionaries
+ * @var int $localDictMode
+ * @var array<array{id: int, name: string}> $languages
+ */
 
 // Display messages
 $messageRaw = $_GET['message'] ?? '';

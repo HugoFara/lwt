@@ -96,6 +96,14 @@
             </errorLevel>
         </TypeDoesNotContainType>
 
+        <!-- View files document expected template variables with @var annotations -->
+        <UnnecessaryVarAnnotation>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
+            </errorLevel>
+        </UnnecessaryVarAnnotation>
+
         <!-- Return value may not be used by callers -->
         <PossiblyUnusedReturnValue>
             <errorLevel type="suppress">

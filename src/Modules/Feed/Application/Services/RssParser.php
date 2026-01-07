@@ -155,7 +155,7 @@ class RssParser
      * Parse a single feed item.
      *
      * @param \DOMElement $node           Item node
-     * @param array       $feedTags       Tag mapping
+     * @param array{item: string, title: string, description: string, link: string, pubDate: string, enclosure: string, url: string} $feedTags Tag mapping
      * @param int         $index          Item index (for date fallback)
      * @param string      $articleSection Tag for inline text extraction
      *
@@ -204,7 +204,7 @@ class RssParser
      * Parse item for detection mode (includes raw text content).
      *
      * @param \DOMElement $node     Item node
-     * @param array       $feedTags Tag mapping
+     * @param array{item: string, title: string, description: string, link: string, pubDate: string, enclosure: string, url: string} $feedTags Tag mapping
      *
      * @return array{title: string, desc: string, link: string, encoded?: string, description?: string, content?: string} Parsed item
      */
@@ -257,7 +257,7 @@ class RssParser
      *
      * @param \DOMDocument $rss Feed document
      *
-     * @return array|null Tag mapping or null if unknown format
+     * @return array{item: string, title: string, description: string, link: string, pubDate: string, enclosure: string, url: string}|null Tag mapping or null if unknown format
      */
     private function getFeedTagMapping(\DOMDocument $rss): ?array
     {
@@ -455,7 +455,7 @@ class RssParser
      * Extract audio enclosure URL.
      *
      * @param \DOMElement $node     Item node
-     * @param array       $feedTags Tag mapping
+     * @param array{item: string, title: string, description: string, link: string, pubDate: string, enclosure: string, url: string} $feedTags Tag mapping
      *
      * @return string Audio URL or empty string
      */
@@ -489,11 +489,11 @@ class RssParser
     /**
      * Count text lengths for source detection.
      *
-     * @param array  $item     Item data
+     * @param array{title: string, desc: string, link: string, encoded?: string, description?: string, content?: string} $item Item data
      * @param string $descKey  Description key
      * @param string $encKey   Encoded key
      *
-     * @return array Counts array
+     * @return array{desc: array{long: int, short: int}, encoded: array{long: int, short: int}} Counts array
      */
     private function countTextLengths(array $item, string $descKey, string $encKey): array
     {
@@ -524,14 +524,14 @@ class RssParser
     /**
      * Determine best text source and update items.
      *
-     * @param array $rssData     Feed items
-     * @param array $feedTags    Tag mapping
+     * @param array<int|string, mixed> $rssData     Feed items
+     * @param array{item: string, title: string, description: string, link: string, pubDate: string, enclosure: string, url: string} $feedTags Tag mapping
      * @param int   $descCount   Long description count
      * @param int   $descNocount Short description count
      * @param int   $encCount    Long encoded count
      * @param int   $encNocount  Short encoded count
      *
-     * @return array Updated feed data
+     * @return array<int|string, mixed> Updated feed data
      */
     private function determineBestTextSource(
         array $rssData,

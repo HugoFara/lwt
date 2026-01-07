@@ -452,7 +452,7 @@ class ArticleExtractor
      *
      * @param string $filterTags Additional filter tags
      *
-     * @return array Filter tags array
+     * @return array<string> Filter tags array
      */
     private function buildFilterTagsList(string $filterTags): array
     {
@@ -540,7 +540,7 @@ class ArticleExtractor
      * @param \DOMDocument  $dom        DOM document
      * @param array<string> $filterTags Tags to filter out
      *
-     * @return array{TxText: string} Result with TxText containing cleaned HTML
+     * @return array{TxTitle: string, TxText: string, TxSourceURI: string, TxAudioURI: string} Result with TxText containing cleaned HTML
      */
     private function extractNewArticleHtml(\DOMDocument $dom, array $filterTags): array
     {
@@ -577,8 +577,8 @@ class ArticleExtractor
         $html = preg_replace(
             ['/\<html[^\>]*\>/', '/\<body\>/'],
             ['', ''],
-            $html
-        );
+            $html !== false ? $html : ''
+        ) ?? '';
 
         return [
             'TxTitle' => '',

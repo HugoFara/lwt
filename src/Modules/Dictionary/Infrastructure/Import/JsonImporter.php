@@ -387,8 +387,8 @@ class JsonImporter implements ImporterInterface
                 return $item[$pattern];
             }
             // Try case-insensitive
+            /** @var mixed $itemVal */
             foreach ($item as $key => $itemVal) {
-                /** @var mixed $itemVal */
                 if (strtolower($key) === strtolower($pattern)) {
                     return $itemVal;
                 }

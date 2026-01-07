@@ -20,8 +20,16 @@
 
 namespace Lwt\Modules\Dictionary\Views;
 
+use Lwt\Core\Entity\LocalDictionary;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+
+/**
+ * @var int $langId
+ * @var string $langName
+ * @var LocalDictionary|null $dictionary
+ * @var array<LocalDictionary> $dictionaries
+ */
 
 // Error handling
 $errorRaw = $_GET['error'] ?? '';

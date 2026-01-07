@@ -680,10 +680,10 @@ class FeedController
     /**
      * Create texts from feed data without edit form.
      *
-     * @param array<int, array<string, mixed>> $texts    Parsed text data
-     * @param array<string, mixed>             $row      Feed data
-     * @param string                           $tagName  Tag name
-     * @param int                              $maxTexts Maximum texts to keep
+     * @param array<int|string, array<string, mixed>> $texts    Parsed text data
+     * @param array<string, mixed>                    $row      Feed data
+     * @param string                                  $tagName  Tag name
+     * @param int                                     $maxTexts Maximum texts to keep
      *
      * @return array{archived: int, sentences: int, textitems: int}
      */
