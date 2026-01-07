@@ -6,18 +6,34 @@
  * - Initializing Tagify on feed tag inputs
  * - Checkbox changes to enable/disable feed form fields
  *
+ * Uses dynamic imports to only load Tagify (~75KB) when this component is used.
+ *
  * @license Unlicense
  * @since   3.0.0
  */
 
 import Alpine from 'alpinejs';
-import Tagify from '@yaireo/tagify';
+import type TagifyType from '@yaireo/tagify';
 import { fetchTextTags, getTextTagsSync } from '@shared/stores/app_data';
+
+// Tagify module reference (loaded dynamically)
+let Tagify: typeof TagifyType | null = null;
+
+/**
+ * Dynamically load Tagify only when needed.
+ */
+async function loadTagify(): Promise<typeof TagifyType> {
+  if (Tagify) return Tagify;
+
+  const tagifyModule = await import('@yaireo/tagify');
+  Tagify = tagifyModule.default;
+  return Tagify;
+}
 
 // Extend HTMLInputElement to include the _tagify property
 declare global {
   interface HTMLInputElement {
-    _tagify?: Tagify;
+    _tagify?: TagifyType;
   }
 }
 
@@ -38,7 +54,7 @@ export interface FeedTextEditData {
 
   // Methods
   init(): Promise<void>;
-  initTagifyOnFeedInput(ulElement: HTMLUListElement): void;
+  initTagifyOnFeedInput(ulElement: HTMLUListElement): Promise<void>;
   handleFeedCheckboxChange(event: Event): void;
 }
 
@@ -86,17 +102,25 @@ export function feedTextEditData(config: FeedTextEditConfig = {}): FeedTextEditD
 
       // Initialize Tagify on all feed tag UL elements
       const ulElements = this.$el.querySelectorAll<HTMLUListElement>('ul[name^="feed"]');
-      ulElements.forEach(ul => this.initTagifyOnFeedInput(ul));
+
+      // Only load Tagify if there are tag inputs to initialize
+      if (ulElements.length > 0) {
+        await Promise.all(Array.from(ulElements).map(ul => this.initTagifyOnFeedInput(ul)));
+      }
 
       this.initialized = true;
     },
 
     /**
      * Initialize Tagify on a single UL element, converting it to a Tagify input.
+     * Tagify is dynamically loaded only when needed.
      */
-    initTagifyOnFeedInput(ulElement: HTMLUListElement): void {
+    async initTagifyOnFeedInput(ulElement: HTMLUListElement): Promise<void> {
       const fieldName = ulElement.getAttribute('name');
       if (!fieldName) return;
+
+      // Dynamically load Tagify
+      const TagifyClass = await loadTagify();
 
       // Extract existing tags from LI elements
       const existingTags: string[] = [];
@@ -122,7 +146,7 @@ export function feedTextEditData(config: FeedTextEditConfig = {}): FeedTextEditD
       ulElement.replaceWith(input);
 
       // Initialize Tagify with currently cached text tags
-      const tagify = new Tagify(input, {
+      const tagify = new TagifyClass(input, {
         whitelist: getTextTagsSync(),
         dropdown: {
           enabled: 1,

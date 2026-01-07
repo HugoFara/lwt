@@ -1,16 +1,31 @@
 /**
  * Statistics Charts Module - Alpine.js component with Chart.js visualizations
  *
+ * Uses dynamic imports to only load Chart.js (~200KB) when the statistics page
+ * is actually visited.
+ *
  * @author  HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */
 
 import Alpine from 'alpinejs';
-import { Chart, registerables } from 'chart.js';
+import type { Chart as ChartType } from 'chart.js';
 
-// Register all Chart.js components
-Chart.register(...registerables);
+// Chart.js module reference (loaded dynamically)
+let Chart: typeof ChartType | null = null;
+
+/**
+ * Dynamically load Chart.js only when needed.
+ */
+async function loadChartJs(): Promise<typeof ChartType> {
+  if (Chart) return Chart;
+
+  const chartModule = await import('chart.js');
+  Chart = chartModule.Chart;
+  Chart.register(...chartModule.registerables);
+  return Chart;
+}
 
 /**
  * Status colors matching LWT's existing status styles.
@@ -67,7 +82,7 @@ interface StatisticsAppState {
   intensityData: IntensityLanguageData[];
   frequencyTotals: FrequencyTotals | null;
   init(this: StatisticsAppState & { $nextTick: (cb: () => void) => void }): void;
-  initCharts(): void;
+  initCharts(): Promise<void>;
 }
 
 /**
@@ -77,14 +92,17 @@ interface StatisticsAppState {
  * @param canvasId - The ID of the canvas element
  * @param data - Array of language intensity data
  */
-export function initIntensityChart(
+export async function initIntensityChart(
   canvasId: string,
   data: IntensityLanguageData[]
-): Chart | null {
+): Promise<ChartType | null> {
   const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
   if (!canvas) {
     return null;
   }
+
+  // Dynamically load Chart.js
+  const ChartClass = await loadChartJs();
 
   const labels = data.map(lang => lang.name);
 
@@ -124,7 +142,7 @@ export function initIntensityChart(
     ]
   };
 
-  return new Chart(canvas, {
+  return new ChartClass(canvas, {
     type: 'bar',
     data: chartData,
     options: {
@@ -169,14 +187,17 @@ export function initIntensityChart(
  * @param canvasId - The ID of the canvas element
  * @param totals - The frequency totals data
  */
-export function initFrequencyChart(
+export async function initFrequencyChart(
   canvasId: string,
   totals: FrequencyTotals
-): Chart | null {
+): Promise<ChartType | null> {
   const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
   if (!canvas) {
     return null;
   }
+
+  // Dynamically load Chart.js
+  const ChartClass = await loadChartJs();
 
   const chartData = {
     labels: ['Today', 'Yesterday', 'Last 7 Days', 'Last 30 Days', 'Last 365 Days'],
@@ -208,7 +229,7 @@ export function initFrequencyChart(
     ]
   };
 
-  return new Chart(canvas, {
+  return new ChartClass(canvas, {
     type: 'line',
     data: chartData,
     options: {
@@ -234,6 +255,7 @@ export function initFrequencyChart(
 /**
  * Alpine.js data component for the statistics page.
  * Manages Chart.js initialization after DOM is ready.
+ * Chart.js is only loaded when this component is initialized.
  */
 export function statisticsApp(): StatisticsAppState {
   return {
@@ -273,20 +295,25 @@ export function statisticsApp(): StatisticsAppState {
 
     /**
      * Initialize Chart.js charts.
+     * Chart.js is dynamically imported only when needed.
      */
-    initCharts() {
+    async initCharts() {
       if (this.chartsInitialized) {
         return;
       }
 
+      // Load charts in parallel for faster initialization
+      const chartPromises: Promise<ChartType | null>[] = [];
+
       if (this.intensityData.length > 0) {
-        initIntensityChart('intensityChart', this.intensityData);
+        chartPromises.push(initIntensityChart('intensityChart', this.intensityData));
       }
 
       if (this.frequencyTotals) {
-        initFrequencyChart('frequencyChart', this.frequencyTotals);
+        chartPromises.push(initFrequencyChart('frequencyChart', this.frequencyTotals));
       }
 
+      await Promise.all(chartPromises);
       this.chartsInitialized = true;
     }
   };

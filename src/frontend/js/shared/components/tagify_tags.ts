@@ -5,14 +5,38 @@
  * existing HTML structure (UL with LI elements) by transforming them
  * into Tagify-compatible inputs.
  *
+ * Uses dynamic imports to only load Tagify (~75KB) when tag inputs are needed.
+ *
  * @license unlicense
  * @since 3.0.0
  */
 
-import Tagify, { TagData } from '@yaireo/tagify';
-import '@yaireo/tagify/dist/tagify.css';
+import type TagifyType from '@yaireo/tagify';
+import type { TagData } from '@yaireo/tagify';
 
 import { containsCharacterOutsideBasicMultilingualPlane } from '@shared/forms/form_validation';
+
+// Tagify module reference (loaded dynamically)
+let Tagify: typeof TagifyType | null = null;
+let tagifyCssLoaded = false;
+
+/**
+ * Dynamically load Tagify and its CSS only when needed.
+ */
+async function loadTagify(): Promise<typeof TagifyType> {
+  if (Tagify) return Tagify;
+
+  // Load Tagify and CSS in parallel
+  const [tagifyModule] = await Promise.all([
+    import('@yaireo/tagify'),
+    // Only load CSS once
+    tagifyCssLoaded ? Promise.resolve() : import('@yaireo/tagify/dist/tagify.css')
+  ]);
+
+  Tagify = tagifyModule.default;
+  tagifyCssLoaded = true;
+  return Tagify;
+}
 
 export interface TagifyInitOptions {
   /** Whitelist of available tags for autocomplete */
@@ -26,12 +50,12 @@ export interface TagifyInitOptions {
 }
 
 // Store Tagify instances for external access (e.g., form dirty checking)
-const tagifyInstances: Map<string, Tagify> = new Map();
+const tagifyInstances: Map<string, TagifyType> = new Map();
 
 /**
  * Get a Tagify instance by element ID
  */
-export function getTagifyInstance(elementId: string): Tagify | undefined {
+export function getTagifyInstance(elementId: string): TagifyType | undefined {
   return tagifyInstances.get(elementId);
 }
 
@@ -40,19 +64,23 @@ export function getTagifyInstance(elementId: string): Tagify | undefined {
  *
  * Transforms a <ul id="..."><li>tag1</li><li>tag2</li></ul> structure
  * into a Tagify input while preserving the tag values.
+ * Tagify is dynamically loaded only when this function is called.
  *
  * @param selector - CSS selector for the UL element
  * @param options - Tagify configuration options
  * @returns The Tagify instance, or null if element not found
  */
-export function initTagify(
+export async function initTagify(
   selector: string,
   options: TagifyInitOptions = {}
-): Tagify | null {
+): Promise<TagifyType | null> {
   const ulElement = document.querySelector<HTMLUListElement>(selector);
   if (!ulElement) {
     return null;
   }
+
+  // Dynamically load Tagify
+  const TagifyClass = await loadTagify();
 
   // Extract existing tags from LI elements
   const existingTags: string[] = [];
@@ -79,7 +107,7 @@ export function initTagify(
   ulElement.replaceWith(input);
 
   // Initialize Tagify
-  const tagify = new Tagify(input, {
+  const tagify = new TagifyClass(input, {
     whitelist: options.whitelist || [],
     dropdown: {
       enabled: 1, // Show suggestions after 1 character
@@ -135,11 +163,11 @@ export function initTagify(
  * @param onAdd - Callback when tag is added
  * @param onRemove - Callback when tag is removed
  */
-export function initTermTags(
+export async function initTermTags(
   whitelist: string[] = [],
   onAdd?: (tagData: TagData) => void,
   onRemove?: (tagData: TagData) => void
-): Tagify | null {
+): Promise<TagifyType | null> {
   return initTagify('#termtags', {
     whitelist,
     fieldName: 'TermTags[TagList][]',
@@ -155,11 +183,11 @@ export function initTermTags(
  * @param onAdd - Callback when tag is added
  * @param onRemove - Callback when tag is removed
  */
-export function initTextTags(
+export async function initTextTags(
   whitelist: string[] = [],
   onAdd?: (tagData: TagData) => void,
   onRemove?: (tagData: TagData) => void
-): Tagify | null {
+): Promise<TagifyType | null> {
   return initTagify('#texttags', {
     whitelist,
     fieldName: 'TextTags[TagList][]',

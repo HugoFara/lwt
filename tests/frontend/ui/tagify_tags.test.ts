@@ -51,13 +51,13 @@ describe('tagify_tags.ts', () => {
   // ===========================================================================
 
   describe('initTagify', () => {
-    it('returns null when element does not exist', () => {
-      const result = initTagify('#nonexistent', { url: '/save' });
+    it('returns null when element does not exist', async () => {
+      const result = await initTagify('#nonexistent', { url: '/save' });
 
       expect(result).toBeNull();
     });
 
-    it('extracts existing tags from LI elements', () => {
+    it('extracts existing tags from LI elements', async () => {
       document.body.innerHTML = `
         <ul id="mytags">
           <li>tag1</li>
@@ -66,21 +66,21 @@ describe('tagify_tags.ts', () => {
         </ul>
       `;
 
-      initTagify('#mytags');
+      await initTagify('#mytags');
 
       expect(Tagify).toHaveBeenCalled();
       const mockInstance = (Tagify as any).mock.results[0].value;
       expect(mockInstance.addTags).toHaveBeenCalledWith(['tag1', 'tag2', 'tag3']);
     });
 
-    it('replaces UL with input element', () => {
+    it('replaces UL with input element', async () => {
       document.body.innerHTML = `
         <ul id="mytags" class="tag-list">
           <li>tag1</li>
         </ul>
       `;
 
-      initTagify('#mytags');
+      await initTagify('#mytags');
 
       expect(document.querySelector('ul#mytags')).toBeNull();
       const input = document.querySelector('input#mytags');
@@ -88,14 +88,14 @@ describe('tagify_tags.ts', () => {
       expect(input!.className).toBe('tag-list');
     });
 
-    it('preserves element ID and class', () => {
+    it('preserves element ID and class', async () => {
       document.body.innerHTML = `
         <ul id="special-tags" class="custom-class">
           <li>tag</li>
         </ul>
       `;
 
-      initTagify('#special-tags');
+      await initTagify('#special-tags');
 
       const input = document.querySelector('input#special-tags') as HTMLInputElement;
       expect(input).not.toBeNull();
@@ -103,19 +103,19 @@ describe('tagify_tags.ts', () => {
       expect(input.className).toBe('custom-class');
     });
 
-    it('sets field name when provided', () => {
+    it('sets field name when provided', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
-      initTagify('#mytags', { fieldName: 'Tags[List][]' });
+      await initTagify('#mytags', { fieldName: 'Tags[List][]' });
 
       const input = document.querySelector('input#mytags') as HTMLInputElement;
       expect(input.name).toBe('Tags[List][]');
     });
 
-    it('initializes Tagify with whitelist', () => {
+    it('initializes Tagify with whitelist', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
-      initTagify('#mytags', { whitelist: ['option1', 'option2', 'option3'] });
+      await initTagify('#mytags', { whitelist: ['option1', 'option2', 'option3'] });
 
       expect(Tagify).toHaveBeenCalledWith(
         expect.any(HTMLInputElement),
@@ -125,11 +125,11 @@ describe('tagify_tags.ts', () => {
       );
     });
 
-    it('calls onAdd callback when tag is added', () => {
+    it('calls onAdd callback when tag is added', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
       const onAdd = vi.fn();
-      initTagify('#mytags', { onAdd });
+      await initTagify('#mytags', { onAdd });
 
       const mockInstance = (Tagify as any).mock.results[0].value;
 
@@ -137,37 +137,37 @@ describe('tagify_tags.ts', () => {
       expect(mockInstance.on).toHaveBeenCalledWith('add', expect.any(Function));
     });
 
-    it('calls onRemove callback when tag is removed', () => {
+    it('calls onRemove callback when tag is removed', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
       const onRemove = vi.fn();
-      initTagify('#mytags', { onRemove });
+      await initTagify('#mytags', { onRemove });
 
       const mockInstance = (Tagify as any).mock.results[0].value;
 
       expect(mockInstance.on).toHaveBeenCalledWith('remove', expect.any(Function));
     });
 
-    it('stores instance for later access', () => {
+    it('stores instance for later access', async () => {
       document.body.innerHTML = '<ul id="stored-tags"></ul>';
 
-      const tagify = initTagify('#stored-tags');
+      const tagify = await initTagify('#stored-tags');
 
       const retrieved = getTagifyInstance('stored-tags');
       expect(retrieved).toBe(tagify);
     });
 
-    it('handles empty existing tags', () => {
+    it('handles empty existing tags', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
-      const tagify = initTagify('#mytags');
+      const tagify = await initTagify('#mytags');
 
       expect(tagify).not.toBeNull();
       const mockInstance = (Tagify as any).mock.results[0].value;
       expect(mockInstance.addTags).not.toHaveBeenCalled();
     });
 
-    it('trims whitespace from tag text', () => {
+    it('trims whitespace from tag text', async () => {
       document.body.innerHTML = `
         <ul id="mytags">
           <li>  spaced  </li>
@@ -175,13 +175,13 @@ describe('tagify_tags.ts', () => {
         </ul>
       `;
 
-      initTagify('#mytags');
+      await initTagify('#mytags');
 
       const mockInstance = (Tagify as any).mock.results[0].value;
       expect(mockInstance.addTags).toHaveBeenCalledWith(['spaced', 'normal']);
     });
 
-    it('filters out empty tag text', () => {
+    it('filters out empty tag text', async () => {
       document.body.innerHTML = `
         <ul id="mytags">
           <li>valid</li>
@@ -191,17 +191,17 @@ describe('tagify_tags.ts', () => {
         </ul>
       `;
 
-      initTagify('#mytags');
+      await initTagify('#mytags');
 
       const mockInstance = (Tagify as any).mock.results[0].value;
       // Empty and whitespace-only tags should be filtered out
       expect(mockInstance.addTags).toHaveBeenCalledWith(['valid', 'another']);
     });
 
-    it('returns Tagify instance', () => {
+    it('returns Tagify instance', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
-      const result = initTagify('#mytags');
+      const result = await initTagify('#mytags');
 
       expect(result).not.toBeNull();
       expect(result).toBe((Tagify as any).mock.results[0].value);
@@ -213,27 +213,27 @@ describe('tagify_tags.ts', () => {
   // ===========================================================================
 
   describe('initTermTags', () => {
-    it('initializes tagify on #termtags element', () => {
+    it('initializes tagify on #termtags element', async () => {
       document.body.innerHTML = '<ul id="termtags"></ul>';
 
-      initTermTags();
+      await initTermTags();
 
       expect(Tagify).toHaveBeenCalled();
     });
 
-    it('sets correct field name for term tags', () => {
+    it('sets correct field name for term tags', async () => {
       document.body.innerHTML = '<ul id="termtags"></ul>';
 
-      initTermTags();
+      await initTermTags();
 
       const input = document.querySelector('input#termtags') as HTMLInputElement;
       expect(input.name).toBe('TermTags[TagList][]');
     });
 
-    it('passes whitelist to Tagify', () => {
+    it('passes whitelist to Tagify', async () => {
       document.body.innerHTML = '<ul id="termtags"></ul>';
 
-      initTermTags(['grammar', 'vocabulary', 'idiom']);
+      await initTermTags(['grammar', 'vocabulary', 'idiom']);
 
       expect(Tagify).toHaveBeenCalledWith(
         expect.any(HTMLInputElement),
@@ -243,27 +243,27 @@ describe('tagify_tags.ts', () => {
       );
     });
 
-    it('returns null when element does not exist', () => {
-      const result = initTermTags();
+    it('returns null when element does not exist', async () => {
+      const result = await initTermTags();
 
       expect(result).toBeNull();
     });
 
-    it('passes onAdd callback', () => {
+    it('passes onAdd callback', async () => {
       document.body.innerHTML = '<ul id="termtags"></ul>';
 
       const onAdd = vi.fn();
-      initTermTags([], onAdd);
+      await initTermTags([], onAdd);
 
       const mockInstance = (Tagify as any).mock.results[0].value;
       expect(mockInstance.on).toHaveBeenCalledWith('add', expect.any(Function));
     });
 
-    it('passes onRemove callback', () => {
+    it('passes onRemove callback', async () => {
       document.body.innerHTML = '<ul id="termtags"></ul>';
 
       const onRemove = vi.fn();
-      initTermTags([], undefined, onRemove);
+      await initTermTags([], undefined, onRemove);
 
       const mockInstance = (Tagify as any).mock.results[0].value;
       expect(mockInstance.on).toHaveBeenCalledWith('remove', expect.any(Function));
@@ -275,27 +275,27 @@ describe('tagify_tags.ts', () => {
   // ===========================================================================
 
   describe('initTextTags', () => {
-    it('initializes tagify on #texttags element', () => {
+    it('initializes tagify on #texttags element', async () => {
       document.body.innerHTML = '<ul id="texttags"></ul>';
 
-      initTextTags();
+      await initTextTags();
 
       expect(Tagify).toHaveBeenCalled();
     });
 
-    it('sets correct field name for text tags', () => {
+    it('sets correct field name for text tags', async () => {
       document.body.innerHTML = '<ul id="texttags"></ul>';
 
-      initTextTags();
+      await initTextTags();
 
       const input = document.querySelector('input#texttags') as HTMLInputElement;
       expect(input.name).toBe('TextTags[TagList][]');
     });
 
-    it('passes whitelist to Tagify', () => {
+    it('passes whitelist to Tagify', async () => {
       document.body.innerHTML = '<ul id="texttags"></ul>';
 
-      initTextTags(['news', 'fiction', 'podcast']);
+      await initTextTags(['news', 'fiction', 'podcast']);
 
       expect(Tagify).toHaveBeenCalledWith(
         expect.any(HTMLInputElement),
@@ -305,8 +305,8 @@ describe('tagify_tags.ts', () => {
       );
     });
 
-    it('returns null when element does not exist', () => {
-      const result = initTextTags();
+    it('returns null when element does not exist', async () => {
+      const result = await initTextTags();
 
       expect(result).toBeNull();
     });
@@ -323,10 +323,10 @@ describe('tagify_tags.ts', () => {
       expect(result).toBeUndefined();
     });
 
-    it('returns stored instance by ID', () => {
+    it('returns stored instance by ID', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
-      const created = initTagify('#mytags');
+      const created = await initTagify('#mytags');
       const retrieved = getTagifyInstance('mytags');
 
       expect(retrieved).toBe(created);
@@ -338,14 +338,14 @@ describe('tagify_tags.ts', () => {
   // ===========================================================================
 
   describe('setupTagChangeTracking', () => {
-    it('sets up event listeners on all tagify instances', () => {
+    it('sets up event listeners on all tagify instances', async () => {
       document.body.innerHTML = `
         <ul id="tags1"></ul>
         <ul id="tags2"></ul>
       `;
 
-      initTagify('#tags1');
-      initTagify('#tags2');
+      await initTagify('#tags1');
+      await initTagify('#tags2');
 
       const onChange = vi.fn();
       setupTagChangeTracking(onChange);
@@ -370,10 +370,10 @@ describe('tagify_tags.ts', () => {
   // ===========================================================================
 
   describe('Tagify configuration', () => {
-    it('configures dropdown settings', () => {
+    it('configures dropdown settings', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
-      initTagify('#mytags');
+      await initTagify('#mytags');
 
       expect(Tagify).toHaveBeenCalledWith(
         expect.any(HTMLInputElement),
@@ -388,10 +388,10 @@ describe('tagify_tags.ts', () => {
       );
     });
 
-    it('disables duplicates', () => {
+    it('disables duplicates', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
-      initTagify('#mytags');
+      await initTagify('#mytags');
 
       expect(Tagify).toHaveBeenCalledWith(
         expect.any(HTMLInputElement),
@@ -401,10 +401,10 @@ describe('tagify_tags.ts', () => {
       );
     });
 
-    it('configures transformTag for BMP validation', () => {
+    it('configures transformTag for BMP validation', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
-      initTagify('#mytags');
+      await initTagify('#mytags');
 
       expect(Tagify).toHaveBeenCalledWith(
         expect.any(HTMLInputElement),
@@ -414,13 +414,13 @@ describe('tagify_tags.ts', () => {
       );
     });
 
-    it('validates tags against BMP characters', () => {
+    it('validates tags against BMP characters', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
       // Mock containsCharacterOutsideBasicMultilingualPlane to return true
       (containsCharacterOutsideBasicMultilingualPlane as any).mockReturnValue(true);
 
-      initTagify('#mytags');
+      await initTagify('#mytags');
 
       // Get the transformTag function that was passed to Tagify
       const callArgs = (Tagify as any).mock.calls[0][1];
@@ -433,13 +433,13 @@ describe('tagify_tags.ts', () => {
       expect(tagData.value).toBe('');
     });
 
-    it('allows valid BMP tags', () => {
+    it('allows valid BMP tags', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
       // Mock containsCharacterOutsideBasicMultilingualPlane to return false
       (containsCharacterOutsideBasicMultilingualPlane as any).mockReturnValue(false);
 
-      initTagify('#mytags');
+      await initTagify('#mytags');
 
       const callArgs = (Tagify as any).mock.calls[0][1];
       const transformTag = callArgs.transformTag;
@@ -450,10 +450,10 @@ describe('tagify_tags.ts', () => {
       expect(tagData.value).toBe('validtag');
     });
 
-    it('configures originalInputValueFormat for comma separation', () => {
+    it('configures originalInputValueFormat for comma separation', async () => {
       document.body.innerHTML = '<ul id="mytags"></ul>';
 
-      initTagify('#mytags');
+      await initTagify('#mytags');
 
       const callArgs = (Tagify as any).mock.calls[0][1];
       const format = callArgs.originalInputValueFormat;

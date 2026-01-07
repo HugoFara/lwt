@@ -1,5 +1,6 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type PluginOption } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
+import purgecss from 'vite-plugin-purgecss';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -45,7 +46,56 @@ export default defineConfig({
   plugins: [
     legacy({
       targets: ['defaults', 'not IE 11']
-    })
+    }),
+    // PurgeCSS to remove unused CSS (especially from Bulma)
+    // Cast needed due to vite-plugin-purgecss type issues with 'enforce' property
+    purgecss({
+      content: [
+        // PHP views and templates
+        resolve(__dirname, 'src/**/*.php'),
+        resolve(__dirname, 'index.php'),
+        // TypeScript files (for dynamic class names)
+        resolve(__dirname, 'src/frontend/js/**/*.ts'),
+        // CSS files (for @apply directives)
+        resolve(__dirname, 'src/frontend/css/**/*.css'),
+      ],
+      // Safelist patterns that are dynamically generated
+      safelist: {
+        standard: [
+          // Word status classes (s1, s2, s3, s4, s5, s98, s99)
+          /^s\d+$/,
+          /^status\d+$/,
+          /^status-\d+$/,
+          // Bulma modals and dropdowns (may be opened dynamically)
+          'is-active',
+          'is-hidden',
+          'is-loading',
+          'is-disabled',
+          // Alpine.js visibility
+          /^\[x-cloak\]$/,
+          // Chart.js canvas
+          'chartjs-render-monitor',
+          // Tagify
+          /^tagify/,
+          // Dynamic color classes
+          /^has-background-/,
+          /^has-text-/,
+        ],
+        // Keep all Bulma responsive helpers
+        greedy: [
+          /^is-hidden-/,
+          /^is-invisible-/,
+          /^is-block-/,
+          /^is-flex-/,
+          /^is-inline-/,
+          // Column sizes
+          /^is-\d+-/,
+          /^is-offset-/,
+        ],
+      },
+      // Skip purging these files
+      rejected: true,
+    }) as PluginOption,
   ],
 
   server: {

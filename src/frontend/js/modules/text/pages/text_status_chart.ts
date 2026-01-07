@@ -4,14 +4,30 @@
  * Renders horizontal stacked bar charts showing the distribution of word statuses
  * (Unknown, Learning 1-5, Well Known, Ignored) for each text card.
  *
+ * Uses dynamic imports to only load Chart.js (~200KB) when charts are actually needed.
+ *
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */
 
-import { Chart, registerables } from 'chart.js';
+import type { Chart as ChartType, ChartConfiguration } from 'chart.js';
 
-// Register all Chart.js components
-Chart.register(...registerables);
+// Chart.js module reference (loaded dynamically)
+let Chart: typeof ChartType | null = null;
+let chartJsLoaded = false;
+
+/**
+ * Dynamically load Chart.js only when needed.
+ */
+async function loadChartJs(): Promise<typeof ChartType> {
+  if (Chart) return Chart;
+
+  const chartModule = await import('chart.js');
+  Chart = chartModule.Chart;
+  Chart.register(...chartModule.registerables);
+  chartJsLoaded = true;
+  return Chart;
+}
 
 /**
  * Status colors matching LWT's existing barchart CSS styles.
@@ -63,7 +79,7 @@ const STATUS_ORDER = [0, 1, 2, 3, 4, 5, 99, 98];
 /**
  * Map of text ID to Chart instance for cleanup/updates.
  */
-const chartInstances: Map<string, Chart> = new Map();
+const chartInstances: Map<string, ChartType> = new Map();
 
 /**
  * Get status data from hidden span elements.
@@ -93,14 +109,17 @@ function getStatusDataFromDOM(textId: string): Record<number, number> {
  * @param data - Optional status data (if not provided, reads from DOM)
  * @returns The Chart instance or null if canvas not found
  */
-export function createTextStatusChart(
+export async function createTextStatusChart(
   textId: string,
   data?: Record<number, number>
-): Chart | null {
+): Promise<ChartType | null> {
   const canvas = document.getElementById(`chart_${textId}`) as HTMLCanvasElement | null;
   if (!canvas) {
     return null;
   }
+
+  // Dynamically load Chart.js
+  const ChartClass = await loadChartJs();
 
   // Get data from DOM if not provided
   const statusData = data || getStatusDataFromDOM(textId);
@@ -124,7 +143,7 @@ export function createTextStatusChart(
     categoryPercentage: 1.0
   }));
 
-  const chart = new Chart(canvas, {
+  const chart = new ChartClass(canvas, {
     type: 'bar',
     data: {
       labels: [''],
@@ -188,7 +207,7 @@ export function createTextStatusChart(
  *
  * @param textId - The text ID
  */
-export function updateTextStatusChart(textId: string): void {
+export async function updateTextStatusChart(textId: string): Promise<void> {
   const chart = chartInstances.get(textId);
   const statusData = getStatusDataFromDOM(textId);
 
@@ -202,38 +221,56 @@ export function updateTextStatusChart(textId: string): void {
     chart.update('none');
   } else {
     // Create new chart
-    createTextStatusChart(textId, statusData);
+    await createTextStatusChart(textId, statusData);
   }
 }
 
 /**
  * Initialize all text status charts on the page.
  * Looks for canvas elements with class 'text-status-chart'.
+ * Only loads Chart.js if there are charts to render.
  */
-export function initTextStatusCharts(): void {
+export async function initTextStatusCharts(): Promise<void> {
   const canvases = document.querySelectorAll<HTMLCanvasElement>('.text-status-chart');
 
-  canvases.forEach(canvas => {
+  // Skip loading Chart.js if no charts on page
+  if (canvases.length === 0) {
+    return;
+  }
+
+  // Create all charts (Chart.js will be loaded on first createTextStatusChart call)
+  const promises = Array.from(canvases).map(canvas => {
     const textId = canvas.dataset.textId;
     if (textId) {
-      createTextStatusChart(textId);
+      return createTextStatusChart(textId);
     }
+    return Promise.resolve(null);
   });
+
+  await Promise.all(promises);
 }
 
 /**
  * Update all text status charts on the page.
  * Called after word counts are loaded via AJAX.
  */
-export function updateAllTextStatusCharts(): void {
+export async function updateAllTextStatusCharts(): Promise<void> {
   const canvases = document.querySelectorAll<HTMLCanvasElement>('.text-status-chart');
 
-  canvases.forEach(canvas => {
+  // Skip if no charts
+  if (canvases.length === 0) {
+    return;
+  }
+
+  const promises = Array.from(canvases).map(canvas => {
     const textId = canvas.dataset.textId;
     if (textId) {
-      updateTextStatusChart(textId);
+      return updateTextStatusChart(textId);
     }
+    return Promise.resolve();
   });
+
+  await Promise.all(promises);
 }
 
 /**
