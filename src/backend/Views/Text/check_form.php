@@ -31,6 +31,7 @@ $languagesOption = (string) ($languagesOption ?? '');
 <h2 class="title is-4">Check Text Parsing</h2>
 
 <form class="validate" action="/text/check" method="post">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <div class="box">
         <!-- Language -->
         <div class="field is-horizontal">

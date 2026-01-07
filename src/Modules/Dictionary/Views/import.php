@@ -54,6 +54,7 @@ echo PageLayoutHelper::buildActionCard([
 
     <form method="POST" action="/dictionaries/import" enctype="multipart/form-data"
           @submit="submitting = true">
+        <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
         <input type="hidden" name="lang_id" value="<?php echo $langId; ?>">
 
         <!-- Dictionary Selection -->

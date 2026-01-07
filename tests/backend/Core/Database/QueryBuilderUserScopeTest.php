@@ -50,6 +50,7 @@ class QueryBuilderUserScopeTest extends TestCase
         // Reset multi-user state before each test
         Globals::setMultiUserEnabled(false);
         Globals::setCurrentUserId(null);
+        Globals::setCurrentUserIsAdmin(false);
     }
 
     protected function tearDown(): void
@@ -57,6 +58,7 @@ class QueryBuilderUserScopeTest extends TestCase
         // Reset state after each test
         Globals::setMultiUserEnabled(false);
         Globals::setCurrentUserId(null);
+        Globals::setCurrentUserIsAdmin(false);
     }
 
     // =========================================================================
@@ -73,9 +75,10 @@ class QueryBuilderUserScopeTest extends TestCase
 
     public function testWithoutUserScopeDisablesFiltering(): void
     {
-        // Enable multi-user mode
+        // Enable multi-user mode with admin user (required for withoutUserScope)
         Globals::setMultiUserEnabled(true);
         Globals::setCurrentUserId(42);
+        Globals::setCurrentUserIsAdmin(true);
 
         // Without user scope, query should not have user filter
         $sql = QueryBuilder::table('words')
@@ -83,6 +86,32 @@ class QueryBuilderUserScopeTest extends TestCase
             ->toSql();
 
         $this->assertStringNotContainsString('WoUsID', $sql);
+    }
+
+    public function testWithoutUserScopeThrowsForNonAdmin(): void
+    {
+        // Enable multi-user mode without admin privileges
+        Globals::setMultiUserEnabled(true);
+        Globals::setCurrentUserId(42);
+        Globals::setCurrentUserIsAdmin(false);
+
+        $this->expectException(\Lwt\Core\Exception\AuthException::class);
+        $this->expectExceptionMessage('You do not have permission to access cross-user data.');
+
+        QueryBuilder::table('words')->withoutUserScope();
+    }
+
+    public function testWithoutUserScopeAllowedWhenMultiUserDisabled(): void
+    {
+        // When multi-user mode is disabled, any user can call withoutUserScope
+        Globals::setMultiUserEnabled(false);
+        Globals::setCurrentUserId(42);
+        Globals::setCurrentUserIsAdmin(false);
+
+        $qb = QueryBuilder::table('words');
+        $result = $qb->withoutUserScope();
+
+        $this->assertSame($qb, $result);
     }
 
     // =========================================================================

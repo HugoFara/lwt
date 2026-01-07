@@ -75,6 +75,7 @@ $connSocket = $connObj->socket ?? '';
             <?php endif; ?>
 
             <form name="database_connect" action="" method="post" x-data="{ showPassword: false }">
+                <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                 <!-- Server Address -->
                 <div class="field">
                     <label class="label" for="server">Server Address</label>

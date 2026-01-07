@@ -52,6 +52,7 @@ $actions = [
 <form class="validate" action="/feeds/edit" method="post"
       x-data="feedForm()"
       @submit="handleSubmit($event)">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="NfOptions" value="" />
     <input type="hidden" name="save_feed" value="1" />
 

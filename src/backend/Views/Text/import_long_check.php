@@ -36,6 +36,7 @@ $plural = ($textCount == 1 ? '' : 's');
 $shorter = ($textCount == 1 ? ' ' : ' shorter ');
 ?>
 <form enctype="multipart/form-data" action="/text/import-long" method="post" data-lwt-form-check="true" data-lwt-dirty>
+<?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 <input type="hidden" name="LgID" value="<?php echo $langId; ?>" />
 <input type="hidden" name="TxTitle" value="<?php echo \htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>" />
 <input type="hidden" name="TxSourceURI" value="<?php echo \htmlspecialchars($sourceUri, ENT_QUOTES, 'UTF-8'); ?>" />

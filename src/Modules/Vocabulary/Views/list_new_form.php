@@ -21,6 +21,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 ?>
 <h2>New Term</h2>
 <form name="newword" class="validate" action="/words/edit" method="post" data-lwt-form-check="true">
+<?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lgid; ?>" />
 <table class="tab1" cellspacing="0" cellpadding="5">
 <tr>

@@ -55,6 +55,7 @@ $email = $email ?? '';
 
                     <!-- Registration form -->
                     <form method="POST" action="/register" x-data="registerForm()" @submit="submitForm($event)">
+                        <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                         <div class="field">
                             <label class="label" for="username">Username</label>
                             <div class="control has-icons-left has-icons-right">

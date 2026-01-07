@@ -34,6 +34,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 ?>
 <form name="newword" class="validate" action="/word/edit-multi" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
+<?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $term->lgid; ?>" />
 <input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($term->textlc ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
 <input type="hidden" name="tid" value="<?php echo $tid; ?>" />

@@ -116,6 +116,7 @@ $configJson = json_encode([
     </div>
 
     <form class="validate" action="/feeds/edit" method="post" @submit="handleSubmit">
+        <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
         <div class="box">
             <!-- Language -->
             <div class="field is-horizontal">

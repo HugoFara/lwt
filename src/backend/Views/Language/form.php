@@ -92,6 +92,7 @@ $parserInfo = $parserInfo ?? [];
               advanced: false
           }
       }">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="LgID" value="<?php echo $language->id; ?>" />
 
     <?php if (!$isNew): ?>

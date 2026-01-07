@@ -80,6 +80,7 @@ $langcnt = (int)($langcnt ?? 0);
         <form action="/admin/install-demo" method="post"
               @submit="installing = true"
               x-show="!installing">
+            <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
             <div class="field is-grouped mt-5">
                 <div class="control">
                     <button type="submit"

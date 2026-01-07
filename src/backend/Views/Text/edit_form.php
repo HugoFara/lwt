@@ -75,6 +75,7 @@ if ($isNew) {
 <form class="validate" method="post"
       action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>"
       x-data="{ showAnnotation: <?php echo $isNew ? 'false' : 'true'; ?> }">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="TxID" value="<?php echo $textId; ?>" />
 
     <div class="box">

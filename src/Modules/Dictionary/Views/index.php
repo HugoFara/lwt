@@ -118,6 +118,7 @@ echo PageLayoutHelper::buildActionCard([
 <div class="box mb-4">
     <h4 class="title is-5 mb-2">Quick Create Dictionary</h4>
     <form method="POST" action="/dictionaries?lang=<?php echo $langId; ?>">
+        <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
         <div class="field has-addons">
             <div class="control is-expanded">
                 <input type="text" name="dict_name" class="input" placeholder="Dictionary name..." required>
@@ -190,6 +191,7 @@ echo PageLayoutHelper::buildActionCard([
                         <div class="buttons are-small">
                             <!-- Toggle enable/disable -->
                             <form method="POST" action="/dictionaries?lang=<?php echo $langId; ?>" style="display:inline;">
+                                <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                                 <input type="hidden" name="dict_id" value="<?php echo $dict->id(); ?>">
                                 <button type="submit" name="toggle_enabled" value="1"
                                         class="button <?php echo $dict->isEnabled() ? 'is-warning' : 'is-success'; ?>"
@@ -207,6 +209,7 @@ echo PageLayoutHelper::buildActionCard([
                             <!-- Delete -->
                             <form method="POST" action="/dictionaries/delete" style="display:inline;"
                                   onsubmit="return confirm('Delete this dictionary and all its entries?');">
+                                <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                                 <input type="hidden" name="dict_id" value="<?php echo $dict->id(); ?>">
                                 <input type="hidden" name="lang_id" value="<?php echo $langId; ?>">
                                 <button type="submit" class="button is-danger" title="Delete">

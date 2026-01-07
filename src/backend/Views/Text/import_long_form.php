@@ -42,6 +42,7 @@ $actions = [
 
 <form enctype="multipart/form-data" class="validate" action="/text/import-long" method="post"
       x-data="{ inputMethod: 'paste' }">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <div class="box">
         <!-- Language -->
         <div class="field">

@@ -75,6 +75,7 @@ $configJson = json_encode([
     <?php endif; ?>
 
     <form class="validate" action="/feeds/wizard" method="post">
+        <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
         <input type="hidden" name="step" value="2" />
         <input type="hidden" name="selected_feed" value="0" />
         <input type="hidden" name="article_tags" value="1" />

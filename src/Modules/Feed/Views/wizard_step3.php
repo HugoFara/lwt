@@ -258,6 +258,7 @@ $configJson = json_encode([
 
     <!-- Wizard Controls -->
     <form name="lwt_form1" class="validate" action="/feeds/wizard" method="post">
+        <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
         <nav class="level wizard-controls mt-4">
             <div class="level-left">
                 <div class="level-item">

@@ -54,6 +54,7 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
 
 ?>
 <form class="validate" action="/admin/settings" method="post" data-lwt-settings-form>
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 
     <!-- Appearance Section -->
     <div class="card settings-section mb-4" x-data="{ open: false }">

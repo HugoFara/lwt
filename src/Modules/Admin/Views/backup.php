@@ -75,6 +75,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
             </div>
 
             <form action="/admin/backup" method="post" class="mt-4">
+                <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                 <div class="field is-grouped is-grouped-right">
                     <div class="control">
                         <button type="submit" name="orig_backup" class="button is-info is-outlined">
@@ -141,6 +142,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                   @submit="restoring = true"
                   x-show="!restoring"
                   data-confirm-submit="Are you sure? This will REPLACE all existing data!">
+                <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                 <input type="hidden" name="restore" value="1">
                 <div class="field">
                     <label class="label">Backup File</label>
@@ -266,6 +268,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                   @submit="emptying = true"
                   x-show="!emptying"
                   data-confirm-submit="Are you sure? This will DELETE all your data!">
+                <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                 <input type="hidden" name="empty" value="1">
                 <div class="field" x-show="!emptying">
                     <label class="checkbox">

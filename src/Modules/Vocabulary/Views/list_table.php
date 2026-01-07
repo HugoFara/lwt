@@ -29,6 +29,7 @@ use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 <p class="has-text-grey">No terms found.</p>
 <?php else: ?>
 <form name="form2" action="/words/edit" method="post">
+<?php echo FormHelper::csrfField(); ?>
 <input type="hidden" name="data" value="" />
 
 <!-- Multi Actions Section -->

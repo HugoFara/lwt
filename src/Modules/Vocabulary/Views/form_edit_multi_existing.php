@@ -38,6 +38,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 ?>
 <form name="editword" class="validate" action="/word/edit-multi" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
+<?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $term->lgid; ?>" />
 <input type="hidden" name="WoID" value="<?php echo $term->id; ?>" />
 <input type="hidden" name="WoOldStatus" value="<?php echo $originalStatus; ?>" />

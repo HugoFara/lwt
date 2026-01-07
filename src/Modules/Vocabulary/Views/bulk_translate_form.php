@@ -36,6 +36,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 
 <form name="form1" action="/word/bulk-translate" method="post"
       x-data="bulkTranslateApp()">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 
     <!-- Controls Panel -->
     <div class="box notranslate mb-4">

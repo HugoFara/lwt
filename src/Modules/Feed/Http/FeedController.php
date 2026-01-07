@@ -611,6 +611,7 @@ class FeedController
                     $count++;
                 } else {
                     echo '<form class="validate" action="/feeds" method="post">';
+                    echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField();
                     $editText = 1;
                     $languages = $this->feedFacade->getLanguages();
                 }
