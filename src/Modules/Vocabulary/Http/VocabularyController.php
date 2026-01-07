@@ -393,13 +393,20 @@ class VocabularyController
     /**
      * Update term status.
      *
-     * @param array<string, string> $params Route parameters
+     * Routes:
+     * - PUT /vocabulary/term/{wid:int}/status (new RESTful route)
+     * - PUT /vocabulary/term/status?wid=[id] (legacy route)
+     *
+     * Body: {"status": 1-5|98|99}
+     *
+     * @param int|null $wid Term ID (injected from route parameter)
      *
      * @return void
      */
-    public function updateStatus(array $params): void
+    public function updateStatus(?int $wid = null): void
     {
-        $termId = InputValidator::getInt('wid', 0) ?? 0;
+        // Support both new route param injection and legacy query param
+        $termId = $wid ?? InputValidator::getInt('wid', 0) ?? 0;
         $status = InputValidator::getInt('status', 0) ?? 0;
 
         if ($termId === 0 || $status === 0) {
@@ -468,33 +475,41 @@ class VocabularyController
     /**
      * Show word details.
      *
-     * Call: ?wid=[wordid]&ann=[annotation]
+     * Routes:
+     * - GET /word/{wid:int} (new RESTful route)
+     * - GET /word/show?wid=[wordid] (legacy route)
      *
-     * @param array<string, string> $params Route parameters
+     * Optional query parameter: ann=[annotation]
+     *
+     * @param int|null $wid Word ID (injected from route parameter)
      *
      * @return void
      */
-    public function showWord(array $params): void
+    public function showWord(?int $wid = null): void
     {
         PageLayoutHelper::renderPageStartNobody('Term');
 
-        $wid = InputValidator::getString('wid');
+        // Support both new route param injection and legacy query param
+        if ($wid === null) {
+            $widParam = InputValidator::getString('wid');
+            $wid = $widParam !== '' ? (int) $widParam : null;
+        }
         $ann = InputValidator::getString('ann');
 
-        if ($wid === '') {
+        if ($wid === null) {
             echo '<p>Word ID is required</p>';
             PageLayoutHelper::renderPageEnd();
             return;
         }
 
-        $term = $this->facade->getTerm((int) $wid);
+        $term = $this->facade->getTerm($wid);
         if ($term === null) {
             echo '<p>Word not found</p>';
             PageLayoutHelper::renderPageEnd();
             return;
         }
 
-        $tags = TagsFacade::getWordTagList((int) $wid, false);
+        $tags = TagsFacade::getWordTagList($wid, false);
         $scrdir = $this->languageFacade->getScriptDirectionTag($term->languageId()->toInt());
 
         // Convert Term entity to array for view compatibility

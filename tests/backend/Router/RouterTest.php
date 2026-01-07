@@ -453,4 +453,257 @@ class RouterTest extends TestCase
         $this->assertEquals('not_found', $result['type']);
         $this->assertArrayNotHasKey('middleware', $result);
     }
+
+    // ==================== TYPED ROUTE PARAMETER TESTS ====================
+
+    public function testTypedIntParameter(): void
+    {
+        $this->router->register('/text/{id:int}', 'text_handler.php');
+
+        $result = $this->simulateRequest('/text/123');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('text_handler.php', $result['handler']);
+        $this->assertArrayHasKey('routeParams', $result);
+        $this->assertSame(123, $result['routeParams']['id']); // Should be int, not string
+    }
+
+    public function testTypedIntParameterRejectsNonNumeric(): void
+    {
+        $this->router->register('/text/{id:int}', 'text_handler.php');
+
+        $result = $this->simulateRequest('/text/abc');
+
+        // Should not match because 'abc' doesn't match [0-9]+
+        $this->assertEquals('not_found', $result['type']);
+    }
+
+    public function testTypedAlphaParameter(): void
+    {
+        $this->router->register('/category/{name:alpha}', 'category_handler.php');
+
+        $result = $this->simulateRequest('/category/sports');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('sports', $result['routeParams']['name']);
+    }
+
+    public function testTypedAlphaParameterRejectsNumbers(): void
+    {
+        $this->router->register('/category/{name:alpha}', 'category_handler.php');
+
+        $result = $this->simulateRequest('/category/sports123');
+
+        // Should not match because 'sports123' doesn't match [a-zA-Z]+
+        $this->assertEquals('not_found', $result['type']);
+    }
+
+    public function testTypedSlugParameter(): void
+    {
+        $this->router->register('/post/{slug:slug}', 'post_handler.php');
+
+        $result = $this->simulateRequest('/post/my-first-post_2023');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('my-first-post_2023', $result['routeParams']['slug']);
+    }
+
+    public function testTypedAlphanumParameter(): void
+    {
+        $this->router->register('/token/{token:alphanum}', 'token_handler.php');
+
+        $result = $this->simulateRequest('/token/abc123XYZ');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('abc123XYZ', $result['routeParams']['token']);
+    }
+
+    public function testTypedUuidParameter(): void
+    {
+        $this->router->register('/resource/{id:uuid}', 'resource_handler.php');
+
+        $result = $this->simulateRequest('/resource/550e8400-e29b-41d4-a716-446655440000');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('550e8400-e29b-41d4-a716-446655440000', $result['routeParams']['id']);
+    }
+
+    public function testTypedUuidParameterRejectsInvalid(): void
+    {
+        $this->router->register('/resource/{id:uuid}', 'resource_handler.php');
+
+        $result = $this->simulateRequest('/resource/not-a-uuid');
+
+        $this->assertEquals('not_found', $result['type']);
+    }
+
+    // ==================== OPTIONAL PARAMETER TESTS ====================
+
+    public function testOptionalParameterPresent(): void
+    {
+        $this->router->register('/page/{num?}', 'page_handler.php');
+
+        $result = $this->simulateRequest('/page/5');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('5', $result['routeParams']['num']);
+    }
+
+    public function testOptionalTypedParameterPresent(): void
+    {
+        $this->router->register('/page/{num:int?}', 'page_handler.php');
+
+        $result = $this->simulateRequest('/page/5');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertSame(5, $result['routeParams']['num']);
+    }
+
+    public function testOptionalTypedParameterRejectsInvalid(): void
+    {
+        $this->router->register('/page/{num:int?}', 'page_handler.php');
+
+        $result = $this->simulateRequest('/page/abc');
+
+        // Should not match - optional but if present must be valid
+        $this->assertEquals('not_found', $result['type']);
+    }
+
+    // ==================== MULTIPLE TYPED PARAMETERS TESTS ====================
+
+    public function testMultipleTypedParameters(): void
+    {
+        $this->router->register('/user/{userId:int}/post/{postId:int}', 'user_post_handler.php');
+
+        $result = $this->simulateRequest('/user/42/post/99');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertSame(42, $result['routeParams']['userId']);
+        $this->assertSame(99, $result['routeParams']['postId']);
+    }
+
+    public function testMixedTypedAndUntypedParameters(): void
+    {
+        $this->router->register('/user/{userId:int}/action/{action}', 'handler.php');
+
+        $result = $this->simulateRequest('/user/42/action/delete');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertSame(42, $result['routeParams']['userId']);
+        $this->assertEquals('delete', $result['routeParams']['action']);
+    }
+
+    // ==================== ROUTE PARAMS VS QUERY PARAMS TESTS ====================
+
+    public function testRouteParamsSeparateFromQueryParams(): void
+    {
+        $this->router->register('/text/{id:int}', 'text_handler.php');
+
+        $result = $this->simulateRequest('/text/123', 'GET', ['page' => '2']);
+
+        // routeParams should only have route parameters
+        $this->assertArrayHasKey('routeParams', $result);
+        $this->assertArrayHasKey('id', $result['routeParams']);
+        $this->assertArrayNotHasKey('page', $result['routeParams']);
+
+        // params should have both
+        $this->assertArrayHasKey('id', $result['params']);
+        $this->assertArrayHasKey('page', $result['params']);
+    }
+
+    // ==================== CONVENIENCE METHOD TESTS ====================
+
+    public function testGetMethod(): void
+    {
+        $this->router->get('/api/users', 'UserController@index');
+
+        $getResult = $this->simulateRequest('/api/users', 'GET');
+        $this->assertEquals('handler', $getResult['type']);
+        $this->assertEquals('UserController@index', $getResult['handler']);
+
+        // POST should not match
+        $postResult = $this->simulateRequest('/api/users', 'POST');
+        $this->assertEquals('not_found', $postResult['type']);
+    }
+
+    public function testPostMethod(): void
+    {
+        $this->router->post('/api/users', 'UserController@store');
+
+        $postResult = $this->simulateRequest('/api/users', 'POST');
+        $this->assertEquals('handler', $postResult['type']);
+        $this->assertEquals('UserController@store', $postResult['handler']);
+
+        // GET should not match
+        $getResult = $this->simulateRequest('/api/users', 'GET');
+        $this->assertEquals('not_found', $getResult['type']);
+    }
+
+    public function testPutMethod(): void
+    {
+        $this->router->put('/api/users/{id:int}', 'UserController@update');
+
+        $result = $this->simulateRequest('/api/users/123', 'PUT');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('UserController@update', $result['handler']);
+        $this->assertSame(123, $result['routeParams']['id']);
+    }
+
+    public function testDeleteMethod(): void
+    {
+        $this->router->delete('/api/users/{id:int}', 'UserController@destroy');
+
+        $result = $this->simulateRequest('/api/users/123', 'DELETE');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('UserController@destroy', $result['handler']);
+    }
+
+    public function testPatchMethod(): void
+    {
+        $this->router->patch('/api/users/{id:int}', 'UserController@patch');
+
+        $result = $this->simulateRequest('/api/users/123', 'PATCH');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('UserController@patch', $result['handler']);
+    }
+
+    public function testMatchMultipleMethods(): void
+    {
+        $this->router->match(['GET', 'POST'], '/api/data', 'DataController@handle');
+
+        $getResult = $this->simulateRequest('/api/data', 'GET');
+        $this->assertEquals('handler', $getResult['type']);
+
+        $postResult = $this->simulateRequest('/api/data', 'POST');
+        $this->assertEquals('handler', $postResult['type']);
+
+        // PUT should not match
+        $putResult = $this->simulateRequest('/api/data', 'PUT');
+        $this->assertEquals('not_found', $putResult['type']);
+    }
+
+    public function testConvenienceMethodWithMiddleware(): void
+    {
+        $this->router->get('/protected', 'ProtectedController@index', ['AuthMiddleware']);
+
+        $result = $this->simulateRequest('/protected', 'GET');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertContains('AuthMiddleware', $result['middleware']);
+    }
+
+    public function testConvenienceMethodWithTypedParams(): void
+    {
+        $this->router->get('/user/{id:int}/posts/{slug:slug}', 'PostController@show', ['AuthMiddleware']);
+
+        $result = $this->simulateRequest('/user/42/posts/my-post-title', 'GET');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertSame(42, $result['routeParams']['id']);
+        $this->assertEquals('my-post-title', $result['routeParams']['slug']);
+        $this->assertContains('AuthMiddleware', $result['middleware']);
+    }
 }

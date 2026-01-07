@@ -86,19 +86,23 @@ class TextController extends BaseController
      *
      * Modern text reading interface with client-side rendering using Alpine.js.
      *
-     * @param array $params Route parameters
+     * Routes:
+     * - GET /text/{text:int}/read (new RESTful route)
+     * - GET /text/read?text=[id] (legacy route)
+     *
+     * @param int|null $text Text ID (injected from route parameter)
      *
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function read(array $params): void
+    public function read(?int $text = null): void
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         require_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
 
-        // Get text ID from request
-        $textId = $this->getTextIdFromRequest();
+        // Get text ID from route param or query params
+        $textId = $this->getTextIdFromRequest($text);
 
         if ($textId === null) {
             header("Location: /text/edit");
@@ -112,10 +116,17 @@ class TextController extends BaseController
     /**
      * Get text ID from request parameters.
      *
+     * @param int|null $injectedId Text ID injected from route parameter
+     *
      * @return int|null Text ID or null
      */
-    private function getTextIdFromRequest(): ?int
+    private function getTextIdFromRequest(?int $injectedId = null): ?int
     {
+        // First check for injected route parameter
+        if ($injectedId !== null) {
+            return $injectedId;
+        }
+        // Then check query parameters
         $textId = $this->paramInt('text');
         if ($textId !== null) {
             return $textId;
@@ -458,13 +469,17 @@ class TextController extends BaseController
     /**
      * Display improved text (replaces text_display.php)
      *
-     * @param array $params Route parameters
+     * Routes:
+     * - GET /text/{text:int}/display (new RESTful route)
+     * - GET /text/display?text=[id] (legacy route)
+     *
+     * @param int|null $text Text ID (injected from route parameter)
      *
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function display(array $params): void
+    public function display(?int $text = null): void
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
@@ -476,7 +491,8 @@ class TextController extends BaseController
         require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
         require_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
 
-        $textId = $this->paramInt('text', 0) ?? 0;
+        // Support both new route param injection and legacy query param
+        $textId = $text ?? $this->paramInt('text', 0) ?? 0;
 
         if ($textId === 0) {
             header("Location: /text/edit");

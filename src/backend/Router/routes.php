@@ -49,7 +49,10 @@ function registerRoutes(Router $router): void
     // ==================== TEXT ROUTES (PROTECTED) ====================
 
     // Read text (Alpine.js - client-side rendering)
-    $router->registerWithMiddleware('/text/read', 'Lwt\\Modules\\Text\\Http\\TextController@read', AUTH_MIDDLEWARE);
+    // New RESTful route: /text/123/read
+    $router->get('/text/{text:int}/read', 'Lwt\\Modules\\Text\\Http\\TextController@read', AUTH_MIDDLEWARE);
+    // Legacy route: /text/read?text=123
+    $router->get('/text/read', 'Lwt\\Modules\\Text\\Http\\TextController@read', AUTH_MIDDLEWARE);
 
     // Empty iframe placeholder (used in text read, test, and word pages)
     // These are static files, no auth needed
@@ -63,7 +66,10 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware('/texts', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
 
     // Display improved text
-    $router->registerWithMiddleware('/text/display', 'Lwt\\Modules\\Text\\Http\\TextController@display', AUTH_MIDDLEWARE);
+    // New RESTful route: /text/123/display
+    $router->get('/text/{text:int}/display', 'Lwt\\Modules\\Text\\Http\\TextController@display', AUTH_MIDDLEWARE);
+    // Legacy route: /text/display?text=123
+    $router->get('/text/display', 'Lwt\\Modules\\Text\\Http\\TextController@display', AUTH_MIDDLEWARE);
 
     // Print text (TextPrintController from Text module)
     $router->registerWithMiddleware('/text/print', 'Lwt\\Modules\\Text\\Http\\TextPrintController@printAnnotated', AUTH_MIDDLEWARE);
@@ -126,12 +132,10 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
-    // Show word
-    $router->registerWithMiddleware(
-        '/word/show',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@showWord',
-        AUTH_MIDDLEWARE
-    );
+    // Show word - new RESTful route with typed parameter
+    $router->get('/word/{wid:int}', 'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@showWord', AUTH_MIDDLEWARE);
+    // Legacy route for backward compatibility
+    $router->get('/word/show', 'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@showWord', AUTH_MIDDLEWARE);
 
     // Inline edit
     $router->registerWithMiddleware(
@@ -180,12 +184,11 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE,
         'PUT'
     );
-    $router->registerWithMiddleware(
-        '/vocabulary/term/status',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@updateStatus',
-        AUTH_MIDDLEWARE,
-        'PUT'
-    );
+    // Update term status
+    // New RESTful route: PUT /vocabulary/term/123/status
+    $router->put('/vocabulary/term/{wid:int}/status', 'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@updateStatus', AUTH_MIDDLEWARE);
+    // Legacy route: PUT /vocabulary/term/status?wid=123
+    $router->put('/vocabulary/term/status', 'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@updateStatus', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware(
         '/vocabulary/term/delete',
         'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@delete',
