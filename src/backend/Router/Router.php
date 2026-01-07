@@ -32,7 +32,22 @@ use Lwt\Router\Middleware\MiddlewareInterface;
  */
 class Router
 {
+    /**
+     * Registered routes.
+     *
+     * Structure: ['path' => ['method' => 'ControllerClass::method']]
+     *
+     * @var array<string, array<string, string>>
+     */
     private array $routes = [];
+
+    /**
+     * Prefix-based routes.
+     *
+     * Structure: ['prefix' => ['method' => 'ControllerClass::method']]
+     *
+     * @var array<string, array<string, string>>
+     */
     private array $prefixRoutes = [];
 
     /**
@@ -414,9 +429,11 @@ class Router
     /**
      * Execute the resolved handler
      *
-     * @param array $resolution Result from resolve()
+     * @param array<string, mixed> $resolution Result from resolve()
      *
      * @return void
+     *
+     * @psalm-suppress MixedAssignment,MixedArgument,MixedArrayAccess - Dynamic route resolution
      */
     public function execute(array $resolution): void
     {
@@ -452,6 +469,8 @@ class Router
 
             case 'not_found':
                 $this->handle404($resolution['path']);
+                // handle404() calls exit() so break is unreachable
+                // Fall through to default is intentional as safety net
 
             default:
                 $this->handle500(
@@ -463,7 +482,7 @@ class Router
     /**
      * Execute the middleware chain.
      *
-     * @param array $middlewareList List of middleware class names or instances
+     * @param array<MiddlewareInterface|string> $middlewareList List of middleware class names or instances
      *
      * @return bool True if all middleware passed, false if halted
      */
@@ -503,8 +522,10 @@ class Router
 
         // Use DI container if available
         if ($this->container !== null && $this->container->has($middleware)) {
+            /** @psalm-suppress MixedAssignment - Container returns mixed */
             $instance = $this->container->get($middleware);
         } else {
+            /** @psalm-suppress MixedMethodCall - Dynamic instantiation */
             $instance = new $middleware();
         }
 
@@ -603,6 +624,8 @@ class Router
      * @param class-string $controllerClass The fully qualified controller class name
      *
      * @return object The controller instance
+     *
+     * @psalm-suppress MixedInferredReturnType,MixedReturnStatement - Dynamic instantiation
      */
     private function resolveController(string $controllerClass): object
     {
@@ -612,6 +635,7 @@ class Router
         }
 
         // Fallback to direct instantiation
+        /** @psalm-suppress MixedMethodCall - Dynamic class instantiation */
         return new $controllerClass();
     }
 
