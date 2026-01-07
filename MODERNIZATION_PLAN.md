@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-06
+**Last Updated:** 2026-01-07
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -20,7 +20,7 @@ LWT carried significant technical debt from its 2007 origins. **Major architectu
 | Phase 3: Modernization | **COMPLETE** | ~98% |
 | Phase 4: Modular Monolith | **COMPLETE** | 100% |
 
-## Architecture Summary (2026-01-06)
+## Architecture Summary (2026-01-07)
 
 | Component | Count | Lines |
 |-----------|-------|-------|
@@ -119,7 +119,7 @@ Modules/[Module]/
 - DI container integrated with auto-wiring
 - Repository pattern for core entities (Language, Text, Term, User)
 - 6 custom exception classes with global handler
-- InnoDB for all permanent tables with user ownership FKs
+- InnoDB for all permanent tables with full FK constraints (user ownership + inter-table)
 
 ### Modular Monolith (Phase 4)
 All 10 modules complete with ServiceProviders:
@@ -139,7 +139,7 @@ All 10 modules complete with ServiceProviders:
 
 ### Future Improvements
 - [ ] Migrate away from `unsafe-inline` in CSP
-- [ ] Inter-table foreign keys (texts→languages, words→languages, etc.)
+- [x] Inter-table foreign keys (texts→languages, words→languages, etc.)
 - [ ] Transaction usage in multi-query operations
 
 ## Test Coverage

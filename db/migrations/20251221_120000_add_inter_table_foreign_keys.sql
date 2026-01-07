@@ -5,10 +5,18 @@
 -- ============================================================================
 -- PART 0: Fix column type mismatches for FK compatibility
 -- FK columns must match parent PK types exactly
+-- All PK and FK columns are standardized to int(11) unsigned for consistency
 -- ============================================================================
 
--- Fix newsfeeds.NfLgID to match languages.LgID type
--- (Some databases have tinyint but LgID may be int)
+-- First, update parent PK columns to int(11) unsigned
+ALTER TABLE languages MODIFY COLUMN LgID int(11) unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE texts MODIFY COLUMN TxID int(11) unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE sentences MODIFY COLUMN SeID int(11) unsigned NOT NULL AUTO_INCREMENT;
+
+-- Fix all FK columns that reference languages.LgID
+ALTER TABLE texts MODIFY COLUMN TxLgID int(11) unsigned NOT NULL;
+ALTER TABLE words MODIFY COLUMN WoLgID int(11) unsigned NOT NULL;
+ALTER TABLE archivedtexts MODIFY COLUMN AtLgID int(11) unsigned NOT NULL;
 ALTER TABLE newsfeeds MODIFY COLUMN NfLgID int(11) unsigned NOT NULL;
 
 -- Fix textitems2.Ti2TxID to match texts.TxID type
@@ -72,6 +80,26 @@ UPDATE textitems2 SET Ti2WoID = NULL WHERE Ti2WoID = 0;
 -- Clean up any orphaned records that would violate FK constraints
 -- ============================================================================
 
+-- Clean up orphaned texts (referencing non-existent languages)
+DELETE t FROM texts t
+    LEFT JOIN languages l ON t.TxLgID = l.LgID
+    WHERE l.LgID IS NULL;
+
+-- Clean up orphaned words (referencing non-existent languages)
+DELETE w FROM words w
+    LEFT JOIN languages l ON w.WoLgID = l.LgID
+    WHERE l.LgID IS NULL;
+
+-- Clean up orphaned archivedtexts (referencing non-existent languages)
+DELETE a FROM archivedtexts a
+    LEFT JOIN languages l ON a.AtLgID = l.LgID
+    WHERE l.LgID IS NULL;
+
+-- Clean up orphaned sentences (referencing non-existent languages)
+DELETE s FROM sentences s
+    LEFT JOIN languages l ON s.SeLgID = l.LgID
+    WHERE l.LgID IS NULL;
+
 -- Clean up orphaned sentences (referencing non-existent texts)
 DELETE s FROM sentences s
     LEFT JOIN texts t ON s.SeTxID = t.TxID
@@ -112,6 +140,26 @@ DELETE nf FROM newsfeeds nf
 DELETE att FROM archtexttags att
     LEFT JOIN archivedtexts at ON att.AgAtID = at.AtID
     WHERE at.AtID IS NULL;
+
+-- Clean up orphaned archtexttags (referencing non-existent tags2)
+DELETE att FROM archtexttags att
+    LEFT JOIN tags2 t2 ON att.AgT2ID = t2.T2ID
+    WHERE t2.T2ID IS NULL;
+
+-- Clean up orphaned texttags (referencing non-existent tags2)
+DELETE tt FROM texttags tt
+    LEFT JOIN tags2 t2 ON tt.TtT2ID = t2.T2ID
+    WHERE t2.T2ID IS NULL;
+
+-- Clean up orphaned wordtags (referencing non-existent words)
+DELETE wt FROM wordtags wt
+    LEFT JOIN words w ON wt.WtWoID = w.WoID
+    WHERE w.WoID IS NULL;
+
+-- Clean up orphaned wordtags (referencing non-existent tags)
+DELETE wt FROM wordtags wt
+    LEFT JOIN tags t ON wt.WtTgID = t.TgID
+    WHERE t.TgID IS NULL;
 
 -- ============================================================================
 -- PART 3: Language Reference FKs (ON DELETE CASCADE)
