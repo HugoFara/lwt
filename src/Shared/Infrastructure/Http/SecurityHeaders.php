@@ -97,11 +97,11 @@ class SecurityHeaders
      * Restricts which resources can be loaded, providing strong XSS protection.
      *
      * Current policy:
-     * - Scripts: self + unsafe-inline (needed for legacy inline scripts)
+     * - Scripts: self + unsafe-inline + unsafe-eval (Alpine.js needs eval for x-data)
      * - Styles: self + unsafe-inline (needed for inline styles)
      * - Images: self + data: (for inline images) + blob: (for generated content)
      * - Fonts: self
-     * - Connect: self (AJAX requests)
+     * - Connect: self + api.github.com (for release checks)
      * - Media: self + blob: (for audio playback)
      * - Frame ancestors: self (alternative to X-Frame-Options)
      *
@@ -111,16 +111,16 @@ class SecurityHeaders
     {
         $policy = implode('; ', [
             "default-src 'self'",
-            // Scripts: self + inline (needed for legacy inline scripts)
-            "script-src 'self' 'unsafe-inline'",
+            // Scripts: self + inline + eval (Alpine.js needs eval for x-data expressions)
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
             // Styles: self + inline (needed for dynamic styling)
             "style-src 'self' 'unsafe-inline'",
             // Images: self + data URIs + blob for generated content
             "img-src 'self' data: blob:",
             // Fonts: self only
             "font-src 'self'",
-            // AJAX/fetch requests: self only
-            "connect-src 'self'",
+            // AJAX/fetch requests: self + GitHub API for release checks
+            "connect-src 'self' https://api.github.com",
             // Audio/video: self + blob for TTS
             "media-src 'self' blob:",
             // Frames: block all embedding (clickjacking protection)

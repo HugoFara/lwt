@@ -163,8 +163,8 @@ class WordListService
     /**
      * Build tag filter condition.
      *
-     * @param string $tag1  First tag ID
-     * @param string $tag2  Second tag ID
+     * @param string $tag1  First tag ID (must be numeric or empty)
+     * @param string $tag2  Second tag ID (must be numeric or empty)
      * @param string $tag12 Tag logic (0=OR, 1=AND)
      *
      * @return string SQL HAVING clause
@@ -175,22 +175,27 @@ class WordListService
             return '';
         }
 
+        // Sanitize tag IDs to prevent SQL injection - cast to int for safety
+        // Non-numeric strings become null and are ignored
+        $tag1Int = ($tag1 !== '' && is_numeric($tag1)) ? (int)$tag1 : null;
+        $tag2Int = ($tag2 !== '' && is_numeric($tag2)) ? (int)$tag2 : null;
+
         $whTag1 = null;
         $whTag2 = null;
 
-        if ($tag1 != '') {
-            if ($tag1 == '-1') {
+        if ($tag1Int !== null) {
+            if ($tag1Int === -1) {
                 $whTag1 = "group_concat(WtTgID) IS NULL";
             } else {
-                $whTag1 = "concat('/',group_concat(WtTgID separator '/'),'/') like '%/" . $tag1 . "/%'";
+                $whTag1 = "concat('/',group_concat(WtTgID separator '/'),'/') like '%/" . $tag1Int . "/%'";
             }
         }
 
-        if ($tag2 != '') {
-            if ($tag2 == '-1') {
+        if ($tag2Int !== null) {
+            if ($tag2Int === -1) {
                 $whTag2 = "group_concat(WtTgID) IS NULL";
             } else {
-                $whTag2 = "concat('/',group_concat(WtTgID separator '/'),'/') like '%/" . $tag2 . "/%'";
+                $whTag2 = "concat('/',group_concat(WtTgID separator '/'),'/') like '%/" . $tag2Int . "/%'";
             }
         }
 
@@ -198,6 +203,8 @@ class WordListService
             return " having (" . $whTag1 . ') ';
         } elseif ($whTag2 !== null && $whTag1 === null) {
             return " having (" . $whTag2 . ') ';
+        } elseif ($whTag1 === null && $whTag2 === null) {
+            return '';
         } else {
             return " having ((" . (string)$whTag1 . ($tag12 ? ') AND (' : ') OR (') . (string)$whTag2 . ")) ";
         }

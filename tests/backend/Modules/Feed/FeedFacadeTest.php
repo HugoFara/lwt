@@ -394,7 +394,7 @@ class FeedFacadeTest extends TestCase
         $this->assertEquals('https://example.com/article', $result[0]['FlLink']);
     }
 
-    public function testGetFeedLinksExtractsSearchFromWhereQuery(): void
+    public function testGetFeedLinksPassesSearchDirectly(): void
     {
         $this->articleRepository
             ->expects($this->once())
@@ -405,11 +405,11 @@ class FeedFacadeTest extends TestCase
                 50,
                 'FlDate',
                 'DESC',
-                'test'  // Extracted from whereQuery
+                'test'  // Search passed directly
             )
             ->willReturn([]);
 
-        $this->facade->getFeedLinks('1', " AND FlTitle LIKE '%test%'");
+        $this->facade->getFeedLinks('1', 'test');
     }
 
     public function testCountFeedLinksReturnsInteger(): void
@@ -1009,40 +1009,35 @@ class FeedFacadeTest extends TestCase
     public function testBuildQueryFilterReturnsEmptyForEmptyQuery(): void
     {
         $result = $this->facade->buildQueryFilter('', 'title', '');
-        $this->assertEquals('', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals('', $result['clause']);
+        $this->assertEquals('', $result['search']);
     }
 
     public function testBuildQueryFilterForTitleMode(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
         $result = $this->facade->buildQueryFilter('test', 'title', '');
-        $this->assertStringContainsString('FlTitle', $result);
-        $this->assertStringContainsString("LIKE 'test'", $result);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('FlTitle', $result['clause']);
+        $this->assertStringContainsString('LIKE', $result['clause']);
+        $this->assertEquals('test', $result['search']);
     }
 
     public function testBuildQueryFilterConvertsWildcards(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
         $result = $this->facade->buildQueryFilter('test*', 'title', '');
-        $this->assertStringContainsString('%', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals('test%', $result['search']);
     }
 
     public function testBuildQueryFilterForAllFields(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
         $result = $this->facade->buildQueryFilter('search', 'title,desc,text', '');
-        $this->assertStringContainsString('FlTitle', $result);
-        $this->assertStringContainsString('FlDescription', $result);
-        $this->assertStringContainsString('FlText', $result);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('FlTitle', $result['clause']);
+        $this->assertStringContainsString('FlDescription', $result['clause']);
+        $this->assertStringContainsString('FlText', $result['clause']);
+        $this->assertEquals('search', $result['search']);
     }
 
     public function testValidateRegexPatternReturnsTrueForEmpty(): void

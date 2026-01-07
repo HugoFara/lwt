@@ -95,6 +95,11 @@ class RateLimitMiddleware implements MiddlewareInterface
     public function handle(): bool
     {
         $clientId = $this->getClientIdentifier();
+
+        // Skip rate limiting for localhost (development/testing)
+        if ($clientId === '127.0.0.1' || $clientId === '::1') {
+            return true;
+        }
         $endpoint = $this->getEndpointType();
 
         // Use stricter limits for auth endpoints (brute force protection)

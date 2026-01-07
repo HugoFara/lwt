@@ -207,17 +207,17 @@ class FeedFacade
     /**
      * Get feed links (articles) for specified feeds.
      *
-     * @param string $feedIds    Comma-separated feed IDs
-     * @param string $whereQuery Additional WHERE clause (legacy)
-     * @param string $orderBy    ORDER BY clause
-     * @param int    $offset     Pagination offset
-     * @param int    $limit      Pagination limit
+     * @param string $feedIds Comma-separated feed IDs
+     * @param string $search  Search term (optional)
+     * @param string $orderBy ORDER BY clause
+     * @param int    $offset  Pagination offset
+     * @param int    $limit   Pagination limit
      *
      * @return array Array of feed link records
      */
     public function getFeedLinks(
         string $feedIds,
-        string $whereQuery = '',
+        string $search = '',
         string $orderBy = 'FlDate DESC',
         int $offset = 0,
         int $limit = 50
@@ -228,12 +228,6 @@ class FeedFacade
         $parts = explode(' ', trim($orderBy));
         $column = $parts[0];
         $direction = strtoupper($parts[1] ?? 'DESC');
-
-        // Extract search from whereQuery if present
-        $search = '';
-        if (preg_match("/FlTitle LIKE '%([^%]+)%'/", $whereQuery, $matches)) {
-            $search = $matches[1];
-        }
 
         $result = $this->getArticles->execute(
             $ids,
@@ -254,21 +248,14 @@ class FeedFacade
     /**
      * Count feed links for specified feeds.
      *
-     * @param string $feedIds    Comma-separated feed IDs
-     * @param string $whereQuery Additional WHERE clause (legacy)
+     * @param string $feedIds Comma-separated feed IDs
+     * @param string $search  Search term (optional)
      *
      * @return int Number of matching feed links
      */
-    public function countFeedLinks(string $feedIds, string $whereQuery = ''): int
+    public function countFeedLinks(string $feedIds, string $search = ''): int
     {
         $ids = array_map('intval', explode(',', $feedIds));
-
-        // Extract search from whereQuery if present
-        $search = '';
-        if (preg_match("/FlTitle LIKE '%([^%]+)%'/", $whereQuery, $matches)) {
-            $search = $matches[1];
-        }
-
         return $this->articleRepository->countByFeeds($ids, $search);
     }
 
@@ -610,38 +597,48 @@ class FeedFacade
     /**
      * Build query filter condition for feed links.
      *
-     * @param string $query     Search query
-     * @param string $queryMode Query mode
-     * @param string $regexMode Regex mode
+     * Returns structured filter data for use with prepared statements.
+     * For backward compatibility, also returns a legacy SQL clause.
      *
-     * @return string SQL WHERE clause addition
+     * @param string $query     Search query
+     * @param string $queryMode Query mode ('title', 'title,desc,text')
+     * @param string $regexMode Regex mode ('' for LIKE, 'R' for RLIKE)
+     *
+     * @return array{clause: string, search: string, mode: string, regex: string}
+     *               Filter data with clause for legacy use and search for prepared statements
      */
-    public function buildQueryFilter(string $query, string $queryMode, string $regexMode): string
+    public function buildQueryFilter(string $query, string $queryMode, string $regexMode): array
     {
         if (empty($query)) {
-            return '';
+            return ['clause' => '', 'search' => '', 'mode' => $queryMode, 'regex' => $regexMode];
         }
 
         $searchValue = ($regexMode === '')
             ? str_replace('*', '%', mb_strtolower($query, 'UTF-8'))
             : $query;
 
-        $connection = Globals::getDbConnection();
-        if ($connection === null) {
-            return '';
-        }
-        /** @var string $escaped */
-        $escaped = mysqli_real_escape_string($connection, $searchValue);
-        $pattern = $regexMode . "LIKE '" . $escaped . "'";
+        // Build clause pattern for backward compatibility (used by legacy code paths)
+        // Note: The search value is passed separately for use with prepared statements
+        $operator = $regexMode . 'LIKE';
 
         switch ($queryMode) {
             case 'title,desc,text':
-                return " AND (FlTitle $pattern OR FlDescription $pattern OR FlText $pattern)";
+                $clause = " AND (FlTitle $operator ? OR FlDescription $operator ? OR FlText $operator ?)";
+                break;
             case 'title':
-                return " AND (FlTitle $pattern)";
+                $clause = " AND (FlTitle $operator ?)";
+                break;
             default:
-                return " AND (FlTitle $pattern OR FlDescription $pattern OR FlText $pattern)";
+                $clause = " AND (FlTitle $operator ? OR FlDescription $operator ? OR FlText $operator ?)";
+                break;
         }
+
+        return [
+            'clause' => $clause,
+            'search' => $searchValue,
+            'mode' => $queryMode,
+            'regex' => $regexMode
+        ];
     }
 
     /**
@@ -657,18 +654,15 @@ class FeedFacade
             return true;
         }
 
-        $connection = Globals::getDbConnection();
-        if ($connection === null) {
+        try {
+            $stmt = \Lwt\Shared\Infrastructure\Database\Connection::prepare(
+                "SELECT 'test' RLIKE ?"
+            );
+            $stmt->bind('s', $pattern)->execute();
+            return true;
+        } catch (\Exception $e) {
             return false;
         }
-        /** @var string $escaped */
-        $escaped = mysqli_real_escape_string($connection, $pattern);
-        $result = @mysqli_query(
-            $connection,
-            "SELECT 'test' RLIKE '" . $escaped . "'"
-        );
-
-        return $result !== false;
     }
 
     /**
