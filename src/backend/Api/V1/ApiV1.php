@@ -42,6 +42,7 @@ use Lwt\Modules\Tags\Http\TagApiHandler;
 use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler;
 use Lwt\Modules\Text\Http\TextApiHandler;
+use Lwt\Api\V1\Handlers\YouTubeApiHandler;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
 
@@ -62,6 +63,7 @@ class ApiV1
     private TagApiHandler $tagHandler;
     private VocabularyApiHandler $termHandler;
     private TextApiHandler $textHandler;
+    private YouTubeApiHandler $youtubeHandler;
 
     /**
      * Endpoints that do not require authentication.
@@ -89,6 +91,7 @@ class ApiV1
         $this->tagHandler = new TagApiHandler();
         $this->termHandler = new VocabularyApiHandler();
         $this->textHandler = new TextApiHandler();
+        $this->youtubeHandler = new YouTubeApiHandler();
     }
 
     /**
@@ -242,6 +245,10 @@ class ApiV1
 
             case 'local-dictionaries':
                 $this->handleLocalDictionariesGet($fragments, $params);
+                break;
+
+            case 'youtube':
+                $this->handleYouTubeGet($fragments, $params);
                 break;
 
             default:
@@ -1116,6 +1123,38 @@ class ApiV1
         }
 
         Response::error('Dictionary ID (Integer) Expected', 404);
+    }
+
+    // =========================================================================
+    // YouTube Request Handlers
+    // =========================================================================
+
+    /**
+     * Handle GET requests for YouTube API proxy.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Query parameters
+     */
+    private function handleYouTubeGet(array $fragments, array $params): void
+    {
+        switch ($fragments[1] ?? '') {
+            case 'configured':
+                // GET /youtube/configured - check if YouTube API is configured
+                Response::success($this->youtubeHandler->formatIsConfigured());
+                break;
+
+            case 'video':
+                // GET /youtube/video?video_id=xxx - get video info
+                $videoId = $params['video_id'] ?? '';
+                if ($videoId === '') {
+                    Response::error('video_id parameter is required', 400);
+                }
+                Response::success($this->youtubeHandler->formatGetVideoInfo($videoId));
+                break;
+
+            default:
+                Response::error('Expected "configured" or "video"', 404);
+        }
     }
 
     // =========================================================================

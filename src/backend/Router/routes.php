@@ -18,15 +18,28 @@
 namespace Lwt\Router;
 
 use Lwt\Router\Middleware\AuthMiddleware;
+use Lwt\Router\Middleware\AdminMiddleware;
+use Lwt\Router\Middleware\CsrfMiddleware;
 
 require_once __DIR__ . '/Middleware/AuthMiddleware.php';
+require_once __DIR__ . '/Middleware/AdminMiddleware.php';
+require_once __DIR__ . '/Middleware/CsrfMiddleware.php';
 
 /**
  * Auth middleware for protected routes.
+ * Includes CSRF protection for state-changing requests (POST, PUT, DELETE).
  *
  * @var array<string>
  */
-const AUTH_MIDDLEWARE = [AuthMiddleware::class];
+const AUTH_MIDDLEWARE = [AuthMiddleware::class, CsrfMiddleware::class];
+
+/**
+ * Admin middleware for admin-only routes.
+ * Requires authentication AND admin role, plus CSRF protection.
+ *
+ * @var array<string>
+ */
+const ADMIN_MIDDLEWARE = [AdminMiddleware::class, CsrfMiddleware::class];
 
 /**
  * Register all application routes.
@@ -291,28 +304,29 @@ function registerRoutes(Router $router): void
     // Preview (AJAX)
     $router->registerWithMiddleware('/dictionaries/preview', 'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@preview', AUTH_MIDDLEWARE, 'POST');
 
-    // ==================== ADMIN ROUTES (PROTECTED) ====================
+    // ==================== ADMIN ROUTES (ADMIN ONLY) ====================
+    // These routes require admin role, not just authentication
 
     // Backup & Restore (Admin module)
-    $router->registerWithMiddleware('/admin/backup', 'Lwt\\Modules\\Admin\\Http\\AdminController@backup', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/admin/backup', 'Lwt\\Modules\\Admin\\Http\\AdminController@backup', ADMIN_MIDDLEWARE);
 
     // Database Wizard (Admin module)
-    $router->registerWithMiddleware('/admin/wizard', 'Lwt\\Modules\\Admin\\Http\\AdminController@wizard', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/admin/wizard', 'Lwt\\Modules\\Admin\\Http\\AdminController@wizard', ADMIN_MIDDLEWARE);
 
-    // Statistics (Admin module)
+    // Statistics (Admin module) - allow regular users to see statistics
     $router->registerWithMiddleware('/admin/statistics', 'Lwt\\Modules\\Admin\\Http\\AdminController@statistics', AUTH_MIDDLEWARE);
 
     // Install Demo (Admin module)
-    $router->registerWithMiddleware('/admin/install-demo', 'Lwt\\Modules\\Admin\\Http\\AdminController@installDemo', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/admin/install-demo', 'Lwt\\Modules\\Admin\\Http\\AdminController@installDemo', ADMIN_MIDDLEWARE);
 
     // Settings (Admin module)
-    $router->registerWithMiddleware('/admin/settings', 'Lwt\\Modules\\Admin\\Http\\AdminController@settings', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/admin/settings', 'Lwt\\Modules\\Admin\\Http\\AdminController@settings', ADMIN_MIDDLEWARE);
 
     // Server data (Admin module)
-    $router->registerWithMiddleware('/admin/server-data', 'Lwt\\Modules\\Admin\\Http\\AdminController@serverData', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/admin/server-data', 'Lwt\\Modules\\Admin\\Http\\AdminController@serverData', ADMIN_MIDDLEWARE);
 
     // Save setting and redirect (Admin module)
-    $router->registerWithMiddleware('/admin/save-setting', 'Lwt\\Modules\\Admin\\Http\\AdminController@saveSetting', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/admin/save-setting', 'Lwt\\Modules\\Admin\\Http\\AdminController@saveSetting', ADMIN_MIDDLEWARE);
 
     // ==================== AUTHENTICATION ROUTES (PUBLIC) ====================
     // All auth routes use UserController from the User module

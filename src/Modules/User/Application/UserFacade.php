@@ -18,6 +18,7 @@ use Lwt\Core\Entity\User;
 use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Application\Services\PasswordHasher;
+use Lwt\Modules\User\Application\Services\TokenHasher;
 use Lwt\Modules\User\Application\UseCases\GenerateApiToken;
 use Lwt\Modules\User\Application\UseCases\GetCurrentUser;
 use Lwt\Modules\User\Application\UseCases\Login;
@@ -51,6 +52,13 @@ class UserFacade
      */
     private PasswordHasher $passwordHasher;
 
+    /**
+     * Token hasher for API and remember tokens.
+     *
+     * @var TokenHasher
+     */
+    private TokenHasher $tokenHasher;
+
     // Use cases (lazily initialized)
     private ?Login $loginUseCase = null;
     private ?Register $registerUseCase = null;
@@ -65,13 +73,16 @@ class UserFacade
      *
      * @param UserRepositoryInterface $repository     User repository
      * @param PasswordHasher|null     $passwordHasher Password hasher
+     * @param TokenHasher|null        $tokenHasher    Token hasher
      */
     public function __construct(
         UserRepositoryInterface $repository,
-        ?PasswordHasher $passwordHasher = null
+        ?PasswordHasher $passwordHasher = null,
+        ?TokenHasher $tokenHasher = null
     ) {
         $this->repository = $repository;
         $this->passwordHasher = $passwordHasher ?? new PasswordHasher();
+        $this->tokenHasher = $tokenHasher ?? new TokenHasher();
     }
 
     // =========================================================================
@@ -207,10 +218,12 @@ class UserFacade
     /**
      * Set a remember-me token for a user.
      *
+     * Returns the plaintext token but stores only the hash for security.
+     *
      * @param int $userId The user ID
      * @param int $days   Number of days until expiration (default: 30)
      *
-     * @return string The generated remember token
+     * @return string The generated remember token (plaintext)
      *
      * @throws \InvalidArgumentException If user not found
      */
@@ -221,19 +234,25 @@ class UserFacade
             throw new \InvalidArgumentException("User not found: {$userId}");
         }
 
-        $token = $this->passwordHasher->generateToken(32);
+        // Generate plaintext token and hash for storage
+        $plaintextToken = $this->tokenHasher->generate(32);
+        $hashedToken = $this->tokenHasher->hash($plaintextToken);
         $expires = new \DateTimeImmutable("+{$days} days");
 
-        $user->setRememberToken($token, $expires);
+        // Store the hash, not the plaintext
+        $user->setRememberToken($hashedToken, $expires);
         $this->repository->save($user);
 
-        return $token;
+        // Return plaintext to user (for cookie storage)
+        return $plaintextToken;
     }
 
     /**
      * Validate a remember-me token and return the associated user.
      *
-     * @param string $token The remember token to validate
+     * The provided plaintext token is hashed before lookup.
+     *
+     * @param string $token The remember token to validate (plaintext)
      *
      * @return User|null The user if token is valid, null otherwise
      */
@@ -243,7 +262,9 @@ class UserFacade
             return null;
         }
 
-        $user = $this->repository->findByRememberToken($token);
+        // Hash the provided token to match what's stored
+        $hashedToken = $this->tokenHasher->hash($token);
+        $user = $this->repository->findByRememberToken($hashedToken);
         if ($user === null) {
             return null;
         }
@@ -463,7 +484,7 @@ class UserFacade
     private function getGenerateApiTokenUseCase(): GenerateApiToken
     {
         if ($this->generateApiTokenUseCase === null) {
-            $this->generateApiTokenUseCase = new GenerateApiToken($this->repository, $this->passwordHasher);
+            $this->generateApiTokenUseCase = new GenerateApiToken($this->repository, $this->tokenHasher);
         }
         return $this->generateApiTokenUseCase;
     }
@@ -474,7 +495,7 @@ class UserFacade
     private function getValidateApiTokenUseCase(): ValidateApiToken
     {
         if ($this->validateApiTokenUseCase === null) {
-            $this->validateApiTokenUseCase = new ValidateApiToken($this->repository);
+            $this->validateApiTokenUseCase = new ValidateApiToken($this->repository, $this->tokenHasher);
         }
         return $this->validateApiTokenUseCase;
     }

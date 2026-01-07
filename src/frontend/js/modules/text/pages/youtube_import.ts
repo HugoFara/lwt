@@ -2,26 +2,23 @@
  * YouTube Import - Fetch text data from YouTube videos.
  *
  * Allows importing video title, description, and source URL from YouTube
- * using the YouTube Data API v3.
+ * via a server-side proxy to keep the API key secure.
  *
  * @license unlicense
  * @since   3.0.0
  */
 
 /**
- * YouTube API response structure.
+ * Server proxy response structure.
  */
-interface YouTubeVideoSnippet {
-  title: string;
-  description: string;
-}
-
-interface YouTubeVideoItem {
-  snippet: YouTubeVideoSnippet;
-}
-
-interface YouTubeApiResponse {
-  items: YouTubeVideoItem[];
+interface YouTubeProxyResponse {
+  success: boolean;
+  data?: {
+    title: string;
+    description: string;
+    source_url: string;
+  };
+  error?: string;
 }
 
 /**
@@ -47,68 +44,59 @@ function setYtDataStatus(msg: string): void {
 }
 
 /**
- * Handle successful YouTube API response.
+ * Handle successful proxy response.
  * Populates the text form fields with video data.
  *
- * @param data - The YouTube API response
- * @param videoId - The YouTube video ID
+ * @param data - The proxy response data
  */
-function handleFetchSuccess(data: YouTubeApiResponse, videoId: string): void {
-  if (data.items.length === 0) {
-    setYtDataStatus('No videos found.');
-  } else {
-    setYtDataStatus('Success!');
-    const snippet = data.items[0].snippet;
-    setInputByName('TxTitle', snippet.title);
-    setInputByName('TxText', snippet.description);
-    setInputByName('TxSourceURI', `https://youtube.com/watch?v=${videoId}`);
+function handleFetchSuccess(data: YouTubeProxyResponse['data']): void {
+  if (!data) {
+    setYtDataStatus('No video data returned.');
+    return;
   }
+  setYtDataStatus('Success!');
+  setInputByName('TxTitle', data.title);
+  setInputByName('TxText', data.description);
+  setInputByName('TxSourceURI', data.source_url);
 }
 
 /**
- * Fetch text data from YouTube using the YouTube Data API v3.
- * Requires a valid API key configured in the application.
+ * Fetch text data from YouTube via server-side proxy.
+ * The API key is kept server-side for security.
  */
 export function getYtTextData(): void {
   setYtDataStatus('Fetching YouTube data...');
 
   const ytVideoIdInput = document.getElementById('ytVideoId') as HTMLInputElement | null;
-  const ytApiKeyInput = document.getElementById('ytApiKey') as HTMLInputElement | null;
 
-  if (!ytVideoIdInput || !ytApiKeyInput) {
-    setYtDataStatus('Error: Missing YouTube input fields.');
+  if (!ytVideoIdInput) {
+    setYtDataStatus('Error: Missing YouTube video ID input field.');
     return;
   }
 
   const ytVideoId = ytVideoIdInput.value.trim();
-  const apiKey = ytApiKeyInput.value.trim();
 
   if (!ytVideoId) {
     setYtDataStatus('Please enter a YouTube Video ID.');
     return;
   }
 
-  if (!apiKey) {
-    setYtDataStatus('Error: YouTube API key not configured.');
-    return;
-  }
-
-  const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${encodeURIComponent(ytVideoId)}&key=${encodeURIComponent(apiKey)}`;
+  const url = `/api/v1/youtube/video?video_id=${encodeURIComponent(ytVideoId)}`;
 
   fetch(url)
     .then((response) => {
       if (!response.ok) {
-        if (response.status === 403) {
-          throw new Error('Invalid API key or quota exceeded.');
-        } else if (response.status === 400) {
-          throw new Error('Invalid video ID.');
-        } else {
-          throw new Error(response.statusText || 'Failed to fetch YouTube data.');
-        }
+        throw new Error(`Server error: ${response.status}`);
       }
-      return response.json() as Promise<YouTubeApiResponse>;
+      return response.json() as Promise<{ data: YouTubeProxyResponse }>;
     })
-    .then((data) => handleFetchSuccess(data, ytVideoId))
+    .then((response) => {
+      const result = response.data;
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch YouTube data.');
+      }
+      handleFetchSuccess(result.data);
+    })
     .catch((error: Error) => {
       setYtDataStatus(`Error: ${error.message}`);
     });

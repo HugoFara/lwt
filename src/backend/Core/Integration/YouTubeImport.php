@@ -46,18 +46,19 @@ class YouTubeImport
     /**
      * Output the YouTube import form fragment.
      *
+     * The API key is no longer exposed to the client.
+     * Instead, requests go through the /api/v1/youtube/video endpoint.
+     *
      * @return void
      */
     public static function renderFormFragment(): void
     {
-        $apiKey = self::getApiKey() ?? '';
         ?>
 <tr>
   <td class="td1 right">YouTube Video Id:</td>
   <td class="td1">
     <input type="text" id="ytVideoId" />
     <input type="button" value="Fetch Text from Youtube" data-action="fetch-youtube" />
-    <input type="hidden" id="ytApiKey" value="<?php echo htmlspecialchars($apiKey, ENT_QUOTES, 'UTF-8'); ?>" />
     <p id="ytDataStatus"></p>
   </td>
 </tr>

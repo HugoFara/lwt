@@ -14,7 +14,7 @@ This document tracks security issues identified during the pre-release audit of 
 | Severity | Total | Fixed | Open |
 |----------|-------|-------|------|
 | Critical | 8 | 5 | 3 |
-| High | 13 | 6 | 7 |
+| High | 13 | 9 | 4 |
 | Medium | 10 | 4 | 6 |
 
 ---
@@ -347,66 +347,39 @@ $nonce = base64_encode(random_bytes(16));
 
 ---
 
-### 20. YouTube API Key Exposed to Clients - OPEN
+### 20. YouTube API Key Exposed to Clients - FIXED
 
-**Status:** Open
+**Status:** Fixed
 
 **Risk:** API key abuse, quota exhaustion, credential theft.
 
-**Affected Files:**
-- `src/backend/Core/Integration/YouTubeImport.php` (line 60)
-- `src/frontend/js/modules/text/pages/youtube_import.ts` (line 96)
+**Resolution:**
+YouTube API calls are now proxied through the server:
 
-**Issue:**
-API key rendered in HTML and used directly in client-side fetch requests:
+- Created `src/backend/Api/V1/Handlers/YouTubeApiHandler.php` to handle YouTube API requests server-side
+- Added `/api/v1/youtube/video` endpoint that accepts a `video_id` parameter
+- Updated `src/frontend/js/modules/text/pages/youtube_import.ts` to call the server proxy instead of YouTube directly
+- Removed the hidden API key input from `src/backend/Core/Integration/YouTubeImport.php`
 
-```php
-<input type="hidden" id="ytApiKey" value="<?php echo htmlspecialchars($apiKey, ENT_QUOTES, 'UTF-8'); ?>" />
-```
-
-**Remediation:**
-Proxy YouTube API calls through the server:
-
-```php
-// New API endpoint: /api/v1/youtube/video-info
-public function getVideoInfo(string $videoId): array
-{
-    $apiKey = getenv('YOUTUBE_API_KEY');
-    $response = file_get_contents(
-        "https://www.googleapis.com/youtube/v3/videos?part=snippet&id={$videoId}&key={$apiKey}"
-    );
-    return json_decode($response, true);
-}
-```
+The API key is now only read on the server and never exposed to clients.
 
 ---
 
-### 21. API/Remember Tokens Stored in Plaintext - OPEN
+### 21. API/Remember Tokens Stored in Plaintext - FIXED
 
-**Status:** Open
+**Status:** Fixed
 
 **Risk:** Database breach exposes all valid tokens for account takeover.
 
-**Affected File:** `src/Modules/User/Infrastructure/MySqlUserRepository.php`
+**Resolution:**
+Tokens are now hashed using SHA-256 before storage:
 
-**Issue:**
-`UsApiToken` and `UsRememberToken` stored as plaintext in database.
+- Created `src/Modules/User/Application/Services/TokenHasher.php` for secure token hashing
+- Updated `src/Modules/User/Application/UseCases/GenerateApiToken.php` to hash tokens before storage
+- Updated `src/Modules/User/Application/UseCases/ValidateApiToken.php` to hash provided tokens before lookup
+- Updated `src/Modules/User/Application/UserFacade.php` to hash remember tokens before storage and during validation
 
-**Remediation:**
-Hash tokens before storage (like passwords):
-
-```php
-// On token generation
-$token = bin2hex(random_bytes(32));
-$hashedToken = password_hash($token, PASSWORD_DEFAULT);
-// Store $hashedToken in database, return $token to user
-
-// On token validation
-$storedHash = $user->getApiTokenHash();
-if (!password_verify($providedToken, $storedHash)) {
-    throw new AuthException('Invalid token');
-}
-```
+The plaintext token is returned to the user once (at generation) and only the hash is stored in the database. When validating, the provided token is hashed and compared against the stored hash.
 
 ---
 
@@ -442,46 +415,24 @@ public function requestReset(string $email): void
 
 ---
 
-### 23. No Role-Based Authorization - OPEN
+### 23. No Role-Based Authorization - FIXED
 
-**Status:** Open
+**Status:** Fixed
 
 **Risk:** Any authenticated user can access admin functionality.
 
-**Affected Files:**
-- `src/Modules/Admin/Http/AdminController.php`
-- `src/Modules/Admin/Http/AdminApiHandler.php`
-- All `/admin/*` routes
+**Resolution:**
+Created admin middleware and applied to admin routes:
 
-**Issue:**
-User entity has `UsRole` field (`user`/`admin`) but it's never checked. Admin endpoints only verify authentication, not authorization.
+- Created `src/backend/Router/Middleware/AdminMiddleware.php` that checks for admin role after authentication
+- Updated `src/backend/Router/routes.php` to define `ADMIN_MIDDLEWARE` constant
+- Applied `ADMIN_MIDDLEWARE` to admin-only routes: `/admin/backup`, `/admin/wizard`, `/admin/install-demo`, `/admin/settings`, `/admin/server-data`, `/admin/save-setting`
+- Statistics route (`/admin/statistics`) remains accessible to regular users
 
-**Remediation:**
-Create admin middleware:
-
-```php
-// src/backend/Router/Middleware/AdminMiddleware.php
-class AdminMiddleware
-{
-    public function handle(): bool
-    {
-        $userId = Globals::getCurrentUserId();
-        if ($userId === null) {
-            return false;
-        }
-
-        $user = $this->userRepository->findById($userId);
-        if ($user === null || $user->getRole() !== User::ROLE_ADMIN) {
-            http_response_code(403);
-            echo json_encode(['error' => 'Admin access required']);
-            return false;
-        }
-        return true;
-    }
-}
-```
-
-Apply to admin routes in `routes.php`.
+The middleware:
+1. First checks authentication (like `AuthMiddleware`)
+2. Then verifies the user has admin role (`User::ROLE_ADMIN`)
+3. Returns 403 Forbidden for API requests or redirects to home for web requests if not authorized
 
 ---
 
@@ -834,9 +785,6 @@ The codebase demonstrates strong security practices:
 
 | # | Task | Effort | Files |
 |---|------|--------|-------|
-| 20 | Proxy YouTube API calls server-side | Medium | New endpoint + refactor TS |
-| 21 | Hash API/remember tokens before storage | Medium | `MySqlUserRepository.php` |
-| 23 | Implement role-based authorization | Medium | New middleware + routes |
 | 24 | Add authorization check to `withoutUserScope()` | Low | `QueryBuilder.php` |
 | 25 | Sanitize SQL errors before throwing | Low | `Connection.php` |
 | 26 | Add `JSON_HEX_TAG` to json_encode in views | Low | Multiple view files |

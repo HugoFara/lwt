@@ -15,10 +15,13 @@
 namespace Lwt\Modules\User\Application\UseCases;
 
 use Lwt\Core\Entity\User;
+use Lwt\Modules\User\Application\Services\TokenHasher;
 use Lwt\Modules\User\Domain\UserRepositoryInterface;
 
 /**
  * Use case for validating API tokens.
+ *
+ * Tokens are hashed before lookup since only hashes are stored in the database.
  *
  * @since 3.0.0
  */
@@ -32,26 +35,42 @@ class ValidateApiToken
     private UserRepositoryInterface $repository;
 
     /**
+     * Token hasher.
+     *
+     * @var TokenHasher
+     */
+    private TokenHasher $tokenHasher;
+
+    /**
      * Create a new ValidateApiToken use case.
      *
-     * @param UserRepositoryInterface $repository User repository
+     * @param UserRepositoryInterface $repository   User repository
+     * @param TokenHasher|null        $tokenHasher  Token hasher
      */
-    public function __construct(UserRepositoryInterface $repository)
-    {
+    public function __construct(
+        UserRepositoryInterface $repository,
+        ?TokenHasher $tokenHasher = null
+    ) {
         $this->repository = $repository;
+        $this->tokenHasher = $tokenHasher ?? new TokenHasher();
     }
 
     /**
      * Execute to validate an API token.
      *
-     * @param string $token The API token to validate
+     * The provided plaintext token is hashed before lookup since
+     * only hashes are stored in the database.
+     *
+     * @param string $token The API token to validate (plaintext)
      *
      * @return User|null The user if token is valid, null otherwise
      */
     public function execute(string $token): ?User
     {
         try {
-            $user = $this->repository->findByApiToken($token);
+            // Hash the provided token to match what's stored
+            $hashedToken = $this->tokenHasher->hash($token);
+            $user = $this->repository->findByApiToken($hashedToken);
 
             if ($user === null) {
                 return null;
