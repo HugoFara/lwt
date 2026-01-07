@@ -98,8 +98,8 @@ class BuildTextFilters
     /**
      * Build HAVING clause for tag filtering.
      *
-     * @param string|int $tag1       First tag filter
-     * @param string|int $tag2       Second tag filter
+     * @param string|int $tag1       First tag filter (must be numeric or empty)
+     * @param string|int $tag2       Second tag filter (must be numeric or empty)
      * @param string     $tag12      AND/OR operator
      * @param string     $tagIdCol   Tag ID column (AgT2ID for archived, TtT2ID for active)
      *
@@ -115,30 +115,38 @@ class BuildTextFilters
             return '';
         }
 
+        // Sanitize tag IDs to prevent SQL injection - cast to int for safety
+        // Non-numeric strings become 0, which won't match any valid tag ID
+        $tag1Int = ($tag1 !== '' && is_numeric($tag1)) ? (int)$tag1 : null;
+        $tag2Int = ($tag2 !== '' && is_numeric($tag2)) ? (int)$tag2 : null;
+
         $whTag1 = null;
         $whTag2 = null;
 
-        if ($tag1 !== '') {
-            if ($tag1 == -1) {
+        if ($tag1Int !== null) {
+            if ($tag1Int === -1) {
                 $whTag1 = "GROUP_CONCAT({$tagIdCol}) IS NULL";
             } else {
-                $whTag1 = "CONCAT('/', GROUP_CONCAT({$tagIdCol} SEPARATOR '/'), '/') LIKE '%/{$tag1}/%'";
+                $whTag1 = "CONCAT('/', GROUP_CONCAT({$tagIdCol} SEPARATOR '/'), '/') LIKE '%/{$tag1Int}/%'";
             }
         }
 
-        if ($tag2 !== '') {
-            if ($tag2 == -1) {
+        if ($tag2Int !== null) {
+            if ($tag2Int === -1) {
                 $whTag2 = "GROUP_CONCAT({$tagIdCol}) IS NULL";
             } else {
-                $whTag2 = "CONCAT('/', GROUP_CONCAT({$tagIdCol} SEPARATOR '/'), '/') LIKE '%/{$tag2}/%'";
+                $whTag2 = "CONCAT('/', GROUP_CONCAT({$tagIdCol} SEPARATOR '/'), '/') LIKE '%/{$tag2Int}/%'";
             }
         }
 
-        if ($tag1 !== '' && $tag2 === '') {
+        if ($tag1Int !== null && $tag2Int === null) {
             return " HAVING ({$whTag1})";
         }
-        if ($tag2 !== '' && $tag1 === '') {
+        if ($tag2Int !== null && $tag1Int === null) {
             return " HAVING ({$whTag2})";
+        }
+        if ($tag1Int === null && $tag2Int === null) {
+            return '';
         }
 
         $operator = $tag12 ? 'AND' : 'OR';
