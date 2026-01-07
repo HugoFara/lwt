@@ -480,11 +480,10 @@ class RssParser
      */
     private function convertToHtmlEntities(string $html): string
     {
-        return mb_convert_encoding(
-            html_entity_decode($html, ENT_NOQUOTES, 'UTF-8'),
-            'HTML-ENTITIES',
-            'UTF-8'
-        );
+        $decoded = html_entity_decode($html, ENT_NOQUOTES, 'UTF-8');
+        // Convert non-ASCII characters to numeric HTML entities
+        // Convmap: [start, end, offset, mask] - converts chars 0x80-0x10FFFF
+        return mb_encode_numericentity($decoded, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');
     }
 
     /**

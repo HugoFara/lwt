@@ -515,9 +515,10 @@ class ArticleExtractor
                 $nodeValue = $textNode->nodeValue;
                 if ($nodeValue !== null && $nodeValue !== '') {
                     if ($isInlineText) {
-                        $text .= mb_convert_encoding(
+                        // Convert non-ASCII to numeric entities for safe concatenation
+                        $text .= mb_encode_numericentity(
                             $nodeValue,
-                            'HTML-ENTITIES',
+                            [0x80, 0x10FFFF, 0, 0x1FFFFF],
                             'UTF-8'
                         );
                     } else {

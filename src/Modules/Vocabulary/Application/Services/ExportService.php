@@ -355,7 +355,8 @@ class ExportService
                 $on = 0;
             }
             if ($on) {
-                if (preg_match('/[' . $regexword . ']/u', $c)) {
+                // Empty regex means no characters match, so don't mask anything
+                if ($regexword !== '' && preg_match('/[' . $regexword . ']/u', $c)) {
                     $r .= '•';
                 } else {
                     $r .= $c;
