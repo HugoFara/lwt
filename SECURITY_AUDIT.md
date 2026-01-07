@@ -14,7 +14,7 @@ This document tracks security issues identified during the pre-release audit of 
 | Severity | Total | Fixed | Open |
 |----------|-------|-------|------|
 | Critical | 8 | 8 | 0 |
-| High | 13 | 11 | 2 |
+| High | 13 | 12 | 1 |
 | Medium | 10 | 10 | 0 |
 
 ---
@@ -196,20 +196,34 @@ fetch('/api/endpoint', {
 
 ---
 
-### 7. No API Rate Limiting - OPEN
+### 7. No API Rate Limiting - FIXED
 
-**Status:** Open (deferred to post-release)
+**Status:** Fixed
 
 **Risk:** DoS attacks, brute force, API abuse.
 
 **Affected:** `/api/v1/*` endpoints
 
-**Recommendation:**
-Implement per-IP rate limiting via:
-- Application middleware
-- Reverse proxy (nginx `limit_req`, Apache `mod_ratelimit`)
+**Resolution:**
+Implemented per-IP rate limiting via application middleware:
 
-**Priority:** Can be handled at infrastructure level for self-hosted deployments.
+1. **RateLimitMiddleware** (`src/backend/Router/Middleware/RateLimitMiddleware.php`):
+   - Sliding window algorithm for request counting
+   - General API: 100 requests per 60 seconds
+   - Auth endpoints (login/register): 10 requests per 5 minutes (brute force protection)
+   - Proper 429 Too Many Requests response with Retry-After header
+   - X-RateLimit-* headers for client visibility
+
+2. **RateLimitStorage** (`src/backend/Router/Middleware/RateLimitStorage.php`):
+   - Uses APCu if available for high-performance caching
+   - Falls back to file-based storage for self-hosted deployments
+   - Automatic cleanup of expired entries
+
+3. **Integration** (`src/backend/Controllers/ApiController.php`):
+   - Rate limiting applied before API request processing
+   - Supports X-Forwarded-For and X-Real-IP headers for reverse proxy deployments
+
+**Note:** Additional infrastructure-level rate limiting (nginx `limit_req`, Apache `mod_ratelimit`) is still recommended for production deployments.
 
 ---
 
@@ -700,7 +714,7 @@ All P1 issues have been resolved:
 
 | # | Task | Status | Files |
 |---|------|--------|-------|
-| 7 | Add API rate limiting | Open | Middleware or reverse proxy |
+| 7 | Add API rate limiting | ✅ Fixed | `RateLimitMiddleware.php`, `RateLimitStorage.php`, `ApiController.php` |
 | 22 | Implement password reset | Open | New service, views, email |
 | 28 | Migrate utf8 to utf8mb4 | ✅ Fixed | `baseline.sql`, `Configuration.php`, migration |
 

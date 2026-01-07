@@ -1,0 +1,240 @@
+<?php declare(strict_types=1);
+/**
+ * Rate Limiting Middleware
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Router\Middleware
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Router\Middleware;
+
+require_once __DIR__ . '/MiddlewareInterface.php';
+require_once __DIR__ . '/RateLimitStorage.php';
+
+/**
+ * Middleware that enforces rate limiting for API requests.
+ *
+ * Uses a sliding window algorithm to limit requests per IP address.
+ * Configurable limits for general API requests and auth endpoints.
+ *
+ * @category Lwt
+ * @package  Lwt\Router\Middleware
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+class RateLimitMiddleware implements MiddlewareInterface
+{
+    /**
+     * Default rate limit for general API requests (requests per window).
+     */
+    private const DEFAULT_LIMIT = 100;
+
+    /**
+     * Default window size in seconds (1 minute).
+     */
+    private const DEFAULT_WINDOW = 60;
+
+    /**
+     * Stricter rate limit for authentication endpoints (requests per window).
+     */
+    private const AUTH_LIMIT = 10;
+
+    /**
+     * Window size for auth endpoints in seconds (5 minutes).
+     */
+    private const AUTH_WINDOW = 300;
+
+    /**
+     * Storage backend for rate limit data.
+     */
+    private RateLimitStorage $storage;
+
+    /**
+     * Maximum requests allowed per window.
+     */
+    private int $limit;
+
+    /**
+     * Window size in seconds.
+     */
+    private int $window;
+
+    /**
+     * Create a new RateLimitMiddleware.
+     *
+     * @param RateLimitStorage|null $storage Optional storage backend
+     * @param int|null              $limit   Optional custom request limit
+     * @param int|null              $window  Optional custom window size in seconds
+     */
+    public function __construct(
+        ?RateLimitStorage $storage = null,
+        ?int $limit = null,
+        ?int $window = null
+    ) {
+        $this->storage = $storage ?? new RateLimitStorage();
+        $this->limit = $limit ?? self::DEFAULT_LIMIT;
+        $this->window = $window ?? self::DEFAULT_WINDOW;
+    }
+
+    /**
+     * Handle the incoming request.
+     *
+     * Checks if the client has exceeded the rate limit.
+     * On failure, returns 429 Too Many Requests.
+     *
+     * @return bool True if request is allowed, false if rate limited
+     */
+    public function handle(): bool
+    {
+        $clientId = $this->getClientIdentifier();
+        $endpoint = $this->getEndpointType();
+
+        // Use stricter limits for auth endpoints (brute force protection)
+        $limit = $endpoint === 'auth' ? self::AUTH_LIMIT : $this->limit;
+        $window = $endpoint === 'auth' ? self::AUTH_WINDOW : $this->window;
+
+        $key = $this->buildKey($clientId, $endpoint);
+        $now = time();
+
+        // Get current request count and window start
+        $data = $this->storage->get($key);
+
+        if ($data === null || $data['window_start'] < ($now - $window)) {
+            // Start new window
+            $data = [
+                'count' => 1,
+                'window_start' => $now,
+            ];
+            $this->storage->set($key, $data, $window);
+            $this->addRateLimitHeaders($limit, $limit - 1, $now + $window);
+            return true;
+        }
+
+        // Increment request count
+        $data['count']++;
+
+        if ($data['count'] > $limit) {
+            // Rate limit exceeded
+            $retryAfter = $data['window_start'] + $window - $now;
+            $this->sendRateLimitedResponse($retryAfter, $limit);
+            // Note: sendRateLimitedResponse calls exit, so this line is never reached
+            // but Psalm requires explicit return for control flow analysis
+        }
+
+        // Update count
+        $remaining = $window - ($now - $data['window_start']);
+        $this->storage->set($key, $data, $remaining > 0 ? $remaining : 1);
+        $this->addRateLimitHeaders($limit, $limit - $data['count'], $data['window_start'] + $window);
+
+        return true;
+    }
+
+    /**
+     * Get the client identifier (IP address).
+     *
+     * @return string Client identifier
+     */
+    private function getClientIdentifier(): string
+    {
+        // Check for forwarded IP (behind reverse proxy)
+        $forwarded = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+        if ($forwarded !== '') {
+            // Take the first IP in the chain (original client)
+            $ips = explode(',', $forwarded);
+            $clientIp = trim($ips[0]);
+            // Validate IP format to prevent spoofing
+            if (filter_var($clientIp, FILTER_VALIDATE_IP)) {
+                return $clientIp;
+            }
+        }
+
+        // Check X-Real-IP header
+        $realIp = $_SERVER['HTTP_X_REAL_IP'] ?? '';
+        if ($realIp !== '' && filter_var($realIp, FILTER_VALIDATE_IP)) {
+            return $realIp;
+        }
+
+        // Fall back to REMOTE_ADDR
+        return $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+    }
+
+    /**
+     * Get the endpoint type for rate limiting.
+     *
+     * @return string Endpoint type: 'auth' for auth endpoints, 'api' for others
+     */
+    private function getEndpointType(): string
+    {
+        $path = $_SERVER['REQUEST_URI'] ?? '/';
+        $parsedUrl = parse_url($path);
+        $requestPath = $parsedUrl['path'] ?? '/';
+
+        // Check if this is an auth endpoint
+        if (preg_match('#/api(?:\.php)?/v1/auth/(login|register)#', $requestPath)) {
+            return 'auth';
+        }
+
+        return 'api';
+    }
+
+    /**
+     * Build the storage key for rate limit tracking.
+     *
+     * @param string $clientId Client identifier
+     * @param string $endpoint Endpoint type
+     *
+     * @return string Storage key
+     */
+    private function buildKey(string $clientId, string $endpoint): string
+    {
+        return "rate_limit:{$endpoint}:{$clientId}";
+    }
+
+    /**
+     * Add rate limit headers to the response.
+     *
+     * @param int $limit     Maximum requests allowed
+     * @param int $remaining Requests remaining in current window
+     * @param int $reset     Unix timestamp when window resets
+     *
+     * @return void
+     */
+    private function addRateLimitHeaders(int $limit, int $remaining, int $reset): void
+    {
+        header("X-RateLimit-Limit: {$limit}");
+        header("X-RateLimit-Remaining: " . max(0, $remaining));
+        header("X-RateLimit-Reset: {$reset}");
+    }
+
+    /**
+     * Send a 429 Too Many Requests response.
+     *
+     * @param int $retryAfter Seconds until client can retry
+     * @param int $limit      Maximum requests allowed
+     *
+     * @return never
+     */
+    private function sendRateLimitedResponse(int $retryAfter, int $limit): void
+    {
+        http_response_code(429);
+        header('Content-Type: application/json; charset=utf-8');
+        header("Retry-After: {$retryAfter}");
+        header("X-RateLimit-Limit: {$limit}");
+        header("X-RateLimit-Remaining: 0");
+
+        echo json_encode([
+            'error' => 'Too Many Requests',
+            'message' => "Rate limit exceeded. Please retry after {$retryAfter} seconds.",
+            'retry_after' => $retryAfter,
+        ]);
+        exit;
+    }
+}
