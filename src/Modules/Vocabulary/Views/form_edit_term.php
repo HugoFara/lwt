@@ -43,7 +43,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 /** @var string $rom */
 /** @var int $status */
 
-$phpSelf = $_SERVER['PHP_SELF'] ?? '';
+$phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
 <form name="editword" class="validate" action="<?php echo $phpSelf; ?>" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">

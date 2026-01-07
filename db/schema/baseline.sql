@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS users (
     UsPasswordHash varchar(255) DEFAULT NULL,
     UsApiToken varchar(64) DEFAULT NULL,
     UsApiTokenExpires datetime DEFAULT NULL,
+    UsRememberToken varchar(64) DEFAULT NULL,
+    UsRememberTokenExpires datetime DEFAULT NULL,
     UsWordPressId int(10) unsigned DEFAULT NULL,
     UsCreated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UsLastLogin timestamp NULL DEFAULT NULL,
@@ -27,6 +29,7 @@ CREATE TABLE IF NOT EXISTS users (
     UNIQUE KEY UsUsername (UsUsername),
     UNIQUE KEY UsEmail (UsEmail),
     UNIQUE KEY UsApiToken (UsApiToken),
+    UNIQUE KEY UsRememberToken (UsRememberToken),
     KEY UsWordPressId (UsWordPressId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

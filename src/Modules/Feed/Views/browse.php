@@ -114,7 +114,7 @@ echo PageLayoutHelper::buildActionCard([
 </form>
 
 <?php if ($recno > 0): ?>
-  <form name="form2" action="<?php echo $_SERVER['PHP_SELF'] ?? '' ?>" method="post">
+  <form name="form2" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" method="post">
   <table class="tab2" cellspacing="0" cellpadding="5">
   <tr><th class="th1" colspan="2">Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?></th></tr>
   <tr><td class="td1 center feeds-filter-cell">

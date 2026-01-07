@@ -33,7 +33,7 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
-$phpSelf = $_SERVER['PHP_SELF'] ?? '';
+$phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
 
 <script type="application/json" id="word-form-config">

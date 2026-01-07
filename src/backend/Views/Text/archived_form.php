@@ -42,7 +42,7 @@ $recordAnnotLen = (int) $recordMerged['annotlen'];
 /** @var array<int, array{id: int, name: string}> $languages */
 $languages = $languages ?? [];
 
-$phpSelf = $_SERVER['PHP_SELF'] ?? '';
+$phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
 <h2 class="title is-4">Edit Archived Text</h2>
 

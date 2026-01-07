@@ -63,6 +63,9 @@ if (!$conn) {
     exit(1);
 }
 
+// Disable mysqli exception mode to allow graceful error handling
+mysqli_report(MYSQLI_REPORT_OFF);
+
 /**
  * Output a message unless quiet mode is enabled.
  */

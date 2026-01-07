@@ -32,7 +32,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 $isEdit = $mode === 'edit';
 $pageTitle = $isEdit ? 'Edit Tag' : 'New Tag';
 $formName = $isEdit ? 'edittag' : 'newtag';
-$phpSelf = $_SERVER['PHP_SELF'] ?? '';
+$phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 $actionUrl = $isEdit && $tag !== null ?
     $phpSelf . '#rec' . $tag['id'] :
     $phpSelf;
