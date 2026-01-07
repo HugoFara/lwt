@@ -193,11 +193,12 @@ class RateLimitMiddlewareTest extends TestCase
         // Set invalid forwarded IP
         $_SERVER['HTTP_X_FORWARDED_FOR'] = 'not-a-valid-ip';
         unset($_SERVER['HTTP_X_REAL_IP']);
-        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        // Use non-localhost IP since localhost skips rate limiting
+        $_SERVER['REMOTE_ADDR'] = '192.168.1.50';
         $middleware->handle();
 
         // Should fall back to REMOTE_ADDR
-        $data = $this->storage->get('rate_limit:api:127.0.0.1');
+        $data = $this->storage->get('rate_limit:api:192.168.1.50');
         $this->assertNotNull($data);
     }
 }
