@@ -35,7 +35,7 @@ class RssParser
      * @param string $sourceUri      Feed URL
      * @param string $articleSection Tag name for inline text extraction
      *
-     * @return array|null Array of feed items or null on error
+     * @return array<int, array{title: string, link: string, desc: string, date: string, audio: string, text: string}>|null Array of feed items or null on error
      */
     public function parse(string $sourceUri, string $articleSection = ''): ?array
     {
@@ -159,7 +159,7 @@ class RssParser
      * @param int         $index          Item index (for date fallback)
      * @param string      $articleSection Tag for inline text extraction
      *
-     * @return array|null Parsed item or null if invalid
+     * @return array{title: string, link: string, desc: string, date: string, audio: string, text: string}|null Parsed item or null if invalid
      */
     private function parseItem(
         \DOMElement $node,
@@ -178,6 +178,7 @@ class RssParser
             'link' => $this->extractLink($linkNode, $feedTags),
             'date' => $this->parseFeedDate($dateNode?->nodeValue, $index),
             'audio' => '',
+            'text' => '',
         ];
 
         // Truncate description
@@ -187,7 +188,7 @@ class RssParser
 
         // Extract inline text if article section specified
         if ($articleSection !== '') {
-            $item['text'] = $this->extractInlineText($node, $articleSection);
+            $item['text'] = $this->extractInlineText($node, $articleSection) ?? '';
         }
 
         // Extract audio enclosure
@@ -524,14 +525,14 @@ class RssParser
     /**
      * Determine best text source and update items.
      *
-     * @param array<int|string, mixed> $rssData     Feed items
+     * @param array<int|string, array<string, string>|string> $rssData Feed items
      * @param array{item: string, title: string, description: string, link: string, pubDate: string, enclosure: string, url: string} $feedTags Tag mapping
      * @param int   $descCount   Long description count
      * @param int   $descNocount Short description count
      * @param int   $encCount    Long encoded count
      * @param int   $encNocount  Short encoded count
      *
-     * @return array<int|string, mixed> Updated feed data
+     * @return array<int|string, array<string, string>|string> Updated feed data
      */
     private function determineBestTextSource(
         array $rssData,
@@ -545,15 +546,21 @@ class RssParser
             $source = ($feedTags['item'] === 'entry') ? 'content' : 'description';
             $rssData['feed_text'] = $source;
             foreach ($rssData as $i => $val) {
-                if (is_array($val)) {
-                    $rssData[$i]['text'] = $val[$source] ?? '';
+                if (is_int($i) && is_array($val)) {
+                    /** @var array<string, string> $item */
+                    $item = $val;
+                    $item['text'] = $val[$source] ?? '';
+                    $rssData[$i] = $item;
                 }
             }
         } elseif ($encCount > $encNocount) {
             $rssData['feed_text'] = 'encoded';
             foreach ($rssData as $i => $val) {
-                if (is_array($val)) {
-                    $rssData[$i]['text'] = $val['encoded'] ?? '';
+                if (is_int($i) && is_array($val)) {
+                    /** @var array<string, string> $item */
+                    $item = $val;
+                    $item['text'] = $val['encoded'] ?? '';
+                    $rssData[$i] = $item;
                 }
             }
         } else {

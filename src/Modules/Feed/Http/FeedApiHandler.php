@@ -166,6 +166,7 @@ class FeedApiHandler
                 "error" => 'Could not load "' . $nfname . '"'
             ];
         }
+        /** @var array<array-key, array<string, string>> $feed */
         list($importedFeed, $nif) = $this->getFeedsList($feed, $nfid);
         $msg = $this->getFeedResult($importedFeed, $nif, $nfname, $nfid, $nfoptions);
         return [
@@ -216,7 +217,7 @@ class FeedApiHandler
         $page = max(1, (int)($params['page'] ?? 1));
         $perPage = max(1, min(100, (int)($params['per_page'] ?? 50)));
         $langId = isset($params['lang']) && $params['lang'] !== '' ? (int)$params['lang'] : null;
-        $query = $params['query'] ?? '';
+        $query = (string)($params['query'] ?? '');
         $sort = max(1, min(3, (int)($params['sort'] ?? 2)));
 
         // Build WHERE clause with parameters
@@ -364,7 +365,7 @@ class FeedApiHandler
             ->where('LgID', '=', (int)$feed['NfLgID'])
             ->firstPrepared();
         if ($langResult !== null) {
-            $feed['LgName'] = $langResult['LgName'];
+            $feed['LgName'] = (string)$langResult['LgName'];
         }
 
         // Get article count
@@ -389,8 +390,8 @@ class FeedApiHandler
     public function createFeed(array $data): array
     {
         $langId = (int)($data['langId'] ?? 0);
-        $name = trim($data['name'] ?? '');
-        $sourceUri = trim($data['sourceUri'] ?? '');
+        $name = trim((string)($data['name'] ?? ''));
+        $sourceUri = trim((string)($data['sourceUri'] ?? ''));
 
         if ($langId <= 0) {
             return ['success' => false, 'error' => 'Language is required'];
@@ -490,7 +491,7 @@ class FeedApiHandler
 
         $page = max(1, (int)($params['page'] ?? 1));
         $perPage = max(1, min(100, (int)($params['per_page'] ?? 50)));
-        $query = $params['query'] ?? '';
+        $query = (string)($params['query'] ?? '');
         $sort = max(1, min(3, (int)($params['sort'] ?? 1)));
 
         // Get feed info
@@ -652,8 +653,9 @@ class FeedApiHandler
         $errors = [];
 
         foreach ($feedLinks as $row) {
-            $nfOptions = $row['NfOptions'] ?? '';
-            $nfName = (string)$row['NfName'];
+            /** @var array<string, mixed> $row */
+            $nfOptions = (string)($row['NfOptions'] ?? '');
+            $nfName = (string)($row['NfName'] ?? '');
 
             $tagNameRaw = $this->feedFacade->getNfOption($nfOptions, 'tag');
             $tagName = is_string($tagNameRaw) && $tagNameRaw !== '' ? $tagNameRaw : mb_substr($nfName, 0, 20, 'utf-8');
@@ -664,25 +666,29 @@ class FeedApiHandler
                 $maxTexts = (int)Settings::getWithDefault('set-max-texts-per-feed');
             }
 
+            $flLink = (string)($row['FlLink'] ?? '');
+            $flId = (string)($row['FlID'] ?? '');
             $doc = [[
-                'link' => empty($row['FlLink']) ? ('#' . $row['FlID']) : $row['FlLink'],
-                'title' => $row['FlTitle'],
-                'audio' => $row['FlAudio'],
-                'text' => $row['FlText']
+                'link' => empty($flLink) ? ('#' . $flId) : $flLink,
+                'title' => (string)($row['FlTitle'] ?? ''),
+                'audio' => (string)($row['FlAudio'] ?? ''),
+                'text' => (string)($row['FlText'] ?? '')
             ]];
 
             $charsetRaw = $this->feedFacade->getNfOption($nfOptions, 'charset');
             $charset = is_string($charsetRaw) ? $charsetRaw : null;
             $texts = $this->feedFacade->extractTextFromArticle(
                 $doc,
-                $row['NfArticleSectionTags'],
-                $row['NfFilterTags'],
+                (string)($row['NfArticleSectionTags'] ?? ''),
+                (string)($row['NfFilterTags'] ?? ''),
                 $charset
             );
 
             if (isset($texts['error'])) {
-                $errors[] = $texts['error']['message'];
-                foreach ($texts['error']['link'] as $errLink) {
+                /** @var array{message?: string, link?: string[]} $errorData */
+                $errorData = $texts['error'];
+                $errors[] = $errorData['message'] ?? 'Unknown error';
+                foreach ($errorData['link'] ?? [] as $errLink) {
                     $this->feedFacade->markLinkAsError($errLink);
                 }
                 unset($texts['error']);
@@ -690,12 +696,13 @@ class FeedApiHandler
 
             if (is_array($texts)) {
                 foreach ($texts as $text) {
+                    /** @var array{TxTitle?: mixed, TxText?: mixed, TxAudioURI?: mixed, TxSourceURI?: mixed} $text */
                     $this->feedFacade->createTextFromFeed([
-                        'TxLgID' => $row['NfLgID'],
-                        'TxTitle' => $text['TxTitle'],
-                        'TxText' => $text['TxText'],
-                        'TxAudioURI' => $text['TxAudioURI'] ?? '',
-                        'TxSourceURI' => $text['TxSourceURI'] ?? ''
+                        'TxLgID' => (int)($row['NfLgID'] ?? 0),
+                        'TxTitle' => (string)($text['TxTitle'] ?? ''),
+                        'TxText' => (string)($text['TxText'] ?? ''),
+                        'TxAudioURI' => (string)($text['TxAudioURI'] ?? ''),
+                        'TxSourceURI' => (string)($text['TxSourceURI'] ?? '')
                     ], $tagName);
                     $imported++;
                 }

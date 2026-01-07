@@ -79,7 +79,7 @@ class LoadFeed
      *
      * @param Feed $feed Feed to load
      *
-     * @return array Load result
+     * @return array{success: bool, feed: Feed|null, inserted: int, duplicates: int, error: string|null} Load result
      */
     public function loadFeed(Feed $feed): array
     {

@@ -275,6 +275,7 @@ class FeedController
         string $filterTags,
         ?string $charset = null
     ): array|string|null {
+        /** @var array<int|string, array{link: string, title: string, audio?: string, text?: string}> $feedData */
         return $this->feedFacade->extractTextFromArticle($feedData, $articleSection, $filterTags, $charset);
     }
 
@@ -496,6 +497,7 @@ class FeedController
         bool $checkAutoupdate,
         string $redirectUrl
     ): void {
+        /** @var array{feeds: array, count: int} $config */
         $config = $this->getFeedLoadConfig($currentFeed, $checkAutoupdate);
 
         // Output JSON config for Alpine component
@@ -615,14 +617,14 @@ class FeedController
             }
 
             $doc = [[
-                'link' => empty($row['FlLink']) ? ('#' . $row['FlID']) : $row['FlLink'],
+                'link' => $row['FlLink'] === '' ? ('#' . ($row['FlID'] ?? 0)) : $row['FlLink'],
                 'title' => $row['FlTitle'],
                 'audio' => $row['FlAudio'],
                 'text' => $row['FlText']
             ]];
 
-            $nfName = (string)$row['NfName'];
-            $nfId = (int)$row['NfID'];
+            $nfName = $row['NfName'];
+            $nfId = $row['NfID'];
             $nfOptions = $row['NfOptions'];
 
             $tagNameRaw = $this->feedFacade->getNfOption($nfOptions, 'tag');
@@ -653,7 +655,7 @@ class FeedController
 
             if ($requiresEdit) {
                 // Include edit form view
-                $scrdir = $this->languageFacade->getScriptDirectionTag((int)$row['NfLgID']);
+                $scrdir = $this->languageFacade->getScriptDirectionTag($row['NfLgID']);
                 /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
                 include $this->viewPath . 'edit_text_form.php';
             } elseif (is_array($texts)) {

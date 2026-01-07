@@ -93,25 +93,26 @@ class ImportArticles
             }
 
             $feedResult = $this->importFeedArticles($feed, $feedArticles);
-            $result['imported'] += $feedResult['imported'];
-            $result['failed'] += $feedResult['failed'];
-            $result['archived'] += $feedResult['archived'];
+            $result['imported'] = (int)$result['imported'] + $feedResult['imported'];
+            $result['failed'] = (int)$result['failed'] + $feedResult['failed'];
+            $result['archived'] = (int)$result['archived'] + $feedResult['archived'];
 
-            if (!empty($feedResult['errors'])) {
+            if ($feedResult['errors'] !== null && count($feedResult['errors']) > 0) {
                 $result['errors'][(string) $feedId] = $feedResult['errors'];
             }
         }
 
+        /** @var array{imported: int, failed: int, archived: int, errors: array<string, string[]>} $result */
         return $result;
     }
 
     /**
      * Import articles for a specific feed.
      *
-     * @param \Lwt\Modules\Feed\Domain\Feed $feed     Feed entity
-     * @param array                         $articles Article entities
+     * @param \Lwt\Modules\Feed\Domain\Feed          $feed     Feed entity
+     * @param array<\Lwt\Modules\Feed\Domain\Article> $articles Article entities
      *
-     * @return array Import result
+     * @return array{imported: int, failed: int, archived: int, errors: string[]} Import result
      */
     private function importFeedArticles($feed, array $articles): array
     {
@@ -128,12 +129,12 @@ class ImportArticles
         $charset = $options->get('charset');
 
         // Prepare article data for extraction
+        /** @var array<int, array{link: string, title: string, audio?: string, text?: string}> $feedData */
         $feedData = [];
         foreach ($articles as $article) {
             $feedData[] = [
                 'title' => $article->title(),
                 'link' => $article->link(),
-                'desc' => $article->description(),
                 'audio' => $article->audio(),
                 'text' => $article->text(),
             ];
@@ -150,16 +151,19 @@ class ImportArticles
         // Process extracted content
         foreach ($extracted as $key => $data) {
             if ($key === 'error') {
-                $result['errors'] = $data['link'] ?? [];
-                $result['failed'] += count($data['link'] ?? []);
+                /** @var array{link?: string[]} $data */
+                $errorLinks = $data['link'] ?? [];
+                $result['errors'] = $errorLinks;
+                $result['failed'] += count($errorLinks);
 
                 // Mark failed articles as error
-                foreach ($data['link'] ?? [] as $link) {
+                foreach ($errorLinks as $link) {
                     $this->articleRepository->markAsError($link);
                 }
                 continue;
             }
 
+            /** @var array{TxSourceURI: string, TxTitle: string, TxText: string, TxAudioURI?: string} $data */
             // Skip if already imported
             if ($this->textCreation->sourceUriExists($data['TxSourceURI'])) {
                 continue;

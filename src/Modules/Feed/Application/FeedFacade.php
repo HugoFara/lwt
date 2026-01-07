@@ -315,7 +315,7 @@ class FeedFacade
      *
      * @param array|string $markedItems Array or comma-separated string of IDs
      *
-     * @return array Array of feed link data with feed options
+     * @return array<int, array{FlID: int|null, FlNfID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, FlText: string, NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string}> Array of feed link data with feed options
      */
     public function getMarkedFeedLinks($markedItems): array
     {
@@ -327,6 +327,7 @@ class FeedFacade
 
         $articles = $this->getArticles->getByIds(array_map('intval', $ids));
 
+        /** @var array<int, array{FlID: int|null, FlNfID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, FlText: string, NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string}> $result */
         $result = [];
         foreach ($articles as $article) {
             $feed = $this->feedRepository->find($article->feedId());
@@ -334,10 +335,10 @@ class FeedFacade
                 continue;
             }
 
-            $result[] = array_merge(
-                $this->articleEntityToArray($article),
-                $this->feedToArray($feed)
-            );
+            $result[] = [
+                ...$this->articleEntityToArray($article),
+                ...$this->feedToArray($feed)
+            ];
         }
 
         return $result;
@@ -719,7 +720,7 @@ class FeedFacade
      *
      * @param Feed $feed Feed entity
      *
-     * @return array Legacy array format
+     * @return array{NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string} Legacy array format
      */
     private function feedToArray(Feed $feed): array
     {
@@ -740,7 +741,7 @@ class FeedFacade
      *
      * @param \Lwt\Modules\Feed\Domain\Article $article Article entity
      *
-     * @return array Legacy array format
+     * @return array{FlID: int|null, FlNfID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, FlText: string} Legacy array format
      */
     private function articleEntityToArray($article): array
     {
