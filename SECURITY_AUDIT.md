@@ -15,7 +15,7 @@ This document tracks security issues identified during the pre-release audit of 
 |----------|-------|-------|------|
 | Critical | 8 | 8 | 0 |
 | High | 13 | 11 | 2 |
-| Medium | 10 | 9 | 1 |
+| Medium | 10 | 10 | 0 |
 
 ---
 
@@ -563,33 +563,25 @@ Errors are now handled through the proper exception system, which respects debug
 
 ---
 
-### 28. UTF-8 Collation Instead of utf8mb4 - OPEN
+### 28. UTF-8 Collation Instead of utf8mb4 - FIXED
 
-**Status:** Open
+**Status:** Fixed
 
 **Risk:** Data truncation for emoji and 4-byte Unicode characters.
 
-**Affected Files:**
-- `db/schema/baseline.sql`
-- `src/Shared/Infrastructure/Database/Configuration.php`
+**Resolution:**
+Updated all character set and collation settings to use `utf8mb4`:
 
-**Issue:**
-Schema uses `utf8_general_ci` which only supports 3-byte characters. Emoji and some Asian characters are 4 bytes.
+1. **baseline.sql**: All tables now use `DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+   - Columns requiring binary collation (WoTextLC, Ti2Text, TgText, T2Text) use `utf8mb4_bin`
 
-**Remediation:**
-1. Update baseline.sql:
-```sql
-DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-```
+2. **Configuration.php**:
+   - Database creation uses `utf8mb4_unicode_ci`
+   - Connection charset set to `utf8mb4` via `SET NAMES`
 
-2. Create migration to convert existing tables:
-```sql
-ALTER DATABASE `learning-with-texts`
-    CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-ALTER TABLE words CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
--- Repeat for other tables
-```
+3. **Migration** (`20260107_160000_convert_utf8_to_utf8mb4.sql`):
+   - Converts all existing tables to `utf8mb4_unicode_ci`
+   - Preserves binary collation on case-sensitive columns
 
 ---
 
@@ -706,11 +698,11 @@ All P1 issues have been resolved:
 
 ### Post-Release (P2) - Can Defer
 
-| # | Task | Effort | Files |
+| # | Task | Status | Files |
 |---|------|--------|-------|
-| 7 | Add API rate limiting | Medium | Middleware or reverse proxy |
-| 22 | Implement password reset | High | New service, views, email |
-| 28 | Migrate utf8 to utf8mb4 | Medium | Migration + schema |
+| 7 | Add API rate limiting | Open | Middleware or reverse proxy |
+| 22 | Implement password reset | Open | New service, views, email |
+| 28 | Migrate utf8 to utf8mb4 | ✅ Fixed | `baseline.sql`, `Configuration.php`, migration |
 
 ### Deployment Checklist
 

@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS users (
     UNIQUE KEY UsApiToken (UsApiToken),
     UNIQUE KEY UsRememberToken (UsRememberToken),
     KEY UsWordPressId (UsWordPressId)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- NOTE: Admin user should be created through the setup wizard or registration page.
 -- For security, no default admin is inserted. Multi-user mode requires explicit setup.
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS textitems2 (
     Ti2SeID mediumint(8) unsigned NOT NULL,
     Ti2Order smallint(5) unsigned NOT NULL,
     Ti2WordCount tinyint(3) unsigned NOT NULL,
-    Ti2Text varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+    Ti2Text varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
     PRIMARY KEY (Ti2TxID,Ti2Order,Ti2WordCount), KEY Ti2WoID (Ti2WoID)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -126,18 +126,18 @@ CREATE TABLE IF NOT EXISTS temptextitems (
     TiSeID mediumint(8) unsigned NOT NULL,
     TiOrder smallint(5) unsigned NOT NULL,
     TiWordCount tinyint(3) unsigned NOT NULL,
-    TiText varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL
-) ENGINE=MEMORY DEFAULT CHARSET=utf8;
+    TiText varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
+) ENGINE=MEMORY DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS tempwords (
     WoText varchar(250) DEFAULT NULL,
-    WoTextLC varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+    WoTextLC varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
     WoTranslation varchar(500) NOT NULL DEFAULT '*',
     WoRomanization varchar(100) DEFAULT NULL,
     WoSentence varchar(1000) DEFAULT NULL,
     WoTaglist varchar(255) DEFAULT NULL,
     PRIMARY KEY(WoTextLC)
-) ENGINE=MEMORY DEFAULT CHARSET=utf8;
+) ENGINE=MEMORY DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS texts (
     TxID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
@@ -155,14 +155,14 @@ CREATE TABLE IF NOT EXISTS texts (
     KEY TxLgID (TxLgID),
     KEY TxLgIDSourceURI (TxSourceURI(20),TxLgID),
     CONSTRAINT fk_texts_user FOREIGN KEY (TxUsID) REFERENCES users(UsID) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS words (
     WoID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
     WoUsID int(10) unsigned DEFAULT NULL,
     WoLgID tinyint(3) unsigned NOT NULL,
     WoText varchar(250) NOT NULL,
-    WoTextLC varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+    WoTextLC varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
     WoStatus tinyint(4) NOT NULL,
     WoTranslation varchar(500) NOT NULL DEFAULT '*',
     WoRomanization varchar(100) DEFAULT NULL,
@@ -193,13 +193,13 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 CREATE TABLE IF NOT EXISTS tags (
     TgID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
     TgUsID int(10) unsigned DEFAULT NULL,
-    TgText varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+    TgText varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
     TgComment varchar(200) NOT NULL DEFAULT '',
     PRIMARY KEY (TgID),
     KEY TgUsID (TgUsID),
     UNIQUE KEY TgText (TgText),
     CONSTRAINT fk_tags_user FOREIGN KEY (TgUsID) REFERENCES users(UsID) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE IF NOT EXISTS wordtags (
@@ -207,24 +207,24 @@ CREATE TABLE IF NOT EXISTS wordtags (
     WtTgID smallint(5) unsigned NOT NULL,
     PRIMARY KEY (WtWoID,WtTgID),
     KEY WtTgID (WtTgID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS tags2 (
     T2ID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
     T2UsID int(10) unsigned DEFAULT NULL,
-    T2Text varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+    T2Text varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
     T2Comment varchar(200) NOT NULL DEFAULT '',
     PRIMARY KEY (T2ID),
     KEY T2UsID (T2UsID),
     UNIQUE KEY T2Text (T2Text),
     CONSTRAINT fk_tags2_user FOREIGN KEY (T2UsID) REFERENCES users(UsID) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS texttags (
     TtTxID smallint(5) unsigned NOT NULL,
     TtT2ID smallint(5) unsigned NOT NULL,
     PRIMARY KEY (TtTxID,TtT2ID), KEY TtT2ID (TtT2ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS newsfeeds (
     NfID tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
@@ -241,7 +241,7 @@ CREATE TABLE IF NOT EXISTS newsfeeds (
     KEY NfLgID (NfLgID),
     KEY NfUpdate (NfUpdate),
     CONSTRAINT fk_newsfeeds_user FOREIGN KEY (NfUsID) REFERENCES users(UsID) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS feedlinks (
     FlID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
@@ -256,14 +256,14 @@ CREATE TABLE IF NOT EXISTS feedlinks (
     KEY FlLink (FlLink),
     KEY FlDate (FlDate),
     UNIQUE KEY FlTitle (FlNfID,FlTitle)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS archtexttags (
     AgAtID smallint(5) unsigned NOT NULL,
     AgT2ID smallint(5) unsigned NOT NULL,
     PRIMARY KEY (AgAtID,AgT2ID),
     KEY AgT2ID (AgT2ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Prefix migration tracking table for multi-user conversion
 CREATE TABLE IF NOT EXISTS _prefix_migration_log (
@@ -272,7 +272,7 @@ CREATE TABLE IF NOT EXISTS _prefix_migration_log (
     tables_migrated INT DEFAULT 0,
     migrated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (prefix)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================================
 -- Inter-table foreign key constraints

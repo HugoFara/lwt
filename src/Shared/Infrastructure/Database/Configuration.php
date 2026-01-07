@@ -132,7 +132,7 @@ class Configuration
             $result = mysqli_query(
                 $dbconnection,
                 "CREATE DATABASE `$dbname`
-                DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci"
+                DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
             );
             if (!$result) {
                 ErrorHandler::die("Failed to create database!");
@@ -158,7 +158,7 @@ class Configuration
             );
         }
 
-        @mysqli_query($dbconnection, "SET NAMES 'utf8'");
+        @mysqli_query($dbconnection, "SET NAMES 'utf8mb4'");
 
         @mysqli_query($dbconnection, "SET SESSION sql_mode = 'STRICT_ALL_TABLES'");
 
