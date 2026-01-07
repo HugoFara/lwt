@@ -24,30 +24,17 @@ describe('youtube_import.ts', () => {
       it('shows error when ytVideoId input is missing', () => {
         document.body.innerHTML = `
           <div id="ytDataStatus"></div>
-          <input id="ytApiKey" value="api-key">
         `;
 
         getYtTextData();
 
-        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Missing YouTube input fields.');
-      });
-
-      it('shows error when ytApiKey input is missing', () => {
-        document.body.innerHTML = `
-          <div id="ytDataStatus"></div>
-          <input id="ytVideoId" value="video-id">
-        `;
-
-        getYtTextData();
-
-        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Missing YouTube input fields.');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Missing YouTube video ID input field.');
       });
 
       it('shows error when video ID is empty', () => {
         document.body.innerHTML = `
           <div id="ytDataStatus"></div>
           <input id="ytVideoId" value="">
-          <input id="ytApiKey" value="api-key">
         `;
 
         getYtTextData();
@@ -59,24 +46,11 @@ describe('youtube_import.ts', () => {
         document.body.innerHTML = `
           <div id="ytDataStatus"></div>
           <input id="ytVideoId" value="   ">
-          <input id="ytApiKey" value="api-key">
         `;
 
         getYtTextData();
 
         expect(document.getElementById('ytDataStatus')!.textContent).toBe('Please enter a YouTube Video ID.');
-      });
-
-      it('shows error when API key is empty', () => {
-        document.body.innerHTML = `
-          <div id="ytDataStatus"></div>
-          <input id="ytVideoId" value="video-id">
-          <input id="ytApiKey" value="">
-        `;
-
-        getYtTextData();
-
-        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: YouTube API key not configured.');
       });
     });
 
@@ -85,7 +59,6 @@ describe('youtube_import.ts', () => {
         document.body.innerHTML = `
           <div id="ytDataStatus"></div>
           <input id="ytVideoId" value="dQw4w9WgXcQ">
-          <input id="ytApiKey" value="test-api-key">
           <input name="TxTitle" value="">
           <input name="TxText" value="">
           <input name="TxSourceURI" value="">
@@ -104,12 +77,14 @@ describe('youtube_import.ts', () => {
 
       it('populates form fields on successful API response', async () => {
         const mockResponse = {
-          items: [{
-            snippet: {
+          data: {
+            success: true,
+            data: {
               title: 'Test Video Title',
-              description: 'Test video description content'
+              description: 'Test video description content',
+              source_url: 'https://youtube.com/watch?v=dQw4w9WgXcQ'
             }
-          }]
+          }
         };
 
         global.fetch = vi.fn().mockResolvedValue({
@@ -129,9 +104,12 @@ describe('youtube_import.ts', () => {
         expect((document.querySelector('[name=TxSourceURI]') as HTMLInputElement).value).toBe('https://youtube.com/watch?v=dQw4w9WgXcQ');
       });
 
-      it('handles empty items array', async () => {
+      it('handles missing data in response', async () => {
         const mockResponse = {
-          items: []
+          data: {
+            success: true,
+            data: undefined
+          }
         };
 
         global.fetch = vi.fn().mockResolvedValue({
@@ -142,24 +120,18 @@ describe('youtube_import.ts', () => {
         getYtTextData();
 
         await vi.waitFor(() => {
-          expect(document.getElementById('ytDataStatus')!.textContent).toBe('No videos found.');
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('No video data returned.');
         });
         expect((document.querySelector('[name=TxTitle]') as HTMLInputElement).value).toBe(''); // Unchanged
       });
 
-      it('constructs correct API URL', () => {
+      it('constructs correct API URL with server proxy', () => {
         global.fetch = vi.fn().mockReturnValue(new Promise(() => {}));
 
         getYtTextData();
 
         expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('https://www.googleapis.com/youtube/v3/videos')
-        );
-        expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('id=dQw4w9WgXcQ')
-        );
-        expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('key=test-api-key')
+          '/api/v1/youtube/video?video_id=dQw4w9WgXcQ'
         );
       });
 
@@ -167,7 +139,6 @@ describe('youtube_import.ts', () => {
         document.body.innerHTML = `
           <div id="ytDataStatus"></div>
           <input id="ytVideoId" value="test&video=id">
-          <input id="ytApiKey" value="api-key">
         `;
 
         global.fetch = vi.fn().mockReturnValue(new Promise(() => {}));
@@ -175,7 +146,7 @@ describe('youtube_import.ts', () => {
         getYtTextData();
 
         expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining(encodeURIComponent('test&video=id'))
+          `/api/v1/youtube/video?video_id=${encodeURIComponent('test&video=id')}`
         );
       });
     });
@@ -185,63 +156,94 @@ describe('youtube_import.ts', () => {
         document.body.innerHTML = `
           <div id="ytDataStatus"></div>
           <input id="ytVideoId" value="video-id">
-          <input id="ytApiKey" value="api-key">
         `;
       });
 
-      it('shows error for 403 status (invalid API key)', async () => {
+      it('shows error for server error response', async () => {
         global.fetch = vi.fn().mockResolvedValue({
           ok: false,
-          status: 403,
-          statusText: 'Forbidden'
+          status: 500
         });
 
         getYtTextData();
 
         await vi.waitFor(() => {
-          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Invalid API key or quota exceeded.');
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Server error: 500');
         });
       });
 
-      it('shows error for 400 status (invalid video ID)', async () => {
+      it('shows error for 403 status', async () => {
         global.fetch = vi.fn().mockResolvedValue({
           ok: false,
-          status: 400,
-          statusText: 'Bad Request'
+          status: 403
         });
 
         getYtTextData();
 
         await vi.waitFor(() => {
-          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Invalid video ID.');
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Server error: 403');
         });
       });
 
-      it('shows generic error for other status codes', async () => {
+      it('shows error for 400 status', async () => {
         global.fetch = vi.fn().mockResolvedValue({
           ok: false,
-          status: 500,
-          statusText: 'Internal Server Error'
+          status: 400
         });
 
         getYtTextData();
 
         await vi.waitFor(() => {
-          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Internal Server Error');
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Server error: 400');
         });
       });
 
-      it('shows fallback error when statusText is empty', async () => {
+      it('shows error when API returns success: false', async () => {
+        const mockResponse = {
+          data: {
+            success: false,
+            error: 'Invalid video ID'
+          }
+        };
+
         global.fetch = vi.fn().mockResolvedValue({
-          ok: false,
-          status: 0,
-          statusText: ''
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        });
+
+        getYtTextData();
+
+        await vi.waitFor(() => {
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Invalid video ID');
+        });
+      });
+
+      it('shows fallback error when API returns success: false without error message', async () => {
+        const mockResponse = {
+          data: {
+            success: false
+          }
+        };
+
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
         });
 
         getYtTextData();
 
         await vi.waitFor(() => {
           expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Failed to fetch YouTube data.');
+        });
+      });
+
+      it('handles network errors', async () => {
+        global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+
+        getYtTextData();
+
+        await vi.waitFor(() => {
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Network error');
         });
       });
     });
@@ -256,7 +258,6 @@ describe('youtube_import.ts', () => {
       document.body.innerHTML = `
         <div id="ytDataStatus"></div>
         <input id="ytVideoId" value="">
-        <input id="ytApiKey" value="api-key">
         <button data-action="fetch-youtube">Fetch</button>
       `;
 
@@ -273,7 +274,6 @@ describe('youtube_import.ts', () => {
       document.body.innerHTML = `
         <div id="ytDataStatus"></div>
         <input id="ytVideoId" value="">
-        <input id="ytApiKey" value="">
         <button data-action="fetch-youtube">Fetch</button>
       `;
 
@@ -290,7 +290,6 @@ describe('youtube_import.ts', () => {
       document.body.innerHTML = `
         <div id="ytDataStatus"></div>
         <input id="ytVideoId" value="">
-        <input id="ytApiKey" value="key">
         <button data-action="fetch-youtube">Fetch 1</button>
         <button data-action="fetch-youtube">Fetch 2</button>
       `;
@@ -310,7 +309,6 @@ describe('youtube_import.ts', () => {
       document.body.innerHTML = `
         <div id="ytDataStatus"></div>
         <input id="ytVideoId" value="">
-        <input id="ytApiKey" value="key">
         <div id="container"></div>
       `;
 
@@ -338,15 +336,25 @@ describe('youtube_import.ts', () => {
       document.body.innerHTML = `
         <div id="ytDataStatus"></div>
         <input id="ytVideoId" value="  video-id  ">
-        <input id="ytApiKey" value="api-key">
         <input name="TxSourceURI" value="">
         <input name="TxTitle" value="">
         <input name="TxText" value="">
       `;
 
+      const mockResponse = {
+        data: {
+          success: true,
+          data: {
+            title: 'Test',
+            description: 'Desc',
+            source_url: 'https://youtube.com/watch?v=video-id'
+          }
+        }
+      };
+
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({ items: [{ snippet: { title: 'Test', description: 'Desc' } }] })
+        json: () => Promise.resolve(mockResponse)
       });
 
       getYtTextData();
@@ -355,24 +363,8 @@ describe('youtube_import.ts', () => {
         expect(document.getElementById('ytDataStatus')!.textContent).toBe('Success!');
       });
 
-      // URL should use trimmed video ID
-      expect((document.querySelector('[name=TxSourceURI]') as HTMLInputElement).value).toBe('https://youtube.com/watch?v=video-id');
-    });
-
-    it('trims API key before use', () => {
-      document.body.innerHTML = `
-        <div id="ytDataStatus"></div>
-        <input id="ytVideoId" value="video-id">
-        <input id="ytApiKey" value="  api-key  ">
-      `;
-
-      global.fetch = vi.fn().mockReturnValue(new Promise(() => {}));
-
-      getYtTextData();
-
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('key=api-key')
-      );
+      // API should be called with trimmed video ID
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/youtube/video?video_id=video-id');
     });
   });
 });
