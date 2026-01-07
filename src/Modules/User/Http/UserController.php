@@ -257,6 +257,159 @@ class UserController extends BaseController
         $this->redirect('/login');
     }
 
+    // =========================================================================
+    // Password Reset Methods
+    // =========================================================================
+
+    /**
+     * Display the forgot password form.
+     *
+     * GET /password/forgot
+     *
+     * @return void
+     */
+    public function forgotPasswordForm(): void
+    {
+        // If already authenticated, redirect to home
+        if (Globals::isAuthenticated()) {
+            $this->redirect('/');
+        }
+
+        $error = null;
+        $success = null;
+        $email = '';
+
+        if (isset($_SESSION['password_error'])) {
+            $error = $_SESSION['password_error'];
+            unset($_SESSION['password_error']);
+        }
+        if (isset($_SESSION['password_success'])) {
+            $success = $_SESSION['password_success'];
+            unset($_SESSION['password_success']);
+        }
+        if (isset($_SESSION['password_email'])) {
+            $email = $_SESSION['password_email'];
+            unset($_SESSION['password_email']);
+        }
+
+        $this->render('Forgot Password', false);
+        require __DIR__ . '/../Views/forgot_password.php';
+        $this->endRender();
+    }
+
+    /**
+     * Process the forgot password form submission.
+     *
+     * POST /password/forgot
+     *
+     * @return void
+     */
+    public function forgotPassword(): void
+    {
+        if (!$this->isPost()) {
+            $this->redirect('/password/forgot');
+        }
+
+        $email = $this->post('email');
+
+        if (empty($email)) {
+            $_SESSION['password_error'] = 'Please enter your email address';
+            $this->redirect('/password/forgot');
+        }
+
+        // Always show success message (prevents email enumeration)
+        $this->userFacade->requestPasswordReset($email);
+
+        $_SESSION['password_success'] = 'If an account exists with that email, you will receive a password reset link shortly.';
+        $this->redirect('/password/forgot');
+    }
+
+    /**
+     * Display the reset password form.
+     *
+     * GET /password/reset?token=xxx
+     *
+     * @return void
+     */
+    public function resetPasswordForm(): void
+    {
+        // If already authenticated, redirect to home
+        if (Globals::isAuthenticated()) {
+            $this->redirect('/');
+        }
+
+        $token = $this->get('token');
+        $error = null;
+
+        if (empty($token)) {
+            $_SESSION['password_error'] = 'Invalid or missing reset token';
+            $this->redirect('/password/forgot');
+        }
+
+        // Validate token before showing form
+        if (!$this->userFacade->validatePasswordResetToken($token)) {
+            $_SESSION['password_error'] = 'This password reset link has expired or is invalid. Please request a new one.';
+            $this->redirect('/password/forgot');
+        }
+
+        if (isset($_SESSION['password_error'])) {
+            $error = $_SESSION['password_error'];
+            unset($_SESSION['password_error']);
+        }
+
+        $this->render('Reset Password', false);
+        require __DIR__ . '/../Views/reset_password.php';
+        $this->endRender();
+    }
+
+    /**
+     * Process the reset password form submission.
+     *
+     * POST /password/reset
+     *
+     * @return void
+     */
+    public function resetPassword(): void
+    {
+        if (!$this->isPost()) {
+            $this->redirect('/password/forgot');
+        }
+
+        $token = $this->post('token');
+        $password = $this->post('password');
+        $passwordConfirm = $this->post('password_confirm');
+
+        if (empty($token)) {
+            $_SESSION['password_error'] = 'Invalid reset token';
+            $this->redirect('/password/forgot');
+        }
+
+        if (empty($password)) {
+            $_SESSION['password_error'] = 'Please enter a new password';
+            $this->redirect('/password/reset?token=' . urlencode($token));
+        }
+
+        if ($password !== $passwordConfirm) {
+            $_SESSION['password_error'] = 'Passwords do not match';
+            $this->redirect('/password/reset?token=' . urlencode($token));
+        }
+
+        try {
+            $success = $this->userFacade->completePasswordReset($token, $password);
+
+            if ($success) {
+                $_SESSION['auth_success'] = 'Your password has been reset successfully. Please log in with your new password.';
+                $this->redirect('/login');
+            } else {
+                $_SESSION['password_error'] = 'This password reset link has expired or is invalid. Please request a new one.';
+                $this->redirect('/password/forgot');
+            }
+        } catch (\InvalidArgumentException $e) {
+            $_SESSION['password_error'] = $e->getMessage();
+            $this->redirect('/password/reset?token=' . urlencode($token));
+        }
+    }
+
     /**
      * Try to restore session from remember-me cookie.
      *

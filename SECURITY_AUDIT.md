@@ -14,7 +14,7 @@ This document tracks security issues identified during the pre-release audit of 
 | Severity | Total | Fixed | Open |
 |----------|-------|-------|------|
 | Critical | 8 | 8 | 0 |
-| High | 13 | 12 | 1 |
+| High | 13 | 13 | 0 |
 | Medium | 10 | 10 | 0 |
 
 ---
@@ -350,35 +350,36 @@ The plaintext token is returned to the user once (at generation) and only the ha
 
 ---
 
-### 22. No Password Reset Functionality - OPEN
+### 22. No Password Reset Functionality - FIXED
 
-**Status:** Open
+**Status:** Fixed
 
 **Risk:** Users cannot recover accounts; encourages weak/shared passwords.
 
-**Affected:** User module
+**Resolution:**
+Implemented secure email-based password reset using PHPMailer:
 
-**Remediation:**
-Implement secure email-based password reset:
+1. **Database**: Added `UsPasswordResetToken` and `UsPasswordResetTokenExpires` columns to users table
+2. **Token Security**: Tokens are SHA-256 hashed before storage (plaintext sent via email)
+3. **Token Expiry**: 1-hour time limit on reset tokens
+4. **Email Enumeration Prevention**: Silent fail - always returns success message regardless of whether email exists
+5. **Token Invalidation**: Token cleared immediately after successful password reset
 
-1. Generate time-limited token (e.g., 1 hour expiry)
-2. Send email with reset link containing token
-3. Validate token and allow password change
-4. Invalidate token after use
+**New Files:**
+- `src/Modules/User/Application/Services/EmailService.php` - PHPMailer wrapper
+- `src/Modules/User/Application/UseCases/RequestPasswordReset.php` - Request flow
+- `src/Modules/User/Application/UseCases/CompletePasswordReset.php` - Reset flow
+- `src/Modules/User/Views/forgot_password.php` - Email input form
+- `src/Modules/User/Views/reset_password.php` - New password form
+- `db/migrations/20260107_170000_add_password_reset_token.sql` - Migration
 
-```php
-// PasswordResetService.php
-public function requestReset(string $email): void
-{
-    $user = $this->userRepository->findByEmail($email);
-    if (!$user) return; // Silent fail to prevent enumeration
+**Routes:**
+- `GET /password/forgot` - Show email input form
+- `POST /password/forgot` - Request reset email
+- `GET /password/reset?token=xxx` - Show password form
+- `POST /password/reset` - Complete reset
 
-    $token = bin2hex(random_bytes(32));
-    $expires = new DateTime('+1 hour');
-    $this->storeResetToken($user->getId(), hash('sha256', $token), $expires);
-    $this->emailService->sendResetLink($email, $token);
-}
-```
+**Configuration:** SMTP settings via `.env` (see `.env.example`). When email is disabled, tokens are logged for development.
 
 ---
 
@@ -715,7 +716,7 @@ All P1 issues have been resolved:
 | # | Task | Status | Files |
 |---|------|--------|-------|
 | 7 | Add API rate limiting | ✅ Fixed | `RateLimitMiddleware.php`, `RateLimitStorage.php`, `ApiController.php` |
-| 22 | Implement password reset | Open | New service, views, email |
+| 22 | Implement password reset | ✅ Fixed | `EmailService.php`, `RequestPasswordReset.php`, `CompletePasswordReset.php`, views |
 | 28 | Migrate utf8 to utf8mb4 | ✅ Fixed | `baseline.sql`, `Configuration.php`, migration |
 
 ### Deployment Checklist

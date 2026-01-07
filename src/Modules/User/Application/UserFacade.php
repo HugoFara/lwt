@@ -19,11 +19,14 @@ use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Application\Services\PasswordHasher;
 use Lwt\Modules\User\Application\Services\TokenHasher;
+use Lwt\Modules\User\Application\Services\EmailService;
+use Lwt\Modules\User\Application\UseCases\CompletePasswordReset;
 use Lwt\Modules\User\Application\UseCases\GenerateApiToken;
 use Lwt\Modules\User\Application\UseCases\GetCurrentUser;
 use Lwt\Modules\User\Application\UseCases\Login;
 use Lwt\Modules\User\Application\UseCases\Logout;
 use Lwt\Modules\User\Application\UseCases\Register;
+use Lwt\Modules\User\Application\UseCases\RequestPasswordReset;
 use Lwt\Modules\User\Application\UseCases\ValidateApiToken;
 use Lwt\Modules\User\Application\UseCases\ValidateSession;
 use Lwt\Modules\User\Domain\UserRepositoryInterface;
@@ -67,6 +70,8 @@ class UserFacade
     private ?GetCurrentUser $getCurrentUserUseCase = null;
     private ?GenerateApiToken $generateApiTokenUseCase = null;
     private ?ValidateApiToken $validateApiTokenUseCase = null;
+    private ?RequestPasswordReset $requestPasswordResetUseCase = null;
+    private ?CompletePasswordReset $completePasswordResetUseCase = null;
 
     /**
      * Constructor.
@@ -298,6 +303,52 @@ class UserFacade
     }
 
     // =========================================================================
+    // Password Reset Operations
+    // =========================================================================
+
+    /**
+     * Request a password reset for an email address.
+     *
+     * Always returns true to prevent email enumeration attacks.
+     * If the email doesn't exist, we silently succeed.
+     *
+     * @param string $email The email address
+     *
+     * @return bool Always true (silent fail for security)
+     */
+    public function requestPasswordReset(string $email): bool
+    {
+        return $this->getRequestPasswordResetUseCase()->execute($email);
+    }
+
+    /**
+     * Complete a password reset with token and new password.
+     *
+     * @param string $token       The reset token from email
+     * @param string $newPassword The new password
+     *
+     * @return bool True if password was reset
+     *
+     * @throws \InvalidArgumentException If password validation fails
+     */
+    public function completePasswordReset(string $token, string $newPassword): bool
+    {
+        return $this->getCompletePasswordResetUseCase()->execute($token, $newPassword);
+    }
+
+    /**
+     * Validate a password reset token without using it.
+     *
+     * @param string $token The reset token
+     *
+     * @return bool True if token is valid
+     */
+    public function validatePasswordResetToken(string $token): bool
+    {
+        return $this->getCompletePasswordResetUseCase()->validateToken($token);
+    }
+
+    // =========================================================================
     // User Lookup Operations
     // =========================================================================
 
@@ -499,5 +550,35 @@ class UserFacade
             $this->validateApiTokenUseCase = new ValidateApiToken($this->repository, $this->tokenHasher);
         }
         return $this->validateApiTokenUseCase;
+    }
+
+    /**
+     * @return RequestPasswordReset
+     */
+    private function getRequestPasswordResetUseCase(): RequestPasswordReset
+    {
+        if ($this->requestPasswordResetUseCase === null) {
+            $this->requestPasswordResetUseCase = new RequestPasswordReset(
+                $this->repository,
+                $this->tokenHasher,
+                new EmailService()
+            );
+        }
+        return $this->requestPasswordResetUseCase;
+    }
+
+    /**
+     * @return CompletePasswordReset
+     */
+    private function getCompletePasswordResetUseCase(): CompletePasswordReset
+    {
+        if ($this->completePasswordResetUseCase === null) {
+            $this->completePasswordResetUseCase = new CompletePasswordReset(
+                $this->repository,
+                $this->tokenHasher,
+                $this->passwordHasher
+            );
+        }
+        return $this->completePasswordResetUseCase;
     }
 }

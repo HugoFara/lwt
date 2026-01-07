@@ -38,6 +38,7 @@ use Lwt\Modules\User\Http\WordPressController;
 use Lwt\Modules\User\Application\Services\WordPressAuthService;
 
 // Application Services
+use Lwt\Modules\User\Application\Services\EmailService;
 use Lwt\Modules\User\Application\Services\PasswordService;
 use Lwt\Modules\User\Application\Services\AuthService;
 
@@ -129,6 +130,11 @@ class UserServiceProvider implements ServiceProviderInterface
         // Password Hasher (wraps PasswordService for module use)
         $container->singleton(PasswordHasher::class, function (Container $c) {
             return new PasswordHasher($c->getTyped(PasswordService::class));
+        });
+
+        // Email Service (for password reset)
+        $container->singleton(EmailService::class, function (Container $_c) {
+            return new EmailService();
         });
     }
 

@@ -41,6 +41,8 @@ class User
     private ?DateTimeImmutable $apiTokenExpires;
     private ?string $rememberToken;
     private ?DateTimeImmutable $rememberTokenExpires;
+    private ?string $passwordResetToken;
+    private ?DateTimeImmutable $passwordResetTokenExpires;
     private ?int $wordPressId;
     private DateTimeImmutable $created;
     private ?DateTimeImmutable $lastLogin;
@@ -59,6 +61,8 @@ class User
         ?DateTimeImmutable $apiTokenExpires,
         ?string $rememberToken,
         ?DateTimeImmutable $rememberTokenExpires,
+        ?string $passwordResetToken,
+        ?DateTimeImmutable $passwordResetTokenExpires,
         ?int $wordPressId,
         DateTimeImmutable $created,
         ?DateTimeImmutable $lastLogin,
@@ -73,6 +77,8 @@ class User
         $this->apiTokenExpires = $apiTokenExpires;
         $this->rememberToken = $rememberToken;
         $this->rememberTokenExpires = $rememberTokenExpires;
+        $this->passwordResetToken = $passwordResetToken;
+        $this->passwordResetTokenExpires = $passwordResetTokenExpires;
         $this->wordPressId = $wordPressId;
         $this->created = $created;
         $this->lastLogin = $lastLogin;
@@ -107,6 +113,8 @@ class User
             $trimmedUsername,
             strtolower($trimmedEmail),
             $passwordHash,
+            null,
+            null,
             null,
             null,
             null,
@@ -154,6 +162,8 @@ class User
             null,
             null,
             null,
+            null,
+            null,
             $wordPressId,
             new DateTimeImmutable(),
             null,
@@ -165,15 +175,17 @@ class User
     /**
      * Reconstitute a user from persistence.
      *
-     * @param int                    $id                   The user ID
-     * @param string                 $username             The username
-     * @param string                 $email                The email
-     * @param string|null            $passwordHash         The password hash
-     * @param string|null            $apiToken             The API token
-     * @param DateTimeImmutable|null $apiTokenExpires      When the API token expires
-     * @param string|null            $rememberToken        The remember-me token
-     * @param DateTimeImmutable|null $rememberTokenExpires When the remember token expires
-     * @param int|null               $wordPressId          The WordPress user ID
+     * @param int                    $id                          The user ID
+     * @param string                 $username                    The username
+     * @param string                 $email                       The email
+     * @param string|null            $passwordHash                The password hash
+     * @param string|null            $apiToken                    The API token
+     * @param DateTimeImmutable|null $apiTokenExpires             When the API token expires
+     * @param string|null            $rememberToken               The remember-me token
+     * @param DateTimeImmutable|null $rememberTokenExpires        When the remember token expires
+     * @param string|null            $passwordResetToken          The password reset token
+     * @param DateTimeImmutable|null $passwordResetTokenExpires   When the reset token expires
+     * @param int|null               $wordPressId                 The WordPress user ID
      * @param DateTimeImmutable      $created              When the user was created
      * @param DateTimeImmutable|null $lastLogin            Last login time
      * @param bool                   $isActive             Whether the user is active
@@ -192,6 +204,8 @@ class User
         ?DateTimeImmutable $apiTokenExpires,
         ?string $rememberToken,
         ?DateTimeImmutable $rememberTokenExpires,
+        ?string $passwordResetToken,
+        ?DateTimeImmutable $passwordResetTokenExpires,
         ?int $wordPressId,
         DateTimeImmutable $created,
         ?DateTimeImmutable $lastLogin,
@@ -207,6 +221,8 @@ class User
             $apiTokenExpires,
             $rememberToken,
             $rememberTokenExpires,
+            $passwordResetToken,
+            $passwordResetTokenExpires,
             $wordPressId,
             $created,
             $lastLogin,
@@ -309,6 +325,44 @@ class User
     {
         $this->rememberToken = null;
         $this->rememberTokenExpires = null;
+    }
+
+    /**
+     * Set a new password reset token.
+     *
+     * @param string            $token   The password reset token (hashed)
+     * @param DateTimeImmutable $expires When the token expires
+     *
+     * @return void
+     */
+    public function setPasswordResetToken(string $token, DateTimeImmutable $expires): void
+    {
+        $this->passwordResetToken = $token;
+        $this->passwordResetTokenExpires = $expires;
+    }
+
+    /**
+     * Invalidate the password reset token.
+     *
+     * @return void
+     */
+    public function invalidatePasswordResetToken(): void
+    {
+        $this->passwordResetToken = null;
+        $this->passwordResetTokenExpires = null;
+    }
+
+    /**
+     * Check if the password reset token is valid (not expired).
+     *
+     * @return bool
+     */
+    public function hasValidPasswordResetToken(): bool
+    {
+        if ($this->passwordResetToken === null || $this->passwordResetTokenExpires === null) {
+            return false;
+        }
+        return $this->passwordResetTokenExpires > new DateTimeImmutable();
     }
 
     /**
@@ -547,6 +601,16 @@ class User
     public function rememberTokenExpires(): ?DateTimeImmutable
     {
         return $this->rememberTokenExpires;
+    }
+
+    public function passwordResetToken(): ?string
+    {
+        return $this->passwordResetToken;
+    }
+
+    public function passwordResetTokenExpires(): ?DateTimeImmutable
+    {
+        return $this->passwordResetTokenExpires;
     }
 
     public function wordPressId(): ?int

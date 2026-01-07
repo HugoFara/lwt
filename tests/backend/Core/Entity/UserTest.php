@@ -183,7 +183,9 @@ class UserTest extends TestCase
             $tokenExpires,
             'remember456',
             $rememberExpires,
-            null,
+            null, // passwordResetToken
+            null, // passwordResetTokenExpires
+            null, // wordPressId
             $created,
             $lastLogin,
             true,
@@ -395,11 +397,13 @@ class UserTest extends TestCase
             'testuser',
             'test@example.com',
             'hashedpassword',
-            null,
-            null,
-            null,
-            null,
-            null,
+            null, // apiToken
+            null, // apiTokenExpires
+            null, // rememberToken
+            null, // rememberTokenExpires
+            null, // passwordResetToken
+            null, // passwordResetTokenExpires
+            null, // wordPressId
             new DateTimeImmutable(),
             null,
             true,

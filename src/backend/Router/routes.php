@@ -342,6 +342,12 @@ function registerRoutes(Router $router): void
     // Logout - technically needs auth but handles gracefully if not
     $router->register('/logout', 'Lwt\\Modules\\User\\Http\\UserController@logout');
 
+    // Password Reset - no auth required
+    $router->register('/password/forgot', 'Lwt\\Modules\\User\\Http\\UserController@forgotPasswordForm', 'GET');
+    $router->register('/password/forgot', 'Lwt\\Modules\\User\\Http\\UserController@forgotPassword', 'POST');
+    $router->register('/password/reset', 'Lwt\\Modules\\User\\Http\\UserController@resetPasswordForm', 'GET');
+    $router->register('/password/reset', 'Lwt\\Modules\\User\\Http\\UserController@resetPassword', 'POST');
+
     // ==================== WORDPRESS INTEGRATION (PUBLIC) ====================
 
     // WordPress routes are public - they handle their own auth via WP tokens

@@ -179,6 +179,26 @@ interface UserRepositoryInterface
     public function updateRememberToken(int $userId, ?string $token, ?DateTimeImmutable $expires): bool;
 
     /**
+     * Find a user by password reset token.
+     *
+     * @param string $token The password reset token (hashed)
+     *
+     * @return User|null
+     */
+    public function findByPasswordResetToken(string $token): ?User;
+
+    /**
+     * Update the password reset token.
+     *
+     * @param int                    $userId  User ID
+     * @param string|null            $token   Password reset token (null to clear)
+     * @param DateTimeImmutable|null $expires Token expiration
+     *
+     * @return bool True if updated
+     */
+    public function updatePasswordResetToken(int $userId, ?string $token, ?DateTimeImmutable $expires): bool;
+
+    /**
      * Activate a user account.
      *
      * @param int $userId User ID

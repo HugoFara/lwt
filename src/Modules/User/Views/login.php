@@ -20,7 +20,14 @@ namespace Lwt\Modules\User\Views;
 
 // Default variables
 $error = isset($error) && is_string($error) ? $error : null;
+$success = null;
 $username = $username ?? '';
+
+// Check for success message (e.g., after password reset)
+if (isset($_SESSION['auth_success'])) {
+    $success = $_SESSION['auth_success'];
+    unset($_SESSION['auth_success']);
+}
 ?>
 
 <section class="section">
@@ -42,6 +49,14 @@ $username = $username ?? '';
                             Learning With Texts
                         </p>
                     </div>
+
+                    <!-- Success message -->
+                    <?php if ($success !== null): ?>
+                    <div class="notification is-success is-light">
+                        <button class="delete" onclick="this.parentElement.remove()"></button>
+                        <?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?>
+                    </div>
+                    <?php endif; ?>
 
                     <!-- Error message -->
                     <?php if ($error !== null): ?>
@@ -91,10 +106,17 @@ $username = $username ?? '';
                         </div>
 
                         <div class="field">
-                            <label class="checkbox">
-                                <input type="checkbox" name="remember" value="1">
-                                Remember me
-                            </label>
+                            <div class="level is-mobile">
+                                <div class="level-left">
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="remember" value="1">
+                                        Remember me
+                                    </label>
+                                </div>
+                                <div class="level-right">
+                                    <a href="/password/forgot" class="is-size-7">Forgot password?</a>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="field">
