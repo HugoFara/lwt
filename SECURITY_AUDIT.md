@@ -624,84 +624,72 @@ ALTER TABLE words CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 ---
 
-### 29. Settings Table Lacks Composite Primary Key - OPEN
+### 29. Settings Table Lacks Composite Primary Key - FIXED
 
-**Status:** Open
+**Status:** Fixed
 
 **Risk:** In multi-user mode, settings could conflict between users.
 
-**Affected File:** `db/migrations/20251212_000002_add_user_id_columns.sql`
-
-**Issue:**
-Settings table has `StUsID` column but primary key is still just `(StKey)`, not `(StKey, StUsID)`.
-
-**Remediation:**
-Create migration:
+**Resolution:**
+Created migration `db/migrations/20260107_150000_settings_composite_pk.sql`:
 
 ```sql
+-- Set default value for NULL StUsID (0 for system settings)
+UPDATE settings SET StUsID = 0 WHERE StUsID IS NULL;
+ALTER TABLE settings MODIFY StUsID int(10) unsigned NOT NULL DEFAULT 0;
+
+-- Change to composite primary key
 ALTER TABLE settings DROP PRIMARY KEY;
 ALTER TABLE settings ADD PRIMARY KEY (StKey, StUsID);
 ```
 
-Update settings queries to always include user_id in WHERE clause.
+Also updated `db/schema/baseline.sql` for fresh installations to use `PRIMARY KEY (StKey, StUsID)`.
 
 ---
 
-### 30. Frontend Console Logging Visible - OPEN
+### 30. Frontend Console Logging Visible - FIXED
 
-**Status:** Open (Low Priority)
+**Status:** Fixed
 
 **Risk:** Debug information visible in browser DevTools.
 
-**Affected:** Multiple TypeScript files in `src/frontend/js/`
+**Resolution:**
+Already configured in `vite.config.ts` (lines 36-42):
 
-**Issue:**
-`console.error()`, `console.warn()`, `console.log()` statements remain in production code.
-
-**Remediation:**
-Configure Vite to strip console statements in production:
-
-```js
-// vite.config.js
-export default defineConfig({
-  build: {
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    }
-  }
-});
+```typescript
+build: {
+  minify: 'terser',
+  terserOptions: {
+    compress: {
+      drop_console: true,
+      drop_debugger: true,
+    },
+  },
+}
 ```
+
+Console statements are stripped from production builds automatically.
 
 ---
 
-### 31. No Migration File Integrity Validation - OPEN
+### 31. No Migration File Integrity Validation - FIXED
 
-**Status:** Open (Low Priority)
+**Status:** Fixed
 
 **Risk:** Corrupted or tampered migration files could execute without detection.
 
-**Affected:** `src/Shared/Infrastructure/Database/Migrations.php`
+**Resolution:**
+Added SHA-256 checksum validation to `src/Shared/Infrastructure/Database/Migrations.php`:
 
-**Remediation:**
-Add checksum validation:
+1. **Checksum storage**: Added `checksum` column to `_migrations` table (VARCHAR(64))
+2. **Checksum calculation**: `calculateChecksum()` method computes SHA-256 hash of migration files
+3. **Recording**: `recordMigration()` now stores checksum when migration is applied
+4. **Validation**: `validateMigrationIntegrity()` checks all applied migrations haven't been modified
+5. **Integration**: Integrity check runs automatically before applying new migrations (logs warnings if files changed)
 
-1. Generate checksums file:
-```bash
-sha256sum db/migrations/*.sql > db/migrations/checksums.sha256
-```
-
-2. Validate before executing:
-```php
-$expectedHash = $this->loadExpectedHash($filename);
-$actualHash = hash_file('sha256', $filepath);
-if ($expectedHash !== $actualHash) {
-    throw new \RuntimeException("Migration file integrity check failed: $filename");
-}
-```
+Updated schema files:
+- `db/schema/baseline.sql`: Added `checksum` column to `_migrations` table
+- `src/Shared/Infrastructure/Database/Migrations.php`: Added integrity validation methods
 
 ---
 
@@ -752,9 +740,6 @@ All P0 issues have been resolved:
 | 7 | Add API rate limiting | Medium | Middleware or reverse proxy |
 | 22 | Implement password reset | High | New service, views, email |
 | 28 | Migrate utf8 to utf8mb4 | Medium | Migration + schema |
-| 29 | Add composite PK to settings table | Low | Migration |
-| 30 | Strip console.log in production builds | Low | `vite.config.js` |
-| 31 | Add migration checksum validation | Low | `Migrations.php` |
 
 ### Deployment Checklist
 
