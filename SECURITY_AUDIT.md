@@ -15,7 +15,7 @@ This document tracks security issues identified during the pre-release audit of 
 |----------|-------|-------|------|
 | Critical | 8 | 8 | 0 |
 | High | 13 | 11 | 2 |
-| Medium | 10 | 7 | 3 |
+| Medium | 10 | 9 | 1 |
 
 ---
 
@@ -389,80 +389,60 @@ The middleware:
 
 ---
 
-### 24. withoutUserScope() Has No Authorization Check - OPEN
+### 24. withoutUserScope() Has No Authorization Check - FIXED
 
-**Status:** Open
+**Status:** Fixed
 
 **Risk:** Any code can bypass multi-user data isolation.
 
-**Affected File:** `src/Shared/Infrastructure/Database/QueryBuilder.php` (line 225)
-
-**Issue:**
-`withoutUserScope()` disables user filtering with no permission check:
+**Resolution:**
+Added authorization check to `src/Shared/Infrastructure/Database/QueryBuilder.php`:
 
 ```php
-// Any code can do this:
-$allWords = QueryBuilder::table('words')
-    ->withoutUserScope()
-    ->get(); // Returns ALL users' data
-```
-
-**Remediation:**
-Add authorization check:
-
-```php
-public function withoutUserScope(): self
+public function withoutUserScope(): static
 {
-    // Only allow in non-multi-user mode or for admin users
-    if (Globals::isMultiUserEnabled()) {
-        $userId = Globals::getCurrentUserId();
-        $user = Container::get(UserRepository::class)->findById($userId);
-        if ($user === null || $user->getRole() !== User::ROLE_ADMIN) {
-            throw new AuthException('Admin privileges required for cross-user queries');
-        }
+    // Authorization check: only allow in non-multi-user mode or for admin users
+    if (Globals::isMultiUserEnabled() && !Globals::isCurrentUserAdmin()) {
+        throw AuthException::insufficientPermissions('access cross-user data');
     }
+
     $this->userScopeEnabled = false;
     return $this;
 }
 ```
 
+Supporting changes:
+- Added `setCurrentUserIsAdmin()` and `isCurrentUserAdmin()` to `Globals` class
+- Updated `UserFacade::setCurrentUser()` to set admin status when user context is established
+- Added unit tests for authorization check behavior
+
+**Commit:** `2783c8f5`
+
 ---
 
-### 25. SQL Errors Expose Full Queries - OPEN
+### 25. SQL Errors Expose Full Queries - FIXED
 
-**Status:** Open
+**Status:** Fixed
 
 **Risk:** Information disclosure via error messages reveals table/column structure.
 
-**Affected File:** `src/Shared/Infrastructure/Database/Connection.php` (line 87)
-
-**Issue:**
-```php
-throw new \RuntimeException(
-    'SQL Error [' . mysqli_errno($connection) . ']: ' .
-    mysqli_error($connection) . "\nQuery: " . $sql  // Full query exposed
-);
-```
-
-**Remediation:**
-Use `DatabaseException` with query sanitization:
+**Resolution:**
+The codebase already uses `DatabaseException::queryFailed()` which provides generic user messages. Updated `DatabaseException::getQuery()` to return sanitized queries:
 
 ```php
-throw new DatabaseException(
-    'Database query failed',
-    mysqli_errno($connection),
-    null,
-    $sql // DatabaseException sanitizes this internally
-);
+public function getQuery(): ?string
+{
+    return $this->query !== null ? $this->sanitizeQuery($this->query) : null;
+}
 ```
 
-Or sanitize before including:
+Security measures now in place:
+1. **User messages are generic**: `getUserMessage()` returns "A database error occurred. Please try again later."
+2. **Query getter returns sanitized data**: `getQuery()` masks string values with `***`
+3. **Context uses sanitized query**: The `context['query']` field uses sanitized version for logging
+4. **No raw query exposure**: Raw queries are only accessible in internal exception properties
 
-```php
-$sanitizedQuery = preg_replace("/(['\"])([^'\"]{0,50})\\1/", "'***'", $sql);
-throw new \RuntimeException('SQL Error: ' . mysqli_error($connection));
-// Log full query separately: error_log("SQL Error - Query: $sql");
-```
+**Commit:** `2783c8f5`
 
 ---
 
@@ -531,66 +511,55 @@ Added default values to columns that previously had `NOT NULL` without defaults:
 
 ---
 
-### 26. JSON in Script Tags Missing JSON_HEX_TAG - OPEN
+### 26. JSON in Script Tags Missing JSON_HEX_TAG - FIXED
 
-**Status:** Open
+**Status:** Fixed
 
-**Risk:** XSS via `</script>` sequences in user data breaking out of JSON blocks.
+**Resolution:**
+Applied `JSON_HEX_TAG | JSON_HEX_AMP` flags to all `json_encode()` calls within `<script type="application/json">` tags across 30+ view files:
 
-**Affected Files:**
-- `src/backend/Views/Text/read_header.php` (line 44)
-- `src/backend/Views/Text/edit_form.php` (line 63)
-- Multiple other view files using `json_encode()` in `<script>` tags
+**Files Updated:**
+- `src/backend/Views/Text/*.php` (7 files)
+- `src/backend/Views/Test/*.php` (1 file)
+- `src/backend/Views/Word/hover_save_result.php`
+- `src/Modules/Text/Views/*.php` (6 files)
+- `src/Modules/Vocabulary/Views/*.php` (12 files)
+- `src/Modules/Review/Views/test_desktop.php`
 
-**Issue:**
-```php
-<script type="application/json" id="config">
-<?php echo json_encode($data); ?>
-</script>
-```
-
-If `$data` contains `</script>`, it breaks out of the tag.
-
-**Remediation:**
-Always use `JSON_HEX_TAG` flag:
-
+All instances now use:
 ```php
 <?php echo json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP); ?>
 ```
 
+This prevents XSS attacks where `</script>` sequences in user data could break out of JSON blocks.
+
+**Commit:** `2783c8f5`
+
 ---
 
-### 27. Legacy ErrorHandler::die() Exposes Backtraces - OPEN
+### 27. Legacy ErrorHandler::die() Exposes Backtraces - FIXED
 
-**Status:** Open
+**Status:** Fixed
 
-**Risk:** Stack traces exposed to users, revealing file paths and code structure.
+**Resolution:**
+Replaced all `ErrorHandler::die()` calls with proper `RuntimeException` throws in application services and controllers:
 
-**Affected File:** `src/backend/Core/Utils/ErrorHandler.php` (line 55)
+**Files Updated:**
+- `src/Modules/Text/Application/Services/AnnotationService.php` (1 instance)
+  - Changed: `ErrorHandler::die("Unable to format to JSON")`
+  - To: `throw new \RuntimeException("Unable to format annotation data to JSON")`
 
-**Issue:**
-```php
-public static function die(string $text): never
-{
-    // ... output HTML error
-    debug_print_backtrace();  // Always prints, even in production
-}
-```
+- `src/Modules/Vocabulary/Application/Services/WordService.php` (1 instance)
+  - Changed: `ErrorHandler::die("ERROR: Could not modify words! Message: " . $e->getMessage())`
+  - To: `throw new \RuntimeException("Could not modify words: " . $e->getMessage(), 0, $e)`
 
-**Still Used In:**
-- `src/Modules/Text/Application/Services/AnnotationService.php`
-- `src/Modules/Vocabulary/Application/Services/WordService.php`
-- `src/Modules/Vocabulary/Http/VocabularyController.php`
+- `src/Modules/Vocabulary/Http/VocabularyController.php` (7 instances)
+  - Replaced all `ErrorHandler::die()` calls with descriptive `RuntimeException` throws
+  - Examples: "Cannot access term and language: term not found in text", "Term ID missing: required parameter not provided"
 
-**Remediation:**
-1. Replace `ErrorHandler::die()` calls with proper exceptions
-2. Or check debug mode before printing backtrace:
+Errors are now handled through the proper exception system, which respects debug mode settings and doesn't expose stack traces to users in production.
 
-```php
-if ($this->isDebugMode()) {
-    debug_print_backtrace();
-}
-```
+**Commit:** `2783c8f5`
 
 ---
 
@@ -726,12 +695,14 @@ All P0 issues have been resolved:
 
 ### Pre-Release (P1) - Should Fix
 
-| # | Task | Effort | Files |
+All P1 issues have been resolved:
+
+| # | Task | Status | Files |
 |---|------|--------|-------|
-| 24 | Add authorization check to `withoutUserScope()` | Low | `QueryBuilder.php` |
-| 25 | Sanitize SQL errors before throwing | Low | `Connection.php` |
-| 26 | Add `JSON_HEX_TAG` to json_encode in views | Low | Multiple view files |
-| 27 | Replace ErrorHandler::die() with exceptions | Medium | 3 service files |
+| 24 | Add authorization check to `withoutUserScope()` | ✅ Fixed | `QueryBuilder.php`, `Globals.php` |
+| 25 | Sanitize SQL errors before throwing | ✅ Fixed | `DatabaseException.php` |
+| 26 | Add `JSON_HEX_TAG` to json_encode in views | ✅ Fixed | 30+ view files |
+| 27 | Replace ErrorHandler::die() with exceptions | ✅ Fixed | `AnnotationService.php`, `WordService.php`, `VocabularyController.php` |
 
 ### Post-Release (P2) - Can Defer
 
@@ -746,6 +717,7 @@ All P0 issues have been resolved:
 Before going live, verify:
 
 - [x] All P0 issues resolved
+- [x] All P1 issues resolved
 - [ ] `APP_ENV=production` set in `.env`
 - [ ] Strong database credentials (not `root`)
 - [ ] HTTPS enabled with valid certificate
@@ -753,7 +725,6 @@ Before going live, verify:
 - [ ] `npm run build:all` executed for production assets
 - [ ] Backup/restore tested end-to-end
 - [ ] Admin account created with strong password
-- [ ] Add CSRF tokens to all POST forms (use `FormHelper::csrfField()`)
 
 ---
 
