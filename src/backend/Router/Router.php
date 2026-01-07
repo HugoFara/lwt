@@ -192,6 +192,8 @@ class Router
      * @param array  $middleware Optional middleware
      *
      * @return void
+     *
+     * @psalm-suppress PossiblyUnusedMethod - Public API for route registration
      */
     public function post(string $path, string $handler, array $middleware = []): void
     {
@@ -226,6 +228,8 @@ class Router
      * @param array  $middleware Optional middleware
      *
      * @return void
+     *
+     * @psalm-suppress PossiblyUnusedMethod - Public API for route registration
      */
     public function delete(string $path, string $handler, array $middleware = []): void
     {
@@ -243,6 +247,8 @@ class Router
      * @param array  $middleware Optional middleware
      *
      * @return void
+     *
+     * @psalm-suppress PossiblyUnusedMethod - Public API for route registration
      */
     public function patch(string $path, string $handler, array $middleware = []): void
     {
@@ -261,6 +267,8 @@ class Router
      * @param array         $middleware Optional middleware
      *
      * @return void
+     *
+     * @psalm-suppress PossiblyUnusedMethod - Public API for route registration
      */
     public function match(
         array $methods,
@@ -671,6 +679,7 @@ class Router
      * @return void
      *
      * @psalm-suppress MixedAssignment,MixedArgument,MixedArrayAccess - Dynamic route resolution
+     * @psalm-suppress PossiblyUnusedMethod - Called from Application::run()
      */
     public function execute(array $resolution): void
     {

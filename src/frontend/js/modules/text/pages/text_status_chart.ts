@@ -10,11 +10,10 @@
  * @since   3.0.0
  */
 
-import type { Chart as ChartType, ChartConfiguration } from 'chart.js';
+import type { Chart as ChartType } from 'chart.js';
 
 // Chart.js module reference (loaded dynamically)
 let Chart: typeof ChartType | null = null;
-let chartJsLoaded = false;
 
 /**
  * Dynamically load Chart.js only when needed.
@@ -25,7 +24,6 @@ async function loadChartJs(): Promise<typeof ChartType> {
   const chartModule = await import('chart.js');
   Chart = chartModule.Chart;
   Chart.register(...chartModule.registerables);
-  chartJsLoaded = true;
   return Chart;
 }
 
