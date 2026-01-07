@@ -334,13 +334,14 @@ class LanguageRepositoryTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $longName = 'RepoTest_' . str_repeat('A', 50);
+        // LgName is varchar(40), so create exactly 40 chars (max allowed)
+        $longName = 'RT_' . str_repeat('A', 37); // 3 + 37 = 40 chars
         $this->createTestLanguageInDb($longName);
 
         $result = $this->repository->getForSelect(30);
 
         foreach ($result as $item) {
-            if (str_starts_with($item['name'], 'RepoTest_AA')) {
+            if (str_starts_with($item['name'], 'RT_AA')) {
                 $this->assertLessThanOrEqual(33, strlen($item['name'])); // 30 + '...'
                 $this->assertStringEndsWith('...', $item['name']);
                 return;

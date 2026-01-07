@@ -12,3 +12,7 @@ ALTER TABLE texts
 
 ALTER TABLE archivedtexts
     MODIFY COLUMN AtAnnotatedText longtext NOT NULL DEFAULT '';
+
+ALTER TABLE feedlinks
+    MODIFY COLUMN FlAudio varchar(200) NOT NULL DEFAULT '',
+    MODIFY COLUMN FlText longtext NOT NULL DEFAULT '';

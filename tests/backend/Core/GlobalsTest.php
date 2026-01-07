@@ -1,7 +1,15 @@
 <?php declare(strict_types=1);
 namespace Lwt\Tests\Core;
 
+require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 require_once __DIR__ . '/../../../src/backend/Core/Globals.php';
+
+use Lwt\Core\Bootstrap\EnvLoader;
+
+EnvLoader::load(__DIR__ . '/../../../.env');
+$config = EnvLoader::getDatabaseConfig();
+\Lwt\Core\Globals::setDatabaseName("test_" . $config['dbname']);
+
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/Exception/AuthException.php';
 

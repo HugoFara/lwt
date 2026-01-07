@@ -356,6 +356,8 @@ if (!in_array($columnDefaultsMigration, $appliedMigrations)) {
         "ALTER TABLE languages MODIFY COLUMN LgRegexpWordCharacters varchar(500) NOT NULL DEFAULT 'a-zA-ZÀ-ÖØ-öø-ȳ'",
         "ALTER TABLE texts MODIFY COLUMN TxAnnotatedText longtext NOT NULL DEFAULT ''",
         "ALTER TABLE archivedtexts MODIFY COLUMN AtAnnotatedText longtext NOT NULL DEFAULT ''",
+        "ALTER TABLE feedlinks MODIFY COLUMN FlAudio varchar(200) NOT NULL DEFAULT ''",
+        "ALTER TABLE feedlinks MODIFY COLUMN FlText longtext NOT NULL DEFAULT ''",
     ];
 
     foreach ($columnDefaults as $sql) {

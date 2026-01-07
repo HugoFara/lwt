@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 
@@ -339,8 +340,8 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        // Use a unique long tag name to avoid duplicate key errors
-        $longTag = 'LongTag_' . time() . '_' . str_repeat('X', 20);
+        // Use a unique tag name (max 20 chars for TgText column)
+        $longTag = 'LT_' . substr((string)time(), -7);
         $result = TagsFacade::addTagToWords($longTag, '(1)');
         $this->assertIsString($result, 'Should handle long tag names');
     }
@@ -767,8 +768,8 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        // Use a highly unique tag name with microseconds
-        $uniqueTagName = 'DupTest_' . uniqid('', true);
+        // Use a unique tag name (max 20 chars for TgText column)
+        $uniqueTagName = 'D_' . substr(uniqid(), -8);
 
         // Clean up any pre-existing tag with this name (shouldn't exist, but be safe)
         Connection::preparedExecute(

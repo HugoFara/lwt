@@ -16,6 +16,7 @@ use PHPUnit\Framework\TestCase;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 

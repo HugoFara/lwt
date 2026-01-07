@@ -303,7 +303,7 @@ class FeedServiceTest extends TestCase
         // Add a feedlink (article) to the feed
         Connection::execute(
             "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
-             VALUES ($feedId, 'Test Article', 'https://example.com/article', 'Description', " . time() . ")"
+             VALUES ($feedId, 'Test Article', 'https://example.com/article', 'Description', FROM_UNIXTIME(" . time() . "))"
         );
 
         // Verify article exists
@@ -607,7 +607,7 @@ class FeedServiceTest extends TestCase
         for ($i = 1; $i <= 3; $i++) {
             Connection::execute(
                 "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
-                 VALUES ($feedId, 'Article $i', 'https://example.com/art$i', 'Desc', " . time() . ")"
+                 VALUES ($feedId, 'Article $i', 'https://example.com/art$i', 'Desc', FROM_UNIXTIME(" . time() . "))"
             );
         }
 
@@ -651,7 +651,7 @@ class FeedServiceTest extends TestCase
         // Add article with space prefix (unloadable)
         Connection::execute(
             "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
-             VALUES ($feedId, 'Unloadable Article', ' https://example.com/unloadable', 'Desc', " . time() . ")"
+             VALUES ($feedId, 'Unloadable Article', ' https://example.com/unloadable', 'Desc', FROM_UNIXTIME(" . time() . "))"
         );
 
         // Reset unloadable

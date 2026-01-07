@@ -22,6 +22,8 @@ use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
+$config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 
@@ -605,6 +607,7 @@ class LanguageFacadeTest extends TestCase
         $updatedName = $uniqueName . '_Updated';
         $updateResult = $this->facade->updateFromData($langId, [
             'name' => $updatedName,
+            'dict1Uri' => 'https://example.com/dict?q=lwt_term',  // Required: NOT NULL field
         ]);
         $this->assertTrue($updateResult['success']);
 
