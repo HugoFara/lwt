@@ -1,0 +1,160 @@
+<?php declare(strict_types=1);
+/**
+ * Reparse Language Texts Use Case
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Modules\Language\Application\UseCases
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Modules\Language\Application\UseCases;
+
+use Lwt\Shared\Infrastructure\Database\Maintenance;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\TextParsing;
+use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
+use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
+
+/**
+ * Use case for reparsing all texts for a language.
+ *
+ * @since 3.0.0
+ */
+class ReparseLanguageTexts
+{
+    private LanguageRepositoryInterface $repository;
+
+    /**
+     * @param LanguageRepositoryInterface|null $repository Repository instance
+     */
+    public function __construct(?LanguageRepositoryInterface $repository = null)
+    {
+        $this->repository = $repository ?? new MySqlLanguageRepository();
+    }
+
+    /**
+     * Refresh (reparse) all texts for a language.
+     *
+     * @param int $id Language ID
+     *
+     * @return string Result message
+     */
+    public function execute(int $id): string
+    {
+        $sentencesDeleted = QueryBuilder::table('sentences')
+            ->where('SeLgID', '=', $id)
+            ->delete();
+        $textItemsDeleted = QueryBuilder::table('textitems2')
+            ->where('Ti2LgID', '=', $id)
+            ->delete();
+        Maintenance::adjustAutoIncrement('sentences', 'SeID');
+
+        $rows = QueryBuilder::table('texts')
+            ->select(['TxID', 'TxText'])
+            ->where('TxLgID', '=', $id)
+            ->orderBy('TxID')
+            ->getPrepared();
+        foreach ($rows as $record) {
+            $txtid = (int)$record["TxID"];
+            $txttxt = (string)$record["TxText"];
+            TextParsing::parseAndSave($txttxt, $id, $txtid);
+        }
+
+        $sentencesAdded = QueryBuilder::table('sentences')
+            ->where('SeLgID', '=', $id)
+            ->count();
+        $textItemsAdded = QueryBuilder::table('textitems2')
+            ->where('Ti2LgID', '=', $id)
+            ->count();
+
+        return "Sentences deleted: " . $sentencesDeleted .
+            " / Text items deleted: " . $textItemsDeleted .
+            " / Sentences added: " . $sentencesAdded .
+            " / Text items added: " . $textItemsAdded;
+    }
+
+    /**
+     * Refresh (reparse) all texts for a language and return stats.
+     *
+     * @param int $id Language ID
+     *
+     * @return array{sentencesDeleted: int, textItemsDeleted: int, sentencesAdded: int, textItemsAdded: int}
+     */
+    public function refreshTexts(int $id): array
+    {
+        $sentencesDeleted = QueryBuilder::table('sentences')
+            ->where('SeLgID', '=', $id)
+            ->delete();
+        $textItemsDeleted = QueryBuilder::table('textitems2')
+            ->where('Ti2LgID', '=', $id)
+            ->delete();
+        Maintenance::adjustAutoIncrement('sentences', 'SeID');
+
+        $rows = QueryBuilder::table('texts')
+            ->select(['TxID', 'TxText'])
+            ->where('TxLgID', '=', $id)
+            ->orderBy('TxID')
+            ->getPrepared();
+        foreach ($rows as $record) {
+            $txtid = (int)$record["TxID"];
+            $txttxt = (string)$record["TxText"];
+            TextParsing::parseAndSave($txttxt, $id, $txtid);
+        }
+
+        $sentencesAdded = QueryBuilder::table('sentences')
+            ->where('SeLgID', '=', $id)
+            ->count();
+        $textItemsAdded = QueryBuilder::table('textitems2')
+            ->where('Ti2LgID', '=', $id)
+            ->count();
+
+        return [
+            'sentencesDeleted' => $sentencesDeleted,
+            'textItemsDeleted' => $textItemsDeleted,
+            'sentencesAdded' => $sentencesAdded,
+            'textItemsAdded' => $textItemsAdded
+        ];
+    }
+
+    /**
+     * Reparse all texts for a language (internal use).
+     *
+     * @param int $id Language ID
+     *
+     * @return int Number of reparsed texts
+     */
+    public function reparseTexts(int $id): int
+    {
+        QueryBuilder::table('sentences')
+            ->where('SeLgID', '=', $id)
+            ->delete();
+        QueryBuilder::table('textitems2')
+            ->where('Ti2LgID', '=', $id)
+            ->delete();
+        Maintenance::adjustAutoIncrement('sentences', 'SeID');
+        QueryBuilder::table('words')
+            ->where('WoLgID', '=', $id)
+            ->updatePrepared(['WoWordCount' => 0]);
+        Maintenance::initWordCount();
+
+        $rows = QueryBuilder::table('texts')
+            ->select(['TxID', 'TxText'])
+            ->where('TxLgID', '=', $id)
+            ->orderBy('TxID')
+            ->getPrepared();
+        $count = 0;
+        foreach ($rows as $record) {
+            $txtid = (int)$record["TxID"];
+            $txttxt = (string)$record["TxText"];
+            TextParsing::parseAndSave($txttxt, $id, $txtid);
+            $count++;
+        }
+
+        return $count;
+    }
+}

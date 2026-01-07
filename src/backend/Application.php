@@ -17,15 +17,29 @@
 
 namespace Lwt;
 
-use Lwt\Core\Container\Container;
-use Lwt\Core\Container\ControllerServiceProvider;
-use Lwt\Core\Container\CoreServiceProvider;
-use Lwt\Core\Container\RepositoryServiceProvider;
-use Lwt\Core\Container\ServiceProviderInterface;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Shared\Infrastructure\Container\ControllerServiceProvider;
+use Lwt\Shared\Infrastructure\Container\CoreServiceProvider;
+use Lwt\Shared\Infrastructure\Container\RepositoryServiceProvider;
+use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
+use Lwt\Modules\Text\TextServiceProvider;
+use Lwt\Modules\Language\LanguageServiceProvider;
+use Lwt\Modules\Feed\FeedServiceProvider;
+use Lwt\Modules\Vocabulary\VocabularyServiceProvider;
+use Lwt\Modules\Tags\TagsServiceProvider;
+use Lwt\Modules\Review\ReviewServiceProvider;
+use Lwt\Modules\Admin\AdminServiceProvider;
+use Lwt\Modules\User\UserServiceProvider;
+use Lwt\Modules\Home\HomeServiceProvider;
+use Lwt\Modules\Dictionary\DictionaryServiceProvider;
+use Lwt\Modules\Admin\Application\DTO\DatabaseConnectionDTO;
+use Lwt\Modules\Admin\Application\UseCases\Wizard\AutocompleteConnection;
+use Lwt\Modules\Admin\Application\UseCases\Wizard\LoadConnection;
+use Lwt\Modules\Admin\Application\UseCases\Wizard\SaveConnection;
+use Lwt\Modules\Admin\Application\UseCases\Wizard\TestConnection;
 use Lwt\Core\Exception\ExceptionHandler;
-use Lwt\Core\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Router\Router;
-use Lwt\Services\DatabaseWizardService;
 
 /**
  * Main application class that bootstraps and runs LWT.
@@ -129,6 +143,17 @@ class Application
             new CoreServiceProvider(),
             new ControllerServiceProvider(),
             new RepositoryServiceProvider(),
+            // Module service providers
+            new TextServiceProvider(),
+            new LanguageServiceProvider(),
+            new FeedServiceProvider(),
+            new VocabularyServiceProvider(),
+            new TagsServiceProvider(),
+            new ReviewServiceProvider(),
+            new AdminServiceProvider(),
+            new UserServiceProvider(),
+            new HomeServiceProvider(),
+            new DictionaryServiceProvider(),
         ];
 
         // Register phase: all providers register their bindings
@@ -200,13 +225,15 @@ class Application
     private function isDebugMode(): bool
     {
         // Check APP_DEBUG env variable
-        $appDebug = getenv('APP_DEBUG') ?: ($_ENV['APP_DEBUG'] ?? null);
+        $envDebug = getenv('APP_DEBUG');
+        $appDebug = ($envDebug !== false && $envDebug !== '') ? $envDebug : ($_ENV['APP_DEBUG'] ?? null);
         if ($appDebug !== null && $appDebug !== false) {
             return in_array(strtolower((string)$appDebug), ['true', '1', 'yes'], true);
         }
 
         // Check APP_ENV
-        $appEnv = getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? 'production');
+        $envAppEnv = getenv('APP_ENV');
+        $appEnv = ($envAppEnv !== false && $envAppEnv !== '') ? $envAppEnv : ($_ENV['APP_ENV'] ?? 'production');
         return in_array(strtolower($appEnv), ['development', 'local', 'dev'], true);
     }
 
@@ -234,6 +261,7 @@ class Application
      * Handles the incoming request through the router.
      *
      * @psalm-suppress UndefinedFunction Function loaded via require_once
+     * @psalm-suppress UnresolvableInclude Path computed from basePath
      *
      * @return void
      */
@@ -294,40 +322,44 @@ class Application
     /**
      * Run the database wizard without requiring database connection.
      *
+     * Uses the Admin module's wizard use cases which work without database.
+     *
      * @psalm-suppress UnusedVariable Variables used by included wizard.php view
+     * @psalm-suppress UnresolvableInclude Path computed from basePath
      *
      * @return void
      */
     private function runDatabaseWizard(): void
     {
-        require_once $this->basePath . '/src/backend/Services/DatabaseWizardService.php';
-        $wizardService = new DatabaseWizardService();
-
+        $loadConnection = new LoadConnection();
         $conn = null;
         $errorMessage = null;
 
         $op = InputValidator::getString('op');
         if ($op != '') {
             if ($op == "Autocomplete") {
-                $conn = $wizardService->autocompleteConnection();
+                $autocomplete = new AutocompleteConnection();
+                $conn = $autocomplete->execute();
             } elseif ($op == "Check") {
                 $formData = $this->getWizardFormData();
-                $conn = $wizardService->createConnectionFromForm($formData);
-                $errorMessage = $wizardService->testConnection($conn);
+                $conn = DatabaseConnectionDTO::fromFormData($formData);
+                $testConnection = new TestConnection();
+                $errorMessage = $testConnection->execute($conn);
             } elseif ($op == "Change") {
                 $formData = $this->getWizardFormData();
-                $conn = $wizardService->createConnectionFromForm($formData);
-                $wizardService->saveConnection($conn);
+                $conn = DatabaseConnectionDTO::fromFormData($formData);
+                $saveConnection = new SaveConnection();
+                $saveConnection->execute($conn);
                 header("Location: /");
                 exit;
             }
-        } elseif ($wizardService->envFileExists()) {
-            $conn = $wizardService->loadConnection();
+        } elseif ($loadConnection->envExists()) {
+            $conn = $loadConnection->execute();
         } else {
-            $conn = $wizardService->createEmptyConnection();
+            $conn = new DatabaseConnectionDTO();
         }
 
-        include $this->basePath . '/src/backend/Views/Admin/wizard.php';
+        include $this->basePath . '/src/Modules/Admin/Views/wizard.php';
     }
 
     /**

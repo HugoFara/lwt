@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parseInlineMarkdown, containsMarkdown } from '../../../src/frontend/js/core/inline_markdown';
+import { parseInlineMarkdown, containsMarkdown } from '../../../src/frontend/js/shared/utils/inline_markdown';
 
 describe('parseInlineMarkdown', () => {
   describe('basic formatting', () => {

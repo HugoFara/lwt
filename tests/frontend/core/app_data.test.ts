@@ -10,7 +10,7 @@ import {
   getTextTagsSync,
   clearTagCaches,
   initTagsData,
-} from '../../../src/frontend/js/core/app_data';
+} from '../../../src/frontend/js/shared/stores/app_data';
 
 describe('app_data.ts', () => {
   beforeEach(() => {

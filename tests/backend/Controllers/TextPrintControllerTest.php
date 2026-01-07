@@ -3,27 +3,28 @@ namespace Lwt\Tests\Controllers;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Controllers\TextPrintController;
-use Lwt\Core\EnvLoader;
+use Lwt\Modules\Text\Http\TextPrintController;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\TextPrintService;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Modules\Text\Application\Services\TextPrintService;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/TextPrintController.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextPrintService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Http/TextPrintController.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextPrintService.php';
 
 /**
  * Unit tests for the TextPrintController class.
  *
- * Tests controller initialization, service integration,
+ * Tests controller initialization (from Text module), service integration,
  * and verifies the MVC pattern implementation.
  */
 class TextPrintControllerTest extends TestCase

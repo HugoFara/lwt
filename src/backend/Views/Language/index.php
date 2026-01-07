@@ -19,8 +19,8 @@
 
 namespace Lwt\Views\Language;
 
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 ?>
 <!-- Alpine.js Language List Component -->

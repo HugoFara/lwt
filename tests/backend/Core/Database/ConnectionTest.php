@@ -3,10 +3,11 @@ namespace Lwt\Tests\Core\Database;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Core\Exception\DatabaseException;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -129,9 +130,9 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessageMatches('/SQL Error/');
-        
+        $this->expectException(DatabaseException::class);
+        $this->expectExceptionMessageMatches('/Query failed:/');
+
         Connection::query("SELECT * FROM nonexistent_table_xyz");
     }
 

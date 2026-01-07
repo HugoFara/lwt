@@ -15,6 +15,8 @@
 
 namespace Lwt\View\Helper;
 
+use Lwt\Shared\UI\Helpers\IconHelper;
+
 /**
  * Helper class for word status-related display logic.
  *
@@ -250,7 +252,7 @@ class StatusHelper
      */
     public static function getName(int $status): string
     {
-        $statuses = \Lwt\Services\WordStatusService::getStatuses();
+        $statuses = \Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses();
         return $statuses[$status]['name'] ?? '';
     }
 
@@ -263,7 +265,7 @@ class StatusHelper
      */
     public static function getAbbr(int $status): string
     {
-        $statuses = \Lwt\Services\WordStatusService::getStatuses();
+        $statuses = \Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses();
         return $statuses[$status]['abbr'] ?? '';
     }
 }

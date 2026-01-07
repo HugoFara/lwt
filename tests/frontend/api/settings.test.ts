@@ -2,11 +2,11 @@
  * Tests for api/settings.ts - Settings API operations
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { SettingsApi } from '../../../src/frontend/js/api/settings';
-import * as apiClient from '../../../src/frontend/js/core/api_client';
+import { SettingsApi } from '../../../src/frontend/js/modules/admin/api/settings_api';
+import * as apiClient from '../../../src/frontend/js/shared/api/client';
 
 // Mock the api_client module
-vi.mock('../../../src/frontend/js/core/api_client', () => ({
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
   apiGet: vi.fn(),
   apiPostForm: vi.fn(),
 }));

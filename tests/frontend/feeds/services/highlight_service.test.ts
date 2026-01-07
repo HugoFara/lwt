@@ -6,7 +6,7 @@ import {
   HighlightService,
   getHighlightService,
   initHighlightService
-} from '../../../../src/frontend/js/feeds/services/highlight_service';
+} from '../../../../src/frontend/js/modules/feed/services/highlight_service';
 
 describe('feeds/services/highlight_service.ts', () => {
   let service: HighlightService;

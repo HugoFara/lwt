@@ -9,7 +9,7 @@ import {
   initLucideIcons,
   createSpinner,
   spinnerHtml
-} from '../../../src/frontend/js/ui/icons';
+} from '../../../src/frontend/js/shared/icons/icons';
 
 describe('ui/icons.ts', () => {
   beforeEach(() => {

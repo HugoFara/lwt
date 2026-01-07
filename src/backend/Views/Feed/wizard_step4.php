@@ -21,39 +21,50 @@
 
 namespace Lwt\Views\Feed;
 
-use Lwt\Core\Http\InputValidator;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Prepare languages array for JSON
-$languagesJson = array_map(function ($lang) {
+$languagesJson = array_map(function (array $lang): array {
     return ['id' => (int)$lang['LgID'], 'name' => $lang['LgName']];
 }, $languages);
 
+// Helper to safely convert option to int
+$optionToInt = function (mixed $val): ?int {
+    if ($val === null) {
+        return null;
+    }
+    return is_numeric($val) ? (int) $val : null;
+};
+
 // Prepare options for JSON config
+$maxLinksRaw = $service->getNfOption($wizardData['options'], 'max_links');
+$maxTextsRaw = $service->getNfOption($wizardData['options'], 'max_texts');
+$charsetRaw = $service->getNfOption($wizardData['options'], 'charset');
+$tagRaw = $service->getNfOption($wizardData['options'], 'tag');
+
 $optionsConfig = [
     'editText' => $service->getNfOption($wizardData['options'], 'edit_text') !== null,
     'autoUpdate' => [
         'enabled' => $autoUpdI !== null,
-        'interval' => $autoUpdI !== null ? (int)$autoUpdI : null,
+        'interval' => is_numeric($autoUpdI) ? (int)$autoUpdI : null,
         'unit' => $autoUpdV ?? 'h'
     ],
     'maxLinks' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'max_links') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'max_links') !== null
-            ? (int)$service->getNfOption($wizardData['options'], 'max_links') : null
+        'enabled' => $maxLinksRaw !== null,
+        'value' => $optionToInt($maxLinksRaw)
     ],
     'maxTexts' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'max_texts') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'max_texts') !== null
-            ? (int)$service->getNfOption($wizardData['options'], 'max_texts') : null
+        'enabled' => $maxTextsRaw !== null,
+        'value' => $optionToInt($maxTextsRaw)
     ],
     'charset' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'charset') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'charset') ?? ''
+        'enabled' => $charsetRaw !== null,
+        'value' => is_string($charsetRaw) ? $charsetRaw : ''
     ],
     'tag' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'tag') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'tag') ?? ''
+        'enabled' => $tagRaw !== null,
+        'value' => is_string($tagRaw) ? $tagRaw : ''
     ]
 ];
 
@@ -72,7 +83,7 @@ $configJson = json_encode([
 <script type="application/json" id="wizard-step4-config"><?php echo $configJson; ?></script>
 
 <div x-data="feedWizardStep4" x-cloak>
-    <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
+    <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildLogo(); ?>
 
     <h1 class="title is-4 is-flex is-align-items-center">
         <span class="icon mr-2">
@@ -105,6 +116,7 @@ $configJson = json_encode([
     </div>
 
     <form class="validate" action="/feeds/edit" method="post" @submit="handleSubmit">
+        <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
         <div class="box">
             <!-- Language -->
             <div class="field is-horizontal">

@@ -4,7 +4,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the api_client module
-vi.mock('../../../src/frontend/js/core/api_client', () => ({
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
   apiGet: vi.fn(),
   apiPost: vi.fn(),
   apiPut: vi.fn(),
@@ -12,14 +12,14 @@ vi.mock('../../../src/frontend/js/core/api_client', () => ({
   apiPostForm: vi.fn()
 }));
 
-import { TermsApi } from '../../../src/frontend/js/api/terms';
+import { TermsApi } from '../../../src/frontend/js/modules/vocabulary/api/terms_api';
 import {
   apiGet,
   apiPost,
   apiPut,
   apiDelete,
   apiPostForm
-} from '../../../src/frontend/js/core/api_client';
+} from '../../../src/frontend/js/shared/api/client';
 
 describe('api/terms.ts', () => {
   beforeEach(() => {
@@ -250,7 +250,7 @@ describe('api/terms.ts', () => {
 
       expect(apiPost).toHaveBeenCalledWith('/terms', {
         text: 'hello',
-        lg_id: 1,
+        language_id: 1,
         translation: 'bonjour'
       });
     });
@@ -278,7 +278,7 @@ describe('api/terms.ts', () => {
       await TermsApi.addWithTranslation('test', 5, 'translation');
 
       expect(apiPost).toHaveBeenCalledWith('/terms', expect.objectContaining({
-        lg_id: 5
+        language_id: 5
       }));
     });
   });
@@ -294,7 +294,7 @@ describe('api/terms.ts', () => {
       await TermsApi.createQuick(1, 5, 99);
 
       expect(apiPost).toHaveBeenCalledWith('/terms/quick', {
-        textId: 1,
+        text_id: 1,
         position: 5,
         status: 99
       });
@@ -306,7 +306,7 @@ describe('api/terms.ts', () => {
       await TermsApi.createQuick(1, 5, 98);
 
       expect(apiPost).toHaveBeenCalledWith('/terms/quick', {
-        textId: 1,
+        text_id: 1,
         position: 5,
         status: 98
       });
@@ -334,7 +334,7 @@ describe('api/terms.ts', () => {
       await TermsApi.createQuick(42, 5, 99);
 
       expect(apiPost).toHaveBeenCalledWith('/terms/quick', expect.objectContaining({
-        textId: 42
+        text_id: 42
       }));
     });
   });
@@ -351,7 +351,7 @@ describe('api/terms.ts', () => {
 
       expect(apiGet).toHaveBeenCalledWith('/similar-terms', {
         term: 'hello',
-        lg_id: 1
+        language_id: 1
       });
     });
 
@@ -391,7 +391,7 @@ describe('api/terms.ts', () => {
 
       expect(apiGet).toHaveBeenCalledWith('/similar-terms', {
         term: 'こんにちは',
-        lg_id: 2
+        language_id: 2
       });
     });
   });
@@ -408,7 +408,7 @@ describe('api/terms.ts', () => {
 
       expect(apiGet).toHaveBeenCalledWith('/sentences-with-term', {
         term_id: 100,
-        lg_id: 1
+        language_id: 1
       });
     });
 
@@ -549,7 +549,7 @@ describe('api/terms.ts', () => {
 
       expect(apiGet).toHaveBeenCalledWith('/similar-terms', {
         term: '',
-        lg_id: 1
+        language_id: 1
       });
     });
 

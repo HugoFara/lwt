@@ -4,25 +4,28 @@ namespace Lwt\Tests\Core;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\Restore;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Restore;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Core\StringUtils;
-use Lwt\Services\DictionaryService;
-use Lwt\Services\ExportService;
-use Lwt\Services\LanguageService;
-use Lwt\Services\MediaService;
-use Lwt\Services\SentenceService;
+use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
+use Lwt\Modules\Language\Application\LanguageFacade;
+use Lwt\Modules\Admin\Application\Services\MediaService;
+use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Services\TableSetService;
-use Lwt\Services\TagService;
-use Lwt\Services\TextNavigationService;
-use Lwt\Services\TextStatisticsService;
-use Lwt\View\Helper\FormHelper;
-use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\Modules\Tags\Application\TagsFacade;
+use Lwt\Modules\Text\Application\Services\TextNavigationService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
+use Lwt\Shared\UI\Helpers\FormHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Admin\Application\AdminFacade;
+use Lwt\Modules\Admin\Infrastructure\MySqlSettingsRepository;
+use Lwt\Modules\Admin\Infrastructure\MySqlBackupRepository;
 use PHPUnit\Framework\TestCase;
 
 
@@ -32,22 +35,21 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/View/Helper/FormHelper.php';
-require_once __DIR__ . '/../../../src/backend/View/Helper/SelectOptionsBuilder.php';
+require_once __DIR__ . '/../../../src/Shared/UI/Helpers/FormHelper.php';
+require_once __DIR__ . '/../../../src/Shared/UI/Helpers/SelectOptionsBuilder.php';
 require_once __DIR__ . '/../../../src/backend/View/Helper/StatusHelper.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextStatisticsService.php';
-require_once __DIR__ . '/../../../src/backend/Services/SentenceService.php';
-require_once __DIR__ . '/../../../src/backend/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../src/backend/Services/SimilarTermsService.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
-require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
-require_once __DIR__ . '/../../../src/backend/Services/ExportService.php';
-require_once __DIR__ . '/../../../src/backend/Services/MediaService.php';
-require_once __DIR__ . '/../../../src/backend/Services/DictionaryService.php';
-require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
-require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextStatisticsService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/SentenceService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/AnnotationService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextNavigationService.php';
+require_once __DIR__ . '/../../../src/Modules/Language/Application/Services/TextParsingService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
+require_once __DIR__ . '/../../../src/Shared/Infrastructure/Database/Restore.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExportService.php';
+require_once __DIR__ . '/../../../src/Modules/Admin/Application/Services/MediaService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
+// LanguageFacade loaded via autoloader
 
 /**
  * Integration tests for core functionality.
@@ -57,7 +59,7 @@ require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
  */
 class IntegrationTest extends TestCase
 {
-    private static ?LanguageService $languageService = null;
+    private static ?LanguageFacade $languageService = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -93,7 +95,7 @@ class IntegrationTest extends TestCase
             Restore::restoreFile($handle, "Demo Database");
         }
 
-        self::$languageService = new LanguageService();
+        self::$languageService = new LanguageFacade();
     }
 
     public function testInstallDemoDB(): void
@@ -515,7 +517,7 @@ class IntegrationTest extends TestCase
 
     public function testGetFirstTranslation(): void
     {
-        $annotationService = new \Lwt\Services\AnnotationService();
+        $annotationService = new \Lwt\Modules\Text\Application\Services\AnnotationService();
         $sepa = StringUtils::getFirstSeparator();
         $trans = "hello{$sepa}world{$sepa}test";
         $first = $annotationService->getFirstTranslation($trans);
@@ -539,8 +541,10 @@ class IntegrationTest extends TestCase
     public function testGetThemesSelectOptions(): void
     {
         $current_theme = Settings::getWithDefault('set-theme-dir');
-        $themeService = new \Lwt\Services\ThemeService();
-        $themes = $themeService->getAvailableThemes();
+        $settingsRepo = new MySqlSettingsRepository();
+        $backupRepo = new MySqlBackupRepository();
+        $adminFacade = new AdminFacade($settingsRepo, $backupRepo);
+        $themes = $adminFacade->getAvailableThemes();
         $options = SelectOptionsBuilder::forThemes($themes, $current_theme);
         $this->assertStringContainsString('<option', $options);
     }
@@ -580,7 +584,7 @@ class IntegrationTest extends TestCase
         );
 
         // Test getting tag list
-        $tag_list = TagService::getWordTagList($word_id);
+        $tag_list = TagsFacade::getWordTagList($word_id);
         $this->assertStringContainsString('testtag1', $tag_list);
 
         // Clean up
@@ -646,7 +650,7 @@ class IntegrationTest extends TestCase
     public function testEchoLwtLogoExtended(): void
     {
         // Test that it outputs the logo HTML
-        $output = \Lwt\View\Helper\PageLayoutHelper::buildLogo();
+        $output = \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildLogo();
 
         $this->assertIsString($output);
         // Should contain logo image
@@ -820,13 +824,13 @@ class IntegrationTest extends TestCase
      */
     public function testCreateDictLinksInEditWin(): void
     {
-        // Function signature: DictionaryService::createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst)
+        // Function signature: DictionaryAdapter::createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst)
         $lang = 1;
         $word = "test";
         $sentctljs = "javascript:void(0)";
         $openfirst = true;
 
-        $service = new DictionaryService();
+        $service = new DictionaryAdapter();
         $result = $service->createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst);
         $this->assertIsString($result);
     }

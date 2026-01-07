@@ -2,7 +2,7 @@
  * Tests for ui/navbar.ts - Navbar Alpine.js component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { navbarData, initNavbarAlpine } from '../../../src/frontend/js/ui/navbar';
+import { navbarData, initNavbarAlpine } from '../../../src/frontend/js/shared/components/navbar';
 
 describe('ui/navbar.ts', () => {
   let originalLocation: Location;

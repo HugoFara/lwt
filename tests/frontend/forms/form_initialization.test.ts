@@ -8,16 +8,16 @@ import {
   initTextEditForm,
   initWordEditForm,
   autoInitializeForms
-} from '../../../src/frontend/js/forms/form_initialization';
+} from '../../../src/frontend/js/shared/forms/form_initialization';
 
 // Mock unloadformcheck
-vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/unloadformcheck', () => ({
   lwtFormCheck: {
     askBeforeExit: vi.fn()
   }
 }));
 
-import { lwtFormCheck } from '../../../src/frontend/js/forms/unloadformcheck';
+import { lwtFormCheck } from '../../../src/frontend/js/shared/forms/unloadformcheck';
 
 describe('form_initialization.ts', () => {
   beforeEach(() => {

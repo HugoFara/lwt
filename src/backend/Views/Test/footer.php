@@ -19,13 +19,18 @@
 
 namespace Lwt\Views\Test;
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+
+// Type assertions for variables from controller extract()
+$remaining = (int) ($remaining ?? 0);
+$wrong = (int) ($wrong ?? 0);
+$correct = (int) ($correct ?? 0);
 
 $total = $wrong + $correct + $remaining;
 $divisor = $total > 0 ? $total / 100.0 : 1.0;
-$lRemaining = round($remaining / $divisor, 0);
-$lWrong = round($wrong / $divisor, 0);
-$lCorrect = round($correct / $divisor, 0);
+$lRemaining = (int) round($remaining / $divisor, 0);
+$lWrong = (int) round($wrong / $divisor, 0);
+$lCorrect = (int) round($correct / $divisor, 0);
 ?>
 <footer id="footer">
     <span class="test-footer-stat">

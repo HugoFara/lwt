@@ -4,36 +4,36 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the dependencies
-vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/unloadformcheck', () => ({
   lwtFormCheck: {
     resetDirty: vi.fn()
   }
 }));
 
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   showRightFramesPanel: vi.fn(),
   hideRightFrames: vi.fn(),
   loadModalFrame: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/ui_utilities', () => ({
   showAllwordsClick: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   quickMenuRedirection: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/terms/translation_api', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/translation_api', () => ({
   deleteTranslation: vi.fn(),
   addTranslation: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/terms/term_operations', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/term_operations', () => ({
   changeTableTestStatus: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/ui/modal', () => ({
+vi.mock('../../../src/frontend/js/shared/components/modal', () => ({
   showExportTemplateHelp: vi.fn()
 }));
 
@@ -44,14 +44,13 @@ import {
   cancelAndGoBack,
   confirmSubmit,
   initSimpleInteractions
-} from '../../../src/frontend/js/core/simple_interactions';
-import { lwtFormCheck } from '../../../src/frontend/js/forms/unloadformcheck';
-import { showRightFramesPanel, hideRightFrames, loadModalFrame } from '../../../src/frontend/js/reading/frame_management';
-import { showAllwordsClick } from '../../../src/frontend/js/core/ui_utilities';
-import { quickMenuRedirection } from '../../../src/frontend/js/core/user_interactions';
-import { deleteTranslation, addTranslation } from '../../../src/frontend/js/terms/translation_api';
-import { changeTableTestStatus } from '../../../src/frontend/js/terms/term_operations';
-import { showExportTemplateHelp } from '../../../src/frontend/js/ui/modal';
+} from '../../../src/frontend/js/shared/utils/simple_interactions';
+import { lwtFormCheck } from '../../../src/frontend/js/shared/forms/unloadformcheck';
+import { showAllwordsClick } from '../../../src/frontend/js/shared/utils/ui_utilities';
+import { quickMenuRedirection } from '../../../src/frontend/js/shared/utils/user_interactions';
+import { deleteTranslation, addTranslation } from '../../../src/frontend/js/modules/vocabulary/services/translation_api';
+import { changeTableTestStatus } from '../../../src/frontend/js/modules/vocabulary/services/term_operations';
+import { showExportTemplateHelp } from '../../../src/frontend/js/shared/components/modal';
 
 describe('simple_interactions.ts', () => {
   let originalLocation: Location;
@@ -307,28 +306,30 @@ describe('simple_interactions.ts', () => {
     });
 
     describe('data-action="show-right-frames"', () => {
-      it('shows the right frames panel', () => {
+      it('is a legacy no-op action', () => {
+        // This action is kept for backward compatibility but does nothing
+        // since iframes were removed
         document.body.innerHTML = `
           <button data-action="show-right-frames">Show Frames</button>
         `;
 
         const button = document.querySelector('[data-action="show-right-frames"]') as HTMLElement;
-        button.dispatchEvent(new Event('click', { bubbles: true }));
-
-        expect(showRightFramesPanel).toHaveBeenCalled();
+        // Should not throw
+        expect(() => button.dispatchEvent(new Event('click', { bubbles: true }))).not.toThrow();
       });
     });
 
     describe('data-action="hide-right-frames"', () => {
-      it('hides the right frames panel', () => {
+      it('is a legacy no-op action', () => {
+        // This action is kept for backward compatibility but does nothing
+        // since iframes were removed
         document.body.innerHTML = `
           <button data-action="hide-right-frames">Hide Frames</button>
         `;
 
         const button = document.querySelector('[data-action="hide-right-frames"]') as HTMLElement;
-        button.dispatchEvent(new Event('click', { bubbles: true }));
-
-        expect(hideRightFrames).toHaveBeenCalled();
+        // Should not throw
+        expect(() => button.dispatchEvent(new Event('click', { bubbles: true }))).not.toThrow();
       });
     });
 
@@ -499,7 +500,7 @@ describe('simple_interactions.ts', () => {
     });
 
     describe('data-action="know-all"', () => {
-      it('shows right frames for all words well-known', () => {
+      it('navigates to mark all well-known', () => {
         vi.spyOn(window, 'confirm').mockReturnValue(true);
         document.body.innerHTML = `
           <button data-action="know-all" data-text-id="42">Know All</button>
@@ -509,11 +510,12 @@ describe('simple_interactions.ts', () => {
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-        expect(loadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=42');
+        expect(window.location.href).toBe('/word/set-all-status?text=42');
       });
 
       it('does nothing if cancelled', () => {
         vi.spyOn(window, 'confirm').mockReturnValue(false);
+        const originalHref = window.location.href;
         document.body.innerHTML = `
           <button data-action="know-all" data-text-id="42">Know All</button>
         `;
@@ -521,12 +523,12 @@ describe('simple_interactions.ts', () => {
         const button = document.querySelector('[data-action="know-all"]') as HTMLElement;
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
-        expect(loadModalFrame).not.toHaveBeenCalled();
+        expect(window.location.href).toBe(originalHref);
       });
     });
 
     describe('data-action="ignore-all"', () => {
-      it('shows right frames for all words ignored', () => {
+      it('navigates to mark all ignored', () => {
         vi.spyOn(window, 'confirm').mockReturnValue(true);
         document.body.innerHTML = `
           <button data-action="ignore-all" data-text-id="42">Ignore All</button>
@@ -536,12 +538,12 @@ describe('simple_interactions.ts', () => {
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-        expect(loadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=42&stat=98');
+        expect(window.location.href).toBe('/word/set-all-status?text=42&stat=98');
       });
     });
 
     describe('data-action="bulk-translate"', () => {
-      it('shows right frames with URL', () => {
+      it('navigates to bulk translate URL', () => {
         document.body.innerHTML = `
           <button data-action="bulk-translate" data-url="/bulk/translate">Bulk</button>
         `;
@@ -549,7 +551,7 @@ describe('simple_interactions.ts', () => {
         const button = document.querySelector('[data-action="bulk-translate"]') as HTMLElement;
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
-        expect(loadModalFrame).toHaveBeenCalledWith('/bulk/translate');
+        expect(window.location.href).toBe('/bulk/translate');
       });
     });
 

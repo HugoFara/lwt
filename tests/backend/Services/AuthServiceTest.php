@@ -3,17 +3,17 @@
 namespace Lwt\Tests\Services;
 
 require_once __DIR__ . '/../../../src/backend/Core/Globals.php';
-require_once __DIR__ . '/../../../src/backend/Core/Entity/ValueObject/UserId.php';
+require_once __DIR__ . '/../../../src/Shared/Domain/ValueObjects/UserId.php';
 require_once __DIR__ . '/../../../src/backend/Core/Entity/User.php';
 require_once __DIR__ . '/../../../src/backend/Core/Exception/AuthException.php';
-require_once __DIR__ . '/../../../src/backend/Services/PasswordService.php';
-require_once __DIR__ . '/../../../src/backend/Services/AuthService.php';
+require_once __DIR__ . '/../../../src/Modules/User/Application/Services/PasswordService.php';
+require_once __DIR__ . '/../../../src/Modules/User/Application/Services/AuthService.php';
 
 use Lwt\Core\Entity\User;
 use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
-use Lwt\Services\AuthService;
-use Lwt\Services\PasswordService;
+use Lwt\Modules\User\Application\Services\AuthService;
+use Lwt\Modules\User\Application\Services\PasswordService;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -81,7 +81,7 @@ class AuthServiceTest extends TestCase
     {
         $user = User::create('testuser', 'test@example.com', 'hashedpassword');
         // Simulate that user has been persisted
-        $user->setId(\Lwt\Core\Entity\ValueObject\UserId::fromInt(42));
+        $user->setId(\Lwt\Shared\Domain\ValueObjects\UserId::fromInt(42));
 
         $this->service->setCurrentUser($user);
 

@@ -20,33 +20,31 @@ namespace Lwt\Api\V1;
 
 // Load required dependencies for API handlers
 require_once __DIR__ . '/../../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../Services/TextStatisticsService.php';
-require_once __DIR__ . '/../../Services/SentenceService.php';
-require_once __DIR__ . '/../../Services/AnnotationService.php';
-require_once __DIR__ . '/../../Services/SimilarTermsService.php';
-require_once __DIR__ . '/../../Services/TextNavigationService.php';
-require_once __DIR__ . '/../../Services/TextParsingService.php';
-require_once __DIR__ . '/../../Services/ExpressionService.php';
-require_once __DIR__ . '/../../Core/Database/Restore.php';
-require_once __DIR__ . '/../../Services/WordStatusService.php';
-require_once __DIR__ . '/../../Services/DictionaryService.php';
-require_once __DIR__ . '/../../Services/MediaService.php';
-require_once __DIR__ . '/../../Services/LanguageService.php';
-require_once __DIR__ . '/../../Services/LanguageDefinitions.php';
-require_once __DIR__ . '/../../Services/TagService.php';
+require_once __DIR__ . '/../../../Modules/Text/Application/Services/TextStatisticsService.php';
+require_once __DIR__ . '/../../../Modules/Text/Application/Services/SentenceService.php';
+require_once __DIR__ . '/../../../Modules/Text/Application/Services/AnnotationService.php';
+require_once __DIR__ . '/../../../Modules/Text/Application/Services/TextNavigationService.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
+require_once __DIR__ . '/../../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+require_once __DIR__ . '/../../../Modules/Vocabulary/Application/Services/ExpressionService.php';
+require_once __DIR__ . '/../../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
+require_once __DIR__ . '/../../../Modules/Admin/Application/Services/MediaService.php';
+// Language module now loaded via autoloader
 
-use Lwt\Api\V1\Handlers\AuthHandler;
-use Lwt\Api\V1\Handlers\FeedHandler;
-use Lwt\Api\V1\Handlers\ImportHandler;
-use Lwt\Api\V1\Handlers\ImprovedTextHandler;
-use Lwt\Api\V1\Handlers\LanguageHandler;
-use Lwt\Api\V1\Handlers\MediaHandler;
-use Lwt\Api\V1\Handlers\ReviewHandler;
-use Lwt\Api\V1\Handlers\SettingsHandler;
-use Lwt\Api\V1\Handlers\StatisticsHandler;
-use Lwt\Api\V1\Handlers\TermHandler;
-use Lwt\Api\V1\Handlers\TextHandler;
+use Lwt\Modules\Dictionary\Http\DictionaryApiHandler;
+use Lwt\Modules\Language\Http\LanguageApiHandler;
+use Lwt\Modules\Feed\Application\FeedFacade;
+use Lwt\Modules\Feed\Http\FeedApiHandler;
+use Lwt\Modules\Admin\Application\AdminFacade;
+use Lwt\Modules\Admin\Http\AdminApiHandler;
+use Lwt\Modules\Review\Http\ReviewApiHandler;
+use Lwt\Modules\Tags\Http\TagApiHandler;
+use Lwt\Modules\User\Http\UserApiHandler;
+use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler;
+use Lwt\Modules\Text\Http\TextApiHandler;
+use Lwt\Api\V1\Handlers\YouTubeApiHandler;
 use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Container\Container;
 
 /**
  * Main API V1 handler class.
@@ -56,17 +54,16 @@ class ApiV1
     private const VERSION = "0.1.1";
     private const RELEASE_DATE = "2023-12-29";
 
-    private AuthHandler $authHandler;
-    private FeedHandler $feedHandler;
-    private ImportHandler $importHandler;
-    private ImprovedTextHandler $improvedTextHandler;
-    private LanguageHandler $languageHandler;
-    private MediaHandler $mediaHandler;
-    private ReviewHandler $reviewHandler;
-    private SettingsHandler $settingsHandler;
-    private StatisticsHandler $statisticsHandler;
-    private TermHandler $termHandler;
-    private TextHandler $textHandler;
+    private UserApiHandler $authHandler;
+    private FeedApiHandler $feedHandler;
+    private LanguageApiHandler $languageHandler;
+    private DictionaryApiHandler $localDictionaryHandler;
+    private AdminApiHandler $adminHandler;
+    private ReviewApiHandler $reviewHandler;
+    private TagApiHandler $tagHandler;
+    private VocabularyApiHandler $termHandler;
+    private TextApiHandler $textHandler;
+    private YouTubeApiHandler $youtubeHandler;
 
     /**
      * Endpoints that do not require authentication.
@@ -81,17 +78,20 @@ class ApiV1
 
     public function __construct()
     {
-        $this->authHandler = new AuthHandler();
-        $this->feedHandler = new FeedHandler();
-        $this->importHandler = new ImportHandler();
-        $this->improvedTextHandler = new ImprovedTextHandler();
-        $this->languageHandler = new LanguageHandler();
-        $this->mediaHandler = new MediaHandler();
-        $this->reviewHandler = new ReviewHandler();
-        $this->settingsHandler = new SettingsHandler();
-        $this->statisticsHandler = new StatisticsHandler();
-        $this->termHandler = new TermHandler();
-        $this->textHandler = new TextHandler();
+        $this->authHandler = new UserApiHandler();
+        $this->feedHandler = new FeedApiHandler(
+            Container::getInstance()->get(FeedFacade::class)
+        );
+        $this->languageHandler = new LanguageApiHandler();
+        $this->localDictionaryHandler = new DictionaryApiHandler();
+        $this->adminHandler = new AdminApiHandler(
+            Container::getInstance()->get(AdminFacade::class)
+        );
+        $this->reviewHandler = new ReviewApiHandler();
+        $this->tagHandler = new TagApiHandler();
+        $this->termHandler = new VocabularyApiHandler();
+        $this->textHandler = new TextApiHandler();
+        $this->youtubeHandler = new YouTubeApiHandler();
     }
 
     /**
@@ -193,7 +193,7 @@ class ApiV1
                 break;
 
             case 'media-files':
-                Response::success($this->mediaHandler->formatMediaFiles());
+                Response::success($this->adminHandler->formatMediaFiles());
                 break;
 
             case 'phonetic-reading':
@@ -214,13 +214,13 @@ class ApiV1
 
             case 'similar-terms':
                 Response::success($this->languageHandler->formatSimilarTerms(
-                    (int)$params["lg_id"],
+                    (int)($params["language_id"] ?? 0),
                     (string)$params["term"]
                 ));
                 break;
 
             case 'statuses':
-                Response::success(\Lwt\Services\WordStatusService::getStatuses());
+                Response::success(\Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses());
                 break;
 
             case 'tags':
@@ -243,6 +243,14 @@ class ApiV1
                 $this->handleFeedsGet($fragments, $params);
                 break;
 
+            case 'local-dictionaries':
+                $this->handleLocalDictionariesGet($fragments, $params);
+                break;
+
+            case 'youtube':
+                $this->handleYouTubeGet($fragments, $params);
+                break;
+
             default:
                 Response::error('Endpoint Not Found: ' . $fragments[0], 404);
         }
@@ -262,7 +270,7 @@ class ApiV1
                 break;
 
             case 'settings':
-                Response::success($this->settingsHandler->formatSaveSetting(
+                Response::success($this->adminHandler->formatSaveSetting(
                     $params['key'],
                     $params['value']
                 ));
@@ -282,6 +290,10 @@ class ApiV1
 
             case 'feeds':
                 $this->handleFeedsPost($fragments, $params);
+                break;
+
+            case 'local-dictionaries':
+                $this->handleLocalDictionariesPost($fragments, $params);
                 break;
 
             default:
@@ -458,16 +470,19 @@ class ApiV1
 
     private function handleSentencesGet(array $fragments, array $params): void
     {
+        $languageId = (int)($params["language_id"] ?? 0);
+        $termLc = $params["term_lc"] ?? '';
+
         if (isset($fragments[1]) && ctype_digit($fragments[1])) {
             Response::success($this->languageHandler->formatSentencesWithRegisteredTerm(
-                (int)$params["lg_id"],
-                $params["word_lc"],
+                $languageId,
+                $termLc,
                 (int)$fragments[1]
             ));
         } else {
             Response::success($this->languageHandler->formatSentencesWithNewTerm(
-                (int)$params["lg_id"],
-                $params["word_lc"],
+                $languageId,
+                $termLc,
                 array_key_exists("advanced_search", $params)
             ));
         }
@@ -476,7 +491,7 @@ class ApiV1
     private function handleSettingsGet(array $fragments, array $params): void
     {
         if (($fragments[1] ?? '') === 'theme-path') {
-            Response::success($this->settingsHandler->formatThemePath($params['path']));
+            Response::success($this->adminHandler->formatThemePath($params['path']));
         } else {
             Response::error('Endpoint Not Found: ' . ($fragments[1] ?? ''), 404);
         }
@@ -484,20 +499,7 @@ class ApiV1
 
     private function handleTagsGet(array $fragments): void
     {
-        switch ($fragments[1] ?? '') {
-            case 'term':
-                Response::success(\Lwt\Services\TagService::getAllTermTags());
-                break;
-            case 'text':
-                Response::success(\Lwt\Services\TagService::getAllTextTags());
-                break;
-            default:
-                // Return both tag types
-                Response::success([
-                    'term' => \Lwt\Services\TagService::getAllTermTags(),
-                    'text' => \Lwt\Services\TagService::getAllTextTags()
-                ]);
-        }
+        $this->tagHandler->handleGet(array_slice($fragments, 1));
     }
 
     private function handleTermsGet(array $fragments, array $params): void
@@ -507,10 +509,10 @@ class ApiV1
             Response::success($this->termHandler->formatGetWordList($params));
         } elseif (($fragments[1] ?? '') === 'filter-options') {
             // GET /terms/filter-options - get filter dropdown options
-            $langId = isset($params['lang']) && $params['lang'] !== '' ? (int)$params['lang'] : null;
+            $langId = isset($params['language_id']) && $params['language_id'] !== '' ? (int)$params['language_id'] : null;
             Response::success($this->termHandler->formatGetFilterOptions($langId));
         } elseif (($fragments[1] ?? '') === 'imported') {
-            Response::success($this->importHandler->formatImportedTerms(
+            Response::success($this->termHandler->formatImportedTerms(
                 $params["last_update"],
                 (int)$params["page"],
                 (int)$params["count"]
@@ -518,14 +520,14 @@ class ApiV1
         } elseif (($fragments[1] ?? '') === 'for-edit') {
             // GET /terms/for-edit - get term data for editing in modal
             Response::success($this->termHandler->formatGetTermForEdit(
-                (int)($params['tid'] ?? 0),
+                (int)($params['term_id'] ?? 0),
                 (int)($params['ord'] ?? 0),
                 isset($params['wid']) && $params['wid'] !== '' ? (int)$params['wid'] : null
             ));
         } elseif (($fragments[1] ?? '') === 'multi') {
             // GET /terms/multi - get multi-word expression data for editing
             Response::success($this->termHandler->formatGetMultiWord(
-                (int)($params['tid'] ?? 0),
+                (int)($params['term_id'] ?? 0),
                 (int)($params['ord'] ?? 0),
                 $params['txt'] ?? null,
                 isset($params['wid']) ? (int)$params['wid'] : null
@@ -533,7 +535,7 @@ class ApiV1
         } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
             $termId = (int)$fragments[1];
             if (($fragments[2] ?? '') === 'translations') {
-                Response::success($this->improvedTextHandler->formatTermTranslations(
+                Response::success($this->textHandler->formatTermTranslations(
                     (string)$params["term_lc"],
                     (int)$params["text_id"]
                 ));
@@ -557,12 +559,12 @@ class ApiV1
     private function handleTextsGet(array $fragments, array $params): void
     {
         if (($fragments[1] ?? '') === 'statistics') {
-            $textsId = $params["texts_id"] ?? $params["ids"] ?? null;
-            if ($textsId === null) {
-                Response::error('Missing required parameter: texts_id', 400);
+            $textIds = $params["text_ids"] ?? null;
+            if ($textIds === null) {
+                Response::error('Missing required parameter: text_ids', 400);
                 return;
             }
-            Response::success($this->statisticsHandler->formatTextsStatistics($textsId));
+            Response::success($this->adminHandler->formatTextsStatistics($textIds));
         } elseif (($fragments[1] ?? '') === 'by-language') {
             // GET /texts/by-language/{langId} - get paginated texts for a language
             if (!isset($fragments[2]) || !ctype_digit($fragments[2])) {
@@ -655,13 +657,13 @@ class ApiV1
         } elseif (($fragments[1] ?? '') === 'new') {
             Response::success($this->termHandler->formatAddTranslation(
                 $params['term_text'],
-                (int)$params['lg_id'],
+                (int)($params['language_id'] ?? 0),
                 $params['translation']
             ));
         } elseif (($fragments[1] ?? '') === 'quick') {
             // POST /terms/quick - quick create term with status (98 or 99)
             Response::success($this->termHandler->formatQuickCreate(
-                (int)$params['textId'],
+                (int)$params['text_id'],
                 (int)$params['position'],
                 (int)$params['status']
             ));
@@ -779,6 +781,10 @@ class ApiV1
 
             case 'feeds':
                 $this->handleFeedsPut($fragments, $params);
+                break;
+
+            case 'local-dictionaries':
+                $this->handleLocalDictionariesPut($fragments, $params);
                 break;
 
             default:
@@ -930,6 +936,10 @@ class ApiV1
                 $this->handleFeedsDelete($fragments, $params);
                 break;
 
+            case 'local-dictionaries':
+                $this->handleLocalDictionariesDelete($fragments);
+                break;
+
             default:
                 Response::error('Endpoint Not Found On DELETE: ' . $fragments[0], 404);
         }
@@ -993,6 +1003,161 @@ class ApiV1
     }
 
     // =========================================================================
+    // Local Dictionary Request Handlers
+    // =========================================================================
+
+    /**
+     * Handle GET requests for local dictionaries.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Query parameters
+     */
+    private function handleLocalDictionariesGet(array $fragments, array $params): void
+    {
+        // GET /local-dictionaries/lookup - look up a term
+        if (($fragments[1] ?? '') === 'lookup') {
+            $languageId = (int)($params['language_id'] ?? 0);
+            $term = $params['term'] ?? '';
+
+            if ($languageId <= 0) {
+                Response::error('language_id is required', 400);
+            }
+            if ($term === '') {
+                Response::error('term is required', 400);
+            }
+
+            Response::success($this->localDictionaryHandler->formatLookup($languageId, $term));
+            return;
+        }
+
+        // GET /local-dictionaries/entries/{dictId} - get entries for dictionary
+        if (($fragments[1] ?? '') === 'entries' && isset($fragments[2]) && ctype_digit($fragments[2])) {
+            Response::success($this->localDictionaryHandler->formatGetEntries((int)$fragments[2], $params));
+            return;
+        }
+
+        // GET /local-dictionaries/{id} - get single dictionary
+        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
+            Response::success($this->localDictionaryHandler->formatGetDictionary((int)$fragments[1]));
+            return;
+        }
+
+        // GET /local-dictionaries?language_id=N - list dictionaries for language
+        $languageId = (int)($params['language_id'] ?? 0);
+        if ($languageId <= 0) {
+            Response::error('language_id is required', 400);
+        }
+
+        Response::success($this->localDictionaryHandler->formatGetDictionaries($languageId));
+    }
+
+    /**
+     * Handle POST requests for local dictionaries.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    POST parameters
+     */
+    private function handleLocalDictionariesPost(array $fragments, array $params): void
+    {
+        // POST /local-dictionaries/preview - preview file before import
+        if (($fragments[1] ?? '') === 'preview') {
+            Response::success($this->localDictionaryHandler->formatPreview($params));
+            return;
+        }
+
+        // POST /local-dictionaries/entries/{dictId} - add entry to dictionary
+        if (($fragments[1] ?? '') === 'entries' && isset($fragments[2]) && ctype_digit($fragments[2])) {
+            Response::success($this->localDictionaryHandler->formatAddEntry((int)$fragments[2], $params));
+            return;
+        }
+
+        // POST /local-dictionaries/{id}/import - import entries into dictionary
+        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'import') {
+            Response::success($this->localDictionaryHandler->formatImport((int)$fragments[1], $params));
+            return;
+        }
+
+        // POST /local-dictionaries/{id}/clear - clear all entries
+        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'clear') {
+            Response::success($this->localDictionaryHandler->formatClearEntries((int)$fragments[1]));
+            return;
+        }
+
+        // POST /local-dictionaries - create new dictionary
+        if (!isset($fragments[1]) || $fragments[1] === '') {
+            Response::success($this->localDictionaryHandler->formatCreateDictionary($params));
+            return;
+        }
+
+        Response::error('Endpoint Not Found: local-dictionaries/' . ($fragments[1] ?? ''), 404);
+    }
+
+    /**
+     * Handle PUT requests for local dictionaries.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Request body parameters
+     */
+    private function handleLocalDictionariesPut(array $fragments, array $params): void
+    {
+        // PUT /local-dictionaries/{id} - update dictionary
+        if (isset($fragments[1]) && ctype_digit($fragments[1]) && !isset($fragments[2])) {
+            Response::success($this->localDictionaryHandler->formatUpdateDictionary((int)$fragments[1], $params));
+            return;
+        }
+
+        Response::error('Dictionary ID (Integer) Expected', 404);
+    }
+
+    /**
+     * Handle DELETE requests for local dictionaries.
+     *
+     * @param string[] $fragments Endpoint path segments
+     */
+    private function handleLocalDictionariesDelete(array $fragments): void
+    {
+        // DELETE /local-dictionaries/{id} - delete dictionary
+        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
+            Response::success($this->localDictionaryHandler->formatDeleteDictionary((int)$fragments[1]));
+            return;
+        }
+
+        Response::error('Dictionary ID (Integer) Expected', 404);
+    }
+
+    // =========================================================================
+    // YouTube Request Handlers
+    // =========================================================================
+
+    /**
+     * Handle GET requests for YouTube API proxy.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Query parameters
+     */
+    private function handleYouTubeGet(array $fragments, array $params): void
+    {
+        switch ($fragments[1] ?? '') {
+            case 'configured':
+                // GET /youtube/configured - check if YouTube API is configured
+                Response::success($this->youtubeHandler->formatIsConfigured());
+                break;
+
+            case 'video':
+                // GET /youtube/video?video_id=xxx - get video info
+                $videoId = $params['video_id'] ?? '';
+                if ($videoId === '') {
+                    Response::error('video_id parameter is required', 400);
+                }
+                Response::success($this->youtubeHandler->formatGetVideoInfo($videoId));
+                break;
+
+            default:
+                Response::error('Expected "configured" or "video"', 404);
+        }
+    }
+
+    // =========================================================================
     // Helper Methods
     // =========================================================================
 
@@ -1014,7 +1179,7 @@ class ApiV1
     private static function parseJsonBody(): array
     {
         $input = file_get_contents('php://input');
-        if (empty($input)) {
+        if ($input === false || $input === '') {
             return [];
         }
         $data = json_decode($input, true);
@@ -1028,7 +1193,7 @@ class ApiV1
      */
     public static function handleRequest(): void
     {
-        $method = $_SERVER['REQUEST_METHOD'];
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
         if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE'])) {
             Response::error('Method Not Allowed', 405);
@@ -1043,6 +1208,6 @@ class ApiV1
         }
 
         $api = new self();
-        $api->handle($method, $_SERVER['REQUEST_URI'], $bodyData);
+        $api->handle($method, $_SERVER['REQUEST_URI'] ?? '/', $bodyData);
     }
 }

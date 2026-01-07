@@ -21,8 +21,15 @@
 
 namespace Lwt\Views\Test;
 
+// Type assertions for view variables
+$property = (string) ($property ?? '');
+$title = (string) ($title ?? '');
+$totalCount = (int) ($totalCount ?? 0);
+$totalDue = (int) ($totalDue ?? 0);
+$languageName = (string) ($languageName ?? '');
+
 ?>
-<h1>TEST - <?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
+<h1>TEST - <?php echo \htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h1>
 <div class="test-word-count">
     Word<?php echo $totalCount > 1 ? 's' : ''; ?> due today:
     <?php echo $totalCount; ?>,

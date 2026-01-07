@@ -1,12 +1,13 @@
 <?xml version="1.0"?>
 <psalm
-    errorLevel="4"
+    errorLevel="2"
     resolveFromConfigFile="true"
     findUnusedBaselineEntry="true"
     findUnusedCode="true"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    errorBaseline="psalm-baseline-level1.xml"
 >
     <projectFiles>
         <directory name="." />
@@ -25,8 +26,17 @@
         <UndefinedGlobalVariable>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
             </errorLevel>
         </UndefinedGlobalVariable>
+
+        <!-- Views receive variables via extract(), psalm cannot verify they are defined -->
+        <PossiblyUndefinedVariable>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
+            </errorLevel>
+        </PossiblyUndefinedVariable>
 
         <!-- Controllers pass variables to views, services have template vars -->
         <UnusedVariable>
@@ -34,6 +44,7 @@
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Views" />
                 <directory name="src/backend/Services" />
+                <directory name="src/Modules" />
             </errorLevel>
         </UnusedVariable>
 
@@ -43,6 +54,8 @@
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Services" />
                 <directory name="src/backend/View" />
+                <directory name="src/Modules" />
+                <directory name="src/Shared" />
             </errorLevel>
         </PossiblyUnusedParam>
 
@@ -54,6 +67,8 @@
                 <directory name="src/backend/Core" />
                 <directory name="src/backend/Services" />
                 <directory name="src/backend/View" />
+                <directory name="src/Modules" />
+                <directory name="src/Shared" />
             </errorLevel>
         </PossiblyUnusedMethod>
 
@@ -61,6 +76,7 @@
         <UndefinedFunction>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
             </errorLevel>
         </UndefinedFunction>
 
@@ -68,6 +84,7 @@
         <RedundantCondition>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
             </errorLevel>
         </RedundantCondition>
 
@@ -75,14 +92,81 @@
         <TypeDoesNotContainType>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
             </errorLevel>
         </TypeDoesNotContainType>
+
+        <!-- View files document expected template variables with @var annotations -->
+        <UnnecessaryVarAnnotation>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+                <directory name="src/Modules" />
+            </errorLevel>
+        </UnnecessaryVarAnnotation>
 
         <!-- Return value may not be used by callers -->
         <PossiblyUnusedReturnValue>
             <errorLevel type="suppress">
                 <directory name="src/backend/Services" />
+                <directory name="src/Modules" />
+                <directory name="src/Shared" />
             </errorLevel>
         </PossiblyUnusedReturnValue>
+
+        <!-- Unused properties may be kept for future use or DI -->
+        <UnusedProperty>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+                <directory name="src/Shared" />
+            </errorLevel>
+        </UnusedProperty>
+
+        <!-- Classes may be used via DI container or routing -->
+        <UnusedClass>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Api" />
+                <directory name="src/Modules" />
+                <directory name="src/Shared" />
+            </errorLevel>
+        </UnusedClass>
+
+        <!-- Closure params for DI may not be used -->
+        <UnusedClosureParam>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+            </errorLevel>
+        </UnusedClosureParam>
+
+        <!-- Private methods may have unused params for consistency or future use -->
+        <UnusedParam>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+            </errorLevel>
+        </UnusedParam>
+
+        <!-- Repository implementations may have more specific param types -->
+        <MoreSpecificImplementedParamType>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+                <directory name="src/backend/Core" />
+            </errorLevel>
+        </MoreSpecificImplementedParamType>
+
+        <!-- Repository implementations may have less specific return types -->
+        <LessSpecificImplementedReturnType>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+                <directory name="src/backend/Core" />
+            </errorLevel>
+        </LessSpecificImplementedReturnType>
+
+        <!-- Interface implementations may have different parameter names -->
+        <ParamNameMismatch>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+                <directory name="src/backend/Core" />
+            </errorLevel>
+        </ParamNameMismatch>
     </issueHandlers>
 </psalm>

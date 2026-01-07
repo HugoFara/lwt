@@ -2,7 +2,7 @@
  * Tests for feed_form_component.ts - Feed form Alpine component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { feedFormData, FeedFormConfig } from '../../../src/frontend/js/feeds/components/feed_form_component';
+import { feedFormData, FeedFormConfig } from '../../../src/frontend/js/modules/feed/components/feed_form_component';
 
 describe('feed_form_component.ts', () => {
   beforeEach(() => {

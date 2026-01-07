@@ -3,27 +3,30 @@ namespace Lwt\Tests\Controllers;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Controllers\TestController;
-use Lwt\Core\EnvLoader;
+use Lwt\Modules\Review\Http\TestController;
+use Lwt\Modules\Review\Application\ReviewFacade;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Services\TestService;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Modules\Review\Application\Services\TestService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/TestController.php';
-require_once __DIR__ . '/../../../src/backend/Services/TestService.php';
+require_once __DIR__ . '/../../../src/Modules/Review/Http/TestController.php';
+require_once __DIR__ . '/../../../src/Modules/Review/Application/Services/TestService.php';
 
 /**
  * Unit tests for the TestController class.
  *
- * Tests the word testing/review interface controller and TestService integration.
+ * Tests the word testing/review interface controller (from Review module)
+ * and TestService integration.
  */
 class TestControllerTest extends TestCase
 {
@@ -90,7 +93,7 @@ class TestControllerTest extends TestCase
      */
     private function createController(): TestController
     {
-        return new TestController(new TestService());
+        return new TestController(new ReviewFacade());
     }
 
     /**

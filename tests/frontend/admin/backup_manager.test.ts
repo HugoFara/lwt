@@ -2,7 +2,7 @@
  * Tests for backup_manager.ts - Backup Manager Alpine.js component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { backupManager, initBackupManagerAlpine } from '../../../src/frontend/js/admin/backup_manager';
+import { backupManager, initBackupManagerAlpine } from '../../../src/frontend/js/modules/admin/pages/backup_manager';
 
 describe('backup_manager.ts', () => {
   beforeEach(() => {

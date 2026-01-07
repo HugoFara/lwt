@@ -57,3 +57,6 @@ coverage.xml
 
 # Cypress coverage
 /cypress/
+
+# Lighthouse reports
+/lighthouse-reports/

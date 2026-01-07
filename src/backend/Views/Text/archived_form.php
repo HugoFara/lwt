@@ -15,21 +15,38 @@
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  *
- * @psalm-suppress UndefinedVariable - Variables are set by the including controller
+ * @psalm-suppress UndefinedVariable, PossiblyUndefinedVariable - Variables are set by the including controller
  */
 
 namespace Lwt\Views\Text;
 
-use Lwt\Services\MediaService;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Modules\Admin\Application\Services\MediaService;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
-/** @var int $textId */
-/** @var array $record */
+// Type assertions for view variables
+$textId = (int) ($textId ?? 0);
+/** @var array $recordInput */
+$recordInput = $record ?? [];
+/** @var array<string, mixed> $recordMerged */
+$recordMerged = array_merge([
+    'AtLgID' => 0, 'AtTitle' => '', 'AtText' => '',
+    'AtAudioURI' => '', 'AtSourceURI' => '', 'annotlen' => 0
+], $recordInput);
+// Extract typed values
+$recordAtLgId = (int) $recordMerged['AtLgID'];
+$recordAtTitle = (string) $recordMerged['AtTitle'];
+$recordAtText = (string) $recordMerged['AtText'];
+$recordAtAudioUri = (string) $recordMerged['AtAudioURI'];
+$recordAtSourceUri = (string) $recordMerged['AtSourceURI'];
+$recordAnnotLen = (int) $recordMerged['annotlen'];
+/** @var array<int, array{id: int, name: string}> $languages */
+$languages = $languages ?? [];
 
+$phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
 <h2 class="title is-4">Edit Archived Text</h2>
 
-<form class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>#rec<?php echo $textId; ?>" method="post">
+<form class="validate" action="<?php echo $phpSelf; ?>#rec<?php echo $textId; ?>" method="post">
     <input type="hidden" name="AtID" value="<?php echo $textId; ?>" />
 
     <div class="box">
@@ -43,7 +60,7 @@ use Lwt\View\Helper\IconHelper;
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
                             <select name="AtLgID" id="AtLgID" class="notempty setfocus" required>
-                                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $record['AtLgID'], '[Choose...]'); ?>
+                                <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languages, $recordAtLgId, '[Choose...]'); ?>
                             </select>
                         </div>
                     </div>
@@ -69,7 +86,7 @@ use Lwt\View\Helper\IconHelper;
                                data_info="Title"
                                name="AtTitle"
                                id="AtTitle"
-                               value="<?php echo htmlspecialchars($record['AtTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo htmlspecialchars($recordAtTitle, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
                                required />
                     </div>
@@ -96,7 +113,7 @@ use Lwt\View\Helper\IconHelper;
                                   data_maxlength="65000"
                                   data_info="Text"
                                   rows="15"
-                                  required><?php echo htmlspecialchars($record['AtText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                  required><?php echo htmlspecialchars($recordAtText, ENT_QUOTES, 'UTF-8'); ?></textarea>
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
@@ -115,7 +132,7 @@ use Lwt\View\Helper\IconHelper;
             <div class="field-body">
                 <div class="field">
                     <div class="control">
-                        <?php if ($record['annotlen']): ?>
+                        <?php if ($recordAnnotLen > 0): ?>
                         <div class="notification is-info is-light">
                             <span class="icon-text">
                                 <span class="icon has-text-success">
@@ -152,7 +169,7 @@ use Lwt\View\Helper\IconHelper;
                                data_info="Source URI"
                                name="AtSourceURI"
                                id="AtSourceURI"
-                               value="<?php echo htmlspecialchars($record['AtSourceURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo htmlspecialchars($recordAtSourceUri, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="1000"
                                placeholder="https://..." />
                     </div>
@@ -168,7 +185,9 @@ use Lwt\View\Helper\IconHelper;
             <div class="field-body">
                 <div class="field">
                     <div class="control">
-                        <?php echo getArchivedTextTags($textId); ?>
+                        <?php
+                        echo (string) getArchivedTextTags($textId);
+                        ?>
                     </div>
                 </div>
             </div>
@@ -187,7 +206,7 @@ use Lwt\View\Helper\IconHelper;
                                data_info="Audio-URI"
                                name="AtAudioURI"
                                id="AtAudioURI"
-                               value="<?php echo htmlspecialchars($record['AtAudioURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo htmlspecialchars($recordAtAudioUri, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
                                placeholder="Path to audio file or URL" />
                     </div>

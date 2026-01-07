@@ -15,10 +15,10 @@
 namespace Lwt\Router\Middleware;
 
 use Lwt\Core\Globals;
-use Lwt\Services\AuthService;
+use Lwt\Modules\User\Application\UserFacade;
+use Lwt\Shared\Infrastructure\Container\Container;
 
 require_once __DIR__ . '/MiddlewareInterface.php';
-require_once __DIR__ . '/../../Services/AuthService.php';
 require_once __DIR__ . '/../../Core/Globals.php';
 
 /**
@@ -40,22 +40,22 @@ require_once __DIR__ . '/../../Core/Globals.php';
 class AuthMiddleware implements MiddlewareInterface
 {
     /**
-     * Auth service instance.
+     * User facade instance.
      *
-     * @var AuthService
+     * @var UserFacade
      */
-    private AuthService $authService;
+    private UserFacade $userFacade;
 
     /**
      * Create a new AuthMiddleware.
      *
-     * @param AuthService|null $authService Optional auth service instance
+     * @param UserFacade|null $userFacade Optional user facade instance
      *
      * @psalm-suppress PossiblyUnusedMethod - Public API for middleware instantiation
      */
-    public function __construct(?AuthService $authService = null)
+    public function __construct(?UserFacade $userFacade = null)
     {
-        $this->authService = $authService ?? new AuthService();
+        $this->userFacade = $userFacade ?? Container::getInstance()->get(UserFacade::class);
     }
 
     /**
@@ -133,7 +133,7 @@ class AuthMiddleware implements MiddlewareInterface
      */
     private function validateSession(): bool
     {
-        return $this->authService->validateSession();
+        return $this->userFacade->validateSession();
     }
 
     /**
@@ -150,13 +150,13 @@ class AuthMiddleware implements MiddlewareInterface
             return false;
         }
 
-        $user = $this->authService->validateApiToken($token);
+        $user = $this->userFacade->validateApiToken($token);
         if ($user === null) {
             return false;
         }
 
         // Set user context
-        $this->authService->setCurrentUser($user);
+        $this->userFacade->setCurrentUser($user);
         return true;
     }
 

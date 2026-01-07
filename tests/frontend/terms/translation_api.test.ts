@@ -9,7 +9,7 @@ import {
   getTranslationFromGlosbeApi,
   getLibreTranslateTranslationBase,
   getLibreTranslateTranslation,
-} from '../../../src/frontend/js/terms/translation_api';
+} from '../../../src/frontend/js/modules/vocabulary/services/translation_api';
 
 describe('translation_api.ts', () => {
   beforeEach(() => {

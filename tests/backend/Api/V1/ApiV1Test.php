@@ -4,9 +4,12 @@ namespace Lwt\Tests\Api\V1;
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Api\V1\ApiV1;
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Modules\Admin\AdminServiceProvider;
+use Lwt\Modules\Feed\FeedServiceProvider;
+use Lwt\Shared\Infrastructure\Database\Configuration;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -52,6 +55,18 @@ class ApiV1Test extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Register service providers for handler dependencies
+        $container = Container::getInstance();
+
+        $feedProvider = new FeedServiceProvider();
+        $feedProvider->register($container);
+        $feedProvider->boot($container);
+
+        $adminProvider = new AdminServiceProvider();
+        $adminProvider->register($container);
+        $adminProvider->boot($container);
+
         $this->api = new ApiV1();
     }
 
@@ -102,17 +117,18 @@ class ApiV1Test extends TestCase
         $reflection = new \ReflectionClass(ApiV1::class);
 
         // Get all private handler properties
+        // Note: importHandler, improvedTextHandler, and mediaHandler have been
+        // consolidated into their respective module handlers (termHandler, textHandler, adminHandler)
         $expectedHandlers = [
             'feedHandler',
-            'importHandler',
-            'improvedTextHandler',
             'languageHandler',
-            'mediaHandler',
+            'localDictionaryHandler',
+            'adminHandler',  // Combined settings + statistics + media handler
             'reviewHandler',
-            'settingsHandler',
-            'statisticsHandler',
-            'termHandler',
-            'textHandler',
+            'tagHandler',
+            'termHandler',   // Also handles import functionality
+            'textHandler',   // Also handles improved text functionality
+            'authHandler',
         ];
 
         foreach ($expectedHandlers as $handlerName) {

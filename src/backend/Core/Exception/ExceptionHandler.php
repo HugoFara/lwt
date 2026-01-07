@@ -439,8 +439,9 @@ class ExceptionHandler
                 if (!empty($context)) {
                     echo '<div class="context">';
                     echo '<strong>Context:</strong><br>';
+                    $encoded = json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
                     echo '<pre>' . htmlspecialchars(
-                        json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) ?: '',
+                        $encoded !== false ? $encoded : '',
                         ENT_QUOTES,
                         'UTF-8'
                     ) . '</pre>';

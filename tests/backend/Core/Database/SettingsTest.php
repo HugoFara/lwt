@@ -3,12 +3,12 @@ namespace Lwt\Tests\Core\Database;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Escaping;
-use Lwt\Database\Settings;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database

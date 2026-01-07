@@ -14,8 +14,8 @@
 
 namespace Lwt\Router;
 
-use Lwt\Core\Container\Container;
-use Lwt\Core\Http\SecurityHeaders;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Shared\Infrastructure\Http\SecurityHeaders;
 use Lwt\Router\Middleware\MiddlewareInterface;
 
 /**
@@ -32,7 +32,22 @@ use Lwt\Router\Middleware\MiddlewareInterface;
  */
 class Router
 {
+    /**
+     * Registered routes.
+     *
+     * Structure: ['path' => ['method' => 'ControllerClass::method']]
+     *
+     * @var array<string, array<string, string>>
+     */
     private array $routes = [];
+
+    /**
+     * Prefix-based routes.
+     *
+     * Structure: ['prefix' => ['method' => 'ControllerClass::method']]
+     *
+     * @var array<string, array<string, string>>
+     */
     private array $prefixRoutes = [];
 
     /**
@@ -151,11 +166,141 @@ class Router
     }
 
     /**
-     * Resolve the current request to a handler
+     * Register a GET route.
      *
-     * @return (((array|string)[]|string)[]|int|mixed|string)[]
+     * Convenience method for registering GET-only routes.
      *
-     * @psalm-return array{type: 'handler'|'not_found'|'redirect'|'static', path?: string, url?: string, code?: 301, handler?: mixed, params?: array<array<int|string, array<int|string, mixed>|string>|string>, file?: string, mime?: string, middleware?: array}
+     * @param string $path       The URL path (supports {param} placeholders)
+     * @param string $handler    The handler (controller@method)
+     * @param array  $middleware Optional middleware
+     *
+     * @return void
+     */
+    public function get(string $path, string $handler, array $middleware = []): void
+    {
+        $this->routes[$path]['GET'] = $handler;
+        if (!empty($middleware)) {
+            $this->middleware[$path]['GET'] = $middleware;
+        }
+    }
+
+    /**
+     * Register a POST route.
+     *
+     * @param string $path       The URL path (supports {param} placeholders)
+     * @param string $handler    The handler (controller@method)
+     * @param array  $middleware Optional middleware
+     *
+     * @return void
+     *
+     * @psalm-suppress PossiblyUnusedMethod - Public API for route registration
+     */
+    public function post(string $path, string $handler, array $middleware = []): void
+    {
+        $this->routes[$path]['POST'] = $handler;
+        if (!empty($middleware)) {
+            $this->middleware[$path]['POST'] = $middleware;
+        }
+    }
+
+    /**
+     * Register a PUT route.
+     *
+     * @param string $path       The URL path (supports {param} placeholders)
+     * @param string $handler    The handler (controller@method)
+     * @param array  $middleware Optional middleware
+     *
+     * @return void
+     */
+    public function put(string $path, string $handler, array $middleware = []): void
+    {
+        $this->routes[$path]['PUT'] = $handler;
+        if (!empty($middleware)) {
+            $this->middleware[$path]['PUT'] = $middleware;
+        }
+    }
+
+    /**
+     * Register a DELETE route.
+     *
+     * @param string $path       The URL path (supports {param} placeholders)
+     * @param string $handler    The handler (controller@method)
+     * @param array  $middleware Optional middleware
+     *
+     * @return void
+     *
+     * @psalm-suppress PossiblyUnusedMethod - Public API for route registration
+     */
+    public function delete(string $path, string $handler, array $middleware = []): void
+    {
+        $this->routes[$path]['DELETE'] = $handler;
+        if (!empty($middleware)) {
+            $this->middleware[$path]['DELETE'] = $middleware;
+        }
+    }
+
+    /**
+     * Register a PATCH route.
+     *
+     * @param string $path       The URL path (supports {param} placeholders)
+     * @param string $handler    The handler (controller@method)
+     * @param array  $middleware Optional middleware
+     *
+     * @return void
+     *
+     * @psalm-suppress PossiblyUnusedMethod - Public API for route registration
+     */
+    public function patch(string $path, string $handler, array $middleware = []): void
+    {
+        $this->routes[$path]['PATCH'] = $handler;
+        if (!empty($middleware)) {
+            $this->middleware[$path]['PATCH'] = $middleware;
+        }
+    }
+
+    /**
+     * Register routes for multiple HTTP methods.
+     *
+     * @param array<string> $methods    HTTP methods (GET, POST, etc.)
+     * @param string        $path       The URL path
+     * @param string        $handler    The handler
+     * @param array         $middleware Optional middleware
+     *
+     * @return void
+     *
+     * @psalm-suppress PossiblyUnusedMethod - Public API for route registration
+     */
+    public function match(
+        array $methods,
+        string $path,
+        string $handler,
+        array $middleware = []
+    ): void {
+        foreach ($methods as $method) {
+            $this->routes[$path][strtoupper($method)] = $handler;
+            if (!empty($middleware)) {
+                $this->middleware[$path][strtoupper($method)] = $middleware;
+            }
+        }
+    }
+
+    /**
+     * Resolve the current request to a handler.
+     *
+     * @return array<string, mixed> Resolution array with type and handler info
+     *
+     * @psalm-return array{
+     *     type: 'handler'|'not_found'|'redirect'|'static',
+     *     path?: string,
+     *     url?: string,
+     *     code?: 301,
+     *     handler?: string,
+     *     params?: array<string, mixed>,
+     *     routeParams?: array<string, mixed>,
+     *     file?: string,
+     *     mime?: string,
+     *     middleware?: array<MiddlewareInterface|string>
+     * }
      */
     public function resolve(): array
     {
@@ -200,6 +345,7 @@ class Router
             // Check specific method first, then wildcard
             if (isset($methodRoutes[$requestMethod])) {
                 $middleware = $this->middleware[$path][$requestMethod] ?? [];
+                /** @psalm-suppress InvalidReturnStatement - Dynamic route resolution */
                 return [
                     'type' => 'handler',
                     'handler' => $methodRoutes[$requestMethod],
@@ -208,6 +354,7 @@ class Router
                 ];
             } elseif (isset($methodRoutes['*'])) {
                 $middleware = $this->middleware[$path]['*'] ?? [];
+                /** @psalm-suppress InvalidReturnStatement - Dynamic route resolution */
                 return [
                     'type' => 'handler',
                     'handler' => $methodRoutes['*'],
@@ -219,9 +366,22 @@ class Router
 
         // Try pattern matching for dynamic routes (e.g., /text/{id})
         foreach ($this->routes as $pattern => $methods) {
+            // Skip exact patterns (no placeholders)
+            if (!str_contains($pattern, '{')) {
+                continue;
+            }
+
             $regex = $this->convertPatternToRegex($pattern);
             if (preg_match($regex, $path, $matches)) {
-                array_shift($matches); // Remove full match
+                // Extract only named captures (remove numeric keys and full match)
+                $routeParams = array_filter(
+                    $matches,
+                    fn($key) => is_string($key),
+                    ARRAY_FILTER_USE_KEY
+                );
+
+                // Coerce types based on route definition
+                $routeParams = $this->coerceParams($pattern, $routeParams);
 
                 $methodRoutes = $methods;
                 $matchedMethod = isset($methodRoutes[$requestMethod])
@@ -231,12 +391,14 @@ class Router
                     ? $methodRoutes[$matchedMethod]
                     : null;
 
-                if ($handler) {
+                if ($handler !== null) {
                     $middleware = $this->middleware[$pattern][$matchedMethod] ?? [];
+                    /** @psalm-suppress InvalidReturnStatement - Dynamic route resolution */
                     return [
                         'type' => 'handler',
                         'handler' => $handler,
-                        'params' => array_merge($_GET, $matches),
+                        'params' => array_merge($_GET, $routeParams),
+                        'routeParams' => $routeParams,
                         'middleware' => $middleware,
                     ];
                 }
@@ -253,8 +415,9 @@ class Router
                     ? $methods[$matchedMethod]
                     : null;
 
-                if ($handler) {
+                if ($handler !== null) {
                     $middleware = $this->prefixMiddleware[$prefix][$matchedMethod] ?? [];
+                    /** @psalm-suppress InvalidReturnStatement - Dynamic route resolution */
                     return [
                         'type' => 'handler',
                         'handler' => $handler,
@@ -391,29 +554,132 @@ class Router
     }
 
     /**
-     * Convert route pattern to regex
+     * Route parameter type constraints.
      *
-     * @param string $pattern Route pattern (e.g., '/text/{id}')
+     * Maps type names to regex patterns.
      *
-     * @return string Regex pattern
+     * @var array<string, string>
+     */
+    private const PARAM_TYPES = [
+        'int' => '[0-9]+',
+        'alpha' => '[a-zA-Z]+',
+        'alphanum' => '[a-zA-Z0-9]+',
+        'slug' => '[a-zA-Z0-9_-]+',
+        'uuid' => '[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}',
+    ];
+
+    /**
+     * Store parameter types for routes.
+     *
+     * Structure: ['pattern' => ['param_name' => 'type']]
+     *
+     * @var array<string, array<string, string>>
+     */
+    private array $routeParamTypes = [];
+
+    /**
+     * Convert route pattern to regex.
+     *
+     * Supports:
+     * - Basic params: {id} - matches any non-slash characters
+     * - Typed params: {id:int} - matches only digits
+     * - Optional params: {id?} or {id:int?} - makes the param optional
+     *
+     * Available types: int, alpha, alphanum, slug, uuid
+     *
+     * @param string $pattern Route pattern (e.g., '/text/{id}', '/user/{id:int}')
+     *
+     * @return non-empty-string Regex pattern
      */
     private function convertPatternToRegex(string $pattern): string
     {
+        $originalPattern = $pattern;
+
         // Escape slashes
         $pattern = str_replace('/', '\/', $pattern);
 
-        // Convert {param} to named capture groups
-        $pattern = preg_replace('/\{(\w+)\}/', '(?P<$1>[^\/]+)', $pattern);
+        // Convert typed optional params: {param:type?}
+        $pattern = preg_replace_callback(
+            '/\{(\w+):(\w+)\?\}/',
+            function (array $matches) use ($originalPattern): string {
+                $paramName = $matches[1];
+                $type = $matches[2];
+                $typePattern = self::PARAM_TYPES[$type] ?? '[^\/]+';
+
+                // Store param type for later coercion
+                $this->routeParamTypes[$originalPattern][$paramName] = $type;
+
+                return '(?:(?P<' . $paramName . '>' . $typePattern . '))?';
+            },
+            $pattern
+        );
+
+        // Convert typed params: {param:type}
+        $pattern = preg_replace_callback(
+            '/\{(\w+):(\w+)\}/',
+            function (array $matches) use ($originalPattern): string {
+                $paramName = $matches[1];
+                $type = $matches[2];
+                $typePattern = self::PARAM_TYPES[$type] ?? '[^\/]+';
+
+                // Store param type for later coercion
+                $this->routeParamTypes[$originalPattern][$paramName] = $type;
+
+                return '(?P<' . $paramName . '>' . $typePattern . ')';
+            },
+            $pattern
+        );
+
+        // Convert optional params: {param?}
+        // Must start with a letter (not a digit) to avoid matching regex quantifiers like {8}
+        $pattern = preg_replace(
+            '/\{([a-zA-Z]\w*)\?\}/',
+            '(?:(?P<$1>[^\/]+))?',
+            $pattern
+        );
+
+        // Convert basic params: {param}
+        // Must start with a letter (not a digit) to avoid matching regex quantifiers like {8}
+        $pattern = preg_replace('/\{([a-zA-Z]\w*)\}/', '(?P<$1>[^\/]+)', $pattern);
 
         return '/^' . $pattern . '$/';
     }
 
     /**
+     * Coerce route parameters to their declared types.
+     *
+     * @param string               $routePattern The original route pattern
+     * @param array<string, mixed> $params       The extracted parameters
+     *
+     * @return array<string, mixed> Parameters with types coerced
+     */
+    private function coerceParams(string $routePattern, array $params): array
+    {
+        $types = $this->routeParamTypes[$routePattern] ?? [];
+
+        foreach ($types as $name => $type) {
+            if (!isset($params[$name])) {
+                continue;
+            }
+
+            $params[$name] = match ($type) {
+                'int' => (int) $params[$name],
+                default => $params[$name],
+            };
+        }
+
+        return $params;
+    }
+
+    /**
      * Execute the resolved handler
      *
-     * @param array $resolution Result from resolve()
+     * @param array<string, mixed> $resolution Result from resolve()
      *
      * @return void
+     *
+     * @psalm-suppress MixedAssignment,MixedArgument,MixedArrayAccess - Dynamic route resolution
+     * @psalm-suppress PossiblyUnusedMethod - Called from Application::run()
      */
     public function execute(array $resolution): void
     {
@@ -443,12 +709,15 @@ class Router
 
                 $this->executeHandler(
                     $resolution['handler'],
-                    $resolution['params']
+                    $resolution['params'],
+                    $resolution['routeParams'] ?? []
                 );
                 break;
 
             case 'not_found':
                 $this->handle404($resolution['path']);
+                // handle404() calls exit() so break is unreachable
+                // Fall through to default is intentional as safety net
 
             default:
                 $this->handle500(
@@ -460,7 +729,7 @@ class Router
     /**
      * Execute the middleware chain.
      *
-     * @param array $middlewareList List of middleware class names or instances
+     * @param array<MiddlewareInterface|string> $middlewareList List of middleware class names or instances
      *
      * @return bool True if all middleware passed, false if halted
      */
@@ -500,8 +769,10 @@ class Router
 
         // Use DI container if available
         if ($this->container !== null && $this->container->has($middleware)) {
+            /** @psalm-suppress MixedAssignment - Container returns mixed */
             $instance = $this->container->get($middleware);
         } else {
+            /** @psalm-suppress MixedMethodCall - Dynamic instantiation */
             $instance = new $middleware();
         }
 
@@ -539,17 +810,23 @@ class Router
     /**
      * Execute a handler (file include or controller method)
      *
-     * @param string $handler Handler string
-     * @param array  $params  Request parameters
+     * @param string               $handler     Handler string
+     * @param array<string, mixed> $params      All request parameters (query + route)
+     * @param array<string, mixed> $routeParams Route parameters only (for injection)
      *
      * @return void
      */
-    private function executeHandler(string $handler, array $params): void
-    {
+    private function executeHandler(
+        string $handler,
+        array $params,
+        array $routeParams = []
+    ): void {
         // Check if it's a controller@method format
         if (str_contains($handler, '@')) {
-            list($controller, $method) = explode('@', $handler, 2);
-            $this->executeController($controller, $method, $params);
+            $parts = explode('@', $handler, 2);
+            $controller = $parts[0];
+            $method = $parts[1] ?? '';
+            $this->executeController($controller, $method, $params, $routeParams);
         } else {
             // It's a file path - include it
             $this->executeFile($handler, $params);
@@ -557,18 +834,28 @@ class Router
     }
 
     /**
-     * Execute a controller method
+     * Execute a controller method with parameter injection.
      *
-     * @param string $controllerClass Controller class name
-     * @param string $method          Method name
-     * @param array  $params          Parameters
+     * Route parameters are injected as method arguments by name.
+     * The method can also accept a $params array for all parameters.
+     *
+     * Examples:
+     * - Route: /text/{id:int} -> Method: read(int $id)
+     * - Route: /user/{id}/post/{slug} -> Method: show(int $id, string $slug)
+     * - Legacy: Method: index(array $params) still works
+     *
+     * @param string               $controllerClass Controller class name
+     * @param string               $method          Method name
+     * @param array<string, mixed> $params          All parameters (query + route)
+     * @param array<string, mixed> $routeParams     Route parameters for injection
      *
      * @return void
      */
     private function executeController(
         string $controllerClass,
         string $method,
-        array $params
+        array $params,
+        array $routeParams = []
     ): void {
         // Add namespace if not present
         if (!str_contains($controllerClass, '\\')) {
@@ -588,16 +875,96 @@ class Router
             );
         }
 
-        // Call the controller method
-        call_user_func([$controller, $method], $params);
+        // Build method arguments using reflection
+        $arguments = $this->buildMethodArguments(
+            $controllerClass,
+            $method,
+            $params,
+            $routeParams
+        );
+
+        // Call the controller method with resolved arguments
+        call_user_func_array([$controller, $method], $arguments);
+    }
+
+    /**
+     * Build method arguments using reflection.
+     *
+     * Matches route parameters to method parameter names. Falls back to
+     * passing the full params array for legacy compatibility.
+     *
+     * @param string               $controllerClass Controller class name
+     * @param string               $method          Method name
+     * @param array<string, mixed> $params          All parameters
+     * @param array<string, mixed> $routeParams     Route parameters
+     *
+     * @return array<int, mixed> Ordered arguments for the method
+     */
+    private function buildMethodArguments(
+        string $controllerClass,
+        string $method,
+        array $params,
+        array $routeParams
+    ): array {
+        try {
+            /** @psalm-suppress ArgumentTypeCoercion - Controller class verified above */
+            $reflection = new \ReflectionMethod($controllerClass, $method);
+        } catch (\ReflectionException) {
+            // Fallback: pass params array as single argument
+            return [$params];
+        }
+
+        $methodParams = $reflection->getParameters();
+
+        // No parameters - call with no arguments
+        if (count($methodParams) === 0) {
+            return [];
+        }
+
+        // Check if first parameter is an array (legacy style)
+        $firstParam = $methodParams[0];
+        $firstParamType = $firstParam->getType();
+        if (
+            $firstParamType instanceof \ReflectionNamedType
+            && $firstParamType->getName() === 'array'
+            && $firstParam->getName() === 'params'
+        ) {
+            // Legacy style: method expects (array $params)
+            return [$params];
+        }
+
+        // Modern style: inject named parameters
+        $arguments = [];
+        foreach ($methodParams as $param) {
+            $name = $param->getName();
+
+            // Try route params first, then all params
+            if (array_key_exists($name, $routeParams)) {
+                $arguments[] = $routeParams[$name];
+            } elseif (array_key_exists($name, $params)) {
+                $arguments[] = $params[$name];
+            } elseif ($param->isDefaultValueAvailable()) {
+                $arguments[] = $param->getDefaultValue();
+            } elseif ($param->allowsNull()) {
+                $arguments[] = null;
+            } else {
+                // Required parameter not found - pass params array as fallback
+                // This handles the case where controller expects different params
+                return [$params];
+            }
+        }
+
+        return $arguments;
     }
 
     /**
      * Resolve a controller instance from the container or create directly.
      *
-     * @param string $controllerClass The fully qualified controller class name
+     * @param class-string $controllerClass The fully qualified controller class name
      *
      * @return object The controller instance
+     *
+     * @psalm-suppress MixedInferredReturnType,MixedReturnStatement - Dynamic instantiation
      */
     private function resolveController(string $controllerClass): object
     {
@@ -607,6 +974,7 @@ class Router
         }
 
         // Fallback to direct instantiation
+        /** @psalm-suppress MixedMethodCall - Dynamic class instantiation */
         return new $controllerClass();
     }
 

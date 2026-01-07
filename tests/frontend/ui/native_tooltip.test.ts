@@ -11,12 +11,12 @@ beforeEach(() => {
   document.querySelectorAll('.lwt-tooltip, .ui-tooltip').forEach(el => el.remove());
 });
 
-import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
+import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/modules/language/stores/language_config';
 
 // Dynamic import to reset module state
 async function importNativeTooltip() {
   vi.resetModules();
-  return await import('../../../src/frontend/js/ui/native_tooltip');
+  return await import('../../../src/frontend/js/shared/components/native_tooltip');
 }
 
 beforeEach(() => {

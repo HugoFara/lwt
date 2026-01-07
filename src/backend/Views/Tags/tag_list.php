@@ -9,7 +9,7 @@
  * - $pagination: Array with 'pages', 'currentPage', 'perPage'
  * - $currentQuery: Current filter query
  * - $currentSort: Current sort index
- * - $service: TagService instance
+ * - $service: TagsFacade instance
  * - $isTextTag: boolean - true for text tags, false for term tags
  *
  * PHP version 8.1
@@ -20,29 +20,38 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
- *
- * @psalm-suppress UndefinedVariable - Variables are set by the including controller
  */
 
 namespace Lwt\Views\Tags;
 
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\FormHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\FormHelper;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
-/** @var string $message */
-/** @var array $tags */
-/** @var int $totalCount */
-/** @var array $pagination */
-/** @var string $currentQuery */
-/** @var int $currentSort */
-/** @var \Lwt\Services\TagService $service */
-/** @var bool $isTextTag */
+// Type assertions for variables from controller extract()
+$message = (string) ($message ?? '');
+/** @var array<int, array{id: int, text: string, comment: string|null, usageCount: int, archivedUsageCount?: int}> $tags */
+$tags = $tags ?? [];
+$totalCount = (int) ($totalCount ?? 0);
+/** @var array{pages: int, currentPage: int, perPage: int} $paginationRaw */
+$paginationRaw = $pagination ?? ['pages' => 0, 'currentPage' => 1, 'perPage' => 50];
+$pagination = [
+    'pages' => $paginationRaw['pages'] ?? 0,
+    'currentPage' => $paginationRaw['currentPage'] ?? 1,
+    'perPage' => $paginationRaw['perPage'] ?? 50,
+];
+$currentQuery = (string) ($currentQuery ?? '');
+$currentSort = (int) ($currentSort ?? 0);
+/** @var TagsFacade $service */
+$service = $service;
+$isTextTag = (bool) ($isTextTag ?? false);
+/** @var array<int, array{value: int, text: string}> $sortOptions */
+$sortOptions = $service->getSortOptions();
 
 $baseUrl = $service->getBaseUrl();
 $tagTypeLabel = $service->getTagTypeLabel();
-$sortOptions = $service->getSortOptions();
 $itemLabel = $isTextTag ? 'Texts' : 'Terms';
 
 PageLayoutHelper::renderMessage($message, false);
@@ -52,8 +61,8 @@ echo PageLayoutHelper::buildActionCard([
 ]);
 ?>
 
-<!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
-     This search bar should support:
+<!-- NOTE: Search bar planned for future UI refactoring.
+     Planned features:
      - Search across tag text and comments
      - Autocomplete suggestions
 -->
@@ -280,7 +289,7 @@ echo PageLayoutHelper::buildActionCard([
             </div>
         </div>
 
-        <?php if (!empty($tag['comment'])): ?>
+        <?php if ($tag['comment'] !== null && $tag['comment'] !== ''): ?>
         <p class="has-text-grey mb-2"><?php echo htmlspecialchars($tag['comment'], ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
 

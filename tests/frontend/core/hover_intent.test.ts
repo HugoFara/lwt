@@ -2,7 +2,7 @@
  * Tests for hover_intent.ts - HoverIntent and scrollTo utilities
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { hoverIntent, scrollTo } from '../../../src/frontend/js/core/hover_intent';
+import { hoverIntent, scrollTo } from '../../../src/frontend/js/shared/utils/hover_intent';
 
 describe('hover_intent.ts', () => {
   beforeEach(() => {

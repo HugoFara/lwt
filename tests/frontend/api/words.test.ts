@@ -2,11 +2,11 @@
  * Tests for api/words.ts - Words API operations
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { WordsApi } from '../../../src/frontend/js/api/words';
-import * as apiClient from '../../../src/frontend/js/core/api_client';
+import { WordsApi } from '../../../src/frontend/js/modules/vocabulary/api/words_api';
+import * as apiClient from '../../../src/frontend/js/shared/api/client';
 
 // Mock the api_client module
-vi.mock('../../../src/frontend/js/core/api_client', () => ({
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
   apiGet: vi.fn(),
   apiPut: vi.fn(),
 }));
@@ -205,7 +205,7 @@ describe('api/words.ts', () => {
 
       await WordsApi.getFilterOptions(1);
 
-      expect(apiClient.apiGet).toHaveBeenCalledWith('/terms/filter-options', { lang: 1 });
+      expect(apiClient.apiGet).toHaveBeenCalledWith('/terms/filter-options', { language_id: 1 });
     });
 
     it('returns filter options', async () => {

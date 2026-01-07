@@ -2,25 +2,20 @@
 
 namespace Lwt\Tests\Core\Entity;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/LanguageId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TextId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TermId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TermStatus.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/Language.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/Term.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/Text.php';
+require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Domain/Term.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Domain/Text.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/GoogleTranslate.php';
 
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Lwt\Core\Entity\GoogleTranslate;
-use Lwt\Core\Entity\Language;
-use Lwt\Core\Entity\Term;
-use Lwt\Core\Entity\Text;
-use Lwt\Core\Entity\ValueObject\LanguageId;
-use Lwt\Core\Entity\ValueObject\TermId;
-use Lwt\Core\Entity\ValueObject\TermStatus;
-use Lwt\Core\Entity\ValueObject\TextId;
+use Lwt\Modules\Language\Domain\Language;
+use Lwt\Modules\Vocabulary\Domain\Term;
+use Lwt\Modules\Text\Domain\Text;
+use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermId;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
+use Lwt\Modules\Text\Domain\ValueObject\TextId;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -201,6 +196,11 @@ class ClassesTest extends TestCase
             'http://dict1.test',
             'http://dict2.test',
             'http://translate.test',
+            false,  // dict1PopUp
+            false,  // dict2PopUp
+            false,  // translatorPopUp
+            'de',   // sourceLang
+            'en',   // targetLang
             'Template: %s',
             150,
             'ß=ss',
@@ -293,7 +293,7 @@ class ClassesTest extends TestCase
 
     public function testLanguageGetDictionaryUrl(): void
     {
-        $lang = Language::create('English', 'http://dict.test/###', '.!?', 'a-z');
+        $lang = Language::create('English', 'http://dict.test/lwt_term', '.!?', 'a-z');
         $url = $lang->getDictionaryUrl('hello');
         $this->assertEquals('http://dict.test/hello', $url);
     }
@@ -302,6 +302,7 @@ class ClassesTest extends TestCase
     {
         $lang = Language::reconstitute(
             42, 'Test', 'http://dict1', 'http://dict2', 'http://trans',
+            false, false, false, null, null,  // popup and lang fields
             'Template', 100, 'a=b', '.!?', 'Dr.', 'a-z',
             true, false, true, 'http://tts', true
         );
@@ -334,15 +335,6 @@ class ClassesTest extends TestCase
         $this->assertTrue($lang->hasTranslator());
         $this->assertTrue($lang->hasExportTemplate());
         $this->assertTrue($lang->hasTts());
-    }
-
-    public function testLanguageUsesMecab(): void
-    {
-        $lang = Language::create('Japanese', '', '.!?', 'mecab');
-        $this->assertTrue($lang->usesMecab());
-
-        $lang2 = Language::create('English', '', '.!?', 'a-z');
-        $this->assertFalse($lang2->usesMecab());
     }
 
     // =========================================================================
@@ -586,27 +578,6 @@ class ClassesTest extends TestCase
         $this->assertEquals(12.5, $text->audioPosition());
     }
 
-    public function testTextFromDbRecord(): void
-    {
-        $record = [
-            'TxID' => 789,
-            'TxLgID' => 2,
-            'TxTitle' => 'Database Text',
-            'TxText' => 'Loaded from database.',
-            'TxAnnotatedText' => '<annotated>content</annotated>',
-            'TxAudioURI' => 'audio/file.mp3',
-            'TxSourceURI' => 'https://source.url',
-            'TxPosition' => 100,
-            'TxAudioPosition' => 5.75
-        ];
-
-        $text = Text::fromDbRecord($record);
-
-        $this->assertEquals(789, $text->id()->toInt());
-        $this->assertEquals(2, $text->languageId()->toInt());
-        $this->assertEquals('Database Text', $text->title());
-    }
-
     public function testTextRename(): void
     {
         $langId = LanguageId::fromInt(1);
@@ -844,7 +815,9 @@ class ClassesTest extends TestCase
     public function testLanguageSetIdOnPersistedEntityFails(): void
     {
         $lang = Language::reconstitute(
-            1, 'English', '', '', '', '', 100, '', '.!?', '', 'a-z',
+            1, 'English', '', '', '',
+            false, false, false, null, null,  // popup and lang fields
+            '', 100, '', '.!?', '', 'a-z',
             false, false, false, '', true
         );
 

@@ -3,11 +3,11 @@ namespace Lwt\Tests\Services;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\TextService;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Modules\Text\Application\TextFacade;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -16,10 +16,10 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/TextFacade.php';
 
 /**
- * Unit tests for the TextService reading-related methods.
+ * Unit tests for the TextFacade reading-related methods.
  *
  * Tests data retrieval for text reading functionality.
  */
@@ -28,7 +28,7 @@ class TextServiceReadingTest extends TestCase
     private static bool $dbConnected = false;
     private static int $testLangId = 0;
     private static int $testTextId = 0;
-    private TextService $service;
+    private TextFacade $service;
 
     public static function setUpBeforeClass(): void
     {
@@ -102,7 +102,7 @@ class TextServiceReadingTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->service = new TextService();
+        $this->service = new TextFacade();
     }
 
     // ===== getTextForReading() tests =====

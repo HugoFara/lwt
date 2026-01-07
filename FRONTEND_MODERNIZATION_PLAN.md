@@ -1,9 +1,9 @@
 # Frontend Modernization Plan
 
 **Project:** Learning with Texts (LWT)
-**Document Version:** 7.0
-**Last Updated:** December 2, 2025
-**Status:** Phase 3 Complete - jQuery Removed, Alpine.js & Bulma Adopted
+**Document Version:** 8.1
+**Last Updated:** January 6, 2026
+**Status:** Phase 5 In Progress - Performance & Accessibility Optimization
 
 ---
 
@@ -32,12 +32,15 @@ This document outlines the comprehensive plan to modernize the Learning with Tex
 - ✅ Convert to ES6+ modules - **COMPLETE** (104 TypeScript files, ~25,000 lines)
 - ✅ Extract backend-embedded JavaScript - **COMPLETE** (zero inline handlers)
 - ✅ Centralized API client with type-safe wrappers - **COMPLETE**
-- ✅ Comprehensive test suite - **COMPLETE** (84 test files, ~41,000 lines)
+- ✅ Comprehensive test suite - **COMPLETE** (96 test files, 3000+ tests)
 - ✅ Remove jQuery entirely - **COMPLETE**
 - ✅ Adopt Alpine.js for reactive components - **COMPLETE**
 - ✅ Adopt Bulma CSS framework - **COMPLETE**
-- 🔧 Component architecture refinement - **IN PROGRESS** (Phase 4)
-- 🎯 Performance optimization - **PLANNED** (Phase 5)
+- ✅ Component architecture refinement - **COMPLETE** (Phase 4)
+- 🔄 Performance optimization - **IN PROGRESS** (Phase 5)
+  - ✅ Accessibility: 79 → 96 (WCAG 2.1 AA compliant)
+  - ✅ Async CSS loading (render-blocking eliminated)
+  - ✅ JS code splitting (main bundle: 1.1MB → 357KB)
 
 **Risk Level:** Low (phased approach proven successful)
 **Expected ROI:** High (improved DX, performance, maintainability)
@@ -51,7 +54,7 @@ This document outlines the comprehensive plan to modernize the Learning with Tex
 **JavaScript:**
 
 - **Total Lines:** ~25,000 lines across 104 TypeScript files
-- **Test Coverage:** 84 test files with ~41,000 lines of tests
+- **Test Coverage:** 96 test files with 3000+ tests
 - **Module System:** ES6 modules (TypeScript)
 - **UI Framework:** Alpine.js 3.x (reactive components)
 - **CSS Framework:** Bulma 1.x (modern CSS)
@@ -193,6 +196,7 @@ src/frontend/js/
 
 ```text
 src/frontend/css/
+├── critical.css                  - Inlined critical CSS for fast first paint
 ├── base/
 │   ├── styles.css                - Main stylesheet (Bulma-based)
 │   ├── css_charts.css            - Chart visualizations
@@ -312,25 +316,26 @@ One file (`Views/Text/read_text.php`) contains inline CSS for dynamic annotation
 |------|-------|-------------|--------|
 | `Views/Text/read_text.php` | 80-120 | Dynamic annotation styling (::after, ::before), ruby text | Acceptable - dynamic based on config |
 
-#### 2. Alpine.js Migration Completion
+#### 2. Alpine.js Migration Completion ✅
 
-Some pages still use vanilla JS patterns that could benefit from Alpine.js:
+All major pages now use Alpine.js components:
 
-- Feed wizard pages
-- Some admin pages
-- Legacy word list pages
+- ✅ Feed wizard pages (already migrated with `feed_wizard_store.ts` and step components)
+- ✅ Admin pages (`ttsSettingsApp`, `settingsFormApp`, `statisticsChartsApp`, etc.)
+- ✅ Word list pages (`wordListFilterApp`, `wordListTableApp`, `wordUploadFormApp`, `bulkTranslateApp`)
 
 ### Technical Metrics
 
 | Metric | Phase 0 | Phase 2.5 | Current | Notes |
 |--------|---------|-----------|---------|-------|
 | TypeScript Files | 0 | 83 | 104 | +25% growth |
-| Test Files | 0 | 72 | 84 | +17% growth |
-| Test Lines | 0 | ~34,000 | ~41,000 | Comprehensive |
+| Test Files | 0 | 72 | 96 | +33% growth |
+| Tests | 0 | ~2,500 | 3,051 | Comprehensive |
 | Bundle Size (JS) | ~600KB | ~286KB | ~995KB | Includes Alpine + Chart.js |
 | Inline Handlers | 50+ | 0 | 0 | ✅ Complete |
 | API Endpoints Typed | 0 | 15+ | All | ✅ Complete |
 | jQuery Usage | 100% | ~50% | 0% | ✅ Complete |
+| Alpine Components | 0 | ~10 | 25+ | ✅ Complete |
 
 ---
 
@@ -533,7 +538,7 @@ composer build                   # Alias for npm run build:all
 3. ✅ PHP functions return data instead of generating JS
 4. ✅ New TypeScript modules created and tested
 5. ✅ Centralized API client with type-safe wrappers
-6. ✅ Comprehensive test suite (84 test files)
+6. ✅ Comprehensive test suite (96 test files)
 
 ---
 
@@ -563,7 +568,7 @@ composer build                   # Alias for npm run build:all
 
 ---
 
-### Phase 4: Component Architecture 🔧 **IN PROGRESS**
+### Phase 4: Component Architecture ✅ **COMPLETE**
 
 **Goals:**
 
@@ -582,16 +587,13 @@ composer build                   # Alias for npm run build:all
 - ✅ Home app (`home_app.ts`)
 - ✅ Audio player component (`audio_player_alpine.ts`)
 - ✅ UI components (`navbar.ts`, `footer.ts`, `word_popup.ts`)
-
-**Remaining:**
-
-- Feed wizard Alpine migration
-- Admin pages Alpine migration
-- Word list pages Alpine migration
+- ✅ Feed wizard components (`feed_wizard_store.ts`, step components)
+- ✅ Admin components (`ttsSettingsApp`, `settingsFormApp`, `statisticsChartsApp`, `backupManagerApp`, `tableManagementApp`)
+- ✅ Word list components (`wordListFilterApp`, `wordListTableApp`, `wordUploadFormApp`, `wordUploadResultApp`, `bulkTranslateApp`)
 
 ---
 
-### Phase 5: Polish & Optimization 🎯 **PLANNED**
+### Phase 5: Polish & Optimization 🔄 **IN PROGRESS**
 
 **Goals:**
 
@@ -600,6 +602,36 @@ composer build                   # Alias for npm run build:all
 - Accessibility improvements (WCAG 2.1 AA)
 - Code splitting optimization
 - Bundle size optimization
+
+**Completed:**
+
+- ✅ Accessibility improvements (texts page: 79 → 96)
+  - Fixed color contrast for `.is-static` buttons and `.status` links
+  - Added `aria-label` to collapse buttons, checkboxes, and select elements
+  - Added `aria-expanded` state to collapsible sections
+- ✅ Async CSS loading (eliminates render-blocking)
+  - CSS loads via `rel="preload"` + `onload` pattern
+  - Critical CSS (~3KB) inlined in `<head>` for fast first paint
+- ✅ JavaScript code splitting
+  - Vendor chunks: Alpine (43KB), Chart.js (201KB), Lucide (335KB), Tagify (75KB)
+  - Main bundle reduced from 1.1MB to 357KB
+  - Terser minification with console removal
+- ✅ Build cleanup (removed 200+ old build artifacts)
+
+**Results:**
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| FCP | 10.0s | 6.5s | -35% |
+| TBT | 50ms | 0ms | -100% |
+| Render-blocking | 3,300ms | 0ms | Eliminated |
+| Accessibility (texts) | 79 | 96 | +17 |
+
+**Remaining:**
+
+- CSS modernization (consider Bulma tree-shaking)
+- Further Lighthouse performance improvements
+- Mobile performance optimization
 
 ---
 
@@ -632,18 +664,20 @@ composer build                   # Alias for npm run build:all
 |--------|--------|----------|-------|
 | TypeScript Migration | 100% | ✅ 100% | 104 files |
 | Inline Handlers | 0 | ✅ 0 | All removed |
-| Test Files | 70+ | ✅ 84 | Comprehensive |
+| Test Files | 70+ | ✅ 96 | Comprehensive |
 | jQuery Removal | 100% | ✅ 100% | Fully removed |
 | API Type Safety | All endpoints | ✅ All | Complete coverage |
-| Alpine Components | Core pages | ✅ Done | Reading, testing, texts |
+| Alpine Components | All pages | ✅ 25+ | Reading, testing, texts, admin, feeds, words |
 
 ### Pending Metrics
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
-| Lighthouse Performance | 90+ | TBD | Phase 5 |
-| Accessibility Score | 95+ | TBD | Phase 5 |
-| Alpine Migration | 100% | ~70% | Phase 4 |
+| Lighthouse Performance | 90+ | 58 | 🔄 In Progress (limited by dev server) |
+| Accessibility Score | 95+ | ✅ 96 | ✅ Complete |
+| Alpine Migration | 100% | ✅ 100% | ✅ Complete |
+| Render-blocking Resources | 0 | ✅ 0 | ✅ Eliminated |
+| Code Splitting | Yes | ✅ Yes | ✅ Complete |
 
 ---
 
@@ -658,13 +692,13 @@ composer build                   # Alias for npm run build:all
 | 2 | Build pipeline | ✅ Nov 2025 |
 | 2.5 | API client + tests | ✅ Nov 2025 |
 | 3 | jQuery removal + Alpine/Bulma adoption | ✅ Dec 2025 |
+| 4 | Full Alpine component architecture | ✅ Dec 2025 |
 
 ### Upcoming Milestones
 
 | Phase | Milestone | Target |
 |-------|-----------|--------|
-| 4 | Full Alpine component architecture | TBD |
-| 5 | Performance optimization | TBD |
+| 5 | Performance optimization | 🔄 In Progress (Jan 2026) |
 
 ---
 
@@ -807,6 +841,20 @@ tests/frontend/
 
 ```text
 src/frontend/js/
+├── admin/
+│   ├── tts_settings.ts           - TTS settings component (ttsSettingsApp)
+│   ├── settings_form.ts          - Settings form component (settingsFormApp)
+│   ├── statistics_charts.ts      - Statistics charts component
+│   ├── backup_manager.ts         - Backup manager component (backupManagerApp)
+│   └── table_management.ts       - Table management component (tableManagementApp)
+├── feeds/
+│   ├── components/
+│   │   ├── feed_wizard_step1.ts  - Wizard step 1 component
+│   │   ├── feed_wizard_step2.ts  - Wizard step 2 component
+│   │   ├── feed_wizard_step3.ts  - Wizard step 3 component
+│   │   └── feed_wizard_step4.ts  - Wizard step 4 component
+│   └── stores/
+│       └── feed_wizard_store.ts  - Feed wizard state management
 ├── reading/
 │   ├── components/
 │   │   ├── text_reader.ts        - Main text reading component
@@ -823,6 +871,11 @@ src/frontend/js/
 ├── texts/
 │   ├── texts_grouped_app.ts      - Texts list Alpine app
 │   └── archived_texts_grouped_app.ts - Archived texts Alpine app
+├── words/
+│   ├── word_list_filter.ts       - Word list filter component (wordListFilterApp)
+│   ├── word_list_table.ts        - Word list table component (wordListTableApp)
+│   ├── word_upload.ts            - Word upload components (wordUploadFormApp, wordUploadResultApp)
+│   └── bulk_translate.ts         - Bulk translate component (bulkTranslateApp)
 ├── media/
 │   └── audio_player_alpine.ts    - Audio player component
 ├── home/

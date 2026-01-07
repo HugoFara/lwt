@@ -18,7 +18,7 @@ vi.mock('alpinejs', () => ({
 }));
 
 // Mock frame management
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   loadModalFrame: vi.fn()
 }));
 
@@ -28,7 +28,7 @@ import {
   mwordDragNDrop,
   mword_drag_n_drop_select,
   mword_touch_select
-} from '../../../src/frontend/js/reading/text_multiword_selection';
+} from '../../../src/frontend/js/modules/text/pages/reading/text_multiword_selection';
 
 describe('text_multiword_selection.ts', () => {
   beforeEach(() => {

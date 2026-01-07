@@ -3,23 +3,24 @@
 namespace Lwt\Tests\Core\Tag;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Http/UrlUtilities.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Http/UrlUtilities.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
-use Lwt\Services\TagService;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Modules\Tags\Application\TagsFacade;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 
 /**
- * Comprehensive tests for TagService
+ * Comprehensive tests for TagsFacade
  *
  * Tests tag creation, retrieval, assignment to words/texts, and list manipulation
  */
@@ -56,7 +57,7 @@ class TagsTest extends TestCase
 
         // This function adds tags to words but needs words to exist
         // We'll test the basic function structure
-        $result = TagService::addTagToWords('TestTag', '(1,2,3)');
+        $result = TagsFacade::addTagToWords('TestTag', '(1,2,3)');
 
         $this->assertIsString($result, 'Should return a string message');
         $this->assertStringContainsString('Tag added', $result, 'Should indicate tag was processed');
@@ -73,14 +74,14 @@ class TagsTest extends TestCase
         }
 
         // Test with special characters in tag name
-        $result = TagService::addTagToWords('Tag-With-Dashes', '(1)');
+        $result = TagsFacade::addTagToWords('Tag-With-Dashes', '(1)');
         $this->assertIsString($result);
 
-        $result = TagService::addTagToWords('Tag_With_Underscores', '(1)');
+        $result = TagsFacade::addTagToWords('Tag_With_Underscores', '(1)');
         $this->assertIsString($result);
 
         // Test with spaces
-        $result = TagService::addTagToWords('Tag With Spaces', '(1)');
+        $result = TagsFacade::addTagToWords('Tag With Spaces', '(1)');
         $this->assertIsString($result);
     }
 
@@ -99,7 +100,7 @@ class TagsTest extends TestCase
 
         // Should handle SQL injection safely by escaping
         // The tag name will be stored as escaped string, not executed
-        $result = TagService::addTagToWords("SafeTag_NoInjection", '(1)');
+        $result = TagsFacade::addTagToWords("SafeTag_NoInjection", '(1)');
         $this->assertIsString($result, 'Should handle tag creation safely');
     }
 
@@ -117,7 +118,7 @@ class TagsTest extends TestCase
         }
 
         // Single space should work (gets trimmed and becomes non-empty in DB)
-        $result = TagService::addTagToWords(' Trimmed Tag ', '(1)');
+        $result = TagsFacade::addTagToWords(' Trimmed Tag ', '(1)');
         $this->assertIsString($result, 'Should handle whitespace-padded tag name');
     }
 
@@ -131,7 +132,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::addTagToWords('TestTag', '()');
+        $result = TagsFacade::addTagToWords('TestTag', '()');
         $this->assertIsString($result);
         $this->assertStringContainsString('0', $result, 'Should indicate 0 items affected');
     }
@@ -146,7 +147,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::addTagToArchivedTexts('ArchiveTag', '(1)');
+        $result = TagsFacade::addTagToArchivedTexts('ArchiveTag', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('Tag added', $result);
     }
@@ -161,7 +162,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::addTagToArchivedTexts('Archive-Tag_2023', '(1)');
+        $result = TagsFacade::addTagToArchivedTexts('Archive-Tag_2023', '(1)');
         $this->assertIsString($result);
     }
 
@@ -175,7 +176,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::addTagToTexts('TextTag', '(1)');
+        $result = TagsFacade::addTagToTexts('TextTag', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('Tag added', $result);
     }
@@ -191,10 +192,10 @@ class TagsTest extends TestCase
         }
 
         // First add a tag to ensure it exists
-        TagService::addTagToWords('RemoveTestTag', '(1)');
+        TagsFacade::addTagToWords('RemoveTestTag', '(1)');
 
         // Now remove it
-        $result = TagService::removeTagFromWords('RemoveTestTag', '(1,2,3)');
+        $result = TagsFacade::removeTagFromWords('RemoveTestTag', '(1,2,3)');
         $this->assertIsString($result);
         $this->assertStringContainsString('Tag removed', $result);
     }
@@ -210,7 +211,7 @@ class TagsTest extends TestCase
         }
 
         // Non-existent tag ID
-        $result = TagService::removeTagFromWords('99999', '(1)');
+        $result = TagsFacade::removeTagFromWords('99999', '(1)');
         $this->assertIsString($result);
     }
 
@@ -225,10 +226,10 @@ class TagsTest extends TestCase
         }
 
         // First add a tag to ensure it exists
-        TagService::addTagToArchivedTexts('RemoveArchTestTag', '(1)');
+        TagsFacade::addTagToArchivedTexts('RemoveArchTestTag', '(1)');
 
         // Now remove it
-        $result = TagService::removeTagFromArchivedTexts('RemoveArchTestTag', '(1)');
+        $result = TagsFacade::removeTagFromArchivedTexts('RemoveArchTestTag', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('Tag removed', $result);
     }
@@ -244,10 +245,10 @@ class TagsTest extends TestCase
         }
 
         // First add a tag to ensure it exists
-        TagService::addTagToTexts('RemoveTextTestTag', '(1)');
+        TagsFacade::addTagToTexts('RemoveTextTestTag', '(1)');
 
         // Now remove it
-        $result = TagService::removeTagFromTexts('RemoveTextTestTag', '(1)');
+        $result = TagsFacade::removeTagFromTexts('RemoveTextTestTag', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('Tag removed', $result);
     }
@@ -262,7 +263,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $tags = TagService::getAllTermTags();
+        $tags = TagsFacade::getAllTermTags();
         $this->assertIsArray($tags, 'Should return array of tags');
     }
 
@@ -276,7 +277,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $tags = TagService::getAllTermTags(true);
+        $tags = TagsFacade::getAllTermTags(true);
         $this->assertIsArray($tags, 'Should return array of tags after refresh');
     }
 
@@ -290,7 +291,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $tags = TagService::getAllTextTags();
+        $tags = TagsFacade::getAllTextTags();
         $this->assertIsArray($tags, 'Should return array of text tags');
     }
 
@@ -304,7 +305,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $tags = TagService::getAllTextTags(true);
+        $tags = TagsFacade::getAllTextTags(true);
         $this->assertIsArray($tags, 'Should return array after refresh');
     }
 
@@ -319,13 +320,13 @@ class TagsTest extends TestCase
         }
 
         // Test with Unicode tag names
-        $result = TagService::addTagToWords('日本語タグ', '(1)');
+        $result = TagsFacade::addTagToWords('日本語タグ', '(1)');
         $this->assertIsString($result, 'Should handle Unicode in tag names');
 
-        $result = TagService::addTagToWords('العربية', '(1)');
+        $result = TagsFacade::addTagToWords('العربية', '(1)');
         $this->assertIsString($result, 'Should handle Arabic in tag names');
 
-        $result = TagService::addTagToWords('Ελληνικά', '(1)');
+        $result = TagsFacade::addTagToWords('Ελληνικά', '(1)');
         $this->assertIsString($result, 'Should handle Greek in tag names');
     }
 
@@ -339,9 +340,9 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        // Use a unique long tag name to avoid duplicate key errors
-        $longTag = 'LongTag_' . time() . '_' . str_repeat('X', 20);
-        $result = TagService::addTagToWords($longTag, '(1)');
+        // Use a unique tag name (max 20 chars for TgText column)
+        $longTag = 'LT_' . substr((string)time(), -7);
+        $result = TagsFacade::addTagToWords($longTag, '(1)');
         $this->assertIsString($result, 'Should handle long tag names');
     }
 
@@ -356,11 +357,11 @@ class TagsTest extends TestCase
         }
 
         // Add tag
-        $result = TagService::addTagToWords('SequentialTag', '(1)');
+        $result = TagsFacade::addTagToWords('SequentialTag', '(1)');
         $this->assertIsString($result);
 
         // Get tags
-        $tags = TagService::getAllTermTags(true);
+        $tags = TagsFacade::getAllTermTags(true);
         $this->assertIsArray($tags);
 
         // Remove tag (would need actual tag ID from database)
@@ -382,7 +383,7 @@ class TagsTest extends TestCase
         }
 
         // Test with no language filter
-        $result = TagService::getTermTagSelectOptions('', '');
+        $result = TagsFacade::getTermTagSelectOptions('', '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
         $this->assertStringContainsString('[Filter off]', $result);
@@ -403,7 +404,7 @@ class TagsTest extends TestCase
         }
 
         // Test with language filter
-        $result = TagService::getTermTagSelectOptions('', 1);
+        $result = TagsFacade::getTermTagSelectOptions('', 1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
     }
@@ -423,7 +424,7 @@ class TagsTest extends TestCase
         }
 
         // Test with selected value
-        $result = TagService::getTermTagSelectOptions('1', '');
+        $result = TagsFacade::getTermTagSelectOptions('1', '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
     }
@@ -442,7 +443,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = TagService::getTextTagSelectOptions('', '');
+        $result = TagsFacade::getTextTagSelectOptions('', '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
         $this->assertStringContainsString('[Filter off]', $result);
@@ -462,7 +463,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = TagService::getTextTagSelectOptions('', 1);
+        $result = TagsFacade::getTextTagSelectOptions('', 1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
     }
@@ -481,7 +482,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = TagService::getTextTagSelectOptionsWithTextIds('', '');
+        $result = TagsFacade::getTextTagSelectOptionsWithTextIds('', '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
         $this->assertStringContainsString('[Filter off]', $result);
@@ -501,7 +502,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = TagService::getTextTagSelectOptionsWithTextIds(1, '');
+        $result = TagsFacade::getTextTagSelectOptionsWithTextIds(1, '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
     }
@@ -520,7 +521,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = TagService::getArchivedTextTagSelectOptions('', '');
+        $result = TagsFacade::getArchivedTextTagSelectOptions('', '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
         $this->assertStringContainsString('[Filter off]', $result);
@@ -540,7 +541,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = TagService::getArchivedTextTagSelectOptions('', 1);
+        $result = TagsFacade::getArchivedTextTagSelectOptions('', 1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
     }
@@ -555,7 +556,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::getWordTagsHtml(1);
+        $result = TagsFacade::getWordTagsHtml(1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
         $this->assertStringContainsString('id="termtags"', $result);
@@ -572,7 +573,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::getWordTagsHtml(0);
+        $result = TagsFacade::getWordTagsHtml(0);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
         $this->assertStringContainsString('</ul>', $result);
@@ -588,7 +589,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::getWordTagsHtml(-1);
+        $result = TagsFacade::getWordTagsHtml(-1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
     }
@@ -603,7 +604,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::getTextTagsHtml(1);
+        $result = TagsFacade::getTextTagsHtml(1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
         $this->assertStringContainsString('id="texttags"', $result);
@@ -620,7 +621,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::getTextTagsHtml(0);
+        $result = TagsFacade::getTextTagsHtml(0);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
         $this->assertStringContainsString('</ul>', $result);
@@ -636,7 +637,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::getArchivedTextTagsHtml(1);
+        $result = TagsFacade::getArchivedTextTagsHtml(1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
         $this->assertStringContainsString('id="texttags"', $result);
@@ -653,7 +654,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::getArchivedTextTagsHtml(0);
+        $result = TagsFacade::getArchivedTextTagsHtml(0);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
     }
@@ -668,8 +669,8 @@ class TagsTest extends TestCase
         }
 
         // Test with a non-existent ID - should handle gracefully
-        TagService::saveWordTags(999999);
-        TagService::saveWordTags(0);
+        TagsFacade::saveWordTagsFromForm(999999);
+        TagsFacade::saveWordTagsFromForm(0);
 
         // Should complete without errors
         $this->assertTrue(true);
@@ -685,8 +686,8 @@ class TagsTest extends TestCase
         }
 
         // Test with a non-existent ID - should handle gracefully
-        TagService::saveTextTags(999999);
-        TagService::saveTextTags(0);
+        TagsFacade::saveTextTagsFromForm(999999);
+        TagsFacade::saveTextTagsFromForm(0);
 
         // Should complete without errors
         $this->assertTrue(true);
@@ -702,8 +703,8 @@ class TagsTest extends TestCase
         }
 
         // Test with a non-existent ID - should handle gracefully
-        TagService::saveArchivedTextTags(999999);
-        TagService::saveArchivedTextTags(0);
+        TagsFacade::saveArchivedTextTagsFromForm(999999);
+        TagsFacade::saveArchivedTextTagsFromForm(0);
 
         // Should complete without errors
         $this->assertTrue(true);
@@ -719,7 +720,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::removeTagFromWords('', '(1)');
+        $result = TagsFacade::removeTagFromWords('', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('not found', $result);
     }
@@ -734,7 +735,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::removeTagFromTexts('', '(1)');
+        $result = TagsFacade::removeTagFromTexts('', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('not found', $result);
     }
@@ -749,7 +750,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagService::removeTagFromArchivedTexts('', '(1)');
+        $result = TagsFacade::removeTagFromArchivedTexts('', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('not found', $result);
     }
@@ -767,8 +768,8 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        // Use a highly unique tag name with microseconds
-        $uniqueTagName = 'DupTest_' . uniqid('', true);
+        // Use a unique tag name (max 20 chars for TgText column)
+        $uniqueTagName = 'D_' . substr(uniqid(), -8);
 
         // Clean up any pre-existing tag with this name (shouldn't exist, but be safe)
         Connection::preparedExecute(
@@ -788,7 +789,7 @@ class TagsTest extends TestCase
 
             // Try to save a word with this tag - should NOT throw exception
             // even though the tag exists but is not in the cache
-            TagService::saveWordTagsFromArray(1, [$uniqueTagName]);
+            TagsFacade::saveWordTagsFromArray(1, [$uniqueTagName]);
             $this->assertTrue(true, 'saveWordTagsFromArray should handle duplicate tags gracefully');
         } catch (\RuntimeException $e) {
             if (strpos($e->getMessage(), 'Duplicate entry') !== false) {

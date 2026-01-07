@@ -30,6 +30,9 @@ class ParserResult
      *
      * @param string[] $sentences Array of sentence strings
      * @param Token[]  $tokens    Array of Token objects
+     *
+     * @psalm-param list<string> $sentences
+     * @psalm-param list<Token> $tokens
      */
     public function __construct(
         private array $sentences,

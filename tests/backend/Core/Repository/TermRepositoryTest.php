@@ -4,15 +4,15 @@ namespace Lwt\Tests\Core\Repository;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\Entity\Term;
-use Lwt\Core\Entity\ValueObject\LanguageId;
-use Lwt\Core\Entity\ValueObject\TermId;
-use Lwt\Core\Entity\ValueObject\TermStatus;
-use Lwt\Core\EnvLoader;
+use Lwt\Modules\Vocabulary\Domain\Term;
+use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermId;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
+use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Core\Repository\TermRepository;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -21,25 +21,21 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TermId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TermStatus.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/LanguageId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/Term.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Database/PreparedStatement.php';
+require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Domain/Term.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/PreparedStatement.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Repository/RepositoryInterface.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Repository/AbstractRepository.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/TermRepository.php';
+require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Infrastructure/MySqlTermRepository.php';
 
 /**
- * Tests for the TermRepository class.
+ * Tests for the MySqlTermRepository class.
  *
- * @covers \Lwt\Core\Repository\TermRepository
- * @covers \Lwt\Core\Repository\AbstractRepository
+ * @covers \Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository
  */
 class TermRepositoryTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private TermRepository $repository;
+    private MySqlTermRepository $repository;
     private static int $testLanguageId = 0;
     private static array $testTermIds = [];
 
@@ -95,7 +91,7 @@ class TermRepositoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->repository = new TermRepository();
+        $this->repository = new MySqlTermRepository();
     }
 
     protected function tearDown(): void

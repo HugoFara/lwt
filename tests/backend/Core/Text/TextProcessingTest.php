@@ -3,36 +3,36 @@ namespace Lwt\Tests\Core\Text;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/View/Helper/FormHelper.php';
+require_once __DIR__ . '/../../../../src/Shared/UI/Helpers/FormHelper.php';
 require_once __DIR__ . '/../../../../src/backend/View/Helper/StatusHelper.php';
-require_once __DIR__ . '/../../../../src/backend/Services/TextStatisticsService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/SentenceService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/SimilarTermsService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/TextNavigationService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/TextParsingService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Database/Restore.php';
-require_once __DIR__ . '/../../../../src/backend/Services/ExportService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/LanguageService.php';
-require_once __DIR__ . '/../../../../src/backend/Services/WordStatusService.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/TextStatisticsService.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/SentenceService.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/AnnotationService.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/TextNavigationService.php';
+require_once __DIR__ . '/../../../../src/Modules/Language/Application/Services/TextParsingService.php';
+require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/Restore.php';
+require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExportService.php';
+// LanguageFacade loaded via autoloader
 
 use Lwt\Core\StringUtils;
-use Lwt\Services\ExportService;
-use Lwt\Services\LanguageService;
-use Lwt\Services\TextStatisticsService;
-use Lwt\View\Helper\FormHelper;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
+use Lwt\Modules\Language\Application\LanguageFacade;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
+use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\View\Helper\StatusHelper;
 
 
@@ -44,7 +44,7 @@ use Lwt\View\Helper\StatusHelper;
 class TextProcessingTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static ?LanguageService $languageService = null;
+    private static ?LanguageFacade $languageService = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -62,7 +62,7 @@ class TextProcessingTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$languageService = new LanguageService();
+        self::$languageService = new LanguageFacade();
     }
 
     protected function tearDown(): void

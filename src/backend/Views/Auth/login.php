@@ -44,7 +44,7 @@ $username = $username ?? '';
                     </div>
 
                     <!-- Error message -->
-                    <?php if ($error): ?>
+                    <?php if ($error !== null && $error !== ''): ?>
                     <div class="notification is-danger is-light">
                         <button class="delete" onclick="this.parentElement.remove()"></button>
                         <?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?>
@@ -53,6 +53,7 @@ $username = $username ?? '';
 
                     <!-- Login form -->
                     <form method="POST" action="/login" x-data="{ loading: false }" @submit="loading = true">
+                        <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                         <div class="field">
                             <label class="label" for="username">Username or Email</label>
                             <div class="control has-icons-left">

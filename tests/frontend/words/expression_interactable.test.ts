@@ -2,22 +2,22 @@
  * Tests for expression_interactable.ts - Auto-initialization for multi-word expressions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { autoInitExpressionInteractables } from '../../../src/frontend/js/words/expression_interactable';
+import { autoInitExpressionInteractables } from '../../../src/frontend/js/modules/vocabulary/pages/expression_interactable';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/terms/word_status', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_status', () => ({
   make_tooltip: vi.fn((text, trans, rom, status) =>
     `Tooltip: ${text} - ${trans} (${status})`
   )
 }));
 
-vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   newExpressionInteractable: vi.fn()
 }));
 
-import { make_tooltip } from '../../../src/frontend/js/terms/word_status';
-import { newExpressionInteractable } from '../../../src/frontend/js/core/user_interactions';
-import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/core/text_config';
+import { make_tooltip } from '../../../src/frontend/js/modules/vocabulary/services/word_status';
+import { newExpressionInteractable } from '../../../src/frontend/js/shared/utils/user_interactions';
+import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/modules/text/stores/text_config';
 
 describe('expression_interactable.ts', () => {
   beforeEach(() => {
@@ -362,7 +362,7 @@ describe('expression_interactable.ts', () => {
 
   describe('window exports', () => {
     it('exports autoInitExpressionInteractables to window', async () => {
-      await import('../../../src/frontend/js/words/expression_interactable');
+      await import('../../../src/frontend/js/modules/vocabulary/pages/expression_interactable');
 
       expect((window as unknown as Record<string, unknown>).autoInitExpressionInteractables).toBeDefined();
     });

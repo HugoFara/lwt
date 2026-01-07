@@ -20,7 +20,11 @@ CREATE TABLE IF NOT EXISTS users (
     KEY UsWordPressId (UsWordPressId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Insert a default admin user (password must be set on first login)
--- This ensures existing single-user installations have an account
+-- Insert a migration-only admin user for existing installations upgrading to multi-user mode.
+-- SECURITY NOTE: This account has NO PASSWORD (NULL hash) and CANNOT log in.
+-- The Login use case rejects users with null password hashes.
+-- Users must register a new account with proper credentials.
+-- For fresh installations using baseline.sql, no default admin is created.
+-- This INSERT exists only to provide a user_id=1 owner for migrated data.
 INSERT IGNORE INTO users (UsUsername, UsEmail, UsRole)
 VALUES ('admin', 'admin@localhost', 'admin');

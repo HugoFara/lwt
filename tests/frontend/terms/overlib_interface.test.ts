@@ -36,11 +36,11 @@ import {
   createWellKnownButton,
   createIgnoreButton,
   createTestStatusButtons,
-} from '../../../src/frontend/js/terms/overlib_interface';
-import type { WordActionContext } from '../../../src/frontend/js/reading/word_actions';
+} from '../../../src/frontend/js/modules/vocabulary/services/overlib_interface';
+import type { WordActionContext } from '../../../src/frontend/js/modules/vocabulary/services/word_actions';
 
 // Mock the word_actions module
-vi.mock('../../../src/frontend/js/reading/word_actions', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_actions', () => ({
   changeWordStatus: vi.fn().mockResolvedValue({ success: true }),
   deleteWord: vi.fn().mockResolvedValue({ success: true }),
   markWellKnown: vi.fn().mockResolvedValue({ success: true }),
@@ -48,9 +48,9 @@ vi.mock('../../../src/frontend/js/reading/word_actions', () => ({
   incrementWordStatus: vi.fn().mockResolvedValue({ success: true }),
 }));
 
-import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
-import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/core/text_config';
-import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/core/settings_config';
+import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/modules/language/stores/language_config';
+import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/modules/text/stores/text_config';
+import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/shared/utils/settings_config';
 
 describe('overlib_interface.ts', () => {
   beforeEach(() => {
@@ -61,9 +61,9 @@ describe('overlib_interface.ts', () => {
     resetSettingsConfig();
     initLanguageConfig({
       id: 1,
-      dictLink1: 'http://dict1.example.com/###',
-      dictLink2: 'http://dict2.example.com/###',
-      translatorLink: 'http://translator.example.com/###',
+      dictLink1: 'http://dict1.example.com/lwt_term',
+      dictLink2: 'http://dict2.example.com/lwt_term',
+      translatorLink: 'http://translator.example.com/lwt_term',
       delimiter: ',',
       rtl: false,
       ttsVoiceApi: ''
@@ -124,9 +124,9 @@ describe('overlib_interface.ts', () => {
   describe('make_overlib_link_wb', () => {
     it('creates dictionary links with lookup term', () => {
       const result = make_overlib_link_wb(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         1,
         '5'
@@ -140,9 +140,9 @@ describe('overlib_interface.ts', () => {
 
     it('includes sentence lookup when torder and txid are valid', () => {
       const result = make_overlib_link_wb(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         1,
         '5'
@@ -153,9 +153,9 @@ describe('overlib_interface.ts', () => {
 
     it('excludes sentence lookup when torder is 0', () => {
       const result = make_overlib_link_wb(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         1,
         '0'
@@ -166,9 +166,9 @@ describe('overlib_interface.ts', () => {
 
     it('excludes sentence lookup when txid is 0', () => {
       const result = make_overlib_link_wb(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         0,
         '5'
@@ -185,9 +185,9 @@ describe('overlib_interface.ts', () => {
   describe('make_overlib_link_wbnl', () => {
     it('creates dictionary links with term prefix', () => {
       const result = make_overlib_link_wbnl(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         1,
         '5'
@@ -198,9 +198,9 @@ describe('overlib_interface.ts', () => {
 
     it('includes sentence link when valid', () => {
       const result = make_overlib_link_wbnl(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         1,
         '5'
@@ -217,9 +217,9 @@ describe('overlib_interface.ts', () => {
   describe('make_overlib_link_wbnl2', () => {
     it('creates dictionary links for term and sentence', () => {
       const result = make_overlib_link_wbnl2(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         'This is a test sentence.'
       );
@@ -230,9 +230,9 @@ describe('overlib_interface.ts', () => {
 
     it('excludes sentence when empty', () => {
       const result = make_overlib_link_wbnl2(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         ''
       );
@@ -278,7 +278,7 @@ describe('overlib_interface.ts', () => {
     it('returns link with new status when different', () => {
       const result = make_overlib_link_change_status(1, '5', 100, 3, 4);
 
-      expect(result).toContain('set_word_status.php');
+      expect(result).toContain('/word/set-status');
       expect(result).toContain('tid=1');
       expect(result).toContain('ord=5');
       expect(result).toContain('wid=100');
@@ -309,7 +309,7 @@ describe('overlib_interface.ts', () => {
     it('returns test status links for all levels', () => {
       const result = make_overlib_link_change_status_alltest(100, 2);
 
-      expect(result).toContain('set_test_status.php');
+      expect(result).toContain('/word/set-test-status');
       expect(result).toContain('wid=100');
       // Current status (2) should show diamond inside link
       expect(result).toContain('◆');
@@ -325,7 +325,7 @@ describe('overlib_interface.ts', () => {
       const result = make_overlib_link_change_status_test2(100, 3, 3);
 
       expect(result).toContain('◆');
-      expect(result).toContain('set_test_status.php');
+      expect(result).toContain('/word/set-test-status');
     });
 
     it('shows status abbreviation when status differs', () => {
@@ -344,7 +344,7 @@ describe('overlib_interface.ts', () => {
     it('creates link with positive change and success sound', () => {
       const result = make_overlib_link_change_status_test(100, 1, 'Got it!');
 
-      expect(result).toContain('set_test_status.php');
+      expect(result).toContain('/word/set-test-status');
       expect(result).toContain('wid=100');
       expect(result).toContain('stchange=1');
       expect(result).toContain('successSound()');
@@ -472,7 +472,7 @@ describe('overlib_interface.ts', () => {
     it('creates link to delete a word with confirmation', () => {
       const result = make_overlib_link_delete_word(1, 100);
 
-      expect(result).toContain('delete_word.php');
+      expect(result).toContain('/word/delete-term');
       expect(result).toContain('wid=100');
       expect(result).toContain('tid=1');
       expect(result).toContain('confirmDelete()');
@@ -488,7 +488,7 @@ describe('overlib_interface.ts', () => {
     it('creates link to delete a multiword with confirmation', () => {
       const result = make_overlib_link_delete_multiword(1, 100);
 
-      expect(result).toContain('delete_mword.php');
+      expect(result).toContain('/word/delete-multi');
       expect(result).toContain('wid=100');
       expect(result).toContain('tid=1');
       expect(result).toContain('confirmDelete()');
@@ -504,7 +504,7 @@ describe('overlib_interface.ts', () => {
     it('creates link to mark word as well-known', () => {
       const result = make_overlib_link_wellknown_word(1, '5');
 
-      expect(result).toContain('insert_word_wellknown.php');
+      expect(result).toContain('/word/insert-wellknown');
       expect(result).toContain('tid=1');
       expect(result).toContain('ord=5');
       expect(result).toContain('I know this term well');
@@ -519,7 +519,7 @@ describe('overlib_interface.ts', () => {
     it('creates link to ignore a word', () => {
       const result = make_overlib_link_ignore_word(1, '5');
 
-      expect(result).toContain('insert_word_ignore.php');
+      expect(result).toContain('/word/insert-ignore');
       expect(result).toContain('tid=1');
       expect(result).toContain('ord=5');
       expect(result).toContain('Ignore this term');
@@ -560,7 +560,7 @@ describe('overlib_interface.ts', () => {
   describe.skip('run_overlib functions (require popup dialog)', () => {
     it('run_overlib_status_98 returns boolean', () => {
       const result = run_overlib_status_98(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', 100, ['', '', '', '', '', '', '', ''], false, ''
       );
       expect(typeof result).toBe('boolean');
@@ -568,7 +568,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_status_99 returns boolean', () => {
       const result = run_overlib_status_99(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', 100, ['', '', '', '', '', '', '', ''], false, ''
       );
       expect(typeof result).toBe('boolean');
@@ -576,7 +576,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_status_1_to_5 returns boolean', () => {
       const result = run_overlib_status_1_to_5(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', 100, 3, ['', '', '', '', '', '', '', ''], false, ''
       );
       expect(typeof result).toBe('boolean');
@@ -584,7 +584,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_status_unknown returns boolean', () => {
       const result = run_overlib_status_unknown(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', ['', '', '', '', '', '', '', ''], false
       );
       expect(typeof result).toBe('boolean');
@@ -592,7 +592,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_multiword returns boolean', () => {
       const result = run_overlib_multiword(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'multi word', 100, 3, '2 ', ''
       );
       expect(typeof result).toBe('boolean');
@@ -600,7 +600,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_test returns boolean', () => {
       const result = run_overlib_test(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         100, 'word', 'translation', 'roman', 3, 'test sentence', 1
       );
       expect(typeof result).toBe('boolean');
@@ -608,7 +608,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_test with todo=0 skips interactive buttons', () => {
       const result = run_overlib_test(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         100, 'word', 'translation', 'roman', 3, 'test sentence', 0
       );
       expect(typeof result).toBe('boolean');
@@ -663,7 +663,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('handles click event on non-current status', async () => {
-      const { changeWordStatus } = await import('../../../src/frontend/js/reading/word_actions');
+      const { changeWordStatus } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       const btn = createStatusChangeButton(mockContext, 4);
 
       const clickEvent = new MouseEvent('click', { bubbles: true });
@@ -731,7 +731,7 @@ describe('overlib_interface.ts', () => {
 
     it('shows confirmation dialog when confirm is true', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-      const { deleteWord } = await import('../../../src/frontend/js/reading/word_actions');
+      const { deleteWord } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
 
       const btn = createDeleteButton(mockContext, true);
       btn.click();
@@ -743,7 +743,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('deletes without confirmation when confirm is false', async () => {
-      const { deleteWord } = await import('../../../src/frontend/js/reading/word_actions');
+      const { deleteWord } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(deleteWord).mockClear();
 
       const btn = createDeleteButton(mockContext, false);
@@ -755,7 +755,7 @@ describe('overlib_interface.ts', () => {
 
     it('calls deleteWord after confirmation', async () => {
       vi.spyOn(window, 'confirm').mockReturnValue(true);
-      const { deleteWord } = await import('../../../src/frontend/js/reading/word_actions');
+      const { deleteWord } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(deleteWord).mockClear();
 
       const btn = createDeleteButton(mockContext, true);
@@ -781,7 +781,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('calls markWellKnown on click', async () => {
-      const { markWellKnown } = await import('../../../src/frontend/js/reading/word_actions');
+      const { markWellKnown } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(markWellKnown).mockClear();
 
       const btn = createWellKnownButton(mockContext);
@@ -807,7 +807,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('calls markIgnored on click', async () => {
-      const { markIgnored } = await import('../../../src/frontend/js/reading/word_actions');
+      const { markIgnored } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(markIgnored).mockClear();
 
       const btn = createIgnoreButton(mockContext);
@@ -924,7 +924,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('calls incrementWordStatus up on Got it click', async () => {
-      const { incrementWordStatus } = await import('../../../src/frontend/js/reading/word_actions');
+      const { incrementWordStatus } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(incrementWordStatus).mockClear();
 
       const mockContext: WordActionContext = {
@@ -947,7 +947,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('calls incrementWordStatus down on Oops click', async () => {
-      const { incrementWordStatus } = await import('../../../src/frontend/js/reading/word_actions');
+      const { incrementWordStatus } = await import('../../../src/frontend/js/modules/vocabulary/services/word_actions');
       vi.mocked(incrementWordStatus).mockClear();
 
       const mockContext: WordActionContext = {

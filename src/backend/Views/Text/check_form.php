@@ -20,17 +20,18 @@
 
 namespace Lwt\Views\Text;
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
 
-/** @var string $languagesOption */
-/** @var array $languageData */
+// Type assertions for view variables
+$languagesOption = (string) ($languagesOption ?? '');
 
 ?>
-<script type="application/json" id="language-data-config"><?php echo json_encode($languageData); ?></script>
+<script type="application/json" id="language-data-config"><?php echo json_encode($languageData, JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 
 <h2 class="title is-4">Check Text Parsing</h2>
 
 <form class="validate" action="/text/check" method="post">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <div class="box">
         <!-- Language -->
         <div class="field is-horizontal">

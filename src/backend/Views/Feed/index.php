@@ -24,17 +24,17 @@
 
 namespace Lwt\Views\Feed;
 
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/feeds', 'label' => 'Feeds', 'icon' => 'list'],
     ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
 ]);
 ?>
-<div x-data="feedIndex({currentQuery: '<?php echo addslashes($currentQuery); ?>'})">
-<!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
-     This search bar should support:
+<div x-data="feedIndex({currentQuery: '<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>'})">
+<!-- NOTE: Search bar planned for future UI refactoring.
+     Planned features:
      - Search across feed names
      - Filter chips for language filter
      - Autocomplete suggestions
@@ -75,7 +75,7 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
             </div>
             <div class="level-item">
-                <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form1'); ?>
+                <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form1'); ?>
             </div>
             <div class="level-right">
                 <div class="level-item">
@@ -86,7 +86,7 @@ echo PageLayoutHelper::buildActionCard([
                         <div class="control">
                             <div class="select is-small">
                                 <select name="sort" @change="handleSort($event)">
-                                    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
+                                    <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forTextSort($currentSort); ?>
                                 </select>
                             </div>
                         </div>
@@ -133,7 +133,8 @@ echo PageLayoutHelper::buildActionCard([
 </tr>
 <?php
 $time = time();
-foreach ($feeds as $row):
+$feedsArr = $feeds ?? [];
+foreach ($feedsArr as $row):
     $diff = $time - (int)$row['NfUpdate'];
 ?>
 <tr>
@@ -155,7 +156,7 @@ foreach ($feeds as $row):
         </span>
     </td>
     <td class="td1 center"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-    <td class="td1 center"><?php echo str_replace(',', ', ', $row['NfOptions']); ?></td>
+    <td class="td1 center"><?php echo str_replace(',', ', ', (string) ($row['NfOptions'] ?? '')); ?></td>
     <td class="td1 center" sorttable_customkey="<?php echo $diff; ?>">
         <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
     </td>
@@ -167,7 +168,7 @@ foreach ($feeds as $row):
 <form name="form3" method="get" action="">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr><th class="th1 feeds-filter-cell"><?php echo $totalFeeds; ?></th>
-<th class="th1"><?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form3'); ?></th>
+<th class="th1"><?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form3'); ?></th>
 </tr></table>
 </form>
 <?php endif; ?>

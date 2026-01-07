@@ -15,7 +15,8 @@
     "autoload": {
         "psr-4": {
             "Lwt\\": "src/backend/",
-            "Lwt\\Database\\": "src/backend/Core/Database/"
+            "Lwt\\Shared\\": "src/Shared/",
+            "Lwt\\Modules\\": "src/Modules/"
         }
     },
     "autoload-dev": {
@@ -27,7 +28,8 @@
         "php": "^8.1 | ^8.2 | ^8.3 | ^8.4",
         "ext-mbstring": "*",
         "ext-mysqli": "*",
-        "ext-dom": "*"
+        "ext-dom": "*",
+        "phpmailer/phpmailer": "^6.9"
     },
     "require-dev": {
         "vimeo/psalm": "^5.6",
@@ -57,7 +59,6 @@
             "vendor/bin/phpunit --no-coverage --testsuite integration"
         ],
         "psalm": "vendor/bin/psalm",
-        "psalm:level3": "vendor/bin/psalm --error-level=3",
         "psalm:level1": "vendor/bin/psalm --error-level=1",
         "doc": [
             "npm run docs:build",
@@ -80,8 +81,7 @@
         "test:integration": "Run integration tests (requires database)",
         "test": "Run all tests with coverage (cleans up stale DB connections first)",
         "test:no-coverage": "Run all tests without coverage (cleans up stale DB connections first)",
-        "psalm": "Run Psalm static analysis (current config level)",
-        "psalm:level3": "Run Psalm at level 3 (stricter)",
+        "psalm": "Run Psalm static analysis (level 2 by default)",
         "psalm:level1": "Run Psalm at level 1 (strictest)",
         "doc": "Regenerate all documentation (VitePress + JSDoc + phpDoc)",
         "build": "Build frontend assets (Vite + themes)",

@@ -17,7 +17,7 @@ import {
   readTextAloud,
   handleReadingConfiguration,
   speechDispatcher,
-} from '../../../src/frontend/js/core/user_interactions';
+} from '../../../src/frontend/js/shared/utils/user_interactions';
 
 // Mock SpeechSynthesisUtterance for jsdom environment
 class MockSpeechSynthesisUtterance {
@@ -104,9 +104,17 @@ describe('user_interactions.ts', () => {
       expect(window.top!.location.href).toBe('/');
     });
 
-    it('falls back to .php for unknown values', () => {
+    it('logs error and does not navigate for unknown values', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const originalHref = window.top!.location.href;
+
       quickMenuRedirection('unknown_page');
-      expect(window.top!.location.href).toBe('unknown_page.php');
+
+      expect(window.top!.location.href).toBe(originalHref);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Quick menu: unknown value "unknown_page". Add it to quickMenuRoutes.'
+      );
+      consoleSpy.mockRestore();
     });
 
     it('resets quickmenu selectedIndex to 0', () => {
@@ -505,7 +513,7 @@ describe('user_interactions.ts', () => {
       vi.useFakeTimers();
       vi.spyOn(window, 'focus').mockImplementation(() => {});
       // Dynamically import reading_state to set position
-      const { setReadingPosition } = await import('../../../src/frontend/js/core/reading_state');
+      const { setReadingPosition } = await import('../../../src/frontend/js/modules/text/stores/reading_state');
       setReadingPosition(0);
     });
 
@@ -514,7 +522,7 @@ describe('user_interactions.ts', () => {
     });
 
     it('scrolls to position 0 when reading_position is 0', async () => {
-      const { setReadingPosition } = await import('../../../src/frontend/js/core/reading_state');
+      const { setReadingPosition } = await import('../../../src/frontend/js/modules/text/stores/reading_state');
       document.body.innerHTML = `
         <span class="wsty" data_pos="100">Word</span>
       `;
@@ -525,7 +533,7 @@ describe('user_interactions.ts', () => {
     });
 
     it('finds element at exact reading position', async () => {
-      const { setReadingPosition } = await import('../../../src/frontend/js/core/reading_state');
+      const { setReadingPosition } = await import('../../../src/frontend/js/modules/text/stores/reading_state');
       document.body.innerHTML = `
         <span class="wsty" data_pos="50">First</span>
         <span class="wsty" data_pos="100">Target</span>
@@ -537,7 +545,7 @@ describe('user_interactions.ts', () => {
     });
 
     it('finds closest element when exact position not found', async () => {
-      const { setReadingPosition } = await import('../../../src/frontend/js/core/reading_state');
+      const { setReadingPosition } = await import('../../../src/frontend/js/modules/text/stores/reading_state');
       document.body.innerHTML = `
         <span class="wsty" data_pos="50">First</span>
         <span class="wsty" data_pos="150">Last</span>
@@ -548,7 +556,7 @@ describe('user_interactions.ts', () => {
     });
 
     it('handles no wsty elements', async () => {
-      const { setReadingPosition } = await import('../../../src/frontend/js/core/reading_state');
+      const { setReadingPosition } = await import('../../../src/frontend/js/modules/text/stores/reading_state');
       document.body.innerHTML = '<div>No words</div>';
       setReadingPosition(100);
 

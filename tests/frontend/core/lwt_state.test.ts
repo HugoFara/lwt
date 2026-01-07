@@ -2,7 +2,7 @@
  * Tests for lwt_state.ts - LWT State Management and state modules
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings } from '../../../src/frontend/js/core/lwt_state';
+import type { LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings } from '../../../src/frontend/js/shared/stores/lwt_state';
 import {
   // Language config
   initLanguageConfig,
@@ -49,7 +49,7 @@ import {
   openAnswer,
   resetAnswer,
   resetTestState,
-} from '../../../src/frontend/js/core/lwt_state';
+} from '../../../src/frontend/js/shared/stores/lwt_state';
 
 describe('lwt_state.ts', () => {
   // ===========================================================================
@@ -92,15 +92,15 @@ describe('lwt_state.ts', () => {
 
     it('getDictionaryLinks returns all links', () => {
       initLanguageConfig({
-        dictLink1: 'http://dict1.com/###',
-        dictLink2: 'http://dict2.com/###',
-        translatorLink: 'http://translate.com/###'
+        dictLink1: 'http://dict1.com/lwt_term',
+        dictLink2: 'http://dict2.com/lwt_term',
+        translatorLink: 'http://translate.com/lwt_term'
       });
 
       const links = getDictionaryLinks();
-      expect(links.dict1).toBe('http://dict1.com/###');
-      expect(links.dict2).toBe('http://dict2.com/###');
-      expect(links.translator).toBe('http://translate.com/###');
+      expect(links.dict1).toBe('http://dict1.com/lwt_term');
+      expect(links.dict2).toBe('http://dict2.com/lwt_term');
+      expect(links.translator).toBe('http://translate.com/lwt_term');
     });
 
     it('allows setting TTS voice API', () => {
@@ -361,7 +361,7 @@ describe('lwt_state.ts', () => {
       // Configure for a reading session
       initLanguageConfig({
         id: 1,
-        dictLink1: 'http://dict.example.com/###',
+        dictLink1: 'http://dict.example.com/lwt_term',
         rtl: false
       });
       initTextConfig({ id: 42 });

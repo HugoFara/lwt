@@ -14,7 +14,7 @@
 
 namespace Lwt\Core\Parser;
 
-use Lwt\Core\Entity\Language;
+use Lwt\Modules\Language\Domain\Language;
 
 /**
  * Configuration passed to parsers from language settings.

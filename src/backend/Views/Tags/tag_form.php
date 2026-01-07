@@ -5,7 +5,7 @@
  * Variables expected:
  * - $mode: 'new' or 'edit'
  * - $tag: array with 'id', 'text', 'comment' (for edit mode, null for new)
- * - $service: TagService instance
+ * - $service: TagsFacade instance
  * - $formFieldPrefix: 'Tg' or 'T2'
  *
  * PHP version 8.1
@@ -16,25 +16,28 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
- *
- * @psalm-suppress UndefinedVariable - Variables are set by the including controller
  */
 
 namespace Lwt\Views\Tags;
 
-/** @var string $mode */
-/** @var array|null $tag */
-/** @var \Lwt\Services\TagService $service */
-/** @var string $formFieldPrefix */
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
-use Lwt\View\Helper\IconHelper;
+// Type assertions for variables from controller extract()
+$mode = (string) ($mode ?? 'new');
+/** @var array{id: int, text: string, comment: string|null}|null $tag */
+$tag = $tag ?? null;
+/** @var TagsFacade $service */
+$service = $service;
+$formFieldPrefix = (string) ($formFieldPrefix ?? 'Tg');
 
 $isEdit = $mode === 'edit';
 $pageTitle = $isEdit ? 'Edit Tag' : 'New Tag';
 $formName = $isEdit ? 'edittag' : 'newtag';
+$phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 $actionUrl = $isEdit && $tag !== null ?
-    $_SERVER['PHP_SELF'] . '#rec' . $tag['id'] :
-    $_SERVER['PHP_SELF'];
+    $phpSelf . '#rec' . $tag['id'] :
+    $phpSelf;
 $cancelUrl = $isEdit && $tag !== null ?
     $service->getBaseUrl() . '#rec' . $tag['id'] :
     $service->getBaseUrl();
@@ -48,8 +51,8 @@ $tagComment = $isEdit && $tag !== null ? htmlspecialchars($tag['comment'] ?? '',
 
 <form name="<?php echo $formName; ?>" class="validate" action="<?php echo $actionUrl; ?>" method="post"
       x-data="{
-          tagText: '<?php echo addslashes($tagText); ?>',
-          tagComment: '<?php echo addslashes($tagComment); ?>',
+          tagText: '<?php echo $tagText; ?>',
+          tagComment: '<?php echo $tagComment; ?>',
           charCount: <?php echo strlen($tagComment); ?>
       }">
     <?php if ($isEdit && $tag !== null): ?>

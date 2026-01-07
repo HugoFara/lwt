@@ -8,15 +8,15 @@ import {
   updateWordStatusAjax,
   initWordStatusChange,
   type WordStatusUpdateData
-} from '../../../src/frontend/js/words/word_status_ajax';
+} from '../../../src/frontend/js/modules/vocabulary/services/word_status_ajax';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/words/word_dom_updates', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates', () => ({
   updateWordStatusInDOM: vi.fn(),
   updateLearnStatus: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   cleanupRightFrames: vi.fn()
 }));
 
@@ -39,7 +39,7 @@ describe('word_status_ajax.ts', () => {
 
   describe('wordUpdateError', () => {
     it('displays error message in status_change_log', async () => {
-      const { cleanupRightFrames } = await import('../../../src/frontend/js/reading/frame_management');
+      const { cleanupRightFrames } = await import('../../../src/frontend/js/modules/text/pages/reading/frame_management');
 
       document.body.innerHTML = `
         <div id="status_change_log"></div>
@@ -52,7 +52,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('calls cleanupRightFrames even when element does not exist', async () => {
-      const { cleanupRightFrames } = await import('../../../src/frontend/js/reading/frame_management');
+      const { cleanupRightFrames } = await import('../../../src/frontend/js/modules/text/pages/reading/frame_management');
 
       document.body.innerHTML = '';
 
@@ -68,8 +68,8 @@ describe('word_status_ajax.ts', () => {
 
   describe('applyWordUpdate', () => {
     it('displays success message with status', async () => {
-      const { updateWordStatusInDOM } = await import('../../../src/frontend/js/words/word_dom_updates');
-      const { cleanupRightFrames } = await import('../../../src/frontend/js/reading/frame_management');
+      const { updateWordStatusInDOM } = await import('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates');
+      const { cleanupRightFrames } = await import('../../../src/frontend/js/modules/text/pages/reading/frame_management');
 
       document.body.innerHTML = `
         <div id="status_change_log"></div>
@@ -98,7 +98,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('updates learnstatus in parent frame-h', async () => {
-      await import('../../../src/frontend/js/words/word_dom_updates');
+      await import('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates');
 
       document.body.innerHTML = `
         <div id="status_change_log"></div>
@@ -129,7 +129,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('handles missing frame-h gracefully', async () => {
-      const { updateWordStatusInDOM } = await import('../../../src/frontend/js/words/word_dom_updates');
+      const { updateWordStatusInDOM } = await import('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates');
 
       document.body.innerHTML = `
         <div id="status_change_log"></div>
@@ -185,7 +185,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('calls applyWordUpdate on successful response', async () => {
-      await import('../../../src/frontend/js/words/word_dom_updates');
+      await import('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates');
 
       global.fetch = vi.fn(() =>
         Promise.resolve({
@@ -212,7 +212,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('calls wordUpdateError on empty response', async () => {
-      await import('../../../src/frontend/js/reading/frame_management');
+      await import('../../../src/frontend/js/modules/text/pages/reading/frame_management');
 
       global.fetch = vi.fn(() =>
         Promise.resolve({
@@ -238,7 +238,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('calls wordUpdateError on error response', async () => {
-      await import('../../../src/frontend/js/reading/frame_management');
+      await import('../../../src/frontend/js/modules/text/pages/reading/frame_management');
 
       global.fetch = vi.fn(() =>
         Promise.resolve({
@@ -370,7 +370,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('handles special characters in term', async () => {
-      await import('../../../src/frontend/js/words/word_dom_updates');
+      await import('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates');
 
       global.fetch = vi.fn(() =>
         Promise.resolve({
@@ -396,7 +396,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('handles Unicode characters in term', async () => {
-      await import('../../../src/frontend/js/words/word_dom_updates');
+      await import('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates');
 
       global.fetch = vi.fn(() =>
         Promise.resolve({
@@ -422,7 +422,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('handles null parent document gracefully', async () => {
-      const { updateWordStatusInDOM } = await import('../../../src/frontend/js/words/word_dom_updates');
+      const { updateWordStatusInDOM } = await import('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates');
 
       global.fetch = vi.fn(() =>
         Promise.resolve({

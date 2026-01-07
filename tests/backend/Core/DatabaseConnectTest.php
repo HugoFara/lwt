@@ -5,30 +5,30 @@ namespace Lwt\Tests\Core;
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\ApplicationInfo;
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\DB;
-use Lwt\Database\Escaping;
-use Lwt\Database\Maintenance;
-use Lwt\Database\Migrations;
-use Lwt\Database\Settings;
-use Lwt\Database\TextParsing;
-use Lwt\Database\Validation;
-use Lwt\Services\SettingsService;
-use Lwt\Services\TextParsingService;
-use Lwt\Services\WordStatusService;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\Maintenance;
+use Lwt\Shared\Infrastructure\Database\Migrations;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\TextParsing;
+use Lwt\Shared\Infrastructure\Database\Validation;
+use Lwt\Modules\Admin\Domain\SettingDefinitions;
+use Lwt\Modules\Language\Application\Services\TextParsingService;
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
 
 /**
  * @return string[]
@@ -1015,35 +1015,6 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test check_text_valid function
-     */
-    public function testCheckTextValid(): void
-    {
-        
-        // Ensure DB connection exists
-        if (!Globals::getDbConnection()) {
-            list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
-            );
-            Globals::setDbConnection($connection);
-        }
-
-        // Test with non-existent language (returns null when language doesn't exist)
-        // check_text_valid outputs HTML, so we need to capture it
-        ob_start();
-        $result = TextParsing::checkValid(99999);
-        ob_end_clean();
-        $this->assertNull($result, 'Non-existent language should return null');
-
-        // Test with empty language
-        ob_start();
-        $result = TextParsing::checkValid(0);
-        ob_end_clean();
-        $this->assertTrue($result === null || $result === false, 'Empty language ID should return null or false');
-    }
-
-    /**
      * Test get_first_value function
      */
     public function testGetFirstValue(): void
@@ -1233,7 +1204,7 @@ class DatabaseConnectTest extends TestCase
             $temp_file, "-- Comment\nSELECT 1;\n\nSELECT 2;\n-- Another comment\nSELECT 3;"
         );
 
-        $queries = \Lwt\Database\SqlFileParser::parseFile($temp_file);
+        $queries = \Lwt\Shared\Infrastructure\Database\SqlFileParser::parseFile($temp_file);
         $this->assertIsArray($queries);
         $this->assertCount(3, $queries);
         $this->assertStringContainsString('SELECT 1', $queries[0]);
@@ -1295,28 +1266,28 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test WordStatusService::makeScoreRandomInsertUpdate static method
+     * Test TermStatusService::makeScoreRandomInsertUpdate static method
      */
     public function testMakeScoreRandomInsertUpdate(): void
     {
         // Test insert variable mode (column names)
-        $result = WordStatusService::makeScoreRandomInsertUpdate('iv');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('iv');
         $this->assertIsString($result);
         $this->assertStringContainsString('WoTodayScore', $result);
         $this->assertStringContainsString('WoRandom', $result);
 
         // Test insert data mode (values)
-        $result = WordStatusService::makeScoreRandomInsertUpdate('id');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('id');
         $this->assertIsString($result);
         $this->assertStringContainsString('RAND()', $result);
 
         // Test update mode
-        $result = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('u');
         $this->assertIsString($result);
         $this->assertStringContainsString('WoTodayScore', $result);
 
         // Test with invalid mode (should return empty string)
-        $result = WordStatusService::makeScoreRandomInsertUpdate('x');
+        $result = TermStatusService::makeScoreRandomInsertUpdate('x');
         $this->assertIsString($result);
         $this->assertEquals('', $result);
     }
@@ -1369,11 +1340,11 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test SettingsService::getDefinitions() function (formerly get_setting_data)
+     * Test SettingDefinitions::getAll() function (formerly get_setting_data)
      */
     public function testGetSettingData(): void
     {
-        $settings = SettingsService::getDefinitions();
+        $settings = SettingDefinitions::getAll();
         $this->assertIsArray($settings);
 
         // Should contain common settings

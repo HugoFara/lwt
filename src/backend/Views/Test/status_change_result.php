@@ -21,8 +21,15 @@
 
 namespace Lwt\Views\Test;
 
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\View\Helper\StatusHelper;
+
+// Type assertions for view variables
+$wordText = (string) ($wordText ?? '');
+$oldStatus = (int) ($oldStatus ?? 0);
+$newStatus = (int) ($newStatus ?? 0);
+$oldScore = (int) ($oldScore ?? 0);
+$newScore = (int) ($newScore ?? 0);
 
 PageLayoutHelper::renderPageStart("Term: " . $wordText, false);
 

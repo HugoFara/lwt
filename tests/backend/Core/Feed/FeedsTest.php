@@ -4,26 +4,30 @@ namespace Lwt\Tests\Core\Feed;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\FeedService;
+use Lwt\Modules\Feed\Application\FeedFacade;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Modules\Feed\FeedServiceProvider;
+use Lwt\Shared\Infrastructure\Database\Configuration;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/Services/LanguageService.php';
+// LanguageFacade loaded via autoloader
 
 /**
- * Tests for FeedService RSS feed operations.
+ * Tests for FeedFacade RSS feed operations.
  *
- * Tests migrated from Core/Feed/feeds.php function tests to FeedService method tests.
+ * Tests migrated from Core/Feed/feeds.php function tests to FeedFacade method tests.
  */
 class FeedsTest extends TestCase
 {
-    private FeedService $feedService;
+    private FeedFacade $feedService;
 
     protected function setUp(): void
     {
@@ -37,7 +41,13 @@ class FeedsTest extends TestCase
             Globals::setDbConnection($connection);
         }
 
-        $this->feedService = new FeedService();
+        // Register FeedServiceProvider and get FeedFacade
+        $container = Container::getInstance();
+        $provider = new FeedServiceProvider();
+        $provider->register($container);
+        $provider->boot($container);
+
+        $this->feedService = $container->get(FeedFacade::class);
     }
 
     /**

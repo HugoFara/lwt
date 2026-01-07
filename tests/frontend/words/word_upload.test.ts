@@ -1,11 +1,13 @@
 /**
- * Tests for word_upload.ts - Word import form and results display
+ * Tests for word_upload.ts - Alpine.js components for word import
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  updateImportMode,
-  showImportedTerms
-} from '../../../src/frontend/js/words/word_upload';
+  wordUploadFormApp,
+  wordUploadResultApp,
+  type WordUploadFormConfig,
+  type UploadResultConfig
+} from '../../../src/frontend/js/modules/vocabulary/pages/word_upload';
 
 describe('word_upload.ts', () => {
   beforeEach(() => {
@@ -19,433 +21,236 @@ describe('word_upload.ts', () => {
   });
 
   // ===========================================================================
-  // updateImportMode Tests
+  // wordUploadFormApp Tests
   // ===========================================================================
 
-  describe('updateImportMode', () => {
-    beforeEach(() => {
-      document.body.innerHTML = `
-        <div id="imp_transl_delim" class="hide">
-          <input type="text">
-        </div>
-      `;
+  describe('wordUploadFormApp', () => {
+    it('initializes with default values', () => {
+      const component = wordUploadFormApp();
+
+      expect(component.importMode).toBe(0);
+      expect(component.showDelimiter).toBe(false);
     });
 
-    describe('shows translation delimiter field', () => {
-      it('for mode 4', () => {
-        updateImportMode(4);
+    it('initializes with config values', () => {
+      const config: WordUploadFormConfig = { initialMode: 4 };
+      const component = wordUploadFormApp(config);
 
-        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(false);
-        expect(document.querySelector('#imp_transl_delim input')!.classList.contains('notempty')).toBe(true);
+      expect(component.importMode).toBe(4);
+    });
+
+    it('init sets showDelimiter based on importMode', () => {
+      const config: WordUploadFormConfig = { initialMode: 5 };
+      const component = wordUploadFormApp(config);
+      component.init();
+
+      expect(component.showDelimiter).toBe(true);
+    });
+
+    describe('updateImportMode', () => {
+      it('shows delimiter for mode 4', () => {
+        const component = wordUploadFormApp();
+        component.updateImportMode(4);
+
+        expect(component.importMode).toBe(4);
+        expect(component.showDelimiter).toBe(true);
       });
 
-      it('for mode 5', () => {
-        updateImportMode(5);
+      it('shows delimiter for mode 5', () => {
+        const component = wordUploadFormApp();
+        component.updateImportMode(5);
 
-        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(false);
+        expect(component.importMode).toBe(5);
+        expect(component.showDelimiter).toBe(true);
       });
 
-      it('for string mode "4"', () => {
-        updateImportMode('4');
+      it('hides delimiter for modes 0-3', () => {
+        const component = wordUploadFormApp();
+        component.updateImportMode(4); // First show it
 
-        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(false);
+        component.updateImportMode(0);
+        expect(component.showDelimiter).toBe(false);
+
+        component.updateImportMode(1);
+        expect(component.showDelimiter).toBe(false);
+
+        component.updateImportMode(2);
+        expect(component.showDelimiter).toBe(false);
+
+        component.updateImportMode(3);
+        expect(component.showDelimiter).toBe(false);
       });
 
-      it('for string mode "5"', () => {
-        updateImportMode('5');
+      it('handles string values', () => {
+        const component = wordUploadFormApp();
+        component.updateImportMode('4');
 
-        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(false);
+        expect(component.importMode).toBe(4);
+        expect(component.showDelimiter).toBe(true);
+      });
+    });
+  });
+
+  // ===========================================================================
+  // wordUploadResultApp Tests
+  // ===========================================================================
+
+  describe('wordUploadResultApp', () => {
+    it('initializes with default values', () => {
+      const component = wordUploadResultApp();
+
+      expect(component.lastUpdate).toBe('');
+      expect(component.rtl).toBe(false);
+      expect(component.recno).toBe(0);
+      expect(component.currentPage).toBe(1);
+      expect(component.totalPages).toBe(1);
+      expect(component.terms).toEqual([]);
+      expect(component.isLoading).toBe(false);
+      expect(component.hasTerms).toBe(false);
+    });
+
+    it('initializes with config values', () => {
+      const config: UploadResultConfig = {
+        lastUpdate: '2024-01-01',
+        rtl: true,
+        recno: 10
+      };
+      const component = wordUploadResultApp(config);
+
+      expect(component.lastUpdate).toBe('2024-01-01');
+      expect(component.rtl).toBe(true);
+      expect(component.recno).toBe(10);
+    });
+
+    describe('init', () => {
+      it('sets hasTerms based on recno', () => {
+        const component = wordUploadResultApp({ lastUpdate: '', rtl: false, recno: 5 });
+
+        // Mock fetch
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ navigation: { current_page: 1, total_pages: 1 }, terms: [] })
+          } as Response)
+        );
+
+        component.init();
+
+        expect(component.hasTerms).toBe(true);
+      });
+
+      it('does not load page when recno is 0', () => {
+        const component = wordUploadResultApp({ lastUpdate: '', rtl: false, recno: 0 });
+
+        global.fetch = vi.fn();
+        component.init();
+
+        expect(component.hasTerms).toBe(false);
+        expect(global.fetch).not.toHaveBeenCalled();
       });
     });
 
-    describe('hides translation delimiter field', () => {
+    describe('loadPage', () => {
+      it('fetches terms from API', async () => {
+        const mockResponse = {
+          navigation: { current_page: 1, total_pages: 3 },
+          terms: [{ WoID: 1, WoText: 'test', WoTranslation: 'test', WoRomanization: '', WoSentence: '', WoStatus: 1, SentOK: 1, taglist: '' }]
+        };
+
+        global.fetch = vi.fn(() =>
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockResponse)
+          } as Response)
+        );
+
+        const component = wordUploadResultApp({ lastUpdate: '2024-01-01', rtl: false, recno: 10 });
+        await component.loadPage(1);
+
+        expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('api.php/v1/terms/imported'));
+        expect(component.currentPage).toBe(1);
+        expect(component.totalPages).toBe(3);
+        expect(component.terms.length).toBe(1);
+        expect(component.hasTerms).toBe(true);
+      });
+
+      it('handles empty response', async () => {
+        const component = wordUploadResultApp({ lastUpdate: '', rtl: false, recno: 0 });
+        await component.loadPage(1);
+
+        expect(component.hasTerms).toBe(false);
+      });
+
+      it('handles fetch errors', async () => {
+        global.fetch = vi.fn(() => Promise.reject(new Error('Network error')));
+
+        const component = wordUploadResultApp({ lastUpdate: '2024-01-01', rtl: false, recno: 10 });
+        await component.loadPage(1);
+
+        expect(component.hasTerms).toBe(false);
+        expect(component.isLoading).toBe(false);
+      });
+    });
+
+    describe('navigation methods', () => {
+      let component: ReturnType<typeof wordUploadResultApp>;
+
       beforeEach(() => {
-        // First show it
-        document.querySelector('#imp_transl_delim')!.classList.remove('hide');
-        document.querySelector('#imp_transl_delim input')!.classList.add('notempty');
+        component = wordUploadResultApp({ lastUpdate: '2024-01-01', rtl: false, recno: 100 });
+        component.totalPages = 5;
+        component.currentPage = 3;
       });
 
-      it('for mode 0', () => {
-        updateImportMode(0);
+      it('goToPage loads the specified page', () => {
+        const loadPageSpy = vi.spyOn(component, 'loadPage').mockImplementation(() => Promise.resolve());
 
-        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(true);
-        expect(document.querySelector('#imp_transl_delim input')!.classList.contains('notempty')).toBe(false);
+        component.goToPage(2);
+        expect(loadPageSpy).toHaveBeenCalledWith(2);
       });
 
-      it('for mode 1', () => {
-        updateImportMode(1);
+      it('goToPage ignores invalid page numbers', () => {
+        const loadPageSpy = vi.spyOn(component, 'loadPage').mockImplementation(() => Promise.resolve());
 
-        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(true);
+        component.goToPage(0);
+        expect(loadPageSpy).not.toHaveBeenCalled();
+
+        component.goToPage(6);
+        expect(loadPageSpy).not.toHaveBeenCalled();
       });
 
-      it('for mode 2', () => {
-        updateImportMode(2);
+      it('goFirst goes to page 1', () => {
+        const loadPageSpy = vi.spyOn(component, 'loadPage').mockImplementation(() => Promise.resolve());
 
-        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(true);
+        component.goFirst();
+        expect(loadPageSpy).toHaveBeenCalledWith(1);
       });
 
-      it('for mode 3', () => {
-        updateImportMode(3);
+      it('goPrev goes to previous page', () => {
+        const loadPageSpy = vi.spyOn(component, 'loadPage').mockImplementation(() => Promise.resolve());
 
-        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(true);
+        component.goPrev();
+        expect(loadPageSpy).toHaveBeenCalledWith(2);
       });
 
-      it('for string mode "0"', () => {
-        updateImportMode('0');
+      it('goNext goes to next page', () => {
+        const loadPageSpy = vi.spyOn(component, 'loadPage').mockImplementation(() => Promise.resolve());
 
-        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(true);
+        component.goNext();
+        expect(loadPageSpy).toHaveBeenCalledWith(4);
       });
-    });
-  });
 
-  // ===========================================================================
-  // showImportedTerms Tests
-  // ===========================================================================
+      it('goLast goes to last page', () => {
+        const loadPageSpy = vi.spyOn(component, 'loadPage').mockImplementation(() => Promise.resolve());
 
-  describe('showImportedTerms', () => {
-    beforeEach(() => {
-      document.body.innerHTML = `
-        <span id="recno">10</span>
-        <div id="res_data-no_terms_imported"></div>
-        <div id="res_data-navigation">
-          <div id="res_data-navigation-prev">
-            <button id="res_data-navigation-prev-first"></button>
-            <button id="res_data-navigation-prev-minus"></button>
-          </div>
-          <select id="res_data-navigation-quick_nav"></select>
-          <span id="res_data-navigation-no_quick_nav"></span>
-          <span id="res_data-navigation-totalPages"></span>
-          <div id="res_data-navigation-next">
-            <button id="res_data-navigation-next-plus"></button>
-            <button id="res_data-navigation-next-last"></button>
-          </div>
-        </div>
-        <table id="res_data-res_table">
-          <tbody id="res_data-res_table-body"></tbody>
-        </table>
-      `;
-    });
-
-    it('shows no terms message when count is 0', () => {
-      showImportedTerms('2024-01-01', false, 0, 1);
-
-      // JSDOM normalizes 'inherit' to 'block', so check not 'none'
-      expect(getComputedStyle(document.querySelector('#res_data-no_terms_imported')!).display).not.toBe('none');
-      expect(getComputedStyle(document.querySelector('#res_data-navigation')!).display).toBe('none');
-      expect(getComputedStyle(document.querySelector('#res_data-res_table')!).display).toBe('none');
-    });
-
-    it('shows results when count is greater than 0', () => {
-      const mockResponse = {
-        navigation: {
-          current_page: 1,
-          total_pages: 1
-        },
-        terms: []
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', false, 10, 1);
-
-      expect(getComputedStyle(document.querySelector('#res_data-no_terms_imported')!).display).toBe('none');
-      expect(getComputedStyle(document.querySelector('#res_data-navigation')!).display).not.toBe('none');
-    });
-
-    it('handles string count parameter', () => {
-      showImportedTerms('2024-01-01', false, 0, 1);
-
-      // Should still show no terms message - JSDOM normalizes 'inherit' to 'block'
-      expect(getComputedStyle(document.querySelector('#res_data-no_terms_imported')!).display).not.toBe('none');
-    });
-
-    it('handles RTL as string "true"', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 1 },
-        terms: [{
-          WoID: 1,
-          WoText: 'مرحبا',
-          WoTranslation: 'Hello',
-          WoRomanization: 'marhaba',
-          WoSentence: 'مرحبا بك',
-          WoStatus: 1,
-          SentOK: 1,
-          taglist: ''
-        }]
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', 'true', 1, 1);
-
-      // Should call API
-      expect(global.fetch).toHaveBeenCalled();
-    });
-
-    it('handles RTL as string "1"', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 1 },
-        terms: []
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', '1', 1, 1);
-
-      expect(global.fetch).toHaveBeenCalled();
-    });
-
-    it('makes API call with correct parameters', () => {
-      global.fetch = vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as Response));
-
-      showImportedTerms('2024-01-15 10:30:00', false, 25, 2);
-
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/terms/imported')
-      );
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('last_update=2024-01-15+10%3A30%3A00')
-      );
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('count=25')
-      );
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('page=2')
-      );
-    });
-
-    it('handles string page parameter', () => {
-      global.fetch = vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as Response));
-
-      showImportedTerms('2024-01-01', false, 10, '3');
-
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('page=3')
-      );
-    });
-  });
-
-  // ===========================================================================
-  // Navigation Tests
-  // ===========================================================================
-
-  describe('navigation', () => {
-    beforeEach(() => {
-      document.body.innerHTML = `
-        <span id="recno">50</span>
-        <div id="res_data-no_terms_imported"></div>
-        <div id="res_data-navigation">
-          <div id="res_data-navigation-prev" style="display: none;">
-            <button id="res_data-navigation-prev-first"></button>
-            <button id="res_data-navigation-prev-minus"></button>
-          </div>
-          <select id="res_data-navigation-quick_nav"></select>
-          <span id="res_data-navigation-no_quick_nav"></span>
-          <span id="res_data-navigation-totalPages"></span>
-          <div id="res_data-navigation-next" style="display: none;">
-            <button id="res_data-navigation-next-plus"></button>
-            <button id="res_data-navigation-next-last"></button>
-          </div>
-        </div>
-        <table id="res_data-res_table">
-          <tbody id="res_data-res_table-body"></tbody>
-        </table>
-        <form name="form1">
-          <select name="page"></select>
-        </form>
-      `;
-    });
-
-    it('shows prev buttons on page > 1', async () => {
-      const mockResponse = {
-        navigation: { current_page: 2, total_pages: 5 },
-        terms: []
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', false, 50, 2);
-
-      await vi.waitFor(() => {
-        const prevNav = document.getElementById('res_data-navigation-prev');
-        expect(prevNav?.style.display).not.toBe('none');
+        component.goLast();
+        expect(loadPageSpy).toHaveBeenCalledWith(5);
       });
     });
 
-    it('hides prev buttons on page 1', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 5 },
-        terms: []
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', false, 50, 1);
-
-      await vi.waitFor(() => {
-        const prevNav = document.getElementById('res_data-navigation-prev');
-        expect(prevNav?.style.display).toBe('none');
-      });
-    });
-
-    it('shows next buttons when not on last page', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 5 },
-        terms: []
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', false, 50, 1);
-
-      await vi.waitFor(() => {
-        const nextNav = document.getElementById('res_data-navigation-next');
-        expect(nextNav?.style.display).not.toBe('none');
-      });
-    });
-
-    it('hides next buttons on last page', async () => {
-      const mockResponse = {
-        navigation: { current_page: 5, total_pages: 5 },
-        terms: []
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', false, 50, 5);
-
-      await vi.waitFor(() => {
-        const nextNav = document.getElementById('res_data-navigation-next');
-        expect(nextNav?.style.display).toBe('none');
-      });
-    });
-
-    it('creates page select options', async () => {
-      const mockResponse = {
-        navigation: { current_page: 2, total_pages: 3 },
-        terms: []
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', false, 50, 2);
-
-      await vi.waitFor(() => {
-        const options = document.querySelectorAll('#res_data-navigation-quick_nav option');
-        expect(options.length).toBe(3);
-      });
-    });
-
-    it('hides quick nav when only 1 page', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 1 },
-        terms: []
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', false, 10, 1);
-
-      await vi.waitFor(() => {
-        const quickNav = document.getElementById('res_data-navigation-quick_nav');
-        expect(quickNav?.style.display).toBe('none');
-        const noQuickNav = document.getElementById('res_data-navigation-no_quick_nav');
-        expect(noQuickNav?.style.display).not.toBe('none');
-      });
-    });
-
-    it('displays total pages', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 10 },
-        terms: []
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', false, 100, 1);
-
-      await vi.waitFor(() => {
-        expect(document.getElementById('res_data-navigation-totalPages')?.textContent).toBe('10');
-      });
-    });
-  });
-
-  // ===========================================================================
-  // Terms Display Tests
-  // ===========================================================================
-
-  describe('terms display', () => {
-    beforeEach(() => {
-      document.body.innerHTML = `
-        <span id="recno">2</span>
-        <div id="res_data-no_terms_imported"></div>
-        <div id="res_data-navigation">
-          <div id="res_data-navigation-prev"></div>
-          <select id="res_data-navigation-quick_nav"></select>
-          <span id="res_data-navigation-no_quick_nav"></span>
-          <span id="res_data-navigation-totalPages"></span>
-          <div id="res_data-navigation-next"></div>
-        </div>
-        <table id="res_data-res_table">
-          <tbody id="res_data-res_table-body"></tbody>
-        </table>
-      `;
-    });
-
-    it('displays term data in table rows', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 1 },
-        terms: [{
+    describe('formatTermRow', () => {
+      it('formats term with all fields', () => {
+        const component = wordUploadResultApp({ lastUpdate: '', rtl: false, recno: 1 });
+        const term = {
           WoID: 1,
           WoText: 'hello',
           WoTranslation: 'hola',
@@ -454,123 +259,20 @@ describe('word_upload.ts', () => {
           WoStatus: 1,
           SentOK: 1,
           taglist: 'tag1, tag2'
-        }]
-      };
+        };
 
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
+        const html = component.formatTermRow(term);
 
-      showImportedTerms('2024-01-01', false, 1, 1);
-
-      await vi.waitFor(() => {
-        const tbody = document.getElementById('res_data-res_table-body');
-        expect(tbody?.innerHTML).toContain('hello');
-        expect(tbody?.innerHTML).toContain('hola');
-        expect(tbody?.innerHTML).toContain('helo');
-        // Tags are rendered as Bulma tag spans
-        expect(tbody?.innerHTML).toContain('tag1');
-        expect(tbody?.innerHTML).toContain('tag2');
+        expect(html).toContain('hello');
+        expect(html).toContain('hola');
+        expect(html).toContain('helo');
+        expect(html).toContain('tag1');
+        expect(html).toContain('tag2');
       });
-    });
 
-    it('shows valid sentence icon when SentOK is not 0', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 1 },
-        terms: [{
-          WoID: 1,
-          WoText: 'test',
-          WoTranslation: 'test',
-          WoRomanization: '',
-          WoSentence: 'Test sentence',
-          WoStatus: 1,
-          SentOK: 1,
-          taglist: ''
-        }]
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', false, 1, 1);
-
-      await vi.waitFor(() => {
-        // Uses Lucide icons: check icon for valid sentence
-        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('data-lucide="check"');
-      });
-    });
-
-    it('shows no sentence icon when SentOK is 0', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 1 },
-        terms: [{
-          WoID: 1,
-          WoText: 'test',
-          WoTranslation: 'test',
-          WoRomanization: '',
-          WoSentence: '',
-          WoStatus: 1,
-          SentOK: 0,
-          taglist: ''
-        }]
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', false, 1, 1);
-
-      await vi.waitFor(() => {
-        // Uses Lucide icons: x icon for no valid sentence
-        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('data-lucide="x"');
-      });
-    });
-
-    it('displays status abbreviation', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 1 },
-        terms: [{
-          WoID: 1,
-          WoText: 'test',
-          WoTranslation: 'test',
-          WoRomanization: '',
-          WoSentence: '',
-          WoStatus: 99,
-          SentOK: 0,
-          taglist: ''
-        }]
-      };
-
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
-
-      showImportedTerms('2024-01-01', false, 1, 1);
-
-      await vi.waitFor(() => {
-        // statuses[99] has abbr: 'WKn' for Well Known
-        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('WKn');
-      });
-    });
-
-    it('applies RTL direction when enabled', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 1 },
-        terms: [{
+      it('applies RTL direction when enabled', () => {
+        const component = wordUploadResultApp({ lastUpdate: '', rtl: true, recno: 1 });
+        const term = {
           WoID: 1,
           WoText: 'مرحبا',
           WoTranslation: 'Hello',
@@ -579,27 +281,16 @@ describe('word_upload.ts', () => {
           WoStatus: 1,
           SentOK: 0,
           taglist: ''
-        }]
-      };
+        };
 
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
+        const html = component.formatTermRow(term);
 
-      showImportedTerms('2024-01-01', true, 1, 1);
-
-      await vi.waitFor(() => {
-        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('dir="rtl"');
+        expect(html).toContain('dir="rtl"');
       });
-    });
 
-    it('shows asterisk for empty romanization', async () => {
-      const mockResponse = {
-        navigation: { current_page: 1, total_pages: 1 },
-        terms: [{
+      it('shows asterisk for empty romanization', () => {
+        const component = wordUploadResultApp({ lastUpdate: '', rtl: false, recno: 1 });
+        const term = {
           WoID: 1,
           WoText: 'test',
           WoTranslation: 'test',
@@ -608,48 +299,66 @@ describe('word_upload.ts', () => {
           WoStatus: 1,
           SentOK: 0,
           taglist: ''
-        }]
-      };
+        };
 
-      global.fetch = vi.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse)
-        } as Response)
-      );
+        const html = component.formatTermRow(term);
 
-      showImportedTerms('2024-01-01', false, 1, 1);
+        expect(html).toContain('>*<');
+      });
 
-      await vi.waitFor(() => {
-        // Should contain * for empty romanization
-        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('>*<');
+      it('shows check icon for valid sentence', () => {
+        const component = wordUploadResultApp({ lastUpdate: '', rtl: false, recno: 1 });
+        const term = {
+          WoID: 1,
+          WoText: 'test',
+          WoTranslation: 'test',
+          WoRomanization: '',
+          WoSentence: 'Test sentence',
+          WoStatus: 1,
+          SentOK: 1,
+          taglist: ''
+        };
+
+        const html = component.formatTermRow(term);
+
+        expect(html).toContain('data-lucide="check"');
+      });
+
+      it('shows x icon for invalid sentence', () => {
+        const component = wordUploadResultApp({ lastUpdate: '', rtl: false, recno: 1 });
+        const term = {
+          WoID: 1,
+          WoText: 'test',
+          WoTranslation: 'test',
+          WoRomanization: '',
+          WoSentence: '',
+          WoStatus: 1,
+          SentOK: 0,
+          taglist: ''
+        };
+
+        const html = component.formatTermRow(term);
+
+        expect(html).toContain('data-lucide="x"');
       });
     });
-  });
 
-  // ===========================================================================
-  // Event Delegation Tests
-  // ===========================================================================
+    describe('getStatusInfo', () => {
+      it('returns status info for valid status', () => {
+        const component = wordUploadResultApp();
+        const info = component.getStatusInfo(99);
 
-  describe('event delegation', () => {
-    it('handles import mode select change', async () => {
-      document.body.innerHTML = `
-        <select data-action="update-import-mode">
-          <option value="0">Mode 0</option>
-          <option value="4">Mode 4</option>
-        </select>
-        <div id="imp_transl_delim" class="hide">
-          <input type="text">
-        </div>
-      `;
+        expect(info.abbr).toBe('WKn');
+        expect(info.name).toBe('Well Known');
+      });
 
-      await import('../../../src/frontend/js/words/word_upload');
+      it('returns unknown for invalid status', () => {
+        const component = wordUploadResultApp();
+        const info = component.getStatusInfo(999);
 
-      const select = document.querySelector<HTMLSelectElement>('[data-action="update-import-mode"]')!;
-      select.value = '4';
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-
-      expect(document.getElementById('imp_transl_delim')?.classList.contains('hide')).toBe(false);
+        expect(info.abbr).toBe('?');
+        expect(info.name).toBe('Unknown');
+      });
     });
   });
 });

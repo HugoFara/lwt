@@ -11,7 +11,7 @@ import {
   isMigrationComplete,
   migrateTTSCookies,
   getTTSSettingsWithMigration,
-} from '../../../src/frontend/js/core/tts_storage';
+} from '../../../src/frontend/js/shared/utils/tts_storage';
 
 describe('tts_storage.ts', () => {
   beforeEach(() => {

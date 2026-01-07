@@ -4,15 +4,15 @@ namespace Lwt\Tests\Core\Repository;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\Entity\Text;
-use Lwt\Core\Entity\ValueObject\LanguageId;
-use Lwt\Core\Entity\ValueObject\TextId;
-use Lwt\Core\EnvLoader;
+use Lwt\Modules\Text\Domain\Text;
+use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
+use Lwt\Modules\Text\Domain\ValueObject\TextId;
+use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Core\Repository\TextRepository;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -21,24 +21,22 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TextId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/LanguageId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/Text.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Database/PreparedStatement.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Domain/Text.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/PreparedStatement.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Repository/RepositoryInterface.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Repository/AbstractRepository.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/TextRepository.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Infrastructure/MySqlTextRepository.php';
 
 /**
- * Tests for the TextRepository class.
+ * Tests for the MySqlTextRepository class.
  *
- * @covers \Lwt\Core\Repository\TextRepository
+ * @covers \Lwt\Modules\Text\Infrastructure\MySqlTextRepository
  * @covers \Lwt\Core\Repository\AbstractRepository
  */
 class TextRepositoryTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private TextRepository $repository;
+    private MySqlTextRepository $repository;
     private static int $testLanguageId = 0;
     private static array $testTextIds = [];
 
@@ -94,7 +92,7 @@ class TextRepositoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->repository = new TextRepository();
+        $this->repository = new MySqlTextRepository();
     }
 
     protected function tearDown(): void

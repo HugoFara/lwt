@@ -2,16 +2,16 @@
  * Tests for text_print_app.ts - Alpine.js Text Print Component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { textPrintAppData, type TextPrintAppData } from '../../../src/frontend/js/texts/text_print_app';
+import { textPrintAppData, type TextPrintAppData } from '../../../src/frontend/js/modules/text/pages/text_print_app';
 
 // Mock the API client
-vi.mock('../../../src/frontend/js/core/api_client', () => ({
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
   apiGet: vi.fn(),
   apiPost: vi.fn().mockResolvedValue({ data: { success: true } })
 }));
 
 // Mock the texts API
-vi.mock('../../../src/frontend/js/api/texts', () => ({
+vi.mock('../../../src/frontend/js/modules/text/api/texts_api', () => ({
   TextsApi: {
     getPrintItems: vi.fn().mockResolvedValue({
       data: {
@@ -56,10 +56,108 @@ vi.mock('../../../src/frontend/js/api/texts', () => ({
   }
 }));
 
-// Mock lucide
+// Mock lucide with all required icons
 vi.mock('lucide', () => ({
   createIcons: vi.fn(),
-  icons: {}
+  icons: {},
+  // Mock the specific icons that are imported
+  Check: ['svg', {}, []],
+  X: ['svg', {}, []],
+  Plus: ['svg', {}, []],
+  ChevronDown: ['svg', {}, []],
+  Loader2: ['svg', {}, []],
+  AlertCircle: ['svg', {}, []],
+  Archive: ['svg', {}, []],
+  ArchiveX: ['svg', {}, []],
+  ArrowLeft: ['svg', {}, []],
+  ArrowRight: ['svg', {}, []],
+  Asterisk: ['svg', {}, []],
+  BarChart2: ['svg', {}, []],
+  BookMarked: ['svg', {}, []],
+  BookOpen: ['svg', {}, []],
+  BookOpenCheck: ['svg', {}, []],
+  BookOpenText: ['svg', {}, []],
+  Brush: ['svg', {}, []],
+  Calculator: ['svg', {}, []],
+  ChevronLeft: ['svg', {}, []],
+  ChevronRight: ['svg', {}, []],
+  ChevronsLeft: ['svg', {}, []],
+  ChevronsRight: ['svg', {}, []],
+  Circle: ['svg', {}, []],
+  CircleAlert: ['svg', {}, []],
+  CircleCheck: ['svg', {}, []],
+  CircleChevronLeft: ['svg', {}, []],
+  CircleChevronRight: ['svg', {}, []],
+  CircleDot: ['svg', {}, []],
+  CircleHelp: ['svg', {}, []],
+  CircleMinus: ['svg', {}, []],
+  CirclePlus: ['svg', {}, []],
+  CircleX: ['svg', {}, []],
+  Clock: ['svg', {}, []],
+  Database: ['svg', {}, []],
+  Download: ['svg', {}, []],
+  Eraser: ['svg', {}, []],
+  ExternalLink: ['svg', {}, []],
+  Eye: ['svg', {}, []],
+  FastForward: ['svg', {}, []],
+  FileDown: ['svg', {}, []],
+  FilePen: ['svg', {}, []],
+  FilePenLine: ['svg', {}, []],
+  FileStack: ['svg', {}, []],
+  FileText: ['svg', {}, []],
+  Filter: ['svg', {}, []],
+  FilterX: ['svg', {}, []],
+  Frown: ['svg', {}, []],
+  HelpCircle: ['svg', {}, []],
+  Image: ['svg', {}, []],
+  Info: ['svg', {}, []],
+  Languages: ['svg', {}, []],
+  Layers: ['svg', {}, []],
+  Lightbulb: ['svg', {}, []],
+  LightbulbOff: ['svg', {}, []],
+  Link: ['svg', {}, []],
+  List: ['svg', {}, []],
+  Loader: ['svg', {}, []],
+  Lock: ['svg', {}, []],
+  LogIn: ['svg', {}, []],
+  Mail: ['svg', {}, []],
+  Minus: ['svg', {}, []],
+  Newspaper: ['svg', {}, []],
+  NotepadText: ['svg', {}, []],
+  NotepadTextDashed: ['svg', {}, []],
+  Notebook: ['svg', {}, []],
+  NotebookPen: ['svg', {}, []],
+  Palette: ['svg', {}, []],
+  Pencil: ['svg', {}, []],
+  Printer: ['svg', {}, []],
+  RefreshCw: ['svg', {}, []],
+  Repeat: ['svg', {}, []],
+  Rewind: ['svg', {}, []],
+  Rocket: ['svg', {}, []],
+  Rss: ['svg', {}, []],
+  Server: ['svg', {}, []],
+  Settings: ['svg', {}, []],
+  Sliders: ['svg', {}, []],
+  Smile: ['svg', {}, []],
+  Square: ['svg', {}, []],
+  SquareMinus: ['svg', {}, []],
+  SquarePen: ['svg', {}, []],
+  SquarePlus: ['svg', {}, []],
+  Star: ['svg', {}, []],
+  StickyNote: ['svg', {}, []],
+  Sun: ['svg', {}, []],
+  Tag: ['svg', {}, []],
+  Tags: ['svg', {}, []],
+  ThumbsUp: ['svg', {}, []],
+  Upload: ['svg', {}, []],
+  User: ['svg', {}, []],
+  UserPlus: ['svg', {}, []],
+  Volume2: ['svg', {}, []],
+  VolumeX: ['svg', {}, []],
+  Wand2: ['svg', {}, []],
+  WrapText: ['svg', {}, []],
+  XCircle: ['svg', {}, []],
+  Zap: ['svg', {}, []]
 }));
 
 describe('text_print_app.ts', () => {
@@ -121,7 +219,7 @@ describe('text_print_app.ts', () => {
     });
 
     it('loads print items on init for plain mode', async () => {
-      const { TextsApi } = await import('../../../src/frontend/js/api/texts');
+      const { TextsApi } = await import('../../../src/frontend/js/modules/text/api/texts_api');
 
       await component.init();
 
@@ -138,7 +236,7 @@ describe('text_print_app.ts', () => {
       `;
 
       const comp = textPrintAppData();
-      const { TextsApi } = await import('../../../src/frontend/js/api/texts');
+      const { TextsApi } = await import('../../../src/frontend/js/modules/text/api/texts_api');
 
       await comp.init();
 
@@ -459,7 +557,7 @@ describe('text_print_app.ts', () => {
 
   describe('window exports', () => {
     it('exports textPrintAppData to window', async () => {
-      await import('../../../src/frontend/js/texts/text_print_app');
+      await import('../../../src/frontend/js/modules/text/pages/text_print_app');
 
       expect(typeof window.textPrintAppData).toBe('function');
     });

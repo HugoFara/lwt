@@ -3,21 +3,22 @@ namespace Lwt\Tests\Controllers;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Controllers\LanguageController;
-use Lwt\Core\EnvLoader;
+use Lwt\Modules\Language\Http\LanguageController;
+use Lwt\Modules\Language\Application\LanguageFacade;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\LanguageService;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/LanguageController.php';
+// LanguageController loaded via autoloader
 
 /**
  * Unit tests for the LanguageController class.
@@ -126,7 +127,7 @@ class LanguageControllerTest extends TestCase
      */
     private function createController(): LanguageController
     {
-        return new LanguageController(new LanguageService());
+        return new LanguageController(new LanguageFacade());
     }
 
     // ===== Constructor tests =====
@@ -142,7 +143,7 @@ class LanguageControllerTest extends TestCase
         $this->assertInstanceOf(LanguageController::class, $controller);
     }
 
-    public function testControllerHasLanguageService(): void
+    public function testControllerHasLanguageFacade(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -152,11 +153,11 @@ class LanguageControllerTest extends TestCase
 
         // Use reflection to check private property
         $reflection = new \ReflectionClass($controller);
-        $property = $reflection->getProperty('languageService');
+        $property = $reflection->getProperty('languageFacade');
         $property->setAccessible(true);
         $service = $property->getValue($controller);
 
-        $this->assertInstanceOf(LanguageService::class, $service);
+        $this->assertInstanceOf(LanguageFacade::class, $service);
     }
 
     // ===== Route parameter tests =====
@@ -174,7 +175,7 @@ class LanguageControllerTest extends TestCase
 
     // ===== Service delegation tests =====
 
-    public function testControllerUsesLanguageServiceForGetAll(): void
+    public function testControllerUsesLanguageFacadeForGetAll(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -187,7 +188,7 @@ class LanguageControllerTest extends TestCase
 
         // Get the service from the controller
         $reflection = new \ReflectionClass($controller);
-        $property = $reflection->getProperty('languageService');
+        $property = $reflection->getProperty('languageFacade');
         $property->setAccessible(true);
         $service = $property->getValue($controller);
 
@@ -223,7 +224,7 @@ class LanguageControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new LanguageService();
+        $service = new LanguageFacade();
 
         $_REQUEST = [
             'LgName' => 'TestLang_ControllerCreate',
@@ -252,7 +253,7 @@ class LanguageControllerTest extends TestCase
         }
 
         $id = $this->createTestLanguage('TestLang_ControllerUpdate');
-        $service = new LanguageService();
+        $service = new LanguageFacade();
 
         $_REQUEST = [
             'LgName' => 'TestLang_ControllerUpdated',
@@ -289,7 +290,7 @@ class LanguageControllerTest extends TestCase
         Connection::query("DELETE FROM " . Globals::table('words') . " WHERE WoLgID = $id");
         Connection::query("DELETE FROM " . Globals::table('newsfeeds') . " WHERE NfLgID = $id");
 
-        $service = new LanguageService();
+        $service = new LanguageFacade();
 
         $result = $service->delete($id);
 
@@ -304,7 +305,7 @@ class LanguageControllerTest extends TestCase
         }
 
         $id = $this->createTestLanguage('TestLang_ControllerRefresh');
-        $service = new LanguageService();
+        $service = new LanguageFacade();
 
         $result = $service->refresh($id);
 
@@ -324,7 +325,7 @@ class LanguageControllerTest extends TestCase
 
         $controller = $this->createController();
         $reflection = new \ReflectionClass($controller);
-        $property = $reflection->getProperty('languageService');
+        $property = $reflection->getProperty('languageFacade');
         $property->setAccessible(true);
         $service = $property->getValue($controller);
 
@@ -344,7 +345,7 @@ class LanguageControllerTest extends TestCase
 
         $controller = $this->createController();
         $reflection = new \ReflectionClass($controller);
-        $property = $reflection->getProperty('languageService');
+        $property = $reflection->getProperty('languageFacade');
         $property->setAccessible(true);
         $service = $property->getValue($controller);
 
@@ -371,7 +372,7 @@ class LanguageControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new LanguageService();
+        $service = new LanguageFacade();
 
         // Empty name should throw an exception (database constraint)
         $_REQUEST = [
@@ -398,7 +399,7 @@ class LanguageControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new LanguageService();
+        $service = new LanguageFacade();
 
         $_REQUEST = [
             'LgName' => "TestLang_Special'Chars\"",
@@ -425,7 +426,7 @@ class LanguageControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new LanguageService();
+        $service = new LanguageFacade();
 
         $_REQUEST = [
             'LgName' => 'TestLang_日本語',

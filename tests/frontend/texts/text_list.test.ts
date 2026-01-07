@@ -2,26 +2,26 @@
  * Tests for text_list.ts - Text list page interactions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initTextList } from '../../../src/frontend/js/texts/text_list';
+import { initTextList } from '../../../src/frontend/js/modules/text/pages/text_list';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/core/language_settings', () => ({
+vi.mock('../../../src/frontend/js/modules/language/stores/language_settings', () => ({
   setLang: vi.fn(),
   resetAll: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/forms/bulk_actions', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/bulk_actions', () => ({
   selectToggle: vi.fn(),
   multiActionGo: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/ui_utilities', () => ({
   confirmDelete: vi.fn().mockReturnValue(true)
 }));
 
-import { setLang, resetAll } from '../../../src/frontend/js/core/language_settings';
-import { selectToggle, multiActionGo } from '../../../src/frontend/js/forms/bulk_actions';
-import { confirmDelete } from '../../../src/frontend/js/core/ui_utilities';
+import { setLang, resetAll } from '../../../src/frontend/js/modules/language/stores/language_settings';
+import { selectToggle, multiActionGo } from '../../../src/frontend/js/shared/forms/bulk_actions';
+import { confirmDelete } from '../../../src/frontend/js/shared/utils/ui_utilities';
 
 describe('text_list.ts', () => {
   beforeEach(() => {

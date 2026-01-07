@@ -2,16 +2,16 @@
  * Tests for tag_list.ts - Tag list page functionality
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initTagList } from '../../../src/frontend/js/tags/tag_list';
+import { initTagList } from '../../../src/frontend/js/modules/tags/pages/tag_list';
 
 // Mock bulk_actions module
-vi.mock('../../../src/frontend/js/forms/bulk_actions', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/bulk_actions', () => ({
   selectToggle: vi.fn(),
   multiActionGo: vi.fn(),
   allActionGo: vi.fn()
 }));
 
-import { selectToggle, multiActionGo, allActionGo } from '../../../src/frontend/js/forms/bulk_actions';
+import { selectToggle, multiActionGo, allActionGo } from '../../../src/frontend/js/shared/forms/bulk_actions';
 
 describe('tag_list.ts', () => {
   // Store original location

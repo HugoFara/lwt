@@ -3,11 +3,11 @@ namespace Lwt\Tests\Services;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Services\TextService;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Modules\Text\Application\TextFacade;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -16,19 +16,19 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextStatisticsService.php';
-require_once __DIR__ . '/../../../src/backend/Services/SentenceService.php';
-require_once __DIR__ . '/../../../src/backend/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../src/backend/Services/SimilarTermsService.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
-require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
-require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/TextFacade.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextStatisticsService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/SentenceService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/AnnotationService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextNavigationService.php';
+require_once __DIR__ . '/../../../src/Modules/Language/Application/Services/TextParsingService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
+require_once __DIR__ . '/../../../src/Shared/Infrastructure/Database/Restore.php';
+// LanguageFacade loaded via autoloader
 
 /**
- * CRUD tests for the TextService class.
+ * CRUD tests for the TextFacade class.
  *
  * Tests create, read, update, delete, archive, and unarchive operations.
  */
@@ -36,7 +36,7 @@ class TextServiceCrudTest extends TestCase
 {
     private static bool $dbConnected = false;
     private static int $testLangId = 0;
-    private TextService $service;
+    private TextFacade $service;
     private array $createdTextIds = [];
     private array $createdArchivedTextIds = [];
 
@@ -91,7 +91,7 @@ class TextServiceCrudTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->service = new TextService();
+        $this->service = new TextFacade();
         $this->createdTextIds = [];
         $this->createdArchivedTextIds = [];
     }
@@ -338,8 +338,8 @@ class TextServiceCrudTest extends TestCase
         $message = $this->service->archiveTexts([$textId1, $textId2]);
 
         $this->assertIsString($message);
-        // Message format is "Text(s) archived: N"
-        $this->assertStringContainsString('archived', $message);
+        // Message format is "Archived Text(s): N"
+        $this->assertStringContainsStringIgnoringCase('archived', $message);
 
         // Original texts should be gone
         $this->assertNull($this->service->getTextById($textId1));
@@ -685,8 +685,8 @@ class TextServiceCrudTest extends TestCase
         $message = $this->service->rebuildTexts([$textId]);
 
         $this->assertIsString($message);
-        // Message format is "Text(s) reparsed: N"
-        $this->assertStringContainsString('reparsed', $message);
+        // Message format is "Rebuilt Text(s): N" or similar
+        $this->assertStringContainsStringIgnoringCase('rebuilt', $message);
     }
 
     public function testRebuildTextsWithEmptyArray(): void

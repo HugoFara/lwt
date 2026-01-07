@@ -4,7 +4,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   lwtFormCheck,
-} from '../../../src/frontend/js/forms/unloadformcheck';
+} from '../../../src/frontend/js/shared/forms/unloadformcheck';
 
 describe('unloadformcheck.ts', () => {
   beforeEach(() => {

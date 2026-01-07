@@ -2,14 +2,14 @@
 
 namespace Lwt\Tests\Core\Entity;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/UserId.php';
+require_once __DIR__ . '/../../../../src/Shared/Domain/ValueObjects/UserId.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/User.php';
 
 use DateTimeImmutable;
 use InvalidArgumentException;
 use LogicException;
 use Lwt\Core\Entity\User;
-use Lwt\Core\Entity\ValueObject\UserId;
+use Lwt\Shared\Domain\ValueObjects\UserId;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -172,6 +172,7 @@ class UserTest extends TestCase
         $created = new DateTimeImmutable('2024-01-01');
         $lastLogin = new DateTimeImmutable('2024-01-15');
         $tokenExpires = new DateTimeImmutable('+1 hour');
+        $rememberExpires = new DateTimeImmutable('+30 days');
 
         $user = User::reconstitute(
             42,
@@ -180,7 +181,11 @@ class UserTest extends TestCase
             'hashedpassword',
             'token123',
             $tokenExpires,
-            null,
+            'remember456',
+            $rememberExpires,
+            null, // passwordResetToken
+            null, // passwordResetTokenExpires
+            null, // wordPressId
             $created,
             $lastLogin,
             true,
@@ -193,6 +198,8 @@ class UserTest extends TestCase
         $this->assertEquals('hashedpassword', $user->passwordHash());
         $this->assertEquals('token123', $user->apiToken());
         $this->assertSame($tokenExpires, $user->apiTokenExpires());
+        $this->assertEquals('remember456', $user->rememberToken());
+        $this->assertSame($rememberExpires, $user->rememberTokenExpires());
         $this->assertNull($user->wordPressId());
         $this->assertSame($created, $user->created());
         $this->assertSame($lastLogin, $user->lastLogin());
@@ -390,9 +397,13 @@ class UserTest extends TestCase
             'testuser',
             'test@example.com',
             'hashedpassword',
-            null,
-            null,
-            null,
+            null, // apiToken
+            null, // apiTokenExpires
+            null, // rememberToken
+            null, // rememberTokenExpires
+            null, // passwordResetToken
+            null, // passwordResetTokenExpires
+            null, // wordPressId
             new DateTimeImmutable(),
             null,
             true,

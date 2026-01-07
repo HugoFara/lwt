@@ -7,7 +7,7 @@ import {
   clickAnnotation,
   clickText,
   initAnnotationInteractions
-} from '../../../src/frontend/js/reading/annotation_interactions';
+} from '../../../src/frontend/js/modules/text/pages/reading/annotation_interactions';
 
 describe('annotation_interactions.ts', () => {
   beforeEach(() => {

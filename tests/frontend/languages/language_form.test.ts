@@ -9,14 +9,14 @@ import {
   checkDuplicateLanguage,
   initLanguageForm,
   type LanguageFormConfig
-} from '../../../src/frontend/js/languages/language_form';
+} from '../../../src/frontend/js/modules/language/pages/language_form';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/terms/translation_api', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/translation_api', () => ({
   getLibreTranslateTranslation: vi.fn().mockResolvedValue('translated')
 }));
 
-vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   deepFindValue: vi.fn((obj, key) => {
     // Simple implementation for testing
     if (typeof obj !== 'object' || obj === null) return null;
@@ -30,7 +30,7 @@ vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
   readTextWithExternal: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/unloadformcheck', () => ({
   lwtFormCheck: {
     resetDirty: vi.fn(),
     askBeforeExit: vi.fn()
@@ -343,62 +343,13 @@ describe('language_form.ts', () => {
   // languageForm.addPopUpOption Tests
   // ===========================================================================
 
-  describe('languageForm.addPopUpOption', () => {
-    it('adds lwt_popup parameter when checked is true', () => {
-      const result = languageForm.addPopUpOption(
-        'https://example.com/dict?q=test',
-        true
-      );
-
-      expect(result).toContain('lwt_popup=true');
-    });
-
-    it('removes lwt_popup parameter when checked is false', () => {
-      const result = languageForm.addPopUpOption(
-        'https://example.com/dict?q=test&lwt_popup=true',
-        false
-      );
-
-      expect(result).not.toContain('lwt_popup');
-    });
-
-    it('handles URL with leading asterisk', () => {
-      const result = languageForm.addPopUpOption(
-        '*https://example.com/dict?q=test',
-        true
-      );
-
-      expect(result).toContain('lwt_popup=true');
-      expect(result).not.toContain('*');
-    });
-
-    it('returns URL unchanged when popup already present and checked is true', () => {
-      const url = 'https://example.com/dict?q=test&lwt_popup=true';
-      const result = languageForm.addPopUpOption(url, true);
-
-      expect(result).toBe(url);
-    });
-
-    it('returns URL unchanged when popup not present and checked is false', () => {
-      const url = 'https://example.com/dict?q=test';
-      const result = languageForm.addPopUpOption(url, false);
-
-      expect(result).toBe(url);
-    });
-
-    it('returns original string for invalid URLs', () => {
-      const result = languageForm.addPopUpOption('not-a-url', true);
-
-      expect(result).toBe('not-a-url');
-    });
-  });
-
   // ===========================================================================
   // languageForm.changePopUpState Tests
+  // Note: Since popup is now stored in database columns (not URL), this method is now a no-op
   // ===========================================================================
 
   describe('languageForm.changePopUpState', () => {
-    it('updates LgDict1URI when LgDict1PopUp is changed', () => {
+    it('does not modify URL when popup checkbox is changed', () => {
       document.body.innerHTML = `
         <form name="lg_form">
           <input name="LgDict1URI" value="https://dict.com?q=test">
@@ -409,81 +360,57 @@ describe('language_form.ts', () => {
       const checkbox = document.querySelector('[name="LgDict1PopUp"]') as HTMLInputElement;
       checkbox.checked = true;
 
+      // Should not throw and should not modify URL
       languageForm.changePopUpState(checkbox);
 
       const input = document.querySelector('[name="LgDict1URI"]') as HTMLInputElement;
-      expect(input.value).toContain('lwt_popup');
+      // URL should remain unchanged - popup is now stored in database
+      expect(input.value).toBe('https://dict.com?q=test');
     });
 
-    it('updates LgDict2URI when LgDict2PopUp is changed', () => {
+    it('accepts the checkbox element without error', () => {
       document.body.innerHTML = `
         <form name="lg_form">
-          <input name="LgDict2URI" value="https://dict2.com?q=test">
           <input type="checkbox" name="LgDict2PopUp">
         </form>
       `;
 
       const checkbox = document.querySelector('[name="LgDict2PopUp"]') as HTMLInputElement;
-      checkbox.checked = true;
-
-      languageForm.changePopUpState(checkbox);
-
-      const input = document.querySelector('[name="LgDict2URI"]') as HTMLInputElement;
-      expect(input.value).toContain('lwt_popup');
-    });
-
-    it('updates LgGoogleTranslateURI when LgGoogleTranslatePopUp is changed', () => {
-      document.body.innerHTML = `
-        <form name="lg_form">
-          <input name="LgGoogleTranslateURI" value="https://translate.com?q=test">
-          <input type="checkbox" name="LgGoogleTranslatePopUp">
-        </form>
-      `;
-
-      const checkbox = document.querySelector('[name="LgGoogleTranslatePopUp"]') as HTMLInputElement;
-      checkbox.checked = true;
-
-      languageForm.changePopUpState(checkbox);
-
-      const input = document.querySelector('[name="LgGoogleTranslateURI"]') as HTMLInputElement;
-      expect(input.value).toContain('lwt_popup');
+      expect(() => languageForm.changePopUpState(checkbox)).not.toThrow();
     });
   });
 
   // ===========================================================================
   // languageForm.checkDictionaryChanged Tests
+  // Note: Since popup is now stored in database columns, this method no longer detects popup from URL
   // ===========================================================================
 
   describe('languageForm.checkDictionaryChanged', () => {
-    it('sets popup checkbox when URL contains lwt_popup', () => {
+    it('does not modify checkbox state from URL', () => {
       document.body.innerHTML = `
         <form name="lg_form">
-          <input name="LgDict1URI" value="https://dict.com?q=test&lwt_popup=true">
+          <input name="LgDict1URI" value="https://dict.com?q=test">
           <input type="checkbox" name="LgDict1PopUp">
         </form>
       `;
 
-      const input = document.querySelector('[name="LgDict1URI"]') as HTMLInputElement;
-      languageForm.checkDictionaryChanged(input);
+      languageForm.checkDictionaryChanged();
 
+      // Popup setting is now in database, not detected from URL
       const checkbox = document.querySelector('[name="LgDict1PopUp"]') as HTMLInputElement;
-      expect(checkbox.checked).toBe(true);
+      expect(checkbox.checked).toBe(false);
     });
 
-    it('handles URL with leading asterisk', () => {
+    it('accepts input element without error', () => {
       document.body.innerHTML = `
         <form name="lg_form">
-          <input name="LgDict1URI" value="*https://dict.com?q=test">
+          <input name="LgDict1URI" value="https://dict.com?q=test">
           <input type="checkbox" name="LgDict1PopUp">
         </form>
       `;
 
-      const input = document.querySelector('[name="LgDict1URI"]') as HTMLInputElement;
-      languageForm.checkDictionaryChanged(input);
-
-      expect(input.value).toBe('https://dict.com?q=test');
-      const checkbox = document.querySelector('[name="LgDict1PopUp"]') as HTMLInputElement;
-      expect(checkbox.checked).toBe(true);
+      // Should not throw - method is now a no-op
+      expect(() => languageForm.checkDictionaryChanged()).not.toThrow();
     });
 
     it('does nothing when input is empty', () => {
@@ -494,8 +421,7 @@ describe('language_form.ts', () => {
         </form>
       `;
 
-      const input = document.querySelector('[name="LgDict1URI"]') as HTMLInputElement;
-      languageForm.checkDictionaryChanged(input);
+      languageForm.checkDictionaryChanged();
 
       const checkbox = document.querySelector('[name="LgDict1PopUp"]') as HTMLInputElement;
       expect(checkbox.checked).toBe(false);
@@ -629,7 +555,7 @@ describe('language_form.ts', () => {
     });
 
     it('returns true for valid JSON with lwt_term', async () => {
-      const { deepFindValue } = await import('../../../src/frontend/js/core/user_interactions');
+      const { deepFindValue } = await import('../../../src/frontend/js/shared/utils/user_interactions');
       (deepFindValue as any).mockReturnValue('lwt_term');
 
       const result = languageForm.checkVoiceAPI('{"text": "lwt_term"}');
@@ -721,7 +647,7 @@ describe('language_form.ts', () => {
       checkTranslatorChanged(input);
 
       expect(statusSpy).toHaveBeenCalledWith('https://translate.com');
-      expect(dictSpy).toHaveBeenCalledWith(input);
+      expect(dictSpy).toHaveBeenCalled();
     });
   });
 
@@ -850,7 +776,7 @@ describe('language_form.ts', () => {
     });
 
     it('sets up cancel button handler', async () => {
-      const { lwtFormCheck } = await import('../../../src/frontend/js/forms/unloadformcheck');
+      const { lwtFormCheck } = await import('../../../src/frontend/js/shared/forms/unloadformcheck');
 
       const originalLocation = window.location;
       delete (window as any).location;
@@ -898,10 +824,11 @@ describe('language_form.ts', () => {
       expect(() => checkLanguageForm(form)).not.toThrow();
     });
 
-    it('checkTranslatorStatus handles URLs starting with asterisk', () => {
+    it('checkTranslatorStatus handles LibreTranslate URLs', () => {
       const spy = vi.spyOn(languageForm, 'checkLibreTranslateStatus');
 
-      languageForm.checkTranslatorStatus('*http://localhost:5000?lwt_translator=libretranslate');
+      // Asterisk prefix is no longer used for popup - popup is stored in database
+      languageForm.checkTranslatorStatus('http://localhost:5000?lwt_translator=libretranslate');
 
       expect(spy).toHaveBeenCalled();
     });

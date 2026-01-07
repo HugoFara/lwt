@@ -9,8 +9,8 @@
  */
 
 import Alpine from 'alpinejs';
-import { createIcons, icons } from 'lucide';
-import type { LanguageChangedEvent, TextStats } from '../core/language_settings';
+import { initIcons } from '@shared/icons/lucide_icons';
+import type { LanguageChangedEvent, TextStats } from '@modules/language/stores/language_settings';
 
 const STORAGE_KEY = 'lwt_collapsed_menus';
 
@@ -196,7 +196,7 @@ export function homeData(): HomeData {
 
       // Refresh Lucide icons for the newly rendered template
       setTimeout(() => {
-        createIcons({ icons });
+        initIcons();
       }, 0);
 
       // Auto-hide notification after 3 seconds

@@ -1,5 +1,9 @@
 # Multi-User System Refactor: Table Prefix → User ID
 
+> **STATUS: COMPLETED** (January 2026)
+>
+> All phases have been implemented. The system now supports user_id-based data isolation with built-in authentication. Enable with `MULTI_USER_ENABLED=true` in `.env`.
+
 ## Overview
 
 Refactor LWT from table-prefix-based data isolation to a proper user_id column approach with built-in authentication.

@@ -22,11 +22,22 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @psalm-suppress PossiblyUndefinedVariable - Variables are set by the including controller
  */
 
 namespace Lwt\Views\Feed;
 
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+
+// Ensure $texts and $languages are iterable
+if (!is_array($texts)) {
+    return;
+}
+$languagesArr = is_array($languages) ? $languages : [];
+
+// Ensure $tagName is a string
+$tagNameStr = is_string($tagName) ? $tagName : '';
 
 foreach ($texts as $text):
 ?>
@@ -75,7 +86,7 @@ foreach ($texts as $text):
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="feed[<?php echo $count; ?>][TxLgID]" class="notempty setfocus">
-                                <?php foreach ($languages as $rowLang): ?>
+                                <?php foreach ($languagesArr as $rowLang): ?>
                                 <option value="<?php echo $rowLang['LgID']; ?>"<?php
                                     if ($row['NfLgID'] === $rowLang['LgID']) {
                                         echo ' selected';
@@ -140,7 +151,7 @@ foreach ($texts as $text):
                 <div class="field">
                     <div class="control">
                         <div class="tags">
-                            <span class="tag is-info is-light"><?php echo htmlspecialchars($tagName, ENT_QUOTES, 'UTF-8'); ?></span>
+                            <span class="tag is-info is-light"><?php echo htmlspecialchars($tagNameStr, ENT_QUOTES, 'UTF-8'); ?></span>
                         </div>
                         <input type="hidden" name="feed[<?php echo $count; ?>][Nf_ID]" value="<?php echo $nfId; ?>" />
                         <input type="hidden" name="feed[<?php echo $count; ?>][Nf_Max_Texts]" value="<?php echo $maxTexts; ?>" />

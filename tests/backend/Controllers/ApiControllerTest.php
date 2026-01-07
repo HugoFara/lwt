@@ -4,16 +4,16 @@ namespace Lwt\Tests\Controllers;
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Controllers\ApiController;
-use Lwt\Controllers\TranslationController;
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
@@ -22,7 +22,10 @@ require_once __DIR__ . '/../../../src/backend/Controllers/ApiController.php';
 /**
  * Unit tests for the ApiController class.
  *
- * Tests the REST API controller and its delegation to specialized handlers.
+ * Tests the REST API controller.
+ *
+ * Note: Translation API tests (translate, google, glosbe) are now in
+ * tests/backend/Modules/Dictionary/TranslationControllerTest.php
  */
 class ApiControllerTest extends TestCase
 {
@@ -125,39 +128,6 @@ class ApiControllerTest extends TestCase
         $this->assertTrue(method_exists($controller, 'v1'));
     }
 
-    public function testControllerHasTranslateMethod(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new ApiController();
-
-        $this->assertTrue(method_exists($controller, 'translate'));
-    }
-
-    public function testControllerHasGoogleMethod(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new ApiController();
-
-        $this->assertTrue(method_exists($controller, 'google'));
-    }
-
-    public function testControllerHasGlosbeMethod(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new ApiController();
-
-        $this->assertTrue(method_exists($controller, 'glosbe'));
-    }
-
     // ===== BaseController inheritance tests =====
 
     public function testControllerExtendsBaseController(): void
@@ -169,91 +139,6 @@ class ApiControllerTest extends TestCase
         $controller = new ApiController();
 
         $this->assertInstanceOf(\Lwt\Controllers\BaseController::class, $controller);
-    }
-
-    // ===== Translation controller delegation tests =====
-
-    public function testGetTranslationControllerReturnsInstance(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new ApiController();
-
-        // Use reflection to test protected method
-        $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('getTranslationController');
-        $method->setAccessible(true);
-
-        $translationController = $method->invoke($controller);
-
-        $this->assertInstanceOf(TranslationController::class, $translationController);
-    }
-
-    public function testGetTranslationControllerReturnsSameInstance(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new ApiController();
-
-        // Use reflection to test protected method
-        $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('getTranslationController');
-        $method->setAccessible(true);
-
-        $tc1 = $method->invoke($controller);
-        $tc2 = $method->invoke($controller);
-
-        $this->assertSame($tc1, $tc2);
-    }
-
-    // ===== TranslationController tests =====
-
-    public function testTranslationControllerCanBeInstantiated(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
-
-        $this->assertInstanceOf(TranslationController::class, $controller);
-    }
-
-    public function testTranslationControllerHasTranslateMethod(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
-
-        $this->assertTrue(method_exists($controller, 'translate'));
-    }
-
-    public function testTranslationControllerHasGoogleMethod(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
-
-        $this->assertTrue(method_exists($controller, 'google'));
-    }
-
-    public function testTranslationControllerHasGlosbeMethod(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new TranslationController(new \Lwt\Services\TranslationService());
-
-        $this->assertTrue(method_exists($controller, 'glosbe'));
     }
 
     // ===== API request parameter tests =====
@@ -522,49 +407,5 @@ class ApiControllerTest extends TestCase
         $parts = explode('/', trim($uri, '/'));
 
         $this->assertEquals('123', $parts[3]);
-    }
-
-    // ===== Translation request parameter tests =====
-
-    public function testTranslationTextParamDetected(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $_GET['text'] = 'hello world';
-        $_REQUEST['text'] = 'hello world';
-
-        $controller = new ApiController();
-
-        $this->assertEquals('hello world', $this->invokeParam($controller, 'text'));
-    }
-
-    public function testTranslationSourceLangParamDetected(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $_GET['sl'] = 'en';
-        $_REQUEST['sl'] = 'en';
-
-        $controller = new ApiController();
-
-        $this->assertEquals('en', $this->invokeParam($controller, 'sl'));
-    }
-
-    public function testTranslationTargetLangParamDetected(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $_GET['tl'] = 'de';
-        $_REQUEST['tl'] = 'de';
-
-        $controller = new ApiController();
-
-        $this->assertEquals('de', $this->invokeParam($controller, 'tl'));
     }
 }

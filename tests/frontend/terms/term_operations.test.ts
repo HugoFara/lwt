@@ -17,12 +17,12 @@ const { mockApiPost, mockApiGet, mockTermsApi } = vi.hoisted(() => ({
 }));
 
 // Mock the API modules before importing the test subject
-vi.mock('../../../src/frontend/js/core/api_client', () => ({
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
   apiPost: mockApiPost,
   apiGet: mockApiGet
 }));
 
-vi.mock('../../../src/frontend/js/api/terms', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/api/terms_api', () => ({
   TermsApi: mockTermsApi
 }));
 
@@ -39,7 +39,7 @@ import {
   change_example_sentences_zone,
   do_ajax_show_sentences,
   type TransData,
-} from '../../../src/frontend/js/terms/term_operations';
+} from '../../../src/frontend/js/modules/vocabulary/services/term_operations';
 
 // Mock lwtFormCheck global
 const mockLwtFormCheck = {
@@ -637,7 +637,7 @@ describe('term_operations.ts', () => {
 
       expect(mockApiGet).toHaveBeenCalledWith(
         '/similar-terms',
-        { lg_id: 5, term: 'hello' }
+        { language_id: 5, term: 'hello' }
       );
     });
 
@@ -740,7 +740,7 @@ describe('term_operations.ts', () => {
 
       expect(mockApiGet).toHaveBeenCalledWith(
         '/sentences-with-term/42',
-        expect.objectContaining({ lg_id: 1, word_lc: 'word' })
+        expect.objectContaining({ language_id: 1, term_lc: 'word' })
       );
     });
 
@@ -752,8 +752,8 @@ describe('term_operations.ts', () => {
       expect(mockApiGet).toHaveBeenCalledWith(
         '/sentences-with-term',
         expect.objectContaining({
-          lg_id: 1,
-          word_lc: 'word',
+          language_id: 1,
+          term_lc: 'word',
           advanced_search: true,
         })
       );
@@ -766,7 +766,7 @@ describe('term_operations.ts', () => {
 
       expect(mockApiGet).toHaveBeenCalledWith(
         '/sentences-with-term',
-        expect.objectContaining({ lg_id: 1, word_lc: 'word' })
+        expect.objectContaining({ language_id: 1, term_lc: 'word' })
       );
     });
   });

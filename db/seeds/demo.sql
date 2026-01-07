@@ -1,5 +1,6 @@
 -- lwt-backup--- /ensures that this can be imported via Restore/
 --
+SET FOREIGN_KEY_CHECKS = 0;
 -- --------------------------------------------------------------
 -- "Learning with Texts" (LWT) is free and unencumbered software
 -- released into the PUBLIC DOMAIN.
@@ -43,7 +44,7 @@ CREATE TABLE `archivedtexts` (
   `AtLgID` tinyint(3) unsigned NOT NULL,
   `AtTitle` varchar(200) NOT NULL,
   `AtText` text NOT NULL,
-  `AtAnnotatedText` longtext NOT NULL,
+  `AtAnnotatedText` longtext NOT NULL DEFAULT '',
   `AtAudioURI` varchar(200) DEFAULT NULL,
   `AtSourceURI` varchar(1000) DEFAULT NULL,
   PRIMARY KEY (`AtID`),
@@ -190,26 +191,32 @@ CREATE TABLE `languages` (
   `LgDict1URI` varchar(200) NOT NULL,
   `LgDict2URI` varchar(200) DEFAULT NULL,
   `LgGoogleTranslateURI` varchar(200) DEFAULT NULL,
+  `LgDict1PopUp` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `LgDict2PopUp` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `LgGoogleTranslatePopUp` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `LgSourceLang` varchar(10) DEFAULT NULL,
+  `LgTargetLang` varchar(10) DEFAULT NULL,
   `LgExportTemplate` varchar(1000) DEFAULT NULL,
   `LgTextSize` int(5) unsigned NOT NULL DEFAULT '100',
-  `LgCharacterSubstitutions` varchar(500) NOT NULL,
-  `LgRegexpSplitSentences` varchar(500) NOT NULL,
-  `LgExceptionsSplitSentences` varchar(500) NOT NULL,
-  `LgRegexpWordCharacters` varchar(500) NOT NULL,
+  `LgCharacterSubstitutions` varchar(500) NOT NULL DEFAULT '',
+  `LgRegexpSplitSentences` varchar(500) NOT NULL DEFAULT '.!?',
+  `LgExceptionsSplitSentences` varchar(500) NOT NULL DEFAULT '',
+  `LgRegexpWordCharacters` varchar(500) NOT NULL DEFAULT 'a-zA-ZÀ-ÖØ-öø-ȳ',
   `LgParserType` varchar(50) DEFAULT NULL,
   `LgRemoveSpaces` int(1) unsigned NOT NULL DEFAULT '0',
   `LgSplitEachChar` int(1) unsigned NOT NULL DEFAULT '0',
   `LgRightToLeft` int(1) unsigned NOT NULL DEFAULT '0',
   `LgTTSVoiceAPI` varchar(2048) NOT NULL DEFAULT '',
   `LgShowRomanization` tinyint(1) DEFAULT '1',
+  `LgLocalDictMode` tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`LgID`),
   UNIQUE KEY `LgName` (`LgName`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
-    '1', 'French', 'http://www.wordreference.com/fren/lwt_term?lwt_popup=1',
-    NULL, 'https://translate.google.com/?ie=UTF-8&sl=fr&tl=en&text=lwt_term&lwt_popup=1',
+    '1', 'French', 'http://www.wordreference.com/fren/lwt_term',
+    NULL, 'https://translate.google.com/?ie=UTF-8&sl=fr&tl=en&text=lwt_term',
     '$y\\t$t\\n', '100', '´=\'|`=\'|’=\'|‘=\'|...=…|..=‥',
     '.!?:;', '[A-Z].|Dr.', 'a-zA-ZÀ-ÖØ-öø-ȳ',
     '0', '0', '0', '', '1'
@@ -219,7 +226,7 @@ VALUES
   (
     '2', 'Chinese', 'https://ce.linedict.com/dict.html#/cnen/search?query=lwt_term',
     'http://chinesedictionary.mobi/?handler=QueryWorddict&mwdqb=lwt_term',
-    'https://translate.google.com/?ie=UTF-8&sl=zh&tl=en&text=lwt_term&lwt_popup=1',
+    'https://translate.google.com/?ie=UTF-8&sl=zh&tl=en&text=lwt_term',
     '$y\\t$t\\n', '200', '', '.!?:;。！？：；',
     '', '一-龥', '1', '1', '0', '', '1'
   );
@@ -227,7 +234,7 @@ INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateUR
 VALUES
   (
     '3', 'German', 'http://de-en.syn.dict.cc/?s=lwt_term',
-    NULL, 'https://translate.google.com/?ie=UTF-8&sl=de&tl=en&text=lwt_term&lwt_popup=1',
+    NULL, 'https://translate.google.com/?ie=UTF-8&sl=de&tl=en&text=lwt_term',
     '$y\\t$t\\n', '150', '´=\'|`=\'|’=\'|‘=\'|...=…|..=‥',
     '.!?:;', '[A-Z].|Dr.', 'a-zA-ZäöüÄÖÜß',
     '0', '0', '0', '', '1'
@@ -237,7 +244,7 @@ VALUES
   (
     '4', 'Chinese2', 'https://ce.linedict.com/dict.html#/cnen/search?query=lwt_term',
     'http://chinesedictionary.mobi/?handler=QueryWorddict&mwdqb=lwt_term',
-    'https://translate.google.com/?ie=UTF-8&sl=zh&tl=en&text=lwt_term&lwt_popup=1',
+    'https://translate.google.com/?ie=UTF-8&sl=zh&tl=en&text=lwt_term',
     '$y\\t$t\\n', '200', '', '.!?:;。！？：；',
     '', '一-龥', '1', '0', '0', '', '1'
   );
@@ -246,15 +253,15 @@ VALUES
   (
     '5', 'Japanese', 'https://jisho.org/words?eng=&dict=edict&jap=lwt_term',
     'http://jisho.org/kanji/details/lwt_term',
-    'https://translate.google.com/?ie=UTF-8&sl=ja&tl=en&text=lwt_term&lwt_popup=1',
+    'https://translate.google.com/?ie=UTF-8&sl=ja&tl=en&text=lwt_term',
     '$y\\t$t\\n', '200', '', '.!?:;。！？：；',
     '', '一-龥ぁ-ヾ', '1', '1', '0', '', '1'
   );
 INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
-    '6', 'Korean', 'http://endic.naver.com/search.nhn?sLn=kr&isOnlyViewEE=N&query=lwt_term&lwt_popup=1',
-    NULL, 'https://translate.google.com/?text=lwt_term&ie=UTF-8&sl=ko&tl=en&lwt_popup=1',
+    '6', 'Korean', 'http://endic.naver.com/search.nhn?sLn=kr&isOnlyViewEE=N&query=lwt_term',
+    NULL, 'https://translate.google.com/?text=lwt_term&ie=UTF-8&sl=ko&tl=en',
     '$y\\t$t\\n', '150', '', '.!?:;。！？：；',
     '', '가-힣ᄀ-ᇂ', '0', '0', '0', '', '1'
   );
@@ -262,15 +269,15 @@ INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateUR
 VALUES
   (
     '7', 'Thai', 'http://dict.longdo.com/search/lwt_term',
-    NULL, 'https://translate.google.com/?ie=UTF-8&sl=th&tl=en&text=lwt_term&lwt_popup=1',
+    NULL, 'https://translate.google.com/?ie=UTF-8&sl=th&tl=en&text=lwt_term',
     '$y\\t$t\\n', '250', '', '.!?:;',
     '', 'ก-๛', '1', '0', '0', '', '1'
   );
 INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
-    '8', 'Hebrew', 'http://dictionary.reverso.net/hebrew-english/lwt_term&lwt_popup=1',
-    NULL, 'https://translate.google.com/?ie=UTF-8&sl=iw&tl=en&text=lwt_term&lwt_popup=1',
+    '8', 'Hebrew', 'http://dictionary.reverso.net/hebrew-english/lwt_term',
+    NULL, 'https://translate.google.com/?ie=UTF-8&sl=iw&tl=en&text=lwt_term',
     '$y\\t$t\\n', '150', '', '.!?:;',
     '', '\\x{0590}-\\x{05FF}', '0', '0',
     '1', '', '1'
@@ -542,7 +549,7 @@ CREATE TABLE `texts` (
   `TxLgID` tinyint(3) unsigned NOT NULL,
   `TxTitle` varchar(200) NOT NULL,
   `TxText` text NOT NULL,
-  `TxAnnotatedText` longtext NOT NULL,
+  `TxAnnotatedText` longtext NOT NULL DEFAULT '',
   `TxAudioURI` varchar(2048) DEFAULT NULL,
   `TxSourceURI` varchar(1000) DEFAULT NULL,
   `TxPosition` smallint(5) NOT NULL DEFAULT '0',
@@ -2668,11 +2675,41 @@ CREATE TABLE `feedlinks` (
   `FlLink` varchar(400) NOT NULL,
   `FlDescription` text NOT NULL,
   `FlDate` datetime NOT NULL,
-  `FlAudio` varchar(200) NOT NULL,
-  `FlText` longtext NOT NULL,
+  `FlAudio` varchar(200) NOT NULL DEFAULT '',
+  `FlText` longtext NOT NULL DEFAULT '',
   `FlNfID` tinyint(3) unsigned NOT NULL,
   PRIMARY KEY (`FlID`),
   KEY `FlLink` (`FlLink`),
   KEY `FlDate` (`FlDate`),
   UNIQUE KEY `FlTitle` (`FlNfID`, `FlTitle`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8;
+DROP TABLE IF EXISTS local_dictionary_entries;
+DROP TABLE IF EXISTS local_dictionaries;
+CREATE TABLE `local_dictionaries` (
+  `LdID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `LdLgID` TINYINT(3) UNSIGNED NOT NULL,
+  `LdName` VARCHAR(100) NOT NULL,
+  `LdDescription` VARCHAR(500) DEFAULT NULL,
+  `LdSourceFormat` VARCHAR(20) NOT NULL DEFAULT 'csv',
+  `LdEntryCount` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  `LdPriority` TINYINT(3) UNSIGNED NOT NULL DEFAULT 1,
+  `LdEnabled` TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
+  `LdCreated` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `LdUsID` INT(10) UNSIGNED DEFAULT NULL,
+  PRIMARY KEY (`LdID`),
+  KEY `LdLgID` (`LdLgID`),
+  KEY `LdUsID` (`LdUsID`),
+  KEY `LdEnabled_LdPriority` (`LdEnabled`, `LdPriority`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `local_dictionary_entries` (
+  `LeID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `LeLdID` INT(10) UNSIGNED NOT NULL,
+  `LeTerm` VARCHAR(250) NOT NULL,
+  `LeTermLc` VARCHAR(250) NOT NULL,
+  `LeDefinition` TEXT NOT NULL,
+  `LeReading` VARCHAR(250) DEFAULT NULL,
+  `LePartOfSpeech` VARCHAR(50) DEFAULT NULL,
+  PRIMARY KEY (`LeID`),
+  KEY `LeLdID` (`LeLdID`),
+  KEY `LeTermLc` (`LeTermLc`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

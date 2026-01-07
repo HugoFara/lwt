@@ -17,8 +17,14 @@
 
 namespace Lwt\Views\Text;
 
-use Lwt\View\Helper\IconHelper;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+
+// Type assertions for view variables
+/** @var array<int, string> $languageData */
+$languageData = $languageData ?? [];
+$languagesOption = (string) ($languagesOption ?? '');
+$maxInputVars = (int) ($maxInputVars ?? 1000);
 
 $actions = [
     ['url' => '/texts?new=1', 'label' => 'Short Text Import', 'icon' => 'circle-plus', 'class' => 'is-primary'],
@@ -28,7 +34,7 @@ $actions = [
 ];
 
 ?>
-<script type="application/json" id="language-data-config"><?php echo json_encode($languageData); ?></script>
+<script type="application/json" id="language-data-config"><?php echo json_encode($languageData, JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 
 <h2 class="title is-4">Long Text Import</h2>
 
@@ -36,6 +42,7 @@ $actions = [
 
 <form enctype="multipart/form-data" class="validate" action="/text/import-long" method="post"
       x-data="{ inputMethod: 'paste' }">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <div class="box">
         <!-- Language -->
         <div class="field">
@@ -148,7 +155,8 @@ $actions = [
                 <strong>upload_max_filesize</strong>: <?php echo ini_get('upload_max_filesize'); ?>
                 <br />
                 <span class="is-size-7">
-                    Adjust in "<?php echo htmlspecialchars(php_ini_loaded_file() ?: '', ENT_QUOTES, 'UTF-8'); ?>" and restart server if needed.
+                    <?php $iniFile = php_ini_loaded_file(); ?>
+                    Adjust in "<?php echo htmlspecialchars($iniFile !== false ? $iniFile : '', ENT_QUOTES, 'UTF-8'); ?>" and restart server if needed.
                 </span>
             </p>
         </div>
@@ -228,7 +236,7 @@ $actions = [
         <div class="field">
             <label class="label" title="Organize texts with tags for easy filtering">Tags</label>
             <div class="control">
-                <?php echo \Lwt\Services\TagService::getTextTagsHtml(0); ?>
+                <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getTextTagsHtml(0); ?>
             </div>
             <p class="help">Optional. Add tags to categorize and filter your texts. Tags will be applied to all imported sections.</p>
         </div>

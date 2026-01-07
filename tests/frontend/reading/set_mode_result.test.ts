@@ -7,7 +7,7 @@ import {
   hideAnnotations,
   showAnnotations,
   initSetModeResult
-} from '../../../src/frontend/js/reading/set_mode_result';
+} from '../../../src/frontend/js/modules/text/pages/reading/set_mode_result';
 
 describe('set_mode_result.ts', () => {
   beforeEach(() => {

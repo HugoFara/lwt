@@ -1,0 +1,284 @@
+<?php declare(strict_types=1);
+/**
+ * Update Language Use Case
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Modules\Language\Application\UseCases
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Modules\Language\Application\UseCases;
+
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
+use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
+
+/**
+ * Use case for updating an existing language.
+ *
+ * @since 3.0.0
+ */
+class UpdateLanguage
+{
+    private LanguageRepositoryInterface $repository;
+    private ReparseLanguageTexts $reparseUseCase;
+
+    /**
+     * @param LanguageRepositoryInterface|null $repository    Repository instance
+     * @param ReparseLanguageTexts|null        $reparseUseCase Reparse use case
+     */
+    public function __construct(
+        ?LanguageRepositoryInterface $repository = null,
+        ?ReparseLanguageTexts $reparseUseCase = null
+    ) {
+        $this->repository = $repository ?? new MySqlLanguageRepository();
+        $this->reparseUseCase = $reparseUseCase ?? new ReparseLanguageTexts($this->repository);
+    }
+
+    /**
+     * Update an existing language from request data.
+     *
+     * @param int $id Language ID
+     *
+     * @return string Result message
+     */
+    public function execute(int $id): string
+    {
+        $data = $this->getLanguageDataFromRequest();
+
+        // Get old values for comparison
+        $records = QueryBuilder::table('languages')
+            ->where('LgID', '=', $id)
+            ->getPrepared();
+        if (empty($records)) {
+            return "Cannot access language data";
+        }
+        $record = $records[0];
+
+        // Check if reparsing is needed
+        $needReParse = $this->needsReparsing($data, $record);
+
+        // Update language
+        $this->buildLanguageSql($data, $id);
+        $message = "Updated: 1";
+
+        if ($needReParse) {
+            $reparseCount = $this->reparseUseCase->reparseTexts($id);
+            $message .= " / Reparsed texts: " . $reparseCount;
+        } else {
+            $message .= " / Reparsing not needed";
+        }
+
+        return $message;
+    }
+
+    /**
+     * Update an existing language from data array (API-friendly version).
+     *
+     * @param int   $id   Language ID
+     * @param array $data Language data (camelCase keys)
+     *
+     * @return array{success: bool, reparsed: int, message: string}
+     */
+    public function updateFromData(int $id, array $data): array
+    {
+        $normalizedData = $this->normalizeLanguageData($data);
+
+        // Get old values for comparison
+        $records = QueryBuilder::table('languages')
+            ->where('LgID', '=', $id)
+            ->getPrepared();
+
+        if (empty($records)) {
+            return ['success' => false, 'reparsed' => 0, 'message' => 'Language not found'];
+        }
+
+        $record = $records[0];
+
+        // Check if reparsing is needed
+        $needReParse = $this->needsReparsing($normalizedData, $record);
+
+        // Update language
+        $this->buildLanguageSql($normalizedData, $id);
+
+        $reparsedCount = 0;
+        if ($needReParse) {
+            $reparsedCount = $this->reparseUseCase->reparseTexts($id);
+        }
+
+        return [
+            'success' => true,
+            'reparsed' => $reparsedCount,
+            'message' => $needReParse ? 'Updated and reparsed' : 'Updated'
+        ];
+    }
+
+    /**
+     * Get language data from request using InputValidator.
+     *
+     * @return array<string, string|int|bool|null>
+     */
+    private function getLanguageDataFromRequest(): array
+    {
+        return [
+            'LgName' => InputValidator::getString('LgName'),
+            'LgDict1URI' => InputValidator::getString('LgDict1URI'),
+            'LgDict2URI' => InputValidator::getString('LgDict2URI'),
+            'LgGoogleTranslateURI' => InputValidator::getString('LgGoogleTranslateURI'),
+            'LgDict1PopUp' => InputValidator::has('LgDict1PopUp'),
+            'LgDict2PopUp' => InputValidator::has('LgDict2PopUp'),
+            'LgGoogleTranslatePopUp' => InputValidator::has('LgGoogleTranslatePopUp'),
+            'LgSourceLang' => InputValidator::getString('LgSourceLang') ?: null,
+            'LgTargetLang' => InputValidator::getString('LgTargetLang') ?: null,
+            'LgExportTemplate' => InputValidator::getString('LgExportTemplate'),
+            'LgTextSize' => InputValidator::getString('LgTextSize', '100'),
+            'LgCharacterSubstitutions' => InputValidator::getString('LgCharacterSubstitutions', '', false),
+            'LgRegexpSplitSentences' => InputValidator::getString('LgRegexpSplitSentences'),
+            'LgExceptionsSplitSentences' => InputValidator::getString('LgExceptionsSplitSentences', '', false),
+            'LgRegexpWordCharacters' => InputValidator::getString('LgRegexpWordCharacters'),
+            'LgParserType' => InputValidator::getString('LgParserType') ?: null,
+            'LgRemoveSpaces' => InputValidator::has('LgRemoveSpaces'),
+            'LgSplitEachChar' => InputValidator::has('LgSplitEachChar'),
+            'LgRightToLeft' => InputValidator::has('LgRightToLeft'),
+            'LgTTSVoiceAPI' => InputValidator::getString('LgTTSVoiceAPI'),
+            'LgShowRomanization' => InputValidator::has('LgShowRomanization'),
+            'LgLocalDictMode' => (int) InputValidator::getString('LgLocalDictMode', '0'),
+        ];
+    }
+
+    /**
+     * Normalize language data from API request to database fields.
+     *
+     * @param array $data API request data (camelCase keys)
+     *
+     * @return array Normalized data (LgXxx keys)
+     */
+    private function normalizeLanguageData(array $data): array
+    {
+        return [
+            'LgName' => $data['name'] ?? '',
+            'LgDict1URI' => $data['dict1Uri'] ?? '',
+            'LgDict2URI' => $data['dict2Uri'] ?? '',
+            'LgGoogleTranslateURI' => $data['translatorUri'] ?? '',
+            'LgDict1PopUp' => !empty($data['dict1PopUp']),
+            'LgDict2PopUp' => !empty($data['dict2PopUp']),
+            'LgGoogleTranslatePopUp' => !empty($data['translatorPopUp']),
+            'LgSourceLang' => $data['sourceLang'] ?? null,
+            'LgTargetLang' => $data['targetLang'] ?? null,
+            'LgExportTemplate' => $data['exportTemplate'] ?? '',
+            'LgTextSize' => (string)($data['textSize'] ?? '100'),
+            'LgCharacterSubstitutions' => $data['characterSubstitutions'] ?? '',
+            'LgRegexpSplitSentences' => $data['regexpSplitSentences'] ?? '.!?',
+            'LgExceptionsSplitSentences' => $data['exceptionsSplitSentences'] ?? '',
+            'LgRegexpWordCharacters' => $data['regexpWordCharacters'] ?? 'a-zA-Z',
+            'LgParserType' => $data['parserType'] ?? null,
+            'LgRemoveSpaces' => !empty($data['removeSpaces']),
+            'LgSplitEachChar' => !empty($data['splitEachChar']),
+            'LgRightToLeft' => !empty($data['rightToLeft']),
+            'LgTTSVoiceAPI' => $data['ttsVoiceApi'] ?? '',
+            'LgShowRomanization' => $data['showRomanization'] ?? false,
+            'LgLocalDictMode' => (int)($data['localDictMode'] ?? 0),
+        ];
+    }
+
+    /**
+     * Check if language changes require reparsing texts.
+     *
+     * @param array $newData   New language data
+     * @param array $oldRecord Old language data
+     *
+     * @return bool
+     */
+    private function needsReparsing(array $newData, array $oldRecord): bool
+    {
+        return (
+            ($newData["LgCharacterSubstitutions"] ?? '')
+            != ($oldRecord['LgCharacterSubstitutions'] ?? '')
+        ) || (
+            trim($newData["LgRegexpSplitSentences"] ?? '') !=
+            trim($oldRecord['LgRegexpSplitSentences'] ?? '')
+        ) || (
+            ($newData["LgExceptionsSplitSentences"] ?? '')
+            != ($oldRecord['LgExceptionsSplitSentences'] ?? '')
+        ) || (
+            trim($newData["LgRegexpWordCharacters"] ?? '') !=
+            trim($oldRecord['LgRegexpWordCharacters'] ?? '')
+        ) || ((int)$newData["LgRemoveSpaces"] != (int)$oldRecord['LgRemoveSpaces']) ||
+        ((int)$newData["LgSplitEachChar"] != (int)$oldRecord['LgSplitEachChar']) ||
+        (($newData["LgParserType"] ?? null) != ($oldRecord['LgParserType'] ?? null));
+    }
+
+    /**
+     * Convert empty strings to null.
+     *
+     * @param string|null $value Value to convert
+     *
+     * @return string|null Trimmed value or null if empty
+     */
+    private function emptyToNull(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+        $trimmed = trim($value);
+        return $trimmed === '' ? null : $trimmed;
+    }
+
+    /**
+     * Build SQL and execute update for a language.
+     *
+     * @param array $data Language data
+     * @param int   $id   Language ID
+     *
+     * @return void
+     */
+    private function buildLanguageSql(array $data, int $id): void
+    {
+        $columns = [
+            'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
+            'LgDict1PopUp', 'LgDict2PopUp', 'LgGoogleTranslatePopUp',
+            'LgSourceLang', 'LgTargetLang',
+            'LgExportTemplate', 'LgTextSize', 'LgCharacterSubstitutions',
+            'LgRegexpSplitSentences', 'LgExceptionsSplitSentences',
+            'LgRegexpWordCharacters', 'LgParserType', 'LgRemoveSpaces', 'LgSplitEachChar',
+            'LgRightToLeft', 'LgTTSVoiceAPI', 'LgShowRomanization', 'LgLocalDictMode'
+        ];
+
+        $params = [
+            $this->emptyToNull($data["LgName"]),
+            $this->emptyToNull($data["LgDict1URI"]),
+            $this->emptyToNull($data["LgDict2URI"]),
+            $this->emptyToNull($data["LgGoogleTranslateURI"]),
+            (int)($data["LgDict1PopUp"] ?? false),
+            (int)($data["LgDict2PopUp"] ?? false),
+            (int)($data["LgGoogleTranslatePopUp"] ?? false),
+            $this->emptyToNull($data["LgSourceLang"] ?? null),
+            $this->emptyToNull($data["LgTargetLang"] ?? null),
+            $this->emptyToNull($data["LgExportTemplate"]),
+            $this->emptyToNull($data["LgTextSize"]),
+            $data["LgCharacterSubstitutions"],
+            $this->emptyToNull($data["LgRegexpSplitSentences"]),
+            $data["LgExceptionsSplitSentences"],
+            $this->emptyToNull($data["LgRegexpWordCharacters"]),
+            $data["LgParserType"] ?? null,
+            (int)$data["LgRemoveSpaces"],
+            (int)$data["LgSplitEachChar"],
+            (int)$data["LgRightToLeft"],
+            $data["LgTTSVoiceAPI"] ?? '',
+            (int)$data["LgShowRomanization"],
+            (int)($data["LgLocalDictMode"] ?? 0),
+        ];
+
+        $updateData = array_combine($columns, $params);
+
+        QueryBuilder::table('languages')
+            ->where('LgID', '=', $id)
+            ->updatePrepared($updateData);
+    }
+}

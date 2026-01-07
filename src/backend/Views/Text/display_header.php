@@ -26,11 +26,17 @@ namespace Lwt\Views\Text;
 // Variables injected from text_display_header.php:
 // $title, $audio, $sourceUri, $textLinks
 
-use Lwt\Services\MediaService;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Modules\Admin\Application\Services\MediaService;
+use Lwt\Shared\UI\Helpers\IconHelper;
+
+// Type assertions for view variables
+$title = (string) ($title ?? '');
+$sourceUri = (string) ($sourceUri ?? '');
+$textLinks = (string) ($textLinks ?? '');
+$audio = (string) ($audio ?? '');
 
 ?>
-<h1><?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
+<h1><?php echo \htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h1>
 <div class="flex-spaced">
     <div>
         <span id="hidet" class="click" data-action="hide-translations">
@@ -48,8 +54,8 @@ use Lwt\View\Helper\IconHelper;
     </div>
     <div>
         <?php
-        if ($sourceUri !== null && $sourceUri !== '') {
-            echo ' <a href="' . $sourceUri . '" target="_blank">';
+        if ($sourceUri !== '') {
+            echo ' <a href="' . htmlspecialchars($sourceUri, ENT_QUOTES, 'UTF-8') . '" target="_blank">';
             echo IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']);
             echo '</a>';
         }

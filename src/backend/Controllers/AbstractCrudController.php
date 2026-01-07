@@ -15,8 +15,8 @@
 
 namespace Lwt\Controllers;
 
-use Lwt\Core\Http\InputValidator;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 /**
  * Abstract base controller providing standardized CRUD operations.

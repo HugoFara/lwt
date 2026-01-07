@@ -3,10 +3,10 @@ namespace Lwt\Tests\Core\Database;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -229,7 +229,7 @@ class ConfigurationTest extends TestCase
         $row = mysqli_fetch_assoc($result);
         mysqli_free_result($result);
 
-        // The function sets sql_mode to empty string
-        $this->assertEquals('', $row['mode'], 'SQL mode should be empty');
+        // The function sets sql_mode to STRICT_ALL_TABLES
+        $this->assertEquals('STRICT_ALL_TABLES', $row['mode'], 'SQL mode should be STRICT_ALL_TABLES');
     }
 }

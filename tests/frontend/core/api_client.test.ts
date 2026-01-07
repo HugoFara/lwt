@@ -8,7 +8,7 @@ import {
   apiPut,
   apiDelete,
   apiPostForm
-} from '../../../src/frontend/js/core/api_client';
+} from '../../../src/frontend/js/shared/api/client';
 
 describe('core/api_client.ts', () => {
   const mockFetch = vi.fn();

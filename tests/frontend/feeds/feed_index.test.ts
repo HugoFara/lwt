@@ -4,12 +4,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the dependencies before importing the module
-vi.mock('../../../src/frontend/js/core/language_settings', () => ({
+vi.mock('../../../src/frontend/js/modules/language/stores/language_settings', () => ({
   setLang: vi.fn(),
   resetAll: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/forms/bulk_actions', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/bulk_actions', () => ({
   selectToggle: vi.fn(),
   multiActionGo: vi.fn()
 }));
@@ -17,9 +17,9 @@ vi.mock('../../../src/frontend/js/forms/bulk_actions', () => ({
 import {
   feedIndexData,
   type FeedIndexConfig
-} from '../../../src/frontend/js/feeds/components/feed_index_component';
-import { setLang, resetAll } from '../../../src/frontend/js/core/language_settings';
-import { selectToggle, multiActionGo } from '../../../src/frontend/js/forms/bulk_actions';
+} from '../../../src/frontend/js/modules/feed/components/feed_index_component';
+import { setLang, resetAll } from '../../../src/frontend/js/modules/language/stores/language_settings';
+import { selectToggle, multiActionGo } from '../../../src/frontend/js/shared/forms/bulk_actions';
 
 describe('feed_index_component.ts', () => {
   let originalLocation: Location;

@@ -3,11 +3,13 @@ namespace Lwt\Tests\Services;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\FeedService;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Modules\Feed\Application\FeedFacade;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Modules\Feed\FeedServiceProvider;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -16,18 +18,18 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/FeedService.php';
 
 /**
- * Unit tests for the FeedService class.
+ * Unit tests for the FeedFacade class.
  *
- * Tests feed/newsfeed CRUD operations through the service layer.
+ * Tests feed/newsfeed CRUD operations through the facade layer.
+ * Migrated from FeedServiceTest to use the new modular architecture.
  */
 class FeedServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
     private static int $testLangId = 0;
-    private FeedService $service;
+    private FeedFacade $service;
 
     public static function setUpBeforeClass(): void
     {
@@ -83,7 +85,13 @@ class FeedServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->service = new FeedService();
+        // Register FeedServiceProvider if not already registered
+        $container = Container::getInstance();
+        $provider = new FeedServiceProvider();
+        $provider->register($container);
+        $provider->boot($container);
+
+        $this->service = $container->get(FeedFacade::class);
     }
 
     protected function tearDown(): void
@@ -295,7 +303,7 @@ class FeedServiceTest extends TestCase
         // Add a feedlink (article) to the feed
         Connection::execute(
             "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
-             VALUES ($feedId, 'Test Article', 'https://example.com/article', 'Description', " . time() . ")"
+             VALUES ($feedId, 'Test Article', 'https://example.com/article', 'Description', FROM_UNIXTIME(" . time() . "))"
         );
 
         // Verify article exists
@@ -599,7 +607,7 @@ class FeedServiceTest extends TestCase
         for ($i = 1; $i <= 3; $i++) {
             Connection::execute(
                 "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
-                 VALUES ($feedId, 'Article $i', 'https://example.com/art$i', 'Desc', " . time() . ")"
+                 VALUES ($feedId, 'Article $i', 'https://example.com/art$i', 'Desc', FROM_UNIXTIME(" . time() . "))"
             );
         }
 
@@ -643,7 +651,7 @@ class FeedServiceTest extends TestCase
         // Add article with space prefix (unloadable)
         Connection::execute(
             "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
-             VALUES ($feedId, 'Unloadable Article', ' https://example.com/unloadable', 'Desc', " . time() . ")"
+             VALUES ($feedId, 'Unloadable Article', ' https://example.com/unloadable', 'Desc', FROM_UNIXTIME(" . time() . "))"
         );
 
         // Reset unloadable

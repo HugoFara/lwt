@@ -1,14 +1,14 @@
 <?php declare(strict_types=1);
 namespace Lwt\Tests\Core\Container;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Container/ContainerInterface.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Container/ContainerException.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Container/NotFoundException.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Container/Container.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Container/ContainerInterface.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Container/ContainerException.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Container/NotFoundException.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Container/Container.php';
 
-use Lwt\Core\Container\Container;
-use Lwt\Core\Container\ContainerException;
-use Lwt\Core\Container\NotFoundException;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Shared\Infrastructure\Container\ContainerException;
+use Lwt\Shared\Infrastructure\Container\NotFoundException;
 use PHPUnit\Framework\TestCase;
 
 /**

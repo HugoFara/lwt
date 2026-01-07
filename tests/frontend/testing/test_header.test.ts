@@ -8,7 +8,7 @@ import {
   resetTestFrames,
   startWordTest,
   startTestTable
-} from '../../../src/frontend/js/testing/test_header';
+} from '../../../src/frontend/js/modules/review/pages/test_header';
 
 describe('test_header.ts', () => {
   let originalLocation: Location;

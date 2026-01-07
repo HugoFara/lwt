@@ -9,8 +9,8 @@ import {
   updateWordTranslationInDOM,
   calculateCharCount,
   type RenderSettings
-} from '../../../src/frontend/js/reading/text_renderer';
-import type { WordData } from '../../../src/frontend/js/reading/stores/word_store';
+} from '../../../src/frontend/js/modules/text/pages/reading/text_renderer';
+import type { WordData } from '../../../src/frontend/js/modules/text/pages/reading/stores/word_store';
 
 describe('reading/text_renderer.ts', () => {
   beforeEach(() => {

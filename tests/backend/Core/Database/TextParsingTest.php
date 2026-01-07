@@ -3,11 +3,11 @@ namespace Lwt\Tests\Core\Database;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\TextParsing;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\TextParsing;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -103,65 +103,64 @@ class TextParsingTest extends TestCase
     }
 
     /**
-     * Helper to call prepare() with output buffering
+     * Helper to call splitIntoSentences() with output buffering
      */
-    private function callPrepare(string $text, int $id, int $lid): ?array
+    private function callSplitIntoSentences(string $text, int $lid): array
     {
         ob_start();
-        $result = TextParsing::prepare($text, $id, $lid);
+        $result = TextParsing::splitIntoSentences($text, $lid);
         ob_end_clean();
         return $result;
     }
 
     /**
-     * Helper to call splitCheck() with output buffering
+     * Helper to call parseAndDisplayPreview() with output buffering
      */
-    private function callSplitCheck(string $text, int $lid, int $id): ?array
+    private function callParseAndDisplayPreview(string $text, int $lid): void
     {
         ob_start();
-        $result = TextParsing::splitCheck($text, $lid, $id);
+        TextParsing::parseAndDisplayPreview($text, $lid);
         ob_end_clean();
-        return $result;
     }
 
-    // ===== prepare() tests =====
+    // ===== splitIntoSentences() tests =====
 
-    public function testPrepareBasicText(): void
+    public function testSplitIntoSentencesBasicText(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "Hello world. This is a test.";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should return array in split mode');
         $this->assertNotEmpty($result, 'Should have parsed sentences');
     }
 
-    public function testPrepareEmptyText(): void
+    public function testSplitIntoSentencesEmptyText(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->callPrepare('', -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences('', self::$testLanguageId);
 
         $this->assertIsArray($result);
     }
 
-    public function testPrepareWhitespaceOnly(): void
+    public function testSplitIntoSentencesWhitespaceOnly(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->callPrepare("   \n\t  ", -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences("   \n\t  ", self::$testLanguageId);
 
         $this->assertIsArray($result);
     }
 
-    public function testPrepareWithBraces(): void
+    public function testSplitIntoSentencesWithBraces(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -169,146 +168,147 @@ class TextParsingTest extends TestCase
 
         // Braces should be replaced with brackets
         $text = "Text with {braces} and more {content}.";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
     }
 
-    public function testPrepareWithWindowsLineEndings(): void
+    public function testSplitIntoSentencesWithWindowsLineEndings(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "Line one.\r\nLine two.\r\nLine three.";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
     }
 
-    public function testPrepareWithUnicode(): void
+    public function testSplitIntoSentencesWithUnicode(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "Hello 世界. Γεια σου κόσμε.";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
     }
 
-    public function testPrepareInvalidLanguage(): void
+    public function testSplitIntoSentencesInvalidLanguage(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->callPrepare("Test text.", -2, 99999);
+        $result = $this->callSplitIntoSentences("Test text.", 99999);
 
-        // Should return null for invalid language
-        $this->assertNull($result);
+        // Should return empty array for invalid language (since splitIntoSentences returns [''])
+        $this->assertIsArray($result);
+        $this->assertEquals([''], $result);
     }
 
-    // ===== parseStandard() tests =====
+    // ===== splitIntoSentences() tests - sentence parsing =====
 
-    public function testParseStandardBasicText(): void
+    public function testSplitIntoSentencesBasicSentences(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "Hello world. This is a test sentence.";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertGreaterThanOrEqual(2, count($result), 'Should split into at least 2 sentences');
     }
 
-    public function testParseStandardMultipleParagraphs(): void
+    public function testSplitIntoSentencesMultipleParagraphs(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "First paragraph.\n\nSecond paragraph.\n\nThird paragraph.";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertGreaterThanOrEqual(3, count($result));
     }
 
-    public function testParseStandardSpecialPunctuation(): void
+    public function testSplitIntoSentencesSpecialPunctuation(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "Question? Exclamation! Period. Another one.";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertGreaterThanOrEqual(3, count($result));
     }
 
-    public function testParseStandardWithNumbers(): void
+    public function testSplitIntoSentencesWithNumbers(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "The value is 3.14. Another number is 42. Version 2.0.1 is here.";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertGreaterThanOrEqual(3, count($result));
     }
 
-    public function testParseStandardWithQuotes(): void
+    public function testSplitIntoSentencesWithQuotes(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = '"First sentence." "Second sentence." \'Third sentence.\'';
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertGreaterThanOrEqual(3, count($result));
     }
 
-    public function testParseStandardWithEllipsis(): void
+    public function testSplitIntoSentencesWithEllipsis(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "Wait for it... Here it comes. Done.";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
     }
 
-    // ===== splitCheck() tests =====
+    // ===== parseAndDisplayPreview() tests =====
 
-    public function testSplitCheckSplitMode(): void
+    public function testParseAndDisplayPreviewSplitMode(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "Hello world. This is a test.";
-        $result = $this->callSplitCheck($text, self::$testLanguageId, -2);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
     }
 
-    public function testSplitCheckCheckMode(): void
+    public function testParseAndDisplayPreviewCheckMode(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -317,36 +317,15 @@ class TextParsingTest extends TestCase
         $text = "Test sentence.";
 
         ob_start();
-        $result = TextParsing::splitCheck($text, self::$testLanguageId, -1);
+        TextParsing::parseAndDisplayPreview($text, self::$testLanguageId);
         $output = ob_get_clean();
 
-        $this->assertNull($result, 'Check mode should return null');
         $this->assertStringContainsString('Test sentence', $output, 'Output should contain the text');
     }
 
-    // ===== checkValid() tests =====
+    // ===== parseAndSave() tests =====
 
-    public function testCheckValidOutputsHtml(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        // First, prepare some text to populate temptextitems
-        $this->callPrepare("Hello world. Test sentence.", -1, self::$testLanguageId);
-
-        ob_start();
-        TextParsing::checkValid(self::$testLanguageId);
-        $output = ob_get_clean();
-
-        // Should contain HTML elements
-        $this->assertStringContainsString('<h4>Sentences</h4>', $output);
-        $this->assertStringContainsString('<ol>', $output);
-    }
-
-    // ===== registerSentencesTextItems() tests =====
-
-    public function testRegisterSentencesTextItemsCreatesRecords(): void
+    public function testParseAndSaveCreatesSentencesAndTextItems(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -362,11 +341,8 @@ class TextParsingTest extends TestCase
         Connection::query($sql);
         $textId = mysqli_insert_id(Globals::getDbConnection());
 
-        // Prepare the text (populates temptextitems)
-        $this->callPrepare("Hello world.", $textId, self::$testLanguageId);
-
-        // Register sentences and text items
-        TextParsing::registerSentencesTextItems($textId, self::$testLanguageId, false);
+        // Parse and save the text (populates temptextitems and registers sentences/text items)
+        TextParsing::parseAndSave("Hello world.", self::$testLanguageId, $textId);
 
         // Check that sentences were created
         $sentenceCount = Connection::fetchValue(
@@ -386,80 +362,9 @@ class TextParsingTest extends TestCase
         Connection::query("DELETE FROM $texts WHERE TxID = $textId");
     }
 
-    // ===== displayStatistics() tests =====
-
-    public function testDisplayStatisticsOutputsJson(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        ob_start();
-        TextParsing::displayStatistics(self::$testLanguageId, false, false);
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('<script type="application/json"', $output);
-        $this->assertStringContainsString('text-check-config', $output);
-        $this->assertStringContainsString('multiWords', $output);
-        $this->assertStringContainsString('rtlScript', $output);
-    }
-
-    public function testDisplayStatisticsWithRtl(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        ob_start();
-        TextParsing::displayStatistics(self::$testLanguageId, true, false);
-        $output = ob_get_clean();
-
-        // RTL setting is now passed as JSON data for TypeScript to handle
-        $this->assertStringContainsString('"rtlScript":true', $output, 'RTL script flag should be true in JSON');
-    }
-
-    // ===== checkExpressions() tests =====
-
-    public function testCheckExpressionsWithEmptyArray(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        // Empty word length array should be handled gracefully
-        // This would cause issues with implode, so it shouldn't be called with empty array
-        // Just verify the function signature exists
-        $this->assertTrue(method_exists(TextParsing::class, 'checkExpressions'));
-    }
-
-    public function testCheckExpressionsCreatesTemporaryTable(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $tempexprs = Globals::table('tempexprs');
-
-        // First prepare some text
-        $this->callPrepare("Hello world test.", -1, self::$testLanguageId);
-
-        // Call checkExpressions with word lengths
-        TextParsing::checkExpressions([2, 3]);
-
-        // Check that tempexprs table exists and has been used
-        $result = Connection::query("SHOW TABLES LIKE '$tempexprs'");
-        $exists = mysqli_num_rows($result) > 0;
-        mysqli_free_result($result);
-
-        $this->assertTrue($exists, 'tempexprs table should exist');
-
-        // Clean up
-        Connection::query("TRUNCATE TABLE $tempexprs");
-    }
-
     // ===== Edge cases =====
 
-    public function testPrepareLongText(): void
+    public function testSplitIntoSentencesLongText(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -472,46 +377,46 @@ class TextParsingTest extends TestCase
         }
         $text = implode(' ', $sentences);
 
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertGreaterThanOrEqual(49, count($result));
     }
 
-    public function testPrepareSpecialCharacters(): void
+    public function testSplitIntoSentencesSpecialCharacters(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "Test with 'single quotes'. Test with \"double quotes\". Test with \\ backslash.";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
     }
 
-    public function testPrepareWithEmoji(): void
+    public function testSplitIntoSentencesWithEmoji(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "Hello 😀 world. How are you 🌍 doing?";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
     }
 
-    public function testPrepareNoPunctuation(): void
+    public function testSplitIntoSentencesNoPunctuation(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $text = "Text without any sentence ending punctuation marks";
-        $result = $this->callPrepare($text, -2, self::$testLanguageId);
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result, 'Should still return the text');
@@ -522,57 +427,84 @@ class TextParsingTest extends TestCase
      *
      * When a text ends without punctuation, the last word should still be
      * recognized as a word (WordCount=1), not as a non-word (WordCount=0).
+     *
+     * This test verifies the behavior through the public parseAndSave() API
+     * and checks the final textitems2 table for correct word recognition.
      */
-    public function testPrepareLastWordRecognizedWithoutPunctuation(): void
+    public function testParseAndSaveLastWordRecognizedWithoutPunctuation(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $temptextitems = 'temptextitems';
-        Connection::query("DROP TEMPORARY TABLE IF EXISTS $temptextitems");
-        Connection::query("CREATE TEMPORARY TABLE $temptextitems (
-            TiSeID INT,
-            TiCount INT,
-            TiOrder INT,
-            TiText VARCHAR(250),
-            TiWordCount INT
-        )");
+        $texts = Globals::table('texts');
+        $sentences = Globals::table('sentences');
+        $textitems2 = Globals::table('textitems2');
 
         // Test text WITHOUT punctuation
-        Connection::query("TRUNCATE $temptextitems");
-        TextParsing::prepare("Hello world", 1, self::$testLanguageId);
-        $result = Connection::fetchAll(
-            "SELECT TiText, TiWordCount FROM $temptextitems ORDER BY TiOrder"
+        $sql = "INSERT INTO $texts (TxLgID, TxTitle, TxText, TxAudioURI)
+                VALUES (" . self::$testLanguageId . ", 'Issue 114 Test NoPunct', 'Hello world', '')";
+        Connection::query($sql);
+        $textIdNoPunct = mysqli_insert_id(Globals::getDbConnection());
+
+        TextParsing::parseAndSave("Hello world", self::$testLanguageId, $textIdNoPunct);
+
+        // Query textitems2 to check word recognition
+        $resultNoPunct = Connection::fetchAll(
+            "SELECT Ti2Text, Ti2WordCount FROM $textitems2
+             WHERE Ti2TxID = $textIdNoPunct ORDER BY Ti2Order"
         );
 
-        // Both "Hello" and "world" should be recognized as words (WordCount=1)
-        $this->assertCount(2, $result, 'Should have 2 words');
-        $this->assertEquals('Hello', $result[0]['TiText']);
-        $this->assertEquals(1, (int)$result[0]['TiWordCount'], 'First word should have WordCount=1');
-        $this->assertEquals('world', $result[1]['TiText']);
-        $this->assertEquals(1, (int)$result[1]['TiWordCount'], 'Last word should have WordCount=1 even without trailing punctuation');
+        // Filter to only word items (Ti2WordCount > 0)
+        $wordsNoPunct = array_filter($resultNoPunct, fn($r) => (int)$r['Ti2WordCount'] > 0);
+        $wordsNoPunct = array_values($wordsNoPunct); // Re-index
+
+        // Both "Hello" and "world" should be recognized as words
+        $this->assertCount(2, $wordsNoPunct, 'Should have 2 words without punctuation');
+        $this->assertEquals('Hello', $wordsNoPunct[0]['Ti2Text']);
+        $this->assertEquals(1, (int)$wordsNoPunct[0]['Ti2WordCount'], 'First word should have WordCount=1');
+        $this->assertEquals('world', $wordsNoPunct[1]['Ti2Text']);
+        $this->assertEquals(1, (int)$wordsNoPunct[1]['Ti2WordCount'], 'Last word should have WordCount=1 even without trailing punctuation');
 
         // Test text WITH punctuation for comparison
-        Connection::query("TRUNCATE $temptextitems");
-        TextParsing::prepare("Hello world.", 1, self::$testLanguageId);
+        $sql = "INSERT INTO $texts (TxLgID, TxTitle, TxText, TxAudioURI)
+                VALUES (" . self::$testLanguageId . ", 'Issue 114 Test WithPunct', 'Hello world.', '')";
+        Connection::query($sql);
+        $textIdWithPunct = mysqli_insert_id(Globals::getDbConnection());
+
+        TextParsing::parseAndSave("Hello world.", self::$testLanguageId, $textIdWithPunct);
+
         $resultWithPunct = Connection::fetchAll(
-            "SELECT TiText, TiWordCount FROM $temptextitems ORDER BY TiOrder"
+            "SELECT Ti2Text, Ti2WordCount FROM $textitems2
+             WHERE Ti2TxID = $textIdWithPunct ORDER BY Ti2Order"
         );
 
-        // Both words should still be recognized, plus the period as non-word
-        $this->assertCount(3, $resultWithPunct, 'Should have 2 words + 1 punctuation');
-        $this->assertEquals('Hello', $resultWithPunct[0]['TiText']);
-        $this->assertEquals(1, (int)$resultWithPunct[0]['TiWordCount']);
-        $this->assertEquals('world', $resultWithPunct[1]['TiText']);
-        $this->assertEquals(1, (int)$resultWithPunct[1]['TiWordCount']);
-        $this->assertEquals('.', $resultWithPunct[2]['TiText']);
-        $this->assertEquals(0, (int)$resultWithPunct[2]['TiWordCount'], 'Punctuation should have WordCount=0');
+        // Filter to only word items
+        $wordsWithPunct = array_filter($resultWithPunct, fn($r) => (int)$r['Ti2WordCount'] > 0);
+        $wordsWithPunct = array_values($wordsWithPunct);
+
+        // Both words should be recognized
+        $this->assertCount(2, $wordsWithPunct, 'Should have 2 words with punctuation');
+        $this->assertEquals('Hello', $wordsWithPunct[0]['Ti2Text']);
+        $this->assertEquals(1, (int)$wordsWithPunct[0]['Ti2WordCount']);
+        $this->assertEquals('world', $wordsWithPunct[1]['Ti2Text']);
+        $this->assertEquals(1, (int)$wordsWithPunct[1]['Ti2WordCount']);
+
+        // Check that punctuation is also stored (as non-word)
+        $punctuation = array_filter($resultWithPunct, fn($r) => $r['Ti2Text'] === '.');
+        $this->assertNotEmpty($punctuation, 'Punctuation should be stored');
+        $punctItem = array_values($punctuation)[0];
+        $this->assertEquals(0, (int)$punctItem['Ti2WordCount'], 'Punctuation should have WordCount=0');
+
+        // Clean up
+        Connection::query("DELETE FROM $textitems2 WHERE Ti2TxID IN ($textIdNoPunct, $textIdWithPunct)");
+        Connection::query("DELETE FROM $sentences WHERE SeTxID IN ($textIdNoPunct, $textIdWithPunct)");
+        Connection::query("DELETE FROM $texts WHERE TxID IN ($textIdNoPunct, $textIdWithPunct)");
     }
 
     // ===== Character substitution tests =====
 
-    public function testPrepareWithCharacterSubstitutions(): void
+    public function testSplitIntoSentencesWithCharacterSubstitutions(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -596,7 +528,7 @@ class TextParsingTest extends TestCase
         $germanLangId = mysqli_insert_id(Globals::getDbConnection());
 
         $text = "Größe Käse Tür";
-        $result = $this->callPrepare($text, -2, $germanLangId);
+        $result = $this->callSplitIntoSentences($text, $germanLangId);
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
@@ -607,7 +539,7 @@ class TextParsingTest extends TestCase
 
     // ===== Split each char language tests =====
 
-    public function testPrepareWithSplitEachChar(): void
+    public function testSplitIntoSentencesWithSplitEachChar(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -631,7 +563,7 @@ class TextParsingTest extends TestCase
         $splitLangId = mysqli_insert_id(Globals::getDbConnection());
 
         $text = "Hello。";
-        $result = $this->callPrepare($text, -2, $splitLangId);
+        $result = $this->callSplitIntoSentences($text, $splitLangId);
 
         $this->assertIsArray($result);
 
@@ -641,7 +573,7 @@ class TextParsingTest extends TestCase
 
     // ===== RTL language tests =====
 
-    public function testPrepareWithRtlLanguage(): void
+    public function testSplitIntoSentencesWithRtlLanguage(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -665,7 +597,7 @@ class TextParsingTest extends TestCase
         $rtlLangId = mysqli_insert_id(Globals::getDbConnection());
 
         $text = "مرحبا. كيف حالك.";
-        $result = $this->callPrepare($text, -2, $rtlLangId);
+        $result = $this->callSplitIntoSentences($text, $rtlLangId);
 
         $this->assertIsArray($result);
 

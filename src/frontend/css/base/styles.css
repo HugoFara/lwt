@@ -1998,6 +1998,21 @@ Home page styles - Bulma integration
   color: #363636 !important;
 }
 
+/* Accessibility: Fix .is-static button contrast (WCAG 2.1 AA requires 4.5:1)
+   Default Bulma #69748c on #f3f4f6 = 4.26:1, needs darker text */
+.button.is-static {
+  color: #4a5568 !important;
+}
+
+/* Accessibility: Fix status link contrast in stat cards
+   Default #3273dc on #f5f5f5 = 4.16:1, use darker blue for 4.5:1+ */
+.stat-value a.status4,
+.stat-value a.status3,
+.stat-value a.status2,
+.stat-value a.status1 {
+  color: #2456a5 !important;
+}
+
 /* Fix select/dropdown background - force white in light mode */
 .select select,
 .menu-content select,

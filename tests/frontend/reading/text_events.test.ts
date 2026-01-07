@@ -9,11 +9,10 @@ import {
   word_hover_over,
   word_hover_out,
   prepareTextInteractions,
-} from '../../../src/frontend/js/reading/text_events';
-import * as userInteractions from '../../../src/frontend/js/core/user_interactions';
-import * as overlibInterface from '../../../src/frontend/js/terms/overlib_interface';
-import * as frameManagement from '../../../src/frontend/js/reading/frame_management';
-import * as wordStatus from '../../../src/frontend/js/terms/word_status';
+} from '../../../src/frontend/js/modules/text/pages/reading/text_events';
+import * as userInteractions from '../../../src/frontend/js/shared/utils/user_interactions';
+import * as overlibInterface from '../../../src/frontend/js/modules/vocabulary/services/overlib_interface';
+import * as wordStatus from '../../../src/frontend/js/modules/vocabulary/services/word_status';
 
 // Polyfill HTMLDialogElement methods for JSDOM
 function polyfillDialog() {
@@ -38,9 +37,9 @@ function polyfillDialog() {
 }
 
 // Import state modules
-import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
-import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/core/text_config';
-import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/core/settings_config';
+import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/modules/language/stores/language_config';
+import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/modules/text/stores/text_config';
+import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/shared/utils/settings_config';
 
 // Setup global mocks
 beforeEach(() => {
@@ -51,9 +50,9 @@ beforeEach(() => {
   resetSettingsConfig();
   initLanguageConfig({
     id: 1,
-    dictLink1: 'http://dict1.example.com/###',
-    dictLink2: 'http://dict2.example.com/###',
-    translatorLink: 'http://translate.example.com/###',
+    dictLink1: 'http://dict1.example.com/lwt_term',
+    dictLink2: 'http://dict2.example.com/lwt_term',
+    translatorLink: 'http://translate.example.com/lwt_term',
     delimiter: ',',
     rtl: false,
   });
@@ -347,7 +346,6 @@ describe('text_events.ts', () => {
       vi.spyOn(overlibInterface, 'run_overlib_status_99').mockImplementation(() => {});
       vi.spyOn(overlibInterface, 'run_overlib_status_98').mockImplementation(() => {});
       vi.spyOn(overlibInterface, 'run_overlib_status_1_to_5').mockImplementation(() => {});
-      vi.spyOn(frameManagement, 'loadModalFrame').mockImplementation(() => {});
       vi.spyOn(wordStatus, 'make_tooltip').mockReturnValue('tooltip text');
       vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => ({} as JQuery.jqXHR));
     });
@@ -371,8 +369,8 @@ describe('text_events.ts', () => {
       const word = document.querySelector('.word') as HTMLElement;
       word_click_event_do_text_text.call(word);
 
+      // Shows popup with "Learn term" link - no frame loading needed
       expect(overlibInterface.run_overlib_status_unknown).toHaveBeenCalled();
-      expect(frameManagement.loadModalFrame).toHaveBeenCalled();
     });
 
     it('calls run_overlib_status_99 for well-known words', () => {
@@ -564,7 +562,6 @@ describe('text_events.ts', () => {
 
       // Mock the functions that would be called on click
       vi.spyOn(overlibInterface, 'run_overlib_status_unknown').mockImplementation(() => {});
-      vi.spyOn(frameManagement, 'loadModalFrame').mockImplementation(() => {});
 
       prepareTextInteractions();
 
@@ -657,7 +654,6 @@ describe('text_events.ts', () => {
     it('word_click handles empty title attribute', () => {
       // Native tooltips are always used now
       vi.spyOn(overlibInterface, 'run_overlib_status_unknown').mockImplementation(() => {});
-      vi.spyOn(frameManagement, 'loadModalFrame').mockImplementation(() => {});
 
       document.body.innerHTML = `
         <span class="word" data_status="0" data_order="1">Test</span>

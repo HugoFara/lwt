@@ -3,10 +3,10 @@
 namespace Lwt\Tests\Core\Text;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
-require_once __DIR__ . '/../../../../src/backend/Services/AnnotationService.php';
+require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/AnnotationService.php';
 
 use Lwt\Core\Globals;
-use Lwt\Services\AnnotationService;
+use Lwt\Modules\Text\Application\Services\AnnotationService;
 use PHPUnit\Framework\TestCase;
 
 Globals::initialize();

@@ -7,24 +7,24 @@ import {
   autoRomanization,
   initWordFormAuto,
   type WordFormConfig
-} from '../../../src/frontend/js/forms/word_form_auto';
+} from '../../../src/frontend/js/shared/forms/word_form_auto';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/terms/translation_api', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/translation_api', () => ({
   getLibreTranslateTranslation: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   getPhoneticTextAsync: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/terms/dictionary', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/dictionary', () => ({
   getLangFromDict: vi.fn()
 }));
 
-import { getLibreTranslateTranslation } from '../../../src/frontend/js/terms/translation_api';
-import { getPhoneticTextAsync } from '../../../src/frontend/js/core/user_interactions';
-import { getLangFromDict } from '../../../src/frontend/js/terms/dictionary';
+import { getLibreTranslateTranslation } from '../../../src/frontend/js/modules/vocabulary/services/translation_api';
+import { getPhoneticTextAsync } from '../../../src/frontend/js/shared/utils/user_interactions';
+import { getLangFromDict } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
 
 describe('word_form_auto.ts', () => {
   beforeEach(() => {

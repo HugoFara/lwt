@@ -11,30 +11,30 @@ import {
   ajaxReloader,
   pageReloader,
   handleStatusChangeResult
-} from '../../../src/frontend/js/testing/test_ajax';
+} from '../../../src/frontend/js/modules/review/pages/test_ajax';
 
 // Mock dependencies - use the actual test_state and language_config modules
-import { resetTestState } from '../../../src/frontend/js/core/test_state';
-import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
+import { resetTestState } from '../../../src/frontend/js/modules/review/stores/test_state';
+import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/modules/language/stores/language_config';
 
-vi.mock('../../../src/frontend/js/ui/word_popup', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/components/word_popup', () => ({
   cClick: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   speechDispatcher: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/testing/test_mode', () => ({
+vi.mock('../../../src/frontend/js/modules/review/pages/test_mode', () => ({
   word_click_event_do_test_test: vi.fn(),
   keydown_event_do_test_test: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/testing/elapsed_timer', () => ({
+vi.mock('../../../src/frontend/js/modules/review/utils/elapsed_timer', () => ({
   startElapsedTimer: vi.fn()
 }));
 
-import { speechDispatcher } from '../../../src/frontend/js/core/user_interactions';
+import { speechDispatcher } from '../../../src/frontend/js/shared/utils/user_interactions';
 
 describe('test_ajax.ts', () => {
   beforeEach(() => {
@@ -169,9 +169,9 @@ describe('test_ajax.ts', () => {
       `;
     });
 
-    it('calls doTestFinished when word_id is 0', () => {
+    it('calls doTestFinished when term_id is 0', () => {
       testQueryHandler(
-        { word_id: 0, solution: '', group: '', word_text: '' },
+        { term_id: 0, solution: '', group: '', term_text: '' },
         10,
         'test_key',
         'selection'
@@ -181,9 +181,9 @@ describe('test_ajax.ts', () => {
       expect(termTest.style.display).toBe('none');
     });
 
-    it('inserts new word when word_id is not 0', () => {
+    it('inserts new word when term_id is not 0', () => {
       testQueryHandler(
-        { word_id: 123, solution: 'sol', group: '<span>Group</span>', word_text: 'word' },
+        { term_id: 123, solution: 'sol', group: '<span>Group</span>', term_text: 'word' },
         10,
         'test_key',
         'selection'
@@ -197,7 +197,7 @@ describe('test_ajax.ts', () => {
       checkbox.checked = true;
 
       testQueryHandler(
-        { word_id: 123, solution: 'sol', group: '<span class="word">Word</span>', word_text: 'word' },
+        { term_id: 123, solution: 'sol', group: '<span class="word">Word</span>', term_text: 'word' },
         10,
         'test_key',
         'selection'

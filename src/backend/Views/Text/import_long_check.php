@@ -22,10 +22,21 @@ namespace Lwt\Views\Text;
 
 // JavaScript moved to forms/form_initialization.ts (uses data-lwt-form-check and data-lwt-dirty)
 
+// Type assertions for view variables
+$langId = (int) ($langId ?? 0);
+$title = (string) ($title ?? '');
+$sourceUri = (string) ($sourceUri ?? '');
+$textTags = isset($textTags) ? (string) $textTags : null;
+/** @var array<int, array<int, string>> $texts */
+$texts = $texts ?? [];
+$textCount = (int) ($textCount ?? 0);
+$scrdir = (string) ($scrdir ?? '');
+
 $plural = ($textCount == 1 ? '' : 's');
 $shorter = ($textCount == 1 ? ' ' : ' shorter ');
 ?>
 <form enctype="multipart/form-data" action="/text/import-long" method="post" data-lwt-form-check="true" data-lwt-dirty>
+<?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 <input type="hidden" name="LgID" value="<?php echo $langId; ?>" />
 <input type="hidden" name="TxTitle" value="<?php echo \htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>" />
 <input type="hidden" name="TxSourceURI" value="<?php echo \htmlspecialchars($sourceUri, ENT_QUOTES, 'UTF-8'); ?>" />

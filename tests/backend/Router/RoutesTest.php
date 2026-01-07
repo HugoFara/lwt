@@ -87,14 +87,14 @@ class RoutesTest extends TestCase
     {
         $result = $this->simulateRequest('/');
         $this->assertEquals('handler', $result['type']);
-        $this->assertEquals('HomeController@index', $result['handler']);
+        $this->assertEquals('Lwt\\Modules\\Home\\Http\\HomeController@index', $result['handler']);
     }
 
     public function testIndexPhpRoute(): void
     {
         $result = $this->simulateRequest('/index.php');
         $this->assertEquals('handler', $result['type']);
-        $this->assertEquals('HomeController@index', $result['handler']);
+        $this->assertEquals('Lwt\\Modules\\Home\\Http\\HomeController@index', $result['handler']);
     }
 
     /**
@@ -134,17 +134,19 @@ class RoutesTest extends TestCase
 
     public static function textRoutesProvider(): array
     {
+        $textController = 'Lwt\\Modules\\Text\\Http\\TextController';
+        $textPrintController = 'Lwt\\Modules\\Text\\Http\\TextPrintController';
         return [
-            'text read' => ['/text/read', 'TextController@read'],
-            'text edit' => ['/text/edit', 'TextController@edit'],
-            'texts list' => ['/texts', 'TextController@edit'],
-            'text display' => ['/text/display', 'TextController@display'],
-            'text print' => ['/text/print', 'TextPrintController@printAnnotated'],
-            'text print-plain' => ['/text/print-plain', 'TextPrintController@printPlain'],
-            'text import-long' => ['/text/import-long', 'TextController@importLong'],
-            'text set-mode' => ['/text/set-mode', 'TextController@setMode'],
-            'text check' => ['/text/check', 'TextController@check'],
-            'text archived' => ['/text/archived', 'TextController@archived'],
+            'text read' => ['/text/read', "{$textController}@read"],
+            'text edit' => ['/text/edit', "{$textController}@edit"],
+            'texts list' => ['/texts', "{$textController}@edit"],
+            'text display' => ['/text/display', "{$textController}@display"],
+            'text print' => ['/text/print', "{$textPrintController}@printAnnotated"],
+            'text print-plain' => ['/text/print-plain', "{$textPrintController}@printPlain"],
+            'text import-long' => ['/text/import-long', "{$textController}@importLong"],
+            'text set-mode' => ['/text/set-mode', "{$textController}@setMode"],
+            'text check' => ['/text/check', "{$textController}@check"],
+            'text archived' => ['/text/archived', "{$textController}@archived"],
         ];
     }
 
@@ -163,20 +165,19 @@ class RoutesTest extends TestCase
 
     public static function wordRoutesProvider(): array
     {
+        $vocabularyController = 'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController';
         return [
-            'word edit' => ['/word/edit', 'WordController@edit'],
-            'words edit list' => ['/words/edit', 'WordController@listEditAlpine'],
-            'word edit-multi' => ['/word/edit-multi', 'WordController@editMulti'],
-            'word delete' => ['/word/delete', 'WordController@delete'],
-            'words list' => ['/words', 'WordController@listEditAlpine'],
-            'word new' => ['/word/new', 'WordController@create'],
-            'word show' => ['/word/show', 'WordController@show'],
-            'word insert-wellknown' => ['/word/insert-wellknown', 'WordController@insertWellknown'],
-            'word insert-ignore' => ['/word/insert-ignore', 'WordController@insertIgnore'],
-            'word inline-edit' => ['/word/inline-edit', 'WordController@inlineEdit'],
-            'word bulk-translate' => ['/word/bulk-translate', 'WordController@bulkTranslate'],
-            'word set-status' => ['/word/set-status', 'WordController@setStatus'],
-            'word upload' => ['/word/upload', 'WordController@upload'],
+            'word edit' => ['/word/edit', "{$vocabularyController}@editWord"],
+            'word edit-term' => ['/word/edit-term', "{$vocabularyController}@editTerm"],
+            'words edit list' => ['/words/edit', "{$vocabularyController}@listEditAlpine"],
+            'word edit-multi' => ['/word/edit-multi', "{$vocabularyController}@editMulti"],
+            'words list' => ['/words', "{$vocabularyController}@listEditAlpine"],
+            'word new' => ['/word/new', "{$vocabularyController}@createWord"],
+            'word show' => ['/word/show', "{$vocabularyController}@showWord"],
+            'word inline-edit' => ['/word/inline-edit', "{$vocabularyController}@inlineEdit"],
+            'word bulk-translate' => ['/word/bulk-translate', "{$vocabularyController}@bulkTranslate"],
+            'word set-all-status' => ['/word/set-all-status', "{$vocabularyController}@markAllWords"],
+            'word upload' => ['/word/upload', "{$vocabularyController}@upload"],
         ];
     }
 
@@ -196,7 +197,7 @@ class RoutesTest extends TestCase
     public static function reviewTestRoutesProvider(): array
     {
         return [
-            'test index' => ['/test', 'TestController@index'],
+            'test index' => ['/test', 'Lwt\\Modules\\Review\\Http\\TestController@index'],
         ];
     }
 
@@ -216,7 +217,7 @@ class RoutesTest extends TestCase
     public static function languageRoutesProvider(): array
     {
         return [
-            'languages list' => ['/languages', 'LanguageController@index'],
+            'languages list' => ['/languages', 'Lwt\\Modules\\Language\\Http\\LanguageController@index'],
         ];
     }
 
@@ -236,8 +237,8 @@ class RoutesTest extends TestCase
     public static function tagRoutesProvider(): array
     {
         return [
-            'tags list' => ['/tags', 'TermTagsController@index'],
-            'tags text' => ['/tags/text', 'TextTagsController@index'],
+            'tags list' => ['/tags', 'Lwt\\Modules\\Tags\\Http\\TermTagController@index'],
+            'tags text' => ['/tags/text', 'Lwt\\Modules\\Tags\\Http\\TextTagController@index'],
         ];
     }
 
@@ -257,9 +258,9 @@ class RoutesTest extends TestCase
     public static function feedRoutesProvider(): array
     {
         return [
-            'feeds index' => ['/feeds', 'FeedsController@index'],
-            'feeds edit' => ['/feeds/edit', 'FeedsController@edit'],
-            'feeds wizard' => ['/feeds/wizard', 'FeedsController@wizard'],
+            'feeds index' => ['/feeds', 'Lwt\\Modules\\Feed\\Http\\FeedController@index'],
+            'feeds edit' => ['/feeds/edit', 'Lwt\\Modules\\Feed\\Http\\FeedController@edit'],
+            'feeds wizard' => ['/feeds/wizard', 'Lwt\\Modules\\Feed\\Http\\FeedController@wizard'],
         ];
     }
 
@@ -279,13 +280,12 @@ class RoutesTest extends TestCase
     public static function adminRoutesProvider(): array
     {
         return [
-            'admin backup' => ['/admin/backup', 'AdminController@backup'],
-            'admin wizard' => ['/admin/wizard', 'AdminController@wizard'],
-            'admin statistics' => ['/admin/statistics', 'AdminController@statistics'],
-            'admin install-demo' => ['/admin/install-demo', 'AdminController@installDemo'],
-            'admin settings' => ['/admin/settings', 'AdminController@settings'],
-            'admin settings hover' => ['/admin/settings/hover', 'AdminController@settingsHover'],
-            'admin server-data' => ['/admin/server-data', 'AdminController@serverData'],
+            'admin backup' => ['/admin/backup', 'Lwt\\Modules\\Admin\\Http\\AdminController@backup'],
+            'admin wizard' => ['/admin/wizard', 'Lwt\\Modules\\Admin\\Http\\AdminController@wizard'],
+            'admin statistics' => ['/admin/statistics', 'Lwt\\Modules\\Admin\\Http\\AdminController@statistics'],
+            'admin install-demo' => ['/admin/install-demo', 'Lwt\\Modules\\Admin\\Http\\AdminController@installDemo'],
+            'admin settings' => ['/admin/settings', 'Lwt\\Modules\\Admin\\Http\\AdminController@settings'],
+            'admin server-data' => ['/admin/server-data', 'Lwt\\Modules\\Admin\\Http\\AdminController@serverData'],
         ];
     }
 
@@ -305,8 +305,8 @@ class RoutesTest extends TestCase
     public static function wordpressRoutesProvider(): array
     {
         return [
-            'wordpress start' => ['/wordpress/start', 'WordPressController@start'],
-            'wordpress stop' => ['/wordpress/stop', 'WordPressController@stop'],
+            'wordpress start' => ['/wordpress/start', 'Lwt\\Modules\\User\\Http\\WordPressController@start'],
+            'wordpress stop' => ['/wordpress/stop', 'Lwt\\Modules\\User\\Http\\WordPressController@stop'],
         ];
     }
 
@@ -327,9 +327,9 @@ class RoutesTest extends TestCase
     {
         return [
             'api v1' => ['/api/v1', 'ApiController@v1'],
-            'api translate' => ['/api/translate', 'ApiController@translate'],
-            'api google' => ['/api/google', 'ApiController@google'],
-            'api glosbe' => ['/api/glosbe', 'ApiController@glosbe'],
+            'api translate' => ['/api/translate', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@translate'],
+            'api google' => ['/api/google', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@google'],
+            'api glosbe' => ['/api/glosbe', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@glosbe'],
         ];
     }
 
@@ -424,11 +424,8 @@ class RoutesTest extends TestCase
             // New routes should use hyphens for word separation
             '/text/import-long' => 'should use hyphens',
             '/word/edit-multi' => 'should use hyphens',
-            '/word/insert-wellknown' => 'should use hyphens',
-            '/word/insert-ignore' => 'should use hyphens',
             '/word/inline-edit' => 'should use hyphens',
             '/word/bulk-translate' => 'should use hyphens',
-            '/word/set-status' => 'should use hyphens',
             '/admin/install-demo' => 'should use hyphens',
             '/admin/server-data' => 'should use hyphens',
         ];

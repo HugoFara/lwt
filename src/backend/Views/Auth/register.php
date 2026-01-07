@@ -46,7 +46,7 @@ $email = $email ?? '';
                     </div>
 
                     <!-- Error message -->
-                    <?php if ($error): ?>
+                    <?php if ($error !== null && $error !== ''): ?>
                     <div class="notification is-danger is-light">
                         <button class="delete" onclick="this.parentElement.remove()"></button>
                         <?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?>
@@ -55,6 +55,7 @@ $email = $email ?? '';
 
                     <!-- Registration form -->
                     <form method="POST" action="/register" x-data="registerForm()" @submit="submitForm($event)">
+                        <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                         <div class="field">
                             <label class="label" for="username">Username</label>
                             <div class="control has-icons-left has-icons-right">

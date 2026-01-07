@@ -3,11 +3,11 @@ namespace Lwt\Tests\Services;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\TextDisplayService;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Modules\Text\Application\Services\TextDisplayService;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -16,7 +16,7 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/TextDisplayService.php';
+require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextDisplayService.php';
 
 /**
  * Unit tests for the TextDisplayService class.

@@ -5,16 +5,17 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 
 use Lwt\Controllers\BaseController;
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 
@@ -174,52 +175,6 @@ class BaseControllerTest extends TestCase
         $this->assertFalse($this->controller->testIsGet());
     }
 
-    // ===== escape() tests =====
-
-    public function testEscapeHandlesQuotes(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $escaped = $this->controller->testEscape("test's value");
-        $this->assertStringContainsString("test\\'s value", $escaped);
-        $this->assertStringStartsWith("'", $escaped);
-        $this->assertStringEndsWith("'", $escaped);
-    }
-
-    public function testEscapeHandlesEmptyString(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $escaped = $this->controller->testEscape("");
-        $this->assertEquals('NULL', $escaped);
-    }
-
-    // ===== escapeNonNull() tests =====
-
-    public function testEscapeNonNullHandlesQuotes(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $escaped = $this->controller->testEscapeNonNull("test's value");
-        $this->assertStringContainsString("test\\'s value", $escaped);
-    }
-
-    public function testEscapeNonNullWithEmptyString(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $escaped = $this->controller->testEscapeNonNull("");
-        $this->assertEquals("''", $escaped);
-    }
-
     // ===== query() tests =====
 
     public function testQueryExecutesSelect(): void
@@ -335,16 +290,6 @@ class TestableController extends BaseController
     public function testIsGet(): bool
     {
         return $this->isGet();
-    }
-
-    public function testEscape(string $value): string
-    {
-        return $this->escape($value);
-    }
-
-    public function testEscapeNonNull(string $value): string
-    {
-        return $this->escapeNonNull($value);
     }
 
     public function testQuery(string $sql): \mysqli_result|bool

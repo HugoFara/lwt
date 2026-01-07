@@ -15,15 +15,14 @@
 
 namespace Lwt\Controllers;
 
-use Lwt\Core\Http\InputValidator;
-use Lwt\Database\Connection;
-use Lwt\Database\DB;
-use Lwt\Database\Escaping;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../Core/Http/InputValidator.php';
-require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../../Shared/Infrastructure/Http/InputValidator.php';
+require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
 
 /**
  * Abstract base controller providing common functionality for all controllers.
@@ -265,45 +264,6 @@ abstract class BaseController
     protected function getValue(string $sql): mixed
     {
         return Connection::fetchValue($sql);
-    }
-
-
-    /**
-     * Escape a string for safe SQL insertion.
-     *
-     * @param string $value String to escape
-     *
-     * @return string Escaped string suitable for SQL (with quotes)
-     *
-     * @deprecated Use prepared statements instead:
-     *             Connection::preparedExecute($sql, [$param1, $param2])
-     *             Connection::preparedFetchAll($sql, [$param1, $param2])
-     *             Connection::preparedFetchOne($sql, [$param1, $param2])
-     *             Connection::preparedFetchValue($sql, [$param1, $param2])
-     *             Connection::preparedInsert($sql, [$param1, $param2])
-     */
-    protected function escape(string $value): string
-    {
-        return Escaping::toSqlSyntax($value);
-    }
-
-    /**
-     * Escape a string for safe SQL insertion (returns empty string instead of NULL).
-     *
-     * @param string $value String to escape
-     *
-     * @return string Escaped string suitable for SQL (with quotes)
-     *
-     * @deprecated Use prepared statements instead:
-     *             Connection::preparedExecute($sql, [$param1, $param2])
-     *             Connection::preparedFetchAll($sql, [$param1, $param2])
-     *             Connection::preparedFetchOne($sql, [$param1, $param2])
-     *             Connection::preparedFetchValue($sql, [$param1, $param2])
-     *             Connection::preparedInsert($sql, [$param1, $param2])
-     */
-    protected function escapeNonNull(string $value): string
-    {
-        return Escaping::toSqlSyntaxNoNull($value);
     }
 
     /**

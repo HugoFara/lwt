@@ -3,11 +3,11 @@ namespace Lwt\Tests\Core\Database;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Database\DB;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -65,7 +65,7 @@ class DBTest extends TestCase
         }
 
         $builder = DB::table('settings');
-        $this->assertInstanceOf(\Lwt\Database\QueryBuilder::class, $builder);
+        $this->assertInstanceOf(\Lwt\Shared\Infrastructure\Database\QueryBuilder::class, $builder);
     }
 
     public function testTableBuilderWorks(): void

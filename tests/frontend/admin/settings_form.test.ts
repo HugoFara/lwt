@@ -3,15 +3,16 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
+  settingsFormApp,
   initSettingsForm,
   initConfirmSubmitForms,
   initNavigateButtons,
   initHistoryBackButtons,
-} from '../../../src/frontend/js/admin/settings_form';
-import * as unloadformcheck from '../../../src/frontend/js/forms/unloadformcheck';
+} from '../../../src/frontend/js/modules/admin/pages/settings_form';
+import * as unloadformcheck from '../../../src/frontend/js/shared/forms/unloadformcheck';
 
 // Mock the lwtFormCheck module
-vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
+vi.mock('../../../src/frontend/js/shared/forms/unloadformcheck', () => ({
   lwtFormCheck: {
     askBeforeExit: vi.fn(),
     resetDirty: vi.fn(),
@@ -32,7 +33,85 @@ describe('settings_form.ts', () => {
   });
 
   // ===========================================================================
-  // initSettingsForm Tests
+  // settingsFormApp Alpine Component Tests
+  // ===========================================================================
+
+  describe('settingsFormApp (Alpine component)', () => {
+    it('initializes with default state', () => {
+      const app = settingsFormApp();
+
+      expect(app.isDirty).toBe(false);
+      expect(app.isSubmitting).toBe(false);
+    });
+
+    it('init sets up form change tracking', () => {
+      const app = settingsFormApp();
+      app.init();
+
+      expect(unloadformcheck.lwtFormCheck.askBeforeExit).toHaveBeenCalled();
+    });
+
+    it('navigate resets dirty state and redirects', () => {
+      Object.defineProperty(window, 'location', {
+        value: { href: '' },
+        writable: true,
+      });
+
+      const app = settingsFormApp();
+      app.navigate('/test/url');
+
+      expect(unloadformcheck.lwtFormCheck.resetDirty).toHaveBeenCalled();
+      expect(location.href).toBe('/test/url');
+    });
+
+    it('historyBack calls history.back', () => {
+      const backSpy = vi.spyOn(history, 'back').mockImplementation(() => {});
+
+      const app = settingsFormApp();
+      app.historyBack();
+
+      expect(backSpy).toHaveBeenCalled();
+    });
+
+    it('confirmSubmit returns true and sets isSubmitting when confirmed', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      const app = settingsFormApp();
+      const event = new Event('submit', { cancelable: true });
+      const result = app.confirmSubmit(event, 'Are you sure?');
+
+      expect(result).toBe(true);
+      expect(app.isSubmitting).toBe(true);
+      expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
+    });
+
+    it('confirmSubmit returns false and prevents default when cancelled', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+      const app = settingsFormApp();
+      const event = new Event('submit', { cancelable: true });
+      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+      const result = app.confirmSubmit(event, 'Continue?');
+
+      expect(result).toBe(false);
+      expect(preventDefaultSpy).toHaveBeenCalled();
+      expect(app.isSubmitting).toBe(false);
+    });
+
+    it('confirmSubmit uses default message when not provided', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      const app = settingsFormApp();
+      const event = new Event('submit', { cancelable: true });
+      app.confirmSubmit(event);
+
+      expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
+    });
+  });
+
+  // ===========================================================================
+  // initSettingsForm Tests (Legacy)
   // ===========================================================================
 
   describe('initSettingsForm', () => {

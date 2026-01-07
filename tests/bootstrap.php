@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace Lwt\Tests;
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 
 // Load Composer autoloader

@@ -4,7 +4,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/api/terms', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/api/terms_api', () => ({
   TermsApi: {
     setStatus: vi.fn(),
     incrementStatus: vi.fn(),
@@ -13,13 +13,13 @@ vi.mock('../../../src/frontend/js/api/terms', () => ({
   }
 }));
 
-vi.mock('../../../src/frontend/js/api/review', () => ({
+vi.mock('../../../src/frontend/js/modules/review/api/review_api', () => ({
   ReviewApi: {
     updateStatus: vi.fn()
   }
 }));
 
-vi.mock('../../../src/frontend/js/words/word_dom_updates', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates', () => ({
   updateWordStatusInDOM: vi.fn(),
   deleteWordFromDOM: vi.fn(),
   markWordWellKnownInDOM: vi.fn(),
@@ -27,17 +27,16 @@ vi.mock('../../../src/frontend/js/words/word_dom_updates', () => ({
   updateLearnStatus: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
-  cleanupRightFrames: vi.fn(),
+vi.mock('../../../src/frontend/js/shared/utils/audio_feedback', () => ({
   successSound: vi.fn(),
   failureSound: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/ui/word_popup', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/components/word_popup', () => ({
   cClick: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/ui/result_panel', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/components/result_panel', () => ({
   showResultPanel: vi.fn(),
   hideResultPanel: vi.fn(),
   showErrorInPanel: vi.fn()
@@ -53,19 +52,19 @@ import {
   getContextFromElement,
   buildContext,
   type WordActionContext
-} from '../../../src/frontend/js/reading/word_actions';
-import { TermsApi } from '../../../src/frontend/js/api/terms';
-import { ReviewApi } from '../../../src/frontend/js/api/review';
+} from '../../../src/frontend/js/modules/vocabulary/services/word_actions';
+import { TermsApi } from '../../../src/frontend/js/modules/vocabulary/api/terms_api';
+import { ReviewApi } from '../../../src/frontend/js/modules/review/api/review_api';
 import {
   updateWordStatusInDOM,
   deleteWordFromDOM,
   markWordWellKnownInDOM,
   markWordIgnoredInDOM,
   updateLearnStatus
-} from '../../../src/frontend/js/words/word_dom_updates';
-import { successSound, failureSound } from '../../../src/frontend/js/reading/frame_management';
-import { cClick } from '../../../src/frontend/js/ui/word_popup';
-import { showResultPanel, showErrorInPanel } from '../../../src/frontend/js/ui/result_panel';
+} from '../../../src/frontend/js/modules/vocabulary/services/word_dom_updates';
+import { successSound, failureSound } from '../../../src/frontend/js/shared/utils/audio_feedback';
+import { cClick } from '../../../src/frontend/js/modules/vocabulary/components/word_popup';
+import { showResultPanel, showErrorInPanel } from '../../../src/frontend/js/modules/vocabulary/components/result_panel';
 
 describe('reading/word_actions.ts', () => {
   beforeEach(() => {

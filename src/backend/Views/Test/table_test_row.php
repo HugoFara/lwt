@@ -21,14 +21,22 @@
 namespace Lwt\Views\Test;
 
 use Lwt\Core\StringUtils;
-use Lwt\Services\ExportService;
+use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+
+// Type assertions for view variables
+/** @var array $wordInput */
+$wordInput = $word ?? [];
+/** @var array{WoID: int, WoText: string, WoTranslation: string, WoRomanization: string, WoSentence: string, WoStatus: int, Score: int} $word */
+$word = array_merge(['WoID' => 0, 'WoText' => '', 'WoTranslation' => '', 'WoRomanization' => '', 'WoSentence' => '', 'WoStatus' => 0, 'Score' => 0], $wordInput);
+$regexWord = (string) ($regexWord ?? '');
+$textSize = (int) ($textSize ?? 100);
 
 $span1 = $rtl ? '<span dir="rtl">' : '';
 $span2 = $rtl ? '</span>' : '';
 
-$sent = htmlspecialchars(ExportService::replaceTabNewline($word['WoSentence'] ?? ''), ENT_QUOTES, 'UTF-8');
+$sent = htmlspecialchars(ExportService::replaceTabNewline($word['WoSentence']), ENT_QUOTES, 'UTF-8');
 $sent1 = str_replace(
     "{",
     ' <b>[',
@@ -49,28 +57,28 @@ $sent1 = str_replace(
     <td class="td1 center" nowrap="nowrap">
         <span id="STAT<?php echo $word['WoID']; ?>">
             <?php echo StatusHelper::buildTestTableControls(
-                (int) $word['Score'],
-                (int) $word['WoStatus'],
-                (int) $word['WoID'],
-                StatusHelper::getAbbr((int) $word['WoStatus'])
+                $word['Score'],
+                $word['WoStatus'],
+                $word['WoID'],
+                StatusHelper::getAbbr($word['WoStatus'])
             ); ?>
         </span>
     </td>
     <td class="td1 center" style="font-size:<?php echo $textSize; ?>%;">
         <?php echo $span1; ?>
         <span id="TERM<?php echo $word['WoID']; ?>">
-            <?php echo \htmlspecialchars($word['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+            <?php echo \htmlspecialchars($word['WoText'], ENT_QUOTES, 'UTF-8'); ?>
         </span>
         <?php echo $span2; ?>
     </td>
     <td class="td1 center">
         <span id="TRAN<?php echo $word['WoID']; ?>">
-            <?php echo StringUtils::parseInlineMarkdown($word['WoTranslation'] ?? ''); ?>
+            <?php echo StringUtils::parseInlineMarkdown($word['WoTranslation']); ?>
         </span>
     </td>
     <td class="td1 center">
         <span id="ROMA<?php echo $word['WoID']; ?>">
-            <?php echo \htmlspecialchars($word['WoRomanization'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+            <?php echo \htmlspecialchars($word['WoRomanization'], ENT_QUOTES, 'UTF-8'); ?>
         </span>
     </td>
     <td class="td1 center test-sentence-cell">

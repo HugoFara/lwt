@@ -31,7 +31,8 @@ if (isset($_SESSION['LWT-WP-User'])) {
         $url = $_SERVER['HTTP_REFERER'];
     }
     if (strpos($url, "/") !== false) {
-        $url = substr($url, strrpos($url, '/') + 1);
+        $pos = strrpos($url, '/');
+        $url = $pos !== false ? substr($url, $pos + 1) : $url;
     }
     header("Location: ./wp_lwt_start.php?rd=" . urlencode($url));
     exit();

@@ -1,0 +1,6 @@
+# Deny direct access to PHP files in backend directory
+# All requests should go through the front controller (index.php)
+
+<FilesMatch "\.(php|inc)$">
+    Require all denied
+</FilesMatch>

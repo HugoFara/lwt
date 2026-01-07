@@ -21,8 +21,11 @@
 
 namespace Lwt\Views\Text;
 
-// Variables injected from text_display_text.php:
-// $annotations, $textSize, $rtlScript
+// Type assertions for view variables
+/** @var array<int, array{type: int, text?: string, rom?: string, trans?: string}> $annotations */
+$annotations = $annotations ?? [];
+$textSize = (int) ($textSize ?? 100);
+
 // JavaScript moved to reading/annotation_interactions.ts
 
 ?>
@@ -30,17 +33,20 @@ namespace Lwt\Views\Text;
 <p style="font-size:<?php echo $textSize; ?>%;line-height: 1.35; margin-bottom: 10px; ">
 <?php
 foreach ($annotations as $item) {
+    $itemRom = $item['rom'] ?? '';
+    $itemText = $item['text'] ?? '';
+    $itemTrans = $item['trans'] ?? '';
     if ($item['type'] > -1) {
         // Regular word with annotation
         echo ' <ruby>
             <rb>
                 <span class="click anntermruby" style="color:black;"' .
-                ($item['rom'] === '' ? '' : (' title="' . \htmlspecialchars($item['rom'] ?? '', ENT_QUOTES, 'UTF-8') . '"')) . '>' .
-                    \htmlspecialchars($item['text'] ?? '', ENT_QUOTES, 'UTF-8') .
+                ($itemRom === '' ? '' : (' title="' . \htmlspecialchars($itemRom, ENT_QUOTES, 'UTF-8') . '"')) . '>' .
+                    \htmlspecialchars($itemText, ENT_QUOTES, 'UTF-8') .
                 '</span>
             </rb>
             <rt>
-                <span class="click anntransruby2">' . \htmlspecialchars($item['trans'] ?? '', ENT_QUOTES, 'UTF-8') . '</span>
+                <span class="click anntransruby2">' . \htmlspecialchars($itemTrans, ENT_QUOTES, 'UTF-8') . '</span>
             </rt>
         </ruby> ';
     } else {
@@ -50,7 +56,7 @@ foreach ($annotations as $item) {
             '</p>
             <p style="font-size:' . $textSize .
             '%;line-height: 1.3; margin-bottom: 10px;">',
-            " " . \htmlspecialchars($item['text'] ?? '', ENT_QUOTES, 'UTF-8')
+            " " . \htmlspecialchars($itemText, ENT_QUOTES, 'UTF-8')
         );
     }
 }

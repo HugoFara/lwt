@@ -4,15 +4,15 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the language_settings module
-vi.mock('../../../src/frontend/js/core/language_settings', () => ({
+vi.mock('../../../src/frontend/js/modules/language/stores/language_settings', () => ({
   setLang: vi.fn()
 }));
 
 import {
   feedMultiLoadData,
   FeedMultiLoadConfig
-} from '../../../src/frontend/js/feeds/components/feed_multi_load_component';
-import { setLang } from '../../../src/frontend/js/core/language_settings';
+} from '../../../src/frontend/js/modules/feed/components/feed_multi_load_component';
+import { setLang } from '../../../src/frontend/js/modules/language/stores/language_settings';
 
 describe('feed_multi_load_component.ts', () => {
   let originalLocation: Location;

@@ -8,7 +8,7 @@ import {
   initTextStatusCharts,
   updateAllTextStatusCharts,
   destroyAllTextStatusCharts
-} from '../../../src/frontend/js/texts/text_status_chart';
+} from '../../../src/frontend/js/modules/text/pages/text_status_chart';
 
 // Mock Chart.js
 vi.mock('chart.js', () => {
@@ -83,22 +83,22 @@ describe('texts/text_status_chart.ts', () => {
   // ===========================================================================
 
   describe('createTextStatusChart', () => {
-    it('returns null when canvas not found', () => {
-      const result = createTextStatusChart('nonexistent');
+    it('returns null when canvas not found', async () => {
+      const result = await createTextStatusChart('nonexistent');
 
       expect(result).toBeNull();
     });
 
-    it('creates chart when canvas exists', () => {
+    it('creates chart when canvas exists', async () => {
       createChartCanvas('1');
       setupStatusData('1', { 0: 10, 1: 5 });
 
-      const result = createTextStatusChart('1');
+      const result = await createTextStatusChart('1');
 
       expect(result).not.toBeNull();
     });
 
-    it('reads data from DOM when not provided', () => {
+    it('reads data from DOM when not provided', async () => {
       createChartCanvas('1');
       setupStatusData('1', { 0: 20, 1: 10, 2: 5 });
 
@@ -107,7 +107,7 @@ describe('texts/text_status_chart.ts', () => {
       expect(chart).not.toBeNull();
     });
 
-    it('uses provided data when available', () => {
+    it('uses provided data when available', async () => {
       createChartCanvas('1');
       const data = { 0: 50, 1: 25, 2: 25 };
 
@@ -116,7 +116,7 @@ describe('texts/text_status_chart.ts', () => {
       expect(chart).not.toBeNull();
     });
 
-    it('destroys existing chart before creating new one', () => {
+    it('destroys existing chart before creating new one', async () => {
       createChartCanvas('1');
       setupStatusData('1', { 0: 10 });
 

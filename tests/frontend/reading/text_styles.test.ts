@@ -7,8 +7,8 @@ import {
   injectTextStyles,
   generateParagraphStyles,
   removeTextStyles
-} from '../../../src/frontend/js/reading/text_styles';
-import type { TextReadingConfig } from '../../../src/frontend/js/api/texts';
+} from '../../../src/frontend/js/modules/text/pages/reading/text_styles';
+import type { TextReadingConfig } from '../../../src/frontend/js/modules/text/api/texts_api';
 
 describe('reading/text_styles.ts', () => {
   beforeEach(() => {

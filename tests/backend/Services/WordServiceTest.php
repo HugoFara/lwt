@@ -3,11 +3,11 @@ namespace Lwt\Tests\Services;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\EnvLoader;
+use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Services\WordService;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
+use Lwt\Modules\Vocabulary\Application\Services\WordService;
+use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -16,10 +16,9 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Services/ExportService.php';
-require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
-require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../src/backend/Services/WordService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExportService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/WordService.php';
 
 /**
  * Unit tests for the WordService class.

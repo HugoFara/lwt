@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/StringUtils.php';
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
-use Lwt\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\Escaping;
 use PHPUnit\Framework\TestCase;
 
 Globals::initialize();

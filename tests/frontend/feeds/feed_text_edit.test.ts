@@ -14,7 +14,7 @@ vi.mock('@yaireo/tagify', () => {
 });
 
 // Mock app_data to provide text tags
-vi.mock('../../../src/frontend/js/core/app_data', () => ({
+vi.mock('../../../src/frontend/js/shared/stores/app_data', () => ({
   fetchTextTags: vi.fn().mockResolvedValue(['tag1', 'tag2', 'tag3']),
   getTextTagsSync: vi.fn().mockReturnValue(['tag1', 'tag2', 'tag3'])
 }));
@@ -22,7 +22,7 @@ vi.mock('../../../src/frontend/js/core/app_data', () => ({
 import {
   feedTextEditData,
   type FeedTextEditConfig
-} from '../../../src/frontend/js/feeds/components/feed_text_edit_component';
+} from '../../../src/frontend/js/modules/feed/components/feed_text_edit_component';
 
 describe('feed_text_edit_component.ts', () => {
   beforeEach(() => {
@@ -154,7 +154,7 @@ describe('feed_text_edit_component.ts', () => {
   // ===========================================================================
 
   describe('initTagifyOnFeedInput()', () => {
-    it('replaces UL with input element', () => {
+    it('replaces UL with input element', async () => {
       document.body.innerHTML = `
         <ul name="feed[0][TxTags]">
           <li>tag1</li>
@@ -165,7 +165,7 @@ describe('feed_text_edit_component.ts', () => {
       const component = feedTextEditData();
       const ul = document.querySelector<HTMLUListElement>('ul')!;
 
-      component.initTagifyOnFeedInput(ul);
+      await component.initTagifyOnFeedInput(ul);
 
       // UL should be replaced with input
       const input = document.querySelector<HTMLInputElement>('.tagify-feed-input');
@@ -173,7 +173,7 @@ describe('feed_text_edit_component.ts', () => {
       expect(document.querySelector('ul')).toBeNull();
     });
 
-    it('creates input with correct attributes', () => {
+    it('creates input with correct attributes', async () => {
       document.body.innerHTML = `
         <ul name="feed[5][TxTags]">
           <li>test</li>
@@ -183,14 +183,14 @@ describe('feed_text_edit_component.ts', () => {
       const component = feedTextEditData();
       const ul = document.querySelector<HTMLUListElement>('ul')!;
 
-      component.initTagifyOnFeedInput(ul);
+      await component.initTagifyOnFeedInput(ul);
 
       const input = document.querySelector<HTMLInputElement>('.tagify-feed-input');
       expect(input?.name).toBe('feed[5][TxTags]');
       expect(input?.dataset.feedIndex).toBe('5');
     });
 
-    it('extracts existing tags from LI elements', () => {
+    it('extracts existing tags from LI elements', async () => {
       document.body.innerHTML = `
         <ul name="feed[1][TxTags]">
           <li>first tag</li>
@@ -202,13 +202,13 @@ describe('feed_text_edit_component.ts', () => {
       const component = feedTextEditData();
       const ul = document.querySelector<HTMLUListElement>('ul')!;
 
-      component.initTagifyOnFeedInput(ul);
+      await component.initTagifyOnFeedInput(ul);
 
       const input = document.querySelector<HTMLInputElement>('.tagify-feed-input');
       expect(input?.value).toBe('first tag, second tag, third tag');
     });
 
-    it('handles empty UL elements', () => {
+    it('handles empty UL elements', async () => {
       document.body.innerHTML = `
         <ul name="feed[2][TxTags]"></ul>
       `;
@@ -216,14 +216,14 @@ describe('feed_text_edit_component.ts', () => {
       const component = feedTextEditData();
       const ul = document.querySelector<HTMLUListElement>('ul')!;
 
-      component.initTagifyOnFeedInput(ul);
+      await component.initTagifyOnFeedInput(ul);
 
       const input = document.querySelector<HTMLInputElement>('.tagify-feed-input');
       expect(input).toBeTruthy();
       expect(input?.value).toBe('');
     });
 
-    it('ignores UL without name attribute', () => {
+    it('ignores UL without name attribute', async () => {
       document.body.innerHTML = `
         <ul>
           <li>ignored</li>
@@ -233,14 +233,14 @@ describe('feed_text_edit_component.ts', () => {
       const component = feedTextEditData();
       const ul = document.querySelector<HTMLUListElement>('ul')!;
 
-      component.initTagifyOnFeedInput(ul);
+      await component.initTagifyOnFeedInput(ul);
 
       // UL should still be there
       expect(document.querySelector('ul')).toBeTruthy();
       expect(document.querySelector('.tagify-feed-input')).toBeNull();
     });
 
-    it('handles whitespace in tag text', () => {
+    it('handles whitespace in tag text', async () => {
       document.body.innerHTML = `
         <ul name="feed[0][TxTags]">
           <li>  spaced tag  </li>
@@ -251,7 +251,7 @@ describe('feed_text_edit_component.ts', () => {
       const component = feedTextEditData();
       const ul = document.querySelector<HTMLUListElement>('ul')!;
 
-      component.initTagifyOnFeedInput(ul);
+      await component.initTagifyOnFeedInput(ul);
 
       const input = document.querySelector<HTMLInputElement>('.tagify-feed-input');
       expect(input?.value).toContain('spaced tag');

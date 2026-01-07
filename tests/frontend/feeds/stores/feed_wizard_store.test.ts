@@ -19,13 +19,13 @@ vi.mock('alpinejs', () => {
 });
 
 // Mock xpath_utils
-vi.mock('../../../../src/frontend/js/feeds/utils/xpath_utils', () => ({
+vi.mock('../../../../src/frontend/js/modules/feed/utils/xpath_utils', () => ({
   isValidXPath: vi.fn((xpath: string) => xpath.startsWith('//')),
   xpathQuery: vi.fn(() => [])
 }));
 
 import Alpine from 'alpinejs';
-import { getFeedWizardStore, initFeedWizardStore } from '../../../../src/frontend/js/feeds/stores/feed_wizard_store';
+import { getFeedWizardStore, initFeedWizardStore } from '../../../../src/frontend/js/modules/feed/stores/feed_wizard_store';
 
 describe('feeds/stores/feed_wizard_store.ts', () => {
   beforeEach(() => {

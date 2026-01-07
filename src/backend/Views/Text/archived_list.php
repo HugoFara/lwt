@@ -20,9 +20,12 @@
 
 namespace Lwt\Views\Text;
 
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\PageLayoutHelper;
-use Lwt\View\Helper\IconHelper;
+use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\IconHelper;
+
+// Type assertions for view variables
+$message = (string) ($message ?? '');
 
 PageLayoutHelper::renderMessage($message, false);
 
@@ -61,7 +64,7 @@ echo PageLayoutHelper::buildActionCard([
                         </div>
                         <div class="control">
                             <div class="select is-small">
-                                <select @change="handleSortChange($event)">
+                                <select @change="handleSortChange($event)" aria-label="Sort texts by">
                                     <?php echo SelectOptionsBuilder::forTextSort(); ?>
                                 </select>
                             </div>
@@ -81,7 +84,9 @@ echo PageLayoutHelper::buildActionCard([
                     <span x-text="lang.name"></span>
                     <span class="tag is-warning ml-2" x-text="lang.text_count + ' archived text' + (lang.text_count === 1 ? '' : 's')"></span>
                 </p>
-                <button class="card-header-icon" type="button">
+                <button class="card-header-icon" type="button"
+                        :aria-label="isCollapsed(lang.id) ? 'Expand ' + lang.name + ' texts' : 'Collapse ' + lang.name + ' texts'"
+                        :aria-expanded="!isCollapsed(lang.id)">
                     <span class="icon">
                         <i :data-lucide="isCollapsed(lang.id) ? 'chevron-right' : 'chevron-down'"></i>
                     </span>
@@ -126,7 +131,7 @@ echo PageLayoutHelper::buildActionCard([
                                 </div>
                                 <div class="control">
                                     <div class="select is-small">
-                                        <select :disabled="!hasMarkedInLanguage(lang.id)" @change="handleMultiAction(lang.id, $event)">
+                                        <select :disabled="!hasMarkedInLanguage(lang.id)" @change="handleMultiAction(lang.id, $event)" aria-label="Bulk actions for selected texts">
                                             <?php echo SelectOptionsBuilder::forMultipleArchivedTextsActions(); ?>
                                         </select>
                                     </div>
@@ -145,6 +150,7 @@ echo PageLayoutHelper::buildActionCard([
                                     <label class="card-header-icon checkbox-wrapper" @click.stop>
                                         <input type="checkbox"
                                                class="markcheck"
+                                               :aria-label="'Select ' + text.title"
                                                :checked="isMarked(lang.id, text.id)"
                                                @change="toggleMark(lang.id, text.id, $event.target.checked)" />
                                     </label>
@@ -221,4 +227,4 @@ echo PageLayoutHelper::buildActionCard([
 <!-- Config for Alpine - pass active language for default expansion -->
 <script type="application/json" id="archived-texts-grouped-config"><?php echo json_encode([
     'activeLanguageId' => $activeLanguageId
-]); ?></script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

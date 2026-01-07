@@ -23,8 +23,15 @@
 
 namespace Lwt\Views\Text;
 
-use Lwt\Services\MediaService;
-use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Modules\Admin\Application\Services\MediaService;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+
+// Type assertions for view variables
+$textId = (int) ($textId ?? 0);
+$langId = (int) ($langId ?? 0);
+$sourceUri = (string) ($sourceUri ?? '');
+$media = (string) ($media ?? '');
+$audioPosition = (int) ($audioPosition ?? 0);
 
 ?>
 <!-- Main navigation -->
@@ -38,7 +45,7 @@ use Lwt\View\Helper\PageLayoutHelper;
         <div class="level-item">
           <strong x-text="title || 'Loading...'"></strong>
           <?php if (isset($sourceUri) && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')): ?>
-          <?php echo \Lwt\View\Helper\IconHelper::link('external-link', $sourceUri, ['alt' => 'Source'], ['target' => '_blank', 'rel' => 'noopener', 'class' => 'ml-2', 'title' => 'Source']); ?>
+          <?php echo \Lwt\Shared\UI\Helpers\IconHelper::link('external-link', $sourceUri, ['alt' => 'Source'], ['target' => '_blank', 'rel' => 'noopener', 'class' => 'ml-2', 'title' => 'Source']); ?>
           <?php endif; ?>
         </div>
       </div>
@@ -205,4 +212,4 @@ use Lwt\View\Helper\PageLayoutHelper;
 <script type="application/json" id="text-reader-config"><?php echo json_encode([
     'textId' => $textId,
     'langId' => $langId,
-]); ?></script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

@@ -58,6 +58,10 @@ class Endpoints
         'feeds/list' => ['GET'],
         'feeds/articles' => ['GET'],
         'feeds/articles/import' => ['POST'],
+        'local-dictionaries' => ['GET', 'POST', 'PUT', 'DELETE'],
+        'local-dictionaries/lookup' => ['GET'],
+        'local-dictionaries/preview' => ['POST'],
+        'local-dictionaries/entries' => ['GET', 'POST', 'PUT', 'DELETE'],
         'version' => ['GET'],
     ];
 

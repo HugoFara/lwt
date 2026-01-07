@@ -9,7 +9,7 @@ import {
   isInt,
   check,
   textareaKeydown,
-} from '../../../src/frontend/js/forms/form_validation';
+} from '../../../src/frontend/js/shared/forms/form_validation';
 
 describe('form_validation.ts', () => {
   afterEach(() => {
