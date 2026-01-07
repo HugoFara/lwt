@@ -28,20 +28,33 @@ ALTER TABLE sentences CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_c
 ALTER TABLE settings CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- words table - preserve binary collation on WoTextLC for case-sensitive lookups
-ALTER TABLE words CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- Using column-by-column conversion to avoid unique key violations from collation changes
+-- when hiragana/katakana or voiced/unvoiced pairs would become duplicates under unicode_ci
+ALTER TABLE words DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE words MODIFY WoTextLC varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;
+ALTER TABLE words MODIFY WoText varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
+ALTER TABLE words MODIFY WoTranslation varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '*';
+ALTER TABLE words MODIFY WoRomanization varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL;
+ALTER TABLE words MODIFY WoSentence varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL;
+ALTER TABLE words MODIFY WoNotes varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL;
 
 -- textitems2 table - preserve binary collation on Ti2Text
-ALTER TABLE textitems2 CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE textitems2 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE textitems2 MODIFY Ti2Text varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;
+ALTER TABLE textitems2 MODIFY Ti2LgID tinyint(3) unsigned NOT NULL;
+ALTER TABLE textitems2 MODIFY Ti2TxID smallint(5) unsigned NOT NULL;
+ALTER TABLE textitems2 MODIFY Ti2WoID mediumint(8) unsigned DEFAULT NULL;
+ALTER TABLE textitems2 MODIFY Ti2SeID mediumint(8) unsigned NOT NULL;
 
 -- tags table - preserve binary collation on TgText for case-sensitive tag matching
-ALTER TABLE tags CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE tags DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE tags MODIFY TgText varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;
+ALTER TABLE tags MODIFY TgComment varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '';
 
 -- tags2 table - preserve binary collation on T2Text
-ALTER TABLE tags2 CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE tags2 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE tags2 MODIFY T2Text varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;
+ALTER TABLE tags2 MODIFY T2Comment varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '';
 
 ALTER TABLE wordtags CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
