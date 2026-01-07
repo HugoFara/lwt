@@ -163,35 +163,35 @@ class FeedController
     /**
      * Get feed articles with pagination.
      *
-     * @param string $feedIds    Comma-separated feed IDs
-     * @param string $whereQuery Additional WHERE clause
-     * @param string $orderBy    ORDER BY clause
-     * @param int    $offset     Pagination offset
-     * @param int    $limit      Page size
+     * @param string $feedIds Comma-separated feed IDs
+     * @param string $search  Search term (optional)
+     * @param string $orderBy ORDER BY clause
+     * @param int    $offset  Pagination offset
+     * @param int    $limit   Page size
      *
      * @return array Array of articles
      */
     public function getFeedLinks(
         string $feedIds,
-        string $whereQuery = '',
+        string $search = '',
         string $orderBy = 'FlDate DESC',
         int $offset = 0,
         int $limit = 50
     ): array {
-        return $this->feedFacade->getFeedLinks($feedIds, $whereQuery, $orderBy, $offset, $limit);
+        return $this->feedFacade->getFeedLinks($feedIds, $search, $orderBy, $offset, $limit);
     }
 
     /**
      * Count feed articles.
      *
-     * @param string $feedIds    Comma-separated feed IDs
-     * @param string $whereQuery Additional WHERE clause
+     * @param string $feedIds Comma-separated feed IDs
+     * @param string $search  Search term (optional)
      *
      * @return int Article count
      */
-    public function countFeedLinks(string $feedIds, string $whereQuery = ''): int
+    public function countFeedLinks(string $feedIds, string $search = ''): int
     {
-        return $this->feedFacade->countFeedLinks($feedIds, $whereQuery);
+        return $this->feedFacade->countFeedLinks($feedIds, $search);
     }
 
     /**
@@ -414,9 +414,9 @@ class FeedController
      * @param string $queryMode Query mode
      * @param string $regexMode Regex mode
      *
-     * @return string SQL WHERE clause
+     * @return array{clause: string, search: string, mode: string, regex: string} Filter data
      */
-    public function buildQueryFilter(string $query, string $queryMode, string $regexMode): string
+    public function buildQueryFilter(string $query, string $queryMode, string $regexMode): array
     {
         return $this->feedFacade->buildQueryFilter($query, $queryMode, $regexMode);
     }
@@ -767,12 +767,13 @@ class FeedController
         $currentQueryMode = InputValidator::getStringWithSession("query_mode", "currentrssquerymode", 'title,desc,text');
         $currentRegexMode = Settings::getWithDefault("set-regex-mode");
 
-        $whQuery = $this->feedFacade->buildQueryFilter($currentQuery, $currentQueryMode, $currentRegexMode);
+        $filterData = $this->feedFacade->buildQueryFilter($currentQuery, $currentQueryMode, $currentRegexMode);
+        $searchTerm = $filterData['search'];
 
         if (!empty($currentQuery) && !empty($currentRegexMode)) {
             if (!$this->feedFacade->validateRegexPattern($currentQuery)) {
                 $currentQuery = '';
-                $whQuery = '';
+                $searchTerm = '';
                 unset($_SESSION['currentwordquery']);
                 if (InputValidator::has('query')) {
                     echo '<p id="hide3" class="warning-message">+++ Warning: Invalid Search +++</p>';
@@ -802,7 +803,7 @@ class FeedController
         }
 
         $feedIds = (string)$currentFeed;
-        $recno = $currentFeed ? $this->feedFacade->countFeedLinks($feedIds, $whQuery) : 0;
+        $recno = $currentFeed ? $this->feedFacade->countFeedLinks($feedIds, $searchTerm) : 0;
 
         // Pagination
         $maxPerPage = (int)Settings::getWithDefault('set-articles-per-page');
@@ -821,7 +822,7 @@ class FeedController
         // Get articles if there are any
         $articles = [];
         if ($recno > 0) {
-            $articles = $this->feedFacade->getFeedLinks($feedIds, $whQuery, $sortColumn, $offset, $maxPerPage);
+            $articles = $this->feedFacade->getFeedLinks($feedIds, $searchTerm, $sortColumn, $offset, $maxPerPage);
         }
 
         // Format last update for view

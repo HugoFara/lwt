@@ -442,9 +442,11 @@ class FeedsTest extends TestCase
      */
     public function testBuildQueryFilter(): void
     {
-        // Test with empty query
+        // Test with empty query - returns array with empty values
         $result = $this->feedService->buildQueryFilter('', 'title', '');
-        $this->assertEquals('', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals('', $result['clause']);
+        $this->assertEquals('', $result['search']);
 
         // Test method exists
         $this->assertTrue(method_exists($this->feedService, 'buildQueryFilter'));

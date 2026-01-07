@@ -453,7 +453,9 @@ class FeedServiceTest extends TestCase
         }
 
         $result = $this->service->buildQueryFilter('', 'title,desc,text', '');
-        $this->assertEquals('', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals('', $result['clause']);
+        $this->assertEquals('', $result['search']);
     }
 
     public function testBuildQueryFilterCreatesLikeClause(): void
@@ -463,10 +465,12 @@ class FeedServiceTest extends TestCase
         }
 
         $result = $this->service->buildQueryFilter('test*', 'title,desc,text', '');
-        $this->assertStringContainsString('LIKE', $result);
-        $this->assertStringContainsString('FlTitle', $result);
-        $this->assertStringContainsString('FlDescription', $result);
-        $this->assertStringContainsString('FlText', $result);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('LIKE', $result['clause']);
+        $this->assertStringContainsString('FlTitle', $result['clause']);
+        $this->assertStringContainsString('FlDescription', $result['clause']);
+        $this->assertStringContainsString('FlText', $result['clause']);
+        $this->assertEquals('test%', $result['search']);
     }
 
     public function testBuildQueryFilterTitleOnly(): void
@@ -476,9 +480,11 @@ class FeedServiceTest extends TestCase
         }
 
         $result = $this->service->buildQueryFilter('test', 'title', '');
-        $this->assertStringContainsString('FlTitle', $result);
-        $this->assertStringNotContainsString('FlDescription', $result);
-        $this->assertStringNotContainsString('FlText', $result);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('FlTitle', $result['clause']);
+        $this->assertStringNotContainsString('FlDescription', $result['clause']);
+        $this->assertStringNotContainsString('FlText', $result['clause']);
+        $this->assertEquals('test', $result['search']);
     }
 
     // ===== validateRegexPattern() tests =====
