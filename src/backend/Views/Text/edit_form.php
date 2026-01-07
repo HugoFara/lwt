@@ -60,7 +60,7 @@ if ($isNew) {
 
 ?>
 <script type="application/json" id="text-edit-config">
-<?php echo json_encode(['languageData' => $languageData]); ?>
+<?php echo json_encode(['languageData' => $languageData], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>
 
 <h2 class="title is-4 is-flex is-align-items-center">

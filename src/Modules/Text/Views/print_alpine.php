@@ -200,7 +200,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
     <!-- Print content -->
     <?php if ($mode === 'plain'): ?>
     <div x-show="!loading" id="print" <?php echo ($rtlScript ? 'dir="rtl"' : ''); ?>>
-        <h2 x-text="config?.title || '<?php echo htmlspecialchars(addslashes($title), ENT_QUOTES, 'UTF-8'); ?>'"></h2>
+        <h2 x-text="config?.title || '<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>'"></h2>
         <p :style="'font-size:' + (config?.textSize || <?php echo $textSize; ?>) + '%; line-height: 1.35; margin-bottom: 10px;'">
             <template x-for="item in items" :key="item.position">
                 <span x-html="formatItem(item)"></span>
@@ -210,7 +210,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
     <?php elseif ($mode === 'annotated'): ?>
     <div x-show="!loading" id="print" <?php echo ($rtlScript ? 'dir="rtl"' : ''); ?>>
         <p :style="'font-size:' + (annConfig?.textSize || <?php echo $textSize; ?>) + '%; line-height: 1.35; margin-bottom: 10px;'">
-            <span x-text="annConfig?.title || '<?php echo htmlspecialchars(addslashes($title), ENT_QUOTES, 'UTF-8'); ?>'"></span>
+            <span x-text="annConfig?.title || '<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>'"></span>
             <br /><br />
             <template x-if="annItems">
                 <template x-for="item in annItems" :key="item.order + '-' + item.text">

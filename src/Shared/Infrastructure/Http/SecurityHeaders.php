@@ -111,8 +111,8 @@ class SecurityHeaders
     {
         $policy = implode('; ', [
             "default-src 'self'",
-            // Scripts: self + inline (legacy support) + eval for some libraries
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            // Scripts: self + inline (needed for legacy inline scripts)
+            "script-src 'self' 'unsafe-inline'",
             // Styles: self + inline (needed for dynamic styling)
             "style-src 'self' 'unsafe-inline'",
             // Images: self + data URIs + blob for generated content

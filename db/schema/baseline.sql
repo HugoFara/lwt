@@ -2,9 +2,11 @@
 
 -- Migration tracking table
 -- Migrations are discovered from db/migrations/*.sql files and tracked here when applied
+-- The checksum column stores SHA-256 hash for integrity validation
 CREATE TABLE IF NOT EXISTS _migrations (
 	filename VARCHAR(255) NOT NULL,
 	applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	checksum VARCHAR(64) DEFAULT NULL,
 	PRIMARY KEY (filename)
 );
 
@@ -33,9 +35,8 @@ CREATE TABLE IF NOT EXISTS users (
     KEY UsWordPressId (UsWordPressId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Insert default admin user
-INSERT IGNORE INTO users (UsID, UsUsername, UsEmail, UsRole)
-VALUES (1, 'admin', 'admin@localhost', 'admin');
+-- NOTE: Admin user should be created through the setup wizard or registration page.
+-- For security, no default admin is inserted. Multi-user mode requires explicit setup.
 
 CREATE TABLE IF NOT EXISTS archivedtexts (
     AtID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
@@ -102,10 +103,9 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS settings (
     StKey varchar(40) NOT NULL,
-    StUsID int(10) unsigned DEFAULT NULL,
+    StUsID int(10) unsigned NOT NULL DEFAULT 0,
     StValue varchar(40) DEFAULT NULL,
-    PRIMARY KEY (StKey),
-    KEY StUsID (StUsID)
+    PRIMARY KEY (StKey, StUsID)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

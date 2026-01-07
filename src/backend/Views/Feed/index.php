@@ -32,7 +32,7 @@ echo PageLayoutHelper::buildActionCard([
     ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
 ]);
 ?>
-<div x-data="feedIndex({currentQuery: '<?php echo addslashes($currentQuery); ?>'})">
+<div x-data="feedIndex({currentQuery: '<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>'})">
 <!-- NOTE: Search bar planned for future UI refactoring.
      Planned features:
      - Search across feed names

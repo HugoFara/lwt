@@ -46,7 +46,7 @@ $audioPosition = (int) ($audioPosition ?? 0);
     'phoneticText' => $phoneticText,
     'languageCode' => $languageCode,
     'voiceApi' => $voiceApi
-]); ?></script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 
 <div class="flex-header">
     <div>

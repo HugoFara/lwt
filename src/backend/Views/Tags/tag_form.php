@@ -51,8 +51,8 @@ $tagComment = $isEdit && $tag !== null ? htmlspecialchars($tag['comment'] ?? '',
 
 <form name="<?php echo $formName; ?>" class="validate" action="<?php echo $actionUrl; ?>" method="post"
       x-data="{
-          tagText: '<?php echo addslashes($tagText); ?>',
-          tagComment: '<?php echo addslashes($tagComment); ?>',
+          tagText: '<?php echo $tagText; ?>',
+          tagComment: '<?php echo $tagComment; ?>',
           charCount: <?php echo strlen($tagComment); ?>
       }">
     <?php if ($isEdit && $tag !== null): ?>

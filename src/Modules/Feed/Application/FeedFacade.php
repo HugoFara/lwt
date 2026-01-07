@@ -818,7 +818,8 @@ class FeedFacade
         }
         $NfID = array_unique($NfID);
 
-        $NfTag = '';
+        /** @var list<string> $currentTagList */
+        $currentTagList = [];
         /** @var list<int|string> $textItem */
         $textItem = [];
         /** @var int|null $nfMaxTexts */
@@ -827,8 +828,8 @@ class FeedFacade
         foreach ($NfID as $feedID) {
             foreach ($texts as $text) {
                 if ($feedID == $text['Nf_ID']) {
-                    if ($NfTag != '"' . implode('","', $text['TagList']) . '"') {
-                        $NfTag = '"' . implode('","', $text['TagList']) . '"';
+                    if ($currentTagList !== $text['TagList']) {
+                        $currentTagList = $text['TagList'];
 
                         // Ensure tags exist
                         /** @var array<string> $sessionTextTags */
@@ -877,34 +878,43 @@ class FeedFacade
                     $textLgId = is_numeric($textLgIdRaw) ? (int)$textLgIdRaw : 0;
                     \Lwt\Shared\Infrastructure\Database\TextParsing::parseAndSave($textContent, $textLgId, (int) $id);
 
-                    // Apply tags
-                    $bindings = [];
-                    \Lwt\Shared\Infrastructure\Database\Connection::query(
-                        'INSERT INTO texttags (TtTxID, TtT2ID)
-                        SELECT ' . $id . ', T2ID FROM tags2
-                        WHERE T2Text IN (' . $NfTag . ')'
-                        . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('tags2', $bindings)
-                    );
+                    // Apply tags using prepared statement
+                    if (!empty($currentTagList)) {
+                        $tagPlaceholders = implode(',', array_fill(0, count($currentTagList), '?'));
+                        /** @var list<mixed> $tagBindings */
+                        $tagBindings = array_values(array_merge([$id], $currentTagList));
+                        \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute(
+                            'INSERT INTO texttags (TtTxID, TtT2ID)
+                            SELECT ?, T2ID FROM tags2
+                            WHERE T2Text IN (' . $tagPlaceholders . ')'
+                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('tags2', $tagBindings),
+                            $tagBindings
+                        );
+                    }
                 }
             }
 
             // Refresh text tags
             \Lwt\Modules\Tags\Application\TagsFacade::getAllTextTags(true);
 
-            // Get all texts with this tag
-            $bindings = [];
-            $result = \Lwt\Shared\Infrastructure\Database\Connection::querySelect(
-                "SELECT TtTxID FROM texttags
-                JOIN tags2 ON TtT2ID=T2ID
-                WHERE T2Text IN (" . $NfTag . ")"
-                . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('tags2', $bindings)
-            );
-
-            $textCount = 0;
-            while ($row = mysqli_fetch_assoc($result)) {
-                $textItem[$textCount++] = $row['TtTxID'];
+            // Get all texts with this tag using prepared statement
+            $textItem = [];
+            if (!empty($currentTagList)) {
+                $tagPlaceholders = implode(',', array_fill(0, count($currentTagList), '?'));
+                /** @var list<mixed> $tagQueryBindings */
+                $tagQueryBindings = array_values($currentTagList);
+                $rows = \Lwt\Shared\Infrastructure\Database\Connection::preparedFetchAll(
+                    "SELECT TtTxID FROM texttags
+                    JOIN tags2 ON TtT2ID=T2ID
+                    WHERE T2Text IN (" . $tagPlaceholders . ")"
+                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('tags2', $tagQueryBindings),
+                    $tagQueryBindings
+                );
+                foreach ($rows as $row) {
+                    $textItem[] = $row['TtTxID'];
+                }
             }
-            mysqli_free_result($result);
+            $textCount = count($textItem);
 
             // Archive excess texts
             if ($textCount > (int)$nfMaxTexts) {

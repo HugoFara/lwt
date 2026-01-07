@@ -39,7 +39,7 @@ echo PageLayoutHelper::buildActionCard([
     ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'],
 ]);
 ?>
-<div x-data="feedBrowse({currentQuery: '<?php echo addslashes($currentQuery); ?>', currentQueryMode: '<?php echo addslashes($currentQueryMode); ?>'})">
+<div x-data="feedBrowse({currentQuery: '<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>', currentQueryMode: '<?php echo htmlspecialchars($currentQueryMode, ENT_QUOTES, 'UTF-8'); ?>'})">
 
 <!-- NOTE: Search bar planned for future UI refactoring.
      Planned features:

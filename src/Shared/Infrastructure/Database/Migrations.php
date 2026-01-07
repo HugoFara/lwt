@@ -124,31 +124,92 @@ class Migrations
     }
 
     /**
-     * Record a migration as applied.
+     * Record a migration as applied with its checksum.
      *
      * @param string $filename The migration filename
+     * @param string $checksum SHA-256 hash of the migration file
      *
      * @return void
      */
-    public static function recordMigration(string $filename): void
+    public static function recordMigration(string $filename, string $checksum = ''): void
     {
         Connection::preparedExecute(
-            "INSERT IGNORE INTO _migrations (filename, applied_at) VALUES (?, NOW())",
-            [$filename]
+            "INSERT IGNORE INTO _migrations (filename, applied_at, checksum) VALUES (?, NOW(), ?)",
+            [$filename, $checksum]
         );
+    }
+
+    /**
+     * Calculate SHA-256 checksum for a migration file.
+     *
+     * @param string $filepath Full path to the migration file
+     *
+     * @return string SHA-256 hash or empty string if file not readable
+     */
+    public static function calculateChecksum(string $filepath): string
+    {
+        if (!file_exists($filepath) || !is_readable($filepath)) {
+            return '';
+        }
+        $hash = hash_file('sha256', $filepath);
+        return $hash !== false ? $hash : '';
+    }
+
+    /**
+     * Validate that applied migrations haven't been modified.
+     *
+     * Checks the checksum of each applied migration against its stored value.
+     * This detects tampering or accidental modification of migration files.
+     *
+     * @return array{valid: bool, errors: array<string>} Validation result
+     */
+    public static function validateMigrationIntegrity(): array
+    {
+        $errors = [];
+        $migrationsDir = __DIR__ . '/../../../../db/migrations/';
+
+        try {
+            $rows = Connection::fetchAll(
+                "SELECT filename, checksum FROM _migrations WHERE checksum IS NOT NULL AND checksum != ''"
+            );
+        } catch (\RuntimeException $e) {
+            // Table doesn't exist or no checksum column yet
+            return ['valid' => true, 'errors' => []];
+        }
+
+        foreach ($rows as $row) {
+            $filename = $row['filename'];
+            $storedChecksum = $row['checksum'];
+            $filepath = $migrationsDir . $filename;
+
+            if (!file_exists($filepath)) {
+                $errors[] = "Migration file missing: $filename";
+                continue;
+            }
+
+            $currentChecksum = self::calculateChecksum($filepath);
+            if ($currentChecksum !== $storedChecksum) {
+                $errors[] = "Migration file integrity check failed: $filename (file was modified after being applied)";
+            }
+        }
+
+        return [
+            'valid' => count($errors) === 0,
+            'errors' => $errors
+        ];
     }
 
     /**
      * Upgrade the _migrations table from old schema to new schema.
      *
      * Old schema stored migrations to be run; new schema tracks applied migrations.
-     * This method adds the applied_at column and marks all existing entries as applied.
+     * This method adds the applied_at and checksum columns.
      *
      * @return void
      */
     public static function upgradeMigrationsTable(): void
     {
-        // Check if applied_at column exists
+        // Check which columns exist
         $dbname = Globals::getDatabaseName();
         $columns = Connection::preparedFetchAll(
             "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
@@ -161,6 +222,13 @@ class Migrations
             // Add applied_at column
             Connection::execute(
                 "ALTER TABLE _migrations ADD COLUMN applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            );
+        }
+
+        if (!in_array('checksum', $columnNames)) {
+            // Add checksum column for integrity validation
+            Connection::execute(
+                "ALTER TABLE _migrations ADD COLUMN checksum VARCHAR(64) DEFAULT NULL"
             );
         }
     }
@@ -213,20 +281,30 @@ class Migrations
                 );
             }
 
+            // Validate integrity of already-applied migrations
+            $integrityCheck = self::validateMigrationIntegrity();
+            if (!$integrityCheck['valid']) {
+                // Log errors but don't block - allow admin to investigate
+                foreach ($integrityCheck['errors'] as $error) {
+                    error_log('Migration integrity warning: ' . $error);
+                }
+            }
+
             // Get pending migrations (not yet applied)
             $allMigrations = self::getMigrationFiles();
             $appliedMigrations = self::getAppliedMigrations();
             $pendingMigrations = array_diff($allMigrations, $appliedMigrations);
+            $migrationsDir = __DIR__ . '/../../../../db/migrations/';
 
             foreach ($pendingMigrations as $filename) {
-                $queries = SqlFileParser::parseFile(
-                    __DIR__ . '/../../../../db/migrations/' . $filename
-                );
+                $filepath = $migrationsDir . $filename;
+                $queries = SqlFileParser::parseFile($filepath);
                 foreach ($queries as $sql_query) {
                     Connection::execute($sql_query);
                 }
-                // Record migration as applied
-                self::recordMigration($filename);
+                // Record migration as applied with checksum
+                $checksum = self::calculateChecksum($filepath);
+                self::recordMigration($filename, $checksum);
             }
 
             Connection::execute(

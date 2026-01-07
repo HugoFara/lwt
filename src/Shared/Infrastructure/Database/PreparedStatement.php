@@ -15,6 +15,8 @@
 
 namespace Lwt\Shared\Infrastructure\Database;
 
+use Lwt\Core\Exception\DatabaseException;
+
 /**
  * Wrapper class for mysqli prepared statements.
  *
@@ -61,7 +63,7 @@ class PreparedStatement
      * @param \mysqli $connection The database connection
      * @param string  $sql        The SQL query with placeholders
      *
-     * @throws \RuntimeException If the statement cannot be prepared
+     * @throws DatabaseException If the statement cannot be prepared
      */
     public function __construct(\mysqli $connection, string $sql)
     {
@@ -70,9 +72,9 @@ class PreparedStatement
 
         $stmt = $connection->prepare($sql);
         if ($stmt === false) {
-            throw new \RuntimeException(
-                'Failed to prepare statement [' . $connection->errno . ']: ' .
-                $connection->error . "\nQuery: " . $sql
+            throw DatabaseException::prepareFailed(
+                $sql,
+                $connection->error
             );
         }
 
@@ -111,9 +113,12 @@ class PreparedStatement
             }
 
             if (!$this->stmt->bind_param(...$refs)) {
-                throw new \RuntimeException(
-                    'Failed to bind parameters [' . $this->stmt->errno . ']: ' .
-                    $this->stmt->error . "\nQuery: " . $this->sql
+                throw new DatabaseException(
+                    'Failed to bind parameters: ' . $this->stmt->error,
+                    0,
+                    null,
+                    $this->sql,
+                    $this->stmt->errno
                 );
             }
         }
@@ -175,14 +180,17 @@ class PreparedStatement
      *
      * @return int Number of affected rows (for INSERT/UPDATE/DELETE), -1 on error
      *
-     * @throws \RuntimeException If execution fails
+     * @throws DatabaseException If execution fails
      */
     public function execute(): int
     {
         if (!$this->stmt->execute()) {
-            throw new \RuntimeException(
-                'Failed to execute statement [' . $this->stmt->errno . ']: ' .
-                $this->stmt->error . "\nQuery: " . $this->sql
+            throw new DatabaseException(
+                'Failed to execute statement: ' . $this->stmt->error,
+                0,
+                null,
+                $this->sql,
+                $this->stmt->errno
             );
         }
 
@@ -197,9 +205,12 @@ class PreparedStatement
     public function fetchAll(): array
     {
         if (!$this->stmt->execute()) {
-            throw new \RuntimeException(
-                'Failed to execute statement [' . $this->stmt->errno . ']: ' .
-                $this->stmt->error . "\nQuery: " . $this->sql
+            throw new DatabaseException(
+                'Failed to execute statement: ' . $this->stmt->error,
+                0,
+                null,
+                $this->sql,
+                $this->stmt->errno
             );
         }
 
@@ -226,9 +237,12 @@ class PreparedStatement
     public function fetchOne(): ?array
     {
         if (!$this->stmt->execute()) {
-            throw new \RuntimeException(
-                'Failed to execute statement [' . $this->stmt->errno . ']: ' .
-                $this->stmt->error . "\nQuery: " . $this->sql
+            throw new DatabaseException(
+                'Failed to execute statement: ' . $this->stmt->error,
+                0,
+                null,
+                $this->sql,
+                $this->stmt->errno
             );
         }
 

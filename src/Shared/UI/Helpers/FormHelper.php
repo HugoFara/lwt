@@ -121,4 +121,38 @@ class FormHelper
         }
         return ' ';
     }
+
+    /**
+     * Generate a hidden CSRF token field for forms.
+     *
+     * This method should be called within every form that uses
+     * POST, PUT, DELETE, or PATCH methods for CSRF protection.
+     *
+     * @return string HTML hidden input element with CSRF token
+     *
+     * @example
+     * <form method="post">
+     *     <?php echo FormHelper::csrfField(); ?>
+     *     <!-- other form fields -->
+     * </form>
+     */
+    public static function csrfField(): string
+    {
+        // Delegate to CsrfMiddleware for token management
+        require_once __DIR__ . '/../../../backend/Router/Middleware/CsrfMiddleware.php';
+        return \Lwt\Router\Middleware\CsrfMiddleware::formField();
+    }
+
+    /**
+     * Get the current CSRF token value.
+     *
+     * Useful for AJAX requests that need to send the token in a header.
+     *
+     * @return string The CSRF token
+     */
+    public static function csrfToken(): string
+    {
+        require_once __DIR__ . '/../../../backend/Router/Middleware/CsrfMiddleware.php';
+        return \Lwt\Router\Middleware\CsrfMiddleware::getToken();
+    }
 }

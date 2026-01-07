@@ -15,6 +15,7 @@
 
 namespace Lwt\Shared\Infrastructure\Database;
 
+use Lwt\Core\Exception\DatabaseException;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\PreparedStatement;
 
@@ -75,7 +76,7 @@ class Connection
      *
      * @return \mysqli_result|true Query result or true for non-SELECT queries
      *
-     * @throws \RuntimeException On query failure
+     * @throws DatabaseException On query failure
      */
     public static function query(string $sql): \mysqli_result|bool
     {
@@ -83,9 +84,10 @@ class Connection
         $result = mysqli_query($connection, $sql);
 
         if ($result === false) {
-            throw new \RuntimeException(
-                'SQL Error [' . mysqli_errno($connection) . ']: ' .
-                mysqli_error($connection) . "\nQuery: " . $sql
+            throw DatabaseException::queryFailed(
+                $sql,
+                mysqli_error($connection),
+                mysqli_errno($connection)
             );
         }
 
@@ -102,16 +104,18 @@ class Connection
      *
      * @return \mysqli_result Query result set
      *
-     * @throws \RuntimeException On query failure or if query doesn't return a result set
+     * @throws DatabaseException On query failure or if query doesn't return a result set
      */
     public static function querySelect(string $sql): \mysqli_result
     {
         $result = self::query($sql);
 
         if ($result === true) {
-            throw new \RuntimeException(
-                'Query did not return a result set. Use query() for INSERT/UPDATE/DELETE. ' .
-                'Query: ' . $sql
+            throw new DatabaseException(
+                'Query did not return a result set. Use query() for INSERT/UPDATE/DELETE.',
+                0,
+                null,
+                $sql
             );
         }
 
