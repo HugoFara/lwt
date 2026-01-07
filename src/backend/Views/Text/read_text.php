@@ -72,7 +72,7 @@ $varArray = [
     ]
 ];
 ?>
-<script type="application/json" id="text-reading-config"><?php echo json_encode($varArray); ?></script>
+<script type="application/json" id="text-reading-config"><?php echo json_encode($varArray, JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 
 <!-- Text container - content loaded dynamically via Alpine.js -->
 <div id="thetext"

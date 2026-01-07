@@ -31,5 +31,4 @@ use Lwt\Modules\Text\Application\Services\TextStatisticsService;
     'wid' => (int) $wid,
     'showAll' => $showAll,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent((int) $textId)
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

@@ -205,4 +205,4 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 <script type="application/json" id="text-reader-config"><?php echo json_encode([
     'textId' => $textId,
     'langId' => $langId,
-]); ?></script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

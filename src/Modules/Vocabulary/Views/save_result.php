@@ -44,6 +44,6 @@ use Lwt\Modules\Text\Application\Services\TextStatisticsService;
     'hex' => $hex,
     'textId' => $textId,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
-]); ?>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>
 <?php endif; ?>

@@ -93,6 +93,13 @@ class Globals
     private static bool $multiUserEnabled = false;
 
     /**
+     * Whether the current authenticated user is an admin.
+     *
+     * @var bool
+     */
+    private static bool $currentUserIsAdmin = false;
+
+    /**
      * Initialize all global variables.
      *
      * This should be called once during application bootstrap.
@@ -326,6 +333,35 @@ class Globals
     }
 
     /**
+     * Set whether the current user is an admin.
+     *
+     * This should be called after successful authentication to establish
+     * the admin context for authorization checks.
+     *
+     * @param bool $isAdmin Whether the current user is an admin
+     *
+     * @return void
+     *
+     * @since 3.0.0
+     */
+    public static function setCurrentUserIsAdmin(bool $isAdmin): void
+    {
+        self::$currentUserIsAdmin = $isAdmin;
+    }
+
+    /**
+     * Check if the current authenticated user is an admin.
+     *
+     * @return bool True if the current user is an admin
+     *
+     * @since 3.0.0
+     */
+    public static function isCurrentUserAdmin(): bool
+    {
+        return self::$currentUserIsAdmin;
+    }
+
+    /**
      * Reset all globals to initial state.
      *
      * Primarily used for testing.
@@ -340,5 +376,6 @@ class Globals
         self::$initialized = false;
         self::$currentUserId = null;
         self::$multiUserEnabled = false;
+        self::$currentUserIsAdmin = false;
     }
 }

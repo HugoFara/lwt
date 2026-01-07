@@ -25,8 +25,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 <?php echo json_encode([
     'showLearningChanged' => $showLearning != $oldShowLearning,
     'showLearning' => (bool)$showLearning
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 <p><span id="waiting"><?php echo IconHelper::render('waiting', ['title' => 'Please wait', 'alt' => 'Please wait']); ?>&nbsp;&nbsp;Please wait ...</span>
 
 <?php if ($showAll == 1): ?>

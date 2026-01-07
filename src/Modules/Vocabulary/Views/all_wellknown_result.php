@@ -51,5 +51,4 @@ if ($status == 98) {
     'words' => $wordsData,
     'useTooltips' => $useTooltips,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

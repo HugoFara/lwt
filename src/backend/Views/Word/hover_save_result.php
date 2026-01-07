@@ -48,5 +48,4 @@ echo (string) get_colored_status_msg($status);
     'translation' => $translation,
     'wordRaw' => $wordRaw,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

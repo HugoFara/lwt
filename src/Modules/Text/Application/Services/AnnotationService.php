@@ -268,7 +268,7 @@ class AnnotationService
         }
         $json_data = json_encode($arr);
         if ($json_data === false) {
-            ErrorHandler::die("Unable to format to JSON");
+            throw new \RuntimeException("Unable to format annotation data to JSON");
         }
         return $json_data;
     }

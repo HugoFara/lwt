@@ -15,6 +15,7 @@
 
 namespace Lwt\Shared\Infrastructure\Database;
 
+use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
 
 /**
@@ -208,7 +209,8 @@ class QueryBuilder
      * Disable automatic user scope filtering for this query.
      *
      * Use this for admin operations, migrations, or queries that need
-     * to access data across all users.
+     * to access data across all users. Requires admin privileges when
+     * multi-user mode is enabled.
      *
      * Usage:
      * ```php
@@ -220,10 +222,17 @@ class QueryBuilder
      *
      * @return static
      *
+     * @throws AuthException If multi-user mode is enabled and user is not admin
+     *
      * @since 3.0.0
      */
     public function withoutUserScope(): static
     {
+        // Authorization check: only allow in non-multi-user mode or for admin users
+        if (Globals::isMultiUserEnabled() && !Globals::isCurrentUserAdmin()) {
+            throw AuthException::insufficientPermissions('access cross-user data');
+        }
+
         $this->userScopeEnabled = false;
         return $this;
     }

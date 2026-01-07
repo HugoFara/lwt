@@ -40,5 +40,4 @@ use Lwt\Shared\UI\Helpers\IconHelper;
     'useTooltip' => ($tooltipMode == 1),
     'cleanUp' => $cleanUp,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent($tid)
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

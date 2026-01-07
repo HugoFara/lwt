@@ -1191,7 +1191,7 @@ class WordService
 
             return [$rows, $wordData];
         } catch (\RuntimeException $e) {
-            ErrorHandler::die("ERROR: Could not modify words! Message: " . $e->getMessage());
+            throw new \RuntimeException("Could not modify words: " . $e->getMessage(), 0, $e);
         }
     }
 

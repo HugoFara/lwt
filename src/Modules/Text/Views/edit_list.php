@@ -286,4 +286,4 @@ echo PageLayoutHelper::buildActionCard([
 <script type="application/json" id="texts-grouped-config"><?php echo json_encode([
     'statuses' => $statuses,
     'activeLanguageId' => $activeLanguageId
-]); ?></script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

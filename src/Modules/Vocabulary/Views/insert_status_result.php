@@ -44,5 +44,4 @@ $statusName = $status === 99 ? 'Well-Known' : 'Ignored';
     'textId' => $textId,
     'ord' => $ord,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

@@ -707,7 +707,7 @@ class VocabularyController
             // Get the term from text items
             $termData = $wordService->getTermFromTextItem($textId, $ord);
             if ($termData === null) {
-                ErrorHandler::die("Cannot access Term and Language in edit_word.php");
+                throw new \RuntimeException("Cannot access term and language: term not found in text");
             }
             $term = (string) $termData['Ti2Text'];
             $lang = (int) $termData['Ti2LgID'];
@@ -725,7 +725,7 @@ class VocabularyController
             // Get existing word data
             $wordData = $wordService->findById($wid);
             if ($wordData === null) {
-                ErrorHandler::die("Cannot access Term and Language in edit_word.php");
+                throw new \RuntimeException("Cannot access term and language: word ID not found");
             }
             $term = (string) $wordData['WoText'];
             $lang = (int) $wordData['WoLgID'];
@@ -766,7 +766,7 @@ class VocabularyController
             // Edit existing word form
             $wordData = $wordService->findById($wid);
             if ($wordData === null) {
-                ErrorHandler::die("Cannot access word data");
+                throw new \RuntimeException("Cannot access word data: word ID not found");
             }
 
             $status = $wordData['WoStatus'];
@@ -907,13 +907,13 @@ class VocabularyController
                 ->where('WoID', '=', $wid)
                 ->valuePrepared('WoLgID');
             if (!isset($lang)) {
-                ErrorHandler::die('Cannot retrieve language in edit_tword.php');
+                throw new \RuntimeException('Cannot retrieve language: word not found');
             }
             $regexword = QueryBuilder::table('languages')
                 ->where('LgID', '=', $lang)
                 ->valuePrepared('LgRegexpWordCharacters');
             if (!isset($regexword)) {
-                ErrorHandler::die('Cannot retrieve language data in edit_tword.php');
+                throw new \RuntimeException('Cannot retrieve language data: language not found');
             }
             $sent = htmlspecialchars(ExportService::replaceTabNewline($woSentence), ENT_QUOTES, 'UTF-8');
             $sent1 = str_replace(
@@ -952,7 +952,7 @@ class VocabularyController
         $widParam = InputValidator::getString('wid');
 
         if ($widParam == '') {
-            ErrorHandler::die("Term ID missing in edit_tword.php");
+            throw new \RuntimeException("Term ID missing: required parameter not provided");
         }
         $wid = (int) $widParam;
 
@@ -975,7 +975,7 @@ class VocabularyController
                 ->where('LgID', '=', $lang)
                 ->valuePrepared('LgShowRomanization');
         } else {
-            ErrorHandler::die("Term data not found in edit_tword.php");
+            throw new \RuntimeException("Term data not found: invalid term ID");
         }
 
         $termlc = mb_strtolower($term, 'UTF-8');
@@ -1140,7 +1140,7 @@ class VocabularyController
             $wid = (int) $strWid;
             $wordData = $wordService->getMultiWordData($wid);
             if ($wordData === null) {
-                ErrorHandler::die("Cannot access Term and Language in edit_mword.php");
+                throw new \RuntimeException("Cannot access term and language: multi-word not found");
             }
             PageLayoutHelper::renderPageStartNobody("Edit Term: " . $wordData['text']);
             $this->displayEditMultiWordForm($wid, $wordData, $tid, $ord);

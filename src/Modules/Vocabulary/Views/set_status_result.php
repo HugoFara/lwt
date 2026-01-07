@@ -44,5 +44,4 @@ $hex = StringUtils::toClassName($term->textLowercase());
     'textId' => $textId,
     'ord' => $ord,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

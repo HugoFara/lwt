@@ -41,8 +41,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
     'transUri' => $transUri,
     'langShort' => $langShort,
     'lang' => $lang,
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 <form name="newword" class="validate" action="<?php echo $phpSelf; ?>" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="fromAnn" value="<?php echo $fromAnn; ?>" />

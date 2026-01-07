@@ -43,5 +43,4 @@ echo json_encode([
     'status' => $status,
     'sentence' => $sent1,
     'statusControlsHtml' => StatusHelper::buildTestTableControls(1, (int) $status, $wid, $statusAbbr)
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

@@ -276,13 +276,17 @@ class DatabaseException extends LwtException
     }
 
     /**
-     * Get the SQL query that caused the error.
+     * Get the SQL query that caused the error (sanitized for security).
      *
-     * @return string|null
+     * Returns a sanitized version with string values masked to prevent
+     * information disclosure. For the raw query (logging only), access
+     * the protected $query property directly in subclasses.
+     *
+     * @return string|null The sanitized query or null
      */
     public function getQuery(): ?string
     {
-        return $this->query;
+        return $this->query !== null ? $this->sanitizeQuery($this->query) : null;
     }
 
     /**

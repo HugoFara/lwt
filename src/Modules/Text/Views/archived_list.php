@@ -224,4 +224,4 @@ echo PageLayoutHelper::buildActionCard([
 <!-- Config for Alpine - pass active language for default expansion -->
 <script type="application/json" id="archived-texts-grouped-config"><?php echo json_encode([
     'activeLanguageId' => $activeLanguageId
-]); ?></script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

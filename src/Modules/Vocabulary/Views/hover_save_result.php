@@ -41,5 +41,4 @@ use Lwt\Modules\Text\Application\Services\TextStatisticsService;
     'translation' => $translation,
     'wordRaw' => $wordRaw,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

@@ -31,8 +31,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
     'dictionaries' => $dictionaries,
     'sourceLanguage' => $sl,
     'targetLanguage' => $tl
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <form name="form1" action="/word/bulk-translate" method="post"

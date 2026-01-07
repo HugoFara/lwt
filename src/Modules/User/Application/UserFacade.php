@@ -162,6 +162,7 @@ class UserFacade
     public function setCurrentUser(User $user): void
     {
         Globals::setCurrentUserId($user->id()->toInt());
+        Globals::setCurrentUserIsAdmin($user->isAdmin());
         $this->getCurrentUserUseCase?->clearCache();
     }
 

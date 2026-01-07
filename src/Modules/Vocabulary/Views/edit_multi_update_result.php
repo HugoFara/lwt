@@ -29,5 +29,4 @@ $termData = json_decode($termJson, true);
     'romanization' => $termData['romanization'],
     'status' => (int) $termData['status'],
     'oldStatus' => $oldStatusValue
-]); ?>
-</script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

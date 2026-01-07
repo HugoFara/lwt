@@ -248,4 +248,4 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
     'savedAnn' => $savedAnn,
     'savedStatus' => $savedStatus,
     'savedPlacement' => $savedPlacement
-]); ?></script>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

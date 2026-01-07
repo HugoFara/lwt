@@ -28,7 +28,7 @@ $actions = [
 ];
 
 ?>
-<script type="application/json" id="language-data-config"><?php echo json_encode($languageData); ?></script>
+<script type="application/json" id="language-data-config"><?php echo json_encode($languageData, JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 
 <h2 class="title is-4">Long Text Import</h2>
 
