@@ -3,7 +3,7 @@
 **Date:** 2025-12-12
 **Last Updated:** 2026-01-07
 **Branch:** dev
-**Status:** Most issues resolved
+**Status:** All issues resolved
 
 This document tracks security issues identified during the pre-release audit of LWT v3.
 
@@ -14,8 +14,8 @@ This document tracks security issues identified during the pre-release audit of 
 | Severity | Total | Fixed | Open |
 |----------|-------|-------|------|
 | Critical | 5 | 5 | 0 |
-| High | 6 | 5 | 1 |
-| Medium | 4 | 3 | 1 |
+| High | 6 | 6 | 0 |
+| Medium | 4 | 4 | 0 |
 
 ---
 
@@ -232,15 +232,29 @@ Added `src/backend/.htaccess`:
 
 ---
 
-### 15. SQL Mode Disabled - OPEN
+### 15. SQL Strict Mode - FIXED
 
-**Status:** Open (low priority)
+**Status:** Fixed
 
-**File:** Database configuration
+**Resolution:**
+MySQL strict mode (`STRICT_ALL_TABLES`) is now enabled in `Configuration.php`:
 
-**Risk:** Allows potentially unsafe SQL operations.
+```php
+@mysqli_query($dbconnection, "SET SESSION sql_mode = 'STRICT_ALL_TABLES'");
+```
 
-**Recommendation:** Document why strict mode is disabled (legacy compatibility) or enable it after thorough testing.
+**Schema Updates:**
+Added default values to columns that previously had `NOT NULL` without defaults:
+- `languages.LgCharacterSubstitutions` - DEFAULT ''
+- `languages.LgRegexpSplitSentences` - DEFAULT '.!?'
+- `languages.LgExceptionsSplitSentences` - DEFAULT ''
+- `languages.LgRegexpWordCharacters` - DEFAULT 'a-zA-ZÀ-ÖØ-öø-ȳ'
+- `texts.TxAnnotatedText` - DEFAULT ''
+- `archivedtexts.AtAnnotatedText` - DEFAULT ''
+
+**Migration:** `20260107_120000_add_language_column_defaults.sql`
+
+**Commit:** See Configuration.php, baseline.sql
 
 ---
 
@@ -268,7 +282,6 @@ The codebase demonstrates strong security practices:
 | Task | Effort | Priority |
 |------|--------|----------|
 | Add API rate limiting | Medium | Low (can use reverse proxy) |
-| Document SQL mode decision | Low | Low |
 
 ---
 

@@ -229,7 +229,7 @@ class ConfigurationTest extends TestCase
         $row = mysqli_fetch_assoc($result);
         mysqli_free_result($result);
 
-        // The function sets sql_mode to empty string
-        $this->assertEquals('', $row['mode'], 'SQL mode should be empty');
+        // The function sets sql_mode to STRICT_ALL_TABLES
+        $this->assertEquals('STRICT_ALL_TABLES', $row['mode'], 'SQL mode should be STRICT_ALL_TABLES');
     }
 }

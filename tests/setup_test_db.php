@@ -252,15 +252,18 @@ sort($migrationFiles);
 // The baseline schema already includes all table structures from migrations.
 // We need to:
 // 1. Mark most migrations as "applied" (since baseline incorporates their changes)
-// 2. Actually run only the inter-table FK migration (baseline notes this is separate)
+// 2. Actually run specific migrations that need explicit execution:
+//    - FK migration (adds inter-table foreign keys)
+//    - Column defaults migration (mysqli_multi_query doesn't handle DEFAULT '' correctly)
 $fkMigration = '20251221_120000_add_inter_table_foreign_keys.sql';
+$columnDefaultsMigration = '20260107_120000_add_language_column_defaults.sql';
 
 output("Marking migrations as applied (baseline includes these changes)...\n", $quiet);
 foreach ($migrationFiles as $migrationFile) {
     $filename = basename($migrationFile);
 
-    // Skip the FK migration - we'll run it explicitly
-    if ($filename === $fkMigration) {
+    // Skip migrations that need to be run explicitly
+    if ($filename === $fkMigration || $filename === $columnDefaultsMigration) {
         continue;
     }
 
@@ -339,6 +342,33 @@ if (!in_array($fkMigration, $appliedMigrations)) {
     $appliedCount = 1;
 } else {
     output("FK constraints already applied.\n", $quiet);
+}
+
+// Apply column defaults migration (mysqli_multi_query doesn't handle DEFAULT '' correctly in baseline.sql)
+if (!in_array($columnDefaultsMigration, $appliedMigrations)) {
+    output("Applying column defaults for strict SQL mode...\n", $quiet);
+
+    // These columns need explicit defaults for STRICT_ALL_TABLES mode
+    $columnDefaults = [
+        "ALTER TABLE languages MODIFY COLUMN LgCharacterSubstitutions varchar(500) NOT NULL DEFAULT ''",
+        "ALTER TABLE languages MODIFY COLUMN LgRegexpSplitSentences varchar(500) NOT NULL DEFAULT '.!?'",
+        "ALTER TABLE languages MODIFY COLUMN LgExceptionsSplitSentences varchar(500) NOT NULL DEFAULT ''",
+        "ALTER TABLE languages MODIFY COLUMN LgRegexpWordCharacters varchar(500) NOT NULL DEFAULT 'a-zA-ZÀ-ÖØ-öø-ȳ'",
+        "ALTER TABLE texts MODIFY COLUMN TxAnnotatedText longtext NOT NULL DEFAULT ''",
+        "ALTER TABLE archivedtexts MODIFY COLUMN AtAnnotatedText longtext NOT NULL DEFAULT ''",
+    ];
+
+    foreach ($columnDefaults as $sql) {
+        @mysqli_query($conn, $sql);
+    }
+
+    // Record migration as applied
+    $escapedFilename = mysqli_real_escape_string($conn, $columnDefaultsMigration);
+    mysqli_query($conn, "INSERT IGNORE INTO _migrations (filename, applied_at) VALUES ('$escapedFilename', NOW())");
+
+    output("Column defaults applied.\n", $quiet);
+} else {
+    output("Column defaults already applied.\n", $quiet);
 }
 
 // Verify setup

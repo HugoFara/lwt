@@ -160,8 +160,7 @@ class Configuration
 
         @mysqli_query($dbconnection, "SET NAMES 'utf8'");
 
-        // @mysqli_query($dbconnection, "SET SESSION sql_mode = 'STRICT_ALL_TABLES'");
-        @mysqli_query($dbconnection, "SET SESSION sql_mode = ''");
+        @mysqli_query($dbconnection, "SET SESSION sql_mode = 'STRICT_ALL_TABLES'");
 
         // Set shorter timeouts for test database connections to prevent zombie locks
         if (str_starts_with($dbname, 'test_')) {
