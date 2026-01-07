@@ -1110,7 +1110,8 @@ class WordUploadService
             }
         } elseif ($mwords > 0) {
             // Update individual multi-word expressions
-            $sqlarr = [];
+            $allPlaceholders = [];
+            $allParams = [];
             $rows = QueryBuilder::table('words')
                 ->select(['WoID', 'WoTextLC', 'WoWordCount'])
                 ->where('WoWordCount', '>', 1)
@@ -1121,15 +1122,18 @@ class WordUploadService
                 $wid = (int) $record['WoID'];
                 $textlc = (string) $record['WoTextLC'];
                 $expressionService = new ExpressionService();
-                $sqlarr[] = $expressionService->insertExpressions($textlc, $langId, $wid, $len, 2);
+                $result = $expressionService->insertExpressions($textlc, $langId, $wid, $len, 2);
+                if ($result !== null) {
+                    $allPlaceholders = array_merge($allPlaceholders, $result['placeholders']);
+                    $allParams = array_merge($allParams, $result['params']);
+                }
             }
-            $sqlarr = array_filter($sqlarr);
 
-            if (!empty($sqlarr)) {
-                $sqltext = "INSERT INTO textitems2 (
+            if (!empty($allPlaceholders)) {
+                $sql = "INSERT INTO textitems2 (
                     Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
-                ) VALUES " . rtrim(implode(',', $sqlarr), ',');
-                Connection::query($sqltext);
+                ) VALUES " . implode(',', $allPlaceholders);
+                Connection::preparedExecute($sql, $allParams);
             }
         }
     }

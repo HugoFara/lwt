@@ -246,11 +246,13 @@ class ExpressionService
      * @param int    $mode   Function mode
      *                       - 0: Default mode, do nothing special
      *                       - 1: Runs an expression inserter interactable
-     *                       - 2: Return the sql output
+     *                       - 2: Return prepared statement data for batch insert
      *
-     * @return string|null If $mode == 2 return values to insert in textitems2, nothing otherwise.
+     * @return array{placeholders: list<string>, params: list<mixed>}|null
+     *         If $mode == 2 returns array with placeholders and params for prepared statement,
+     *         null otherwise.
      */
-    public function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mode): string|null
+    public function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mode): array|null
     {
         $regexp = (string)(QueryBuilder::table('languages')
             ->where('LgID', '=', $lid)
@@ -298,18 +300,8 @@ class ExpressionService
             }
 
             if ($mode == 2) {
-                // Legacy mode: return SQL text for external use
-                // Build the VALUES portion with escaped data
-                $sqlarr = [];
-                $dbConn = Globals::getDbConnection();
-                foreach ($occurrences as $occ) {
-                    $txId = $occ["SeTxID"] ?? $occ["TxID"] ?? 0;
-                    $term = $occ["term"] === null || $dbConn === null
-                        ? 'NULL'
-                        : "'" . mysqli_real_escape_string($dbConn, $occ["term"]) . "'";
-                    $sqlarr[] = "($wid, $lid, $txId, {$occ["SeID"]}, {$occ["position"]}, $len, $term)";
-                }
-                return implode(',', $sqlarr);
+                // Return prepared statement data for batch insert
+                return ['placeholders' => $placeholders, 'params' => $params];
             }
 
             $sql = "INSERT INTO textitems2
