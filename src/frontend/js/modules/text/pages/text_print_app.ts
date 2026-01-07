@@ -13,7 +13,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { createIcons, icons } from 'lucide';
+import { initIcons } from '@shared/icons/lucide_icons';
 import { apiPost } from '@shared/api/client';
 import {
   TextsApi,
@@ -248,7 +248,7 @@ export function textPrintAppData(): TextPrintAppData {
 
       // Refresh icons after render
       setTimeout(() => {
-        createIcons({ icons });
+        initIcons();
       }, 0);
     },
 

@@ -12,7 +12,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { createIcons, icons } from 'lucide';
+import { initIcons } from '@shared/icons/lucide_icons';
 import { apiGet } from '@shared/api/client';
 import { confirmDelete } from '@shared/utils/ui_utilities';
 import { renderTags } from '@shared/utils/html_utils';
@@ -185,7 +185,7 @@ export function archivedTextsGroupedData(): ArchivedTextsGroupedData {
 
       // Refresh icons after render
       setTimeout(() => {
-        createIcons({ icons });
+        initIcons();
       }, 0);
     },
 
@@ -236,7 +236,7 @@ export function archivedTextsGroupedData(): ArchivedTextsGroupedData {
 
       // Refresh icons
       setTimeout(() => {
-        createIcons({ icons });
+        initIcons();
       }, 0);
     },
 
@@ -263,7 +263,7 @@ export function archivedTextsGroupedData(): ArchivedTextsGroupedData {
 
       // Refresh icons
       setTimeout(() => {
-        createIcons({ icons });
+        initIcons();
       }, 0);
     },
 

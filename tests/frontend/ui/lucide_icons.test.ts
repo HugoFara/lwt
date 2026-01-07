@@ -4,9 +4,107 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock lucide before importing the module
+// The actual module imports specific icons and passes them to createIcons
 vi.mock('lucide', () => ({
   createIcons: vi.fn(),
-  icons: { check: {}, x: {}, plus: {} }
+  // Mock the specific icons that are imported
+  Check: ['svg', {}, []],
+  X: ['svg', {}, []],
+  Plus: ['svg', {}, []],
+  ChevronDown: ['svg', {}, []],
+  Loader2: ['svg', {}, []],
+  AlertCircle: ['svg', {}, []],
+  Archive: ['svg', {}, []],
+  ArchiveX: ['svg', {}, []],
+  ArrowLeft: ['svg', {}, []],
+  ArrowRight: ['svg', {}, []],
+  Asterisk: ['svg', {}, []],
+  BarChart2: ['svg', {}, []],
+  BookMarked: ['svg', {}, []],
+  BookOpen: ['svg', {}, []],
+  BookOpenCheck: ['svg', {}, []],
+  BookOpenText: ['svg', {}, []],
+  Brush: ['svg', {}, []],
+  Calculator: ['svg', {}, []],
+  ChevronLeft: ['svg', {}, []],
+  ChevronRight: ['svg', {}, []],
+  ChevronsLeft: ['svg', {}, []],
+  ChevronsRight: ['svg', {}, []],
+  Circle: ['svg', {}, []],
+  CircleAlert: ['svg', {}, []],
+  CircleCheck: ['svg', {}, []],
+  CircleChevronLeft: ['svg', {}, []],
+  CircleChevronRight: ['svg', {}, []],
+  CircleDot: ['svg', {}, []],
+  CircleHelp: ['svg', {}, []],
+  CircleMinus: ['svg', {}, []],
+  CirclePlus: ['svg', {}, []],
+  CircleX: ['svg', {}, []],
+  Clock: ['svg', {}, []],
+  Database: ['svg', {}, []],
+  Download: ['svg', {}, []],
+  Eraser: ['svg', {}, []],
+  ExternalLink: ['svg', {}, []],
+  Eye: ['svg', {}, []],
+  FastForward: ['svg', {}, []],
+  FileDown: ['svg', {}, []],
+  FilePen: ['svg', {}, []],
+  FilePenLine: ['svg', {}, []],
+  FileStack: ['svg', {}, []],
+  FileText: ['svg', {}, []],
+  Filter: ['svg', {}, []],
+  FilterX: ['svg', {}, []],
+  Frown: ['svg', {}, []],
+  HelpCircle: ['svg', {}, []],
+  Image: ['svg', {}, []],
+  Info: ['svg', {}, []],
+  Languages: ['svg', {}, []],
+  Layers: ['svg', {}, []],
+  Lightbulb: ['svg', {}, []],
+  LightbulbOff: ['svg', {}, []],
+  Link: ['svg', {}, []],
+  List: ['svg', {}, []],
+  Loader: ['svg', {}, []],
+  Lock: ['svg', {}, []],
+  LogIn: ['svg', {}, []],
+  Mail: ['svg', {}, []],
+  Minus: ['svg', {}, []],
+  Newspaper: ['svg', {}, []],
+  NotepadText: ['svg', {}, []],
+  NotepadTextDashed: ['svg', {}, []],
+  Notebook: ['svg', {}, []],
+  NotebookPen: ['svg', {}, []],
+  Palette: ['svg', {}, []],
+  Pencil: ['svg', {}, []],
+  Printer: ['svg', {}, []],
+  RefreshCw: ['svg', {}, []],
+  Repeat: ['svg', {}, []],
+  Rewind: ['svg', {}, []],
+  Rocket: ['svg', {}, []],
+  Rss: ['svg', {}, []],
+  Server: ['svg', {}, []],
+  Settings: ['svg', {}, []],
+  Sliders: ['svg', {}, []],
+  Smile: ['svg', {}, []],
+  Square: ['svg', {}, []],
+  SquareMinus: ['svg', {}, []],
+  SquarePen: ['svg', {}, []],
+  SquarePlus: ['svg', {}, []],
+  Star: ['svg', {}, []],
+  StickyNote: ['svg', {}, []],
+  Sun: ['svg', {}, []],
+  Tag: ['svg', {}, []],
+  Tags: ['svg', {}, []],
+  ThumbsUp: ['svg', {}, []],
+  Upload: ['svg', {}, []],
+  User: ['svg', {}, []],
+  UserPlus: ['svg', {}, []],
+  Volume2: ['svg', {}, []],
+  VolumeX: ['svg', {}, []],
+  Wand2: ['svg', {}, []],
+  WrapText: ['svg', {}, []],
+  XCircle: ['svg', {}, []],
+  Zap: ['svg', {}, []]
 }));
 
 import {
@@ -15,7 +113,7 @@ import {
   createIcon,
   replaceWithLucide
 } from '../../../src/frontend/js/shared/icons/lucide_icons';
-import { createIcons, icons } from 'lucide';
+import { createIcons } from 'lucide';
 
 describe('ui/lucide_icons.ts', () => {
   beforeEach(() => {
@@ -36,7 +134,9 @@ describe('ui/lucide_icons.ts', () => {
     it('calls createIcons with icons object', () => {
       initIcons();
 
-      expect(createIcons).toHaveBeenCalledWith({ icons });
+      expect(createIcons).toHaveBeenCalledWith(
+        expect.objectContaining({ icons: expect.any(Object) })
+      );
     });
 
     it('can be called multiple times', () => {
@@ -63,7 +163,9 @@ describe('ui/lucide_icons.ts', () => {
 
       initIconsIn(container);
 
-      expect(createIcons).toHaveBeenCalledWith({ icons });
+      expect(createIcons).toHaveBeenCalledWith(
+        expect.objectContaining({ icons: expect.any(Object) })
+      );
     });
 
     it('does not call createIcons when container has no icons', () => {

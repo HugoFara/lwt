@@ -12,7 +12,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { createIcons, icons } from 'lucide';
+import { initIcons } from '@shared/icons/lucide_icons';
 import {
   WordsApi,
   type WordItem,
@@ -164,7 +164,7 @@ export function wordListData(): WordListData {
 
       // Refresh icons after render
       setTimeout(() => {
-        createIcons({ icons });
+        initIcons();
       }, 0);
     },
 
@@ -180,7 +180,7 @@ export function wordListData(): WordListData {
 
       // Refresh icons
       setTimeout(() => {
-        createIcons({ icons });
+        initIcons();
       }, 0);
     },
 

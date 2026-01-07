@@ -26,7 +26,8 @@ export default defineConfig({
           'alpine': ['alpinejs'],
           'chart': ['chart.js'],
           'tagify': ['@yaireo/tagify'],
-          'lucide': ['lucide'],
+          // Note: lucide icons are tree-shaken (only ~90 icons imported)
+          // so no separate chunk needed
         },
       },
     },

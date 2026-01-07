@@ -8,7 +8,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { createIcons, icons } from 'lucide';
+import { initIcons } from '@shared/icons/lucide_icons';
 import {
   getLanguageStore,
   type LanguageStoreState
@@ -44,7 +44,7 @@ export interface LanguageListComponentData {
  */
 function refreshIcons(): void {
   setTimeout(() => {
-    createIcons({ icons });
+    initIcons();
   }, 0);
 }
 

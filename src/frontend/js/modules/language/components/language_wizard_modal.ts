@@ -9,7 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { createIcons, icons } from 'lucide';
+import { initIcons } from '@shared/icons/lucide_icons';
 import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
 import {
   getLanguageStore,
@@ -51,7 +51,7 @@ export interface WizardModalComponentData {
  */
 function refreshIcons(): void {
   setTimeout(() => {
-    createIcons({ icons });
+    initIcons();
   }, 0);
 }
 

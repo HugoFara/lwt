@@ -4,11 +4,219 @@
  * This module initializes Lucide SVG icons throughout the application,
  * replacing legacy PNG icons with modern, scalable vector icons.
  *
+ * Only specific icons used in the application are imported to minimize
+ * bundle size (tree-shaking).
+ *
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */
 
-import { createIcons, icons } from 'lucide';
+import { createIcons, type IconNode } from 'lucide';
+
+// Import only the icons we actually use
+import {
+  AlertCircle,
+  Archive,
+  ArchiveX,
+  ArrowLeft,
+  ArrowRight,
+  Asterisk,
+  BarChart2,
+  BookMarked,
+  BookOpen,
+  BookOpenCheck,
+  BookOpenText,
+  Brush,
+  Calculator,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Circle,
+  CircleAlert,
+  CircleCheck,
+  CircleChevronLeft,
+  CircleChevronRight,
+  CircleDot,
+  CircleHelp,
+  CircleMinus,
+  CirclePlus,
+  CircleX,
+  Clock,
+  Database,
+  Download,
+  Eraser,
+  ExternalLink,
+  Eye,
+  FastForward,
+  FileDown,
+  FilePen,
+  FilePenLine,
+  FileStack,
+  FileText,
+  Filter,
+  FilterX,
+  Frown,
+  HelpCircle,
+  Image,
+  Info,
+  Languages,
+  Layers,
+  Lightbulb,
+  LightbulbOff,
+  Link,
+  List,
+  Loader,
+  Loader2,
+  Lock,
+  LogIn,
+  Mail,
+  Minus,
+  Newspaper,
+  NotepadText,
+  NotepadTextDashed,
+  Notebook,
+  NotebookPen,
+  Palette,
+  Pencil,
+  Plus,
+  Printer,
+  RefreshCw,
+  Repeat,
+  Rewind,
+  Rocket,
+  Rss,
+  Server,
+  Settings,
+  Sliders,
+  Smile,
+  Square,
+  SquareMinus,
+  SquarePen,
+  SquarePlus,
+  Star,
+  StickyNote,
+  Sun,
+  Tag,
+  Tags,
+  ThumbsUp,
+  Upload,
+  User,
+  UserPlus,
+  Volume2,
+  VolumeX,
+  Wand2,
+  WrapText,
+  X,
+  XCircle,
+  Zap
+} from 'lucide';
+
+/**
+ * Map of icon names to icon definitions.
+ * Keys are kebab-case names used in data-lucide attributes.
+ */
+const usedIcons: Record<string, IconNode> = {
+  'alert-circle': AlertCircle,
+  archive: Archive,
+  'archive-x': ArchiveX,
+  'arrow-left': ArrowLeft,
+  'arrow-right': ArrowRight,
+  asterisk: Asterisk,
+  'bar-chart-2': BarChart2,
+  'book-marked': BookMarked,
+  'book-open': BookOpen,
+  'book-open-check': BookOpenCheck,
+  'book-open-text': BookOpenText,
+  brush: Brush,
+  calculator: Calculator,
+  check: Check,
+  'chevron-down': ChevronDown,
+  'chevron-left': ChevronLeft,
+  'chevron-right': ChevronRight,
+  'chevrons-left': ChevronsLeft,
+  'chevrons-right': ChevronsRight,
+  circle: Circle,
+  'circle-alert': CircleAlert,
+  'circle-check': CircleCheck,
+  'circle-chevron-left': CircleChevronLeft,
+  'circle-chevron-right': CircleChevronRight,
+  'circle-dot': CircleDot,
+  'circle-help': CircleHelp,
+  'circle-minus': CircleMinus,
+  'circle-plus': CirclePlus,
+  'circle-x': CircleX,
+  clock: Clock,
+  database: Database,
+  download: Download,
+  eraser: Eraser,
+  'external-link': ExternalLink,
+  eye: Eye,
+  'fast-forward': FastForward,
+  'file-down': FileDown,
+  'file-pen': FilePen,
+  'file-pen-line': FilePenLine,
+  'file-stack': FileStack,
+  'file-text': FileText,
+  filter: Filter,
+  'filter-x': FilterX,
+  frown: Frown,
+  'help-circle': HelpCircle,
+  image: Image,
+  info: Info,
+  languages: Languages,
+  layers: Layers,
+  lightbulb: Lightbulb,
+  'lightbulb-off': LightbulbOff,
+  link: Link,
+  list: List,
+  loader: Loader,
+  'loader-2': Loader2,
+  lock: Lock,
+  'log-in': LogIn,
+  mail: Mail,
+  minus: Minus,
+  newspaper: Newspaper,
+  'notepad-text': NotepadText,
+  'notepad-text-dashed': NotepadTextDashed,
+  notebook: Notebook,
+  'notebook-pen': NotebookPen,
+  palette: Palette,
+  pencil: Pencil,
+  plus: Plus,
+  printer: Printer,
+  'refresh-cw': RefreshCw,
+  repeat: Repeat,
+  rewind: Rewind,
+  rocket: Rocket,
+  rss: Rss,
+  server: Server,
+  settings: Settings,
+  sliders: Sliders,
+  smile: Smile,
+  square: Square,
+  'square-minus': SquareMinus,
+  'square-pen': SquarePen,
+  'square-plus': SquarePlus,
+  star: Star,
+  'sticky-note': StickyNote,
+  sun: Sun,
+  tag: Tag,
+  tags: Tags,
+  'thumbs-up': ThumbsUp,
+  upload: Upload,
+  user: User,
+  'user-plus': UserPlus,
+  'volume-2': Volume2,
+  'volume-x': VolumeX,
+  'wand-2': Wand2,
+  'wrap-text': WrapText,
+  x: X,
+  'x-circle': XCircle,
+  zap: Zap
+};
 
 /**
  * Initialize all Lucide icons in the document.
@@ -17,7 +225,7 @@ import { createIcons, icons } from 'lucide';
  * them with the corresponding SVG icons.
  */
 export function initIcons(): void {
-  createIcons({ icons });
+  createIcons({ icons: usedIcons });
 }
 
 /**
@@ -34,7 +242,7 @@ export function initIconsIn(container: Element): void {
 
   if (iconElements.length > 0) {
     // Re-run createIcons to process new elements
-    createIcons({ icons });
+    createIcons({ icons: usedIcons });
   }
 }
 
@@ -72,7 +280,7 @@ export function createIcon(
 
   // Process the icon
   createIcons({
-    icons,
+    icons: usedIcons,
     attrs: {
       width: size,
       height: size,
@@ -137,7 +345,7 @@ export function replaceWithLucide(
   imgElement.replaceWith(iconEl);
 
   // Initialize the new icon
-  createIcons({ icons });
+  createIcons({ icons: usedIcons });
 }
 
 // Initialize icons when DOM is ready
