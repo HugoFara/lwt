@@ -637,52 +637,28 @@ export class ResultPanel {
 
 ### Phase 5: Testing and Validation
 
-#### 5.1 Unit Tests
+#### 5.1 Unit Tests ✓ DONE
 
-Add tests for API client:
+API client tests exist at `tests/frontend/core/api_client.test.ts` covering:
+- GET/POST/PUT/DELETE requests
+- Error handling
+- Parameter serialization
+- Form data posting
 
-```typescript
-// tests/js/api_client.test.ts
+#### 5.2 Integration Tests ✓ DONE
 
-describe('API Client', () => {
-  it('should make GET requests with params', async () => {
-    // ...
-  });
+E2E tests for reading interface exist at `cypress/e2e/09-reading.cy.ts` covering:
+- Reading page load
+- Word display with status classes
+- Multi-word selection
+- Modal interactions
 
-  it('should handle errors gracefully', async () => {
-    // ...
-  });
-});
-```
+#### 5.3 Legacy File Cleanup ✓ DONE
 
-#### 5.2 Integration Tests
-
-Update Cypress E2E tests:
-
-```javascript
-// cypress/e2e/reading.cy.js
-
-describe('Reading Interface', () => {
-  it('should change word status via API', () => {
-    cy.intercept('PUT', '/api.php/v1/terms/*/status/*').as('statusChange');
-
-    cy.visit('/text/read?text=1');
-    cy.get('.word').first().click();
-    cy.get('.status-btn[data-status="2"]').click();
-
-    cy.wait('@statusChange').its('response.statusCode').should('eq', 200);
-  });
-});
-```
-
-#### 5.3 Deprecation Warnings
-
-Add console warnings for legacy endpoints still being called:
-
-```php
-// In legacy PHP files, add deprecation header
-header('X-Deprecated: Use /api/v1/terms/{id}/status instead');
-```
+All legacy PHP endpoint files have been removed. No deprecation warnings needed as:
+- All functionality migrated to controllers and REST API
+- No legacy `.php` files remain in the codebase
+- Frame-based operations replaced with API mode
 
 ---
 
@@ -708,8 +684,10 @@ Phase 1.2  Create domain API modules               [Foundation] ✓ DONE
                 Phase 4.4  Event delegation        [Major] ✓ DONE
                 Phase 4.5  API mode as default     [Major] ✓ DONE
                     │
-                    └── Phase 5  Testing           [Validation]
+                    └── Phase 5  Testing           [Validation] ✓ DONE
 ```
+
+**Status: Migration Complete** - All phases have been implemented. The modernization from jQuery/frame-based communication to fetch API/in-page updates is complete.
 
 ---
 
@@ -741,18 +719,20 @@ LWT_DATA.settings.use_frame_mode = true;
 </script>
 ```
 
-### Deprecated Endpoints
+### Frame Mode Controller Methods
 
-The following controller methods are deprecated and will be removed in a future version:
+The following controller methods exist to support legacy frame mode. They render HTML for iframe display and are kept for backward compatibility:
 
-| Deprecated Endpoint | Replacement API |
-|---------------------|-----------------|
-| `WordController::delete()` | `DELETE /api/v1/terms/{id}` |
-| `WordController::deleteMulti()` | `DELETE /api/v1/terms/{id}` |
-| `WordController::insertWellknown()` | `POST /api/v1/terms/quick` (status=99) |
-| `WordController::insertIgnore()` | `POST /api/v1/terms/quick` (status=98) |
-| `WordController::setStatus()` | `PUT /api/v1/terms/{id}/status/{status}` |
+| Controller Method | REST API Alternative |
+|-------------------|---------------------|
+| `VocabularyController::delete()` | `DELETE /api/v1/terms/{id}` |
+| `VocabularyController::deleteMulti()` | `DELETE /api/v1/terms/{id}` |
+| `VocabularyController::insertWellknown()` | `POST /api/v1/terms/quick` (status=99) |
+| `VocabularyController::insertIgnore()` | `POST /api/v1/terms/quick` (status=98) |
+| `VocabularyController::setStatus()` | `PUT /api/v1/terms/{id}/status/{status}` |
 | `TestController::setStatus()` | `PUT /api/v1/review/status` |
+
+These methods are still used when `use_frame_mode = true` is set.
 
 ---
 
@@ -770,56 +750,75 @@ The following controller methods are deprecated and will be removed in a future 
 
 ---
 
-## Risks and Mitigations
+## Risks and Mitigations (Resolved)
 
-| Risk | Mitigation |
+| Risk | Resolution |
 |------|------------|
-| Breaking existing functionality | Incremental migration with feature flags |
-| jQuery removal affects other code | Audit all jQuery usage first |
-| Frame removal affects layout | Create equivalent CSS panel layouts |
-| Backward compatibility | Keep legacy endpoints during transition |
+| Breaking existing functionality | Mitigated via `use_frame_mode` toggle for backward compatibility |
+| jQuery removal affects other code | jQuery still available for legacy code; new code uses fetch API |
+| Frame removal affects layout | Result panels and modals replace frame content |
+| Backward compatibility | Frame mode controller methods retained alongside REST API |
 
 ---
 
-## Files to Modify Summary
+## Files Summary (Current Paths)
 
-### New Files Created
+### API Layer
 
-- `src/frontend/js/core/api_client.ts` ✓
-- `src/frontend/js/api/terms.ts` ✓
-- `src/frontend/js/api/texts.ts` ✓
-- `src/frontend/js/api/review.ts` ✓
-- `src/frontend/js/api/settings.ts` ✓
-- `src/frontend/js/reading/word_actions.ts` ✓ (Phase 4)
-- `src/frontend/js/ui/result_panel.ts` ✓ (Phase 4)
+- `src/frontend/js/shared/api/client.ts` - Centralized API client ✓
+- `src/frontend/js/modules/vocabulary/api/terms_api.ts` - Term/word operations ✓
+- `src/frontend/js/modules/vocabulary/api/words_api.ts` - Word-specific operations ✓
+- `src/frontend/js/modules/text/api/texts_api.ts` - Text operations ✓
+- `src/frontend/js/modules/review/api/review_api.ts` - Review/test operations ✓
+- `src/frontend/js/modules/admin/api/settings_api.ts` - Settings operations ✓
+- `src/frontend/js/modules/language/api/languages_api.ts` - Language operations ✓
+- `src/frontend/js/modules/feed/api/feeds_api.ts` - Feed operations ✓
 
-### Files Modified
+### Service Layer
 
-- `src/frontend/js/core/ajax_utilities.ts` - Replace jQuery ✓
-- `src/frontend/js/words/word_status_ajax.ts` - Replace jQuery ✓
-- `src/frontend/js/reading/text_display.ts` - Replace jQuery ✓
-- `src/frontend/js/testing/test_ajax.ts` - Replace jQuery ✓
-- `src/frontend/js/terms/term_operations.ts` - Replace jQuery ✓
-- `src/frontend/js/terms/overlib_interface.ts` - Major refactor ✓ (Phase 4)
-- `src/frontend/js/reading/text_events.ts` - API mode support ✓ (Phase 4)
-- `src/frontend/js/globals.ts` - Export new functions ✓ (Phase 4)
-- `src/backend/Api/V1/Endpoints.php` - Add new routes ✓
-- `src/backend/Api/V1/Handlers/TermHandler.php` - Add methods ✓
-- `src/backend/Api/V1/Handlers/ReviewHandler.php` - Add methods ✓
+- `src/frontend/js/modules/vocabulary/services/word_actions.ts` - Word action handlers ✓
+- `src/frontend/js/modules/vocabulary/services/word_status_ajax.ts` - Status change logic ✓
+- `src/frontend/js/modules/vocabulary/services/term_operations.ts` - Term CRUD operations ✓
+- `src/frontend/js/modules/vocabulary/services/overlib_interface.ts` - Popup interface ✓
+
+### UI Components
+
+- `src/frontend/js/modules/vocabulary/components/result_panel.ts` - Result display panel ✓
+
+### Page Modules
+
+- `src/frontend/js/modules/text/pages/reading/text_display.ts` - Text display logic ✓
+- `src/frontend/js/modules/text/pages/reading/text_events.ts` - Event handling ✓
+- `src/frontend/js/modules/text/pages/reading/text_keyboard.ts` - Keyboard shortcuts (partial)
+- `src/frontend/js/modules/review/pages/test_ajax.ts` - Test mode AJAX ✓
+
+### Shared Utilities
+
+- `src/frontend/js/shared/utils/ajax_utilities.ts` - AJAX helpers ✓
+
+### Backend
+
+- `src/backend/Api/V1/Endpoints.php` - REST API routes ✓
+- `src/backend/Api/V1/Handlers/TermHandler.php` - Term endpoint handlers ✓
+- `src/backend/Api/V1/Handlers/ReviewHandler.php` - Review endpoint handlers ✓
 
 ### Files Pending (Phase 4 Optional Cleanup)
 
-- `src/frontend/js/reading/text_keyboard.ts` - Can be updated to use API mode (currently uses frame navigation)
+- `src/frontend/js/modules/text/pages/reading/text_keyboard.ts` - Uses API mode for word operations; still uses frame access for audio controller
 
-### Files to Eventually Deprecate
+### Legacy PHP Files (Removed)
 
-- `set_word_status.php`
-- `set_test_status.php`
-- `delete_word.php`
-- `delete_mword.php`
-- `insert_word_wellknown.php`
-- `insert_word_ignore.php`
-- `inline_edit.php`
-- `set_text_mode.php`
-- `trans.php`
-- `set_word_on_hover.php`
+All legacy PHP endpoint files have been removed. The functionality has been migrated to:
+
+| Former File | Replacement |
+|-------------|-------------|
+| `set_word_status.php` | `VocabularyController::setStatus()` + `PUT /api/v1/terms/{id}/status/{status}` |
+| `set_test_status.php` | `ReviewController` + `PUT /api/v1/review/status` |
+| `delete_word.php` | `VocabularyController::delete()` + `DELETE /api/v1/terms/{id}` |
+| `delete_mword.php` | `VocabularyController::deleteMulti()` + `DELETE /api/v1/terms/{id}` |
+| `insert_word_wellknown.php` | `VocabularyController::insertWellknown()` + `POST /api/v1/terms/quick` |
+| `insert_word_ignore.php` | `VocabularyController::insertIgnore()` + `POST /api/v1/terms/quick` |
+| `inline_edit.php` | `VocabularyController::inlineEdit()` at `/word/inline-edit` |
+| `set_text_mode.php` | `TextController` + `PUT /api/v1/texts/{id}/display-mode` |
+| `trans.php` | Direct dictionary URLs (no proxy needed) |
+| `set_word_on_hover.php` | API mode hover handlers |

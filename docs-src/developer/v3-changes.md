@@ -4,7 +4,16 @@ This document describes all the architectural and structural changes introduced 
 
 ## Overview
 
-Version 3 represents a major architectural refactoring of LWT, transitioning from a collection of 60+ standalone PHP files in the root directory to a proper MVC (Model-View-Controller) structure with a front controller pattern. This change improves code organization, maintainability, and sets the foundation for future improvements.
+Version 3 represents a major architectural refactoring of LWT, transitioning from a collection of 60+ standalone PHP files in the root directory to a modern, modular architecture. Key improvements include:
+
+- **Front Controller Pattern:** All requests route through `index.php`
+- **MVC Structure:** Controllers, Services, and Views organized by feature
+- **Modular Architecture:** 10 feature modules following Clean Architecture principles
+- **Shared Infrastructure:** Common database, HTTP, and UI utilities
+- **Dependency Injection:** PSR-11 compatible container with service providers
+- **Multi-User Support:** Optional data isolation for shared installations
+
+This change improves code organization, testability, and sets the foundation for future improvements.
 
 ## Key Changes
 
@@ -37,17 +46,19 @@ Static assets have been consolidated into the `assets/` directory:
 
 #### PHP Source Reorganization
 
-All PHP source files have been moved to `src/backend/`:
+All PHP source files have been reorganized into a modular structure:
 
 | Old Location | New Location |
 |-------------|--------------|
 | `inc/` | `src/backend/Core/` |
-| Root PHP files (`do_text.php`, etc.) | `src/backend/Legacy/` |
+| Root PHP files (`do_text.php`, etc.) | Migrated to Controllers/Services |
 | (new) | `src/backend/Controllers/` |
 | (new) | `src/backend/Router/` |
 | (new) | `src/backend/Services/` |
 | (new) | `src/backend/Views/` |
 | (new) | `src/backend/Api/` |
+| (new) | `src/Shared/` (cross-cutting infrastructure) |
+| (new) | `src/Modules/` (10 feature modules) |
 
 #### Frontend Source Reorganization
 
@@ -92,7 +103,9 @@ All application routes are defined in this file, organized by feature:
 
 ### 4. MVC Controllers
 
-Controller classes in `src/backend/Controllers/`:
+Controller classes are organized in two locations:
+
+**Backend Controllers** (`src/backend/Controllers/`):
 
 | Controller | Purpose |
 |-----------|---------|
@@ -111,6 +124,21 @@ Controller classes in `src/backend/Controllers/`:
 | `TranslationController.php` | Translation API integration |
 | `WordPressController.php` | WordPress integration |
 
+**Module Controllers** (`src/Modules/*/Http/`):
+
+| Module | Controller | Purpose |
+|--------|------------|---------|
+| Text | `TextController` | Text CRUD and reading |
+| Text | `TextPrintController` | Print and export |
+| Vocabulary | `VocabularyController` | Term management |
+| Language | `LanguageController` | Language settings |
+| Tags | `TagsController` | Tag CRUD |
+| Review | `TestController` | Spaced repetition |
+| Feed | `FeedController` | RSS feeds |
+| Admin | `AdminController` | Settings, backup |
+| User | `UserController` | Authentication |
+| Dictionary | `DictionaryController` | Dictionary lookup |
+
 #### BaseController Features
 
 The `BaseController` provides helper methods for all controllers:
@@ -127,7 +155,9 @@ The `BaseController` provides helper methods for all controllers:
 
 ### 5. Services Layer
 
-Version 3 introduces a Services layer that extracts business logic from controllers:
+Version 3 introduces a Services layer that extracts business logic from controllers.
+
+**Backend Services** (`src/backend/Services/`):
 
 | Service | Purpose |
 |---------|---------|
@@ -154,7 +184,21 @@ Version 3 introduces a Services layer that extracts business logic from controll
 | `WordListService.php` | Word list filtering, pagination, and bulk operations |
 | `WordUploadService.php` | Word import/upload operations |
 
-Services are located in `src/backend/Services/` and follow the pattern of extracting complex business logic from controllers for better testability and maintainability.
+**Module Services** (`src/Modules/*/Application/Services/`):
+
+| Module | Key Services |
+|--------|-------------|
+| Text | TextReadingService, TextDisplayService, SentenceService, AnnotationService |
+| Vocabulary | WordService, WordListService, TermStatusService, ExportService |
+| Language | TextParsingService |
+| Tags | TagService, TagAssociationService |
+| Review | ReviewService, TestGenerationService, ScoreCalculationService |
+| Feed | FeedService, ArticleService, FeedParsingService |
+| User | AuthService, PasswordService, EmailService |
+| Admin | MediaService, TtsService, SessionCleaner |
+| Dictionary | LocalDictionaryService, TranslationService |
+
+Services follow the pattern of extracting complex business logic for better testability. Module services are organized alongside Use Cases in the Application layer.
 
 ### 6. Views Architecture
 
@@ -354,18 +398,111 @@ $service = new MyService();
 $data = $service->doSomething();
 ```
 
+### Creating New Modules (Recommended)
+
+For new features, prefer creating a new module in `src/Modules/`:
+
+1. Create the module directory structure:
+
+```text
+src/Modules/MyFeature/
+├── Application/
+│   ├── MyFeatureFacade.php
+│   ├── Services/
+│   └── UseCases/
+├── Domain/
+│   ├── Entities/
+│   └── MyFeatureRepositoryInterface.php
+├── Http/
+│   └── MyFeatureController.php
+├── Infrastructure/
+│   └── MySqlMyFeatureRepository.php
+├── Views/
+└── MyFeatureServiceProvider.php
+```
+
+2. Create the ServiceProvider:
+
+```php
+// src/Modules/MyFeature/MyFeatureServiceProvider.php
+namespace Lwt\Modules\MyFeature;
+
+use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
+
+class MyFeatureServiceProvider implements ServiceProviderInterface
+{
+    public function register(ContainerInterface $container): void
+    {
+        $container->singleton(
+            MyFeatureRepositoryInterface::class,
+            MySqlMyFeatureRepository::class
+        );
+        $container->singleton(MyFeatureFacade::class);
+    }
+
+    public function boot(ContainerInterface $container): void {}
+}
+```
+
+3. Register the provider in `index.php` or the container bootstrap.
+
+4. Add routes in `src/backend/Router/routes.php`.
+
+### Using the DI Container
+
+Register services via the container instead of manual instantiation:
+
+```php
+use Lwt\Shared\Infrastructure\Container\Container;
+
+// Register a service
+$container = Container::getInstance();
+$container->singleton(MyService::class);
+
+// Retrieve a service (auto-wires dependencies)
+$service = $container->get(MyService::class);
+```
+
+### Database Queries with Prepared Statements
+
+Always use prepared statements for user input:
+
+```php
+use Lwt\Shared\Infrastructure\Database\Connection;
+
+// Preferred: Prepared statements
+$results = Connection::preparedFetchAll(
+    "SELECT * FROM words WHERE WoLgID = ? AND WoStatus = ?",
+    [$langId, $status]
+);
+
+// For complex queries: QueryBuilder
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+
+$query = new QueryBuilder('words');
+$words = $query
+    ->where('WoLgID', '=', $langId)
+    ->where('WoStatus', '>=', 1)
+    ->orderBy('WoText')
+    ->limit(100)
+    ->get();
+```
+
 ## Statistics
 
 | Metric | Before | After |
 |--------|--------|-------|
 | PHP files in root | 60+ | 1 (`index.php`) |
 | Root directories | 10+ | 6 (assets, db, docs, media, src, tests) |
-| Controllers | 0 | 14 |
-| Services | 0 | 22 |
+| Controllers | 0 | 20+ |
+| Services | 0 | 40+ |
 | View directories | 0 | 9 |
 | Legacy PHP files remaining | 60+ | 0 |
 | Route definitions | 0 | 80+ |
 | Test files for routing | 0 | 2 (1000+ lines) |
+| Feature modules | 0 | 10 |
+| Use case classes | 0 | 76 |
+| API handlers | 0 | 20+ |
 
 ### 10. Global Variables Refactoring
 
@@ -925,18 +1062,380 @@ Version 3 migrates all database tables from MyISAM to InnoDB engine.
 
 This change prepares LWT for future improvements including foreign key constraints and transaction support for multi-step operations.
 
+### 14. Shared Infrastructure Layer
+
+Version 3 introduces a `src/Shared/` directory containing cross-cutting infrastructure code that is used across all feature modules.
+
+#### Directory Structure
+
+```text
+src/Shared/
+├── Domain/
+│   └── ValueObjects/
+│       └── UserId.php              # User identity value object
+├── Infrastructure/
+│   ├── Container/                  # Dependency Injection
+│   │   ├── Container.php           # PSR-11 compatible DI container
+│   │   ├── ContainerInterface.php  # Container interface
+│   │   ├── ServiceProviderInterface.php
+│   │   ├── CoreServiceProvider.php
+│   │   ├── ControllerServiceProvider.php
+│   │   ├── RepositoryServiceProvider.php
+│   │   ├── ContainerException.php
+│   │   └── NotFoundException.php
+│   ├── Database/                   # Database utilities
+│   │   ├── Connection.php          # mysqli wrapper (singleton)
+│   │   ├── PreparedStatement.php   # Safe parameterized queries
+│   │   ├── QueryBuilder.php        # Fluent SQL builder
+│   │   ├── DB.php                  # Static database helpers
+│   │   ├── UserScopedQuery.php     # Auto user-filtering
+│   │   ├── Settings.php            # Key-value settings
+│   │   ├── Configuration.php       # Database config
+│   │   ├── Escaping.php            # SQL escaping
+│   │   ├── Validation.php          # Value validation
+│   │   ├── Maintenance.php         # DB maintenance
+│   │   ├── Migrations.php          # Migration tracking
+│   │   ├── SqlFileParser.php       # SQL file parsing
+│   │   ├── Restore.php             # Database restore
+│   │   └── TextParsing.php         # Text parsing utilities
+│   └── Http/                       # HTTP utilities
+│       ├── InputValidator.php      # Type-safe request validation
+│       ├── SecurityHeaders.php     # Security header management
+│       └── UrlUtilities.php        # URL generation
+└── UI/
+    ├── Assets/
+    │   └── ViteHelper.php          # Vite asset loading
+    └── Helpers/
+        ├── FormHelper.php          # Form attribute generation
+        ├── PageLayoutHelper.php    # Page layout elements
+        ├── IconHelper.php          # Lucide SVG icons
+        ├── TagHelper.php           # HTML tag utilities
+        └── SelectOptionsBuilder.php # Select option building
+```
+
+#### Key Components
+
+**Database Classes:**
+
+| Class | Purpose |
+|-------|---------|
+| `Connection` | Singleton mysqli wrapper with query execution |
+| `PreparedStatement` | Safe parameterized query execution |
+| `QueryBuilder` | Fluent SQL builder with prepared statement support |
+| `DB` | Static helper methods for common database operations |
+| `UserScopedQuery` | Automatic user filtering for multi-user mode |
+
+**HTTP Utilities:**
+
+| Class | Purpose |
+|-------|---------|
+| `InputValidator` | Type-safe request parameter access (`getString()`, `getInt()`, `getBool()`) |
+| `SecurityHeaders` | Security header management |
+| `UrlUtilities` | URL generation and manipulation |
+
+**UI Helpers:**
+
+| Class | Purpose |
+|-------|---------|
+| `FormHelper` | HTML form attributes (checked, selected) |
+| `PageLayoutHelper` | Navbar, footers, menus |
+| `IconHelper` | Lucide SVG icon rendering (replaces legacy PNG icons) |
+| `TagHelper` | HTML tag generation |
+| `SelectOptionsBuilder` | HTML select option building |
+| `ViteHelper` | Vite CSS/JS bundle loading |
+
+#### Usage Examples
+
+```php
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+
+// Database queries with prepared statements
+$words = Connection::preparedFetchAll(
+    "SELECT * FROM words WHERE WoLgID = ?",
+    [$languageId]
+);
+
+// Fluent query builder
+$texts = (new QueryBuilder('texts'))
+    ->where('TxLgID', '=', $langId)
+    ->orderBy('TxTitle')
+    ->get();
+
+// Type-safe input validation
+$validator = new InputValidator($_REQUEST);
+$textId = $validator->getInt('text', 0);
+$title = $validator->getString('title', '');
+```
+
+### 15. Modular Architecture (src/Modules)
+
+Version 3 introduces a modular architecture with 10 feature modules, each following Clean Architecture principles.
+
+#### Module List
+
+| Module | Purpose |
+|--------|---------|
+| `Admin` | Administration, settings, backup, statistics |
+| `Dictionary` | Dictionary integrations and local dictionaries |
+| `Feed` | RSS feed management |
+| `Home` | Dashboard and landing page |
+| `Language` | Language configuration |
+| `Review` | Spaced repetition testing |
+| `Tags` | Tagging system |
+| `Text` | Text reading and management |
+| `User` | Authentication and user management |
+| `Vocabulary` | Terms/words management |
+
+#### Module Structure
+
+Each module follows a consistent structure:
+
+```text
+src/Modules/[Module]/
+├── Application/              # Use cases and application services
+│   ├── Facade.php           # Simplified module API
+│   ├── Services/            # Application services
+│   └── UseCases/            # Command/query handlers
+├── Domain/                  # Business logic
+│   ├── Entities/            # Domain entities
+│   ├── ValueObjects/        # Value objects (IDs, status)
+│   └── RepositoryInterface.php
+├── Http/                    # Request handling
+│   ├── Controller.php       # MVC controller
+│   └── ApiHandler.php       # REST API handler
+├── Infrastructure/          # External integrations
+│   └── MySqlRepository.php  # Repository implementation
+├── Views/                   # PHP templates
+└── [Module]ServiceProvider.php  # DI registration
+```
+
+#### Module Statistics
+
+| Module | Use Cases | Services | Views |
+|--------|-----------|----------|-------|
+| Text | 9 | 7 | 18 |
+| Vocabulary | 7 | 7 | 22 |
+| Language | 5 | 1 | 5 |
+| Tags | 6 | 2 | 5 |
+| Review | 5 | 3 | 6 |
+| Feed | 7 | 4 | 8 |
+| User | 5 | 6 | 6 |
+| Admin | 7+ | 3 | 8 |
+| Home | 3 | 0 | 2 |
+| Dictionary | 3 | 2 | 2 |
+
+#### Use Case Pattern
+
+Each module uses the Use Case pattern for business operations:
+
+```php
+// src/Modules/Text/Application/UseCases/ImportText.php
+namespace Lwt\Modules\Text\Application\UseCases;
+
+class ImportText
+{
+    public function __construct(
+        private TextRepositoryInterface $repository,
+        private TextParsingService $parser
+    ) {}
+
+    public function execute(ImportTextRequest $request): Text
+    {
+        // Business logic here
+        $text = new Text($request->title, $request->content);
+        $this->parser->parse($text);
+        return $this->repository->save($text);
+    }
+}
+```
+
+#### Module Facades
+
+Each module provides a Facade for simplified access:
+
+```php
+use Lwt\Modules\Text\Application\TextFacade;
+use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
+
+// Get text for reading
+$text = $textFacade->getTextForReading($textId);
+
+// Update term status
+$vocabFacade->updateTermStatus($termId, 3);
+```
+
+### 16. Dependency Injection Container
+
+Version 3 introduces a PSR-11 compatible dependency injection container.
+
+#### Container Features
+
+| Feature | Description |
+|---------|-------------|
+| Singleton support | Services registered as singletons are reused |
+| Factory pattern | Fresh instances created on each request |
+| Auto-wiring | Dependencies resolved via reflection |
+| Service aliases | Alternative names for services |
+| Circular detection | Prevents circular dependency loops |
+| Typed retrieval | `getTyped()` for static analysis |
+
+#### Service Providers
+
+Each module registers its services via a ServiceProvider:
+
+```php
+// src/Modules/Text/TextServiceProvider.php
+namespace Lwt\Modules\Text;
+
+use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
+
+class TextServiceProvider implements ServiceProviderInterface
+{
+    public function register(ContainerInterface $container): void
+    {
+        // Register repository interface to implementation
+        $container->singleton(
+            TextRepositoryInterface::class,
+            MySqlTextRepository::class
+        );
+
+        // Register use cases
+        $container->singleton(ImportText::class);
+        $container->singleton(GetTextForReading::class);
+
+        // Register facade
+        $container->singleton(TextFacade::class);
+    }
+
+    public function boot(ContainerInterface $container): void
+    {
+        // Post-registration initialization
+    }
+}
+```
+
+#### Core Service Providers
+
+| Provider | Purpose |
+|----------|---------|
+| `CoreServiceProvider` | Core services (Globals, database) |
+| `ControllerServiceProvider` | All MVC controllers |
+| `RepositoryServiceProvider` | Repository implementations |
+| `[Module]ServiceProvider` | Module-specific services |
+
+#### Container Usage
+
+```php
+use Lwt\Shared\Infrastructure\Container\Container;
+
+// Get the container
+$container = Container::getInstance();
+
+// Retrieve a service
+$textFacade = $container->get(TextFacade::class);
+
+// Typed retrieval (for static analysis)
+$textFacade = $container->getTyped(TextFacade::class, TextFacade::class);
+
+// Create fresh instance
+$service = $container->make(SomeService::class);
+```
+
+### 17. Multi-User Support
+
+Version 3 adds optional multi-user support for shared installations.
+
+#### Enabling Multi-User Mode
+
+Set in `.env`:
+
+```bash
+MULTI_USER_ENABLED=true
+```
+
+#### User-Scoped Tables
+
+When multi-user mode is enabled, the following tables are automatically filtered by user:
+
+| Table | User ID Column |
+|-------|----------------|
+| `languages` | `LgUsID` |
+| `texts` | `TxUsID` |
+| `archivedtexts` | `AtUsID` |
+| `words` | `WoUsID` |
+| `tags` | `TgUsID` |
+| `tags2` | `T2UsID` |
+| `newsfeeds` | `NfUsID` |
+| `settings` | `StUsID` |
+| `local_dictionaries` | `LdUsID` |
+
+#### UserId Value Object
+
+User identity is represented by an immutable value object:
+
+```php
+use Lwt\Shared\Domain\ValueObjects\UserId;
+
+// Create from integer
+$userId = UserId::fromInt(123);
+
+// Create for unsaved user (value 0)
+$userId = UserId::unsaved();
+
+// Get the integer value
+$id = $userId->getValue();
+
+// Check if saved
+if ($userId->isSaved()) {
+    // User exists in database
+}
+```
+
+#### UserScopedQuery
+
+The `UserScopedQuery` class automatically adds user filtering:
+
+```php
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
+
+// Automatically adds WHERE clause for current user
+$query = new UserScopedQuery('texts');
+$texts = $query->where('TxLgID', '=', $langId)->get();
+```
+
+#### Accessing Current User
+
+```php
+use Lwt\Core\Globals;
+
+// Get current user ID (may be null)
+$userId = Globals::getCurrentUserId();
+
+// Get user ID or throw exception
+$userId = Globals::requireUserId();
+
+// Check if multi-user is enabled
+if (Globals::isMultiUserEnabled()) {
+    // Apply user filtering
+}
+```
+
 ## Future Improvements
 
 This refactoring enables:
 
-1. **Gradual migration:** Legacy files can be incrementally converted to proper MVC
-2. **Better testing:** Controllers and Services are easier to unit test
-3. **Cleaner URLs:** SEO-friendly URLs without `.php` extensions
-4. **Modular architecture:** Clear separation of concerns
-5. **Namespace support:** PHP autoloading with PSR-4 style namespaces
-6. **Explicit dependencies:** The `Globals` class makes global state visible and trackable
-7. **Modern configuration:** `.env` files work with Docker, CI/CD, and modern deployment workflows
-8. **API versioning:** Structured API handlers allow for future API versions
+1. **Unit testing:** Use cases, services, and repositories are fully testable in isolation
+2. **Cleaner URLs:** SEO-friendly URLs without `.php` extensions
+3. **Modular architecture:** 10 feature modules with clear boundaries
+4. **Namespace support:** PHP autoloading with PSR-4 namespaces
+5. **Explicit dependencies:** DI container makes dependencies visible and swappable
+6. **Modern configuration:** `.env` files work with Docker, CI/CD, and modern deployment workflows
+7. **API versioning:** Structured API handlers allow for future API versions
+8. **Multi-user support:** Data isolation for shared installations
+9. **Clean Architecture:** Domain, Application, and Infrastructure layers are separated
+10. **Repository pattern:** Database access abstracted behind interfaces for future ORM migration
 
 ## Commit History
 

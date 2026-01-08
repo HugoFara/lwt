@@ -193,7 +193,7 @@ export function wrapRadioButtons(): void {
 export function prepareMainAreas(): void {
   // Initialize inline editing for editable areas
   initInlineEdit('.edit_area', {
-    url: 'inline_edit.php',
+    url: '/word/inline-edit',
     tooltip: 'Click to edit...',
     submitText: 'Save',
     cancelText: 'Cancel',
