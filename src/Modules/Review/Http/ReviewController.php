@@ -114,7 +114,7 @@ class ReviewController extends BaseController
 
         if ($testData === null) {
             PageLayoutHelper::renderPageStart('Request Error!', true);
-            ErrorHandler::die("do_test_header.php called with wrong parameters");
+            ErrorHandler::die("Review header called with invalid parameters");
             return;
         }
 
@@ -165,7 +165,7 @@ class ReviewController extends BaseController
         );
 
         if ($identifier[0] === '') {
-            ErrorHandler::die("do_test_table.php called with wrong parameters");
+            ErrorHandler::die("Review table called with invalid parameters");
             return;
         }
 
