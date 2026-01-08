@@ -54,7 +54,6 @@ All instances now use `htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 
 | File | Status |
 |------|--------|
 | `src/backend/Views/Feed/browse.php` | Fixed |
-| `src/backend/Views/Text/archived_form.php` | Fixed |
 | `src/Modules/Feed/Views/browse.php` | Fixed |
 | `src/Modules/Text/Views/archived_form.php` | Fixed |
 | `src/Modules/Tags/Views/tag_form.php` | Fixed |
@@ -551,10 +550,9 @@ Added default values to columns that previously had `NOT NULL` without defaults:
 Applied `JSON_HEX_TAG | JSON_HEX_AMP` flags to all `json_encode()` calls within `<script type="application/json">` tags across 30+ view files:
 
 **Files Updated:**
-- `src/backend/Views/Text/*.php` (7 files)
 - `src/backend/Views/Test/*.php` (1 file)
 - `src/backend/Views/Word/hover_save_result.php`
-- `src/Modules/Text/Views/*.php` (6 files)
+- `src/Modules/Text/Views/*.php` (13 files)
 - `src/Modules/Vocabulary/Views/*.php` (12 files)
 - `src/Modules/Review/Views/review_desktop.php`
 
