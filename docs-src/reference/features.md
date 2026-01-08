@@ -13,7 +13,7 @@
 * See your progress on the statistics page.
 * You may export the words and expressions and use them in Anki or other programs.
 * You may upload words and expressions into LWT (from LingQ or other sources, CSV/TSV) - they are immediately available in all texts!
-* **New since Version 1.5.0:** Create and edit an improved annotated text version (a [hyperliteral translation](http://learnanylanguage.wikia.com/wiki/Hyperliteral_translations) as [interlinear text](http://en.wikipedia.org/wiki/Interlinear_gloss)) for online or offline learning. Read more [here](info.html#il).
+* **New since Version 1.5.0:** Create and edit an improved annotated text version (a [hyperliteral translation](https://learnanylanguage.fandom.com/wiki/Hyperliteral_translations) as [interlinear text](http://en.wikipedia.org/wiki/Interlinear_gloss)) for online or offline learning. Read more in the [How to Use guide](/guide/how-to-use#create-edit-and-use-an-improved-annotated-text).
 
 ----
 

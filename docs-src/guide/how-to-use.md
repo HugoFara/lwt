@@ -28,7 +28,7 @@ It is recommended to use the "Language Settings Wizard" first. You only select y
 native (L1) and study (L2) languages, and let the wizard set all language settings
 that are marked in yellow. You can always adjust the settings afterwards.  
 
-**Explanations of the input fields** - please read also [this section](info.html#langsetup):  
+**Explanations of the input fields** - please read also the [Language Setup guide](/reference/language-setup):  
 
 The three [URLs](https://en.wikipedia.org/wiki/URL) are URLs to three web dictionaries (the second and third is optional). Use ``lwt_term`` as a placeholder for the search word in the URIs. If ``lwt_term`` is missing, the search word will be appended to the end. If the URI to query "travailler" in WordReference is "<http://www.wordreference.com/fren/travailler>", you may enter: "http&#58;&#47;&#47;www&period;wordreference&period;com&#47;fren&#47;lwt_term" or "<http://www.wordreference.com/fren/>". Another example: The URI to query "travailler" in sensagent is "<http://dictionary.sensagent.com/travailler/fr-en/>", so you enter in LWT "http&#58;&#47;&#47;dictionary&period;sensagent&period;com/lwt_term/fr-en/".  
 
@@ -47,46 +47,43 @@ A different third web dictionary is of course possible, but sentence translation
 
 ##### Specify Encoding
 
-**This feature has been abandonned, do not use it**!
+**This feature has been abandoned, do not use it**!
 
-If the searchword in the three URIs needs to be converted into a different encoding (standard is UTF-8), you could use ###encoding### as a placeholder. Normally you see this right away if terms show up wrongly in the web dictionary. Example: Linguee expects the searchword in ISO-8859-15, not in UTF-8, so you define it this way: "http&#58;&#47;&#47;www.linguee.de/search?direction=auto&query=###ISO-8859-15###". A list of encodings can be found [on the Supported Character Encodings PHP page](http://php.net/manual/en/mbstring.supported-encodings.php).
+Custom encoding support (`###encoding###` placeholder) has been removed. All dictionaries should now use UTF-8 encoding.
 
 ##### Glosbe API
 
-Glosbe closed there API, this feature does no longer work.
-
-One dictionary ([Glosbe](http://glosbe.com/)) has been closely integrated into LWT via the Glosbe API. To use this dictionary, input the "special" dictionary link "http&#58;&#47;&#47;localhost/lwt/glosbe\_api.php?from=...&dest=...&phrase=lwt\_term" with _from_: "L2 language code" (the language of your texts) and _dest_: "L1 language code" (e.g. mother tongue). To find the language codes, open [this page](http://glosbe.com/all-languages) to select the "from" (L2) language. On the next page, select the "L2 - L1" language pair. The URL of the next page shows the two language codes, here as an example "French - English": http&#58;&#47;&#47;glosbe.com/**fr**/**en**/. The "from" code is "fr", the "dest" code is "en". Using this dictionary makes the transfer of translation(s) from the Glosbe to LWT very easy: just click on the icon next to the translations to copy them into the LWT edit screen. I recommend to use the LWT-integrated Glosbe dictionary as the "Dictionary 1 URI". Note: I cannot guarantee that the Glosbe API and this special integration will work in the future! glosbe\_api.php is just an example how one can integrate a dictionary into LWT.  
+**The Glosbe API integration has been discontinued.** Glosbe closed their public API, so the `glosbe_api.php` integration no longer works. You can still use [Glosbe](https://glosbe.com/) as a regular dictionary by setting it as one of your dictionary URLs.  
 
 You don't know how and where to find a good web dictionary? Try these dictionary directories:
 
-* [http://www.alphadictionary.com/langdir.html](http://www.alphadictionary.com/langdir.html)
-* [http://dir.yahoo.com/reference/dictionaries/](http://dir.yahoo.com/reference/dictionaries/)
-* [http://www.dmoz.org/Reference/Dictionaries/](http://www.dmoz.org/Reference/Dictionaries/)
-* [http://www.lexicool.com/](http://www.lexicool.com/)
+* [Lexicool - Online dictionaries directory](https://www.lexicool.com/)
+* [Linguee](https://www.linguee.com/) - Dictionary and translation search
+* [WordReference](https://www.wordreference.com/) - Multilingual dictionary
 
-If you have found a suitable web dictionary, try to translate some words and look whether the word is part of the web address (URI/URL). If yes, replace the word with ### and put this in one of the URI fields within LWT.  
+If you have found a suitable web dictionary, try to translate some words and look whether the word is part of the web address (URI/URL). If yes, replace the word with `lwt_term` and put this in one of the URI fields within LWT.  
 
 The entry "Text Size" defines the relative font size of the text. This is great for Chinese, etc.  
 
 "Character Substitutions" is an optional list of "from=to" items with "|" as list separator. The "from" character is replaced by the "to" character ("to" may be also empty). So different kinds of apostrophes can unified or deleted.  
 
-"RegExp Split Sentences" is a list of characters that signify a sentence ending (ALWAYS together with a following space or newline!). The space can be omitted (and it is normally), if you set "Make each character a word" to Yes (see below). Whether you include here ":" and ";" - that's your decision. See also [this table](info.html#langsetup). Characters can be also defined in [Unicode](http://en.wikipedia.org/wiki/Unicode) form: "\\x{....}"; the Chinese/Japanese full stop "。" is then "\\x{3002}" (always without "). Please inform yourself about Unicode [here (general information)](http://en.wikipedia.org/wiki/Unicode) and [here (Table of Unicode characters)](http://unicode.coeurlumiere.com/).  
+"RegExp Split Sentences" is a list of characters that signify a sentence ending (ALWAYS together with a following space or newline!). The space can be omitted (and it is normally), if you set "Make each character a word" to Yes (see below). Whether you include here ":" and ";" - that's your decision. See also the [Language Setup guide](/reference/language-setup). Characters can be also defined in [Unicode](http://en.wikipedia.org/wiki/Unicode) form: "\\x{....}"; the Chinese/Japanese full stop "。" is then "\\x{3002}" (always without "). Please inform yourself about Unicode [here (general information)](http://en.wikipedia.org/wiki/Unicode) and [here (Table of Unicode characters)](https://unicode-table.com/).  
 
 "Exceptions Split Sentences" are a list of exceptions that are NOT to be treated as sentence endings with "|" as list separator. \[A-Z\] is a character range. If you don't want to split sentences after Mr. / Dr. / A. to Z. / Vd. / Vds. / U.S.A., then you should specify these here: "Mr.|Dr.|\[A-Z\].|Vd.|Vds.|U.S.A." (without ").  
 
-"RegExp Word Characters" is a list of characters OR character ranges "x-y" that defines all characters in a word, e.g. English: "a-zA-Z", German: "a-zA-ZaöüÄÖÜß", Chinese: 一-龥. See also [this table](info.html#langsetup). Characters can be also defined in [Unicode](http://en.wikipedia.org/wiki/Unicode) form: "\\x{....}"; the Chinese/Japanese character "one" "一" is then "\\x{4E00}" (always without "). So the above specification for the range of characters in Chinese "一-龥" can also be specified: "\\x{4E00}-\\x{9FA5}".
+"RegExp Word Characters" is a list of characters OR character ranges "x-y" that defines all characters in a word, e.g. English: "a-zA-Z", German: "a-zA-ZaöüÄÖÜß", Chinese: 一-龥. See also the [Language Setup guide](/reference/language-setup). Characters can be also defined in [Unicode](http://en.wikipedia.org/wiki/Unicode) form: "\\x{....}"; the Chinese/Japanese character "one" "一" is then "\\x{4E00}" (always without "). So the above specification for the range of characters in Chinese "一-龥" can also be specified: "\\x{4E00}-\\x{9FA5}".
 
 * The value "mecab" is special as it will use MeCab to process japanese. You can ignore subsequent fields.
 
-"Make each character a word" is a special option for Chinese, etc. This makes EVERY character a single word (normally words are split by any non-word character or a space). See also [this table](info.html#langsetup).  
+"Make each character a word" is a special option for Chinese, etc. This makes EVERY character a single word (normally words are split by any non-word character or a space). See also the [Language Setup guide](/reference/language-setup).  
 
-"Remove spaces" is another option for Chinese, etc. It removes all spaces from the text (and the example sentences). See also [this table](info.html#langsetup).  
+"Remove spaces" is another option for Chinese, etc. It removes all spaces from the text (and the example sentences). See also the [Language Setup guide](/reference/language-setup).  
 
 "Right-To-Left Script" must be set to "Yes" if the language/script is written from right to left, like Arabic, Hebrew, Farsi, Urdu, etc.  
 
-"Export Template". The export template controls "Flexible" Term Exports for the terms of that language. It consists of a string of characters. Some parts of this string are placeholders that are replaced by the actual term data, [see this table](export_template.html). For each term (word or expression), that has been selected for export, the placeholders of the export template will be replaced by the term data and the string will be written to the export file. If the export template is empty, nothing will be exported.
+"Export Template". The export template controls "Flexible" Term Exports for the terms of that language. It consists of a string of characters. Some parts of this string are placeholders that are replaced by the actual term data, [see the Export Templates reference](/reference/export-templates). For each term (word or expression), that has been selected for export, the placeholders of the export template will be replaced by the term data and the string will be written to the export file. If the export template is empty, nothing will be exported.
 
-To understand all these options, please study also [this](info.html#langsetup), look at the examples and play around with different settings and different texts.  
+To understand all these options, please study also the [Language Setup guide](/reference/language-setup), look at the examples and play around with different settings and different texts.  
 
 ![Image](/assets/images/language_edition.jpg)  
 
@@ -146,7 +143,7 @@ You can open the article and, if available, the audio in a new window.
 ### Manage Feeds
 
 Multi Actions for marked newsfeeds: You can update feeds, unset unloadable articles
-(see [Newsfeed Import](info.html#Newsfeed%20Import)), delete all articles or delete feeds.  
+(see [Newsfeed Import](#newsfeed-import) above), delete all articles or delete feeds.  
 Actions: You can edit, update, delete a feed or follow the link to the newsfeed.  
 
 ![Image](/assets/images/38.jpg)  
@@ -158,8 +155,8 @@ Explanations of the input fields
 * Language: select your language, it can be changed later.
 * Name: the name is limited to 40 characters, this field must not be empty.
 * Newsfeed url: URL of your RSS/Atom-Feed, this field must not be empty.
-* Article Section: [xpath expression](http://www.w3.org/TR/xpath20/) (i.e.: //div\[@id="content-to-read"\]/p), the [feed wizard](info.html#feed_wizard) can be used to get the right sections, this field must not be empty.
-* Filter Tags: [xpath expression](http://www.w3.org/TR/xpath20/), the [feed wizard](info.html#feed_wizard) removes sections to include in the text.
+* Article Section: [xpath expression](http://www.w3.org/TR/xpath20/) (i.e.: //div\[@id="content-to-read"\]/p), the [Feed Wizard](#feed-wizard) can be used to get the right sections, this field must not be empty.
+* Filter Tags: [xpath expression](http://www.w3.org/TR/xpath20/), the [Feed Wizard](#feed-wizard) removes sections to include in the text.
 * Options:
   * Edit Text: if this is checked, you can edit your articles before saving.
   * Auto Update Interval: your feed will be updated automatically, when you enter MY FEEDS from the main menu.
@@ -192,11 +189,11 @@ Here you can edit or set up a new newsfeed in 4 steps.
 
     ![Image](/assets/images/40.jpg)  
 
-4. The settings are explained in the [New/Edit Feeds](info.html#New%2FEdit%20Feeds).  
+4. The settings are explained in [New/Edit Feeds](#newedit-feeds) above.  
 
 ## Read a Text
 
-This is your "working area": Reading (and listening to) a text, saving/editing words and expressions, looking up words, expressions, sentences in external dictionaries or Google Translate. To create an expression, click on the first word. You see "Exp: 2..xx 3..yy 4..zz ...". Just click on the number of words (2..9) of the desired expression you want to save. The dictionary links for multi word expressions are always in the edit frame! You can also use the Keyboard in the text frame, see [Key Bindings](info.html#keybind). Double clicking on a word sets the audio position approximately to the text position, if an audio was defined. The other audio controls are self-explanatory: automatic repeat, rewind and move forward n seconds, etc.).  
+This is your "working area": Reading (and listening to) a text, saving/editing words and expressions, looking up words, expressions, sentences in external dictionaries or Google Translate. To create an expression, click on the first word. You see "Exp: 2..xx 3..yy 4..zz ...". Just click on the number of words (2..9) of the desired expression you want to save. The dictionary links for multi word expressions are always in the edit frame! You can also use the Keyboard in the text frame, see [Keyboard Shortcuts](/reference/keyboard-shortcuts). Double clicking on a word sets the audio position approximately to the text position, if an audio was defined. The other audio controls are self-explanatory: automatic repeat, rewind and move forward n seconds, etc.).  
 
 ![Image](/assets/images/06.jpg)  
 
@@ -216,7 +213,7 @@ With the checkbox \[Show All\] you can switch the display of text:
 
 ## Review terms
 
-Tests are only possible if a term has a translation. Terms with status "Ignored" and "Well Known" are never tested, and terms with a positive or zero score are not tested today. In summary, the term score must fall below zero to trigger the test. See also [Term scores](info.html#termscores). Terms that are due today are marked with a red bullet in the term table. Terms that are due tomorrow are marked with a yellow bullet in the term table.  
+Tests are only possible if a term has a translation. Terms with status "Ignored" and "Well Known" are never tested, and terms with a positive or zero score are not tested today. In summary, the term score must fall below zero to trigger the test. See also [Term Scores](/reference/term-scores). Terms that are due today are marked with a red bullet in the term table. Terms that are due tomorrow are marked with a yellow bullet in the term table.  
 
 During a test, a status display (at the bottom of the test frame) shows you the elapsed time "mm:ss", a small bar graph, and the total, not yet tested, wrong and correct terms in this test.
 
@@ -224,19 +221,19 @@ In the following, L1 denotes you mother tongue (= translations), and L2 the lang
 
 ### Review terms in a text (L2 -> L1)
 
-This is Test #1 or #4: L2 -> L1 (recognition) - to train your ability to recognize a L2 term. You may test within sentence context (Button "..\[L2\].."), or just the term (Button "\[L2\]"). You can also use the Keyboard in the test frame, see [Key Bindings](info.html#keybind).  
+This is Test #1 or #4: L2 -> L1 (recognition) - to train your ability to recognize a L2 term. You may test within sentence context (Button "..\[L2\].."), or just the term (Button "\[L2\]"). You can also use the Keyboard in the test frame, see [Keyboard Shortcuts](/reference/keyboard-shortcuts).  
 
 ![Image](/assets/images/07.jpg)  
 
 ### Review terms in a text (L1 -> L2)
 
-This is Test #2 or #5: L1 -> L2 (recall) - to train your ability to produce a term from L1. You may test within sentence context (Button "..\[L1\].."), or just the term (Button "\[L1\]"). You can also use the Keyboard in the test frame, see [Key Bindings](info.html#keybind).  
+This is Test #2 or #5: L1 -> L2 (recall) - to train your ability to produce a term from L1. You may test within sentence context (Button "..\[L1\].."), or just the term (Button "\[L1\]"). You can also use the Keyboard in the test frame, see [Keyboard Shortcuts](/reference/keyboard-shortcuts).  
 
 ![Image](/assets/images/11.jpg)  
 
 ### Review terms in a text (••• -> L2)
 
-This is test #3: ••• -> L2 (recall) - to train your ability to produce a term only from the sentence context (Button "..\[••\].."). If you hover over "\[•••\]", a tooltip displays the translation of the term. You can also use the Keyboard in the test frame, see [Key Bindings](info.html#keybind).  
+This is test #3: ••• -> L2 (recall) - to train your ability to produce a term only from the sentence context (Button "..\[••\].."). If you hover over "\[•••\]", a tooltip displays the translation of the term. You can also use the Keyboard in the test frame, see [Keyboard Shortcuts](/reference/keyboard-shortcuts).  
 
 ![Image](/assets/images/12.jpg)  
 
@@ -260,7 +257,7 @@ Chinese Text with annotation (only Romanization/Pinyin):
 
 ## Create, edit, and use an _Improved Annotated Text_
 
-**Motivation:** Annotated texts (as [interlinear text](http://en.wikipedia.org/wiki/Interlinear_gloss)) have been used for language learning for a long time. One example are the word-by-word translations in [Assimil](http://en.assimil.com/) courses. The German [V. F. Birkenbihl](http://web.archive.org/web/20070223080453/http://195.149.74.241/BIRKENBIHL/PDF/MethodEnglish.pdf) proposes the creation of interlinear word-by-word or [hyperliteral](http://learnanylanguage.wikia.com/wiki/Hyperliteral_translations) translations (calling this creation "decoding") in foreign language learning. Learning Latin or Ancient Greek via interlinear texts is quite old as you can see in "[014 Latin Interlinear Texts - a forgotten route to language learning.avi](https://www.youtube.com/watch?v=XnEKnezLXJg)".  
+**Motivation:** Annotated texts (as [interlinear text](http://en.wikipedia.org/wiki/Interlinear_gloss)) have been used for language learning for a long time. One example are the word-by-word translations in [Assimil](http://en.assimil.com/) courses. The German [V. F. Birkenbihl](http://web.archive.org/web/20070223080453/http://195.149.74.241/BIRKENBIHL/PDF/MethodEnglish.pdf) proposes the creation of interlinear word-by-word or [hyperliteral](https://learnanylanguage.fandom.com/wiki/Hyperliteral_translations) translations (calling this creation "decoding") in foreign language learning. Learning Latin or Ancient Greek via interlinear texts is quite old as you can see in "[014 Latin Interlinear Texts - a forgotten route to language learning.avi](https://www.youtube.com/watch?v=XnEKnezLXJg)".  
 
 LWT's old "Print Screen" offers annotations, but it displays ALL translations of a term. The _Improved Annotated Text_ feature enables you to select the best translation for every word in the text. As a result, you create an L1 word-by-word translation that is displayed above the L2 text. This interlinear text is better suited for language study, especially for beginners.  
 

@@ -24,7 +24,7 @@
 * Automatically translate terms with LibreTranslate
 * Automatic text to speech
 * Automatic spelling for Japanese with MeCab
-* Automatically import texts from RSS feeds (for more info see: [Newsfeed Import](info.html#Newsfeed%20Import))
+* Automatically import texts from RSS feeds (for more info see: [Newsfeed Import](/guide/how-to-use#newsfeed-import))
 * Longer (> 9 characters) expressions can now be saved (up to 250 characters)
 * Improved Search/Query for Words/Texts
 * Selecting terms according to a text tag

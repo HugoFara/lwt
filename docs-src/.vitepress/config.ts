@@ -11,14 +11,10 @@ export default defineConfig({
   // Exclude API docs from processing
   srcExclude: ['**/api/**'],
 
-  // Ignore dead links for localhost URLs and old info.html references
+  // Ignore dead links for localhost URLs (used in examples) and changelog references
   ignoreDeadLinks: [
     /^http:\/\/localhost/,
-    /\.\/info(#.*)?$/,
-    /\.\/index$/,
-    /\.\/export_template$/,
-    /\.\/CHANGELOG$/,
-    /\.\.\/\.\.\/CHANGELOG$/
+    /CHANGELOG$/
   ],
 
   head: [
@@ -69,7 +65,6 @@ export default defineConfig({
         {
           text: 'Troubleshooting',
           items: [
-            { text: 'iPad/Tablet Setup', link: '/guide/troubleshooting/ipad' },
             { text: 'WordPress Integration', link: '/guide/troubleshooting/wordpress' }
           ]
         }

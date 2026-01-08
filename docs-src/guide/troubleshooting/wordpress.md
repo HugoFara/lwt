@@ -1,6 +1,6 @@
 # Wordpress Integration
 
-* **IMPORTANT: Please read this [THIS WARNING](info.html#mue) first!**
+* **IMPORTANT: The WordPress feature is a legacy function no longer maintained. Use at your own risk!**
 
 lang-learn-guy:
 > I CANNOT give any support for this feature, NOR can I help you with any WordPress problems!

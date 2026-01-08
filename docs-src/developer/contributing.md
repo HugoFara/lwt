@@ -152,8 +152,10 @@ The PHP codebase structure:
 
 * `index.php` - Front controller entry point
 * `src/backend/Controllers/` - MVC Controllers
-* `src/backend/Core/` - Core modules (database, utilities, AJAX handlers)
-* `src/backend/Legacy/` - Legacy PHP files being migrated
+* `src/backend/Services/` - Business logic services
+* `src/backend/Views/` - View templates
+* `src/backend/Core/` - Core modules (database, utilities)
+* `src/backend/Api/` - REST API handlers
 
 ### Testing your Code
 
@@ -240,16 +242,18 @@ When adding new features or fixing bugs that affect user-facing functionality, c
 
 ## Improving Documentation
 
-To regenerate all PHP and Markdown documentation, use ``composer doc``.
-For the JS documentation, you need NPM. Use `./node_modules/.bin/jsdoc -c jsdoc.json`.
+To regenerate all documentation (VitePress, JSDoc, phpDoc), use ``composer doc``.
 
 ### General Documentation
 
-The documentation is split across Markdown (``.md``) files in ``docs/``.
-Then, those files are requested by ``info.php``.
-The final version is ``info.html``, which contains all files.
+The documentation source files are in `docs-src/` and use [VitePress](https://vitepress.dev/) for static site generation. Markdown files are organized by topic:
 
-To regenerate ``info.hml``, run ``composer info.html``.
+* `docs-src/guide/` - User guides and tutorials
+* `docs-src/reference/` - Reference documentation
+* `docs-src/developer/` - Developer documentation
+* `docs-src/legal/` - License information
+
+The built documentation is output to `docs/`.
 
 ### PHP Code Documentation
 

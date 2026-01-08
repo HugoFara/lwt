@@ -1,7 +1,5 @@
 # LWT Installation
 
-* *Last update*: February 20, 2023
-
 Let's install the LWT server. LWT uses a client-server architecture, which means it
 will run in your browser as a classical website. You can use any computer as the
 server, here are some ways to do it.
@@ -25,7 +23,7 @@ Two main softwares can be used to set up a local server on your computer: XAMPP 
 
 1. Install XAMPP
    1. Go to <https://www.apachefriends.org/download.html>
-   2. Download "XAMPP for **Windows**". PHP starting from **8.0** is supported.
+   2. Download "XAMPP for **Windows**". PHP **8.1 or higher** is required.
    3. Open your Downloads folder and run the downloaded "xampp-windows-x64-xxx-installer.exe". Please install the components Apache, MySQL, PHP and phpMyAdmin into the folder C:\xampp.
 
 2. Get the [latest GitHub release](https://github.com/HugoFara/lwt/releases), unzip it.
@@ -133,8 +131,8 @@ The following instruction were tested on Raspbian Stretch.
       Note: you should be able to freely switch between MySQL and MariaDB.
 
    2. Check if everything is okay:
-      * ``php -v`` should show a PHP version equal or above to 8.0.0.
-      * <http://locahlhost> should display a nice web page.
+      * ``php -v`` should show a PHP version equal or above to 8.1.0.
+      * <http://localhost> should display a nice web page.
       * ``mysql -V`` should work.
 
    3. Enable the extensions
@@ -156,7 +154,7 @@ The following instruction were tested on Raspbian Stretch.
       QUIT;
       ```
 
-   5. (Optionnal) Check MySQL access
+   5. (Optional) Check MySQL access
 
        ```bash
        mysql -u root -p
@@ -240,6 +238,6 @@ Already have LWT installed? See the [Upgrading Guide](./upgrade.md) for detailed
 
 Need more help? You can contact us through [GitHub](https://github.com/HugoFara/lwt/issues)!
 
-You can also consult the troubleshooting section of the documentation at <https://hugofara.github.io/lwt/docs/info.html#faq>.
+You can also consult the [FAQ](/guide/faq) section of the documentation.
 
 Please note that *PHP below version 8.1 is no longer supported*.

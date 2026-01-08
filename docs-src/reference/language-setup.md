@@ -1,10 +1,10 @@
 # Language Setup
 
-* This section shows some language setups ("RegExp Split Sentences", "RegExp Word Characters", "Make each character a word", "Remove spaces") for different languages. They are only recommendations, and you may change them according to your needs (and texts). See also [here](info.html#go1).  
+* This section shows some language setups ("RegExp Split Sentences", "RegExp Word Characters", "Make each character a word", "Remove spaces") for different languages. They are only recommendations, and you may change them according to your needs (and texts). See also the [New/Edit Language section](/guide/how-to-use#newedit-language) in the user guide.  
 
 * If you are unsure, try the "Language Settings Wizard" first. Later you can adjust the settings.  
 
-* Please inform yourself about Unicode [here (general information)](http://en.wikipedia.org/wiki/Unicode) and [here (Table of Unicode characters)](http://unicode.coeurlumiere.com/) and about the characters that occur in the language you learn!  
+* Please inform yourself about Unicode [here (general information)](http://en.wikipedia.org/wiki/Unicode) and [here (Table of Unicode characters)](https://unicode-table.com/) and about the characters that occur in the language you learn!  
 
 | **Language**                                                                     | **RegExp Split Sentences** | **RegExp Word Characters** | **Make each character a word** | **Remove spaces** |
 |----------------------------------------------------------------------------------|----------------------------|----------------------------|---------------------------------|---------------|

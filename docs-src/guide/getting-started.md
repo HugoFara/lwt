@@ -54,7 +54,7 @@ If you spot any problem, please post any [issue on GitHub](https://github.com/Hu
 While work is not yet finished, I also aim to expand LWT:
 
 * Better UI: custom themes and better default appearance
-* Better UX: as of today (2022), 60 % of the web is done through mobile devices. It means less content at once and more intuitive behaviors.
+* Better UX: the majority of web browsing is now done through mobile devices. It means less content at once and more intuitive behaviors.
 * Sounds: language learning is not just language reading.
   * Text-to-speech features.
   * Motivational sounds when testing terms to makes things more lively.

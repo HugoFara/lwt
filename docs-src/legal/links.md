@@ -2,11 +2,11 @@
 
 * [**Original Project Page** @ Sourceforge](http://sourceforge.net/projects/learning-with-texts/)
 * **Download Page**:
-  * [Lastest release @ GitHub](https://github.com/HugoFara/lwt/releases/latest)
-  * [Lastest pushed @ GitHub](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip)
-  * [Official version @ Sourceforge](http://sourceforge.net/projects/learning-with-texts/files/)
+  * [Latest release @ GitHub](https://github.com/HugoFara/lwt/releases/latest)
+  * [Latest development version @ GitHub](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip)
+  * [Official version @ Sourceforge](http://sourceforge.net/projects/learning-with-texts/files/) (original, unmaintained)
 * [**Community Maintained Version** @ GitHub](https://github.com/HugoFara/lwt)
-* **Documentation**: try either the [local link](index.html) or the [absolute link](https://hugofara.github.io/lwt/index.html).
+* **Documentation**: try either the [local link](/) or the [online documentation](https://hugofara.github.io/lwt/docs/).
 
 ## LWT Online Demo - *try it out:*
 
