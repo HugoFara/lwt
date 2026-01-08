@@ -249,6 +249,8 @@ export function homeData(): HomeData {
       if (this.shouldUpdate(phpVersion, phpMinVersion)) {
         this.warnings.phpOutdated.phpVersion = phpVersion;
         this.warnings.phpOutdated.minVersion = phpMinVersion;
+        this.warnings.phpOutdated.message =
+          `Your PHP version (${phpVersion}) is outdated. Please upgrade to at least ${phpMinVersion}.`;
         this.warnings.phpOutdated.visible = true;
       }
     },
@@ -262,6 +264,8 @@ export function homeData(): HomeData {
             this.warnings.updateAvailable.currentVersion = lwtVersion;
             this.warnings.updateAvailable.latestVersion = latestVersion;
             this.warnings.updateAvailable.downloadUrl = `https://github.com/HugoFara/lwt/releases/tag/${latestVersion}`;
+            this.warnings.updateAvailable.message =
+              `A new version (${latestVersion}) is available. You are currently using ${lwtVersion}.`;
             this.warnings.updateAvailable.visible = true;
           }
         })
