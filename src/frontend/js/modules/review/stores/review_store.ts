@@ -149,15 +149,23 @@ function calculateNewStatus(currentStatus: number, change: number): number {
 }
 
 /**
+ * Initial values that can be set before store creation.
+ */
+interface ReviewStoreInitialValues {
+  reviewType?: number;
+  isTableMode?: boolean;
+}
+
+/**
  * Create the review store data object.
  */
-function createReviewStore(): ReviewStoreState {
+function createReviewStore(initialValues?: ReviewStoreInitialValues): ReviewStoreState {
   return {
     // Review configuration
     reviewKey: '',
     selection: '',
-    reviewType: 1,
-    isTableMode: false,
+    reviewType: initialValues?.reviewType ?? 1,
+    isTableMode: initialValues?.isTableMode ?? false,
     wordMode: false,
     langId: 0,
     wordRegex: '',
@@ -225,7 +233,9 @@ function createReviewStore(): ReviewStoreState {
 
       // Load read aloud preference from localStorage
       const savedReadAloud = localStorage.getItem('lwt-review-read-aloud');
-      this.readAloudEnabled = savedReadAloud === 'true';
+      if (savedReadAloud !== null) {
+        this.readAloudEnabled = savedReadAloud === 'true';
+      }
 
       this.isInitialized = true;
       this.startTimer();
@@ -489,9 +499,11 @@ function createReviewStore(): ReviewStoreState {
 
 /**
  * Initialize the review store as an Alpine.js store.
+ *
+ * @param initialValues Optional initial values to set before Alpine renders
  */
-export function initReviewStore(): void {
-  Alpine.store('review', createReviewStore());
+export function initReviewStore(initialValues?: ReviewStoreInitialValues): void {
+  Alpine.store('review', createReviewStore(initialValues));
 }
 
 /**
@@ -501,7 +513,18 @@ export function getReviewStore(): ReviewStoreState {
   return Alpine.store('review') as ReviewStoreState;
 }
 
-// Register the store immediately
+/**
+ * Check if the review store has been initialized.
+ */
+export function isReviewStoreInitialized(): boolean {
+  try {
+    return Alpine.store('review') !== undefined;
+  } catch {
+    return false;
+  }
+}
+
+// Register the store with defaults (will be re-initialized with config in initReviewApp)
 initReviewStore();
 
 // Expose for global access

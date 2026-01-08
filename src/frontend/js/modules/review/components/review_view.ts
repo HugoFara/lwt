@@ -10,7 +10,7 @@
 
 import Alpine from 'alpinejs';
 import type { ReviewStoreState, ReviewConfig, LangSettings } from '../stores/review_store';
-import { getReviewStore } from '../stores/review_store';
+import { getReviewStore, initReviewStore } from '../stores/review_store';
 import { ReviewApi, type TableReviewWord } from '@modules/review/api/review_api';
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { saveSetting } from '@shared/utils/ajax_utilities';
@@ -568,10 +568,12 @@ export function initReviewApp(): void {
       return;
     }
 
-    // Pre-set critical store values before Alpine renders to prevent visual glitches
-    const store = getReviewStore();
-    store.reviewType = config.reviewType;
-    store.isTableMode = config.isTableMode;
+    // Re-initialize store with correct initial values to prevent visual glitches
+    // (CSP build prohibits direct property assignment, so we recreate the store)
+    initReviewStore({
+      reviewType: config.reviewType,
+      isTableMode: config.isTableMode
+    });
 
     // Register the Alpine components
     registerReviewAppComponent(config);
@@ -664,7 +666,7 @@ function registerReviewAppComponent(config: ReviewConfig): void {
     },
 
     saveReadAloudSetting() {
-      localStorage.setItem('lwt-test-read-aloud', String(this.store.readAloudEnabled));
+      localStorage.setItem('lwt-review-read-aloud', String(this.store.readAloudEnabled));
     },
 
     handleKeydown(e: KeyboardEvent) {
