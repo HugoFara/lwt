@@ -8,7 +8,7 @@ use Lwt\Modules\Review\Application\UseCases\SubmitAnswer;
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\ReviewSession;
 use Lwt\Modules\Review\Domain\ReviewConfiguration;
-use Lwt\Modules\Review\Domain\TestWord;
+use Lwt\Modules\Review\Domain\ReviewWord;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -175,7 +175,7 @@ class ReviewSessionUseCaseTest extends TestCase
         // Use test type 2 which doesn't call TagsFacade::getWordTagList
         $config = ReviewConfiguration::fromLanguage(1, ReviewConfiguration::TYPE_TRANSLATION_TO_TERM);
 
-        $testWord = $this->createTestWord(
+        $testWord = $this->createReviewWord(
             id: 100,
             text: 'hello',
             translation: 'hola',
@@ -234,7 +234,7 @@ class ReviewSessionUseCaseTest extends TestCase
     {
         $config = ReviewConfiguration::fromLanguage(1, ReviewConfiguration::TYPE_TRANSLATION_TO_TERM);
 
-        $testWord = $this->createTestWord(
+        $testWord = $this->createReviewWord(
             id: 100,
             text: 'book',
             translation: 'libro',
@@ -262,7 +262,7 @@ class ReviewSessionUseCaseTest extends TestCase
     {
         $config = ReviewConfiguration::fromLanguage(1, ReviewConfiguration::TYPE_SENTENCE_TO_TERM);
 
-        $testWord = $this->createTestWord(
+        $testWord = $this->createReviewWord(
             id: 100,
             text: 'running',
             translation: 'corriendo',
@@ -289,7 +289,7 @@ class ReviewSessionUseCaseTest extends TestCase
         // Use test type 2 (translation to term) in word mode to avoid TagsFacade call
         $config = ReviewConfiguration::fromLanguage(1, ReviewConfiguration::TYPE_TRANSLATION_TO_TERM, true);
 
-        $testWord = $this->createTestWord(
+        $testWord = $this->createReviewWord(
             id: 100,
             text: 'word',
             translation: 'palabra',
@@ -575,17 +575,17 @@ class ReviewSessionUseCaseTest extends TestCase
     // ===================================
 
     /**
-     * Create a mock TestWord instance.
+     * Create a mock ReviewWord instance.
      */
-    private function createTestWord(
+    private function createReviewWord(
         int $id,
         string $text,
         string $translation,
         ?string $sentence = null,
         int $status = 2,
         int $languageId = 1
-    ): TestWord {
-        return new TestWord(
+    ): ReviewWord {
+        return new ReviewWord(
             id: $id,
             text: $text,
             textLowercase: strtolower($text),

@@ -158,7 +158,7 @@ class ReviewControllerTest extends TestCase
 
         $controller = $this->createController();
 
-        $this->assertTrue(method_exists($controller, 'tableTest'));
+        $this->assertTrue(method_exists($controller, 'tableReview'));
     }
 
     // ===== BaseController inheritance tests =====
@@ -539,7 +539,7 @@ class ReviewControllerTest extends TestCase
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('getTestProperty');
+        $method = $reflection->getMethod('getReviewProperty');
         $method->setAccessible(true);
 
         $result = $method->invoke($controller);
@@ -559,7 +559,7 @@ class ReviewControllerTest extends TestCase
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('getTestProperty');
+        $method = $reflection->getMethod('getReviewProperty');
         $method->setAccessible(true);
 
         $result = $method->invoke($controller);
@@ -579,7 +579,7 @@ class ReviewControllerTest extends TestCase
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('getTestProperty');
+        $method = $reflection->getMethod('getReviewProperty');
         $method->setAccessible(true);
 
         $result = $method->invoke($controller);
@@ -597,7 +597,7 @@ class ReviewControllerTest extends TestCase
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('getTestProperty');
+        $method = $reflection->getMethod('getReviewProperty');
         $method->setAccessible(true);
 
         $result = $method->invoke($controller);
