@@ -169,8 +169,8 @@ describe('review_ajax.ts', () => {
       `;
     });
 
-    it('calls doReviewFinished when term_id is 0', () => {
-      reviewQueryHandler(
+    it('calls doReviewFinished when term_id is 0', async () => {
+      await reviewQueryHandler(
         { term_id: 0, solution: '', group: '', term_text: '' },
         10,
         'review_key',
@@ -181,8 +181,8 @@ describe('review_ajax.ts', () => {
       expect(termReview.style.display).toBe('none');
     });
 
-    it('inserts new word when term_id is not 0', () => {
-      reviewQueryHandler(
+    it('inserts new word when term_id is not 0', async () => {
+      await reviewQueryHandler(
         { term_id: 123, solution: 'sol', group: '<span>Group</span>', term_text: 'word' },
         10,
         'review_key',
@@ -192,11 +192,11 @@ describe('review_ajax.ts', () => {
       expect(document.getElementById('term-review')?.innerHTML).toContain('Group');
     });
 
-    it('prepares word reading when utterance-allowed is checked', () => {
+    it('prepares word reading when utterance-allowed is checked', async () => {
       const checkbox = document.getElementById('utterance-allowed') as HTMLInputElement;
       checkbox.checked = true;
 
-      reviewQueryHandler(
+      await reviewQueryHandler(
         { term_id: 123, solution: 'sol', group: '<span class="word">Word</span>', term_text: 'word' },
         10,
         'review_key',
