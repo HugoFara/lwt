@@ -15,8 +15,6 @@
 
 namespace Lwt\Core;
 
-use Lwt\Core\Utils\ErrorHandler;
-
 /**
  * Application information and version utilities.
  *
@@ -60,11 +58,15 @@ class ApplicationInfo
         $v = \preg_replace('/-\w+\d*/', '', $v);
         $pos = \strpos($v, ' ', 0);
         if ($pos === false) {
-            ErrorHandler::die('Wrong version: ' . $v);
+            throw new \InvalidArgumentException(
+                "Invalid version format '$v': expected 'X.Y.Z (date)'"
+            );
         }
         $vn = \preg_split("/[.]/", \substr($v, 0, $pos));
         if (\count($vn) < 3) {
-            ErrorHandler::die('Wrong version: ' . $v);
+            throw new \InvalidArgumentException(
+                "Invalid version format '$v': expected at least 3 version components (X.Y.Z)"
+            );
         }
         for ($i = 0; $i < 3; $i++) {
             $r .= \substr('000' . $vn[$i], -3);
