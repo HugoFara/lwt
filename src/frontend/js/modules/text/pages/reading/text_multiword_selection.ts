@@ -9,7 +9,6 @@
  */
 
 import Alpine from 'alpinejs';
-import { loadModalFrame } from '@modules/text/pages/reading/frame_management';
 import type { MultiWordFormStoreState } from '@modules/vocabulary/stores/multi_word_form_store';
 import { getTextId as getTextIdFromConfig } from '@modules/text/stores/text_config';
 
@@ -178,13 +177,13 @@ export function handleTextSelection(container: HTMLElement): void {
   if (store && typeof store.loadForEdit === 'function') {
     store.loadForEdit(textId, position, text, selectedWords.length);
   } else {
-    // Fallback to frame-based editing
+    // Fallback to page navigation
     const params = new URLSearchParams({
       tid: String(textId),
       ord: String(position),
       txt: text
     });
-    loadModalFrame('/word/edit?' + params.toString());
+    window.location.href = '/word/edit?' + params.toString();
   }
 
   clearSelection();

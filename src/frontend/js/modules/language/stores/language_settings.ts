@@ -6,7 +6,7 @@
  * @since   2.10.0-fork Extracted from legacy/pgm.ts
  */
 
-import { loadModalFrame } from '@modules/text/pages/reading/frame_management';
+import { apiPut } from '@shared/api/client';
 
 /**
  * Statistics for a text showing word status counts.
@@ -166,14 +166,23 @@ export async function resetAll(url: string): Promise<void> {
 }
 
 /**
- * Prepare a window to make all words from a text well-known
+ * Mark all unknown words in a text as well-known.
  *
  * @param t Text ID
  */
-export function iknowall(t: string | number): void {
+export async function iknowall(t: string | number): Promise<void> {
   const answer = confirm('Are you sure?');
-  if (answer) {
-    loadModalFrame('/word/set-all-status?text=' + t);
+  if (!answer) return;
+
+  const textId = typeof t === 'string' ? parseInt(t, 10) : t;
+
+  try {
+    await apiPut(`/texts/${textId}/mark-all-wellknown`, {});
+    // Reload page to show updated word statuses
+    window.location.reload();
+  } catch (error) {
+    console.error('Failed to mark all words as well-known:', error);
+    alert('Failed to mark words. Please try again.');
   }
 }
 

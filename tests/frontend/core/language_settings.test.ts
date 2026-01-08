@@ -3,12 +3,9 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 
-// Use vi.hoisted to ensure mock function is available during hoisting
-const mockLoadModalFrame = vi.hoisted(() => vi.fn());
-
 // Mock dependencies
-vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
-  loadModalFrame: mockLoadModalFrame
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
+  apiPut: vi.fn().mockResolvedValue({ data: { count: 5 } })
 }));
 
 import {
@@ -19,6 +16,7 @@ import {
   iknowall,
   validateTablePrefix
 } from '../../../src/frontend/js/modules/language/stores/language_settings';
+import { apiPut } from '../../../src/frontend/js/shared/api/client';
 
 describe('core/language_settings.ts', () => {
   const originalLocation = window.location;
@@ -230,44 +228,66 @@ describe('core/language_settings.ts', () => {
   // ===========================================================================
 
   describe('iknowall', () => {
-    it('shows confirmation dialog', () => {
+    let reloadSpy: Mock;
+
+    beforeEach(() => {
+      reloadSpy = vi.fn();
+      Object.defineProperty(window, 'location', {
+        value: {
+          ...window.location,
+          reload: reloadSpy
+        },
+        writable: true
+      });
+    });
+
+    it('shows confirmation dialog', async () => {
       const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-      iknowall(1);
+      await iknowall(1);
 
       expect(confirmSpy).toHaveBeenCalledWith('Are you sure?');
     });
 
-    it('calls loadModalFrame when confirmed', () => {
+    it('calls API when confirmed', async () => {
       vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-      iknowall(1);
+      await iknowall(1);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith('/word/set-all-status?text=1');
+      expect(apiPut).toHaveBeenCalledWith('/texts/1/mark-all-wellknown', {});
     });
 
-    it('does not call loadModalFrame when cancelled', () => {
+    it('does not call API when cancelled', async () => {
       vi.spyOn(window, 'confirm').mockReturnValue(false);
+      vi.mocked(apiPut).mockClear();
 
-      iknowall(1);
+      await iknowall(1);
 
-      expect(mockLoadModalFrame).not.toHaveBeenCalled();
+      expect(apiPut).not.toHaveBeenCalled();
     });
 
-    it('handles string text ID', () => {
+    it('handles string text ID', async () => {
       vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-      iknowall('42');
+      await iknowall('42');
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith('/word/set-all-status?text=42');
+      expect(apiPut).toHaveBeenCalledWith('/texts/42/mark-all-wellknown', {});
     });
 
-    it('handles numeric text ID', () => {
+    it('handles numeric text ID', async () => {
       vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-      iknowall(123);
+      await iknowall(123);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith('/word/set-all-status?text=123');
+      expect(apiPut).toHaveBeenCalledWith('/texts/123/mark-all-wellknown', {});
+    });
+
+    it('reloads page after successful API call', async () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      await iknowall(1);
+
+      expect(reloadSpy).toHaveBeenCalled();
     });
   });
 
@@ -485,12 +505,12 @@ describe('core/language_settings.ts', () => {
       expect(validateTablePrefix(tooLong)).toBe(false);
     });
 
-    it('iknowall handles zero text ID', () => {
+    it('iknowall handles zero text ID', async () => {
       vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-      iknowall(0);
+      await iknowall(0);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith('/word/set-all-status?text=0');
+      expect(apiPut).toHaveBeenCalledWith('/texts/0/mark-all-wellknown', {});
     });
 
     it('validateTablePrefix handles consecutive underscores', () => {

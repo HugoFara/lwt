@@ -445,7 +445,7 @@ describe('text_keyboard.ts', () => {
   // ===========================================================================
 
   describe('W key (87) - Well-known word', () => {
-    it('sets status to 99 for known word', () => {
+    it('sets status to 99 for known word via API', () => {
       document.body.innerHTML = `
         <span id="w1" class="word status3 kwordmarked"
               data_wid="100" data_order="5" data_status="3">word</span>
@@ -456,7 +456,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(87);
       const result = handleTextKeydown(event);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('status=99'));
+      expect(mockTermsApiSetStatus).toHaveBeenCalledWith(100, 99);
       expect(result).toBe(false);
     });
   });
@@ -530,7 +530,7 @@ describe('text_keyboard.ts', () => {
   // ===========================================================================
 
   describe('E key (69) - Edit term', () => {
-    it('opens edit word page for known word', () => {
+    it('opens edit word form for known word', () => {
       document.body.innerHTML = `
         <span id="w1" class="word status3 kwordmarked"
               data_wid="100" data_order="5" data_status="3">word</span>
@@ -541,11 +541,11 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(69);
       const result = handleTextKeydown(event);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/edit'));
+      // Now opens word form via Alpine store
       expect(result).toBe(false);
     });
 
-    it('opens edit mword page for multiwords', () => {
+    it('opens edit form for multiwords', () => {
       document.body.innerHTML = `
         <span id="w1" class="mword status3 kwordmarked"
               data_wid="100" data_order="5" data_status="3" data_code="2">multi word</span>
@@ -554,32 +554,24 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(0);
 
       const event = createKeyEvent(69);
-      handleTextKeydown(event);
+      const result = handleTextKeydown(event);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/edit-multi'));
+      // Now opens word form via Alpine store
+      expect(result).toBe(false);
     });
 
-    it('opens new word form for unknown words (via hover)', () => {
-      // Note: status0 words are not in knownwordlist, so they can only be
-      // accessed via hover (which doesn't work in jsdom). This test is skipped.
-      // The actual behavior for unknown words via hover opens /word/edit?wid=&tid=...
-      // We skip this test since :hover doesn't work in jsdom environment
-    });
-
-    it.skip('opens new word form for unknown words - requires hover', () => {
-      // This test would verify that pressing E on a hovered status0 word
-      // opens /word/edit?wid=&tid=... but jsdom doesn't support :hover
+    it('returns false when opening edit form', () => {
       document.body.innerHTML = `
-        <span id="w1" class="word status0"
-              data_wid="" data_order="5" data_status="0">unknown</span>
+        <span id="w1" class="word status3 kwordmarked"
+              data_wid="100" data_order="5" data_status="3">word</span>
       `;
 
-      setReadingPosition(-1);
+      setReadingPosition(0);
 
       const event = createKeyEvent(69);
-      handleTextKeydown(event);
+      const result = handleTextKeydown(event);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/edit?wid=&tid='));
+      expect(result).toBe(false);
     });
   });
 

@@ -7,15 +7,33 @@
  */
 
 import { showTestWordPopup } from '@modules/vocabulary/services/word_popup_interface';
-import { loadModalFrame, cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
+import { cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
 import { getCurrentWordId, getTestSolution, isAnswerOpened, openAnswer } from '@modules/review/stores/test_state';
 import { getDictionaryLinks } from '@modules/language/stores/language_config';
+import { ReviewApi } from '@modules/review/api/review_api';
 
 /**
  * Helper to safely get an HTML attribute value as a string.
  */
 function getAttr(el: HTMLElement, attr: string): string {
   return el.getAttribute(attr) || '';
+}
+
+/**
+ * Update test status and reload to next word.
+ *
+ * @param wordId Word ID
+ * @param status New status (or undefined to keep current)
+ * @param change Status change amount (+1 or -1)
+ */
+async function updateTestStatusAndReload(
+  wordId: number,
+  status?: number,
+  change?: number
+): Promise<void> {
+  await ReviewApi.updateStatus(wordId, status, change);
+  // Reload the page to show next test word
+  window.location.reload();
 }
 
 /**
@@ -53,56 +71,60 @@ export function handleTestKeydown(e: KeyboardEvent): boolean {
   const wordId = getCurrentWordId();
 
   if ((e.key === ' ' || e.key === 'Space' || e.which === 32) && !isAnswerOpened()) {
-    // space : show solution
+    // space : show solution - click word to show popup and open answer
     wordEl?.click();
     cleanupRightFrames();
-    loadModalFrame('/word/show?wid=' + wordEl?.getAttribute('data_wid') + '&ann=');
     openAnswer();
     return false;
   }
+
   if (e.key === 'Escape' || e.which === 27) {
-    // esc : skip term, don't change status
-    loadModalFrame(
-      '/word/set-test-status?wid=' + wordId +
-      '&status=' + wordEl?.getAttribute('data_status')
-    );
+    // esc : skip term, don't change status - just reload to next word
+    const currentStatus = parseInt(wordEl?.getAttribute('data_status') || '1', 10);
+    updateTestStatusAndReload(wordId, currentStatus);
     return false;
   }
+
   if (e.key === 'I' || e.key === 'i' || e.which === 73) {
     // I : ignore, status=98
-    loadModalFrame('/word/set-test-status?wid=' + wordId + '&status=98');
+    updateTestStatusAndReload(wordId, 98);
     return false;
   }
+
   if (e.key === 'W' || e.key === 'w' || e.which === 87) {
     // W : well known, status=99
-    loadModalFrame('/word/set-test-status?wid=' + wordId + '&status=99');
+    updateTestStatusAndReload(wordId, 99);
     return false;
   }
+
   if (e.key === 'E' || e.key === 'e' || e.which === 69) {
-    // E : edit
-    loadModalFrame('/word/edit-term?wid=' + wordId);
+    // E : edit - navigate to edit page
+    window.location.href = '/word/edit-term?wid=' + wordId;
     return false;
   }
+
   // The next interactions should only be available with displayed solution
   if (!isAnswerOpened()) { return true; }
+
   if (e.key === 'ArrowUp' || e.which === 38) {
     // up : status+1
-    loadModalFrame('/word/set-test-status?wid=' + wordId + '&stchange=1');
+    updateTestStatusAndReload(wordId, undefined, 1);
     return false;
   }
+
   if (e.key === 'ArrowDown' || e.which === 40) {
     // down : status-1
-    loadModalFrame('/word/set-test-status?wid=' + wordId + '&stchange=-1');
+    updateTestStatusAndReload(wordId, undefined, -1);
     return false;
   }
+
   for (let i = 0; i < 5; i++) {
     if (e.which === (49 + i) || e.which === (97 + i) || e.key === String(i + 1)) {
       // 1,.. : status=i
-      loadModalFrame(
-        '/word/set-test-status?wid=' + wordId + '&status=' + (i + 1)
-      );
+      updateTestStatusAndReload(wordId, i + 1);
       return false;
     }
   }
+
   return true;
 }

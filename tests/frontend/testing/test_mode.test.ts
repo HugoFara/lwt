@@ -13,12 +13,18 @@ vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_popup_interfa
 }));
 
 vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
-  loadModalFrame: vi.fn(),
   cleanupRightFrames: vi.fn()
 }));
 
+vi.mock('../../../src/frontend/js/modules/review/api/review_api', () => ({
+  ReviewApi: {
+    updateStatus: vi.fn().mockResolvedValue({ data: { status: 1 } })
+  }
+}));
+
 import { showTestWordPopup } from '../../../src/frontend/js/modules/vocabulary/services/word_popup_interface';
-import { loadModalFrame, cleanupRightFrames } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
+import { cleanupRightFrames } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
+import { ReviewApi } from '../../../src/frontend/js/modules/review/api/review_api';
 import {
   setCurrentWordId,
   setTestSolution,
@@ -31,9 +37,29 @@ import {
 } from '../../../src/frontend/js/modules/language/stores/language_config';
 
 describe('test_mode.ts', () => {
+  let reloadSpy: ReturnType<typeof vi.fn>;
+  let hrefSpy: ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
+
+    // Mock window.location.reload and href
+    reloadSpy = vi.fn();
+    hrefSpy = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: {
+        ...window.location,
+        reload: reloadSpy,
+        set href(value: string) {
+          hrefSpy(value);
+        },
+        get href() {
+          return '';
+        }
+      },
+      writable: true
+    });
 
     // Initialize test state
     setCurrentWordId(123);
@@ -192,7 +218,7 @@ describe('test_mode.ts', () => {
         const result = handleTestKeydown(event);
 
         expect(cleanupRightFrames).toHaveBeenCalled();
-        expect(loadModalFrame).toHaveBeenCalledWith('/word/show?wid=123&ann=');
+        // Space key now just clicks the word and opens the answer
         expect(result).toBe(false);
       });
 
@@ -208,13 +234,12 @@ describe('test_mode.ts', () => {
     });
 
     describe('Escape key', () => {
-      it('skips term without changing status', () => {
+      it('skips term without changing status', async () => {
         const event = createKeyEvent('Escape', 27);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith(
-          expect.stringContaining('/word/set-test-status?wid=123&status=2')
-        );
+        // Uses API to update status (same status = skip)
+        expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, 2, undefined);
         expect(result).toBe(false);
       });
     });
@@ -224,7 +249,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('I', 73);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&status=98');
+        expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, 98, undefined);
         expect(result).toBe(false);
       });
     });
@@ -234,7 +259,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('W', 87);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&status=99');
+        expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, 99, undefined);
         expect(result).toBe(false);
       });
     });
@@ -244,7 +269,8 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('E', 69);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith('/word/edit-term?wid=123');
+        // E key now navigates to edit page
+        expect(hrefSpy).toHaveBeenCalledWith('/word/edit-term?wid=123');
         expect(result).toBe(false);
       });
     });
@@ -256,7 +282,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('ArrowUp', 38);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).not.toHaveBeenCalled();
+        expect(ReviewApi.updateStatus).not.toHaveBeenCalled();
         expect(result).toBe(true);
       });
 
@@ -266,7 +292,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('ArrowUp', 38);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&stchange=1');
+        expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, undefined, 1);
         expect(result).toBe(false);
       });
     });
@@ -278,7 +304,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('ArrowDown', 40);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).not.toHaveBeenCalled();
+        expect(ReviewApi.updateStatus).not.toHaveBeenCalled();
         expect(result).toBe(true);
       });
 
@@ -288,7 +314,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('ArrowDown', 40);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&stchange=-1');
+        expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, undefined, -1);
         expect(result).toBe(false);
       });
     });
@@ -306,7 +332,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent(key, keyCode);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith(`/word/set-test-status?wid=123&status=${expectedStatus}`);
+        expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, expectedStatus, undefined);
         expect(result).toBe(false);
       });
 
@@ -316,7 +342,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('1', 49);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).not.toHaveBeenCalled();
+        expect(ReviewApi.updateStatus).not.toHaveBeenCalled();
         expect(result).toBe(true);
       });
 
@@ -332,7 +358,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent(key, keyCode);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).toHaveBeenCalledWith(`/word/set-test-status?wid=123&status=${expectedStatus}`);
+        expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, expectedStatus, undefined);
         expect(result).toBe(false);
       });
     });
@@ -342,7 +368,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('A', 65);
         const result = handleTestKeydown(event);
 
-        expect(loadModalFrame).not.toHaveBeenCalled();
+        expect(ReviewApi.updateStatus).not.toHaveBeenCalled();
         expect(result).toBe(true);
       });
     });

@@ -1,13 +1,9 @@
 /**
  * Frame Management - Right frames show/hide/cleanup operations
  *
- * Note: The iframe-based reading interface has been replaced with
- * Bulma + Alpine.js using API-based word operations via word_store
- * and word_modal components.
- *
- * The frame functions (loadModalFrame, loadDictionaryFrame, etc.) are
- * kept for backward compatibility but return false when frames are not
- * present (which is the default in modern templates).
+ * The iframe system is only used for external dictionary lookups.
+ * Internal LWT operations now use the API-based word_store and word_modal
+ * components with Bulma + Alpine.js.
  *
  * Sound functions (successSound, failureSound) are still used.
  * Consider using audio_feedback.ts for new code.
@@ -71,32 +67,11 @@ export function showRightFramesPanel(): boolean {
 }
 
 /**
- * Load content in the upper modal frame (ro).
+ * Load content in the dictionary frame (ru).
  *
- * The upper frame is used for LWT internal pages like term editing forms,
- * status changes, and word operations. These pages are always from LWT
- * and will work in an iframe.
- *
- * @param url URL to load in the modal frame
- * @returns true if the frame was found and URL loaded, false otherwise
- */
-export function loadModalFrame(url: string): boolean {
-  if (!top?.frames) return false;
-  const frame = top.frames['ro' as unknown as number];
-  if (frame) {
-    frame.location.href = url;
-    return showRightFramesPanel();
-  }
-  return false;
-}
-
-/**
- * Load content in the lower dictionary frame (ru).
- *
- * The lower frame is used for external dictionary lookups. Note that some
- * dictionary websites may block iframe embedding via X-Frame-Options or
- * Content-Security-Policy headers. In such cases, the iframe will show
- * an error or blank page.
+ * Used for external dictionary lookups. Note that some dictionary websites
+ * may block iframe embedding via X-Frame-Options or Content-Security-Policy
+ * headers. In such cases, the iframe will show an error or blank page.
  *
  * @param url URL to load in the dictionary iframe
  * @returns true if the frame was found and URL loaded, false otherwise
