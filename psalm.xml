@@ -101,6 +101,70 @@
             </errorLevel>
         </UnnecessaryVarAnnotation>
 
+        <!-- Views receive untyped data via extract() from controllers -->
+        <MixedArgument>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </MixedArgument>
+
+        <MixedArrayAccess>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </MixedArrayAccess>
+
+        <MixedArrayOffset>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </MixedArrayOffset>
+
+        <MixedAssignment>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </MixedAssignment>
+
+        <MixedMethodCall>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </MixedMethodCall>
+
+        <MixedOperand>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </MixedOperand>
+
+        <!-- Docblock contradictions in views due to extract() pattern -->
+        <DocblockTypeContradiction>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </DocblockTypeContradiction>
+
+        <!-- Redundant casts in views for safety with dynamic data -->
+        <RedundantCast>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </RedundantCast>
+
+        <RedundantCastGivenDocblockType>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </RedundantCastGivenDocblockType>
+
+        <!-- Truthy/falsy comparisons in views for safety with dynamic data -->
+        <RiskyTruthyFalsyComparison>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </RiskyTruthyFalsyComparison>
+
         <!-- Return value may not be used by callers -->
         <PossiblyUnusedReturnValue>
             <errorLevel type="suppress">

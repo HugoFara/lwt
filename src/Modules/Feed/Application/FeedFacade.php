@@ -107,7 +107,7 @@ class FeedFacade
      *
      * @param int|null $langId Language ID filter (null for all)
      *
-     * @return array Array of feed records (legacy format)
+     * @return array<int, array{NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string}> Array of feed records
      */
     public function getFeeds(?int $langId = null): array
     {
@@ -124,7 +124,7 @@ class FeedFacade
      *
      * @param int $feedId Feed ID
      *
-     * @return array|null Feed record or null if not found
+     * @return array{NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string}|null Feed record or null if not found
      */
     public function getFeedById(int $feedId): ?array
     {

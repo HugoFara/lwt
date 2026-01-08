@@ -2,21 +2,6 @@
 /**
  * Feeds Browse View - Main feeds index page
  *
- * Variables expected:
- * - $currentLang: int current language filter
- * - $currentQuery: string search query
- * - $currentQueryMode: string query mode (title,desc,text or title)
- * - $currentRegexMode: string regex mode setting
- * - $feeds: array of feed records
- * - $currentFeed: int current feed ID
- * - $recno: int total article count
- * - $currentPage: int current page number
- * - $currentSort: int current sort index
- * - $maxPerPage: int articles per page
- * - $pages: int total pages
- * - $articles: array of feed article records
- * - $feedTime: int|null last update timestamp
- *
  * PHP version 8.1
  *
  * @category Lwt
@@ -31,6 +16,35 @@ namespace Lwt\Views\Feed;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+
+/**
+ * @var int $currentLang Current language filter
+ * @var string $currentQuery Search query
+ * @var string $currentQueryMode Query mode (title,desc,text or title)
+ * @var string $currentRegexMode Regex mode setting
+ * @var array<int, array{NfID: int, NfName: string}> $feeds Array of feed records
+ * @var int $currentFeed Current feed ID
+ * @var int $recno Total article count
+ * @var int $currentPage Current page number
+ * @var int $currentSort Current sort index
+ * @var int $maxPerPage Articles per page
+ * @var int $pages Total pages
+ * @var array<int, array{FlID: int, FlTitle: string, FlDescription: string, FlAudio: string, FlDate: string, FlLink: string, TxID: int|null, AtID: int|null}> $articles Array of feed article records
+ * @var int|null $feedTime Last update timestamp
+ */
+$currentLang = $currentLang ?? 0;
+$currentQuery = $currentQuery ?? '';
+$currentQueryMode = $currentQueryMode ?? '';
+$currentRegexMode = $currentRegexMode ?? '';
+$feeds = $feeds ?? [];
+$currentFeed = $currentFeed ?? 0;
+$recno = $recno ?? 0;
+$currentPage = $currentPage ?? 1;
+$currentSort = $currentSort ?? 1;
+$maxPerPage = $maxPerPage ?? 50;
+$pages = $pages ?? 1;
+$articles = $articles ?? [];
+$feedTime = $feedTime ?? null;
 
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
@@ -131,7 +145,9 @@ echo PageLayoutHelper::buildActionCard([
   <th class="th1 sorttable_nosort">Link</th>
   <th class="th1 clickable feeds-date-col">Date</th>
   </tr>
-    <?php foreach ($articles as $row): ?>
+    <?php
+    /** @var array{FlID: int, FlTitle: string, FlDescription: string, FlAudio: string, FlDate: string, FlLink: string, TxID: int|null, AtID: int|null} $row */
+    foreach ($articles as $row): ?>
         <tr>
         <?php if ($row['TxID']): ?>
             <td class="td1 center"><a href="/text/read?start=<?php echo $row['TxID']; ?>" >

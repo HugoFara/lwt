@@ -4,16 +4,6 @@
  *
  * Renders the form for editing feed items before creating texts.
  *
- * Variables expected:
- * - $texts: array of text data (TxTitle, TxText, TxSourceURI, TxAudioURI)
- * - $row: array feed link and feed data (NfLgID, NfID)
- * - $count: int starting form counter (passed by reference)
- * - $tagName: string tag name for the text
- * - $nfId: int feed ID
- * - $maxTexts: int maximum texts setting
- * - $languages: array of language records
- * - $scrdir: string script direction HTML attribute
- *
  * PHP version 8.1
  *
  * @category Lwt
@@ -30,15 +20,36 @@ namespace Lwt\Views\Feed;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+/**
+ * @var array<int, array{TxTitle?: string, TxText?: string, TxSourceURI?: string, TxAudioURI?: string}> $texts
+ * @var array{NfLgID: int, NfID: int} $row
+ * @var int $count
+ * @var string $tagName
+ * @var int $nfId
+ * @var int $maxTexts
+ * @var array<int, array{LgID: int, LgName: string}> $languages
+ * @var string $scrdir
+ */
+$texts = $texts ?? [];
+$row = $row ?? ['NfLgID' => 0, 'NfID' => 0];
+$count = $count ?? 0;
+$tagName = $tagName ?? '';
+$nfId = $nfId ?? 0;
+$maxTexts = $maxTexts ?? 0;
+$languages = $languages ?? [];
+$scrdir = $scrdir ?? '';
+
 // Ensure $texts and $languages are iterable
 if (!is_array($texts)) {
     return;
 }
+/** @var array<int, array{LgID: int, LgName: string}> $languagesArr */
 $languagesArr = is_array($languages) ? $languages : [];
 
 // Ensure $tagName is a string
 $tagNameStr = is_string($tagName) ? $tagName : '';
 
+/** @var array{TxTitle?: string, TxText?: string, TxSourceURI?: string, TxAudioURI?: string} $text */
 foreach ($texts as $text):
 ?>
 <div class="box mb-4" x-data="{ isSelected: true }">
@@ -86,7 +97,9 @@ foreach ($texts as $text):
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="feed[<?php echo $count; ?>][TxLgID]" class="notempty setfocus">
-                                <?php foreach ($languagesArr as $rowLang): ?>
+                                <?php
+                                /** @var array{LgID: int, LgName: string} $rowLang */
+                                foreach ($languagesArr as $rowLang): ?>
                                 <option value="<?php echo $rowLang['LgID']; ?>"<?php
                                     if ($row['NfLgID'] === $rowLang['LgID']) {
                                         echo ' selected';

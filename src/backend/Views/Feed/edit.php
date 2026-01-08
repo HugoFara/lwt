@@ -2,13 +2,6 @@
 /**
  * Edit Feed Form View
  *
- * Variables expected:
- * - $feed: array feed data from database
- * - $languages: array of language data [{LgID, LgName}, ...]
- * - $options: array parsed feed options
- * - $autoUpdateInterval: string|null auto-update interval value
- * - $autoUpdateUnit: string|null auto-update unit (h/d/w)
- *
  * PHP version 8.1
  *
  * @category Lwt
@@ -23,6 +16,19 @@ namespace Lwt\Views\Feed;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+
+/**
+ * @var array{NfID: string, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string} $feed
+ * @var array<int, array{LgID: int, LgName: string}> $languages
+ * @var array{edit_text?: string, max_links?: string, charset?: string, max_texts?: string, tag?: string, article_source?: string} $options
+ * @var string|null $autoUpdateInterval
+ * @var string|null $autoUpdateUnit
+ */
+$feed = $feed ?? ['NfID' => '', 'NfLgID' => 0, 'NfName' => '', 'NfSourceURI' => '', 'NfArticleSectionTags' => '', 'NfFilterTags' => ''];
+$languages = $languages ?? [];
+$options = $options ?? [];
+$autoUpdateInterval = $autoUpdateInterval ?? null;
+$autoUpdateUnit = $autoUpdateUnit ?? null;
 
 $actions = [
     ['url' => '/feeds?page=1', 'label' => 'Feeds', 'icon' => 'list'],
@@ -76,7 +82,9 @@ $actions = [
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="NfLgID" id="NfLgID">
-                                <?php foreach ($languages as $lang): ?>
+                                <?php
+                                /** @var array{LgID: int, LgName: string} $lang */
+                                foreach ($languages as $lang): ?>
                                 <option value="<?php echo $lang['LgID']; ?>"<?php if ($feed['NfLgID'] === $lang['LgID']) echo ' selected'; ?>>
                                     <?php echo htmlspecialchars($lang['LgName'], ENT_QUOTES, 'UTF-8'); ?>
                                 </option>

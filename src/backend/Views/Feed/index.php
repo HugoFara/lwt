@@ -2,16 +2,6 @@
 /**
  * Feeds Management Index View
  *
- * Variables expected:
- * - $feeds: array of feed data from query result
- * - $currentLang: int current language filter
- * - $currentQuery: string search query
- * - $currentPage: int current page number
- * - $currentSort: int current sort index
- * - $totalFeeds: int total number of feeds
- * - $pages: int total number of pages
- * - $maxPerPage: int feeds per page
- *
  * PHP version 8.1
  *
  * @category Lwt
@@ -26,6 +16,26 @@ namespace Lwt\Views\Feed;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+
+/**
+ * @var array<int, array{NfID: int, NfName: string, NfSourceURI: string, NfOptions: string, NfUpdate: int}> $feeds
+ * @var int $currentLang
+ * @var string $currentQuery
+ * @var int $currentPage
+ * @var int $currentSort
+ * @var int $totalFeeds
+ * @var int $pages
+ * @var int $maxPerPage
+ * @var \Lwt\Modules\Feed\Application\FeedFacade $feedService
+ */
+$feeds = $feeds ?? [];
+$currentLang = $currentLang ?? 0;
+$currentQuery = $currentQuery ?? '';
+$currentPage = $currentPage ?? 1;
+$currentSort = $currentSort ?? 1;
+$totalFeeds = $totalFeeds ?? 0;
+$pages = $pages ?? 1;
+$maxPerPage = $maxPerPage ?? 50;
 
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/feeds', 'label' => 'Feeds', 'icon' => 'list'],
@@ -134,6 +144,7 @@ echo PageLayoutHelper::buildActionCard([
 <?php
 $time = time();
 $feedsArr = $feeds ?? [];
+/** @var array{NfID: int, NfName: string, NfSourceURI: string, NfOptions: string, NfUpdate: int} $row */
 foreach ($feedsArr as $row):
     $diff = $time - (int)$row['NfUpdate'];
 ?>

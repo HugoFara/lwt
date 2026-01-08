@@ -646,9 +646,11 @@ class FeedController
             );
 
             if (isset($texts['error'])) {
-                echo $texts['error']['message'];
-                foreach ($texts['error']['link'] as $errLink) {
-                    $this->feedFacade->markLinkAsError($errLink);
+                echo (string)$texts['error']['message'];
+                /** @var array<string> $errLinks */
+                $errLinks = $texts['error']['link'] ?? [];
+                foreach ($errLinks as $errLink) {
+                    $this->feedFacade->markLinkAsError((string)$errLink);
                 }
                 unset($texts['error']);
             }
@@ -693,7 +695,7 @@ class FeedController
     {
         foreach ($texts as $text) {
             echo '<div class="msgblue">
-            <p class="hide_message">+++ "' . $text['TxTitle'] . '" added! +++</p>
+            <p class="hide_message">+++ "' . htmlspecialchars((string)($text['TxTitle'] ?? ''), ENT_QUOTES, 'UTF-8') . '" added! +++</p>
             </div>';
 
             $this->feedFacade->createTextFromFeed([
