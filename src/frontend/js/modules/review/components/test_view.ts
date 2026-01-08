@@ -13,6 +13,7 @@ import type { TestStoreState, TestConfig, LangSettings } from '../stores/test_st
 import { getTestStore } from '../stores/test_store';
 import { ReviewApi, type TableTestWord } from '@modules/review/api/review_api';
 import { speechDispatcher } from '@shared/utils/user_interactions';
+import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
 
 /**
  * Test types configuration
@@ -784,10 +785,8 @@ function registerTableTestComponent(): void {
 
     saveContextAnnotationSettings() {
       // Save to server via AJAX
-      import('@shared/utils/ajax_utilities').then(({ do_ajax_save_setting }) => {
-        do_ajax_save_setting('currenttabletestsetting7', this.contextAnnotations.rom ? '1' : '0');
-        do_ajax_save_setting('currenttabletestsetting8', this.contextAnnotations.trans ? '1' : '0');
-      });
+      do_ajax_save_setting('currenttabletestsetting7', this.contextAnnotations.rom ? '1' : '0');
+      do_ajax_save_setting('currenttabletestsetting8', this.contextAnnotations.trans ? '1' : '0');
       // Also save to localStorage for quick reload
       localStorage.setItem('lwt-context-annotations', JSON.stringify(this.contextAnnotations));
     },
