@@ -308,12 +308,14 @@ This allows administrators to balance security (preventing user tracking via ext
 
 ---
 
-### 19. CSP Policy Too Permissive - PARTIALLY FIXED
+### 19. CSP Policy Too Permissive - FIXED
 
-**Status:** Partially Fixed
+**Status:** Fixed
 
 **Resolution:**
-Removed `'unsafe-eval'` from Content Security Policy in `src/Shared/Infrastructure/Http/SecurityHeaders.php`:
+1. Migrated from `alpinejs` to `@alpinejs/csp` (CSP-compliant build) in `package.json`
+2. Added Vite alias to map existing imports: `'alpinejs': '@alpinejs/csp'` in `vite.config.ts`
+3. Removed `'unsafe-eval'` from Content Security Policy in `src/Shared/Infrastructure/Http/SecurityHeaders.php`
 
 ```php
 // Before
@@ -325,7 +327,7 @@ Removed `'unsafe-eval'` from Content Security Policy in `src/Shared/Infrastructu
 
 **Remaining:** `'unsafe-inline'` still needed for legacy inline scripts. Future improvement: migrate to nonce-based CSP.
 
-**Note:** Alpine.js, jQuery, and Vite production builds do not require `unsafe-eval`. Verified via grep for `eval()` and `new Function()` calls.
+**Note:** The Alpine.js CSP build eliminates the need for `unsafe-eval` by avoiding `Function()` constructors. See https://alpinejs.dev/advanced/csp for limitations (no arrow functions, template literals, or global variable access in x-data expressions).
 
 ---
 

@@ -99,7 +99,7 @@ class SecurityHeaders
      * Restricts which resources can be loaded, providing strong XSS protection.
      *
      * Current policy:
-     * - Scripts: self + unsafe-inline + unsafe-eval (Alpine.js needs eval for x-data)
+     * - Scripts: self + unsafe-inline (Alpine.js CSP build doesn't need eval)
      * - Styles: self + unsafe-inline (needed for inline styles)
      * - Images: self + data: (for inline images) + blob: (for generated content)
      * - Fonts: self
@@ -113,8 +113,8 @@ class SecurityHeaders
     {
         $policy = implode('; ', [
             "default-src 'self'",
-            // Scripts: self + inline + eval (Alpine.js needs eval for x-data expressions)
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            // Scripts: self + inline (Alpine.js CSP build doesn't need eval)
+            "script-src 'self' 'unsafe-inline'",
             // Styles: self + inline (needed for dynamic styling)
             "style-src 'self' 'unsafe-inline'",
             // Images: self + data URIs + blob for generated content

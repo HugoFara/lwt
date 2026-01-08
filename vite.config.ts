@@ -24,7 +24,7 @@ export default defineConfig({
         assetFileNames: 'css/vite/[name].[hash][extname]',
         manualChunks: {
           // Vendor chunks - loaded on demand
-          'alpine': ['alpinejs'],
+          'alpine': ['@alpinejs/csp'],
           'chart': ['chart.js'],
           'tagify': ['@yaireo/tagify'],
           // Note: lucide icons are tree-shaken (only ~90 icons imported)
@@ -115,6 +115,8 @@ export default defineConfig({
       '@shared': resolve(__dirname, 'src/frontend/js/shared'),
       '@modules': resolve(__dirname, 'src/frontend/js/modules'),
       '@css': resolve(__dirname, 'src/frontend/css'),
+      // Use CSP-compliant Alpine.js build (no unsafe-eval needed)
+      'alpinejs': '@alpinejs/csp',
     }
   }
 });
