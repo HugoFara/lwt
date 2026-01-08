@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 /**
- * Desktop Test Layout View
+ * Desktop Review Layout View
  *
- * Minimal container for client-side rendered test interface.
+ * Minimal container for client-side rendered review interface.
  * All UI is rendered by Alpine.js.
  *
  * Variables expected:
- * - $config: array - Test configuration (from TestController)
+ * - $config: array - Review configuration (from ReviewController)
  *
  * PHP version 8.1
  *
@@ -26,8 +26,8 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 <!-- Main navigation -->
 <?php echo PageLayoutHelper::buildNavbar(); ?>
 
-<!-- Test application root - all UI rendered by Alpine.js -->
-<div id="test-app"></div>
+<!-- Review application root - all UI rendered by Alpine.js -->
+<div id="review-app"></div>
 
 <!-- Audio elements for feedback -->
 <audio id="success_sound" preload="auto">
@@ -37,5 +37,5 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
   <source src="<?php StringUtils::printFilePath("sounds/failure.mp3"); ?>" type="audio/mpeg" />
 </audio>
 
-<!-- Test configuration -->
-<script type="application/json" id="test-config"><?php echo json_encode($config, JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
+<!-- Review configuration -->
+<script type="application/json" id="review-config"><?php echo json_encode($config, JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
