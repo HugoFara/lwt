@@ -371,7 +371,7 @@ export function buildKnownWordPopupContent(
   const editLink = document.createElement('a');
   editLink.href = `/word/edit?tid=${context.textId}&ord=${context.position}&wid=${context.wordId}`;
   editLink.target = 'ro';
-  editLink.textContent = 'Edit term';
+  editLink.innerHTML = `${iconHtml('sticky-note--pencil', { title: 'Edit Term', alt: 'Edit Term' })} Edit term`;
   editLink.onclick = () => { showRightFramesPanel(); };
   actionsRow.appendChild(editLink);
 
@@ -863,7 +863,9 @@ export function showReviewWordPopup(
   overlib_string += '<b>' + escapeHtml(createWordTooltip(txt, trans, roman, String(stat))) +
     '</b><br />' +
     ' <a href="/word/edit-term?wid=' + wid +
-    '" target="ro" onclick="showRightFramesPanel();">Edit term</a><br />' +
+    '" target="ro" onclick="showRightFramesPanel();">' +
+    iconHtml('sticky-note--pencil', { title: 'Edit Term', alt: 'Edit Term' }) +
+    ' Edit term</a><br />' +
     createTheDictLink(wblink1, txt, 'Dict1', 'Lookup Term: ') +
     createTheDictLink(wblink2, txt, 'Dict2', '') +
     createTheDictLink(wblink3, txt, 'Trans', '') +
@@ -1176,7 +1178,7 @@ export function createEditMultiWordLink(
   torder: string | number,
   wid: string | number
 ): string {
-  return ` <a href="#" onclick="openMultiWordModal(${txid}, ${torder}, '', 0, ${wid}); return false;">Edit term</a> `;
+  return ` <a href="#" onclick="openMultiWordModal(${txid}, ${torder}, '', 0, ${wid}); return false;">${iconHtml('sticky-note--pencil', { title: 'Edit Term', alt: 'Edit Term' })} Edit term</a> `;
 }
 
 /**
@@ -1254,7 +1256,9 @@ export function createEditWordLink(
     '&amp;ord=' + torder +
     '&amp;wid=' + wid;
   return ' <a href="' + url +
-    ' " target="ro" onclick="showRightFramesPanel()">Edit term</a> ';
+    ' " target="ro" onclick="showRightFramesPanel()">' +
+    iconHtml('sticky-note--pencil', { title: 'Edit Term', alt: 'Edit Term' }) +
+    ' Edit term</a> ';
 }
 
 /**
