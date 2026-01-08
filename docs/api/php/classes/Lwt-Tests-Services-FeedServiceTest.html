@@ -61,10 +61,6 @@
 </h4>
     <ul class="phpdocumentor-list">
                     <li>
-                <a href="namespaces/lwt-core.html" class="">Core</a>
-                
-            </li>
-                    <li>
                 <a href="namespaces/lwt-api.html" class="">Api</a>
                 
             </li>
@@ -73,11 +69,7 @@
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-database.html" class="">Database</a>
-                
-            </li>
-                    <li>
-                <a href="namespaces/lwt-text-from-youtube.html" class="">Text_From_Youtube</a>
+                <a href="namespaces/lwt-core.html" class="">Core</a>
                 
             </li>
                     <li>
@@ -85,15 +77,15 @@
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-services.html" class="">Services</a>
-                
-            </li>
-                    <li>
                 <a href="namespaces/lwt-view.html" class="">View</a>
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-views.html" class="">Views</a>
+                <a href="namespaces/lwt-modules.html" class="">Modules</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/lwt-shared.html" class="">Shared</a>
                 
             </li>
                     <li>
@@ -110,6 +102,10 @@
     <a href="namespaces/tests.html" class="">Tests</a>
 </h4>
     <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/tests-backend.html" class="">Backend</a>
+                
+            </li>
                     <li>
                 <a href="namespaces/tests-router.html" class="">Router</a>
                 
@@ -354,6 +350,16 @@
     <ul class="phpdocumentor-list">
                     <li>
                 <a href="namespaces/phpdocumentor-reflection.html" class="">Reflection</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/phpmailer.html" class="">PHPMailer</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/phpmailer-phpmailer.html" class="">PHPMailer</a>
                 
             </li>
             </ul>
@@ -616,10 +622,6 @@
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Database.html" class="">Database</a>
-                
-            </li>
-                    <li>
                 <a href="packages/Lwt-Entity.html" class="">Entity</a>
                 
             </li>
@@ -628,11 +630,19 @@
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Services.html" class="">Services</a>
+                <a href="packages/Lwt-Views.html" class="">Views</a>
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Views.html" class="">Views</a>
+                <a href="packages/Lwt-Modules.html" class="">Modules</a>
+                
+            </li>
+                    <li>
+                <a href="packages/Lwt-Shared.html" class="">Shared</a>
+                
+            </li>
+                    <li>
+                <a href="packages/Lwt-Database.html" class="">Database</a>
                 
             </li>
                     <li>
@@ -648,6 +658,20 @@
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/JsonMapper.html" class="">JsonMapper</a>
 </h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/PHPMailer.html" class="">PHPMailer</a>
+</h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/PHPMailerSomeFrenchpunctuationrequiresathinnon.html" class="">PHPMailerSomeFrenchpunctuationrequiresathinnon</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="packages/PHPMailerSomeFrenchpunctuationrequiresathinnon-breakingspaceU202Fcharacterbeforeitforexamplebeforeacolonorexclamationmark.html" class="">breakingspaceU202Fcharacterbeforeitforexamplebeforeacolonorexclamationmark</a>
+                
+            </li>
+            </ul>
 
                         </section>
             
@@ -698,14 +722,15 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">26</span>
+    <span class="phpdocumentor-element-found-in__line">28</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Unit tests for the FeedService class.</p>
+            <p class="phpdocumentor-summary">Unit tests for the FeedFacade class.</p>
 
 
-    <section class="phpdocumentor-description"><p>Tests feed/newsfeed CRUD operations through the service layer.</p>
+    <section class="phpdocumentor-description"><p>Tests feed/newsfeed CRUD operations through the facade layer.
+Migrated from FeedServiceTest to use the new modular architecture.</p>
 </section>
 
 
@@ -741,7 +766,7 @@
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
     <a class="" href="classes/Lwt-Tests-Services-FeedServiceTest.html#property_service">$service</a>
     <span>
-                        &nbsp;: <a href="classes/Lwt-Services-FeedService.html"><abbr title="\Lwt\Services\FeedService">FeedService</abbr></a>            </span>
+                        &nbsp;: <a href="classes/Lwt-Modules-Feed-Application-FeedFacade.html"><abbr title="\Lwt\Modules\Feed\Application\FeedFacade">FeedFacade</abbr></a>            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
@@ -2506,7 +2531,7 @@ resets the locale to its original value after the test is run.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">28</span>
+    <span class="phpdocumentor-element-found-in__line">30</span>
 
     </aside>
 
@@ -2543,7 +2568,7 @@ resets the locale to its original value after the test is run.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">30</span>
+    <span class="phpdocumentor-element-found-in__line">32</span>
 
     </aside>
 
@@ -2551,7 +2576,7 @@ resets the locale to its original value after the test is run.</dd>
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
         <span class="phpdocumentor-signature__visibility">private</span>
-            <span class="phpdocumentor-signature__type"><a href="classes/Lwt-Services-FeedService.html"><abbr title="\Lwt\Services\FeedService">FeedService</abbr></a></span>
+            <span class="phpdocumentor-signature__type"><a href="classes/Lwt-Modules-Feed-Application-FeedFacade.html"><abbr title="\Lwt\Modules\Feed\Application\FeedFacade">FeedFacade</abbr></a></span>
     <span class="phpdocumentor-signature__name">$service</span>
     </code>
 
@@ -2580,7 +2605,7 @@ resets the locale to its original value after the test is run.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">29</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
@@ -16008,7 +16033,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">32</span>
+    <span class="phpdocumentor-element-found-in__line">34</span>
 
     </aside>
 
@@ -16290,7 +16315,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">72</span>
+    <span class="phpdocumentor-element-found-in__line">74</span>
 
     </aside>
 
@@ -16325,7 +16350,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">451</span>
+    <span class="phpdocumentor-element-found-in__line">461</span>
 
     </aside>
 
@@ -16359,7 +16384,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">441</span>
+    <span class="phpdocumentor-element-found-in__line">449</span>
 
     </aside>
 
@@ -16393,7 +16418,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">464</span>
+    <span class="phpdocumentor-element-found-in__line">476</span>
 
     </aside>
 
@@ -16427,7 +16452,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">320</span>
+    <span class="phpdocumentor-element-found-in__line">328</span>
 
     </aside>
 
@@ -16461,7 +16486,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">195</span>
+    <span class="phpdocumentor-element-found-in__line">203</span>
 
     </aside>
 
@@ -16495,7 +16520,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">218</span>
+    <span class="phpdocumentor-element-found-in__line">226</span>
 
     </aside>
 
@@ -16529,7 +16554,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">662</span>
+    <span class="phpdocumentor-element-found-in__line">676</span>
 
     </aside>
 
@@ -16563,7 +16588,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">583</span>
+    <span class="phpdocumentor-element-found-in__line">597</span>
 
     </aside>
 
@@ -16597,7 +16622,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">280</span>
+    <span class="phpdocumentor-element-found-in__line">288</span>
 
     </aside>
 
@@ -16631,7 +16656,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">429</span>
+    <span class="phpdocumentor-element-found-in__line">437</span>
 
     </aside>
 
@@ -16665,7 +16690,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">419</span>
+    <span class="phpdocumentor-element-found-in__line">427</span>
 
     </aside>
 
@@ -16699,7 +16724,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">399</span>
+    <span class="phpdocumentor-element-found-in__line">407</span>
 
     </aside>
 
@@ -16733,7 +16758,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">409</span>
+    <span class="phpdocumentor-element-found-in__line">417</span>
 
     </aside>
 
@@ -16767,7 +16792,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">389</span>
+    <span class="phpdocumentor-element-found-in__line">397</span>
 
     </aside>
 
@@ -16801,7 +16826,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">160</span>
+    <span class="phpdocumentor-element-found-in__line">168</span>
 
     </aside>
 
@@ -16835,7 +16860,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">183</span>
+    <span class="phpdocumentor-element-found-in__line">191</span>
 
     </aside>
 
@@ -16869,7 +16894,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">135</span>
+    <span class="phpdocumentor-element-found-in__line">143</span>
 
     </aside>
 
@@ -16903,7 +16928,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">112</span>
+    <span class="phpdocumentor-element-found-in__line">120</span>
 
     </aside>
 
@@ -16937,7 +16962,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">102</span>
+    <span class="phpdocumentor-element-found-in__line">110</span>
 
     </aside>
 
@@ -16971,7 +16996,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">511</span>
+    <span class="phpdocumentor-element-found-in__line">525</span>
 
     </aside>
 
@@ -17005,7 +17030,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">572</span>
+    <span class="phpdocumentor-element-found-in__line">586</span>
 
     </aside>
 
@@ -17039,7 +17064,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">550</span>
+    <span class="phpdocumentor-element-found-in__line">564</span>
 
     </aside>
 
@@ -17073,7 +17098,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">561</span>
+    <span class="phpdocumentor-element-found-in__line">575</span>
 
     </aside>
 
@@ -17107,7 +17132,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">527</span>
+    <span class="phpdocumentor-element-found-in__line">541</span>
 
     </aside>
 
@@ -17141,7 +17166,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">356</span>
+    <span class="phpdocumentor-element-found-in__line">364</span>
 
     </aside>
 
@@ -17175,7 +17200,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">346</span>
+    <span class="phpdocumentor-element-found-in__line">354</span>
 
     </aside>
 
@@ -17209,7 +17234,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">376</span>
+    <span class="phpdocumentor-element-found-in__line">384</span>
 
     </aside>
 
@@ -17243,7 +17268,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">366</span>
+    <span class="phpdocumentor-element-found-in__line">374</span>
 
     </aside>
 
@@ -17277,7 +17302,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">628</span>
+    <span class="phpdocumentor-element-found-in__line">642</span>
 
     </aside>
 
@@ -17311,7 +17336,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">245</span>
+    <span class="phpdocumentor-element-found-in__line">253</span>
 
     </aside>
 
@@ -17345,7 +17370,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">478</span>
+    <span class="phpdocumentor-element-found-in__line">492</span>
 
     </aside>
 
@@ -17379,7 +17404,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">498</span>
+    <span class="phpdocumentor-element-found-in__line">512</span>
 
     </aside>
 
@@ -17413,7 +17438,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">488</span>
+    <span class="phpdocumentor-element-found-in__line">502</span>
 
     </aside>
 
@@ -19255,7 +19280,7 @@ resets the locale to its original value after the test is run.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">84</span>
+    <span class="phpdocumentor-element-found-in__line">86</span>
 
     </aside>
 
@@ -19290,7 +19315,7 @@ resets the locale to its original value after the test is run.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Services/FeedServiceTest.php"><a href="files/tests-backend-services-feedservicetest.html"><abbr title="tests/backend/Services/FeedServiceTest.php">FeedServiceTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">89</span>
+    <span class="phpdocumentor-element-found-in__line">97</span>
 
     </aside>
 

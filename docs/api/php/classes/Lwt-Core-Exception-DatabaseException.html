@@ -61,10 +61,6 @@
 </h4>
     <ul class="phpdocumentor-list">
                     <li>
-                <a href="namespaces/lwt-core.html" class="">Core</a>
-                
-            </li>
-                    <li>
                 <a href="namespaces/lwt-api.html" class="">Api</a>
                 
             </li>
@@ -73,11 +69,7 @@
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-database.html" class="">Database</a>
-                
-            </li>
-                    <li>
-                <a href="namespaces/lwt-text-from-youtube.html" class="">Text_From_Youtube</a>
+                <a href="namespaces/lwt-core.html" class="">Core</a>
                 
             </li>
                     <li>
@@ -85,15 +77,15 @@
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-services.html" class="">Services</a>
-                
-            </li>
-                    <li>
                 <a href="namespaces/lwt-view.html" class="">View</a>
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-views.html" class="">Views</a>
+                <a href="namespaces/lwt-modules.html" class="">Modules</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/lwt-shared.html" class="">Shared</a>
                 
             </li>
                     <li>
@@ -110,6 +102,10 @@
     <a href="namespaces/tests.html" class="">Tests</a>
 </h4>
     <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/tests-backend.html" class="">Backend</a>
+                
+            </li>
                     <li>
                 <a href="namespaces/tests-router.html" class="">Router</a>
                 
@@ -354,6 +350,16 @@
     <ul class="phpdocumentor-list">
                     <li>
                 <a href="namespaces/phpdocumentor-reflection.html" class="">Reflection</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/phpmailer.html" class="">PHPMailer</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/phpmailer-phpmailer.html" class="">PHPMailer</a>
                 
             </li>
             </ul>
@@ -616,10 +622,6 @@
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Database.html" class="">Database</a>
-                
-            </li>
-                    <li>
                 <a href="packages/Lwt-Entity.html" class="">Entity</a>
                 
             </li>
@@ -628,11 +630,19 @@
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Services.html" class="">Services</a>
+                <a href="packages/Lwt-Views.html" class="">Views</a>
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Views.html" class="">Views</a>
+                <a href="packages/Lwt-Modules.html" class="">Modules</a>
+                
+            </li>
+                    <li>
+                <a href="packages/Lwt-Shared.html" class="">Shared</a>
+                
+            </li>
+                    <li>
+                <a href="packages/Lwt-Database.html" class="">Database</a>
                 
             </li>
                     <li>
@@ -648,6 +658,20 @@
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/JsonMapper.html" class="">JsonMapper</a>
 </h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/PHPMailer.html" class="">PHPMailer</a>
+</h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/PHPMailerSomeFrenchpunctuationrequiresathinnon.html" class="">PHPMailerSomeFrenchpunctuationrequiresathinnon</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="packages/PHPMailerSomeFrenchpunctuationrequiresathinnon-breakingspaceU202Fcharacterbeforeitforexamplebeforeacolonorexclamationmark.html" class="">breakingspaceU202Fcharacterbeforeitforexamplebeforeacolonorexclamationmark</a>
+                
+            </li>
+            </ul>
 
                         </section>
             
@@ -847,7 +871,7 @@ and constraint violations.</p>
     <span>
                                 &nbsp;: string|null    </span>
 </dt>
-<dd>Get the SQL query that caused the error.</dd>
+<dd>Get the SQL query that caused the error (sanitized for security).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Core-Exception-DatabaseException.html#method_getSqlErrorCode">getSqlErrorCode()</a>
@@ -1600,11 +1624,11 @@ and constraint violations.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Exception/DatabaseException.php"><a href="files/src-backend-core-exception-databaseexception.html"><abbr title="src/backend/Core/Exception/DatabaseException.php">DatabaseException.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">283</span>
+    <span class="phpdocumentor-element-found-in__line">287</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Get the SQL query that caused the error.</p>
+        <p class="phpdocumentor-summary">Get the SQL query that caused the error (sanitized for security).</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1613,7 +1637,11 @@ and constraint violations.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>Returns a sanitized version with string values masked to prevent
+information disclosure. For the raw query (logging only), access
+the protected $query property directly in subclasses.</p>
+</section>
+
     
     
 
@@ -1622,6 +1650,10 @@ and constraint violations.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">string|null</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>The sanitized query or null</p>
+</section>
+
             </section>
 
 </article>
@@ -1639,7 +1671,7 @@ and constraint violations.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Exception/DatabaseException.php"><a href="files/src-backend-core-exception-databaseexception.html"><abbr title="src/backend/Core/Exception/DatabaseException.php">DatabaseException.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">293</span>
+    <span class="phpdocumentor-element-found-in__line">297</span>
 
     </aside>
 
@@ -1678,7 +1710,7 @@ and constraint violations.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Exception/DatabaseException.php"><a href="files/src-backend-core-exception-databaseexception.html"><abbr title="src/backend/Core/Exception/DatabaseException.php">DatabaseException.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">303</span>
+    <span class="phpdocumentor-element-found-in__line">307</span>
 
     </aside>
 
@@ -1717,7 +1749,7 @@ and constraint violations.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Exception/DatabaseException.php"><a href="files/src-backend-core-exception-databaseexception.html"><abbr title="src/backend/Core/Exception/DatabaseException.php">DatabaseException.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">311</span>
+    <span class="phpdocumentor-element-found-in__line">315</span>
 
     </aside>
 
@@ -2251,7 +2283,7 @@ and constraint violations.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Exception/DatabaseException.php"><a href="files/src-backend-core-exception-databaseexception.html"><abbr title="src/backend/Core/Exception/DatabaseException.php">DatabaseException.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">325</span>
+    <span class="phpdocumentor-element-found-in__line">329</span>
 
     </aside>
 

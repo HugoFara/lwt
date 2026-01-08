@@ -61,10 +61,6 @@
 </h4>
     <ul class="phpdocumentor-list">
                     <li>
-                <a href="namespaces/lwt-core.html" class="">Core</a>
-                
-            </li>
-                    <li>
                 <a href="namespaces/lwt-api.html" class="">Api</a>
                 
             </li>
@@ -73,11 +69,7 @@
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-database.html" class="">Database</a>
-                
-            </li>
-                    <li>
-                <a href="namespaces/lwt-text-from-youtube.html" class="">Text_From_Youtube</a>
+                <a href="namespaces/lwt-core.html" class="">Core</a>
                 
             </li>
                     <li>
@@ -85,15 +77,15 @@
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-services.html" class="">Services</a>
-                
-            </li>
-                    <li>
                 <a href="namespaces/lwt-view.html" class="">View</a>
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-views.html" class="">Views</a>
+                <a href="namespaces/lwt-modules.html" class="">Modules</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/lwt-shared.html" class="">Shared</a>
                 
             </li>
                     <li>
@@ -110,6 +102,10 @@
     <a href="namespaces/tests.html" class="">Tests</a>
 </h4>
     <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/tests-backend.html" class="">Backend</a>
+                
+            </li>
                     <li>
                 <a href="namespaces/tests-router.html" class="">Router</a>
                 
@@ -354,6 +350,16 @@
     <ul class="phpdocumentor-list">
                     <li>
                 <a href="namespaces/phpdocumentor-reflection.html" class="">Reflection</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/phpmailer.html" class="">PHPMailer</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/phpmailer-phpmailer.html" class="">PHPMailer</a>
                 
             </li>
             </ul>
@@ -616,10 +622,6 @@
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Database.html" class="">Database</a>
-                
-            </li>
-                    <li>
                 <a href="packages/Lwt-Entity.html" class="">Entity</a>
                 
             </li>
@@ -628,11 +630,19 @@
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Services.html" class="">Services</a>
+                <a href="packages/Lwt-Views.html" class="">Views</a>
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Views.html" class="">Views</a>
+                <a href="packages/Lwt-Modules.html" class="">Modules</a>
+                
+            </li>
+                    <li>
+                <a href="packages/Lwt-Shared.html" class="">Shared</a>
+                
+            </li>
+                    <li>
+                <a href="packages/Lwt-Database.html" class="">Database</a>
                 
             </li>
                     <li>
@@ -648,6 +658,20 @@
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/JsonMapper.html" class="">JsonMapper</a>
 </h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/PHPMailer.html" class="">PHPMailer</a>
+</h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/PHPMailerSomeFrenchpunctuationrequiresathinnon.html" class="">PHPMailerSomeFrenchpunctuationrequiresathinnon</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="packages/PHPMailerSomeFrenchpunctuationrequiresathinnon-breakingspaceU202Fcharacterbeforeitforexamplebeforeacolonorexclamationmark.html" class="">breakingspaceU202Fcharacterbeforeitforexamplebeforeacolonorexclamationmark</a>
+                
+            </li>
+            </ul>
 
                         </section>
             
@@ -797,6 +821,13 @@ $userId = Globals::requireUserId();
 <dd>Current authenticated user ID</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
+    <a class="" href="classes/Lwt-Core-Globals.html#property_currentUserIsAdmin">$currentUserIsAdmin</a>
+    <span>
+                        &nbsp;: bool            </span>
+</dt>
+<dd>Whether the current authenticated user is an admin.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -private">
     <a class="" href="classes/Lwt-Core-Globals.html#property_databaseName">$databaseName</a>
     <span>
                         &nbsp;: string            </span>
@@ -875,6 +906,13 @@ $userId = Globals::requireUserId();
 <dd>Check if a user is currently authenticated.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Globals.html#method_isCurrentUserAdmin">isCurrentUserAdmin()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Check if the current authenticated user is an admin.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Core-Globals.html#method_isErrorDisplayEnabled">isErrorDisplayEnabled()</a>
     <span>
                                 &nbsp;: bool    </span>
@@ -891,7 +929,7 @@ $userId = Globals::requireUserId();
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Core-Globals.html#method_query">query()</a>
     <span>
-                                &nbsp;: <a href="classes/Lwt-Database-QueryBuilder.html"><abbr title="\Lwt\Database\QueryBuilder">QueryBuilder</abbr></a>    </span>
+                                &nbsp;: <a href="classes/Lwt-Shared-Infrastructure-Database-QueryBuilder.html"><abbr title="\Lwt\Shared\Infrastructure\Database\QueryBuilder">QueryBuilder</abbr></a>    </span>
 </dt>
 <dd>Get a query builder instance for a table.</dd>
 
@@ -915,6 +953,13 @@ $userId = Globals::requireUserId();
                                 &nbsp;: void    </span>
 </dt>
 <dd>Set the current authenticated user ID.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Globals.html#method_setCurrentUserIsAdmin">setCurrentUserIsAdmin()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Set whether the current user is an admin.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Core-Globals.html#method_setDatabaseName">setDatabaseName()</a>
@@ -993,6 +1038,44 @@ $userId = Globals::requireUserId();
         <span class="phpdocumentor-signature__static">static</span>    <span class="phpdocumentor-signature__type">int|null</span>
     <span class="phpdocumentor-signature__name">$currentUserId</span>
      = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -private
+            -static                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="property_currentUserIsAdmin">
+        $currentUserIsAdmin
+        <a href="classes/Lwt-Core-Globals.html#property_currentUserIsAdmin" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                                            </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">100</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Whether the current authenticated user is an admin.</p>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">private</span>
+        <span class="phpdocumentor-signature__static">static</span>    <span class="phpdocumentor-signature__type">bool</span>
+    <span class="phpdocumentor-signature__name">$currentUserIsAdmin</span>
+     = <span class="phpdocumentor-signature__default-value">false</span></code>
 
     
     
@@ -1216,7 +1299,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">252</span>
+    <span class="phpdocumentor-element-found-in__line">259</span>
 
     </aside>
 
@@ -1276,7 +1359,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">153</span>
+    <span class="phpdocumentor-element-found-in__line">160</span>
 
     </aside>
 
@@ -1319,7 +1402,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">131</span>
+    <span class="phpdocumentor-element-found-in__line">138</span>
 
     </aside>
 
@@ -1362,7 +1445,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">102</span>
+    <span class="phpdocumentor-element-found-in__line">109</span>
 
     </aside>
 
@@ -1399,7 +1482,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">294</span>
+    <span class="phpdocumentor-element-found-in__line">301</span>
 
     </aside>
 
@@ -1449,6 +1532,64 @@ $userId = Globals::requireUserId();
             -public
                                     -static                    "
 >
+    <h4 class="phpdocumentor-element__name" id="method_isCurrentUserAdmin">
+        isCurrentUserAdmin()
+        <a href="classes/Lwt-Core-Globals.html#method_isCurrentUserAdmin" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">359</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Check if the current authenticated user is an admin.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">isCurrentUserAdmin</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Lwt-Core-Globals.html#method_isCurrentUserAdmin#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">3.0.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>True if the current user is an admin</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
     <h4 class="phpdocumentor-element__name" id="method_isErrorDisplayEnabled">
         isErrorDisplayEnabled()
         <a href="classes/Lwt-Core-Globals.html#method_isErrorDisplayEnabled" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1457,7 +1598,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">175</span>
+    <span class="phpdocumentor-element-found-in__line">182</span>
 
     </aside>
 
@@ -1500,7 +1641,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">323</span>
+    <span class="phpdocumentor-element-found-in__line">330</span>
 
     </aside>
 
@@ -1558,7 +1699,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">217</span>
+    <span class="phpdocumentor-element-found-in__line">224</span>
 
     </aside>
 
@@ -1566,7 +1707,7 @@ $userId = Globals::requireUserId();
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">query</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tableName</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Database-QueryBuilder.html"><abbr title="\Lwt\Database\QueryBuilder">QueryBuilder</abbr></a></span></code>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">query</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tableName</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Shared-Infrastructure-Database-QueryBuilder.html"><abbr title="\Lwt\Shared\Infrastructure\Database\QueryBuilder">QueryBuilder</abbr></a></span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1618,7 +1759,7 @@ Globals::query('words')
     
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Database-QueryBuilder.html"><abbr title="\Lwt\Database\QueryBuilder">QueryBuilder</abbr></a></span>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Shared-Infrastructure-Database-QueryBuilder.html"><abbr title="\Lwt\Shared\Infrastructure\Database\QueryBuilder">QueryBuilder</abbr></a></span>
             </section>
 
 </article>
@@ -1636,7 +1777,7 @@ Globals::query('words')
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">279</span>
+    <span class="phpdocumentor-element-found-in__line">286</span>
 
     </aside>
 
@@ -1715,7 +1856,7 @@ to proceed. It provides a cleaner alternative to checking for null.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">335</span>
+    <span class="phpdocumentor-element-found-in__line">371</span>
 
     </aside>
 
@@ -1752,7 +1893,7 @@ to proceed. It provides a cleaner alternative to checking for null.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">238</span>
+    <span class="phpdocumentor-element-found-in__line">245</span>
 
     </aside>
 
@@ -1809,6 +1950,71 @@ the user context for all subsequent database operations.</p>
             -public
                                     -static                    "
 >
+    <h4 class="phpdocumentor-element__name" id="method_setCurrentUserIsAdmin">
+        setCurrentUserIsAdmin()
+        <a href="classes/Lwt-Core-Globals.html#method_setCurrentUserIsAdmin" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">347</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Set whether the current user is an admin.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">setCurrentUserIsAdmin</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$isAdmin</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>This should be called after successful authentication to establish
+the admin context for authorization checks.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$isAdmin</span>
+                : <span class="phpdocumentor-argument-list__argument__type">bool</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Whether the current user is an admin</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Lwt-Core-Globals.html#method_setCurrentUserIsAdmin#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">3.0.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
     <h4 class="phpdocumentor-element__name" id="method_setDatabaseName">
         setDatabaseName()
         <a href="classes/Lwt-Core-Globals.html#method_setDatabaseName" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1817,7 +2023,7 @@ the user context for all subsequent database operations.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">143</span>
+    <span class="phpdocumentor-element-found-in__line">150</span>
 
     </aside>
 
@@ -1864,7 +2070,7 @@ the user context for all subsequent database operations.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">121</span>
+    <span class="phpdocumentor-element-found-in__line">128</span>
 
     </aside>
 
@@ -1911,7 +2117,7 @@ the user context for all subsequent database operations.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">165</span>
+    <span class="phpdocumentor-element-found-in__line">172</span>
 
     </aside>
 
@@ -1958,7 +2164,7 @@ the user context for all subsequent database operations.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">311</span>
+    <span class="phpdocumentor-element-found-in__line">318</span>
 
     </aside>
 
@@ -2023,7 +2229,7 @@ for user-scoped tables.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">189</span>
+    <span class="phpdocumentor-element-found-in__line">196</span>
 
     </aside>
 
@@ -2182,6 +2388,7 @@ for user-scoped tables.</p>
                 <li>
                     <ul class="phpdocumentor-list -clean">
                                                     <li class=""><a href="classes/Lwt-Core-Globals.html#property_currentUserId">$currentUserId</a></li>
+                                                    <li class=""><a href="classes/Lwt-Core-Globals.html#property_currentUserIsAdmin">$currentUserIsAdmin</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Globals.html#property_databaseName">$databaseName</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Globals.html#property_dbConnection">$dbConnection</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Globals.html#property_errorDisplayEnabled">$errorDisplayEnabled</a></li>
@@ -2198,12 +2405,14 @@ for user-scoped tables.</p>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_getDbConnection">getDbConnection()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_initialize">initialize()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_isAuthenticated">isAuthenticated()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Globals.html#method_isCurrentUserAdmin">isCurrentUserAdmin()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_isErrorDisplayEnabled">isErrorDisplayEnabled()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_isMultiUserEnabled">isMultiUserEnabled()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_query">query()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_requireUserId">requireUserId()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_reset">reset()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_setCurrentUserId">setCurrentUserId()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Globals.html#method_setCurrentUserIsAdmin">setCurrentUserIsAdmin()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_setDatabaseName">setDatabaseName()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_setDbConnection">setDbConnection()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_setErrorDisplay">setErrorDisplay()</a></li>

@@ -61,10 +61,6 @@
 </h4>
     <ul class="phpdocumentor-list">
                     <li>
-                <a href="namespaces/lwt-core.html" class="">Core</a>
-                
-            </li>
-                    <li>
                 <a href="namespaces/lwt-api.html" class="">Api</a>
                 
             </li>
@@ -73,11 +69,7 @@
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-database.html" class="">Database</a>
-                
-            </li>
-                    <li>
-                <a href="namespaces/lwt-text-from-youtube.html" class="">Text_From_Youtube</a>
+                <a href="namespaces/lwt-core.html" class="">Core</a>
                 
             </li>
                     <li>
@@ -85,15 +77,15 @@
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-services.html" class="">Services</a>
-                
-            </li>
-                    <li>
                 <a href="namespaces/lwt-view.html" class="">View</a>
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-views.html" class="">Views</a>
+                <a href="namespaces/lwt-modules.html" class="">Modules</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/lwt-shared.html" class="">Shared</a>
                 
             </li>
                     <li>
@@ -110,6 +102,10 @@
     <a href="namespaces/tests.html" class="">Tests</a>
 </h4>
     <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/tests-backend.html" class="">Backend</a>
+                
+            </li>
                     <li>
                 <a href="namespaces/tests-router.html" class="">Router</a>
                 
@@ -354,6 +350,16 @@
     <ul class="phpdocumentor-list">
                     <li>
                 <a href="namespaces/phpdocumentor-reflection.html" class="">Reflection</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/phpmailer.html" class="">PHPMailer</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/phpmailer-phpmailer.html" class="">PHPMailer</a>
                 
             </li>
             </ul>
@@ -616,10 +622,6 @@
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Database.html" class="">Database</a>
-                
-            </li>
-                    <li>
                 <a href="packages/Lwt-Entity.html" class="">Entity</a>
                 
             </li>
@@ -628,11 +630,19 @@
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Services.html" class="">Services</a>
+                <a href="packages/Lwt-Views.html" class="">Views</a>
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Views.html" class="">Views</a>
+                <a href="packages/Lwt-Modules.html" class="">Modules</a>
+                
+            </li>
+                    <li>
+                <a href="packages/Lwt-Shared.html" class="">Shared</a>
+                
+            </li>
+                    <li>
+                <a href="packages/Lwt-Database.html" class="">Database</a>
                 
             </li>
                     <li>
@@ -648,6 +658,20 @@
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/JsonMapper.html" class="">JsonMapper</a>
 </h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/PHPMailer.html" class="">PHPMailer</a>
+</h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/PHPMailerSomeFrenchpunctuationrequiresathinnon.html" class="">PHPMailerSomeFrenchpunctuationrequiresathinnon</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="packages/PHPMailerSomeFrenchpunctuationrequiresathinnon-breakingspaceU202Fcharacterbeforeitforexamplebeforeacolonorexclamationmark.html" class="">breakingspaceU202Fcharacterbeforeitforexamplebeforeacolonorexclamationmark</a>
+                
+            </li>
+            </ul>
 
                         </section>
             
@@ -699,7 +723,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">32</span>
+    <span class="phpdocumentor-element-found-in__line">35</span>
 
     </aside>
 
@@ -708,7 +732,9 @@
 
     <section class="phpdocumentor-description"><p>Tests the core text processing pipeline including:</p>
 <ul>
-<li>TextParsing::prepare() - entry point for text parsing</li>
+<li>TextParsing::splitIntoSentences() - split text into sentences</li>
+<li>TextParsing::parseAndDisplayPreview() - parse and preview text</li>
+<li>TextParsing::parseAndSave() - parse and save text to database</li>
 <li>Character substitutions</li>
 <li>Language-specific processing</li>
 <li>Brace replacement</li>
@@ -2127,144 +2153,144 @@ exactly $count times.</dd>
 <dd>Test TextParsingService::findLatinSentenceEnd method - comprehensive tests</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingAbbreviations">testPrepareTextParsingAbbreviations()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testParseAndDisplayPreviewCheckMode">testParseAndDisplayPreviewCheckMode()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with abbreviations</dd>
+<dd>Test parseAndDisplayPreview check mode</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingBasic">testPrepareTextParsingBasic()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesAbbreviations">testSplitIntoSentencesAbbreviations()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with basic text</dd>
+<dd>Test splitIntoSentences with abbreviations</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingBraceReplacement">testPrepareTextParsingBraceReplacement()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesBasic">testSplitIntoSentencesBasic()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test brace replacement in prepare_text_parsing</dd>
+<dd>Test splitIntoSentences with basic text</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingCharacterSubstitution">testPrepareTextParsingCharacterSubstitution()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesBraceReplacement">testSplitIntoSentencesBraceReplacement()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test character substitution in prepare_text_parsing</dd>
+<dd>Test brace replacement in splitIntoSentences</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingCheckMode">testPrepareTextParsingCheckMode()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesCharacterSubstitution">testSplitIntoSentencesCharacterSubstitution()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing mode: check (-1)</dd>
+<dd>Test character substitution in splitIntoSentences</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingEllipsis">testPrepareTextParsingEllipsis()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesEllipsis">testSplitIntoSentencesEllipsis()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with ellipsis</dd>
+<dd>Test splitIntoSentences with ellipsis</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingEmoji">testPrepareTextParsingEmoji()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesEmoji">testSplitIntoSentencesEmoji()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with emoji</dd>
+<dd>Test splitIntoSentences with emoji</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingEmpty">testPrepareTextParsingEmpty()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesEmpty">testSplitIntoSentencesEmpty()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with empty text</dd>
+<dd>Test splitIntoSentences with empty text</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingInvalidLanguage">testPrepareTextParsingInvalidLanguage()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesInvalidLanguage">testSplitIntoSentencesInvalidLanguage()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with invalid language ID</dd>
+<dd>Test splitIntoSentences with invalid language ID</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingLongText">testPrepareTextParsingLongText()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesLongText">testSplitIntoSentencesLongText()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with very long text</dd>
+<dd>Test splitIntoSentences with very long text</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingMixedCase">testPrepareTextParsingMixedCase()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesMixedCase">testSplitIntoSentencesMixedCase()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with mixed case</dd>
+<dd>Test splitIntoSentences with mixed case</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingMultipleParagraphs">testPrepareTextParsingMultipleParagraphs()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesMultipleParagraphs">testSplitIntoSentencesMultipleParagraphs()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with multiple paragraphs</dd>
+<dd>Test splitIntoSentences with multiple paragraphs</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingNoPunctuation">testPrepareTextParsingNoPunctuation()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesNoPunctuation">testSplitIntoSentencesNoPunctuation()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with no punctuation</dd>
+<dd>Test splitIntoSentences with no punctuation</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingNumbers">testPrepareTextParsingNumbers()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesNumbers">testSplitIntoSentencesNumbers()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with numbers</dd>
+<dd>Test splitIntoSentences with numbers</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingQuotes">testPrepareTextParsingQuotes()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesQuotes">testSplitIntoSentencesQuotes()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with quotes</dd>
+<dd>Test splitIntoSentences with quotes</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingSpecialCharacters">testPrepareTextParsingSpecialCharacters()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesSpecialCharacters">testSplitIntoSentencesSpecialCharacters()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with special characters that need escaping</dd>
+<dd>Test splitIntoSentences with special characters that need escaping</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingSpecialPunctuation">testPrepareTextParsingSpecialPunctuation()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesSpecialPunctuation">testSplitIntoSentencesSpecialPunctuation()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with special punctuation</dd>
+<dd>Test splitIntoSentences with special punctuation</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingUnicode">testPrepareTextParsingUnicode()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesUnicode">testSplitIntoSentencesUnicode()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with Unicode text</dd>
+<dd>Test splitIntoSentences with Unicode text</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingWhitespaceOnly">testPrepareTextParsingWhitespaceOnly()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesWhitespaceOnly">testSplitIntoSentencesWhitespaceOnly()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with whitespace-only text</dd>
+<dd>Test splitIntoSentences with whitespace-only text</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingWindowsLineEndings">testPrepareTextParsingWindowsLineEndings()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesWindowsLineEndings">testSplitIntoSentencesWindowsLineEndings()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Test prepare_text_parsing with Windows line endings</dd>
+<dd>Test splitIntoSentences with Windows line endings</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/PHPUnit-Framework-TestCase.html#method_throwException">throwException()</a>
@@ -2428,11 +2454,11 @@ resets the locale to its original value after the test is run.</dd>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
-    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_callPrepareTextParsing">callPrepareTextParsing()</a>
+    <a class="" href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_callSplitIntoSentences">callSplitIntoSentences()</a>
     <span>
-                                &nbsp;: null|array&lt;string|int, string&gt;    </span>
+                                &nbsp;: array&lt;string|int, string&gt;    </span>
 </dt>
-<dd>Helper method to call prepare_text_parsing with output buffering
+<dd>Helper method to call splitIntoSentences with output buffering
 This prevents HTML output from polluting the test output</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
@@ -2472,7 +2498,7 @@ This prevents HTML output from polluting the test output</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">34</span>
+    <span class="phpdocumentor-element-found-in__line">37</span>
 
     </aside>
 
@@ -2509,7 +2535,7 @@ This prevents HTML output from polluting the test output</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">35</span>
+    <span class="phpdocumentor-element-found-in__line">38</span>
 
     </aside>
 
@@ -15937,7 +15963,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">40</span>
+    <span class="phpdocumentor-element-found-in__line">43</span>
 
     </aside>
 
@@ -16219,7 +16245,7 @@ expected exception code are retrieved from a given Exception object.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">98</span>
+    <span class="phpdocumentor-element-found-in__line">101</span>
 
     </aside>
 
@@ -16285,23 +16311,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingAbbreviations">
-        testPrepareTextParsingAbbreviations()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingAbbreviations" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testParseAndDisplayPreviewCheckMode">
+        testParseAndDisplayPreviewCheckMode()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testParseAndDisplayPreviewCheckMode" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">313</span>
+    <span class="phpdocumentor-element-found-in__line">385</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with abbreviations</p>
+        <p class="phpdocumentor-summary">Test parseAndDisplayPreview check mode</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingAbbreviations</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testParseAndDisplayPreviewCheckMode</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16320,23 +16346,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingBasic">
-        testPrepareTextParsingBasic()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingBasic" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesAbbreviations">
+        testSplitIntoSentencesAbbreviations()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesAbbreviations" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">126</span>
+    <span class="phpdocumentor-element-found-in__line">314</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with basic text</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with abbreviations</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingBasic</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesAbbreviations</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16355,23 +16381,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingBraceReplacement">
-        testPrepareTextParsingBraceReplacement()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingBraceReplacement" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesBasic">
+        testSplitIntoSentencesBasic()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesBasic" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">188</span>
+    <span class="phpdocumentor-element-found-in__line">127</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test brace replacement in prepare_text_parsing</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with basic text</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingBraceReplacement</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesBasic</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16390,23 +16416,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingCharacterSubstitution">
-        testPrepareTextParsingCharacterSubstitution()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingCharacterSubstitution" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesBraceReplacement">
+        testSplitIntoSentencesBraceReplacement()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesBraceReplacement" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">144</span>
+    <span class="phpdocumentor-element-found-in__line">189</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test character substitution in prepare_text_parsing</p>
+        <p class="phpdocumentor-summary">Test brace replacement in splitIntoSentences</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingCharacterSubstitution</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesBraceReplacement</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16425,23 +16451,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingCheckMode">
-        testPrepareTextParsingCheckMode()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingCheckMode" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesCharacterSubstitution">
+        testSplitIntoSentencesCharacterSubstitution()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesCharacterSubstitution" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">384</span>
+    <span class="phpdocumentor-element-found-in__line">145</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing mode: check (-1)</p>
+        <p class="phpdocumentor-summary">Test character substitution in splitIntoSentences</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingCheckMode</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesCharacterSubstitution</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16460,9 +16486,9 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingEllipsis">
-        testPrepareTextParsingEllipsis()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingEllipsis" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesEllipsis">
+        testSplitIntoSentencesEllipsis()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesEllipsis" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -16472,11 +16498,11 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with ellipsis</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with ellipsis</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingEllipsis</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesEllipsis</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16495,9 +16521,9 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingEmoji">
-        testPrepareTextParsingEmoji()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingEmoji" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesEmoji">
+        testSplitIntoSentencesEmoji()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesEmoji" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -16507,11 +16533,11 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with emoji</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with emoji</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingEmoji</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesEmoji</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16530,23 +16556,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingEmpty">
-        testPrepareTextParsingEmpty()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingEmpty" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesEmpty">
+        testSplitIntoSentencesEmpty()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesEmpty" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">209</span>
+    <span class="phpdocumentor-element-found-in__line">210</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with empty text</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with empty text</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingEmpty</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesEmpty</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16565,9 +16591,9 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingInvalidLanguage">
-        testPrepareTextParsingInvalidLanguage()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingInvalidLanguage" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesInvalidLanguage">
+        testSplitIntoSentencesInvalidLanguage()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesInvalidLanguage" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -16577,11 +16603,11 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with invalid language ID</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with invalid language ID</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingInvalidLanguage</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesInvalidLanguage</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16600,9 +16626,9 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingLongText">
-        testPrepareTextParsingLongText()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingLongText" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesLongText">
+        testSplitIntoSentencesLongText()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesLongText" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -16612,11 +16638,11 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with very long text</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with very long text</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingLongText</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesLongText</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16635,23 +16661,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingMixedCase">
-        testPrepareTextParsingMixedCase()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingMixedCase" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesMixedCase">
+        testSplitIntoSentencesMixedCase()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesMixedCase" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">350</span>
+    <span class="phpdocumentor-element-found-in__line">351</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with mixed case</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with mixed case</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingMixedCase</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesMixedCase</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16670,23 +16696,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingMultipleParagraphs">
-        testPrepareTextParsingMultipleParagraphs()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingMultipleParagraphs" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesMultipleParagraphs">
+        testSplitIntoSentencesMultipleParagraphs()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesMultipleParagraphs" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">261</span>
+    <span class="phpdocumentor-element-found-in__line">262</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with multiple paragraphs</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with multiple paragraphs</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingMultipleParagraphs</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesMultipleParagraphs</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16705,9 +16731,9 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingNoPunctuation">
-        testPrepareTextParsingNoPunctuation()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingNoPunctuation" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesNoPunctuation">
+        testSplitIntoSentencesNoPunctuation()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesNoPunctuation" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -16717,11 +16743,11 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with no punctuation</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with no punctuation</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingNoPunctuation</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesNoPunctuation</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16740,23 +16766,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingNumbers">
-        testPrepareTextParsingNumbers()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingNumbers" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesNumbers">
+        testSplitIntoSentencesNumbers()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesNumbers" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">333</span>
+    <span class="phpdocumentor-element-found-in__line">334</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with numbers</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with numbers</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingNumbers</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesNumbers</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16775,23 +16801,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingQuotes">
-        testPrepareTextParsingQuotes()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingQuotes" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesQuotes">
+        testSplitIntoSentencesQuotes()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesQuotes" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">367</span>
+    <span class="phpdocumentor-element-found-in__line">368</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with quotes</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with quotes</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingQuotes</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesQuotes</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16810,9 +16836,9 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingSpecialCharacters">
-        testPrepareTextParsingSpecialCharacters()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingSpecialCharacters" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesSpecialCharacters">
+        testSplitIntoSentencesSpecialCharacters()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesSpecialCharacters" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -16822,11 +16848,11 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with special characters that need escaping</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with special characters that need escaping</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingSpecialCharacters</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesSpecialCharacters</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16845,23 +16871,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingSpecialPunctuation">
-        testPrepareTextParsingSpecialPunctuation()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingSpecialPunctuation" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesSpecialPunctuation">
+        testSplitIntoSentencesSpecialPunctuation()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesSpecialPunctuation" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">296</span>
+    <span class="phpdocumentor-element-found-in__line">297</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with special punctuation</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with special punctuation</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingSpecialPunctuation</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesSpecialPunctuation</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16880,23 +16906,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingUnicode">
-        testPrepareTextParsingUnicode()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingUnicode" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesUnicode">
+        testSplitIntoSentencesUnicode()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesUnicode" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">243</span>
+    <span class="phpdocumentor-element-found-in__line">244</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with Unicode text</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with Unicode text</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingUnicode</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesUnicode</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16915,23 +16941,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingWhitespaceOnly">
-        testPrepareTextParsingWhitespaceOnly()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingWhitespaceOnly" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesWhitespaceOnly">
+        testSplitIntoSentencesWhitespaceOnly()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesWhitespaceOnly" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">226</span>
+    <span class="phpdocumentor-element-found-in__line">227</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with whitespace-only text</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with whitespace-only text</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingWhitespaceOnly</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesWhitespaceOnly</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -16950,23 +16976,23 @@ end of sentence based on context (abbreviations, numbers, case, etc.)</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_testPrepareTextParsingWindowsLineEndings">
-        testPrepareTextParsingWindowsLineEndings()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingWindowsLineEndings" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_testSplitIntoSentencesWindowsLineEndings">
+        testSplitIntoSentencesWindowsLineEndings()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesWindowsLineEndings" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">278</span>
+    <span class="phpdocumentor-element-found-in__line">279</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Test prepare_text_parsing with Windows line endings</p>
+        <p class="phpdocumentor-summary">Test splitIntoSentences with Windows line endings</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">testPrepareTextParsingWindowsLineEndings</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">testSplitIntoSentencesWindowsLineEndings</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -18939,24 +18965,24 @@ resets the locale to its original value after the test is run.</p>
             -private
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_callPrepareTextParsing">
-        callPrepareTextParsing()
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_callPrepareTextParsing" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_callSplitIntoSentences">
+        callSplitIntoSentences()
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_callSplitIntoSentences" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">115</span>
+    <span class="phpdocumentor-element-found-in__line">116</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Helper method to call prepare_text_parsing with output buffering
+        <p class="phpdocumentor-summary">Helper method to call splitIntoSentences with output buffering
 This prevents HTML output from polluting the test output</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">callPrepareTextParsing</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$text</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lid</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">null|array&lt;string|int, string&gt;</span></code>
+                    <span class="phpdocumentor-signature__name">callSplitIntoSentences</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$text</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lid</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, string&gt;</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -18972,15 +18998,8 @@ This prevents HTML output from polluting the test output</p>
                 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$id</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$lid</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int|string</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                 
@@ -18990,25 +19009,16 @@ This prevents HTML output from polluting the test output</p>
     
     <h5 class="phpdocumentor-tag-list__heading" id="tags">
         Tags
-        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_callPrepareTextParsing#tags" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_callSplitIntoSentences#tags" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
-                    <span class="phpdocumentor-tag__name">psalm-param</span>
-                </dt>
-                <dd class="phpdocumentor-tag-list__definition">
-                                                                                
-                                                 <section class="phpdocumentor-description"><p>-2 $id</p>
-</section>
-
-                                    </dd>
-                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">psalm-return</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
                                                                                 
-                                                 <section class="phpdocumentor-description"><p>non-empty-list<string>|null</p>
+                                                 <section class="phpdocumentor-description"><p>non-empty-list<string></p>
 </section>
 
                                     </dd>
@@ -19018,7 +19028,7 @@ This prevents HTML output from polluting the test output</p>
     
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">null|array&lt;string|int, string&gt;</span>
+        <span class="phpdocumentor-signature__response_type">array&lt;string|int, string&gt;</span>
             </section>
 
 </article>
@@ -19036,7 +19046,7 @@ This prevents HTML output from polluting the test output</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="tests/backend/Core/Text/TextParsingTest.php"><a href="files/tests-backend-core-text-textparsingtest.html"><abbr title="tests/backend/Core/Text/TextParsingTest.php">TextParsingTest.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">62</span>
+    <span class="phpdocumentor-element-found-in__line">65</span>
 
     </aside>
 
@@ -19382,26 +19392,26 @@ This prevents HTML output from polluting the test output</p>
                                             <li class=""><a href="classes/PHPUnit-Framework-Assert.html#method_stringStartsWith">stringStartsWith()</a></li>
                                             <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_tearDownAfterClass">tearDownAfterClass()</a></li>
                                             <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testFindLatinSentenceEnd">testFindLatinSentenceEnd()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingAbbreviations">testPrepareTextParsingAbbreviations()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingBasic">testPrepareTextParsingBasic()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingBraceReplacement">testPrepareTextParsingBraceReplacement()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingCharacterSubstitution">testPrepareTextParsingCharacterSubstitution()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingCheckMode">testPrepareTextParsingCheckMode()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingEllipsis">testPrepareTextParsingEllipsis()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingEmoji">testPrepareTextParsingEmoji()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingEmpty">testPrepareTextParsingEmpty()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingInvalidLanguage">testPrepareTextParsingInvalidLanguage()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingLongText">testPrepareTextParsingLongText()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingMixedCase">testPrepareTextParsingMixedCase()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingMultipleParagraphs">testPrepareTextParsingMultipleParagraphs()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingNoPunctuation">testPrepareTextParsingNoPunctuation()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingNumbers">testPrepareTextParsingNumbers()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingQuotes">testPrepareTextParsingQuotes()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingSpecialCharacters">testPrepareTextParsingSpecialCharacters()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingSpecialPunctuation">testPrepareTextParsingSpecialPunctuation()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingUnicode">testPrepareTextParsingUnicode()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingWhitespaceOnly">testPrepareTextParsingWhitespaceOnly()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testPrepareTextParsingWindowsLineEndings">testPrepareTextParsingWindowsLineEndings()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testParseAndDisplayPreviewCheckMode">testParseAndDisplayPreviewCheckMode()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesAbbreviations">testSplitIntoSentencesAbbreviations()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesBasic">testSplitIntoSentencesBasic()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesBraceReplacement">testSplitIntoSentencesBraceReplacement()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesCharacterSubstitution">testSplitIntoSentencesCharacterSubstitution()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesEllipsis">testSplitIntoSentencesEllipsis()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesEmoji">testSplitIntoSentencesEmoji()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesEmpty">testSplitIntoSentencesEmpty()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesInvalidLanguage">testSplitIntoSentencesInvalidLanguage()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesLongText">testSplitIntoSentencesLongText()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesMixedCase">testSplitIntoSentencesMixedCase()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesMultipleParagraphs">testSplitIntoSentencesMultipleParagraphs()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesNoPunctuation">testSplitIntoSentencesNoPunctuation()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesNumbers">testSplitIntoSentencesNumbers()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesQuotes">testSplitIntoSentencesQuotes()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesSpecialCharacters">testSplitIntoSentencesSpecialCharacters()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesSpecialPunctuation">testSplitIntoSentencesSpecialPunctuation()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesUnicode">testSplitIntoSentencesUnicode()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesWhitespaceOnly">testSplitIntoSentencesWhitespaceOnly()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_testSplitIntoSentencesWindowsLineEndings">testSplitIntoSentencesWindowsLineEndings()</a></li>
                                             <li class=""><a href="classes/PHPUnit-Framework-TestCase.html#method_throwException">throwException()</a></li>
                                             <li class=""><a href="classes/PHPUnit-Framework-TestCase.html#method_assertPostConditions">assertPostConditions()</a></li>
                                             <li class=""><a href="classes/PHPUnit-Framework-TestCase.html#method_assertPreConditions">assertPreConditions()</a></li>
@@ -19425,7 +19435,7 @@ This prevents HTML output from polluting the test output</p>
                                             <li class=""><a href="classes/PHPUnit-Framework-TestCase.html#method_setUp">setUp()</a></li>
                                             <li class=""><a href="classes/PHPUnit-Framework-TestCase.html#method_tearDown">tearDown()</a></li>
                                             <li class=""><a href="classes/PHPUnit-Framework-TestCase.html#method_transformException">transformException()</a></li>
-                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_callPrepareTextParsing">callPrepareTextParsing()</a></li>
+                                            <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_callSplitIntoSentences">callSplitIntoSentences()</a></li>
                                             <li class=""><a href="classes/Lwt-Tests-Core-Text-TextParsingTest.html#method_createTestLanguage">createTestLanguage()</a></li>
                                     </ul>
             </li>

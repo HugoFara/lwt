@@ -61,10 +61,6 @@
 </h4>
     <ul class="phpdocumentor-list">
                     <li>
-                <a href="namespaces/lwt-core.html" class="">Core</a>
-                
-            </li>
-                    <li>
                 <a href="namespaces/lwt-api.html" class="">Api</a>
                 
             </li>
@@ -73,11 +69,7 @@
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-database.html" class="">Database</a>
-                
-            </li>
-                    <li>
-                <a href="namespaces/lwt-text-from-youtube.html" class="">Text_From_Youtube</a>
+                <a href="namespaces/lwt-core.html" class="">Core</a>
                 
             </li>
                     <li>
@@ -85,15 +77,15 @@
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-services.html" class="">Services</a>
-                
-            </li>
-                    <li>
                 <a href="namespaces/lwt-view.html" class="">View</a>
                 
             </li>
                     <li>
-                <a href="namespaces/lwt-views.html" class="">Views</a>
+                <a href="namespaces/lwt-modules.html" class="">Modules</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/lwt-shared.html" class="">Shared</a>
                 
             </li>
                     <li>
@@ -110,6 +102,10 @@
     <a href="namespaces/tests.html" class="">Tests</a>
 </h4>
     <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/tests-backend.html" class="">Backend</a>
+                
+            </li>
                     <li>
                 <a href="namespaces/tests-router.html" class="">Router</a>
                 
@@ -354,6 +350,16 @@
     <ul class="phpdocumentor-list">
                     <li>
                 <a href="namespaces/phpdocumentor-reflection.html" class="">Reflection</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/phpmailer.html" class="">PHPMailer</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/phpmailer-phpmailer.html" class="">PHPMailer</a>
                 
             </li>
             </ul>
@@ -616,10 +622,6 @@
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Database.html" class="">Database</a>
-                
-            </li>
-                    <li>
                 <a href="packages/Lwt-Entity.html" class="">Entity</a>
                 
             </li>
@@ -628,11 +630,19 @@
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Services.html" class="">Services</a>
+                <a href="packages/Lwt-Views.html" class="">Views</a>
                 
             </li>
                     <li>
-                <a href="packages/Lwt-Views.html" class="">Views</a>
+                <a href="packages/Lwt-Modules.html" class="">Modules</a>
+                
+            </li>
+                    <li>
+                <a href="packages/Lwt-Shared.html" class="">Shared</a>
+                
+            </li>
+                    <li>
+                <a href="packages/Lwt-Database.html" class="">Database</a>
                 
             </li>
                     <li>
@@ -648,6 +658,20 @@
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/JsonMapper.html" class="">JsonMapper</a>
 </h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/PHPMailer.html" class="">PHPMailer</a>
+</h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/PHPMailerSomeFrenchpunctuationrequiresathinnon.html" class="">PHPMailerSomeFrenchpunctuationrequiresathinnon</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="packages/PHPMailerSomeFrenchpunctuationrequiresathinnon-breakingspaceU202Fcharacterbeforeitforexamplebeforeacolonorexclamationmark.html" class="">breakingspaceU202Fcharacterbeforeitforexamplebeforeacolonorexclamationmark</a>
+                
+            </li>
+            </ul>
 
                         </section>
             
@@ -697,7 +721,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/ApiController.php"><a href="files/src-backend-controllers-apicontroller.html"><abbr title="src/backend/Controllers/ApiController.php">ApiController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">51</span>
+    <span class="phpdocumentor-element-found-in__line">43</span>
 
     </aside>
 
@@ -707,8 +731,9 @@
     <section class="phpdocumentor-description"><p>Handles:</p>
 <ul>
 <li>Main REST API (v1)</li>
-<li>Translation APIs (delegated to TranslationController)</li>
 </ul>
+<p>Note: Translation APIs (/api/translate, /api/google, /api/glosbe) are now
+handled directly by Lwt\Modules\Dictionary\Http\TranslationController.</p>
 </section>
 
 
@@ -778,27 +803,6 @@
 
 
 
-<h4 id="toc-properties">
-    Properties
-    <a href="classes/Lwt-Controllers-ApiController.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
-
-</h4>
-<dl class="phpdocumentor-table-of-contents">
-            <dt class="phpdocumentor-table-of-contents__entry -property -protected">
-    <a class="" href="classes/Lwt-Controllers-BaseController.html#property_db">$db</a>
-    <span>
-                        &nbsp;: <abbr title="\mysqli">mysqli</abbr>|null            </span>
-</dt>
-<dd>Database connection (may be null if session_utility.php not yet loaded)</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -property -protected">
-    <a class="" href="classes/Lwt-Controllers-ApiController.html#property_translationController">$translationController</a>
-    <span>
-                        &nbsp;: <a href="classes/Lwt-Controllers-TranslationController.html"><abbr title="\Lwt\Controllers\TranslationController">TranslationController</abbr></a>            </span>
-</dt>
-<dd>Translation controller for handling translation endpoints</dd>
-
-    </dl>
 
 <h4 id="toc-methods">
     Methods
@@ -811,28 +815,7 @@
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Initialize the controller with dependencies.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Controllers-ApiController.html#method_glosbe">glosbe()</a>
-    <span>
-                                &nbsp;: void    </span>
-</dt>
-<dd>Glosbe API endpoint (replaces api_glosbe.php)</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Controllers-ApiController.html#method_google">google()</a>
-    <span>
-                                &nbsp;: void    </span>
-</dt>
-<dd>Google translate endpoint (replaces api_google.php)</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Controllers-ApiController.html#method_translate">translate()</a>
-    <span>
-                                &nbsp;: void    </span>
-</dt>
-<dd>Translation endpoint (replaces api_translate.php)</dd>
+<dd>Initialize the controller.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Controllers-ApiController.html#method_v1">v1()</a>
@@ -847,20 +830,6 @@
                                 &nbsp;: void    </span>
 </dt>
 <dd>End page rendering with standard LWT footer.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -protected">
-    <a class="-deprecated" href="classes/Lwt-Controllers-BaseController.html#method_escape">escape()</a>
-    <span>
-                                &nbsp;: string    </span>
-</dt>
-<dd>Escape a string for safe SQL insertion.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -protected">
-    <a class="-deprecated" href="classes/Lwt-Controllers-BaseController.html#method_escapeNonNull">escapeNonNull()</a>
-    <span>
-                                &nbsp;: string    </span>
-</dt>
-<dd>Escape a string for safe SQL insertion (returns empty string instead of NULL).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/Lwt-Controllers-BaseController.html#method_execute">execute()</a>
@@ -882,13 +851,6 @@
                                 &nbsp;: array&lt;string|int, int&gt;    </span>
 </dt>
 <dd>Get IDs from marked checkboxes.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -protected">
-    <a class="" href="classes/Lwt-Controllers-ApiController.html#method_getTranslationController">getTranslationController()</a>
-    <span>
-                                &nbsp;: <a href="classes/Lwt-Controllers-TranslationController.html"><abbr title="\Lwt\Controllers\TranslationController">TranslationController</abbr></a>    </span>
-</dt>
-<dd>Get the translation controller.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/Lwt-Controllers-BaseController.html#method_getValue">getValue()</a>
@@ -995,89 +957,6 @@
         
 
         
-    <section class="phpdocumentor-properties">
-        <h3 class="phpdocumentor-elements__header" id="properties">
-            Properties
-            <a href="classes/Lwt-Controllers-ApiController.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
-
-        </h3>
-                    <article
-        class="
-            phpdocumentor-element
-            -property
-            -protected
-                                                                    "
->
-    <h4 class="phpdocumentor-element__name" id="property_db">
-        $db
-        <a href="classes/Lwt-Controllers-BaseController.html#property_db" class="headerlink"><i class="fas fa-link"></i></a>
-
-        <span class="phpdocumentor-element__modifiers">
-                                            </span>
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">48</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Database connection (may be null if session_utility.php not yet loaded)</p>
-
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-        <span class="phpdocumentor-signature__visibility">protected</span>
-            <span class="phpdocumentor-signature__type"><abbr title="\mysqli">mysqli</abbr>|null</span>
-    <span class="phpdocumentor-signature__name">$db</span>
-     = <span class="phpdocumentor-signature__default-value">null</span></code>
-
-    
-    
-    
-
-        
-        
-
-</article>
-                    <article
-        class="
-            phpdocumentor-element
-            -property
-            -protected
-                                                                    "
->
-    <h4 class="phpdocumentor-element__name" id="property_translationController">
-        $translationController
-        <a href="classes/Lwt-Controllers-ApiController.html#property_translationController" class="headerlink"><i class="fas fa-link"></i></a>
-
-        <span class="phpdocumentor-element__modifiers">
-                                            </span>
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/ApiController.php"><a href="files/src-backend-controllers-apicontroller.html"><abbr title="src/backend/Controllers/ApiController.php">ApiController.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">58</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Translation controller for handling translation endpoints</p>
-
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-        <span class="phpdocumentor-signature__visibility">protected</span>
-            <span class="phpdocumentor-signature__type"><a href="classes/Lwt-Controllers-TranslationController.html"><abbr title="\Lwt\Controllers\TranslationController">TranslationController</abbr></a></span>
-    <span class="phpdocumentor-signature__name">$translationController</span>
-    </code>
-
-    
-    
-    
-
-        
-        
-
-</article>
-            </section>
 
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
@@ -1099,180 +978,21 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/ApiController.php"><a href="files/src-backend-controllers-apicontroller.html"><abbr title="src/backend/Controllers/ApiController.php">ApiController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">65</span>
+    <span class="phpdocumentor-element-found-in__line">48</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Initialize the controller with dependencies.</p>
+        <p class="phpdocumentor-summary">Initialize the controller.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Controllers-TranslationController.html"><abbr title="\Lwt\Controllers\TranslationController">TranslationController</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$translationController</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
     
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$translationController</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Controllers-TranslationController.html"><abbr title="\Lwt\Controllers\TranslationController">TranslationController</abbr></a>|null</span>
-                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Translation controller (optional for BC)</p>
-</section>
-
-            </dd>
-            </dl>
-
     
-
-        
-    
-    
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_glosbe">
-        glosbe()
-        <a href="classes/Lwt-Controllers-ApiController.html#method_glosbe" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/ApiController.php"><a href="files/src-backend-controllers-apicontroller.html"><abbr title="src/backend/Controllers/ApiController.php">ApiController.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">132</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Glosbe API endpoint (replaces api_glosbe.php)</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">glosbe</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$params</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-        <section class="phpdocumentor-description"><p>Delegates to TranslationController for proper MVC handling.</p>
-</section>
-
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$params</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string|int, mixed&gt;</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Route parameters</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-        
-    
-    
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_google">
-        google()
-        <a href="classes/Lwt-Controllers-ApiController.html#method_google" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/ApiController.php"><a href="files/src-backend-controllers-apicontroller.html"><abbr title="src/backend/Controllers/ApiController.php">ApiController.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">118</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Google translate endpoint (replaces api_google.php)</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">google</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$params</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-        <section class="phpdocumentor-description"><p>Delegates to TranslationController for proper MVC handling.</p>
-</section>
-
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$params</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string|int, mixed&gt;</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Route parameters</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-        
-    
-    
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_translate">
-        translate()
-        <a href="classes/Lwt-Controllers-ApiController.html#method_translate" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/ApiController.php"><a href="files/src-backend-controllers-apicontroller.html"><abbr title="src/backend/Controllers/ApiController.php">ApiController.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">104</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Translation endpoint (replaces api_translate.php)</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">translate</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$params</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-        <section class="phpdocumentor-description"><p>Delegates to TranslationController for proper MVC handling.</p>
-</section>
-
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$params</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string|int, mixed&gt;</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Route parameters</p>
-</section>
-
-            </dd>
-            </dl>
-
     
 
         
@@ -1293,7 +1013,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/ApiController.php"><a href="files/src-backend-controllers-apicontroller.html"><abbr title="src/backend/Controllers/ApiController.php">ApiController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">90</span>
+    <span class="phpdocumentor-element-found-in__line">63</span>
 
     </aside>
 
@@ -1306,7 +1026,8 @@
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Uses the new ApiV1 handler class for clean separation of concerns.</p>
+        <section class="phpdocumentor-description"><p>Uses the new ApiV1 handler class for clean separation of concerns.
+Applies rate limiting before processing the request.</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -1342,7 +1063,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">79</span>
+    <span class="phpdocumentor-element-found-in__line">68</span>
 
     </aside>
 
@@ -1367,140 +1088,6 @@
         class="phpdocumentor-element
             -method
             -protected
-            -deprecated                                            "
->
-    <h4 class="phpdocumentor-element__name" id="method_escape">
-        escape()
-        <a href="classes/Lwt-Controllers-BaseController.html#method_escape" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">295</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Escape a string for safe SQL insertion.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature -deprecated">
-    <span class="phpdocumentor-signature__visibility">protected</span>
-                    <span class="phpdocumentor-signature__name">escape</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$value</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-                <div class="phpdocumentor-admonition">
-        <svg class="phpdocumentor-admonition__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <article>
-                <p>Use prepared statements instead:
-Connection::preparedExecute($sql, [$param1, $param2])
-Connection::preparedFetchAll($sql, [$param1, $param2])
-Connection::preparedFetchOne($sql, [$param1, $param2])
-Connection::preparedFetchValue($sql, [$param1, $param2])
-Connection::preparedInsert($sql, [$param1, $param2])</p>
-
-            </article>
-        </div>
-    
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$value</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>String to escape</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">string</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>Escaped string suitable for SQL (with quotes)</p>
-</section>
-
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -protected
-            -deprecated                                            "
->
-    <h4 class="phpdocumentor-element__name" id="method_escapeNonNull">
-        escapeNonNull()
-        <a href="classes/Lwt-Controllers-BaseController.html#method_escapeNonNull" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">314</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Escape a string for safe SQL insertion (returns empty string instead of NULL).</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature -deprecated">
-    <span class="phpdocumentor-signature__visibility">protected</span>
-                    <span class="phpdocumentor-signature__name">escapeNonNull</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$value</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-                <div class="phpdocumentor-admonition">
-        <svg class="phpdocumentor-admonition__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <article>
-                <p>Use prepared statements instead:
-Connection::preparedExecute($sql, [$param1, $param2])
-Connection::preparedFetchAll($sql, [$param1, $param2])
-Connection::preparedFetchOne($sql, [$param1, $param2])
-Connection::preparedFetchValue($sql, [$param1, $param2])
-Connection::preparedInsert($sql, [$param1, $param2])</p>
-
-            </article>
-        </div>
-    
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$value</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>String to escape</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">string</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>Escaped string suitable for SQL (with quotes)</p>
-</section>
-
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -protected
                                                         "
 >
     <h4 class="phpdocumentor-element__name" id="method_execute">
@@ -1511,7 +1098,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">263</span>
+    <span class="phpdocumentor-element-found-in__line">252</span>
 
     </aside>
 
@@ -1582,7 +1169,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">146</span>
+    <span class="phpdocumentor-element-found-in__line">135</span>
 
     </aside>
 
@@ -1646,7 +1233,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">344</span>
+    <span class="phpdocumentor-element-found-in__line">294</span>
 
     </aside>
 
@@ -1709,45 +1296,6 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
             -protected
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_getTranslationController">
-        getTranslationController()
-        <a href="classes/Lwt-Controllers-ApiController.html#method_getTranslationController" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/ApiController.php"><a href="files/src-backend-controllers-apicontroller.html"><abbr title="src/backend/Controllers/ApiController.php">ApiController.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">76</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Get the translation controller.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">protected</span>
-                    <span class="phpdocumentor-signature__name">getTranslationController</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Controllers-TranslationController.html"><abbr title="\Lwt\Controllers\TranslationController">TranslationController</abbr></a></span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-    
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Controllers-TranslationController.html"><abbr title="\Lwt\Controllers\TranslationController">TranslationController</abbr></a></span>
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -protected
-                                                        "
->
     <h4 class="phpdocumentor-element__name" id="method_getValue">
         getValue()
         <a href="classes/Lwt-Controllers-BaseController.html#method_getValue" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1756,7 +1304,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">275</span>
+    <span class="phpdocumentor-element-found-in__line">264</span>
 
     </aside>
 
@@ -1811,7 +1359,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">133</span>
+    <span class="phpdocumentor-element-found-in__line">122</span>
 
     </aside>
 
@@ -1866,7 +1414,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">223</span>
+    <span class="phpdocumentor-element-found-in__line">212</span>
 
     </aside>
 
@@ -1905,7 +1453,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">213</span>
+    <span class="phpdocumentor-element-found-in__line">202</span>
 
     </aside>
 
@@ -1944,7 +1492,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">327</span>
+    <span class="phpdocumentor-element-found-in__line">277</span>
 
     </aside>
 
@@ -2004,7 +1552,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">92</span>
+    <span class="phpdocumentor-element-found-in__line">81</span>
 
     </aside>
 
@@ -2060,7 +1608,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">121</span>
+    <span class="phpdocumentor-element-found-in__line">110</span>
 
     </aside>
 
@@ -2124,7 +1672,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">203</span>
+    <span class="phpdocumentor-element-found-in__line">192</span>
 
     </aside>
 
@@ -2188,7 +1736,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">174</span>
+    <span class="phpdocumentor-element-found-in__line">163</span>
 
     </aside>
 
@@ -2270,7 +1818,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">159</span>
+    <span class="phpdocumentor-element-found-in__line">148</span>
 
     </aside>
 
@@ -2334,7 +1882,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">249</span>
+    <span class="phpdocumentor-element-found-in__line">238</span>
 
     </aside>
 
@@ -2389,7 +1937,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">236</span>
+    <span class="phpdocumentor-element-found-in__line">225</span>
 
     </aside>
 
@@ -2449,7 +1997,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">69</span>
+    <span class="phpdocumentor-element-found-in__line">58</span>
 
     </aside>
 
@@ -2505,7 +2053,7 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Controllers/BaseController.php"><a href="files/src-backend-controllers-basecontroller.html"><abbr title="src/backend/Controllers/BaseController.php">BaseController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">190</span>
+    <span class="phpdocumentor-element-found-in__line">179</span>
 
     </aside>
 
@@ -2688,34 +2236,20 @@ Connection::preparedInsert($sql, [$param1, $param2])</p>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                            <li><a href="classes/Lwt-Controllers-ApiController.html#toc-properties">Properties</a></li>
-                                                            <li><a href="classes/Lwt-Controllers-ApiController.html#toc-methods">Methods</a></li>
+                                                                                <li><a href="classes/Lwt-Controllers-ApiController.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
             
-                            <li class="phpdocumentor-on-this-page-section__title">Properties</li>
-                <li>
-                    <ul class="phpdocumentor-list -clean">
-                                                    <li class=""><a href="classes/Lwt-Controllers-BaseController.html#property_db">$db</a></li>
-                                                    <li class=""><a href="classes/Lwt-Controllers-ApiController.html#property_translationController">$translationController</a></li>
-                                            </ul>
-                </li>
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Lwt-Controllers-ApiController.html#method___construct">__construct()</a></li>
-                                            <li class=""><a href="classes/Lwt-Controllers-ApiController.html#method_glosbe">glosbe()</a></li>
-                                            <li class=""><a href="classes/Lwt-Controllers-ApiController.html#method_google">google()</a></li>
-                                            <li class=""><a href="classes/Lwt-Controllers-ApiController.html#method_translate">translate()</a></li>
                                             <li class=""><a href="classes/Lwt-Controllers-ApiController.html#method_v1">v1()</a></li>
                                             <li class=""><a href="classes/Lwt-Controllers-BaseController.html#method_endRender">endRender()</a></li>
-                                            <li class="-deprecated"><a href="classes/Lwt-Controllers-BaseController.html#method_escape">escape()</a></li>
-                                            <li class="-deprecated"><a href="classes/Lwt-Controllers-BaseController.html#method_escapeNonNull">escapeNonNull()</a></li>
                                             <li class=""><a href="classes/Lwt-Controllers-BaseController.html#method_execute">execute()</a></li>
                                             <li class=""><a href="classes/Lwt-Controllers-BaseController.html#method_get">get()</a></li>
                                             <li class=""><a href="classes/Lwt-Controllers-BaseController.html#method_getMarkedIds">getMarkedIds()</a></li>
-                                            <li class=""><a href="classes/Lwt-Controllers-ApiController.html#method_getTranslationController">getTranslationController()</a></li>
                                             <li class=""><a href="classes/Lwt-Controllers-BaseController.html#method_getValue">getValue()</a></li>
                                             <li class=""><a href="classes/Lwt-Controllers-BaseController.html#method_hasParam">hasParam()</a></li>
                                             <li class=""><a href="classes/Lwt-Controllers-BaseController.html#method_isGet">isGet()</a></li>
