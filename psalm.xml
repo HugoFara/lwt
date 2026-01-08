@@ -43,7 +43,6 @@
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Views" />
-                <directory name="src/backend/Services" />
                 <directory name="src/Modules" />
             </errorLevel>
         </UnusedVariable>
@@ -52,7 +51,6 @@
         <PossiblyUnusedParam>
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
-                <directory name="src/backend/Services" />
                 <directory name="src/backend/View" />
                 <directory name="src/Modules" />
                 <directory name="src/Shared" />
@@ -65,7 +63,6 @@
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Api" />
                 <directory name="src/backend/Core" />
-                <directory name="src/backend/Services" />
                 <directory name="src/backend/View" />
                 <directory name="src/Modules" />
                 <directory name="src/Shared" />
@@ -107,7 +104,6 @@
         <!-- Return value may not be used by callers -->
         <PossiblyUnusedReturnValue>
             <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
                 <directory name="src/Modules" />
                 <directory name="src/Shared" />
             </errorLevel>

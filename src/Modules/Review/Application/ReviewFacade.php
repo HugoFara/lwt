@@ -230,7 +230,7 @@ class ReviewFacade
      *     sentence: string|null,
      *     sentenceId: int|null,
      *     found: bool,
-     *     annotations: array<int, array{text: string, romanization: string|null, translation: string|null, isTarget: bool}>
+     *     annotations: array<int, array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>
      * }
      */
     public function getSentenceWithAnnotations(int $wordId, string $wordlc): array

@@ -393,6 +393,13 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @return array{
+     *     sentence: string|null,
+     *     sentenceId: int|null,
+     *     found: bool,
+     *     annotations: array<int, array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>
+     * }
      */
     public function getSentenceWithAnnotations(int $wordId, string $wordLc): array
     {
@@ -517,10 +524,11 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
 
             // Only include annotation data if the word is known (has a WoID)
             if ($woId !== null) {
+                $romanization = $row['WoRomanization'];
                 $annotations[$order] = [
                     'text' => $text,
-                    'romanization' => $row['WoRomanization'] ?: null,
-                    'translation' => $this->getFirstTranslation($row['WoTranslation'] ?? ''),
+                    'romanization' => ($romanization === null || $romanization === '') ? null : (string)$romanization,
+                    'translation' => $this->getFirstTranslation((string)($row['WoTranslation'] ?? '')),
                     'isTarget' => $isTarget,
                     'order' => $order
                 ];
@@ -553,7 +561,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             return null;
         }
         $arr = preg_split('/[' . \Lwt\Core\StringUtils::getSeparators() . ']/u', $trans);
-        if ($arr === false || count($arr) < 1) {
+        if ($arr === false) {
             return null;
         }
         $r = trim($arr[0]);

@@ -206,7 +206,7 @@ class WordListService
         } elseif ($whTag1 === null && $whTag2 === null) {
             return '';
         } else {
-            return " having ((" . (string)$whTag1 . ($tag12 ? ') AND (' : ') OR (') . (string)$whTag2 . ")) ";
+            return " having ((" . $whTag1 . ($tag12 ? ') AND (' : ') OR (') . $whTag2 . ")) ";
         }
     }
 
