@@ -43,7 +43,7 @@ To run LWT, you'll need:
 
 ### Community Version: [HugoFara](https://github.com/HugoFara) (GitHub version maintainer)
 
-I started using LWT in 2021, and continued its development almost instantly. I felt that the core idea was very good, but its implementation seemed unadapted, and the code was quite obfuscated. While I do not have any official responsibility to LWT (we don't have any kind of official agreement with lang-learn-guy), I am the the *de facto* maintainer of the community version. I dedicated myself to the following points (see the [GitHub post](https://github.com/HugoFara/lwt/discussions/6)):
+I started using LWT in 2021, and continued its development almost instantly. I felt that the core idea was very good, but its implementation seemed unadapted, and the code was quite obfuscated. While I do not have any official responsibility to LWT (we don't have any kind of official agreement with lang-learn-guy), I am the the _de facto_ maintainer of the community version. I dedicated myself to the following points (see the [GitHub post](https://github.com/HugoFara/lwt/discussions/6)):
 
 * Make LWT Open Source: document and refactor code
 * Meet the HTML5 standards: the interface was relying on deprecated systems like frames, making it difficult to use on small screens.
@@ -59,4 +59,4 @@ While work is not yet finished, I also aim to expand LWT:
   * Text-to-speech features.
   * Motivational sounds when testing terms to makes things more lively.
 
-But there is much more! The community version of LWT is no longer the feat of one man, it belongs to everyone. As such, it gets well easier to implement new features, discuss and exchange code and ideas. I don't know if LWT contains *your* killer feature, but I can say that it *can be implemented* with this version. Enjoy!
+But there is much more! The community version of LWT is no longer the feat of one man, it belongs to everyone. As such, it gets well easier to implement new features, discuss and exchange code and ideas. I don't know if LWT contains _your_ killer feature, but I can say that it _can be implemented_ with this version. Enjoy!

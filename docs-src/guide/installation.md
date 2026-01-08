@@ -150,10 +150,10 @@ The following instruction were tested on Raspbian Stretch.
 
       Then type
 
-      ```MySQL
+      ```sql
       ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'abcxyz';
       FLUSH privileges;
-      QUIT; 
+      QUIT;
       ```
 
    5. (Optionnal) Check MySQL access
@@ -165,7 +165,7 @@ The following instruction were tested on Raspbian Stretch.
 
        If you see the MySQL prompt ``mysql>`` after the first command, everything is OK. Quit with
 
-       ```MySQL
+       ```sql
        QUIT;
        ```
 
@@ -231,15 +231,15 @@ The official repository is at <https://packagist.org/packages/hugofara/lwt>.
 
 Already have LWT installed? See the [Upgrading Guide](./upgrade.md) for detailed instructions on how to safely upgrade to a newer version, including:
 
-- Backup procedures
-- Automatic database migrations
-- Upgrading from very old versions
-- Troubleshooting common issues
+* Backup procedures
+* Automatic database migrations
+* Upgrading from very old versions
+* Troubleshooting common issues
 
 ## Something Went Wrong
 
-Need more help? You can contact us through  [GitHub](https://github.com/HugoFara/lwt/issues) and [Discord](https://discord.gg/xrkRZR2jtt)!
+Need more help? You can contact us through [GitHub](https://github.com/HugoFara/lwt/issues)!
 
 You can also consult the troubleshooting section of the documentation at <https://hugofara.github.io/lwt/docs/info.html#faq>.
 
-Please note that *PHP below version 8.0 is no longer supported*.
+Please note that *PHP below version 8.1 is no longer supported*.

@@ -22,7 +22,7 @@ two main advantages:
 
 ### Using Docker
 
-Original instructions provided [here](https://nickramkissoon.medium.com/easily-set-up-and-use-mecab-with-docker-and-nodejs-5f01ae761a61).
+Original instructions provided on [Easily Set Up and Use MeCab With Docker and NodeJS (Medium)](https://nickramkissoon.medium.com/easily-set-up-and-use-mecab-with-docker-and-nodejs-5f01ae761a61).
 
 1. Run your LWT container in interactive mode and install MeCab.
 
@@ -71,7 +71,7 @@ LWT supports a multi-user mode where each user has their own isolated data. This
 
 1. Edit your `.env` file and add:
 
-   ```env
+   ```dotenv
    MULTI_USER_ENABLED=true
    ```
 
@@ -92,17 +92,19 @@ When creating accounts in multi-user mode, passwords must meet the following req
 
 ::: tip Security Best Practices
 For production deployments, we recommend:
-- Use a strong, unique password (12+ characters with mixed case, numbers, and symbols)
-- Never reuse passwords from other services
-- Consider using a password manager
-- Always use HTTPS in production
+
+* Use a strong, unique password (12+ characters with mixed case, numbers, and symbols)
+* Never reuse passwords from other services
+* Consider using a password manager
+* Always use HTTPS in production
 :::
 
 ### Password Hashing
 
 LWT uses modern password hashing algorithms:
-- **Argon2ID** (preferred) - Memory-hard algorithm resistant to GPU attacks
-- **bcrypt** (fallback) - Used if Argon2ID is unavailable
+
+* **Argon2ID** (preferred) - Memory-hard algorithm resistant to GPU attacks
+* **bcrypt** (fallback) - Used if Argon2ID is unavailable
 
 Passwords are never stored in plain text and cannot be recovered—only reset.
 
@@ -115,7 +117,7 @@ LWT can import captions from YouTube videos. To enable this feature:
 3. Create an API key in the Credentials section
 4. Add the key to your `.env` file:
 
-   ```env
+   ```dotenv
    YT_API_KEY=your_api_key_here
    ```
 

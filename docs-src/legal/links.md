@@ -33,7 +33,6 @@
 
 ## LWT Forum Threads
 
-* [How-To-Learn-Any-Language Forum Thread about LWT](http://how-to-learn-any-language.com/forum/forum_posts.asp?TID=28312&PN=1&TPN=1)
 * [Sites/Apps like Readlang, Lingq, Lingua.ly, etc.](https://forum.language-learners.org/viewtopic.php?f=19&t=1993)
 * [Best dictionaries for use with LWT?](https://forum.language-learners.org/viewtopic.php?f=19&t=5648)
 * [Getting the most out of LWT](https://forum.language-learners.org/viewtopic.php?f=19&t=7156)
@@ -49,7 +48,7 @@ Similar software or services:
 
 Resources for various languages
 
-* [GoogleDocs Spreadsheet](http://tinyurl.com/cbpndlt) with recommendations for LWT Language Settings ("Templates")  
+* [GoogleDocs Spreadsheet](https://docs.google.com/spreadsheets/d/1NdSuuFVVLX3an_ED4nlJYnH3zY_h7Oz6AXxfqvCScgM/edit?hl=en_US&hl=en_US&gid=0#gid=0) with recommendations for LWT Language Settings ("Templates")  
         **Important:** Please be careful when making additions or corrections!
 * Japanese: [MeCab - Yet Another Part-of-Speech and Morphological Analyzer](http://taku910.github.io/mecab/)
 

@@ -1,14 +1,5 @@
 # Third Party Licenses
 
-The following software packages, bundled within the LWT software, have different licenses:
-
-* jQuery, jQueryUI - Copyright © John Resig et.al., [http://jquery.org/license](http://jquery.org/license) (../js/jquery.js, ../js/jquery-ui.min.js)
-* Tagify - Copyright © Yair Even Or, [https://github.com/yairEO/tagify](https://github.com/yairEO/tagify) (via npm @yaireo/tagify)
-* mobiledetect - Copyright © Șerban Ghiță & Victor Stanciu, [http://mobiledetect.net](http://mobiledetect.net/) (vendor/mobiledetect/mobiledetectlib/Mobile\_Detect.php)
-* iUI - Copyright © iUI, [http://www.iui-js.org/](http://www.iui-js.org/) (iui)
-
-The icons in the "icn" subdirectory are Copyright © [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/). All rights reserved. Licensed under a [Creative Commons Attribution 3.0 license](http://creativecommons.org/licenses/by/3.0/). The wizard icon "wizard.png" is the "Free Wizard Icon", free for commercial use, from [icojam.com](http://www.icojam.com/blog/?p=159) (Author: [IcoJam / Andrew Zhebrakov](http://www.icojam.com)).  
-
 The following examples, supplied within the LWT download package, have the following licenses:
 
 * Chinese: The Man and the Dog - Copyright © Praxis Language LLC, now ChinesePod Ltd., [Source](http://chinesepod.com/lessons/the-man-and-the-dog), MP3 licensed under a [Creative Commons 3.0 Unported license](http://creativecommons.org/licenses/by/3.0/).
