@@ -804,9 +804,9 @@
 <dd>Constructor.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_findNextWordForTest">findNextWordForTest()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_findNextWordForReview">findNextWordForReview()</a>
     <span>
-                                &nbsp;: <a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a>|null    </span>
+                                &nbsp;: <a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a>|null    </span>
 </dt>
 <dd>Find the next word for testing using spaced repetition algorithm.</dd>
 
@@ -832,6 +832,13 @@
 <dd>Get language settings for test display.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getReviewCounts">getReviewCounts()</a>
+    <span>
+                                &nbsp;: array{due: int, total: int}    </span>
+</dt>
+<dd>Get test counts (due today and total).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getSentenceForWord">getSentenceForWord()</a>
     <span>
                                 &nbsp;: array{sentence: string|null, found: bool}    </span>
@@ -841,12 +848,12 @@
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getSentenceWithAnnotations">getSentenceWithAnnotations()</a>
     <span>
-                                &nbsp;: array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool}>}    </span>
+                                &nbsp;: array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>}    </span>
 </dt>
 <dd>Get sentence with annotations for surrounding words.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTableTestSettings">getTableTestSettings()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTableReviewSettings">getTableReviewSettings()</a>
     <span>
                                 &nbsp;: array{edit: int, status: int, term: int, trans: int, rom: int, sentence: int, contextRom: int, contextTrans: int}    </span>
 </dt>
@@ -855,16 +862,9 @@
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTableWords">getTableWords()</a>
     <span>
-                                &nbsp;: array&lt;string|int, <a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a>&gt;    </span>
+                                &nbsp;: array&lt;string|int, <a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a>&gt;    </span>
 </dt>
 <dd>Get all words for table test mode.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTestCounts">getTestCounts()</a>
-    <span>
-                                &nbsp;: array{due: int, total: int}    </span>
-</dt>
-<dd>Get test counts (due today and total).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTomorrowCount">getTomorrowCount()</a>
@@ -1026,9 +1026,9 @@
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_findNextWordForTest">
-        findNextWordForTest()
-        <a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_findNextWordForTest" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_findNextWordForReview">
+        findNextWordForReview()
+        <a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_findNextWordForReview" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -1042,7 +1042,7 @@
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">findNextWordForTest</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a>|null</span></code>
+                    <span class="phpdocumentor-signature__name">findNextWordForReview</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a>|null</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1052,7 +1052,7 @@
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Test configuration</p>
@@ -1067,7 +1067,7 @@
     
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a>|null</span>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a>|null</span>
                     &mdash;
                 <section class="phpdocumentor-description"><p>Next word to test or null if none available</p>
 </section>
@@ -1097,7 +1097,7 @@
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getLanguageIdFromConfig</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|null</span></code>
+                    <span class="phpdocumentor-signature__name">getLanguageIdFromConfig</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|null</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1107,7 +1107,7 @@
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Test configuration</p>
@@ -1152,7 +1152,7 @@
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getLanguageName</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+                    <span class="phpdocumentor-signature__name">getLanguageName</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1162,7 +1162,7 @@
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Test configuration</p>
@@ -1242,6 +1242,57 @@
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_getReviewCounts">
+        getReviewCounts()
+        <a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getReviewCounts" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Infrastructure/MySqlReviewRepository.php"><a href="files/src-modules-review-infrastructure-mysqlreviewrepository.html"><abbr title="src/Modules/Review/Infrastructure/MySqlReviewRepository.php">MySqlReviewRepository.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">132</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Get test counts (due today and total).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getReviewCounts</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{due: int, total: int}</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$config</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Test configuration</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array{due: int, total: int}</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_getSentenceForWord">
         getSentenceForWord()
         <a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getSentenceForWord" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1310,7 +1361,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Infrastructure/MySqlReviewRepository.php"><a href="files/src-modules-review-infrastructure-mysqlreviewrepository.html"><abbr title="src/Modules/Review/Infrastructure/MySqlReviewRepository.php">MySqlReviewRepository.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">397</span>
+    <span class="phpdocumentor-element-found-in__line">404</span>
 
     </aside>
 
@@ -1318,7 +1369,7 @@
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getSentenceWithAnnotations</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordLc</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool}>}</span></code>
+                    <span class="phpdocumentor-signature__name">getSentenceWithAnnotations</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordLc</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>}</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1352,7 +1403,7 @@
     
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool}>}</span>
+        <span class="phpdocumentor-signature__response_type">array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>}</span>
             </section>
 
 </article>
@@ -1362,9 +1413,9 @@
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_getTableTestSettings">
-        getTableTestSettings()
-        <a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTableTestSettings" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_getTableReviewSettings">
+        getTableReviewSettings()
+        <a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTableReviewSettings" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -1378,7 +1429,7 @@
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTableTestSettings</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{edit: int, status: int, term: int, trans: int, rom: int, sentence: int, contextRom: int, contextTrans: int}</span></code>
+                    <span class="phpdocumentor-signature__name">getTableReviewSettings</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{edit: int, status: int, term: int, trans: int, rom: int, sentence: int, contextRom: int, contextTrans: int}</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1417,7 +1468,7 @@
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTableWords</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, <a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a>&gt;</span></code>
+                    <span class="phpdocumentor-signature__name">getTableWords</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, <a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a>&gt;</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1427,7 +1478,7 @@
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Test configuration</p>
@@ -1442,62 +1493,11 @@
     
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">array&lt;string|int, <a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a>&gt;</span>
+        <span class="phpdocumentor-signature__response_type">array&lt;string|int, <a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a>&gt;</span>
                     &mdash;
                 <section class="phpdocumentor-description"><p>Array of test words</p>
 </section>
 
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_getTestCounts">
-        getTestCounts()
-        <a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTestCounts" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Infrastructure/MySqlReviewRepository.php"><a href="files/src-modules-review-infrastructure-mysqlreviewrepository.html"><abbr title="src/Modules/Review/Infrastructure/MySqlReviewRepository.php">MySqlReviewRepository.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">132</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Get test counts (due today and total).</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTestCounts</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{due: int, total: int}</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Test configuration</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">array{due: int, total: int}</span>
             </section>
 
 </article>
@@ -1523,7 +1523,7 @@
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTomorrowCount</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
+                    <span class="phpdocumentor-signature__name">getTomorrowCount</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1533,7 +1533,7 @@
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Test configuration</p>
@@ -1748,7 +1748,7 @@
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">validateSingleLanguage</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{valid: bool, langCount: int, error: string|null}</span></code>
+                    <span class="phpdocumentor-signature__name">validateSingleLanguage</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{valid: bool, langCount: int, error: string|null}</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1758,7 +1758,7 @@
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Test configuration</p>
@@ -1791,7 +1791,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Infrastructure/MySqlReviewRepository.php"><a href="files/src-modules-review-infrastructure-mysqlreviewrepository.html"><abbr title="src/Modules/Review/Infrastructure/MySqlReviewRepository.php">MySqlReviewRepository.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">458</span>
+    <span class="phpdocumentor-element-found-in__line">465</span>
 
     </aside>
 
@@ -1869,7 +1869,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Infrastructure/MySqlReviewRepository.php"><a href="files/src-modules-review-infrastructure-mysqlreviewrepository.html"><abbr title="src/Modules/Review/Infrastructure/MySqlReviewRepository.php">MySqlReviewRepository.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">550</span>
+    <span class="phpdocumentor-element-found-in__line">558</span>
 
     </aside>
 
@@ -2033,15 +2033,15 @@
             <li>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method___construct">__construct()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_findNextWordForTest">findNextWordForTest()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_findNextWordForReview">findNextWordForReview()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getLanguageIdFromConfig">getLanguageIdFromConfig()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getLanguageName">getLanguageName()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getLanguageSettings">getLanguageSettings()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getReviewCounts">getReviewCounts()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getSentenceForWord">getSentenceForWord()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getSentenceWithAnnotations">getSentenceWithAnnotations()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTableTestSettings">getTableTestSettings()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTableReviewSettings">getTableReviewSettings()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTableWords">getTableWords()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTestCounts">getTestCounts()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getTomorrowCount">getTomorrowCount()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getWordStatus">getWordStatus()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Infrastructure-MySqlReviewRepository.html#method_getWordText">getWordText()</a></li>

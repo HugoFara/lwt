@@ -722,7 +722,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">35</span>
+    <span class="phpdocumentor-element-found-in__line">37</span>
 
     </aside>
 
@@ -883,11 +883,25 @@
 <dd>Send X-Frame-Options header.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
+    <a class="" href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_buildMediaSrcDirective">buildMediaSrcDirective()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>Build the media-src CSP directive based on configuration.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_isSecureConnection">isSecureConnection()</a>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
 <dd>Check if the current connection is secure (HTTPS).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -private">
+    <a class="" href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_isValidCspSource">isValidCspSource()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Validate a CSP source value.</dd>
 
     </dl>
 
@@ -919,7 +933,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">42</span>
+    <span class="phpdocumentor-element-found-in__line">44</span>
 
     </aside>
 
@@ -962,7 +976,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">223</span>
+    <span class="phpdocumentor-element-found-in__line">291</span>
 
     </aside>
 
@@ -997,7 +1011,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">51</span>
+    <span class="phpdocumentor-element-found-in__line">53</span>
 
     </aside>
 
@@ -1034,7 +1048,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">110</span>
+    <span class="phpdocumentor-element-found-in__line">112</span>
 
     </aside>
 
@@ -1055,7 +1069,7 @@
 <li>Images: self + data: (for inline images) + blob: (for generated content)</li>
 <li>Fonts: self</li>
 <li>Connect: self + api.github.com (for release checks)</li>
-<li>Media: self + blob: (for audio playback)</li>
+<li>Media: configurable via CSP_MEDIA_SOURCES env var (default: self + blob)</li>
 <li>Frame ancestors: self (alternative to X-Frame-Options)</li>
 </ul>
 </section>
@@ -1081,7 +1095,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">181</span>
+    <span class="phpdocumentor-element-found-in__line">249</span>
 
     </aside>
 
@@ -1119,7 +1133,7 @@ Disables features not needed by the application.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">168</span>
+    <span class="phpdocumentor-element-found-in__line">236</span>
 
     </aside>
 
@@ -1162,7 +1176,7 @@ Disables features not needed by the application.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">145</span>
+    <span class="phpdocumentor-element-found-in__line">213</span>
 
     </aside>
 
@@ -1200,7 +1214,7 @@ Only sent when the current connection is already HTTPS.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">89</span>
+    <span class="phpdocumentor-element-found-in__line">91</span>
 
     </aside>
 
@@ -1238,7 +1252,7 @@ attackers to execute code by uploading files with misleading extensions.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">76</span>
+    <span class="phpdocumentor-element-found-in__line">78</span>
 
     </aside>
 
@@ -1268,6 +1282,57 @@ protecting against clickjacking attacks.</p>
             -private
                                     -static                    "
 >
+    <h4 class="phpdocumentor-element__name" id="method_buildMediaSrcDirective">
+        buildMediaSrcDirective()
+        <a href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_buildMediaSrcDirective" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">151</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Build the media-src CSP directive based on configuration.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">private</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">buildMediaSrcDirective</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Reads CSP_MEDIA_SOURCES from environment:</p>
+<ul>
+<li>&quot;self&quot; (default): Only allow media from same origin</li>
+<li>&quot;https&quot;: Allow any HTTPS source</li>
+<li>Comma-separated domains: Allow specific domains</li>
+</ul>
+<p>Always includes 'self' and 'blob:' for local files and TTS.</p>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>The complete media-src directive</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -private
+                                    -static                    "
+>
     <h4 class="phpdocumentor-element__name" id="method_isSecureConnection">
         isSecureConnection()
         <a href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_isSecureConnection" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1276,7 +1341,7 @@ protecting against clickjacking attacks.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">199</span>
+    <span class="phpdocumentor-element-found-in__line">267</span>
 
     </aside>
 
@@ -1300,6 +1365,68 @@ protecting against clickjacking attacks.</p>
         <span class="phpdocumentor-signature__response_type">bool</span>
                     &mdash;
                 <section class="phpdocumentor-description"><p>True if connection is over HTTPS</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -private
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_isValidCspSource">
+        isValidCspSource()
+        <a href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_isValidCspSource" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Shared/Infrastructure/Http/SecurityHeaders.php"><a href="files/src-shared-infrastructure-http-securityheaders.html"><abbr title="src/Shared/Infrastructure/Http/SecurityHeaders.php">SecurityHeaders.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">190</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Validate a CSP source value.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">private</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">isValidCspSource</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$source</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Accepts:</p>
+<ul>
+<li>https://domain.com or https://domain.com:port</li>
+<li>http://domain.com (allowed but not recommended)</li>
+<li>*.domain.com wildcards</li>
+</ul>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$source</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The source to validate</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>True if valid CSP source</p>
 </section>
 
             </section>
@@ -1435,7 +1562,9 @@ protecting against clickjacking attacks.</p>
                                             <li class=""><a href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_sendStrictTransportSecurity">sendStrictTransportSecurity()</a></li>
                                             <li class=""><a href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_sendXContentTypeOptions">sendXContentTypeOptions()</a></li>
                                             <li class=""><a href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_sendXFrameOptions">sendXFrameOptions()</a></li>
+                                            <li class=""><a href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_buildMediaSrcDirective">buildMediaSrcDirective()</a></li>
                                             <li class=""><a href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_isSecureConnection">isSecureConnection()</a></li>
+                                            <li class=""><a href="classes/Lwt-Shared-Infrastructure-Http-SecurityHeaders.html#method_isValidCspSource">isValidCspSource()</a></li>
                                     </ul>
             </li>
                     </ul>

@@ -799,7 +799,7 @@ gets sentence context, and formats the solution.</p>
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-Review-Application-UseCases-GetNextTerm.html#method_execute">execute()</a>
     <span>
-                                &nbsp;: <abbr title="array{word_id: int|string, word_text: string, solution: string, group: string, word?: \Lwt\Modules\Review\Domain\TestWord}">TestWord}</abbr>    </span>
+                                &nbsp;: <abbr title="array{word_id: int|string, word_text: string, solution: string, group: string, word?: \Lwt\Modules\Review\Domain\ReviewWord}">ReviewWord}</abbr>    </span>
 </dt>
 <dd>Get the next term for testing.</dd>
 
@@ -951,7 +951,7 @@ gets sentence context, and formats the solution.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">execute</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="array{word_id: int|string, word_text: string, solution: string, group: string, word?: \Lwt\Modules\Review\Domain\TestWord}">TestWord}</abbr></span></code>
+                    <span class="phpdocumentor-signature__name">execute</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="array{word_id: int|string, word_text: string, solution: string, group: string, word?: \Lwt\Modules\Review\Domain\ReviewWord}">ReviewWord}</abbr></span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -961,7 +961,7 @@ gets sentence context, and formats the solution.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Test configuration</p>
@@ -976,7 +976,7 @@ gets sentence context, and formats the solution.</p>
     
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type"><abbr title="array{word_id: int|string, word_text: string, solution: string, group: string, word?: \Lwt\Modules\Review\Domain\TestWord}">TestWord}</abbr></span>
+        <span class="phpdocumentor-signature__response_type"><abbr title="array{word_id: int|string, word_text: string, solution: string, group: string, word?: \Lwt\Modules\Review\Domain\ReviewWord}">ReviewWord}</abbr></span>
             </section>
 
 </article>
@@ -1002,7 +1002,7 @@ gets sentence context, and formats the solution.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">formatTermForTest</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$word</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sentence</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testType</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{0: string, 1: string}</span></code>
+                    <span class="phpdocumentor-signature__name">formatTermForTest</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$word</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sentence</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testType</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{0: string, 1: string}</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1012,7 +1012,7 @@ gets sentence context, and formats the solution.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$word</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Word entity</p>
@@ -1075,7 +1075,7 @@ gets sentence context, and formats the solution.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">getSentenceForWord</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$word</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordMode</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+                    <span class="phpdocumentor-signature__name">getSentenceForWord</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$word</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordMode</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1085,7 +1085,7 @@ gets sentence context, and formats the solution.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$word</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The word</p>
@@ -1139,7 +1139,7 @@ gets sentence context, and formats the solution.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">getSolution</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testType</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$word</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordMode</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordText</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+                    <span class="phpdocumentor-signature__name">getSolution</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testType</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$word</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordMode</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordText</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1158,7 +1158,7 @@ gets sentence context, and formats the solution.</p>
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$word</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestWord.html"><abbr title="\Lwt\Modules\Review\Domain\TestWord">TestWord</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewWord.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewWord">ReviewWord</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Word entity</p>

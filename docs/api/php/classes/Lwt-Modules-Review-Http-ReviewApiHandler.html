@@ -827,7 +827,7 @@
 <dd>Format response for updating review status.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_getWordTestData">getWordTestData()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_getWordReviewData">getWordReviewData()</a>
     <span>
                                 &nbsp;: array{term_id: int|string, solution?: string, term_text: string, group: string}    </span>
 </dt>
@@ -852,7 +852,7 @@
     <span>
                                 &nbsp;: array{term_id: int|string, solution?: string, term_text: string, group: string}    </span>
 </dt>
-<dd>Get the next word to test based on request parameters.</dd>
+<dd>Get the next word to review based on request parameters.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_buildAnnotatedSentenceHtml">buildAnnotatedSentenceHtml()</a>
@@ -873,7 +873,7 @@
     <span>
                                 &nbsp;: int|array&lt;string|int, int&gt;    </span>
 </dt>
-<dd>Parse selection parameter based on test key type.</dd>
+<dd>Parse selection parameter based on review key type.</dd>
 
     </dl>
 
@@ -994,7 +994,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Http/ReviewApiHandler.php"><a href="files/src-modules-review-http-reviewapihandler.html"><abbr title="src/Modules/Review/Http/ReviewApiHandler.php">ReviewApiHandler.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">334</span>
+    <span class="phpdocumentor-element-found-in__line">336</span>
 
     </aside>
 
@@ -1045,7 +1045,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Http/ReviewApiHandler.php"><a href="files/src-modules-review-http-reviewapihandler.html"><abbr title="src/Modules/Review/Http/ReviewApiHandler.php">ReviewApiHandler.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">530</span>
+    <span class="phpdocumentor-element-found-in__line">532</span>
 
     </aside>
 
@@ -1100,7 +1100,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Http/ReviewApiHandler.php"><a href="files/src-modules-review-http-reviewapihandler.html"><abbr title="src/Modules/Review/Http/ReviewApiHandler.php">ReviewApiHandler.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">415</span>
+    <span class="phpdocumentor-element-found-in__line">417</span>
 
     </aside>
 
@@ -1155,7 +1155,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Http/ReviewApiHandler.php"><a href="files/src-modules-review-http-reviewapihandler.html"><abbr title="src/Modules/Review/Http/ReviewApiHandler.php">ReviewApiHandler.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">346</span>
+    <span class="phpdocumentor-element-found-in__line">348</span>
 
     </aside>
 
@@ -1206,7 +1206,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Http/ReviewApiHandler.php"><a href="files/src-modules-review-http-reviewapihandler.html"><abbr title="src/Modules/Review/Http/ReviewApiHandler.php">ReviewApiHandler.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">395</span>
+    <span class="phpdocumentor-element-found-in__line">397</span>
 
     </aside>
 
@@ -1249,9 +1249,9 @@
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_getWordTestData">
-        getWordTestData()
-        <a href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_getWordTestData" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_getWordReviewData">
+        getWordReviewData()
+        <a href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_getWordReviewData" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -1265,7 +1265,7 @@
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getWordTestData</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testsql</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordMode</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testtype</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{term_id: int|string, solution?: string, term_text: string, group: string}</span></code>
+                    <span class="phpdocumentor-signature__name">getWordReviewData</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reviewsql</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordMode</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testtype</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{term_id: int|string, solution?: string, term_text: string, group: string}</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1274,7 +1274,7 @@
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$testsql</span>
+                <span class="phpdocumentor-argument-list__argument__name">$reviewsql</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
@@ -1326,7 +1326,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Http/ReviewApiHandler.php"><a href="files/src-modules-review-http-reviewapihandler.html"><abbr title="src/Modules/Review/Http/ReviewApiHandler.php">ReviewApiHandler.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">293</span>
+    <span class="phpdocumentor-element-found-in__line">294</span>
 
     </aside>
 
@@ -1377,7 +1377,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Http/ReviewApiHandler.php"><a href="files/src-modules-review-http-reviewapihandler.html"><abbr title="src/Modules/Review/Http/ReviewApiHandler.php">ReviewApiHandler.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">360</span>
+    <span class="phpdocumentor-element-found-in__line">362</span>
 
     </aside>
 
@@ -1450,7 +1450,7 @@
 
     </aside>
 
-        <p class="phpdocumentor-summary">Get the next word to test based on request parameters.</p>
+        <p class="phpdocumentor-summary">Get the next word to review based on request parameters.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1688,15 +1688,15 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Http/ReviewApiHandler.php"><a href="files/src-modules-review-http-reviewapihandler.html"><abbr title="src/Modules/Review/Http/ReviewApiHandler.php">ReviewApiHandler.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">315</span>
+    <span class="phpdocumentor-element-found-in__line">317</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Parse selection parameter based on test key type.</p>
+        <p class="phpdocumentor-summary">Parse selection parameter based on review key type.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">parseSelection</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testKey</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selection</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|array&lt;string|int, int&gt;</span></code>
+                    <span class="phpdocumentor-signature__name">parseSelection</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reviewKey</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selection</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|array&lt;string|int, int&gt;</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1705,11 +1705,11 @@
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$testKey</span>
+                <span class="phpdocumentor-argument-list__argument__name">$reviewKey</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The test key type</p>
+                    <section class="phpdocumentor-description"><p>The review key type</p>
 </section>
 
             </dd>
@@ -1866,7 +1866,7 @@
                                             <li class=""><a href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_formatTestConfig">formatTestConfig()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_formatTomorrowCount">formatTomorrowCount()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_formatUpdateStatus">formatUpdateStatus()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_getWordTestData">getWordTestData()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_getWordReviewData">getWordReviewData()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_tomorrowTestCount">tomorrowTestCount()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_updateReviewStatus">updateReviewStatus()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Http-ReviewApiHandler.html#method_wordTestAjax">wordTestAjax()</a></li>

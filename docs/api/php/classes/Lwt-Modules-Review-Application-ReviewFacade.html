@@ -780,15 +780,15 @@ Designed for backward compatibility with existing TestService callers.</p>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -protected">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getTableWords">$getTableWords</a>
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getReviewConfiguration">$getReviewConfiguration</a>
     <span>
-                        &nbsp;: <a href="classes/Lwt-Modules-Review-Application-UseCases-GetTableWords.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetTableWords">GetTableWords</abbr></a>            </span>
+                        &nbsp;: <a href="classes/Lwt-Modules-Review-Application-UseCases-GetReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetReviewConfiguration">GetReviewConfiguration</abbr></a>            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -protected">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getTestConfiguration">$getTestConfiguration</a>
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getTableWords">$getTableWords</a>
     <span>
-                        &nbsp;: <a href="classes/Lwt-Modules-Review-Application-UseCases-GetTestConfiguration.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetTestConfiguration">GetTestConfiguration</abbr></a>            </span>
+                        &nbsp;: <a href="classes/Lwt-Modules-Review-Application-UseCases-GetTableWords.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetTableWords">GetTableWords</abbr></a>            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -protected">
@@ -837,7 +837,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 <dd>Constructor.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_buildSelectionTestSql">buildSelectionTestSql()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_buildSelectionReviewSql">buildSelectionReviewSql()</a>
     <span>
                                 &nbsp;: string|null    </span>
 </dt>
@@ -858,7 +858,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 <dd>Calculate status change.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_clampTestType">clampTestType()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_clampReviewType">clampReviewType()</a>
     <span>
                                 &nbsp;: int    </span>
 </dt>
@@ -872,6 +872,13 @@ Designed for backward compatibility with existing TestService callers.</p>
 <dd>Get next term for testing (new API).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_fetchReviewConfiguration">fetchReviewConfiguration()</a>
+    <span>
+                                &nbsp;: array&lt;string|int, mixed&gt;    </span>
+</dt>
+<dd>Get test configuration (new API).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_fetchTableWords">fetchTableWords()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
@@ -879,14 +886,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 <dd>Get table words (new API).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_fetchTestConfiguration">fetchTestConfiguration()</a>
-    <span>
-                                &nbsp;: array&lt;string|int, mixed&gt;    </span>
-</dt>
-<dd>Get test configuration (new API).</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getBaseTestType">getBaseTestType()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getBaseReviewType">getBaseReviewType()</a>
     <span>
                                 &nbsp;: int    </span>
 </dt>
@@ -907,7 +907,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 <dd>Get L2 language name.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getLanguageIdFromTestSql">getLanguageIdFromTestSql()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getLanguageIdFromReviewSql">getLanguageIdFromReviewSql()</a>
     <span>
                                 &nbsp;: int|null    </span>
 </dt>
@@ -928,6 +928,41 @@ Designed for backward compatibility with existing TestService callers.</p>
 <dd>Get the next word to test.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewCounts">getReviewCounts()</a>
+    <span>
+                                &nbsp;: array{due: int, total: int}    </span>
+</dt>
+<dd>Get test counts.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewDataFromParams">getReviewDataFromParams()</a>
+    <span>
+                                &nbsp;: array&lt;string|int, mixed&gt;|null    </span>
+</dt>
+<dd>Get test data from params.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewIdentifier">getReviewIdentifier()</a>
+    <span>
+                                &nbsp;: array{0: string, 1: int|int[]|string}    </span>
+</dt>
+<dd>Get test identifier from request parameters.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewSessionData">getReviewSessionData()</a>
+    <span>
+                                &nbsp;: array{start: int, correct: int, wrong: int, total: int}    </span>
+</dt>
+<dd>Get review session data.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewSql">getReviewSql()</a>
+    <span>
+                                &nbsp;: string|null    </span>
+</dt>
+<dd>Get SQL projection for test.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getSentenceForWord">getSentenceForWord()</a>
     <span>
                                 &nbsp;: array{sentence: string|null, found: bool}    </span>
@@ -937,51 +972,23 @@ Designed for backward compatibility with existing TestService callers.</p>
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getSentenceWithAnnotations">getSentenceWithAnnotations()</a>
     <span>
-                                &nbsp;: array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool}>}    </span>
+                                &nbsp;: array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>}    </span>
 </dt>
 <dd>Get sentence for word with annotations for surrounding words.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableTestSettings">getTableTestSettings()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableReviewSettings">getTableReviewSettings()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
 <dd>Get table test settings.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableTestWords">getTableTestWords()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableReviewWords">getTableReviewWords()</a>
     <span>
                                 &nbsp;: <abbr title="\mysqli_result">mysqli_result</abbr>|bool    </span>
 </dt>
 <dd>Get table test words.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestCounts">getTestCounts()</a>
-    <span>
-                                &nbsp;: array{due: int, total: int}    </span>
-</dt>
-<dd>Get test counts.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestDataFromParams">getTestDataFromParams()</a>
-    <span>
-                                &nbsp;: array&lt;string|int, mixed&gt;|null    </span>
-</dt>
-<dd>Get test data from params.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestIdentifier">getTestIdentifier()</a>
-    <span>
-                                &nbsp;: array{0: string, 1: int|int[]|string}    </span>
-</dt>
-<dd>Get test identifier from request parameters.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestSessionData">getTestSessionData()</a>
-    <span>
-                                &nbsp;: array{start: int, correct: int, wrong: int, total: int}    </span>
-</dt>
-<dd>Get test session data.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestSolution">getTestSolution()</a>
@@ -991,14 +998,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 <dd>Get test solution.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestSql">getTestSql()</a>
-    <span>
-                                &nbsp;: string|null    </span>
-</dt>
-<dd>Get SQL projection for test.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTomorrowTestCount">getTomorrowTestCount()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTomorrowReviewCount">getTomorrowReviewCount()</a>
     <span>
                                 &nbsp;: int    </span>
 </dt>
@@ -1019,11 +1019,11 @@ Designed for backward compatibility with existing TestService callers.</p>
 <dd>Get word text.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_initializeTestSession">initializeTestSession()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_initializeReviewSession">initializeReviewSession()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Initialize test session.</dd>
+<dd>Initialize review session.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_isWordMode">isWordMode()</a>
@@ -1061,7 +1061,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 <dd>Update word status.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_validateTestSelection">validateTestSelection()</a>
+    <a class="" href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_validateReviewSelection">validateReviewSelection()</a>
     <span>
                                 &nbsp;: array{valid: bool, langCount: int, error: string|null}    </span>
 </dt>
@@ -1138,6 +1138,43 @@ Designed for backward compatibility with existing TestService callers.</p>
             -protected
                                                                     "
 >
+    <h4 class="phpdocumentor-element__name" id="property_getReviewConfiguration">
+        $getReviewConfiguration
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getReviewConfiguration" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                                            </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">46</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">protected</span>
+            <span class="phpdocumentor-signature__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetReviewConfiguration">GetReviewConfiguration</abbr></a></span>
+    <span class="phpdocumentor-signature__name">$getReviewConfiguration</span>
+    </code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -protected
+                                                                    "
+>
     <h4 class="phpdocumentor-element__name" id="property_getTableWords">
         $getTableWords
         <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getTableWords" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1158,43 +1195,6 @@ Designed for backward compatibility with existing TestService callers.</p>
         <span class="phpdocumentor-signature__visibility">protected</span>
             <span class="phpdocumentor-signature__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetTableWords.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetTableWords">GetTableWords</abbr></a></span>
     <span class="phpdocumentor-signature__name">$getTableWords</span>
-    </code>
-
-    
-    
-    
-
-        
-        
-
-</article>
-                    <article
-        class="
-            phpdocumentor-element
-            -property
-            -protected
-                                                                    "
->
-    <h4 class="phpdocumentor-element__name" id="property_getTestConfiguration">
-        $getTestConfiguration
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getTestConfiguration" class="headerlink"><i class="fas fa-link"></i></a>
-
-        <span class="phpdocumentor-element__modifiers">
-                                            </span>
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">46</span>
-
-    </aside>
-
-    
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-        <span class="phpdocumentor-signature__visibility">protected</span>
-            <span class="phpdocumentor-signature__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetTestConfiguration.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetTestConfiguration">GetTestConfiguration</abbr></a></span>
-    <span class="phpdocumentor-signature__name">$getTestConfiguration</span>
     </code>
 
     
@@ -1420,7 +1420,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewRepositoryInterface.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewRepositoryInterface">ReviewRepositoryInterface</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$repository</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Infrastructure-SessionStateManager.html"><abbr title="\Lwt\Modules\Review\Infrastructure\SessionStateManager">SessionStateManager</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sessionManager</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetNextTerm.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetNextTerm">GetNextTerm</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$getNextTerm</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetTableWords.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetTableWords">GetTableWords</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$getTableWords</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetTestConfiguration.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetTestConfiguration">GetTestConfiguration</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$getTestConfiguration</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetTomorrowCount.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetTomorrowCount">GetTomorrowCount</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$getTomorrowCount</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-StartReviewSession.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\StartReviewSession">StartReviewSession</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$startReviewSession</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-SubmitAnswer.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\SubmitAnswer">SubmitAnswer</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$submitAnswer</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewRepositoryInterface.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewRepositoryInterface">ReviewRepositoryInterface</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$repository</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Infrastructure-SessionStateManager.html"><abbr title="\Lwt\Modules\Review\Infrastructure\SessionStateManager">SessionStateManager</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sessionManager</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetNextTerm.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetNextTerm">GetNextTerm</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$getNextTerm</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetTableWords.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetTableWords">GetTableWords</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$getTableWords</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetReviewConfiguration">GetReviewConfiguration</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$getReviewConfiguration</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetTomorrowCount.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetTomorrowCount">GetTomorrowCount</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$getTomorrowCount</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-StartReviewSession.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\StartReviewSession">StartReviewSession</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$startReviewSession</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-SubmitAnswer.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\SubmitAnswer">SubmitAnswer</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$submitAnswer</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1465,8 +1465,8 @@ Designed for backward compatibility with existing TestService callers.</p>
 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$getTestConfiguration</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetTestConfiguration.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetTestConfiguration">GetTestConfiguration</abbr></a>|null</span>
+                <span class="phpdocumentor-argument-list__argument__name">$getReviewConfiguration</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Application-UseCases-GetReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Application\UseCases\GetReviewConfiguration">GetReviewConfiguration</abbr></a>|null</span>
                  = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Get config use case</p>
@@ -1514,9 +1514,9 @@ Designed for backward compatibility with existing TestService callers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_buildSelectionTestSql">
-        buildSelectionTestSql()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_buildSelectionTestSql" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_buildSelectionReviewSql">
+        buildSelectionReviewSql()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_buildSelectionReviewSql" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -1530,7 +1530,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">buildSelectionTestSql</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selectionType</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selectionData</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+                    <span class="phpdocumentor-signature__name">buildSelectionReviewSql</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selectionType</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selectionData</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1694,9 +1694,9 @@ Designed for backward compatibility with existing TestService callers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_clampTestType">
-        clampTestType()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_clampTestType" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_clampReviewType">
+        clampReviewType()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_clampReviewType" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -1710,7 +1710,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">clampTestType</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testType</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
+                    <span class="phpdocumentor-signature__name">clampReviewType</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testType</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1761,7 +1761,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">fetchNextTerm</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
+                    <span class="phpdocumentor-signature__name">fetchNextTerm</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1771,7 +1771,58 @@ Designed for backward compatibility with existing TestService callers.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Test configuration</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_fetchReviewConfiguration">
+        fetchReviewConfiguration()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_fetchReviewConfiguration" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">504</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Get test configuration (new API).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">fetchReviewConfiguration</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$config</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Test configuration</p>
@@ -1812,7 +1863,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">fetchTableWords</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
+                    <span class="phpdocumentor-signature__name">fetchTableWords</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1822,7 +1873,7 @@ Designed for backward compatibility with existing TestService callers.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Test configuration</p>
@@ -1847,60 +1898,9 @@ Designed for backward compatibility with existing TestService callers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_fetchTestConfiguration">
-        fetchTestConfiguration()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_fetchTestConfiguration" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">504</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Get test configuration (new API).</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">fetchTestConfiguration</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Test configuration</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span>
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_getBaseTestType">
-        getBaseTestType()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getBaseTestType" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_getBaseReviewType">
+        getBaseReviewType()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getBaseReviewType" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -1914,7 +1914,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getBaseTestType</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testType</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
+                    <span class="phpdocumentor-signature__name">getBaseReviewType</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testType</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -2004,7 +2004,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getL2LanguageName</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lang</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$text</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selection</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testsql</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+                    <span class="phpdocumentor-signature__name">getL2LanguageName</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lang</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$text</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selection</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reviewsql</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -2040,7 +2040,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$testsql</span>
+                <span class="phpdocumentor-argument-list__argument__name">$reviewsql</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
                  = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
@@ -2066,9 +2066,9 @@ Designed for backward compatibility with existing TestService callers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_getLanguageIdFromTestSql">
-        getLanguageIdFromTestSql()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getLanguageIdFromTestSql" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_getLanguageIdFromReviewSql">
+        getLanguageIdFromReviewSql()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getLanguageIdFromReviewSql" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -2082,7 +2082,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getLanguageIdFromTestSql</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|null</span></code>
+                    <span class="phpdocumentor-signature__name">getLanguageIdFromReviewSql</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reviewsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|null</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -2091,7 +2091,7 @@ Designed for backward compatibility with existing TestService callers.</p>
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$testsql</span>
+                <span class="phpdocumentor-argument-list__argument__name">$reviewsql</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
@@ -2184,7 +2184,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getNextWord</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|null</span></code>
+                    <span class="phpdocumentor-signature__name">getNextWord</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reviewsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|null</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -2193,7 +2193,7 @@ Designed for backward compatibility with existing TestService callers.</p>
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$testsql</span>
+                <span class="phpdocumentor-argument-list__argument__name">$reviewsql</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
@@ -2212,6 +2212,320 @@ Designed for backward compatibility with existing TestService callers.</p>
         <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|null</span>
                     &mdash;
                 <section class="phpdocumentor-description"><p>Word record or null</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getReviewCounts">
+        getReviewCounts()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewCounts" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">159</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Get test counts.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getReviewCounts</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reviewsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{due: int, total: int}</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$reviewsql</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>SQL projection string</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array{due: int, total: int}</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getReviewDataFromParams">
+        getReviewDataFromParams()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewDataFromParams" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">403</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Get test data from params.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getReviewDataFromParams</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selection</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sessTestsql</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$langId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$textId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$selection</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Selection type</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$sessTestsql</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Session test SQL</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$langId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Language ID</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$textId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Text ID</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getReviewIdentifier">
+        getReviewIdentifier()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewIdentifier" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">100</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Get test identifier from request parameters.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getReviewIdentifier</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selection</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sessTestsql</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lang</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$text</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{0: string, 1: int|int[]|string}</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$selection</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Test is of type selection</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$sessTestsql</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>SQL string for test</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$lang</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Test is of type language</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$text</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Testing text with ID $text</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array{0: string, 1: int|int[]|string}</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>Selector type and selection value</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getReviewSessionData">
+        getReviewSessionData()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewSessionData" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">297</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Get review session data.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getReviewSessionData</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{start: int, correct: int, wrong: int, total: int}</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array{start: int, correct: int, wrong: int, total: int}</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getReviewSql">
+        getReviewSql()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewSql" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">128</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Get SQL projection for test.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getReviewSql</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selector</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|array&lt;string|int, int&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selection</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$selector</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Type of test</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$selection</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|array&lt;string|int, int&gt;</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Selection value</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string|null</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>SQL projection string</p>
 </section>
 
             </section>
@@ -2299,7 +2613,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getSentenceWithAnnotations</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordlc</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool}>}</span></code>
+                    <span class="phpdocumentor-signature__name">getSentenceWithAnnotations</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordlc</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>}</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -2333,7 +2647,7 @@ Designed for backward compatibility with existing TestService callers.</p>
     
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool}>}</span>
+        <span class="phpdocumentor-signature__response_type">array{sentence: string|null, sentenceId: int|null, found: bool, annotations: array<int,array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>}</span>
             </section>
 
 </article>
@@ -2343,9 +2657,9 @@ Designed for backward compatibility with existing TestService callers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_getTableTestSettings">
-        getTableTestSettings()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableTestSettings" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_getTableReviewSettings">
+        getTableReviewSettings()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableReviewSettings" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -2359,7 +2673,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTableTestSettings</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
+                    <span class="phpdocumentor-signature__name">getTableReviewSettings</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -2382,9 +2696,9 @@ Designed for backward compatibility with existing TestService callers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_getTableTestWords">
-        getTableTestWords()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableTestWords" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_getTableReviewWords">
+        getTableReviewWords()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableReviewWords" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -2398,7 +2712,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTableTestWords</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\mysqli_result">mysqli_result</abbr>|bool</span></code>
+                    <span class="phpdocumentor-signature__name">getTableReviewWords</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reviewsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\mysqli_result">mysqli_result</abbr>|bool</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -2407,7 +2721,7 @@ Designed for backward compatibility with existing TestService callers.</p>
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$testsql</span>
+                <span class="phpdocumentor-argument-list__argument__name">$reviewsql</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
@@ -2424,256 +2738,6 @@ Designed for backward compatibility with existing TestService callers.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><abbr title="\mysqli_result">mysqli_result</abbr>|bool</span>
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_getTestCounts">
-        getTestCounts()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestCounts" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">159</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Get test counts.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTestCounts</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{due: int, total: int}</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$testsql</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>SQL projection string</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">array{due: int, total: int}</span>
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_getTestDataFromParams">
-        getTestDataFromParams()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestDataFromParams" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">403</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Get test data from params.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTestDataFromParams</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selection</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sessTestsql</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$langId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$textId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|null</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$selection</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Selection type</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$sessTestsql</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Session test SQL</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$langId</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Language ID</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$textId</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Text ID</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|null</span>
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_getTestIdentifier">
-        getTestIdentifier()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestIdentifier" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">100</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Get test identifier from request parameters.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTestIdentifier</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selection</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sessTestsql</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lang</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$text</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{0: string, 1: int|int[]|string}</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$selection</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Test is of type selection</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$sessTestsql</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>SQL string for test</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$lang</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Test is of type language</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$text</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Testing text with ID $text</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">array{0: string, 1: int|int[]|string}</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>Selector type and selection value</p>
-</section>
-
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_getTestSessionData">
-        getTestSessionData()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestSessionData" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">297</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Get test session data.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTestSessionData</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{start: int, correct: int, wrong: int, total: int}</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-    
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">array{start: int, correct: int, wrong: int, total: int}</span>
             </section>
 
 </article>
@@ -2761,73 +2825,9 @@ Designed for backward compatibility with existing TestService callers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_getTestSql">
-        getTestSql()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestSql" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Review/Application/ReviewFacade.php"><a href="files/src-modules-review-application-reviewfacade.html"><abbr title="src/Modules/Review/Application/ReviewFacade.php">ReviewFacade.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">128</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Get SQL projection for test.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTestSql</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selector</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|array&lt;string|int, int&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$selection</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$selector</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Type of test</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$selection</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int|array&lt;string|int, int&gt;</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Selection value</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">string|null</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>SQL projection string</p>
-</section>
-
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_getTomorrowTestCount">
-        getTomorrowTestCount()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTomorrowTestCount" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_getTomorrowReviewCount">
+        getTomorrowReviewCount()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTomorrowReviewCount" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -2841,7 +2841,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getTomorrowTestCount</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
+                    <span class="phpdocumentor-signature__name">getTomorrowReviewCount</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reviewsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -2850,7 +2850,7 @@ Designed for backward compatibility with existing TestService callers.</p>
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$testsql</span>
+                <span class="phpdocumentor-argument-list__argument__name">$reviewsql</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
@@ -2966,9 +2966,9 @@ Designed for backward compatibility with existing TestService callers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_initializeTestSession">
-        initializeTestSession()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_initializeTestSession" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_initializeReviewSession">
+        initializeReviewSession()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_initializeReviewSession" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -2978,11 +2978,11 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Initialize test session.</p>
+        <p class="phpdocumentor-summary">Initialize review session.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">initializeTestSession</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$totalDue</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">initializeReviewSession</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$totalDue</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -3295,9 +3295,9 @@ Designed for backward compatibility with existing TestService callers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_validateTestSelection">
-        validateTestSelection()
-        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_validateTestSelection" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_validateReviewSelection">
+        validateReviewSelection()
+        <a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_validateReviewSelection" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
@@ -3311,7 +3311,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">validateTestSelection</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$testsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{valid: bool, langCount: int, error: string|null}</span></code>
+                    <span class="phpdocumentor-signature__name">validateReviewSelection</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reviewsql</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{valid: bool, langCount: int, error: string|null}</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -3320,7 +3320,7 @@ Designed for backward compatibility with existing TestService callers.</p>
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$testsql</span>
+                <span class="phpdocumentor-argument-list__argument__name">$reviewsql</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
@@ -3362,7 +3362,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">buildTitle</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+                    <span class="phpdocumentor-signature__name">buildTitle</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -3372,7 +3372,7 @@ Designed for backward compatibility with existing TestService callers.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Configuration</p>
@@ -3413,7 +3413,7 @@ Designed for backward compatibility with existing TestService callers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">getSelectionTitle</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$langName</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+                    <span class="phpdocumentor-signature__name">getSelectionTitle</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$config</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$langName</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -3423,7 +3423,7 @@ Designed for backward compatibility with existing TestService callers.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$config</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-TestConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\TestConfiguration">TestConfiguration</abbr></a></span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Modules-Review-Domain-ReviewConfiguration.html"><abbr title="\Lwt\Modules\Review\Domain\ReviewConfiguration">ReviewConfiguration</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Configuration</p>
@@ -3567,8 +3567,8 @@ Designed for backward compatibility with existing TestService callers.</p>
                 <li>
                     <ul class="phpdocumentor-list -clean">
                                                     <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getNextTerm">$getNextTerm</a></li>
+                                                    <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getReviewConfiguration">$getReviewConfiguration</a></li>
                                                     <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getTableWords">$getTableWords</a></li>
-                                                    <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getTestConfiguration">$getTestConfiguration</a></li>
                                                     <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_getTomorrowCount">$getTomorrowCount</a></li>
                                                     <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_repository">$repository</a></li>
                                                     <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#property_sessionManager">$sessionManager</a></li>
@@ -3581,39 +3581,39 @@ Designed for backward compatibility with existing TestService callers.</p>
             <li>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method___construct">__construct()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_buildSelectionTestSql">buildSelectionTestSql()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_buildSelectionReviewSql">buildSelectionReviewSql()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_calculateNewStatus">calculateNewStatus()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_calculateStatusChange">calculateStatusChange()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_clampTestType">clampTestType()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_clampReviewType">clampReviewType()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_fetchNextTerm">fetchNextTerm()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_fetchReviewConfiguration">fetchReviewConfiguration()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_fetchTableWords">fetchTableWords()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_fetchTestConfiguration">fetchTestConfiguration()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getBaseTestType">getBaseTestType()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getBaseReviewType">getBaseReviewType()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getEditFrameWaitingTime">getEditFrameWaitingTime()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getL2LanguageName">getL2LanguageName()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getLanguageIdFromTestSql">getLanguageIdFromTestSql()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getLanguageIdFromReviewSql">getLanguageIdFromReviewSql()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getLanguageSettings">getLanguageSettings()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getNextWord">getNextWord()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewCounts">getReviewCounts()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewDataFromParams">getReviewDataFromParams()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewIdentifier">getReviewIdentifier()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewSessionData">getReviewSessionData()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getReviewSql">getReviewSql()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getSentenceForWord">getSentenceForWord()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getSentenceWithAnnotations">getSentenceWithAnnotations()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableTestSettings">getTableTestSettings()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableTestWords">getTableTestWords()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestCounts">getTestCounts()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestDataFromParams">getTestDataFromParams()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestIdentifier">getTestIdentifier()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestSessionData">getTestSessionData()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableReviewSettings">getTableReviewSettings()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTableReviewWords">getTableReviewWords()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestSolution">getTestSolution()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTestSql">getTestSql()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTomorrowTestCount">getTomorrowTestCount()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getTomorrowReviewCount">getTomorrowReviewCount()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getWaitingTime">getWaitingTime()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getWordText">getWordText()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_initializeTestSession">initializeTestSession()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_initializeReviewSession">initializeReviewSession()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_isWordMode">isWordMode()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_submitAnswer">submitAnswer()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_submitAnswerWithChange">submitAnswerWithChange()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_updateSessionProgress">updateSessionProgress()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_updateWordStatus">updateWordStatus()</a></li>
-                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_validateTestSelection">validateTestSelection()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_validateReviewSelection">validateReviewSelection()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_buildTitle">buildTitle()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Review-Application-ReviewFacade.html#method_getSelectionTitle">getSelectionTitle()</a></li>
                                     </ul>
