@@ -11,7 +11,7 @@
 import Alpine from 'alpinejs';
 import type { ReviewStoreState, ReviewConfig, LangSettings } from '../stores/review_store';
 import { getReviewStore } from '../stores/review_store';
-import { ReviewApi, type TableTestWord } from '@modules/review/api/review_api';
+import { ReviewApi, type TableReviewWord } from '@modules/review/api/review_api';
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { saveSetting } from '@shared/utils/ajax_utilities';
 
@@ -72,7 +72,7 @@ function buildReviewToolbar(): string {
                 <div class="buttons are-small">
                   ${REVIEW_TYPES.map(t => `
                     <button class="button"
-                            :class="{ 'is-primary': store.testType === ${t.id} && !store.isTableMode }"
+                            :class="{ 'is-primary': store.reviewType === ${t.id} && !store.isTableMode }"
                             @click="switchReviewType(${t.id})"
                             title="${escapeHtml(t.title)}">
                       ${escapeHtml(t.label)}
@@ -710,7 +710,7 @@ function registerReviewAppComponent(config: ReviewConfig): void {
  */
 function registerTableReviewComponent(): void {
   Alpine.data('tableReview', () => ({
-    words: [] as TableTestWord[],
+    words: [] as TableReviewWord[],
     langSettings: null as LangSettings | null,
     columns: { edit: true, status: true, term: true, trans: true, rom: false, sentence: true },
     hideTermContent: false,
@@ -731,7 +731,7 @@ function registerTableReviewComponent(): void {
       const store = getReviewStore();
 
       try {
-        const response = await ReviewApi.getTableWords(store.testKey, store.selection);
+        const response = await ReviewApi.getTableWords(store.reviewKey, store.selection);
         if (response.data) {
           this.words = response.data.words;
           this.langSettings = response.data.langSettings;
@@ -747,7 +747,7 @@ function registerTableReviewComponent(): void {
       try {
         const response = await ReviewApi.updateStatus(wordId, status);
         if (response.data?.status !== undefined) {
-          const word = this.words.find((w: TableTestWord) => w.id === wordId);
+          const word = this.words.find((w: TableReviewWord) => w.id === wordId);
           if (word) word.status = response.data.status;
         }
       } catch (err) {

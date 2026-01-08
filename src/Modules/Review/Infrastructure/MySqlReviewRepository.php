@@ -326,14 +326,14 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getLanguageName(ReviewConfiguration $config): string
     {
-        if ($config->testKey === ReviewConfiguration::KEY_LANG) {
+        if ($config->reviewKey === ReviewConfiguration::KEY_LANG) {
             $name = QueryBuilder::table('languages')
                 ->where('LgID', '=', $config->selection)
                 ->valuePrepared('LgName');
             return $name !== null ? (string) $name : 'L2';
         }
 
-        if ($config->testKey === ReviewConfiguration::KEY_TEXT) {
+        if ($config->reviewKey === ReviewConfiguration::KEY_TEXT) {
             $row = QueryBuilder::table('texts')
                 ->select(['LgName'])
                 ->join('languages', 'TxLgID', '=', 'LgID')

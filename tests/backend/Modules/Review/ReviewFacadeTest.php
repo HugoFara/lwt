@@ -87,9 +87,9 @@ class ReviewFacadeTest extends TestCase
     {
         $config = ReviewConfiguration::fromLanguage(1, 2, false);
 
-        $this->assertEquals(ReviewConfiguration::KEY_LANG, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_LANG, $config->reviewKey);
         $this->assertEquals(1, $config->selection);
-        $this->assertEquals(2, $config->testType);
+        $this->assertEquals(2, $config->reviewType);
         $this->assertFalse($config->isTableMode);
         $this->assertTrue($config->isValid());
     }
@@ -98,9 +98,9 @@ class ReviewFacadeTest extends TestCase
     {
         $config = ReviewConfiguration::fromText(42, 3, true);
 
-        $this->assertEquals(ReviewConfiguration::KEY_TEXT, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_TEXT, $config->reviewKey);
         $this->assertEquals(42, $config->selection);
-        $this->assertEquals(3, $config->testType);
+        $this->assertEquals(3, $config->reviewType);
         $this->assertTrue($config->wordMode);
     }
 
@@ -109,7 +109,7 @@ class ReviewFacadeTest extends TestCase
         $wordIds = [1, 2, 3, 4, 5];
         $config = ReviewConfiguration::fromWords($wordIds, 1, false);
 
-        $this->assertEquals(ReviewConfiguration::KEY_WORDS, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_WORDS, $config->reviewKey);
         $this->assertEquals($wordIds, $config->selection);
         $this->assertEquals('1,2,3,4,5', $config->getSelectionString());
     }
@@ -119,7 +119,7 @@ class ReviewFacadeTest extends TestCase
         $textIds = [10, 20, 30];
         $config = ReviewConfiguration::fromTexts($textIds, 2);
 
-        $this->assertEquals(ReviewConfiguration::KEY_TEXTS, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_TEXTS, $config->reviewKey);
         $this->assertEquals($textIds, $config->selection);
     }
 
@@ -128,7 +128,7 @@ class ReviewFacadeTest extends TestCase
         $config = ReviewConfiguration::forTableMode(ReviewConfiguration::KEY_LANG, 1);
 
         $this->assertTrue($config->isTableMode);
-        $this->assertEquals(1, $config->testType);
+        $this->assertEquals(1, $config->reviewType);
     }
 
     public function testReviewConfigurationGetBaseType(): void
@@ -195,11 +195,11 @@ class ReviewFacadeTest extends TestCase
     {
         // Test type 0 should clamp to 1
         $config0 = ReviewConfiguration::fromLanguage(1, 0);
-        $this->assertEquals(1, $config0->testType);
+        $this->assertEquals(1, $config0->reviewType);
 
         // Test type 10 should clamp to 5
         $config10 = ReviewConfiguration::fromLanguage(1, 10);
-        $this->assertEquals(5, $config10->testType);
+        $this->assertEquals(5, $config10->reviewType);
     }
 
     // ===== Utility method tests =====

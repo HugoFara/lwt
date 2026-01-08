@@ -62,9 +62,9 @@ export interface ReviewTimer {
  * Review configuration from server.
  */
 export interface ReviewConfig {
-  testKey: string;
+  reviewKey: string;
   selection: string;
-  testType: number;
+  reviewType: number;
   isTableMode: boolean;
   wordMode: boolean;
   langId: number;
@@ -85,9 +85,9 @@ export interface ReviewConfig {
  */
 export interface ReviewStoreState {
   // Review configuration
-  testKey: string;
+  reviewKey: string;
   selection: string;
-  testType: number;
+  reviewType: number;
   isTableMode: boolean;
   wordMode: boolean;
   langId: number;
@@ -154,9 +154,9 @@ function calculateNewStatus(currentStatus: number, change: number): number {
 function createReviewStore(): ReviewStoreState {
   return {
     // Review configuration
-    testKey: '',
+    reviewKey: '',
     selection: '',
-    testType: 1,
+    reviewType: 1,
     isTableMode: false,
     wordMode: false,
     langId: 0,
@@ -209,9 +209,9 @@ function createReviewStore(): ReviewStoreState {
      * Note: Named 'configure' instead of 'init' because Alpine auto-calls init() on stores.
      */
     configure(config: ReviewConfig): void {
-      this.testKey = config.testKey;
+      this.reviewKey = config.reviewKey;
       this.selection = config.selection;
-      this.testType = config.testType;
+      this.reviewType = config.reviewType;
       this.isTableMode = config.isTableMode;
       this.wordMode = config.wordMode;
       this.langId = config.langId;
@@ -244,12 +244,12 @@ function createReviewStore(): ReviewStoreState {
 
       try {
         const response = await ReviewApi.getNextWord({
-          testKey: this.testKey,
+          reviewKey: this.reviewKey,
           selection: this.selection,
           wordMode: this.wordMode,
           lgId: this.langId,
           wordRegex: this.wordRegex,
-          type: this.testType
+          type: this.reviewType
         });
 
         if (response.error) {
@@ -265,7 +265,7 @@ function createReviewStore(): ReviewStoreState {
 
           // Fetch tomorrow count
           const tomorrowResponse = await ReviewApi.getTomorrowCount(
-            this.testKey,
+            this.reviewKey,
             this.selection
           );
           if (tomorrowResponse.data?.count) {

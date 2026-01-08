@@ -43,10 +43,10 @@ export interface ReviewStatusResponse {
 }
 
 /**
- * Parameters for getting next word to test.
+ * Parameters for getting next word to review.
  */
 export interface NextWordParams {
-  testKey: string;
+  reviewKey: string;
   selection: string;
   wordMode: boolean;
   lgId: number;
@@ -55,9 +55,9 @@ export interface NextWordParams {
 }
 
 /**
- * Language settings for a test.
+ * Language settings for a review.
  */
-export interface TestLangSettings {
+export interface ReviewLangSettings {
   name: string;
   dict1Uri: string;
   dict2Uri: string;
@@ -68,17 +68,17 @@ export interface TestLangSettings {
 }
 
 /**
- * Test configuration response from server.
+ * Review configuration response from server.
  */
-export interface TestConfigResponse {
-  testKey: string;
+export interface ReviewConfigResponse {
+  reviewKey: string;
   selection: string;
-  testType: number;
+  reviewType: number;
   isTableMode: boolean;
   wordMode: boolean;
   langId: number;
   wordRegex: string;
-  langSettings: TestLangSettings;
+  langSettings: ReviewLangSettings;
   progress: {
     total: number;
     remaining: number;
@@ -94,9 +94,9 @@ export interface TestConfigResponse {
 }
 
 /**
- * Word data for table test.
+ * Word data for table review.
  */
-export interface TableTestWord {
+export interface TableReviewWord {
   id: number;
   text: string;
   translation: string;
@@ -108,11 +108,11 @@ export interface TableTestWord {
 }
 
 /**
- * Table test words response.
+ * Table review words response.
  */
 export interface TableWordsResponse {
-  words: TableTestWord[];
-  langSettings: TestLangSettings;
+  words: TableReviewWord[];
+  langSettings: ReviewLangSettings;
 }
 
 /**
@@ -120,14 +120,14 @@ export interface TableWordsResponse {
  */
 export const ReviewApi = {
   /**
-   * Get the next word to test.
+   * Get the next word to review.
    *
-   * @param params Test parameters
-   * @returns Promise with word test data
+   * @param params Review parameters
+   * @returns Promise with word review data
    */
   async getNextWord(params: NextWordParams): Promise<ApiResponse<WordTestData>> {
     return apiGet<WordTestData>('/review/next-word', {
-      test_key: params.testKey,
+      review_key: params.reviewKey,
       selection: params.selection,
       word_mode: params.wordMode,
       language_id: params.lgId,
@@ -139,16 +139,16 @@ export const ReviewApi = {
   /**
    * Get count of words due for review tomorrow.
    *
-   * @param testKey   Test session key
+   * @param reviewKey Review session key
    * @param selection Word selection criteria
    * @returns Promise with count
    */
   async getTomorrowCount(
-    testKey: string,
+    reviewKey: string,
     selection: string
   ): Promise<ApiResponse<TomorrowCountResponse>> {
     return apiGet<TomorrowCountResponse>('/review/tomorrow-count', {
-      test_key: testKey,
+      review_key: reviewKey,
       selection
     });
   },
@@ -174,32 +174,32 @@ export const ReviewApi = {
   },
 
   /**
-   * Get test configuration.
+   * Get review configuration.
    *
-   * @param params Test parameters (lang, text, or selection)
-   * @returns Promise with test configuration
+   * @param params Review parameters (lang, text, or selection)
+   * @returns Promise with review configuration
    */
-  async getTestConfig(params: {
+  async getReviewConfig(params: {
     lang?: number;
     text?: number;
     selection?: number;
-  }): Promise<ApiResponse<TestConfigResponse>> {
-    return apiGet<TestConfigResponse>('/review/config', params);
+  }): Promise<ApiResponse<ReviewConfigResponse>> {
+    return apiGet<ReviewConfigResponse>('/review/config', params);
   },
 
   /**
-   * Get all words for table test mode.
+   * Get all words for table review mode.
    *
-   * @param testKey   Test session key
+   * @param reviewKey Review session key
    * @param selection Word selection criteria
    * @returns Promise with table words
    */
   async getTableWords(
-    testKey: string,
+    reviewKey: string,
     selection: string
   ): Promise<ApiResponse<TableWordsResponse>> {
     return apiGet<TableWordsResponse>('/review/table-words', {
-      test_key: testKey,
+      review_key: reviewKey,
       selection
     });
   }

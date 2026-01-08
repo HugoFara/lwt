@@ -78,12 +78,12 @@ class GetNextTerm
         list($htmlSentence, $displayWord) = $this->formatTermForTest(
             $word,
             $sentence,
-            $config->testType
+            $config->reviewType
         );
 
         // Get solution text
         $solution = $this->getSolution(
-            $config->testType,
+            $config->reviewType,
             $word,
             $config->wordMode,
             $displayWord

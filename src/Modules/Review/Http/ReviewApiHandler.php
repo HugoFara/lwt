@@ -257,7 +257,7 @@ class ReviewApiHandler
     }
 
     /**
-     * Get the next word to test based on request parameters.
+     * Get the next word to review based on request parameters.
      *
      * @param array $params Request parameters
      *
@@ -265,9 +265,10 @@ class ReviewApiHandler
      */
     public function wordTestAjax(array $params): array
     {
+        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
         $testSql = $this->reviewFacade->getReviewSql(
-            $params['test_key'],
-            $this->parseSelection($params['test_key'], $params['selection'])
+            $reviewKey,
+            $this->parseSelection($reviewKey, $params['selection'])
         );
         if ($testSql === null) {
             return [
@@ -292,9 +293,10 @@ class ReviewApiHandler
      */
     public function tomorrowTestCount(array $params): array
     {
+        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
         $testSql = $this->reviewFacade->getReviewSql(
-            $params['test_key'],
-            $this->parseSelection($params['test_key'], $params['selection'])
+            $reviewKey,
+            $this->parseSelection($reviewKey, $params['selection'])
         );
         if ($testSql === null) {
             return ["count" => 0];
@@ -305,16 +307,16 @@ class ReviewApiHandler
     }
 
     /**
-     * Parse selection parameter based on test key type.
+     * Parse selection parameter based on review key type.
      *
-     * @param string $testKey   The test key type
+     * @param string $reviewKey The review key type
      * @param string $selection The selection value
      *
      * @return int|int[] Parsed selection value
      */
-    private function parseSelection(string $testKey, string $selection): int|array
+    private function parseSelection(string $reviewKey, string $selection): int|array
     {
-        if ($testKey === 'words' || $testKey === 'texts') {
+        if ($reviewKey === 'words' || $reviewKey === 'texts') {
             return array_map('intval', explode(',', $selection));
         }
         return (int)$selection;
@@ -487,11 +489,11 @@ class ReviewApiHandler
         $sessionData = $this->reviewFacade->getTestSessionData();
 
         return [
-            'testKey' => $identifier[0],
+            'reviewKey' => $identifier[0],
             'selection' => is_array($identifier[1])
                 ? implode(',', $identifier[1])
                 : (string)$identifier[1],
-            'testType' => $baseType,
+            'reviewType' => $baseType,
             'isTableMode' => $isTableMode,
             'wordMode' => $wordMode,
             'langId' => $langIdFromSql,
@@ -529,15 +531,15 @@ class ReviewApiHandler
      */
     public function formatTableWords(array $params): array
     {
-        $testKey = $params['test_key'] ?? '';
+        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
         $selection = $params['selection'] ?? '';
 
-        if ($testKey === '' || $selection === '') {
-            return ['error' => 'test_key and selection are required'];
+        if ($reviewKey === '' || $selection === '') {
+            return ['error' => 'review_key and selection are required'];
         }
 
-        $parsedSelection = $this->parseSelection($testKey, $selection);
-        $testsql = $this->reviewFacade->getReviewSql($testKey, $parsedSelection);
+        $parsedSelection = $this->parseSelection($reviewKey, $selection);
+        $testsql = $this->reviewFacade->getReviewSql($reviewKey, $parsedSelection);
 
         if ($testsql === null) {
             return ['error' => 'Unable to generate test SQL'];

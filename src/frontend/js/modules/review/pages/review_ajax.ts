@@ -16,14 +16,14 @@ import { getLanguageId, initLanguageConfig } from '@modules/language/stores/lang
 
 // Interface for review data
 interface ReviewData {
-  test_key: string;
+  review_key: string;
   selection: string;
   word_mode: number;
   language_id: number;
   word_regex: string;
   type: number;
   count: number;
-  total_tests: number;
+  total_reviews: number;
 }
 
 // Interface for current review word
@@ -157,7 +157,7 @@ export async function reviewQueryHandler(
  */
 export async function queryNextTerm(reviewData: ReviewData): Promise<void> {
   const response = await ReviewApi.getNextWord({
-    testKey: reviewData.test_key,
+    reviewKey: reviewData.review_key,
     selection: reviewData.selection,
     wordMode: reviewData.word_mode === 1,
     lgId: reviewData.language_id,
@@ -175,7 +175,7 @@ export async function queryNextTerm(reviewData: ReviewData): Promise<void> {
       term_text: response.data.term_text
     };
     await reviewQueryHandler(
-      data, reviewData.count, reviewData.test_key, reviewData.selection
+      data, reviewData.count, reviewData.review_key, reviewData.selection
     );
   }
 }

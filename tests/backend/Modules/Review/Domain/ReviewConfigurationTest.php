@@ -39,9 +39,9 @@ class ReviewConfigurationTest extends TestCase
     {
         $config = new ReviewConfiguration('lang', 1);
 
-        $this->assertEquals('lang', $config->testKey);
+        $this->assertEquals('lang', $config->reviewKey);
         $this->assertEquals(1, $config->selection);
-        $this->assertEquals(1, $config->testType);
+        $this->assertEquals(1, $config->reviewType);
         $this->assertFalse($config->wordMode);
         $this->assertFalse($config->isTableMode);
     }
@@ -50,9 +50,9 @@ class ReviewConfigurationTest extends TestCase
     {
         $config = new ReviewConfiguration('text', 42, 3, true, true);
 
-        $this->assertEquals('text', $config->testKey);
+        $this->assertEquals('text', $config->reviewKey);
         $this->assertEquals(42, $config->selection);
-        $this->assertEquals(3, $config->testType);
+        $this->assertEquals(3, $config->reviewType);
         $this->assertTrue($config->wordMode);
         $this->assertTrue($config->isTableMode);
     }
@@ -79,9 +79,9 @@ class ReviewConfigurationTest extends TestCase
     {
         $config = ReviewConfiguration::fromLanguage(42);
 
-        $this->assertEquals(ReviewConfiguration::KEY_LANG, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_LANG, $config->reviewKey);
         $this->assertEquals(42, $config->selection);
-        $this->assertEquals(1, $config->testType);
+        $this->assertEquals(1, $config->reviewType);
         $this->assertFalse($config->wordMode);
         $this->assertFalse($config->isTableMode);
     }
@@ -90,7 +90,7 @@ class ReviewConfigurationTest extends TestCase
     {
         $config = ReviewConfiguration::fromLanguage(42, 3);
 
-        $this->assertEquals(3, $config->testType);
+        $this->assertEquals(3, $config->reviewType);
         $this->assertFalse($config->wordMode);
     }
 
@@ -99,7 +99,7 @@ class ReviewConfigurationTest extends TestCase
         // Test types 4 and 5 should automatically enable word mode
         $config = ReviewConfiguration::fromLanguage(42, 4);
 
-        $this->assertEquals(4, $config->testType);
+        $this->assertEquals(4, $config->reviewType);
         $this->assertTrue($config->wordMode);
     }
 
@@ -107,7 +107,7 @@ class ReviewConfigurationTest extends TestCase
     {
         $config = ReviewConfiguration::fromLanguage(42, 1, true);
 
-        $this->assertEquals(1, $config->testType);
+        $this->assertEquals(1, $config->reviewType);
         $this->assertTrue($config->wordMode);
     }
 
@@ -115,13 +115,13 @@ class ReviewConfigurationTest extends TestCase
     {
         // Test type should be clamped to 1-5
         $config = ReviewConfiguration::fromLanguage(42, 10);
-        $this->assertEquals(5, $config->testType);
+        $this->assertEquals(5, $config->reviewType);
 
         $config = ReviewConfiguration::fromLanguage(42, 0);
-        $this->assertEquals(1, $config->testType);
+        $this->assertEquals(1, $config->reviewType);
 
         $config = ReviewConfiguration::fromLanguage(42, -1);
-        $this->assertEquals(1, $config->testType);
+        $this->assertEquals(1, $config->reviewType);
     }
 
     // ===== fromText Factory Tests =====
@@ -130,9 +130,9 @@ class ReviewConfigurationTest extends TestCase
     {
         $config = ReviewConfiguration::fromText(123);
 
-        $this->assertEquals(ReviewConfiguration::KEY_TEXT, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_TEXT, $config->reviewKey);
         $this->assertEquals(123, $config->selection);
-        $this->assertEquals(1, $config->testType);
+        $this->assertEquals(1, $config->reviewType);
         $this->assertFalse($config->wordMode);
         $this->assertFalse($config->isTableMode);
     }
@@ -141,14 +141,14 @@ class ReviewConfigurationTest extends TestCase
     {
         $config = ReviewConfiguration::fromText(123, 2);
 
-        $this->assertEquals(2, $config->testType);
+        $this->assertEquals(2, $config->reviewType);
     }
 
     public function testFromTextWithWordModeTestType(): void
     {
         $config = ReviewConfiguration::fromText(123, 5);
 
-        $this->assertEquals(5, $config->testType);
+        $this->assertEquals(5, $config->reviewType);
         $this->assertTrue($config->wordMode);
     }
 
@@ -159,9 +159,9 @@ class ReviewConfigurationTest extends TestCase
         $wordIds = [10, 20, 30];
         $config = ReviewConfiguration::fromWords($wordIds);
 
-        $this->assertEquals(ReviewConfiguration::KEY_WORDS, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_WORDS, $config->reviewKey);
         $this->assertEquals([10, 20, 30], $config->selection);
-        $this->assertEquals(1, $config->testType);
+        $this->assertEquals(1, $config->reviewType);
         $this->assertFalse($config->isTableMode);
     }
 
@@ -177,7 +177,7 @@ class ReviewConfigurationTest extends TestCase
     {
         $config = ReviewConfiguration::fromWords([1, 2], 3);
 
-        $this->assertEquals(3, $config->testType);
+        $this->assertEquals(3, $config->reviewType);
     }
 
     // ===== fromTexts Factory Tests =====
@@ -187,9 +187,9 @@ class ReviewConfigurationTest extends TestCase
         $textIds = [100, 200, 300];
         $config = ReviewConfiguration::fromTexts($textIds);
 
-        $this->assertEquals(ReviewConfiguration::KEY_TEXTS, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_TEXTS, $config->reviewKey);
         $this->assertEquals([100, 200, 300], $config->selection);
-        $this->assertEquals(1, $config->testType);
+        $this->assertEquals(1, $config->reviewType);
     }
 
     public function testFromTextsConvertsToIntegers(): void
@@ -206,9 +206,9 @@ class ReviewConfigurationTest extends TestCase
     {
         $config = ReviewConfiguration::forTableMode('lang', 42);
 
-        $this->assertEquals('lang', $config->testKey);
+        $this->assertEquals('lang', $config->reviewKey);
         $this->assertEquals(42, $config->selection);
-        $this->assertEquals(1, $config->testType);
+        $this->assertEquals(1, $config->reviewType);
         $this->assertFalse($config->wordMode);
         $this->assertTrue($config->isTableMode);
     }
@@ -299,7 +299,7 @@ class ReviewConfigurationTest extends TestCase
         $config = new ReviewConfiguration('invalid_key', 1);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid test key');
+        $this->expectExceptionMessage('Invalid review key');
 
         $config->toSqlProjection();
     }
@@ -377,9 +377,9 @@ class ReviewConfigurationTest extends TestCase
         $config = ReviewConfiguration::fromLanguage(42, 2);
 
         // All properties are public readonly
-        $this->assertEquals('lang', $config->testKey);
+        $this->assertEquals('lang', $config->reviewKey);
         $this->assertEquals(42, $config->selection);
-        $this->assertEquals(2, $config->testType);
+        $this->assertEquals(2, $config->reviewType);
         $this->assertFalse($config->wordMode);
         $this->assertFalse($config->isTableMode);
     }
@@ -401,14 +401,14 @@ class ReviewConfigurationTest extends TestCase
     public function testWordModeAutoEnabledForType4(): void
     {
         $config = ReviewConfiguration::fromLanguage(1, 4, false);
-        // Word mode should be true because testType > 3
+        // Word mode should be true because reviewType > 3
         $this->assertTrue($config->wordMode);
     }
 
     public function testWordModeAutoEnabledForType5(): void
     {
         $config = ReviewConfiguration::fromText(1, 5, false);
-        // Word mode should be true because testType > 3
+        // Word mode should be true because reviewType > 3
         $this->assertTrue($config->wordMode);
     }
 }

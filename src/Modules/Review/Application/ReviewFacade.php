@@ -114,7 +114,7 @@ class ReviewFacade
             return ['', ''];
         }
 
-        return [$config->testKey, $config->selection];
+        return [$config->reviewKey, $config->selection];
     }
 
     /**
@@ -443,7 +443,7 @@ class ReviewFacade
     {
         $langName = $this->repository->getLanguageName($config);
 
-        return match ($config->testKey) {
+        return match ($config->reviewKey) {
             ReviewConfiguration::KEY_LANG => "All Terms in {$langName}",
             ReviewConfiguration::KEY_TEXT => "Text Review",
             ReviewConfiguration::KEY_WORDS, ReviewConfiguration::KEY_TEXTS => $this->getSelectionTitle($config, $langName),
