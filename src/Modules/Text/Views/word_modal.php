@@ -266,7 +266,7 @@ namespace Lwt\Views\Text;
                   <button
                     type="button"
                     class="button"
-                    :class="formStore.formData.status === s.value ? getStatusClass(s.value) : 'is-outlined'"
+                    :class="getStatusClass(s.value) + (formStore.formData.status !== s.value ? ' is-outlined' : '')"
                     @click="formStore.formData.status = s.value"
                     x-text="s.abbr"
                   ></button>

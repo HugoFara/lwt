@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS languages (
     LgSplitEachChar tinyint(1) unsigned NOT NULL DEFAULT '0',
     LgRightToLeft tinyint(1) unsigned NOT NULL DEFAULT '0',
     LgTTSVoiceAPI varchar(2048) NOT NULL DEFAULT '',
-    LgShowRomanization tinyint(1) unsigned NOT NULL DEFAULT '1',
+    LgShowRomanization tinyint(1) unsigned NOT NULL DEFAULT '0',
     PRIMARY KEY (LgID),
     KEY LgUsID (LgUsID),
     UNIQUE KEY LgName (LgName),
