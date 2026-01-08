@@ -29,11 +29,11 @@ interface ReviewRepositoryInterface
     /**
      * Find the next word for testing using spaced repetition algorithm.
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
-     * @return TestWord|null Next word to test or null if none available
+     * @return ReviewWord|null Next word to test or null if none available
      */
-    public function findNextWordForTest(TestConfiguration $config): ?TestWord;
+    public function findNextWordForTest(ReviewConfiguration $config): ?ReviewWord;
 
     /**
      * Get a sentence containing the word for context.
@@ -50,29 +50,29 @@ interface ReviewRepositoryInterface
     /**
      * Get test counts (due today and total).
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return array{due: int, total: int}
      */
-    public function getTestCounts(TestConfiguration $config): array;
+    public function getTestCounts(ReviewConfiguration $config): array;
 
     /**
      * Get count of words due tomorrow.
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return int Count of words due tomorrow
      */
-    public function getTomorrowCount(TestConfiguration $config): int;
+    public function getTomorrowCount(ReviewConfiguration $config): int;
 
     /**
      * Get all words for table test mode.
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
-     * @return TestWord[] Array of test words
+     * @return ReviewWord[] Array of test words
      */
-    public function getTableWords(TestConfiguration $config): array;
+    public function getTableWords(ReviewConfiguration $config): array;
 
     /**
      * Update word status during test.
@@ -115,29 +115,29 @@ interface ReviewRepositoryInterface
     /**
      * Get language ID from test configuration.
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return int|null Language ID or null if none found
      */
-    public function getLanguageIdFromConfig(TestConfiguration $config): ?int;
+    public function getLanguageIdFromConfig(ReviewConfiguration $config): ?int;
 
     /**
      * Validate that test selection contains only one language.
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return array{valid: bool, langCount: int, error: string|null}
      */
-    public function validateSingleLanguage(TestConfiguration $config): array;
+    public function validateSingleLanguage(ReviewConfiguration $config): array;
 
     /**
      * Get language name from test configuration.
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return string Language name or 'L2' as default
      */
-    public function getLanguageName(TestConfiguration $config): string;
+    public function getLanguageName(ReviewConfiguration $config): string;
 
     /**
      * Get word text by ID.

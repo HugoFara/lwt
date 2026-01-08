@@ -21,8 +21,8 @@ use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
-use Lwt\Modules\Review\Domain\TestConfiguration;
-use Lwt\Modules\Review\Domain\TestWord;
+use Lwt\Modules\Review\Domain\ReviewConfiguration;
+use Lwt\Modules\Review\Domain\ReviewWord;
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 
@@ -50,7 +50,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function findNextWordForTest(TestConfiguration $config): ?TestWord
+    public function findNextWordForTest(ReviewConfiguration $config): ?ReviewWord
     {
         $testsql = $config->toSqlProjection();
         $pass = 0;
@@ -76,7 +76,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             mysqli_free_result($res);
 
             if ($record !== null && $record !== false) {
-                return TestWord::fromRecord($record);
+                return ReviewWord::fromRecord($record);
             }
         }
 
@@ -129,7 +129,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getTestCounts(TestConfiguration $config): array
+    public function getTestCounts(ReviewConfiguration $config): array
     {
         $testsql = $config->toSqlProjection();
 
@@ -153,7 +153,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getTomorrowCount(TestConfiguration $config): int
+    public function getTomorrowCount(ReviewConfiguration $config): int
     {
         $testsql = $config->toSqlProjection();
 
@@ -168,7 +168,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getTableWords(TestConfiguration $config): array
+    public function getTableWords(ReviewConfiguration $config): array
     {
         $testsql = $config->toSqlProjection();
 
@@ -184,7 +184,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
 
         if ($result instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($result)) {
-                $words[] = TestWord::fromRecord($record);
+                $words[] = ReviewWord::fromRecord($record);
             }
             mysqli_free_result($result);
         }
@@ -281,7 +281,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getLanguageIdFromConfig(TestConfiguration $config): ?int
+    public function getLanguageIdFromConfig(ReviewConfiguration $config): ?int
     {
         $testsql = $config->toSqlProjection();
 
@@ -296,7 +296,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function validateSingleLanguage(TestConfiguration $config): array
+    public function validateSingleLanguage(ReviewConfiguration $config): array
     {
         $testsql = $config->toSqlProjection();
 
@@ -324,16 +324,16 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getLanguageName(TestConfiguration $config): string
+    public function getLanguageName(ReviewConfiguration $config): string
     {
-        if ($config->testKey === TestConfiguration::KEY_LANG) {
+        if ($config->testKey === ReviewConfiguration::KEY_LANG) {
             $name = QueryBuilder::table('languages')
                 ->where('LgID', '=', $config->selection)
                 ->valuePrepared('LgName');
             return $name !== null ? (string) $name : 'L2';
         }
 
-        if ($config->testKey === TestConfiguration::KEY_TEXT) {
+        if ($config->testKey === ReviewConfiguration::KEY_TEXT) {
             $row = QueryBuilder::table('texts')
                 ->select(['LgName'])
                 ->join('languages', 'TxLgID', '=', 'LgID')

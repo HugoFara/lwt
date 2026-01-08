@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 /**
- * Test Controller
+ * Review Controller
  *
- * HTTP controller for word testing/review interface.
+ * HTTP controller for word review interface.
  *
  * PHP version 8.1
  *
@@ -10,7 +10,7 @@
  * @package  Lwt\Modules\Review\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/files/src-modules-review-http-testcontroller.html
+ * @link     https://hugofara.github.io/lwt/docs/php/files/src-modules-review-http-reviewcontroller.html
  * @since    3.0.0
  */
 
@@ -19,7 +19,7 @@ namespace Lwt\Modules\Review\Http;
 use Lwt\Controllers\BaseController;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Modules\Review\Application\ReviewFacade;
-use Lwt\Modules\Review\Domain\TestConfiguration;
+use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
@@ -34,13 +34,13 @@ require_once __DIR__ . '/../../../Shared/UI/Helpers/FormHelper.php';
 require_once __DIR__ . '/../../../backend/Core/Bootstrap/start_session.php';
 
 /**
- * Controller for word testing/review interface.
+ * Controller for word review interface.
  *
  * Handles:
- * - Test index (main testing interface)
- * - Test header display
- * - Test status updates
- * - Table tests
+ * - Review index (main review interface)
+ * - Review header display
+ * - Review status updates
+ * - Table reviews
  *
  * @category Lwt
  * @package  Lwt\Modules\Review\Http
@@ -49,13 +49,13 @@ require_once __DIR__ . '/../../../backend/Core/Bootstrap/start_session.php';
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
-class TestController extends BaseController
+class ReviewController extends BaseController
 {
     private ReviewFacade $reviewFacade;
     private LanguageFacade $languageService;
 
     /**
-     * Create a new TestController.
+     * Create a new ReviewController.
      *
      * @param ReviewFacade|null   $reviewFacade    Review facade (optional for BC)
      * @param LanguageFacade|null $languageService Language facade (optional for BC)
@@ -70,9 +70,9 @@ class TestController extends BaseController
     }
 
     /**
-     * Test index page (main entry point).
+     * Review index page (main entry point).
      *
-     * Routes to appropriate test type based on parameters.
+     * Routes to appropriate review type based on parameters.
      *
      * @param array $params Route parameters
      *
@@ -80,17 +80,17 @@ class TestController extends BaseController
      */
     public function index(array $params): void
     {
-        $property = $this->getTestProperty();
+        $property = $this->getReviewProperty();
 
         if ($property === '') {
             $this->redirect('/text/edit');
         }
 
-        $this->renderTestPage();
+        $this->renderReviewPage();
     }
 
     /**
-     * Render test header frame.
+     * Render review header frame.
      *
      * @param array $params Route parameters
      *
@@ -141,7 +141,7 @@ class TestController extends BaseController
     }
 
     /**
-     * Render table test.
+     * Render table review.
      *
      * @param array $params Route parameters
      *
@@ -149,14 +149,14 @@ class TestController extends BaseController
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function tableTest(array $params): void
+    public function tableReview(array $params): void
     {
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
         $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
         $sessTestsql = $_SESSION['testsql'] ?? null;
 
-        // Get test SQL
+        // Get review SQL
         $identifier = $this->reviewFacade->getTestIdentifier(
             $selection,
             $sessTestsql,
@@ -173,7 +173,7 @@ class TestController extends BaseController
         $testsql = $this->reviewFacade->getTestSql($identifier[0], $identifier[1]);
 
         if ($testsql === null) {
-            echo '<p>Sorry - Unable to generate test SQL</p>';
+            echo '<p>Sorry - Unable to generate review SQL</p>';
             return;
         }
 
@@ -218,11 +218,11 @@ class TestController extends BaseController
     }
 
     /**
-     * Get test property from request parameters.
+     * Get review property from request parameters.
      *
      * @return string URL property string
      */
-    private function getTestProperty(): string
+    private function getReviewProperty(): string
     {
         $selection = $this->param('selection');
         if ($selection !== '' && isset($_SESSION['testsql'])) {
@@ -240,7 +240,7 @@ class TestController extends BaseController
     }
 
     /**
-     * Render the main test page.
+     * Render the main review page.
      *
      * Modern interface with reactive state management and no iframes.
      *
@@ -248,7 +248,7 @@ class TestController extends BaseController
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    private function renderTestPage(): void
+    private function renderReviewPage(): void
     {
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
@@ -257,7 +257,7 @@ class TestController extends BaseController
         $testTypeParam = $this->param('type', '1');
         $isTableMode = $testTypeParam === 'table';
 
-        // Get test data
+        // Get review data
         $testData = $this->reviewFacade->getTestDataFromParams(
             $selection,
             $sessTestsql,
@@ -269,7 +269,7 @@ class TestController extends BaseController
             $this->redirect('/text/edit');
         }
 
-        // Get test identifier
+        // Get review identifier
         $identifier = $this->reviewFacade->getTestIdentifier(
             $selection,
             $sessTestsql,

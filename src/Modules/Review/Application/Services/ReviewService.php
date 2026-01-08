@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 /**
- * Test Service - Business logic for word testing/review operations
+ * Review Service - Business logic for word review operations
  *
  * PHP version 8.1
  *
@@ -27,7 +27,7 @@ use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**
- * Service class for managing word tests/reviews.
+ * Service class for managing word reviews.
  *
  * Handles test SQL generation, word selection, status updates,
  * and progress tracking for vocabulary testing.
@@ -39,7 +39,7 @@ use Lwt\Modules\Tags\Application\TagsFacade;
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
-class TestService
+class ReviewService
 {
     /**
      * Sentence service instance
@@ -137,7 +137,7 @@ class TestService
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
                 break;
             default:
-                ErrorHandler::die("TestService::getTestSql called with wrong parameters");
+                ErrorHandler::die("ReviewService::getTestSql called with wrong parameters");
         }
         return $testsql;
     }

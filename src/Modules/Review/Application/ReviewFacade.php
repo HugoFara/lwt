@@ -18,13 +18,13 @@ namespace Lwt\Modules\Review\Application;
 
 use Lwt\Modules\Review\Application\UseCases\GetNextTerm;
 use Lwt\Modules\Review\Application\UseCases\GetTableWords;
-use Lwt\Modules\Review\Application\UseCases\GetTestConfiguration;
+use Lwt\Modules\Review\Application\UseCases\GetReviewConfiguration;
 use Lwt\Modules\Review\Application\UseCases\GetTomorrowCount;
 use Lwt\Modules\Review\Application\UseCases\StartReviewSession;
 use Lwt\Modules\Review\Application\UseCases\SubmitAnswer;
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\ReviewSession;
-use Lwt\Modules\Review\Domain\TestConfiguration;
+use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Review\Infrastructure\MySqlReviewRepository;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
@@ -43,7 +43,7 @@ class ReviewFacade
     protected SessionStateManager $sessionManager;
     protected GetNextTerm $getNextTerm;
     protected GetTableWords $getTableWords;
-    protected GetTestConfiguration $getTestConfiguration;
+    protected GetReviewConfiguration $getReviewConfiguration;
     protected GetTomorrowCount $getTomorrowCount;
     protected StartReviewSession $startReviewSession;
     protected SubmitAnswer $submitAnswer;
@@ -55,7 +55,7 @@ class ReviewFacade
      * @param SessionStateManager|null       $sessionManager       Session manager
      * @param GetNextTerm|null               $getNextTerm          Get next term use case
      * @param GetTableWords|null             $getTableWords        Get table words use case
-     * @param GetTestConfiguration|null      $getTestConfiguration Get config use case
+     * @param GetReviewConfiguration|null      $getReviewConfiguration Get config use case
      * @param GetTomorrowCount|null          $getTomorrowCount     Tomorrow count use case
      * @param StartReviewSession|null        $startReviewSession   Start session use case
      * @param SubmitAnswer|null              $submitAnswer         Submit answer use case
@@ -65,7 +65,7 @@ class ReviewFacade
         ?SessionStateManager $sessionManager = null,
         ?GetNextTerm $getNextTerm = null,
         ?GetTableWords $getTableWords = null,
-        ?GetTestConfiguration $getTestConfiguration = null,
+        ?GetReviewConfiguration $getReviewConfiguration = null,
         ?GetTomorrowCount $getTomorrowCount = null,
         ?StartReviewSession $startReviewSession = null,
         ?SubmitAnswer $submitAnswer = null
@@ -74,8 +74,8 @@ class ReviewFacade
         $this->sessionManager = $sessionManager ?? new SessionStateManager();
         $this->getNextTerm = $getNextTerm ?? new GetNextTerm($this->repository);
         $this->getTableWords = $getTableWords ?? new GetTableWords($this->repository);
-        $this->getTestConfiguration = $getTestConfiguration
-            ?? new GetTestConfiguration($this->repository, $this->sessionManager);
+        $this->getReviewConfiguration = $getReviewConfiguration
+            ?? new GetReviewConfiguration($this->repository, $this->sessionManager);
         $this->getTomorrowCount = $getTomorrowCount ?? new GetTomorrowCount($this->repository);
         $this->startReviewSession = $startReviewSession
             ?? new StartReviewSession($this->repository, $this->sessionManager);
@@ -103,7 +103,7 @@ class ReviewFacade
         ?int $lang,
         ?int $text
     ): array {
-        $config = $this->getTestConfiguration->parseFromParams(
+        $config = $this->getReviewConfiguration->parseFromParams(
             $selection,
             $sessTestsql,
             $lang,
@@ -127,7 +127,7 @@ class ReviewFacade
      */
     public function getTestSql(string $selector, int|array $selection): ?string
     {
-        $config = new TestConfiguration($selector, $selection);
+        $config = new ReviewConfiguration($selector, $selection);
         try {
             return $config->toSqlProjection();
         } catch (\InvalidArgumentException $e) {
@@ -145,7 +145,7 @@ class ReviewFacade
     public function validateTestSelection(string $testsql): array
     {
         // Create a raw SQL config for validation
-        $config = new TestConfiguration(TestConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
         return $this->repository->validateSingleLanguage($config);
     }
 
@@ -158,7 +158,7 @@ class ReviewFacade
      */
     public function getTestCounts(string $testsql): array
     {
-        $config = new TestConfiguration(TestConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
         return $this->repository->getTestCounts($config);
     }
 
@@ -171,7 +171,7 @@ class ReviewFacade
      */
     public function getTomorrowTestCount(string $testsql): int
     {
-        $config = new TestConfiguration(TestConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
         $result = $this->getTomorrowCount->execute($config);
         return $result['count'];
     }
@@ -185,7 +185,7 @@ class ReviewFacade
      */
     public function getNextWord(string $testsql): ?array
     {
-        $config = new TestConfiguration(TestConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
         $word = $this->repository->findNextWordForTest($config);
 
         if ($word === null) {
@@ -272,7 +272,7 @@ class ReviewFacade
      */
     public function getLanguageIdFromTestSql(string $testsql): ?int
     {
-        $config = new TestConfiguration(TestConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
         return $this->repository->getLanguageIdFromConfig($config);
     }
 
@@ -351,7 +351,7 @@ class ReviewFacade
      *
      * @return \mysqli_result|bool
      */
-    public function getTableTestWords(string $testsql): \mysqli_result|bool
+    public function getTableReviewWords(string $testsql): \mysqli_result|bool
     {
         // For backward compatibility, return raw query result
         // New code should use getTableWords use case
@@ -380,7 +380,7 @@ class ReviewFacade
         ?int $selection = null,
         ?string $testsql = null
     ): string {
-        $config = $this->getTestConfiguration->parseFromParams(
+        $config = $this->getReviewConfiguration->parseFromParams(
             $selection,
             $testsql,
             $lang,
@@ -406,7 +406,7 @@ class ReviewFacade
         ?int $langId,
         ?int $textId
     ): ?array {
-        $config = $this->getTestConfiguration->parseFromParams(
+        $config = $this->getReviewConfiguration->parseFromParams(
             $selection,
             $sessTestsql,
             $langId,
@@ -435,18 +435,18 @@ class ReviewFacade
     /**
      * Build title for test.
      *
-     * @param TestConfiguration $config Configuration
+     * @param ReviewConfiguration $config Configuration
      *
      * @return string
      */
-    private function buildTitle(TestConfiguration $config): string
+    private function buildTitle(ReviewConfiguration $config): string
     {
         $langName = $this->repository->getLanguageName($config);
 
         return match ($config->testKey) {
-            TestConfiguration::KEY_LANG => "All Terms in {$langName}",
-            TestConfiguration::KEY_TEXT => "Text Review",
-            TestConfiguration::KEY_WORDS, TestConfiguration::KEY_TEXTS => $this->getSelectionTitle($config, $langName),
+            ReviewConfiguration::KEY_LANG => "All Terms in {$langName}",
+            ReviewConfiguration::KEY_TEXT => "Text Review",
+            ReviewConfiguration::KEY_WORDS, ReviewConfiguration::KEY_TEXTS => $this->getSelectionTitle($config, $langName),
             default => 'Review'
         };
     }
@@ -454,12 +454,12 @@ class ReviewFacade
     /**
      * Get selection title.
      *
-     * @param TestConfiguration $config   Configuration
+     * @param ReviewConfiguration $config   Configuration
      * @param string            $langName Language name
      *
      * @return string
      */
-    private function getSelectionTitle(TestConfiguration $config, string $langName): string
+    private function getSelectionTitle(ReviewConfiguration $config, string $langName): string
     {
         $count = is_array($config->selection) ? count($config->selection) : 1;
         $plural = $count === 1 ? '' : 's';
@@ -473,11 +473,11 @@ class ReviewFacade
     /**
      * Get next term for testing (new API).
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return array
      */
-    public function fetchNextTerm(TestConfiguration $config): array
+    public function fetchNextTerm(ReviewConfiguration $config): array
     {
         return $this->getNextTerm->execute($config);
     }
@@ -485,11 +485,11 @@ class ReviewFacade
     /**
      * Get table words (new API).
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return array
      */
-    public function fetchTableWords(TestConfiguration $config): array
+    public function fetchTableWords(ReviewConfiguration $config): array
     {
         return $this->getTableWords->execute($config);
     }
@@ -497,13 +497,13 @@ class ReviewFacade
     /**
      * Get test configuration (new API).
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return array
      */
-    public function fetchTestConfiguration(TestConfiguration $config): array
+    public function fetchReviewConfiguration(ReviewConfiguration $config): array
     {
-        return $this->getTestConfiguration->execute($config);
+        return $this->getReviewConfiguration->execute($config);
     }
 
     /**
@@ -660,16 +660,16 @@ class ReviewFacade
         $dataIntArray = array_map('intval', $dataStringArray);
 
         $testKey = match ($selectionType) {
-            2 => TestConfiguration::KEY_WORDS,
-            3 => TestConfiguration::KEY_TEXTS,
-            default => TestConfiguration::KEY_RAW_SQL
+            2 => ReviewConfiguration::KEY_WORDS,
+            3 => ReviewConfiguration::KEY_TEXTS,
+            default => ReviewConfiguration::KEY_RAW_SQL
         };
 
-        if ($testKey === TestConfiguration::KEY_RAW_SQL) {
+        if ($testKey === ReviewConfiguration::KEY_RAW_SQL) {
             return $selectionData;
         }
 
-        $config = new TestConfiguration($testKey, $dataIntArray);
+        $config = new ReviewConfiguration($testKey, $dataIntArray);
         return $config->toSqlProjection();
     }
 

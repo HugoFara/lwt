@@ -29,7 +29,7 @@ use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 // Use Cases
 use Lwt\Modules\Review\Application\UseCases\GetNextTerm;
 use Lwt\Modules\Review\Application\UseCases\GetTableWords;
-use Lwt\Modules\Review\Application\UseCases\GetTestConfiguration;
+use Lwt\Modules\Review\Application\UseCases\GetReviewConfiguration;
 use Lwt\Modules\Review\Application\UseCases\GetTomorrowCount;
 use Lwt\Modules\Review\Application\UseCases\StartReviewSession;
 use Lwt\Modules\Review\Application\UseCases\SubmitAnswer;
@@ -38,17 +38,17 @@ use Lwt\Modules\Review\Application\UseCases\SubmitAnswer;
 use Lwt\Modules\Review\Application\ReviewFacade;
 
 // Http
-use Lwt\Modules\Review\Http\TestController;
+use Lwt\Modules\Review\Http\ReviewController;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
 
 // Application Services
-use Lwt\Modules\Review\Application\Services\TestService;
+use Lwt\Modules\Review\Application\Services\ReviewService;
 
 /**
  * Service provider for the Review module.
  *
  * Registers the ReviewRepositoryInterface, all use cases,
- * ReviewFacade, TestController, and ReviewApiHandler.
+ * ReviewFacade, ReviewController, and ReviewApiHandler.
  *
  * @since 3.0.0
  */
@@ -89,7 +89,7 @@ class ReviewServiceProvider implements ServiceProviderInterface
                 $c->getTyped(SessionStateManager::class),
                 $c->getTyped(GetNextTerm::class),
                 $c->getTyped(GetTableWords::class),
-                $c->getTyped(GetTestConfiguration::class),
+                $c->getTyped(GetReviewConfiguration::class),
                 $c->getTyped(GetTomorrowCount::class),
                 $c->getTyped(StartReviewSession::class),
                 $c->getTyped(SubmitAnswer::class)
@@ -97,8 +97,8 @@ class ReviewServiceProvider implements ServiceProviderInterface
         });
 
         // Register Controller
-        $container->singleton(TestController::class, function (Container $c) {
-            return new TestController(
+        $container->singleton(ReviewController::class, function (Container $c) {
+            return new ReviewController(
                 $c->getTyped(ReviewFacade::class)
             );
         });
@@ -110,9 +110,9 @@ class ReviewServiceProvider implements ServiceProviderInterface
             );
         });
 
-        // Register TestService
-        $container->singleton(TestService::class, function (Container $_c) {
-            return new TestService();
+        // Register ReviewService
+        $container->singleton(ReviewService::class, function (Container $_c) {
+            return new ReviewService();
         });
     }
 
@@ -139,9 +139,9 @@ class ReviewServiceProvider implements ServiceProviderInterface
             );
         });
 
-        // GetTestConfiguration use case
-        $container->singleton(GetTestConfiguration::class, function (Container $c) {
-            return new GetTestConfiguration(
+        // GetReviewConfiguration use case
+        $container->singleton(GetReviewConfiguration::class, function (Container $c) {
+            return new GetReviewConfiguration(
                 $c->getTyped(ReviewRepositoryInterface::class),
                 $c->getTyped(SessionStateManager::class)
             );

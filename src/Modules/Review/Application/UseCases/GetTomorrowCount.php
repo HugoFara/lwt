@@ -15,7 +15,7 @@
 namespace Lwt\Modules\Review\Application\UseCases;
 
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
-use Lwt\Modules\Review\Domain\TestConfiguration;
+use Lwt\Modules\Review\Domain\ReviewConfiguration;
 
 /**
  * Use case for getting count of words due tomorrow.
@@ -39,11 +39,11 @@ class GetTomorrowCount
     /**
      * Get count of words due tomorrow.
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return array{count: int}
      */
-    public function execute(TestConfiguration $config): array
+    public function execute(ReviewConfiguration $config): array
     {
         if (!$config->isValid()) {
             return ['count' => 0];

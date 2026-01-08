@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 /**
- * Test Word Entity
+ * Review Word Entity
  *
- * Represents a word being tested with its context.
+ * Represents a word being reviewed with its context.
  *
  * PHP version 8.1
  *
@@ -17,14 +17,14 @@
 namespace Lwt\Modules\Review\Domain;
 
 /**
- * Entity representing a word being tested.
+ * Entity representing a word being reviewed.
  *
  * Contains all word data needed for the test interface including
  * the word itself, translation, sentence context, and scoring info.
  *
  * @since 3.0.0
  */
-final class TestWord
+final class ReviewWord
 {
     /**
      * Constructor.

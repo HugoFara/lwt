@@ -15,7 +15,7 @@
 namespace Lwt\Modules\Review\Application\UseCases;
 
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
-use Lwt\Modules\Review\Domain\TestConfiguration;
+use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
@@ -45,11 +45,11 @@ class GetTableWords
     /**
      * Get all words for table test mode.
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return array Table words data
      */
-    public function execute(TestConfiguration $config): array
+    public function execute(ReviewConfiguration $config): array
     {
         if (!$config->isValid()) {
             return ['error' => 'Invalid test configuration'];

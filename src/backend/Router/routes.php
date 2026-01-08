@@ -258,8 +258,8 @@ function registerRoutes(Router $router): void
 
     // ==================== TEST ROUTES (PROTECTED) ====================
 
-    // Test interface (Review module)
-    $router->registerWithMiddleware('/test', 'Lwt\\Modules\\Review\\Http\\TestController@index', AUTH_MIDDLEWARE);
+    // Review interface (Review module)
+    $router->registerWithMiddleware('/test', 'Lwt\\Modules\\Review\\Http\\ReviewController@index', AUTH_MIDDLEWARE);
 
     // ==================== LANGUAGE ROUTES (PROTECTED) ====================
 

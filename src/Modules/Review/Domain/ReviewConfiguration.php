@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 /**
- * Test Configuration Value Object
+ * Review Configuration Value Object
  *
- * Represents the configuration for a test/review session.
+ * Represents the configuration for a review session.
  *
  * PHP version 8.1
  *
@@ -17,14 +17,14 @@
 namespace Lwt\Modules\Review\Domain;
 
 /**
- * Value object representing test configuration parameters.
+ * Value object representing review configuration parameters.
  *
  * Immutable after creation. Encapsulates test type, selection mode,
  * and other test parameters.
  *
  * @since 3.0.0
  */
-final readonly class TestConfiguration
+final readonly class ReviewConfiguration
 {
     /**
      * Test key types.

@@ -15,8 +15,8 @@
 namespace Lwt\Modules\Review\Application\UseCases;
 
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
-use Lwt\Modules\Review\Domain\TestConfiguration;
-use Lwt\Modules\Review\Domain\TestWord;
+use Lwt\Modules\Review\Domain\ReviewConfiguration;
+use Lwt\Modules\Review\Domain\ReviewWord;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 
@@ -47,17 +47,17 @@ class GetNextTerm
     /**
      * Get the next term for testing.
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return array{
      *     word_id: int|string,
      *     word_text: string,
      *     solution: string,
      *     group: string,
-     *     word?: TestWord
+     *     word?: ReviewWord
      * }
      */
-    public function execute(TestConfiguration $config): array
+    public function execute(ReviewConfiguration $config): array
     {
         // Get next word from repository
         $word = $this->repository->findNextWordForTest($config);
@@ -101,12 +101,12 @@ class GetNextTerm
     /**
      * Get sentence for word based on mode.
      *
-     * @param TestWord $word     The word
+     * @param ReviewWord $word     The word
      * @param bool     $wordMode Whether in word mode
      *
      * @return string Sentence with word marked
      */
-    private function getSentenceForWord(TestWord $word, bool $wordMode): string
+    private function getSentenceForWord(ReviewWord $word, bool $wordMode): string
     {
         if ($wordMode) {
             return '{' . $word->text . '}';
@@ -124,14 +124,14 @@ class GetNextTerm
     /**
      * Format term for test display.
      *
-     * @param TestWord $word     Word entity
+     * @param ReviewWord $word     Word entity
      * @param string   $sentence Sentence containing the word
      * @param int      $testType Test type (1-5)
      *
      * @return array{0: string, 1: string} [HTML display, plain word text]
      */
     private function formatTermForTest(
-        TestWord $word,
+        ReviewWord $word,
         string $sentence,
         int $testType
     ): array {
@@ -168,7 +168,7 @@ class GetNextTerm
      * Get solution text for the test.
      *
      * @param int      $testType Test type
-     * @param TestWord $word     Word entity
+     * @param ReviewWord $word     Word entity
      * @param bool     $wordMode Word mode flag
      * @param string   $wordText Displayed word text
      *
@@ -176,7 +176,7 @@ class GetNextTerm
      */
     private function getSolution(
         int $testType,
-        TestWord $word,
+        ReviewWord $word,
         bool $wordMode,
         string $wordText
     ): string {

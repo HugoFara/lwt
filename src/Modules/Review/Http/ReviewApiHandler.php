@@ -17,7 +17,7 @@
 namespace Lwt\Modules\Review\Http;
 
 use Lwt\Modules\Review\Application\ReviewFacade;
-use Lwt\Modules\Review\Domain\TestConfiguration;
+use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
@@ -566,7 +566,7 @@ class ReviewApiHandler
         );
 
         // Get words
-        $wordsResult = $this->reviewFacade->getTableTestWords($testsql);
+        $wordsResult = $this->reviewFacade->getTableReviewWords($testsql);
         $words = [];
 
         if ($wordsResult instanceof \mysqli_result) {

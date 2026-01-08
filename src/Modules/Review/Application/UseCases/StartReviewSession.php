@@ -16,7 +16,7 @@ namespace Lwt\Modules\Review\Application\UseCases;
 
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\ReviewSession;
-use Lwt\Modules\Review\Domain\TestConfiguration;
+use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 
 /**
@@ -49,7 +49,7 @@ class StartReviewSession
     /**
      * Start a new review session.
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return array{
      *     success: bool,
@@ -59,7 +59,7 @@ class StartReviewSession
      *     error?: string
      * }
      */
-    public function execute(TestConfiguration $config): array
+    public function execute(ReviewConfiguration $config): array
     {
         // Validate configuration
         if (!$config->isValid()) {
@@ -105,11 +105,11 @@ class StartReviewSession
     /**
      * Get current session or start new one if none exists.
      *
-     * @param TestConfiguration $config Test configuration
+     * @param ReviewConfiguration $config Test configuration
      *
      * @return ReviewSession
      */
-    public function getOrStartSession(TestConfiguration $config): ReviewSession
+    public function getOrStartSession(ReviewConfiguration $config): ReviewSession
     {
         $session = $this->sessionManager->getSession();
         if ($session !== null) {
