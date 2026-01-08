@@ -32,8 +32,8 @@ const STATUSES: StatusInfo[] = [
   { value: 3, label: 'Learning (3)', abbr: '3', class: 'is-info' },
   { value: 4, label: 'Learning (4)', abbr: '4', class: 'is-primary' },
   { value: 5, label: 'Learned', abbr: '5', class: 'is-success' },
-  { value: 99, label: 'Well Known', abbr: 'WKn', class: 'is-success is-light' },
-  { value: 98, label: 'Ignored', abbr: 'Ign', class: 'is-light' }
+  { value: 99, label: 'Well Known', abbr: 'Known', class: 'is-success is-light' },
+  { value: 98, label: 'Ignored', abbr: 'Ignore', class: 'is-light' }
 ];
 
 /**
@@ -104,9 +104,13 @@ export function wordPopoverData(): WordPopoverData {
     popoverEl: null,
 
     init(): void {
-      // Watch for popover open state changes
+      // Watch for popover open state changes and target element changes
       Alpine.effect(() => {
-        if (this.store.isPopoverOpen) {
+        // Track both isPopoverOpen and popoverTargetElement to trigger on word changes
+        const isOpen = this.store.isPopoverOpen;
+        const targetEl = this.store.popoverTargetElement;
+
+        if (isOpen && targetEl) {
           // Use requestAnimationFrame to wait for DOM update
           requestAnimationFrame(() => {
             this.calculatePosition();

@@ -80,13 +80,13 @@ namespace Lwt\Views\Text;
                   :class="isCurrentStatus(99) ? 'is-success' : 'is-outlined is-success'"
                   :disabled="isLoading"
                   @click="setStatus(99)"
-                >WKn</button>
+                >Known</button>
                 <button
                   class="button"
                   :class="isCurrentStatus(98) ? 'is-warning' : 'is-outlined is-warning'"
                   :disabled="isLoading"
                   @click="setStatus(98)"
-                >Ign</button>
+                >Ignore</button>
               </div>
             </div>
           </template>
@@ -97,11 +97,11 @@ namespace Lwt\Views\Text;
               <div class="buttons are-small mb-0">
                 <button class="button is-success is-small" :disabled="isLoading" @click="markWellKnown">
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('check', ['size' => 12]); ?>
-                  <span class="ml-1">WKn</span>
+                  <span class="ml-1">Known</span>
                 </button>
                 <button class="button is-warning is-small" :disabled="isLoading" @click="markIgnored">
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('x', ['size' => 12]); ?>
-                  <span class="ml-1">Ign</span>
+                  <span class="ml-1">Ignore</span>
                 </button>
               </div>
             </div>

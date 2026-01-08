@@ -61,6 +61,7 @@ class IconHelper
         'navigation-180-button-light' => 'circle-chevron-left',
 
         // Actions - CRUD
+        'edit' => 'pencil',
         'plus' => 'plus',
         'plus-button' => 'circle-plus',
         'minus' => 'minus',
