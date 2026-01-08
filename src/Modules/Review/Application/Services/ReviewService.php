@@ -15,7 +15,6 @@
 namespace Lwt\Modules\Review\Application\Services;
 
 use Lwt\Core\Globals;
-use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
@@ -137,7 +136,9 @@ class ReviewService
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
                 break;
             default:
-                ErrorHandler::die("ReviewService::getReviewSql called with wrong parameters");
+                throw new \InvalidArgumentException(
+                    "Invalid selector '$selector': must be 'words', 'texts', 'lang', or 'text'"
+                );
         }
         return $testsql;
     }

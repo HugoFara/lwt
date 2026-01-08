@@ -17,7 +17,6 @@ namespace Lwt\Modules\Dictionary\Http;
 use Lwt\Controllers\BaseController;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Core\Integration\GoogleTimeToken;
-use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Modules\Dictionary\Application\TranslationService;
 use Lwt\Shared\Infrastructure\Database\Settings;
@@ -152,7 +151,9 @@ class TranslationController extends BaseController
         );
 
         if (!$result['success']) {
-            ErrorHandler::die($result['error'] ?? 'Unable to get translation from Google!');
+            throw new \RuntimeException(
+                $result['error'] ?? 'Unable to get translation from Google Translate API'
+            );
         }
 
         // Build Google Translate link

@@ -17,7 +17,7 @@
 namespace Lwt\Modules\Review\Http;
 
 use Lwt\Controllers\BaseController;
-use Lwt\Core\Utils\ErrorHandler;
+use Lwt\Core\Exception\ValidationException;
 use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Language\Application\LanguageFacade;
@@ -113,9 +113,10 @@ class ReviewController extends BaseController
         );
 
         if ($testData === null) {
-            PageLayoutHelper::renderPageStart('Request Error!', true);
-            ErrorHandler::die("Review header called with invalid parameters");
-            return;
+            throw ValidationException::forField(
+                'parameters',
+                'Review header requires valid lang, text, or selection parameter'
+            )->setHttpStatusCode(400);
         }
 
         $languageName = $this->reviewFacade->getL2LanguageName(
@@ -165,8 +166,10 @@ class ReviewController extends BaseController
         );
 
         if ($identifier[0] === '') {
-            ErrorHandler::die("Review table called with invalid parameters");
-            return;
+            throw ValidationException::forField(
+                'parameters',
+                'Review table requires valid lang, text, or selection parameter'
+            )->setHttpStatusCode(400);
         }
 
         /** @psalm-suppress InvalidScalarArgument */
