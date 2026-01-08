@@ -33,9 +33,17 @@ use Lwt\Modules\User\Application\Services\PasswordHasher;
 use Lwt\Modules\User\Http\UserController;
 use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\User\Http\WordPressController;
+use Lwt\Modules\User\Http\GoogleController;
 
 // WordPress integration
 use Lwt\Modules\User\Application\Services\WordPressAuthService;
+
+// Google OAuth integration
+use Lwt\Modules\User\Application\Services\GoogleAuthService;
+
+// Microsoft OAuth integration
+use Lwt\Modules\User\Application\Services\MicrosoftAuthService;
+use Lwt\Modules\User\Http\MicrosoftController;
 
 // Application Services
 use Lwt\Modules\User\Application\Services\EmailService;
@@ -87,6 +95,12 @@ class UserServiceProvider implements ServiceProviderInterface
 
         // Register WordPress integration services
         $this->registerWordPressServices($container);
+
+        // Register Google OAuth services
+        $this->registerGoogleServices($container);
+
+        // Register Microsoft OAuth services
+        $this->registerMicrosoftServices($container);
 
         // Register authentication services
         $this->registerAuthServices($container);
@@ -158,6 +172,54 @@ class UserServiceProvider implements ServiceProviderInterface
         $container->bind(WordPressController::class, function (Container $c) {
             return new WordPressController(
                 $c->getTyped(WordPressAuthService::class)
+            );
+        });
+    }
+
+    /**
+     * Register Google OAuth services.
+     *
+     * @param Container $container The DI container
+     *
+     * @return void
+     */
+    private function registerGoogleServices(Container $container): void
+    {
+        // Google Auth Service
+        $container->singleton(GoogleAuthService::class, function (Container $c) {
+            return new GoogleAuthService(
+                $c->getTyped(UserFacade::class)
+            );
+        });
+
+        // Google Controller
+        $container->bind(GoogleController::class, function (Container $c) {
+            return new GoogleController(
+                $c->getTyped(GoogleAuthService::class)
+            );
+        });
+    }
+
+    /**
+     * Register Microsoft OAuth services.
+     *
+     * @param Container $container The DI container
+     *
+     * @return void
+     */
+    private function registerMicrosoftServices(Container $container): void
+    {
+        // Microsoft Auth Service
+        $container->singleton(MicrosoftAuthService::class, function (Container $c) {
+            return new MicrosoftAuthService(
+                $c->getTyped(UserFacade::class)
+            );
+        });
+
+        // Microsoft Controller
+        $container->bind(MicrosoftController::class, function (Container $c) {
+            return new MicrosoftController(
+                $c->getTyped(MicrosoftAuthService::class)
             );
         });
     }

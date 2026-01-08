@@ -111,6 +111,24 @@ interface UserRepositoryInterface
     public function findByWordPressId(int $wordPressId): ?User;
 
     /**
+     * Find a user by Google ID.
+     *
+     * @param string $googleId The Google user ID
+     *
+     * @return User|null
+     */
+    public function findByGoogleId(string $googleId): ?User;
+
+    /**
+     * Find a user by Microsoft ID.
+     *
+     * @param string $microsoftId The Microsoft user ID
+     *
+     * @return User|null
+     */
+    public function findByMicrosoftId(string $microsoftId): ?User;
+
+    /**
      * Check if a username exists.
      *
      * @param string   $username  Username to check

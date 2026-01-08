@@ -44,6 +44,8 @@ class User
     private ?string $passwordResetToken;
     private ?DateTimeImmutable $passwordResetTokenExpires;
     private ?int $wordPressId;
+    private ?string $googleId;
+    private ?string $microsoftId;
     private DateTimeImmutable $created;
     private ?DateTimeImmutable $lastLogin;
     private bool $isActive;
@@ -64,6 +66,8 @@ class User
         ?string $passwordResetToken,
         ?DateTimeImmutable $passwordResetTokenExpires,
         ?int $wordPressId,
+        ?string $googleId,
+        ?string $microsoftId,
         DateTimeImmutable $created,
         ?DateTimeImmutable $lastLogin,
         bool $isActive,
@@ -80,6 +84,8 @@ class User
         $this->passwordResetToken = $passwordResetToken;
         $this->passwordResetTokenExpires = $passwordResetTokenExpires;
         $this->wordPressId = $wordPressId;
+        $this->googleId = $googleId;
+        $this->microsoftId = $microsoftId;
         $this->created = $created;
         $this->lastLogin = $lastLogin;
         $this->isActive = $isActive;
@@ -113,6 +119,8 @@ class User
             $trimmedUsername,
             strtolower($trimmedEmail),
             $passwordHash,
+            null,
+            null,
             null,
             null,
             null,
@@ -165,6 +173,102 @@ class User
             null,
             null,
             $wordPressId,
+            null,
+            null,
+            new DateTimeImmutable(),
+            null,
+            true,
+            self::ROLE_USER
+        );
+    }
+
+    /**
+     * Create a user from Google OAuth.
+     *
+     * @param string $googleId The Google user ID
+     * @param string $username The username
+     * @param string $email    The email address
+     *
+     * @return self
+     *
+     * @throws InvalidArgumentException If Google ID is empty
+     */
+    public static function createFromGoogle(
+        string $googleId,
+        string $username,
+        string $email
+    ): self {
+        if ($googleId === '') {
+            throw new InvalidArgumentException('Google user ID cannot be empty');
+        }
+
+        $trimmedUsername = trim($username);
+        $trimmedEmail = trim($email);
+
+        self::validateUsername($trimmedUsername);
+        self::validateEmail($trimmedEmail);
+
+        return new self(
+            UserId::new(),
+            $trimmedUsername,
+            strtolower($trimmedEmail),
+            null, // No password for Google users
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            $googleId,
+            null,
+            new DateTimeImmutable(),
+            null,
+            true,
+            self::ROLE_USER
+        );
+    }
+
+    /**
+     * Create a user from Microsoft OAuth.
+     *
+     * @param string $microsoftId The Microsoft user ID
+     * @param string $username    The username
+     * @param string $email       The email address
+     *
+     * @return self
+     *
+     * @throws InvalidArgumentException If Microsoft ID is empty
+     */
+    public static function createFromMicrosoft(
+        string $microsoftId,
+        string $username,
+        string $email
+    ): self {
+        if ($microsoftId === '') {
+            throw new InvalidArgumentException('Microsoft user ID cannot be empty');
+        }
+
+        $trimmedUsername = trim($username);
+        $trimmedEmail = trim($email);
+
+        self::validateUsername($trimmedUsername);
+        self::validateEmail($trimmedEmail);
+
+        return new self(
+            UserId::new(),
+            $trimmedUsername,
+            strtolower($trimmedEmail),
+            null, // No password for Microsoft users
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            $microsoftId,
             new DateTimeImmutable(),
             null,
             true,
@@ -186,6 +290,8 @@ class User
      * @param string|null            $passwordResetToken          The password reset token
      * @param DateTimeImmutable|null $passwordResetTokenExpires   When the reset token expires
      * @param int|null               $wordPressId                 The WordPress user ID
+     * @param string|null            $googleId                    The Google user ID
+     * @param string|null            $microsoftId                 The Microsoft user ID
      * @param DateTimeImmutable      $created              When the user was created
      * @param DateTimeImmutable|null $lastLogin            Last login time
      * @param bool                   $isActive             Whether the user is active
@@ -207,6 +313,8 @@ class User
         ?string $passwordResetToken,
         ?DateTimeImmutable $passwordResetTokenExpires,
         ?int $wordPressId,
+        ?string $googleId,
+        ?string $microsoftId,
         DateTimeImmutable $created,
         ?DateTimeImmutable $lastLogin,
         bool $isActive,
@@ -224,6 +332,8 @@ class User
             $passwordResetToken,
             $passwordResetTokenExpires,
             $wordPressId,
+            $googleId,
+            $microsoftId,
             $created,
             $lastLogin,
             $isActive,
@@ -442,6 +552,60 @@ class User
         $this->wordPressId = null;
     }
 
+    /**
+     * Link to a Google account.
+     *
+     * @param string $googleId The Google user ID
+     *
+     * @return void
+     *
+     * @throws InvalidArgumentException If Google ID is empty
+     */
+    public function linkGoogle(string $googleId): void
+    {
+        if ($googleId === '') {
+            throw new InvalidArgumentException('Google user ID cannot be empty');
+        }
+        $this->googleId = $googleId;
+    }
+
+    /**
+     * Unlink from Google account.
+     *
+     * @return void
+     */
+    public function unlinkGoogle(): void
+    {
+        $this->googleId = null;
+    }
+
+    /**
+     * Link to a Microsoft account.
+     *
+     * @param string $microsoftId The Microsoft user ID
+     *
+     * @return void
+     *
+     * @throws InvalidArgumentException If Microsoft ID is empty
+     */
+    public function linkMicrosoft(string $microsoftId): void
+    {
+        if ($microsoftId === '') {
+            throw new InvalidArgumentException('Microsoft user ID cannot be empty');
+        }
+        $this->microsoftId = $microsoftId;
+    }
+
+    /**
+     * Unlink from Microsoft account.
+     *
+     * @return void
+     */
+    public function unlinkMicrosoft(): void
+    {
+        $this->microsoftId = null;
+    }
+
     // Query methods
 
     /**
@@ -462,6 +626,26 @@ class User
     public function isLinkedToWordPress(): bool
     {
         return $this->wordPressId !== null;
+    }
+
+    /**
+     * Check if the user is linked to Google.
+     *
+     * @return bool
+     */
+    public function isLinkedToGoogle(): bool
+    {
+        return $this->googleId !== null;
+    }
+
+    /**
+     * Check if the user is linked to Microsoft.
+     *
+     * @return bool
+     */
+    public function isLinkedToMicrosoft(): bool
+    {
+        return $this->microsoftId !== null;
     }
 
     /**
@@ -616,6 +800,16 @@ class User
     public function wordPressId(): ?int
     {
         return $this->wordPressId;
+    }
+
+    public function googleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function microsoftId(): ?string
+    {
+        return $this->microsoftId;
     }
 
     public function created(): DateTimeImmutable

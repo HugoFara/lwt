@@ -74,6 +74,8 @@ class MySqlUserRepository implements UserRepositoryInterface
             ($row['UsPasswordResetToken'] ?? null) !== null ? (string) $row['UsPasswordResetToken'] : null,
             $this->parseNullableDateTime($row['UsPasswordResetTokenExpires'] ?? null),
             $row['UsWordPressId'] !== null ? (int) $row['UsWordPressId'] : null,
+            ($row['UsGoogleId'] ?? null) !== null ? (string) $row['UsGoogleId'] : null,
+            ($row['UsMicrosoftId'] ?? null) !== null ? (string) $row['UsMicrosoftId'] : null,
             $this->parseDateTime($row['UsCreated'] ?? null),
             $this->parseNullableDateTime($row['UsLastLogin'] ?? null),
             (bool) ($row['UsIsActive'] ?? true),
@@ -102,6 +104,8 @@ class MySqlUserRepository implements UserRepositoryInterface
             'UsPasswordResetToken' => $entity->passwordResetToken(),
             'UsPasswordResetTokenExpires' => $entity->passwordResetTokenExpires()?->format('Y-m-d H:i:s'),
             'UsWordPressId' => $entity->wordPressId(),
+            'UsGoogleId' => $entity->googleId(),
+            'UsMicrosoftId' => $entity->microsoftId(),
             'UsCreated' => $entity->created()->format('Y-m-d H:i:s'),
             'UsLastLogin' => $entity->lastLogin()?->format('Y-m-d H:i:s'),
             'UsIsActive' => $entity->isActive() ? 1 : 0,
@@ -270,6 +274,30 @@ class MySqlUserRepository implements UserRepositoryInterface
     /**
      * {@inheritdoc}
      */
+    public function findByGoogleId(string $googleId): ?User
+    {
+        $row = $this->query()
+            ->where('UsGoogleId', '=', $googleId)
+            ->firstPrepared();
+
+        return $row !== null ? $this->mapToEntity($row) : null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findByMicrosoftId(string $microsoftId): ?User
+    {
+        $row = $this->query()
+            ->where('UsMicrosoftId', '=', $microsoftId)
+            ->firstPrepared();
+
+        return $row !== null ? $this->mapToEntity($row) : null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function usernameExists(string $username, ?int $excludeId = null): bool
     {
         $query = $this->query()
@@ -358,6 +386,42 @@ class MySqlUserRepository implements UserRepositoryInterface
     {
         $rows = $this->query()
             ->whereNotNull('UsWordPressId')
+            ->orderBy('UsUsername')
+            ->getPrepared();
+
+        return array_map(
+            fn(array $row) => $this->mapToEntity($row),
+            $rows
+        );
+    }
+
+    /**
+     * Find users linked to Google.
+     *
+     * @return User[]
+     */
+    public function findGoogleUsers(): array
+    {
+        $rows = $this->query()
+            ->whereNotNull('UsGoogleId')
+            ->orderBy('UsUsername')
+            ->getPrepared();
+
+        return array_map(
+            fn(array $row) => $this->mapToEntity($row),
+            $rows
+        );
+    }
+
+    /**
+     * Find users linked to Microsoft.
+     *
+     * @return User[]
+     */
+    public function findMicrosoftUsers(): array
+    {
+        $rows = $this->query()
+            ->whereNotNull('UsMicrosoftId')
             ->orderBy('UsUsername')
             ->getPrepared();
 
@@ -518,6 +582,72 @@ class MySqlUserRepository implements UserRepositoryInterface
         $affected = $this->query()
             ->where('UsID', '=', $userId)
             ->updatePrepared(['UsWordPressId' => null]);
+
+        return $affected > 0;
+    }
+
+    /**
+     * Link user to Google account.
+     *
+     * @param int    $userId   User ID
+     * @param string $googleId Google user ID
+     *
+     * @return bool True if updated
+     */
+    public function linkGoogle(int $userId, string $googleId): bool
+    {
+        $affected = $this->query()
+            ->where('UsID', '=', $userId)
+            ->updatePrepared(['UsGoogleId' => $googleId]);
+
+        return $affected > 0;
+    }
+
+    /**
+     * Unlink user from Google account.
+     *
+     * @param int $userId User ID
+     *
+     * @return bool True if updated
+     */
+    public function unlinkGoogle(int $userId): bool
+    {
+        $affected = $this->query()
+            ->where('UsID', '=', $userId)
+            ->updatePrepared(['UsGoogleId' => null]);
+
+        return $affected > 0;
+    }
+
+    /**
+     * Link user to Microsoft account.
+     *
+     * @param int    $userId      User ID
+     * @param string $microsoftId Microsoft user ID
+     *
+     * @return bool True if updated
+     */
+    public function linkMicrosoft(int $userId, string $microsoftId): bool
+    {
+        $affected = $this->query()
+            ->where('UsID', '=', $userId)
+            ->updatePrepared(['UsMicrosoftId' => $microsoftId]);
+
+        return $affected > 0;
+    }
+
+    /**
+     * Unlink user from Microsoft account.
+     *
+     * @param int $userId User ID
+     *
+     * @return bool True if updated
+     */
+    public function unlinkMicrosoft(int $userId): bool
+    {
+        $affected = $this->query()
+            ->where('UsID', '=', $userId)
+            ->updatePrepared(['UsMicrosoftId' => null]);
 
         return $affected > 0;
     }
@@ -695,7 +825,7 @@ class MySqlUserRepository implements UserRepositoryInterface
     /**
      * Get user statistics.
      *
-     * @return array{total: int, active: int, inactive: int, admins: int, wordpress_linked: int}
+     * @return array{total: int, active: int, inactive: int, admins: int, wordpress_linked: int, google_linked: int, microsoft_linked: int}
      */
     public function getStatistics(): array
     {
@@ -719,12 +849,22 @@ class MySqlUserRepository implements UserRepositoryInterface
             ->whereNotNull('UsWordPressId')
             ->countPrepared();
 
+        $googleLinked = (clone $baseQuery)
+            ->whereNotNull('UsGoogleId')
+            ->countPrepared();
+
+        $microsoftLinked = (clone $baseQuery)
+            ->whereNotNull('UsMicrosoftId')
+            ->countPrepared();
+
         return [
             'total' => $total,
             'active' => $active,
             'inactive' => $inactive,
             'admins' => $admins,
             'wordpress_linked' => $wordPressLinked,
+            'google_linked' => $googleLinked,
+            'microsoft_linked' => $microsoftLinked,
         ];
     }
 

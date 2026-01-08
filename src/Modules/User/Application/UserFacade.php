@@ -443,6 +443,136 @@ class UserFacade
         return $user;
     }
 
+    /**
+     * Find a user by Google ID.
+     *
+     * @param string $googleId Google user ID
+     *
+     * @return User|null
+     */
+    public function findByGoogleId(string $googleId): ?User
+    {
+        try {
+            return $this->repository->findByGoogleId($googleId);
+        } catch (\RuntimeException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Find or create a user from Google OAuth.
+     *
+     * @param string $googleId Google user ID
+     * @param string $username Generated username
+     * @param string $email    Google email
+     *
+     * @return User The found or created user
+     */
+    public function findOrCreateGoogleUser(
+        string $googleId,
+        string $username,
+        string $email
+    ): User {
+        // First, try to find by Google ID
+        try {
+            $user = $this->repository->findByGoogleId($googleId);
+            if ($user !== null) {
+                return $user;
+            }
+        } catch (\RuntimeException $e) {
+            // Continue to try other methods
+        }
+
+        // Try to find by email and link
+        try {
+            $user = $this->repository->findByEmail($email);
+            if ($user !== null) {
+                $user->linkGoogle($googleId);
+                $this->repository->save($user);
+                return $user;
+            }
+        } catch (\RuntimeException $e) {
+            // Continue to create new user
+        }
+
+        // Create a new user from Google
+        $user = User::createFromGoogle($googleId, $username, $email);
+        $this->repository->save($user);
+
+        return $user;
+    }
+
+    /**
+     * Save a user entity.
+     *
+     * @param User $user The user to save
+     *
+     * @return void
+     */
+    public function save(User $user): void
+    {
+        $this->repository->save($user);
+    }
+
+    /**
+     * Find a user by Microsoft ID.
+     *
+     * @param string $microsoftId Microsoft user ID
+     *
+     * @return User|null
+     */
+    public function findByMicrosoftId(string $microsoftId): ?User
+    {
+        try {
+            return $this->repository->findByMicrosoftId($microsoftId);
+        } catch (\RuntimeException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Find or create a user from Microsoft OAuth.
+     *
+     * @param string $microsoftId Microsoft user ID
+     * @param string $username    Generated username
+     * @param string $email       Microsoft email
+     *
+     * @return User The found or created user
+     */
+    public function findOrCreateMicrosoftUser(
+        string $microsoftId,
+        string $username,
+        string $email
+    ): User {
+        // First, try to find by Microsoft ID
+        try {
+            $user = $this->repository->findByMicrosoftId($microsoftId);
+            if ($user !== null) {
+                return $user;
+            }
+        } catch (\RuntimeException $e) {
+            // Continue to try other methods
+        }
+
+        // Try to find by email and link
+        try {
+            $user = $this->repository->findByEmail($email);
+            if ($user !== null) {
+                $user->linkMicrosoft($microsoftId);
+                $this->repository->save($user);
+                return $user;
+            }
+        } catch (\RuntimeException $e) {
+            // Continue to create new user
+        }
+
+        // Create a new user from Microsoft
+        $user = User::createFromMicrosoft($microsoftId, $username, $email);
+        $this->repository->save($user);
+
+        return $user;
+    }
+
     // =========================================================================
     // Password Operations
     // =========================================================================

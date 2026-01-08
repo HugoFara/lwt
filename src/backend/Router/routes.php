@@ -347,6 +347,22 @@ function registerRoutes(Router $router): void
     $router->register('/wordpress/start', 'Lwt\\Modules\\User\\Http\\WordPressController@start');
     $router->register('/wordpress/stop', 'Lwt\\Modules\\User\\Http\\WordPressController@stop');
 
+    // ==================== GOOGLE OAUTH INTEGRATION (PUBLIC) ====================
+
+    // Google OAuth routes are public - they handle their own auth via OAuth tokens
+    $router->register('/google/start', 'Lwt\\Modules\\User\\Http\\GoogleController@start');
+    $router->register('/google/callback', 'Lwt\\Modules\\User\\Http\\GoogleController@callback');
+    $router->register('/google/link-confirm', 'Lwt\\Modules\\User\\Http\\GoogleController@linkConfirm', 'GET');
+    $router->register('/google/link-confirm', 'Lwt\\Modules\\User\\Http\\GoogleController@processLinkConfirm', 'POST');
+
+    // ==================== MICROSOFT OAUTH INTEGRATION (PUBLIC) ====================
+
+    // Microsoft OAuth routes are public - they handle their own auth via OAuth tokens
+    $router->register('/microsoft/start', 'Lwt\\Modules\\User\\Http\\MicrosoftController@start');
+    $router->register('/microsoft/callback', 'Lwt\\Modules\\User\\Http\\MicrosoftController@callback');
+    $router->register('/microsoft/link-confirm', 'Lwt\\Modules\\User\\Http\\MicrosoftController@linkConfirm', 'GET');
+    $router->register('/microsoft/link-confirm', 'Lwt\\Modules\\User\\Http\\MicrosoftController@processLinkConfirm', 'POST');
+
     // ==================== API ROUTES ====================
 
     // Main API - use prefix to catch all sub-paths

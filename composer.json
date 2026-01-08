@@ -29,7 +29,9 @@
         "ext-mbstring": "*",
         "ext-mysqli": "*",
         "ext-dom": "*",
-        "phpmailer/phpmailer": "^6.9"
+        "phpmailer/phpmailer": "^6.9",
+        "league/oauth2-google": "^4.1",
+        "thenetworg/oauth2-azure": "^2.2"
     },
     "require-dev": {
         "vimeo/psalm": "^5.6",

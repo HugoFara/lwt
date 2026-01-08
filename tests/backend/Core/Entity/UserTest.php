@@ -186,6 +186,8 @@ class UserTest extends TestCase
             null, // passwordResetToken
             null, // passwordResetTokenExpires
             null, // wordPressId
+            null, // googleId
+            null, // microsoftId
             $created,
             $lastLogin,
             true,
@@ -201,6 +203,8 @@ class UserTest extends TestCase
         $this->assertEquals('remember456', $user->rememberToken());
         $this->assertSame($rememberExpires, $user->rememberTokenExpires());
         $this->assertNull($user->wordPressId());
+        $this->assertNull($user->googleId());
+        $this->assertNull($user->microsoftId());
         $this->assertSame($created, $user->created());
         $this->assertSame($lastLogin, $user->lastLogin());
         $this->assertTrue($user->isActive());
@@ -404,6 +408,8 @@ class UserTest extends TestCase
             null, // passwordResetToken
             null, // passwordResetTokenExpires
             null, // wordPressId
+            null, // googleId
+            null, // microsoftId
             new DateTimeImmutable(),
             null,
             true,
