@@ -277,7 +277,7 @@ class ReviewServiceTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $counts['total']);
     }
 
-    // ===== getTomorrowTestCount() tests =====
+    // ===== getTomorrowReviewCount() tests =====
 
     public function testGetTomorrowTestCount(): void
     {
@@ -286,7 +286,7 @@ class ReviewServiceTest extends TestCase
         }
 
         $sql = $this->service->getReviewSql('lang', self::$testLangId);
-        $count = $this->service->getTomorrowTestCount($sql);
+        $count = $this->service->getTomorrowReviewCount($sql);
 
         $this->assertIsInt($count);
         $this->assertGreaterThanOrEqual(0, $count);
@@ -348,7 +348,7 @@ class ReviewServiceTest extends TestCase
         $this->assertEmpty($settings);
     }
 
-    // ===== getLanguageIdFromTestSql() tests =====
+    // ===== getLanguageIdFromReviewSql() tests =====
 
     public function testGetLanguageIdFromTestSql(): void
     {
@@ -357,7 +357,7 @@ class ReviewServiceTest extends TestCase
         }
 
         $sql = $this->service->getReviewSql('lang', self::$testLangId);
-        $langId = $this->service->getLanguageIdFromTestSql($sql);
+        $langId = $this->service->getLanguageIdFromReviewSql($sql);
 
         $this->assertEquals(self::$testLangId, $langId);
     }
@@ -409,25 +409,25 @@ class ReviewServiceTest extends TestCase
         $this->assertEquals(0, $this->service->calculateStatusChange(1, 1));
     }
 
-    // ===== clampTestType() tests =====
+    // ===== clampReviewType() tests =====
 
     public function testClampTestTypeValid(): void
     {
-        $this->assertEquals(1, $this->service->clampTestType(1));
-        $this->assertEquals(3, $this->service->clampTestType(3));
-        $this->assertEquals(5, $this->service->clampTestType(5));
+        $this->assertEquals(1, $this->service->clampReviewType(1));
+        $this->assertEquals(3, $this->service->clampReviewType(3));
+        $this->assertEquals(5, $this->service->clampReviewType(5));
     }
 
     public function testClampTestTypeTooLow(): void
     {
-        $this->assertEquals(1, $this->service->clampTestType(0));
-        $this->assertEquals(1, $this->service->clampTestType(-5));
+        $this->assertEquals(1, $this->service->clampReviewType(0));
+        $this->assertEquals(1, $this->service->clampReviewType(-5));
     }
 
     public function testClampTestTypeTooHigh(): void
     {
-        $this->assertEquals(5, $this->service->clampTestType(6));
-        $this->assertEquals(5, $this->service->clampTestType(100));
+        $this->assertEquals(5, $this->service->clampReviewType(6));
+        $this->assertEquals(5, $this->service->clampReviewType(100));
     }
 
     // ===== isWordMode() tests =====
@@ -445,19 +445,19 @@ class ReviewServiceTest extends TestCase
         $this->assertTrue($this->service->isWordMode(5));
     }
 
-    // ===== getBaseTestType() tests =====
+    // ===== getBaseReviewType() tests =====
 
     public function testGetBaseTestTypeSentenceMode(): void
     {
-        $this->assertEquals(1, $this->service->getBaseTestType(1));
-        $this->assertEquals(2, $this->service->getBaseTestType(2));
-        $this->assertEquals(3, $this->service->getBaseTestType(3));
+        $this->assertEquals(1, $this->service->getBaseReviewType(1));
+        $this->assertEquals(2, $this->service->getBaseReviewType(2));
+        $this->assertEquals(3, $this->service->getBaseReviewType(3));
     }
 
     public function testGetBaseTestTypeWordMode(): void
     {
-        $this->assertEquals(1, $this->service->getBaseTestType(4));
-        $this->assertEquals(2, $this->service->getBaseTestType(5));
+        $this->assertEquals(1, $this->service->getBaseReviewType(4));
+        $this->assertEquals(2, $this->service->getBaseReviewType(5));
     }
 
     // ===== getTableReviewSettings() tests =====
@@ -649,7 +649,7 @@ class ReviewServiceTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $time);
     }
 
-    // ===== getTestDataFromParams() tests =====
+    // ===== getReviewDataFromParams() tests =====
 
     public function testGetTestDataFromParamsWithLangId(): void
     {
@@ -657,7 +657,7 @@ class ReviewServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getTestDataFromParams(
+        $result = $this->service->getReviewDataFromParams(
             null,
             null,
             self::$testLangId,
@@ -678,7 +678,7 @@ class ReviewServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getTestDataFromParams(
+        $result = $this->service->getReviewDataFromParams(
             null,
             null,
             null,
@@ -693,7 +693,7 @@ class ReviewServiceTest extends TestCase
 
     public function testGetTestDataFromParamsNoParams(): void
     {
-        $result = $this->service->getTestDataFromParams(null, null, null, null);
+        $result = $this->service->getReviewDataFromParams(null, null, null, null);
 
         $this->assertNull($result);
     }

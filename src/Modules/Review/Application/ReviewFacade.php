@@ -169,7 +169,7 @@ class ReviewFacade
      *
      * @return int
      */
-    public function getTomorrowTestCount(string $testsql): int
+    public function getTomorrowReviewCount(string $testsql): int
     {
         $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
         $result = $this->getTomorrowCount->execute($config);
@@ -270,7 +270,7 @@ class ReviewFacade
      *
      * @return int|null
      */
-    public function getLanguageIdFromTestSql(string $testsql): ?int
+    public function getLanguageIdFromReviewSql(string $testsql): ?int
     {
         $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
         return $this->repository->getLanguageIdFromConfig($config);
@@ -400,7 +400,7 @@ class ReviewFacade
      *
      * @return array|null
      */
-    public function getTestDataFromParams(
+    public function getReviewDataFromParams(
         ?int $selection,
         ?string $sessTestsql,
         ?int $langId,
@@ -543,7 +543,7 @@ class ReviewFacade
      *
      * @return int
      */
-    public function clampTestType(int $testType): int
+    public function clampReviewType(int $testType): int
     {
         return max(1, min(5, $testType));
     }
@@ -567,7 +567,7 @@ class ReviewFacade
      *
      * @return int
      */
-    public function getBaseTestType(int $testType): int
+    public function getBaseReviewType(int $testType): int
     {
         return $testType > 3 ? $testType - 3 : $testType;
     }
@@ -634,7 +634,7 @@ class ReviewFacade
         bool $wordMode,
         string $wordText
     ): string {
-        $baseType = $this->getBaseTestType($testType);
+        $baseType = $this->getBaseReviewType($testType);
 
         if ($baseType === 1) {
             $tagList = \Lwt\Modules\Tags\Application\TagsFacade::getWordTagList((int) $wordData['WoID'], false);

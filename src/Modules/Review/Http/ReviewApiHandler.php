@@ -55,7 +55,7 @@ class ReviewApiHandler
      *
      * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
      */
-    public function getWordTestData(string $testsql, bool $wordMode, int $testtype): array
+    public function getWordReviewData(string $testsql, bool $wordMode, int $testtype): array
     {
         $wordRecord = $this->reviewFacade->getNextWord($testsql);
         if ($wordRecord === null || $wordRecord === []) {
@@ -138,7 +138,7 @@ class ReviewApiHandler
         bool $showContextRom = false,
         bool $showContextTrans = false
     ): array {
-        $baseType = $this->reviewFacade->getBaseTestType($testType);
+        $baseType = $this->reviewFacade->getBaseReviewType($testType);
         $wordText = $wordRecord['WoText'];
 
         // Extract the word from sentence (marked with {})
@@ -277,7 +277,7 @@ class ReviewApiHandler
                 "group" => ''
             ];
         }
-        return $this->getWordTestData(
+        return $this->getWordReviewData(
             $testSql,
             filter_var($params['word_mode'], FILTER_VALIDATE_BOOLEAN),
             (int)$params['type']
@@ -302,7 +302,7 @@ class ReviewApiHandler
             return ["count" => 0];
         }
         return [
-            "count" => $this->reviewFacade->getTomorrowTestCount($testSql)
+            "count" => $this->reviewFacade->getTomorrowReviewCount($testSql)
         ];
     }
 
@@ -429,7 +429,7 @@ class ReviewApiHandler
         $sessReviewSql = $_SESSION['reviewsql'] ?? null;
 
         // Get test data
-        $testData = $this->reviewFacade->getTestDataFromParams(
+        $testData = $this->reviewFacade->getReviewDataFromParams(
             $selection,
             $sessReviewSql,
             $langId,
@@ -465,12 +465,12 @@ class ReviewApiHandler
             return ['error' => 'Unable to generate test SQL'];
         }
 
-        $testType = $this->reviewFacade->clampTestType($testType);
+        $testType = $this->reviewFacade->clampReviewType($testType);
         $wordMode = $this->reviewFacade->isWordMode($testType);
-        $baseType = $this->reviewFacade->getBaseTestType($testType);
+        $baseType = $this->reviewFacade->getBaseReviewType($testType);
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromTestSql($testsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($testsql);
         if ($langIdFromSql === null) {
             return ['error' => 'No words available for testing'];
         }
@@ -552,7 +552,7 @@ class ReviewApiHandler
         }
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromTestSql($testsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($testsql);
         if ($langIdFromSql === null) {
             return ['words' => [], 'langSettings' => null];
         }

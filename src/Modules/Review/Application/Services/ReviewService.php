@@ -288,7 +288,7 @@ class ReviewService
      *
      * @return int Number of tests due tomorrow
      */
-    public function getTomorrowTestCount(string $testsql): int
+    public function getTomorrowReviewCount(string $testsql): int
     {
         return (int) Connection::fetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
@@ -424,7 +424,7 @@ class ReviewService
      *
      * @return int|null Language ID or null
      */
-    public function getLanguageIdFromTestSql(string $testsql): ?int
+    public function getLanguageIdFromReviewSql(string $testsql): ?int
     {
         $langId = Connection::fetchValue(
             "SELECT WoLgID FROM $testsql LIMIT 1",
@@ -527,7 +527,7 @@ class ReviewService
      *
      * @return int Test type clamped to 1-5
      */
-    public function clampTestType(int $testType): int
+    public function clampReviewType(int $testType): int
     {
         return max(1, min(5, $testType));
     }
@@ -551,7 +551,7 @@ class ReviewService
      *
      * @return int Base test type (1-3)
      */
-    public function getBaseTestType(int $testType): int
+    public function getBaseReviewType(int $testType): int
     {
         return $testType > 3 ? $testType - 3 : $testType;
     }
@@ -601,7 +601,7 @@ class ReviewService
      *
      * @return array{title: string, property: string, counts: array{due: int, total: int}}|null
      */
-    public function getTestDataFromParams(
+    public function getReviewDataFromParams(
         ?int $selection,
         ?string $sessTestsql,
         ?int $langId,
@@ -753,7 +753,7 @@ class ReviewService
         bool $wordMode,
         string $wordText
     ): string {
-        $baseType = $this->getBaseTestType($testType);
+        $baseType = $this->getBaseReviewType($testType);
 
         if ($baseType == 1) {
             $tagList = TagsFacade::getWordTagList((int) $wordData['WoID'], false);

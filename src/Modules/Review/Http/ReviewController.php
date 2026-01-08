@@ -105,7 +105,7 @@ class ReviewController extends BaseController
         $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
         $sessReviewSql = $_SESSION['reviewsql'] ?? null;
 
-        $testData = $this->reviewFacade->getTestDataFromParams(
+        $testData = $this->reviewFacade->getReviewDataFromParams(
             $selection,
             $sessReviewSql,
             $langId,
@@ -188,7 +188,7 @@ class ReviewController extends BaseController
         }
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromTestSql($testsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($testsql);
         if ($langIdFromSql === null) {
             include __DIR__ . '/../Views/no_terms.php';
             PageLayoutHelper::renderPageEnd();
@@ -261,7 +261,7 @@ class ReviewController extends BaseController
         $isTableMode = $testTypeParam === 'table';
 
         // Get review data
-        $testData = $this->reviewFacade->getTestDataFromParams(
+        $testData = $this->reviewFacade->getReviewDataFromParams(
             $selection,
             $sessReviewSql,
             $langId,
@@ -290,12 +290,12 @@ class ReviewController extends BaseController
             $this->redirect('/text/edit');
         }
 
-        $testType = $isTableMode ? 1 : $this->reviewFacade->clampTestType((int) $testTypeParam);
+        $testType = $isTableMode ? 1 : $this->reviewFacade->clampReviewType((int) $testTypeParam);
         $wordMode = $this->reviewFacade->isWordMode($testType);
-        $baseType = $this->reviewFacade->getBaseTestType($testType);
+        $baseType = $this->reviewFacade->getBaseReviewType($testType);
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromTestSql($testsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($testsql);
         if ($langIdFromSql === null) {
             PageLayoutHelper::renderPageStartNobody('Review', 'full-width');
             include __DIR__ . '/../Views/no_terms.php';

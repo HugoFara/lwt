@@ -287,8 +287,8 @@ class ReviewControllerTest extends TestCase
         $service = new ReviewService();
 
         // Test clamping within valid range
-        $this->assertEquals(1, $service->clampTestType(1));
-        $this->assertEquals(5, $service->clampTestType(5));
+        $this->assertEquals(1, $service->clampReviewType(1));
+        $this->assertEquals(5, $service->clampReviewType(5));
     }
 
     public function testReviewServiceClampTestTypeClampsLow(): void
@@ -299,8 +299,8 @@ class ReviewControllerTest extends TestCase
 
         $service = new ReviewService();
 
-        $this->assertEquals(1, $service->clampTestType(0));
-        $this->assertEquals(1, $service->clampTestType(-5));
+        $this->assertEquals(1, $service->clampReviewType(0));
+        $this->assertEquals(1, $service->clampReviewType(-5));
     }
 
     public function testReviewServiceClampTestTypeClampsHigh(): void
@@ -312,7 +312,7 @@ class ReviewControllerTest extends TestCase
         $service = new ReviewService();
 
         // Assuming max test type is around 5-6
-        $result = $service->clampTestType(100);
+        $result = $service->clampReviewType(100);
         $this->assertGreaterThanOrEqual(1, $result);
         $this->assertLessThanOrEqual(6, $result);
     }
@@ -337,7 +337,7 @@ class ReviewControllerTest extends TestCase
 
         $service = new ReviewService();
 
-        $baseType = $service->getBaseTestType(1);
+        $baseType = $service->getBaseReviewType(1);
         $this->assertIsInt($baseType);
         $this->assertGreaterThanOrEqual(1, $baseType);
     }

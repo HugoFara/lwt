@@ -206,11 +206,11 @@ class ReviewFacadeTest extends TestCase
 
     public function testClampTestType(): void
     {
-        $this->assertEquals(1, $this->facade->clampTestType(0));
-        $this->assertEquals(1, $this->facade->clampTestType(-5));
-        $this->assertEquals(3, $this->facade->clampTestType(3));
-        $this->assertEquals(5, $this->facade->clampTestType(5));
-        $this->assertEquals(5, $this->facade->clampTestType(10));
+        $this->assertEquals(1, $this->facade->clampReviewType(0));
+        $this->assertEquals(1, $this->facade->clampReviewType(-5));
+        $this->assertEquals(3, $this->facade->clampReviewType(3));
+        $this->assertEquals(5, $this->facade->clampReviewType(5));
+        $this->assertEquals(5, $this->facade->clampReviewType(10));
     }
 
     public function testIsWordMode(): void
@@ -224,11 +224,11 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetBaseTestType(): void
     {
-        $this->assertEquals(1, $this->facade->getBaseTestType(1));
-        $this->assertEquals(2, $this->facade->getBaseTestType(2));
-        $this->assertEquals(3, $this->facade->getBaseTestType(3));
-        $this->assertEquals(1, $this->facade->getBaseTestType(4)); // 4-3=1
-        $this->assertEquals(2, $this->facade->getBaseTestType(5)); // 5-3=2
+        $this->assertEquals(1, $this->facade->getBaseReviewType(1));
+        $this->assertEquals(2, $this->facade->getBaseReviewType(2));
+        $this->assertEquals(3, $this->facade->getBaseReviewType(3));
+        $this->assertEquals(1, $this->facade->getBaseReviewType(4)); // 4-3=1
+        $this->assertEquals(2, $this->facade->getBaseReviewType(5)); // 5-3=2
     }
 
     public function testCalculateNewStatus(): void
@@ -432,7 +432,7 @@ class ReviewFacadeTest extends TestCase
         }
 
         $sql = ' words WHERE WoLgID = 999999 ';
-        $result = $this->facade->getTomorrowTestCount($sql);
+        $result = $this->facade->getTomorrowReviewCount($sql);
 
         $this->assertIsInt($result);
         $this->assertEquals(0, $result);
@@ -457,7 +457,7 @@ class ReviewFacadeTest extends TestCase
         }
 
         $sql = ' words WHERE WoLgID = 999999 ';
-        $result = $this->facade->getLanguageIdFromTestSql($sql);
+        $result = $this->facade->getLanguageIdFromReviewSql($sql);
 
         // Should return null for non-existent language
         $this->assertNull($result);
@@ -518,7 +518,7 @@ class ReviewFacadeTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->facade->getTestDataFromParams(null, null, null, null);
+        $result = $this->facade->getReviewDataFromParams(null, null, null, null);
         $this->assertNull($result);
     }
 
