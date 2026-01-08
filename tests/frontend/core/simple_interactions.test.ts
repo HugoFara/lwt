@@ -37,6 +37,11 @@ vi.mock('../../../src/frontend/js/shared/components/modal', () => ({
   showExportTemplateHelp: vi.fn()
 }));
 
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates', () => ({
+  markWordWellKnownInDOM: vi.fn(),
+  markWordIgnoredInDOM: vi.fn()
+}));
+
 import {
   goBack,
   navigateTo,
@@ -51,6 +56,7 @@ import { quickMenuRedirection } from '../../../src/frontend/js/shared/utils/user
 import { deleteTranslation, addTranslation } from '../../../src/frontend/js/modules/vocabulary/services/translation_api';
 import { changeTableTestStatus } from '../../../src/frontend/js/modules/vocabulary/services/term_operations';
 import { showExportTemplateHelp } from '../../../src/frontend/js/shared/components/modal';
+import { markWordWellKnownInDOM, markWordIgnoredInDOM } from '../../../src/frontend/js/modules/vocabulary/services/word_dom_updates';
 
 describe('simple_interactions.ts', () => {
   let originalLocation: Location;
@@ -500,8 +506,17 @@ describe('simple_interactions.ts', () => {
     });
 
     describe('data-action="know-all"', () => {
-      it('navigates to mark all well-known', () => {
+      it('calls API to mark all well-known and updates DOM', async () => {
         vi.spyOn(window, 'confirm').mockReturnValue(true);
+        const mockWords = [
+          { wid: 1, hex: 'abc', term: 'word1', status: 99 },
+          { wid: 2, hex: 'def', term: 'word2', status: 99 }
+        ];
+        const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ count: 2, words: mockWords })
+        } as Response);
+
         document.body.innerHTML = `
           <button data-action="know-all" data-text-id="42">Know All</button>
         `;
@@ -510,12 +525,23 @@ describe('simple_interactions.ts', () => {
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-        expect(window.location.href).toBe('/word/set-all-status?text=42');
+        expect(fetchSpy).toHaveBeenCalledWith('/api/v1/texts/42/mark-all-wellknown', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        // Wait for async operations
+        await vi.waitFor(() => {
+          expect(markWordWellKnownInDOM).toHaveBeenCalledWith(1, 'abc', 'word1');
+          expect(markWordWellKnownInDOM).toHaveBeenCalledWith(2, 'def', 'word2');
+        });
+
+        fetchSpy.mockRestore();
       });
 
       it('does nothing if cancelled', () => {
         vi.spyOn(window, 'confirm').mockReturnValue(false);
-        const originalHref = window.location.href;
+        const fetchSpy = vi.spyOn(globalThis, 'fetch');
         document.body.innerHTML = `
           <button data-action="know-all" data-text-id="42">Know All</button>
         `;
@@ -523,13 +549,22 @@ describe('simple_interactions.ts', () => {
         const button = document.querySelector('[data-action="know-all"]') as HTMLElement;
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
-        expect(window.location.href).toBe(originalHref);
+        expect(fetchSpy).not.toHaveBeenCalled();
+        fetchSpy.mockRestore();
       });
     });
 
     describe('data-action="ignore-all"', () => {
-      it('navigates to mark all ignored', () => {
+      it('calls API to mark all ignored and updates DOM', async () => {
         vi.spyOn(window, 'confirm').mockReturnValue(true);
+        const mockWords = [
+          { wid: 3, hex: 'ghi', term: 'word3', status: 98 }
+        ];
+        const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ count: 1, words: mockWords })
+        } as Response);
+
         document.body.innerHTML = `
           <button data-action="ignore-all" data-text-id="42">Ignore All</button>
         `;
@@ -538,7 +573,17 @@ describe('simple_interactions.ts', () => {
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-        expect(window.location.href).toBe('/word/set-all-status?text=42&stat=98');
+        expect(fetchSpy).toHaveBeenCalledWith('/api/v1/texts/42/mark-all-ignored', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        // Wait for async operations
+        await vi.waitFor(() => {
+          expect(markWordIgnoredInDOM).toHaveBeenCalledWith(3, 'ghi', 'word3');
+        });
+
+        fetchSpy.mockRestore();
       });
     });
 

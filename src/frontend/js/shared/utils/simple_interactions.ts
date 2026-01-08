@@ -19,6 +19,51 @@ import { quickMenuRedirection } from './user_interactions';
 import { deleteTranslation, addTranslation } from '@modules/vocabulary/services/translation_api';
 import { changeTableTestStatus } from '@modules/vocabulary/services/term_operations';
 import { showExportTemplateHelp } from '@shared/components/modal';
+import { markWordWellKnownInDOM, markWordIgnoredInDOM } from '@modules/vocabulary/services/word_dom_updates';
+
+interface MarkAllWordsResponse {
+  count: number;
+  words: Array<{
+    wid: number;
+    hex: string;
+    term: string;
+    status: number;
+  }>;
+}
+
+/**
+ * Mark all unknown words in a text as well-known via API.
+ *
+ * @param textId - The text ID
+ * @returns The API response with count and word data
+ */
+async function markAllWellKnown(textId: string): Promise<MarkAllWordsResponse> {
+  const response = await fetch(`/api/v1/texts/${textId}/mark-all-wellknown`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to mark words: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Mark all unknown words in a text as ignored via API.
+ *
+ * @param textId - The text ID
+ * @returns The API response with count and word data
+ */
+async function markAllIgnored(textId: string): Promise<MarkAllWordsResponse> {
+  const response = await fetch(`/api/v1/texts/${textId}/mark-all-ignored`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to mark words: ${response.statusText}`);
+  }
+  return response.json();
+}
 
 /**
  * Navigate back in browser history.
@@ -192,7 +237,20 @@ export function initSimpleInteractions(): void {
       {
         const textId = el.dataset.textId;
         if (textId && confirm('Are you sure?')) {
-          window.location.href = '/word/set-all-status?text=' + textId;
+          el.classList.add('is-loading');
+          markAllWellKnown(textId)
+            .then(data => {
+              data.words.forEach(word => {
+                markWordWellKnownInDOM(word.wid, word.hex, word.term);
+              });
+            })
+            .catch(err => {
+              console.error('Failed to mark all as well-known:', err);
+              alert('Failed to mark words. Please try again.');
+            })
+            .finally(() => {
+              el.classList.remove('is-loading');
+            });
         }
       }
       break;
@@ -203,7 +261,20 @@ export function initSimpleInteractions(): void {
       {
         const textId = el.dataset.textId;
         if (textId && confirm('Are you sure?')) {
-          window.location.href = '/word/set-all-status?text=' + textId + '&stat=98';
+          el.classList.add('is-loading');
+          markAllIgnored(textId)
+            .then(data => {
+              data.words.forEach(word => {
+                markWordIgnoredInDOM(word.wid, word.hex, word.term);
+              });
+            })
+            .catch(err => {
+              console.error('Failed to mark all as ignored:', err);
+              alert('Failed to mark words. Please try again.');
+            })
+            .finally(() => {
+              el.classList.remove('is-loading');
+            });
         }
       }
       break;
