@@ -74,7 +74,7 @@ class ExpressionService
             $fp = fopen($db_to_mecab, 'w');
             fwrite($fp, $text);
             fclose($fp);
-            $handle = popen($mecab . $db_to_mecab, "r");
+            $handle = popen($mecab . escapeshellarg($db_to_mecab), "r");
             while (!feof($handle)) {
                 $row = fgets($handle, 16132);
                 $arr = explode("\t", $row, 4);
@@ -96,7 +96,7 @@ class ExpressionService
                 fwrite($fp, $sent . "\n");
                 fclose($fp);
 
-                $handle = popen($mecab . $db_to_mecab, "r");
+                $handle = popen($mecab . escapeshellarg($db_to_mecab), "r");
                 $parsed_sentence = '';
                 // For each word in sentence
                 while (!feof($handle)) {

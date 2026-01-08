@@ -91,7 +91,7 @@ class GetPhoneticReading
         fwrite($fp, $text . "\n");
         fclose($fp);
         $mecab = (new TextParsingService())->getMecabPath($mecab_args);
-        $handle = popen($mecab . $mecab_file, "r");
+        $handle = popen($mecab . escapeshellarg($mecab_file), "r");
         $mecab_str = '';
         while (($line = fgets($handle, 4096)) !== false) {
             $mecab_str .= $line;

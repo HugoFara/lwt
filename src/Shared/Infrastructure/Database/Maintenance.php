@@ -115,7 +115,7 @@ class Maintenance
             fclose($fp);
 
             // STEP 2: process the data with MeCab and refine the output
-            $handle = popen($mecab . $db_to_mecab, "r");
+            $handle = popen($mecab . escapeshellarg($db_to_mecab), "r");
             if (feof($handle)) {
                 pclose($handle);
                 return;

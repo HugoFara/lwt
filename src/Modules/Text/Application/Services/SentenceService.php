@@ -85,7 +85,7 @@ class SentenceService
             fwrite($fp, $wordlc . "\n");
             fclose($fp);
             $mecab = $this->textParsingService->getMecabPath($mecab_args);
-            $handle = popen($mecab . $mecab_file, "r");
+            $handle = popen($mecab . escapeshellarg($mecab_file), "r");
             if (!feof($handle)) {
                 $row = fgets($handle, 256);
                 $mecab_str = "\t" . preg_replace_callback(
@@ -159,7 +159,7 @@ class SentenceService
             fwrite($fp, $wordlc . "\n");
             fclose($fp);
             $mecab = $this->textParsingService->getMecabPath($mecab_args);
-            $handle = popen($mecab . $mecab_file, "r");
+            $handle = popen($mecab . escapeshellarg($mecab_file), "r");
             if (!feof($handle)) {
                 $row = fgets($handle, 256);
                 $mecab_str = "\t" . preg_replace_callback(
