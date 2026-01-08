@@ -10,7 +10,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { createTheDictUrl, owin } from '@modules/vocabulary/services/dictionary';
+import { createTheDictUrl, openDictionaryPopup } from '@modules/vocabulary/services/dictionary';
 import { selectToggle } from '@shared/forms/bulk_actions';
 import { setDictionaryLinks } from '@modules/language/stores/language_config';
 
@@ -340,7 +340,7 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
       const termText = prevSibling?.textContent || '';
       const dictUrl = createTheDictUrl(dictLink, termText);
 
-      owin(dictUrl);
+      openDictionaryPopup(dictUrl);
 
       // Swap WoTranslation name attributes to track current input
       const currentTranslation = document.querySelector<HTMLElement>('[name="WoTranslation"]');

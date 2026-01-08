@@ -2,7 +2,7 @@
  * Modal dialog component for LWT.
  *
  * Provides a reusable modal dialog that can display HTML content
- * as a modern replacement for popup windows (oewin/owin).
+ * as a modern replacement for popup windows (openEditWindow/openDictionaryPopup).
  *
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
@@ -346,7 +346,7 @@ export function openModalFromUrl(url: string, options: ModalOptions = {}): void 
 
 /**
  * Show the export template help modal.
- * This is a convenience function replacing oewin('export_template.html').
+ * This is a convenience function replacing openEditWindow('export_template.html').
  */
 export function showExportTemplateHelp(): void {
   const content = `

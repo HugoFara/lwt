@@ -12,7 +12,7 @@ import { scrollTo } from '@shared/utils/hover_intent';
 import { apiPost, apiGet } from '@shared/api/client';
 import { TermsApi } from '@modules/vocabulary/api/terms_api';
 import { iconHtml, spinnerHtml } from '@shared/icons/icons';
-import { oewin } from './dictionary';
+import { openEditWindow } from './dictionary';
 
 // Interface for lwtFormCheck
 interface LwtFormCheck {
@@ -255,7 +255,7 @@ export function editTermAnnotationTranslations(trans_data: TransData, text_id: n
     });
     edit_word_link = `<a name="rec${trans_data.ann_index}"></a>
     <span class="click"
-    onclick="oewin('/word/edit?` + escapeHtml(params.toString()) + `');">
+    onclick="openEditWindow('/word/edit?` + escapeHtml(params.toString()) + `');">
           ${iconHtml('sticky-note--pencil', { title: 'Edit Term', alt: 'Edit Term' })}
       </span>`;
   } else {
@@ -608,7 +608,7 @@ function initImprovedTextEventDelegation(): void {
       const scrollPos = window.scrollY || document.documentElement.scrollTop || 0;
       if (wid && textid) {
         const url = '/word/edit?fromAnn=' + scrollPos + '&wid=' + wid + '&tid=' + textid + '&ord=' + ord;
-        oewin(url);
+        openEditWindow(url);
       }
     }
   });

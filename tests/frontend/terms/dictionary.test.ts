@@ -3,8 +3,8 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  owin,
-  oewin,
+  openDictionaryPopup,
+  openEditWindow,
   createTheDictUrl,
   createTheDictLink,
   createSentLookupLink,
@@ -32,15 +32,15 @@ describe('dictionary.ts', () => {
   });
 
   // ===========================================================================
-  // owin Tests
+  // openDictionaryPopup Tests
   // ===========================================================================
 
-  describe('owin', () => {
+  describe('openDictionaryPopup', () => {
     it('opens window with correct parameters', () => {
       const mockWindow = {} as Window;
       const openSpy = vi.spyOn(window, 'open').mockReturnValue(mockWindow);
 
-      const result = owin('http://example.com/dict?word=test');
+      const result = openDictionaryPopup('http://example.com/dict?word=test');
 
       expect(openSpy).toHaveBeenCalledWith(
         'http://example.com/dict?word=test',
@@ -53,22 +53,22 @@ describe('dictionary.ts', () => {
     it('handles null return from window.open', () => {
       vi.spyOn(window, 'open').mockReturnValue(null);
 
-      const result = owin('http://example.com');
+      const result = openDictionaryPopup('http://example.com');
 
       expect(result).toBeNull();
     });
   });
 
   // ===========================================================================
-  // oewin Tests
+  // openEditWindow Tests
   // ===========================================================================
 
-  describe('oewin', () => {
+  describe('openEditWindow', () => {
     it('opens edit window with correct parameters', () => {
       const mockWindow = {} as Window;
       const openSpy = vi.spyOn(window, 'open').mockReturnValue(mockWindow);
 
-      const result = oewin('http://example.com/edit');
+      const result = openEditWindow('http://example.com/edit');
 
       expect(openSpy).toHaveBeenCalledWith(
         'http://example.com/edit',

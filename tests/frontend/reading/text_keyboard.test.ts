@@ -4,9 +4,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Use vi.hoisted to define mock functions that will be available during vi.mock hoisting
-const { mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo, mockNewPosition, mockTermsApiSetStatus, mockTermsApiCreateQuick } = vi.hoisted(() => ({
+const { mockSpeechDispatcher, mockOpenDictionaryPopup, mockCClick, mockScrollTo, mockNewPosition, mockTermsApiSetStatus, mockTermsApiCreateQuick } = vi.hoisted(() => ({
   mockSpeechDispatcher: vi.fn(),
-  mockOwin: vi.fn(),
+  mockOpenDictionaryPopup: vi.fn(),
   mockCClick: vi.fn(),
   mockScrollTo: vi.fn(),
   mockNewPosition: vi.fn(),
@@ -18,7 +18,7 @@ const { mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo, mockNewPositio
 vi.mock('../../../src/frontend/js/modules/vocabulary/services/dictionary', () => ({
   getLangFromDict: vi.fn().mockReturnValue('en'),
   createTheDictUrl: vi.fn().mockReturnValue('http://dict.example.com/word'),
-  owin: mockOwin
+  openDictionaryPopup: mockOpenDictionaryPopup
 }));
 
 vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
@@ -120,7 +120,7 @@ describe('text_keyboard.ts', () => {
 
     // Clear mock function calls between tests
     mockSpeechDispatcher.mockClear();
-    mockOwin.mockClear();
+    mockOpenDictionaryPopup.mockClear();
     mockCClick.mockClear();
     mockScrollTo.mockClear();
     mockTermsApiSetStatus.mockClear();
@@ -516,7 +516,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(84);
       handleTextKeydown(event);
 
-      expect(mockOwin).toHaveBeenCalled();
+      expect(mockOpenDictionaryPopup).toHaveBeenCalled();
     });
   });
 

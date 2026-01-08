@@ -12,8 +12,8 @@ import {
   createTheDictUrl,
   createTheDictLink,
   createSentLookupLink,
-  owin,
-  oewin,
+  openDictionaryPopup,
+  openEditWindow,
 } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
 import {
   escapeHtml,
@@ -333,11 +333,11 @@ describe('pgm.ts', () => {
   // Window Functions Tests
   // ===========================================================================
 
-  describe('owin', () => {
+  describe('openDictionaryPopup', () => {
     it('opens a window with correct parameters', () => {
       const mockOpen = vi.spyOn(window, 'open').mockReturnValue(null);
 
-      owin('http://example.com');
+      openDictionaryPopup('http://example.com');
 
       expect(mockOpen).toHaveBeenCalledWith(
         'http://example.com',
@@ -347,11 +347,11 @@ describe('pgm.ts', () => {
     });
   });
 
-  describe('oewin', () => {
+  describe('openEditWindow', () => {
     it('opens an edit window with correct parameters', () => {
       const mockOpen = vi.spyOn(window, 'open').mockReturnValue(null);
 
-      oewin('http://example.com/edit');
+      openEditWindow('http://example.com/edit');
 
       expect(mockOpen).toHaveBeenCalledWith(
         'http://example.com/edit',
