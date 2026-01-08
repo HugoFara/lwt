@@ -139,7 +139,7 @@ export function feedLoaderData(config: FeedLoaderConfig = { feeds: [], redirectU
         formData.append('source_uri', feed.sourceUri);
         formData.append('options', feed.options);
 
-        const response = await fetch(`api.php/v1/feeds/${feed.id}/load`, {
+        const response = await fetch(`/api/v1/feeds/${feed.id}/load`, {
           method: 'POST',
           body: formData
         });

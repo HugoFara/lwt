@@ -575,7 +575,7 @@ describe('user_interactions.ts', () => {
       saveReadingPosition(42, 100);
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        'api.php/v1/texts/42/reading-position',
+        '/api/v1/texts/42/reading-position',
         expect.objectContaining({
           method: 'POST',
           body: expect.any(String)
@@ -595,7 +595,7 @@ describe('user_interactions.ts', () => {
       saveAudioPosition(42, 50.5);
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        'api.php/v1/texts/42/audio-position',
+        '/api/v1/texts/42/audio-position',
         expect.objectContaining({
           method: 'POST',
           body: expect.any(String)
@@ -617,7 +617,7 @@ describe('user_interactions.ts', () => {
       getPhoneticTextAsync('hello', 'en-US');
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/phonetic-reading')
+        expect.stringContaining('/api/v1/phonetic-reading')
       );
     });
 
@@ -629,7 +629,7 @@ describe('user_interactions.ts', () => {
       getPhoneticTextAsync('hello', 5);
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/phonetic-reading')
+        expect.stringContaining('/api/v1/phonetic-reading')
       );
     });
   });
@@ -720,7 +720,7 @@ describe('user_interactions.ts', () => {
       readTextAloud('hello', 'en-US', 1.0, 1.0, undefined, true);
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/phonetic-reading')
+        expect.stringContaining('/api/v1/phonetic-reading')
       );
     });
   });
@@ -813,7 +813,7 @@ describe('user_interactions.ts', () => {
       speechDispatcher('hello', 5);
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/languages/5/reading-configuration')
+        expect.stringContaining('/api/v1/languages/5/reading-configuration')
       );
     });
   });

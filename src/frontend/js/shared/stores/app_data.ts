@@ -44,7 +44,7 @@ export async function fetchTermTags(refresh = false): Promise<string[]> {
   }
 
   try {
-    const response = await fetch('api.php/v1/tags/term');
+    const response = await fetch('/api/v1/tags/term');
     if (!response.ok) {
       console.error('Failed to fetch term tags:', response.statusText);
       return termTagsCache ?? [];
@@ -70,7 +70,7 @@ export async function fetchTextTags(refresh = false): Promise<string[]> {
   }
 
   try {
-    const response = await fetch('api.php/v1/tags/text');
+    const response = await fetch('/api/v1/tags/text');
     if (!response.ok) {
       console.error('Failed to fetch text tags:', response.statusText);
       return textTagsCache ?? [];

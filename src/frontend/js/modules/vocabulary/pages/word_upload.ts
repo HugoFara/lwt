@@ -172,7 +172,7 @@ export function wordUploadResultApp(config: UploadResultConfig = { lastUpdate: '
       });
 
       try {
-        const response = await fetch('api.php/v1/terms/imported?' + params.toString());
+        const response = await fetch('/api/v1/terms/imported?' + params.toString());
         if (!response.ok) {
           throw new Error(`HTTP error: ${response.status}`);
         }

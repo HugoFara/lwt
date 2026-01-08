@@ -101,7 +101,7 @@ export function refreshMediaSelect(): void {
     loadingImg.style.display = 'inherit';
   }
 
-  fetch('api.php/v1/media-files')
+  fetch('/api/v1/media-files')
     .then(response => response.json())
     .then(handleMediaSelectResponse)
     .catch(error => {

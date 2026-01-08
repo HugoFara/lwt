@@ -295,7 +295,7 @@ describe('feed_loader_component.ts', () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        'api.php/v1/feeds/42/load',
+        '/api/v1/feeds/42/load',
         expect.objectContaining({ method: 'POST' })
       );
     });

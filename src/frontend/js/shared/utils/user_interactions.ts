@@ -219,7 +219,7 @@ export function goToLastPosition(): void {
  * @since 2.9.0-fork
  */
 export function saveReadingPosition(text_id: number, position: number): void {
-  fetch('api.php/v1/texts/' + text_id + '/reading-position', {
+  fetch('/api/v1/texts/' + text_id + '/reading-position', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -232,7 +232,7 @@ export function saveReadingPosition(text_id: number, position: number): void {
  * Save audio position
  */
 export function saveAudioPosition(text_id: number, pos: number): void {
-  fetch('api.php/v1/texts/' + text_id + '/audio-position', {
+  fetch('/api/v1/texts/' + text_id + '/audio-position', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -258,7 +258,7 @@ export function getPhoneticTextAsync(
   } else {
     params.append('lang', lang);
   }
-  return fetch('api.php/v1/phonetic-reading?' + params.toString())
+  return fetch('/api/v1/phonetic-reading?' + params.toString())
     .then(response => response.json());
 }
 
@@ -499,7 +499,7 @@ export function speechDispatcher(
   const params = new URLSearchParams();
   params.append('language_id', String(languageId));
 
-  return fetch('api.php/v1/languages/' + languageId + '/reading-configuration?' + params.toString())
+  return fetch('/api/v1/languages/' + languageId + '/reading-configuration?' + params.toString())
     .then(response => response.json())
     .then((data: ReadingConfiguration) => {
       handleReadingConfiguration(data, term, languageId);

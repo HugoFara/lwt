@@ -63,7 +63,7 @@ describe('app_data.ts', () => {
 
       const result = await fetchTermTags();
 
-      expect(fetchSpy).toHaveBeenCalledWith('api.php/v1/tags/term');
+      expect(fetchSpy).toHaveBeenCalledWith('/api/v1/tags/term');
       expect(result).toEqual(mockTags);
     });
 
@@ -177,7 +177,7 @@ describe('app_data.ts', () => {
 
       const result = await fetchTextTags();
 
-      expect(fetchSpy).toHaveBeenCalledWith('api.php/v1/tags/text');
+      expect(fetchSpy).toHaveBeenCalledWith('/api/v1/tags/text');
       expect(result).toEqual(mockTags);
     });
 
@@ -347,8 +347,8 @@ describe('app_data.ts', () => {
       await initTagsData();
 
       expect(fetchSpy).toHaveBeenCalledTimes(2);
-      expect(fetchSpy).toHaveBeenCalledWith('api.php/v1/tags/term');
-      expect(fetchSpy).toHaveBeenCalledWith('api.php/v1/tags/text');
+      expect(fetchSpy).toHaveBeenCalledWith('/api/v1/tags/term');
+      expect(fetchSpy).toHaveBeenCalledWith('/api/v1/tags/text');
     });
 
     it('fetches both tag types in parallel', async () => {
@@ -362,7 +362,7 @@ describe('app_data.ts', () => {
                   json: () => Promise.resolve([url]),
                 } as Response);
               },
-              url === 'api.php/v1/tags/term' ? 100 : 50
+              url === '/api/v1/tags/term' ? 100 : 50
             );
           })
       );

@@ -167,7 +167,7 @@ describe('word_upload.ts', () => {
         const component = wordUploadResultApp({ lastUpdate: '2024-01-01', rtl: false, recno: 10 });
         await component.loadPage(1);
 
-        expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('api.php/v1/terms/imported'));
+        expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/api/v1/terms/imported'));
         expect(component.currentPage).toBe(1);
         expect(component.totalPages).toBe(3);
         expect(component.terms.length).toBe(1);

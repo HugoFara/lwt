@@ -242,7 +242,7 @@ describe('media_selection.ts', () => {
 
       refreshMediaSelect();
 
-      expect(fetchSpy).toHaveBeenCalledWith('api.php/v1/media-files');
+      expect(fetchSpy).toHaveBeenCalledWith('/api/v1/media-files');
 
       fetchSpy.mockRestore();
     });
