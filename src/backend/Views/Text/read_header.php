@@ -65,7 +65,7 @@ $audioPosition = (int) ($audioPosition ?? 0);
         ?>
     </div>
     <div>
-        <a href="/test?text=<?php echo $textId; ?>" target="_top">
+        <a href="/review?text=<?php echo $textId; ?>" target="_top">
             <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('circle-help', ['title' => 'Review', 'alt' => 'Review']); ?>
         </a>
         <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">

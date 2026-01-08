@@ -11,7 +11,7 @@ It is inspired by:
 * Steve Kaufmann's [LingQ](http://lingq.com) System and
 * Ideas from Khatzumoto, published at ["AJATT - All Japanese All The Time"](http://www.alljapaneseallthetime.com).
 
-You define languages you want to learn and import texts you want to use for learning. While listening to the optional audio, you read the text, save, review and test "terms" (words or multi word expressions, 2 to 9 words).
+You define languages you want to learn and import texts you want to use for learning. While listening to the optional audio, you read the text, save and review "terms" (words or multi word expressions, 2 to 9 words).
 
 In new texts all your previously saved words and expressions are displayed according to their current learn statuses, tooltips show translations and romanizations (readings), editing, changing the status, dictionary lookup, etc. is just a click away.
 

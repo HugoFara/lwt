@@ -281,13 +281,13 @@ To leave the Edit mode, click on "Display/Print Mode". You may then print or dis
 
 ### Display Mode
 
-With audio player in a separate window. Clicking the "T" or "A" lightbulb icons hides/shows the text or the blue annotations. You may also click on a single term or a single annotation to show or to hide it. This enables you to test yourself or to concentrate on one text only. Romanizations, if available, appear while hovering over a term.  
+With audio player in a separate window. Clicking the "T" or "A" lightbulb icons hides/shows the text or the blue annotations. You may also click on a single term or a single annotation to show or to hide it. This enables you to quiz yourself or to concentrate on one text only. Romanizations, if available, appear while hovering over a term.  
 
 ![Image](/assets/images/29.jpg)  
 
 ## Terms
 
-The list of your saved words or expressions (= terms). You may filter the list of terms by language, text, status, term/romanization/translation (wildcard \* possible) or term tag(s). Different sort orders are possible. You can do "multi actions" only on the marked or on all terms (on all pages!). "Se?" displays a green dot if a valid sentences with {term} exists. "Stat/Days" displays the status and the number of days since the last status change. The score of a term is a rough measure (in percent) how well you know a term. Terms with zero score are displayed red and should be tested today.  
+The list of your saved words or expressions (= terms). You may filter the list of terms by language, text, status, term/romanization/translation (wildcard \* possible) or term tag(s). Different sort orders are possible. You can do "multi actions" only on the marked or on all terms (on all pages!). "Se?" displays a green dot if a valid sentences with {term} exists. "Stat/Days" displays the status and the number of days since the last status change. The score of a term is a rough measure (in percent) how well you know a term. Terms with zero score are displayed red and should be reviewed today.  
 
 ![Image](/assets/images/08.jpg)  
 

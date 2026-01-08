@@ -205,7 +205,7 @@ class TextController extends BaseController
         );
 
         // Check for actions that skip page start
-        $noPagestart = ($this->param('markaction') == 'test' ||
+        $noPagestart = ($this->param('markaction') == 'review' ||
             $this->param('markaction') == 'deltag' ||
             substr($this->param('op'), -8) == 'and Open');
 
@@ -309,9 +309,9 @@ class TextController extends BaseController
                 $message = $this->textService->rebuildTexts($marked);
                 break;
 
-            case 'test':
+            case 'review':
                 $_SESSION['testsql'] = $list;
-                header("Location: /test?selection=3");
+                header("Location: /review?selection=3");
                 exit();
         }
 

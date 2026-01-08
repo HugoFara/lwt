@@ -256,10 +256,10 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
-    // ==================== TEST ROUTES (PROTECTED) ====================
+    // ==================== REVIEW ROUTES (PROTECTED) ====================
 
     // Review interface (Review module)
-    $router->registerWithMiddleware('/test', 'Lwt\\Modules\\Review\\Http\\ReviewController@index', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/review', 'Lwt\\Modules\\Review\\Http\\ReviewController@index', AUTH_MIDDLEWARE);
 
     // ==================== LANGUAGE ROUTES (PROTECTED) ====================
 

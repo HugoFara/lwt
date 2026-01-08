@@ -92,7 +92,7 @@ All application routes are defined in this file, organized by feature:
 - **Home:** `/`, `/index.php`
 - **Text:** `/text/read`, `/text/edit`, `/texts`, `/text/display`, `/text/print`, etc.
 - **Word/Term:** `/word/edit`, `/words/edit`, `/word/new`, `/word/show`, etc.
-- **Test:** `/test`, `/test/set-status`
+- **Review:** `/review`, `/review/set-status`
 - **Language:** `/languages`, `/languages/select-pair`
 - **Tags:** `/tags`, `/tags/text`
 - **Feeds:** `/feeds`, `/feeds/edit`, `/feeds/wizard`
@@ -114,7 +114,7 @@ Controller classes are organized in two locations:
 | `TextController.php` | Text reading and management |
 | `TextPrintController.php` | Text printing (plain and annotated) |
 | `WordController.php` | Word/term management |
-| `TestController.php` | Testing/review interface |
+| `ReviewController.php` | Spaced repetition review interface |
 | `LanguageController.php` | Language configuration |
 | `TagsController.php` | Tag management |
 | `FeedsController.php` | RSS feed management |
@@ -133,7 +133,7 @@ Controller classes are organized in two locations:
 | Vocabulary | `VocabularyController` | Term management |
 | Language | `LanguageController` | Language settings |
 | Tags | `TagsController` | Tag CRUD |
-| Review | `TestController` | Spaced repetition |
+| Review | `ReviewController` | Spaced repetition |
 | Feed | `FeedController` | RSS feeds |
 | Admin | `AdminController` | Settings, backup |
 | User | `UserController` | Authentication |
@@ -173,7 +173,7 @@ Version 3 introduces a Services layer that extracts business logic from controll
 | `StatisticsService.php` | Usage statistics calculation |
 | `TableSetService.php` | Table set management |
 | `TagService.php` | Tag management operations |
-| `TestService.php` | Test/review session logic |
+| `ReviewService.php` | Review session logic |
 | `TextDisplayService.php` | Annotated text display |
 | `TextPrintService.php` | Text printing and export |
 | `TextService.php` | Text CRUD and processing |
@@ -192,7 +192,7 @@ Version 3 introduces a Services layer that extracts business logic from controll
 | Vocabulary | WordService, WordListService, TermStatusService, ExportService |
 | Language | TextParsingService |
 | Tags | TagService, TagAssociationService |
-| Review | ReviewService, TestGenerationService, ScoreCalculationService |
+| Review | ReviewService, ReviewGenerationService, ScoreCalculationService |
 | Feed | FeedService, ArticleService, FeedParsingService |
 | User | AuthService, PasswordService, EmailService |
 | Admin | MediaService, TtsService, SessionCleaner |
@@ -228,7 +228,7 @@ Each module contains its own Views directory with templates specific to that fea
 | Vocabulary | 22 | form_edit_existing.php, list_table.php, upload_form.php |
 | Language | 5 | index.php, edit_form.php, new_form.php |
 | Tags | 5 | index.php, create_form.php, edit_form.php |
-| Review | 6 | test_form.php, test_result.php, next_word.php |
+| Review | 6 | review_form.php, review_result.php, next_word.php |
 | Feed | 8 | index.php, articles.php, import_article.php |
 | User | 6 | login.php, register.php, profile.php |
 | Admin | 8 | settings.php, backup.php, statistics.php |
@@ -355,7 +355,7 @@ If you have custom code or bookmarks:
 |---------|---------|
 | `do_text.php?text=1` | `/text/read?text=1` |
 | `edit_words.php` | `/words/edit` |
-| `do_test.php` | `/test` |
+| `do_test.php` | `/review` |
 | `edit_languages.php` | `/languages` |
 | `backup_restore.php` | `/admin/backup` |
 | `api.php/v1/...` | `/api/v1/...` |
@@ -968,7 +968,7 @@ The `src/backend/Core/` directory is organized into subdirectories by concern:
 | `Media/` | Media file handling |
 | `Mobile/` | Mobile interface logic |
 | `Tag/` | Tag management |
-| `Test/` | Test/review logic |
+| `Review/` | Review/spaced repetition logic |
 | `Text/` | Text processing |
 | `UI/` | UI helper functions |
 | `Utils/` | General utilities |
@@ -1483,7 +1483,7 @@ Type-safe API client modules in `src/frontend/js/`:
 - `shared/api/client.ts` - Centralized fetch wrapper
 - `modules/vocabulary/api/terms_api.ts` - Term/word operations
 - `modules/text/api/texts_api.ts` - Text operations
-- `modules/review/api/review_api.ts` - Review/test operations
+- `modules/review/api/review_api.ts` - Review operations
 - `modules/admin/api/settings_api.ts` - Settings operations
 
 #### API Mode

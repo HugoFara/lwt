@@ -33,7 +33,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
         <?php
         echo (new TextNavigationService())->getPreviousAndNextTextLinks(
             $textId,
-            '/test?text=',
+            '/review?text=',
             false,
             ''
         );

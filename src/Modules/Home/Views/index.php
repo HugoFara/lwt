@@ -208,7 +208,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                                 <span class="icon"><i data-lucide="book-open"></i></span>
                                 <span>Read</span>
                             </a>
-                            <a :href="'/test?text=' + lastText.id" class="button is-info is-light is-medium">
+                            <a :href="'/review?text=' + lastText.id" class="button is-info is-light is-medium">
                                 <span class="icon"><i data-lucide="circle-help"></i></span>
                                 <span>Review</span>
                             </a>
