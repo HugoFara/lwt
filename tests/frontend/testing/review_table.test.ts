@@ -1,8 +1,8 @@
 /**
- * Tests for test_table.ts - Table test mode with column visibility toggles
+ * Tests for review_table.ts - Table review mode with column visibility toggles
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initTableTest } from '../../../src/frontend/js/modules/review/pages/test_table';
+import { initTableReview } from '../../../src/frontend/js/modules/review/pages/review_table';
 
 // Mock ajax_utilities
 vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
@@ -11,7 +11,7 @@ vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
 
 import { saveSetting } from '../../../src/frontend/js/shared/utils/ajax_utilities';
 
-describe('test_table.ts', () => {
+describe('review_table.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
@@ -58,7 +58,7 @@ describe('test_table.ts', () => {
 
     describe('cbEdit checkbox', () => {
       it('hides first column when unchecked', () => {
-        initTableTest();
+        initTableReview();
 
         const checkbox = document.querySelector<HTMLInputElement>('#cbEdit')!;
         checkbox.checked = false;
@@ -72,7 +72,7 @@ describe('test_table.ts', () => {
       });
 
       it('shows first column when checked', () => {
-        initTableTest();
+        initTableReview();
 
         // First hide it
         const checkbox = document.querySelector<HTMLInputElement>('#cbEdit')!;
@@ -91,7 +91,7 @@ describe('test_table.ts', () => {
 
     describe('cbStatus checkbox', () => {
       it('hides second column when unchecked', () => {
-        initTableTest();
+        initTableReview();
 
         const checkbox = document.querySelector<HTMLInputElement>('#cbStatus')!;
         checkbox.checked = false;
@@ -107,7 +107,7 @@ describe('test_table.ts', () => {
 
     describe('cbRom checkbox', () => {
       it('hides fifth column when unchecked', () => {
-        initTableTest();
+        initTableReview();
 
         const checkbox = document.querySelector<HTMLInputElement>('#cbRom')!;
         checkbox.checked = false;
@@ -123,7 +123,7 @@ describe('test_table.ts', () => {
 
     describe('cbSentence checkbox', () => {
       it('hides sixth column when unchecked', () => {
-        initTableTest();
+        initTableReview();
 
         const checkbox = document.querySelector<HTMLInputElement>('#cbSentence')!;
         checkbox.checked = false;
@@ -174,7 +174,7 @@ describe('test_table.ts', () => {
 
     describe('cbTerm checkbox', () => {
       it('hides term content (white text) when unchecked', () => {
-        initTableTest();
+        initTableReview();
 
         const checkbox = document.querySelector<HTMLInputElement>('#cbTerm')!;
         checkbox.checked = false;
@@ -189,7 +189,7 @@ describe('test_table.ts', () => {
       });
 
       it('shows term content when checked', () => {
-        initTableTest();
+        initTableReview();
 
         const checkbox = document.querySelector<HTMLInputElement>('#cbTerm')!;
         checkbox.checked = false;
@@ -209,7 +209,7 @@ describe('test_table.ts', () => {
 
     describe('cbTrans checkbox', () => {
       it('hides translation content (white text) when unchecked', () => {
-        initTableTest();
+        initTableReview();
 
         const checkbox = document.querySelector<HTMLInputElement>('#cbTrans')!;
         checkbox.checked = false;
@@ -259,7 +259,7 @@ describe('test_table.ts', () => {
     });
 
     it('reveals hidden text on cell click', () => {
-      initTableTest();
+      initTableReview();
 
       // First hide term content
       const checkbox = document.querySelector<HTMLInputElement>('#cbTerm')!;
@@ -281,7 +281,7 @@ describe('test_table.ts', () => {
     });
 
     it('sets white background on all cells', () => {
-      initTableTest();
+      initTableReview();
 
       const tdElements = document.querySelectorAll('td');
       tdElements.forEach((cell) => {
@@ -327,7 +327,7 @@ describe('test_table.ts', () => {
     });
 
     it('updates left border radius when hiding left columns', () => {
-      initTableTest();
+      initTableReview();
 
       const checkbox = document.querySelector<HTMLInputElement>('#cbEdit')!;
       checkbox.checked = false;
@@ -340,7 +340,7 @@ describe('test_table.ts', () => {
     });
 
     it('updates right border radius when hiding right columns', () => {
-      initTableTest();
+      initTableReview();
 
       const checkbox = document.querySelector<HTMLInputElement>('#cbSentence')!;
       checkbox.checked = false;
@@ -386,7 +386,7 @@ describe('test_table.ts', () => {
         </table>
       `;
 
-      initTableTest();
+      initTableReview();
 
       // Unchecked checkboxes should hide content (color set to white)
       // JSDOM normalizes 'white' to 'rgb(255, 255, 255)'
@@ -421,7 +421,7 @@ describe('test_table.ts', () => {
       `;
 
       // Should not throw even without cbEdit
-      expect(() => initTableTest()).not.toThrow();
+      expect(() => initTableReview()).not.toThrow();
     });
 
     it('handles missing checkboxes gracefully', () => {
@@ -434,7 +434,7 @@ describe('test_table.ts', () => {
       `;
 
       // Should not throw with partial checkboxes
-      expect(() => initTableTest()).not.toThrow();
+      expect(() => initTableReview()).not.toThrow();
     });
   });
 
@@ -487,7 +487,7 @@ describe('test_table.ts', () => {
         </table>
       `;
 
-      initTableTest();
+      initTableReview();
 
       const checkbox = document.querySelector<HTMLInputElement>('#cbEdit')!;
       checkbox.checked = false;
@@ -515,7 +515,7 @@ describe('test_table.ts', () => {
         </table>
       `;
 
-      initTableTest();
+      initTableReview();
 
       const tdElements = document.querySelectorAll('td');
 

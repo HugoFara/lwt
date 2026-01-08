@@ -97,7 +97,7 @@ class ReviewFacade
      *
      * @return array{0: string, 1: int|int[]|string} Selector type and selection value
      */
-    public function getTestIdentifier(
+    public function getReviewIdentifier(
         ?int $selection,
         ?string $sessTestsql,
         ?int $lang,
@@ -114,7 +114,7 @@ class ReviewFacade
             return ['', ''];
         }
 
-        return [$config->testKey, $config->selection];
+        return [$config->reviewKey, $config->selection];
     }
 
     /**
@@ -125,7 +125,7 @@ class ReviewFacade
      *
      * @return string|null SQL projection string
      */
-    public function getTestSql(string $selector, int|array $selection): ?string
+    public function getReviewSql(string $selector, int|array $selection): ?string
     {
         $config = new ReviewConfiguration($selector, $selection);
         try {
@@ -138,40 +138,40 @@ class ReviewFacade
     /**
      * Validate test selection.
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return array{valid: bool, langCount: int, error: string|null}
      */
-    public function validateTestSelection(string $testsql): array
+    public function validateReviewSelection(string $reviewsql): array
     {
         // Create a raw SQL config for validation
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         return $this->repository->validateSingleLanguage($config);
     }
 
     /**
      * Get test counts.
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return array{due: int, total: int}
      */
-    public function getTestCounts(string $testsql): array
+    public function getReviewCounts(string $reviewsql): array
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
-        return $this->repository->getTestCounts($config);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
+        return $this->repository->getReviewCounts($config);
     }
 
     /**
      * Get tomorrow's test count.
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return int
      */
-    public function getTomorrowTestCount(string $testsql): int
+    public function getTomorrowReviewCount(string $reviewsql): int
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         $result = $this->getTomorrowCount->execute($config);
         return $result['count'];
     }
@@ -179,14 +179,14 @@ class ReviewFacade
     /**
      * Get the next word to test.
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return array|null Word record or null
      */
-    public function getNextWord(string $testsql): ?array
+    public function getNextWord(string $reviewsql): ?array
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
-        $word = $this->repository->findNextWordForTest($config);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
+        $word = $this->repository->findNextWordForReview($config);
 
         if ($word === null) {
             return null;
@@ -266,35 +266,35 @@ class ReviewFacade
     /**
      * Get language ID from test SQL.
      *
-     * @param string $testsql Test SQL
+     * @param string $reviewsql Test SQL
      *
      * @return int|null
      */
-    public function getLanguageIdFromTestSql(string $testsql): ?int
+    public function getLanguageIdFromReviewSql(string $reviewsql): ?int
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         return $this->repository->getLanguageIdFromConfig($config);
     }
 
     /**
-     * Initialize test session.
+     * Initialize review session.
      *
      * @param int $totalDue Total words due
      *
      * @return void
      */
-    public function initializeTestSession(int $totalDue): void
+    public function initializeReviewSession(int $totalDue): void
     {
         $session = ReviewSession::start($totalDue);
         $this->sessionManager->saveSession($session);
     }
 
     /**
-     * Get test session data.
+     * Get review session data.
      *
      * @return array{start: int, correct: int, wrong: int, total: int}
      */
-    public function getTestSessionData(): array
+    public function getReviewSessionData(): array
     {
         $session = $this->sessionManager->getSession();
         if ($session === null) {
@@ -339,25 +339,25 @@ class ReviewFacade
      *
      * @return array
      */
-    public function getTableTestSettings(): array
+    public function getTableReviewSettings(): array
     {
-        return $this->repository->getTableTestSettings();
+        return $this->repository->getTableReviewSettings();
     }
 
     /**
      * Get table test words.
      *
-     * @param string $testsql SQL projection
+     * @param string $reviewsql SQL projection
      *
      * @return \mysqli_result|bool
      */
-    public function getTableReviewWords(string $testsql): \mysqli_result|bool
+    public function getTableReviewWords(string $reviewsql): \mysqli_result|bool
     {
         // For backward compatibility, return raw query result
         // New code should use getTableWords use case
         $sql = "SELECT DISTINCT WoID, WoText, WoTranslation, WoRomanization,
             WoSentence, WoStatus, WoTodayScore AS Score
-            FROM $testsql AND WoStatus BETWEEN 1 AND 5
+            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*'
             ORDER BY WoTodayScore, WoRandom * RAND()";
 
@@ -370,7 +370,7 @@ class ReviewFacade
      * @param int|null    $lang      Language ID
      * @param int|null    $text      Text ID
      * @param int|null    $selection Selection type
-     * @param string|null $testsql   Test SQL
+     * @param string|null $reviewsql   Test SQL
      *
      * @return string
      */
@@ -378,11 +378,11 @@ class ReviewFacade
         ?int $lang,
         ?int $text,
         ?int $selection = null,
-        ?string $testsql = null
+        ?string $reviewsql = null
     ): string {
         $config = $this->getReviewConfiguration->parseFromParams(
             $selection,
-            $testsql,
+            $reviewsql,
             $lang,
             $text
         );
@@ -400,7 +400,7 @@ class ReviewFacade
      *
      * @return array|null
      */
-    public function getTestDataFromParams(
+    public function getReviewDataFromParams(
         ?int $selection,
         ?string $sessTestsql,
         ?int $langId,
@@ -422,12 +422,12 @@ class ReviewFacade
             return null;
         }
 
-        $counts = $this->repository->getTestCounts($config);
+        $counts = $this->repository->getReviewCounts($config);
 
         return [
             'title' => $this->buildTitle($config),
             'property' => $config->toUrlProperty(),
-            'testsql' => $config->toSqlProjection(),
+            'reviewsql' => $config->toSqlProjection(),
             'counts' => $counts
         ];
     }
@@ -443,7 +443,7 @@ class ReviewFacade
     {
         $langName = $this->repository->getLanguageName($config);
 
-        return match ($config->testKey) {
+        return match ($config->reviewKey) {
             ReviewConfiguration::KEY_LANG => "All Terms in {$langName}",
             ReviewConfiguration::KEY_TEXT => "Text Review",
             ReviewConfiguration::KEY_WORDS, ReviewConfiguration::KEY_TEXTS => $this->getSelectionTitle($config, $langName),
@@ -543,7 +543,7 @@ class ReviewFacade
      *
      * @return int
      */
-    public function clampTestType(int $testType): int
+    public function clampReviewType(int $testType): int
     {
         return max(1, min(5, $testType));
     }
@@ -567,7 +567,7 @@ class ReviewFacade
      *
      * @return int
      */
-    public function getBaseTestType(int $testType): int
+    public function getBaseReviewType(int $testType): int
     {
         return $testType > 3 ? $testType - 3 : $testType;
     }
@@ -634,7 +634,7 @@ class ReviewFacade
         bool $wordMode,
         string $wordText
     ): string {
-        $baseType = $this->getBaseTestType($testType);
+        $baseType = $this->getBaseReviewType($testType);
 
         if ($baseType === 1) {
             $tagList = \Lwt\Modules\Tags\Application\TagsFacade::getWordTagList((int) $wordData['WoID'], false);
@@ -654,7 +654,7 @@ class ReviewFacade
      *
      * @return string|null
      */
-    public function buildSelectionTestSql(int $selectionType, string $selectionData): ?string
+    public function buildSelectionReviewSql(int $selectionType, string $selectionData): ?string
     {
         $dataStringArray = explode(',', trim($selectionData, '()'));
         $dataIntArray = array_map('intval', $dataStringArray);

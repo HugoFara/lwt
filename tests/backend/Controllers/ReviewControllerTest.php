@@ -3,13 +3,13 @@ namespace Lwt\Tests\Controllers;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Modules\Review\Http\TestController;
+use Lwt\Modules\Review\Http\ReviewController;
 use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
-use Lwt\Modules\Review\Application\Services\TestService;
+use Lwt\Modules\Review\Application\Services\ReviewService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -19,16 +19,16 @@ Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../../src/Modules/Review/Http/TestController.php';
-require_once __DIR__ . '/../../../src/Modules/Review/Application/Services/TestService.php';
+require_once __DIR__ . '/../../../src/Modules/Review/Http/ReviewController.php';
+require_once __DIR__ . '/../../../src/Modules/Review/Application/Services/ReviewService.php';
 
 /**
- * Unit tests for the TestController class.
+ * Unit tests for the ReviewController class.
  *
  * Tests the word testing/review interface controller (from Review module)
- * and TestService integration.
+ * and ReviewService integration.
  */
-class TestControllerTest extends TestCase
+class ReviewControllerTest extends TestCase
 {
     private static bool $dbConnected = false;
     private array $originalServer;
@@ -87,25 +87,25 @@ class TestControllerTest extends TestCase
     }
 
     /**
-     * Helper method to create a TestController with its dependencies.
+     * Helper method to create a ReviewController with its dependencies.
      *
-     * @return TestController
+     * @return ReviewController
      */
-    private function createController(): TestController
+    private function createController(): ReviewController
     {
-        return new TestController(new ReviewFacade());
+        return new ReviewController(new ReviewFacade());
     }
 
     /**
      * Helper method to call protected param() method.
      *
-     * @param TestController $controller The controller instance
+     * @param ReviewController $controller The controller instance
      * @param string         $name       Parameter name
      * @param string         $default    Default value
      *
      * @return string Parameter value
      */
-    private function invokeParam(TestController $controller, string $name, string $default = ''): string
+    private function invokeParam(ReviewController $controller, string $name, string $default = ''): string
     {
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('param');
@@ -123,7 +123,7 @@ class TestControllerTest extends TestCase
 
         $controller = $this->createController();
 
-        $this->assertInstanceOf(TestController::class, $controller);
+        $this->assertInstanceOf(ReviewController::class, $controller);
     }
 
     // ===== Method existence tests =====
@@ -158,7 +158,7 @@ class TestControllerTest extends TestCase
 
         $controller = $this->createController();
 
-        $this->assertTrue(method_exists($controller, 'tableTest'));
+        $this->assertTrue(method_exists($controller, 'tableReview'));
     }
 
     // ===== BaseController inheritance tests =====
@@ -174,236 +174,236 @@ class TestControllerTest extends TestCase
         $this->assertInstanceOf(\Lwt\Controllers\BaseController::class, $controller);
     }
 
-    // ===== TestService tests =====
+    // ===== ReviewService tests =====
 
-    public function testTestServiceCanBeInstantiated(): void
+    public function testReviewServiceCanBeInstantiated(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
-        $this->assertInstanceOf(TestService::class, $service);
+        $this->assertInstanceOf(ReviewService::class, $service);
     }
 
-    public function testTestServiceCalculateNewStatusIncrements(): void
+    public function testReviewServiceCalculateNewStatusIncrements(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // Test status increment
         $newStatus = $service->calculateNewStatus(2, 1);
         $this->assertEquals(3, $newStatus);
     }
 
-    public function testTestServiceCalculateNewStatusDecrements(): void
+    public function testReviewServiceCalculateNewStatusDecrements(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // Test status decrement
         $newStatus = $service->calculateNewStatus(3, -1);
         $this->assertEquals(2, $newStatus);
     }
 
-    public function testTestServiceCalculateNewStatusClampsMin(): void
+    public function testReviewServiceCalculateNewStatusClampsMin(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // Test minimum status clamping
         $newStatus = $service->calculateNewStatus(1, -5);
         $this->assertEquals(1, $newStatus);
     }
 
-    public function testTestServiceCalculateNewStatusClampsMax(): void
+    public function testReviewServiceCalculateNewStatusClampsMax(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // Test maximum status clamping
         $newStatus = $service->calculateNewStatus(5, 10);
         $this->assertEquals(5, $newStatus);
     }
 
-    public function testTestServiceCalculateStatusChangePositive(): void
+    public function testReviewServiceCalculateStatusChangePositive(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // Returns 1 for positive change (not the actual difference)
         $change = $service->calculateStatusChange(2, 4);
         $this->assertEquals(1, $change);
     }
 
-    public function testTestServiceCalculateStatusChangeNegative(): void
+    public function testReviewServiceCalculateStatusChangeNegative(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // Returns -1 for negative change (not the actual difference)
         $change = $service->calculateStatusChange(4, 2);
         $this->assertEquals(-1, $change);
     }
 
-    public function testTestServiceCalculateStatusChangeZero(): void
+    public function testReviewServiceCalculateStatusChangeZero(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // Returns 0 for no change
         $change = $service->calculateStatusChange(3, 3);
         $this->assertEquals(0, $change);
     }
 
-    public function testTestServiceClampTestType(): void
+    public function testReviewServiceClampTestType(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // Test clamping within valid range
-        $this->assertEquals(1, $service->clampTestType(1));
-        $this->assertEquals(5, $service->clampTestType(5));
+        $this->assertEquals(1, $service->clampReviewType(1));
+        $this->assertEquals(5, $service->clampReviewType(5));
     }
 
-    public function testTestServiceClampTestTypeClampsLow(): void
+    public function testReviewServiceClampTestTypeClampsLow(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
-        $this->assertEquals(1, $service->clampTestType(0));
-        $this->assertEquals(1, $service->clampTestType(-5));
+        $this->assertEquals(1, $service->clampReviewType(0));
+        $this->assertEquals(1, $service->clampReviewType(-5));
     }
 
-    public function testTestServiceClampTestTypeClampsHigh(): void
+    public function testReviewServiceClampTestTypeClampsHigh(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // Assuming max test type is around 5-6
-        $result = $service->clampTestType(100);
+        $result = $service->clampReviewType(100);
         $this->assertGreaterThanOrEqual(1, $result);
         $this->assertLessThanOrEqual(6, $result);
     }
 
-    public function testTestServiceIsWordMode(): void
+    public function testReviewServiceIsWordMode(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // Test word mode detection
         $this->assertIsBool($service->isWordMode(1));
     }
 
-    public function testTestServiceGetBaseTestType(): void
+    public function testReviewServiceGetBaseTestType(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
-        $baseType = $service->getBaseTestType(1);
+        $baseType = $service->getBaseReviewType(1);
         $this->assertIsInt($baseType);
         $this->assertGreaterThanOrEqual(1, $baseType);
     }
 
-    public function testTestServiceGetWaitingTime(): void
+    public function testReviewServiceGetWaitingTime(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         $waitTime = $service->getWaitingTime();
         $this->assertIsInt($waitTime);
         $this->assertGreaterThanOrEqual(0, $waitTime);
     }
 
-    public function testTestServiceGetEditFrameWaitingTime(): void
+    public function testReviewServiceGetEditFrameWaitingTime(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         $waitTime = $service->getEditFrameWaitingTime();
         $this->assertIsInt($waitTime);
         $this->assertGreaterThanOrEqual(0, $waitTime);
     }
 
-    public function testTestServiceGetWordText(): void
+    public function testReviewServiceGetWordText(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // Test with non-existent word ID
         $text = $service->getWordText(999999);
         $this->assertNull($text);
     }
 
-    public function testTestServiceGetTestSessionData(): void
+    public function testReviewServiceGetReviewSessionData(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
-        $sessionData = $service->getTestSessionData();
+        $sessionData = $service->getReviewSessionData();
         $this->assertIsArray($sessionData);
         $this->assertArrayHasKey('wrong', $sessionData);
         $this->assertArrayHasKey('correct', $sessionData);
     }
 
-    public function testTestServiceGetTableTestSettings(): void
+    public function testReviewServiceGetTableTestSettings(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
-        $settings = $service->getTableTestSettings();
+        $settings = $service->getTableReviewSettings();
         $this->assertIsArray($settings);
     }
 
@@ -533,13 +533,13 @@ class TestControllerTest extends TestCase
         }
 
         $_REQUEST['selection'] = '1';
-        $_SESSION['testsql'] = 'SELECT * FROM words';
+        $_SESSION['reviewsql'] = 'SELECT * FROM words';
 
         $controller = $this->createController();
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('getTestProperty');
+        $method = $reflection->getMethod('getReviewProperty');
         $method->setAccessible(true);
 
         $result = $method->invoke($controller);
@@ -559,7 +559,7 @@ class TestControllerTest extends TestCase
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('getTestProperty');
+        $method = $reflection->getMethod('getReviewProperty');
         $method->setAccessible(true);
 
         $result = $method->invoke($controller);
@@ -579,7 +579,7 @@ class TestControllerTest extends TestCase
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('getTestProperty');
+        $method = $reflection->getMethod('getReviewProperty');
         $method->setAccessible(true);
 
         $result = $method->invoke($controller);
@@ -597,7 +597,7 @@ class TestControllerTest extends TestCase
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('getTestProperty');
+        $method = $reflection->getMethod('getReviewProperty');
         $method->setAccessible(true);
 
         $result = $method->invoke($controller);
@@ -657,56 +657,56 @@ class TestControllerTest extends TestCase
         $controller1 = $this->createController();
         $controller2 = $this->createController();
 
-        $this->assertInstanceOf(TestController::class, $controller1);
-        $this->assertInstanceOf(TestController::class, $controller2);
+        $this->assertInstanceOf(ReviewController::class, $controller1);
+        $this->assertInstanceOf(ReviewController::class, $controller2);
         $this->assertNotSame($controller1, $controller2);
     }
 
-    // ===== TestService test identifier tests =====
+    // ===== ReviewService test identifier tests =====
 
-    public function testTestServiceGetTestIdentifierWithLang(): void
+    public function testReviewServiceGetTestIdentifierWithLang(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
-        $identifier = $service->getTestIdentifier(null, null, 1, null);
+        $identifier = $service->getReviewIdentifier(null, null, 1, null);
 
         $this->assertIsArray($identifier);
         $this->assertCount(2, $identifier);
     }
 
-    public function testTestServiceGetTestIdentifierWithText(): void
+    public function testReviewServiceGetTestIdentifierWithText(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
-        $identifier = $service->getTestIdentifier(null, null, null, 1);
+        $identifier = $service->getReviewIdentifier(null, null, null, 1);
 
         $this->assertIsArray($identifier);
         $this->assertCount(2, $identifier);
     }
 
-    public function testTestServiceGetTestIdentifierWithSelection(): void
+    public function testReviewServiceGetTestIdentifierWithSelection(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
-        $identifier = $service->getTestIdentifier(1, 'SELECT * FROM words', null, null);
+        $identifier = $service->getReviewIdentifier(1, 'SELECT * FROM words', null, null);
 
         $this->assertIsArray($identifier);
         $this->assertCount(2, $identifier);
     }
 
-    // ===== TestService validation tests =====
+    // ===== ReviewService validation tests =====
 
     public function testValidateTestSelectionMethodExists(): void
     {
@@ -714,24 +714,24 @@ class TestControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
-        $this->assertTrue(method_exists($service, 'validateTestSelection'));
+        $this->assertTrue(method_exists($service, 'validateReviewSelection'));
     }
 
-    public function testTestServiceValidateTestSelectionReturnsArray(): void
+    public function testReviewServiceValidateTestSelectionReturnsArray(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
+        $service = new ReviewService();
 
         // The method expects a subquery format like "(SELECT WoID FROM words) AS t"
         // Use proper subquery syntax
         $subquery = "(SELECT WoID, WoLgID FROM " . Globals::table('words') . " WHERE WoLgID = 1 LIMIT 1) AS subq";
 
-        $result = $service->validateTestSelection($subquery);
+        $result = $service->validateReviewSelection($subquery);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('valid', $result);
@@ -740,29 +740,29 @@ class TestControllerTest extends TestCase
 
     // ===== Session progress tests =====
 
-    public function testTestServiceInitializeTestSession(): void
+    public function testReviewServiceInitializeReviewSession(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
-        $service->initializeTestSession(10);
+        $service = new ReviewService();
+        $service->initializeReviewSession(10);
 
-        $sessionData = $service->getTestSessionData();
+        $sessionData = $service->getReviewSessionData();
 
         $this->assertIsArray($sessionData);
         $this->assertArrayHasKey('start', $sessionData);
     }
 
-    public function testTestServiceUpdateSessionProgress(): void
+    public function testReviewServiceUpdateSessionProgress(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $service = new TestService();
-        $service->initializeTestSession(10);
+        $service = new ReviewService();
+        $service->initializeReviewSession(10);
 
         $result = $service->updateSessionProgress(1);
 

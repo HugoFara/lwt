@@ -174,7 +174,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                     </div>
 
                     <footer class="card-footer">
-                        <a :href="'/test?lang=' + lang.id" class="card-footer-item">
+                        <a :href="'/review?lang=' + lang.id" class="card-footer-item">
                             <span class="icon">
                                 <i data-lucide="circle-help" style="width: 16px; height: 16px;"></i>
                             </span>

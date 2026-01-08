@@ -29,12 +29,12 @@ use Lwt\Modules\Review\Domain\ReviewSession;
 class SessionStateManager
 {
     /**
-     * Session keys used for test state.
+     * Session keys used for review state.
      */
-    private const KEY_START = 'teststart';
-    private const KEY_TOTAL = 'testtotal';
-    private const KEY_CORRECT = 'testcorrect';
-    private const KEY_WRONG = 'testwrong';
+    private const KEY_START = 'reviewstart';
+    private const KEY_TOTAL = 'reviewtotal';
+    private const KEY_CORRECT = 'reviewcorrect';
+    private const KEY_WRONG = 'reviewwrong';
 
     /**
      * Get the current review session from PHP session.

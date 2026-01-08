@@ -1,21 +1,21 @@
 /**
- * Test State Module - Manages mutable test/review mode state.
+ * Review State Module - Manages mutable review mode state.
  *
- * This module provides explicit getter/setter functions for test mode operations.
+ * This module provides explicit getter/setter functions for review mode operations.
  *
  * @license Unlicense <http://unlicense.org/>
  * @since 3.1.0
  */
 
 /**
- * Current word ID being tested.
+ * Current word ID being reviewed.
  */
 let currentWordId = 0;
 
 /**
- * The correct solution for the current test question.
+ * The correct solution for the current review question.
  */
-let testSolution = '';
+let reviewSolution = '';
 
 /**
  * Whether the answer has been revealed.
@@ -23,31 +23,31 @@ let testSolution = '';
 let answerOpened = false;
 
 /**
- * Get the current word ID being tested.
+ * Get the current word ID being reviewed.
  */
 export function getCurrentWordId(): number {
   return currentWordId;
 }
 
 /**
- * Set the current word ID being tested.
+ * Set the current word ID being reviewed.
  */
 export function setCurrentWordId(wordId: number): void {
   currentWordId = wordId;
 }
 
 /**
- * Get the test solution.
+ * Get the review solution.
  */
-export function getTestSolution(): string {
-  return testSolution;
+export function getReviewSolution(): string {
+  return reviewSolution;
 }
 
 /**
- * Set the test solution.
+ * Set the review solution.
  */
-export function setTestSolution(solution: string): void {
-  testSolution = solution;
+export function setReviewSolution(solution: string): void {
+  reviewSolution = solution;
 }
 
 /**
@@ -79,10 +79,10 @@ export function resetAnswer(): void {
 }
 
 /**
- * Reset all test state (for testing or new session).
+ * Reset all review state (for new session).
  */
-export function resetTestState(): void {
+export function resetReviewState(): void {
   currentWordId = 0;
-  testSolution = '';
+  reviewSolution = '';
   answerOpened = false;
 }

@@ -14,7 +14,6 @@
 
 namespace Lwt\Modules\Feed\Http;
 
-use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Modules\Feed\Domain\Feed;
 use Lwt\Modules\Language\Application\LanguageFacade;
@@ -1438,7 +1437,9 @@ class FeedController
             $rssUrl === $_SESSION['wizard']['rss_url']
         ) {
             session_destroy();
-            ErrorHandler::die("Your session seems to have an issue, please reload the page.");
+            throw new \RuntimeException(
+                "Session state conflict detected. Please reload the page and try again."
+            );
         }
 
         $_SESSION['wizard']['feed'] = $this->feedFacade->detectAndParseFeed($rssUrl);

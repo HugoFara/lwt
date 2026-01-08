@@ -37,7 +37,7 @@ export interface LwtWord {
   id: number;
 }
 
-export interface LwtTest {
+export interface LwtReview {
   solution: string;
   answer_opened: boolean;
 }
@@ -52,7 +52,7 @@ export interface LwtData {
   language: LwtLanguage;
   text: LwtText;
   word: LwtWord;
-  test: LwtTest;
+  review: LwtReview;
   settings: LwtSettings;
 }
 

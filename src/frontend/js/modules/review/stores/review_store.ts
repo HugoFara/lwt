@@ -1,7 +1,7 @@
 /**
- * Test Store - Alpine.js store for vocabulary testing state management.
+ * Review Store - Alpine.js store for vocabulary review state management.
  *
- * Provides centralized state management for the test interface including
+ * Provides centralized state management for the review interface including
  * current word, progress tracking, timer, and UI state.
  *
  * @license Unlicense <http://unlicense.org/>
@@ -12,7 +12,7 @@ import Alpine from 'alpinejs';
 import { ReviewApi } from '@modules/review/api/review_api';
 
 /**
- * Language settings for the test.
+ * Language settings for the review.
  */
 export interface LangSettings {
   name: string;
@@ -25,9 +25,9 @@ export interface LangSettings {
 }
 
 /**
- * Current word being tested.
+ * Current word being reviewed.
  */
-export interface TestWord {
+export interface ReviewWord {
   wordId: number;
   text: string;
   translation: string;
@@ -39,9 +39,9 @@ export interface TestWord {
 }
 
 /**
- * Test progress tracking.
+ * Review progress tracking.
  */
-export interface TestProgress {
+export interface ReviewProgress {
   total: number;
   remaining: number;
   wrong: number;
@@ -51,7 +51,7 @@ export interface TestProgress {
 /**
  * Timer state.
  */
-export interface TestTimer {
+export interface ReviewTimer {
   startTime: number;
   serverTime: number;
   elapsed: string;
@@ -59,19 +59,19 @@ export interface TestTimer {
 }
 
 /**
- * Test configuration from server.
+ * Review configuration from server.
  */
-export interface TestConfig {
-  testKey: string;
+export interface ReviewConfig {
+  reviewKey: string;
   selection: string;
-  testType: number;
+  reviewType: number;
   isTableMode: boolean;
   wordMode: boolean;
   langId: number;
   error?: string;
   wordRegex: string;
   langSettings: LangSettings;
-  progress: TestProgress;
+  progress: ReviewProgress;
   timer: {
     startTime: number;
     serverTime: number;
@@ -81,13 +81,13 @@ export interface TestConfig {
 }
 
 /**
- * Test store state interface.
+ * Review store state interface.
  */
-export interface TestStoreState {
-  // Test configuration
-  testKey: string;
+export interface ReviewStoreState {
+  // Review configuration
+  reviewKey: string;
   selection: string;
-  testType: number;
+  reviewType: number;
   isTableMode: boolean;
   wordMode: boolean;
   langId: number;
@@ -98,14 +98,14 @@ export interface TestStoreState {
   // Language settings
   langSettings: LangSettings;
 
-  // Current word being tested
-  currentWord: TestWord | null;
+  // Current word being reviewed
+  currentWord: ReviewWord | null;
 
   // Progress tracking
-  progress: TestProgress;
+  progress: ReviewProgress;
 
   // Timer
-  timer: TestTimer;
+  timer: ReviewTimer;
 
   // UI state
   isLoading: boolean;
@@ -118,7 +118,7 @@ export interface TestStoreState {
   isInitialized: boolean;
 
   // Methods
-  configure(config: TestConfig): void;
+  configure(config: ReviewConfig): void;
   nextWord(): Promise<void>;
   revealAnswer(): void;
   updateStatus(status: number, isCorrect?: boolean): Promise<void>;
@@ -149,14 +149,14 @@ function calculateNewStatus(currentStatus: number, change: number): number {
 }
 
 /**
- * Create the test store data object.
+ * Create the review store data object.
  */
-function createTestStore(): TestStoreState {
+function createReviewStore(): ReviewStoreState {
   return {
-    // Test configuration
-    testKey: '',
+    // Review configuration
+    reviewKey: '',
     selection: '',
-    testType: 1,
+    reviewType: 1,
     isTableMode: false,
     wordMode: false,
     langId: 0,
@@ -175,7 +175,7 @@ function createTestStore(): TestStoreState {
       langCode: ''
     },
 
-    // Current word being tested
+    // Current word being reviewed
     currentWord: null,
 
     // Progress tracking
@@ -208,10 +208,10 @@ function createTestStore(): TestStoreState {
      * Configure the store with settings from server.
      * Note: Named 'configure' instead of 'init' because Alpine auto-calls init() on stores.
      */
-    configure(config: TestConfig): void {
-      this.testKey = config.testKey;
+    configure(config: ReviewConfig): void {
+      this.reviewKey = config.reviewKey;
       this.selection = config.selection;
-      this.testType = config.testType;
+      this.reviewType = config.reviewType;
       this.isTableMode = config.isTableMode;
       this.wordMode = config.wordMode;
       this.langId = config.langId;
@@ -224,7 +224,7 @@ function createTestStore(): TestStoreState {
       this.timer.serverTime = config.timer.serverTime;
 
       // Load read aloud preference from localStorage
-      const savedReadAloud = localStorage.getItem('lwt-test-read-aloud');
+      const savedReadAloud = localStorage.getItem('lwt-review-read-aloud');
       this.readAloudEnabled = savedReadAloud === 'true';
 
       this.isInitialized = true;
@@ -244,12 +244,12 @@ function createTestStore(): TestStoreState {
 
       try {
         const response = await ReviewApi.getNextWord({
-          testKey: this.testKey,
+          reviewKey: this.reviewKey,
           selection: this.selection,
           wordMode: this.wordMode,
           lgId: this.langId,
           wordRegex: this.wordRegex,
-          type: this.testType
+          type: this.reviewType
         });
 
         if (response.error) {
@@ -265,7 +265,7 @@ function createTestStore(): TestStoreState {
 
           // Fetch tomorrow count
           const tomorrowResponse = await ReviewApi.getTomorrowCount(
-            this.testKey,
+            this.reviewKey,
             this.selection
           );
           if (tomorrowResponse.data?.count) {
@@ -488,27 +488,27 @@ function createTestStore(): TestStoreState {
 }
 
 /**
- * Initialize the test store as an Alpine.js store.
+ * Initialize the review store as an Alpine.js store.
  */
-export function initTestStore(): void {
-  Alpine.store('test', createTestStore());
+export function initReviewStore(): void {
+  Alpine.store('review', createReviewStore());
 }
 
 /**
- * Get the test store instance.
+ * Get the review store instance.
  */
-export function getTestStore(): TestStoreState {
-  return Alpine.store('test') as TestStoreState;
+export function getReviewStore(): ReviewStoreState {
+  return Alpine.store('review') as ReviewStoreState;
 }
 
 // Register the store immediately
-initTestStore();
+initReviewStore();
 
 // Expose for global access
 declare global {
   interface Window {
-    getTestStore: typeof getTestStore;
+    getReviewStore: typeof getReviewStore;
   }
 }
 
-window.getTestStore = getTestStore;
+window.getReviewStore = getReviewStore;

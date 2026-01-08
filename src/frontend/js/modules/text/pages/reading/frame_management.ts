@@ -66,25 +66,6 @@ export function showRightFramesPanel(): boolean {
   return false;
 }
 
-/**
- * Load content in the dictionary frame (ru).
- *
- * Used for external dictionary lookups. Note that some dictionary websites
- * may block iframe embedding via X-Frame-Options or Content-Security-Policy
- * headers. In such cases, the iframe will show an error or blank page.
- *
- * @param url URL to load in the dictionary iframe
- * @returns true if the frame was found and URL loaded, false otherwise
- */
-export function loadDictionaryFrame(url: string): boolean {
-  if (!top?.frames) return false;
-  const frame = top.frames['ru' as unknown as number];
-  if (frame) {
-    frame.location.href = url;
-    return showRightFramesPanel();
-  }
-  return false;
-}
 
 /**
  * Hide the right frames if found.

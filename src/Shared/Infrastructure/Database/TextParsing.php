@@ -17,7 +17,7 @@ namespace Lwt\Shared\Infrastructure\Database;
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
-use Lwt\Core\Utils\ErrorHandler;
+use Lwt\Core\Exception\DatabaseException;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Language\Application\Services\TextParsingService;
@@ -74,7 +74,7 @@ class TextParsing
             ->firstPrepared();
 
         if ($record === null) {
-            ErrorHandler::die("Language data not found for ID: $lid");
+            throw DatabaseException::recordNotFound('languages', 'LgID', $lid);
         }
         $rtlScript = (bool)$record['LgRightToLeft'];
 
@@ -127,7 +127,7 @@ class TextParsing
             ->firstPrepared();
 
         if ($record === null) {
-            ErrorHandler::die("Language data not found for ID: $lid");
+            throw DatabaseException::recordNotFound('languages', 'LgID', $lid);
         }
 
         // Parse text into temptextitems (id>0 uses MAX(SeID)+1 for sentence IDs)

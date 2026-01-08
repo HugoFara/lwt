@@ -3,8 +3,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  owin,
-  oewin,
+  openDictionaryPopup,
   createTheDictUrl,
   createTheDictLink,
   createSentLookupLink,
@@ -19,7 +18,6 @@ import {
 // Mock dependencies
 vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   showRightFramesPanel: vi.fn(),
-  loadDictionaryFrame: vi.fn(),
 }));
 
 describe('dictionary.ts', () => {
@@ -33,15 +31,15 @@ describe('dictionary.ts', () => {
   });
 
   // ===========================================================================
-  // owin Tests
+  // openDictionaryPopup Tests
   // ===========================================================================
 
-  describe('owin', () => {
+  describe('openDictionaryPopup', () => {
     it('opens window with correct parameters', () => {
       const mockWindow = {} as Window;
       const openSpy = vi.spyOn(window, 'open').mockReturnValue(mockWindow);
 
-      const result = owin('http://example.com/dict?word=test');
+      const result = openDictionaryPopup('http://example.com/dict?word=test');
 
       expect(openSpy).toHaveBeenCalledWith(
         'http://example.com/dict?word=test',
@@ -54,29 +52,9 @@ describe('dictionary.ts', () => {
     it('handles null return from window.open', () => {
       vi.spyOn(window, 'open').mockReturnValue(null);
 
-      const result = owin('http://example.com');
+      const result = openDictionaryPopup('http://example.com');
 
       expect(result).toBeNull();
-    });
-  });
-
-  // ===========================================================================
-  // oewin Tests
-  // ===========================================================================
-
-  describe('oewin', () => {
-    it('opens edit window with correct parameters', () => {
-      const mockWindow = {} as Window;
-      const openSpy = vi.spyOn(window, 'open').mockReturnValue(mockWindow);
-
-      const result = oewin('http://example.com/edit');
-
-      expect(openSpy).toHaveBeenCalledWith(
-        'http://example.com/edit',
-        'editwin',
-        'width=800, height=600, scrollbars=yes, menubar=no, resizable=yes, status=no'
-      );
-      expect(result).toBe(mockWindow);
     });
   });
 

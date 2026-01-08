@@ -49,15 +49,15 @@ class ReviewApiHandler
     /**
      * Get the next word to test as structured data.
      *
-     * @param string $testsql  SQL projection query
+     * @param string $reviewsql  SQL projection query
      * @param bool   $wordMode Test is in word mode
      * @param int    $testtype Test type
      *
      * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
      */
-    public function getWordTestData(string $testsql, bool $wordMode, int $testtype): array
+    public function getWordReviewData(string $reviewsql, bool $wordMode, int $testtype): array
     {
-        $wordRecord = $this->reviewFacade->getNextWord($testsql);
+        $wordRecord = $this->reviewFacade->getNextWord($reviewsql);
         if ($wordRecord === null || $wordRecord === []) {
             return [
                 "term_id" => 0,
@@ -67,7 +67,7 @@ class ReviewApiHandler
         }
 
         // Check context annotation settings
-        $settings = $this->reviewFacade->getTableTestSettings();
+        $settings = $this->reviewFacade->getTableReviewSettings();
         $showContextRom = (bool) ($settings['contextRom'] ?? 0);
         $showContextTrans = (bool) ($settings['contextTrans'] ?? 0);
         $useAnnotations = !$wordMode && ($showContextRom || $showContextTrans);
@@ -138,7 +138,7 @@ class ReviewApiHandler
         bool $showContextRom = false,
         bool $showContextTrans = false
     ): array {
-        $baseType = $this->reviewFacade->getBaseTestType($testType);
+        $baseType = $this->reviewFacade->getBaseReviewType($testType);
         $wordText = $wordRecord['WoText'];
 
         // Extract the word from sentence (marked with {})
@@ -257,7 +257,7 @@ class ReviewApiHandler
     }
 
     /**
-     * Get the next word to test based on request parameters.
+     * Get the next word to review based on request parameters.
      *
      * @param array $params Request parameters
      *
@@ -265,9 +265,10 @@ class ReviewApiHandler
      */
     public function wordTestAjax(array $params): array
     {
-        $testSql = $this->reviewFacade->getTestSql(
-            $params['test_key'],
-            $this->parseSelection($params['test_key'], $params['selection'])
+        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
+        $testSql = $this->reviewFacade->getReviewSql(
+            $reviewKey,
+            $this->parseSelection($reviewKey, $params['selection'])
         );
         if ($testSql === null) {
             return [
@@ -276,7 +277,7 @@ class ReviewApiHandler
                 "group" => ''
             ];
         }
-        return $this->getWordTestData(
+        return $this->getWordReviewData(
             $testSql,
             filter_var($params['word_mode'], FILTER_VALIDATE_BOOLEAN),
             (int)$params['type']
@@ -292,29 +293,30 @@ class ReviewApiHandler
      */
     public function tomorrowTestCount(array $params): array
     {
-        $testSql = $this->reviewFacade->getTestSql(
-            $params['test_key'],
-            $this->parseSelection($params['test_key'], $params['selection'])
+        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
+        $testSql = $this->reviewFacade->getReviewSql(
+            $reviewKey,
+            $this->parseSelection($reviewKey, $params['selection'])
         );
         if ($testSql === null) {
             return ["count" => 0];
         }
         return [
-            "count" => $this->reviewFacade->getTomorrowTestCount($testSql)
+            "count" => $this->reviewFacade->getTomorrowReviewCount($testSql)
         ];
     }
 
     /**
-     * Parse selection parameter based on test key type.
+     * Parse selection parameter based on review key type.
      *
-     * @param string $testKey   The test key type
+     * @param string $reviewKey The review key type
      * @param string $selection The selection value
      *
      * @return int|int[] Parsed selection value
      */
-    private function parseSelection(string $testKey, string $selection): int|array
+    private function parseSelection(string $reviewKey, string $selection): int|array
     {
-        if ($testKey === 'words' || $testKey === 'texts') {
+        if ($reviewKey === 'words' || $reviewKey === 'texts') {
             return array_map('intval', explode(',', $selection));
         }
         return (int)$selection;
@@ -377,7 +379,7 @@ class ReviewApiHandler
 
         // Return the new status and controls HTML
         $statusAbbr = StatusHelper::getAbbr($result['newStatus']);
-        $controls = StatusHelper::buildTestTableControls(1, $result['newStatus'], $wordId, $statusAbbr);
+        $controls = StatusHelper::buildReviewTableControls(1, $result['newStatus'], $wordId, $statusAbbr);
 
         return [
             'status' => $result['newStatus'],
@@ -424,12 +426,12 @@ class ReviewApiHandler
             ? (int)$params['type'] : 1;
         $isTableMode = ($params['type'] ?? '') === 'table';
 
-        $sessTestsql = $_SESSION['testsql'] ?? null;
+        $sessReviewSql = $_SESSION['reviewsql'] ?? null;
 
         // Get test data
-        $testData = $this->reviewFacade->getTestDataFromParams(
+        $testData = $this->reviewFacade->getReviewDataFromParams(
             $selection,
-            $sessTestsql,
+            $sessReviewSql,
             $langId,
             $textId
         );
@@ -439,9 +441,9 @@ class ReviewApiHandler
         }
 
         // Get test identifier
-        $identifier = $this->reviewFacade->getTestIdentifier(
+        $identifier = $this->reviewFacade->getReviewIdentifier(
             $selection,
-            $sessTestsql,
+            $sessReviewSql,
             $langId,
             $textId
         );
@@ -452,23 +454,23 @@ class ReviewApiHandler
 
         // Handle legacy raw_sql case
         if ($identifier[0] === 'raw_sql') {
-            $testsql = is_string($identifier[1]) ? $identifier[1] : null;
+            $reviewsql = is_string($identifier[1]) ? $identifier[1] : null;
         } else {
             /** @var int|int[] $sel */
             $sel = $identifier[1];
-            $testsql = $this->reviewFacade->getTestSql($identifier[0], $sel);
+            $reviewsql = $this->reviewFacade->getReviewSql($identifier[0], $sel);
         }
 
-        if ($testsql === null) {
+        if ($reviewsql === null) {
             return ['error' => 'Unable to generate test SQL'];
         }
 
-        $testType = $this->reviewFacade->clampTestType($testType);
+        $testType = $this->reviewFacade->clampReviewType($testType);
         $wordMode = $this->reviewFacade->isWordMode($testType);
-        $baseType = $this->reviewFacade->getBaseTestType($testType);
+        $baseType = $this->reviewFacade->getBaseReviewType($testType);
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromTestSql($testsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql);
         if ($langIdFromSql === null) {
             return ['error' => 'No words available for testing'];
         }
@@ -483,15 +485,15 @@ class ReviewApiHandler
         );
 
         // Initialize session
-        $this->reviewFacade->initializeTestSession($testData['counts']['due']);
-        $sessionData = $this->reviewFacade->getTestSessionData();
+        $this->reviewFacade->initializeReviewSession($testData['counts']['due']);
+        $sessionData = $this->reviewFacade->getReviewSessionData();
 
         return [
-            'testKey' => $identifier[0],
+            'reviewKey' => $identifier[0],
             'selection' => is_array($identifier[1])
                 ? implode(',', $identifier[1])
                 : (string)$identifier[1],
-            'testType' => $baseType,
+            'reviewType' => $baseType,
             'isTableMode' => $isTableMode,
             'wordMode' => $wordMode,
             'langId' => $langIdFromSql,
@@ -529,28 +531,28 @@ class ReviewApiHandler
      */
     public function formatTableWords(array $params): array
     {
-        $testKey = $params['test_key'] ?? '';
+        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
         $selection = $params['selection'] ?? '';
 
-        if ($testKey === '' || $selection === '') {
-            return ['error' => 'test_key and selection are required'];
+        if ($reviewKey === '' || $selection === '') {
+            return ['error' => 'review_key and selection are required'];
         }
 
-        $parsedSelection = $this->parseSelection($testKey, $selection);
-        $testsql = $this->reviewFacade->getTestSql($testKey, $parsedSelection);
+        $parsedSelection = $this->parseSelection($reviewKey, $selection);
+        $reviewsql = $this->reviewFacade->getReviewSql($reviewKey, $parsedSelection);
 
-        if ($testsql === null) {
+        if ($reviewsql === null) {
             return ['error' => 'Unable to generate test SQL'];
         }
 
         // Validate single language
-        $validation = $this->reviewFacade->validateTestSelection($testsql);
+        $validation = $this->reviewFacade->validateReviewSelection($reviewsql);
         if (!$validation['valid']) {
             return ['error' => $validation['error']];
         }
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromTestSql($testsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql);
         if ($langIdFromSql === null) {
             return ['words' => [], 'langSettings' => null];
         }
@@ -566,7 +568,7 @@ class ReviewApiHandler
         );
 
         // Get words
-        $wordsResult = $this->reviewFacade->getTableReviewWords($testsql);
+        $wordsResult = $this->reviewFacade->getTableReviewWords($reviewsql);
         $words = [];
 
         if ($wordsResult instanceof \mysqli_result) {

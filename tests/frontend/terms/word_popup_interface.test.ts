@@ -8,16 +8,16 @@ import {
   showLearningWordPopup,
   showUnknownWordPopup,
   showMultiWordPopup,
-  showTestWordPopup,
+  showReviewWordPopup,
   createNewMultiWordLink,
   createDictionaryLinks,
   createDictionaryLinksnl,
   createDictionaryLinksnl2,
   createStatusChangeLinks,
-  createTestStatusChangeLinks,
+  createReviewStatusChangeLinks,
   createStatusChangeLink,
-  createTestStatusLink,
-  createTestStatusLink2,
+  createReviewStatusLink,
+  createReviewStatusLink2,
   createNewWordLink,
   createEditMultiWordLink,
   createEditMultiWordTitleLink,
@@ -35,7 +35,7 @@ import {
   createDeleteButton,
   createWellKnownButton,
   createIgnoreButton,
-  createTestStatusButtons,
+  createReviewStatusButtons,
 } from '../../../src/frontend/js/modules/vocabulary/services/word_popup_interface';
 import type { WordActionContext } from '../../../src/frontend/js/modules/vocabulary/services/word_actions';
 
@@ -302,14 +302,14 @@ describe('word_popup_interface.ts', () => {
   });
 
   // ===========================================================================
-  // createTestStatusChangeLinks Tests
+  // createReviewStatusChangeLinks Tests
   // ===========================================================================
 
-  describe('createTestStatusChangeLinks', () => {
+  describe('createReviewStatusChangeLinks', () => {
     it('returns test status links for all levels', () => {
-      const result = createTestStatusChangeLinks(100, 2);
+      const result = createReviewStatusChangeLinks(100, 2);
 
-      expect(result).toContain('/word/set-test-status');
+      expect(result).toContain('/word/set-review-status');
       expect(result).toContain('wid=100');
       // Current status (2) should show diamond inside link
       expect(result).toContain('◆');
@@ -317,19 +317,19 @@ describe('word_popup_interface.ts', () => {
   });
 
   // ===========================================================================
-  // createTestStatusLink2 Tests
+  // createReviewStatusLink2 Tests
   // ===========================================================================
 
-  describe('createTestStatusLink2', () => {
+  describe('createReviewStatusLink2', () => {
     it('shows diamond when status matches', () => {
-      const result = createTestStatusLink2(100, 3, 3);
+      const result = createReviewStatusLink2(100, 3, 3);
 
       expect(result).toContain('◆');
-      expect(result).toContain('/word/set-test-status');
+      expect(result).toContain('/word/set-review-status');
     });
 
     it('shows status abbreviation when status differs', () => {
-      const result = createTestStatusLink2(100, 3, 4);
+      const result = createReviewStatusLink2(100, 3, 4);
 
       expect(result).toContain('[4]');
       expect(result).not.toContain('◆');
@@ -337,14 +337,14 @@ describe('word_popup_interface.ts', () => {
   });
 
   // ===========================================================================
-  // createTestStatusLink Tests
+  // createReviewStatusLink Tests
   // ===========================================================================
 
-  describe('createTestStatusLink', () => {
+  describe('createReviewStatusLink', () => {
     it('creates link with positive change and success sound', () => {
-      const result = createTestStatusLink(100, 1, 'Got it!');
+      const result = createReviewStatusLink(100, 1, 'Got it!');
 
-      expect(result).toContain('/word/set-test-status');
+      expect(result).toContain('/word/set-review-status');
       expect(result).toContain('wid=100');
       expect(result).toContain('stchange=1');
       expect(result).toContain('successSound()');
@@ -352,7 +352,7 @@ describe('word_popup_interface.ts', () => {
     });
 
     it('creates link with negative change and failure sound', () => {
-      const result = createTestStatusLink(100, -1, 'Oops!');
+      const result = createReviewStatusLink(100, -1, 'Oops!');
 
       expect(result).toContain('stchange=-1');
       expect(result).toContain('failureSound()');
@@ -598,16 +598,16 @@ describe('word_popup_interface.ts', () => {
       expect(typeof result).toBe('boolean');
     });
 
-    it('showTestWordPopup returns boolean', () => {
-      const result = showTestWordPopup(
+    it('showReviewWordPopup returns boolean', () => {
+      const result = showReviewWordPopup(
         'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         100, 'word', 'translation', 'roman', 3, 'test sentence', 1
       );
       expect(typeof result).toBe('boolean');
     });
 
-    it('showTestWordPopup with todo=0 skips interactive buttons', () => {
-      const result = showTestWordPopup(
+    it('showReviewWordPopup with todo=0 skips interactive buttons', () => {
+      const result = showReviewWordPopup(
         'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         100, 'word', 'translation', 'roman', 3, 'test sentence', 0
       );
@@ -818,7 +818,7 @@ describe('word_popup_interface.ts', () => {
     });
   });
 
-  describe('createTestStatusButtons', () => {
+  describe('createReviewStatusButtons', () => {
     it('creates test buttons for status 1-5', () => {
       const mockContext: WordActionContext = {
         textId: 1,
@@ -828,7 +828,7 @@ describe('word_popup_interface.ts', () => {
         status: 3,
       };
 
-      const fragment = createTestStatusButtons(mockContext);
+      const fragment = createReviewStatusButtons(mockContext);
       const container = document.createElement('div');
       container.appendChild(fragment);
 
@@ -846,7 +846,7 @@ describe('word_popup_interface.ts', () => {
         status: 3,
       };
 
-      const fragment = createTestStatusButtons(mockContext);
+      const fragment = createReviewStatusButtons(mockContext);
       const container = document.createElement('div');
       container.appendChild(fragment);
 
@@ -865,7 +865,7 @@ describe('word_popup_interface.ts', () => {
         status: 5,
       };
 
-      const fragment = createTestStatusButtons(mockContext);
+      const fragment = createReviewStatusButtons(mockContext);
       const container = document.createElement('div');
       container.appendChild(fragment);
 
@@ -882,7 +882,7 @@ describe('word_popup_interface.ts', () => {
         status: 1,
       };
 
-      const fragment = createTestStatusButtons(mockContext);
+      const fragment = createReviewStatusButtons(mockContext);
       const container = document.createElement('div');
       container.appendChild(fragment);
 
@@ -899,7 +899,7 @@ describe('word_popup_interface.ts', () => {
         status: 99,
       };
 
-      const fragment = createTestStatusButtons(mockContext);
+      const fragment = createReviewStatusButtons(mockContext);
       const container = document.createElement('div');
       container.appendChild(fragment);
 
@@ -914,7 +914,7 @@ describe('word_popup_interface.ts', () => {
         text: 'test',
       };
 
-      const fragment = createTestStatusButtons(mockContext);
+      const fragment = createReviewStatusButtons(mockContext);
       const container = document.createElement('div');
       container.appendChild(fragment);
 
@@ -935,7 +935,7 @@ describe('word_popup_interface.ts', () => {
         status: 3,
       };
 
-      const fragment = createTestStatusButtons(mockContext);
+      const fragment = createReviewStatusButtons(mockContext);
       const container = document.createElement('div');
       container.appendChild(fragment);
 
@@ -958,7 +958,7 @@ describe('word_popup_interface.ts', () => {
         status: 3,
       };
 
-      const fragment = createTestStatusButtons(mockContext);
+      const fragment = createReviewStatusButtons(mockContext);
       const container = document.createElement('div');
       container.appendChild(fragment);
 

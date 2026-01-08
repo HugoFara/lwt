@@ -7,19 +7,19 @@ in the LingQ Forum, you will find there lots of great links to resources.
 Or click (within the LingQ library) on "My Imports" - you will find a list of links
 of "Suggested resources".
 
-Read the text, look up the new words and expressions (=terms) and save them for review and test.
+Read the text, look up the new words and expressions (=terms) and save them for review.
 The good thing with LWT: Every saved term will show up with its translation,
 status, etc. in all other occurrences of the same text and every other text!
 So you'll see immediately what you already know and how well you know it.
 And of course you'll see what you don't know!
 
 Train: load the MP3 file also on your portable MP3 player and listen to it often.
-Review (by reading again) or test your saved words and expressions.  
+Review your saved words and expressions (by reading again or using spaced repetition).  
 
 In short:
 
-* Listen ▶ Read ▶ Review/Test.  
-* Listen ▶ Read ▶ Review/Test.  
+* Listen ▶ Read ▶ Review.
+* Listen ▶ Read ▶ Review.  
 * ......  
 
 That's it. It's that simple. You can also watch

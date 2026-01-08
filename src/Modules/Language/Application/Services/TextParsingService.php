@@ -17,8 +17,6 @@
 
 namespace Lwt\Modules\Language\Application\Services;
 
-use Lwt\Core\Utils\ErrorHandler;
-
 /**
  * Service class for text parsing operations.
  *
@@ -51,9 +49,10 @@ class TextParsingService
             if (shell_exec("command -v mecab") !== null) {
                 return 'mecab' . $mecabArgs;
             }
-            ErrorHandler::die(
-                "MeCab not detected! " .
-                "Please install it or add it to your PATH (see documentation)."
+            throw new \RuntimeException(
+                "MeCab not detected on Linux/macOS. " .
+                "Please install MeCab or add it to your PATH. " .
+                "See: https://hugofara.github.io/lwt/docs/install.html"
             );
         }
         if (str_starts_with($os, 'WIN')) {
@@ -69,12 +68,16 @@ class TextParsingService
             if (shell_exec('where mecab.exe') !== null) {
                 return 'mecab.exe' . $mecabArgs;
             }
-            ErrorHandler::die(
-                "MeCab not detected! " .
-                "Install it or add it to the PATH (see documentation)."
+            throw new \RuntimeException(
+                "MeCab not detected on Windows. " .
+                "Please install MeCab or add it to your PATH. " .
+                "See: https://hugofara.github.io/lwt/docs/install.html"
             );
         }
-        ErrorHandler::die("Your OS '$os' cannot use MeCab with this version of LWT!");
+        throw new \RuntimeException(
+            "Unsupported operating system '$os' for MeCab integration. " .
+            "MeCab is only supported on Linux, macOS, and Windows."
+        );
     }
 
     /**

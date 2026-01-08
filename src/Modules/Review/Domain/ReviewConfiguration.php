@@ -19,15 +19,15 @@ namespace Lwt\Modules\Review\Domain;
 /**
  * Value object representing review configuration parameters.
  *
- * Immutable after creation. Encapsulates test type, selection mode,
- * and other test parameters.
+ * Immutable after creation. Encapsulates review type, selection mode,
+ * and other review parameters.
  *
  * @since 3.0.0
  */
 final readonly class ReviewConfiguration
 {
     /**
-     * Test key types.
+     * Review key types.
      */
     public const KEY_LANG = 'lang';
     public const KEY_TEXT = 'text';
@@ -36,7 +36,7 @@ final readonly class ReviewConfiguration
     public const KEY_RAW_SQL = 'raw_sql';
 
     /**
-     * Test types.
+     * Review types.
      */
     public const TYPE_TERM_TO_TRANSLATION = 1;
     public const TYPE_TRANSLATION_TO_TERM = 2;
@@ -47,97 +47,97 @@ final readonly class ReviewConfiguration
     /**
      * Constructor.
      *
-     * @param string          $testKey     Test key type (lang, text, words, texts, raw_sql)
+     * @param string          $reviewKey   Review key type (lang, text, words, texts, raw_sql)
      * @param int|int[]|string $selection   Selection value (ID, array of IDs, or SQL string)
-     * @param int             $testType    Test type (1-5)
+     * @param int             $reviewType  Review type (1-5)
      * @param bool            $wordMode    Whether in word mode (no sentence)
-     * @param bool            $isTableMode Whether in table test mode
+     * @param bool            $isTableMode Whether in table review mode
      */
     public function __construct(
-        public string $testKey,
+        public string $reviewKey,
         public int|array|string $selection,
-        public int $testType = 1,
+        public int $reviewType = 1,
         public bool $wordMode = false,
         public bool $isTableMode = false
     ) {
     }
 
     /**
-     * Create configuration for testing a language.
+     * Create configuration for reviewing a language.
      *
-     * @param int  $langId   Language ID
-     * @param int  $testType Test type (1-5)
-     * @param bool $wordMode Word mode flag
+     * @param int  $langId     Language ID
+     * @param int  $reviewType Review type (1-5)
+     * @param bool $wordMode   Word mode flag
      *
      * @return self
      */
-    public static function fromLanguage(int $langId, int $testType = 1, bool $wordMode = false): self
+    public static function fromLanguage(int $langId, int $reviewType = 1, bool $wordMode = false): self
     {
         return new self(
             self::KEY_LANG,
             $langId,
-            self::clampTestType($testType),
-            $wordMode || $testType > 3,
+            self::clampReviewType($reviewType),
+            $wordMode || $reviewType > 3,
             false
         );
     }
 
     /**
-     * Create configuration for testing a text.
+     * Create configuration for reviewing a text.
      *
-     * @param int  $textId   Text ID
-     * @param int  $testType Test type (1-5)
-     * @param bool $wordMode Word mode flag
+     * @param int  $textId     Text ID
+     * @param int  $reviewType Review type (1-5)
+     * @param bool $wordMode   Word mode flag
      *
      * @return self
      */
-    public static function fromText(int $textId, int $testType = 1, bool $wordMode = false): self
+    public static function fromText(int $textId, int $reviewType = 1, bool $wordMode = false): self
     {
         return new self(
             self::KEY_TEXT,
             $textId,
-            self::clampTestType($testType),
-            $wordMode || $testType > 3,
+            self::clampReviewType($reviewType),
+            $wordMode || $reviewType > 3,
             false
         );
     }
 
     /**
-     * Create configuration for testing specific words.
+     * Create configuration for reviewing specific words.
      *
-     * @param int[] $wordIds  Array of word IDs
-     * @param int   $testType Test type (1-5)
-     * @param bool  $wordMode Word mode flag
+     * @param int[] $wordIds    Array of word IDs
+     * @param int   $reviewType Review type (1-5)
+     * @param bool  $wordMode   Word mode flag
      *
      * @return self
      */
-    public static function fromWords(array $wordIds, int $testType = 1, bool $wordMode = false): self
+    public static function fromWords(array $wordIds, int $reviewType = 1, bool $wordMode = false): self
     {
         return new self(
             self::KEY_WORDS,
             array_map('intval', $wordIds),
-            self::clampTestType($testType),
-            $wordMode || $testType > 3,
+            self::clampReviewType($reviewType),
+            $wordMode || $reviewType > 3,
             false
         );
     }
 
     /**
-     * Create configuration for testing words from specific texts.
+     * Create configuration for reviewing words from specific texts.
      *
-     * @param int[] $textIds  Array of text IDs
-     * @param int   $testType Test type (1-5)
-     * @param bool  $wordMode Word mode flag
+     * @param int[] $textIds    Array of text IDs
+     * @param int   $reviewType Review type (1-5)
+     * @param bool  $wordMode   Word mode flag
      *
      * @return self
      */
-    public static function fromTexts(array $textIds, int $testType = 1, bool $wordMode = false): self
+    public static function fromTexts(array $textIds, int $reviewType = 1, bool $wordMode = false): self
     {
         return new self(
             self::KEY_TEXTS,
             array_map('intval', $textIds),
-            self::clampTestType($testType),
-            $wordMode || $testType > 3,
+            self::clampReviewType($reviewType),
+            $wordMode || $reviewType > 3,
             false
         );
     }
@@ -145,24 +145,24 @@ final readonly class ReviewConfiguration
     /**
      * Create table mode configuration.
      *
-     * @param string          $testKey   Test key type
+     * @param string          $reviewKey Review key type
      * @param int|int[]|string $selection Selection value
      *
      * @return self
      */
-    public static function forTableMode(string $testKey, int|array|string $selection): self
+    public static function forTableMode(string $reviewKey, int|array|string $selection): self
     {
-        return new self($testKey, $selection, 1, false, true);
+        return new self($reviewKey, $selection, 1, false, true);
     }
 
     /**
-     * Get base test type (1-3, strips word mode offset).
+     * Get base review type (1-3, strips word mode offset).
      *
-     * @return int Base test type
+     * @return int Base review type
      */
     public function getBaseType(): int
     {
-        return $this->testType > 3 ? $this->testType - 3 : $this->testType;
+        return $this->reviewType > 3 ? $this->reviewType - 3 : $this->reviewType;
     }
 
     /**
@@ -170,12 +170,12 @@ final readonly class ReviewConfiguration
      *
      * @return string SQL fragment for FROM/WHERE clause
      *
-     * @throws \InvalidArgumentException If test key is invalid
+     * @throws \InvalidArgumentException If review key is invalid
      */
     public function toSqlProjection(): string
     {
         $selectionInt = is_int($this->selection) ? $this->selection : (int) (is_array($this->selection) ? ($this->selection[0] ?? 0) : $this->selection);
-        return match ($this->testKey) {
+        return match ($this->reviewKey) {
             self::KEY_LANG => " words WHERE WoLgID = {$selectionInt} ",
             self::KEY_TEXT => " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = {$selectionInt} ",
@@ -184,7 +184,7 @@ final readonly class ReviewConfiguration
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ("
                 . implode(',', (array) $this->selection) . ") ",
             self::KEY_RAW_SQL => is_string($this->selection) ? $this->selection : '',
-            default => throw new \InvalidArgumentException("Invalid test key: {$this->testKey}")
+            default => throw new \InvalidArgumentException("Invalid review key: {$this->reviewKey}")
         };
     }
 
@@ -209,7 +209,7 @@ final readonly class ReviewConfiguration
     public function toUrlProperty(): string
     {
         $selectionStr = $this->getSelectionString();
-        return match ($this->testKey) {
+        return match ($this->reviewKey) {
             self::KEY_LANG => "lang={$selectionStr}",
             self::KEY_TEXT => "text={$selectionStr}",
             self::KEY_WORDS => "selection=2",
@@ -219,24 +219,24 @@ final readonly class ReviewConfiguration
     }
 
     /**
-     * Check if configuration is valid (has a test key).
+     * Check if configuration is valid (has a review key).
      *
      * @return bool True if valid
      */
     public function isValid(): bool
     {
-        return $this->testKey !== '';
+        return $this->reviewKey !== '';
     }
 
     /**
-     * Clamp test type to valid range.
+     * Clamp review type to valid range.
      *
-     * @param int $testType Raw test type
+     * @param int $reviewType Raw review type
      *
      * @return int Clamped to 1-5
      */
-    private static function clampTestType(int $testType): int
+    private static function clampReviewType(int $reviewType): int
     {
-        return max(1, min(5, $testType));
+        return max(1, min(5, $reviewType));
     }
 }

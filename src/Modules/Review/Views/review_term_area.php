@@ -15,11 +15,7 @@
  * @since    3.0.0
  */
 
-namespace Lwt\Views\Test;
-
-// Type assertions for view variables
-/** @var array{rtl: bool, removeSpaces: bool, textSize: int} $langSettings */
-$langSettings = $langSettings ?? ['rtl' => false, 'removeSpaces' => false, 'textSize' => 100];
+namespace Lwt\Views\Review;
 
 ?>
 <div id="body">

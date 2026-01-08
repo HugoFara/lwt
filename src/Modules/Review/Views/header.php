@@ -15,7 +15,7 @@
  * @since    3.0.0
  */
 
-namespace Lwt\Views\Test;
+namespace Lwt\Views\Review;
 
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 use Lwt\Modules\Text\Application\Services\TextNavigationService;
@@ -33,7 +33,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
         <?php
         echo (new TextNavigationService())->getPreviousAndNextTextLinks(
             $textId,
-            '/test?text=',
+            '/review?text=',
             false,
             ''
         );

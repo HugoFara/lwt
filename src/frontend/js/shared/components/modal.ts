@@ -2,7 +2,7 @@
  * Modal dialog component for LWT.
  *
  * Provides a reusable modal dialog that can display HTML content
- * as a modern replacement for popup windows (oewin/owin).
+ * as a modern replacement for popup windows (openEditWindow/openDictionaryPopup).
  *
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
@@ -313,40 +313,8 @@ export function closeModal(): void {
 }
 
 /**
- * Open a modal by fetching content from a URL.
- *
- * @param url URL to fetch content from
- * @param options Modal configuration options
- */
-export function openModalFromUrl(url: string, options: ModalOptions = {}): void {
-  fetch(url)
-    .then(response => {
-      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-      return response.text();
-    })
-    .then(html => {
-      // Extract body content if it's a full HTML document
-      const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-      const content = bodyMatch ? bodyMatch[1] : html;
-
-      // Extract title if not provided
-      if (!options.title) {
-        const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
-        if (titleMatch) {
-          options.title = titleMatch[1];
-        }
-      }
-
-      openModal(content, options);
-    })
-    .catch(() => {
-      openModal('<p class="error">Failed to load content.</p>', options);
-    });
-}
-
-/**
  * Show the export template help modal.
- * This is a convenience function replacing oewin('export_template.html').
+ * This is a convenience function replacing openEditWindow('export_template.html').
  */
 export function showExportTemplateHelp(): void {
   const content = `

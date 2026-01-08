@@ -539,7 +539,7 @@ Applied `JSON_HEX_TAG | JSON_HEX_AMP` flags to all `json_encode()` calls within 
 - `src/backend/Views/Word/hover_save_result.php`
 - `src/Modules/Text/Views/*.php` (6 files)
 - `src/Modules/Vocabulary/Views/*.php` (12 files)
-- `src/Modules/Review/Views/test_desktop.php`
+- `src/Modules/Review/Views/review_desktop.php`
 
 All instances now use:
 ```php

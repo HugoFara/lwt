@@ -50,9 +50,9 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function findNextWordForTest(ReviewConfiguration $config): ?ReviewWord
+    public function findNextWordForReview(ReviewConfiguration $config): ?ReviewWord
     {
-        $testsql = $config->toSqlProjection();
+        $reviewsql = $config->toSqlProjection();
         $pass = 0;
 
         while ($pass < 2) {
@@ -62,7 +62,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
                 (IFNULL(WoSentence, '') NOT LIKE CONCAT('%{', WoText, '}%')) AS notvalid,
                 WoStatus,
                 DATEDIFF(NOW(), WoStatusChanged) AS Days, WoTodayScore AS Score
-                FROM $testsql AND WoStatus BETWEEN 1 AND 5
+                FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
                 AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0 " .
                 ($pass == 1 ? 'AND WoRandom > RAND()' : '') . '
                 ORDER BY WoTodayScore, WoRandom
@@ -129,20 +129,20 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getTestCounts(ReviewConfiguration $config): array
+    public function getReviewCounts(ReviewConfiguration $config): array
     {
-        $testsql = $config->toSqlProjection();
+        $reviewsql = $config->toSqlProjection();
 
         $due = (int) Connection::fetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
-            FROM $testsql AND WoStatus BETWEEN 1 AND 5
+            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0",
             'cnt'
         );
 
         $total = (int) Connection::fetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
-            FROM $testsql AND WoStatus BETWEEN 1 AND 5
+            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*'",
             'cnt'
         );
@@ -155,11 +155,11 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getTomorrowCount(ReviewConfiguration $config): int
     {
-        $testsql = $config->toSqlProjection();
+        $reviewsql = $config->toSqlProjection();
 
         return (int) Connection::fetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
-            FROM $testsql AND WoStatus BETWEEN 1 AND 5
+            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*' AND WoTomorrowScore < 0",
             'cnt'
         );
@@ -170,12 +170,12 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getTableWords(ReviewConfiguration $config): array
     {
-        $testsql = $config->toSqlProjection();
+        $reviewsql = $config->toSqlProjection();
 
         $sql = "SELECT DISTINCT WoID, WoText, WoTextLC, WoTranslation, WoRomanization,
             WoSentence, WoLgID, WoStatus, WoTodayScore AS Score,
             DATEDIFF(NOW(), WoStatusChanged) AS Days
-            FROM $testsql AND WoStatus BETWEEN 1 AND 5
+            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*'
             ORDER BY WoTodayScore, WoRandom * RAND()";
 
@@ -283,10 +283,10 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getLanguageIdFromConfig(ReviewConfiguration $config): ?int
     {
-        $testsql = $config->toSqlProjection();
+        $reviewsql = $config->toSqlProjection();
 
         $langId = Connection::fetchValue(
-            "SELECT WoLgID FROM $testsql LIMIT 1",
+            "SELECT WoLgID FROM $reviewsql LIMIT 1",
             'WoLgID'
         );
 
@@ -298,10 +298,10 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function validateSingleLanguage(ReviewConfiguration $config): array
     {
-        $testsql = $config->toSqlProjection();
+        $reviewsql = $config->toSqlProjection();
 
         $langCount = (int) Connection::fetchValue(
-            "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $testsql",
+            "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $reviewsql",
             'cnt'
         );
 
@@ -326,14 +326,14 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getLanguageName(ReviewConfiguration $config): string
     {
-        if ($config->testKey === ReviewConfiguration::KEY_LANG) {
+        if ($config->reviewKey === ReviewConfiguration::KEY_LANG) {
             $name = QueryBuilder::table('languages')
                 ->where('LgID', '=', $config->selection)
                 ->valuePrepared('LgName');
             return $name !== null ? (string) $name : 'L2';
         }
 
-        if ($config->testKey === ReviewConfiguration::KEY_TEXT) {
+        if ($config->reviewKey === ReviewConfiguration::KEY_TEXT) {
             $row = QueryBuilder::table('texts')
                 ->select(['LgName'])
                 ->join('languages', 'TxLgID', '=', 'LgID')
@@ -343,14 +343,14 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         }
 
         // For selection-based tests, get language from first word
-        $testsql = $config->toSqlProjection();
+        $reviewsql = $config->toSqlProjection();
         $validation = $this->validateSingleLanguage($config);
 
         if ($validation['langCount'] === 1) {
             $bindings = [];
             $name = Connection::preparedFetchValue(
                 "SELECT LgName
-                FROM languages, {$testsql} AND LgID = WoLgID"
+                FROM languages, {$reviewsql} AND LgID = WoLgID"
                 . UserScopedQuery::forTablePrepared('words', $bindings) . "
                 LIMIT 1",
                 $bindings,
@@ -377,7 +377,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getTableTestSettings(): array
+    public function getTableReviewSettings(): array
     {
         return [
             'edit' => Settings::getZeroOrOne('currenttabletestsetting1', 1),

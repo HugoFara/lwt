@@ -10,7 +10,7 @@ import {
 // Mock dependencies
 vi.mock('../../../src/frontend/js/modules/vocabulary/services/dictionary', () => ({
   createTheDictUrl: vi.fn((url, term) => `${url}?q=${encodeURIComponent(term)}`),
-  owin: vi.fn()
+  openDictionaryPopup: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/shared/forms/bulk_actions', () => ({
@@ -27,7 +27,7 @@ vi.mock('../../../src/frontend/js/modules/language/stores/language_config', () =
   resetLanguageConfig: vi.fn()
 }));
 
-import { createTheDictUrl, owin } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
+import { createTheDictUrl, openDictionaryPopup } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
 import { selectToggle } from '../../../src/frontend/js/shared/forms/bulk_actions';
 import { setDictionaryLinks } from '../../../src/frontend/js/modules/language/stores/language_config';
 
@@ -440,7 +440,7 @@ describe('bulk_translate.ts', () => {
 
         component.clickDictionary(dictSpan);
 
-        expect(owin).toHaveBeenCalled();
+        expect(openDictionaryPopup).toHaveBeenCalled();
       });
     });
 
@@ -578,7 +578,7 @@ describe('bulk_translate.ts', () => {
 
       component.clickDictionary(dictSpan);
 
-      expect(owin).toHaveBeenCalled();
+      expect(openDictionaryPopup).toHaveBeenCalled();
     });
 
     it('handles invalid JSON in config script tag', () => {

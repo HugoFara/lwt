@@ -349,10 +349,10 @@ export function wordListData(): WordListData {
         }
       }
 
-      // Handle test action - redirect to test page
-      if (action === 'test') {
-        const testUrl = `/test?selection=${ids.join(',')}`;
-        window.location.href = testUrl;
+      // Handle review action - redirect to review page
+      if (action === 'review') {
+        const reviewUrl = `/review?selection=${ids.join(',')}`;
+        window.location.href = reviewUrl;
         return;
       }
 

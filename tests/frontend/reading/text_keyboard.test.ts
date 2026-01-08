@@ -4,10 +4,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Use vi.hoisted to define mock functions that will be available during vi.mock hoisting
-const { mockLoadDictionaryFrame, mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo, mockNewPosition, mockTermsApiSetStatus, mockTermsApiCreateQuick } = vi.hoisted(() => ({
-  mockLoadDictionaryFrame: vi.fn(),
+const { mockSpeechDispatcher, mockOpenDictionaryPopup, mockCClick, mockScrollTo, mockNewPosition, mockTermsApiSetStatus, mockTermsApiCreateQuick } = vi.hoisted(() => ({
   mockSpeechDispatcher: vi.fn(),
-  mockOwin: vi.fn(),
+  mockOpenDictionaryPopup: vi.fn(),
   mockCClick: vi.fn(),
   mockScrollTo: vi.fn(),
   mockNewPosition: vi.fn(),
@@ -19,7 +18,7 @@ const { mockLoadDictionaryFrame, mockSpeechDispatcher, mockOwin, mockCClick, moc
 vi.mock('../../../src/frontend/js/modules/vocabulary/services/dictionary', () => ({
   getLangFromDict: vi.fn().mockReturnValue('en'),
   createTheDictUrl: vi.fn().mockReturnValue('http://dict.example.com/word'),
-  owin: mockOwin
+  openDictionaryPopup: mockOpenDictionaryPopup
 }));
 
 vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
@@ -36,9 +35,6 @@ vi.mock('../../../src/frontend/js/modules/vocabulary/components/word_popup', () 
   closePopup: mockCClick
 }));
 
-vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
-  loadDictionaryFrame: mockLoadDictionaryFrame
-}));
 
 vi.mock('../../../src/frontend/js/modules/vocabulary/api/terms_api', () => ({
   TermsApi: {
@@ -123,9 +119,8 @@ describe('text_keyboard.ts', () => {
     resetReadingPosition();
 
     // Clear mock function calls between tests
-    mockLoadDictionaryFrame.mockClear();
     mockSpeechDispatcher.mockClear();
-    mockOwin.mockClear();
+    mockOpenDictionaryPopup.mockClear();
     mockCClick.mockClear();
     mockScrollTo.mockClear();
     mockTermsApiSetStatus.mockClear();
@@ -521,7 +516,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(84);
       handleTextKeydown(event);
 
-      expect(mockOwin).toHaveBeenCalled();
+      expect(mockOpenDictionaryPopup).toHaveBeenCalled();
     });
   });
 

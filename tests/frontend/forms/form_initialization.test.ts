@@ -3,7 +3,6 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  clearRightFrameOnUnload,
   changeTextboxesLanguage,
   initTextEditForm,
   initWordEditForm,
@@ -28,60 +27,6 @@ describe('form_initialization.ts', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
-  });
-
-  // ===========================================================================
-  // clearRightFrameOnUnload Tests
-  // ===========================================================================
-
-  describe('clearRightFrameOnUnload', () => {
-    it('sets up beforeunload handler', () => {
-      clearRightFrameOnUnload();
-
-      // The function should have set up a handler - we can verify by checking
-      // that it doesn't throw when triggered
-      expect(() => window.dispatchEvent(new Event('beforeunload'))).not.toThrow();
-    });
-
-    it('attempts to clear right frame on beforeunload', async () => {
-      // Mock window.parent.frames
-      const mockFrame = { location: { href: '' } };
-      const mockParent = {
-        frames: {
-          ru: mockFrame
-        }
-      };
-
-      Object.defineProperty(window, 'parent', {
-        value: mockParent,
-        writable: true,
-        configurable: true
-      });
-
-      clearRightFrameOnUnload();
-
-      // Trigger beforeunload
-      window.dispatchEvent(new Event('beforeunload'));
-
-      // Wait for setTimeout
-      await new Promise(resolve => setTimeout(resolve, 10));
-
-      // Frame should be cleared
-      expect(mockFrame.location.href).toBe('empty.html');
-    });
-
-    it('handles missing parent gracefully', async () => {
-      Object.defineProperty(window, 'parent', {
-        value: null,
-        writable: true,
-        configurable: true
-      });
-
-      clearRightFrameOnUnload();
-
-      // Should not throw
-      expect(() => window.dispatchEvent(new Event('beforeunload'))).not.toThrow();
-    });
   });
 
   // ===========================================================================
@@ -215,20 +160,6 @@ describe('form_initialization.ts', () => {
 
       expect(lwtFormCheck.askBeforeExit).toHaveBeenCalled();
     });
-
-    it('sets up right frame cleanup on unload', () => {
-      const mockFrame = { location: { href: '' } };
-      Object.defineProperty(window, 'parent', {
-        value: { frames: { ru: mockFrame } },
-        writable: true,
-        configurable: true
-      });
-
-      initWordEditForm();
-
-      // Trigger beforeunload and wait
-      window.dispatchEvent(new Event('beforeunload'));
-    });
   });
 
   // ===========================================================================
@@ -277,29 +208,6 @@ describe('form_initialization.ts', () => {
 
       // askBeforeExit should not be called for already-initialized form
       expect(lwtFormCheck.askBeforeExit).not.toHaveBeenCalled();
-    });
-
-    it('initializes forms with data-lwt-clear-frame attribute', async () => {
-      document.body.innerHTML = `
-        <form data-lwt-clear-frame="true"></form>
-      `;
-
-      const mockFrame = { location: { href: '' } };
-      Object.defineProperty(window, 'parent', {
-        value: { frames: { ru: mockFrame } },
-        writable: true,
-        configurable: true
-      });
-
-      autoInitializeForms();
-
-      // Trigger beforeunload
-      window.dispatchEvent(new Event('beforeunload'));
-
-      // Wait for setTimeout
-      await new Promise(resolve => setTimeout(resolve, 10));
-
-      expect(mockFrame.location.href).toBe('empty.html');
     });
 
     it('marks validate class forms as initialized', () => {

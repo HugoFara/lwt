@@ -131,16 +131,16 @@ import '@modules/text/pages/text_print_app';
 import '@modules/review/api/review_api';
 
 // Review stores
-import '@modules/review/stores/test_store';
+import '@modules/review/stores/review_store';
 
 // Review components
-import '@modules/review/components/test_view';
+import '@modules/review/components/review_view';
 
 // Review pages
-import '@modules/review/pages/test_mode';
-import '@modules/review/pages/test_header';
-import '@modules/review/pages/test_table';
-import '@modules/review/pages/test_ajax';
+import '@modules/review/pages/review_mode';
+import '@modules/review/pages/review_header';
+import '@modules/review/pages/review_table';
+import '@modules/review/pages/review_ajax';
 
 // -----------------------------------------------------------------------------
 // FEED MODULE

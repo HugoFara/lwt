@@ -1924,15 +1924,15 @@ class VocabularyController
     }
 
     /**
-     * Set test status (iframe view).
+     * Set review status (iframe view).
      *
-     * Replaces set_test_status.php - sets status during testing and renders result.
+     * Replaces set_test_status.php - sets status during review and renders result.
      *
      * @param array<string, string> $params Route parameters
      *
      * @return void
      */
-    public function setTestStatusView(array $params): void
+    public function setReviewStatusView(array $params): void
     {
         $wid = InputValidator::getInt('wid', 0) ?? 0;
         $status = InputValidator::getInt('status');

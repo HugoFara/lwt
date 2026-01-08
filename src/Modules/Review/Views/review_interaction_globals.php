@@ -19,7 +19,7 @@
  * @since    3.0.0
  */
 
-namespace Lwt\Views\Test;
+namespace Lwt\Views\Review;
 
 ?>
 <script type="application/json" data-lwt-test-interaction-globals-config>

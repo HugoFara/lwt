@@ -8,7 +8,7 @@ use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
-use Lwt\Modules\Review\Domain\TestConfiguration;
+use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use PHPUnit\Framework\TestCase;
 
@@ -81,77 +81,77 @@ class ReviewFacadeTest extends TestCase
         $this->assertInstanceOf(ReviewFacade::class, $facade);
     }
 
-    // ===== TestConfiguration tests =====
+    // ===== ReviewConfiguration tests =====
 
-    public function testTestConfigurationFromLanguage(): void
+    public function testReviewConfigurationFromLanguage(): void
     {
-        $config = TestConfiguration::fromLanguage(1, 2, false);
+        $config = ReviewConfiguration::fromLanguage(1, 2, false);
 
-        $this->assertEquals(TestConfiguration::KEY_LANG, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_LANG, $config->reviewKey);
         $this->assertEquals(1, $config->selection);
-        $this->assertEquals(2, $config->testType);
+        $this->assertEquals(2, $config->reviewType);
         $this->assertFalse($config->isTableMode);
         $this->assertTrue($config->isValid());
     }
 
-    public function testTestConfigurationFromText(): void
+    public function testReviewConfigurationFromText(): void
     {
-        $config = TestConfiguration::fromText(42, 3, true);
+        $config = ReviewConfiguration::fromText(42, 3, true);
 
-        $this->assertEquals(TestConfiguration::KEY_TEXT, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_TEXT, $config->reviewKey);
         $this->assertEquals(42, $config->selection);
-        $this->assertEquals(3, $config->testType);
+        $this->assertEquals(3, $config->reviewType);
         $this->assertTrue($config->wordMode);
     }
 
-    public function testTestConfigurationFromWords(): void
+    public function testReviewConfigurationFromWords(): void
     {
         $wordIds = [1, 2, 3, 4, 5];
-        $config = TestConfiguration::fromWords($wordIds, 1, false);
+        $config = ReviewConfiguration::fromWords($wordIds, 1, false);
 
-        $this->assertEquals(TestConfiguration::KEY_WORDS, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_WORDS, $config->reviewKey);
         $this->assertEquals($wordIds, $config->selection);
         $this->assertEquals('1,2,3,4,5', $config->getSelectionString());
     }
 
-    public function testTestConfigurationFromTexts(): void
+    public function testReviewConfigurationFromTexts(): void
     {
         $textIds = [10, 20, 30];
-        $config = TestConfiguration::fromTexts($textIds, 2);
+        $config = ReviewConfiguration::fromTexts($textIds, 2);
 
-        $this->assertEquals(TestConfiguration::KEY_TEXTS, $config->testKey);
+        $this->assertEquals(ReviewConfiguration::KEY_TEXTS, $config->reviewKey);
         $this->assertEquals($textIds, $config->selection);
     }
 
-    public function testTestConfigurationForTableMode(): void
+    public function testReviewConfigurationForTableMode(): void
     {
-        $config = TestConfiguration::forTableMode(TestConfiguration::KEY_LANG, 1);
+        $config = ReviewConfiguration::forTableMode(ReviewConfiguration::KEY_LANG, 1);
 
         $this->assertTrue($config->isTableMode);
-        $this->assertEquals(1, $config->testType);
+        $this->assertEquals(1, $config->reviewType);
     }
 
-    public function testTestConfigurationGetBaseType(): void
+    public function testReviewConfigurationGetBaseType(): void
     {
-        $config1 = new TestConfiguration(TestConfiguration::KEY_LANG, 1, 1);
-        $config4 = new TestConfiguration(TestConfiguration::KEY_LANG, 1, 4);
+        $config1 = new ReviewConfiguration(ReviewConfiguration::KEY_LANG, 1, 1);
+        $config4 = new ReviewConfiguration(ReviewConfiguration::KEY_LANG, 1, 4);
 
         $this->assertEquals(1, $config1->getBaseType());
         $this->assertEquals(1, $config4->getBaseType()); // 4 -> 1 (word mode)
     }
 
-    public function testTestConfigurationToSqlProjectionForLang(): void
+    public function testReviewConfigurationToSqlProjectionForLang(): void
     {
-        $config = TestConfiguration::fromLanguage(5);
+        $config = ReviewConfiguration::fromLanguage(5);
         $sql = $config->toSqlProjection();
 
         $this->assertStringContainsString('words', $sql);
         $this->assertStringContainsString('WoLgID = 5', $sql);
     }
 
-    public function testTestConfigurationToSqlProjectionForText(): void
+    public function testReviewConfigurationToSqlProjectionForText(): void
     {
-        $config = TestConfiguration::fromText(10);
+        $config = ReviewConfiguration::fromText(10);
         $sql = $config->toSqlProjection();
 
         $this->assertStringContainsString('words', $sql);
@@ -159,58 +159,58 @@ class ReviewFacadeTest extends TestCase
         $this->assertStringContainsString('Ti2TxID = 10', $sql);
     }
 
-    public function testTestConfigurationToSqlProjectionForWords(): void
+    public function testReviewConfigurationToSqlProjectionForWords(): void
     {
-        $config = TestConfiguration::fromWords([1, 2, 3]);
+        $config = ReviewConfiguration::fromWords([1, 2, 3]);
         $sql = $config->toSqlProjection();
 
         $this->assertStringContainsString('WoID IN (1,2,3)', $sql);
     }
 
-    public function testTestConfigurationToUrlProperty(): void
+    public function testReviewConfigurationToUrlProperty(): void
     {
-        $langConfig = TestConfiguration::fromLanguage(5);
+        $langConfig = ReviewConfiguration::fromLanguage(5);
         $this->assertEquals('lang=5', $langConfig->toUrlProperty());
 
-        $textConfig = TestConfiguration::fromText(10);
+        $textConfig = ReviewConfiguration::fromText(10);
         $this->assertEquals('text=10', $textConfig->toUrlProperty());
 
-        $wordsConfig = TestConfiguration::fromWords([1, 2, 3]);
+        $wordsConfig = ReviewConfiguration::fromWords([1, 2, 3]);
         $this->assertEquals('selection=2', $wordsConfig->toUrlProperty());
 
-        $textsConfig = TestConfiguration::fromTexts([5, 6]);
+        $textsConfig = ReviewConfiguration::fromTexts([5, 6]);
         $this->assertEquals('selection=3', $textsConfig->toUrlProperty());
     }
 
-    public function testTestConfigurationIsValid(): void
+    public function testReviewConfigurationIsValid(): void
     {
-        $validConfig = TestConfiguration::fromLanguage(1);
+        $validConfig = ReviewConfiguration::fromLanguage(1);
         $this->assertTrue($validConfig->isValid());
 
-        $invalidConfig = new TestConfiguration('', 0);
+        $invalidConfig = new ReviewConfiguration('', 0);
         $this->assertFalse($invalidConfig->isValid());
     }
 
-    public function testTestConfigurationClampsTestType(): void
+    public function testReviewConfigurationClampsTestType(): void
     {
         // Test type 0 should clamp to 1
-        $config0 = TestConfiguration::fromLanguage(1, 0);
-        $this->assertEquals(1, $config0->testType);
+        $config0 = ReviewConfiguration::fromLanguage(1, 0);
+        $this->assertEquals(1, $config0->reviewType);
 
         // Test type 10 should clamp to 5
-        $config10 = TestConfiguration::fromLanguage(1, 10);
-        $this->assertEquals(5, $config10->testType);
+        $config10 = ReviewConfiguration::fromLanguage(1, 10);
+        $this->assertEquals(5, $config10->reviewType);
     }
 
     // ===== Utility method tests =====
 
     public function testClampTestType(): void
     {
-        $this->assertEquals(1, $this->facade->clampTestType(0));
-        $this->assertEquals(1, $this->facade->clampTestType(-5));
-        $this->assertEquals(3, $this->facade->clampTestType(3));
-        $this->assertEquals(5, $this->facade->clampTestType(5));
-        $this->assertEquals(5, $this->facade->clampTestType(10));
+        $this->assertEquals(1, $this->facade->clampReviewType(0));
+        $this->assertEquals(1, $this->facade->clampReviewType(-5));
+        $this->assertEquals(3, $this->facade->clampReviewType(3));
+        $this->assertEquals(5, $this->facade->clampReviewType(5));
+        $this->assertEquals(5, $this->facade->clampReviewType(10));
     }
 
     public function testIsWordMode(): void
@@ -224,11 +224,11 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetBaseTestType(): void
     {
-        $this->assertEquals(1, $this->facade->getBaseTestType(1));
-        $this->assertEquals(2, $this->facade->getBaseTestType(2));
-        $this->assertEquals(3, $this->facade->getBaseTestType(3));
-        $this->assertEquals(1, $this->facade->getBaseTestType(4)); // 4-3=1
-        $this->assertEquals(2, $this->facade->getBaseTestType(5)); // 5-3=2
+        $this->assertEquals(1, $this->facade->getBaseReviewType(1));
+        $this->assertEquals(2, $this->facade->getBaseReviewType(2));
+        $this->assertEquals(3, $this->facade->getBaseReviewType(3));
+        $this->assertEquals(1, $this->facade->getBaseReviewType(4)); // 4-3=1
+        $this->assertEquals(2, $this->facade->getBaseReviewType(5)); // 5-3=2
     }
 
     public function testCalculateNewStatus(): void
@@ -268,26 +268,26 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetTestIdentifierWithLang(): void
     {
-        $result = $this->facade->getTestIdentifier(null, null, 1, null);
+        $result = $this->facade->getReviewIdentifier(null, null, 1, null);
 
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
-        $this->assertEquals(TestConfiguration::KEY_LANG, $result[0]);
+        $this->assertEquals(ReviewConfiguration::KEY_LANG, $result[0]);
         $this->assertEquals(1, $result[1]);
     }
 
     public function testGetTestIdentifierWithText(): void
     {
-        $result = $this->facade->getTestIdentifier(null, null, null, 42);
+        $result = $this->facade->getReviewIdentifier(null, null, null, 42);
 
         $this->assertIsArray($result);
-        $this->assertEquals(TestConfiguration::KEY_TEXT, $result[0]);
+        $this->assertEquals(ReviewConfiguration::KEY_TEXT, $result[0]);
         $this->assertEquals(42, $result[1]);
     }
 
     public function testGetTestIdentifierWithNoParams(): void
     {
-        $result = $this->facade->getTestIdentifier(null, null, null, null);
+        $result = $this->facade->getReviewIdentifier(null, null, null, null);
 
         $this->assertIsArray($result);
         $this->assertEquals('', $result[0]);
@@ -298,7 +298,7 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetTestSqlForLang(): void
     {
-        $sql = $this->facade->getTestSql(TestConfiguration::KEY_LANG, 1);
+        $sql = $this->facade->getReviewSql(ReviewConfiguration::KEY_LANG, 1);
 
         $this->assertIsString($sql);
         $this->assertStringContainsString('words', $sql);
@@ -307,7 +307,7 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetTestSqlForText(): void
     {
-        $sql = $this->facade->getTestSql(TestConfiguration::KEY_TEXT, 42);
+        $sql = $this->facade->getReviewSql(ReviewConfiguration::KEY_TEXT, 42);
 
         $this->assertIsString($sql);
         $this->assertStringContainsString('textitems2', $sql);
@@ -316,7 +316,7 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetTestSqlForWords(): void
     {
-        $sql = $this->facade->getTestSql(TestConfiguration::KEY_WORDS, [1, 2, 3]);
+        $sql = $this->facade->getReviewSql(ReviewConfiguration::KEY_WORDS, [1, 2, 3]);
 
         $this->assertIsString($sql);
         $this->assertStringContainsString('WoID IN', $sql);
@@ -324,10 +324,10 @@ class ReviewFacadeTest extends TestCase
 
     // ===== Session tests =====
 
-    public function testInitializeTestSession(): void
+    public function testInitializeReviewSession(): void
     {
-        $this->facade->initializeTestSession(10);
-        $data = $this->facade->getTestSessionData();
+        $this->facade->initializeReviewSession(10);
+        $data = $this->facade->getReviewSessionData();
 
         $this->assertIsArray($data);
         $this->assertArrayHasKey('start', $data);
@@ -341,7 +341,7 @@ class ReviewFacadeTest extends TestCase
 
     public function testUpdateSessionProgress(): void
     {
-        $this->facade->initializeTestSession(5);
+        $this->facade->initializeReviewSession(5);
 
         // Correct answer (positive change)
         $result1 = $this->facade->updateSessionProgress(1);
@@ -354,10 +354,10 @@ class ReviewFacadeTest extends TestCase
         $this->assertEquals(1, $result2['wrong']);
     }
 
-    public function testGetTestSessionDataReturnsExpectedStructure(): void
+    public function testGetReviewSessionDataReturnsExpectedStructure(): void
     {
         // Test that session data has the expected structure
-        $data = $this->facade->getTestSessionData();
+        $data = $this->facade->getReviewSessionData();
 
         $this->assertIsArray($data);
         $this->assertArrayHasKey('start', $data);
@@ -403,7 +403,7 @@ class ReviewFacadeTest extends TestCase
         }
 
         // Test with invalid/empty SQL
-        $result = $this->facade->validateTestSelection(' words WHERE 1=0 ');
+        $result = $this->facade->validateReviewSelection(' words WHERE 1=0 ');
         $this->assertIsArray($result);
         $this->assertArrayHasKey('valid', $result);
         $this->assertArrayHasKey('langCount', $result);
@@ -416,7 +416,7 @@ class ReviewFacadeTest extends TestCase
         }
 
         $sql = ' words WHERE WoLgID = 999999 ';
-        $result = $this->facade->getTestCounts($sql);
+        $result = $this->facade->getReviewCounts($sql);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('due', $result);
@@ -432,7 +432,7 @@ class ReviewFacadeTest extends TestCase
         }
 
         $sql = ' words WHERE WoLgID = 999999 ';
-        $result = $this->facade->getTomorrowTestCount($sql);
+        $result = $this->facade->getTomorrowReviewCount($sql);
 
         $this->assertIsInt($result);
         $this->assertEquals(0, $result);
@@ -457,7 +457,7 @@ class ReviewFacadeTest extends TestCase
         }
 
         $sql = ' words WHERE WoLgID = 999999 ';
-        $result = $this->facade->getLanguageIdFromTestSql($sql);
+        $result = $this->facade->getLanguageIdFromReviewSql($sql);
 
         // Should return null for non-existent language
         $this->assertNull($result);
@@ -469,7 +469,7 @@ class ReviewFacadeTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->facade->getTableTestSettings();
+        $result = $this->facade->getTableReviewSettings();
 
         $this->assertIsArray($result);
         // Check for expected keys
@@ -518,25 +518,25 @@ class ReviewFacadeTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->facade->getTestDataFromParams(null, null, null, null);
+        $result = $this->facade->getReviewDataFromParams(null, null, null, null);
         $this->assertNull($result);
     }
 
     public function testBuildSelectionTestSql(): void
     {
         // Type 2 = words
-        $result = $this->facade->buildSelectionTestSql(2, '1,2,3');
+        $result = $this->facade->buildSelectionReviewSql(2, '1,2,3');
         $this->assertIsString($result);
         $this->assertStringContainsString('WoID IN', $result);
 
         // Type 3 = texts
-        $result = $this->facade->buildSelectionTestSql(3, '10,20');
+        $result = $this->facade->buildSelectionReviewSql(3, '10,20');
         $this->assertIsString($result);
         $this->assertStringContainsString('Ti2TxID IN', $result);
 
         // Type 1 = raw SQL (returns as-is)
         $rawSql = 'words WHERE WoLgID = 1';
-        $result = $this->facade->buildSelectionTestSql(1, $rawSql);
+        $result = $this->facade->buildSelectionReviewSql(1, $rawSql);
         $this->assertEquals($rawSql, $result);
     }
 
@@ -574,11 +574,11 @@ class ReviewFacadeTest extends TestCase
         );
     }
 
-    public function testFetchTestConfigurationMethodExists(): void
+    public function testFetchReviewConfigurationMethodExists(): void
     {
         $this->assertTrue(
-            method_exists($this->facade, 'fetchTestConfiguration'),
-            'fetchTestConfiguration method should exist'
+            method_exists($this->facade, 'fetchReviewConfiguration'),
+            'fetchReviewConfiguration method should exist'
         );
     }
 
@@ -601,8 +601,8 @@ class ReviewFacadeTest extends TestCase
     public function testGetTableTestWordsMethodExists(): void
     {
         $this->assertTrue(
-            method_exists($this->facade, 'getTableTestWords'),
-            'getTableTestWords method should exist'
+            method_exists($this->facade, 'getTableReviewWords'),
+            'getTableReviewWords method should exist'
         );
     }
 

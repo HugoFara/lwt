@@ -1,20 +1,20 @@
 /**
- * Tests for test_ajax.ts - AJAX-based vocabulary testing functionality
+ * Tests for review_ajax.ts - AJAX-based vocabulary review functionality
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   prepareWordReading,
   insertNewWord,
-  doTestFinished,
-  testQueryHandler,
-  updateTestsCount,
+  doReviewFinished,
+  reviewQueryHandler,
+  updateReviewsCount,
   ajaxReloader,
   pageReloader,
   handleStatusChangeResult
-} from '../../../src/frontend/js/modules/review/pages/test_ajax';
+} from '../../../src/frontend/js/modules/review/pages/review_ajax';
 
-// Mock dependencies - use the actual test_state and language_config modules
-import { resetTestState } from '../../../src/frontend/js/modules/review/stores/test_state';
+// Mock dependencies - use the actual review_state and language_config modules
+import { resetReviewState } from '../../../src/frontend/js/modules/review/stores/review_state';
 import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/modules/language/stores/language_config';
 
 vi.mock('../../../src/frontend/js/modules/vocabulary/components/word_popup', () => ({
@@ -25,9 +25,9 @@ vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   speechDispatcher: vi.fn()
 }));
 
-vi.mock('../../../src/frontend/js/modules/review/pages/test_mode', () => ({
-  handleTestWordClick: vi.fn(),
-  handleTestKeydown: vi.fn()
+vi.mock('../../../src/frontend/js/modules/review/pages/review_mode', () => ({
+  handleReviewWordClick: vi.fn(),
+  handleReviewKeydown: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/modules/review/utils/elapsed_timer', () => ({
@@ -36,13 +36,13 @@ vi.mock('../../../src/frontend/js/modules/review/utils/elapsed_timer', () => ({
 
 import { speechDispatcher } from '../../../src/frontend/js/shared/utils/user_interactions';
 
-describe('test_ajax.ts', () => {
+describe('review_ajax.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
     vi.useFakeTimers();
     // Initialize state modules
-    resetTestState();
+    resetReviewState();
     resetLanguageConfig();
     initLanguageConfig({ id: 1 });
   });
@@ -92,114 +92,114 @@ describe('test_ajax.ts', () => {
   // ===========================================================================
 
   describe('insertNewWord', () => {
-    it('updates the term-test element with group HTML', () => {
+    it('updates the term-review element with group HTML', () => {
       document.body.innerHTML = `
-        <div id="term-test"></div>
+        <div id="term-review"></div>
       `;
 
       insertNewWord(123, 'solution text', '<span>Word content</span>');
 
-      expect(document.getElementById('term-test')?.innerHTML).toContain('Word content');
+      expect(document.getElementById('term-review')?.innerHTML).toContain('Word content');
     });
   });
 
   // ===========================================================================
-  // doTestFinished Tests
+  // doReviewFinished Tests
   // ===========================================================================
 
-  describe('doTestFinished', () => {
+  describe('doReviewFinished', () => {
     beforeEach(() => {
       document.body.innerHTML = `
-        <div id="term-test">Test area</div>
-        <div id="test-finished-area" style="display: none;"></div>
-        <span id="tests-done-today"></span>
-        <div id="tests-tomorrow">Tomorrow content</div>
+        <div id="term-review">Review area</div>
+        <div id="review-finished-area" style="display: none;"></div>
+        <span id="reviews-done-today"></span>
+        <div id="reviews-tomorrow">Tomorrow content</div>
       `;
     });
 
-    it('hides term-test area', () => {
-      doTestFinished(10);
+    it('hides term-review area', () => {
+      doReviewFinished(10);
 
-      const termTest = document.getElementById('term-test') as HTMLElement;
-      expect(termTest.style.display).toBe('none');
+      const termReview = document.getElementById('term-review') as HTMLElement;
+      expect(termReview.style.display).toBe('none');
     });
 
-    it('shows test-finished-area', () => {
-      doTestFinished(10);
+    it('shows review-finished-area', () => {
+      doReviewFinished(10);
 
-      const finishedArea = document.getElementById('test-finished-area') as HTMLElement;
+      const finishedArea = document.getElementById('review-finished-area') as HTMLElement;
       // JSDOM normalizes 'inherit' to 'block'
       expect(finishedArea.style.display).not.toBe('none');
     });
 
-    it('shows "Nothing more to test" when totalTests > 0', () => {
-      doTestFinished(5);
+    it('shows "Nothing more to review" when totalReviews > 0', () => {
+      doReviewFinished(5);
 
-      const doneToday = document.getElementById('tests-done-today');
-      expect(doneToday?.textContent).toContain('Nothing more to test here!');
+      const doneToday = document.getElementById('reviews-done-today');
+      expect(doneToday?.textContent).toContain('Nothing more to review here!');
     });
 
-    it('shows "Nothing to test" when totalTests is 0', () => {
-      doTestFinished(0);
+    it('shows "Nothing to review" when totalReviews is 0', () => {
+      doReviewFinished(0);
 
-      const doneToday = document.getElementById('tests-done-today');
-      expect(doneToday?.textContent).toBe('Nothing to test here!');
+      const doneToday = document.getElementById('reviews-done-today');
+      expect(doneToday?.textContent).toBe('Nothing to review here!');
     });
 
-    it('hides tests-tomorrow section initially', () => {
-      doTestFinished(10);
+    it('hides reviews-tomorrow section initially', () => {
+      doReviewFinished(10);
 
-      const tomorrow = document.getElementById('tests-tomorrow') as HTMLElement;
+      const tomorrow = document.getElementById('reviews-tomorrow') as HTMLElement;
       expect(tomorrow.style.display).toBe('none');
     });
   });
 
   // ===========================================================================
-  // testQueryHandler Tests
+  // reviewQueryHandler Tests
   // ===========================================================================
 
-  describe('testQueryHandler', () => {
+  describe('reviewQueryHandler', () => {
     beforeEach(() => {
       document.body.innerHTML = `
-        <div id="term-test"></div>
-        <div id="test-finished-area" style="display: none;"></div>
-        <span id="tests-done-today"></span>
-        <div id="tests-tomorrow" style="display: none;"></div>
+        <div id="term-review"></div>
+        <div id="review-finished-area" style="display: none;"></div>
+        <span id="reviews-done-today"></span>
+        <div id="reviews-tomorrow" style="display: none;"></div>
         <input id="utterance-allowed" type="checkbox">
       `;
     });
 
-    it('calls doTestFinished when term_id is 0', () => {
-      testQueryHandler(
+    it('calls doReviewFinished when term_id is 0', async () => {
+      await reviewQueryHandler(
         { term_id: 0, solution: '', group: '', term_text: '' },
         10,
-        'test_key',
+        'review_key',
         'selection'
       );
 
-      const termTest = document.getElementById('term-test') as HTMLElement;
-      expect(termTest.style.display).toBe('none');
+      const termReview = document.getElementById('term-review') as HTMLElement;
+      expect(termReview.style.display).toBe('none');
     });
 
-    it('inserts new word when term_id is not 0', () => {
-      testQueryHandler(
+    it('inserts new word when term_id is not 0', async () => {
+      await reviewQueryHandler(
         { term_id: 123, solution: 'sol', group: '<span>Group</span>', term_text: 'word' },
         10,
-        'test_key',
+        'review_key',
         'selection'
       );
 
-      expect(document.getElementById('term-test')?.innerHTML).toContain('Group');
+      expect(document.getElementById('term-review')?.innerHTML).toContain('Group');
     });
 
-    it('prepares word reading when utterance-allowed is checked', () => {
+    it('prepares word reading when utterance-allowed is checked', async () => {
       const checkbox = document.getElementById('utterance-allowed') as HTMLInputElement;
       checkbox.checked = true;
 
-      testQueryHandler(
+      await reviewQueryHandler(
         { term_id: 123, solution: 'sol', group: '<span class="word">Word</span>', term_text: 'word' },
         10,
-        'test_key',
+        'review_key',
         'selection'
       );
 
@@ -211,37 +211,37 @@ describe('test_ajax.ts', () => {
   });
 
   // ===========================================================================
-  // updateTestsCount Tests
+  // updateReviewsCount Tests
   // ===========================================================================
 
-  describe('updateTestsCount', () => {
+  describe('updateReviewsCount', () => {
     beforeEach(() => {
       document.body.innerHTML = `
-        <div id="not-tested-box" style="width: 50%;"></div>
-        <div id="wrong-tests-box" style="width: 20%;"></div>
-        <div id="correct-tests-box" style="width: 30%;"></div>
-        <span id="not-tested-header">50</span>
-        <span id="not-tested">50</span>
-        <span id="wrong-tests">20</span>
-        <span id="correct-tests">30</span>
+        <div id="not-reviewed-box" style="width: 50%;"></div>
+        <div id="wrong-reviews-box" style="width: 20%;"></div>
+        <div id="correct-reviews-box" style="width: 30%;"></div>
+        <span id="not-reviewed-header">50</span>
+        <span id="not-reviewed">50</span>
+        <span id="wrong-reviews">20</span>
+        <span id="correct-reviews">30</span>
       `;
     });
 
-    it('updates test count text elements', () => {
-      updateTestsCount(
+    it('updates review count text elements', () => {
+      updateReviewsCount(
         { total: 100, remaining: 40, wrong: 25, correct: 35 },
         document
       );
 
-      expect(document.getElementById('not-tested-header')?.textContent).toBe('40');
-      expect(document.getElementById('not-tested')?.textContent).toBe('40');
-      expect(document.getElementById('wrong-tests')?.textContent).toBe('25');
-      expect(document.getElementById('correct-tests')?.textContent).toBe('35');
+      expect(document.getElementById('not-reviewed-header')?.textContent).toBe('40');
+      expect(document.getElementById('not-reviewed')?.textContent).toBe('40');
+      expect(document.getElementById('wrong-reviews')?.textContent).toBe('25');
+      expect(document.getElementById('correct-reviews')?.textContent).toBe('35');
     });
 
     it('handles zero total gracefully', () => {
       expect(() => {
-        updateTestsCount(
+        updateReviewsCount(
           { total: 0, remaining: 0, wrong: 0, correct: 0 },
           document
         );
@@ -334,13 +334,13 @@ describe('test_ajax.ts', () => {
       const parentDoc = document.implementation.createHTMLDocument();
       parentDoc.body.innerHTML = `
         <span class="word123 todo todosty" data_status="1" data_todo="1">Word</span>
-        <div id="not-tested-box"></div>
-        <div id="wrong-tests-box"></div>
-        <div id="correct-tests-box"></div>
-        <span id="not-tested-header"></span>
-        <span id="not-tested"></span>
-        <span id="wrong-tests"></span>
-        <span id="correct-tests"></span>
+        <div id="not-reviewed-box"></div>
+        <div id="wrong-reviews-box"></div>
+        <div id="correct-reviews-box"></div>
+        <span id="not-reviewed-header"></span>
+        <span id="not-reviewed"></span>
+        <span id="wrong-reviews"></span>
+        <span id="correct-reviews"></span>
       `;
 
       // Mock window.parent

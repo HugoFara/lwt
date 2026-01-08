@@ -291,7 +291,7 @@ export function createIgnoreButton(context: WordActionContext): HTMLButtonElemen
  * @param context Word action context
  * @returns DocumentFragment with test buttons
  */
-export function createTestStatusButtons(context: WordActionContext): DocumentFragment {
+export function createReviewStatusButtons(context: WordActionContext): DocumentFragment {
   const fragment = document.createDocumentFragment();
   const s = context.status || 1;
 
@@ -816,7 +816,7 @@ export function showMultiWordPopup(
  * @param todo    If 1, the user should say if he knows the word.
  * @returns An overlib object
  */
-export function showTestWordPopup(
+export function showReviewWordPopup(
   wblink1: string,
   wblink2: string,
   wblink3: string,
@@ -842,14 +842,14 @@ export function showTestWordPopup(
     overlib_string += '<center><hr noshade size=1 /><b>';
     if (s >= 1 && s <= 5) {
       overlib_string +=
-        createTestStatusLink(
+        createReviewStatusLink(
           wid,
           1,
           iconHtml('thumb-up', { title: 'Got it!', alt: 'Got it!' }) + ' Got it! [' +
           cc + ']'
         ) +
         '<hr noshade size=1 />' +
-        createTestStatusLink(
+        createReviewStatusLink(
           wid,
           -1,
           iconHtml('thumb', { title: 'Oops!', alt: 'Oops!' }) + ' Oops! [' + ww + ']'
@@ -857,7 +857,7 @@ export function showTestWordPopup(
         '<hr noshade size=1 />';
     }
     overlib_string +=
-      createTestStatusChangeLinks(wid, stat) +
+      createReviewStatusChangeLinks(wid, stat) +
       '</b></center><hr noshade size=1 />';
   }
   overlib_string += '<b>' + escapeHtml(createWordTooltip(txt, trans, roman, String(stat))) +
@@ -1030,16 +1030,16 @@ export function createStatusChangeLinks(
  * @param oldstat Current status of the word
  * @returns An HTML-formatted list of links.
  */
-export function createTestStatusChangeLinks(
+export function createReviewStatusChangeLinks(
   wid: string | number,
   oldstat: string | number
 ): string {
   let result = '';
   for (let newstat = 1; newstat <= 5; newstat++) {
-    result += createTestStatusLink2(wid, oldstat, newstat);
+    result += createReviewStatusLink2(wid, oldstat, newstat);
   }
-  result += createTestStatusLink2(wid, oldstat, 99);
-  result += createTestStatusLink2(wid, oldstat, 98);
+  result += createReviewStatusLink2(wid, oldstat, 99);
+  result += createReviewStatusLink2(wid, oldstat, 98);
   return result;
 }
 
@@ -1080,12 +1080,12 @@ export function createStatusChangeLink(
  * @param newstat New status
  * @returns HTML-formatted link
  */
-export function createTestStatusLink2(
+export function createReviewStatusLink2(
   wid: string | number,
   oldstat: string | number,
   newstat: number
 ): string {
-  let output = ' <a href="/word/set-test-status?wid=' + wid +
+  let output = ' <a href="/word/set-review-status?wid=' + wid +
     '&amp;status=' + newstat + '&amp;ajax=1" target="ro" onclick="showRightFramesPanel();">' +
     '<span title="' + getStatusName(newstat) + '">[';
   output += (Number(oldstat) === newstat) ? '◆' : getStatusAbbr(newstat);
@@ -1102,12 +1102,12 @@ export function createTestStatusLink2(
  *
  * @returns A tag containing formatted text
  */
-export function createTestStatusLink(
+export function createReviewStatusLink(
   wid: string | number,
   plusminus: number,
   text: string
 ): string {
-  return ' <a href="/word/set-test-status?wid=' + wid +
+  return ' <a href="/word/set-review-status?wid=' + wid +
     '&amp;stchange=' + plusminus +
     '&amp;ajax=1" target="ro" onclick="showRightFramesPanel();' +
     (plusminus > 0 ? 'successSound()' : 'failureSound()') + ';">' +

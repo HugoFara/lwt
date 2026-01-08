@@ -765,7 +765,7 @@ class VocabularyApiHandler
                     return null;
                 }
                 $statusAbbr = StatusHelper::getAbbr((int)$currstatus);
-                return StatusHelper::buildTestTableControls(1, (int)$currstatus, $wid, $statusAbbr);
+                return StatusHelper::buildReviewTableControls(1, (int)$currstatus, $wid, $statusAbbr);
             }
         }
         return null;

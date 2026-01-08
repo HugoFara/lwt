@@ -1,5 +1,5 @@
 /**
- * Test AJAX - AJAX-based vocabulary testing functionality.
+ * Review AJAX - AJAX-based vocabulary review functionality.
  *
  * @license Unlicense
  * @author  HugoFara <hugo.farajallah@protonmail.com>
@@ -8,26 +8,26 @@
 
 import { closePopup } from '@modules/vocabulary/components/word_popup';
 import { speechDispatcher } from '@shared/utils/user_interactions';
-import { handleTestWordClick, handleTestKeydown } from './test_mode';
+import { handleReviewWordClick, handleReviewKeydown } from './review_mode';
 import { startElapsedTimer } from '../utils/elapsed_timer';
 import { ReviewApi } from '@modules/review/api/review_api';
-import { setCurrentWordId, setTestSolution, setAnswerOpened } from '@modules/review/stores/test_state';
+import { setCurrentWordId, setReviewSolution, setAnswerOpened } from '@modules/review/stores/review_state';
 import { getLanguageId, initLanguageConfig } from '@modules/language/stores/language_config';
 
 // Interface for review data
 interface ReviewData {
-  test_key: string;
+  review_key: string;
   selection: string;
   word_mode: number;
   language_id: number;
   word_regex: string;
   type: number;
   count: number;
-  total_tests: number;
+  total_reviews: number;
 }
 
-// Interface for current test word
-interface CurrentTest {
+// Interface for current review word
+interface CurrentReview {
   term_id: number;
   solution: string;
   group: string;
@@ -42,8 +42,8 @@ interface TimeData {
   show_timer: number;
 }
 
-// Interface for test status
-interface TestStatus {
+// Interface for review status
+interface ReviewStatus {
   total: number;
   remaining: number;
   wrong: number;
@@ -65,87 +65,87 @@ export function prepareWordReading(termText: string, langId: number): void {
 }
 
 /**
- * Insert a new word into the test area.
+ * Insert a new word into the review area.
  *
  * @param wordId Word ID
  * @param solution The solution text
  * @param group HTML content for the term
  */
 export function insertNewWord(wordId: number, solution: string, group: string): void {
-  setTestSolution(solution);
+  setReviewSolution(solution);
   setCurrentWordId(wordId);
 
-  const termTestEl = document.getElementById('term-test');
-  if (termTestEl) {
-    termTestEl.innerHTML = group;
+  const termReviewEl = document.getElementById('term-review');
+  if (termReviewEl) {
+    termReviewEl.innerHTML = group;
   }
 
-  document.addEventListener('keydown', handleTestKeydown);
+  document.addEventListener('keydown', handleReviewKeydown);
   document.querySelectorAll('.word').forEach(el => {
-    el.addEventListener('click', handleTestWordClick);
+    el.addEventListener('click', handleReviewWordClick);
   });
 }
 
 /**
- * Display the test finished message.
+ * Display the review finished message.
  *
- * @param totalTests Total number of tests completed
+ * @param totalReviews Total number of reviews completed
  */
-export function doTestFinished(totalTests: number): void {
-  const termTestEl = document.getElementById('term-test');
-  const testFinishedEl = document.getElementById('test-finished-area');
-  const testsDoneTodayEl = document.getElementById('tests-done-today');
-  const testsTomorrowEl = document.getElementById('tests-tomorrow');
+export function doReviewFinished(totalReviews: number): void {
+  const termReviewEl = document.getElementById('term-review');
+  const reviewFinishedEl = document.getElementById('review-finished-area');
+  const reviewsDoneTodayEl = document.getElementById('reviews-done-today');
+  const reviewsTomorrowEl = document.getElementById('reviews-tomorrow');
 
-  if (termTestEl) {
-    termTestEl.style.display = 'none';
+  if (termReviewEl) {
+    termReviewEl.style.display = 'none';
   }
-  if (testFinishedEl) {
-    testFinishedEl.style.display = 'inherit';
+  if (reviewFinishedEl) {
+    reviewFinishedEl.style.display = 'inherit';
   }
-  if (testsDoneTodayEl) {
-    testsDoneTodayEl.textContent = 'Nothing ' + (totalTests > 0 ? 'more ' : '') + 'to test here!';
+  if (reviewsDoneTodayEl) {
+    reviewsDoneTodayEl.textContent = 'Nothing ' + (totalReviews > 0 ? 'more ' : '') + 'to review here!';
   }
-  if (testsTomorrowEl) {
-    testsTomorrowEl.style.display = 'none';
+  if (reviewsTomorrowEl) {
+    reviewsTomorrowEl.style.display = 'none';
   }
 }
 
 /**
  * Handle the response from the next word query.
  *
- * @param currentTest Current test word data
- * @param totalTests Total number of tests
- * @param testKey Test session key
- * @param selection Test selection criteria
+ * @param currentReview Current review word data
+ * @param totalReviews Total number of reviews
+ * @param reviewKey Review session key
+ * @param selection Review selection criteria
  */
-export async function testQueryHandler(
-  currentTest: CurrentTest,
-  totalTests: number,
-  testKey: string,
+export async function reviewQueryHandler(
+  currentReview: CurrentReview,
+  totalReviews: number,
+  reviewKey: string,
   selection: string
 ): Promise<void> {
-  if (currentTest.term_id === 0) {
-    doTestFinished(totalTests);
-    const response = await ReviewApi.getTomorrowCount(testKey, selection);
+  if (currentReview.term_id === 0) {
+    doReviewFinished(totalReviews);
+    const response = await ReviewApi.getTomorrowCount(reviewKey, selection);
     if (response.data?.count) {
-      const testsTomorrowEl = document.getElementById('tests-tomorrow');
-      if (testsTomorrowEl) {
-        testsTomorrowEl.style.display = 'inherit';
-        testsTomorrowEl.textContent =
+      const reviewsTomorrowEl = document.getElementById('reviews-tomorrow');
+      if (reviewsTomorrowEl) {
+        reviewsTomorrowEl.style.display = 'inherit';
+        reviewsTomorrowEl.textContent =
           "Tomorrow you'll find here " + response.data.count +
-          ' test' + (response.data.count < 2 ? '' : 's') + '!';
+          ' review' + (response.data.count < 2 ? '' : 's') + '!';
       }
     }
   } else {
     insertNewWord(
-      currentTest.term_id,
-      currentTest.solution,
-      currentTest.group
+      currentReview.term_id,
+      currentReview.solution,
+      currentReview.group
     );
     const utteranceCheckbox = document.getElementById('utterance-allowed') as HTMLInputElement | null;
     if (utteranceCheckbox?.checked) {
-      prepareWordReading(currentTest.term_text, getLanguageId());
+      prepareWordReading(currentReview.term_text, getLanguageId());
     }
   }
 }
@@ -157,7 +157,7 @@ export async function testQueryHandler(
  */
 export async function queryNextTerm(reviewData: ReviewData): Promise<void> {
   const response = await ReviewApi.getNextWord({
-    testKey: reviewData.test_key,
+    reviewKey: reviewData.review_key,
     selection: reviewData.selection,
     wordMode: reviewData.word_mode === 1,
     lgId: reviewData.language_id,
@@ -166,7 +166,7 @@ export async function queryNextTerm(reviewData: ReviewData): Promise<void> {
   });
 
   if (response.data) {
-    const data: CurrentTest = {
+    const data: CurrentReview = {
       term_id: typeof response.data.term_id === 'string'
         ? parseInt(response.data.term_id, 10)
         : response.data.term_id,
@@ -174,14 +174,14 @@ export async function queryNextTerm(reviewData: ReviewData): Promise<void> {
       group: response.data.group,
       term_text: response.data.term_text
     };
-    await testQueryHandler(
-      data, reviewData.count, reviewData.test_key, reviewData.selection
+    await reviewQueryHandler(
+      data, reviewData.count, reviewData.review_key, reviewData.selection
     );
   }
 }
 
 /**
- * Get a new word for testing.
+ * Get a new word for reviewing.
  *
  * @param reviewData Review session data
  */
@@ -193,76 +193,56 @@ export function getNewWord(reviewData?: ReviewData): void {
 }
 
 /**
- * Prepare the test frames (clear and start timer).
+ * Initialize the review timer.
  *
  * @param timeData Time configuration data
  */
-export function prepareTestFrames(timeData: TimeData): void {
-  const parentWindow = window.parent as Window & {
-    frames: { [key: string]: Window };
-  };
-
-  if (parentWindow.frames['ru']) {
-    parentWindow.frames['ru'].location.href = 'empty.html';
-  }
-  if (timeData.wait_time <= 0) {
-    if (parentWindow.frames['ro']) {
-      parentWindow.frames['ro'].location.href = 'empty.html';
-    }
-  } else {
-    setTimeout(function () {
-      if (parentWindow.frames['ro']) {
-        parentWindow.frames['ro'].location.href = 'empty.html';
-      }
-    }, timeData.wait_time);
-  }
-
-  // Initialize the elapsed timer
+export function initReviewTimer(timeData: TimeData): void {
   startElapsedTimer(
     timeData.time, timeData.start_time, 'timer', timeData.show_timer
   );
 }
 
 /**
- * Update the test count displays in the header.
+ * Update the review count displays in the header.
  *
- * @param testsStatus Test progress data
+ * @param reviewsStatus Review progress data
  * @param contDocument The document to update (typically parent context)
  */
-export function updateTestsCount(testsStatus: TestStatus, contDocument: Document): void {
+export function updateReviewsCount(reviewsStatus: ReviewStatus, contDocument: Document): void {
   let widthDivisor = 0.01;
-  if (testsStatus.total > 0) {
-    widthDivisor = testsStatus.total / 100;
+  if (reviewsStatus.total > 0) {
+    widthDivisor = reviewsStatus.total / 100;
   }
 
-  const notTestedBox = contDocument.getElementById('not-tested-box') as HTMLElement | null;
-  const wrongTestsBox = contDocument.getElementById('wrong-tests-box') as HTMLElement | null;
-  const correctTestsBox = contDocument.getElementById('correct-tests-box') as HTMLElement | null;
-  const notTestedHeader = contDocument.getElementById('not-tested-header');
-  const notTested = contDocument.getElementById('not-tested');
-  const wrongTests = contDocument.getElementById('wrong-tests');
-  const correctTests = contDocument.getElementById('correct-tests');
+  const notReviewedBox = contDocument.getElementById('not-reviewed-box') as HTMLElement | null;
+  const wrongReviewsBox = contDocument.getElementById('wrong-reviews-box') as HTMLElement | null;
+  const correctReviewsBox = contDocument.getElementById('correct-reviews-box') as HTMLElement | null;
+  const notReviewedHeader = contDocument.getElementById('not-reviewed-header');
+  const notReviewed = contDocument.getElementById('not-reviewed');
+  const wrongReviews = contDocument.getElementById('wrong-reviews');
+  const correctReviews = contDocument.getElementById('correct-reviews');
 
-  if (notTestedBox) {
-    notTestedBox.style.width = (testsStatus.remaining / widthDivisor) + 'px';
+  if (notReviewedBox) {
+    notReviewedBox.style.width = (reviewsStatus.remaining / widthDivisor) + 'px';
   }
-  if (wrongTestsBox) {
-    wrongTestsBox.style.width = (testsStatus.wrong / widthDivisor) + 'px';
+  if (wrongReviewsBox) {
+    wrongReviewsBox.style.width = (reviewsStatus.wrong / widthDivisor) + 'px';
   }
-  if (correctTestsBox) {
-    correctTestsBox.style.width = (testsStatus.correct / widthDivisor) + 'px';
+  if (correctReviewsBox) {
+    correctReviewsBox.style.width = (reviewsStatus.correct / widthDivisor) + 'px';
   }
-  if (notTestedHeader) {
-    notTestedHeader.textContent = String(testsStatus.remaining);
+  if (notReviewedHeader) {
+    notReviewedHeader.textContent = String(reviewsStatus.remaining);
   }
-  if (notTested) {
-    notTested.textContent = String(testsStatus.remaining);
+  if (notReviewed) {
+    notReviewed.textContent = String(reviewsStatus.remaining);
   }
-  if (wrongTests) {
-    wrongTests.textContent = String(testsStatus.wrong);
+  if (wrongReviews) {
+    wrongReviews.textContent = String(reviewsStatus.wrong);
   }
-  if (correctTests) {
-    correctTests.textContent = String(testsStatus.correct);
+  if (correctReviews) {
+    correctReviews.textContent = String(reviewsStatus.correct);
   }
 }
 
@@ -311,7 +291,7 @@ export function pageReloader(waitTime: number, target: Window): void {
  * @param wordId Word ID that was updated
  * @param newStatus New status value
  * @param statusChange Direction of status change (positive or negative)
- * @param testStatus Current test progress
+ * @param reviewStatus Current review progress
  * @param ajax Whether using AJAX mode
  * @param waitTime Wait time before reload
  */
@@ -319,7 +299,7 @@ export function handleStatusChangeResult(
   wordId: number,
   newStatus: number,
   statusChange: number,
-  testStatus: TestStatus,
+  reviewStatus: ReviewStatus,
   ajax: boolean,
   waitTime: number
 ): void {
@@ -337,7 +317,7 @@ export function handleStatusChangeResult(
   const adjustedWaitTime = waitTime + 500;
 
   if (ajax) {
-    updateTestsCount(testStatus, context.document);
+    updateReviewsCount(reviewStatus, context.document);
     ajaxReloader(adjustedWaitTime, context as Window & { get_new_word?: () => void });
   } else {
     pageReloader(adjustedWaitTime, context);
@@ -345,25 +325,25 @@ export function handleStatusChangeResult(
 }
 
 /**
- * Initialize AJAX test with review data.
+ * Initialize AJAX review with review data.
  *
  * @param reviewData Review session data
  * @param timeData Time configuration data
  */
-export function initAjaxTest(reviewData: ReviewData, timeData: TimeData): void {
-  // Initialize frames and timer
-  prepareTestFrames(timeData);
+export function initAjaxReview(reviewData: ReviewData, timeData: TimeData): void {
+  // Initialize timer
+  initReviewTimer(timeData);
 
   // Get the first word
   getNewWord(reviewData);
 }
 
 /**
- * Initialize test interaction globals (language settings).
+ * Initialize review interaction globals (language settings).
  *
  * @param config Configuration from PHP
  */
-export function initTestInteractionGlobals(config: {
+export function initReviewInteractionGlobals(config: {
   langId: number;
   dict1Uri: string;
   dict2Uri: string;
@@ -388,9 +368,9 @@ export function initTestInteractionGlobals(config: {
 }
 
 /**
- * Auto-initialize test views from JSON config elements.
+ * Auto-initialize review views from JSON config elements.
  */
-export function autoInitTestViews(): void {
+export function autoInitReviewViews(): void {
   // Status change result
   const statusChangeConfigEl = document.querySelector<HTMLScriptElement>(
     'script[data-lwt-status-change-result-config]'
@@ -402,7 +382,7 @@ export function autoInitTestViews(): void {
         config.wordId,
         config.newStatus,
         config.statusChange,
-        config.testStatus,
+        config.reviewStatus,
         config.ajax,
         config.waitTime
       );
@@ -411,36 +391,36 @@ export function autoInitTestViews(): void {
     }
   }
 
-  // Test interaction globals
-  const testGlobalsConfigEl = document.querySelector<HTMLScriptElement>(
-    'script[data-lwt-test-interaction-globals-config]'
+  // Review interaction globals
+  const reviewGlobalsConfigEl = document.querySelector<HTMLScriptElement>(
+    'script[data-lwt-review-interaction-globals-config]'
   );
-  if (testGlobalsConfigEl) {
+  if (reviewGlobalsConfigEl) {
     try {
-      const config = JSON.parse(testGlobalsConfigEl.textContent || '{}');
-      initTestInteractionGlobals(config);
+      const config = JSON.parse(reviewGlobalsConfigEl.textContent || '{}');
+      initReviewInteractionGlobals(config);
     } catch (e) {
-      console.error('Failed to parse test interaction globals config:', e);
+      console.error('Failed to parse review interaction globals config:', e);
     }
   }
 
-  // AJAX test initialization
-  const ajaxTestConfigEl = document.querySelector<HTMLScriptElement>(
-    'script[data-lwt-ajax-test-config]'
+  // AJAX review initialization
+  const ajaxReviewConfigEl = document.querySelector<HTMLScriptElement>(
+    'script[data-lwt-ajax-review-config]'
   );
-  if (ajaxTestConfigEl) {
+  if (ajaxReviewConfigEl) {
     try {
-      const config = JSON.parse(ajaxTestConfigEl.textContent || '{}');
-      initAjaxTest(config.reviewData, config.timeData);
+      const config = JSON.parse(ajaxReviewConfigEl.textContent || '{}');
+      initAjaxReview(config.reviewData, config.timeData);
     } catch (e) {
-      console.error('Failed to parse ajax test config:', e);
+      console.error('Failed to parse ajax review config:', e);
     }
   }
 }
 
 // Auto-initialize on DOM ready
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', autoInitTestViews);
+  document.addEventListener('DOMContentLoaded', autoInitReviewViews);
 } else {
-  autoInitTestViews();
+  autoInitReviewViews();
 }

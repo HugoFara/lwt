@@ -24,15 +24,15 @@ Key Bindings in the TEXT Frame
 
 (*) Only saved terms with the status(es) defined/filtered in the settings are visited and marked!
 
-Key Bindings in the TEST Frame
+Key Bindings in the REVIEW Frame
 
-| Key(s)        | Action(s)                                         |
-|---------------|---------------------------------------------------|
-| SPACE         | Show solution                                     |
-| UP            | Set status of tested term to (old status plus 1)  |
-| DOWN          | Set status of tested term to (old status minus 1) |
-| ESC           | Do not change status of tested term               |
-| 1, 2, 3, 4, 5 | Set status of tested term to 1, 2, 3, 4, or 5     |
-| I             | Set status of tested term to "Ignored"            |
-| W             | Set status of tested term to "Well Known"         |
-| E             | Edit tested term                                  |
+| Key(s)        | Action(s)                                           |
+|---------------|-----------------------------------------------------|
+| SPACE         | Show solution                                       |
+| UP            | Set status of reviewed term to (old status plus 1)  |
+| DOWN          | Set status of reviewed term to (old status minus 1) |
+| ESC           | Do not change status of reviewed term               |
+| 1, 2, 3, 4, 5 | Set status of reviewed term to 1, 2, 3, 4, or 5     |
+| I             | Set status of reviewed term to "Ignored"            |
+| W             | Set status of reviewed term to "Well Known"         |
+| E             | Edit reviewed term                                  |

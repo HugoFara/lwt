@@ -60,7 +60,7 @@ class GetNextTerm
     public function execute(ReviewConfiguration $config): array
     {
         // Get next word from repository
-        $word = $this->repository->findNextWordForTest($config);
+        $word = $this->repository->findNextWordForReview($config);
 
         if ($word === null) {
             return [
@@ -78,12 +78,12 @@ class GetNextTerm
         list($htmlSentence, $displayWord) = $this->formatTermForTest(
             $word,
             $sentence,
-            $config->testType
+            $config->reviewType
         );
 
         // Get solution text
         $solution = $this->getSolution(
-            $config->testType,
+            $config->reviewType,
             $word,
             $config->wordMode,
             $displayWord

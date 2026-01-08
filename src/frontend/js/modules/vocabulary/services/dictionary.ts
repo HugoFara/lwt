@@ -11,28 +11,15 @@
 // All dictionary functions now open in popup windows.
 
 /**
- * Open a window.
+ * Open a dictionary popup window.
  *
- * @param url URL of the window
+ * @param url URL of the dictionary
  */
-export function owin(url: string): Window | null {
+export function openDictionaryPopup(url: string): Window | null {
   return window.open(
     url,
     'dictwin',
     'width=800, height=400, scrollbars=yes, menubar=no, resizable=yes, status=no'
-  );
-}
-
-/**
- * Open a window in edit mode.
- *
- * @param url Window URL
- */
-export function oewin(url: string): Window | null {
-  return window.open(
-    url,
-    'editwin',
-    'width=800, height=600, scrollbars=yes, menubar=no, resizable=yes, status=no'
   );
 }
 
@@ -173,7 +160,7 @@ export function translateSentence(url: string, sentctl: HTMLTextAreaElement | un
   if (sentctl !== undefined && url !== '') {
     const text = sentctl.value;
     if (typeof text === 'string') {
-      owin(createTheDictUrl(url, text.replace(/[{}]/g, '')));
+      openDictionaryPopup(createTheDictUrl(url, text.replace(/[{}]/g, '')));
     }
   }
 }
@@ -189,7 +176,7 @@ export function translateSentence2(url: string, sentctl: HTMLTextAreaElement | u
     const text = sentctl.value;
     if (typeof text === 'string') {
       const finalurl = createTheDictUrl(url, text.replace(/[{}]/g, ''));
-      owin(finalurl);
+      openDictionaryPopup(finalurl);
     }
   }
 }
@@ -204,7 +191,7 @@ export function translateWord(url: string, wordctl: HTMLInputElement | undefined
   if (wordctl !== undefined && url !== '') {
     const text = wordctl.value;
     if (typeof text === 'string') {
-      owin(createTheDictUrl(url, text));
+      openDictionaryPopup(createTheDictUrl(url, text));
     }
   }
 }
@@ -219,7 +206,7 @@ export function translateWord2(url: string, wordctl: HTMLInputElement | undefine
   if (wordctl !== undefined && url !== '') {
     const text = wordctl.value;
     if (typeof text === 'string') {
-      owin(createTheDictUrl(url, text));
+      openDictionaryPopup(createTheDictUrl(url, text));
     }
   }
 }
@@ -231,7 +218,7 @@ export function translateWord2(url: string, wordctl: HTMLInputElement | undefine
  * @param word Word to translate.
  */
 export function translateWord3(url: string, word: string): void {
-  owin(createTheDictUrl(url, word));
+  openDictionaryPopup(createTheDictUrl(url, word));
 }
 
 /**
@@ -249,7 +236,7 @@ function initDictionaryEventDelegation(): void {
     if (dictPopup) {
       const url = dictPopup.dataset.url;
       if (url) {
-        owin(url);
+        openDictionaryPopup(url);
       }
       return;
     }
@@ -260,7 +247,7 @@ function initDictionaryEventDelegation(): void {
       const url = dictFrame.href;
       if (url) {
         e.preventDefault();
-        owin(url);
+        openDictionaryPopup(url);
       }
       return;
     }
@@ -328,7 +315,7 @@ function initDictionaryEventDelegation(): void {
   document.querySelectorAll<HTMLElement>('[data-action="dict-auto-popup"]').forEach(el => {
     const url = el.dataset.url;
     if (url) {
-      owin(url);
+      openDictionaryPopup(url);
     }
   });
 
@@ -336,7 +323,7 @@ function initDictionaryEventDelegation(): void {
   document.querySelectorAll<HTMLElement>('[data-action="dict-auto-frame"]').forEach(el => {
     const url = el.dataset.url;
     if (url) {
-      owin(url);
+      openDictionaryPopup(url);
     }
   });
 }

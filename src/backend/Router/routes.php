@@ -67,13 +67,6 @@ function registerRoutes(Router $router): void
     // Legacy route: /text/read?text=123
     $router->get('/text/read', 'Lwt\\Modules\\Text\\Http\\TextController@read', AUTH_MIDDLEWARE);
 
-    // Empty iframe placeholder (used in text read, test, and word pages)
-    // These are static files, no auth needed
-    $router->register('/empty.html', 'src/backend/Core/empty.html');
-    $router->register('/text/empty.html', 'src/backend/Core/empty.html');
-    $router->register('/test/empty.html', 'src/backend/Core/empty.html');
-    $router->register('/word/empty.html', 'src/backend/Core/empty.html');
-
     // Edit texts
     $router->registerWithMiddleware('/text/edit', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware('/texts', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
@@ -231,8 +224,8 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
     $router->registerWithMiddleware(
-        '/word/set-test-status',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@setTestStatusView',
+        '/word/set-review-status',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@setReviewStatusView',
         AUTH_MIDDLEWARE
     );
     $router->registerWithMiddleware(
@@ -256,10 +249,10 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
-    // ==================== TEST ROUTES (PROTECTED) ====================
+    // ==================== REVIEW ROUTES (PROTECTED) ====================
 
     // Review interface (Review module)
-    $router->registerWithMiddleware('/test', 'Lwt\\Modules\\Review\\Http\\ReviewController@index', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/review', 'Lwt\\Modules\\Review\\Http\\ReviewController@index', AUTH_MIDDLEWARE);
 
     // ==================== LANGUAGE ROUTES (PROTECTED) ====================
 

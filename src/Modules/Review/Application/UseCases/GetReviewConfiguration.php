@@ -144,7 +144,7 @@ class GetReviewConfiguration
         $langCode = $languageService->getLanguageCode($langId, LanguagePresets::getAll());
 
         // Get test counts
-        $counts = $this->repository->getTestCounts($config);
+        $counts = $this->repository->getReviewCounts($config);
 
         // Get or create session
         $session = $this->sessionManager->getSession();
@@ -157,9 +157,9 @@ class GetReviewConfiguration
         $title = $this->buildTitle($config);
 
         return [
-            'testKey' => $config->testKey,
+            'reviewKey' => $config->reviewKey,
             'selection' => $config->getSelectionString(),
-            'testType' => $config->getBaseType(),
+            'reviewType' => $config->getBaseType(),
             'isTableMode' => $config->isTableMode,
             'wordMode' => $config->wordMode,
             'langId' => $langId,
@@ -199,7 +199,7 @@ class GetReviewConfiguration
     {
         $langName = $this->repository->getLanguageName($config);
 
-        return match ($config->testKey) {
+        return match ($config->reviewKey) {
             ReviewConfiguration::KEY_LANG => "All Terms in {$langName}",
             ReviewConfiguration::KEY_TEXT => $this->getTextTitle($config),
             ReviewConfiguration::KEY_WORDS, ReviewConfiguration::KEY_TEXTS => $this->getSelectionTitle($config, $langName),

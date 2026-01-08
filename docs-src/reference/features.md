@@ -8,8 +8,8 @@
 * You read the text while listening to the audio, and you see immediately the status of every word (unknown, learning, learned, well-known, ignored).
 * You click on words, and you use the external dictionaries to find out their meanings.
 * You save words or expressions (2..9 words) with optional romanization (for asiatic languages), translations and example sentence, you change its status, you edit them whenever needed (like in LingQ).
-* You test your understanding of words and expressions within or without sentence context.
-* MCD (Massive-Context Cloze Deletion) testing, as proposed by Khatzumoto @ AJATT, built-in!
+* You review your understanding of words and expressions within or without sentence context.
+* MCD (Massive-Context Cloze Deletion) reviews, as proposed by Khatzumoto @ AJATT, built-in!
 * See your progress on the statistics page.
 * You may export the words and expressions and use them in Anki or other programs.
 * You may upload words and expressions into LWT (from LingQ or other sources, CSV/TSV) - they are immediately available in all texts!

@@ -88,7 +88,7 @@ class StartReviewSession
         }
 
         // Get test counts
-        $counts = $this->repository->getTestCounts($config);
+        $counts = $this->repository->getReviewCounts($config);
 
         // Initialize session
         $session = ReviewSession::start($counts['due']);

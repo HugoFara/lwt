@@ -19,7 +19,7 @@
  * @since    3.0.0
  */
 
-namespace Lwt\Views\Test;
+namespace Lwt\Views\Review;
 
 ?>
 <h1>REVIEW - <?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>

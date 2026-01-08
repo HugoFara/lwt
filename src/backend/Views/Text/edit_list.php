@@ -223,7 +223,7 @@ echo PageLayoutHelper::buildActionCard([
                                         <?php echo IconHelper::render('book-open', ['size' => 16]); ?>
                                         <span>Read</span>
                                     </a>
-                                    <a :href="'/test?text=' + text.id" class="card-footer-item">
+                                    <a :href="'/review?text=' + text.id" class="card-footer-item">
                                         <?php echo IconHelper::render('circle-help', ['size' => 16]); ?>
                                         <span>Review</span>
                                     </a>

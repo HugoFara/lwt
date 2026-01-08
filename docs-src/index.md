@@ -22,7 +22,7 @@ features:
     details: Import texts in any language, click unknown words to look them up and save translations. Build vocabulary naturally through context.
   - icon: 📊
     title: Track Progress
-    details: Words are tracked with status levels (1-5). Review and test your vocabulary with spaced repetition principles.
+    details: Words are tracked with status levels (1-5). Review your vocabulary with spaced repetition principles.
   - icon: 🏠
     title: Self-Hosted
     details: Run on your own server. Your data stays private. No subscription fees. 100% free and open source.

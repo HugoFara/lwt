@@ -15,7 +15,6 @@
 namespace Lwt\Modules\Review\Application\Services;
 
 use Lwt\Core\Globals;
-use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
@@ -68,7 +67,7 @@ class ReviewService
      *
      * @return array{0: string, 1: int|int[]|string} Selector type and selection value
      */
-    public function getTestIdentifier(
+    public function getReviewIdentifier(
         ?int $selection,
         ?string $sessTestsql,
         ?int $lang,
@@ -108,51 +107,53 @@ class ReviewService
      *
      * @return string|null SQL projection string
      */
-    public function getTestSql(string $selector, int|array $selection): ?string
+    public function getReviewSql(string $selector, int|array $selection): ?string
     {
-        $testsql = null;
+        $reviewsql = null;
         switch ($selector) {
             case 'words':
                 // Test words in a list of words ID
                 $idString = is_array($selection) ? implode(",", $selection) : (string)$selection;
-                $testsql = " words WHERE WoID IN ($idString) ";
-                // Note: Multi-language validation is done by caller via validateTestSelection()
+                $reviewsql = " words WHERE WoID IN ($idString) ";
+                // Note: Multi-language validation is done by caller via validateReviewSelection()
                 break;
             case 'texts':
                 // Test text items from a list of texts ID
                 $idString = is_array($selection) ? implode(",", $selection) : (string)$selection;
-                $testsql = " words, textitems2
+                $reviewsql = " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($idString) ";
-                // Note: Multi-language validation is done by caller via validateTestSelection()
+                // Note: Multi-language validation is done by caller via validateReviewSelection()
                 break;
             case 'lang':
                 // Test words from a specific language
                 $langId = is_array($selection) ? ($selection[0] ?? 0) : $selection;
-                $testsql = " words WHERE WoLgID = $langId ";
+                $reviewsql = " words WHERE WoLgID = $langId ";
                 break;
             case 'text':
                 // Test text items from a specific text ID
                 $textId = is_array($selection) ? ($selection[0] ?? 0) : $selection;
-                $testsql = " words, textitems2
+                $reviewsql = " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
                 break;
             default:
-                ErrorHandler::die("ReviewService::getTestSql called with wrong parameters");
+                throw new \InvalidArgumentException(
+                    "Invalid selector '$selector': must be 'words', 'texts', 'lang', or 'text'"
+                );
         }
-        return $testsql;
+        return $reviewsql;
     }
 
     /**
      * Validate test selection (check single language).
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return array{valid: bool, langCount: int, error: string|null}
      */
-    public function validateTestSelection(string $testsql): array
+    public function validateReviewSelection(string $reviewsql): array
     {
         $langCount = (int) Connection::fetchValue(
-            "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $testsql",
+            "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $reviewsql",
             'cnt'
         );
 
@@ -178,7 +179,7 @@ class ReviewService
      * @param int|null    $lang      Language ID
      * @param int|null    $text      Text ID
      * @param int|null    $selection Selection type
-     * @param string|null $testsql   Test SQL for selection
+     * @param string|null $reviewsql   Test SQL for selection
      *
      * @return string Language name or 'L2' as default
      */
@@ -186,7 +187,7 @@ class ReviewService
         ?int $lang,
         ?int $text,
         ?int $selection = null,
-        ?string $testsql = null
+        ?string $reviewsql = null
     ): string {
         if ($lang !== null) {
             $name = QueryBuilder::table('languages')
@@ -205,10 +206,10 @@ class ReviewService
             return $name !== null ? (string) $name : 'L2';
         }
 
-        if ($selection !== null && $testsql !== null) {
-            $testSqlProjection = $this->buildSelectionTestSql($selection, $testsql);
+        if ($selection !== null && $reviewsql !== null) {
+            $testSqlProjection = $this->buildSelectionReviewSql($selection, $reviewsql);
             if ($testSqlProjection !== null) {
-                $validation = $this->validateTestSelection($testSqlProjection);
+                $validation = $this->validateReviewSelection($testSqlProjection);
                 if ($validation['langCount'] == 1) {
                     $bindings = [];
                     $name = Connection::preparedFetchValue(
@@ -235,20 +236,20 @@ class ReviewService
      *
      * @return string|null SQL projection string
      */
-    public function buildSelectionTestSql(int $selectionType, string $selectionData): ?string
+    public function buildSelectionReviewSql(int $selectionType, string $selectionData): ?string
     {
         $dataStringArray = explode(",", trim($selectionData, "()"));
         $dataIntArray = array_map('intval', $dataStringArray);
         switch ($selectionType) {
             case 2:
-                $testSql = $this->getTestSql('words', $dataIntArray);
+                $testSql = $this->getReviewSql('words', $dataIntArray);
                 break;
             case 3:
-                $testSql = $this->getTestSql('texts', $dataIntArray);
+                $testSql = $this->getReviewSql('texts', $dataIntArray);
                 break;
             default:
                 // Legacy: raw SQL passed directly
-                // Note: Multi-language validation is done by caller via validateTestSelection()
+                // Note: Multi-language validation is done by caller via validateReviewSelection()
                 $testSql = $selectionData;
         }
         return $testSql;
@@ -257,22 +258,22 @@ class ReviewService
     /**
      * Get test counts (due and total).
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return array{due: int, total: int}
      */
-    public function getTestCounts(string $testsql): array
+    public function getReviewCounts(string $reviewsql): array
     {
         $due = (int) Connection::fetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
-            FROM $testsql AND WoStatus BETWEEN 1 AND 5
+            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0",
             'cnt'
         );
 
         $total = (int) Connection::fetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
-            FROM $testsql AND WoStatus BETWEEN 1 AND 5
+            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*'",
             'cnt'
         );
@@ -283,15 +284,15 @@ class ReviewService
     /**
      * Get tomorrow's test count.
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return int Number of tests due tomorrow
      */
-    public function getTomorrowTestCount(string $testsql): int
+    public function getTomorrowReviewCount(string $reviewsql): int
     {
         return (int) Connection::fetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
-            FROM $testsql AND WoStatus BETWEEN 1 AND 5
+            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*' AND WoTomorrowScore < 0",
             'cnt'
         );
@@ -300,11 +301,11 @@ class ReviewService
     /**
      * Get the next word to test.
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return array|null Word record or null if none available
      */
-    public function getNextWord(string $testsql): ?array
+    public function getNextWord(string $reviewsql): ?array
     {
         $pass = 0;
         while ($pass < 2) {
@@ -314,7 +315,7 @@ class ReviewService
                 (IFNULL(WoSentence, '') NOT LIKE CONCAT('%{', WoText, '}%')) AS notvalid,
                 WoStatus,
                 DATEDIFF(NOW(), WoStatusChanged) AS Days, WoTodayScore AS Score
-                FROM $testsql AND WoStatus BETWEEN 1 AND 5
+                FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
                 AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0 " .
                 ($pass == 1 ? 'AND WoRandom > RAND()' : '') . '
                 ORDER BY WoTodayScore, WoRandom
@@ -419,14 +420,14 @@ class ReviewService
     /**
      * Get the language ID from test SQL.
      *
-     * @param string $testsql Test SQL projection
+     * @param string $reviewsql Test SQL projection
      *
      * @return int|null Language ID or null
      */
-    public function getLanguageIdFromTestSql(string $testsql): ?int
+    public function getLanguageIdFromReviewSql(string $reviewsql): ?int
     {
         $langId = Connection::fetchValue(
-            "SELECT WoLgID FROM $testsql LIMIT 1",
+            "SELECT WoLgID FROM $reviewsql LIMIT 1",
             'WoLgID'
         );
         return $langId !== null ? (int) $langId : null;
@@ -526,7 +527,7 @@ class ReviewService
      *
      * @return int Test type clamped to 1-5
      */
-    public function clampTestType(int $testType): int
+    public function clampReviewType(int $testType): int
     {
         return max(1, min(5, $testType));
     }
@@ -550,7 +551,7 @@ class ReviewService
      *
      * @return int Base test type (1-3)
      */
-    public function getBaseTestType(int $testType): int
+    public function getBaseReviewType(int $testType): int
     {
         return $testType > 3 ? $testType - 3 : $testType;
     }
@@ -560,7 +561,7 @@ class ReviewService
      *
      * @return array{edit: int, status: int, term: int, trans: int, rom: int, sentence: int}
      */
-    public function getTableTestSettings(): array
+    public function getTableReviewSettings(): array
     {
         return [
             'edit' => Settings::getZeroOrOne('currenttabletestsetting1', 1),
@@ -575,15 +576,15 @@ class ReviewService
     /**
      * Get words for table test.
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return \mysqli_result|bool Query result
      */
-    public function getTableTestWords(string $testsql): \mysqli_result|bool
+    public function getTableReviewWords(string $reviewsql): \mysqli_result|bool
     {
         $sql = "SELECT DISTINCT WoID, WoText, WoTranslation, WoRomanization,
             WoSentence, WoStatus, WoTodayScore AS Score
-            FROM $testsql AND WoStatus BETWEEN 1 AND 5
+            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*'
             ORDER BY WoTodayScore, WoRandom * RAND()";
 
@@ -600,7 +601,7 @@ class ReviewService
      *
      * @return array{title: string, property: string, counts: array{due: int, total: int}}|null
      */
-    public function getTestDataFromParams(
+    public function getReviewDataFromParams(
         ?int $selection,
         ?string $sessTestsql,
         ?int $langId,
@@ -608,20 +609,20 @@ class ReviewService
     ): ?array {
         if ($selection !== null && $sessTestsql !== null) {
             $property = "selection=$selection";
-            $testsql = $this->buildSelectionTestSql($selection, $sessTestsql);
+            $reviewsql = $this->buildSelectionReviewSql($selection, $sessTestsql);
 
-            if ($testsql === null) {
+            if ($reviewsql === null) {
                 return null;
             }
 
-            $validation = $this->validateTestSelection($testsql);
+            $validation = $this->validateReviewSelection($reviewsql);
             if (!$validation['valid']) {
                 return null;
             }
 
             $bindings = [];
             $totalCount = (int) Connection::preparedFetchValue(
-                "SELECT COUNT(DISTINCT WoID) AS cnt FROM $testsql"
+                "SELECT COUNT(DISTINCT WoID) AS cnt FROM $reviewsql"
                     . UserScopedQuery::forTablePrepared('words', $bindings),
                 $bindings,
                 'cnt'
@@ -631,7 +632,7 @@ class ReviewService
             $bindings = [];
             $langName = Connection::preparedFetchValue(
                 "SELECT LgName
-                FROM languages, {$testsql} AND LgID = WoLgID"
+                FROM languages, {$reviewsql} AND LgID = WoLgID"
                 . UserScopedQuery::forTablePrepared('words', $bindings) . "
                 LIMIT 1",
                 $bindings,
@@ -642,7 +643,7 @@ class ReviewService
             }
         } elseif ($langId !== null) {
             $property = "lang=$langId";
-            $testsql = " words WHERE WoLgID = $langId ";
+            $reviewsql = " words WHERE WoLgID = $langId ";
 
             $langName = QueryBuilder::table('languages')
                 ->where('LgID', '=', $langId)
@@ -650,7 +651,7 @@ class ReviewService
             $title = "All Terms in " . ($langName ?? 'Unknown');
         } elseif ($textId !== null) {
             $property = "text=$textId";
-            $testsql = " words, textitems2
+            $reviewsql = " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
 
             $title = QueryBuilder::table('texts')
@@ -663,12 +664,12 @@ class ReviewService
             return null;
         }
 
-        $counts = $this->getTestCounts($testsql);
+        $counts = $this->getReviewCounts($reviewsql);
 
         return [
             'title' => $title,
             'property' => $property,
-            'testsql' => $testsql,
+            'reviewsql' => $reviewsql,
             'counts' => $counts
         ];
     }
@@ -682,18 +683,18 @@ class ReviewService
      */
     public function updateSessionProgress(int $statusChange): array
     {
-        $total = (int) ($_SESSION['testtotal'] ?? 0);
-        $wrong = (int) ($_SESSION['testwrong'] ?? 0);
-        $correct = (int) ($_SESSION['testcorrect'] ?? 0);
+        $total = (int) ($_SESSION['reviewtotal'] ?? 0);
+        $wrong = (int) ($_SESSION['reviewwrong'] ?? 0);
+        $correct = (int) ($_SESSION['reviewcorrect'] ?? 0);
         $remaining = $total - $correct - $wrong;
 
         if ($remaining > 0) {
             if ($statusChange >= 0) {
                 $correct++;
-                $_SESSION['testcorrect'] = $correct;
+                $_SESSION['reviewcorrect'] = $correct;
             } else {
                 $wrong++;
-                $_SESSION['testwrong'] = $wrong;
+                $_SESSION['reviewwrong'] = $wrong;
             }
             $remaining--;
         }
@@ -707,32 +708,32 @@ class ReviewService
     }
 
     /**
-     * Initialize test session.
+     * Initialize review session.
      *
-     * @param int $totalDue Total words due for testing
+     * @param int $totalDue Total words due for review
      *
      * @return void
      */
-    public function initializeTestSession(int $totalDue): void
+    public function initializeReviewSession(int $totalDue): void
     {
-        $_SESSION['teststart'] = time() + 2;
-        $_SESSION['testcorrect'] = 0;
-        $_SESSION['testwrong'] = 0;
-        $_SESSION['testtotal'] = $totalDue;
+        $_SESSION['reviewstart'] = time() + 2;
+        $_SESSION['reviewcorrect'] = 0;
+        $_SESSION['reviewwrong'] = 0;
+        $_SESSION['reviewtotal'] = $totalDue;
     }
 
     /**
-     * Get test session data.
+     * Get review session data.
      *
      * @return array{start: int, correct: int, wrong: int, total: int}
      */
-    public function getTestSessionData(): array
+    public function getReviewSessionData(): array
     {
         return [
-            'start' => (int) ($_SESSION['teststart'] ?? 0),
-            'correct' => (int) ($_SESSION['testcorrect'] ?? 0),
-            'wrong' => (int) ($_SESSION['testwrong'] ?? 0),
-            'total' => (int) ($_SESSION['testtotal'] ?? 0)
+            'start' => (int) ($_SESSION['reviewstart'] ?? 0),
+            'correct' => (int) ($_SESSION['reviewcorrect'] ?? 0),
+            'wrong' => (int) ($_SESSION['reviewwrong'] ?? 0),
+            'total' => (int) ($_SESSION['reviewtotal'] ?? 0)
         ];
     }
 
@@ -752,7 +753,7 @@ class ReviewService
         bool $wordMode,
         string $wordText
     ): string {
-        $baseType = $this->getBaseTestType($testType);
+        $baseType = $this->getBaseReviewType($testType);
 
         if ($baseType == 1) {
             $tagList = TagsFacade::getWordTagList((int) $wordData['WoID'], false);
