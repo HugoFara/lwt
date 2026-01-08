@@ -90,7 +90,7 @@ $varArray = [
     <!-- Text content (rendered by Alpine.js from word store) -->
     <p x-show="!$store.words.isLoading && $store.words.isInitialized"
        x-bind:style="$store.words.paragraphStyles"
-       x-html="$store.words.renderedHtml">
+       x-effect="$store.words.setTextHtml($el)">
     </p>
 
     <!-- Bottom padding -->

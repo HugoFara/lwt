@@ -245,8 +245,18 @@ declare global {
 window.Alpine = Alpine;
 
 // Register Alpine.js magic method for inline Markdown parsing
-// Usage in templates: x-html="$markdown(text)"
-Alpine.magic('markdown', () => (text: string) => parseInlineMarkdown(text));
+// Note: Returns plain text since x-html is not CSP-compatible
+// Markdown bold/italic is stripped, only plain text is returned
+Alpine.magic('markdown', () => (text: string) => {
+  // For CSP compatibility, strip markdown formatting and return plain text
+  // This avoids needing innerHTML which is prohibited in CSP build
+  if (!text) return '';
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // Bold
+    .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '$1') // Italic
+    .replace(/~~([^~]+)~~/g, '$1') // Strikethrough
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'); // Links (keep text only)
+});
 
 // Start Alpine.js
 Alpine.start();

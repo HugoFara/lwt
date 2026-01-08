@@ -35,6 +35,17 @@ interface Warning {
   visible: boolean;
 }
 
+interface PHPWarning extends Warning {
+  phpVersion: string;
+  minVersion: string;
+}
+
+interface UpdateWarning extends Warning {
+  currentVersion: string;
+  latestVersion: string;
+  downloadUrl: string;
+}
+
 interface LanguageNotification {
   message: string;
   visible: boolean;
@@ -52,9 +63,9 @@ interface HomeData {
 
   // Warnings
   warnings: {
-    phpOutdated: Warning;
+    phpOutdated: PHPWarning;
     cookiesDisabled: Warning;
-    updateAvailable: Warning;
+    updateAvailable: UpdateWarning;
   };
 
   // Methods
@@ -90,7 +101,9 @@ export function homeData(): HomeData {
       phpOutdated: {
         type: 'danger',
         message: '',
-        visible: false
+        visible: false,
+        phpVersion: '',
+        minVersion: ''
       },
       cookiesDisabled: {
         type: 'warning',
@@ -100,7 +113,10 @@ export function homeData(): HomeData {
       updateAvailable: {
         type: 'info',
         message: '',
-        visible: false
+        visible: false,
+        currentVersion: '',
+        latestVersion: '',
+        downloadUrl: ''
       }
     },
 
@@ -229,8 +245,8 @@ export function homeData(): HomeData {
     checkPHPVersion(phpVersion: string) {
       const phpMinVersion = '8.0.0';
       if (this.shouldUpdate(phpVersion, phpMinVersion)) {
-        this.warnings.phpOutdated.message =
-          `Your PHP version is <strong>${phpVersion}</strong>, but version <strong>${phpMinVersion}</strong> is required. Please update PHP.`;
+        this.warnings.phpOutdated.phpVersion = phpVersion;
+        this.warnings.phpOutdated.minVersion = phpMinVersion;
         this.warnings.phpOutdated.visible = true;
       }
     },
@@ -241,9 +257,9 @@ export function homeData(): HomeData {
         .then((data: { tag_name: string }) => {
           const latestVersion = data.tag_name;
           if (this.shouldUpdate(lwtVersion, latestVersion)) {
-            this.warnings.updateAvailable.message =
-              `An update for LWT is available: <strong>${latestVersion}</strong> (your version: ${lwtVersion}). ` +
-              `<a href="https://github.com/HugoFara/lwt/releases/tag/${latestVersion}" class="button is-small is-info is-outlined ml-2">Download</a>`;
+            this.warnings.updateAvailable.currentVersion = lwtVersion;
+            this.warnings.updateAvailable.latestVersion = latestVersion;
+            this.warnings.updateAvailable.downloadUrl = `https://github.com/HugoFara/lwt/releases/tag/${latestVersion}`;
             this.warnings.updateAvailable.visible = true;
           }
         })

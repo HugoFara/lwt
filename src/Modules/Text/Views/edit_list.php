@@ -176,7 +176,11 @@ echo PageLayoutHelper::buildActionCard([
                                 <div class="card-content">
                                     <!-- Tags -->
                                     <div x-show="text.taglist" class="text-meta mb-3">
-                                        <div class="tags" x-html="renderTags(text.taglist)"></div>
+                                        <div class="tags">
+                                            <template x-for="tag in parseTags(text.taglist)" :key="tag">
+                                                <span class="tag is-info is-light is-small" x-text="tag"></span>
+                                            </template>
+                                        </div>
                                     </div>
 
                                     <!-- Word Statistics -->
@@ -186,7 +190,7 @@ echo PageLayoutHelper::buildActionCard([
                                                 <div class="stat-row">
                                                     <div class="stat-item" title="Total number of unique words in this text">
                                                         <span class="stat-label">Total</span>
-                                                        <span class="stat-value" x-text="getStatsForText(lang.id, text.id)?.total ?? '-'"></span>
+                                                        <span class="stat-value" x-text="getStatTotal(lang.id, text.id)"></span>
                                                     </div>
                                                     <div class="stat-item" title="Words you have saved to your vocabulary">
                                                         <span class="stat-label">Saved</span>
@@ -194,20 +198,26 @@ echo PageLayoutHelper::buildActionCard([
                                                             <a class="status4"
                                                                :href="'/words/edit?page=1&query=&status=&tag12=0&tag2=&tag1=&text_mode=0&text=' + text.id"
                                                                @click.stop
-                                                               x-text="getStatsForText(lang.id, text.id)?.saved ?? '-'"></a>
+                                                               x-text="getStatSaved(lang.id, text.id)"></a>
                                                         </span>
                                                     </div>
                                                     <div class="stat-item" title="Words you haven't saved yet">
                                                         <span class="stat-label">Unknown</span>
-                                                        <span class="stat-value status0" x-text="getStatsForText(lang.id, text.id)?.unknown ?? '-'"></span>
+                                                        <span class="stat-value status0" x-text="getStatUnknown(lang.id, text.id)"></span>
                                                     </div>
                                                     <div class="stat-item" title="Percentage of unknown words">
                                                         <span class="stat-label">Unkn.%</span>
-                                                        <span class="stat-value" x-text="(getStatsForText(lang.id, text.id)?.unknownPercent ?? '-') + '%'"></span>
+                                                        <span class="stat-value" x-text="getStatUnknownPercent(lang.id, text.id)"></span>
                                                     </div>
                                                 </div>
                                                 <!-- Status distribution bar chart -->
-                                                <div x-html="renderStatusChart(lang.id, text.id)"></div>
+                                                <div class="status-bar-chart">
+                                                    <template x-for="seg in getStatusSegments(lang.id, text.id)" :key="seg.status">
+                                                        <div :class="'status-segment bc' + seg.status"
+                                                             :style="'width: ' + seg.percent"
+                                                             :title="seg.label"></div>
+                                                    </template>
+                                                </div>
                                             </div>
                                         </template>
                                         <template x-if="!getStatsForText(lang.id, text.id)">

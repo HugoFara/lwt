@@ -171,7 +171,11 @@ echo PageLayoutHelper::buildActionCard([
                                 <div class="card-content">
                                     <!-- Tags -->
                                     <div x-show="text.taglist" class="text-meta mb-3">
-                                        <div class="tags" x-html="renderTags(text.taglist)"></div>
+                                        <div class="tags">
+                                            <template x-for="tag in parseTags(text.taglist)" :key="tag">
+                                                <span class="tag is-info is-light is-small" x-text="tag"></span>
+                                            </template>
+                                        </div>
                                     </div>
 
                                     <!-- Archive Status Badge -->

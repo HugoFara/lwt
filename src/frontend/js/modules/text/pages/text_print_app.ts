@@ -105,6 +105,16 @@ export interface TextPrintAppData {
   confirmNavigateTo(url: string, message: string): void;
   openWindow(url: string): void;
 
+  // CSP-compatible innerHTML setters (use with x-effect)
+  setItemHtml(el: HTMLElement, item: PrintItem): void;
+  setAnnotationItemHtml(el: HTMLElement, item: AnnotationItem): void;
+
+  // Safe accessors (CSP-compatible - avoid ?. in templates)
+  getConfigTitle(fallback: string): string;
+  getConfigTextSize(fallback: number): number;
+  getAnnConfigTitle(fallback: string): string;
+  getAnnConfigTextSize(fallback: number): number;
+
   // Internal formatting helpers
   formatTermBehind(
     term: string,
@@ -496,6 +506,33 @@ export function textPrintAppData(): TextPrintAppData {
 
     openWindow(url: string) {
       window.open(url);
+    },
+
+    // CSP-compatible innerHTML setter for print items (use with x-effect)
+    setItemHtml(el: HTMLElement, item: PrintItem) {
+      el.innerHTML = this.formatItem(item);
+    },
+
+    // CSP-compatible innerHTML setter for annotation items (use with x-effect)
+    setAnnotationItemHtml(el: HTMLElement, item: AnnotationItem) {
+      el.innerHTML = this.formatAnnotationItem(item);
+    },
+
+    // Safe accessors (CSP-compatible - avoid ?. in templates)
+    getConfigTitle(fallback: string): string {
+      return this.config ? this.config.title : fallback;
+    },
+
+    getConfigTextSize(fallback: number): number {
+      return this.config ? this.config.textSize : fallback;
+    },
+
+    getAnnConfigTitle(fallback: string): string {
+      return this.annConfig ? this.annConfig.title : fallback;
+    },
+
+    getAnnConfigTextSize(fallback: number): number {
+      return this.annConfig ? this.annConfig.textSize : fallback;
     }
   };
 }

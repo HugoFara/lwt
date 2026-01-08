@@ -208,12 +208,12 @@ function buildWordReviewArea(): string {
         <!-- Term display -->
         <div class="review-term-display mb-5"
              :style="'font-size: ' + store.langSettings.textSize + '%; direction: ' + (store.langSettings.rtl ? 'rtl' : 'ltr')"
-             x-html="store.currentWord?.group || ''">
+             x-effect="setTermDisplayHtml($el)">
         </div>
 
         <!-- Solution (hidden until revealed) -->
         <div x-show="store.answerRevealed" class="notification is-info is-light mb-5">
-          <p class="is-size-4" x-text="store.currentWord?.solution || ''"></p>
+          <p class="is-size-4" x-text="getCurrentWordSolution()"></p>
         </div>
 
         <!-- Action buttons -->
@@ -246,7 +246,7 @@ function buildWordReviewArea(): string {
           <div class="buttons is-centered are-small">
             ${[1, 2, 3, 4, 5].map(s => `
               <button class="button status-btn"
-                      :class="{ 'status-${s}': store.currentWord?.status === ${s} }"
+                      :class="{ 'status-${s}': getCurrentWordStatus() === ${s} }"
                       @click="setStatus(${s})">${s}</button>
             `).join('')}
             <button class="button" @click="setStatus(98)" title="Press I">
@@ -370,7 +370,7 @@ function buildTableReview(): string {
                   <span x-text="word.translation"></span>
                 </td>
                 <td x-show="columns.rom" class="has-text-centered" x-text="word.romanization"></td>
-                <td x-show="columns.sentence" x-html="word.sentenceHtml"></td>
+                <td x-show="columns.sentence" x-effect="setSentenceHtml($el, word)"></td>
               </tr>
             </template>
           </tbody>
@@ -701,6 +701,24 @@ function registerReviewAppComponent(config: ReviewConfig): void {
           if (this.store.answerRevealed) this.setStatus(parseInt(e.key, 10));
           break;
       }
+    },
+
+    // Safe accessors (CSP-compatible - avoid ?. in templates)
+    getCurrentWordGroup(): string {
+      return this.store.currentWord ? this.store.currentWord.group : '';
+    },
+
+    getCurrentWordSolution(): string {
+      return this.store.currentWord ? this.store.currentWord.solution : '';
+    },
+
+    getCurrentWordStatus(): number {
+      return this.store.currentWord ? this.store.currentWord.status : 0;
+    },
+
+    // CSP-compatible innerHTML setter (use with x-effect)
+    setTermDisplayHtml(el: HTMLElement) {
+      el.innerHTML = this.getCurrentWordGroup();
     }
   }));
 }
@@ -800,6 +818,11 @@ function registerTableReviewComponent(): void {
           if (typeof s.trans === 'boolean') this.contextAnnotations.trans = s.trans;
         } catch { /* ignore */ }
       }
+    },
+
+    // CSP-compatible innerHTML setter (use with x-effect)
+    setSentenceHtml(el: HTMLElement, word: TableReviewWord) {
+      el.innerHTML = word.sentenceHtml;
     }
   }));
 }

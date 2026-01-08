@@ -83,6 +83,7 @@ export interface WordStoreState {
 
   // Methods
   getRenderedHtml(): string;
+  setTextHtml(el: HTMLElement): void;
   loadText(textId: number): Promise<void>;
   initFromData(words: TextWord[], config: TextReadingConfig): void;
   selectWord(hex: string, position: number): void;
@@ -164,6 +165,13 @@ function createWordStore(): WordStoreState {
       };
 
       return renderText(this.words, settings);
+    },
+
+    /**
+     * Set text element HTML (CSP-compatible - use with x-effect)
+     */
+    setTextHtml(el: HTMLElement): void {
+      el.innerHTML = this.renderedHtml;
     },
 
     /**

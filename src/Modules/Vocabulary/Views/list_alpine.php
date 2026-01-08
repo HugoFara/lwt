@@ -401,7 +401,7 @@ echo PageLayoutHelper::buildActionCard([
                             <template x-if="!isEditing(word.id, 'translation')">
                                 <span class="clickedit"
                                       @click="startEdit(word.id, 'translation')"
-                                      x-html="$markdown(getDisplayValue(word, 'translation'))"></span>
+                                      x-text="$markdown(getDisplayValue(word, 'translation'))"></span>
                             </template>
                             <span x-show="word.tags" class="has-text-grey is-size-7 ml-1" x-text="word.tags"></span>
                         </td>
@@ -493,7 +493,7 @@ echo PageLayoutHelper::buildActionCard([
                             </span>
                         </template>
                         <template x-if="!isEditing(word.id, 'translation')">
-                            <span class="clickedit" @click="startEdit(word.id, 'translation')" x-html="$markdown(getDisplayValue(word, 'translation'))"></span>
+                            <span class="clickedit" @click="startEdit(word.id, 'translation')" x-text="$markdown(getDisplayValue(word, 'translation'))"></span>
                         </template>
                     </p>
 

@@ -112,6 +112,7 @@ export interface WordUploadResultData {
   goLast(): void;
   formatTermRow(term: ImportedTerm): string;
   getStatusInfo(status: number): { name: string; abbr: string };
+  setTableBodyHtml(el: HTMLElement): void;
 }
 
 /**
@@ -262,6 +263,13 @@ export function wordUploadResultApp(config: UploadResultConfig = { lastUpdate: '
      */
     getStatusInfo(status: number): { name: string; abbr: string } {
       return statuses[status] || { name: 'Unknown', abbr: '?' };
+    },
+
+    /**
+     * Set table body HTML (CSP-compatible - use with x-effect)
+     */
+    setTableBodyHtml(el: HTMLElement): void {
+      el.innerHTML = this.terms.map(term => this.formatTermRow(term)).join('');
     }
   };
 }

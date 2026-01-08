@@ -114,13 +114,21 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
 <!-- System notifications -->
 <div class="notification is-danger is-light" x-show="warnings.phpOutdated.visible" x-transition>
-    <p x-html="warnings.phpOutdated.message"></p>
+    <p>
+        Your PHP version is <strong x-text="warnings.phpOutdated.phpVersion"></strong>,
+        but version <strong x-text="warnings.phpOutdated.minVersion"></strong> is required.
+        Please update PHP.
+    </p>
 </div>
 <div class="notification is-warning is-light" x-show="warnings.cookiesDisabled.visible" x-transition>
-    <p x-html="warnings.cookiesDisabled.message"></p>
+    <p x-text="warnings.cookiesDisabled.message"></p>
 </div>
 <div class="notification is-info is-light" x-show="warnings.updateAvailable.visible" x-transition>
-    <p x-html="warnings.updateAvailable.message"></p>
+    <p>
+        An update for LWT is available: <strong x-text="warnings.updateAvailable.latestVersion"></strong>
+        (your version: <span x-text="warnings.updateAvailable.currentVersion"></span>).
+        <a :href="warnings.updateAvailable.downloadUrl" class="button is-small is-info is-outlined ml-2">Download</a>
+    </p>
 </div>
 
 <!-- Language change notification -->

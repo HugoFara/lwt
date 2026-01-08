@@ -152,7 +152,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                             <th class="has-text-centered is-clickable">Status</th>
                         </tr>
                     </thead>
-                    <tbody x-html="terms.map(term => formatTermRow(term)).join('')">
+                    <tbody x-effect="setTableBodyHtml($el)">
                     </tbody>
                 </table>
             </div>

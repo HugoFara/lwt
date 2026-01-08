@@ -48,7 +48,7 @@ namespace Lwt\Views\Text;
             <!-- Translation/Romanization for known words -->
             <template x-if="!isUnknown && word.translation">
               <div class="mb-3">
-                <p class="has-text-grey-dark" x-html="$markdown(word.translation)"></p>
+                <p class="has-text-grey-dark" x-text="$markdown(word.translation)"></p>
                 <template x-if="word.romanization">
                   <p class="is-size-7 has-text-grey" x-text="word.romanization"></p>
                 </template>
@@ -59,7 +59,7 @@ namespace Lwt\Views\Text;
             <template x-if="!isUnknown && word.notes">
               <div class="mb-3">
                 <p class="is-size-7 has-text-grey mb-1">Notes:</p>
-                <p class="has-text-grey-dark is-size-7" x-html="$markdown(word.notes)"></p>
+                <p class="has-text-grey-dark is-size-7" x-text="$markdown(word.notes)"></p>
               </div>
             </template>
 

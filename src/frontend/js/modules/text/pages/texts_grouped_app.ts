@@ -16,7 +16,6 @@ import { initIcons } from '@shared/icons/lucide_icons';
 import { apiGet } from '@shared/api/client';
 import { TextsApi } from '@modules/text/api/texts_api';
 import { confirmDelete } from '@shared/utils/ui_utilities';
-import { renderTags, renderStatusBarChart } from '@shared/utils/html_utils';
 
 const STORAGE_KEY = 'lwt_collapsed_languages';
 
@@ -147,8 +146,14 @@ export interface TextsGroupedData {
   handleSortChange(event: Event): void;
 
   // Utility
-  renderTags(tagList: string): string;
-  renderStatusChart(langId: number, textId: number): string;
+  parseTags(tagList: string): string[];
+  getStatusSegments(langId: number, textId: number): Array<{status: number, percent: string, label: string, count: number}>;
+
+  // Safe accessors for stats (CSP-compatible - avoid ?. in templates)
+  getStatTotal(langId: number, textId: number): string;
+  getStatSaved(langId: number, textId: number): string;
+  getStatUnknown(langId: number, textId: number): string;
+  getStatUnknownPercent(langId: number, textId: number): string;
 }
 
 /**
@@ -476,15 +481,66 @@ export function textsGroupedData(): TextsGroupedData {
       }
     },
 
-    // Utility - render tags as Bulma components
-    renderTags(tagList: string): string {
-      return renderTags(tagList);
+    // Utility - parse tags from comma-separated string
+    parseTags(tagList: string): string[] {
+      if (!tagList || tagList.trim() === '') {
+        return [];
+      }
+      return tagList.split(',').map(t => t.trim()).filter(t => t !== '');
     },
 
-    // Utility - render status bar chart
-    renderStatusChart(langId: number, textId: number): string {
+    // Utility - get status chart segments for template rendering
+    getStatusSegments(langId: number, textId: number): Array<{status: number, percent: string, label: string, count: number}> {
       const stats = this.getStatsForText(langId, textId);
-      return renderStatusBarChart(stats);
+      if (!stats || stats.total === 0) {
+        return [];
+      }
+
+      const STATUS_LABELS: Record<number, string> = {
+        0: 'Unknown', 1: 'Learning (1)', 2: 'Learning (2)',
+        3: 'Learning (3)', 4: 'Learning (4)', 5: 'Learned (5)',
+        98: 'Ignored', 99: 'Well Known'
+      };
+      const STATUS_ORDER = [0, 1, 2, 3, 4, 5, 99, 98];
+      const { total, unknown, statusCounts } = stats;
+
+      const segments: Array<{status: number, percent: string, label: string, count: number}> = [];
+
+      for (const status of STATUS_ORDER) {
+        const count = status === 0 ? unknown : (statusCounts[String(status)] || 0);
+        if (count > 0) {
+          const pct = (count / total) * 100;
+          segments.push({
+            status,
+            percent: pct.toFixed(2) + '%',
+            label: `${STATUS_LABELS[status]}: ${count} (${pct.toFixed(1)}%)`,
+            count
+          });
+        }
+      }
+
+      return segments;
+    },
+
+    // Safe accessors for stats (CSP-compatible - avoid ?. in templates)
+    getStatTotal(langId: number, textId: number): string {
+      const stats = this.getStatsForText(langId, textId);
+      return stats ? String(stats.total) : '-';
+    },
+
+    getStatSaved(langId: number, textId: number): string {
+      const stats = this.getStatsForText(langId, textId);
+      return stats ? String(stats.saved) : '-';
+    },
+
+    getStatUnknown(langId: number, textId: number): string {
+      const stats = this.getStatsForText(langId, textId);
+      return stats ? String(stats.unknown) : '-';
+    },
+
+    getStatUnknownPercent(langId: number, textId: number): string {
+      const stats = this.getStatsForText(langId, textId);
+      return stats ? stats.unknownPercent + '%' : '-';
     }
   };
 }
