@@ -1,7 +1,7 @@
 /**
- * Test View - Client-side rendered test interface.
+ * Review View - Client-side rendered review interface.
  *
- * Renders the entire test UI using Alpine.js and vanilla JavaScript.
+ * Renders the entire review UI using Alpine.js and vanilla JavaScript.
  * No server-side HTML generation - fully reactive SPA-style interface.
  *
  * @license Unlicense <http://unlicense.org/>
@@ -9,16 +9,16 @@
  */
 
 import Alpine from 'alpinejs';
-import type { TestStoreState, TestConfig, LangSettings } from '../stores/test_store';
-import { getTestStore } from '../stores/test_store';
+import type { ReviewStoreState, ReviewConfig, LangSettings } from '../stores/review_store';
+import { getReviewStore } from '../stores/review_store';
 import { ReviewApi, type TableTestWord } from '@modules/review/api/review_api';
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { saveSetting } from '@shared/utils/ajax_utilities';
 
 /**
- * Test types configuration
+ * Review types configuration
  */
-const TEST_TYPES = [
+const REVIEW_TYPES = [
   { id: 1, label: 'Sentence → Translation', title: 'Show sentence with term highlighted, guess translation' },
   { id: 2, label: 'Sentence → Term', title: 'Show sentence with translation, guess the term' },
   { id: 3, label: 'Sentence → Both', title: 'Show sentence with hidden term, guess both term and translation' },
@@ -27,23 +27,23 @@ const TEST_TYPES = [
 ];
 
 /**
- * Render the complete test interface.
+ * Render the complete review interface.
  */
-export function renderTestApp(container: HTMLElement): void {
+export function renderReviewApp(container: HTMLElement): void {
   // Build the complete HTML structure
-  container.innerHTML = buildTestAppHTML();
+  container.innerHTML = buildReviewAppHTML();
 
   // Initialize Alpine on the container
   Alpine.initTree(container);
 }
 
 /**
- * Build the complete test app HTML.
+ * Build the complete review app HTML.
  */
-function buildTestAppHTML(): string {
+function buildReviewAppHTML(): string {
   return `
-    <div x-data="testApp" class="test-page" x-cloak>
-      ${buildTestToolbar()}
+    <div x-data="reviewApp" class="review-page" x-cloak>
+      ${buildReviewToolbar()}
       ${buildProgressBar()}
       ${buildMainContent()}
       ${buildWordModal()}
@@ -53,27 +53,27 @@ function buildTestAppHTML(): string {
 }
 
 /**
- * Build test toolbar HTML (below main navbar).
+ * Build review toolbar HTML (below main navbar).
  */
-function buildTestToolbar(): string {
+function buildReviewToolbar(): string {
   return `
     <div class="box py-2 px-4 mb-0" style="border-radius: 0;">
       <div class="level is-mobile">
         <div class="level-left">
           <div class="level-item">
-            <strong>Test: <span x-text="store.title"></span></strong>
+            <strong>Review: <span x-text="store.title"></span></strong>
           </div>
         </div>
         <div class="level-right">
           <div class="level-item">
             <div class="field is-grouped is-grouped-multiline">
-              <!-- Test type buttons -->
+              <!-- Review type buttons -->
               <div class="control">
                 <div class="buttons are-small">
-                  ${TEST_TYPES.map(t => `
+                  ${REVIEW_TYPES.map(t => `
                     <button class="button"
                             :class="{ 'is-primary': store.testType === ${t.id} && !store.isTableMode }"
-                            @click="switchTestType(${t.id})"
+                            @click="switchReviewType(${t.id})"
                             title="${escapeHtml(t.title)}">
                       ${escapeHtml(t.label)}
                     </button>
@@ -104,7 +104,7 @@ function buildTestToolbar(): string {
  */
 function buildProgressBar(): string {
   return `
-    <div class="box py-2 px-4 mb-0 test-progress-section">
+    <div class="box py-2 px-4 mb-0 review-progress-section">
       <div class="level is-mobile">
         <div class="level-left">
           <div class="level-item">
@@ -114,12 +114,12 @@ function buildProgressBar(): string {
         </div>
 
         <div class="level-item is-flex-grow-1 mx-4">
-          <div class="test-progress">
-            <div class="test-progress-remaining"
+          <div class="review-progress">
+            <div class="review-progress-remaining"
                  :style="'width: ' + progressPercent.remaining + '%'"></div>
-            <div class="test-progress-wrong"
+            <div class="review-progress-wrong"
                  :style="'width: ' + progressPercent.wrong + '%'"></div>
-            <div class="test-progress-correct"
+            <div class="review-progress-correct"
                  :style="'width: ' + progressPercent.correct + '%'"></div>
           </div>
         </div>
@@ -146,7 +146,7 @@ function buildMainContent(): string {
     <!-- Loading state -->
     <div x-show="store.isLoading && !store.isInitialized" class="has-text-centered py-6">
       <div class="loading-spinner"></div>
-      <p class="mt-4 has-text-grey">Loading test...</p>
+      <p class="mt-4 has-text-grey">Loading review...</p>
     </div>
 
     <!-- Error state -->
@@ -157,16 +157,16 @@ function buildMainContent(): string {
       </div>
     </template>
 
-    <!-- Word test content -->
-    <div x-show="!store.isTableMode && !store.error && store.isInitialized" class="test-content p-4">
+    <!-- Word review content -->
+    <div x-show="!store.isTableMode && !store.error && store.isInitialized" class="review-content p-4">
       ${buildFinishedMessage()}
-      ${buildWordTestArea()}
+      ${buildWordReviewArea()}
     </div>
 
-    <!-- Table test content -->
-    <div x-show="store.isTableMode && !store.error && store.isInitialized" class="table-test-content p-4">
-      <div x-data="tableTest" x-init="init()">
-        ${buildTableTest()}
+    <!-- Table review content -->
+    <div x-show="store.isTableMode && !store.error && store.isInitialized" class="table-review-content p-4">
+      <div x-data="tableReview" x-init="init()">
+        ${buildTableReview()}
       </div>
     </div>
   `;
@@ -180,10 +180,10 @@ function buildFinishedMessage(): string {
     <div x-show="store.isFinished" class="has-text-centered py-6">
       <div class="notification is-success is-light">
         <p class="is-size-5 has-text-weight-bold"
-           x-text="store.progress.total > 0 ? 'Nothing more to test here!' : 'Nothing to test here!'"></p>
+           x-text="store.progress.total > 0 ? 'Nothing more to review here!' : 'Nothing to review here!'"></p>
         <p class="mt-3" x-show="store.tomorrowCount > 0">
           Tomorrow you'll find here <strong x-text="store.tomorrowCount"></strong>
-          test<span x-show="store.tomorrowCount !== 1">s</span>!
+          review<span x-show="store.tomorrowCount !== 1">s</span>!
         </p>
         <div class="buttons is-centered mt-5">
           <a href="/texts" class="button is-primary">Back to Texts</a>
@@ -194,11 +194,11 @@ function buildFinishedMessage(): string {
 }
 
 /**
- * Build word test area HTML.
+ * Build word review area HTML.
  */
-function buildWordTestArea(): string {
+function buildWordReviewArea(): string {
   return `
-    <div x-show="!store.isFinished && store.currentWord" class="test-word-area">
+    <div x-show="!store.isFinished && store.currentWord" class="review-word-area">
       <!-- Loading next word -->
       <div x-show="store.isLoading" class="has-text-centered py-4">
         <div class="loading-spinner"></div>
@@ -206,7 +206,7 @@ function buildWordTestArea(): string {
 
       <div x-show="!store.isLoading" class="has-text-centered">
         <!-- Term display -->
-        <div class="test-term-display mb-5"
+        <div class="review-term-display mb-5"
              :style="'font-size: ' + store.langSettings.textSize + '%; direction: ' + (store.langSettings.rtl ? 'rtl' : 'ltr')"
              x-html="store.currentWord?.group || ''">
         </div>
@@ -270,9 +270,9 @@ function buildWordTestArea(): string {
 }
 
 /**
- * Build table test HTML.
+ * Build table review HTML.
  */
-function buildTableTest(): string {
+function buildTableReview(): string {
   return `
     <!-- Loading -->
     <div x-show="isLoading" class="has-text-centered py-6">
@@ -282,7 +282,7 @@ function buildTableTest(): string {
 
     <!-- No words -->
     <div x-show="!isLoading && words.length === 0" class="notification is-info is-light">
-      <p>No words available for table testing.</p>
+      <p>No words available for table review.</p>
     </div>
 
     <!-- Table -->
@@ -442,36 +442,36 @@ function buildWordModal(): string {
 function buildStyles(): string {
   return `
     <style>
-      .test-page {
+      .review-page {
         min-height: 100vh;
         display: flex;
         flex-direction: column;
       }
 
-      .test-progress-section {
+      .review-progress-section {
         border-radius: 0;
       }
 
-      .test-content, .table-test-content {
+      .review-content, .table-review-content {
         max-width: 900px;
         margin: 0 auto;
         flex: 1;
         width: 100%;
       }
 
-      .test-word-area {
+      .review-word-area {
         min-height: 400px;
         display: flex;
         flex-direction: column;
         justify-content: center;
       }
 
-      .test-term-display {
+      .review-term-display {
         min-height: 100px;
         line-height: 1.6;
       }
 
-      .test-progress {
+      .review-progress {
         display: flex;
         height: 8px;
         width: 100%;
@@ -480,9 +480,9 @@ function buildStyles(): string {
         background: #e0e0e0;
       }
 
-      .test-progress-remaining { background-color: #808080; transition: width 0.3s ease; }
-      .test-progress-wrong { background-color: #ff6347; transition: width 0.3s ease; }
-      .test-progress-correct { background-color: #32cd32; transition: width 0.3s ease; }
+      .review-progress-remaining { background-color: #808080; transition: width 0.3s ease; }
+      .review-progress-wrong { background-color: #ff6347; transition: width 0.3s ease; }
+      .review-progress-correct { background-color: #32cd32; transition: width 0.3s ease; }
 
       .status-btn.status-1 { background-color: #ff6347 !important; color: white !important; border-color: #ff6347 !important; }
       .status-btn.status-2 { background-color: #ffa500 !important; color: white !important; border-color: #ffa500 !important; }
@@ -534,8 +534,8 @@ function buildStyles(): string {
       [x-cloak] { display: none !important; }
 
       @media screen and (max-width: 768px) {
-        .test-progress-section .level { flex-wrap: wrap; }
-        .test-progress-section .level-item:not(:last-child) { margin-bottom: 0.5rem; }
+        .review-progress-section .level { flex-wrap: wrap; }
+        .review-progress-section .level-item:not(:last-child) { margin-bottom: 0.5rem; }
         .navbar-item .buttons { flex-wrap: wrap; justify-content: center; }
       }
     </style>
@@ -552,16 +552,16 @@ function escapeHtml(str: string): string {
 }
 
 /**
- * Initialize the test application.
+ * Initialize the review application.
  */
-export function initTestApp(): void {
-  const container = document.getElementById('test-app');
-  const configEl = document.getElementById('test-config');
+export function initReviewApp(): void {
+  const container = document.getElementById('review-app');
+  const configEl = document.getElementById('review-config');
 
   if (!container || !configEl) return;
 
   try {
-    const config: TestConfig = JSON.parse(configEl.textContent || '{}');
+    const config: ReviewConfig = JSON.parse(configEl.textContent || '{}');
 
     if (config.error) {
       container.innerHTML = `<div class="notification is-danger m-4">${escapeHtml(config.error)}</div>`;
@@ -569,27 +569,27 @@ export function initTestApp(): void {
     }
 
     // Register the Alpine components
-    registerTestAppComponent(config);
-    registerTableTestComponent();
+    registerReviewAppComponent(config);
+    registerTableReviewComponent();
 
     // Render the app
-    renderTestApp(container);
+    renderReviewApp(container);
 
   } catch (err) {
-    console.error('Error initializing test app:', err);
-    container.innerHTML = '<div class="notification is-danger m-4">Failed to initialize test</div>';
+    console.error('Error initializing review app:', err);
+    container.innerHTML = '<div class="notification is-danger m-4">Failed to initialize review</div>';
   }
 }
 
 /**
- * Register the main test app Alpine component.
+ * Register the main review app Alpine component.
  */
-function registerTestAppComponent(config: TestConfig): void {
-  Alpine.data('testApp', () => ({
+function registerReviewAppComponent(config: ReviewConfig): void {
+  Alpine.data('reviewApp', () => ({
     navbarOpen: false,
 
-    get store(): TestStoreState {
-      return getTestStore();
+    get store(): ReviewStoreState {
+      return getReviewStore();
     },
 
     get progressPercent() {
@@ -636,7 +636,7 @@ function registerTestAppComponent(config: TestConfig): void {
       await this.store.skipWord();
     },
 
-    switchTestType(type: number) {
+    switchReviewType(type: number) {
       const url = new URL(window.location.href);
       url.searchParams.set('type', String(type));
       window.location.href = url.toString();
@@ -706,10 +706,10 @@ function registerTestAppComponent(config: TestConfig): void {
 }
 
 /**
- * Register the table test Alpine component.
+ * Register the table review Alpine component.
  */
-function registerTableTestComponent(): void {
-  Alpine.data('tableTest', () => ({
+function registerTableReviewComponent(): void {
+  Alpine.data('tableReview', () => ({
     words: [] as TableTestWord[],
     langSettings: null as LangSettings | null,
     columns: { edit: true, status: true, term: true, trans: true, rom: false, sentence: true },
@@ -728,7 +728,7 @@ function registerTableTestComponent(): void {
 
     async loadWords() {
       this.isLoading = true;
-      const store = getTestStore();
+      const store = getReviewStore();
 
       try {
         const response = await ReviewApi.getTableWords(store.testKey, store.selection);
@@ -764,7 +764,7 @@ function registerTableTestComponent(): void {
     },
 
     saveColumnSettings() {
-      localStorage.setItem('lwt-table-test-columns', JSON.stringify({
+      localStorage.setItem('lwt-table-review-columns', JSON.stringify({
         columns: this.columns,
         hideTermContent: this.hideTermContent,
         hideTransContent: this.hideTransContent
@@ -772,7 +772,7 @@ function registerTableTestComponent(): void {
     },
 
     loadColumnSettings() {
-      const saved = localStorage.getItem('lwt-table-test-columns');
+      const saved = localStorage.getItem('lwt-table-review-columns');
       if (saved) {
         try {
           const s = JSON.parse(saved);
@@ -805,12 +805,12 @@ function registerTableTestComponent(): void {
 }
 
 // Auto-initialize after Alpine has initialized the DOM
-// We use DOMContentLoaded + check because initTestApp() needs to inject HTML and then call Alpine.initTree()
+// We use DOMContentLoaded + check because initReviewApp() needs to inject HTML and then call Alpine.initTree()
 document.addEventListener('DOMContentLoaded', () => {
-  // Only init if Alpine is available and we're on the test page
-  const container = document.getElementById('test-app');
-  const configEl = document.getElementById('test-config');
+  // Only init if Alpine is available and we're on the review page
+  const container = document.getElementById('review-app');
+  const configEl = document.getElementById('review-config');
   if (container && configEl && window.Alpine) {
-    initTestApp();
+    initReviewApp();
   }
 });

@@ -231,8 +231,8 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
     $router->registerWithMiddleware(
-        '/word/set-test-status',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@setTestStatusView',
+        '/word/set-review-status',
+        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@setReviewStatusView',
         AUTH_MIDDLEWARE
     );
     $router->registerWithMiddleware(

@@ -15,7 +15,7 @@
  * @since    3.0.0
  */
 
-namespace Lwt\Views\Test;
+namespace Lwt\Views\Review;
 
 use Lwt\Shared\UI\Helpers\FormHelper;
 

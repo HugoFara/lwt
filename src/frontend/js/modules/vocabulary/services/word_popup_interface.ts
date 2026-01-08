@@ -1085,7 +1085,7 @@ export function createTestStatusLink2(
   oldstat: string | number,
   newstat: number
 ): string {
-  let output = ' <a href="/word/set-test-status?wid=' + wid +
+  let output = ' <a href="/word/set-review-status?wid=' + wid +
     '&amp;status=' + newstat + '&amp;ajax=1" target="ro" onclick="showRightFramesPanel();">' +
     '<span title="' + getStatusName(newstat) + '">[';
   output += (Number(oldstat) === newstat) ? '◆' : getStatusAbbr(newstat);
@@ -1107,7 +1107,7 @@ export function createTestStatusLink(
   plusminus: number,
   text: string
 ): string {
-  return ' <a href="/word/set-test-status?wid=' + wid +
+  return ' <a href="/word/set-review-status?wid=' + wid +
     '&amp;stchange=' + plusminus +
     '&amp;ajax=1" target="ro" onclick="showRightFramesPanel();' +
     (plusminus > 0 ? 'successSound()' : 'failureSound()') + ';">' +

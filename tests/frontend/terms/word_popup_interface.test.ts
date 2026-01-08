@@ -309,7 +309,7 @@ describe('word_popup_interface.ts', () => {
     it('returns test status links for all levels', () => {
       const result = createTestStatusChangeLinks(100, 2);
 
-      expect(result).toContain('/word/set-test-status');
+      expect(result).toContain('/word/set-review-status');
       expect(result).toContain('wid=100');
       // Current status (2) should show diamond inside link
       expect(result).toContain('◆');
@@ -325,7 +325,7 @@ describe('word_popup_interface.ts', () => {
       const result = createTestStatusLink2(100, 3, 3);
 
       expect(result).toContain('◆');
-      expect(result).toContain('/word/set-test-status');
+      expect(result).toContain('/word/set-review-status');
     });
 
     it('shows status abbreviation when status differs', () => {
@@ -344,7 +344,7 @@ describe('word_popup_interface.ts', () => {
     it('creates link with positive change and success sound', () => {
       const result = createTestStatusLink(100, 1, 'Got it!');
 
-      expect(result).toContain('/word/set-test-status');
+      expect(result).toContain('/word/set-review-status');
       expect(result).toContain('wid=100');
       expect(result).toContain('stchange=1');
       expect(result).toContain('successSound()');

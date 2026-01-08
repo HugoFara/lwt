@@ -12,7 +12,7 @@
  * @since    3.0.0
  */
 
-namespace Lwt\Views\Test;
+namespace Lwt\Views\Review;
 
 ?>
 <p class="center">&nbsp;<br />Sorry - No terms to display or to review at this time.</p>

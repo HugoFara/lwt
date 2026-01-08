@@ -1,5 +1,5 @@
 /**
- * Test AJAX - AJAX-based vocabulary testing functionality.
+ * Review AJAX - AJAX-based vocabulary review functionality.
  *
  * @license Unlicense
  * @author  HugoFara <hugo.farajallah@protonmail.com>
@@ -8,10 +8,10 @@
 
 import { closePopup } from '@modules/vocabulary/components/word_popup';
 import { speechDispatcher } from '@shared/utils/user_interactions';
-import { handleTestWordClick, handleTestKeydown } from './test_mode';
+import { handleReviewWordClick, handleReviewKeydown } from './review_mode';
 import { startElapsedTimer } from '../utils/elapsed_timer';
 import { ReviewApi } from '@modules/review/api/review_api';
-import { setCurrentWordId, setTestSolution, setAnswerOpened } from '@modules/review/stores/test_state';
+import { setCurrentWordId, setReviewSolution, setAnswerOpened } from '@modules/review/stores/review_state';
 import { getLanguageId, initLanguageConfig } from '@modules/language/stores/language_config';
 
 // Interface for review data
@@ -26,8 +26,8 @@ interface ReviewData {
   total_tests: number;
 }
 
-// Interface for current test word
-interface CurrentTest {
+// Interface for current review word
+interface CurrentReview {
   term_id: number;
   solution: string;
   group: string;
@@ -42,8 +42,8 @@ interface TimeData {
   show_timer: number;
 }
 
-// Interface for test status
-interface TestStatus {
+// Interface for review status
+interface ReviewStatus {
   total: number;
   remaining: number;
   wrong: number;
@@ -65,49 +65,49 @@ export function prepareWordReading(termText: string, langId: number): void {
 }
 
 /**
- * Insert a new word into the test area.
+ * Insert a new word into the review area.
  *
  * @param wordId Word ID
  * @param solution The solution text
  * @param group HTML content for the term
  */
 export function insertNewWord(wordId: number, solution: string, group: string): void {
-  setTestSolution(solution);
+  setReviewSolution(solution);
   setCurrentWordId(wordId);
 
-  const termTestEl = document.getElementById('term-test');
-  if (termTestEl) {
-    termTestEl.innerHTML = group;
+  const termReviewEl = document.getElementById('term-review');
+  if (termReviewEl) {
+    termReviewEl.innerHTML = group;
   }
 
-  document.addEventListener('keydown', handleTestKeydown);
+  document.addEventListener('keydown', handleReviewKeydown);
   document.querySelectorAll('.word').forEach(el => {
-    el.addEventListener('click', handleTestWordClick);
+    el.addEventListener('click', handleReviewWordClick);
   });
 }
 
 /**
- * Display the test finished message.
+ * Display the review finished message.
  *
- * @param totalTests Total number of tests completed
+ * @param totalReviews Total number of reviews completed
  */
-export function doTestFinished(totalTests: number): void {
-  const termTestEl = document.getElementById('term-test');
-  const testFinishedEl = document.getElementById('test-finished-area');
-  const testsDoneTodayEl = document.getElementById('tests-done-today');
-  const testsTomorrowEl = document.getElementById('tests-tomorrow');
+export function doReviewFinished(totalReviews: number): void {
+  const termReviewEl = document.getElementById('term-review');
+  const reviewFinishedEl = document.getElementById('review-finished-area');
+  const reviewsDoneTodayEl = document.getElementById('reviews-done-today');
+  const reviewsTomorrowEl = document.getElementById('reviews-tomorrow');
 
-  if (termTestEl) {
-    termTestEl.style.display = 'none';
+  if (termReviewEl) {
+    termReviewEl.style.display = 'none';
   }
-  if (testFinishedEl) {
-    testFinishedEl.style.display = 'inherit';
+  if (reviewFinishedEl) {
+    reviewFinishedEl.style.display = 'inherit';
   }
-  if (testsDoneTodayEl) {
-    testsDoneTodayEl.textContent = 'Nothing ' + (totalTests > 0 ? 'more ' : '') + 'to test here!';
+  if (reviewsDoneTodayEl) {
+    reviewsDoneTodayEl.textContent = 'Nothing ' + (totalReviews > 0 ? 'more ' : '') + 'to review here!';
   }
-  if (testsTomorrowEl) {
-    testsTomorrowEl.style.display = 'none';
+  if (reviewsTomorrowEl) {
+    reviewsTomorrowEl.style.display = 'none';
   }
 }
 
