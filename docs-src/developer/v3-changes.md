@@ -1463,6 +1463,54 @@ if (Globals::isMultiUserEnabled()) {
 }
 ```
 
+### 18. JavaScript-to-PHP Communication Modernization
+
+Version 3 modernizes all JavaScript-to-PHP communication, replacing legacy patterns with a unified REST API approach.
+
+#### Changes
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| AJAX calls | jQuery `$.post()`, `$.getJSON()` | Native `fetch()` API |
+| Word operations | Frame navigation (`target="ro"`) | REST API with in-page updates |
+| Result display | iframe content replacement | Result panels and modals |
+| Audio control | `window.parent.frames` access | Direct module imports |
+
+#### New Frontend API Layer
+
+Type-safe API client modules in `src/frontend/js/`:
+
+- `shared/api/client.ts` - Centralized fetch wrapper
+- `modules/vocabulary/api/terms_api.ts` - Term/word operations
+- `modules/text/api/texts_api.ts` - Text operations
+- `modules/review/api/review_api.ts` - Review/test operations
+- `modules/admin/api/settings_api.ts` - Settings operations
+
+#### API Mode
+
+The frontend uses **API mode by default** for word operations, providing:
+
+- Faster status changes (no iframe reload)
+- Better mobile experience
+- Reduced server load
+- In-page result panels instead of frame navigation
+
+Legacy frame mode can be enabled via `LWT_DATA.settings.use_frame_mode = true` for backward compatibility.
+
+#### Removed Legacy Files
+
+All legacy PHP endpoint files have been removed:
+
+| Removed File | Replacement |
+|--------------|-------------|
+| `set_word_status.php` | `PUT /api/v1/terms/{id}/status/{status}` |
+| `delete_word.php` | `DELETE /api/v1/terms/{id}` |
+| `insert_word_wellknown.php` | `POST /api/v1/terms/quick` (status=99) |
+| `insert_word_ignore.php` | `POST /api/v1/terms/quick` (status=98) |
+| `inline_edit.php` | `/word/inline-edit` route |
+| `set_test_status.php` | `PUT /api/v1/review/status` |
+| `trans.php` | Direct dictionary URLs |
+
 ## Future Improvements
 
 This refactoring enables:
