@@ -17,7 +17,7 @@
 namespace Lwt\Modules\User\Http;
 
 use Lwt\Controllers\BaseController;
-use Lwt\Core\Utils\ErrorHandler;
+use Lwt\Core\Exception\AuthException;
 use Lwt\Modules\User\Application\Services\WordPressAuthService;
 
 /**
@@ -78,7 +78,7 @@ class WordPressController extends BaseController
         $result = $this->wordPressAuthService->handleStart($redirectUrl);
 
         if (!$result['success'] && $result['error'] !== null) {
-            ErrorHandler::die($result['error']);
+            throw new AuthException($result['error']);
         }
 
         $this->redirect($result['redirect']);

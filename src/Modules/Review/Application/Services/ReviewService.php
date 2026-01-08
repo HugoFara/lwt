@@ -683,18 +683,18 @@ class ReviewService
      */
     public function updateSessionProgress(int $statusChange): array
     {
-        $total = (int) ($_SESSION['testtotal'] ?? 0);
-        $wrong = (int) ($_SESSION['testwrong'] ?? 0);
-        $correct = (int) ($_SESSION['testcorrect'] ?? 0);
+        $total = (int) ($_SESSION['reviewtotal'] ?? 0);
+        $wrong = (int) ($_SESSION['reviewwrong'] ?? 0);
+        $correct = (int) ($_SESSION['reviewcorrect'] ?? 0);
         $remaining = $total - $correct - $wrong;
 
         if ($remaining > 0) {
             if ($statusChange >= 0) {
                 $correct++;
-                $_SESSION['testcorrect'] = $correct;
+                $_SESSION['reviewcorrect'] = $correct;
             } else {
                 $wrong++;
-                $_SESSION['testwrong'] = $wrong;
+                $_SESSION['reviewwrong'] = $wrong;
             }
             $remaining--;
         }
@@ -708,32 +708,32 @@ class ReviewService
     }
 
     /**
-     * Initialize test session.
+     * Initialize review session.
      *
-     * @param int $totalDue Total words due for testing
+     * @param int $totalDue Total words due for review
      *
      * @return void
      */
-    public function initializeTestSession(int $totalDue): void
+    public function initializeReviewSession(int $totalDue): void
     {
-        $_SESSION['teststart'] = time() + 2;
-        $_SESSION['testcorrect'] = 0;
-        $_SESSION['testwrong'] = 0;
-        $_SESSION['testtotal'] = $totalDue;
+        $_SESSION['reviewstart'] = time() + 2;
+        $_SESSION['reviewcorrect'] = 0;
+        $_SESSION['reviewwrong'] = 0;
+        $_SESSION['reviewtotal'] = $totalDue;
     }
 
     /**
-     * Get test session data.
+     * Get review session data.
      *
      * @return array{start: int, correct: int, wrong: int, total: int}
      */
-    public function getTestSessionData(): array
+    public function getReviewSessionData(): array
     {
         return [
-            'start' => (int) ($_SESSION['teststart'] ?? 0),
-            'correct' => (int) ($_SESSION['testcorrect'] ?? 0),
-            'wrong' => (int) ($_SESSION['testwrong'] ?? 0),
-            'total' => (int) ($_SESSION['testtotal'] ?? 0)
+            'start' => (int) ($_SESSION['reviewstart'] ?? 0),
+            'correct' => (int) ($_SESSION['reviewcorrect'] ?? 0),
+            'wrong' => (int) ($_SESSION['reviewwrong'] ?? 0),
+            'total' => (int) ($_SESSION['reviewtotal'] ?? 0)
         ];
     }
 

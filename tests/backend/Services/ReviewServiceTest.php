@@ -505,24 +505,24 @@ class ReviewServiceTest extends TestCase
 
     // ===== Session management tests =====
 
-    public function testInitializeTestSession(): void
+    public function testInitializeReviewSession(): void
     {
-        $this->service->initializeTestSession(10);
+        $this->service->initializeReviewSession(10);
 
-        $this->assertEquals(10, $_SESSION['testtotal']);
-        $this->assertEquals(0, $_SESSION['testcorrect']);
-        $this->assertEquals(0, $_SESSION['testwrong']);
-        $this->assertIsInt($_SESSION['teststart']);
+        $this->assertEquals(10, $_SESSION['reviewtotal']);
+        $this->assertEquals(0, $_SESSION['reviewcorrect']);
+        $this->assertEquals(0, $_SESSION['reviewwrong']);
+        $this->assertIsInt($_SESSION['reviewstart']);
     }
 
-    public function testGetTestSessionData(): void
+    public function testGetReviewSessionData(): void
     {
-        $_SESSION['teststart'] = time();
-        $_SESSION['testcorrect'] = 5;
-        $_SESSION['testwrong'] = 2;
-        $_SESSION['testtotal'] = 10;
+        $_SESSION['reviewstart'] = time();
+        $_SESSION['reviewcorrect'] = 5;
+        $_SESSION['reviewwrong'] = 2;
+        $_SESSION['reviewtotal'] = 10;
 
-        $data = $this->service->getTestSessionData();
+        $data = $this->service->getReviewSessionData();
 
         $this->assertIsArray($data);
         $this->assertArrayHasKey('start', $data);
@@ -536,9 +536,9 @@ class ReviewServiceTest extends TestCase
 
     public function testUpdateSessionProgressCorrect(): void
     {
-        $_SESSION['testtotal'] = 10;
-        $_SESSION['testcorrect'] = 3;
-        $_SESSION['testwrong'] = 2;
+        $_SESSION['reviewtotal'] = 10;
+        $_SESSION['reviewcorrect'] = 3;
+        $_SESSION['reviewwrong'] = 2;
 
         $result = $this->service->updateSessionProgress(1);
 
@@ -549,9 +549,9 @@ class ReviewServiceTest extends TestCase
 
     public function testUpdateSessionProgressWrong(): void
     {
-        $_SESSION['testtotal'] = 10;
-        $_SESSION['testcorrect'] = 3;
-        $_SESSION['testwrong'] = 2;
+        $_SESSION['reviewtotal'] = 10;
+        $_SESSION['reviewcorrect'] = 3;
+        $_SESSION['reviewwrong'] = 2;
 
         $result = $this->service->updateSessionProgress(-1);
 
@@ -562,13 +562,13 @@ class ReviewServiceTest extends TestCase
 
     public function testUpdateSessionProgressNoRemaining(): void
     {
-        $_SESSION['testtotal'] = 5;
-        $_SESSION['testcorrect'] = 3;
-        $_SESSION['testwrong'] = 2;
+        $_SESSION['reviewtotal'] = 5;
+        $_SESSION['reviewcorrect'] = 3;
+        $_SESSION['reviewwrong'] = 2;
 
         $result = $this->service->updateSessionProgress(1);
 
-        // No change when no tests remaining
+        // No change when no reviews remaining
         $this->assertEquals(3, $result['correct']);
         $this->assertEquals(2, $result['wrong']);
         $this->assertEquals(0, $result['remaining']);

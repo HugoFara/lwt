@@ -485,8 +485,8 @@ class ReviewApiHandler
         );
 
         // Initialize session
-        $this->reviewFacade->initializeTestSession($testData['counts']['due']);
-        $sessionData = $this->reviewFacade->getTestSessionData();
+        $this->reviewFacade->initializeReviewSession($testData['counts']['due']);
+        $sessionData = $this->reviewFacade->getReviewSessionData();
 
         return [
             'reviewKey' => $identifier[0],

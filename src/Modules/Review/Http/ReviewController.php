@@ -127,7 +127,7 @@ class ReviewController extends BaseController
         );
 
         // Initialize session
-        $this->reviewFacade->initializeTestSession($testData['counts']['due']);
+        $this->reviewFacade->initializeReviewSession($testData['counts']['due']);
 
         // Render header views
         include __DIR__ . '/../Views/header.php';
@@ -312,16 +312,16 @@ class ReviewController extends BaseController
         );
 
         // Initialize session
-        $this->reviewFacade->initializeTestSession($testData['counts']['due']);
-        $sessionData = $this->reviewFacade->getTestSessionData();
+        $this->reviewFacade->initializeReviewSession($testData['counts']['due']);
+        $sessionData = $this->reviewFacade->getReviewSessionData();
 
         // Build config for JavaScript
         $config = [
-            'testKey' => $identifier[0],
+            'reviewKey' => $identifier[0],
             'selection' => is_array($identifier[1])
                 ? implode(',', $identifier[1])
                 : (string) $identifier[1],
-            'testType' => $baseType,
+            'reviewType' => $baseType,
             'isTableMode' => $isTableMode,
             'wordMode' => $wordMode,
             'langId' => $langIdFromSql,

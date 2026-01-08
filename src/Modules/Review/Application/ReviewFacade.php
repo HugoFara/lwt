@@ -277,24 +277,24 @@ class ReviewFacade
     }
 
     /**
-     * Initialize test session.
+     * Initialize review session.
      *
      * @param int $totalDue Total words due
      *
      * @return void
      */
-    public function initializeTestSession(int $totalDue): void
+    public function initializeReviewSession(int $totalDue): void
     {
         $session = ReviewSession::start($totalDue);
         $this->sessionManager->saveSession($session);
     }
 
     /**
-     * Get test session data.
+     * Get review session data.
      *
      * @return array{start: int, correct: int, wrong: int, total: int}
      */
-    public function getTestSessionData(): array
+    public function getReviewSessionData(): array
     {
         $session = $this->sessionManager->getSession();
         if ($session === null) {
