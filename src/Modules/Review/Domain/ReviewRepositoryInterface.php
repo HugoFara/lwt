@@ -33,7 +33,7 @@ interface ReviewRepositoryInterface
      *
      * @return ReviewWord|null Next word to test or null if none available
      */
-    public function findNextWordForTest(ReviewConfiguration $config): ?ReviewWord;
+    public function findNextWordForReview(ReviewConfiguration $config): ?ReviewWord;
 
     /**
      * Get a sentence containing the word for context.
@@ -54,7 +54,7 @@ interface ReviewRepositoryInterface
      *
      * @return array{due: int, total: int}
      */
-    public function getTestCounts(ReviewConfiguration $config): array;
+    public function getReviewCounts(ReviewConfiguration $config): array;
 
     /**
      * Get count of words due tomorrow.
@@ -153,7 +153,7 @@ interface ReviewRepositoryInterface
      *
      * @return array{edit: int, status: int, term: int, trans: int, rom: int, sentence: int, contextRom: int, contextTrans: int}
      */
-    public function getTableTestSettings(): array;
+    public function getTableReviewSettings(): array;
 
     /**
      * Get sentence with annotations for surrounding words.

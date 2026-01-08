@@ -42,5 +42,5 @@ echo json_encode([
     'romanization' => $romanization,
     'status' => $status,
     'sentence' => $sent1,
-    'statusControlsHtml' => StatusHelper::buildTestTableControls(1, (int) $status, $wid, $statusAbbr)
+    'statusControlsHtml' => StatusHelper::buildReviewTableControls(1, (int) $status, $wid, $statusAbbr)
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

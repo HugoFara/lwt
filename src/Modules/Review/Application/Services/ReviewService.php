@@ -68,7 +68,7 @@ class ReviewService
      *
      * @return array{0: string, 1: int|int[]|string} Selector type and selection value
      */
-    public function getTestIdentifier(
+    public function getReviewIdentifier(
         ?int $selection,
         ?string $sessTestsql,
         ?int $lang,
@@ -108,7 +108,7 @@ class ReviewService
      *
      * @return string|null SQL projection string
      */
-    public function getTestSql(string $selector, int|array $selection): ?string
+    public function getReviewSql(string $selector, int|array $selection): ?string
     {
         $testsql = null;
         switch ($selector) {
@@ -116,14 +116,14 @@ class ReviewService
                 // Test words in a list of words ID
                 $idString = is_array($selection) ? implode(",", $selection) : (string)$selection;
                 $testsql = " words WHERE WoID IN ($idString) ";
-                // Note: Multi-language validation is done by caller via validateTestSelection()
+                // Note: Multi-language validation is done by caller via validateReviewSelection()
                 break;
             case 'texts':
                 // Test text items from a list of texts ID
                 $idString = is_array($selection) ? implode(",", $selection) : (string)$selection;
                 $testsql = " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($idString) ";
-                // Note: Multi-language validation is done by caller via validateTestSelection()
+                // Note: Multi-language validation is done by caller via validateReviewSelection()
                 break;
             case 'lang':
                 // Test words from a specific language
@@ -137,7 +137,7 @@ class ReviewService
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
                 break;
             default:
-                ErrorHandler::die("ReviewService::getTestSql called with wrong parameters");
+                ErrorHandler::die("ReviewService::getReviewSql called with wrong parameters");
         }
         return $testsql;
     }
@@ -149,7 +149,7 @@ class ReviewService
      *
      * @return array{valid: bool, langCount: int, error: string|null}
      */
-    public function validateTestSelection(string $testsql): array
+    public function validateReviewSelection(string $testsql): array
     {
         $langCount = (int) Connection::fetchValue(
             "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $testsql",
@@ -206,9 +206,9 @@ class ReviewService
         }
 
         if ($selection !== null && $testsql !== null) {
-            $testSqlProjection = $this->buildSelectionTestSql($selection, $testsql);
+            $testSqlProjection = $this->buildSelectionReviewSql($selection, $testsql);
             if ($testSqlProjection !== null) {
-                $validation = $this->validateTestSelection($testSqlProjection);
+                $validation = $this->validateReviewSelection($testSqlProjection);
                 if ($validation['langCount'] == 1) {
                     $bindings = [];
                     $name = Connection::preparedFetchValue(
@@ -235,20 +235,20 @@ class ReviewService
      *
      * @return string|null SQL projection string
      */
-    public function buildSelectionTestSql(int $selectionType, string $selectionData): ?string
+    public function buildSelectionReviewSql(int $selectionType, string $selectionData): ?string
     {
         $dataStringArray = explode(",", trim($selectionData, "()"));
         $dataIntArray = array_map('intval', $dataStringArray);
         switch ($selectionType) {
             case 2:
-                $testSql = $this->getTestSql('words', $dataIntArray);
+                $testSql = $this->getReviewSql('words', $dataIntArray);
                 break;
             case 3:
-                $testSql = $this->getTestSql('texts', $dataIntArray);
+                $testSql = $this->getReviewSql('texts', $dataIntArray);
                 break;
             default:
                 // Legacy: raw SQL passed directly
-                // Note: Multi-language validation is done by caller via validateTestSelection()
+                // Note: Multi-language validation is done by caller via validateReviewSelection()
                 $testSql = $selectionData;
         }
         return $testSql;
@@ -261,7 +261,7 @@ class ReviewService
      *
      * @return array{due: int, total: int}
      */
-    public function getTestCounts(string $testsql): array
+    public function getReviewCounts(string $testsql): array
     {
         $due = (int) Connection::fetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
@@ -560,7 +560,7 @@ class ReviewService
      *
      * @return array{edit: int, status: int, term: int, trans: int, rom: int, sentence: int}
      */
-    public function getTableTestSettings(): array
+    public function getTableReviewSettings(): array
     {
         return [
             'edit' => Settings::getZeroOrOne('currenttabletestsetting1', 1),
@@ -579,7 +579,7 @@ class ReviewService
      *
      * @return \mysqli_result|bool Query result
      */
-    public function getTableTestWords(string $testsql): \mysqli_result|bool
+    public function getTableReviewWords(string $testsql): \mysqli_result|bool
     {
         $sql = "SELECT DISTINCT WoID, WoText, WoTranslation, WoRomanization,
             WoSentence, WoStatus, WoTodayScore AS Score
@@ -608,13 +608,13 @@ class ReviewService
     ): ?array {
         if ($selection !== null && $sessTestsql !== null) {
             $property = "selection=$selection";
-            $testsql = $this->buildSelectionTestSql($selection, $sessTestsql);
+            $testsql = $this->buildSelectionReviewSql($selection, $sessTestsql);
 
             if ($testsql === null) {
                 return null;
             }
 
-            $validation = $this->validateTestSelection($testsql);
+            $validation = $this->validateReviewSelection($testsql);
             if (!$validation['valid']) {
                 return null;
             }
@@ -663,7 +663,7 @@ class ReviewService
             return null;
         }
 
-        $counts = $this->getTestCounts($testsql);
+        $counts = $this->getReviewCounts($testsql);
 
         return [
             'title' => $title,

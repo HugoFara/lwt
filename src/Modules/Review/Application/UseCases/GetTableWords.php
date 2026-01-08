@@ -110,7 +110,7 @@ class GetTableWords
         }
 
         // Get table settings
-        $tableSettings = $this->repository->getTableTestSettings();
+        $tableSettings = $this->repository->getTableReviewSettings();
 
         return [
             'words' => $formattedWords,

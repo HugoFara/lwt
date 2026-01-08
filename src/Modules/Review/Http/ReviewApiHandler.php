@@ -67,7 +67,7 @@ class ReviewApiHandler
         }
 
         // Check context annotation settings
-        $settings = $this->reviewFacade->getTableTestSettings();
+        $settings = $this->reviewFacade->getTableReviewSettings();
         $showContextRom = (bool) ($settings['contextRom'] ?? 0);
         $showContextTrans = (bool) ($settings['contextTrans'] ?? 0);
         $useAnnotations = !$wordMode && ($showContextRom || $showContextTrans);
@@ -265,7 +265,7 @@ class ReviewApiHandler
      */
     public function wordTestAjax(array $params): array
     {
-        $testSql = $this->reviewFacade->getTestSql(
+        $testSql = $this->reviewFacade->getReviewSql(
             $params['test_key'],
             $this->parseSelection($params['test_key'], $params['selection'])
         );
@@ -292,7 +292,7 @@ class ReviewApiHandler
      */
     public function tomorrowTestCount(array $params): array
     {
-        $testSql = $this->reviewFacade->getTestSql(
+        $testSql = $this->reviewFacade->getReviewSql(
             $params['test_key'],
             $this->parseSelection($params['test_key'], $params['selection'])
         );
@@ -377,7 +377,7 @@ class ReviewApiHandler
 
         // Return the new status and controls HTML
         $statusAbbr = StatusHelper::getAbbr($result['newStatus']);
-        $controls = StatusHelper::buildTestTableControls(1, $result['newStatus'], $wordId, $statusAbbr);
+        $controls = StatusHelper::buildReviewTableControls(1, $result['newStatus'], $wordId, $statusAbbr);
 
         return [
             'status' => $result['newStatus'],
@@ -439,7 +439,7 @@ class ReviewApiHandler
         }
 
         // Get test identifier
-        $identifier = $this->reviewFacade->getTestIdentifier(
+        $identifier = $this->reviewFacade->getReviewIdentifier(
             $selection,
             $sessTestsql,
             $langId,
@@ -456,7 +456,7 @@ class ReviewApiHandler
         } else {
             /** @var int|int[] $sel */
             $sel = $identifier[1];
-            $testsql = $this->reviewFacade->getTestSql($identifier[0], $sel);
+            $testsql = $this->reviewFacade->getReviewSql($identifier[0], $sel);
         }
 
         if ($testsql === null) {
@@ -537,14 +537,14 @@ class ReviewApiHandler
         }
 
         $parsedSelection = $this->parseSelection($testKey, $selection);
-        $testsql = $this->reviewFacade->getTestSql($testKey, $parsedSelection);
+        $testsql = $this->reviewFacade->getReviewSql($testKey, $parsedSelection);
 
         if ($testsql === null) {
             return ['error' => 'Unable to generate test SQL'];
         }
 
         // Validate single language
-        $validation = $this->reviewFacade->validateTestSelection($testsql);
+        $validation = $this->reviewFacade->validateReviewSelection($testsql);
         if (!$validation['valid']) {
             return ['error' => $validation['error']];
         }

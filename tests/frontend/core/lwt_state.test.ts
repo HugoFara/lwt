@@ -2,7 +2,7 @@
  * Tests for lwt_state.ts - LWT State Management and state modules
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings } from '../../../src/frontend/js/shared/stores/lwt_state';
+import type { LwtLanguage, LwtText, LwtWord, LwtReview, LwtSettings } from '../../../src/frontend/js/shared/stores/lwt_state';
 import {
   // Language config
   initLanguageConfig,
@@ -39,16 +39,16 @@ import {
   setReadingPosition,
   resetReadingPosition,
   hasReadingPosition,
-  // Test state
+  // Review state
   getCurrentWordId,
   setCurrentWordId,
-  getTestSolution,
-  setTestSolution,
+  getReviewSolution,
+  setReviewSolution,
   isAnswerOpened,
   setAnswerOpened,
   openAnswer,
   resetAnswer,
-  resetTestState,
+  resetReviewState,
 } from '../../../src/frontend/js/shared/stores/lwt_state';
 
 describe('lwt_state.ts', () => {
@@ -234,17 +234,17 @@ describe('lwt_state.ts', () => {
   });
 
   // ===========================================================================
-  // Test State Tests
+  // Review State Tests
   // ===========================================================================
 
-  describe('Test State', () => {
+  describe('Review State', () => {
     beforeEach(() => {
-      resetTestState();
+      resetReviewState();
     });
 
     it('has correct initial values', () => {
       expect(getCurrentWordId()).toBe(0);
-      expect(getTestSolution()).toBe('');
+      expect(getReviewSolution()).toBe('');
       expect(isAnswerOpened()).toBe(false);
     });
 
@@ -254,8 +254,8 @@ describe('lwt_state.ts', () => {
     });
 
     it('allows setting test solution', () => {
-      setTestSolution('correct answer');
-      expect(getTestSolution()).toBe('correct answer');
+      setReviewSolution('correct answer');
+      expect(getReviewSolution()).toBe('correct answer');
     });
 
     it('allows setting answer opened', () => {
@@ -274,15 +274,15 @@ describe('lwt_state.ts', () => {
       expect(isAnswerOpened()).toBe(false);
     });
 
-    it('resetTestState resets all test state', () => {
+    it('resetReviewState resets all test state', () => {
       setCurrentWordId(123);
-      setTestSolution('answer');
+      setReviewSolution('answer');
       openAnswer();
 
-      resetTestState();
+      resetReviewState();
 
       expect(getCurrentWordId()).toBe(0);
-      expect(getTestSolution()).toBe('');
+      expect(getReviewSolution()).toBe('');
       expect(isAnswerOpened()).toBe(false);
     });
   });
@@ -354,7 +354,7 @@ describe('lwt_state.ts', () => {
       resetTextConfig();
       resetSettingsConfig();
       resetReadingPosition();
-      resetTestState();
+      resetReviewState();
     });
 
     it('can configure a complete reading session', () => {

@@ -1,14 +1,14 @@
 /**
- * Test Mode - Event handlers for vocabulary testing
+ * Review Mode - Event handlers for vocabulary review
  *
  * @license unlicense
  * @author  andreask7 <andreasks7@users.noreply.github.com>
  * @since   1.6.16-fork
  */
 
-import { showTestWordPopup } from '@modules/vocabulary/services/word_popup_interface';
+import { showReviewWordPopup } from '@modules/vocabulary/services/word_popup_interface';
 import { cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
-import { getCurrentWordId, getTestSolution, isAnswerOpened, openAnswer } from '@modules/review/stores/test_state';
+import { getCurrentWordId, getReviewSolution, isAnswerOpened, openAnswer } from '@modules/review/stores/review_state';
 import { getDictionaryLinks } from '@modules/language/stores/language_config';
 import { ReviewApi } from '@modules/review/api/review_api';
 
@@ -20,30 +20,30 @@ function getAttr(el: HTMLElement, attr: string): string {
 }
 
 /**
- * Update test status and reload to next word.
+ * Update review status and reload to next word.
  *
  * @param wordId Word ID
  * @param status New status (or undefined to keep current)
  * @param change Status change amount (+1 or -1)
  */
-async function updateTestStatusAndReload(
+async function updateReviewStatusAndReload(
   wordId: number,
   status?: number,
   change?: number
 ): Promise<void> {
   await ReviewApi.updateStatus(wordId, status, change);
-  // Reload the page to show next test word
+  // Reload the page to show next review word
   window.location.reload();
 }
 
 /**
- * Prepare a dialog when the user clicks a word during a test.
+ * Prepare a dialog when the user clicks a word during a review.
  *
  * @returns false
  */
-export function handleTestWordClick(this: HTMLElement): boolean {
+export function handleReviewWordClick(this: HTMLElement): boolean {
   const dictLinks = getDictionaryLinks();
-  showTestWordPopup(
+  showReviewWordPopup(
     dictLinks.dict1, dictLinks.dict2, dictLinks.translator,
     getAttr(this, 'data_wid'),
     getAttr(this, 'data_text'),
@@ -55,18 +55,18 @@ export function handleTestWordClick(this: HTMLElement): boolean {
   );
   const todoEl = document.querySelector('.todo');
   if (todoEl) {
-    todoEl.textContent = getTestSolution();
+    todoEl.textContent = getReviewSolution();
   }
   return false;
 }
 
 /**
- * Handle keyboard interaction when testing a word.
+ * Handle keyboard interaction when reviewing a word.
  *
  * @param e A keystroke object
  * @returns true if nothing was done, false otherwise
  */
-export function handleTestKeydown(e: KeyboardEvent): boolean {
+export function handleReviewKeydown(e: KeyboardEvent): boolean {
   const wordEl = document.querySelector('.word') as HTMLElement | null;
   const wordId = getCurrentWordId();
 
@@ -81,19 +81,19 @@ export function handleTestKeydown(e: KeyboardEvent): boolean {
   if (e.key === 'Escape' || e.which === 27) {
     // esc : skip term, don't change status - just reload to next word
     const currentStatus = parseInt(wordEl?.getAttribute('data_status') || '1', 10);
-    updateTestStatusAndReload(wordId, currentStatus);
+    updateReviewStatusAndReload(wordId, currentStatus);
     return false;
   }
 
   if (e.key === 'I' || e.key === 'i' || e.which === 73) {
     // I : ignore, status=98
-    updateTestStatusAndReload(wordId, 98);
+    updateReviewStatusAndReload(wordId, 98);
     return false;
   }
 
   if (e.key === 'W' || e.key === 'w' || e.which === 87) {
     // W : well known, status=99
-    updateTestStatusAndReload(wordId, 99);
+    updateReviewStatusAndReload(wordId, 99);
     return false;
   }
 
@@ -108,20 +108,20 @@ export function handleTestKeydown(e: KeyboardEvent): boolean {
 
   if (e.key === 'ArrowUp' || e.which === 38) {
     // up : status+1
-    updateTestStatusAndReload(wordId, undefined, 1);
+    updateReviewStatusAndReload(wordId, undefined, 1);
     return false;
   }
 
   if (e.key === 'ArrowDown' || e.which === 40) {
     // down : status-1
-    updateTestStatusAndReload(wordId, undefined, -1);
+    updateReviewStatusAndReload(wordId, undefined, -1);
     return false;
   }
 
   for (let i = 0; i < 5; i++) {
     if (e.which === (49 + i) || e.which === (97 + i) || e.key === String(i + 1)) {
       // 1,.. : status=i
-      updateTestStatusAndReload(wordId, i + 1);
+      updateReviewStatusAndReload(wordId, i + 1);
       return false;
     }
   }

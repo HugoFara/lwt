@@ -1,5 +1,5 @@
 /**
- * Review Module - Spaced repetition testing functionality.
+ * Review Module - Spaced repetition review functionality.
  *
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
@@ -9,17 +9,17 @@
 export * from './api/review_api';
 
 // Stores
-export * from './stores/test_state';
-export * from './stores/test_store';
+export * from './stores/review_state';
+export * from './stores/review_store';
 
 // Components
-export * from './components/test_view';
+export * from './components/review_view';
 
 // Utils
 export * from './utils/elapsed_timer';
 
 // Side-effect imports (pages)
-import './pages/test_mode';
-import './pages/test_header';
-import './pages/test_table';
-import './pages/test_ajax';
+import './pages/review_mode';
+import './pages/review_header';
+import './pages/review_table';
+import './pages/review_ajax';

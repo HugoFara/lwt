@@ -195,7 +195,7 @@ class StatusHelper
      *
      * @return string HTML controls string
      */
-    public static function buildTestTableControls(
+    public static function buildReviewTableControls(
         int $score,
         int $status,
         int $wordId,

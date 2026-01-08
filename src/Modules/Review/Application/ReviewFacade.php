@@ -97,7 +97,7 @@ class ReviewFacade
      *
      * @return array{0: string, 1: int|int[]|string} Selector type and selection value
      */
-    public function getTestIdentifier(
+    public function getReviewIdentifier(
         ?int $selection,
         ?string $sessTestsql,
         ?int $lang,
@@ -125,7 +125,7 @@ class ReviewFacade
      *
      * @return string|null SQL projection string
      */
-    public function getTestSql(string $selector, int|array $selection): ?string
+    public function getReviewSql(string $selector, int|array $selection): ?string
     {
         $config = new ReviewConfiguration($selector, $selection);
         try {
@@ -142,7 +142,7 @@ class ReviewFacade
      *
      * @return array{valid: bool, langCount: int, error: string|null}
      */
-    public function validateTestSelection(string $testsql): array
+    public function validateReviewSelection(string $testsql): array
     {
         // Create a raw SQL config for validation
         $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
@@ -156,10 +156,10 @@ class ReviewFacade
      *
      * @return array{due: int, total: int}
      */
-    public function getTestCounts(string $testsql): array
+    public function getReviewCounts(string $testsql): array
     {
         $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
-        return $this->repository->getTestCounts($config);
+        return $this->repository->getReviewCounts($config);
     }
 
     /**
@@ -186,7 +186,7 @@ class ReviewFacade
     public function getNextWord(string $testsql): ?array
     {
         $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
-        $word = $this->repository->findNextWordForTest($config);
+        $word = $this->repository->findNextWordForReview($config);
 
         if ($word === null) {
             return null;
@@ -339,9 +339,9 @@ class ReviewFacade
      *
      * @return array
      */
-    public function getTableTestSettings(): array
+    public function getTableReviewSettings(): array
     {
-        return $this->repository->getTableTestSettings();
+        return $this->repository->getTableReviewSettings();
     }
 
     /**
@@ -422,7 +422,7 @@ class ReviewFacade
             return null;
         }
 
-        $counts = $this->repository->getTestCounts($config);
+        $counts = $this->repository->getReviewCounts($config);
 
         return [
             'title' => $this->buildTitle($config),
@@ -654,7 +654,7 @@ class ReviewFacade
      *
      * @return string|null
      */
-    public function buildSelectionTestSql(int $selectionType, string $selectionData): ?string
+    public function buildSelectionReviewSql(int $selectionType, string $selectionData): ?string
     {
         $dataStringArray = explode(',', trim($selectionData, '()'));
         $dataIntArray = array_map('intval', $dataStringArray);

@@ -1,5 +1,5 @@
 /**
- * Test Table - Table test mode with column visibility toggles.
+ * Review Table - Table review mode with column visibility toggles.
  *
  * @license Unlicense
  * @author  HugoFara <hugo.farajallah@protonmail.com>
@@ -114,12 +114,12 @@ function toggleContentVisibility(
 }
 
 /**
- * Initialize table test settings and event handlers.
+ * Initialize table review settings and event handlers.
  *
  * Sets up checkbox handlers for column visibility toggles and
  * click-to-reveal functionality.
  */
-export function initTableTest(): void {
+export function initTableReview(): void {
   // Edit column (1)
   const cbEdit = document.getElementById('cbEdit') as HTMLInputElement | null;
   cbEdit?.addEventListener('change', function () {
@@ -178,9 +178,9 @@ export function initTableTest(): void {
   cbSentence?.dispatchEvent(new Event('change'));
 }
 
-// Auto-initialize when DOM is ready if table test checkboxes exist
+// Auto-initialize when DOM is ready if table review checkboxes exist
 document.addEventListener('DOMContentLoaded', function () {
   if (document.getElementById('cbEdit')) {
-    initTableTest();
+    initTableReview();
   }
 });

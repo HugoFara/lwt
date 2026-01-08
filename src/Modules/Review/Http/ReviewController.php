@@ -157,7 +157,7 @@ class ReviewController extends BaseController
         $sessTestsql = $_SESSION['testsql'] ?? null;
 
         // Get review SQL
-        $identifier = $this->reviewFacade->getTestIdentifier(
+        $identifier = $this->reviewFacade->getReviewIdentifier(
             $selection,
             $sessTestsql,
             $langId,
@@ -170,7 +170,7 @@ class ReviewController extends BaseController
         }
 
         /** @psalm-suppress InvalidScalarArgument */
-        $testsql = $this->reviewFacade->getTestSql($identifier[0], $identifier[1]);
+        $testsql = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
 
         if ($testsql === null) {
             echo '<p>Sorry - Unable to generate review SQL</p>';
@@ -178,7 +178,7 @@ class ReviewController extends BaseController
         }
 
         // Validate single language
-        $validation = $this->reviewFacade->validateTestSelection($testsql);
+        $validation = $this->reviewFacade->validateReviewSelection($testsql);
         if (!$validation['valid']) {
             echo '<p>Sorry - ' . ($validation['error'] ?? 'Unknown error') . '</p>';
             return;
@@ -196,14 +196,14 @@ class ReviewController extends BaseController
         $textSize = round((($langSettings['textSize'] ?? 100) - 100) / 2, 0) + 100;
 
         // Render table settings
-        $settings = $this->reviewFacade->getTableTestSettings();
+        $settings = $this->reviewFacade->getTableReviewSettings();
         include __DIR__ . '/../Views/table_test_settings.php';
 
         echo '<table class="sortable tab2 table-test" cellspacing="0" cellpadding="5">';
         include __DIR__ . '/../Views/table_test_header.php';
 
         // Render table rows
-        $words = $this->reviewFacade->getTableTestWords($testsql);
+        $words = $this->reviewFacade->getTableReviewWords($testsql);
         $regexWord = $langSettings['regexWord'] ?? '';
         $rtl = $langSettings['rtl'] ?? false;
 
@@ -270,7 +270,7 @@ class ReviewController extends BaseController
         }
 
         // Get review identifier
-        $identifier = $this->reviewFacade->getTestIdentifier(
+        $identifier = $this->reviewFacade->getReviewIdentifier(
             $selection,
             $sessTestsql,
             $langId,
@@ -282,7 +282,7 @@ class ReviewController extends BaseController
         }
 
         /** @psalm-suppress InvalidScalarArgument */
-        $testsql = $this->reviewFacade->getTestSql($identifier[0], $identifier[1]);
+        $testsql = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
         if ($testsql === null) {
             $this->redirect('/text/edit');
         }

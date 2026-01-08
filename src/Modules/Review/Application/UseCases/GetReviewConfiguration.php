@@ -144,7 +144,7 @@ class GetReviewConfiguration
         $langCode = $languageService->getLanguageCode($langId, LanguagePresets::getAll());
 
         // Get test counts
-        $counts = $this->repository->getTestCounts($config);
+        $counts = $this->repository->getReviewCounts($config);
 
         // Get or create session
         $session = $this->sessionManager->getSession();

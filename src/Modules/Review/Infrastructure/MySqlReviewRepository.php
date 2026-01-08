@@ -50,7 +50,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function findNextWordForTest(ReviewConfiguration $config): ?ReviewWord
+    public function findNextWordForReview(ReviewConfiguration $config): ?ReviewWord
     {
         $testsql = $config->toSqlProjection();
         $pass = 0;
@@ -129,7 +129,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getTestCounts(ReviewConfiguration $config): array
+    public function getReviewCounts(ReviewConfiguration $config): array
     {
         $testsql = $config->toSqlProjection();
 
@@ -377,7 +377,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getTableTestSettings(): array
+    public function getTableReviewSettings(): array
     {
         return [
             'edit' => Settings::getZeroOrOne('currenttabletestsetting1', 1),

@@ -25,7 +25,7 @@ import {
 } from '@modules/language/stores/language_config';
 import { initTextConfig, getTextId } from '@modules/text/stores/text_config';
 import { initSettingsConfig } from '@shared/utils/settings_config';
-import { resetAnswer } from '@modules/review/stores/test_state';
+import { resetAnswer } from '@modules/review/stores/review_state';
 
 // Type definitions for text reader
 interface TextReader {

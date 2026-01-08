@@ -54,7 +54,7 @@ class ReviewSessionUseCaseTest extends TestCase
             ->willReturn(1);
 
         $this->repository
-            ->method('getTestCounts')
+            ->method('getReviewCounts')
             ->willReturn(['due' => 10, 'total' => 50]);
 
         $this->sessionManager
@@ -132,7 +132,7 @@ class ReviewSessionUseCaseTest extends TestCase
             ->willReturn(1);
 
         $this->repository
-            ->method('getTestCounts')
+            ->method('getReviewCounts')
             ->willReturn(['due' => 5, 'total' => 20]);
 
         $startSession = new StartReviewSession($this->repository, $this->sessionManager);
@@ -155,7 +155,7 @@ class ReviewSessionUseCaseTest extends TestCase
             ->willReturn(1);
 
         $this->repository
-            ->method('getTestCounts')
+            ->method('getReviewCounts')
             ->willReturn(['due' => 3, 'total' => 5]);
 
         $startSession = new StartReviewSession($this->repository, $this->sessionManager);
@@ -183,7 +183,7 @@ class ReviewSessionUseCaseTest extends TestCase
         );
 
         $this->repository
-            ->method('findNextWordForTest')
+            ->method('findNextWordForReview')
             ->willReturn($testWord);
 
         $this->repository
@@ -204,7 +204,7 @@ class ReviewSessionUseCaseTest extends TestCase
         $config = TestConfiguration::fromLanguage(1, 1);
 
         $this->repository
-            ->method('findNextWordForTest')
+            ->method('findNextWordForReview')
             ->willReturn(null);
 
         $getNextTerm = new GetNextTerm($this->repository);
@@ -242,7 +242,7 @@ class ReviewSessionUseCaseTest extends TestCase
         );
 
         $this->repository
-            ->method('findNextWordForTest')
+            ->method('findNextWordForReview')
             ->willReturn($testWord);
 
         $this->repository
@@ -270,7 +270,7 @@ class ReviewSessionUseCaseTest extends TestCase
         );
 
         $this->repository
-            ->method('findNextWordForTest')
+            ->method('findNextWordForReview')
             ->willReturn($testWord);
 
         $this->repository
@@ -297,7 +297,7 @@ class ReviewSessionUseCaseTest extends TestCase
         );
 
         $this->repository
-            ->method('findNextWordForTest')
+            ->method('findNextWordForReview')
             ->willReturn($testWord);
 
         $getNextTerm = new GetNextTerm($this->repository);

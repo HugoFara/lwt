@@ -403,7 +403,7 @@ class TestControllerTest extends TestCase
 
         $service = new TestService();
 
-        $settings = $service->getTableTestSettings();
+        $settings = $service->getTableReviewSettings();
         $this->assertIsArray($settings);
     }
 
@@ -672,7 +672,7 @@ class TestControllerTest extends TestCase
 
         $service = new TestService();
 
-        $identifier = $service->getTestIdentifier(null, null, 1, null);
+        $identifier = $service->getReviewIdentifier(null, null, 1, null);
 
         $this->assertIsArray($identifier);
         $this->assertCount(2, $identifier);
@@ -686,7 +686,7 @@ class TestControllerTest extends TestCase
 
         $service = new TestService();
 
-        $identifier = $service->getTestIdentifier(null, null, null, 1);
+        $identifier = $service->getReviewIdentifier(null, null, null, 1);
 
         $this->assertIsArray($identifier);
         $this->assertCount(2, $identifier);
@@ -700,7 +700,7 @@ class TestControllerTest extends TestCase
 
         $service = new TestService();
 
-        $identifier = $service->getTestIdentifier(1, 'SELECT * FROM words', null, null);
+        $identifier = $service->getReviewIdentifier(1, 'SELECT * FROM words', null, null);
 
         $this->assertIsArray($identifier);
         $this->assertCount(2, $identifier);
@@ -716,7 +716,7 @@ class TestControllerTest extends TestCase
 
         $service = new TestService();
 
-        $this->assertTrue(method_exists($service, 'validateTestSelection'));
+        $this->assertTrue(method_exists($service, 'validateReviewSelection'));
     }
 
     public function testTestServiceValidateTestSelectionReturnsArray(): void
@@ -731,7 +731,7 @@ class TestControllerTest extends TestCase
         // Use proper subquery syntax
         $subquery = "(SELECT WoID, WoLgID FROM " . Globals::table('words') . " WHERE WoLgID = 1 LIMIT 1) AS subq";
 
-        $result = $service->validateTestSelection($subquery);
+        $result = $service->validateReviewSelection($subquery);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('valid', $result);

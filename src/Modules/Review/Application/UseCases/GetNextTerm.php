@@ -60,7 +60,7 @@ class GetNextTerm
     public function execute(ReviewConfiguration $config): array
     {
         // Get next word from repository
-        $word = $this->repository->findNextWordForTest($config);
+        $word = $this->repository->findNextWordForReview($config);
 
         if ($word === null) {
             return [

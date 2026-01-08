@@ -268,7 +268,7 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetTestIdentifierWithLang(): void
     {
-        $result = $this->facade->getTestIdentifier(null, null, 1, null);
+        $result = $this->facade->getReviewIdentifier(null, null, 1, null);
 
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
@@ -278,7 +278,7 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetTestIdentifierWithText(): void
     {
-        $result = $this->facade->getTestIdentifier(null, null, null, 42);
+        $result = $this->facade->getReviewIdentifier(null, null, null, 42);
 
         $this->assertIsArray($result);
         $this->assertEquals(TestConfiguration::KEY_TEXT, $result[0]);
@@ -287,7 +287,7 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetTestIdentifierWithNoParams(): void
     {
-        $result = $this->facade->getTestIdentifier(null, null, null, null);
+        $result = $this->facade->getReviewIdentifier(null, null, null, null);
 
         $this->assertIsArray($result);
         $this->assertEquals('', $result[0]);
@@ -298,7 +298,7 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetTestSqlForLang(): void
     {
-        $sql = $this->facade->getTestSql(TestConfiguration::KEY_LANG, 1);
+        $sql = $this->facade->getReviewSql(TestConfiguration::KEY_LANG, 1);
 
         $this->assertIsString($sql);
         $this->assertStringContainsString('words', $sql);
@@ -307,7 +307,7 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetTestSqlForText(): void
     {
-        $sql = $this->facade->getTestSql(TestConfiguration::KEY_TEXT, 42);
+        $sql = $this->facade->getReviewSql(TestConfiguration::KEY_TEXT, 42);
 
         $this->assertIsString($sql);
         $this->assertStringContainsString('textitems2', $sql);
@@ -316,7 +316,7 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetTestSqlForWords(): void
     {
-        $sql = $this->facade->getTestSql(TestConfiguration::KEY_WORDS, [1, 2, 3]);
+        $sql = $this->facade->getReviewSql(TestConfiguration::KEY_WORDS, [1, 2, 3]);
 
         $this->assertIsString($sql);
         $this->assertStringContainsString('WoID IN', $sql);
@@ -403,7 +403,7 @@ class ReviewFacadeTest extends TestCase
         }
 
         // Test with invalid/empty SQL
-        $result = $this->facade->validateTestSelection(' words WHERE 1=0 ');
+        $result = $this->facade->validateReviewSelection(' words WHERE 1=0 ');
         $this->assertIsArray($result);
         $this->assertArrayHasKey('valid', $result);
         $this->assertArrayHasKey('langCount', $result);
@@ -416,7 +416,7 @@ class ReviewFacadeTest extends TestCase
         }
 
         $sql = ' words WHERE WoLgID = 999999 ';
-        $result = $this->facade->getTestCounts($sql);
+        $result = $this->facade->getReviewCounts($sql);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('due', $result);
@@ -469,7 +469,7 @@ class ReviewFacadeTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->facade->getTableTestSettings();
+        $result = $this->facade->getTableReviewSettings();
 
         $this->assertIsArray($result);
         // Check for expected keys
@@ -525,18 +525,18 @@ class ReviewFacadeTest extends TestCase
     public function testBuildSelectionTestSql(): void
     {
         // Type 2 = words
-        $result = $this->facade->buildSelectionTestSql(2, '1,2,3');
+        $result = $this->facade->buildSelectionReviewSql(2, '1,2,3');
         $this->assertIsString($result);
         $this->assertStringContainsString('WoID IN', $result);
 
         // Type 3 = texts
-        $result = $this->facade->buildSelectionTestSql(3, '10,20');
+        $result = $this->facade->buildSelectionReviewSql(3, '10,20');
         $this->assertIsString($result);
         $this->assertStringContainsString('Ti2TxID IN', $result);
 
         // Type 1 = raw SQL (returns as-is)
         $rawSql = 'words WHERE WoLgID = 1';
-        $result = $this->facade->buildSelectionTestSql(1, $rawSql);
+        $result = $this->facade->buildSelectionReviewSql(1, $rawSql);
         $this->assertEquals($rawSql, $result);
     }
 
@@ -601,8 +601,8 @@ class ReviewFacadeTest extends TestCase
     public function testGetTableTestWordsMethodExists(): void
     {
         $this->assertTrue(
-            method_exists($this->facade, 'getTableTestWords'),
-            'getTableTestWords method should exist'
+            method_exists($this->facade, 'getTableReviewWords'),
+            'getTableReviewWords method should exist'
         );
     }
 

@@ -1,5 +1,5 @@
 /**
- * Test Header - Header initialization and navigation for vocabulary tests.
+ * Review Header - Header initialization and navigation for vocabulary reviews.
  *
  * @license Unlicense
  * @author  HugoFara <hugo.farajallah@protonmail.com>
@@ -33,7 +33,7 @@ export function setUtteranceSetting(): void {
 /**
  * Reset the right frames to empty state.
  */
-export function resetTestFrames(): void {
+export function resetReviewFrames(): void {
   const parentWindow = window.parent as Window & {
     frames: { [key: string]: Window };
   };
@@ -46,51 +46,51 @@ export function resetTestFrames(): void {
 }
 
 /**
- * Start a word test of a specific type.
+ * Start a word review of a specific type.
  *
- * @param type Test type (1-5)
+ * @param type Review type (1-5)
  * @param property URL property string
  */
-export function startWordTest(type: number, property: string): void {
-  resetTestFrames();
-  window.location.href = '/test?type=' + type + '&' + property;
+export function startWordReview(type: number, property: string): void {
+  resetReviewFrames();
+  window.location.href = '/review?type=' + type + '&' + property;
 }
 
 /**
- * Start a table test.
+ * Start a table review.
  *
  * @param property URL property string
  */
-export function startTestTable(property: string): void {
-  resetTestFrames();
-  window.location.href = '/test?type=table&' + property;
+export function startTableReview(property: string): void {
+  resetReviewFrames();
+  window.location.href = '/review?type=table&' + property;
 }
 
 /**
- * Initialize event delegation for test header buttons.
+ * Initialize event delegation for review header buttons.
  */
-function initTestHeaderEvents(): void {
-  // Handle word test start via event delegation
+function initReviewHeaderEvents(): void {
+  // Handle word review start via event delegation
   document.addEventListener('click', (e) => {
-    const target = (e.target as HTMLElement).closest<HTMLElement>('[data-action="start-word-test"]');
+    const target = (e.target as HTMLElement).closest<HTMLElement>('[data-action="start-word-review"]');
     if (target) {
-      const type = parseInt(target.dataset.testType || '1', 10);
+      const type = parseInt(target.dataset.reviewType || '1', 10);
       const property = target.dataset.property || '';
-      startWordTest(type, property);
+      startWordReview(type, property);
       return;
     }
 
-    const tableTarget = (e.target as HTMLElement).closest<HTMLElement>('[data-action="start-test-table"]');
+    const tableTarget = (e.target as HTMLElement).closest<HTMLElement>('[data-action="start-table-review"]');
     if (tableTarget) {
       const property = tableTarget.dataset.property || '';
-      startTestTable(property);
+      startTableReview(property);
     }
   });
 }
 
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  initTestHeaderEvents();
+  initReviewHeaderEvents();
   // Initialize utterance setting if the checkbox exists
   if (document.getElementById('utterance-allowed')) {
     setUtteranceSetting();
