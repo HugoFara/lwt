@@ -24,7 +24,7 @@ services:
         MYSQL_ALLOW_EMPTY_PASSWORD: "no"
         MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     hostname: ${DB_HOSTNAME}
-    image: mariadb:10.11
+    image: mariadb:12.1
     restart: unless-stopped
     volumes:
         - ./lwt_db_data:/var/lib/mysql
