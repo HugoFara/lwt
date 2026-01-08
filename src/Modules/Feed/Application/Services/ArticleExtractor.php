@@ -14,6 +14,8 @@
 
 namespace Lwt\Modules\Feed\Application\Services;
 
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
+
 /**
  * Service for extracting text content from web articles.
  *
@@ -171,6 +173,12 @@ class ArticleExtractor
         string $articleSection,
         string &$newSection
     ): string {
+        // Validate URL to prevent SSRF
+        $validation = UrlUtilities::validateUrlForFetch($link);
+        if (!$validation['valid']) {
+            return $link;
+        }
+
         $dom = new \DOMDocument();
         $htmlString = @file_get_contents(trim($link));
         if ($htmlString === false) {
@@ -219,6 +227,12 @@ class ArticleExtractor
      */
     public function fetchArticleContent(string $url, ?string $charset = null): string
     {
+        // Validate URL to prevent SSRF attacks
+        $validation = UrlUtilities::validateUrlForFetch($url);
+        if (!$validation['valid']) {
+            return '';
+        }
+
         $context = stream_context_create([
             'http' => [
                 'follow_location' => true,
@@ -293,6 +307,12 @@ class ArticleExtractor
      */
     private function detectCharsetFromHeaders(string $url): ?string
     {
+        // Validate URL to prevent SSRF (defense in depth)
+        $validation = UrlUtilities::validateUrlForFetch($url);
+        if (!$validation['valid']) {
+            return null;
+        }
+
         $header = @get_headers(trim($url), true);
         if ($header === false) {
             return null;
