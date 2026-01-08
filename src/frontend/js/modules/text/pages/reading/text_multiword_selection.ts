@@ -216,10 +216,10 @@ export const mwordDragNDrop = {
   stopInteraction: () => {}
 };
 
-export function mword_drag_n_drop_select(): void {
+export function multiWordDragDropSelect(): void {
   // No longer used - selection is handled via native text selection
 }
 
-export function mword_touch_select(): void {
+export function multiWordTouchSelect(): void {
   // No longer used - selection is handled via native text selection
 }

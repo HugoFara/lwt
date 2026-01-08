@@ -3,102 +3,102 @@
  */
 import { describe, it, expect } from 'vitest';
 import {
-  escape_html_chars,
-  escape_html_chars_2,
-  escape_apostrophes,
+  escapeHtml,
+  escapeHtmlWithAnnotation,
+  escapeApostrophes,
   renderTags,
   renderStatusBarChart
 } from '../../../src/frontend/js/shared/utils/html_utils';
 
 describe('core/html_utils.ts', () => {
   // ===========================================================================
-  // escape_html_chars Tests
+  // escapeHtml Tests
   // ===========================================================================
 
-  describe('escape_html_chars', () => {
+  describe('escapeHtml', () => {
     it('escapes ampersand', () => {
-      expect(escape_html_chars('foo & bar')).toBe('foo &amp; bar');
+      expect(escapeHtml('foo & bar')).toBe('foo &amp; bar');
     });
 
     it('escapes less than', () => {
-      expect(escape_html_chars('a < b')).toBe('a &lt; b');
+      expect(escapeHtml('a < b')).toBe('a &lt; b');
     });
 
     it('escapes greater than', () => {
-      expect(escape_html_chars('a > b')).toBe('a &gt; b');
+      expect(escapeHtml('a > b')).toBe('a &gt; b');
     });
 
     it('escapes double quotes', () => {
-      expect(escape_html_chars('say "hello"')).toBe('say &quot;hello&quot;');
+      expect(escapeHtml('say "hello"')).toBe('say &quot;hello&quot;');
     });
 
     it('escapes single quotes', () => {
-      expect(escape_html_chars("it's")).toBe("it&#039;s");
+      expect(escapeHtml("it's")).toBe("it&#039;s");
     });
 
     it('escapes carriage return to br tag', () => {
-      expect(escape_html_chars('line1\x0dline2')).toBe('line1<br />line2');
+      expect(escapeHtml('line1\x0dline2')).toBe('line1<br />line2');
     });
 
     it('escapes multiple special characters', () => {
-      expect(escape_html_chars('<script>"alert(\'xss\')&"</script>')).toBe(
+      expect(escapeHtml('<script>"alert(\'xss\')&"</script>')).toBe(
         '&lt;script&gt;&quot;alert(&#039;xss&#039;)&amp;&quot;&lt;/script&gt;'
       );
     });
 
     it('returns empty string for empty input', () => {
-      expect(escape_html_chars('')).toBe('');
+      expect(escapeHtml('')).toBe('');
     });
 
     it('returns same string when no special characters', () => {
-      expect(escape_html_chars('hello world 123')).toBe('hello world 123');
+      expect(escapeHtml('hello world 123')).toBe('hello world 123');
     });
 
     it('handles unicode characters', () => {
-      expect(escape_html_chars('日本語 & 中文')).toBe('日本語 &amp; 中文');
+      expect(escapeHtml('日本語 & 中文')).toBe('日本語 &amp; 中文');
     });
   });
 
   // ===========================================================================
-  // escape_html_chars_2 Tests
+  // escapeHtmlWithAnnotation Tests
   // ===========================================================================
 
-  describe('escape_html_chars_2', () => {
+  describe('escapeHtmlWithAnnotation', () => {
     it('escapes title without annotation', () => {
-      expect(escape_html_chars_2('Hello <World>', '')).toBe('Hello &lt;World&gt;');
+      expect(escapeHtmlWithAnnotation('Hello <World>', '')).toBe('Hello &lt;World&gt;');
     });
 
     it('highlights annotation in red when provided', () => {
-      const result = escape_html_chars_2('Hello World', 'World');
+      const result = escapeHtmlWithAnnotation('Hello World', 'World');
 
       expect(result).toContain('<span style="color:red">World</span>');
     });
 
     it('escapes both title and annotation', () => {
-      const result = escape_html_chars_2('A & B', 'B');
+      const result = escapeHtmlWithAnnotation('A & B', 'B');
 
       expect(result).toBe('A &amp; <span style="color:red">B</span>');
     });
 
     it('escapes special characters in annotation', () => {
-      const result = escape_html_chars_2('Say "Hello"', '"Hello"');
+      const result = escapeHtmlWithAnnotation('Say "Hello"', '"Hello"');
 
       expect(result).toContain('<span style="color:red">&quot;Hello&quot;</span>');
     });
 
     it('returns escaped title when annotation is empty string', () => {
-      expect(escape_html_chars_2('Test & Check', '')).toBe('Test &amp; Check');
+      expect(escapeHtmlWithAnnotation('Test & Check', '')).toBe('Test &amp; Check');
     });
 
     it('handles annotation not found in title', () => {
-      const result = escape_html_chars_2('Hello World', 'xyz');
+      const result = escapeHtmlWithAnnotation('Hello World', 'xyz');
 
       // Should still escape but not highlight
       expect(result).toBe('Hello World');
     });
 
     it('handles multiple occurrences of annotation', () => {
-      const result = escape_html_chars_2('a a a', 'a');
+      const result = escapeHtmlWithAnnotation('a a a', 'a');
 
       // Should replace first occurrence
       expect(result).toContain('<span style="color:red">a</span>');
@@ -106,32 +106,32 @@ describe('core/html_utils.ts', () => {
   });
 
   // ===========================================================================
-  // escape_apostrophes Tests
+  // escapeApostrophes Tests
   // ===========================================================================
 
-  describe('escape_apostrophes', () => {
+  describe('escapeApostrophes', () => {
     it('escapes single apostrophe', () => {
-      expect(escape_apostrophes("it's")).toBe("it\\'s");
+      expect(escapeApostrophes("it's")).toBe("it\\'s");
     });
 
     it('escapes multiple apostrophes', () => {
-      expect(escape_apostrophes("don't won't can't")).toBe("don\\'t won\\'t can\\'t");
+      expect(escapeApostrophes("don't won't can't")).toBe("don\\'t won\\'t can\\'t");
     });
 
     it('returns same string without apostrophes', () => {
-      expect(escape_apostrophes('hello world')).toBe('hello world');
+      expect(escapeApostrophes('hello world')).toBe('hello world');
     });
 
     it('returns empty string for empty input', () => {
-      expect(escape_apostrophes('')).toBe('');
+      expect(escapeApostrophes('')).toBe('');
     });
 
     it('does not escape double quotes', () => {
-      expect(escape_apostrophes('"hello"')).toBe('"hello"');
+      expect(escapeApostrophes('"hello"')).toBe('"hello"');
     });
 
     it('handles apostrophe at start and end', () => {
-      expect(escape_apostrophes("'hello'")).toBe("\\'hello\\'");
+      expect(escapeApostrophes("'hello'")).toBe("\\'hello\\'");
     });
   });
 
@@ -334,14 +334,14 @@ describe('core/html_utils.ts', () => {
   // ===========================================================================
 
   describe('Edge Cases', () => {
-    it('escape_html_chars handles consecutive special chars', () => {
-      expect(escape_html_chars('<<>>')).toBe('&lt;&lt;&gt;&gt;');
+    it('escapeHtml handles consecutive special chars', () => {
+      expect(escapeHtml('<<>>')).toBe('&lt;&lt;&gt;&gt;');
     });
 
-    it('escape_html_chars handles mixed content', () => {
+    it('escapeHtml handles mixed content', () => {
       const input = 'Hello <b>World</b> & "Quotes" \'apostrophe\'';
       const expected = 'Hello &lt;b&gt;World&lt;/b&gt; &amp; &quot;Quotes&quot; &#039;apostrophe&#039;';
-      expect(escape_html_chars(input)).toBe(expected);
+      expect(escapeHtml(input)).toBe(expected);
     });
 
     it('renderTags handles single comma', () => {

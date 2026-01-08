@@ -41,7 +41,7 @@ vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', 
 }));
 
 vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
-  get_position_from_id: vi.fn((id: string) => parseInt(id.replace(/\D/g, ''), 10) || 0)
+  getPositionFromId: vi.fn((id: string) => parseInt(id.replace(/\D/g, ''), 10) || 0)
 }));
 
 vi.mock('../../../src/frontend/js/shared/utils/hover_intent', () => ({
@@ -54,7 +54,7 @@ vi.mock('../../../src/frontend/js/media/html5_audio_player', () => ({
   }
 }));
 
-import { keydown_event_do_text_text } from '../../../src/frontend/js/modules/text/pages/reading/text_keyboard';
+import { handleTextKeydown } from '../../../src/frontend/js/modules/text/pages/reading/text_keyboard';
 import {
   getReadingPosition,
   setReadingPosition,
@@ -128,7 +128,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(5);
 
       const event = createKeyEvent(27);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(getReadingPosition()).toBe(-1);
       expect(result).toBe(false);
@@ -141,7 +141,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(27);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(document.querySelectorAll('.uwordmarked').length).toBe(0);
       expect(document.querySelectorAll('.kwordmarked').length).toBe(0);
@@ -160,7 +160,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(13);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       // RETURN adds uwordmarked to the first unknown word
       expect(document.querySelectorAll('.uwordmarked').length).toBe(1);
@@ -177,7 +177,7 @@ describe('text_keyboard.ts', () => {
       document.getElementById('w1')?.addEventListener('click', clickSpy);
 
       const event = createKeyEvent(13);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(document.getElementById('w1')?.classList.contains('uwordmarked')).toBe(true);
     });
@@ -188,7 +188,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(13);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(result).toBe(false);
     });
@@ -199,7 +199,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(13);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(result).toBe(false);
     });
@@ -217,7 +217,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(36);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(getReadingPosition()).toBe(0);
       expect(result).toBe(false);
@@ -230,7 +230,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(36);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(document.getElementById('w1')?.classList.contains('kwordmarked')).toBe(true);
     });
@@ -241,7 +241,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(36);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(result).toBe(true);
     });
@@ -259,7 +259,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(35);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(document.getElementById('w2')?.classList.contains('kwordmarked')).toBe(true);
     });
@@ -272,7 +272,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(35);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(getReadingPosition()).toBe(2);
     });
@@ -290,7 +290,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(37);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(document.getElementById('w1')?.classList.contains('kwordmarked')).toBe(true);
       expect(document.getElementById('w2')?.classList.contains('kwordmarked')).toBe(false);
@@ -303,7 +303,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(37);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(document.querySelectorAll('.kwordmarked').length).toBe(1);
     });
@@ -321,7 +321,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(39);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(document.getElementById('w2')?.classList.contains('kwordmarked')).toBe(true);
     });
@@ -339,7 +339,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(32);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(document.getElementById('w2')?.classList.contains('kwordmarked')).toBe(true);
     });
@@ -359,7 +359,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(0);
 
       const event = createKeyEvent(50); // key '2'
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(mockLoadModalFrame).toHaveBeenCalled();
     });
@@ -375,7 +375,7 @@ describe('text_keyboard.ts', () => {
 
       // Press number key to change the status of the marked known word
       const event = createKeyEvent(49); // key '1'
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       // Known word gets /word/set-status call
       expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/set-status'));
@@ -390,7 +390,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(0);
 
       const event = createKeyEvent(99); // numpad '3'
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(mockLoadModalFrame).toHaveBeenCalled();
     });
@@ -410,7 +410,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(0);
 
       const event = createKeyEvent(73);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('status=98'));
     });
@@ -430,7 +430,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(0);
 
       const event = createKeyEvent(87);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('status=99'));
       expect(result).toBe(false);
@@ -451,7 +451,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(0);
 
       const event = createKeyEvent(80);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(mockSpeechDispatcher).toHaveBeenCalledWith('hello', getLanguageId());
       expect(result).toBe(false);
@@ -472,7 +472,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(0);
 
       const event = createKeyEvent(84);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(result).toBe(false);
     });
@@ -495,7 +495,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(0);
 
       const event = createKeyEvent(84);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(mockOwin).toHaveBeenCalled();
     });
@@ -515,7 +515,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(0);
 
       const event = createKeyEvent(69);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/edit'));
       expect(result).toBe(false);
@@ -530,7 +530,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(0);
 
       const event = createKeyEvent(69);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/edit-multi'));
     });
@@ -553,7 +553,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(-1);
 
       const event = createKeyEvent(69);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
 
       expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/edit?wid=&tid='));
     });
@@ -575,7 +575,7 @@ describe('text_keyboard.ts', () => {
       mockNewPosition.mockClear();
 
       const event = createKeyEvent(65);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       // Position calculation: 100 * (50 - 5) / 1000 = 4.5
       expect(mockNewPosition).toHaveBeenCalledWith(4.5);
@@ -593,7 +593,7 @@ describe('text_keyboard.ts', () => {
       mockNewPosition.mockClear();
 
       const event = createKeyEvent(65);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(mockNewPosition).not.toHaveBeenCalled();
       expect(result).toBe(true);
@@ -610,7 +610,7 @@ describe('text_keyboard.ts', () => {
       mockNewPosition.mockClear();
 
       const event = createKeyEvent(65);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       // Position calculation: 100 * (2 - 5) / 1000 = -0.3, clamped to 0
       expect(mockNewPosition).toHaveBeenCalledWith(0);
@@ -631,7 +631,7 @@ describe('text_keyboard.ts', () => {
       `;
 
       const event = createKeyEvent(88); // 'X' key
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(result).toBe(true);
     });
@@ -640,7 +640,7 @@ describe('text_keyboard.ts', () => {
       document.body.innerHTML = '';
 
       const event = createKeyEvent(39);
-      const result = keydown_event_do_text_text(event);
+      const result = handleTextKeydown(event);
 
       expect(result).toBe(true);
     });
@@ -658,7 +658,7 @@ describe('text_keyboard.ts', () => {
       setReadingPosition(-1);
 
       const event = createKeyEvent(80);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
     });
 
     // Note: This test is skipped because the source code uses :hover selector
@@ -678,7 +678,7 @@ describe('text_keyboard.ts', () => {
       });
 
       const event = createKeyEvent(36);
-      keydown_event_do_text_text(event);
+      handleTextKeydown(event);
     });
   });
 });

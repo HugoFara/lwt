@@ -14,17 +14,17 @@
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { hoverIntent } from '@shared/utils/hover_intent';
 import {
-  word_each_do_text_text,
-  mword_each_do_text_text
+  processWordAnnotations,
+  processMultiWordAnnotations
 } from './text_annotations';
-import { keydown_event_do_text_text } from './text_keyboard';
+import { handleTextKeydown } from './text_keyboard';
 import { setupMultiWordSelection } from './text_multiword_selection';
 import {
-  run_overlib_status_unknown,
-  run_overlib_status_99,
-  run_overlib_status_98,
-  run_overlib_status_1_to_5,
-  run_overlib_multiword,
+  showUnknownWordPopup,
+  showWellKnownWordPopup,
+  showIgnoredWordPopup,
+  showLearningWordPopup,
+  showMultiWordPopup,
   buildKnownWordPopupContent,
   buildUnknownWordPopupContent,
   overlib
@@ -46,14 +46,14 @@ import { lwt_audio_controller } from '@/media/html5_audio_player';
 // Re-export from submodules
 export {
   getAttr,
-  word_each_do_text_text,
-  mword_each_do_text_text
+  processWordAnnotations,
+  processMultiWordAnnotations
 } from './text_annotations';
-export { keydown_event_do_text_text } from './text_keyboard';
+export { handleTextKeydown } from './text_keyboard';
 export {
   mwordDragNDrop,
-  mword_drag_n_drop_select,
-  mword_touch_select,
+  multiWordDragDropSelect,
+  multiWordTouchSelect,
   setupMultiWordSelection,
   handleTextSelection
 } from './text_multiword_selection';
@@ -112,7 +112,7 @@ export function isApiModeEnabled(): boolean {
  *
  * @param this The HTML element (word) that was double-clicked
  */
-export function word_dblclick_event_do_text_text(this: HTMLElement): void {
+export function handleWordDoubleClick(this: HTMLElement): void {
   const totalCharEl = document.getElementById('totalcharcount');
   const t = parseInt(totalCharEl?.textContent || '0', 10);
   if (t === 0) { return; }
@@ -128,7 +128,7 @@ export function word_dblclick_event_do_text_text(this: HTMLElement): void {
  *
  * @returns false
  */
-export function word_click_event_do_text_text(this: HTMLElement): boolean {
+export function handleWordClick(this: HTMLElement): boolean {
   const status = this.getAttribute('data_status') || '';
   const ann = this.getAttribute('data_ann') || '';
   const text = this.textContent || '';
@@ -149,9 +149,9 @@ export function word_click_event_do_text_text(this: HTMLElement): boolean {
 
   // Check if we should use API-based mode
   if (isApiModeEnabled()) {
-    word_click_event_api_mode(this, statusNum, multi_words);
+    handleWordClickApiMode(this, statusNum, multi_words);
   } else {
-    word_click_event_frame_mode(
+    handleWordClickFrameMode(
       this, statusNum, order, wid, hints, multi_words, ann
     );
   }
@@ -166,7 +166,7 @@ export function word_click_event_do_text_text(this: HTMLElement): boolean {
  * Handle word click in legacy frame mode.
  * Uses iframe navigation for word operations.
  */
-function word_click_event_frame_mode(
+function handleWordClickFrameMode(
   element: HTMLElement,
   statusNum: number,
   order: string,
@@ -181,25 +181,25 @@ function word_click_event_frame_mode(
   const rtl = isRtl();
 
   if (statusNum < 1) {
-    run_overlib_status_unknown(
+    showUnknownWordPopup(
       dictLinks.dict1, dictLinks.dict2, dictLinks.translator, hints,
       textId, order, text, multi_words, rtl
     );
     // Popup provides "Learn term" link to access edit form
   } else if (statusNum === 99) {
-    run_overlib_status_99(
+    showWellKnownWordPopup(
       dictLinks.dict1, dictLinks.dict2, dictLinks.translator, hints,
       textId, order,
       text, wid, multi_words, rtl, ann
     );
   } else if (statusNum === 98) {
-    run_overlib_status_98(
+    showIgnoredWordPopup(
       dictLinks.dict1, dictLinks.dict2, dictLinks.translator, hints,
       textId, order,
       text, wid, multi_words, rtl, ann
     );
   } else {
-    run_overlib_status_1_to_5(
+    showLearningWordPopup(
       dictLinks.dict1, dictLinks.dict2, dictLinks.translator, hints,
       textId, order,
       text, wid, String(statusNum), multi_words, rtl, ann
@@ -211,7 +211,7 @@ function word_click_event_frame_mode(
  * Handle word click in API-based mode.
  * Uses REST API calls with in-page DOM updates.
  */
-function word_click_event_api_mode(
+function handleWordClickApiMode(
   element: HTMLElement,
   statusNum: number,
   multi_words: (string | undefined)[]
@@ -269,7 +269,7 @@ function word_click_event_api_mode(
  * @param this The HTML element (multi-word) that was clicked
  * @returns false to prevent default behavior
  */
-export function mword_click_event_do_text_text(this: HTMLElement): boolean {
+export function handleMultiWordClick(this: HTMLElement): boolean {
   const status = this.getAttribute('data_status') || '';
   const text = this.textContent || '';
   if (status !== '') {
@@ -278,7 +278,7 @@ export function mword_click_event_do_text_text(this: HTMLElement): boolean {
     const hints = this.getAttribute('title') || '';
     const dictLinks = getDictionaryLinks();
 
-    run_overlib_multiword(
+    showMultiWordPopup(
       dictLinks.dict1, dictLinks.dict2, dictLinks.translator,
       hints,
       getTextId(),
@@ -302,7 +302,7 @@ export function mword_click_event_do_text_text(this: HTMLElement): boolean {
  *
  * @param this The HTML element being hovered over
  */
-export function word_hover_over(this: HTMLElement): void {
+export function handleWordHoverOver(this: HTMLElement): void {
   if (!document.querySelector('.tword')) {
     const classAttr = this.className || '';
     const v = classAttr.replace(/.*(TERM[^ ]*)( .*)*/, '$1');
@@ -319,7 +319,7 @@ export function word_hover_over(this: HTMLElement): void {
  * Handle mouse hover out from a word to remove highlighting.
  * Cleans up tooltip elements and removes the 'hword' class.
  */
-export function word_hover_out(): void {
+export function handleWordHoverOut(): void {
   document.querySelectorAll('.hword').forEach((el) => {
     el.classList.remove('hword');
   });
@@ -333,16 +333,16 @@ export function word_hover_out(): void {
 export function prepareTextInteractions(): void {
   // Process annotations for words and multi-words
   document.querySelectorAll<HTMLElement>('.word').forEach((el) => {
-    word_each_do_text_text.call(el);
+    processWordAnnotations.call(el);
   });
   document.querySelectorAll<HTMLElement>('.mword').forEach((el) => {
-    mword_each_do_text_text.call(el);
+    processMultiWordAnnotations.call(el);
   });
 
   // Word click events
   document.querySelectorAll<HTMLElement>('.word').forEach((el) => {
     el.addEventListener('click', function(this: HTMLElement) {
-      word_click_event_do_text_text.call(this);
+      handleWordClick.call(this);
     });
   });
 
@@ -356,7 +356,7 @@ export function prepareTextInteractions(): void {
     thetext.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('mword')) {
-        mword_click_event_do_text_text.call(target);
+        handleMultiWordClick.call(target);
       }
     });
 
@@ -364,14 +364,14 @@ export function prepareTextInteractions(): void {
     thetext.addEventListener('dblclick', (e) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('mword')) {
-        word_dblclick_event_do_text_text.call(target);
+        handleWordDoubleClick.call(target);
       }
     });
 
     // Hover intent for words
     hoverIntent(thetext, {
-      over: word_hover_over,
-      out: word_hover_out,
+      over: handleWordHoverOver,
+      out: handleWordHoverOut,
       interval: 150,
       selector: '.wsty,.mwsty'
     });
@@ -380,13 +380,13 @@ export function prepareTextInteractions(): void {
   // Word double-click events
   document.querySelectorAll<HTMLElement>('.word').forEach((el) => {
     el.addEventListener('dblclick', function(this: HTMLElement) {
-      word_dblclick_event_do_text_text.call(this);
+      handleWordDoubleClick.call(this);
     });
   });
 
   // Keyboard events
   document.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (!keydown_event_do_text_text(e)) {
+    if (!handleTextKeydown(e)) {
       e.preventDefault();
     }
   });

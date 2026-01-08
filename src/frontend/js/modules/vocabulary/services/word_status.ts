@@ -42,7 +42,7 @@ export function getStatusAbbr(status: number | string): string {
  * @param status Learning status of the word
  * @returns Tooltip for this word
  */
-export function make_tooltip(word: string, trans: string, roman: string, status: number | string): string {
+export function createWordTooltip(word: string, trans: string, roman: string, status: number | string): string {
   const nl = '\x0d';
   let title = word;
   if (roman !== '') {

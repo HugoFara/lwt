@@ -3,33 +3,33 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  run_overlib_status_98,
-  run_overlib_status_99,
-  run_overlib_status_1_to_5,
-  run_overlib_status_unknown,
-  run_overlib_multiword,
-  run_overlib_test,
-  make_overlib_link_new_multiword,
-  make_overlib_link_wb,
-  make_overlib_link_wbnl,
-  make_overlib_link_wbnl2,
-  make_overlib_link_change_status_all,
-  make_overlib_link_change_status_alltest,
-  make_overlib_link_change_status,
-  make_overlib_link_change_status_test,
-  make_overlib_link_change_status_test2,
-  make_overlib_link_new_word,
-  make_overlib_link_edit_multiword,
-  make_overlib_link_edit_multiword_title,
-  make_overlib_link_create_edit_multiword,
-  make_overlib_link_create_edit_multiword_rtl,
-  make_overlib_link_edit_word,
-  make_overlib_link_edit_word_title,
-  make_overlib_link_delete_word,
-  make_overlib_link_delete_multiword,
-  make_overlib_link_wellknown_word,
-  make_overlib_link_ignore_word,
-  make_overlib_audio,
+  showIgnoredWordPopup,
+  showWellKnownWordPopup,
+  showLearningWordPopup,
+  showUnknownWordPopup,
+  showMultiWordPopup,
+  showTestWordPopup,
+  createNewMultiWordLink,
+  createDictionaryLinks,
+  createDictionaryLinksnl,
+  createDictionaryLinksnl2,
+  createStatusChangeLinks,
+  createTestStatusChangeLinks,
+  createStatusChangeLink,
+  createTestStatusLink,
+  createTestStatusLink2,
+  createNewWordLink,
+  createEditMultiWordLink,
+  createEditMultiWordTitleLink,
+  createOrEditMultiWordLink,
+  createOrEditMultiWordLinkRtl,
+  createEditWordLink,
+  createEditWordTitleLink,
+  createDeleteWordLink,
+  createDeleteMultiWordLink,
+  createWellKnownWordLink,
+  createIgnoreWordLink,
+  createAudioButton,
   createStatusChangeButton,
   createStatusButtonsAll,
   createDeleteButton,
@@ -77,23 +77,23 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_new_multiword Tests
+  // createNewMultiWordLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_new_multiword', () => {
+  describe('createNewMultiWordLink', () => {
     it('returns empty string when all multiwords are empty', () => {
-      const result = make_overlib_link_new_multiword(1, '5', ['', '', '', '', '', '', '', ''], false);
+      const result = createNewMultiWordLink(1, '5', ['', '', '', '', '', '', '', ''], false);
       expect(result).toBe('');
     });
 
     it('returns empty string when all multiwords are undefined', () => {
-      const result = make_overlib_link_new_multiword(1, '5', [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined], false);
+      const result = createNewMultiWordLink(1, '5', [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined], false);
       expect(result).toBe('');
     });
 
     it('creates LTR multiword links for valid multiwords via modal', () => {
       const multiWords = ['2 word1 word2', undefined, '4 word1 word2 word3 word4', '', '', '', '', ''];
-      const result = make_overlib_link_new_multiword(1, '5', multiWords, false);
+      const result = createNewMultiWordLink(1, '5', multiWords, false);
 
       expect(result).toContain('Expr:');
       expect(result).toContain('2..');
@@ -103,7 +103,7 @@ describe('overlib_interface.ts', () => {
 
     it('creates RTL multiword links when rtl is true', () => {
       const multiWords = ['2 word1', undefined, undefined, undefined, undefined, undefined, undefined, '8 word8'];
-      const result = make_overlib_link_new_multiword(1, '5', multiWords, true);
+      const result = createNewMultiWordLink(1, '5', multiWords, true);
 
       expect(result).toContain('Expr:');
       expect(result).toContain('dir="rtl"');
@@ -111,19 +111,19 @@ describe('overlib_interface.ts', () => {
 
     it('handles numeric torder', () => {
       const multiWords = ['2 test', '', '', '', '', '', '', ''];
-      const result = make_overlib_link_new_multiword(1, 10, multiWords, false);
+      const result = createNewMultiWordLink(1, 10, multiWords, false);
 
       expect(result).toContain('openMultiWordModal(1, 10,');
     });
   });
 
   // ===========================================================================
-  // make_overlib_link_wb Tests
+  // createDictionaryLinks Tests
   // ===========================================================================
 
-  describe('make_overlib_link_wb', () => {
+  describe('createDictionaryLinks', () => {
     it('creates dictionary links with lookup term', () => {
-      const result = make_overlib_link_wb(
+      const result = createDictionaryLinks(
         'http://dict1.com/lwt_term',
         'http://dict2.com/lwt_term',
         'http://trans.com/lwt_term',
@@ -139,7 +139,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('includes sentence lookup when torder and txid are valid', () => {
-      const result = make_overlib_link_wb(
+      const result = createDictionaryLinks(
         'http://dict1.com/lwt_term',
         'http://dict2.com/lwt_term',
         'http://trans.com/lwt_term',
@@ -152,7 +152,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('excludes sentence lookup when torder is 0', () => {
-      const result = make_overlib_link_wb(
+      const result = createDictionaryLinks(
         'http://dict1.com/lwt_term',
         'http://dict2.com/lwt_term',
         'http://trans.com/lwt_term',
@@ -165,7 +165,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('excludes sentence lookup when txid is 0', () => {
-      const result = make_overlib_link_wb(
+      const result = createDictionaryLinks(
         'http://dict1.com/lwt_term',
         'http://dict2.com/lwt_term',
         'http://trans.com/lwt_term',
@@ -179,12 +179,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_wbnl Tests
+  // createDictionaryLinksnl Tests
   // ===========================================================================
 
-  describe('make_overlib_link_wbnl', () => {
+  describe('createDictionaryLinksnl', () => {
     it('creates dictionary links with term prefix', () => {
-      const result = make_overlib_link_wbnl(
+      const result = createDictionaryLinksnl(
         'http://dict1.com/lwt_term',
         'http://dict2.com/lwt_term',
         'http://trans.com/lwt_term',
@@ -197,7 +197,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('includes sentence link when valid', () => {
-      const result = make_overlib_link_wbnl(
+      const result = createDictionaryLinksnl(
         'http://dict1.com/lwt_term',
         'http://dict2.com/lwt_term',
         'http://trans.com/lwt_term',
@@ -211,12 +211,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_wbnl2 Tests
+  // createDictionaryLinksnl2 Tests
   // ===========================================================================
 
-  describe('make_overlib_link_wbnl2', () => {
+  describe('createDictionaryLinksnl2', () => {
     it('creates dictionary links for term and sentence', () => {
-      const result = make_overlib_link_wbnl2(
+      const result = createDictionaryLinksnl2(
         'http://dict1.com/lwt_term',
         'http://dict2.com/lwt_term',
         'http://trans.com/lwt_term',
@@ -229,7 +229,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('excludes sentence when empty', () => {
-      const result = make_overlib_link_wbnl2(
+      const result = createDictionaryLinksnl2(
         'http://dict1.com/lwt_term',
         'http://dict2.com/lwt_term',
         'http://trans.com/lwt_term',
@@ -243,12 +243,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_change_status_all Tests
+  // createStatusChangeLinks Tests
   // ===========================================================================
 
-  describe('make_overlib_link_change_status_all', () => {
+  describe('createStatusChangeLinks', () => {
     it('returns links for all status levels (1-5, 98, 99)', () => {
-      const result = make_overlib_link_change_status_all(1, '5', 100, 3);
+      const result = createStatusChangeLinks(1, '5', 100, 3);
 
       expect(result).toContain('St:');
       // Should contain links for 1, 2, 4, 5, 98, 99 (not 3 since it's current)
@@ -264,19 +264,19 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_change_status Tests
+  // createStatusChangeLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_change_status', () => {
+  describe('createStatusChangeLink', () => {
     it('returns diamond when old status equals new status', () => {
-      const result = make_overlib_link_change_status(1, '5', 100, 3, 3);
+      const result = createStatusChangeLink(1, '5', 100, 3, 3);
 
       expect(result).toContain('◆');
       expect(result).not.toContain('<a href');
     });
 
     it('returns link with new status when different', () => {
-      const result = make_overlib_link_change_status(1, '5', 100, 3, 4);
+      const result = createStatusChangeLink(1, '5', 100, 3, 4);
 
       expect(result).toContain('/word/set-status');
       expect(result).toContain('tid=1');
@@ -287,14 +287,14 @@ describe('overlib_interface.ts', () => {
     });
 
     it('handles status 99 (well-known)', () => {
-      const result = make_overlib_link_change_status(1, '5', 100, 3, 99);
+      const result = createStatusChangeLink(1, '5', 100, 3, 99);
 
       expect(result).toContain('[WKn]');
       expect(result).toContain('status=99');
     });
 
     it('handles status 98 (ignored)', () => {
-      const result = make_overlib_link_change_status(1, '5', 100, 3, 98);
+      const result = createStatusChangeLink(1, '5', 100, 3, 98);
 
       expect(result).toContain('[Ign]');
       expect(result).toContain('status=98');
@@ -302,12 +302,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_change_status_alltest Tests
+  // createTestStatusChangeLinks Tests
   // ===========================================================================
 
-  describe('make_overlib_link_change_status_alltest', () => {
+  describe('createTestStatusChangeLinks', () => {
     it('returns test status links for all levels', () => {
-      const result = make_overlib_link_change_status_alltest(100, 2);
+      const result = createTestStatusChangeLinks(100, 2);
 
       expect(result).toContain('/word/set-test-status');
       expect(result).toContain('wid=100');
@@ -317,19 +317,19 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_change_status_test2 Tests
+  // createTestStatusLink2 Tests
   // ===========================================================================
 
-  describe('make_overlib_link_change_status_test2', () => {
+  describe('createTestStatusLink2', () => {
     it('shows diamond when status matches', () => {
-      const result = make_overlib_link_change_status_test2(100, 3, 3);
+      const result = createTestStatusLink2(100, 3, 3);
 
       expect(result).toContain('◆');
       expect(result).toContain('/word/set-test-status');
     });
 
     it('shows status abbreviation when status differs', () => {
-      const result = make_overlib_link_change_status_test2(100, 3, 4);
+      const result = createTestStatusLink2(100, 3, 4);
 
       expect(result).toContain('[4]');
       expect(result).not.toContain('◆');
@@ -337,12 +337,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_change_status_test Tests
+  // createTestStatusLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_change_status_test', () => {
+  describe('createTestStatusLink', () => {
     it('creates link with positive change and success sound', () => {
-      const result = make_overlib_link_change_status_test(100, 1, 'Got it!');
+      const result = createTestStatusLink(100, 1, 'Got it!');
 
       expect(result).toContain('/word/set-test-status');
       expect(result).toContain('wid=100');
@@ -352,7 +352,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('creates link with negative change and failure sound', () => {
-      const result = make_overlib_link_change_status_test(100, -1, 'Oops!');
+      const result = createTestStatusLink(100, -1, 'Oops!');
 
       expect(result).toContain('stchange=-1');
       expect(result).toContain('failureSound()');
@@ -361,12 +361,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_new_word Tests
+  // createNewWordLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_new_word', () => {
+  describe('createNewWordLink', () => {
     it('creates link to learn a new word', () => {
-      const result = make_overlib_link_new_word(1, '5', 100);
+      const result = createNewWordLink(1, '5', 100);
 
       expect(result).toContain('/word/edit');
       expect(result).toContain('tid=1');
@@ -378,12 +378,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_edit_multiword Tests
+  // createEditMultiWordLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_edit_multiword', () => {
+  describe('createEditMultiWordLink', () => {
     it('creates button to edit a multiword via modal', () => {
-      const result = make_overlib_link_edit_multiword(1, '5', 100);
+      const result = createEditMultiWordLink(1, '5', 100);
 
       expect(result).toContain('openMultiWordModal');
       expect(result).toContain("1, 5, '', 0, 100");  // textId, position, text='', wordCount=0, wordId
@@ -392,12 +392,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_edit_multiword_title Tests
+  // createEditMultiWordTitleLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_edit_multiword_title', () => {
+  describe('createEditMultiWordTitleLink', () => {
     it('creates styled title button for multiword via modal', () => {
-      const result = make_overlib_link_edit_multiword_title('2-Word-Expression', 1, '5', 100);
+      const result = createEditMultiWordTitleLink('2-Word-Expression', 1, '5', 100);
 
       expect(result).toContain('style="color:yellow"');
       expect(result).toContain('openMultiWordModal');
@@ -407,12 +407,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_create_edit_multiword Tests
+  // createOrEditMultiWordLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_create_edit_multiword', () => {
+  describe('createOrEditMultiWordLink', () => {
     it('creates button to create/edit multiword via modal', () => {
-      const result = make_overlib_link_create_edit_multiword(3, 1, '5', '3 word1 word2 word3');
+      const result = createOrEditMultiWordLink(3, 1, '5', '3 word1 word2 word3');
 
       expect(result).toContain('openMultiWordModal');
       expect(result).toContain("1, 5, '3 word1 word2 word3', 3");  // textId, position, text, wordCount
@@ -421,12 +421,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_create_edit_multiword_rtl Tests
+  // createOrEditMultiWordLinkRtl Tests
   // ===========================================================================
 
-  describe('make_overlib_link_create_edit_multiword_rtl', () => {
+  describe('createOrEditMultiWordLinkRtl', () => {
     it('creates RTL button for multiword via modal', () => {
-      const result = make_overlib_link_create_edit_multiword_rtl(3, 1, '5', '3 מילה1 מילה2');
+      const result = createOrEditMultiWordLinkRtl(3, 1, '5', '3 מילה1 מילה2');
 
       expect(result).toContain('dir="rtl"');
       expect(result).toContain('openMultiWordModal');
@@ -435,12 +435,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_edit_word Tests
+  // createEditWordLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_edit_word', () => {
+  describe('createEditWordLink', () => {
     it('creates link to edit a word', () => {
-      const result = make_overlib_link_edit_word(1, '5', 100);
+      const result = createEditWordLink(1, '5', 100);
 
       expect(result).toContain('/word/edit');
       expect(result).toContain('tid=1');
@@ -451,12 +451,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_edit_word_title Tests
+  // createEditWordTitleLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_edit_word_title', () => {
+  describe('createEditWordTitleLink', () => {
     it('creates styled title link for word', () => {
-      const result = make_overlib_link_edit_word_title('TestWord', 1, '5', 100);
+      const result = createEditWordTitleLink('TestWord', 1, '5', 100);
 
       expect(result).toContain('style="color:yellow"');
       expect(result).toContain('/word/edit');
@@ -465,12 +465,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_delete_word Tests
+  // createDeleteWordLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_delete_word', () => {
+  describe('createDeleteWordLink', () => {
     it('creates link to delete a word with confirmation', () => {
-      const result = make_overlib_link_delete_word(1, 100);
+      const result = createDeleteWordLink(1, 100);
 
       expect(result).toContain('/word/delete-term');
       expect(result).toContain('wid=100');
@@ -481,12 +481,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_delete_multiword Tests
+  // createDeleteMultiWordLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_delete_multiword', () => {
+  describe('createDeleteMultiWordLink', () => {
     it('creates link to delete a multiword with confirmation', () => {
-      const result = make_overlib_link_delete_multiword(1, 100);
+      const result = createDeleteMultiWordLink(1, 100);
 
       expect(result).toContain('/word/delete-multi');
       expect(result).toContain('wid=100');
@@ -497,12 +497,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_wellknown_word Tests
+  // createWellKnownWordLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_wellknown_word', () => {
+  describe('createWellKnownWordLink', () => {
     it('creates link to mark word as well-known', () => {
-      const result = make_overlib_link_wellknown_word(1, '5');
+      const result = createWellKnownWordLink(1, '5');
 
       expect(result).toContain('/word/insert-wellknown');
       expect(result).toContain('tid=1');
@@ -512,12 +512,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_link_ignore_word Tests
+  // createIgnoreWordLink Tests
   // ===========================================================================
 
-  describe('make_overlib_link_ignore_word', () => {
+  describe('createIgnoreWordLink', () => {
     it('creates link to ignore a word', () => {
-      const result = make_overlib_link_ignore_word(1, '5');
+      const result = createIgnoreWordLink(1, '5');
 
       expect(result).toContain('/word/insert-ignore');
       expect(result).toContain('tid=1');
@@ -527,12 +527,12 @@ describe('overlib_interface.ts', () => {
   });
 
   // ===========================================================================
-  // make_overlib_audio Tests
+  // createAudioButton Tests
   // ===========================================================================
 
-  describe('make_overlib_audio', () => {
+  describe('createAudioButton', () => {
     it('creates audio button with speech dispatcher', () => {
-      const result = make_overlib_audio('hello');
+      const result = createAudioButton('hello');
 
       // Now uses Lucide SVG icons instead of PNG images
       expect(result).toContain('<i');
@@ -543,7 +543,7 @@ describe('overlib_interface.ts', () => {
     });
 
     it('escapes HTML characters in text', () => {
-      const result = make_overlib_audio('<script>alert("xss")</script>');
+      const result = createAudioButton('<script>alert("xss")</script>');
 
       expect(result).not.toContain('<script>alert');
       // HTML characters are escaped in the onclick attribute
@@ -558,56 +558,56 @@ describe('overlib_interface.ts', () => {
   // Note: These tests are skipped because they require the word popup dialog
   // which is not properly set up in the test environment
   describe.skip('run_overlib functions (require popup dialog)', () => {
-    it('run_overlib_status_98 returns boolean', () => {
-      const result = run_overlib_status_98(
+    it('showIgnoredWordPopup returns boolean', () => {
+      const result = showIgnoredWordPopup(
         'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', 100, ['', '', '', '', '', '', '', ''], false, ''
       );
       expect(typeof result).toBe('boolean');
     });
 
-    it('run_overlib_status_99 returns boolean', () => {
-      const result = run_overlib_status_99(
+    it('showWellKnownWordPopup returns boolean', () => {
+      const result = showWellKnownWordPopup(
         'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', 100, ['', '', '', '', '', '', '', ''], false, ''
       );
       expect(typeof result).toBe('boolean');
     });
 
-    it('run_overlib_status_1_to_5 returns boolean', () => {
-      const result = run_overlib_status_1_to_5(
+    it('showLearningWordPopup returns boolean', () => {
+      const result = showLearningWordPopup(
         'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', 100, 3, ['', '', '', '', '', '', '', ''], false, ''
       );
       expect(typeof result).toBe('boolean');
     });
 
-    it('run_overlib_status_unknown returns boolean', () => {
-      const result = run_overlib_status_unknown(
+    it('showUnknownWordPopup returns boolean', () => {
+      const result = showUnknownWordPopup(
         'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', ['', '', '', '', '', '', '', ''], false
       );
       expect(typeof result).toBe('boolean');
     });
 
-    it('run_overlib_multiword returns boolean', () => {
-      const result = run_overlib_multiword(
+    it('showMultiWordPopup returns boolean', () => {
+      const result = showMultiWordPopup(
         'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'multi word', 100, 3, '2 ', ''
       );
       expect(typeof result).toBe('boolean');
     });
 
-    it('run_overlib_test returns boolean', () => {
-      const result = run_overlib_test(
+    it('showTestWordPopup returns boolean', () => {
+      const result = showTestWordPopup(
         'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         100, 'word', 'translation', 'roman', 3, 'test sentence', 1
       );
       expect(typeof result).toBe('boolean');
     });
 
-    it('run_overlib_test with todo=0 skips interactive buttons', () => {
-      const result = run_overlib_test(
+    it('showTestWordPopup with todo=0 skips interactive buttons', () => {
+      const result = showTestWordPopup(
         'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         100, 'word', 'translation', 'roman', 3, 'test sentence', 0
       );

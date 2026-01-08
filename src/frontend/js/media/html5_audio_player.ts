@@ -7,7 +7,7 @@
  * @since 3.0.0
  */
 
-import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
+import { saveSetting } from '@shared/utils/ajax_utilities';
 
 /**
  * HTML5 Audio Player class
@@ -309,13 +309,13 @@ export const lwt_audio_controller = {
   setNewPlayerSeconds: function (): void {
     const el = document.getElementById('backtime') as HTMLSelectElement | null;
     const newval = el?.value || '0';
-    do_ajax_save_setting('currentplayerseconds', newval);
+    saveSetting('currentplayerseconds', newval);
   },
 
   setNewPlaybackRate: function (): void {
     const el = document.getElementById('playbackrate') as HTMLSelectElement | null;
     const newval = el?.value || '10';
-    do_ajax_save_setting('currentplaybackrate', newval);
+    saveSetting('currentplaybackrate', newval);
     if (playerInstance) {
       playerInstance.setPlaybackRate(parseFloat(newval) * 0.1);
     }
@@ -335,7 +335,7 @@ export const lwt_audio_controller = {
     }
     document.getElementById('do-single')?.classList.add('hide');
     document.getElementById('do-repeat')?.classList.remove('hide');
-    do_ajax_save_setting('currentplayerrepeatmode', '0');
+    saveSetting('currentplayerrepeatmode', '0');
   },
 
   clickRepeat: function (): void {
@@ -344,7 +344,7 @@ export const lwt_audio_controller = {
     }
     document.getElementById('do-repeat')?.classList.add('hide');
     document.getElementById('do-single')?.classList.remove('hide');
-    do_ajax_save_setting('currentplayerrepeatmode', '1');
+    saveSetting('currentplayerrepeatmode', '1');
   },
 
   clickBackward: function (): void {

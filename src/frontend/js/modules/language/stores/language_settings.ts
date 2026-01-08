@@ -184,7 +184,7 @@ export function iknowall(t: string | number): void {
  * @param p Table prefix
  * @returns true is the prefix is valid
  */
-export function check_table_prefix(p: string): boolean {
+export function validateTablePrefix(p: string): boolean {
   const re = /^[_a-zA-Z0-9]*$/;
   const r = p.length <= 20 && p.length > 0 && re.test(p);
   if (!r) {

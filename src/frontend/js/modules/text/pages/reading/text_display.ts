@@ -6,7 +6,7 @@
  * @since   1.6.16-fork
  */
 
-import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
+import { saveSetting } from '@shared/utils/ajax_utilities';
 import { apiGet } from '@shared/api/client';
 import { updateAllTextStatusCharts } from '@modules/text/pages/text_status_chart';
 
@@ -47,7 +47,7 @@ function getAttr(el: Element | null, attr: string): string {
 /**
  * Update word counts with an AJAX request.
  */
-export async function do_ajax_word_counts(): Promise<void> {
+export async function fetchWordCounts(): Promise<void> {
   const checkboxes = document.querySelectorAll<HTMLInputElement>('.markcheck');
   const textIds = Array.from(checkboxes)
     .map(cb => cb.value)
@@ -59,7 +59,7 @@ export async function do_ajax_word_counts(): Promise<void> {
 
   if (response.data) {
     wordCounts = response.data;
-    word_count_click();
+    handleWordCountClick();
     // Update legacy barcharts if present
     document.querySelectorAll('.barchart').forEach(el => {
       el.classList.remove('hide');
@@ -72,7 +72,7 @@ export async function do_ajax_word_counts(): Promise<void> {
 /**
  * Set a unique item in barchart to reflect how many words are known.
  */
-export function set_barchart_item(this: HTMLElement): void {
+export function updateBarchartItem(this: HTMLElement): void {
   if (!wordCounts) return;
 
   const spanEl = this.querySelector('span');
@@ -103,7 +103,7 @@ export function set_barchart_item(this: HTMLElement): void {
 /**
  * Set the number of words known in a text (in edit_texts.php main page).
  */
-export function set_word_counts(): void {
+export function updateWordCounts(): void {
   if (!wordCounts) return;
 
   // Capture in local const for TypeScript narrowing in closures
@@ -168,7 +168,7 @@ export function set_word_counts(): void {
   });
 
   document.querySelectorAll<HTMLElement>('.barchart').forEach((el) => {
-    set_barchart_item.call(el);
+    updateBarchartItem.call(el);
   });
 }
 
@@ -176,7 +176,7 @@ export function set_word_counts(): void {
  * Handle the click event to switch between total and
  * unique words count in edit_texts.php.
  */
-export function word_count_click(): void {
+export function handleWordCountClick(): void {
   document.querySelectorAll('.wc_cont').forEach((cont) => {
     cont.querySelectorAll<HTMLElement>(':scope > *').forEach((child) => {
       if (parseInt(getAttr(child, 'data_wo_cnt') || '0', 10) === 1) {
@@ -200,7 +200,7 @@ export function word_count_click(): void {
     (parseInt(getAttr(savedEl, 'data_wo_cnt') || '0', 10) << 1) +
     (parseInt(getAttr(totalEl, 'data_wo_cnt') || '0', 10));
 
-  set_word_counts();
+  updateWordCounts();
 }
 
 export const lwt = {
@@ -209,18 +209,18 @@ export const lwt = {
    * Prepare the action so that a click switches between
    * unique word count and total word count.
    */
-  prepare_word_count_click: function (): void {
+  prepare_handleWordCountClick: function (): void {
     const elements = document.querySelectorAll<HTMLElement>('#total,#saved,#unknown,#chart,#unknownpercent');
     elements.forEach((el) => {
       el.addEventListener('click', function (event) {
         const currentVal = parseInt(getAttr(this, 'data_wo_cnt') || '0', 10);
         this.setAttribute('data_wo_cnt', String(currentVal ^ 1));
-        word_count_click();
+        handleWordCountClick();
         event.stopImmediatePropagation();
       });
       el.title = 'u: Unique Word Counts\nt: Total  Word  Counts';
     });
-    do_ajax_word_counts();
+    fetchWordCounts();
   },
 
   /**
@@ -241,7 +241,7 @@ export const lwt = {
       getAttr(unknownEl, 'data_wo_cnt') +
       getAttr(unknownPercentEl, 'data_wo_cnt') +
       getAttr(chartEl, 'data_wo_cnt');
-    do_ajax_save_setting('set-show-text-word-counts', a);
+    saveSetting('set-show-text-word-counts', a);
   }
 };
 
@@ -269,7 +269,7 @@ function autoInitTextList(): void {
     initialShowCounts = config.showCounts || 0;
 
     // Initialize word count click handlers
-    lwt.prepare_word_count_click();
+    lwt.prepare_handleWordCountClick();
 
     // Set up beforeunload handler
     window.addEventListener('beforeunload', lwt.save_text_word_count_settings);

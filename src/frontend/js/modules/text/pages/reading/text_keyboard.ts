@@ -10,7 +10,7 @@ import { speechDispatcher } from '@shared/utils/user_interactions';
 import { getAttrElement } from './text_annotations';
 import { cClick } from '@modules/vocabulary/components/word_popup';
 import { loadModalFrame, loadDictionaryFrame } from '@modules/text/pages/reading/frame_management';
-import { get_position_from_id } from '@shared/utils/ajax_utilities';
+import { getPositionFromId } from '@shared/utils/ajax_utilities';
 import { scrollTo } from '@shared/utils/hover_intent';
 import {
   getReadingPosition,
@@ -45,7 +45,7 @@ function removeClassFromAll(selector: string, className: string): void {
  * @param e Keyboard event
  * @returns false to prevent default behavior, true otherwise
  */
-export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
+export function handleTextKeydown(e: KeyboardEvent): boolean {
   const keyCode = e.which || e.keyCode;
   const textId = getTextId();
   const dictLinks = getDictionaryLinks();
@@ -117,13 +117,13 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
       currid = 100000000;
     } else {
       const markedId = marked.id;
-      currid = get_position_from_id(markedId || '');
+      currid = getPositionFromId(markedId || '');
     }
     removeClassFromAll('span.kwordmarked', 'kwordmarked');
     readingPos = l_knownwordlist - 1;
     for (let i = l_knownwordlist - 1; i >= 0; i--) {
       const itemId = knownwordlist[i].id;
-      const iid = get_position_from_id(itemId || '');
+      const iid = getPositionFromId(itemId || '');
       if (iid < currid) {
         readingPos = i;
         break;
@@ -147,13 +147,13 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
       currid = -1;
     } else {
       const markedId = marked.id;
-      currid = get_position_from_id(markedId || '');
+      currid = getPositionFromId(markedId || '');
     }
     removeClassFromAll('span.kwordmarked', 'kwordmarked');
     readingPos = 0;
     for (let i = 0; i < l_knownwordlist; i++) {
       const itemId = knownwordlist[i].id;
-      const iid = get_position_from_id(itemId || '');
+      const iid = getPositionFromId(itemId || '');
       if (iid > currid) {
         readingPos = i;
         break;

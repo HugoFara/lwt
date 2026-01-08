@@ -10,7 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
-import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
+import { saveSetting } from '@shared/utils/ajax_utilities';
 import {
   getLanguageStore,
   type LanguageStoreState
@@ -116,7 +116,7 @@ export function wizardModalData(): WizardModalComponentData {
      */
     handleL1Change(): void {
       if (this.l1) {
-        do_ajax_save_setting('currentnativelanguage', this.l1);
+        saveSetting('currentnativelanguage', this.l1);
       }
     },
 

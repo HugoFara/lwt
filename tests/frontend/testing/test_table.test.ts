@@ -6,10 +6,10 @@ import { initTableTest } from '../../../src/frontend/js/modules/review/pages/tes
 
 // Mock ajax_utilities
 vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
-  do_ajax_save_setting: vi.fn()
+  saveSetting: vi.fn()
 }));
 
-import { do_ajax_save_setting } from '../../../src/frontend/js/shared/utils/ajax_utilities';
+import { saveSetting } from '../../../src/frontend/js/shared/utils/ajax_utilities';
 
 describe('test_table.ts', () => {
   beforeEach(() => {
@@ -68,7 +68,7 @@ describe('test_table.ts', () => {
         const tdElements = document.querySelectorAll('td');
         expect((thElements[0] as HTMLElement).style.display).toBe('none');
         expect((tdElements[0] as HTMLElement).style.display).toBe('none');
-        expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting1', '0');
+        expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting1', '0');
       });
 
       it('shows first column when checked', () => {
@@ -85,7 +85,7 @@ describe('test_table.ts', () => {
 
         const thElements = document.querySelectorAll('th');
         expect((thElements[0] as HTMLElement).style.display).not.toBe('none');
-        expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting1', '1');
+        expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting1', '1');
       });
     });
 
@@ -101,7 +101,7 @@ describe('test_table.ts', () => {
         const tdElements = document.querySelectorAll('td');
         expect((thElements[1] as HTMLElement).style.display).toBe('none');
         expect((tdElements[1] as HTMLElement).style.display).toBe('none');
-        expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting2', '0');
+        expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting2', '0');
       });
     });
 
@@ -117,7 +117,7 @@ describe('test_table.ts', () => {
         const tdElements = document.querySelectorAll('td');
         expect((thElements[4] as HTMLElement).style.display).toBe('none');
         expect((tdElements[4] as HTMLElement).style.display).toBe('none');
-        expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting5', '0');
+        expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting5', '0');
       });
     });
 
@@ -133,7 +133,7 @@ describe('test_table.ts', () => {
         const tdElements = document.querySelectorAll('td');
         expect((thElements[5] as HTMLElement).style.display).toBe('none');
         expect((tdElements[5] as HTMLElement).style.display).toBe('none');
-        expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting6', '0');
+        expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting6', '0');
       });
     });
   });
@@ -185,7 +185,7 @@ describe('test_table.ts', () => {
         const color = window.getComputedStyle(termCell).color;
         expect(['white', 'rgb(255, 255, 255)']).toContain(color);
         expect(termCell.style.cursor).toBe('pointer');
-        expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting3', '0');
+        expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting3', '0');
       });
 
       it('shows term content when checked', () => {
@@ -203,7 +203,7 @@ describe('test_table.ts', () => {
         const color = window.getComputedStyle(termCell).color;
         expect(['black', 'rgb(0, 0, 0)']).toContain(color);
         expect(termCell.style.cursor).toBe('auto');
-        expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting3', '1');
+        expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting3', '1');
       });
     });
 
@@ -219,7 +219,7 @@ describe('test_table.ts', () => {
         const transCell = tdElements[3] as HTMLElement;
         const color = window.getComputedStyle(transCell).color;
         expect(['white', 'rgb(255, 255, 255)']).toContain(color);
-        expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting4', '0');
+        expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting4', '0');
       });
     });
   });
@@ -397,12 +397,12 @@ describe('test_table.ts', () => {
       expect(['white', 'rgb(255, 255, 255)']).toContain(transColor);
 
       // Settings should be saved for all
-      expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting1', '1');
-      expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting2', '1');
-      expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting3', '0');
-      expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting4', '0');
-      expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting5', '1');
-      expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting6', '1');
+      expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting1', '1');
+      expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting2', '1');
+      expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting3', '0');
+      expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting4', '0');
+      expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting5', '1');
+      expect(saveSetting).toHaveBeenCalledWith('currenttabletestsetting6', '1');
     });
   });
 

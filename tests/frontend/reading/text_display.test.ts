@@ -4,9 +4,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Create the mocks using vi.hoisted so they're available before module import
-const { mockApiGet, mockDoAjaxSaveSetting } = vi.hoisted(() => ({
+const { mockApiGet, mockSaveSetting } = vi.hoisted(() => ({
   mockApiGet: vi.fn(),
-  mockDoAjaxSaveSetting: vi.fn()
+  mockSaveSetting: vi.fn()
 }));
 
 // Mock the api_client module
@@ -16,13 +16,13 @@ vi.mock('../../../src/frontend/js/shared/api/client', () => ({
 
 // Mock the ajax_utilities module
 vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
-  do_ajax_save_setting: mockDoAjaxSaveSetting
+  saveSetting: mockSaveSetting
 }));
 
 import {
-  set_barchart_item,
-  set_word_counts,
-  word_count_click,
+  updateBarchartItem,
+  updateWordCounts,
+  handleWordCountClick,
   lwt,
   _initTestState,
 } from '../../../src/frontend/js/modules/text/pages/reading/text_display';
@@ -58,10 +58,10 @@ describe('text_display.ts', () => {
   });
 
   // ===========================================================================
-  // set_barchart_item Tests
+  // updateBarchartItem Tests
   // ===========================================================================
 
-  describe('set_barchart_item', () => {
+  describe('updateBarchartItem', () => {
     beforeEach(() => {
       _initTestState(createMockWordCounts(), 0, 0);
     });
@@ -76,7 +76,7 @@ describe('text_display.ts', () => {
       `;
 
       const barchart = document.querySelector('.barchart') as HTMLElement;
-      set_barchart_item.call(barchart);
+      updateBarchartItem.call(barchart);
 
       const items = document.querySelectorAll('.barchart li');
       items.forEach((item) => {
@@ -97,7 +97,7 @@ describe('text_display.ts', () => {
       const barchart = document.querySelector('.barchart') as HTMLElement;
 
       // Should not throw
-      expect(() => set_barchart_item.call(barchart)).not.toThrow();
+      expect(() => updateBarchartItem.call(barchart)).not.toThrow();
     });
 
     it('handles missing text ID gracefully', () => {
@@ -110,7 +110,7 @@ describe('text_display.ts', () => {
 
       const barchart = document.querySelector('.barchart') as HTMLElement;
 
-      expect(() => set_barchart_item.call(barchart)).not.toThrow();
+      expect(() => updateBarchartItem.call(barchart)).not.toThrow();
     });
 
     it('calculates logarithmic height for bar items', () => {
@@ -123,7 +123,7 @@ describe('text_display.ts', () => {
       `;
 
       const barchart = document.querySelector('.barchart') as HTMLElement;
-      set_barchart_item.call(barchart);
+      updateBarchartItem.call(barchart);
 
       const items = document.querySelectorAll('.barchart li');
       const firstHeight = parseFloat((items[0] as HTMLElement).style.borderTopWidth);
@@ -135,10 +135,10 @@ describe('text_display.ts', () => {
   });
 
   // ===========================================================================
-  // set_word_counts Tests
+  // updateWordCounts Tests
   // ===========================================================================
 
-  describe('set_word_counts', () => {
+  describe('updateWordCounts', () => {
     beforeEach(() => {
       _initTestState(createMockWordCounts(), 0, 0);
       document.body.innerHTML = `
@@ -163,7 +163,7 @@ describe('text_display.ts', () => {
     });
 
     it('updates total counts in DOM', () => {
-      set_word_counts();
+      updateWordCounts();
 
       const total1 = document.getElementById('total_1');
       const total2 = document.getElementById('total_2');
@@ -172,7 +172,7 @@ describe('text_display.ts', () => {
     });
 
     it('updates saved counts in DOM', () => {
-      set_word_counts();
+      updateWordCounts();
 
       // saved = known - expr
       const saved1 = document.getElementById('saved_1')?.innerHTML || '';
@@ -180,14 +180,14 @@ describe('text_display.ts', () => {
     });
 
     it('updates todo counts in DOM', () => {
-      set_word_counts();
+      updateWordCounts();
 
       const todo1 = document.getElementById('todo_1')?.innerHTML || '0';
       expect(parseInt(todo1, 10)).toBeGreaterThanOrEqual(0);
     });
 
     it('updates unknown percent in DOM', () => {
-      set_word_counts();
+      updateWordCounts();
 
       const percent1 = document.getElementById('unknownpercent_1')?.innerHTML || '0';
       expect(parseFloat(percent1)).toBeGreaterThanOrEqual(0);
@@ -196,7 +196,7 @@ describe('text_display.ts', () => {
 
     it('uses unique counts when SUW bit 0 is set', () => {
       _initTestState(createMockWordCounts(), 1, 0);
-      set_word_counts();
+      updateWordCounts();
 
       // With SUW & 1, should use totalu values
       const total1 = document.getElementById('total_1');
@@ -212,7 +212,7 @@ describe('text_display.ts', () => {
         statu: {},
       }, 0, 0);
 
-      expect(() => set_word_counts()).not.toThrow();
+      expect(() => updateWordCounts()).not.toThrow();
     });
 
     it('shows 0 for saved when no known words', () => {
@@ -222,7 +222,7 @@ describe('text_display.ts', () => {
         statu: { '1': {}, '2': {} },
       }, 0, 0);
 
-      set_word_counts();
+      updateWordCounts();
 
       const saved1 = document.getElementById('saved_1');
       expect(saved1?.innerHTML).toBe('0');
@@ -230,10 +230,10 @@ describe('text_display.ts', () => {
   });
 
   // ===========================================================================
-  // word_count_click Tests
+  // handleWordCountClick Tests
   // ===========================================================================
 
-  describe('word_count_click', () => {
+  describe('handleWordCountClick', () => {
     beforeEach(() => {
       document.body.innerHTML = `
         <span id="total" data_wo_cnt="0" class="wc_cont"><span data_wo_cnt="0">t</span></span>
@@ -252,9 +252,9 @@ describe('text_display.ts', () => {
     });
 
     it('calculates SUW based on data attributes', () => {
-      word_count_click();
+      handleWordCountClick();
 
-      // word_count_click should run without error
+      // handleWordCountClick should run without error
       expect(true).toBe(true);
     });
 
@@ -273,7 +273,7 @@ describe('text_display.ts', () => {
         <ul class="barchart"><span id="bc_text_1"></span></ul>
       `;
 
-      word_count_click();
+      handleWordCountClick();
 
       const children = document.querySelectorAll('.wc_cont > span');
       children.forEach((child) => {
@@ -282,7 +282,7 @@ describe('text_display.ts', () => {
       });
     });
 
-    it('calls set_word_counts', () => {
+    it('calls updateWordCounts', () => {
       // Reset module state for this test
       _initTestState(createMockWordCounts(), 0, 0);
 
@@ -304,9 +304,9 @@ describe('text_display.ts', () => {
         <ul class="barchart"><span id="bc_text_1"></span><li><span>10</span></li></ul>
       `;
 
-      word_count_click();
+      handleWordCountClick();
 
-      // set_word_counts should have updated the DOM with total counts
+      // updateWordCounts should have updated the DOM with total counts
       const total1 = document.getElementById('total_1');
       expect(total1?.innerHTML).toBe('100');
     });
@@ -317,7 +317,7 @@ describe('text_display.ts', () => {
   // ===========================================================================
 
   describe('lwt object', () => {
-    describe('prepare_word_count_click', () => {
+    describe('prepare_handleWordCountClick', () => {
       it('attaches click handlers to word count elements', () => {
         document.body.innerHTML = `
           <span id="total" data_wo_cnt="0"></span>
@@ -328,7 +328,7 @@ describe('text_display.ts', () => {
           <input class="markcheck" value="1" />
         `;
 
-        lwt.prepare_word_count_click();
+        lwt.prepare_handleWordCountClick();
 
         // Check that title attribute was set
         const total = document.getElementById('total');
@@ -346,7 +346,7 @@ describe('text_display.ts', () => {
           <span id="chart" data_wo_cnt="0"></span>
         `;
 
-        lwt.prepare_word_count_click();
+        lwt.prepare_handleWordCountClick();
 
         const saved = document.getElementById('saved');
         const unknown = document.getElementById('unknown');
@@ -369,9 +369,9 @@ describe('text_display.ts', () => {
 
         lwt.save_text_word_count_settings();
 
-        // do_ajax_save_setting should not be called
+        // saveSetting should not be called
         // This verifies the early return
-        expect(mockDoAjaxSaveSetting).not.toHaveBeenCalled();
+        expect(mockSaveSetting).not.toHaveBeenCalled();
       });
 
       it('saves when showUniqueWords differs from initialShowCounts', () => {
@@ -388,7 +388,7 @@ describe('text_display.ts', () => {
         lwt.save_text_word_count_settings();
 
         // Settings should be saved
-        expect(mockDoAjaxSaveSetting).toHaveBeenCalled();
+        expect(mockSaveSetting).toHaveBeenCalled();
       });
     });
   });
@@ -430,7 +430,7 @@ describe('text_display.ts', () => {
       `;
 
       // Run word count click to update display
-      word_count_click();
+      handleWordCountClick();
 
       // Verify totals are populated
       const total1 = document.getElementById('total_1');
@@ -472,7 +472,7 @@ describe('text_display.ts', () => {
         <ul class="barchart"><span id="bc_text_1"></span></ul>
       `;
 
-      expect(() => set_word_counts()).not.toThrow();
+      expect(() => updateWordCounts()).not.toThrow();
       const total1 = document.getElementById('total_1');
       expect(total1?.innerHTML).toBe('0');
     });
@@ -480,7 +480,7 @@ describe('text_display.ts', () => {
     it('handles missing DOM elements gracefully', () => {
       document.body.innerHTML = ''; // Empty DOM
 
-      expect(() => word_count_click()).not.toThrow();
+      expect(() => handleWordCountClick()).not.toThrow();
     });
 
     it('handles very large word counts', () => {
@@ -504,7 +504,7 @@ describe('text_display.ts', () => {
         <ul class="barchart"><span id="bc_text_1"></span><li><span>1000000</span></li></ul>
       `;
 
-      expect(() => set_word_counts()).not.toThrow();
+      expect(() => updateWordCounts()).not.toThrow();
     });
   });
 });

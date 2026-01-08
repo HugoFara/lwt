@@ -9,7 +9,7 @@
  * @since   3.0.0
  */
 
-import { make_tooltip } from '@modules/vocabulary/services/word_status';
+import { createWordTooltip } from '@modules/vocabulary/services/word_status';
 import { cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
 
 /**
@@ -62,7 +62,7 @@ export function generateTooltip(
   romanization: string,
   status: number | string
 ): string {
-  return make_tooltip(word, translation, romanization, status);
+  return createWordTooltip(word, translation, romanization, status);
 }
 
 export interface WordUpdateParams {
@@ -163,7 +163,7 @@ export function deleteWordFromDOM(wid: number, term: string): void {
     const trans = elem.getAttribute('data_trans') ?? '';
     const rom = elem.getAttribute('data_rom') ?? '';
     const combinedTrans = ann + (ann ? ' / ' : '') + trans;
-    const title = make_tooltip(term, combinedTrans, rom, '0');
+    const title = createWordTooltip(term, combinedTrans, rom, '0');
 
     elem.classList.remove('status99', 'status98', 'status1', 'status2', 'status3', 'status4', 'status5', `word${wid}`);
     elem.classList.add('status0');
@@ -187,7 +187,7 @@ export function markWordWellKnownInDOM(wid: number, hex: string, term: string): 
   const frameL = getFrameElement('frame-l');
   if (!frameL) return;
 
-  const title = make_tooltip(term, '*', '', '99');
+  const title = createWordTooltip(term, '*', '', '99');
 
   frameL.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
     el.classList.remove('status0');
@@ -209,7 +209,7 @@ export function markWordIgnoredInDOM(wid: number, hex: string, term: string): vo
   const frameL = getFrameElement('frame-l');
   if (!frameL) return;
 
-  const title = make_tooltip(term, '*', '', '98');
+  const title = createWordTooltip(term, '*', '', '98');
 
   frameL.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
     el.classList.remove('status0');
@@ -314,7 +314,7 @@ export function updateBulkWordInDOM(term: BulkWordUpdateParams, useTooltip: bool
     el.setAttribute('data_trans', term.translation);
 
     if (useTooltip) {
-      el.title = make_tooltip(
+      el.title = createWordTooltip(
         el.textContent || '',
         el.getAttribute('data_trans') ?? '',
         el.getAttribute('data_rom') ?? '',
@@ -343,7 +343,7 @@ export function updateHoverSaveInDOM(
   wordRaw: string
 ): void {
   const context = getParentContext();
-  const title = make_tooltip(wordRaw, translation, '', String(status));
+  const title = createWordTooltip(wordRaw, translation, '', String(status));
 
   context.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
     el.classList.remove('status0');

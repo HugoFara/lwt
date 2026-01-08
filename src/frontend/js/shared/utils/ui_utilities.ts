@@ -7,7 +7,7 @@
  */
 
 import { check } from '@shared/forms/form_validation';
-import { changeImprAnnText, changeImprAnnRadio, do_ajax_show_similar_terms } from '@modules/vocabulary/services/term_operations';
+import { changeImprAnnText, changeImprAnnRadio, showSimilarTerms } from '@modules/vocabulary/services/term_operations';
 import { readRawTextAloud } from './user_interactions';
 import { initInlineEdit } from '@shared/components/inline_edit';
 import { initTermTags, initTextTags } from '@shared/components/tagify_tags';
@@ -366,8 +366,8 @@ export function prepareMainAreas(): void {
   const langField = document.getElementById('langfield');
   const wordField = document.getElementById('wordfield');
   if (simWords && langField && wordField) {
-    wordField.addEventListener('blur', do_ajax_show_similar_terms);
-    do_ajax_show_similar_terms();
+    wordField.addEventListener('blur', showSimilarTerms);
+    showSimilarTerms();
   }
 
   window.setTimeout(noShowAfter3Secs, 3000);

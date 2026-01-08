@@ -14,8 +14,8 @@
  */
 
 import Alpine from 'alpinejs';
-import { escape_html_chars, escape_html_chars_2 } from '@shared/utils/html_utils';
-import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
+import { escapeHtml, escapeHtmlWithAnnotation } from '@shared/utils/html_utils';
+import { createWordTooltip, getStatusName, getStatusAbbr } from './word_status';
 import { createTheDictLink, createSentLookupLink } from './dictionary';
 import { TermsApi, type TermDetails } from '@modules/vocabulary/api/terms_api';
 import { iconHtml, createIcon, initLucideIcons } from '@shared/icons/icons';
@@ -384,7 +384,7 @@ export function buildKnownWordPopupContent(
   if (multiWords.some(mw => mw)) {
     const mwRow = document.createElement('div');
     mwRow.className = 'lwt-popup-row';
-    mwRow.innerHTML = make_overlib_link_new_multiword(
+    mwRow.innerHTML = createNewMultiWordLink(
       context.textId,
       context.position,
       multiWords,
@@ -396,7 +396,7 @@ export function buildKnownWordPopupContent(
   // Dictionary links
   const dictRow = document.createElement('div');
   dictRow.className = 'lwt-popup-row';
-  dictRow.innerHTML = make_overlib_link_wb(
+  dictRow.innerHTML = createDictionaryLinks(
     dictLinks.dict1,
     dictLinks.dict2,
     dictLinks.translator,
@@ -446,7 +446,7 @@ export function buildUnknownWordPopupContent(
   if (multiWords.some(mw => mw)) {
     const mwRow = document.createElement('div');
     mwRow.className = 'lwt-popup-row';
-    mwRow.innerHTML = make_overlib_link_new_multiword(
+    mwRow.innerHTML = createNewMultiWordLink(
       context.textId,
       context.position,
       multiWords,
@@ -458,7 +458,7 @@ export function buildUnknownWordPopupContent(
   // Dictionary links
   const dictRow = document.createElement('div');
   dictRow.className = 'lwt-popup-row';
-  dictRow.innerHTML = make_overlib_link_wb(
+  dictRow.innerHTML = createDictionaryLinks(
     dictLinks.dict1,
     dictLinks.dict2,
     dictLinks.translator,
@@ -579,17 +579,6 @@ function renderTermDetailsHtml(term: TermDetails): string {
   return `<table class="lwt-details-table">${rows.join('')}</table>`;
 }
 
-/**
- * Simple HTML escaping helper.
- *
- * @param str String to escape
- * @returns HTML-escaped string
- */
-function escapeHtml(str: string): string {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
 
 /**
  * Render tags as tag components.
@@ -626,7 +615,7 @@ function renderTags(tags: string[]): string {
  * @param ann
  * @returns
  */
-export function run_overlib_status_98(
+export function showIgnoredWordPopup(
   wblink1: string,
   wblink2: string,
   wblink3: string,
@@ -640,12 +629,12 @@ export function run_overlib_status_98(
   ann: string
 ): boolean {
   return overlib(
-    make_overlib_audio(txt) +
-    '<b>' + escape_html_chars_2(hints, ann) + '</b><br/>' +
-    make_overlib_link_new_word(txid, torder, wid) + ' | ' +
-    make_overlib_link_delete_word(txid, wid) +
-    make_overlib_link_new_multiword(txid, torder, multi_words, rtl) + ' <br /> ' +
-    make_overlib_link_wb(wblink1, wblink2, wblink3, txt, txid, torder),
+    createAudioButton(txt) +
+    '<b>' + escapeHtmlWithAnnotation(hints, ann) + '</b><br/>' +
+    createNewWordLink(txid, torder, wid) + ' | ' +
+    createDeleteWordLink(txid, wid) +
+    createNewMultiWordLink(txid, torder, multi_words, rtl) + ' <br /> ' +
+    createDictionaryLinks(wblink1, wblink2, wblink3, txt, txid, torder),
     'Word'
   );
 }
@@ -666,7 +655,7 @@ export function run_overlib_status_98(
  * @param ann
  * @returns
  */
-export function run_overlib_status_99(
+export function showWellKnownWordPopup(
   wblink1: string,
   wblink2: string,
   wblink3: string,
@@ -680,12 +669,12 @@ export function run_overlib_status_99(
   ann: string
 ): boolean {
   return overlib(
-    make_overlib_audio(txt) +
-    '<b>' + escape_html_chars_2(hints, ann) + '</b><br/> ' +
-    make_overlib_link_new_word(txid, torder, wid) + ' | ' +
-    make_overlib_link_delete_word(txid, wid) +
-    make_overlib_link_new_multiword(txid, torder, multi_words, rtl) + ' <br /> ' +
-    make_overlib_link_wb(wblink1, wblink2, wblink3, txt, txid, torder),
+    createAudioButton(txt) +
+    '<b>' + escapeHtmlWithAnnotation(hints, ann) + '</b><br/> ' +
+    createNewWordLink(txid, torder, wid) + ' | ' +
+    createDeleteWordLink(txid, wid) +
+    createNewMultiWordLink(txid, torder, multi_words, rtl) + ' <br /> ' +
+    createDictionaryLinks(wblink1, wblink2, wblink3, txt, txid, torder),
     'Word'
   );
 }
@@ -707,7 +696,7 @@ export function run_overlib_status_99(
  * @param ann         Annotation
  * @returns
  */
-export function run_overlib_status_1_to_5(
+export function showLearningWordPopup(
   wblink1: string,
   wblink2: string,
   wblink3: string,
@@ -722,14 +711,14 @@ export function run_overlib_status_1_to_5(
   ann: string
 ): boolean {
   return overlib(
-    make_overlib_audio(txt) +
-    '<b>' + escape_html_chars_2(hints, ann) + '</b><br/>' +
-    make_overlib_link_change_status_all(txid, torder, wid, stat) + ' <br /> ' +
-    make_overlib_link_edit_word(txid, torder, wid) + ' | ' +
-    make_overlib_link_delete_word(txid, wid) +
-    make_overlib_link_new_multiword(txid, torder, multi_words, rtl) + ' <br /> ' +
-    make_overlib_link_wb(wblink1, wblink2, wblink3, txt, txid, torder),
-    make_overlib_link_edit_word_title(
+    createAudioButton(txt) +
+    '<b>' + escapeHtmlWithAnnotation(hints, ann) + '</b><br/>' +
+    createStatusChangeLinks(txid, torder, wid, stat) + ' <br /> ' +
+    createEditWordLink(txid, torder, wid) + ' | ' +
+    createDeleteWordLink(txid, wid) +
+    createNewMultiWordLink(txid, torder, multi_words, rtl) + ' <br /> ' +
+    createDictionaryLinks(wblink1, wblink2, wblink3, txt, txid, torder),
+    createEditWordTitleLink(
       'Word &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;',
       txid, torder, wid
     )
@@ -750,7 +739,7 @@ export function run_overlib_status_1_to_5(
  * @param rtl         1 if right-to-left language
  * @returns
  */
-export function run_overlib_status_unknown(
+export function showUnknownWordPopup(
   wblink1: string,
   wblink2: string,
   wblink3: string,
@@ -762,11 +751,11 @@ export function run_overlib_status_unknown(
   rtl: boolean
 ): boolean {
   return overlib(
-    make_overlib_audio(txt) + '<b>' + escape_html_chars(hints) + '</b><br /> ' +
-    make_overlib_link_wellknown_word(txid, torder, txt) + ' <br /> ' +
-    make_overlib_link_ignore_word(txid, torder, txt) +
-    make_overlib_link_new_multiword(txid, torder, multi_words, rtl) + ' <br /> ' +
-    make_overlib_link_wb(wblink1, wblink2, wblink3, txt, txid, torder),
+    createAudioButton(txt) + '<b>' + escapeHtml(hints) + '</b><br /> ' +
+    createWellKnownWordLink(txid, torder, txt) + ' <br /> ' +
+    createIgnoreWordLink(txid, torder, txt) +
+    createNewMultiWordLink(txid, torder, multi_words, rtl) + ' <br /> ' +
+    createDictionaryLinks(wblink1, wblink2, wblink3, txt, txid, torder),
     'New Word'
   );
 }
@@ -787,7 +776,7 @@ export function run_overlib_status_unknown(
  * @param ann         Annotation
  * @returns
  */
-export function run_overlib_multiword(
+export function showMultiWordPopup(
   wblink1: string,
   wblink2: string,
   wblink3: string,
@@ -801,12 +790,12 @@ export function run_overlib_multiword(
   ann: string
 ): boolean {
   return overlib(
-    make_overlib_audio(txt) + '<b>' + escape_html_chars_2(hints, ann) + '</b><br /> ' +
-    make_overlib_link_change_status_all(txid, torder, wid, stat) + ' <br /> ' +
-    make_overlib_link_edit_multiword(txid, torder, wid) + ' | ' +
-    make_overlib_link_delete_multiword(txid, wid) + ' <br /> ' +
-    make_overlib_link_wb(wblink1, wblink2, wblink3, txt, txid, torder),
-    make_overlib_link_edit_multiword_title(
+    createAudioButton(txt) + '<b>' + escapeHtmlWithAnnotation(hints, ann) + '</b><br /> ' +
+    createStatusChangeLinks(txid, torder, wid, stat) + ' <br /> ' +
+    createEditMultiWordLink(txid, torder, wid) + ' | ' +
+    createDeleteMultiWordLink(txid, wid) + ' <br /> ' +
+    createDictionaryLinks(wblink1, wblink2, wblink3, txt, txid, torder),
+    createEditMultiWordTitleLink(
       wcnt.trim() + '-Word-Expression', txid, torder, wid
     )
   );
@@ -827,7 +816,7 @@ export function run_overlib_multiword(
  * @param todo    If 1, the user should say if he knows the word.
  * @returns An overlib object
  */
-export function run_overlib_test(
+export function showTestWordPopup(
   wblink1: string,
   wblink2: string,
   wblink3: string,
@@ -853,14 +842,14 @@ export function run_overlib_test(
     overlib_string += '<center><hr noshade size=1 /><b>';
     if (s >= 1 && s <= 5) {
       overlib_string +=
-        make_overlib_link_change_status_test(
+        createTestStatusLink(
           wid,
           1,
           iconHtml('thumb-up', { title: 'Got it!', alt: 'Got it!' }) + ' Got it! [' +
           cc + ']'
         ) +
         '<hr noshade size=1 />' +
-        make_overlib_link_change_status_test(
+        createTestStatusLink(
           wid,
           -1,
           iconHtml('thumb', { title: 'Oops!', alt: 'Oops!' }) + ' Oops! [' + ww + ']'
@@ -868,10 +857,10 @@ export function run_overlib_test(
         '<hr noshade size=1 />';
     }
     overlib_string +=
-      make_overlib_link_change_status_alltest(wid, stat) +
+      createTestStatusChangeLinks(wid, stat) +
       '</b></center><hr noshade size=1 />';
   }
-  overlib_string += '<b>' + escape_html_chars(make_tooltip(txt, trans, roman, String(stat))) +
+  overlib_string += '<b>' + escapeHtml(createWordTooltip(txt, trans, roman, String(stat))) +
     '</b><br />' +
     ' <a href="/word/edit-term?wid=' + wid +
     '" target="ro" onclick="showRightFramesPanel();">Edit term</a><br />' +
@@ -895,7 +884,7 @@ export function run_overlib_test(
  *
  * @since 2.8.0-fork LTR texts were wrongly displayed
  */
-export function make_overlib_link_new_multiword(
+export function createNewMultiWordLink(
   txid: number,
   torder: string | number,
   multi_words: (string | undefined)[],
@@ -907,7 +896,7 @@ export function make_overlib_link_new_multiword(
   if (rtl) {
     for (let i = 7; i > 0; i--) {
       if (multi_words[i]) {
-        output.push(make_overlib_link_create_edit_multiword_rtl(
+        output.push(createOrEditMultiWordLinkRtl(
           i + 2, txid, torder, multi_words[i]!
         ));
       }
@@ -915,7 +904,7 @@ export function make_overlib_link_new_multiword(
   } else {
     for (let i = 0; i < 7; i++) {
       if (multi_words[i]) {
-        output.push(make_overlib_link_create_edit_multiword(
+        output.push(createOrEditMultiWordLink(
           i + 2, txid, torder, multi_words[i]!
         ));
       }
@@ -935,7 +924,7 @@ export function make_overlib_link_new_multiword(
  * @param torder
  * @returns
  */
-export function make_overlib_link_wb(
+export function createDictionaryLinks(
   wblink1: string,
   wblink2: string,
   wblink3: string,
@@ -965,7 +954,7 @@ export function make_overlib_link_wb(
  * @param torder
  * @returns HTML-formatted list of dictionaries link, and sentece link
  */
-export function make_overlib_link_wbnl(
+export function createDictionaryLinksnl(
   wblink1: string,
   wblink2: string,
   wblink3: string,
@@ -993,7 +982,7 @@ export function make_overlib_link_wbnl(
  * @param sent    Complete sentence
  * @returns HTML-formatted list of links
  */
-export function make_overlib_link_wbnl2(
+export function createDictionaryLinksnl2(
   wblink1: string,
   wblink2: string,
   wblink3: string,
@@ -1019,7 +1008,7 @@ export function make_overlib_link_wbnl2(
  * @param oldstat Old word status
  * @returns Multiple links for a new word status.
  */
-export function make_overlib_link_change_status_all(
+export function createStatusChangeLinks(
   txid: number,
   torder: string | number,
   wid: string | number,
@@ -1027,10 +1016,10 @@ export function make_overlib_link_change_status_all(
 ): string {
   let result = 'St: ';
   for (let newstat = 1; newstat <= 5; newstat++) {
-    result += make_overlib_link_change_status(txid, torder, wid, oldstat, newstat);
+    result += createStatusChangeLink(txid, torder, wid, oldstat, newstat);
   }
-  result += make_overlib_link_change_status(txid, torder, wid, oldstat, 99);
-  result += make_overlib_link_change_status(txid, torder, wid, oldstat, 98);
+  result += createStatusChangeLink(txid, torder, wid, oldstat, 99);
+  result += createStatusChangeLink(txid, torder, wid, oldstat, 98);
   return result;
 }
 
@@ -1041,16 +1030,16 @@ export function make_overlib_link_change_status_all(
  * @param oldstat Current status of the word
  * @returns An HTML-formatted list of links.
  */
-export function make_overlib_link_change_status_alltest(
+export function createTestStatusChangeLinks(
   wid: string | number,
   oldstat: string | number
 ): string {
   let result = '';
   for (let newstat = 1; newstat <= 5; newstat++) {
-    result += make_overlib_link_change_status_test2(wid, oldstat, newstat);
+    result += createTestStatusLink2(wid, oldstat, newstat);
   }
-  result += make_overlib_link_change_status_test2(wid, oldstat, 99);
-  result += make_overlib_link_change_status_test2(wid, oldstat, 98);
+  result += createTestStatusLink2(wid, oldstat, 99);
+  result += createTestStatusLink2(wid, oldstat, 98);
   return result;
 }
 
@@ -1064,7 +1053,7 @@ export function make_overlib_link_change_status_alltest(
  * @param newstat New word status
  * @returns HTML formatted link to change word status
  */
-export function make_overlib_link_change_status(
+export function createStatusChangeLink(
   txid: number,
   torder: string | number,
   wid: string | number,
@@ -1091,7 +1080,7 @@ export function make_overlib_link_change_status(
  * @param newstat New status
  * @returns HTML-formatted link
  */
-export function make_overlib_link_change_status_test2(
+export function createTestStatusLink2(
   wid: string | number,
   oldstat: string | number,
   newstat: number
@@ -1113,7 +1102,7 @@ export function make_overlib_link_change_status_test2(
  *
  * @returns A tag containing formatted text
  */
-export function make_overlib_link_change_status_test(
+export function createTestStatusLink(
   wid: string | number,
   plusminus: number,
   text: string
@@ -1135,7 +1124,7 @@ export function make_overlib_link_change_status_test(
  *
  * @returns
  */
-export function make_overlib_link_new_word(
+export function createNewWordLink(
   txid: number,
   torder: string | number,
   wid: string | number
@@ -1182,7 +1171,7 @@ window.openMultiWordModal = openMultiWordModal;
  * @param wid Word ID
  * @returns
  */
-export function make_overlib_link_edit_multiword(
+export function createEditMultiWordLink(
   txid: number,
   torder: string | number,
   wid: string | number
@@ -1199,7 +1188,7 @@ export function make_overlib_link_edit_multiword(
  * @param wid
  * @returns
  */
-export function make_overlib_link_edit_multiword_title(
+export function createEditMultiWordTitleLink(
   text: string,
   txid: number,
   torder: string | number,
@@ -1217,7 +1206,7 @@ export function make_overlib_link_edit_multiword_title(
  * @param txt    Multi-word text
  * @returns
  */
-export function make_overlib_link_create_edit_multiword(
+export function createOrEditMultiWordLink(
   len: number,
   txid: number,
   torder: string | number,
@@ -1225,7 +1214,7 @@ export function make_overlib_link_create_edit_multiword(
 ): string {
   // Escape the text for use in JavaScript string
   const escapedTxt = txt.replace(/'/g, "\\'").replace(/"/g, '\\"');
-  return ` <a href="#" onclick="openMultiWordModal(${txid}, ${torder}, '${escapedTxt}', ${len}); return false;">${len}..${escape_html_chars(txt.substring(2).trim())}</a> `;
+  return ` <a href="#" onclick="openMultiWordModal(${txid}, ${torder}, '${escapedTxt}', ${len}); return false;">${len}..${escapeHtml(txt.substring(2).trim())}</a> `;
 }
 
 /**
@@ -1237,7 +1226,7 @@ export function make_overlib_link_create_edit_multiword(
  * @param txt    Multi-word text
  * @returns
  */
-export function make_overlib_link_create_edit_multiword_rtl(
+export function createOrEditMultiWordLinkRtl(
   len: number,
   txid: number,
   torder: string | number,
@@ -1245,7 +1234,7 @@ export function make_overlib_link_create_edit_multiword_rtl(
 ): string {
   // Escape the text for use in JavaScript string
   const escapedTxt = txt.replace(/'/g, "\\'").replace(/"/g, '\\"');
-  return ` <a dir="rtl" href="#" onclick="openMultiWordModal(${txid}, ${torder}, '${escapedTxt}', ${len}); return false;">${len}..${escape_html_chars(txt.substring(2).trim())}</a> `;
+  return ` <a dir="rtl" href="#" onclick="openMultiWordModal(${txid}, ${torder}, '${escapedTxt}', ${len}); return false;">${len}..${escapeHtml(txt.substring(2).trim())}</a> `;
 }
 
 /**
@@ -1256,7 +1245,7 @@ export function make_overlib_link_create_edit_multiword_rtl(
  * @param wid
  * @returns
  */
-export function make_overlib_link_edit_word(
+export function createEditWordLink(
   txid: number,
   torder: string | number,
   wid: string | number
@@ -1277,7 +1266,7 @@ export function make_overlib_link_edit_word(
  * @param wid Word ID
  * @returns HTML-formatted link
  */
-export function make_overlib_link_edit_word_title(
+export function createEditWordTitleLink(
   text: string,
   txid: number,
   torder: string | number,
@@ -1296,7 +1285,7 @@ export function make_overlib_link_edit_word_title(
  * @param wid  Word ID
  * @returns HTML-formatted link.
  */
-export function make_overlib_link_delete_word(
+export function createDeleteWordLink(
   txid: number,
   wid: string | number
 ): string {
@@ -1312,7 +1301,7 @@ export function make_overlib_link_delete_word(
  * @param wid  Word ID
  * @returns HTML-formatted string
  */
-export function make_overlib_link_delete_multiword(
+export function createDeleteMultiWordLink(
   txid: number,
   wid: string | number
 ): string {
@@ -1329,7 +1318,7 @@ export function make_overlib_link_delete_multiword(
  * @param txt    Word text
  * @returns HTML link to mark the word well knwown
  */
-export function make_overlib_link_wellknown_word(
+export function createWellKnownWordLink(
   txid: number,
   torder: string | number,
   txt?: string
@@ -1348,7 +1337,7 @@ export function make_overlib_link_wellknown_word(
  * @param txt    Word text
  * @returns HTML string to ignore the word
  */
-export function make_overlib_link_ignore_word(
+export function createIgnoreWordLink(
   txid: number,
   torder: string | number,
   txt?: string
@@ -1365,7 +1354,7 @@ export function make_overlib_link_ignore_word(
  * @param txt Word to say
  * @return HTML-formatted clickable icon
  */
-export function make_overlib_audio(txt: string): string {
+export function createAudioButton(txt: string): string {
   const icon = createIcon('speaker-volume', {
     title: 'Click to read!',
     clickable: true
@@ -1373,7 +1362,7 @@ export function make_overlib_audio(txt: string): string {
   icon.style.cursor = 'pointer';
   icon.setAttribute(
     'onclick',
-    "speechDispatcher('" + escape_html_chars(txt) + "', '" + getLanguageId() + "')"
+    "speechDispatcher('" + escapeHtml(txt) + "', '" + getLanguageId() + "')"
   );
   return icon.outerHTML;
 }

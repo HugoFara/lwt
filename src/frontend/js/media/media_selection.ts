@@ -21,7 +21,7 @@ interface MediaSelectResponse {
  *
  * @returns List of options to append to the select.
  */
-export function select_media_path(
+export function createMediaPathOptions(
   paths: string[],
   folders: string[]
 ): HTMLOptionElement[] {
@@ -49,7 +49,7 @@ export function select_media_path(
  *
  * @param data Received data as a JSON object
  */
-export function media_select_receive_data(data: MediaSelectResponse): void {
+export function handleMediaSelectResponse(data: MediaSelectResponse): void {
   const loadingImg = document.getElementById('mediaSelectLoadingImg');
   const errorEl = document.getElementById('mediaSelectErrorMessage');
   const selectEl = document.querySelector<HTMLSelectElement>('#mediaselect select');
@@ -72,7 +72,7 @@ export function media_select_receive_data(data: MediaSelectResponse): void {
       errorEl.style.display = 'inherit';
     }
   } else {
-    const options = select_media_path(data.paths || [], data.folders || []);
+    const options = createMediaPathOptions(data.paths || [], data.folders || []);
     if (selectEl) {
       selectEl.innerHTML = '';
       for (let i = 0; i < options.length; i++) {
@@ -86,7 +86,7 @@ export function media_select_receive_data(data: MediaSelectResponse): void {
 /**
  * Perform an AJAX query to retrieve and display the media files path.
  */
-export function do_ajax_update_media_select(): void {
+export function refreshMediaSelect(): void {
   const loadingImg = document.getElementById('mediaSelectLoadingImg');
   const errorEl = document.getElementById('mediaSelectErrorMessage');
   const selectEl = document.querySelector<HTMLSelectElement>('#mediaselect select');
@@ -103,10 +103,10 @@ export function do_ajax_update_media_select(): void {
 
   fetch('api.php/v1/media-files')
     .then(response => response.json())
-    .then(media_select_receive_data)
+    .then(handleMediaSelectResponse)
     .catch(error => {
       console.error('Failed to fetch media files:', error);
-      media_select_receive_data({ error: 'fetch_failed' });
+      handleMediaSelectResponse({ error: 'fetch_failed' });
     });
 }
 
@@ -118,7 +118,7 @@ export function autoInitMediaSelect(): void {
   if (configEl) {
     try {
       const config = JSON.parse(configEl.textContent || '{}') as MediaSelectResponse;
-      media_select_receive_data(config);
+      handleMediaSelectResponse(config);
     } catch (e) {
       console.error('Failed to parse media select config:', e);
     }
@@ -156,7 +156,7 @@ function initMediaSelectionEvents(): void {
     const refreshBtn = target.closest('[data-action="refresh-media-select"]');
     if (refreshBtn) {
       e.preventDefault();
-      do_ajax_update_media_select();
+      refreshMediaSelect();
     }
   });
 
@@ -181,8 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Expose globally for backward compatibility with PHP templates
 if (typeof window !== 'undefined') {
   const w = window as unknown as Record<string, unknown>;
-  w.select_media_path = select_media_path;
-  w.media_select_receive_data = media_select_receive_data;
-  w.do_ajax_update_media_select = do_ajax_update_media_select;
+  w.createMediaPathOptions = createMediaPathOptions;
+  w.handleMediaSelectResponse = handleMediaSelectResponse;
+  w.refreshMediaSelect = refreshMediaSelect;
   w.handleMediaDirChange = handleMediaDirChange;
 }

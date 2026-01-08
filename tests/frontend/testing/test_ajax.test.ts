@@ -26,8 +26,8 @@ vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
 }));
 
 vi.mock('../../../src/frontend/js/modules/review/pages/test_mode', () => ({
-  word_click_event_do_test_test: vi.fn(),
-  keydown_event_do_test_test: vi.fn()
+  handleTestWordClick: vi.fn(),
+  handleTestKeydown: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/modules/review/utils/elapsed_timer', () => ({

@@ -26,8 +26,8 @@ import {
   handleTextSelection,
   setupMultiWordSelection,
   mwordDragNDrop,
-  mword_drag_n_drop_select,
-  mword_touch_select
+  multiWordDragDropSelect,
+  multiWordTouchSelect
 } from '../../../src/frontend/js/modules/text/pages/reading/text_multiword_selection';
 
 describe('text_multiword_selection.ts', () => {
@@ -196,16 +196,16 @@ describe('text_multiword_selection.ts', () => {
       expect(typeof mwordDragNDrop.stopInteraction).toBe('function');
     });
 
-    it('exports mword_drag_n_drop_select for backwards compatibility', () => {
-      expect(typeof mword_drag_n_drop_select).toBe('function');
+    it('exports multiWordDragDropSelect function', () => {
+      expect(typeof multiWordDragDropSelect).toBe('function');
       // Should be a no-op
-      mword_drag_n_drop_select();
+      multiWordDragDropSelect();
     });
 
-    it('exports mword_touch_select for backwards compatibility', () => {
-      expect(typeof mword_touch_select).toBe('function');
+    it('exports multiWordTouchSelect function', () => {
+      expect(typeof multiWordTouchSelect).toBe('function');
       // Should be a no-op
-      mword_touch_select();
+      multiWordTouchSelect();
     });
   });
 

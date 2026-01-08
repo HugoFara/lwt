@@ -10,7 +10,7 @@ import {
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
-  do_ajax_save_setting: vi.fn()
+  saveSetting: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/shared/forms/unloadformcheck', () => ({
@@ -26,7 +26,7 @@ vi.mock('../../../src/frontend/js/modules/language/pages/language_form', () => (
   }
 }));
 
-import { do_ajax_save_setting } from '../../../src/frontend/js/shared/utils/ajax_utilities';
+import { saveSetting } from '../../../src/frontend/js/shared/utils/ajax_utilities';
 import { lwtFormCheck } from '../../../src/frontend/js/shared/forms/unloadformcheck';
 import { languageForm } from '../../../src/frontend/js/modules/language/pages/language_form';
 
@@ -317,7 +317,7 @@ describe('language_wizard.ts', () => {
     it('saves native language setting via AJAX', () => {
       languageWizard.changeNative('English');
 
-      expect(do_ajax_save_setting).toHaveBeenCalledWith('currentnativelanguage', 'English');
+      expect(saveSetting).toHaveBeenCalledWith('currentnativelanguage', 'English');
     });
   });
 
@@ -375,7 +375,7 @@ describe('language_wizard.ts', () => {
       l1Select.value = 'English';
       l1Select.dispatchEvent(new Event('change'));
 
-      expect(do_ajax_save_setting).toHaveBeenCalledWith('currentnativelanguage', 'English');
+      expect(saveSetting).toHaveBeenCalledWith('currentnativelanguage', 'English');
     });
 
     it('sets up wizard go button handler', () => {

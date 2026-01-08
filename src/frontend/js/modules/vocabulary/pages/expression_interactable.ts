@@ -8,7 +8,7 @@
  * @since 3.0.0
  */
 
-import { make_tooltip } from '@modules/vocabulary/services/word_status';
+import { createWordTooltip } from '@modules/vocabulary/services/word_status';
 import { newExpressionInteractable } from '@shared/utils/user_interactions';
 import { getTextId } from '@modules/text/stores/text_config';
 
@@ -62,7 +62,7 @@ function initMultiWordInteractable(config: MultiWordConfig): void {
 
   // Always generate tooltips (jQuery UI tooltips removed, now using native)
   const multiWordText = config.multiWords[textId]?.[0] || '';
-  term.title = make_tooltip(
+  term.title = createWordTooltip(
     multiWordText,
     term.data_trans,
     term.data_rom,
@@ -91,7 +91,7 @@ function initExpressionInteractable2(config: ExpressionConfig): void {
   const term = config.attrs;
 
   // Always generate tooltips (jQuery UI tooltips removed, now using native)
-  term.title = make_tooltip(
+  term.title = createWordTooltip(
     config.term,
     term.data_trans,
     term.data_rom,

@@ -16,11 +16,11 @@ vi.mock('../../../src/frontend/js/media/html5_audio_player', () => ({
 }));
 
 import {
-  word_dblclick_event_do_text_text,
-  word_click_event_do_text_text,
-  mword_click_event_do_text_text,
-  word_hover_over,
-  word_hover_out,
+  handleWordDoubleClick,
+  handleWordClick,
+  handleMultiWordClick,
+  handleWordHoverOver,
+  handleWordHoverOut,
   prepareTextInteractions,
 } from '../../../src/frontend/js/modules/text/pages/reading/text_events';
 import * as userInteractions from '../../../src/frontend/js/shared/utils/user_interactions';
@@ -87,10 +87,10 @@ describe('text_events.ts', () => {
   });
 
   // ===========================================================================
-  // word_dblclick_event_do_text_text Tests
+  // handleWordDoubleClick Tests
   // ===========================================================================
 
-  describe('word_dblclick_event_do_text_text', () => {
+  describe('handleWordDoubleClick', () => {
     beforeEach(() => {
       mockNewPosition.mockClear();
     });
@@ -102,7 +102,7 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_dblclick_event_do_text_text.call(word);
+      handleWordDoubleClick.call(word);
 
       // Should return early without calling audio controller
       expect(mockNewPosition).not.toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_dblclick_event_do_text_text.call(word);
+      handleWordDoubleClick.call(word);
 
       // Position should be (505 - 5) / 1000 * 100 = 50%
       expect(mockNewPosition).toHaveBeenCalledWith(50);
@@ -128,7 +128,7 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_dblclick_event_do_text_text.call(word);
+      handleWordDoubleClick.call(word);
 
       // Position (3 - 5) / 1000 * 100 = -0.2%, should clamp to 0
       expect(mockNewPosition).toHaveBeenCalledWith(0);
@@ -141,7 +141,7 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_dblclick_event_do_text_text.call(word);
+      handleWordDoubleClick.call(word);
 
       // Should use 0 as default, resulting in position 0 (clamped from negative)
       expect(mockNewPosition).toHaveBeenCalledWith(0);
@@ -156,17 +156,17 @@ describe('text_events.ts', () => {
       const word = document.querySelector('.word') as HTMLElement;
 
       // Should not throw
-      expect(() => word_dblclick_event_do_text_text.call(word)).not.toThrow();
+      expect(() => handleWordDoubleClick.call(word)).not.toThrow();
       // Position should be (500 - 5) / 1000 * 100 = 49.5%
       expect(mockNewPosition).toHaveBeenCalledWith(49.5);
     });
   });
 
   // ===========================================================================
-  // word_hover_over Tests
+  // handleWordHoverOver Tests
   // ===========================================================================
 
-  describe('word_hover_over', () => {
+  describe('handleWordHoverOver', () => {
     beforeEach(() => {
       // Mock speechDispatcher
       (window as unknown as Record<string, unknown>).speechDispatcher = vi.fn();
@@ -180,7 +180,7 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.TERM123') as HTMLElement;
-      word_hover_over.call(word);
+      handleWordHoverOver.call(word);
 
       const highlighted = document.querySelectorAll('.hword');
       expect(highlighted.length).toBe(2);
@@ -194,7 +194,7 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.TERM123') as HTMLElement;
-      word_hover_over.call(word);
+      handleWordHoverOver.call(word);
 
       const highlighted = document.querySelectorAll('.hword');
       expect(highlighted.length).toBe(0);
@@ -207,7 +207,7 @@ describe('text_events.ts', () => {
       // Native tooltips are always enabled now
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_hover_over.call(word);
+      handleWordHoverOver.call(word);
 
       // The function should handle tooltip mode setting
       expect(true).toBe(true);
@@ -222,7 +222,7 @@ describe('text_events.ts', () => {
       const speechDispatcherSpy = vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => {});
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_hover_over.call(word);
+      handleWordHoverOver.call(word);
 
       expect(speechDispatcherSpy).toHaveBeenCalledWith('Hello', 1);
     });
@@ -236,7 +236,7 @@ describe('text_events.ts', () => {
       const speechDispatcherSpy = vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => {});
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_hover_over.call(word);
+      handleWordHoverOver.call(word);
 
       expect(speechDispatcherSpy).not.toHaveBeenCalled();
     });
@@ -248,7 +248,7 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.TERM999') as HTMLElement;
-      word_hover_over.call(word);
+      handleWordHoverOver.call(word);
 
       const highlighted = document.querySelectorAll('.hword');
       expect(highlighted.length).toBe(2);
@@ -256,10 +256,10 @@ describe('text_events.ts', () => {
   });
 
   // ===========================================================================
-  // word_hover_out Tests
+  // handleWordHoverOut Tests
   // ===========================================================================
 
-  describe('word_hover_out', () => {
+  describe('handleWordHoverOut', () => {
     it('removes hword class from all elements', () => {
       document.body.innerHTML = `
         <span class="word hword">Word 1</span>
@@ -267,7 +267,7 @@ describe('text_events.ts', () => {
         <span class="word hword">Word 3</span>
       `;
 
-      word_hover_out();
+      handleWordHoverOut();
 
       const highlighted = document.querySelectorAll('.hword');
       expect(highlighted.length).toBe(0);
@@ -280,7 +280,7 @@ describe('text_events.ts', () => {
         <span class="word">Word 3</span>
       `;
 
-      word_hover_out();
+      handleWordHoverOut();
 
       const words = document.querySelectorAll('.word');
       expect(words.length).toBe(3);
@@ -289,7 +289,7 @@ describe('text_events.ts', () => {
     it('handles empty document gracefully', () => {
       document.body.innerHTML = '';
 
-      expect(() => word_hover_out()).not.toThrow();
+      expect(() => handleWordHoverOut()).not.toThrow();
     });
   });
 
@@ -308,26 +308,26 @@ describe('text_events.ts', () => {
       const word = document.querySelector('.TERM100') as HTMLElement;
 
       // Hover over
-      word_hover_over.call(word);
+      handleWordHoverOver.call(word);
       expect(document.querySelectorAll('.hword').length).toBe(2);
 
       // Hover out
-      word_hover_out();
+      handleWordHoverOut();
       expect(document.querySelectorAll('.hword').length).toBe(0);
     });
   });
 
   // ===========================================================================
-  // word_click_event_do_text_text Tests
+  // handleWordClick Tests
   // ===========================================================================
 
-  describe('word_click_event_do_text_text', () => {
+  describe('handleWordClick', () => {
     beforeEach(() => {
-      vi.spyOn(overlibInterface, 'run_overlib_status_unknown').mockImplementation(() => {});
-      vi.spyOn(overlibInterface, 'run_overlib_status_99').mockImplementation(() => {});
-      vi.spyOn(overlibInterface, 'run_overlib_status_98').mockImplementation(() => {});
-      vi.spyOn(overlibInterface, 'run_overlib_status_1_to_5').mockImplementation(() => {});
-      vi.spyOn(wordStatus, 'make_tooltip').mockReturnValue('tooltip text');
+      vi.spyOn(overlibInterface, 'showUnknownWordPopup').mockImplementation(() => {});
+      vi.spyOn(overlibInterface, 'showWellKnownWordPopup').mockImplementation(() => {});
+      vi.spyOn(overlibInterface, 'showIgnoredWordPopup').mockImplementation(() => {});
+      vi.spyOn(overlibInterface, 'showLearningWordPopup').mockImplementation(() => {});
+      vi.spyOn(wordStatus, 'createWordTooltip').mockReturnValue('tooltip text');
       vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => ({} as JQuery.jqXHR));
     });
 
@@ -337,54 +337,54 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      const result = word_click_event_do_text_text.call(word);
+      const result = handleWordClick.call(word);
 
       expect(result).toBe(false);
     });
 
-    it('calls run_overlib_status_unknown for status < 1', () => {
+    it('calls showUnknownWordPopup for status < 1', () => {
       document.body.innerHTML = `
         <span class="word" data_status="0" data_order="1" data_wid="">Test</span>
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_click_event_do_text_text.call(word);
+      handleWordClick.call(word);
 
       // Shows popup with "Learn term" link - no frame loading needed
-      expect(overlibInterface.run_overlib_status_unknown).toHaveBeenCalled();
+      expect(overlibInterface.showUnknownWordPopup).toHaveBeenCalled();
     });
 
-    it('calls run_overlib_status_99 for well-known words', () => {
+    it('calls showWellKnownWordPopup for well-known words', () => {
       document.body.innerHTML = `
         <span class="word" data_status="99" data_order="1" data_wid="123" data_ann="">Test</span>
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_click_event_do_text_text.call(word);
+      handleWordClick.call(word);
 
-      expect(overlibInterface.run_overlib_status_99).toHaveBeenCalled();
+      expect(overlibInterface.showWellKnownWordPopup).toHaveBeenCalled();
     });
 
-    it('calls run_overlib_status_98 for ignored words', () => {
+    it('calls showIgnoredWordPopup for ignored words', () => {
       document.body.innerHTML = `
         <span class="word" data_status="98" data_order="1" data_wid="456" data_ann="">Test</span>
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_click_event_do_text_text.call(word);
+      handleWordClick.call(word);
 
-      expect(overlibInterface.run_overlib_status_98).toHaveBeenCalled();
+      expect(overlibInterface.showIgnoredWordPopup).toHaveBeenCalled();
     });
 
-    it('calls run_overlib_status_1_to_5 for learning words', () => {
+    it('calls showLearningWordPopup for learning words', () => {
       document.body.innerHTML = `
         <span class="word" data_status="3" data_order="1" data_wid="789" data_ann="">Test</span>
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_click_event_do_text_text.call(word);
+      handleWordClick.call(word);
 
-      expect(overlibInterface.run_overlib_status_1_to_5).toHaveBeenCalled();
+      expect(overlibInterface.showLearningWordPopup).toHaveBeenCalled();
     });
 
     it('calls speechDispatcher when hts is 2', () => {
@@ -394,7 +394,7 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_click_event_do_text_text.call(word);
+      handleWordClick.call(word);
 
       expect(userInteractions.speechDispatcher).toHaveBeenCalledWith('Hello', 1);
     });
@@ -406,7 +406,7 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_click_event_do_text_text.call(word);
+      handleWordClick.call(word);
 
       expect(userInteractions.speechDispatcher).not.toHaveBeenCalled();
     });
@@ -418,10 +418,10 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_click_event_do_text_text.call(word);
+      handleWordClick.call(word);
 
-      // Should use title attribute instead of make_tooltip
-      expect(overlibInterface.run_overlib_status_1_to_5).toHaveBeenCalled();
+      // Should use title attribute instead of createWordTooltip
+      expect(overlibInterface.showLearningWordPopup).toHaveBeenCalled();
     });
 
     it('collects multi-word data attributes', () => {
@@ -430,10 +430,10 @@ describe('text_events.ts', () => {
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_click_event_do_text_text.call(word);
+      handleWordClick.call(word);
 
-      // run_overlib_status_unknown should receive the multi_words array
-      expect(overlibInterface.run_overlib_status_unknown).toHaveBeenCalledWith(
+      // showUnknownWordPopup should receive the multi_words array
+      expect(overlibInterface.showUnknownWordPopup).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -448,13 +448,13 @@ describe('text_events.ts', () => {
   });
 
   // ===========================================================================
-  // mword_click_event_do_text_text Tests
+  // handleMultiWordClick Tests
   // ===========================================================================
 
-  describe('mword_click_event_do_text_text', () => {
+  describe('handleMultiWordClick', () => {
     beforeEach(() => {
-      vi.spyOn(overlibInterface, 'run_overlib_multiword').mockImplementation(() => {});
-      vi.spyOn(wordStatus, 'make_tooltip').mockReturnValue('mword tooltip');
+      vi.spyOn(overlibInterface, 'showMultiWordPopup').mockImplementation(() => {});
+      vi.spyOn(wordStatus, 'createWordTooltip').mockReturnValue('mword tooltip');
       vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => ({} as JQuery.jqXHR));
     });
 
@@ -464,31 +464,31 @@ describe('text_events.ts', () => {
       `;
 
       const mword = document.querySelector('.mword') as HTMLElement;
-      const result = mword_click_event_do_text_text.call(mword);
+      const result = handleMultiWordClick.call(mword);
 
       expect(result).toBe(false);
     });
 
-    it('calls run_overlib_multiword when status is not empty', () => {
+    it('calls showMultiWordPopup when status is not empty', () => {
       document.body.innerHTML = `
         <span class="mword" data_status="3" data_order="1" data_text="multi word" data_wid="10" data_code="ABC" data_ann="">Test MW</span>
       `;
 
       const mword = document.querySelector('.mword') as HTMLElement;
-      mword_click_event_do_text_text.call(mword);
+      handleMultiWordClick.call(mword);
 
-      expect(overlibInterface.run_overlib_multiword).toHaveBeenCalled();
+      expect(overlibInterface.showMultiWordPopup).toHaveBeenCalled();
     });
 
-    it('does not call run_overlib_multiword when status is empty', () => {
+    it('does not call showMultiWordPopup when status is empty', () => {
       document.body.innerHTML = `
         <span class="mword" data_status="" data_order="1">Test MW</span>
       `;
 
       const mword = document.querySelector('.mword') as HTMLElement;
-      mword_click_event_do_text_text.call(mword);
+      handleMultiWordClick.call(mword);
 
-      expect(overlibInterface.run_overlib_multiword).not.toHaveBeenCalled();
+      expect(overlibInterface.showMultiWordPopup).not.toHaveBeenCalled();
     });
 
     it('calls speechDispatcher when hts is 2', () => {
@@ -498,7 +498,7 @@ describe('text_events.ts', () => {
       `;
 
       const mword = document.querySelector('.mword') as HTMLElement;
-      mword_click_event_do_text_text.call(mword);
+      handleMultiWordClick.call(mword);
 
       expect(userInteractions.speechDispatcher).toHaveBeenCalledWith('Hello World', 1);
     });
@@ -510,9 +510,9 @@ describe('text_events.ts', () => {
       `;
 
       const mword = document.querySelector('.mword') as HTMLElement;
-      mword_click_event_do_text_text.call(mword);
+      handleMultiWordClick.call(mword);
 
-      expect(overlibInterface.run_overlib_multiword).toHaveBeenCalledWith(
+      expect(overlibInterface.showMultiWordPopup).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -542,7 +542,7 @@ describe('text_events.ts', () => {
       `;
 
       // Mock the functions that would be called on click
-      vi.spyOn(overlibInterface, 'run_overlib_status_unknown').mockImplementation(() => {});
+      vi.spyOn(overlibInterface, 'showUnknownWordPopup').mockImplementation(() => {});
 
       prepareTextInteractions();
 
@@ -594,7 +594,7 @@ describe('text_events.ts', () => {
   // ===========================================================================
 
   describe('Edge Cases', () => {
-    it('word_hover_over handles element with no TERM class gracefully', () => {
+    it('handleWordHoverOver handles element with no TERM class gracefully', () => {
       // When there's no TERM class, the regex returns the class string as-is
       // because the pattern doesn't match. The code will then try to find
       // elements with that class.
@@ -604,13 +604,13 @@ describe('text_events.ts', () => {
 
       // Without TERM class, the regex extracts "word" from "word" class string
       // and looks for .word elements, adding hword class to them
-      word_hover_over.call(span);
+      handleWordHoverOver.call(span);
 
       // The span should have hword class added (because .word matches itself)
       expect(span.classList.contains('hword')).toBe(true);
     });
 
-    it('word_dblclick_event_do_text_text handles missing totalcharcount element', () => {
+    it('handleWordDoubleClick handles missing totalcharcount element', () => {
       document.body.innerHTML = `
         <span class="word" data_pos="100">Test</span>
       `;
@@ -618,37 +618,37 @@ describe('text_events.ts', () => {
       const word = document.querySelector('.word') as HTMLElement;
 
       // Should handle NaN gracefully (parseInt of undefined text)
-      expect(() => word_dblclick_event_do_text_text.call(word)).not.toThrow();
+      expect(() => handleWordDoubleClick.call(word)).not.toThrow();
     });
 
-    it('word_hover_over handles TERM class at end of class string', () => {
+    it('handleWordHoverOver handles TERM class at end of class string', () => {
       document.body.innerHTML = `
         <span class="word status1 TERM555">Word</span>
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_hover_over.call(word);
+      handleWordHoverOver.call(word);
 
       expect(document.querySelectorAll('.hword').length).toBe(1);
     });
 
     it('word_click handles empty title attribute', () => {
       // Native tooltips are always used now
-      vi.spyOn(overlibInterface, 'run_overlib_status_unknown').mockImplementation(() => {});
+      vi.spyOn(overlibInterface, 'showUnknownWordPopup').mockImplementation(() => {});
 
       document.body.innerHTML = `
         <span class="word" data_status="0" data_order="1">Test</span>
       `;
 
       const word = document.querySelector('.word') as HTMLElement;
-      word_click_event_do_text_text.call(word);
+      handleWordClick.call(word);
 
       // Should not throw and should use empty string as hints
-      expect(overlibInterface.run_overlib_status_unknown).toHaveBeenCalled();
+      expect(overlibInterface.showUnknownWordPopup).toHaveBeenCalled();
     });
 
     it('mword_click handles missing data attributes', () => {
-      vi.spyOn(overlibInterface, 'run_overlib_multiword').mockImplementation(() => {});
+      vi.spyOn(overlibInterface, 'showMultiWordPopup').mockImplementation(() => {});
 
       document.body.innerHTML = `
         <span class="mword" data_status="3">Test</span>
@@ -657,7 +657,7 @@ describe('text_events.ts', () => {
       const mword = document.querySelector('.mword') as HTMLElement;
 
       // Should not throw
-      expect(() => mword_click_event_do_text_text.call(mword)).not.toThrow();
+      expect(() => handleMultiWordClick.call(mword)).not.toThrow();
     });
   });
 });

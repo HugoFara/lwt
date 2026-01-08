@@ -14,7 +14,7 @@
  * @param s String to be escaped
  * @returns Escaped string
  */
-export function escape_html_chars(s: string): string {
+export function escapeHtml(s: string): string {
   const map: Record<string, string> = {
     '&': '&amp;',
     '<': '&lt;',
@@ -35,13 +35,13 @@ export function escape_html_chars(s: string): string {
  * @param ann   An annotation to show in red
  * @returns Escaped string
  */
-export function escape_html_chars_2(title: string, ann: string): string {
+export function escapeHtmlWithAnnotation(title: string, ann: string): string {
   if (ann !== '') {
-    const ann2 = escape_html_chars(ann);
-    return escape_html_chars(title).replace(ann2,
+    const ann2 = escapeHtml(ann);
+    return escapeHtml(title).replace(ann2,
       '<span style="color:red">' + ann2 + '</span>');
   }
-  return escape_html_chars(title);
+  return escapeHtml(title);
 }
 
 /**
@@ -50,7 +50,7 @@ export function escape_html_chars_2(title: string, ann: string): string {
  * @param s String to be escaped
  * @returns Escaped string
  */
-export function escape_apostrophes(s: string): string {
+export function escapeApostrophes(s: string): string {
   return s.replace(/'/g, "\\'");
 }
 
@@ -71,7 +71,7 @@ export function renderTags(tagList: string): string {
   }
 
   return tags
-    .map(tag => `<span class="tag is-info is-light is-small">${escape_html_chars(tag)}</span>`)
+    .map(tag => `<span class="tag is-info is-light is-small">${escapeHtml(tag)}</span>`)
     .join('');
 }
 

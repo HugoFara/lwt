@@ -3,10 +3,10 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  do_ajax_save_setting,
+  saveSetting,
   scrollToAnchor,
-  get_position_from_id,
-  quick_select_to_input
+  getPositionFromId,
+  copySelectValueToInput
 } from '../../../src/frontend/js/shared/utils/ajax_utilities';
 
 // Mock the SettingsApi module
@@ -30,30 +30,30 @@ describe('ajax_utilities.ts', () => {
   });
 
   // ===========================================================================
-  // do_ajax_save_setting Tests
+  // saveSetting Tests
   // ===========================================================================
 
-  describe('do_ajax_save_setting', () => {
+  describe('saveSetting', () => {
     it('calls SettingsApi.save with key and value', () => {
-      do_ajax_save_setting('theme', 'dark');
+      saveSetting('theme', 'dark');
 
       expect(SettingsApi.save).toHaveBeenCalledWith('theme', 'dark');
     });
 
     it('sends correct key-value pair', () => {
-      do_ajax_save_setting('language_id', '5');
+      saveSetting('language_id', '5');
 
       expect(SettingsApi.save).toHaveBeenCalledWith('language_id', '5');
     });
 
     it('handles empty values', () => {
-      do_ajax_save_setting('filter', '');
+      saveSetting('filter', '');
 
       expect(SettingsApi.save).toHaveBeenCalledWith('filter', '');
     });
 
     it('handles special characters in values', () => {
-      do_ajax_save_setting('query', 'test&value=something');
+      saveSetting('query', 'test&value=something');
 
       expect(SettingsApi.save).toHaveBeenCalledWith('query', 'test&value=something');
     });
@@ -92,50 +92,50 @@ describe('ajax_utilities.ts', () => {
   });
 
   // ===========================================================================
-  // get_position_from_id Tests
+  // getPositionFromId Tests
   // ===========================================================================
 
-  describe('get_position_from_id', () => {
+  describe('getPositionFromId', () => {
     it('extracts position from standard ID format', () => {
       // Formula: arr[1] * 10 + 10 - arr[2]
       // ID-3-1 => 3 * 10 + 10 - 1 = 39
-      const result = get_position_from_id('ID-3-1');
+      const result = getPositionFromId('ID-3-1');
 
       expect(result).toBe(39);
     });
 
     it('calculates correctly for various IDs', () => {
       // ID-5-2 => 5 * 10 + 10 - 2 = 58
-      expect(get_position_from_id('ID-5-2')).toBe(58);
+      expect(getPositionFromId('ID-5-2')).toBe(58);
 
       // ID-10-5 => 10 * 10 + 10 - 5 = 105
-      expect(get_position_from_id('ID-10-5')).toBe(105);
+      expect(getPositionFromId('ID-10-5')).toBe(105);
 
       // ID-0-1 => 0 * 10 + 10 - 1 = 9
-      expect(get_position_from_id('ID-0-1')).toBe(9);
+      expect(getPositionFromId('ID-0-1')).toBe(9);
     });
 
     it('returns -1 for undefined input', () => {
-      const result = get_position_from_id(undefined as unknown as string);
+      const result = getPositionFromId(undefined as unknown as string);
 
       expect(result).toBe(-1);
     });
 
     it('handles ID with larger numbers', () => {
       // ID-100-9 => 100 * 10 + 10 - 9 = 1001
-      const result = get_position_from_id('ID-100-9');
+      const result = getPositionFromId('ID-100-9');
 
       expect(result).toBe(1001);
     });
 
     it('returns NaN for malformed ID', () => {
-      const result = get_position_from_id('invalid');
+      const result = getPositionFromId('invalid');
 
       expect(result).toBeNaN();
     });
 
     it('returns NaN for ID with non-numeric parts', () => {
-      const result = get_position_from_id('ID-abc-xyz');
+      const result = getPositionFromId('ID-abc-xyz');
 
       expect(result).toBeNaN();
     });
@@ -143,13 +143,13 @@ describe('ajax_utilities.ts', () => {
     it('handles ID with extra parts', () => {
       // Only uses first 3 parts split by '-'
       // ID-5-3-extra => 5 * 10 + 10 - 3 = 57
-      const result = get_position_from_id('ID-5-3-extra');
+      const result = getPositionFromId('ID-5-3-extra');
 
       expect(result).toBe(57);
     });
 
     it('handles empty string', () => {
-      const result = get_position_from_id('');
+      const result = getPositionFromId('');
 
       // Empty split gives [''], arr[1] is undefined => NaN
       expect(result).toBeNaN();
@@ -157,10 +157,10 @@ describe('ajax_utilities.ts', () => {
   });
 
   // ===========================================================================
-  // quick_select_to_input Tests
+  // copySelectValueToInput Tests
   // ===========================================================================
 
-  describe('quick_select_to_input', () => {
+  describe('copySelectValueToInput', () => {
     it('assigns selected option value to input', () => {
       document.body.innerHTML = `
         <select id="quick-select">
@@ -174,7 +174,7 @@ describe('ajax_utilities.ts', () => {
       const selectElem = document.getElementById('quick-select') as HTMLSelectElement;
       const inputElem = document.getElementById('target-input') as HTMLInputElement;
 
-      quick_select_to_input(selectElem, inputElem);
+      copySelectValueToInput(selectElem, inputElem);
 
       expect(inputElem.value).toBe('option1');
       expect(selectElem.value).toBe('');
@@ -192,7 +192,7 @@ describe('ajax_utilities.ts', () => {
       const selectElem = document.getElementById('quick-select') as HTMLSelectElement;
       const inputElem = document.getElementById('target-input') as HTMLInputElement;
 
-      quick_select_to_input(selectElem, inputElem);
+      copySelectValueToInput(selectElem, inputElem);
 
       expect(inputElem.value).toBe('original');
       expect(selectElem.value).toBe('');
@@ -210,7 +210,7 @@ describe('ajax_utilities.ts', () => {
       const selectElem = document.getElementById('quick-select') as HTMLSelectElement;
       const inputElem = document.getElementById('target-input') as HTMLInputElement;
 
-      quick_select_to_input(selectElem, inputElem);
+      copySelectValueToInput(selectElem, inputElem);
 
       expect(selectElem.value).toBe('');
     });
@@ -226,7 +226,7 @@ describe('ajax_utilities.ts', () => {
       const selectElem = document.getElementById('quick-select') as HTMLSelectElement;
       const inputElem = document.getElementById('target-input') as HTMLInputElement;
 
-      quick_select_to_input(selectElem, inputElem);
+      copySelectValueToInput(selectElem, inputElem);
 
       expect(inputElem.value).toBe('new-value');
     });
@@ -242,7 +242,7 @@ describe('ajax_utilities.ts', () => {
       const selectElem = document.getElementById('quick-select') as HTMLSelectElement;
       const inputElem = document.getElementById('target-input') as HTMLInputElement;
 
-      quick_select_to_input(selectElem, inputElem);
+      copySelectValueToInput(selectElem, inputElem);
 
       expect(inputElem.value).toBe('test&value');
     });
@@ -258,7 +258,7 @@ describe('ajax_utilities.ts', () => {
       const selectElem = document.getElementById('quick-select') as HTMLSelectElement;
       const inputElem = document.getElementById('target-input') as HTMLInputElement;
 
-      quick_select_to_input(selectElem, inputElem);
+      copySelectValueToInput(selectElem, inputElem);
 
       expect(inputElem.value).toBe('42');
     });
@@ -274,7 +274,7 @@ describe('ajax_utilities.ts', () => {
       const selectElem = document.getElementById('quick-select') as HTMLSelectElement;
       const inputElem = document.getElementById('target-input') as HTMLInputElement;
 
-      quick_select_to_input(selectElem, inputElem);
+      copySelectValueToInput(selectElem, inputElem);
 
       expect(inputElem.value).toBe('日本語');
     });
@@ -285,20 +285,20 @@ describe('ajax_utilities.ts', () => {
   // ===========================================================================
 
   describe('Edge Cases', () => {
-    it('do_ajax_save_setting handles Unicode keys and values', () => {
-      do_ajax_save_setting('설정', '한국어');
+    it('saveSetting handles Unicode keys and values', () => {
+      saveSetting('설정', '한국어');
 
       expect(SettingsApi.save).toHaveBeenCalledWith('설정', '한국어');
     });
 
-    it('get_position_from_id handles single hyphen', () => {
+    it('getPositionFromId handles single hyphen', () => {
       // 'ID-5' => arr[1]=5, arr[2]=undefined => 5*10+10-NaN = NaN
-      const result = get_position_from_id('ID-5');
+      const result = getPositionFromId('ID-5');
 
       expect(result).toBeNaN();
     });
 
-    it('quick_select_to_input handles whitespace-only value', () => {
+    it('copySelectValueToInput handles whitespace-only value', () => {
       document.body.innerHTML = `
         <select id="quick-select">
           <option value="   " selected>Spaces</option>
@@ -309,7 +309,7 @@ describe('ajax_utilities.ts', () => {
       const selectElem = document.getElementById('quick-select') as HTMLSelectElement;
       const inputElem = document.getElementById('target-input') as HTMLInputElement;
 
-      quick_select_to_input(selectElem, inputElem);
+      copySelectValueToInput(selectElem, inputElem);
 
       // Whitespace is not empty string, so it should be assigned
       expect(inputElem.value).toBe('   ');

@@ -25,7 +25,7 @@ import {
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_status', () => ({
-  make_tooltip: vi.fn((word, trans, rom, status) => `${word}|${trans}|${rom}|${status}`)
+  createWordTooltip: vi.fn((word, trans, rom, status) => `${word}|${trans}|${rom}|${status}`)
 }));
 
 vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
@@ -139,7 +139,7 @@ describe('word_dom_updates.ts', () => {
     it('generates tooltip with word, translation, romanization and status', () => {
       const result = generateTooltip('word', 'translation', 'romanization', 1);
 
-      // make_tooltip is mocked to return formatted string
+      // createWordTooltip is mocked to return formatted string
       expect(result).toBe('word|translation|romanization|1');
     });
 

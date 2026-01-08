@@ -8,7 +8,7 @@
 
 import { cClick } from '@modules/vocabulary/components/word_popup';
 import { speechDispatcher } from '@shared/utils/user_interactions';
-import { word_click_event_do_test_test, keydown_event_do_test_test } from './test_mode';
+import { handleTestWordClick, handleTestKeydown } from './test_mode';
 import { startElapsedTimer } from '../utils/elapsed_timer';
 import { ReviewApi } from '@modules/review/api/review_api';
 import { setCurrentWordId, setTestSolution, setAnswerOpened } from '@modules/review/stores/test_state';
@@ -80,9 +80,9 @@ export function insertNewWord(wordId: number, solution: string, group: string): 
     termTestEl.innerHTML = group;
   }
 
-  document.addEventListener('keydown', keydown_event_do_test_test);
+  document.addEventListener('keydown', handleTestKeydown);
   document.querySelectorAll('.word').forEach(el => {
-    el.addEventListener('click', word_click_event_do_test_test);
+    el.addEventListener('click', handleTestWordClick);
   });
 }
 

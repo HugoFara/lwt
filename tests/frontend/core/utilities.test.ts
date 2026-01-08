@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   getStatusName,
   getStatusAbbr,
-  make_tooltip,
+  createWordTooltip,
 } from '../../../src/frontend/js/modules/vocabulary/services/word_status';
 import {
   getLangFromDict,
@@ -16,9 +16,9 @@ import {
   oewin,
 } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
 import {
-  escape_html_chars,
-  escape_html_chars_2,
-  escape_apostrophes,
+  escapeHtml,
+  escapeHtmlWithAnnotation,
+  escapeApostrophes,
 } from '../../../src/frontend/js/shared/utils/html_utils';
 import {
   getCookie,
@@ -27,7 +27,7 @@ import {
   areCookiesEnabled,
 } from '../../../src/frontend/js/shared/utils/cookies';
 import {
-  check_table_prefix,
+  validateTablePrefix,
 } from '../../../src/frontend/js/modules/language/stores/language_settings';
 
 // Note: STATUSES is now hardcoded in app_data.ts, no need to mock
@@ -222,69 +222,69 @@ describe('pgm.ts', () => {
   // HTML Escape Functions Tests
   // ===========================================================================
 
-  describe('escape_html_chars', () => {
+  describe('escapeHtml', () => {
     it('escapes ampersand', () => {
-      expect(escape_html_chars('a & b')).toBe('a &amp; b');
+      expect(escapeHtml('a & b')).toBe('a &amp; b');
     });
 
     it('escapes less than', () => {
-      expect(escape_html_chars('a < b')).toBe('a &lt; b');
+      expect(escapeHtml('a < b')).toBe('a &lt; b');
     });
 
     it('escapes greater than', () => {
-      expect(escape_html_chars('a > b')).toBe('a &gt; b');
+      expect(escapeHtml('a > b')).toBe('a &gt; b');
     });
 
     it('escapes double quotes', () => {
-      expect(escape_html_chars('say "hello"')).toBe('say &quot;hello&quot;');
+      expect(escapeHtml('say "hello"')).toBe('say &quot;hello&quot;');
     });
 
     it('escapes single quotes', () => {
-      expect(escape_html_chars("it's")).toBe('it&#039;s');
+      expect(escapeHtml("it's")).toBe('it&#039;s');
     });
 
     it('converts carriage return to br', () => {
-      expect(escape_html_chars('line1\x0dline2')).toBe('line1<br />line2');
+      expect(escapeHtml('line1\x0dline2')).toBe('line1<br />line2');
     });
 
     it('handles multiple special characters', () => {
-      expect(escape_html_chars('<a & "b">')).toBe('&lt;a &amp; &quot;b&quot;&gt;');
+      expect(escapeHtml('<a & "b">')).toBe('&lt;a &amp; &quot;b&quot;&gt;');
     });
 
     it('handles empty string', () => {
-      expect(escape_html_chars('')).toBe('');
+      expect(escapeHtml('')).toBe('');
     });
   });
 
-  describe('escape_html_chars_2', () => {
+  describe('escapeHtmlWithAnnotation', () => {
     it('escapes HTML and highlights annotation', () => {
-      const result = escape_html_chars_2('hello world', 'world');
+      const result = escapeHtmlWithAnnotation('hello world', 'world');
       expect(result).toContain('<span style="color:red">world</span>');
       expect(result).toContain('hello');
     });
 
     it('handles empty annotation', () => {
-      const result = escape_html_chars_2('hello world', '');
+      const result = escapeHtmlWithAnnotation('hello world', '');
       expect(result).toBe('hello world');
     });
 
     it('escapes both title and annotation', () => {
-      const result = escape_html_chars_2('a & b', '&');
+      const result = escapeHtmlWithAnnotation('a & b', '&');
       expect(result).toContain('<span style="color:red">&amp;</span>');
     });
   });
 
-  describe('escape_apostrophes', () => {
+  describe('escapeApostrophes', () => {
     it('escapes single apostrophes', () => {
-      expect(escape_apostrophes("it's")).toBe("it\\'s");
+      expect(escapeApostrophes("it's")).toBe("it\\'s");
     });
 
     it('escapes multiple apostrophes', () => {
-      expect(escape_apostrophes("don't won't")).toBe("don\\'t won\\'t");
+      expect(escapeApostrophes("don't won't")).toBe("don\\'t won\\'t");
     });
 
     it('handles string without apostrophes', () => {
-      expect(escape_apostrophes('hello world')).toBe('hello world');
+      expect(escapeApostrophes('hello world')).toBe('hello world');
     });
   });
 
@@ -292,36 +292,36 @@ describe('pgm.ts', () => {
   // Tooltip Function Tests
   // ===========================================================================
 
-  describe('make_tooltip', () => {
+  describe('createWordTooltip', () => {
     it('creates tooltip with word only', () => {
-      const result = make_tooltip('hello', '', '', 1);
+      const result = createWordTooltip('hello', '', '', 1);
       expect(result).toContain('hello');
       expect(result).toContain('Learning');
     });
 
     it('includes romanization when provided', () => {
-      const result = make_tooltip('日本語', '', 'nihongo', 1);
+      const result = createWordTooltip('日本語', '', 'nihongo', 1);
       expect(result).toContain('▶ nihongo');
     });
 
     it('includes translation when provided', () => {
-      const result = make_tooltip('bonjour', 'hello', '', 1);
+      const result = createWordTooltip('bonjour', 'hello', '', 1);
       expect(result).toContain('▶ hello');
     });
 
     it('excludes translation when it is *', () => {
-      const result = make_tooltip('word', '*', '', 1);
+      const result = createWordTooltip('word', '*', '', 1);
       expect(result).not.toContain('▶ *');
     });
 
     it('includes status name and abbreviation', () => {
-      const result = make_tooltip('word', 'trans', '', 98);
+      const result = createWordTooltip('word', 'trans', '', 98);
       expect(result).toContain('Ignored');
       expect(result).toContain('[Ign]');
     });
 
     it('handles all fields populated', () => {
-      const result = make_tooltip('日本', 'Japan', 'nihon', 5);
+      const result = createWordTooltip('日本', 'Japan', 'nihon', 5);
       expect(result).toContain('日本');
       expect(result).toContain('▶ nihon');
       expect(result).toContain('▶ Japan');
@@ -432,7 +432,7 @@ describe('pgm.ts', () => {
   // Validation Functions Tests
   // ===========================================================================
 
-  describe('check_table_prefix', () => {
+  describe('validateTablePrefix', () => {
     let alertSpy: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
@@ -440,40 +440,40 @@ describe('pgm.ts', () => {
     });
 
     it('returns true for valid alphanumeric prefix', () => {
-      expect(check_table_prefix('myprefix')).toBe(true);
+      expect(validateTablePrefix('myprefix')).toBe(true);
       expect(alertSpy).not.toHaveBeenCalled();
     });
 
     it('returns true for prefix with underscores', () => {
-      expect(check_table_prefix('my_prefix_1')).toBe(true);
+      expect(validateTablePrefix('my_prefix_1')).toBe(true);
     });
 
     it('returns true for prefix with numbers', () => {
-      expect(check_table_prefix('prefix123')).toBe(true);
+      expect(validateTablePrefix('prefix123')).toBe(true);
     });
 
     it('returns false for empty prefix', () => {
-      expect(check_table_prefix('')).toBe(false);
+      expect(validateTablePrefix('')).toBe(false);
       expect(alertSpy).toHaveBeenCalled();
     });
 
     it('returns false for prefix longer than 20 characters', () => {
-      expect(check_table_prefix('a'.repeat(21))).toBe(false);
+      expect(validateTablePrefix('a'.repeat(21))).toBe(false);
       expect(alertSpy).toHaveBeenCalled();
     });
 
     it('returns false for prefix with special characters', () => {
-      expect(check_table_prefix('prefix!')).toBe(false);
-      expect(check_table_prefix('prefix-name')).toBe(false);
-      expect(check_table_prefix('prefix.name')).toBe(false);
+      expect(validateTablePrefix('prefix!')).toBe(false);
+      expect(validateTablePrefix('prefix-name')).toBe(false);
+      expect(validateTablePrefix('prefix.name')).toBe(false);
     });
 
     it('returns true for single character prefix', () => {
-      expect(check_table_prefix('a')).toBe(true);
+      expect(validateTablePrefix('a')).toBe(true);
     });
 
     it('returns true for exactly 20 character prefix', () => {
-      expect(check_table_prefix('a'.repeat(20))).toBe(true);
+      expect(validateTablePrefix('a'.repeat(20))).toBe(true);
     });
   });
 });

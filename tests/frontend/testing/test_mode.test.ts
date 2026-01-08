@@ -3,13 +3,13 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  word_click_event_do_test_test,
-  keydown_event_do_test_test
+  handleTestWordClick,
+  handleTestKeydown
 } from '../../../src/frontend/js/modules/review/pages/test_mode';
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/modules/vocabulary/services/overlib_interface', () => ({
-  run_overlib_test: vi.fn()
+  showTestWordPopup: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
@@ -17,7 +17,7 @@ vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', 
   cleanupRightFrames: vi.fn()
 }));
 
-import { run_overlib_test } from '../../../src/frontend/js/modules/vocabulary/services/overlib_interface';
+import { showTestWordPopup } from '../../../src/frontend/js/modules/vocabulary/services/overlib_interface';
 import { loadModalFrame, cleanupRightFrames } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
 import {
   setCurrentWordId,
@@ -56,11 +56,11 @@ describe('test_mode.ts', () => {
   });
 
   // ===========================================================================
-  // word_click_event_do_test_test Tests
+  // handleTestWordClick Tests
   // ===========================================================================
 
-  describe('word_click_event_do_test_test', () => {
-    it('calls run_overlib_test with word data attributes', () => {
+  describe('handleTestWordClick', () => {
+    it('calls showTestWordPopup with word data attributes', () => {
       document.body.innerHTML = `
         <span class="word"
           data_wid="456"
@@ -75,9 +75,9 @@ describe('test_mode.ts', () => {
       `;
 
       const wordEl = document.querySelector('.word')!;
-      word_click_event_do_test_test.call(wordEl as HTMLElement);
+      handleTestWordClick.call(wordEl as HTMLElement);
 
-      expect(run_overlib_test).toHaveBeenCalledWith(
+      expect(showTestWordPopup).toHaveBeenCalledWith(
         'http://dict1.com',
         'http://dict2.com',
         'http://translate.com',
@@ -106,7 +106,7 @@ describe('test_mode.ts', () => {
       `;
 
       const wordEl = document.querySelector('.word')!;
-      word_click_event_do_test_test.call(wordEl as HTMLElement);
+      handleTestWordClick.call(wordEl as HTMLElement);
 
       expect(document.querySelector('.todo')?.textContent).toBe('Test Solution');
     });
@@ -126,7 +126,7 @@ describe('test_mode.ts', () => {
       `;
 
       const wordEl = document.querySelector('.word')!;
-      const result = word_click_event_do_test_test.call(wordEl as HTMLElement);
+      const result = handleTestWordClick.call(wordEl as HTMLElement);
 
       expect(result).toBe(false);
     });
@@ -140,10 +140,10 @@ describe('test_mode.ts', () => {
       const wordEl = document.querySelector('.word')!;
 
       expect(() => {
-        word_click_event_do_test_test.call(wordEl as HTMLElement);
+        handleTestWordClick.call(wordEl as HTMLElement);
       }).not.toThrow();
 
-      expect(run_overlib_test).toHaveBeenCalledWith(
+      expect(showTestWordPopup).toHaveBeenCalledWith(
         'http://dict1.com',
         'http://dict2.com',
         'http://translate.com',
@@ -159,10 +159,10 @@ describe('test_mode.ts', () => {
   });
 
   // ===========================================================================
-  // keydown_event_do_test_test Tests
+  // handleTestKeydown Tests
   // ===========================================================================
 
-  describe('keydown_event_do_test_test', () => {
+  describe('handleTestKeydown', () => {
     beforeEach(() => {
       document.body.innerHTML = `
         <span class="word" data_wid="123" data_status="2">Test</span>
@@ -189,7 +189,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(false);
 
         const event = createKeyEvent(' ', 32);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(cleanupRightFrames).toHaveBeenCalled();
         expect(loadModalFrame).toHaveBeenCalledWith('/word/show?wid=123&ann=');
@@ -200,7 +200,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(true);
 
         const event = createKeyEvent(' ', 32);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(cleanupRightFrames).not.toHaveBeenCalled();
         expect(result).toBe(true);
@@ -210,7 +210,7 @@ describe('test_mode.ts', () => {
     describe('Escape key', () => {
       it('skips term without changing status', () => {
         const event = createKeyEvent('Escape', 27);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).toHaveBeenCalledWith(
           expect.stringContaining('/word/set-test-status?wid=123&status=2')
@@ -222,7 +222,7 @@ describe('test_mode.ts', () => {
     describe('I key', () => {
       it('sets status to ignored (98)', () => {
         const event = createKeyEvent('I', 73);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&status=98');
         expect(result).toBe(false);
@@ -232,7 +232,7 @@ describe('test_mode.ts', () => {
     describe('W key', () => {
       it('sets status to well-known (99)', () => {
         const event = createKeyEvent('W', 87);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&status=99');
         expect(result).toBe(false);
@@ -242,7 +242,7 @@ describe('test_mode.ts', () => {
     describe('E key', () => {
       it('opens edit word form', () => {
         const event = createKeyEvent('E', 69);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).toHaveBeenCalledWith('/word/edit-term?wid=123');
         expect(result).toBe(false);
@@ -254,7 +254,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(false);
 
         const event = createKeyEvent('ArrowUp', 38);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).not.toHaveBeenCalled();
         expect(result).toBe(true);
@@ -264,7 +264,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(true);
 
         const event = createKeyEvent('ArrowUp', 38);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&stchange=1');
         expect(result).toBe(false);
@@ -276,7 +276,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(false);
 
         const event = createKeyEvent('ArrowDown', 40);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).not.toHaveBeenCalled();
         expect(result).toBe(true);
@@ -286,7 +286,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(true);
 
         const event = createKeyEvent('ArrowDown', 40);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).toHaveBeenCalledWith('/word/set-test-status?wid=123&stchange=-1');
         expect(result).toBe(false);
@@ -304,7 +304,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(true);
 
         const event = createKeyEvent(key, keyCode);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).toHaveBeenCalledWith(`/word/set-test-status?wid=123&status=${expectedStatus}`);
         expect(result).toBe(false);
@@ -314,7 +314,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(false);
 
         const event = createKeyEvent('1', 49);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).not.toHaveBeenCalled();
         expect(result).toBe(true);
@@ -330,7 +330,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(true);
 
         const event = createKeyEvent(key, keyCode);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).toHaveBeenCalledWith(`/word/set-test-status?wid=123&status=${expectedStatus}`);
         expect(result).toBe(false);
@@ -340,7 +340,7 @@ describe('test_mode.ts', () => {
     describe('Unhandled keys', () => {
       it('returns true for unhandled keys', () => {
         const event = createKeyEvent('A', 65);
-        const result = keydown_event_do_test_test(event);
+        const result = handleTestKeydown(event);
 
         expect(loadModalFrame).not.toHaveBeenCalled();
         expect(result).toBe(true);

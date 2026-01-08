@@ -25,11 +25,11 @@ import {
   updateBulkWordInDOM,
   type BulkWordUpdateParams
 } from '../services/word_dom_updates';
-import { make_tooltip } from '@modules/vocabulary/services/word_status';
+import { createWordTooltip } from '@modules/vocabulary/services/word_status';
 import { cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
-import { do_ajax_edit_impr_text, editImprTextInOpener } from '@modules/vocabulary/services/term_operations';
+import { loadTermTranslations, editImprTextInOpener } from '@modules/vocabulary/services/term_operations';
 import { closeParentPopup } from '@modules/vocabulary/components/word_popup';
-import { escape_html_chars } from '@shared/utils/html_utils';
+import { escapeHtml } from '@shared/utils/html_utils';
 
 /**
  * Word data for all_wellknown_result view.
@@ -193,9 +193,9 @@ function initEditTermResult(config: EditTermResultConfig): void {
     const sentEl = context.getElementById(`SENT${wid}`);
 
     if (statEl) statEl.innerHTML = config.statusControlsHtml;
-    if (termEl) termEl.innerHTML = escape_html_chars(config.text);
-    if (tranEl) tranEl.innerHTML = escape_html_chars(config.translation);
-    if (romaEl) romaEl.innerHTML = escape_html_chars(config.romanization);
+    if (termEl) termEl.innerHTML = escapeHtml(config.text);
+    if (tranEl) tranEl.innerHTML = escapeHtml(config.translation);
+    if (romaEl) romaEl.innerHTML = escapeHtml(config.romanization);
     if (sentEl) sentEl.innerHTML = config.sentence;
   } else {
     // Normal Test - update word attributes
@@ -219,7 +219,7 @@ function initHoverSaveResult(config: HoverSaveResultConfig): void {
   const context = getParentContext();
 
   // Always generate tooltips (jQuery UI tooltips removed, now using native)
-  const title = make_tooltip(config.wordRaw, config.translation, '', String(config.status));
+  const title = createWordTooltip(config.wordRaw, config.translation, '', String(config.status));
 
   context.querySelectorAll<HTMLElement>(`.TERM${config.hex}`).forEach(el => {
     el.classList.remove('status0');
@@ -244,7 +244,7 @@ function initAllWellKnownResult(config: AllWellKnownConfig): void {
   config.words.forEach((word) => {
     let title = '';
     if (config.useTooltips) {
-      title = make_tooltip(word.term, '*', '', String(word.status));
+      title = createWordTooltip(word.term, '*', '', String(word.status));
     }
 
     context.querySelectorAll<HTMLElement>(`.TERM${word.hex}`).forEach(el => {
@@ -289,7 +289,7 @@ function initEditResult(config: EditResultConfig): void {
     // Try to update opener window via custom event, fall back to local update
     editImprTextInOpener(config.fromAnn, config.textlc ?? '', config.wid);
     // Also run locally in case opener is same-origin or event didn't work
-    do_ajax_edit_impr_text(config.fromAnn, config.textlc ?? '', config.wid);
+    loadTermTranslations(config.fromAnn, config.textlc ?? '', config.wid);
     return;
   }
 

@@ -6,7 +6,7 @@
  * @since   1.6.16-fork
  */
 
-import { escape_html_chars } from '@shared/utils/html_utils';
+import { escapeHtml } from '@shared/utils/html_utils';
 import { isInt } from '@shared/forms/form_validation';
 import { scrollTo } from '@shared/utils/hover_intent';
 import { apiPost, apiGet } from '@shared/api/client';
@@ -83,7 +83,7 @@ export function setTransRoman(tra: string, rom: string): void {
  * @param elem_name Name of the element of which to change annotation (e. g.: "rg1")
  * @param form_data All the data from the form (e. g. {"rg0": "foo", "rg1": "bar"})
  */
-export async function do_ajax_save_impr_text(textid: number, elem_name: string, form_data: string): Promise<void> {
+export async function saveImprovedTextAnnotation(textid: number, elem_name: string, form_data: string): Promise<void> {
   const waitEl = document.getElementById('wait' + elem_name.substring(2));
   if (waitEl) {
     waitEl.innerHTML = spinnerHtml();
@@ -118,7 +118,7 @@ export function changeImprAnnText(this: HTMLElement): void {
   const elem_name = this.getAttribute('name') || '';
   const form = document.querySelector('form');
   const form_data = form ? JSON.stringify(serializeFormToObject(form)) : '{}';
-  do_ajax_save_impr_text(textid, elem_name, form_data);
+  saveImprovedTextAnnotation(textid, elem_name, form_data);
 }
 
 /**
@@ -129,7 +129,7 @@ export function changeImprAnnRadio(this: HTMLElement): void {
   const elem_name = this.getAttribute('name') || '';
   const form = document.querySelector('form');
   const form_data = form ? JSON.stringify(serializeFormToObject(form)) : '{}';
-  do_ajax_save_impr_text(textid, elem_name, form_data);
+  saveImprovedTextAnnotation(textid, elem_name, form_data);
 }
 
 /**
@@ -156,7 +156,7 @@ export async function updateTermTranslation(wordid: number, txid: string): Promi
     return;
   }
   if (response.data?.update) {
-    do_ajax_edit_impr_text(pagepos, response.data.update, wordid);
+    loadTermTranslations(pagepos, response.data.update, wordid);
   }
 }
 
@@ -185,7 +185,7 @@ export async function addTermTranslation(txid: string, word: string, lang: numbe
     return;
   }
   if (response.data?.add && response.data?.term_id !== undefined) {
-    do_ajax_edit_impr_text(pagepos, response.data.add, response.data.term_id);
+    loadTermTranslations(pagepos, response.data.add, response.data.term_id);
   }
 }
 
@@ -217,7 +217,7 @@ export async function changeTableTestStatus(wordid: string, up: boolean): Promis
  * @param trans_data All the useful data for the term
  * @returns An HTML-formatted option
  */
-export function translation_radio(curr_trans: string, trans_data: TransData): string {
+export function createTranslationRadio(curr_trans: string, trans_data: TransData): string {
   if (trans_data.wid === null) {
     return '';
   }
@@ -229,8 +229,8 @@ export function translation_radio(curr_trans: string, trans_data: TransData): st
   const option = `<span class="nowrap">
     <input class="impr-ann-radio" ` +
       (set ? 'checked="checked" ' : '') + 'type="radio" name="rg' +
-      trans_data.ann_index + '" value="' + escape_html_chars(trim_trans) + `" />
-          &nbsp; ` + escape_html_chars(trim_trans) + `
+      trans_data.ann_index + '" value="' + escapeHtml(trim_trans) + `" />
+          &nbsp; ` + escapeHtml(trim_trans) + `
   </span>
   <br />`;
   return option;
@@ -242,7 +242,7 @@ export function translation_radio(curr_trans: string, trans_data: TransData): st
  * @param trans_data Useful data for this term
  * @param text_id    Text ID
  */
-export function edit_term_ann_translations(trans_data: TransData, text_id: number): void {
+export function editTermAnnotationTranslations(trans_data: TransData, text_id: number): void {
   const widset = trans_data.wid !== null;
   // First create a link to edit the word in a new window
   let edit_word_link: string;
@@ -255,7 +255,7 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
     });
     edit_word_link = `<a name="rec${trans_data.ann_index}"></a>
     <span class="click"
-    onclick="oewin('/word/edit?` + escape_html_chars(params.toString()) + `');">
+    onclick="oewin('/word/edit?` + escapeHtml(params.toString()) + `');">
           ${iconHtml('sticky-note--pencil', { title: 'Edit Term', alt: 'Edit Term' })}
       </span>`;
   } else {
@@ -269,7 +269,7 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
   let translations_list = '';
   trans_data.translations.forEach(
     function (candidate_trans: string) {
-      translations_list += translation_radio(candidate_trans, trans_data);
+      translations_list += createTranslationRadio(candidate_trans, trans_data);
     }
   );
 
@@ -282,7 +282,7 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
   &nbsp;
   <input class="impr-ann-text" type="text" name="tx${trans_data.ann_index}` +
     `" id="tx${trans_data.ann_index}" value="` +
-    (select_last ? escape_html_chars(curr_trans) : '') +
+    (select_last ? escapeHtml(curr_trans) : '') +
   `" maxlength="50" size="40" />
    &nbsp;
   <span class="click" data-action="erase-field" data-target="#tx${trans_data.ann_index}">
@@ -325,7 +325,7 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
  *
  * @since 2.9.0 The new parameter $wid is now necessary
  */
-export async function do_ajax_edit_impr_text(pagepos: number, word: string, term_id: number): Promise<void> {
+export async function loadTermTranslations(pagepos: number, word: string, term_id: number): Promise<void> {
   const editImprTextDataEl = document.getElementById('editimprtextdata');
   // Special case, on empty word reload the main annotations form
   if (word === '') {
@@ -346,7 +346,7 @@ export async function do_ajax_edit_impr_text(pagepos: number, word: string, term
   if (response.error || response.data?.error) {
     alert(response.error || response.data?.error);
   } else if (response.data) {
-    edit_term_ann_translations(response.data, textid);
+    editTermAnnotationTranslations(response.data, textid);
     scrollTo(pagepos);
     document.querySelectorAll<HTMLInputElement>('input.impr-ann-text').forEach(el => {
       el.addEventListener('change', changeImprAnnText);
@@ -364,7 +364,7 @@ export async function do_ajax_edit_impr_text(pagepos: number, word: string, term
  * @param word_text Text to match
  * @returns Promise with similar terms data
  */
-export async function do_ajax_req_sim_terms(language_id: number, word_text: string): Promise<{ similar_terms: string } | null> {
+export async function fetchSimilarTerms(language_id: number, word_text: string): Promise<{ similar_terms: string } | null> {
   const response = await apiGet<{ similar_terms: string }>(
     '/similar-terms',
     { language_id, term: word_text }
@@ -375,7 +375,7 @@ export async function do_ajax_req_sim_terms(language_id: number, word_text: stri
 /**
  * Display the terms similar to a specific term with AJAX.
  */
-export async function do_ajax_show_similar_terms(): Promise<void> {
+export async function showSimilarTerms(): Promise<void> {
   const simwordsEl = document.getElementById('simwords');
   if (simwordsEl) {
     simwordsEl.innerHTML = spinnerHtml();
@@ -383,7 +383,7 @@ export async function do_ajax_show_similar_terms(): Promise<void> {
 
   const langfieldEl = document.getElementById('langfield') as HTMLInputElement | HTMLSelectElement | null;
   const wordfieldEl = document.getElementById('wordfield') as HTMLInputElement | null;
-  const data = await do_ajax_req_sim_terms(
+  const data = await fetchSimilarTerms(
     parseInt(langfieldEl?.value || '0', 10),
     wordfieldEl?.value || ''
   );
@@ -402,7 +402,7 @@ export async function do_ajax_show_similar_terms(): Promise<void> {
  * @param targetCtlId The ID of the element that should change value on click
  * @returns A formatted group of sentences
  */
-export function display_example_sentences(
+export function createExampleSentencesHtml(
   sentences: [string, string][],
   targetCtlId: string
 ): HTMLDivElement {
@@ -432,7 +432,7 @@ export function display_example_sentences(
  * @param sentences    A list of sentences to display.
  * @param ctl The selector for the element that should change value on click
  */
-export function change_example_sentences_zone(sentences: [string, string][], ctl: string): void {
+export function updateExampleSentencesZone(sentences: [string, string][], ctl: string): void {
   const waitingEl = document.getElementById('exsent-waiting');
   const sentencesEl = document.getElementById('exsent-sentences');
   if (waitingEl) {
@@ -440,7 +440,7 @@ export function change_example_sentences_zone(sentences: [string, string][], ctl
   }
   if (sentencesEl) {
     sentencesEl.style.display = 'inherit';
-    const new_element = display_example_sentences(sentences, ctl);
+    const new_element = createExampleSentencesHtml(sentences, ctl);
     sentencesEl.appendChild(new_element);
   }
 }
@@ -453,7 +453,7 @@ export function change_example_sentences_zone(sentences: [string, string][], ctl
  * @param ctl  Selector for the element to edit on click
  * @param woid Term id (word or multi-word)
  */
-export async function do_ajax_show_sentences(lang: number, word: string, ctl: string, woid: number | string): Promise<void> {
+export async function showExampleSentences(lang: number, word: string, ctl: string, woid: number | string): Promise<void> {
   const interactableEl = document.getElementById('exsent-interactable');
   const waitingEl = document.getElementById('exsent-waiting');
   if (interactableEl) {
@@ -481,7 +481,7 @@ export async function do_ajax_show_sentences(lang: number, word: string, ctl: st
   }
 
   if (response.data) {
-    change_example_sentences_zone(response.data, ctl);
+    updateExampleSentencesZone(response.data, ctl);
   }
 }
 
@@ -518,7 +518,7 @@ function initSentenceEventDelegation(): void {
       const targetId = actionEl.dataset.target || '';
       const wid = parseInt(actionEl.dataset.wid || '0', 10);
       if (lang && termlc) {
-        do_ajax_show_sentences(lang, termlc, targetId, wid);
+        showExampleSentences(lang, termlc, targetId, wid);
       }
     }
 
@@ -589,7 +589,7 @@ function initImprovedTextEventDelegation(): void {
 
     // Handle reload-impr-text: reload the improved text annotations form
     if (action === 'reload-impr-text') {
-      do_ajax_edit_impr_text(0, '', 0);
+      loadTermTranslations(0, '', 0);
     }
 
     // Handle back-to-print-mode: navigate to print/display mode
@@ -624,12 +624,12 @@ interface ImprTextEditEvent extends CustomEvent {
 }
 
 document.addEventListener('lwt-edit-impr-text', ((e: ImprTextEditEvent) => {
-  do_ajax_edit_impr_text(e.detail.pagepos, e.detail.word, e.detail.termId);
+  loadTermTranslations(e.detail.pagepos, e.detail.word, e.detail.termId);
 }) as EventListener);
 
 /**
  * Trigger improved text edit in opener window via custom event.
- * Use this from popup windows instead of accessing window.opener.do_ajax_edit_impr_text.
+ * Use this from popup windows instead of accessing window.opener.loadTermTranslations.
  */
 export function editImprTextInOpener(pagepos: number, word: string, termId: number): void {
   try {

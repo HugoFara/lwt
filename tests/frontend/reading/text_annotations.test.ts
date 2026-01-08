@@ -4,18 +4,18 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   getAttr,
-  word_each_do_text_text,
-  mword_each_do_text_text
+  processWordAnnotations,
+  processMultiWordAnnotations
 } from '../../../src/frontend/js/modules/text/pages/reading/text_annotations';
 
 // Mock word_status module
 vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_status', () => ({
-  make_tooltip: vi.fn((text, trans, rom, status) =>
+  createWordTooltip: vi.fn((text, trans, rom, status) =>
     `${text} [${trans}] (${rom}) - Status: ${status}`
   )
 }));
 
-import { make_tooltip } from '../../../src/frontend/js/modules/vocabulary/services/word_status';
+import { createWordTooltip } from '../../../src/frontend/js/modules/vocabulary/services/word_status';
 import {
   setAnnotations,
   resetTextConfig
@@ -113,10 +113,10 @@ describe('text_annotations.ts', () => {
   });
 
   // ===========================================================================
-  // word_each_do_text_text Tests
+  // processWordAnnotations Tests
   // ===========================================================================
 
-  describe('word_each_do_text_text', () => {
+  describe('processWordAnnotations', () => {
     it('does not match annotation when wid is empty', () => {
       setAnnotations({
         '10': [null, 'word123', 'note']
@@ -127,7 +127,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('word1') as HTMLElement;
 
-      word_each_do_text_text.call(element);
+      processWordAnnotations.call(element);
 
       // Should not have set data_ann since wid is empty and doesn't match annotation
       expect(element.getAttribute('data_ann')).toBeNull();
@@ -143,7 +143,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('word1') as HTMLElement;
 
-      word_each_do_text_text.call(element);
+      processWordAnnotations.call(element);
 
       expect(element.getAttribute('data_ann')).toBe('note');
     });
@@ -158,7 +158,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('word1') as HTMLElement;
 
-      word_each_do_text_text.call(element);
+      processWordAnnotations.call(element);
 
       expect(element.getAttribute('data_trans')).toBe('annotation / translation');
     });
@@ -174,7 +174,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('word1') as HTMLElement;
 
-      word_each_do_text_text.call(element);
+      processWordAnnotations.call(element);
 
       // Should not add duplicate
       expect(element.getAttribute('data_trans')).toBe('hello');
@@ -186,9 +186,9 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('word1') as HTMLElement;
 
-      word_each_do_text_text.call(element);
+      processWordAnnotations.call(element);
 
-      expect(make_tooltip).toHaveBeenCalledWith(
+      expect(createWordTooltip).toHaveBeenCalledWith(
         'Hello',
         'translation',
         'romanization',
@@ -202,9 +202,9 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('word1') as HTMLElement;
 
-      word_each_do_text_text.call(element);
+      processWordAnnotations.call(element);
 
-      expect(make_tooltip).toHaveBeenCalledWith(
+      expect(createWordTooltip).toHaveBeenCalledWith(
         'Hello',
         'translation',
         'rom',
@@ -222,7 +222,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('word1') as HTMLElement;
 
-      word_each_do_text_text.call(element);
+      processWordAnnotations.call(element);
 
       expect(element.getAttribute('data_ann')).toBeNull();
     });
@@ -237,26 +237,26 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('word1') as HTMLElement;
 
-      word_each_do_text_text.call(element);
+      processWordAnnotations.call(element);
 
       expect(element.getAttribute('data_ann')).toBe('note (test)');
     });
   });
 
   // ===========================================================================
-  // mword_each_do_text_text Tests
+  // processMultiWordAnnotations Tests
   // ===========================================================================
 
-  describe('mword_each_do_text_text', () => {
+  describe('processMultiWordAnnotations', () => {
     it('does nothing when data_status is empty', () => {
       document.body.innerHTML = `
         <span id="mword1" class="mword" data_wid="mword123" data_order="10" data_trans="translation" data_rom="rom" data_status="">Multi Word</span>
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
-      expect(make_tooltip).not.toHaveBeenCalled();
+      expect(createWordTooltip).not.toHaveBeenCalled();
     });
 
     it('does nothing when wid is empty', () => {
@@ -265,7 +265,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
       expect(element.getAttribute('data_ann')).toBeNull();
     });
@@ -281,7 +281,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
       expect(element.getAttribute('data_ann')).toBe('multi annotation');
     });
@@ -297,7 +297,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
       // Should find first one at offset +2
       expect(element.getAttribute('data_ann')).toBe('first annotation');
@@ -313,7 +313,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
       expect(element.getAttribute('data_trans')).toBe('note / original');
     });
@@ -329,7 +329,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
       expect(element.getAttribute('data_trans')).toBe('same');
     });
@@ -340,9 +340,9 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
-      expect(make_tooltip).toHaveBeenCalledWith(
+      expect(createWordTooltip).toHaveBeenCalledWith(
         'Multi Word',
         'trans',
         'rom',
@@ -356,9 +356,9 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
-      expect(make_tooltip).toHaveBeenCalledWith(
+      expect(createWordTooltip).toHaveBeenCalledWith(
         'Full Text',
         'trans',
         'rom',
@@ -377,7 +377,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
       expect(element.getAttribute('data_ann')).toBe('far annotation');
     });
@@ -393,7 +393,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
       expect(element.getAttribute('data_ann')).toBeNull();
     });
@@ -404,9 +404,9 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
-      expect(make_tooltip).toHaveBeenCalledWith(
+      expect(createWordTooltip).toHaveBeenCalledWith(
         'Multi',
         'trans',
         'rom',
@@ -429,7 +429,7 @@ describe('text_annotations.ts', () => {
       expect(result).toBe('');
     });
 
-    it('word_each_do_text_text handles annotation with brackets', () => {
+    it('processWordAnnotations handles annotation with brackets', () => {
       setAnnotations({
         '10': [null, 'word123', 'note [extra]']
       });
@@ -439,7 +439,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('word1') as HTMLElement;
 
-      word_each_do_text_text.call(element);
+      processWordAnnotations.call(element);
 
       const trans = element.getAttribute('data_trans');
       expect(trans).toContain('note [extra]');
@@ -456,7 +456,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('word1') as HTMLElement;
 
-      word_each_do_text_text.call(element);
+      processWordAnnotations.call(element);
 
       // The regex should match ann at the start/end with delimiters
       expect(element.getAttribute('data_trans')).toBe(',ann,');
@@ -472,13 +472,13 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('word1') as HTMLElement;
 
-      word_each_do_text_text.call(element);
+      processWordAnnotations.call(element);
 
       // '05' !== '5' so annotation won't match - this is expected behavior
       expect(element.getAttribute('data_ann')).toBeNull();
     });
 
-    it('mword_each_do_text_text handles zero order value', () => {
+    it('processMultiWordAnnotations handles zero order value', () => {
       setAnnotations({
         '2': [null, 'mword123', 'note']
       });
@@ -488,7 +488,7 @@ describe('text_annotations.ts', () => {
       `;
       const element = document.getElementById('mword1') as HTMLElement;
 
-      mword_each_do_text_text.call(element);
+      processMultiWordAnnotations.call(element);
 
       expect(element.getAttribute('data_ann')).toBe('note');
     });

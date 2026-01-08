@@ -6,7 +6,7 @@ import { autoInitExpressionInteractables } from '../../../src/frontend/js/module
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_status', () => ({
-  make_tooltip: vi.fn((text, trans, rom, status) =>
+  createWordTooltip: vi.fn((text, trans, rom, status) =>
     `Tooltip: ${text} - ${trans} (${status})`
   )
 }));
@@ -15,7 +15,7 @@ vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   newExpressionInteractable: vi.fn()
 }));
 
-import { make_tooltip } from '../../../src/frontend/js/modules/vocabulary/services/word_status';
+import { createWordTooltip } from '../../../src/frontend/js/modules/vocabulary/services/word_status';
 import { newExpressionInteractable } from '../../../src/frontend/js/shared/utils/user_interactions';
 import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/modules/text/stores/text_config';
 
@@ -63,7 +63,7 @@ describe('expression_interactable.ts', () => {
       autoInitExpressionInteractables();
 
       expect(newExpressionInteractable).toHaveBeenCalled();
-      expect(make_tooltip).toHaveBeenCalledWith(
+      expect(createWordTooltip).toHaveBeenCalledWith(
         'multi word',
         'translation',
         'romanization',
@@ -149,7 +149,7 @@ describe('expression_interactable.ts', () => {
 
       autoInitExpressionInteractables();
 
-      expect(make_tooltip).toHaveBeenCalled();
+      expect(createWordTooltip).toHaveBeenCalled();
     });
   });
 
@@ -225,7 +225,7 @@ describe('expression_interactable.ts', () => {
 
       autoInitExpressionInteractables();
 
-      expect(make_tooltip).toHaveBeenCalledWith(
+      expect(createWordTooltip).toHaveBeenCalledWith(
         'the expression',
         'trans',
         'rom',

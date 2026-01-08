@@ -14,7 +14,7 @@ import { SettingsApi } from '@modules/admin/api/settings_api';
  * @param k Setting name as a key
  * @param v Setting value
  */
-export function do_ajax_save_setting(k: string, v: string): void {
+export function saveSetting(k: string, v: string): void {
   SettingsApi.save(k, v);
 }
 
@@ -33,7 +33,7 @@ export function scrollToAnchor(aid: string): void {
  * @param id_string HTML element ID containing position information (e.g., "ID-3-42")
  * @returns Position number extracted from the ID, or -1 if undefined/invalid
  */
-export function get_position_from_id(id_string: string): number {
+export function getPositionFromId(id_string: string): number {
   if (typeof id_string === 'undefined') return -1;
   const arr = id_string.split('-');
   return parseInt(arr[1], 10) * 10 + 10 - parseInt(arr[2], 10);
@@ -45,7 +45,7 @@ export function get_position_from_id(id_string: string): number {
  * @param select_elem
  * @param input_elem
  */
-export function quick_select_to_input(select_elem: HTMLSelectElement, input_elem: HTMLInputElement): void {
+export function copySelectValueToInput(select_elem: HTMLSelectElement, input_elem: HTMLInputElement): void {
   const val = select_elem.options[select_elem.selectedIndex].value;
   if (val !== '') { input_elem.value = val; }
   select_elem.value = '';

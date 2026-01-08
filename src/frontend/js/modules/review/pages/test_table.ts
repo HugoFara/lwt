@@ -6,7 +6,7 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
+import { saveSetting } from '@shared/utils/ajax_utilities';
 
 /**
  * Update left border radius for visible columns.
@@ -84,7 +84,7 @@ function toggleColumnVisibility(
   document.querySelectorAll<HTMLElement>(selector).forEach((el) => {
     el.style.display = isVisible ? '' : 'none';
   });
-  do_ajax_save_setting(settingKey, isVisible ? '1' : '0');
+  saveSetting(settingKey, isVisible ? '1' : '0');
 
   if (updateLeft) {
     updateLeftBorderRadius();
@@ -110,7 +110,7 @@ function toggleContentVisibility(
     el.style.color = isVisible ? 'black' : 'white';
     el.style.cursor = isVisible ? 'auto' : 'pointer';
   });
-  do_ajax_save_setting(settingKey, isVisible ? '1' : '0');
+  saveSetting(settingKey, isVisible ? '1' : '0');
 }
 
 /**

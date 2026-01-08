@@ -13,7 +13,7 @@
  * @since 3.0.0
  */
 
-import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
+import { saveSetting } from '@shared/utils/ajax_utilities';
 import { lwtFormCheck } from '@shared/forms/unloadformcheck';
 import { languageForm } from './language_form';
 
@@ -204,7 +204,7 @@ export const languageWizard = {
    * @param value - The selected native language
    */
   changeNative(value: string): void {
-    do_ajax_save_setting('currentnativelanguage', value);
+    saveSetting('currentnativelanguage', value);
   },
 
   /**

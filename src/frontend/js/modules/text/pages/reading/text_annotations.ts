@@ -5,7 +5,7 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { make_tooltip } from '@modules/vocabulary/services/word_status';
+import { createWordTooltip } from '@modules/vocabulary/services/word_status';
 import { getAnnotation } from '@modules/text/stores/text_config';
 import { getDelimiter } from '@modules/language/stores/language_config';
 
@@ -35,7 +35,7 @@ export function getAttrElement(el: HTMLElement, attr: string): string {
 /**
  * Add annotations to a word.
  */
-export function word_each_do_text_text(
+export function processWordAnnotations(
   this: HTMLElement
 ): void {
   const wid = getAttr(this, 'data_wid');
@@ -62,7 +62,7 @@ export function word_each_do_text_text(
     }
   }
   // Native tooltips are always used (jQuery tooltips removed)
-  this.title = make_tooltip(
+  this.title = createWordTooltip(
     this.textContent || '',
     getAttr(this, 'data_trans'),
     getAttr(this, 'data_rom'),
@@ -76,7 +76,7 @@ export function word_each_do_text_text(
  *
  * @param this The HTML element being processed (word span)
  */
-export function mword_each_do_text_text(
+export function processMultiWordAnnotations(
   this: HTMLElement
 ): void {
   if (getAttr(this, 'data_status') !== '') {
@@ -108,7 +108,7 @@ export function mword_each_do_text_text(
       }
     }
     // Native tooltips are always used (jQuery tooltips removed)
-    this.title = make_tooltip(
+    this.title = createWordTooltip(
       getAttr(this, 'data_text'),
       getAttr(this, 'data_trans'),
       getAttr(this, 'data_rom'),

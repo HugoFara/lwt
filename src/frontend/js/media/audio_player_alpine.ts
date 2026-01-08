@@ -9,7 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { do_ajax_save_setting } from '@shared/utils/ajax_utilities';
+import { saveSetting } from '@shared/utils/ajax_utilities';
 
 /**
  * Audio player configuration from PHP
@@ -294,7 +294,7 @@ export function audioPlayerData(): AudioPlayerData {
       }
       // Save to server
       const rateValue = Math.round(this.playbackRate * 10);
-      do_ajax_save_setting('currentplaybackrate', String(rateValue));
+      saveSetting('currentplaybackrate', String(rateValue));
     },
 
     slower() {
@@ -329,13 +329,13 @@ export function audioPlayerData(): AudioPlayerData {
       if (this.audio) {
         this.audio.loop = this.repeatMode;
       }
-      do_ajax_save_setting('currentplayerrepeatmode', this.repeatMode ? '1' : '0');
+      saveSetting('currentplayerrepeatmode', this.repeatMode ? '1' : '0');
     },
 
     // Skip time
     setSkipSeconds(seconds: number) {
       this.skipSeconds = seconds;
-      do_ajax_save_setting('currentplayerseconds', String(seconds));
+      saveSetting('currentplayerseconds', String(seconds));
     },
 
     // Utilities

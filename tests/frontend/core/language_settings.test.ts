@@ -17,7 +17,7 @@ import {
   resetAll,
   resetAllAsync,
   iknowall,
-  check_table_prefix
+  validateTablePrefix
 } from '../../../src/frontend/js/modules/language/stores/language_settings';
 
 describe('core/language_settings.ts', () => {
@@ -272,36 +272,36 @@ describe('core/language_settings.ts', () => {
   });
 
   // ===========================================================================
-  // check_table_prefix Tests
+  // validateTablePrefix Tests
   // ===========================================================================
 
-  describe('check_table_prefix', () => {
+  describe('validateTablePrefix', () => {
     it('returns true for valid alphanumeric prefix', () => {
-      const result = check_table_prefix('myprefix');
+      const result = validateTablePrefix('myprefix');
 
       expect(result).toBe(true);
     });
 
     it('returns true for prefix with underscore', () => {
-      const result = check_table_prefix('my_prefix');
+      const result = validateTablePrefix('my_prefix');
 
       expect(result).toBe(true);
     });
 
     it('returns true for prefix with numbers', () => {
-      const result = check_table_prefix('prefix123');
+      const result = validateTablePrefix('prefix123');
 
       expect(result).toBe(true);
     });
 
     it('returns true for single character prefix', () => {
-      const result = check_table_prefix('a');
+      const result = validateTablePrefix('a');
 
       expect(result).toBe(true);
     });
 
     it('returns true for 20 character prefix', () => {
-      const result = check_table_prefix('a'.repeat(20));
+      const result = validateTablePrefix('a'.repeat(20));
 
       expect(result).toBe(true);
     });
@@ -309,7 +309,7 @@ describe('core/language_settings.ts', () => {
     it('returns false for empty prefix', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      const result = check_table_prefix('');
+      const result = validateTablePrefix('');
 
       expect(result).toBe(false);
       expect(alertSpy).toHaveBeenCalled();
@@ -318,7 +318,7 @@ describe('core/language_settings.ts', () => {
     it('returns false for prefix longer than 20 characters', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      const result = check_table_prefix('a'.repeat(21));
+      const result = validateTablePrefix('a'.repeat(21));
 
       expect(result).toBe(false);
       expect(alertSpy).toHaveBeenCalled();
@@ -327,7 +327,7 @@ describe('core/language_settings.ts', () => {
     it('returns false for prefix with special characters', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      const result = check_table_prefix('my-prefix');
+      const result = validateTablePrefix('my-prefix');
 
       expect(result).toBe(false);
       expect(alertSpy).toHaveBeenCalled();
@@ -336,7 +336,7 @@ describe('core/language_settings.ts', () => {
     it('returns false for prefix with spaces', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      const result = check_table_prefix('my prefix');
+      const result = validateTablePrefix('my prefix');
 
       expect(result).toBe(false);
       expect(alertSpy).toHaveBeenCalled();
@@ -345,7 +345,7 @@ describe('core/language_settings.ts', () => {
     it('returns false for prefix with dots', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      const result = check_table_prefix('my.prefix');
+      const result = validateTablePrefix('my.prefix');
 
       expect(result).toBe(false);
       expect(alertSpy).toHaveBeenCalled();
@@ -354,7 +354,7 @@ describe('core/language_settings.ts', () => {
     it('shows error message for invalid prefix', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      check_table_prefix('invalid!');
+      validateTablePrefix('invalid!');
 
       expect(alertSpy).toHaveBeenCalledWith(
         expect.stringContaining('Table Set Name')
@@ -362,13 +362,13 @@ describe('core/language_settings.ts', () => {
     });
 
     it('allows uppercase letters', () => {
-      const result = check_table_prefix('MyPrefix');
+      const result = validateTablePrefix('MyPrefix');
 
       expect(result).toBe(true);
     });
 
     it('allows mixed case with numbers and underscore', () => {
-      const result = check_table_prefix('My_Prefix_123');
+      const result = validateTablePrefix('My_Prefix_123');
 
       expect(result).toBe(true);
     });
@@ -376,26 +376,26 @@ describe('core/language_settings.ts', () => {
     it('returns false for Unicode characters', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      const result = check_table_prefix('日本語');
+      const result = validateTablePrefix('日本語');
 
       expect(result).toBe(false);
       expect(alertSpy).toHaveBeenCalled();
     });
 
     it('returns true for underscore only prefix', () => {
-      const result = check_table_prefix('_');
+      const result = validateTablePrefix('_');
 
       expect(result).toBe(true);
     });
 
     it('returns true for prefix starting with underscore', () => {
-      const result = check_table_prefix('_myprefix');
+      const result = validateTablePrefix('_myprefix');
 
       expect(result).toBe(true);
     });
 
     it('returns true for prefix starting with number', () => {
-      const result = check_table_prefix('123prefix');
+      const result = validateTablePrefix('123prefix');
 
       expect(result).toBe(true);
     });
@@ -403,7 +403,7 @@ describe('core/language_settings.ts', () => {
     it('does not show alert for valid prefix', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      check_table_prefix('validprefix');
+      validateTablePrefix('validprefix');
 
       expect(alertSpy).not.toHaveBeenCalled();
     });
@@ -476,13 +476,13 @@ describe('core/language_settings.ts', () => {
       await expect(setLang(select, '/test')).rejects.toThrow();
     });
 
-    it('check_table_prefix handles boundary length 20', () => {
+    it('validateTablePrefix handles boundary length 20', () => {
       const exactLength = 'a'.repeat(20);
-      expect(check_table_prefix(exactLength)).toBe(true);
+      expect(validateTablePrefix(exactLength)).toBe(true);
 
       const tooLong = 'a'.repeat(21);
       vi.spyOn(window, 'alert').mockImplementation(() => {});
-      expect(check_table_prefix(tooLong)).toBe(false);
+      expect(validateTablePrefix(tooLong)).toBe(false);
     });
 
     it('iknowall handles zero text ID', () => {
@@ -493,8 +493,8 @@ describe('core/language_settings.ts', () => {
       expect(mockLoadModalFrame).toHaveBeenCalledWith('/word/set-all-status?text=0');
     });
 
-    it('check_table_prefix handles consecutive underscores', () => {
-      const result = check_table_prefix('my__prefix');
+    it('validateTablePrefix handles consecutive underscores', () => {
+      const result = validateTablePrefix('my__prefix');
 
       expect(result).toBe(true);
     });

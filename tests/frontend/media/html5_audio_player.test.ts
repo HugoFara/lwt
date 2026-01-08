@@ -4,11 +4,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Create the mock using vi.hoisted so it's available before module import
-const mockDoAjaxSaveSetting = vi.hoisted(() => vi.fn());
+const mockSaveSetting = vi.hoisted(() => vi.fn());
 
 // Mock the ajax_utilities module
 vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
-  do_ajax_save_setting: mockDoAjaxSaveSetting
+  saveSetting: mockSaveSetting
 }));
 
 import {
@@ -21,7 +21,7 @@ import {
 
 // Setup global mocks
 beforeEach(() => {
-  mockDoAjaxSaveSetting.mockClear();
+  mockSaveSetting.mockClear();
 });
 
 describe('html5_audio_player.ts', () => {
@@ -445,7 +445,7 @@ describe('html5_audio_player.ts', () => {
     describe('setNewPlayerSeconds', () => {
       it('saves setting via AJAX', () => {
         lwt_audio_controller.setNewPlayerSeconds();
-        expect(mockDoAjaxSaveSetting).toHaveBeenCalledWith('currentplayerseconds', '5');
+        expect(mockSaveSetting).toHaveBeenCalledWith('currentplayerseconds', '5');
       });
     });
 
@@ -455,7 +455,7 @@ describe('html5_audio_player.ts', () => {
         if (player) {
           const spy = vi.spyOn(player, 'setPlaybackRate');
           lwt_audio_controller.setNewPlaybackRate();
-          expect(mockDoAjaxSaveSetting).toHaveBeenCalledWith('currentplaybackrate', '10');
+          expect(mockSaveSetting).toHaveBeenCalledWith('currentplaybackrate', '10');
           expect(spy).toHaveBeenCalledWith(1.0); // 10 * 0.1
         }
       });
@@ -481,7 +481,7 @@ describe('html5_audio_player.ts', () => {
 
       it('saves setting', () => {
         lwt_audio_controller.clickSingle();
-        expect(mockDoAjaxSaveSetting).toHaveBeenCalledWith('currentplayerrepeatmode', '0');
+        expect(mockSaveSetting).toHaveBeenCalledWith('currentplayerrepeatmode', '0');
       });
     });
 
@@ -504,7 +504,7 @@ describe('html5_audio_player.ts', () => {
 
       it('saves setting', () => {
         lwt_audio_controller.clickRepeat();
-        expect(mockDoAjaxSaveSetting).toHaveBeenCalledWith('currentplayerrepeatmode', '1');
+        expect(mockSaveSetting).toHaveBeenCalledWith('currentplayerrepeatmode', '1');
       });
     });
 

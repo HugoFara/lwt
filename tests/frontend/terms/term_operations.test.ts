@@ -28,16 +28,16 @@ vi.mock('../../../src/frontend/js/modules/vocabulary/api/terms_api', () => ({
 
 import {
   setTransRoman,
-  translation_radio,
-  display_example_sentences,
-  do_ajax_save_impr_text,
+  createTranslationRadio,
+  createExampleSentencesHtml,
+  saveImprovedTextAnnotation,
   updateTermTranslation,
   addTermTranslation,
   changeTableTestStatus,
-  do_ajax_req_sim_terms,
-  do_ajax_show_similar_terms,
-  change_example_sentences_zone,
-  do_ajax_show_sentences,
+  fetchSimilarTerms,
+  showSimilarTerms,
+  updateExampleSentencesZone,
+  showExampleSentences,
   type TransData,
 } from '../../../src/frontend/js/modules/vocabulary/services/term_operations';
 
@@ -156,10 +156,10 @@ describe('term_operations.ts', () => {
   });
 
   // ===========================================================================
-  // translation_radio Tests
+  // createTranslationRadio Tests
   // ===========================================================================
 
-  describe('translation_radio', () => {
+  describe('createTranslationRadio', () => {
     const baseTransData: TransData = {
       wid: 1,
       trans: 'hello',
@@ -172,27 +172,27 @@ describe('term_operations.ts', () => {
 
     it('returns empty string when wid is null', () => {
       const transData = { ...baseTransData, wid: null };
-      const result = translation_radio('hello', transData);
+      const result = createTranslationRadio('hello', transData);
       expect(result).toBe('');
     });
 
     it('returns empty string for empty translation', () => {
-      const result = translation_radio('', baseTransData);
+      const result = createTranslationRadio('', baseTransData);
       expect(result).toBe('');
     });
 
     it('returns empty string for whitespace-only translation', () => {
-      const result = translation_radio('   ', baseTransData);
+      const result = createTranslationRadio('   ', baseTransData);
       expect(result).toBe('');
     });
 
     it('returns empty string for asterisk translation', () => {
-      const result = translation_radio('*', baseTransData);
+      const result = createTranslationRadio('*', baseTransData);
       expect(result).toBe('');
     });
 
     it('creates radio button HTML for valid translation', () => {
-      const result = translation_radio('hello', baseTransData);
+      const result = createTranslationRadio('hello', baseTransData);
 
       expect(result).toContain('<input');
       expect(result).toContain('type="radio"');
@@ -203,20 +203,20 @@ describe('term_operations.ts', () => {
 
     it('marks radio as checked when translation matches current', () => {
       const transData = { ...baseTransData, trans: 'hello' };
-      const result = translation_radio('hello', transData);
+      const result = createTranslationRadio('hello', transData);
 
       expect(result).toContain('checked="checked"');
     });
 
     it('does not mark radio as checked when translation differs', () => {
       const transData = { ...baseTransData, trans: 'goodbye' };
-      const result = translation_radio('hello', transData);
+      const result = createTranslationRadio('hello', transData);
 
       expect(result).not.toContain('checked="checked"');
     });
 
     it('escapes HTML special characters in translation', () => {
-      const result = translation_radio('<script>', baseTransData);
+      const result = createTranslationRadio('<script>', baseTransData);
 
       expect(result).toContain('&lt;script&gt;');
       expect(result).not.toContain('<script>');
@@ -224,53 +224,53 @@ describe('term_operations.ts', () => {
 
     it('uses correct annotation index in name attribute', () => {
       const transData = { ...baseTransData, ann_index: '42' };
-      const result = translation_radio('test', transData);
+      const result = createTranslationRadio('test', transData);
 
       expect(result).toContain('name="rg42"');
     });
 
     it('adds impr-ann-radio class to input', () => {
-      const result = translation_radio('test', baseTransData);
+      const result = createTranslationRadio('test', baseTransData);
 
       expect(result).toContain('class="impr-ann-radio"');
     });
 
     it('handles translations with quotes', () => {
-      const result = translation_radio('say "hello"', baseTransData);
+      const result = createTranslationRadio('say "hello"', baseTransData);
 
       expect(result).toContain('&quot;');
     });
 
     it('handles translations with ampersands', () => {
-      const result = translation_radio('cats & dogs', baseTransData);
+      const result = createTranslationRadio('cats & dogs', baseTransData);
 
       expect(result).toContain('&amp;');
     });
 
     it('trims whitespace from translation', () => {
-      const result = translation_radio('  hello  ', baseTransData);
+      const result = createTranslationRadio('  hello  ', baseTransData);
 
       expect(result).toContain('value="hello"');
     });
   });
 
   // ===========================================================================
-  // display_example_sentences Tests
+  // createExampleSentencesHtml Tests
   // ===========================================================================
 
-  describe('display_example_sentences', () => {
+  describe('createExampleSentencesHtml', () => {
     beforeEach(() => {
       (window as unknown as Record<string, unknown>).lwtFormCheck = mockLwtFormCheck;
     });
 
     it('returns a div element', () => {
-      const result = display_example_sentences([], 'document.getElementById("target")');
+      const result = createExampleSentencesHtml([], 'document.getElementById("target")');
 
       expect(result).toBeInstanceOf(HTMLDivElement);
     });
 
     it('returns empty div for empty sentences array', () => {
-      const result = display_example_sentences([], 'target');
+      const result = createExampleSentencesHtml([], 'target');
 
       expect(result.children.length).toBe(0);
     });
@@ -281,7 +281,7 @@ describe('term_operations.ts', () => {
         ['<b>Goodbye</b> world', 'Goodbye']
       ];
 
-      const result = display_example_sentences(sentences, 'target');
+      const result = createExampleSentencesHtml(sentences, 'target');
 
       expect(result.children.length).toBe(2);
     });
@@ -291,7 +291,7 @@ describe('term_operations.ts', () => {
         ['Test sentence', 'Test']
       ];
 
-      const result = display_example_sentences(sentences, 'target');
+      const result = createExampleSentencesHtml(sentences, 'target');
       // Now uses Lucide SVG icons instead of PNG images (tick-button maps to circle-check)
       const icon = result.querySelector('i[data-lucide="circle-check"]');
 
@@ -304,7 +304,7 @@ describe('term_operations.ts', () => {
         ['Test sentence', 'Test']
       ];
 
-      const result = display_example_sentences(sentences, 'myField');
+      const result = createExampleSentencesHtml(sentences, 'myField');
       const clickable = result.querySelector('span.click');
 
       expect(clickable).not.toBeNull();
@@ -318,7 +318,7 @@ describe('term_operations.ts', () => {
         ['<b>Hello</b> world', 'Hello']
       ];
 
-      const result = display_example_sentences(sentences, 'target');
+      const result = createExampleSentencesHtml(sentences, 'target');
 
       expect(result.innerHTML).toContain('<b>Hello</b> world');
     });
@@ -328,7 +328,7 @@ describe('term_operations.ts', () => {
         ['Test', "it's a test"]
       ];
 
-      const result = display_example_sentences(sentences, 'target');
+      const result = createExampleSentencesHtml(sentences, 'target');
       const clickable = result.querySelector('span.click');
 
       expect(clickable?.getAttribute('data-sentence')).toBe("it's a test");
@@ -339,7 +339,7 @@ describe('term_operations.ts', () => {
         ['Test', 'value']
       ];
 
-      const result = display_example_sentences(sentences, 'target');
+      const result = createExampleSentencesHtml(sentences, 'target');
       const clickable = result.querySelector('span.click');
 
       expect(clickable?.getAttribute('data-action')).toBe('copy-sentence');
@@ -353,7 +353,7 @@ describe('term_operations.ts', () => {
         ['Third sentence', 'Third']
       ];
 
-      const result = display_example_sentences(sentences, 'target');
+      const result = createExampleSentencesHtml(sentences, 'target');
 
       expect(result.children.length).toBe(3);
       expect(result.innerHTML).toContain('First sentence');
@@ -366,7 +366,7 @@ describe('term_operations.ts', () => {
         ['Test', 'value']
       ];
 
-      const result = display_example_sentences(sentences, 'target');
+      const result = createExampleSentencesHtml(sentences, 'target');
       const parentDiv = result.firstChild as HTMLDivElement;
       const clickSpan = parentDiv.firstChild as HTMLSpanElement;
       // Now uses Lucide SVG icons (I element) instead of IMG
@@ -431,10 +431,10 @@ describe('term_operations.ts', () => {
   });
 
   // ===========================================================================
-  // do_ajax_save_impr_text Tests
+  // saveImprovedTextAnnotation Tests
   // ===========================================================================
 
-  describe('do_ajax_save_impr_text', () => {
+  describe('saveImprovedTextAnnotation', () => {
     beforeEach(() => {
       document.body.innerHTML = `
         <span id="wait1"><img src="icn/empty.gif" /></span>
@@ -445,7 +445,7 @@ describe('term_operations.ts', () => {
     it('shows waiting indicator and makes POST request', async () => {
       mockApiPost.mockResolvedValue({ data: {} });
 
-      await do_ajax_save_impr_text(123, 'rg1', '{"rg1":"test"}');
+      await saveImprovedTextAnnotation(123, 'rg1', '{"rg1":"test"}');
 
       expect(mockApiPost).toHaveBeenCalledWith(
         '/texts/123/annotation',
@@ -460,7 +460,7 @@ describe('term_operations.ts', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
       mockApiPost.mockResolvedValue({ error: 'Test error message' });
 
-      await do_ajax_save_impr_text(123, 'rg1', '{}');
+      await saveImprovedTextAnnotation(123, 'rg1', '{}');
 
       expect(alertSpy).toHaveBeenCalledWith(
         expect.stringContaining('Test error message')
@@ -626,14 +626,14 @@ describe('term_operations.ts', () => {
   });
 
   // ===========================================================================
-  // do_ajax_req_sim_terms Tests
+  // fetchSimilarTerms Tests
   // ===========================================================================
 
-  describe('do_ajax_req_sim_terms', () => {
+  describe('fetchSimilarTerms', () => {
     it('makes GET request with correct parameters', async () => {
       mockApiGet.mockResolvedValue({ data: { similar_terms: '<div>Similar</div>' } });
 
-      await do_ajax_req_sim_terms(5, 'hello');
+      await fetchSimilarTerms(5, 'hello');
 
       expect(mockApiGet).toHaveBeenCalledWith(
         '/similar-terms',
@@ -644,17 +644,17 @@ describe('term_operations.ts', () => {
     it('returns data from API response', async () => {
       mockApiGet.mockResolvedValue({ data: { similar_terms: '<div>Test</div>' } });
 
-      const result = await do_ajax_req_sim_terms(1, 'test');
+      const result = await fetchSimilarTerms(1, 'test');
 
       expect(result).toEqual({ similar_terms: '<div>Test</div>' });
     });
   });
 
   // ===========================================================================
-  // do_ajax_show_similar_terms Tests
+  // showSimilarTerms Tests
   // ===========================================================================
 
-  describe('do_ajax_show_similar_terms', () => {
+  describe('showSimilarTerms', () => {
     beforeEach(() => {
       document.body.innerHTML = `
         <div id="simwords"></div>
@@ -666,7 +666,7 @@ describe('term_operations.ts', () => {
     it('shows loading indicator', () => {
       mockApiGet.mockReturnValue(new Promise(() => {})); // Never resolves
 
-      do_ajax_show_similar_terms();
+      showSimilarTerms();
 
       // Now uses Lucide SVG spinner icon instead of waiting2.gif
       expect(document.getElementById('simwords')!.innerHTML).toContain('data-lucide="loader-2"');
@@ -675,17 +675,17 @@ describe('term_operations.ts', () => {
     it('updates simwords on success', async () => {
       mockApiGet.mockResolvedValue({ data: { similar_terms: '<div>Similar words here</div>' } });
 
-      await do_ajax_show_similar_terms();
+      await showSimilarTerms();
 
       expect(document.getElementById('simwords')!.innerHTML).toBe('<div>Similar words here</div>');
     });
   });
 
   // ===========================================================================
-  // change_example_sentences_zone Tests
+  // updateExampleSentencesZone Tests
   // ===========================================================================
 
-  describe('change_example_sentences_zone', () => {
+  describe('updateExampleSentencesZone', () => {
     beforeEach(() => {
       document.body.innerHTML = `
         <div id="exsent-waiting" style="display: block;"></div>
@@ -694,7 +694,7 @@ describe('term_operations.ts', () => {
     });
 
     it('hides waiting indicator and shows sentences zone', () => {
-      change_example_sentences_zone([], 'target');
+      updateExampleSentencesZone([], 'target');
 
       expect((document.getElementById('exsent-waiting') as HTMLElement).style.display).toBe('none');
       expect((document.getElementById('exsent-sentences') as HTMLElement).style.display).not.toBe('none');
@@ -705,17 +705,17 @@ describe('term_operations.ts', () => {
         ['Test sentence', 'Test'],
       ];
 
-      change_example_sentences_zone(sentences, 'target');
+      updateExampleSentencesZone(sentences, 'target');
 
       expect(document.getElementById('exsent-sentences')!.innerHTML).toContain('Test sentence');
     });
   });
 
   // ===========================================================================
-  // do_ajax_show_sentences Tests
+  // showExampleSentences Tests
   // ===========================================================================
 
-  describe('do_ajax_show_sentences', () => {
+  describe('showExampleSentences', () => {
     beforeEach(() => {
       document.body.innerHTML = `
         <div id="exsent-interactable" style="display: block;"></div>
@@ -727,7 +727,7 @@ describe('term_operations.ts', () => {
     it('shows waiting indicator and hides interactable', () => {
       mockApiGet.mockReturnValue(new Promise(() => {})); // Never resolves
 
-      do_ajax_show_sentences(1, 'word', 'target', 5);
+      showExampleSentences(1, 'word', 'target', 5);
 
       expect((document.getElementById('exsent-interactable') as HTMLElement).style.display).toBe('none');
       expect((document.getElementById('exsent-waiting') as HTMLElement).style.display).not.toBe('none');
@@ -736,7 +736,7 @@ describe('term_operations.ts', () => {
     it('calls API with term ID when wid is a valid number', () => {
       mockApiGet.mockReturnValue(new Promise(() => {}));
 
-      do_ajax_show_sentences(1, 'word', 'target', 42);
+      showExampleSentences(1, 'word', 'target', 42);
 
       expect(mockApiGet).toHaveBeenCalledWith(
         '/sentences-with-term/42',
@@ -747,7 +747,7 @@ describe('term_operations.ts', () => {
     it('calls API without term ID when wid is -1 (advanced search)', () => {
       mockApiGet.mockReturnValue(new Promise(() => {}));
 
-      do_ajax_show_sentences(1, 'word', 'target', -1);
+      showExampleSentences(1, 'word', 'target', -1);
 
       expect(mockApiGet).toHaveBeenCalledWith(
         '/sentences-with-term',
@@ -762,7 +762,7 @@ describe('term_operations.ts', () => {
     it('calls API without term ID for non-integer wid', () => {
       mockApiGet.mockReturnValue(new Promise(() => {}));
 
-      do_ajax_show_sentences(1, 'word', 'target', 'invalid');
+      showExampleSentences(1, 'word', 'target', 'invalid');
 
       expect(mockApiGet).toHaveBeenCalledWith(
         '/sentences-with-term',
@@ -811,9 +811,9 @@ describe('term_operations.ts', () => {
       expect((document.querySelectorAll('textarea[name="WoTranslation"]')[0] as HTMLTextAreaElement).value).toBe('test');
     });
 
-    it('translation_radio handles very long translations', () => {
+    it('createTranslationRadio handles very long translations', () => {
       const longTrans = 'a'.repeat(1000);
-      const result = translation_radio(longTrans, {
+      const result = createTranslationRadio(longTrans, {
         wid: 1,
         trans: '',
         ann_index: '0',
@@ -826,23 +826,23 @@ describe('term_operations.ts', () => {
       expect(result).toContain(longTrans);
     });
 
-    it('display_example_sentences handles sentences with HTML', () => {
+    it('createExampleSentencesHtml handles sentences with HTML', () => {
       const sentences: [string, string][] = [
         ['<div class="highlight">Test</div>', 'Test']
       ];
 
-      const result = display_example_sentences(sentences, 'target');
+      const result = createExampleSentencesHtml(sentences, 'target');
 
       // The HTML should be preserved in the display
       expect(result.innerHTML).toContain('<div class="highlight">');
     });
 
-    it('display_example_sentences handles empty string values', () => {
+    it('createExampleSentencesHtml handles empty string values', () => {
       const sentences: [string, string][] = [
         ['', '']
       ];
 
-      const result = display_example_sentences(sentences, 'target');
+      const result = createExampleSentencesHtml(sentences, 'target');
 
       expect(result.children.length).toBe(1);
     });

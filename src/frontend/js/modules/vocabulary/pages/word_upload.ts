@@ -11,7 +11,7 @@
  */
 
 import Alpine from 'alpinejs';
-import { escape_html_chars, renderTags } from '@shared/utils/html_utils';
+import { escapeHtml, renderTags } from '@shared/utils/html_utils';
 import { statuses } from '@shared/stores/app_data';
 import { iconHtml } from '@shared/icons/icons';
 
@@ -235,24 +235,24 @@ export function wordUploadResultApp(config: UploadResultConfig = { lastUpdate: '
 
       return `<tr>
         <td>
-          <span${this.rtl ? ' dir="rtl"' : ''}>${escape_html_chars(term.WoText)}</span>
+          <span${this.rtl ? ' dir="rtl"' : ''}>${escapeHtml(term.WoText)}</span>
           <span class="has-text-grey"> / </span>
-          <span id="roman${term.WoID}" class="edit_area clickedit has-text-grey-dark">${term.WoRomanization !== '' ? escape_html_chars(term.WoRomanization) : '*'}</span>
+          <span id="roman${term.WoID}" class="edit_area clickedit has-text-grey-dark">${term.WoRomanization !== '' ? escapeHtml(term.WoRomanization) : '*'}</span>
         </td>
         <td>
-          <span id="trans${term.WoID}" class="edit_area clickedit">${escape_html_chars(term.WoTranslation)}</span>
+          <span id="trans${term.WoID}" class="edit_area clickedit">${escapeHtml(term.WoTranslation)}</span>
         </td>
         <td>
           <span class="tags">${renderTags(term.taglist)}</span>
         </td>
         <td class="has-text-centered">
           ${term.SentOK !== 0
-    ? iconHtml('check', { title: escape_html_chars(term.WoSentence), alt: 'Yes', className: 'has-text-success' })
+    ? iconHtml('check', { title: escapeHtml(term.WoSentence), alt: 'Yes', className: 'has-text-success' })
     : iconHtml('x', { title: '(No valid sentence)', alt: 'No', className: 'has-text-danger' })
 }
         </td>
-        <td class="has-text-centered" title="${escape_html_chars(statusInfo.name)}">
-          <span class="tag is-light">${escape_html_chars(statusInfo.abbr)}</span>
+        <td class="has-text-centered" title="${escapeHtml(statusInfo.name)}">
+          <span class="tag is-light">${escapeHtml(statusInfo.abbr)}</span>
         </td>
       </tr>`;
     },

@@ -21,7 +21,7 @@ vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates',
 }));
 
 vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_status', () => ({
-  make_tooltip: vi.fn(() => 'tooltip text')
+  createWordTooltip: vi.fn(() => 'tooltip text')
 }));
 
 vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
@@ -29,11 +29,11 @@ vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', 
 }));
 
 vi.mock('../../../src/frontend/js/modules/vocabulary/services/term_operations', () => ({
-  do_ajax_edit_impr_text: vi.fn()
+  loadTermTranslations: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/shared/utils/html_utils', () => ({
-  escape_html_chars: vi.fn((s) => s)
+  escapeHtml: vi.fn((s) => s)
 }));
 
 import {

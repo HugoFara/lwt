@@ -6,7 +6,7 @@
  * @since   1.6.16-fork
  */
 
-import { run_overlib_test } from '@modules/vocabulary/services/overlib_interface';
+import { showTestWordPopup } from '@modules/vocabulary/services/overlib_interface';
 import { loadModalFrame, cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
 import { getCurrentWordId, getTestSolution, isAnswerOpened, openAnswer } from '@modules/review/stores/test_state';
 import { getDictionaryLinks } from '@modules/language/stores/language_config';
@@ -23,9 +23,9 @@ function getAttr(el: HTMLElement, attr: string): string {
  *
  * @returns false
  */
-export function word_click_event_do_test_test(this: HTMLElement): boolean {
+export function handleTestWordClick(this: HTMLElement): boolean {
   const dictLinks = getDictionaryLinks();
-  run_overlib_test(
+  showTestWordPopup(
     dictLinks.dict1, dictLinks.dict2, dictLinks.translator,
     getAttr(this, 'data_wid'),
     getAttr(this, 'data_text'),
@@ -48,7 +48,7 @@ export function word_click_event_do_test_test(this: HTMLElement): boolean {
  * @param e A keystroke object
  * @returns true if nothing was done, false otherwise
  */
-export function keydown_event_do_test_test(e: KeyboardEvent): boolean {
+export function handleTestKeydown(e: KeyboardEvent): boolean {
   const wordEl = document.querySelector('.word') as HTMLElement | null;
   const wordId = getCurrentWordId();
 

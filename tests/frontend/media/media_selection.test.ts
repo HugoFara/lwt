@@ -3,9 +3,9 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  select_media_path,
-  media_select_receive_data,
-  do_ajax_update_media_select
+  createMediaPathOptions,
+  handleMediaSelectResponse,
+  refreshMediaSelect
 } from '../../../src/frontend/js/media/media_selection';
 
 describe('media_selection.ts', () => {
@@ -20,12 +20,12 @@ describe('media_selection.ts', () => {
   });
 
   // ===========================================================================
-  // select_media_path Tests
+  // createMediaPathOptions Tests
   // ===========================================================================
 
-  describe('select_media_path', () => {
+  describe('createMediaPathOptions', () => {
     it('returns options array with Choose option first', () => {
-      const options = select_media_path([], []);
+      const options = createMediaPathOptions([], []);
 
       expect(options.length).toBe(1);
       expect(options[0].value).toBe('');
@@ -36,7 +36,7 @@ describe('media_selection.ts', () => {
       const paths = ['audio1.mp3', 'audio2.mp3', 'video.mp4'];
       const folders: string[] = [];
 
-      const options = select_media_path(paths, folders);
+      const options = createMediaPathOptions(paths, folders);
 
       expect(options.length).toBe(4); // 1 Choose + 3 files
       expect(options[1].value).toBe('audio1.mp3');
@@ -49,7 +49,7 @@ describe('media_selection.ts', () => {
       const paths = ['folder1', 'file.mp3', 'folder2'];
       const folders = ['folder1', 'folder2'];
 
-      const options = select_media_path(paths, folders);
+      const options = createMediaPathOptions(paths, folders);
 
       expect(options.length).toBe(4);
 
@@ -75,7 +75,7 @@ describe('media_selection.ts', () => {
       ];
       const folders = ['subfolder', 'another_folder'];
 
-      const options = select_media_path(paths, folders);
+      const options = createMediaPathOptions(paths, folders);
 
       expect(options[1].disabled).toBe(true);  // subfolder
       expect(options[2].disabled).toBe(false); // subfolder/audio.mp3
@@ -85,7 +85,7 @@ describe('media_selection.ts', () => {
     });
 
     it('returns HTMLOptionElement instances', () => {
-      const options = select_media_path(['test.mp3'], []);
+      const options = createMediaPathOptions(['test.mp3'], []);
 
       expect(options[0]).toBeInstanceOf(HTMLOptionElement);
       expect(options[1]).toBeInstanceOf(HTMLOptionElement);
@@ -93,10 +93,10 @@ describe('media_selection.ts', () => {
   });
 
   // ===========================================================================
-  // media_select_receive_data Tests
+  // handleMediaSelectResponse Tests
   // ===========================================================================
 
-  describe('media_select_receive_data', () => {
+  describe('handleMediaSelectResponse', () => {
     beforeEach(() => {
       document.body.innerHTML = `
         <img id="mediaSelectLoadingImg" style="display: block" />
@@ -108,7 +108,7 @@ describe('media_selection.ts', () => {
     });
 
     it('hides loading image on success', () => {
-      media_select_receive_data({
+      handleMediaSelectResponse({
         paths: ['file.mp3'],
         folders: [],
         base_path: ''
@@ -119,7 +119,7 @@ describe('media_selection.ts', () => {
     });
 
     it('populates select with options on success', () => {
-      media_select_receive_data({
+      handleMediaSelectResponse({
         paths: ['audio1.mp3', 'audio2.mp3'],
         folders: [],
         base_path: ''
@@ -131,7 +131,7 @@ describe('media_selection.ts', () => {
     });
 
     it('displays error for not_a_directory error', () => {
-      media_select_receive_data({
+      handleMediaSelectResponse({
         error: 'not_a_directory',
         base_path: 'testpath'
       });
@@ -143,7 +143,7 @@ describe('media_selection.ts', () => {
     });
 
     it('displays error for does_not_exist error', () => {
-      media_select_receive_data({
+      handleMediaSelectResponse({
         error: 'does_not_exist',
         base_path: 'mypath'
       });
@@ -155,7 +155,7 @@ describe('media_selection.ts', () => {
     });
 
     it('displays generic error for unknown error', () => {
-      media_select_receive_data({
+      handleMediaSelectResponse({
         error: 'something_else'
       });
 
@@ -168,7 +168,7 @@ describe('media_selection.ts', () => {
       const select = document.querySelector('#mediaselect select')!;
       select.innerHTML = '<option>Old option</option>';
 
-      media_select_receive_data({
+      handleMediaSelectResponse({
         paths: ['new.mp3'],
         folders: [],
         base_path: ''
@@ -179,7 +179,7 @@ describe('media_selection.ts', () => {
     });
 
     it('handles empty paths array', () => {
-      media_select_receive_data({
+      handleMediaSelectResponse({
         paths: [],
         folders: [],
         base_path: ''
@@ -190,7 +190,7 @@ describe('media_selection.ts', () => {
     });
 
     it('handles undefined paths and folders', () => {
-      media_select_receive_data({
+      handleMediaSelectResponse({
         base_path: ''
       });
 
@@ -200,10 +200,10 @@ describe('media_selection.ts', () => {
   });
 
   // ===========================================================================
-  // do_ajax_update_media_select Tests
+  // refreshMediaSelect Tests
   // ===========================================================================
 
-  describe('do_ajax_update_media_select', () => {
+  describe('refreshMediaSelect', () => {
     beforeEach(() => {
       document.body.innerHTML = `
         <img id="mediaSelectLoadingImg" style="display: none" />
@@ -222,7 +222,7 @@ describe('media_selection.ts', () => {
         json: () => Promise.resolve({ paths: [], folders: [], base_path: '' })
       } as Response);
 
-      do_ajax_update_media_select();
+      refreshMediaSelect();
 
       const errorEl = document.getElementById('mediaSelectErrorMessage')!;
       const selectEl = document.querySelector('#mediaselect select') as HTMLSelectElement;
@@ -240,20 +240,20 @@ describe('media_selection.ts', () => {
         json: () => Promise.resolve({ paths: [], folders: [], base_path: '' })
       } as Response);
 
-      do_ajax_update_media_select();
+      refreshMediaSelect();
 
       expect(fetchSpy).toHaveBeenCalledWith('api.php/v1/media-files');
 
       fetchSpy.mockRestore();
     });
 
-    it('calls media_select_receive_data with response data', async () => {
+    it('calls handleMediaSelectResponse with response data', async () => {
       const mockData = { paths: ['test.mp3'], folders: [], base_path: '' };
       const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         json: () => Promise.resolve(mockData)
       } as Response);
 
-      do_ajax_update_media_select();
+      refreshMediaSelect();
 
       // Wait for promises to resolve
       await new Promise(resolve => setTimeout(resolve, 0));
@@ -269,7 +269,7 @@ describe('media_selection.ts', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const fetchSpy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
 
-      do_ajax_update_media_select();
+      refreshMediaSelect();
 
       // Wait for promises to resolve
       await new Promise(resolve => setTimeout(resolve, 0));
@@ -289,16 +289,16 @@ describe('media_selection.ts', () => {
   // ===========================================================================
 
   describe('window exports', () => {
-    it('exports select_media_path to window', () => {
-      expect((window as any).select_media_path).toBe(select_media_path);
+    it('exports createMediaPathOptions to window', () => {
+      expect((window as any).createMediaPathOptions).toBe(createMediaPathOptions);
     });
 
-    it('exports media_select_receive_data to window', () => {
-      expect((window as any).media_select_receive_data).toBe(media_select_receive_data);
+    it('exports handleMediaSelectResponse to window', () => {
+      expect((window as any).handleMediaSelectResponse).toBe(handleMediaSelectResponse);
     });
 
-    it('exports do_ajax_update_media_select to window', () => {
-      expect((window as any).do_ajax_update_media_select).toBe(do_ajax_update_media_select);
+    it('exports refreshMediaSelect to window', () => {
+      expect((window as any).refreshMediaSelect).toBe(refreshMediaSelect);
     });
   });
 });
