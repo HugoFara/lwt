@@ -48,7 +48,7 @@ echo PageLayoutHelper::buildActionCard([
     <!-- Loading state -->
     <div x-show="loading" class="has-text-centered py-6">
         <span class="icon is-large">
-            <i data-lucide="loader-2" class="animate-spin"></i>
+            <i data-lucide="loader-2" class="icon-spin"></i>
         </span>
         <p class="mt-2">Loading texts...</p>
     </div>
@@ -103,7 +103,7 @@ echo PageLayoutHelper::buildActionCard([
                 <!-- Loading state for this language -->
                 <div x-show="isLoadingMore(lang.id) && getTextsForLanguage(lang.id).length === 0" class="has-text-centered py-4">
                     <span class="icon">
-                        <i data-lucide="loader-2" class="animate-spin"></i>
+                        <i data-lucide="loader-2" class="icon-spin"></i>
                     </span>
                     <span class="ml-2">Loading...</span>
                 </div>

@@ -19,6 +19,8 @@
 
 namespace Lwt\Views\Test;
 
+use Lwt\Shared\UI\Helpers\IconHelper;
+
 // Type assertions for view variables
 $tomorrowTests = (int) ($tomorrowTests ?? 0);
 $totalTests = (int) ($totalTests ?? 0);
@@ -26,7 +28,7 @@ $totalTests = (int) ($totalTests ?? 0);
 $display = $hidden ? 'none' : 'inherit';
 ?>
 <p id="test-finished-area" class="center" style="display: <?php echo $display; ?>;">
-    <img src="/assets/images/ok.png" alt="Done!" />
+    <?php echo IconHelper::render('circle-check', ['size' => 32, 'class' => 'icon-success', 'title' => 'Done!', 'alt' => 'Done!']); ?>
     <br /><br />
     <span class="red2">
         <span id="tests-done-today">

@@ -85,7 +85,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
         <!-- Loading state -->
         <div x-show="loading" class="has-text-centered py-6">
             <span class="icon is-large">
-                <i data-lucide="loader-2" class="animate-spin"></i>
+                <i data-lucide="loader-2" class="icon-spin"></i>
             </span>
             <p class="mt-2">Loading...</p>
         </div>

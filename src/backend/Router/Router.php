@@ -440,7 +440,6 @@ class Router
      *
      * Maps legacy paths to new asset locations:
      * - /css/* -> /assets/css/*
-     * - /icn/* -> /assets/icons/*
      * - /img/* -> /assets/images/*
      * - /js/* -> /assets/js/*
      * - /assets/* -> /assets/* (direct access)
@@ -456,7 +455,6 @@ class Router
         // Path mappings from legacy to new structure
         $mappings = [
             '/css/' => '/assets/css/',
-            '/icn/' => '/assets/icons/',
             '/img/' => '/assets/images/',
             '/js/' => '/assets/js/',
             '/sounds/' => '/assets/sounds/',
