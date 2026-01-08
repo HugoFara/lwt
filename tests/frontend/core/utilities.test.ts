@@ -13,7 +13,6 @@ import {
   createTheDictLink,
   createSentLookupLink,
   openDictionaryPopup,
-  openEditWindow,
 } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
 import {
   escapeHtml,
@@ -343,20 +342,6 @@ describe('pgm.ts', () => {
         'http://example.com',
         'dictwin',
         expect.stringContaining('width=800')
-      );
-    });
-  });
-
-  describe('openEditWindow', () => {
-    it('opens an edit window with correct parameters', () => {
-      const mockOpen = vi.spyOn(window, 'open').mockReturnValue(null);
-
-      openEditWindow('http://example.com/edit');
-
-      expect(mockOpen).toHaveBeenCalledWith(
-        'http://example.com/edit',
-        'editwin',
-        expect.stringContaining('height=600')
       );
     });
   });

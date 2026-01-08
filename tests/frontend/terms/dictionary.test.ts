@@ -4,7 +4,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   openDictionaryPopup,
-  openEditWindow,
   createTheDictUrl,
   createTheDictLink,
   createSentLookupLink,
@@ -56,26 +55,6 @@ describe('dictionary.ts', () => {
       const result = openDictionaryPopup('http://example.com');
 
       expect(result).toBeNull();
-    });
-  });
-
-  // ===========================================================================
-  // openEditWindow Tests
-  // ===========================================================================
-
-  describe('openEditWindow', () => {
-    it('opens edit window with correct parameters', () => {
-      const mockWindow = {} as Window;
-      const openSpy = vi.spyOn(window, 'open').mockReturnValue(mockWindow);
-
-      const result = openEditWindow('http://example.com/edit');
-
-      expect(openSpy).toHaveBeenCalledWith(
-        'http://example.com/edit',
-        'editwin',
-        'width=800, height=600, scrollbars=yes, menubar=no, resizable=yes, status=no'
-      );
-      expect(result).toBe(mockWindow);
     });
   });
 

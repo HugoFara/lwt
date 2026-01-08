@@ -24,19 +24,6 @@ export function openDictionaryPopup(url: string): Window | null {
 }
 
 /**
- * Open a popup window for editing.
- *
- * @param url Window URL
- */
-export function openEditWindow(url: string): Window | null {
-  return window.open(
-    url,
-    'editwin',
-    'width=800, height=600, scrollbars=yes, menubar=no, resizable=yes, status=no'
-  );
-}
-
-/**
  * Create a dictionary URL.
  *
  * JS alter ego of the createTheDictLink PHP function.

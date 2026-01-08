@@ -12,7 +12,7 @@ import { scrollTo } from '@shared/utils/hover_intent';
 import { apiPost, apiGet } from '@shared/api/client';
 import { TermsApi } from '@modules/vocabulary/api/terms_api';
 import { iconHtml, spinnerHtml } from '@shared/icons/icons';
-import { openEditWindow } from './dictionary';
+import { openTermEditModal } from '../components/term_edit_modal';
 
 // Interface for lwtFormCheck
 interface LwtFormCheck {
@@ -247,15 +247,11 @@ export function editTermAnnotationTranslations(trans_data: TransData, text_id: n
   // First create a link to edit the word in a new window
   let edit_word_link: string;
   if (widset) {
-    const params = new URLSearchParams({
-      fromAnn: String(window.scrollY || document.documentElement.scrollTop || 0),
-      wid: String(trans_data.wid),
-      ord: trans_data.term_ord,
-      tid: String(text_id)
-    });
     edit_word_link = `<a name="rec${trans_data.ann_index}"></a>
-    <span class="click"
-    onclick="openEditWindow('/word/edit?` + escapeHtml(params.toString()) + `');">
+    <span class="click" data-action="edit-term-popup"
+          data-wid="${trans_data.wid}"
+          data-textid="${text_id}"
+          data-ord="${escapeHtml(trans_data.term_ord || '')}">
           ${iconHtml('sticky-note--pencil', { title: 'Edit Term', alt: 'Edit Term' })}
       </span>`;
   } else {
@@ -600,15 +596,16 @@ function initImprovedTextEventDelegation(): void {
       }
     }
 
-    // Handle edit-term-popup: open term editor in popup window
+    // Handle edit-term-popup: open term editor in modal
     if (action === 'edit-term-popup') {
       const wid = actionEl.dataset.wid || '';
       const textid = actionEl.dataset.textid || '';
       const ord = actionEl.dataset.ord || '';
-      const scrollPos = window.scrollY || document.documentElement.scrollTop || 0;
-      if (wid && textid) {
-        const url = '/word/edit?fromAnn=' + scrollPos + '&wid=' + wid + '&tid=' + textid + '&ord=' + ord;
-        openEditWindow(url);
+      if (textid && ord) {
+        const textIdNum = parseInt(textid, 10);
+        const ordNum = parseInt(ord, 10);
+        const widNum = wid ? parseInt(wid, 10) : undefined;
+        openTermEditModal(textIdNum, ordNum, widNum);
       }
     }
   });
