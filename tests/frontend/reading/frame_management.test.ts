@@ -8,13 +8,12 @@ import {
   cleanupRightFrames,
   successSound,
   failureSound,
-  loadModalFrame,
   loadDictionaryFrame
 } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
 
 // Mock word_popup module
 vi.mock('../../../src/frontend/js/modules/vocabulary/components/word_popup', () => ({
-  cClick: vi.fn(),
+  closePopup: vi.fn(),
   closeParentPopup: vi.fn()
 }));
 
@@ -132,66 +131,6 @@ describe('frame_management.ts', () => {
       hideRightFrames();
 
       // Verify that animation was initiated via requestAnimationFrame
-      expect(rafSpy).toHaveBeenCalled();
-      rafSpy.mockRestore();
-    });
-  });
-
-  // ===========================================================================
-  // loadModalFrame Tests
-  // ===========================================================================
-
-  describe('loadModalFrame', () => {
-    it('returns true and loads URL in ro frame when frame exists', () => {
-      const mockRoFrame = { location: { href: '' } };
-      (global as any).top = {
-        frames: {
-          ro: mockRoFrame
-        }
-      };
-      document.body.innerHTML = '<div id="frames-r"></div>';
-
-      const result = loadModalFrame('edit_word.php?id=1');
-
-      expect(result).toBe(true);
-      expect(mockRoFrame.location.href).toBe('edit_word.php?id=1');
-    });
-
-    it('returns false when top.frames is undefined', () => {
-      (global as any).top = {};
-      document.body.innerHTML = '<div id="frames-r"></div>';
-
-      const result = loadModalFrame('edit_word.php?id=1');
-
-      expect(result).toBe(false);
-    });
-
-    it('returns false when ro frame does not exist', () => {
-      (global as any).top = {
-        frames: {}
-      };
-      document.body.innerHTML = '<div id="frames-r"></div>';
-
-      const result = loadModalFrame('edit_word.php?id=1');
-
-      expect(result).toBe(false);
-    });
-
-    it('shows the right frames panel after loading', () => {
-      const mockRoFrame = { location: { href: '' } };
-      (global as any).top = {
-        frames: {
-          ro: mockRoFrame
-        }
-      };
-      document.body.innerHTML = '<div id="frames-r" style="right: -100%;"></div>';
-      const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
-        cb(performance.now() + 1000);
-        return 1;
-      });
-
-      loadModalFrame('edit_word.php');
-
       expect(rafSpy).toHaveBeenCalled();
       rafSpy.mockRestore();
     });
@@ -478,17 +417,15 @@ describe('frame_management.ts', () => {
     it('frame operations work without errors when frames container missing', () => {
       document.body.innerHTML = '<div>Empty page</div>';
       // Setup mock frames to avoid error accessing undefined
-      const mockRoFrame = { location: { href: '' } };
       const mockRuFrame = { location: { href: '' } };
       (global as any).top = {
         frames: {
-          ro: mockRoFrame,
           ru: mockRuFrame
         }
       };
 
       expect(showRightFramesPanel()).toBe(false);
-      expect(loadModalFrame('url1')).toBe(false);
+      expect(loadDictionaryFrame('url1')).toBe(false);
       expect(hideRightFrames()).toBe(false);
     });
   });
@@ -498,33 +435,18 @@ describe('frame_management.ts', () => {
   // ===========================================================================
 
   describe('Edge Cases', () => {
-    it('loadModalFrame handles URL with query parameters', () => {
-      const mockRoFrame = { location: { href: '' } };
+    it('loadDictionaryFrame handles URL with query parameters', () => {
+      const mockRuFrame = { location: { href: '' } };
       (global as any).top = {
         frames: {
-          ro: mockRoFrame
+          ru: mockRuFrame
         }
       };
       document.body.innerHTML = '<div id="frames-r"></div>';
 
-      loadModalFrame('edit.php?id=1&action=save&data=test%20value');
+      loadDictionaryFrame('https://dict.example.com/?word=test%20value');
 
-      expect(mockRoFrame.location.href).toBe('edit.php?id=1&action=save&data=test%20value');
-    });
-
-    it('loadModalFrame handles empty string URLs', () => {
-      const mockRoFrame = { location: { href: 'original.php' } };
-      (global as any).top = {
-        frames: {
-          ro: mockRoFrame
-        }
-      };
-      document.body.innerHTML = '<div id="frames-r"></div>';
-
-      // Empty string is still a valid URL (goes to current page)
-      loadModalFrame('');
-
-      expect(mockRoFrame.location.href).toBe('');
+      expect(mockRuFrame.location.href).toBe('https://dict.example.com/?word=test%20value');
     });
 
     it('sound functions handle play() rejection', async () => {

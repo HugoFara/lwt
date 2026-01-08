@@ -509,7 +509,7 @@ describe('user_interactions.ts', () => {
   describe('goToLastPosition', () => {
     beforeEach(async () => {
       // Use fake timers to prevent setTimeout callbacks from firing
-      // (overlib and cClick are called via setTimeout and would cause errors)
+      // (overlib and closePopup are called via setTimeout and would cause errors)
       vi.useFakeTimers();
       vi.spyOn(window, 'focus').mockImplementation(() => {});
       // Dynamically import reading_state to set position

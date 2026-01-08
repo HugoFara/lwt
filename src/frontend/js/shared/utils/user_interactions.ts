@@ -6,7 +6,7 @@
  * @since   2.0.3-fork
  */
 
-import { overlib, cClick } from '@modules/vocabulary/components/word_popup';
+import { overlib, closePopup } from '@modules/vocabulary/components/word_popup';
 import { scrollTo } from '@shared/utils/hover_intent';
 import { getTTSSettingsWithMigration, type TTSLanguageSettings } from './tts_storage';
 import { getReadingPosition } from '@modules/text/stores/reading_state';
@@ -207,7 +207,7 @@ export function goToLastPosition(): void {
   }
   focus();
   setTimeout(overlib, 10);
-  setTimeout(cClick, 100);
+  setTimeout(closePopup, 100);
 }
 
 /**

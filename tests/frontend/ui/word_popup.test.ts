@@ -62,12 +62,12 @@ describe('word_popup.ts', () => {
   });
 
   // ===========================================================================
-  // cClick Tests
+  // closePopup Tests
   // ===========================================================================
 
-  describe('cClick', () => {
+  describe('closePopup', () => {
     it('closes dialog when popup is open', async () => {
-      const { overlib, cClick } = await importWordPopup();
+      const { overlib, closePopup } = await importWordPopup();
 
       // Open a popup
       overlib('Test content', 'Test Title');
@@ -76,24 +76,24 @@ describe('word_popup.ts', () => {
       expect(dialog.open).toBe(true);
 
       // Close it
-      cClick();
+      closePopup();
 
       expect(dialog.open).toBe(false);
     });
 
     it('does not throw when no popup is open', async () => {
-      const { cClick } = await importWordPopup();
-      expect(() => cClick()).not.toThrow();
+      const { closePopup } = await importWordPopup();
+      expect(() => closePopup()).not.toThrow();
     });
 
     it('does not throw when called multiple times', async () => {
-      const { overlib, cClick } = await importWordPopup();
+      const { overlib, closePopup } = await importWordPopup();
 
       overlib('Test content');
-      cClick();
+      closePopup();
 
       // Second close should not throw
-      expect(() => cClick()).not.toThrow();
+      expect(() => closePopup()).not.toThrow();
     });
   });
 
@@ -102,7 +102,7 @@ describe('word_popup.ts', () => {
   // ===========================================================================
 
   describe('nd', () => {
-    it('calls cClick and returns true', async () => {
+    it('calls closePopup and returns true', async () => {
       const { nd } = await importWordPopup();
       const result = nd();
       expect(result).toBe(true);
@@ -535,14 +535,14 @@ describe('word_popup.ts', () => {
       expect(dialog.style.top).toBe('50%');
     });
 
-    it('cClick clears event reference', async () => {
-      const { overlib, setCurrentEvent, cClick } = await importWordPopup();
+    it('closePopup clears event reference', async () => {
+      const { overlib, setCurrentEvent, closePopup } = await importWordPopup();
 
       const mouseEvent = new MouseEvent('click', { clientX: 100, clientY: 100 });
       setCurrentEvent(mouseEvent);
       overlib('Test');
 
-      cClick();
+      closePopup();
 
       // Open new popup - should use center positioning (no event)
       overlib('New popup');
@@ -553,11 +553,11 @@ describe('word_popup.ts', () => {
     });
 
     it('handles rapid open/close cycles', async () => {
-      const { overlib, cClick } = await importWordPopup();
+      const { overlib, closePopup } = await importWordPopup();
 
       for (let i = 0; i < 10; i++) {
         overlib(`Content ${i}`);
-        cClick();
+        closePopup();
       }
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;

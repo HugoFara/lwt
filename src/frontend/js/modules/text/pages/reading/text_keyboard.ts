@@ -8,8 +8,8 @@
 import { getLangFromDict, createTheDictUrl, owin } from '@modules/vocabulary/services/dictionary';
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { getAttrElement } from './text_annotations';
-import { cClick } from '@modules/vocabulary/components/word_popup';
-import { loadModalFrame, loadDictionaryFrame } from '@modules/text/pages/reading/frame_management';
+import { closePopup } from '@modules/vocabulary/components/word_popup';
+import { loadDictionaryFrame } from '@modules/text/pages/reading/frame_management';
 import { getPositionFromId } from '@shared/utils/ajax_utilities';
 import { scrollTo } from '@shared/utils/hover_intent';
 import {
@@ -25,6 +25,14 @@ import {
 import { getTextId } from '@modules/text/stores/text_config';
 import { getWordStatusFilter } from '@shared/utils/settings_config';
 import { lwt_audio_controller } from '@/media/html5_audio_player';
+import { TermsApi } from '@modules/vocabulary/api/terms_api';
+import {
+  updateExistingWordInDOM,
+  markWordWellKnownInDOM,
+  markWordIgnoredInDOM
+} from '@modules/vocabulary/services/word_dom_updates';
+import { getWordStore } from '@modules/vocabulary/stores/word_store';
+import { getWordFormStore } from '@modules/vocabulary/stores/word_form_store';
 
 /**
  * Remove a class from all elements matching a selector.
@@ -36,6 +44,109 @@ function removeClassFromAll(selector: string, className: string): void {
   document.querySelectorAll(selector).forEach((el) => {
     el.classList.remove(className);
   });
+}
+
+/**
+ * Navigate to a word and click it to show info.
+ *
+ * @param wordEl The word element to navigate to
+ */
+function navigateToWord(wordEl: HTMLElement): void {
+  scrollTo(wordEl, { offset: -150 });
+  // Click to trigger word popup/modal
+  wordEl.click();
+}
+
+/**
+ * Set status for an existing word via API.
+ *
+ * @param wordId Word ID
+ * @param status New status
+ * @param wordEl Word element for DOM updates
+ */
+async function setWordStatusViaApi(
+  wordId: number,
+  status: number,
+  wordEl: HTMLElement
+): Promise<void> {
+  const response = await TermsApi.setStatus(wordId, status);
+  if (response.error) {
+    console.error('Failed to set word status:', response.error);
+    return;
+  }
+
+  // Update DOM
+  const text = wordEl.textContent || '';
+  const translation = wordEl.getAttribute('data_trans') || '';
+  const romanization = wordEl.getAttribute('data_rom') || '';
+  const oldStatus = wordEl.getAttribute('data_status') || '0';
+
+  updateExistingWordInDOM(
+    { wid: wordId, status, translation, romanization, text },
+    oldStatus
+  );
+}
+
+/**
+ * Create a quick word (ignored or well-known) via API.
+ *
+ * @param textId Text ID
+ * @param position Word position
+ * @param status Status (98 or 99)
+ * @param hex Hex identifier
+ * @param text Word text
+ */
+async function createQuickWordViaApi(
+  textId: number,
+  position: number,
+  status: 98 | 99,
+  hex: string,
+  text: string
+): Promise<void> {
+  const response = await TermsApi.createQuick(textId, position, status);
+  if (response.error || !response.data?.term_id) {
+    console.error('Failed to create word:', response.error);
+    return;
+  }
+
+  const wordId = response.data.term_id;
+
+  // Update DOM
+  if (status === 99) {
+    markWordWellKnownInDOM(wordId, hex, text);
+  } else {
+    markWordIgnoredInDOM(wordId, hex, text);
+  }
+}
+
+/**
+ * Open word edit form via Alpine.js store.
+ *
+ * @param textId Text ID
+ * @param position Word position
+ * @param wordId Word ID (optional for new words)
+ */
+function openWordEditForm(textId: number, position: number, wordId?: number): void {
+  try {
+    const wordStore = getWordStore();
+    const formStore = getWordFormStore();
+
+    if (wordStore && formStore) {
+      // Load the form and open modal
+      formStore.loadForEdit(textId, position, wordId);
+      wordStore.isModalOpen = true;
+    }
+  } catch {
+    // Alpine stores not available, fall back to navigation
+    const params = new URLSearchParams({
+      tid: String(textId),
+      ord: String(position)
+    });
+    if (wordId) {
+      params.set('wid', String(wordId));
+    }
+    window.location.href = '/word/edit?' + params.toString();
+  }
 }
 
 /**
@@ -54,7 +165,7 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
     resetReadingPosition();
     removeClassFromAll('span.uwordmarked', 'uwordmarked');
     removeClassFromAll('span.kwordmarked', 'kwordmarked');
-    cClick();
+    closePopup();
     return false;
   }
 
@@ -67,7 +178,7 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
     scrollTo(unknownWord, { offset: -150 });
     unknownWord.classList.add('uwordmarked');
     unknownWord.click();
-    cClick();
+    closePopup();
     return false;
   }
 
@@ -81,7 +192,6 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
 
   // the following only for a non-zero known words list
   let curr: HTMLElement;
-  let ann: string;
   let readingPos: number;
 
   if (keyCode === 36) { // home : known word navigation -> first
@@ -89,12 +199,7 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
     setReadingPosition(0);
     curr = knownwordlist[0];
     curr.classList.add('kwordmarked');
-    scrollTo(curr, { offset: -150 });
-    ann = getAttrElement(curr, 'data_ann');
-    loadModalFrame(
-      '/word/show?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
-        encodeURIComponent(ann)
-    );
+    navigateToWord(curr);
     return false;
   }
   if (keyCode === 35) { // end : known word navigation -> last
@@ -102,12 +207,7 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
     setReadingPosition(l_knownwordlist - 1);
     curr = knownwordlist[l_knownwordlist - 1];
     curr.classList.add('kwordmarked');
-    scrollTo(curr, { offset: -150 });
-    ann = getAttrElement(curr, 'data_ann');
-    loadModalFrame(
-      '/word/show?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
-        encodeURIComponent(ann)
-    );
+    navigateToWord(curr);
     return false;
   }
   if (keyCode === 37) { // left : known word navigation
@@ -132,12 +232,7 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
     setReadingPosition(readingPos);
     curr = knownwordlist[readingPos];
     curr.classList.add('kwordmarked');
-    scrollTo(curr, { offset: -150 });
-    ann = getAttrElement(curr, 'data_ann');
-    loadModalFrame(
-      '/word/show?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
-        encodeURIComponent(ann)
-    );
+    navigateToWord(curr);
     return false;
   }
   if (keyCode === 39 || keyCode === 32) { // space /right : known word navigation
@@ -163,12 +258,7 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
 
     curr = knownwordlist[readingPos];
     curr.classList.add('kwordmarked');
-    scrollTo(curr, { offset: -150 });
-    ann = getAttrElement(curr, 'data_ann');
-    loadModalFrame(
-      '/word/show?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
-        encodeURIComponent(ann)
-    );
+    navigateToWord(curr);
     return false;
   }
 
@@ -185,66 +275,53 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
   const wid = getAttrElement(curr, 'data_wid');
   const ord = getAttrElement(curr, 'data_order');
   const stat = getAttrElement(curr, 'data_status');
+  const hex = getAttrElement(curr, 'data_hex') ||
+    curr.className.match(/TERM([a-f0-9]+)/)?.[1] || '';
   const txt = curr.classList.contains('mwsty')
     ? getAttrElement(curr, 'data_text')
     : (curr.textContent || '');
-  let dict = '';
 
+  // Status keys 1-5
   for (let i = 1; i <= 5; i++) {
     if (keyCode === (48 + i) || keyCode === (96 + i)) { // 1,.. : status=i
       if (stat === '0') {
-        let statusVal: string | number = i;
-        if (i === 1) {
-          // Prefer sourceLang from config, fall back to parsing translator URL
-          const sl = getSourceLang() || getLangFromDict(dictLinks.translator);
-          const tl = dictLinks.translator.replace(/.*[?&]tl=([a-zA-Z-]*)(&.*)*$/, '$1');
-          if (sl && sl !== dictLinks.translator && tl !== dictLinks.translator) {
-            statusVal = i + '&sl=' + sl + '&tl=' + tl;
-          }
-        }
-        loadModalFrame(
-          '/vocabulary/term-hover?text=' + txt + '&tid=' + textId + '&status=' + statusVal
-        );
+        // New word - open edit form with pre-set status
+        openWordEditForm(textId, parseInt(ord, 10));
       } else {
-        loadModalFrame(
-          '/word/set-status?wid=' + wid + '&tid=' + textId + '&ord=' + ord +
-            '&status=' + i
-        );
-        return false;
+        // Existing word - set status via API
+        setWordStatusViaApi(parseInt(wid, 10), i, curr);
       }
-    }
-  }
-  if (keyCode === 73) { // I : status=98
-    if (stat === '0') {
-      loadModalFrame(
-        '/vocabulary/term-hover?text=' + txt + '&tid=' + textId +
-          '&status=98'
-      );
-    } else {
-      loadModalFrame(
-        '/word/set-status?wid=' + wid + '&tid=' + textId +
-          '&ord=' + ord + '&status=98'
-      );
       return false;
     }
   }
-  if (keyCode === 87) { // W : status=99
+
+  if (keyCode === 73) { // I : status=98 (ignored)
     if (stat === '0') {
-      loadModalFrame(
-        '/vocabulary/term-hover?text=' + txt + '&tid=' + textId + '&status=99'
-      );
+      // New word - create as ignored via API
+      createQuickWordViaApi(textId, parseInt(ord, 10), 98, hex, txt);
     } else {
-      loadModalFrame(
-        '/word/set-status?wid=' + wid + '&tid=' + textId + '&ord=' + ord +
-          '&status=99'
-      );
+      // Existing word - set status via API
+      setWordStatusViaApi(parseInt(wid, 10), 98, curr);
     }
     return false;
   }
+
+  if (keyCode === 87) { // W : status=99 (well-known)
+    if (stat === '0') {
+      // New word - create as well-known via API
+      createQuickWordViaApi(textId, parseInt(ord, 10), 99, hex, txt);
+    } else {
+      // Existing word - set status via API
+      setWordStatusViaApi(parseInt(wid, 10), 99, curr);
+    }
+    return false;
+  }
+
   if (keyCode === 80) { // P : pronounce term
     speechDispatcher(txt, getLanguageId());
     return false;
   }
+
   if (keyCode === 84) { // T : translate sentence
     let popup = false;
     let dict_link = dictLinks.translator;
@@ -253,9 +330,8 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
       dict_link = dict_link.substring(1);
     }
     let open_url = true;
-    let final_url: URL | undefined;
     try {
-      final_url = new URL(dict_link);
+      const final_url = new URL(dict_link);
       popup = popup || final_url.searchParams.has('lwt_popup');
     } catch (err) {
       if (err instanceof TypeError) {
@@ -271,6 +347,7 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
     }
     return false;
   }
+
   if (keyCode === 65) { // A : set audio pos.
     let p = parseInt(getAttrElement(curr, 'data_pos') || '0', 10);
     const totalCharEl = document.getElementById('totalcharcount');
@@ -281,8 +358,8 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
     lwt_audio_controller.newPosition(p);
     return false;
   }
-  if (keyCode === 71) { //  G : edit term and open GTr
-    dict = '&nodict';
+
+  if (keyCode === 71) { // G : edit term and open GTr (translator)
     const target_url = dictLinks.translator;
     setTimeout(function () {
       let popup = target_url.startsWith('*');
@@ -300,20 +377,15 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
         loadDictionaryFrame(createTheDictUrl(target_url, txt));
       }
     }, 10);
+    // Also open edit form (fall through to E key handler below)
   }
-  if (keyCode === 69 || keyCode === 71) { //  E / G: edit term
-    let url = '';
-    if (curr.classList.contains('mword')) {
-      url = '/word/edit-multi?wid=' + wid + '&len=' + getAttrElement(curr, 'data_code') +
-        '&tid=' + textId + '&ord=' + ord + dict;
-    } else if (stat === '0') {
-      url = '/word/edit?wid=&tid=' + textId + '&ord=' + ord + dict;
-    } else {
-      url = '/word/edit?wid=' + wid + '&tid=' + textId + '&ord=' + ord + dict;
-    }
-    loadModalFrame(url);
+
+  if (keyCode === 69 || keyCode === 71) { // E / G: edit term
+    const wordId = wid ? parseInt(wid, 10) : undefined;
+    openWordEditForm(textId, parseInt(ord, 10), wordId);
     return false;
   }
+
   return true;
 }
 

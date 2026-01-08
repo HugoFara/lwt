@@ -20,7 +20,7 @@ import {
   updateLearnStatus
 } from '@modules/vocabulary/services/word_dom_updates';
 import { successSound, failureSound } from '@shared/utils/audio_feedback';
-import { cClick } from '@modules/vocabulary/components/word_popup';
+import { closePopup } from '@modules/vocabulary/components/word_popup';
 import { showResultPanel, showErrorInPanel } from '@modules/vocabulary/components/result_panel';
 
 /**
@@ -93,7 +93,7 @@ export async function changeWordStatus(
   );
 
   // Close popup after status change
-  cClick();
+  closePopup();
 
   return { success: true, newStatus };
 }
@@ -163,7 +163,7 @@ export async function deleteWord(
   deleteWordFromDOM(context.wordId, context.text);
 
   showResultPanel('Term deleted', { autoClose: true, duration: 1500 });
-  cClick();
+  closePopup();
 
   return { success: true };
 }
@@ -198,7 +198,7 @@ export async function markWellKnown(
   }
 
   showResultPanel('Marked as well-known', { autoClose: true, duration: 1500 });
-  cClick();
+  closePopup();
 
   return { success: true, newStatus: 99, wordId };
 }
@@ -233,7 +233,7 @@ export async function markIgnored(
   }
 
   showResultPanel('Marked as ignored', { autoClose: true, duration: 1500 });
-  cClick();
+  closePopup();
 
   return { success: true, newStatus: 98, wordId };
 }

@@ -6,7 +6,7 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import { cClick } from '@modules/vocabulary/components/word_popup';
+import { closePopup } from '@modules/vocabulary/components/word_popup';
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { handleTestWordClick, handleTestKeydown } from './test_mode';
 import { startElapsedTimer } from '../utils/elapsed_timer';
@@ -189,7 +189,7 @@ export function getNewWord(reviewData?: ReviewData): void {
   if (reviewData) {
     queryNextTerm(reviewData);
   }
-  cClick();
+  closePopup();
 }
 
 /**

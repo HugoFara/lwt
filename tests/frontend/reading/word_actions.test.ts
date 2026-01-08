@@ -33,7 +33,7 @@ vi.mock('../../../src/frontend/js/shared/utils/audio_feedback', () => ({
 }));
 
 vi.mock('../../../src/frontend/js/modules/vocabulary/components/word_popup', () => ({
-  cClick: vi.fn()
+  closePopup: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/modules/vocabulary/components/result_panel', () => ({
@@ -63,7 +63,7 @@ import {
   updateLearnStatus
 } from '../../../src/frontend/js/modules/vocabulary/services/word_dom_updates';
 import { successSound, failureSound } from '../../../src/frontend/js/shared/utils/audio_feedback';
-import { cClick } from '../../../src/frontend/js/modules/vocabulary/components/word_popup';
+import { closePopup } from '../../../src/frontend/js/modules/vocabulary/components/word_popup';
 import { showResultPanel, showErrorInPanel } from '../../../src/frontend/js/modules/vocabulary/components/result_panel';
 
 describe('reading/word_actions.ts', () => {
@@ -150,7 +150,7 @@ describe('reading/word_actions.ts', () => {
 
       await changeWordStatus(baseContext, 2);
 
-      expect(cClick).toHaveBeenCalled();
+      expect(closePopup).toHaveBeenCalled();
     });
 
     it('returns success with new status', async () => {
@@ -333,7 +333,7 @@ describe('reading/word_actions.ts', () => {
 
       await deleteWord(baseContext);
 
-      expect(cClick).toHaveBeenCalled();
+      expect(closePopup).toHaveBeenCalled();
     });
 
     it('returns success on completion', async () => {
@@ -417,7 +417,7 @@ describe('reading/word_actions.ts', () => {
 
       await markWellKnown(baseContext);
 
-      expect(cClick).toHaveBeenCalled();
+      expect(closePopup).toHaveBeenCalled();
     });
   });
 

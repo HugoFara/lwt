@@ -46,7 +46,7 @@ import {
 } from '@modules/vocabulary/services/word_actions';
 
 // Re-export for backward compatibility
-export { overlib, cClick, nd } from '@modules/vocabulary/components/word_popup';
+export { overlib, closePopup, nd } from '@modules/vocabulary/components/word_popup';
 
 // Note: The following functions are used in HTML string templates (onclick handlers)
 // and accessed via window at runtime: showRightFramesPanel, confirmDelete, successSound, failureSound

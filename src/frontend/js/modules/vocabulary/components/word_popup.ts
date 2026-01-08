@@ -54,7 +54,7 @@ function ensurePopupContainer(): HTMLDialogElement {
   closeBtn.textContent = '×';
   closeBtn.type = 'button';
   closeBtn.setAttribute('aria-label', POPUP_CONFIG.closeText);
-  closeBtn.addEventListener('click', () => cClick());
+  closeBtn.addEventListener('click', () => closePopup());
 
   titlebar.appendChild(titleElement);
   titlebar.appendChild(closeBtn);
@@ -70,7 +70,7 @@ function ensurePopupContainer(): HTMLDialogElement {
   // Close on click outside (backdrop click)
   dialogElement.addEventListener('click', (e) => {
     if (e.target === dialogElement) {
-      cClick();
+      closePopup();
     }
   });
 
@@ -126,7 +126,7 @@ function positionDialog(dialog: HTMLDialogElement, event: MouseEvent | null): vo
 /**
  * Close any open popup
  */
-export function cClick(): void {
+export function closePopup(): void {
   if (dialogElement && dialogElement.open) {
     dialogElement.close();
     // Reset transform for next positioning
@@ -137,7 +137,7 @@ export function cClick(): void {
 
 // Legacy alias
 export function nd(): boolean {
-  cClick();
+  closePopup();
   return true;
 }
 
@@ -150,7 +150,7 @@ export function nd(): boolean {
  */
 export function overlib(content: string, title?: string): boolean {
   // Close any existing popup
-  cClick();
+  closePopup();
 
   const dialog = ensurePopupContainer();
 
@@ -268,14 +268,14 @@ if (typeof document !== 'undefined') {
 
   // Listen for cross-frame popup close events
   document.addEventListener('lwt-close-popup', () => {
-    cClick();
+    closePopup();
   });
 }
 
 
 /**
  * Close popup in parent frame via custom event.
- * Use this from child frames instead of accessing window.parent.cClick directly.
+ * Use this from child frames instead of accessing window.parent.closePopup directly.
  */
 export function closeParentPopup(): void {
   try {

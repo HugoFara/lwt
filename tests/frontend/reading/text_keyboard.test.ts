@@ -4,14 +4,15 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Use vi.hoisted to define mock functions that will be available during vi.mock hoisting
-const { mockLoadModalFrame, mockLoadDictionaryFrame, mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo, mockNewPosition } = vi.hoisted(() => ({
-  mockLoadModalFrame: vi.fn(),
+const { mockLoadDictionaryFrame, mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo, mockNewPosition, mockTermsApiSetStatus, mockTermsApiCreateQuick } = vi.hoisted(() => ({
   mockLoadDictionaryFrame: vi.fn(),
   mockSpeechDispatcher: vi.fn(),
   mockOwin: vi.fn(),
   mockCClick: vi.fn(),
   mockScrollTo: vi.fn(),
-  mockNewPosition: vi.fn()
+  mockNewPosition: vi.fn(),
+  mockTermsApiSetStatus: vi.fn().mockResolvedValue({ data: { status: 1 } }),
+  mockTermsApiCreateQuick: vi.fn().mockResolvedValue({ data: { term_id: 999 } })
 }));
 
 // Mock dependencies
@@ -32,12 +33,32 @@ vi.mock('../../../src/frontend/js/modules/text/pages/reading/text_annotations', 
 }));
 
 vi.mock('../../../src/frontend/js/modules/vocabulary/components/word_popup', () => ({
-  cClick: mockCClick
+  closePopup: mockCClick
 }));
 
 vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
-  loadModalFrame: mockLoadModalFrame,
   loadDictionaryFrame: mockLoadDictionaryFrame
+}));
+
+vi.mock('../../../src/frontend/js/modules/vocabulary/api/terms_api', () => ({
+  TermsApi: {
+    setStatus: mockTermsApiSetStatus,
+    createQuick: mockTermsApiCreateQuick
+  }
+}));
+
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates', () => ({
+  updateExistingWordInDOM: vi.fn(),
+  markWordWellKnownInDOM: vi.fn(),
+  markWordIgnoredInDOM: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/modules/vocabulary/stores/word_store', () => ({
+  getWordStore: vi.fn(() => ({ isModalOpen: false }))
+}));
+
+vi.mock('../../../src/frontend/js/modules/vocabulary/stores/word_form_store', () => ({
+  getWordFormStore: vi.fn(() => ({ loadForEdit: vi.fn() }))
 }));
 
 vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
@@ -102,11 +123,13 @@ describe('text_keyboard.ts', () => {
     resetReadingPosition();
 
     // Clear mock function calls between tests
-    mockLoadModalFrame.mockClear();
+    mockLoadDictionaryFrame.mockClear();
     mockSpeechDispatcher.mockClear();
     mockOwin.mockClear();
     mockCClick.mockClear();
     mockScrollTo.mockClear();
+    mockTermsApiSetStatus.mockClear();
+    mockTermsApiCreateQuick.mockClear();
   });
 
   afterEach(() => {
@@ -350,7 +373,7 @@ describe('text_keyboard.ts', () => {
   // ===========================================================================
 
   describe('Number keys (1-5) for status change', () => {
-    it('changes status of known word', () => {
+    it('changes status of known word via API', () => {
       document.body.innerHTML = `
         <span id="w1" class="word status3 kwordmarked"
               data_wid="100" data_order="5" data_status="3">word</span>
@@ -361,7 +384,8 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(50); // key '2'
       handleTextKeydown(event);
 
-      expect(mockLoadModalFrame).toHaveBeenCalled();
+      // Now uses TermsApi.setStatus instead of loadModalFrame
+      expect(mockTermsApiSetStatus).toHaveBeenCalledWith(100, 2);
     });
 
     it('updates status for a word via keyboard navigation', () => {
@@ -377,8 +401,8 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(49); // key '1'
       handleTextKeydown(event);
 
-      // Known word gets /word/set-status call
-      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/set-status'));
+      // Known word gets API call
+      expect(mockTermsApiSetStatus).toHaveBeenCalledWith(100, 1);
     });
 
     it('handles numpad keys (96-100)', () => {
@@ -392,7 +416,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(99); // numpad '3'
       handleTextKeydown(event);
 
-      expect(mockLoadModalFrame).toHaveBeenCalled();
+      expect(mockTermsApiSetStatus).toHaveBeenCalledWith(100, 3);
     });
   });
 
@@ -401,7 +425,7 @@ describe('text_keyboard.ts', () => {
   // ===========================================================================
 
   describe('I key (73) - Ignore word', () => {
-    it('sets status to 98 for known word', () => {
+    it('sets status to 98 for known word via API', () => {
       document.body.innerHTML = `
         <span id="w1" class="word status3 kwordmarked"
               data_wid="100" data_order="5" data_status="3">word</span>
@@ -412,7 +436,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(73);
       handleTextKeydown(event);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('status=98'));
+      expect(mockTermsApiSetStatus).toHaveBeenCalledWith(100, 98);
     });
   });
 

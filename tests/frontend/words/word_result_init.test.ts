@@ -379,11 +379,11 @@ describe('word_result_init.ts', () => {
 
   describe('all wellknown result config', () => {
     beforeEach(() => {
-      // Mock parent for cClick
+      // Mock parent for closePopup
       Object.defineProperty(window, 'parent', {
         writable: true,
         value: {
-          cClick: vi.fn(),
+          closePopup: vi.fn(),
           setTimeout: vi.fn((fn) => fn())
         }
       });

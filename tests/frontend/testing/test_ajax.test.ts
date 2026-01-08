@@ -18,7 +18,7 @@ import { resetTestState } from '../../../src/frontend/js/modules/review/stores/t
 import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/modules/language/stores/language_config';
 
 vi.mock('../../../src/frontend/js/modules/vocabulary/components/word_popup', () => ({
-  cClick: vi.fn()
+  closePopup: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
