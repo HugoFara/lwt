@@ -41,6 +41,7 @@ import {
   isTtsOnClick,
   isFrameModeEnabled
 } from '@shared/utils/settings_config';
+import { lwt_audio_controller } from '@/media/html5_audio_player';
 
 // Re-export from submodules
 export {
@@ -105,16 +106,6 @@ export function isApiModeEnabled(): boolean {
   return useApiMode;
 }
 
-// Audio controller type for frame access
-// We only need the newPosition method for seeking audio
-interface FramesWithH {
-  h: Window & {
-    lwt_audio_controller: {
-      newPosition: (p: number) => void;
-    };
-  };
-}
-
 /**
  * Handle double-click event on a word to jump to its position in audio/video.
  * Calculates the position in the text and seeks the media player accordingly.
@@ -127,10 +118,7 @@ export function word_dblclick_event_do_text_text(this: HTMLElement): void {
   if (t === 0) { return; }
   let p = 100 * (parseInt(this.getAttribute('data_pos') || '0', 10) - 5) / t;
   if (p < 0) { p = 0; }
-  const parentFrames = window.parent as Window & { frames: FramesWithH };
-  if (typeof parentFrames.frames.h?.lwt_audio_controller?.newPosition === 'function') {
-    parentFrames.frames.h.lwt_audio_controller.newPosition(p);
-  }
+  lwt_audio_controller.newPosition(p);
 }
 
 /**

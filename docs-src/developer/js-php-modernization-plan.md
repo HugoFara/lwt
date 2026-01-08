@@ -802,9 +802,12 @@ These methods are still used when `use_frame_mode = true` is set.
 - `src/backend/Api/V1/Handlers/TermHandler.php` - Term endpoint handlers ✓
 - `src/backend/Api/V1/Handlers/ReviewHandler.php` - Review endpoint handlers ✓
 
-### Files Pending (Phase 4 Optional Cleanup)
+### All Files Complete
 
-- `src/frontend/js/modules/text/pages/reading/text_keyboard.ts` - Uses API mode for word operations; still uses frame access for audio controller
+All frontend files have been migrated from frame-based to direct module imports:
+
+- `src/frontend/js/modules/text/pages/reading/text_keyboard.ts` - Migrated to direct `lwt_audio_controller` import ✓
+- `src/frontend/js/modules/text/pages/reading/text_events.ts` - Migrated to direct `lwt_audio_controller` import ✓
 
 ### Legacy PHP Files (Removed)
 

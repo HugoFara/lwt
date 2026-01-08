@@ -4,13 +4,14 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Use vi.hoisted to define mock functions that will be available during vi.mock hoisting
-const { mockLoadModalFrame, mockLoadDictionaryFrame, mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo } = vi.hoisted(() => ({
+const { mockLoadModalFrame, mockLoadDictionaryFrame, mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo, mockNewPosition } = vi.hoisted(() => ({
   mockLoadModalFrame: vi.fn(),
   mockLoadDictionaryFrame: vi.fn(),
   mockSpeechDispatcher: vi.fn(),
   mockOwin: vi.fn(),
   mockCClick: vi.fn(),
-  mockScrollTo: vi.fn()
+  mockScrollTo: vi.fn(),
+  mockNewPosition: vi.fn()
 }));
 
 // Mock dependencies
@@ -45,6 +46,12 @@ vi.mock('../../../src/frontend/js/shared/utils/ajax_utilities', () => ({
 
 vi.mock('../../../src/frontend/js/shared/utils/hover_intent', () => ({
   scrollTo: mockScrollTo
+}));
+
+vi.mock('../../../src/frontend/js/media/html5_audio_player', () => ({
+  lwt_audio_controller: {
+    newPosition: mockNewPosition
+  }
 }));
 
 import { keydown_event_do_text_text } from '../../../src/frontend/js/modules/text/pages/reading/text_keyboard';
@@ -557,7 +564,7 @@ describe('text_keyboard.ts', () => {
   // ===========================================================================
 
   describe('A key (65) - Set audio position', () => {
-    it('returns true when no audio controller available', () => {
+    it('calls audio controller newPosition and returns false', () => {
       document.body.innerHTML = `
         <span id="w1" class="word status3 kwordmarked"
               data_wid="100" data_pos="50">word</span>
@@ -565,11 +572,14 @@ describe('text_keyboard.ts', () => {
       `;
 
       setReadingPosition(0);
+      mockNewPosition.mockClear();
 
       const event = createKeyEvent(65);
       const result = keydown_event_do_text_text(event);
 
-      expect(result).toBe(true);
+      // Position calculation: 100 * (50 - 5) / 1000 = 4.5
+      expect(mockNewPosition).toHaveBeenCalledWith(4.5);
+      expect(result).toBe(false);
     });
 
     it('returns true when totalcharcount is 0', () => {
@@ -580,11 +590,31 @@ describe('text_keyboard.ts', () => {
       `;
 
       setReadingPosition(0);
+      mockNewPosition.mockClear();
 
       const event = createKeyEvent(65);
       const result = keydown_event_do_text_text(event);
 
+      expect(mockNewPosition).not.toHaveBeenCalled();
       expect(result).toBe(true);
+    });
+
+    it('clamps negative position to 0', () => {
+      document.body.innerHTML = `
+        <span id="w1" class="word status3 kwordmarked"
+              data_wid="100" data_pos="2">word</span>
+        <span id="totalcharcount">1000</span>
+      `;
+
+      setReadingPosition(0);
+      mockNewPosition.mockClear();
+
+      const event = createKeyEvent(65);
+      const result = keydown_event_do_text_text(event);
+
+      // Position calculation: 100 * (2 - 5) / 1000 = -0.3, clamped to 0
+      expect(mockNewPosition).toHaveBeenCalledWith(0);
+      expect(result).toBe(false);
     });
   });
 

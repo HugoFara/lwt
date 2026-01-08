@@ -24,16 +24,7 @@ import {
 } from '@modules/language/stores/language_config';
 import { getTextId } from '@modules/text/stores/text_config';
 import { getWordStatusFilter } from '@shared/utils/settings_config';
-
-// Audio controller type for frame access
-// We only need the newPosition method for seeking audio
-interface FramesWithH {
-  h: Window & {
-    lwt_audio_controller: {
-      newPosition: (p: number) => void;
-    };
-  };
-}
+import { lwt_audio_controller } from '@/media/html5_audio_player';
 
 /**
  * Remove a class from all elements matching a selector.
@@ -287,12 +278,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     if (t === 0) { return true; }
     p = 100 * (p - 5) / t;
     if (p < 0) p = 0;
-    const parentFrames = window.parent as Window & { frames: FramesWithH };
-    if (typeof parentFrames.frames.h?.lwt_audio_controller?.newPosition === 'function') {
-      parentFrames.frames.h.lwt_audio_controller.newPosition(p);
-    } else {
-      return true;
-    }
+    lwt_audio_controller.newPosition(p);
     return false;
   }
   if (keyCode === 71) { //  G : edit term and open GTr

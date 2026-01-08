@@ -2,6 +2,19 @@
  * Tests for text_events.ts - Text reading interaction events
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// Use vi.hoisted for mock functions that need to be available during vi.mock hoisting
+const { mockNewPosition } = vi.hoisted(() => ({
+  mockNewPosition: vi.fn()
+}));
+
+// Mock the audio controller module
+vi.mock('../../../src/frontend/js/media/html5_audio_player', () => ({
+  lwt_audio_controller: {
+    newPosition: mockNewPosition
+  }
+}));
+
 import {
   word_dblclick_event_do_text_text,
   word_click_event_do_text_text,
@@ -78,6 +91,10 @@ describe('text_events.ts', () => {
   // ===========================================================================
 
   describe('word_dblclick_event_do_text_text', () => {
+    beforeEach(() => {
+      mockNewPosition.mockClear();
+    });
+
     it('does nothing when totalcharcount is 0', () => {
       document.body.innerHTML = `
         <span id="totalcharcount">0</span>
@@ -87,8 +104,8 @@ describe('text_events.ts', () => {
       const word = document.querySelector('.word') as HTMLElement;
       word_dblclick_event_do_text_text.call(word);
 
-      // Should return early without error
-      expect(true).toBe(true);
+      // Should return early without calling audio controller
+      expect(mockNewPosition).not.toHaveBeenCalled();
     });
 
     it('calculates position percentage correctly', () => {
@@ -96,18 +113,6 @@ describe('text_events.ts', () => {
         <span id="totalcharcount">1000</span>
         <span class="word" data_pos="505">Test</span>
       `;
-
-      // Mock parent frames with audio controller
-      const mockNewPosition = vi.fn();
-      (window as unknown as Record<string, unknown>).parent = {
-        frames: {
-          h: {
-            lwt_audio_controller: {
-              newPosition: mockNewPosition,
-            },
-          },
-        },
-      };
 
       const word = document.querySelector('.word') as HTMLElement;
       word_dblclick_event_do_text_text.call(word);
@@ -122,17 +127,6 @@ describe('text_events.ts', () => {
         <span class="word" data_pos="3">Test</span>
       `;
 
-      const mockNewPosition = vi.fn();
-      (window as unknown as Record<string, unknown>).parent = {
-        frames: {
-          h: {
-            lwt_audio_controller: {
-              newPosition: mockNewPosition,
-            },
-          },
-        },
-      };
-
       const word = document.querySelector('.word') as HTMLElement;
       word_dblclick_event_do_text_text.call(word);
 
@@ -146,17 +140,6 @@ describe('text_events.ts', () => {
         <span class="word">Test</span>
       `;
 
-      const mockNewPosition = vi.fn();
-      (window as unknown as Record<string, unknown>).parent = {
-        frames: {
-          h: {
-            lwt_audio_controller: {
-              newPosition: mockNewPosition,
-            },
-          },
-        },
-      };
-
       const word = document.querySelector('.word') as HTMLElement;
       word_dblclick_event_do_text_text.call(word);
 
@@ -164,20 +147,18 @@ describe('text_events.ts', () => {
       expect(mockNewPosition).toHaveBeenCalledWith(0);
     });
 
-    it('does nothing when audio controller is not available', () => {
+    it('handles function call without throwing', () => {
       document.body.innerHTML = `
         <span id="totalcharcount">1000</span>
         <span class="word" data_pos="500">Test</span>
       `;
 
-      (window as unknown as Record<string, unknown>).parent = {
-        frames: {},
-      };
-
       const word = document.querySelector('.word') as HTMLElement;
 
       // Should not throw
       expect(() => word_dblclick_event_do_text_text.call(word)).not.toThrow();
+      // Position should be (500 - 5) / 1000 * 100 = 49.5%
+      expect(mockNewPosition).toHaveBeenCalledWith(49.5);
     });
   });
 
