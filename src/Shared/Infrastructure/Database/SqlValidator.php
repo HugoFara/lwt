@@ -89,7 +89,7 @@ class SqlValidator
         // Subqueries that could exfiltrate data
         '/\bSELECT\b.*\bFROM\b(?!.*\bINSERT\s+INTO\b)/is',
         // Comments that could hide malicious code
-        '/\/\*[^*]*\*+([^/*][^*]*\*+)*\//i',
+        '/\/\*[^*]*\*+([^\/*][^*]*\*+)*\//i',
         // Multiple statements (semicolon followed by non-whitespace)
         '/;\s*(?!$)\s*(?!--)/m',
         // Hex strings that could encode malicious queries

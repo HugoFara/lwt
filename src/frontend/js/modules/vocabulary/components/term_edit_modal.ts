@@ -257,7 +257,7 @@ export async function openTermEditModal(
     if (cancelBtn) {
       cancelBtn.addEventListener('click', () => closeModal());
     }
-  } catch (error) {
+  } catch {
     openModal('<p class="has-text-danger">Failed to load term data</p>', {
       title: 'Error'
     });

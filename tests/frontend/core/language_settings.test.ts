@@ -37,10 +37,11 @@ describe('core/language_settings.ts', () => {
     // Mock window.location with getter/setter for href
     locationHrefSpy = vi.fn();
     delete (window as unknown as { location: Location }).location;
-    // Destructure to exclude href from spread (avoids duplicate key warning)
-    const { href: _originalHref, ...locationWithoutHref } = originalLocation;
+    // Create a copy of originalLocation and exclude href (we'll define custom getter/setter)
+    const locationCopy = { ...originalLocation };
+    delete (locationCopy as { href?: string }).href;
     window.location = {
-      ...locationWithoutHref,
+      ...locationCopy,
       get href() {
         return locationHrefSpy.mock.calls[locationHrefSpy.mock.calls.length - 1]?.[0] || '';
       },

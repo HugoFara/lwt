@@ -82,8 +82,10 @@ Object.defineProperty(HTMLMediaElement.prototype, 'pause', {
 });
 
 // Mock HTMLFormElement.requestSubmit (not in jsdom)
+// Note: The real requestSubmit accepts an optional submitter parameter,
+// but our mock doesn't need to use it - we just dispatch a submit event
 Object.defineProperty(HTMLFormElement.prototype, 'requestSubmit', {
-  value: vi.fn(function(this: HTMLFormElement, submitter?: HTMLElement) {
+  value: vi.fn(function(this: HTMLFormElement) {
     // Simulate submitting the form by dispatching a submit event
     const event = new Event('submit', { bubbles: true, cancelable: true });
     this.dispatchEvent(event);

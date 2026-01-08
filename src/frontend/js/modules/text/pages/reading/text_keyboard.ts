@@ -5,7 +5,7 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { getLangFromDict, createTheDictUrl, openDictionaryPopup } from '@modules/vocabulary/services/dictionary';
+import { createTheDictUrl, openDictionaryPopup } from '@modules/vocabulary/services/dictionary';
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { getAttrElement } from './text_annotations';
 import { closePopup } from '@modules/vocabulary/components/word_popup';
@@ -18,8 +18,7 @@ import {
 } from '@modules/text/stores/reading_state';
 import {
   getLanguageId,
-  getDictionaryLinks,
-  getSourceLang
+  getDictionaryLinks
 } from '@modules/language/stores/language_config';
 import { getTextId } from '@modules/text/stores/text_config';
 import { getWordStatusFilter } from '@shared/utils/settings_config';
