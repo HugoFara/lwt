@@ -197,10 +197,10 @@ class ReviewController extends BaseController
 
         // Render table settings
         $settings = $this->reviewFacade->getTableReviewSettings();
-        include __DIR__ . '/../Views/table_test_settings.php';
+        include __DIR__ . '/../Views/table_review_settings.php';
 
         echo '<table class="sortable tab2 table-test" cellspacing="0" cellpadding="5">';
-        include __DIR__ . '/../Views/table_test_header.php';
+        include __DIR__ . '/../Views/table_review_header.php';
 
         // Render table rows
         $words = $this->reviewFacade->getTableReviewWords($testsql);
@@ -209,7 +209,7 @@ class ReviewController extends BaseController
 
         if ($words instanceof \mysqli_result) {
             while ($word = mysqli_fetch_assoc($words)) {
-                include __DIR__ . '/../Views/table_test_row.php';
+                include __DIR__ . '/../Views/table_review_row.php';
             }
             mysqli_free_result($words);
         }
@@ -347,7 +347,7 @@ class ReviewController extends BaseController
         ];
 
         PageLayoutHelper::renderPageStartNobody('Review', 'full-width');
-        include __DIR__ . '/../Views/test_desktop.php';
+        include __DIR__ . '/../Views/review_desktop.php';
         PageLayoutHelper::renderPageEnd();
     }
 }
