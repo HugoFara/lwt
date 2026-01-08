@@ -24,6 +24,7 @@ export * from './stores/word_list_filter';
 export * from './stores/word_list_table';
 
 // Components
+export * from './components/word_popover';
 export * from './components/word_modal';
 export * from './components/word_edit_form';
 export * from './components/multi_word_modal';

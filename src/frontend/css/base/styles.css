@@ -2668,6 +2668,121 @@ Settings Page - Collapsible Sections
   padding: 1.25rem;
 }
 
+/* ==========================================================================
+   Word Popover Styles
+   Non-blocking popover for word information display
+   ========================================================================== */
+
+.word-popover {
+  position: absolute;
+  z-index: 1000;
+  min-width: 280px;
+  max-width: 350px;
+  background: white;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.word-popover__content {
+  padding: 0.75rem 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Arrow indicator */
+.word-popover__arrow {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border: 1px solid #dbdbdb;
+  transform: rotate(45deg);
+}
+
+.word-popover__arrow--below {
+  top: -7px;
+  left: 20px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.word-popover__arrow--above {
+  bottom: -7px;
+  left: 20px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Compact button sizing for popover */
+.word-popover .buttons.are-small .button {
+  font-size: 0.7rem;
+  padding: 0.25em 0.5em;
+  height: auto;
+}
+
+/* Actions row separator */
+.word-popover__actions {
+  border-top: 1px solid #f0f0f0;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+/* Transition animations */
+.popover-enter {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.popover-enter-start {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.word-popover--above .popover-enter-start {
+  transform: translateY(4px);
+}
+
+.popover-enter-end {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.popover-leave {
+  transition: opacity 0.1s ease;
+}
+
+.popover-leave-start {
+  opacity: 1;
+}
+
+.popover-leave-end {
+  opacity: 0;
+}
+
+/* Mobile responsive - show as bottom drawer */
+@media screen and (max-width: 768px) {
+  .word-popover {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto !important;
+    max-width: 100%;
+    min-width: 100%;
+    border-radius: 12px 12px 0 0;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  .word-popover__arrow {
+    display: none;
+  }
+
+  .word-popover__content {
+    padding: 1rem 1.25rem;
+  }
+}
+
 @media print
 {
   .noprint
@@ -2688,6 +2803,11 @@ Settings Page - Collapsible Sections
 
   /* Hide audio player when printing */
   .audio-player-container {
+    display: none;
+  }
+
+  /* Hide word popover when printing */
+  .word-popover {
     display: none;
   }
 }

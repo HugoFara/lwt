@@ -1,7 +1,8 @@
 /**
- * Word Modal - Alpine.js component for Bulma word action modal.
+ * Word Modal - Alpine.js component for Bulma word edit modal.
  *
- * Displays word information and action buttons in a centered Bulma modal.
+ * Displays word edit form in a centered Bulma modal.
+ * This modal is only used for editing - info view is handled by word_popover.
  * Integrates with the word store for state management.
  *
  * @license Unlicense <http://unlicense.org/>
@@ -91,10 +92,12 @@ export function wordModalData(): WordModalData {
 
     // Initialize icons when modal opens (called by Alpine.js x-init or x-effect)
     init(): void {
-      // Watch for modal open state changes to re-initialize icons
+      // Watch for modal open state changes to load form data and re-initialize icons
       Alpine.effect(() => {
-        if (this.store.isModalOpen) {
-          // Delay slightly to ensure DOM is updated
+        if (this.store.isEditModalOpen) {
+          // Load form data when modal opens
+          this.showEditForm();
+          // Re-initialize icons after DOM update
           requestAnimationFrame(() => {
             initIcons();
           });
@@ -106,17 +109,16 @@ export function wordModalData(): WordModalData {
         if (this.formStore.shouldCloseModal) {
           this.formStore.shouldCloseModal = false;
           this.formStore.reset();
-          this.viewMode = 'info';
-          this.store.closeModal();
+          this.store.closeEditModal();
         }
       });
 
-      // Watch for form store signals to return to info view (cancel)
+      // Watch for form store signals to cancel edit (close modal)
       Alpine.effect(() => {
         if (this.formStore.shouldReturnToInfo) {
           this.formStore.shouldReturnToInfo = false;
           this.formStore.reset();
-          this.viewMode = 'info';
+          this.store.closeEditModal();
         }
       });
     },
@@ -134,7 +136,7 @@ export function wordModalData(): WordModalData {
     },
 
     get isOpen(): boolean {
-      return this.store.isModalOpen;
+      return this.store.isEditModalOpen;
     },
 
     get isLoading(): boolean {
@@ -161,15 +163,14 @@ export function wordModalData(): WordModalData {
     },
 
     close(): void {
-      // If in edit mode with unsaved changes, confirm
-      if (this.viewMode === 'edit' && this.formStore.isDirty) {
+      // Check for unsaved changes
+      if (this.formStore.isDirty) {
         if (!confirm('You have unsaved changes. Are you sure you want to close?')) {
           return;
         }
         this.formStore.reset();
       }
-      this.viewMode = 'info';
-      this.store.closeModal();
+      this.store.closeEditModal();
     },
 
     speakWord(): void {
@@ -259,25 +260,24 @@ export function wordModalData(): WordModalData {
         word.wordId ?? undefined
       );
 
-      // Switch to edit view
+      // Set view mode to edit (modal is now edit-only)
       this.viewMode = 'edit';
     },
 
     hideEditForm(): void {
-      this.viewMode = 'info';
       this.formStore.reset();
+      this.store.closeEditModal();
     },
 
     onFormSaved(): void {
       // Reset form and close modal after successful save
-      this.viewMode = 'info';
       this.formStore.reset();
-      this.store.closeModal();
+      this.store.closeEditModal();
     },
 
     onFormCancelled(): void {
-      this.viewMode = 'info';
       this.formStore.reset();
+      this.store.closeEditModal();
     }
   };
 }

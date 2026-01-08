@@ -183,16 +183,16 @@ export function textReaderData(): TextReaderData {
 
       if (!hex) return;
 
-      // Select the word (opens modal)
-      this.store.selectWord(hex, position);
+      // Select the word (opens popover near the clicked element)
+      this.store.selectWord(hex, position, wordEl);
 
       // NOTE: TTS integration disabled - requires speechDispatcher import and TTS settings check
       // speechDispatcher(wordEl.textContent || '', this.store.langId);
     },
 
     handleKeydown(): void {
-      // Only handle if modal is not open
-      if (this.store.isModalOpen) return;
+      // Only handle if popover/modal is not open
+      if (this.store.isPopoverOpen || this.store.isEditModalOpen) return;
 
       // NOTE: Keyboard navigation planned - arrow keys for word navigation, number keys for quick status
     },

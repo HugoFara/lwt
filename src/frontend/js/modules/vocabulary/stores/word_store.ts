@@ -70,7 +70,9 @@ export interface WordStoreState {
   // UI state
   selectedHex: string | null;
   selectedPosition: number | null;
-  isModalOpen: boolean;
+  popoverTargetElement: HTMLElement | null;
+  isPopoverOpen: boolean;
+  isEditModalOpen: boolean;
   isLoading: boolean;
   isInitialized: boolean;
 
@@ -86,8 +88,10 @@ export interface WordStoreState {
   setTextHtml(el: HTMLElement): void;
   loadText(textId: number): Promise<void>;
   initFromData(words: TextWord[], config: TextReadingConfig): void;
-  selectWord(hex: string, position: number): void;
-  closeModal(): void;
+  selectWord(hex: string, position: number, targetElement?: HTMLElement): void;
+  closePopover(): void;
+  openEditModal(): void;
+  closeEditModal(): void;
   getSelectedWord(): WordData | null;
   getWordsByHex(hex: string): WordData[];
   setStatus(hex: string, status: number): Promise<boolean>;
@@ -135,7 +139,9 @@ function createWordStore(): WordStoreState {
     // UI state
     selectedHex: null,
     selectedPosition: null,
-    isModalOpen: false,
+    popoverTargetElement: null,
+    isPopoverOpen: false,
+    isEditModalOpen: false,
     isLoading: false,
     isInitialized: false,
 
@@ -268,21 +274,41 @@ function createWordStore(): WordStoreState {
     },
 
     /**
-     * Select a word and open the modal.
+     * Select a word and open the popover.
      */
-    selectWord(hex: string, position: number): void {
+    selectWord(hex: string, position: number, targetElement?: HTMLElement): void {
       this.selectedHex = hex;
       this.selectedPosition = position;
-      this.isModalOpen = true;
+      this.popoverTargetElement = targetElement || null;
+      this.isPopoverOpen = true;
     },
 
     /**
-     * Close the modal.
+     * Close the popover.
      */
-    closeModal(): void {
-      this.isModalOpen = false;
+    closePopover(): void {
+      this.isPopoverOpen = false;
+      this.popoverTargetElement = null;
       this.selectedHex = null;
       this.selectedPosition = null;
+    },
+
+    /**
+     * Open the edit modal (from popover).
+     */
+    openEditModal(): void {
+      this.isPopoverOpen = false;
+      this.isEditModalOpen = true;
+    },
+
+    /**
+     * Close the edit modal.
+     */
+    closeEditModal(): void {
+      this.isEditModalOpen = false;
+      this.selectedHex = null;
+      this.selectedPosition = null;
+      this.popoverTargetElement = null;
     },
 
     /**
@@ -335,7 +361,7 @@ function createWordStore(): WordStoreState {
         updateWordStatusInDOM(hex, status, wordId);
 
         this.isLoading = false;
-        this.closeModal();
+        this.closePopover();
         return true;
       } catch (error) {
         console.error('Error setting status:', error);
@@ -369,7 +395,7 @@ function createWordStore(): WordStoreState {
         updateWordStatusInDOM(hex, status, newWordId);
 
         this.isLoading = false;
-        this.closeModal();
+        this.closePopover();
         return true;
       } catch (error) {
         console.error('Error creating word:', error);
@@ -411,7 +437,7 @@ function createWordStore(): WordStoreState {
         updateWordTranslationInDOM(hex, '', '');
 
         this.isLoading = false;
-        this.closeModal();
+        this.closePopover();
         return true;
       } catch (error) {
         console.error('Error deleting word:', error);

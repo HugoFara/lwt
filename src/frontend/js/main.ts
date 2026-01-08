@@ -28,7 +28,7 @@ import '@shared/utils/ajax_utilities';
 import '@shared/utils/ui_utilities';
 import '@shared/utils/user_interactions';
 import '@shared/utils/simple_interactions';
-import { parseInlineMarkdown } from '@shared/utils/inline_markdown';
+import '@shared/utils/inline_markdown';
 
 // Shared stores
 import '@shared/stores/lwt_state';
@@ -73,6 +73,7 @@ import '@modules/vocabulary/stores/word_list_filter';
 import '@modules/vocabulary/stores/word_list_table';
 
 // Vocabulary components
+import '@modules/vocabulary/components/word_popover';
 import '@modules/vocabulary/components/word_modal';
 import '@modules/vocabulary/components/word_edit_form';
 import '@modules/vocabulary/components/multi_word_modal';

@@ -130,9 +130,9 @@ function openWordEditForm(textId: number, position: number, wordId?: number): vo
     const formStore = getWordFormStore();
 
     if (wordStore && formStore) {
-      // Load the form and open modal
+      // Load the form and open edit modal
       formStore.loadForEdit(textId, position, wordId);
-      wordStore.isModalOpen = true;
+      wordStore.openEditModal();
     }
   } catch {
     // Alpine stores not available, fall back to navigation

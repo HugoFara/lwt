@@ -129,7 +129,10 @@ $audioPosition = (int) ($audioPosition ?? 0);
     </div>
   </div>
 
-  <!-- Word modal -->
+  <!-- Word popover (info view - non-blocking) -->
+  <?php include __DIR__ . '/word_popover.php'; ?>
+
+  <!-- Word modal (edit view only) -->
   <?php include __DIR__ . '/word_modal.php'; ?>
 
   <!-- Multi-word modal -->

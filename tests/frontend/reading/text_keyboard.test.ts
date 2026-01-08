@@ -50,7 +50,11 @@ vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates',
 }));
 
 vi.mock('../../../src/frontend/js/modules/vocabulary/stores/word_store', () => ({
-  getWordStore: vi.fn(() => ({ isModalOpen: false }))
+  getWordStore: vi.fn(() => ({
+    isPopoverOpen: false,
+    isEditModalOpen: false,
+    openEditModal: vi.fn()
+  }))
 }));
 
 vi.mock('../../../src/frontend/js/modules/vocabulary/stores/word_form_store', () => ({
