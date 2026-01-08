@@ -777,6 +777,19 @@ class TagsTest extends TestCase
             [$uniqueTagName]
         );
 
+        // Create a test language and word for the FK constraint
+        Connection::query(
+            "INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+             VALUES ('DupTagTestLang', 'http://test', 'http://test')"
+        );
+        $langId = (int)Connection::lastInsertId();
+
+        Connection::query(
+            "INSERT INTO words (WoText, WoTextLC, WoStatus, WoLgID)
+             VALUES ('duptestword', 'duptestword', 1, $langId)"
+        );
+        $wordId = (int)Connection::lastInsertId();
+
         try {
             // Insert the tag directly into the database
             Connection::preparedExecute(
@@ -789,7 +802,7 @@ class TagsTest extends TestCase
 
             // Try to save a word with this tag - should NOT throw exception
             // even though the tag exists but is not in the cache
-            TagsFacade::saveWordTagsFromArray(1, [$uniqueTagName]);
+            TagsFacade::saveWordTagsFromArray($wordId, [$uniqueTagName]);
             $this->assertTrue(true, 'saveWordTagsFromArray should handle duplicate tags gracefully');
         } catch (\RuntimeException $e) {
             if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
@@ -797,15 +810,17 @@ class TagsTest extends TestCase
             }
             throw $e;
         } finally {
-            // Cleanup: remove the test tag and wordtags associations
+            // Cleanup: remove the test tag, wordtags associations, word, and language
             Connection::preparedExecute(
-                'DELETE FROM wordtags WHERE WtTgID IN (SELECT TgID FROM tags WHERE TgText = ?)',
-                [$uniqueTagName]
+                'DELETE FROM wordtags WHERE WtWoID = ?',
+                [$wordId]
             );
             Connection::preparedExecute(
                 'DELETE FROM tags WHERE TgText = ?',
                 [$uniqueTagName]
             );
+            Connection::query("DELETE FROM words WHERE WoID = $wordId");
+            Connection::query("DELETE FROM languages WHERE LgID = $langId");
         }
     }
 }

@@ -1008,8 +1008,6 @@ class TextParsing
     private static function registerSentencesTextItems(int $tid, int $lid, bool $hasmultiword): void
     {
         // STEP 1: Insert sentences FIRST to satisfy FK constraint.
-        // TiSeID values in temptextitems are pre-computed to match the SeID
-        // values these sentences will receive via auto-increment.
         Connection::query('SET @i=0;');
         Connection::preparedExecute(
             "INSERT INTO sentences (
@@ -1026,7 +1024,43 @@ class TextParsing
             [$lid, $tid]
         );
 
-        // STEP 2: Insert text items. TiSeID directly equals SeID (pre-computed).
+        // STEP 1.5: Align TiSeID with actual SeID values.
+        // The pre-computed TiSeID may not match actual AUTO_INCREMENT values,
+        // so we update temptextitems to use the actual SeID from inserted sentences.
+        // ROW_NUMBER() maps TiSeID rank to SeOrder, which we JOIN to get SeID.
+        Connection::preparedExecute(
+            "UPDATE temptextitems t
+            JOIN (
+                SELECT TiSeID AS old_seid,
+                       ROW_NUMBER() OVER (ORDER BY TiSeID) AS rn
+                FROM temptextitems
+                GROUP BY TiSeID
+            ) mapping ON t.TiSeID = mapping.old_seid
+            JOIN sentences s ON s.SeOrder = mapping.rn AND s.SeTxID = ?
+            SET t.TiSeID = s.SeID",
+            [$tid]
+        );
+
+        // STEP 1.6: Also update tempexprs.sent if multiword expressions exist.
+        // tempexprs was populated before sentences were inserted, so its `sent`
+        // field also needs to be aligned with actual SeID values.
+        if ($hasmultiword) {
+            Connection::preparedExecute(
+                "UPDATE tempexprs e
+                JOIN (
+                    SELECT sent AS old_sent,
+                           ROW_NUMBER() OVER (ORDER BY sent) AS rn
+                    FROM tempexprs
+                    WHERE sent IS NOT NULL
+                    GROUP BY sent
+                ) mapping ON e.sent = mapping.old_sent
+                JOIN sentences s ON s.SeOrder = mapping.rn AND s.SeTxID = ?
+                SET e.sent = s.SeID",
+                [$tid]
+            );
+        }
+
+        // STEP 2: Insert text items. TiSeID and tempexprs.sent now equal actual SeID.
         if ($hasmultiword) {
             $bindings = [$lid, $tid, $lid, $lid, $tid, $lid];
             $stmt = Connection::prepare(
