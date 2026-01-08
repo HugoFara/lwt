@@ -97,7 +97,7 @@ npm run cy:open                  # Interactive Cypress test runner
 
 ```bash
 ./vendor/bin/psalm                                   # Static analysis (default level)
-composer psalm:level3                                # Stricter static analysis
+composer psalm:level1                                # Strictest static analysis
 npm run lint                                         # ESLint for TypeScript/JS
 npm run lint:fix                                     # Auto-fix lint issues
 npm run typecheck                                    # TypeScript type checking
@@ -156,7 +156,9 @@ src/Shared/                          # Cross-cutting infrastructure
 
 src/Modules/                         # Feature modules (bounded contexts)
 ├── Admin/                           # Admin/settings module
+├── Dictionary/                      # Dictionary lookup/translation module
 ├── Feed/                            # RSS feed module
+├── Home/                            # Home page/dashboard module
 ├── Language/                        # Language configuration module
 ├── Review/                          # Spaced repetition testing module
 ├── Tags/                            # Tagging module
