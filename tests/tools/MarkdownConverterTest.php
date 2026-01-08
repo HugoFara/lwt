@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../src/tools/markdown_converter.php';
 
 use PHPUnit\Framework\TestCase;
 
-use function Lwt\Tools\markdown_converter;
+use function Lwt\Tools\markdownConverter;
 
 final class MarkdownConverterTest extends TestCase
 {
@@ -22,7 +22,7 @@ final class MarkdownConverterTest extends TestCase
         $path = stream_get_meta_data($temp)['uri'];
         fwrite($temp, $initialMarkdown);
         fseek($temp, 0);
-        $outputText = trim(markdown_converter($path));
+        $outputText = trim(markdownConverter($path));
         fclose($temp);
         $this->assertSame($expectedHTML, $outputText);
     }

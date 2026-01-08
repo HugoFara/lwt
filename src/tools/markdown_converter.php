@@ -27,7 +27,7 @@ use League\CommonMark\GithubFlavoredMarkdownConverter;
  *
  * @return string An HTML-formatted string
  */
-function markdown_converter($file_path)
+function markdownConverter($file_path)
 {
     $converter = new GithubFlavoredMarkdownConverter();
     $markdown = file_get_contents($file_path);
@@ -41,10 +41,10 @@ function markdown_converter($file_path)
  *
  * @param string $file_path Full path for the file to use, including extension (should be ".md")
  */
-function markdown_integration($file_path): void
+function markdownIntegration($file_path): void
 {
     $id = basename($file_path, ".md");
-    $html = markdown_converter($file_path);
+    $html = markdownConverter($file_path);
     $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
     $dom = new DOMDocument();
     $dom->loadHTML($html);
