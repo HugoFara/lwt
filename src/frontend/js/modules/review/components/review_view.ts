@@ -87,7 +87,7 @@ function buildReviewToolbar(): string {
               </div>
               <div class="control">
                 <label class="checkbox">
-                  <input type="checkbox" x-model="store.readAloudEnabled" @change="saveReadAloudSetting">
+                  <input type="checkbox" :checked="store.readAloudEnabled" @change="toggleReadAloud($event)">
                   Read aloud
                 </label>
               </div>
@@ -665,8 +665,9 @@ function registerReviewAppComponent(config: ReviewConfig): void {
       }
     },
 
-    saveReadAloudSetting() {
-      localStorage.setItem('lwt-review-read-aloud', String(this.store.readAloudEnabled));
+    toggleReadAloud(event: Event) {
+      const target = event.target as HTMLInputElement;
+      this.store.setReadAloud(target.checked);
     },
 
     handleKeydown(e: KeyboardEvent) {

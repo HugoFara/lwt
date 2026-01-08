@@ -133,6 +133,7 @@ export interface ReviewStoreState {
   openModal(): void;
   closeModal(): void;
   playSound(correct: boolean): void;
+  setReadAloud(enabled: boolean): void;
 }
 
 /**
@@ -493,6 +494,14 @@ function createReviewStore(initialValues?: ReviewStoreInitialValues): ReviewStor
           // Ignore autoplay errors
         });
       }
+    },
+
+    /**
+     * Set read aloud preference (CSP-compatible setter).
+     */
+    setReadAloud(enabled: boolean): void {
+      this.readAloudEnabled = enabled;
+      localStorage.setItem('lwt-review-read-aloud', String(enabled));
     }
   };
 }
