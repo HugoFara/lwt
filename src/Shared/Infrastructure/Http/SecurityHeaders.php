@@ -16,6 +16,8 @@
 
 namespace Lwt\Shared\Infrastructure\Http;
 
+use Lwt\Core\Bootstrap\EnvLoader;
+
 /**
  * Handles HTTP security headers for the application.
  *
@@ -102,7 +104,7 @@ class SecurityHeaders
      * - Images: self + data: (for inline images) + blob: (for generated content)
      * - Fonts: self
      * - Connect: self + api.github.com (for release checks)
-     * - Media: self + blob: (for audio playback)
+     * - Media: configurable via CSP_MEDIA_SOURCES env var (default: self + blob)
      * - Frame ancestors: self (alternative to X-Frame-Options)
      *
      * @return void
@@ -121,8 +123,8 @@ class SecurityHeaders
             "font-src 'self'",
             // AJAX/fetch requests: self + GitHub API for release checks
             "connect-src 'self' https://api.github.com",
-            // Audio/video: self + blob for TTS
-            "media-src 'self' blob:",
+            // Audio/video: configurable, defaults to self + blob for TTS
+            self::buildMediaSrcDirective(),
             // Frames: block all embedding (clickjacking protection)
             "frame-ancestors 'self'",
             // Form submissions: self only
@@ -132,6 +134,72 @@ class SecurityHeaders
         ]);
 
         header("Content-Security-Policy: {$policy}");
+    }
+
+    /**
+     * Build the media-src CSP directive based on configuration.
+     *
+     * Reads CSP_MEDIA_SOURCES from environment:
+     * - "self" (default): Only allow media from same origin
+     * - "https": Allow any HTTPS source
+     * - Comma-separated domains: Allow specific domains
+     *
+     * Always includes 'self' and 'blob:' for local files and TTS.
+     *
+     * @return string The complete media-src directive
+     */
+    private static function buildMediaSrcDirective(): string
+    {
+        $config = EnvLoader::get('CSP_MEDIA_SOURCES', 'self');
+        $sources = ["'self'", "blob:"];
+
+        if ($config === null || $config === 'self') {
+            // Default: only self and blob
+            return "media-src " . implode(' ', $sources);
+        }
+
+        if ($config === 'https') {
+            // Allow any HTTPS source
+            $sources[] = "https:";
+            return "media-src " . implode(' ', $sources);
+        }
+
+        // Parse comma-separated list of domains
+        $domains = array_map('trim', explode(',', $config));
+        foreach ($domains as $domain) {
+            if ($domain !== '' && self::isValidCspSource($domain)) {
+                $sources[] = $domain;
+            }
+        }
+
+        return "media-src " . implode(' ', $sources);
+    }
+
+    /**
+     * Validate a CSP source value.
+     *
+     * Accepts:
+     * - https://domain.com or https://domain.com:port
+     * - http://domain.com (allowed but not recommended)
+     * - *.domain.com wildcards
+     *
+     * @param string $source The source to validate
+     *
+     * @return bool True if valid CSP source
+     */
+    private static function isValidCspSource(string $source): bool
+    {
+        // Must start with http:// or https:// or be a wildcard pattern
+        if (preg_match('#^https?://[a-zA-Z0-9][-a-zA-Z0-9.]*[a-zA-Z0-9](:\d+)?/?$#', $source)) {
+            return true;
+        }
+
+        // Allow wildcard subdomains like *.example.com
+        if (preg_match('#^\*\.[a-zA-Z0-9][-a-zA-Z0-9.]*[a-zA-Z0-9]$#', $source)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

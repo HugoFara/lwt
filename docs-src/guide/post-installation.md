@@ -124,3 +124,38 @@ LWT can import captions from YouTube videos. To enable this feature:
 5. Restart your web server
 
 The YouTube import option will now appear when creating new texts.
+
+## External Audio Sources (CSP Configuration)
+
+By default, LWT only allows audio files from the same server (for security). If you want to use audio from external sources (e.g., language learning websites), you can configure the Content Security Policy.
+
+### Configuration
+
+Add the `CSP_MEDIA_SOURCES` setting to your `.env` file:
+
+```dotenv
+# Option 1: Allow any HTTPS source (recommended for self-hosted instances)
+CSP_MEDIA_SOURCES=https
+
+# Option 2: Allow specific domains only
+CSP_MEDIA_SOURCES=https://example.com,https://other-site.org
+
+# Option 3: Strict mode - only local files (default)
+CSP_MEDIA_SOURCES=self
+```
+
+### Security Considerations
+
+| Setting | Security | Use Case |
+|---------|----------|----------|
+| `self` | Highest | Multi-user servers where privacy is critical |
+| `https` | Moderate | Self-hosted instances with trusted users |
+| Specific domains | High | When you know exactly which audio sources you'll use |
+
+::: warning Privacy Note for Multi-User Servers
+When `https` is enabled, users can add audio URLs pointing to external servers. When other users play that audio, the external server can log their IP addresses. For public multi-user servers where privacy matters, consider:
+
+* Keeping the default `self` setting
+* Implementing a media proxy (future feature)
+* Whitelisting only trusted domains
+:::

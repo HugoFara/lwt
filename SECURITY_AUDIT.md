@@ -286,10 +286,25 @@ Added `src/backend/.htaccess`:
 
 - `X-Frame-Options: SAMEORIGIN`
 - `X-Content-Type-Options: nosniff`
-- `Content-Security-Policy` (script-src, style-src, img-src, etc.)
+- `Content-Security-Policy` (script-src, style-src, img-src, media-src, etc.)
 - `Strict-Transport-Security` (HTTPS only)
 - `Referrer-Policy: strict-origin-when-cross-origin`
 - `Permissions-Policy` (disables camera, microphone, geolocation, etc.)
+
+**Configurable media-src:** The `media-src` directive is configurable via the `CSP_MEDIA_SOURCES` environment variable:
+
+```dotenv
+# Default: only local media (strict)
+CSP_MEDIA_SOURCES=self
+
+# Allow all HTTPS sources (for self-hosted instances)
+CSP_MEDIA_SOURCES=https
+
+# Whitelist specific domains
+CSP_MEDIA_SOURCES=https://example.com,https://other-site.org
+```
+
+This allows administrators to balance security (preventing user tracking via external media) with functionality (playing audio from language learning sites).
 
 ---
 
