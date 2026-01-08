@@ -5,7 +5,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   openModal,
   closeModal,
-  openModalFromUrl,
   showExportTemplateHelp,
 } from '../../../src/frontend/js/shared/components/modal';
 
@@ -134,68 +133,6 @@ describe('modal.ts', () => {
     it('handles being called when no modal exists', () => {
       // Should not throw
       expect(() => closeModal()).not.toThrow();
-    });
-  });
-
-  // ===========================================================================
-  // openModalFromUrl Tests
-  // ===========================================================================
-
-  describe('openModalFromUrl', () => {
-    it('fetches content from URL and displays in modal', async () => {
-      // Mock fetch
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        text: vi.fn().mockResolvedValue('<html><head><title>Test Page</title></head><body><p>Loaded content</p></body></html>')
-      });
-      global.fetch = mockFetch as any;
-
-      openModalFromUrl('/test-url');
-
-      expect(mockFetch).toHaveBeenCalledWith('/test-url');
-    });
-
-    it('extracts body content from full HTML document', () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        text: vi.fn().mockResolvedValue('<html><body><p>Body content</p></body></html>')
-      });
-      global.fetch = mockFetch as any;
-
-      openModalFromUrl('/test-url');
-
-      // The fetch should be called
-      expect(mockFetch).toHaveBeenCalledWith('/test-url');
-    });
-
-    it('extracts title from HTML document when not provided', () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        text: vi.fn().mockResolvedValue('<html><head><title>Extracted Title</title></head><body><p>Content</p></body></html>')
-      });
-      global.fetch = mockFetch as any;
-
-      openModalFromUrl('/test-url');
-    });
-
-    it('uses provided title over extracted title', () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        text: vi.fn().mockResolvedValue('<html><head><title>HTML Title</title></head><body><p>Content</p></body></html>')
-      });
-      global.fetch = mockFetch as any;
-
-      openModalFromUrl('/test-url', { title: 'Provided Title' });
-    });
-
-    it('shows error message on fetch failure', () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: false,
-        text: vi.fn().mockResolvedValue('')
-      });
-      global.fetch = mockFetch as any;
-
-      openModalFromUrl('/test-url');
     });
   });
 
