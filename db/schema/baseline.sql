@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS users (
     UsPasswordResetToken varchar(64) DEFAULT NULL,
     UsPasswordResetTokenExpires datetime DEFAULT NULL,
     UsWordPressId int(10) unsigned DEFAULT NULL,
+    UsGoogleId varchar(255) DEFAULT NULL,
+    UsMicrosoftId varchar(255) DEFAULT NULL,
     UsCreated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UsLastLogin timestamp NULL DEFAULT NULL,
     UsIsActive tinyint(1) unsigned NOT NULL DEFAULT 1,
@@ -35,7 +37,9 @@ CREATE TABLE IF NOT EXISTS users (
     UNIQUE KEY UsApiToken (UsApiToken),
     UNIQUE KEY UsRememberToken (UsRememberToken),
     UNIQUE KEY UsPasswordResetToken (UsPasswordResetToken),
-    KEY UsWordPressId (UsWordPressId)
+    KEY UsWordPressId (UsWordPressId),
+    UNIQUE KEY UsGoogleId (UsGoogleId),
+    UNIQUE KEY UsMicrosoftId (UsMicrosoftId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- NOTE: Admin user should be created through the setup wizard or registration page.
