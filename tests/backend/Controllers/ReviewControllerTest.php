@@ -533,7 +533,7 @@ class ReviewControllerTest extends TestCase
         }
 
         $_REQUEST['selection'] = '1';
-        $_SESSION['testsql'] = 'SELECT * FROM words';
+        $_SESSION['reviewsql'] = 'SELECT * FROM words';
 
         $controller = $this->createController();
 

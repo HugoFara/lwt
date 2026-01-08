@@ -669,7 +669,7 @@ class ReviewService
         return [
             'title' => $title,
             'property' => $property,
-            'testsql' => $testsql,
+            'reviewsql' => $testsql,
             'counts' => $counts
         ];
     }

@@ -103,11 +103,11 @@ class ReviewController extends BaseController
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
         $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
-        $sessTestsql = $_SESSION['testsql'] ?? null;
+        $sessReviewSql = $_SESSION['reviewsql'] ?? null;
 
         $testData = $this->reviewFacade->getTestDataFromParams(
             $selection,
-            $sessTestsql,
+            $sessReviewSql,
             $langId,
             $textId
         );
@@ -123,7 +123,7 @@ class ReviewController extends BaseController
             $langId,
             $textId,
             $selection,
-            $sessTestsql
+            $sessReviewSql
         );
 
         // Initialize session
@@ -155,12 +155,12 @@ class ReviewController extends BaseController
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
         $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
-        $sessTestsql = $_SESSION['testsql'] ?? null;
+        $sessReviewSql = $_SESSION['reviewsql'] ?? null;
 
         // Get review SQL
         $identifier = $this->reviewFacade->getReviewIdentifier(
             $selection,
-            $sessTestsql,
+            $sessReviewSql,
             $langId,
             $textId
         );
@@ -228,7 +228,7 @@ class ReviewController extends BaseController
     private function getReviewProperty(): string
     {
         $selection = $this->param('selection');
-        if ($selection !== '' && isset($_SESSION['testsql'])) {
+        if ($selection !== '' && isset($_SESSION['reviewsql'])) {
             return "selection=" . $selection;
         }
         $lang = $this->param('lang');
@@ -256,14 +256,14 @@ class ReviewController extends BaseController
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
         $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
-        $sessTestsql = $_SESSION['testsql'] ?? null;
+        $sessReviewSql = $_SESSION['reviewsql'] ?? null;
         $testTypeParam = $this->param('type', '1');
         $isTableMode = $testTypeParam === 'table';
 
         // Get review data
         $testData = $this->reviewFacade->getTestDataFromParams(
             $selection,
-            $sessTestsql,
+            $sessReviewSql,
             $langId,
             $textId
         );
@@ -275,7 +275,7 @@ class ReviewController extends BaseController
         // Get review identifier
         $identifier = $this->reviewFacade->getReviewIdentifier(
             $selection,
-            $sessTestsql,
+            $sessReviewSql,
             $langId,
             $textId
         );

@@ -427,7 +427,7 @@ class ReviewFacade
         return [
             'title' => $this->buildTitle($config),
             'property' => $config->toUrlProperty(),
-            'testsql' => $config->toSqlProjection(),
+            'reviewsql' => $config->toSqlProjection(),
             'counts' => $counts
         ];
     }

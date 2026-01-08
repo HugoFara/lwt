@@ -310,7 +310,7 @@ class TextController extends BaseController
                 break;
 
             case 'review':
-                $_SESSION['testsql'] = $list;
+                $_SESSION['reviewsql'] = $list;
                 header("Location: /review?selection=3");
                 exit();
         }

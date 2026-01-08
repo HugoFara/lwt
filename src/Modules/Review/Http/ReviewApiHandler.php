@@ -426,12 +426,12 @@ class ReviewApiHandler
             ? (int)$params['type'] : 1;
         $isTableMode = ($params['type'] ?? '') === 'table';
 
-        $sessTestsql = $_SESSION['testsql'] ?? null;
+        $sessReviewSql = $_SESSION['reviewsql'] ?? null;
 
         // Get test data
         $testData = $this->reviewFacade->getTestDataFromParams(
             $selection,
-            $sessTestsql,
+            $sessReviewSql,
             $langId,
             $textId
         );
@@ -443,7 +443,7 @@ class ReviewApiHandler
         // Get test identifier
         $identifier = $this->reviewFacade->getReviewIdentifier(
             $selection,
-            $sessTestsql,
+            $sessReviewSql,
             $langId,
             $textId
         );
