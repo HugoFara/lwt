@@ -139,6 +139,7 @@ class ReviewApiHandler
         bool $showContextTrans = false
     ): array {
         $baseType = $this->reviewFacade->getBaseReviewType($testType);
+        $wordMode = $this->reviewFacade->isWordMode($testType);
         $wordText = $wordRecord['WoText'];
 
         // Extract the word from sentence (marked with {})
@@ -158,18 +159,26 @@ class ReviewApiHandler
                 $showContextTrans
             );
         } else {
-            // Build display HTML based on test type (legacy path)
+            // Build display HTML based on test type
             if ($baseType == 1) {
-                // Type 1: Show term, guess translation
+                // Type 1/4: Show term, guess translation
                 $displayHtml = str_replace(
                     '{' . $markedWord . '}',
                     '<span class="word-test">' . htmlspecialchars($markedWord, ENT_QUOTES, 'UTF-8') . '</span>',
                     $sentence
                 );
             } elseif ($baseType == 2) {
-                // Type 2: Show translation, guess term (hide term)
-                $hiddenSpan = '<span class="word-test-hidden">[...]</span>';
-                $displayHtml = str_replace('{' . $markedWord . '}', $hiddenSpan, $sentence);
+                if ($wordMode) {
+                    // Type 5: Translation → Term (word mode) - show translation
+                    $translation = $wordRecord['WoTranslation'] ?? '';
+                    $displayHtml = '<span class="word-test">'
+                        . htmlspecialchars($translation, ENT_QUOTES, 'UTF-8')
+                        . '</span>';
+                } else {
+                    // Type 2: Sentence → Term (sentence mode) - hide term in sentence
+                    $hiddenSpan = '<span class="word-test-hidden">[...]</span>';
+                    $displayHtml = str_replace('{' . $markedWord . '}', $hiddenSpan, $sentence);
+                }
             } else {
                 // Type 3: Show sentence with hidden term
                 $hiddenSpan = '<span class="word-test-hidden">[...]</span>';

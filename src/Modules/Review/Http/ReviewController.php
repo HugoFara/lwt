@@ -321,7 +321,7 @@ class ReviewController extends BaseController
             'selection' => is_array($identifier[1])
                 ? implode(',', $identifier[1])
                 : (string) $identifier[1],
-            'reviewType' => $baseType,
+            'reviewType' => $testType,
             'isTableMode' => $isTableMode,
             'wordMode' => $wordMode,
             'langId' => $langIdFromSql,

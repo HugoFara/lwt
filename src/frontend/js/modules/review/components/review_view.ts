@@ -568,6 +568,11 @@ export function initReviewApp(): void {
       return;
     }
 
+    // Pre-set critical store values before Alpine renders to prevent visual glitches
+    const store = getReviewStore();
+    store.reviewType = config.reviewType;
+    store.isTableMode = config.isTableMode;
+
     // Register the Alpine components
     registerReviewAppComponent(config);
     registerTableReviewComponent();
