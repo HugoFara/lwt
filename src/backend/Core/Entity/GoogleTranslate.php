@@ -201,15 +201,23 @@ class GoogleTranslate
         if (is_callable('curl_init')) {
             if (!$cookieSet) {
                 $cookie = tempnam(sys_get_temp_dir(), "CURLCOOKIE");
-                $curl = curl_init($url);
-                curl_setopt($curl, CURLOPT_COOKIEJAR, $cookie);
-                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($curl, CURLOPT_HTTPHEADER, self::$headers);
-                curl_setopt($curl, CURLOPT_ENCODING, "gzip");
-                $output = curl_exec($curl);
-                unset($curl);
-                unlink($cookie);
-                return $output;
+                if ($cookie === false) {
+                    throw new \RuntimeException('Failed to create temporary cookie file');
+                }
+                try {
+                    $curl = curl_init($url);
+                    curl_setopt($curl, CURLOPT_COOKIEJAR, $cookie);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($curl, CURLOPT_HTTPHEADER, self::$headers);
+                    curl_setopt($curl, CURLOPT_ENCODING, "gzip");
+                    $output = curl_exec($curl);
+                    unset($curl);
+                    return $output;
+                } finally {
+                    if (file_exists($cookie)) {
+                        unlink($cookie);
+                    }
+                }
             }
             $curl = curl_init($url);
             // curl_setopt($curl, CURLOPT_COOKIEFILE, $cookie); Commented in 2.7.0-fork, do not work

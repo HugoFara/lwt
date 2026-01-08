@@ -286,127 +286,136 @@ class TextParsing
         $text = trim($text);
 
         $file_name = tempnam(sys_get_temp_dir(), "tmpti");
-        // We use the format "word  num num" for all nodes
-        $mecab_args = " -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n";
-        $mecab_args .= " -o $file_name ";
-        $mecab = (new TextParsingService())->getMecabPath($mecab_args);
+        if ($file_name === false) {
+            throw new \RuntimeException('Failed to create temporary file for MeCab parsing');
+        }
 
-        // WARNING: \n is converted to PHP_EOL here!
-        $handle = popen($mecab, 'w');
-        fwrite($handle, $text);
-        pclose($handle);
+        try {
+            // We use the format "word  num num" for all nodes
+            $mecab_args = " -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n";
+            $mecab_args .= " -o $file_name ";
+            $mecab = (new TextParsingService())->getMecabPath($mecab_args);
 
-        Connection::execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS temptextitems2 (
-                TiCount smallint(5) unsigned NOT NULL,
-                TiSeID mediumint(8) unsigned NOT NULL,
-                TiOrder smallint(5) unsigned NOT NULL,
-                TiWordCount tinyint(3) unsigned NOT NULL,
-                TiText varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL
-            ) DEFAULT CHARSET=utf8"
-        );
-        $handle = fopen($file_name, 'r');
-        $mecabed = fread($handle, filesize($file_name));
+            // WARNING: \n is converted to PHP_EOL here!
+            $handle = popen($mecab, 'w');
+            fwrite($handle, $text);
+            pclose($handle);
 
-        fclose($handle);
-        $values = array();
-        $order = 0;
-        $sid = 1;
-        if ($useMaxSeID) {
-            $sid = (int)Connection::fetchValue(
-                "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences"
-                . UserScopedQuery::forTable('sentences')
+            Connection::execute(
+                "CREATE TEMPORARY TABLE IF NOT EXISTS temptextitems2 (
+                    TiCount smallint(5) unsigned NOT NULL,
+                    TiSeID mediumint(8) unsigned NOT NULL,
+                    TiOrder smallint(5) unsigned NOT NULL,
+                    TiWordCount tinyint(3) unsigned NOT NULL,
+                    TiText varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL
+                ) DEFAULT CHARSET=utf8"
             );
-        }
-        $term_type = 0;
-        $last_node_type = 0;
-        $count = 0;
-        $row = array(0, 0, 0, "", 0);
-        foreach (explode(PHP_EOL, $mecabed) as $line) {
-            if (trim($line) == "") {
-                continue;
+            $handle = fopen($file_name, 'r');
+            $mecabed = fread($handle, filesize($file_name));
+
+            fclose($handle);
+            $values = array();
+            $order = 0;
+            $sid = 1;
+            if ($useMaxSeID) {
+                $sid = (int)Connection::fetchValue(
+                    "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences"
+                    . UserScopedQuery::forTable('sentences')
+                );
             }
-            list($term, $node_type, $third) = explode(mb_chr(9), $line);
-            if ($term_type == 2 || $term == 'EOP' && $third == '7') {
-                $sid += 1;
-            }
-            $row[0] = $sid; // TiSeID
-            $row[1] = $count + 1; // TiCount
-            $count += mb_strlen($term);
-            $last_term_type = $term_type;
-            if ($third == '7') {
-                if ($term == 'EOP') {
-                    $term = '¶';
+            $term_type = 0;
+            $last_node_type = 0;
+            $count = 0;
+            $row = array(0, 0, 0, "", 0);
+            foreach (explode(PHP_EOL, $mecabed) as $line) {
+                if (trim($line) == "") {
+                    continue;
                 }
-                $term_type = 2;
-            } elseif (in_array($node_type, ['2', '6', '7', '8'])) {
-                $term_type = 0;
-            } else {
-                $term_type = 1;
-            }
-
-            // Increase word order:
-            // Once if the current or the previous term were words
-            // Twice if current or the previous were not of unmanaged type
-            $order += (int)($term_type == 0 && $last_term_type == 0) +
-            (int)($term_type != 1 || $last_term_type != 1);
-            $row[2] = $order; // TiOrder
-            $row[3] = $term; // TiText (no escaping needed for prepared statement)
-            $row[4] = $term_type == 0 ? 1 : 0; // TiWordCount
-            $values[] = $row;
-            // Special case for kazu (numbers)
-            if ($last_node_type == 8 && $node_type == 8) {
-                $lastKey = array_key_last($values);
-                // $lastKey is int<0, max> since we just added an element
-                // We need at least 2 elements to access previous
-                if ($lastKey > 0 && isset($values[$lastKey - 1][3])) {
-                    // Concatenate the previous value with the current term
-                    $values[$lastKey - 1][3] = $values[$lastKey - 1][3] . $term;
-                    // Remove last element to avoid repetition
-                    array_pop($values);
+                list($term, $node_type, $third) = explode(mb_chr(9), $line);
+                if ($term_type == 2 || $term == 'EOP' && $third == '7') {
+                    $sid += 1;
                 }
+                $row[0] = $sid; // TiSeID
+                $row[1] = $count + 1; // TiCount
+                $count += mb_strlen($term);
+                $last_term_type = $term_type;
+                if ($third == '7') {
+                    if ($term == 'EOP') {
+                        $term = '¶';
+                    }
+                    $term_type = 2;
+                } elseif (in_array($node_type, ['2', '6', '7', '8'])) {
+                    $term_type = 0;
+                } else {
+                    $term_type = 1;
+                }
+
+                // Increase word order:
+                // Once if the current or the previous term were words
+                // Twice if current or the previous were not of unmanaged type
+                $order += (int)($term_type == 0 && $last_term_type == 0) +
+                (int)($term_type != 1 || $last_term_type != 1);
+                $row[2] = $order; // TiOrder
+                $row[3] = $term; // TiText (no escaping needed for prepared statement)
+                $row[4] = $term_type == 0 ? 1 : 0; // TiWordCount
+                $values[] = $row;
+                // Special case for kazu (numbers)
+                if ($last_node_type == 8 && $node_type == 8) {
+                    $lastKey = array_key_last($values);
+                    // $lastKey is int<0, max> since we just added an element
+                    // We need at least 2 elements to access previous
+                    if ($lastKey > 0 && isset($values[$lastKey - 1][3])) {
+                        // Concatenate the previous value with the current term
+                        $values[$lastKey - 1][3] = $values[$lastKey - 1][3] . $term;
+                        // Remove last element to avoid repetition
+                        array_pop($values);
+                    }
+                }
+                $last_node_type = $node_type;
             }
-            $last_node_type = $node_type;
-        }
 
-        // Build multi-row INSERT with prepared statement
-        // Generate placeholders for all rows: (?, ?, ?, ?, ?), (?, ?, ?, ?, ?), ...
-        $placeholders = array();
-        $flatParams = array();
-        foreach ($values as $row) {
-            $placeholders[] = "(?, ?, ?, ?, ?)";
-            // Flatten the row values into a single array for binding
-            $flatParams[] = $row[0]; // TiSeID
-            $flatParams[] = $row[1]; // TiCount
-            $flatParams[] = $row[2]; // TiOrder
-            $flatParams[] = $row[3]; // TiText
-            $flatParams[] = $row[4]; // TiWordCount
-        }
+            // Build multi-row INSERT with prepared statement
+            // Generate placeholders for all rows: (?, ?, ?, ?, ?), (?, ?, ?, ?, ?), ...
+            $placeholders = array();
+            $flatParams = array();
+            foreach ($values as $row) {
+                $placeholders[] = "(?, ?, ?, ?, ?)";
+                // Flatten the row values into a single array for binding
+                $flatParams[] = $row[0]; // TiSeID
+                $flatParams[] = $row[1]; // TiCount
+                $flatParams[] = $row[2]; // TiOrder
+                $flatParams[] = $row[3]; // TiText
+                $flatParams[] = $row[4]; // TiWordCount
+            }
 
-        if (!empty($placeholders)) {
+            if (!empty($placeholders)) {
+                Connection::preparedExecute(
+                    "INSERT INTO temptextitems2 (
+                        TiSeID, TiCount, TiOrder, TiText, TiWordCount
+                    ) VALUES " . implode(',', $placeholders),
+                    $flatParams
+                );
+            }
+            // Delete elements TiOrder=@order
             Connection::preparedExecute(
-                "INSERT INTO temptextitems2 (
-                    TiSeID, TiCount, TiOrder, TiText, TiWordCount
-                ) VALUES " . implode(',', $placeholders),
-                $flatParams
+                "DELETE FROM temptextitems2 WHERE TiOrder=?",
+                [$order]
             );
+            Connection::query(
+                "INSERT INTO temptextitems (
+                    TiCount, TiSeID, TiOrder, TiWordCount, TiText
+                )
+                SELECT MIN(TiCount) s, TiSeID, TiOrder, TiWordCount,
+                group_concat(TiText ORDER BY TiCount SEPARATOR '')
+                FROM temptextitems2
+                GROUP BY TiOrder"
+            );
+            Connection::execute("DROP TABLE temptextitems2");
+        } finally {
+            if (file_exists($file_name)) {
+                unlink($file_name);
+            }
         }
-        // Delete elements TiOrder=@order
-        Connection::preparedExecute(
-            "DELETE FROM temptextitems2 WHERE TiOrder=?",
-            [$order]
-        );
-        Connection::query(
-            "INSERT INTO temptextitems (
-                TiCount, TiSeID, TiOrder, TiWordCount, TiText
-            )
-            SELECT MIN(TiCount) s, TiSeID, TiOrder, TiWordCount,
-            group_concat(TiText ORDER BY TiCount SEPARATOR '')
-            FROM temptextitems2
-            GROUP BY TiOrder"
-        );
-        Connection::execute("DROP TABLE temptextitems2");
-        unlink($file_name);
     }
 
     // =========================================================================

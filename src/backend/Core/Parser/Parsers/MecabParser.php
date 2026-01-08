@@ -160,31 +160,39 @@ class MecabParser implements ParserInterface
     protected function runMecab(string $text): string
     {
         $fileName = tempnam(sys_get_temp_dir(), "lwt_mecab_");
-
-        // MeCab output format: word\tnode_type\tthird_param\n
-        // EOP\t3\t7 marks end of paragraph
-        $mecabArgs = " -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n";
-        $mecabArgs .= " -o " . escapeshellarg($fileName) . " ";
-
-        $mecab = $this->parsingService->getMecabPath($mecabArgs);
-
-        // Run MeCab
-        $handle = popen($mecab, 'w');
-        if ($handle === false) {
-            throw new \RuntimeException('Failed to open MeCab process');
-        }
-        fwrite($handle, $text);
-        pclose($handle);
-
-        // Read output
-        if (!file_exists($fileName)) {
-            throw new \RuntimeException('MeCab did not produce output file');
+        if ($fileName === false) {
+            throw new \RuntimeException('Failed to create temporary file for MeCab');
         }
 
-        $output = file_get_contents($fileName);
-        unlink($fileName);
+        try {
+            // MeCab output format: word\tnode_type\tthird_param\n
+            // EOP\t3\t7 marks end of paragraph
+            $mecabArgs = " -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n";
+            $mecabArgs .= " -o " . escapeshellarg($fileName) . " ";
 
-        return $output !== false ? $output : '';
+            $mecab = $this->parsingService->getMecabPath($mecabArgs);
+
+            // Run MeCab
+            $handle = popen($mecab, 'w');
+            if ($handle === false) {
+                throw new \RuntimeException('Failed to open MeCab process');
+            }
+            fwrite($handle, $text);
+            pclose($handle);
+
+            // Read output
+            if (!file_exists($fileName)) {
+                throw new \RuntimeException('MeCab did not produce output file');
+            }
+
+            $output = file_get_contents($fileName);
+
+            return $output !== false ? $output : '';
+        } finally {
+            if (file_exists($fileName)) {
+                unlink($fileName);
+            }
+        }
     }
 
     /**

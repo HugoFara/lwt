@@ -1615,63 +1615,63 @@ class VocabularyController
         $fields = $parsed['fields'];
 
         // Check for file upload vs text input
-        $fileUpl = (
-            isset($_FILES["thefile"]) &&
-            $_FILES["thefile"]["tmp_name"] != "" &&
-            $_FILES["thefile"]["error"] == 0
-        );
+        $uploadedFile = InputValidator::getUploadedFile('thefile');
 
         // Get or create the input file
         $uploadText = InputValidator::getString("Upload");
-        if ($fileUpl) {
-            $fileName = $_FILES["thefile"]["tmp_name"];
+        $createdTempFile = false;
+        if ($uploadedFile !== null) {
+            $fileName = $uploadedFile["tmp_name"];
         } else {
             if ($uploadText === '') {
                 echo '<p class="msgred">Error: No data to import</p>';
                 return;
             }
             $fileName = $uploadService->createTempFile($uploadText);
+            $createdTempFile = true;
         }
 
-        $ignoreFirst = InputValidator::getString("IgnFirstLine") === '1';
-        $overwrite = InputValidator::getInt("Over", 0) ?? 0;
-        $status = InputValidator::getInt("WoStatus", 1) ?? 1;
-        $translDelim = InputValidator::getString("transl_delim");
+        try {
+            $ignoreFirst = InputValidator::getString("IgnFirstLine") === '1';
+            $overwrite = InputValidator::getInt("Over", 0) ?? 0;
+            $status = InputValidator::getInt("WoStatus", 1) ?? 1;
+            $translDelim = InputValidator::getString("transl_delim");
 
-        // Get last update timestamp before import
-        $lastUpdate = $uploadService->getLastWordUpdate() ?? '';
+            // Get last update timestamp before import
+            $lastUpdate = $uploadService->getLastWordUpdate() ?? '';
 
-        if ($fields["txt"] > 0) {
-            // Import terms
-            $this->importTerms(
-                $uploadService,
-                $langId,
-                $fields,
-                $col,
-                $tabType,
-                $fileName,
-                $status,
-                $overwrite,
-                $ignoreFirst,
-                $translDelim,
-                $lastUpdate
-            );
+            if ($fields["txt"] > 0) {
+                // Import terms
+                $this->importTerms(
+                    $uploadService,
+                    $langId,
+                    $fields,
+                    $col,
+                    $tabType,
+                    $fileName,
+                    $status,
+                    $overwrite,
+                    $ignoreFirst,
+                    $translDelim,
+                    $lastUpdate
+                );
 
-            // Display results
-            $rtl = $uploadService->isRightToLeft($langId) ? 1 : 0;
-            $recno = $uploadService->countImportedTerms($lastUpdate);
-            include $this->viewPath . 'upload_result.php';
-        } elseif ($fields["tl"] > 0) {
-            // Import tags only
-            $uploadService->importTagsOnly($fields, $tabType, $fileName, $ignoreFirst);
-            echo '<p>Tags imported successfully.</p>';
-        } else {
-            echo '<p class="msgred">Error: No term column specified</p>';
-        }
-
-        // Clean up temp file if we created it
-        if (!$fileUpl && file_exists($fileName)) {
-            unlink($fileName);
+                // Display results
+                $rtl = $uploadService->isRightToLeft($langId) ? 1 : 0;
+                $recno = $uploadService->countImportedTerms($lastUpdate);
+                include $this->viewPath . 'upload_result.php';
+            } elseif ($fields["tl"] > 0) {
+                // Import tags only
+                $uploadService->importTagsOnly($fields, $tabType, $fileName, $ignoreFirst);
+                echo '<p>Tags imported successfully.</p>';
+            } else {
+                echo '<p class="msgred">Error: No term column specified</p>';
+            }
+        } finally {
+            // Clean up temp file if we created it
+            if ($createdTempFile && file_exists($fileName)) {
+                unlink($fileName);
+            }
         }
     }
 

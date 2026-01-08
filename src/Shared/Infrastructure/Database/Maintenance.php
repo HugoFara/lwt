@@ -89,11 +89,6 @@ class Maintenance
      */
     public static function updateJapaneseWordCount(int $japid): void
     {
-        // STEP 1: write the useful info to a file
-        $db_to_mecab = tempnam(sys_get_temp_dir(), "db_to_mecab");
-        $mecab_args = ' -F %m%t\\t -U %m%t\\t -E \\n ';
-        $mecab = (new TextParsingService())->getMecabPath($mecab_args);
-
         $rows = QueryBuilder::table('words')
             ->select(['WoID', 'WoTextLC'])
             ->where('WoLgID', '=', $japid)
@@ -102,67 +97,80 @@ class Maintenance
         if (empty($rows)) {
             return;
         }
-        $fp = fopen($db_to_mecab, 'w');
-        foreach ($rows as $record) {
-            fwrite($fp, $record['WoID'] . "\t" . $record['WoTextLC'] . "\n");
-        }
-        fclose($fp);
 
-        // STEP 2: process the data with MeCab and refine the output
-        $handle = popen($mecab . $db_to_mecab, "r");
-        if (feof($handle)) {
-            pclose($handle);
-            unlink($db_to_mecab);
-            return;
+        // STEP 1: write the useful info to a file
+        $db_to_mecab = tempnam(sys_get_temp_dir(), "db_to_mecab");
+        if ($db_to_mecab === false) {
+            throw new \RuntimeException('Failed to create temporary file for MeCab processing');
         }
-        $data = array();
-        while (!feof($handle)) {
-            $row = fgets($handle, 1024);
-            $arr = explode("4\t", $row, 2);
-            if (isset($arr[1]) && $arr[1] !== '') {
-                // NOTE: Test coverage requires MeCab installation - see tests/backend for integration tests
-                $cnt = substr_count(
-                    preg_replace('$[^2678]\\t$u', '', $arr[1]),
-                    "\t"
-                );
-                if (empty($cnt)) {
-                    $cnt = 1;
+
+        try {
+            $mecab_args = ' -F %m%t\\t -U %m%t\\t -E \\n ';
+            $mecab = (new TextParsingService())->getMecabPath($mecab_args);
+
+            $fp = fopen($db_to_mecab, 'w');
+            foreach ($rows as $record) {
+                fwrite($fp, $record['WoID'] . "\t" . $record['WoTextLC'] . "\n");
+            }
+            fclose($fp);
+
+            // STEP 2: process the data with MeCab and refine the output
+            $handle = popen($mecab . $db_to_mecab, "r");
+            if (feof($handle)) {
+                pclose($handle);
+                return;
+            }
+            $data = array();
+            while (!feof($handle)) {
+                $row = fgets($handle, 1024);
+                $arr = explode("4\t", $row, 2);
+                if (isset($arr[1]) && $arr[1] !== '') {
+                    // NOTE: Test coverage requires MeCab installation - see tests/backend for integration tests
+                    $cnt = substr_count(
+                        preg_replace('$[^2678]\\t$u', '', $arr[1]),
+                        "\t"
+                    );
+                    if (empty($cnt)) {
+                        $cnt = 1;
+                    }
+                    $data[] = ['mid' => $arr[0], 'count' => $cnt];
                 }
-                $data[] = ['mid' => $arr[0], 'count' => $cnt];
+            }
+            pclose($handle);
+            if (empty($data)) {
+                // Nothing to update, quit
+                return;
+            }
+
+
+            // STEP 3: edit the database
+            // Temporary tables are session-scoped, no prefix needed
+            Connection::query(
+                "CREATE TEMPORARY TABLE mecab (
+                    MID mediumint(8) unsigned NOT NULL,
+                    MWordCount tinyint(3) unsigned NOT NULL,
+                    PRIMARY KEY (MID)
+                ) CHARSET=utf8"
+            );
+
+            // Insert data using prepared statements
+            $insertSql = "INSERT INTO mecab (MID, MWordCount) VALUES (?, ?)";
+            foreach ($data as $entry) {
+                Connection::preparedExecute($insertSql, [$entry['mid'], $entry['count']]);
+            }
+
+            // UPDATE with JOIN - use raw SQL with fixed table names
+            Connection::query(
+                "UPDATE words
+                JOIN mecab ON MID = WoID
+                SET WoWordCount = MWordCount"
+            );
+            Connection::execute("DROP TABLE mecab");
+        } finally {
+            if (file_exists($db_to_mecab)) {
+                unlink($db_to_mecab);
             }
         }
-        pclose($handle);
-        if (empty($data)) {
-            // Nothing to update, quit
-            return;
-        }
-
-
-        // STEP 3: edit the database
-        // Temporary tables are session-scoped, no prefix needed
-        Connection::query(
-            "CREATE TEMPORARY TABLE mecab (
-                MID mediumint(8) unsigned NOT NULL,
-                MWordCount tinyint(3) unsigned NOT NULL,
-                PRIMARY KEY (MID)
-            ) CHARSET=utf8"
-        );
-
-        // Insert data using prepared statements
-        $insertSql = "INSERT INTO mecab (MID, MWordCount) VALUES (?, ?)";
-        foreach ($data as $entry) {
-            Connection::preparedExecute($insertSql, [$entry['mid'], $entry['count']]);
-        }
-
-        // UPDATE with JOIN - use raw SQL with fixed table names
-        Connection::query(
-            "UPDATE words
-            JOIN mecab ON MID = WoID
-            SET WoWordCount = MWordCount"
-        );
-        Connection::execute("DROP TABLE mecab");
-
-        unlink($db_to_mecab);
     }
 
     /**

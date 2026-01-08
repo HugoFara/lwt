@@ -55,44 +55,26 @@ class ExpressionService
     public function findMecabExpression(string $text, string|int $lid): array
     {
         $db_to_mecab = tempnam(sys_get_temp_dir(), "lwt_db_to_mecab");
-        $mecab_args = " -F %m\\t%t\\t\\n -U %m\\t%t\\t\\n -E \\t\\n ";
-
-        $mecab = $this->textParsingService->getMecabPath($mecab_args);
-        $likeText = "%$text%";
-        $rows = QueryBuilder::table('sentences')
-            ->select(['SeID', 'SeTxID', 'SeFirstPos', 'SeText'])
-            ->where('SeLgID', '=', $lid)
-            ->where('SeText', 'LIKE', $likeText)
-            ->getPrepared();
-
-        $parsed_text = '';
-        $fp = fopen($db_to_mecab, 'w');
-        fwrite($fp, $text);
-        fclose($fp);
-        $handle = popen($mecab . $db_to_mecab, "r");
-        while (!feof($handle)) {
-            $row = fgets($handle, 16132);
-            $arr = explode("\t", $row, 4);
-            // Not a word (punctuation)
-            if (
-                isset($arr[0]) && $arr[0] !== '' && $arr[0] !== "EOP"
-                && isset($arr[1]) && in_array($arr[1], ["2", "6", "7"])
-            ) {
-                $parsed_text .= $arr[0] . ' ';
-            }
+        if ($db_to_mecab === false) {
+            throw new \RuntimeException('Failed to create temporary file for MeCab expression search');
         }
 
-        $occurrences = [];
-        // For each sentence in database containing $text
-        foreach ($rows as $record) {
-            $sent = trim((string) $record['SeText']);
-            $fp = fopen($db_to_mecab, 'w');
-            fwrite($fp, $sent . "\n");
-            fclose($fp);
+        try {
+            $mecab_args = " -F %m\\t%t\\t\\n -U %m\\t%t\\t\\n -E \\t\\n ";
 
+            $mecab = $this->textParsingService->getMecabPath($mecab_args);
+            $likeText = "%$text%";
+            $rows = QueryBuilder::table('sentences')
+                ->select(['SeID', 'SeTxID', 'SeFirstPos', 'SeText'])
+                ->where('SeLgID', '=', $lid)
+                ->where('SeText', 'LIKE', $likeText)
+                ->getPrepared();
+
+            $parsed_text = '';
+            $fp = fopen($db_to_mecab, 'w');
+            fwrite($fp, $text);
+            fclose($fp);
             $handle = popen($mecab . $db_to_mecab, "r");
-            $parsed_sentence = '';
-            // For each word in sentence
             while (!feof($handle)) {
                 $row = fgets($handle, 16132);
                 $arr = explode("\t", $row, 4);
@@ -101,30 +83,58 @@ class ExpressionService
                     isset($arr[0]) && $arr[0] !== '' && $arr[0] !== "EOP"
                     && isset($arr[1]) && in_array($arr[1], ["2", "6", "7"])
                 ) {
-                    $parsed_sentence .= $arr[0] . ' ';
+                    $parsed_text .= $arr[0] . ' ';
                 }
             }
-
-            // Finally we check if parsed text is in parsed sentence
-            $seek = mb_strpos($parsed_sentence, $parsed_text);
-            // For each occurrence of multi-word in sentence
-            while ($seek !== false) {
-                // pos = Number of words * 2 + initial position
-                $pos = preg_match_all('/ /', mb_substr($parsed_sentence, 0, $seek)) * 2 +
-                (int) $record['SeFirstPos'];
-                $occurrences[] = [
-                    "SeID" => (int) $record['SeID'],
-                    "TxID" => (int) $record['SeTxID'],
-                    "position" => $pos,
-                    "term" => $text
-                ];
-                $seek = mb_strpos($parsed_sentence, $parsed_text, $seek + 1);
-            }
             pclose($handle);
-        }
-        unlink($db_to_mecab);
 
-        return $occurrences;
+            $occurrences = [];
+            // For each sentence in database containing $text
+            foreach ($rows as $record) {
+                $sent = trim((string) $record['SeText']);
+                $fp = fopen($db_to_mecab, 'w');
+                fwrite($fp, $sent . "\n");
+                fclose($fp);
+
+                $handle = popen($mecab . $db_to_mecab, "r");
+                $parsed_sentence = '';
+                // For each word in sentence
+                while (!feof($handle)) {
+                    $row = fgets($handle, 16132);
+                    $arr = explode("\t", $row, 4);
+                    // Not a word (punctuation)
+                    if (
+                        isset($arr[0]) && $arr[0] !== '' && $arr[0] !== "EOP"
+                        && isset($arr[1]) && in_array($arr[1], ["2", "6", "7"])
+                    ) {
+                        $parsed_sentence .= $arr[0] . ' ';
+                    }
+                }
+
+                // Finally we check if parsed text is in parsed sentence
+                $seek = mb_strpos($parsed_sentence, $parsed_text);
+                // For each occurrence of multi-word in sentence
+                while ($seek !== false) {
+                    // pos = Number of words * 2 + initial position
+                    $pos = preg_match_all('/ /', mb_substr($parsed_sentence, 0, $seek)) * 2 +
+                    (int) $record['SeFirstPos'];
+                    $occurrences[] = [
+                        "SeID" => (int) $record['SeID'],
+                        "TxID" => (int) $record['SeTxID'],
+                        "position" => $pos,
+                        "term" => $text
+                    ];
+                    $seek = mb_strpos($parsed_sentence, $parsed_text, $seek + 1);
+                }
+                pclose($handle);
+            }
+
+            return $occurrences;
+        } finally {
+            if (file_exists($db_to_mecab)) {
+                unlink($db_to_mecab);
+            }
+        }
     }
 
     /**

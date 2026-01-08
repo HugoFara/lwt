@@ -186,6 +186,9 @@ class WordUploadService
     public function createTempFile(string $content): string
     {
         $fileName = tempnam(sys_get_temp_dir(), "LWT");
+        if ($fileName === false) {
+            throw new \RuntimeException('Failed to create temporary file for import');
+        }
         $temp = fopen($fileName, "w");
         fwrite($temp, Escaping::prepareTextdata($content));
         fclose($temp);
