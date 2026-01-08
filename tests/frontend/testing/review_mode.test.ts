@@ -1,15 +1,15 @@
 /**
- * Tests for test_mode.ts - Event handlers for vocabulary testing
+ * Tests for review_mode.ts - Event handlers for vocabulary review
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  handleTestWordClick,
-  handleTestKeydown
-} from '../../../src/frontend/js/modules/review/pages/test_mode';
+  handleReviewWordClick,
+  handleReviewKeydown
+} from '../../../src/frontend/js/modules/review/pages/review_mode';
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_popup_interface', () => ({
-  showTestWordPopup: vi.fn()
+  showReviewWordPopup: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
@@ -22,21 +22,21 @@ vi.mock('../../../src/frontend/js/modules/review/api/review_api', () => ({
   }
 }));
 
-import { showTestWordPopup } from '../../../src/frontend/js/modules/vocabulary/services/word_popup_interface';
+import { showReviewWordPopup } from '../../../src/frontend/js/modules/vocabulary/services/word_popup_interface';
 import { cleanupRightFrames } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
 import { ReviewApi } from '../../../src/frontend/js/modules/review/api/review_api';
 import {
   setCurrentWordId,
-  setTestSolution,
+  setReviewSolution,
   setAnswerOpened,
-  resetTestState
-} from '../../../src/frontend/js/modules/review/stores/test_state';
+  resetReviewState
+} from '../../../src/frontend/js/modules/review/stores/review_state';
 import {
   setDictionaryLinks,
   resetLanguageConfig
 } from '../../../src/frontend/js/modules/language/stores/language_config';
 
-describe('test_mode.ts', () => {
+describe('review_mode.ts', () => {
   let reloadSpy: ReturnType<typeof vi.fn>;
   let hrefSpy: ReturnType<typeof vi.fn>;
 
@@ -63,7 +63,7 @@ describe('test_mode.ts', () => {
 
     // Initialize test state
     setCurrentWordId(123);
-    setTestSolution('Test Solution');
+    setReviewSolution('Test Solution');
     setAnswerOpened(false);
 
     // Initialize dictionary links
@@ -77,16 +77,16 @@ describe('test_mode.ts', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
-    resetTestState();
+    resetReviewState();
     resetLanguageConfig();
   });
 
   // ===========================================================================
-  // handleTestWordClick Tests
+  // handleReviewWordClick Tests
   // ===========================================================================
 
-  describe('handleTestWordClick', () => {
-    it('calls showTestWordPopup with word data attributes', () => {
+  describe('handleReviewWordClick', () => {
+    it('calls showReviewWordPopup with word data attributes', () => {
       document.body.innerHTML = `
         <span class="word"
           data_wid="456"
@@ -101,9 +101,9 @@ describe('test_mode.ts', () => {
       `;
 
       const wordEl = document.querySelector('.word')!;
-      handleTestWordClick.call(wordEl as HTMLElement);
+      handleReviewWordClick.call(wordEl as HTMLElement);
 
-      expect(showTestWordPopup).toHaveBeenCalledWith(
+      expect(showReviewWordPopup).toHaveBeenCalledWith(
         'http://dict1.com',
         'http://dict2.com',
         'http://translate.com',
@@ -132,7 +132,7 @@ describe('test_mode.ts', () => {
       `;
 
       const wordEl = document.querySelector('.word')!;
-      handleTestWordClick.call(wordEl as HTMLElement);
+      handleReviewWordClick.call(wordEl as HTMLElement);
 
       expect(document.querySelector('.todo')?.textContent).toBe('Test Solution');
     });
@@ -152,7 +152,7 @@ describe('test_mode.ts', () => {
       `;
 
       const wordEl = document.querySelector('.word')!;
-      const result = handleTestWordClick.call(wordEl as HTMLElement);
+      const result = handleReviewWordClick.call(wordEl as HTMLElement);
 
       expect(result).toBe(false);
     });
@@ -166,10 +166,10 @@ describe('test_mode.ts', () => {
       const wordEl = document.querySelector('.word')!;
 
       expect(() => {
-        handleTestWordClick.call(wordEl as HTMLElement);
+        handleReviewWordClick.call(wordEl as HTMLElement);
       }).not.toThrow();
 
-      expect(showTestWordPopup).toHaveBeenCalledWith(
+      expect(showReviewWordPopup).toHaveBeenCalledWith(
         'http://dict1.com',
         'http://dict2.com',
         'http://translate.com',
@@ -185,10 +185,10 @@ describe('test_mode.ts', () => {
   });
 
   // ===========================================================================
-  // handleTestKeydown Tests
+  // handleReviewKeydown Tests
   // ===========================================================================
 
-  describe('handleTestKeydown', () => {
+  describe('handleReviewKeydown', () => {
     beforeEach(() => {
       document.body.innerHTML = `
         <span class="word" data_wid="123" data_status="2">Test</span>
@@ -215,7 +215,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(false);
 
         const event = createKeyEvent(' ', 32);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(cleanupRightFrames).toHaveBeenCalled();
         // Space key now just clicks the word and opens the answer
@@ -226,7 +226,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(true);
 
         const event = createKeyEvent(' ', 32);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(cleanupRightFrames).not.toHaveBeenCalled();
         expect(result).toBe(true);
@@ -236,7 +236,7 @@ describe('test_mode.ts', () => {
     describe('Escape key', () => {
       it('skips term without changing status', async () => {
         const event = createKeyEvent('Escape', 27);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         // Uses API to update status (same status = skip)
         expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, 2, undefined);
@@ -247,7 +247,7 @@ describe('test_mode.ts', () => {
     describe('I key', () => {
       it('sets status to ignored (98)', () => {
         const event = createKeyEvent('I', 73);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, 98, undefined);
         expect(result).toBe(false);
@@ -257,7 +257,7 @@ describe('test_mode.ts', () => {
     describe('W key', () => {
       it('sets status to well-known (99)', () => {
         const event = createKeyEvent('W', 87);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, 99, undefined);
         expect(result).toBe(false);
@@ -267,7 +267,7 @@ describe('test_mode.ts', () => {
     describe('E key', () => {
       it('opens edit word form', () => {
         const event = createKeyEvent('E', 69);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         // E key now navigates to edit page
         expect(hrefSpy).toHaveBeenCalledWith('/word/edit-term?wid=123');
@@ -280,7 +280,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(false);
 
         const event = createKeyEvent('ArrowUp', 38);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(ReviewApi.updateStatus).not.toHaveBeenCalled();
         expect(result).toBe(true);
@@ -290,7 +290,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(true);
 
         const event = createKeyEvent('ArrowUp', 38);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, undefined, 1);
         expect(result).toBe(false);
@@ -302,7 +302,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(false);
 
         const event = createKeyEvent('ArrowDown', 40);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(ReviewApi.updateStatus).not.toHaveBeenCalled();
         expect(result).toBe(true);
@@ -312,7 +312,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(true);
 
         const event = createKeyEvent('ArrowDown', 40);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, undefined, -1);
         expect(result).toBe(false);
@@ -330,7 +330,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(true);
 
         const event = createKeyEvent(key, keyCode);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, expectedStatus, undefined);
         expect(result).toBe(false);
@@ -340,7 +340,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(false);
 
         const event = createKeyEvent('1', 49);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(ReviewApi.updateStatus).not.toHaveBeenCalled();
         expect(result).toBe(true);
@@ -356,7 +356,7 @@ describe('test_mode.ts', () => {
         setAnswerOpened(true);
 
         const event = createKeyEvent(key, keyCode);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(ReviewApi.updateStatus).toHaveBeenCalledWith(123, expectedStatus, undefined);
         expect(result).toBe(false);
@@ -366,7 +366,7 @@ describe('test_mode.ts', () => {
     describe('Unhandled keys', () => {
       it('returns true for unhandled keys', () => {
         const event = createKeyEvent('A', 65);
-        const result = handleTestKeydown(event);
+        const result = handleReviewKeydown(event);
 
         expect(ReviewApi.updateStatus).not.toHaveBeenCalled();
         expect(result).toBe(true);

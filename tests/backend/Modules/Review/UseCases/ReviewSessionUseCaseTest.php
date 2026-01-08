@@ -7,7 +7,7 @@ use Lwt\Modules\Review\Application\UseCases\GetNextTerm;
 use Lwt\Modules\Review\Application\UseCases\SubmitAnswer;
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\ReviewSession;
-use Lwt\Modules\Review\Domain\TestConfiguration;
+use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Review\Domain\TestWord;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use PHPUnit\Framework\TestCase;
@@ -43,7 +43,7 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testStartReviewSessionWithValidConfigSucceeds(): void
     {
-        $config = TestConfiguration::fromLanguage(1, 1);
+        $config = ReviewConfiguration::fromLanguage(1, 1);
 
         $this->repository
             ->method('validateSingleLanguage')
@@ -73,7 +73,7 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testStartReviewSessionWithInvalidConfigFails(): void
     {
-        $config = new TestConfiguration('', [], 1); // Empty test key = invalid
+        $config = new ReviewConfiguration('', [], 1); // Empty test key = invalid
 
         $startSession = new StartReviewSession($this->repository, $this->sessionManager);
         $result = $startSession->execute($config);
@@ -84,7 +84,7 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testStartReviewSessionWithMultipleLanguagesFails(): void
     {
-        $config = TestConfiguration::fromWords([1, 2, 3], 1);
+        $config = ReviewConfiguration::fromWords([1, 2, 3], 1);
 
         $this->repository
             ->method('validateSingleLanguage')
@@ -102,7 +102,7 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testStartReviewSessionWithNoWordsFails(): void
     {
-        $config = TestConfiguration::fromLanguage(999, 1);
+        $config = ReviewConfiguration::fromLanguage(999, 1);
 
         $this->repository
             ->method('validateSingleLanguage')
@@ -121,7 +121,7 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testStartReviewSessionFromText(): void
     {
-        $config = TestConfiguration::fromText(42, 2);
+        $config = ReviewConfiguration::fromText(42, 2);
 
         $this->repository
             ->method('validateSingleLanguage')
@@ -144,7 +144,7 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testStartReviewSessionFromWords(): void
     {
-        $config = TestConfiguration::fromWords([1, 2, 3, 4, 5], 1);
+        $config = ReviewConfiguration::fromWords([1, 2, 3, 4, 5], 1);
 
         $this->repository
             ->method('validateSingleLanguage')
@@ -173,7 +173,7 @@ class ReviewSessionUseCaseTest extends TestCase
     public function testGetNextTermReturnsWordData(): void
     {
         // Use test type 2 which doesn't call TagsFacade::getWordTagList
-        $config = TestConfiguration::fromLanguage(1, TestConfiguration::TYPE_TRANSLATION_TO_TERM);
+        $config = ReviewConfiguration::fromLanguage(1, ReviewConfiguration::TYPE_TRANSLATION_TO_TERM);
 
         $testWord = $this->createTestWord(
             id: 100,
@@ -201,7 +201,7 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testGetNextTermReturnsEmptyWhenNoWordsDue(): void
     {
-        $config = TestConfiguration::fromLanguage(1, 1);
+        $config = ReviewConfiguration::fromLanguage(1, 1);
 
         $this->repository
             ->method('findNextWordForReview')
@@ -232,7 +232,7 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testGetNextTermType2HidesTermGuessesFromTranslation(): void
     {
-        $config = TestConfiguration::fromLanguage(1, TestConfiguration::TYPE_TRANSLATION_TO_TERM);
+        $config = ReviewConfiguration::fromLanguage(1, ReviewConfiguration::TYPE_TRANSLATION_TO_TERM);
 
         $testWord = $this->createTestWord(
             id: 100,
@@ -260,7 +260,7 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testGetNextTermType3UseSentenceContext(): void
     {
-        $config = TestConfiguration::fromLanguage(1, TestConfiguration::TYPE_SENTENCE_TO_TERM);
+        $config = ReviewConfiguration::fromLanguage(1, ReviewConfiguration::TYPE_SENTENCE_TO_TERM);
 
         $testWord = $this->createTestWord(
             id: 100,
@@ -287,7 +287,7 @@ class ReviewSessionUseCaseTest extends TestCase
     public function testGetNextTermWordModeReturnsOnlyWord(): void
     {
         // Use test type 2 (translation to term) in word mode to avoid TagsFacade call
-        $config = TestConfiguration::fromLanguage(1, TestConfiguration::TYPE_TRANSLATION_TO_TERM, true);
+        $config = ReviewConfiguration::fromLanguage(1, ReviewConfiguration::TYPE_TRANSLATION_TO_TERM, true);
 
         $testWord = $this->createTestWord(
             id: 100,

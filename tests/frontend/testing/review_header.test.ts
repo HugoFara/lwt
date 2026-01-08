@@ -1,16 +1,16 @@
 /**
- * Tests for test_header.ts - Test header initialization and navigation.
+ * Tests for review_header.ts - Review header initialization and navigation.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import {
   setUtteranceSetting,
-  resetTestFrames,
-  startWordTest,
-  startTestTable
-} from '../../../src/frontend/js/modules/review/pages/test_header';
+  resetReviewFrames,
+  startWordReview,
+  startTableReview
+} from '../../../src/frontend/js/modules/review/pages/review_header';
 
-describe('test_header.ts', () => {
+describe('review_header.ts', () => {
   let originalLocation: Location;
   let mockLocalStorage: Record<string, string>;
 
@@ -123,7 +123,7 @@ describe('test_header.ts', () => {
     });
   });
 
-  describe('resetTestFrames', () => {
+  describe('resetReviewFrames', () => {
     it('resets ro and ru frames to empty.html', () => {
       const roFrame = { location: { href: '/test/1' } };
       const ruFrame = { location: { href: '/test/2' } };
@@ -139,7 +139,7 @@ describe('test_header.ts', () => {
         writable: true
       });
 
-      resetTestFrames();
+      resetReviewFrames();
 
       expect(roFrame.location.href).toBe('empty.html');
       expect(ruFrame.location.href).toBe('empty.html');
@@ -155,7 +155,7 @@ describe('test_header.ts', () => {
       });
 
       // Should not throw
-      expect(() => resetTestFrames()).not.toThrow();
+      expect(() => resetReviewFrames()).not.toThrow();
     });
 
     it('handles only ro frame existing', () => {
@@ -170,7 +170,7 @@ describe('test_header.ts', () => {
         writable: true
       });
 
-      resetTestFrames();
+      resetReviewFrames();
 
       expect(roFrame.location.href).toBe('empty.html');
     });
@@ -187,13 +187,13 @@ describe('test_header.ts', () => {
         writable: true
       });
 
-      resetTestFrames();
+      resetReviewFrames();
 
       expect(ruFrame.location.href).toBe('empty.html');
     });
   });
 
-  describe('startWordTest', () => {
+  describe('startWordReview', () => {
     beforeEach(() => {
       // Mock parent window without frames to avoid issues
       Object.defineProperty(window, 'parent', {
@@ -205,24 +205,24 @@ describe('test_header.ts', () => {
     });
 
     it('navigates to word test URL with type and property', () => {
-      startWordTest(1, 'lang=1');
+      startWordReview(1, 'lang=1');
 
-      expect(window.location.href).toBe('/test?type=1&lang=1');
+      expect(window.location.href).toBe('/review?type=1&lang=1');
     });
 
     it('handles different test types', () => {
-      startWordTest(3, 'selection=5');
+      startWordReview(3, 'selection=5');
 
-      expect(window.location.href).toBe('/test?type=3&selection=5');
+      expect(window.location.href).toBe('/review?type=3&selection=5');
     });
 
     it('works with empty property', () => {
-      startWordTest(2, '');
+      startWordReview(2, '');
 
-      expect(window.location.href).toBe('/test?type=2&');
+      expect(window.location.href).toBe('/review?type=2&');
     });
 
-    it('calls resetTestFrames before navigation', () => {
+    it('calls resetReviewFrames before navigation', () => {
       const roFrame = { location: { href: '/old' } };
       Object.defineProperty(window, 'parent', {
         value: {
@@ -233,13 +233,13 @@ describe('test_header.ts', () => {
         writable: true
       });
 
-      startWordTest(1, 'test=1');
+      startWordReview(1, 'test=1');
 
       expect(roFrame.location.href).toBe('empty.html');
     });
   });
 
-  describe('startTestTable', () => {
+  describe('startTableReview', () => {
     beforeEach(() => {
       Object.defineProperty(window, 'parent', {
         value: {
@@ -250,18 +250,18 @@ describe('test_header.ts', () => {
     });
 
     it('navigates to table test URL', () => {
-      startTestTable('lang=1&text=5');
+      startTableReview('lang=1&text=5');
 
-      expect(window.location.href).toBe('/test?type=table&lang=1&text=5');
+      expect(window.location.href).toBe('/review?type=table&lang=1&text=5');
     });
 
     it('works with empty property', () => {
-      startTestTable('');
+      startTableReview('');
 
-      expect(window.location.href).toBe('/test?type=table&');
+      expect(window.location.href).toBe('/review?type=table&');
     });
 
-    it('calls resetTestFrames before navigation', () => {
+    it('calls resetReviewFrames before navigation', () => {
       const ruFrame = { location: { href: '/old' } };
       Object.defineProperty(window, 'parent', {
         value: {
@@ -272,7 +272,7 @@ describe('test_header.ts', () => {
         writable: true
       });
 
-      startTestTable('test=1');
+      startTableReview('test=1');
 
       expect(ruFrame.location.href).toBe('empty.html');
     });

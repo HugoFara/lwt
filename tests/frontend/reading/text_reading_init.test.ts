@@ -40,7 +40,7 @@ import {
   getTtsVoiceApi
 } from '../../../src/frontend/js/modules/language/stores/language_config';
 import { getReadingPosition, resetReadingPosition } from '../../../src/frontend/js/modules/text/stores/reading_state';
-import { isAnswerOpened, resetTestState } from '../../../src/frontend/js/modules/review/stores/test_state';
+import { isAnswerOpened, resetReviewState } from '../../../src/frontend/js/modules/review/stores/review_state';
 
 describe('text_reading_init.ts', () => {
   let mockSpeechSynthesis: any;
@@ -76,7 +76,7 @@ describe('text_reading_init.ts', () => {
     document.body.innerHTML = '';
     resetLanguageConfig();
     resetReadingPosition();
-    resetTestState();
+    resetReviewState();
   });
 
   // ===========================================================================

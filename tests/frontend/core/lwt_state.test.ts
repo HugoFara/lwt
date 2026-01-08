@@ -2,7 +2,7 @@
  * Tests for lwt_state.ts - LWT State Management and state modules
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { LwtLanguage, LwtText, LwtWord, LwtReview, LwtSettings } from '../../../src/frontend/js/shared/stores/lwt_state';
+import type { LwtLanguage, LwtText, LwtWord, LwtSettings, LwtReview } from '../../../src/frontend/js/shared/stores/lwt_state';
 import {
   // Language config
   initLanguageConfig,
@@ -324,13 +324,13 @@ describe('lwt_state.ts', () => {
       expect(word.id).toBe(42);
     });
 
-    it('LwtTest type is correctly structured', () => {
-      const test: LwtTest = {
+    it('LwtReview type is correctly structured', () => {
+      const review: LwtReview = {
         solution: 'answer',
         answer_opened: true
       };
-      expect(test.solution).toBe('answer');
-      expect(test.answer_opened).toBe(true);
+      expect(review.solution).toBe('answer');
+      expect(review.answer_opened).toBe(true);
     });
 
     it('LwtSettings type is correctly structured', () => {

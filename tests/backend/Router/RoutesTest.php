@@ -197,7 +197,7 @@ class RoutesTest extends TestCase
     public static function reviewTestRoutesProvider(): array
     {
         return [
-            'test index' => ['/test', 'Lwt\\Modules\\Review\\Http\\TestController@index'],
+            'test index' => ['/test', 'Lwt\\Modules\\Review\\Http\\ReviewController@index'],
         ];
     }
 
