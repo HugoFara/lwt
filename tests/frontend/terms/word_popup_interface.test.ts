@@ -1,5 +1,5 @@
 /**
- * Tests for overlib_interface.ts - Word popup interface functions
+ * Tests for word_popup_interface.ts - Word popup interface functions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
@@ -36,7 +36,7 @@ import {
   createWellKnownButton,
   createIgnoreButton,
   createTestStatusButtons,
-} from '../../../src/frontend/js/modules/vocabulary/services/overlib_interface';
+} from '../../../src/frontend/js/modules/vocabulary/services/word_popup_interface';
 import type { WordActionContext } from '../../../src/frontend/js/modules/vocabulary/services/word_actions';
 
 // Mock the word_actions module
@@ -52,7 +52,7 @@ import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/j
 import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/modules/text/stores/text_config';
 import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/shared/utils/settings_config';
 
-describe('overlib_interface.ts', () => {
+describe('word_popup_interface.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     // Initialize state modules

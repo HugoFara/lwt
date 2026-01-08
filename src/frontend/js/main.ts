@@ -81,7 +81,7 @@ import '@modules/vocabulary/components/multi_word_modal';
 import '@modules/vocabulary/services/word_status';
 import '@modules/vocabulary/services/dictionary';
 import '@modules/vocabulary/services/translation_api';
-import '@modules/vocabulary/services/overlib_interface';
+import '@modules/vocabulary/services/word_popup_interface';
 import '@modules/vocabulary/services/term_operations';
 import '@modules/vocabulary/services/word_dom_updates';
 import '@modules/vocabulary/services/word_status_ajax';

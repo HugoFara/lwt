@@ -6,7 +6,7 @@
  * @since   1.6.16-fork
  */
 
-import { showTestWordPopup } from '@modules/vocabulary/services/overlib_interface';
+import { showTestWordPopup } from '@modules/vocabulary/services/word_popup_interface';
 import { loadModalFrame, cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
 import { getCurrentWordId, getTestSolution, isAnswerOpened, openAnswer } from '@modules/review/stores/test_state';
 import { getDictionaryLinks } from '@modules/language/stores/language_config';

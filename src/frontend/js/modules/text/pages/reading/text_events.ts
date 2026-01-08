@@ -28,7 +28,7 @@ import {
   buildKnownWordPopupContent,
   buildUnknownWordPopupContent,
   overlib
-} from '@modules/vocabulary/services/overlib_interface';
+} from '@modules/vocabulary/services/word_popup_interface';
 import { getContextFromElement } from '@modules/vocabulary/services/word_actions';
 import {
   getLanguageId,

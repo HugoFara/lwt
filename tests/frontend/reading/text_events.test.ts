@@ -24,7 +24,7 @@ import {
   prepareTextInteractions,
 } from '../../../src/frontend/js/modules/text/pages/reading/text_events';
 import * as userInteractions from '../../../src/frontend/js/shared/utils/user_interactions';
-import * as overlibInterface from '../../../src/frontend/js/modules/vocabulary/services/overlib_interface';
+import * as wordPopupInterface from '../../../src/frontend/js/modules/vocabulary/services/word_popup_interface';
 import * as wordStatus from '../../../src/frontend/js/modules/vocabulary/services/word_status';
 
 // Polyfill HTMLDialogElement methods for JSDOM
@@ -323,10 +323,10 @@ describe('text_events.ts', () => {
 
   describe('handleWordClick', () => {
     beforeEach(() => {
-      vi.spyOn(overlibInterface, 'showUnknownWordPopup').mockImplementation(() => {});
-      vi.spyOn(overlibInterface, 'showWellKnownWordPopup').mockImplementation(() => {});
-      vi.spyOn(overlibInterface, 'showIgnoredWordPopup').mockImplementation(() => {});
-      vi.spyOn(overlibInterface, 'showLearningWordPopup').mockImplementation(() => {});
+      vi.spyOn(wordPopupInterface, 'showUnknownWordPopup').mockImplementation(() => {});
+      vi.spyOn(wordPopupInterface, 'showWellKnownWordPopup').mockImplementation(() => {});
+      vi.spyOn(wordPopupInterface, 'showIgnoredWordPopup').mockImplementation(() => {});
+      vi.spyOn(wordPopupInterface, 'showLearningWordPopup').mockImplementation(() => {});
       vi.spyOn(wordStatus, 'createWordTooltip').mockReturnValue('tooltip text');
       vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => ({} as JQuery.jqXHR));
     });
@@ -351,7 +351,7 @@ describe('text_events.ts', () => {
       handleWordClick.call(word);
 
       // Shows popup with "Learn term" link - no frame loading needed
-      expect(overlibInterface.showUnknownWordPopup).toHaveBeenCalled();
+      expect(wordPopupInterface.showUnknownWordPopup).toHaveBeenCalled();
     });
 
     it('calls showWellKnownWordPopup for well-known words', () => {
@@ -362,7 +362,7 @@ describe('text_events.ts', () => {
       const word = document.querySelector('.word') as HTMLElement;
       handleWordClick.call(word);
 
-      expect(overlibInterface.showWellKnownWordPopup).toHaveBeenCalled();
+      expect(wordPopupInterface.showWellKnownWordPopup).toHaveBeenCalled();
     });
 
     it('calls showIgnoredWordPopup for ignored words', () => {
@@ -373,7 +373,7 @@ describe('text_events.ts', () => {
       const word = document.querySelector('.word') as HTMLElement;
       handleWordClick.call(word);
 
-      expect(overlibInterface.showIgnoredWordPopup).toHaveBeenCalled();
+      expect(wordPopupInterface.showIgnoredWordPopup).toHaveBeenCalled();
     });
 
     it('calls showLearningWordPopup for learning words', () => {
@@ -384,7 +384,7 @@ describe('text_events.ts', () => {
       const word = document.querySelector('.word') as HTMLElement;
       handleWordClick.call(word);
 
-      expect(overlibInterface.showLearningWordPopup).toHaveBeenCalled();
+      expect(wordPopupInterface.showLearningWordPopup).toHaveBeenCalled();
     });
 
     it('calls speechDispatcher when hts is 2', () => {
@@ -421,7 +421,7 @@ describe('text_events.ts', () => {
       handleWordClick.call(word);
 
       // Should use title attribute instead of createWordTooltip
-      expect(overlibInterface.showLearningWordPopup).toHaveBeenCalled();
+      expect(wordPopupInterface.showLearningWordPopup).toHaveBeenCalled();
     });
 
     it('collects multi-word data attributes', () => {
@@ -433,7 +433,7 @@ describe('text_events.ts', () => {
       handleWordClick.call(word);
 
       // showUnknownWordPopup should receive the multi_words array
-      expect(overlibInterface.showUnknownWordPopup).toHaveBeenCalledWith(
+      expect(wordPopupInterface.showUnknownWordPopup).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -453,7 +453,7 @@ describe('text_events.ts', () => {
 
   describe('handleMultiWordClick', () => {
     beforeEach(() => {
-      vi.spyOn(overlibInterface, 'showMultiWordPopup').mockImplementation(() => {});
+      vi.spyOn(wordPopupInterface, 'showMultiWordPopup').mockImplementation(() => {});
       vi.spyOn(wordStatus, 'createWordTooltip').mockReturnValue('mword tooltip');
       vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => ({} as JQuery.jqXHR));
     });
@@ -477,7 +477,7 @@ describe('text_events.ts', () => {
       const mword = document.querySelector('.mword') as HTMLElement;
       handleMultiWordClick.call(mword);
 
-      expect(overlibInterface.showMultiWordPopup).toHaveBeenCalled();
+      expect(wordPopupInterface.showMultiWordPopup).toHaveBeenCalled();
     });
 
     it('does not call showMultiWordPopup when status is empty', () => {
@@ -488,7 +488,7 @@ describe('text_events.ts', () => {
       const mword = document.querySelector('.mword') as HTMLElement;
       handleMultiWordClick.call(mword);
 
-      expect(overlibInterface.showMultiWordPopup).not.toHaveBeenCalled();
+      expect(wordPopupInterface.showMultiWordPopup).not.toHaveBeenCalled();
     });
 
     it('calls speechDispatcher when hts is 2', () => {
@@ -512,7 +512,7 @@ describe('text_events.ts', () => {
       const mword = document.querySelector('.mword') as HTMLElement;
       handleMultiWordClick.call(mword);
 
-      expect(overlibInterface.showMultiWordPopup).toHaveBeenCalledWith(
+      expect(wordPopupInterface.showMultiWordPopup).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -542,7 +542,7 @@ describe('text_events.ts', () => {
       `;
 
       // Mock the functions that would be called on click
-      vi.spyOn(overlibInterface, 'showUnknownWordPopup').mockImplementation(() => {});
+      vi.spyOn(wordPopupInterface, 'showUnknownWordPopup').mockImplementation(() => {});
 
       prepareTextInteractions();
 
@@ -634,7 +634,7 @@ describe('text_events.ts', () => {
 
     it('word_click handles empty title attribute', () => {
       // Native tooltips are always used now
-      vi.spyOn(overlibInterface, 'showUnknownWordPopup').mockImplementation(() => {});
+      vi.spyOn(wordPopupInterface, 'showUnknownWordPopup').mockImplementation(() => {});
 
       document.body.innerHTML = `
         <span class="word" data_status="0" data_order="1">Test</span>
@@ -644,11 +644,11 @@ describe('text_events.ts', () => {
       handleWordClick.call(word);
 
       // Should not throw and should use empty string as hints
-      expect(overlibInterface.showUnknownWordPopup).toHaveBeenCalled();
+      expect(wordPopupInterface.showUnknownWordPopup).toHaveBeenCalled();
     });
 
     it('mword_click handles missing data attributes', () => {
-      vi.spyOn(overlibInterface, 'showMultiWordPopup').mockImplementation(() => {});
+      vi.spyOn(wordPopupInterface, 'showMultiWordPopup').mockImplementation(() => {});
 
       document.body.innerHTML = `
         <span class="mword" data_status="3">Test</span>

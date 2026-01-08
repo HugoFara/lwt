@@ -126,7 +126,7 @@ src/frontend/js/
 │       └── word_form_store.ts    - Word form state store
 ├── terms/
 │   ├── translation_api.ts        - Translation APIs
-│   ├── overlib_interface.ts      - Legacy popup interface (deprecated)
+│   ├── word_popup_interface.ts   - Word popup interface
 │   ├── dictionary.ts             - Dictionary link handling
 │   ├── word_status.ts            - Word status utilities
 │   ├── term_operations.ts        - Term CRUD operations
@@ -803,7 +803,7 @@ tests/frontend/
 │   └── tag_list.test.ts
 ├── terms/                       # Term tests (4 files)
 │   ├── dictionary.test.ts
-│   ├── overlib_interface.test.ts
+│   ├── word_popup_interface.test.ts
 │   ├── term_operations.test.ts
 │   └── translation_api.test.ts
 ├── testing/                     # Testing tests (5 files)

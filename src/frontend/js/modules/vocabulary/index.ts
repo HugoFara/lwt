@@ -34,7 +34,7 @@ export * from './components/result_panel';
 export * from './services/word_status';
 export * from './services/dictionary';
 export * from './services/translation_api';
-export * from './services/overlib_interface';
+export * from './services/word_popup_interface';
 export * from './services/term_operations';
 export * from './services/word_dom_updates';
 export * from './services/word_status_ajax';

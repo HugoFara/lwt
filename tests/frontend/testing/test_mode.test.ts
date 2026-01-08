@@ -8,7 +8,7 @@ import {
 } from '../../../src/frontend/js/modules/review/pages/test_mode';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/modules/vocabulary/services/overlib_interface', () => ({
+vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_popup_interface', () => ({
   showTestWordPopup: vi.fn()
 }));
 
@@ -17,7 +17,7 @@ vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', 
   cleanupRightFrames: vi.fn()
 }));
 
-import { showTestWordPopup } from '../../../src/frontend/js/modules/vocabulary/services/overlib_interface';
+import { showTestWordPopup } from '../../../src/frontend/js/modules/vocabulary/services/word_popup_interface';
 import { loadModalFrame, cleanupRightFrames } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
 import {
   setCurrentWordId,
