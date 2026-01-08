@@ -651,7 +651,7 @@ class TextControllerEditTest extends TestCase
         $service = new TextFacade();
 
         // Test with simple text
-        $result = $service->prepareLongTextData([], "Test text content.", 1);
+        $result = $service->prepareLongTextData(null, "Test text content.", 1);
 
         $this->assertIsString($result);
         $this->assertEquals("Test text content.", $result);
@@ -667,7 +667,7 @@ class TextControllerEditTest extends TestCase
 
         // Test with paragraph handling mode 2 (keep paragraphs)
         $text = "Para 1.\n\nPara 2.";
-        $result = $service->prepareLongTextData([], $text, 2);
+        $result = $service->prepareLongTextData(null, $text, 2);
 
         $this->assertIsString($result);
         $this->assertStringContainsString("\n", $result);

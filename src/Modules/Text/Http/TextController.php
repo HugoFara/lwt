@@ -631,7 +631,7 @@ class TextController extends BaseController
         }
 
         $data = $this->textService->prepareLongTextData(
-            $_FILES,
+            InputValidator::getUploadedFile('thefile'),
             $this->param('Upload'),
             $paragraphHandling
         );

@@ -299,6 +299,7 @@ class LanguageFacadeTest extends TestCase
         }
 
         $result = $this->facade->getLanguagesWithTextCounts();
+        $this->assertIsArray($result);
         foreach ($result as $item) {
             $this->assertArrayHasKey('id', $item);
             $this->assertArrayHasKey('name', $item);

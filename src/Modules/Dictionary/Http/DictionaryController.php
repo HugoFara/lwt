@@ -144,12 +144,13 @@ class DictionaryController extends BaseController
         }
 
         // Process uploaded file
-        if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+        $uploadedFile = InputValidator::getUploadedFile('file');
+        if ($uploadedFile === null) {
             $this->redirect("/dictionaries/import?lang=$langId&dict_id=$dictId&error=upload_failed");
         }
 
-        $filePath = $_FILES['file']['tmp_name'];
-        $originalName = $_FILES['file']['name'];
+        $filePath = $uploadedFile['tmp_name'];
+        $originalName = $uploadedFile['name'];
 
         try {
             $importer = $this->dictionaryFacade->getImporter($format, $originalName);
@@ -204,14 +205,15 @@ class DictionaryController extends BaseController
     {
         header('Content-Type: application/json');
 
-        if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+        $uploadedFile = InputValidator::getUploadedFile('file');
+        if ($uploadedFile === null) {
             echo json_encode(['error' => 'No file uploaded']);
             return;
         }
 
         $format = $this->param('format', 'csv');
-        $filePath = $_FILES['file']['tmp_name'];
-        $originalName = $_FILES['file']['name'];
+        $filePath = $uploadedFile['tmp_name'];
+        $originalName = $uploadedFile['name'];
 
         try {
             $importer = $this->dictionaryFacade->getImporter($format, $originalName);

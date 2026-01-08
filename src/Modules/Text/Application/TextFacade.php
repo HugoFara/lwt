@@ -704,23 +704,19 @@ class TextFacade
     /**
      * Prepare text data for long text import.
      *
-     * @param array  $files             $_FILES array
+     * @param array{name: string, type: string, tmp_name: string, error: int, size: int}|null $uploadedFile Validated file data from InputValidator::getUploadedFile()
      * @param string $uploadText        Pasted text content
      * @param int    $paragraphHandling Paragraph handling mode
      *
      * @return string Prepared text data
      */
     public function prepareLongTextData(
-        array $files,
+        ?array $uploadedFile,
         string $uploadText,
         int $paragraphHandling
     ): string {
-        if (
-            isset($files["thefile"])
-            && $files["thefile"]["tmp_name"] != ""
-            && $files["thefile"]["error"] == 0
-        ) {
-            $data = file_get_contents($files["thefile"]["tmp_name"]);
+        if ($uploadedFile !== null) {
+            $data = file_get_contents($uploadedFile["tmp_name"]);
             $data = str_replace("\r\n", "\n", $data);
         } else {
             $data = Escaping::prepareTextdata($uploadText);

@@ -183,7 +183,7 @@ class TextControllerImportLongTest extends TestCase
         $service = new TextFacade();
 
         $result = $service->prepareLongTextData(
-            [],
+            null,
             "Line one.\nLine two.\nLine three.",
             1
         );
@@ -202,7 +202,7 @@ class TextControllerImportLongTest extends TestCase
 
         // Paragraph handling 1: every line break is a paragraph
         $result = $service->prepareLongTextData(
-            [],
+            null,
             "Line one.\nLine two.\nLine three.",
             1
         );
@@ -221,7 +221,7 @@ class TextControllerImportLongTest extends TestCase
 
         // Paragraph handling 2: only double newlines are paragraphs
         $result = $service->prepareLongTextData(
-            [],
+            null,
             "Line one.\nContinued.\n\nNew paragraph.",
             2
         );
@@ -237,7 +237,7 @@ class TextControllerImportLongTest extends TestCase
 
         $service = new TextFacade();
 
-        $result = $service->prepareLongTextData([], '', 1);
+        $result = $service->prepareLongTextData(null, '', 1);
 
         $this->assertEquals('', $result);
     }
@@ -252,7 +252,7 @@ class TextControllerImportLongTest extends TestCase
 
         // Windows line endings should be converted
         $result = $service->prepareLongTextData(
-            [],
+            null,
             "Line one.\r\nLine two.\r\nLine three.",
             1
         );
@@ -270,7 +270,7 @@ class TextControllerImportLongTest extends TestCase
         $service = new TextFacade();
 
         $result = $service->prepareLongTextData(
-            [],
+            null,
             "   Text with whitespace.   ",
             1
         );
@@ -511,7 +511,7 @@ class TextControllerImportLongTest extends TestCase
 
         // Step 1: Prepare data
         $rawText = "First sentence of the long text. Second sentence.\n\nNew paragraph starts here. More content.";
-        $preparedData = $service->prepareLongTextData([], $rawText, 2);
+        $preparedData = $service->prepareLongTextData(null, $rawText, 2);
 
         $this->assertNotEmpty($preparedData);
 
@@ -561,7 +561,7 @@ class TextControllerImportLongTest extends TestCase
 
         // Test with Unicode and special characters
         $result = $service->prepareLongTextData(
-            [],
+            null,
             "Héllo wörld! Ça va?\n日本語テスト。",
             1
         );
@@ -579,7 +579,7 @@ class TextControllerImportLongTest extends TestCase
         $service = new TextFacade();
 
         $result = $service->prepareLongTextData(
-            [],
+            null,
             "Text   with    multiple     spaces.",
             1
         );
@@ -658,8 +658,8 @@ class TextControllerImportLongTest extends TestCase
 
         $data = "Test sentence.";
 
-        $result1 = $service1->prepareLongTextData([], $data, 1);
-        $result2 = $service2->prepareLongTextData([], $data, 1);
+        $result1 = $service1->prepareLongTextData(null, $data, 1);
+        $result2 = $service2->prepareLongTextData(null, $data, 1);
 
         $this->assertEquals($result1, $result2);
     }
@@ -677,10 +677,10 @@ class TextControllerImportLongTest extends TestCase
         $input = "Line one.\nLine two.\n\nParagraph two.";
 
         // Handling mode 1: each line break is significant
-        $result1 = $service->prepareLongTextData([], $input, 1);
+        $result1 = $service->prepareLongTextData(null, $input, 1);
 
         // Handling mode 2: only double line breaks are paragraphs
-        $result2 = $service->prepareLongTextData([], $input, 2);
+        $result2 = $service->prepareLongTextData(null, $input, 2);
 
         // Results should be different
         $this->assertNotEquals($result1, $result2);

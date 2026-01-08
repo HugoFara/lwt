@@ -111,7 +111,9 @@ class AdminController extends BaseController
 
         // Handle operations
         if ($this->hasParam('restore')) {
-            $message = $this->adminFacade->restoreFromUpload($_FILES);
+            $message = $this->adminFacade->restoreFromUpload(
+                InputValidator::getUploadedFile('thefile')
+            );
         } elseif ($this->hasParam('backup')) {
             $this->adminFacade->downloadBackup();
             // downloadBackup exits, so we never reach here

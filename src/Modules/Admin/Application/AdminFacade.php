@@ -199,13 +199,12 @@ class AdminFacade
     /**
      * Restore database from uploaded file.
      *
-     * @param array<non-empty-string, array{error: int<0, 8>, full_path: string, name: string, size: int<0, max>, tmp_name: string, type: string}> $fileData $_FILES data
+     * @param array{name: string, type: string, tmp_name: string, error: int, size: int}|null $fileData Validated file data from InputValidator::getUploadedFile()
      *
      * @return string Status message
      */
-    public function restoreFromUpload(array $fileData): string
+    public function restoreFromUpload(?array $fileData): string
     {
-        /** @var array{thefile?: array{tmp_name?: string, error?: int}} $fileData */
         return $this->restoreFromUpload->execute($fileData);
     }
 

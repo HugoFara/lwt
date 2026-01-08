@@ -430,8 +430,16 @@ class IntegrationTest extends TestCase
 
     public function testSentencesContainingWordLcQuery(): void
     {
+        // Get a valid language ID from the database
+        $langRow = Connection::query("SELECT LgID FROM languages LIMIT 1");
+        $lang = $langRow ? \mysqli_fetch_assoc($langRow) : null;
+        if (!$lang) {
+            $this->markTestSkipped('No languages in database');
+        }
+        $langId = (int) $lang['LgID'];
+
         $service = new SentenceService();
-        $result = $service->buildSentencesContainingWordQuery('test', 1);
+        $result = $service->buildSentencesContainingWordQuery('test', $langId);
         $this->assertIsArray($result);
         $this->assertArrayHasKey('sql', $result);
         $this->assertArrayHasKey('params', $result);

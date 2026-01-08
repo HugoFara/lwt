@@ -1126,28 +1126,28 @@ class TextFacadeTest extends TestCase
     public function testPrepareLongTextDataWithEmptyInput(): void
     {
         $facade = new TextFacade();
-        $result = $facade->prepareLongTextData([], '', 1);
+        $result = $facade->prepareLongTextData(null, '', 1);
         $this->assertIsString($result);
     }
 
     public function testPrepareLongTextDataWithParagraphHandlingMode1(): void
     {
         $facade = new TextFacade();
-        $result = $facade->prepareLongTextData([], "Line 1\nLine 2", 1);
+        $result = $facade->prepareLongTextData(null, "Line 1\nLine 2", 1);
         $this->assertIsString($result);
     }
 
     public function testPrepareLongTextDataWithParagraphHandlingMode2(): void
     {
         $facade = new TextFacade();
-        $result = $facade->prepareLongTextData([], "Para 1\n\nPara 2", 2);
+        $result = $facade->prepareLongTextData(null, "Para 1\n\nPara 2", 2);
         $this->assertIsString($result);
     }
 
     public function testPrepareLongTextDataRemovesExtraWhitespace(): void
     {
         $facade = new TextFacade();
-        $result = $facade->prepareLongTextData([], "Text  with   extra    spaces", 1);
+        $result = $facade->prepareLongTextData(null, "Text  with   extra    spaces", 1);
         $this->assertStringNotContainsString('  ', $result);
     }
 

@@ -668,19 +668,19 @@ class TextServiceTest extends TestCase
 
     public function testPrepareLongTextDataReturnsString(): void
     {
-        $result = $this->service->prepareLongTextData([], "Test text\n\nParagraph 2", 2);
+        $result = $this->service->prepareLongTextData(null, "Test text\n\nParagraph 2", 2);
         $this->assertIsString($result);
     }
 
     public function testPrepareLongTextDataHandlesNewlines(): void
     {
-        $result = $this->service->prepareLongTextData([], "Line 1\nLine 2", 1);
+        $result = $this->service->prepareLongTextData(null, "Line 1\nLine 2", 1);
         $this->assertIsString($result);
     }
 
     public function testPrepareLongTextDataHandlesDoubleParagraphs(): void
     {
-        $result = $this->service->prepareLongTextData([], "Para 1\n\nPara 2", 2);
+        $result = $this->service->prepareLongTextData(null, "Para 1\n\nPara 2", 2);
         $this->assertStringContainsString("\n", $result);
     }
 
