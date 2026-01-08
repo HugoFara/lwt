@@ -203,6 +203,42 @@
             </ul>
 
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/firebase.html" class="">Firebase</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/firebase-jwt.html" class="">JWT</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/guzzlehttp.html" class="">GuzzleHttp</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/guzzlehttp-cookie.html" class="">Cookie</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-exception.html" class="">Exception</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-handler.html" class="">Handler</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-promise.html" class="">Promise</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-psr7.html" class="">Psr7</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/league.html" class="">League</a>
 </h4>
     <ul class="phpdocumentor-list">
@@ -212,6 +248,10 @@
             </li>
                     <li>
                 <a href="namespaces/league-config.html" class="">Config</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/league-oauth2.html" class="">OAuth2</a>
                 
             </li>
             </ul>
@@ -417,6 +457,10 @@
                 
             </li>
                     <li>
+                <a href="namespaces/psr-http.html" class="">Http</a>
+                
+            </li>
+                    <li>
                 <a href="namespaces/psr-log.html" class="">Log</a>
                 
             </li>
@@ -524,6 +568,16 @@
             </li>
                     <li>
                 <a href="namespaces/symfony-contracts.html" class="">Contracts</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/thenetworg.html" class="">TheNetworg</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/thenetworg-oauth2.html" class="">OAuth2</a>
                 
             </li>
             </ul>
@@ -651,6 +705,16 @@
             </li>
                     <li>
                 <a href="packages/Lwt-Tests.html" class="">Tests</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Authentication.html" class="">Authentication</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="packages/Authentication-JWT.html" class="">JWT</a>
                 
             </li>
             </ul>
@@ -815,6 +879,12 @@ authenticate via built-in auth or WordPress integration.</p>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#property_googleId">$googleId</a>
+    <span>
+                        &nbsp;: string|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -private">
     <a class="" href="classes/Lwt-Core-Entity-User.html#property_id">$id</a>
     <span>
                         &nbsp;: <a href="classes/Lwt-Shared-Domain-ValueObjects-UserId.html"><abbr title="\Lwt\Shared\Domain\ValueObjects\UserId">UserId</abbr></a>            </span>
@@ -830,6 +900,12 @@ authenticate via built-in auth or WordPress integration.</p>
     <a class="" href="classes/Lwt-Core-Entity-User.html#property_lastLogin">$lastLogin</a>
     <span>
                         &nbsp;: <abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -private">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#property_microsoftId">$microsoftId</a>
+    <span>
+                        &nbsp;: string|null            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
@@ -949,6 +1025,20 @@ authenticate via built-in auth or WordPress integration.</p>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#method_createFromGoogle">createFromGoogle()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Create a user from Google OAuth.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#method_createFromMicrosoft">createFromMicrosoft()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Create a user from Microsoft OAuth.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Core-Entity-User.html#method_createFromWordPress">createFromWordPress()</a>
     <span>
                                 &nbsp;: self    </span>
@@ -973,6 +1063,12 @@ authenticate via built-in auth or WordPress integration.</p>
     <a class="" href="classes/Lwt-Core-Entity-User.html#method_email">email()</a>
     <span>
                                 &nbsp;: string    </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#method_googleId">googleId()</a>
+    <span>
+                                &nbsp;: string|null    </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
@@ -1044,6 +1140,20 @@ authenticate via built-in auth or WordPress integration.</p>
 <dd>Check if the user is an admin.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#method_isLinkedToGoogle">isLinkedToGoogle()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Check if the user is linked to Google.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#method_isLinkedToMicrosoft">isLinkedToMicrosoft()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Check if the user is linked to Microsoft.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Core-Entity-User.html#method_isLinkedToWordPress">isLinkedToWordPress()</a>
     <span>
                                 &nbsp;: bool    </span>
@@ -1057,11 +1167,31 @@ authenticate via built-in auth or WordPress integration.</p>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#method_linkGoogle">linkGoogle()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Link to a Google account.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#method_linkMicrosoft">linkMicrosoft()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Link to a Microsoft account.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Core-Entity-User.html#method_linkWordPress">linkWordPress()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
 <dd>Link to a WordPress account.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#method_microsoftId">microsoftId()</a>
+    <span>
+                                &nbsp;: string|null    </span>
+</dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Core-Entity-User.html#method_passwordHash">passwordHash()</a>
@@ -1133,6 +1263,20 @@ authenticate via built-in auth or WordPress integration.</p>
                                 &nbsp;: void    </span>
 </dt>
 <dd>Set a new remember-me token.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#method_unlinkGoogle">unlinkGoogle()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Unlink from Google account.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Entity-User.html#method_unlinkMicrosoft">unlinkMicrosoft()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Unlink from Microsoft account.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Core-Entity-User.html#method_unlinkWordPress">unlinkWordPress()</a>
@@ -1345,7 +1489,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">47</span>
+    <span class="phpdocumentor-element-found-in__line">49</span>
 
     </aside>
 
@@ -1392,6 +1536,43 @@ authenticate via built-in auth or WordPress integration.</p>
         <span class="phpdocumentor-signature__visibility">private</span>
             <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">$email</span>
+    </code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -private
+                                                                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_googleId">
+        $googleId
+        <a href="classes/Lwt-Core-Entity-User.html#property_googleId" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                                            </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">47</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">private</span>
+            <span class="phpdocumentor-signature__type">string|null</span>
+    <span class="phpdocumentor-signature__name">$googleId</span>
     </code>
 
     
@@ -1456,7 +1637,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">49</span>
+    <span class="phpdocumentor-element-found-in__line">51</span>
 
     </aside>
 
@@ -1493,7 +1674,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">48</span>
+    <span class="phpdocumentor-element-found-in__line">50</span>
 
     </aside>
 
@@ -1503,6 +1684,43 @@ authenticate via built-in auth or WordPress integration.</p>
         <span class="phpdocumentor-signature__visibility">private</span>
             <span class="phpdocumentor-signature__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>|null</span>
     <span class="phpdocumentor-signature__name">$lastLogin</span>
+    </code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -private
+                                                                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_microsoftId">
+        $microsoftId
+        <a href="classes/Lwt-Core-Entity-User.html#property_microsoftId" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                                            </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">48</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">private</span>
+            <span class="phpdocumentor-signature__type">string|null</span>
+    <span class="phpdocumentor-signature__name">$microsoftId</span>
     </code>
 
     
@@ -1715,7 +1933,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">50</span>
+    <span class="phpdocumentor-element-found-in__line">52</span>
 
     </aside>
 
@@ -1831,7 +2049,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">383</span>
+    <span class="phpdocumentor-element-found-in__line">493</span>
 
     </aside>
 
@@ -1866,7 +2084,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">586</span>
+    <span class="phpdocumentor-element-found-in__line">770</span>
 
     </aside>
 
@@ -1904,7 +2122,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">591</span>
+    <span class="phpdocumentor-element-found-in__line">775</span>
 
     </aside>
 
@@ -1942,7 +2160,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">508</span>
+    <span class="phpdocumentor-element-found-in__line">692</span>
 
     </aside>
 
@@ -1981,7 +2199,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">261</span>
+    <span class="phpdocumentor-element-found-in__line">371</span>
 
     </aside>
 
@@ -2045,7 +2263,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">275</span>
+    <span class="phpdocumentor-element-found-in__line">385</span>
 
     </aside>
 
@@ -2092,7 +2310,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">245</span>
+    <span class="phpdocumentor-element-found-in__line">355</span>
 
     </aside>
 
@@ -2156,7 +2374,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">100</span>
+    <span class="phpdocumentor-element-found-in__line">106</span>
 
     </aside>
 
@@ -2242,7 +2460,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">621</span>
+    <span class="phpdocumentor-element-found-in__line">815</span>
 
     </aside>
 
@@ -2272,6 +2490,178 @@ authenticate via built-in auth or WordPress integration.</p>
             -public
                                     -static                    "
 >
+    <h4 class="phpdocumentor-element__name" id="method_createFromGoogle">
+        createFromGoogle()
+        <a href="classes/Lwt-Core-Entity-User.html#method_createFromGoogle" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">196</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Create a user from Google OAuth.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">createFromGoogle</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$googleId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$username</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$email</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$googleId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The Google user ID</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$username</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The username</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$email</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The email address</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Lwt-Core-Entity-User.html#method_createFromGoogle#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">throws</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><abbr title="\InvalidArgumentException">InvalidArgumentException</abbr></span>
+                                                            
+                                                 <section class="phpdocumentor-description"><p>If Google ID is empty</p>
+</section>
+
+                                    </dd>
+                                            </dl>
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_createFromMicrosoft">
+        createFromMicrosoft()
+        <a href="classes/Lwt-Core-Entity-User.html#method_createFromMicrosoft" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">243</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Create a user from Microsoft OAuth.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">createFromMicrosoft</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$microsoftId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$username</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$email</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$microsoftId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The Microsoft user ID</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$username</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The username</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$email</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The email address</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Lwt-Core-Entity-User.html#method_createFromMicrosoft#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">throws</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><abbr title="\InvalidArgumentException">InvalidArgumentException</abbr></span>
+                                                            
+                                                 <section class="phpdocumentor-description"><p>If Microsoft ID is empty</p>
+</section>
+
+                                    </dd>
+                                            </dl>
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
     <h4 class="phpdocumentor-element__name" id="method_createFromWordPress">
         createFromWordPress()
         <a href="classes/Lwt-Core-Entity-User.html#method_createFromWordPress" class="headerlink"><i class="fas fa-link"></i></a>
@@ -2280,7 +2670,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">141</span>
+    <span class="phpdocumentor-element-found-in__line">149</span>
 
     </aside>
 
@@ -2366,7 +2756,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">393</span>
+    <span class="phpdocumentor-element-found-in__line">503</span>
 
     </aside>
 
@@ -2401,7 +2791,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">413</span>
+    <span class="phpdocumentor-element-found-in__line">523</span>
 
     </aside>
 
@@ -2436,7 +2826,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">576</span>
+    <span class="phpdocumentor-element-found-in__line">760</span>
 
     </aside>
 
@@ -2466,6 +2856,44 @@ authenticate via built-in auth or WordPress integration.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_googleId">
+        googleId()
+        <a href="classes/Lwt-Core-Entity-User.html#method_googleId" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">805</span>
+
+    </aside>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">googleId</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_hasPassword">
         hasPassword()
         <a href="classes/Lwt-Core-Entity-User.html#method_hasPassword" class="headerlink"><i class="fas fa-link"></i></a>
@@ -2474,7 +2902,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">472</span>
+    <span class="phpdocumentor-element-found-in__line">656</span>
 
     </aside>
 
@@ -2513,7 +2941,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">482</span>
+    <span class="phpdocumentor-element-found-in__line">666</span>
 
     </aside>
 
@@ -2552,7 +2980,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">360</span>
+    <span class="phpdocumentor-element-found-in__line">470</span>
 
     </aside>
 
@@ -2591,7 +3019,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">495</span>
+    <span class="phpdocumentor-element-found-in__line">679</span>
 
     </aside>
 
@@ -2630,7 +3058,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">566</span>
+    <span class="phpdocumentor-element-found-in__line">750</span>
 
     </aside>
 
@@ -2668,7 +3096,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">299</span>
+    <span class="phpdocumentor-element-found-in__line">409</span>
 
     </aside>
 
@@ -2703,7 +3131,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">349</span>
+    <span class="phpdocumentor-element-found-in__line">459</span>
 
     </aside>
 
@@ -2738,7 +3166,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">324</span>
+    <span class="phpdocumentor-element-found-in__line">434</span>
 
     </aside>
 
@@ -2773,7 +3201,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">631</span>
+    <span class="phpdocumentor-element-found-in__line">825</span>
 
     </aside>
 
@@ -2811,7 +3239,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">452</span>
+    <span class="phpdocumentor-element-found-in__line">616</span>
 
     </aside>
 
@@ -2842,6 +3270,84 @@ authenticate via built-in auth or WordPress integration.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_isLinkedToGoogle">
+        isLinkedToGoogle()
+        <a href="classes/Lwt-Core-Entity-User.html#method_isLinkedToGoogle" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">636</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Check if the user is linked to Google.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">isLinkedToGoogle</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_isLinkedToMicrosoft">
+        isLinkedToMicrosoft()
+        <a href="classes/Lwt-Core-Entity-User.html#method_isLinkedToMicrosoft" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">646</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Check if the user is linked to Microsoft.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">isLinkedToMicrosoft</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_isLinkedToWordPress">
         isLinkedToWordPress()
         <a href="classes/Lwt-Core-Entity-User.html#method_isLinkedToWordPress" class="headerlink"><i class="fas fa-link"></i></a>
@@ -2850,7 +3356,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">462</span>
+    <span class="phpdocumentor-element-found-in__line">626</span>
 
     </aside>
 
@@ -2889,7 +3395,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">626</span>
+    <span class="phpdocumentor-element-found-in__line">820</span>
 
     </aside>
 
@@ -2919,6 +3425,134 @@ authenticate via built-in auth or WordPress integration.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_linkGoogle">
+        linkGoogle()
+        <a href="classes/Lwt-Core-Entity-User.html#method_linkGoogle" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">564</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Link to a Google account.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">linkGoogle</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$googleId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$googleId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The Google user ID</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Lwt-Core-Entity-User.html#method_linkGoogle#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">throws</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><abbr title="\InvalidArgumentException">InvalidArgumentException</abbr></span>
+                                                            
+                                                 <section class="phpdocumentor-description"><p>If Google ID is empty</p>
+</section>
+
+                                    </dd>
+                                            </dl>
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_linkMicrosoft">
+        linkMicrosoft()
+        <a href="classes/Lwt-Core-Entity-User.html#method_linkMicrosoft" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">591</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Link to a Microsoft account.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">linkMicrosoft</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$microsoftId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$microsoftId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The Microsoft user ID</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Lwt-Core-Entity-User.html#method_linkMicrosoft#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">throws</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><abbr title="\InvalidArgumentException">InvalidArgumentException</abbr></span>
+                                                            
+                                                 <section class="phpdocumentor-description"><p>If Microsoft ID is empty</p>
+</section>
+
+                                    </dd>
+                                            </dl>
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_linkWordPress">
         linkWordPress()
         <a href="classes/Lwt-Core-Entity-User.html#method_linkWordPress" class="headerlink"><i class="fas fa-link"></i></a>
@@ -2927,7 +3561,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">427</span>
+    <span class="phpdocumentor-element-found-in__line">537</span>
 
     </aside>
 
@@ -2983,6 +3617,44 @@ authenticate via built-in auth or WordPress integration.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_microsoftId">
+        microsoftId()
+        <a href="classes/Lwt-Core-Entity-User.html#method_microsoftId" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">810</span>
+
+    </aside>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">microsoftId</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_passwordHash">
         passwordHash()
         <a href="classes/Lwt-Core-Entity-User.html#method_passwordHash" class="headerlink"><i class="fas fa-link"></i></a>
@@ -2991,7 +3663,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">581</span>
+    <span class="phpdocumentor-element-found-in__line">765</span>
 
     </aside>
 
@@ -3029,7 +3701,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">606</span>
+    <span class="phpdocumentor-element-found-in__line">790</span>
 
     </aside>
 
@@ -3067,7 +3739,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">611</span>
+    <span class="phpdocumentor-element-found-in__line">795</span>
 
     </aside>
 
@@ -3105,7 +3777,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">403</span>
+    <span class="phpdocumentor-element-found-in__line">513</span>
 
     </aside>
 
@@ -3140,7 +3812,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">373</span>
+    <span class="phpdocumentor-element-found-in__line">483</span>
 
     </aside>
 
@@ -3175,7 +3847,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">596</span>
+    <span class="phpdocumentor-element-found-in__line">780</span>
 
     </aside>
 
@@ -3213,7 +3885,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">601</span>
+    <span class="phpdocumentor-element-found-in__line">785</span>
 
     </aside>
 
@@ -3251,7 +3923,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">636</span>
+    <span class="phpdocumentor-element-found-in__line">830</span>
 
     </aside>
 
@@ -3289,7 +3961,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">288</span>
+    <span class="phpdocumentor-element-found-in__line">398</span>
 
     </aside>
 
@@ -3345,7 +4017,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">338</span>
+    <span class="phpdocumentor-element-found-in__line">448</span>
 
     </aside>
 
@@ -3401,7 +4073,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">313</span>
+    <span class="phpdocumentor-element-found-in__line">423</span>
 
     </aside>
 
@@ -3449,6 +4121,76 @@ authenticate via built-in auth or WordPress integration.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_unlinkGoogle">
+        unlinkGoogle()
+        <a href="classes/Lwt-Core-Entity-User.html#method_unlinkGoogle" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">577</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Unlink from Google account.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">unlinkGoogle</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_unlinkMicrosoft">
+        unlinkMicrosoft()
+        <a href="classes/Lwt-Core-Entity-User.html#method_unlinkMicrosoft" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">604</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Unlink from Microsoft account.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">unlinkMicrosoft</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_unlinkWordPress">
         unlinkWordPress()
         <a href="classes/Lwt-Core-Entity-User.html#method_unlinkWordPress" class="headerlink"><i class="fas fa-link"></i></a>
@@ -3457,7 +4199,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">440</span>
+    <span class="phpdocumentor-element-found-in__line">550</span>
 
     </aside>
 
@@ -3492,7 +4234,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">571</span>
+    <span class="phpdocumentor-element-found-in__line">755</span>
 
     </aside>
 
@@ -3530,7 +4272,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">616</span>
+    <span class="phpdocumentor-element-found-in__line">800</span>
 
     </aside>
 
@@ -3568,7 +4310,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">55</span>
+    <span class="phpdocumentor-element-found-in__line">57</span>
 
     </aside>
 
@@ -3576,7 +4318,7 @@ authenticate via built-in auth or WordPress integration.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Shared-Domain-ValueObjects-UserId.html"><abbr title="\Lwt\Shared\Domain\ValueObjects\UserId">UserId</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$username</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$email</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$passwordHash</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$apiToken</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$apiTokenExpires</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$rememberToken</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$rememberTokenExpires</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$passwordResetToken</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$passwordResetTokenExpires</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordPressId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$created</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lastLogin</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$isActive</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$role</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Shared-Domain-ValueObjects-UserId.html"><abbr title="\Lwt\Shared\Domain\ValueObjects\UserId">UserId</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$username</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$email</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$passwordHash</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$apiToken</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$apiTokenExpires</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$rememberToken</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$rememberTokenExpires</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$passwordResetToken</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$passwordResetTokenExpires</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$wordPressId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$googleId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$microsoftId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$created</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lastLogin</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$isActive</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$role</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -3662,6 +4404,20 @@ authenticate via built-in auth or WordPress integration.</p>
                 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$googleId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$microsoftId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$created</span>
                 : <span class="phpdocumentor-argument-list__argument__type"><abbr title="\DateTimeImmutable">DateTimeImmutable</abbr></span>
                             </dt>
@@ -3711,7 +4467,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">551</span>
+    <span class="phpdocumentor-element-found-in__line">735</span>
 
     </aside>
 
@@ -3775,7 +4531,7 @@ authenticate via built-in auth or WordPress integration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Entity/User.php"><a href="files/src-backend-core-entity-user.html"><abbr title="src/backend/Core/Entity/User.php">User.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">524</span>
+    <span class="phpdocumentor-element-found-in__line">708</span>
 
     </aside>
 
@@ -3952,9 +4708,11 @@ authenticate via built-in auth or WordPress integration.</p>
                                                     <li class=""><a href="classes/Lwt-Core-Entity-User.html#property_apiTokenExpires">$apiTokenExpires</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Entity-User.html#property_created">$created</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Entity-User.html#property_email">$email</a></li>
+                                                    <li class=""><a href="classes/Lwt-Core-Entity-User.html#property_googleId">$googleId</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Entity-User.html#property_id">$id</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Entity-User.html#property_isActive">$isActive</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Entity-User.html#property_lastLogin">$lastLogin</a></li>
+                                                    <li class=""><a href="classes/Lwt-Core-Entity-User.html#property_microsoftId">$microsoftId</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Entity-User.html#property_passwordHash">$passwordHash</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Entity-User.html#property_passwordResetToken">$passwordResetToken</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Entity-User.html#property_passwordResetTokenExpires">$passwordResetTokenExpires</a></li>
@@ -3978,10 +4736,13 @@ authenticate via built-in auth or WordPress integration.</p>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_changeUsername">changeUsername()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_create">create()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_created">created()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_createFromGoogle">createFromGoogle()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_createFromMicrosoft">createFromMicrosoft()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_createFromWordPress">createFromWordPress()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_deactivate">deactivate()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_demoteFromAdmin">demoteFromAdmin()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_email">email()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_googleId">googleId()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_hasPassword">hasPassword()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_hasValidApiToken">hasValidApiToken()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_hasValidPasswordResetToken">hasValidPasswordResetToken()</a></li>
@@ -3992,9 +4753,14 @@ authenticate via built-in auth or WordPress integration.</p>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_invalidateRememberToken">invalidateRememberToken()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_isActive">isActive()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_isAdmin">isAdmin()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_isLinkedToGoogle">isLinkedToGoogle()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_isLinkedToMicrosoft">isLinkedToMicrosoft()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_isLinkedToWordPress">isLinkedToWordPress()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_lastLogin">lastLogin()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_linkGoogle">linkGoogle()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_linkMicrosoft">linkMicrosoft()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_linkWordPress">linkWordPress()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_microsoftId">microsoftId()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_passwordHash">passwordHash()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_passwordResetToken">passwordResetToken()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_passwordResetTokenExpires">passwordResetTokenExpires()</a></li>
@@ -4006,6 +4772,8 @@ authenticate via built-in auth or WordPress integration.</p>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_setApiToken">setApiToken()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_setPasswordResetToken">setPasswordResetToken()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_setRememberToken">setRememberToken()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_unlinkGoogle">unlinkGoogle()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_unlinkMicrosoft">unlinkMicrosoft()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_unlinkWordPress">unlinkWordPress()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_username">username()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Entity-User.html#method_wordPressId">wordPressId()</a></li>

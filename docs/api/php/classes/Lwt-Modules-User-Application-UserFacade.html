@@ -203,6 +203,42 @@
             </ul>
 
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/firebase.html" class="">Firebase</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/firebase-jwt.html" class="">JWT</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/guzzlehttp.html" class="">GuzzleHttp</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/guzzlehttp-cookie.html" class="">Cookie</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-exception.html" class="">Exception</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-handler.html" class="">Handler</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-promise.html" class="">Promise</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-psr7.html" class="">Psr7</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/league.html" class="">League</a>
 </h4>
     <ul class="phpdocumentor-list">
@@ -212,6 +248,10 @@
             </li>
                     <li>
                 <a href="namespaces/league-config.html" class="">Config</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/league-oauth2.html" class="">OAuth2</a>
                 
             </li>
             </ul>
@@ -417,6 +457,10 @@
                 
             </li>
                     <li>
+                <a href="namespaces/psr-http.html" class="">Http</a>
+                
+            </li>
+                    <li>
                 <a href="namespaces/psr-log.html" class="">Log</a>
                 
             </li>
@@ -524,6 +568,16 @@
             </li>
                     <li>
                 <a href="namespaces/symfony-contracts.html" class="">Contracts</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/thenetworg.html" class="">TheNetworg</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/thenetworg-oauth2.html" class="">OAuth2</a>
                 
             </li>
             </ul>
@@ -651,6 +705,16 @@
             </li>
                     <li>
                 <a href="packages/Lwt-Tests.html" class="">Tests</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Authentication.html" class="">Authentication</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="packages/Authentication-JWT.html" class="">JWT</a>
                 
             </li>
             </ul>
@@ -878,6 +942,13 @@ to the original AuthService for gradual migration.</p>
 <dd>Find a user by email.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findByGoogleId">findByGoogleId()</a>
+    <span>
+                                &nbsp;: <a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>|null    </span>
+</dt>
+<dd>Find a user by Google ID.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findById">findById()</a>
     <span>
                                 &nbsp;: <a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>|null    </span>
@@ -885,11 +956,32 @@ to the original AuthService for gradual migration.</p>
 <dd>Find a user by ID.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findByMicrosoftId">findByMicrosoftId()</a>
+    <span>
+                                &nbsp;: <a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>|null    </span>
+</dt>
+<dd>Find a user by Microsoft ID.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findByUsername">findByUsername()</a>
     <span>
                                 &nbsp;: <a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>|null    </span>
 </dt>
 <dd>Find a user by username.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findOrCreateGoogleUser">findOrCreateGoogleUser()</a>
+    <span>
+                                &nbsp;: <a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>    </span>
+</dt>
+<dd>Find or create a user from Google OAuth.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findOrCreateMicrosoftUser">findOrCreateMicrosoftUser()</a>
+    <span>
+                                &nbsp;: <a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>    </span>
+</dt>
+<dd>Find or create a user from Microsoft OAuth.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findOrCreateWordPressUser">findOrCreateWordPressUser()</a>
@@ -960,6 +1052,13 @@ to the original AuthService for gradual migration.</p>
                                 &nbsp;: bool    </span>
 </dt>
 <dd>Request a password reset for an email address.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Modules-User-Application-UserFacade.html#method_save">save()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Save a user entity.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Modules-User-Application-UserFacade.html#method_setCurrentUser">setCurrentUser()</a>
@@ -1735,6 +1834,57 @@ to the original AuthService for gradual migration.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_findByGoogleId">
+        findByGoogleId()
+        <a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findByGoogleId" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">453</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Find a user by Google ID.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">findByGoogleId</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$googleId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$googleId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Google user ID</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_findById">
         findById()
         <a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findById" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1765,6 +1915,57 @@ to the original AuthService for gradual migration.</p>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>User ID</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_findByMicrosoftId">
+        findByMicrosoftId()
+        <a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findByMicrosoftId" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">524</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Find a user by Microsoft ID.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">findByMicrosoftId</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$microsoftId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$microsoftId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Microsoft user ID</p>
 </section>
 
             </dd>
@@ -1828,6 +2029,152 @@ to the original AuthService for gradual migration.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_findOrCreateGoogleUser">
+        findOrCreateGoogleUser()
+        <a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findOrCreateGoogleUser" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">471</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Find or create a user from Google OAuth.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">findOrCreateGoogleUser</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$googleId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$username</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$email</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$googleId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Google user ID</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$username</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Generated username</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$email</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Google email</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a></span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>The found or created user</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_findOrCreateMicrosoftUser">
+        findOrCreateMicrosoftUser()
+        <a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findOrCreateMicrosoftUser" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">542</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Find or create a user from Microsoft OAuth.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">findOrCreateMicrosoftUser</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$microsoftId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$username</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$email</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$microsoftId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Microsoft user ID</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$username</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Generated username</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$email</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Microsoft email</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a></span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>The found or created user</p>
+</section>
+
             </section>
 
 </article>
@@ -1990,7 +2337,7 @@ to the original AuthService for gradual migration.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">469</span>
+    <span class="phpdocumentor-element-found-in__line">599</span>
 
     </aside>
 
@@ -2448,6 +2795,53 @@ If the email doesn't exist, we silently succeed.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_save">
+        save()
+        <a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_save" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">512</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Save a user entity.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">save</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$user</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$user</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Core-Entity-User.html"><abbr title="\Lwt\Core\Entity\User">User</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The user to save</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_setCurrentUser">
         setCurrentUser()
         <a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_setCurrentUser" class="headerlink"><i class="fas fa-link"></i></a>
@@ -2696,7 +3090,7 @@ If the email doesn't exist, we silently succeed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">457</span>
+    <span class="phpdocumentor-element-found-in__line">587</span>
 
     </aside>
 
@@ -2851,7 +3245,7 @@ If the email doesn't exist, we silently succeed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">573</span>
+    <span class="phpdocumentor-element-found-in__line">703</span>
 
     </aside>
 
@@ -2889,7 +3283,7 @@ If the email doesn't exist, we silently succeed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">536</span>
+    <span class="phpdocumentor-element-found-in__line">666</span>
 
     </aside>
 
@@ -2927,7 +3321,7 @@ If the email doesn't exist, we silently succeed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">525</span>
+    <span class="phpdocumentor-element-found-in__line">655</span>
 
     </aside>
 
@@ -2965,7 +3359,7 @@ If the email doesn't exist, we silently succeed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">481</span>
+    <span class="phpdocumentor-element-found-in__line">611</span>
 
     </aside>
 
@@ -3003,7 +3397,7 @@ If the email doesn't exist, we silently succeed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">503</span>
+    <span class="phpdocumentor-element-found-in__line">633</span>
 
     </aside>
 
@@ -3041,7 +3435,7 @@ If the email doesn't exist, we silently succeed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">492</span>
+    <span class="phpdocumentor-element-found-in__line">622</span>
 
     </aside>
 
@@ -3079,7 +3473,7 @@ If the email doesn't exist, we silently succeed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">558</span>
+    <span class="phpdocumentor-element-found-in__line">688</span>
 
     </aside>
 
@@ -3117,7 +3511,7 @@ If the email doesn't exist, we silently succeed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">547</span>
+    <span class="phpdocumentor-element-found-in__line">677</span>
 
     </aside>
 
@@ -3155,7 +3549,7 @@ If the email doesn't exist, we silently succeed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/User/Application/UserFacade.php"><a href="files/src-modules-user-application-userfacade.html"><abbr title="src/Modules/User/Application/UserFacade.php">UserFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">514</span>
+    <span class="phpdocumentor-element-found-in__line">644</span>
 
     </aside>
 
@@ -3315,8 +3709,12 @@ If the email doesn't exist, we silently succeed.</p>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_completePasswordReset">completePasswordReset()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findByEmail">findByEmail()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findByGoogleId">findByGoogleId()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findById">findById()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findByMicrosoftId">findByMicrosoftId()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findByUsername">findByUsername()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findOrCreateGoogleUser">findOrCreateGoogleUser()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findOrCreateMicrosoftUser">findOrCreateMicrosoftUser()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_findOrCreateWordPressUser">findOrCreateWordPressUser()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_generateApiToken">generateApiToken()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_generateToken">generateToken()</a></li>
@@ -3327,6 +3725,7 @@ If the email doesn't exist, we silently succeed.</p>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_logout">logout()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_register">register()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_requestPasswordReset">requestPasswordReset()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_save">save()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_setCurrentUser">setCurrentUser()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_setRememberToken">setRememberToken()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-User-Application-UserFacade.html#method_validateApiToken">validateApiToken()</a></li>

@@ -203,6 +203,42 @@
             </ul>
 
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/firebase.html" class="">Firebase</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/firebase-jwt.html" class="">JWT</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/guzzlehttp.html" class="">GuzzleHttp</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/guzzlehttp-cookie.html" class="">Cookie</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-exception.html" class="">Exception</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-handler.html" class="">Handler</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-promise.html" class="">Promise</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-psr7.html" class="">Psr7</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/league.html" class="">League</a>
 </h4>
     <ul class="phpdocumentor-list">
@@ -212,6 +248,10 @@
             </li>
                     <li>
                 <a href="namespaces/league-config.html" class="">Config</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/league-oauth2.html" class="">OAuth2</a>
                 
             </li>
             </ul>
@@ -417,6 +457,10 @@
                 
             </li>
                     <li>
+                <a href="namespaces/psr-http.html" class="">Http</a>
+                
+            </li>
+                    <li>
                 <a href="namespaces/psr-log.html" class="">Log</a>
                 
             </li>
@@ -524,6 +568,16 @@
             </li>
                     <li>
                 <a href="namespaces/symfony-contracts.html" class="">Contracts</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/thenetworg.html" class="">TheNetworg</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/thenetworg-oauth2.html" class="">OAuth2</a>
                 
             </li>
             </ul>
@@ -651,6 +705,16 @@
             </li>
                     <li>
                 <a href="packages/Lwt-Tests.html" class="">Tests</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Authentication.html" class="">Authentication</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="packages/Authentication-JWT.html" class="">JWT</a>
                 
             </li>
             </ul>
@@ -836,6 +900,20 @@ This class operates independently of the database.</p>
                                 &nbsp;: string    </span>
 </dt>
 <dd>Test a database connection.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -private">
+    <a class="" href="classes/Lwt-Modules-Admin-Infrastructure-FileSystemEnvRepository.html#method_quoteEnvValue">quoteEnvValue()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>Quote an env value for safe storage.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -private">
+    <a class="" href="classes/Lwt-Modules-Admin-Infrastructure-FileSystemEnvRepository.html#method_unquoteEnvValue">unquoteEnvValue()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>Unquote an env value when loading.</dd>
 
     </dl>
 
@@ -1225,6 +1303,120 @@ This class operates independently of the database.</p>
             </section>
 
 </article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -private
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_quoteEnvValue">
+        quoteEnvValue()
+        <a href="classes/Lwt-Modules-Admin-Infrastructure-FileSystemEnvRepository.html#method_quoteEnvValue" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Admin/Infrastructure/FileSystemEnvRepository.php"><a href="files/src-modules-admin-infrastructure-filesystemenvrepository.html"><abbr title="src/Modules/Admin/Infrastructure/FileSystemEnvRepository.php">FileSystemEnvRepository.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">228</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Quote an env value for safe storage.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">private</span>
+                    <span class="phpdocumentor-signature__name">quoteEnvValue</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$value</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Always uses double quotes and escapes special characters.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$value</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Raw value</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>Quoted and escaped value</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -private
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_unquoteEnvValue">
+        unquoteEnvValue()
+        <a href="classes/Lwt-Modules-Admin-Infrastructure-FileSystemEnvRepository.html#method_unquoteEnvValue" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Admin/Infrastructure/FileSystemEnvRepository.php"><a href="files/src-modules-admin-infrastructure-filesystemenvrepository.html"><abbr title="src/Modules/Admin/Infrastructure/FileSystemEnvRepository.php">FileSystemEnvRepository.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">248</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Unquote an env value when loading.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">private</span>
+                    <span class="phpdocumentor-signature__name">unquoteEnvValue</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$value</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Handles both single and double quoted values, and unescapes characters.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$value</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Quoted value from .env file</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>Unquoted and unescaped value</p>
+</section>
+
+            </section>
+
+</article>
             </section>
 
         <div class="phpdocumentor-modal" id="source-view">
@@ -1354,6 +1546,8 @@ This class operates independently of the database.</p>
                                             <li class=""><a href="classes/Lwt-Modules-Admin-Infrastructure-FileSystemEnvRepository.html#method_load">load()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Admin-Infrastructure-FileSystemEnvRepository.html#method_save">save()</a></li>
                                             <li class=""><a href="classes/Lwt-Modules-Admin-Infrastructure-FileSystemEnvRepository.html#method_testConnection">testConnection()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Admin-Infrastructure-FileSystemEnvRepository.html#method_quoteEnvValue">quoteEnvValue()</a></li>
+                                            <li class=""><a href="classes/Lwt-Modules-Admin-Infrastructure-FileSystemEnvRepository.html#method_unquoteEnvValue">unquoteEnvValue()</a></li>
                                     </ul>
             </li>
                     </ul>

@@ -203,6 +203,42 @@
             </ul>
 
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/firebase.html" class="">Firebase</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/firebase-jwt.html" class="">JWT</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/guzzlehttp.html" class="">GuzzleHttp</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/guzzlehttp-cookie.html" class="">Cookie</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-exception.html" class="">Exception</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-handler.html" class="">Handler</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-promise.html" class="">Promise</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-psr7.html" class="">Psr7</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/league.html" class="">League</a>
 </h4>
     <ul class="phpdocumentor-list">
@@ -212,6 +248,10 @@
             </li>
                     <li>
                 <a href="namespaces/league-config.html" class="">Config</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/league-oauth2.html" class="">OAuth2</a>
                 
             </li>
             </ul>
@@ -417,6 +457,10 @@
                 
             </li>
                     <li>
+                <a href="namespaces/psr-http.html" class="">Http</a>
+                
+            </li>
+                    <li>
                 <a href="namespaces/psr-log.html" class="">Log</a>
                 
             </li>
@@ -524,6 +568,16 @@
             </li>
                     <li>
                 <a href="namespaces/symfony-contracts.html" class="">Contracts</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/thenetworg.html" class="">TheNetworg</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/thenetworg-oauth2.html" class="">OAuth2</a>
                 
             </li>
             </ul>
@@ -651,6 +705,16 @@
             </li>
                     <li>
                 <a href="packages/Lwt-Tests.html" class="">Tests</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Authentication.html" class="">Authentication</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="packages/Authentication-JWT.html" class="">JWT</a>
                 
             </li>
             </ul>
@@ -814,6 +878,13 @@ $userId = Globals::requireUserId();
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
+    <a class="" href="classes/Lwt-Core-Globals.html#property_backupRestoreEnabled">$backupRestoreEnabled</a>
+    <span>
+                        &nbsp;: bool|null            </span>
+</dt>
+<dd>Whether backup restore is enabled.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -private">
     <a class="" href="classes/Lwt-Core-Globals.html#property_currentUserId">$currentUserId</a>
     <span>
                         &nbsp;: int|null            </span>
@@ -906,6 +977,13 @@ $userId = Globals::requireUserId();
 <dd>Check if a user is currently authenticated.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Globals.html#method_isBackupRestoreEnabled">isBackupRestoreEnabled()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Check if backup restore is enabled.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Core-Globals.html#method_isCurrentUserAdmin">isCurrentUserAdmin()</a>
     <span>
                                 &nbsp;: bool    </span>
@@ -946,6 +1024,13 @@ $userId = Globals::requireUserId();
                                 &nbsp;: void    </span>
 </dt>
 <dd>Reset all globals to initial state.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Globals.html#method_setBackupRestoreEnabled">setBackupRestoreEnabled()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Set whether backup restore is enabled.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Lwt-Core-Globals.html#method_setCurrentUserId">setCurrentUserId()</a>
@@ -1009,6 +1094,48 @@ $userId = Globals::requireUserId();
             <a href="classes/Lwt-Core-Globals.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -private
+            -static                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="property_backupRestoreEnabled">
+        $backupRestoreEnabled
+        <a href="classes/Lwt-Core-Globals.html#property_backupRestoreEnabled" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                                            </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">109</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Whether backup restore is enabled.</p>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">private</span>
+        <span class="phpdocumentor-signature__static">static</span>    <span class="phpdocumentor-signature__type">bool|null</span>
+    <span class="phpdocumentor-signature__name">$backupRestoreEnabled</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+        <section class="phpdocumentor-description"><p>Disabled by default in multi-user mode for security.</p>
+</section>
+
+        <section class="phpdocumentor-description"><p>Null means use default based on multi-user mode</p>
+</section>
+
+    
+
+        
+        
+
+</article>
                     <article
         class="
             phpdocumentor-element
@@ -1299,7 +1426,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">259</span>
+    <span class="phpdocumentor-element-found-in__line">268</span>
 
     </aside>
 
@@ -1359,7 +1486,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">160</span>
+    <span class="phpdocumentor-element-found-in__line">169</span>
 
     </aside>
 
@@ -1402,7 +1529,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">138</span>
+    <span class="phpdocumentor-element-found-in__line">147</span>
 
     </aside>
 
@@ -1445,7 +1572,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">109</span>
+    <span class="phpdocumentor-element-found-in__line">118</span>
 
     </aside>
 
@@ -1482,7 +1609,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">301</span>
+    <span class="phpdocumentor-element-found-in__line">310</span>
 
     </aside>
 
@@ -1532,6 +1659,68 @@ $userId = Globals::requireUserId();
             -public
                                     -static                    "
 >
+    <h4 class="phpdocumentor-element__name" id="method_isBackupRestoreEnabled">
+        isBackupRestoreEnabled()
+        <a href="classes/Lwt-Core-Globals.html#method_isBackupRestoreEnabled" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">398</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Check if backup restore is enabled.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">isBackupRestoreEnabled</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>In multi-user mode, backup restore is disabled by default for security.
+Single-user mode allows restore by default.
+This can be overridden by explicitly setting BACKUP_RESTORE_ENABLED.</p>
+</section>
+
+    
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Lwt-Core-Globals.html#method_isBackupRestoreEnabled#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">3.0.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>True if backup restore is enabled</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
     <h4 class="phpdocumentor-element__name" id="method_isCurrentUserAdmin">
         isCurrentUserAdmin()
         <a href="classes/Lwt-Core-Globals.html#method_isCurrentUserAdmin" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1540,7 +1729,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">359</span>
+    <span class="phpdocumentor-element-found-in__line">368</span>
 
     </aside>
 
@@ -1598,7 +1787,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">182</span>
+    <span class="phpdocumentor-element-found-in__line">191</span>
 
     </aside>
 
@@ -1641,7 +1830,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">330</span>
+    <span class="phpdocumentor-element-found-in__line">339</span>
 
     </aside>
 
@@ -1699,7 +1888,7 @@ $userId = Globals::requireUserId();
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">224</span>
+    <span class="phpdocumentor-element-found-in__line">233</span>
 
     </aside>
 
@@ -1777,7 +1966,7 @@ Globals::query('words')
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">286</span>
+    <span class="phpdocumentor-element-found-in__line">295</span>
 
     </aside>
 
@@ -1856,7 +2045,7 @@ to proceed. It provides a cleaner alternative to checking for null.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">371</span>
+    <span class="phpdocumentor-element-found-in__line">416</span>
 
     </aside>
 
@@ -1885,6 +2074,68 @@ to proceed. It provides a cleaner alternative to checking for null.</p>
             -public
                                     -static                    "
 >
+    <h4 class="phpdocumentor-element__name" id="method_setBackupRestoreEnabled">
+        setBackupRestoreEnabled()
+        <a href="classes/Lwt-Core-Globals.html#method_setBackupRestoreEnabled" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">382</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Set whether backup restore is enabled.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">setBackupRestoreEnabled</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$enabled</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$enabled</span>
+                : <span class="phpdocumentor-argument-list__argument__type">bool|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Whether to enable backup restore, null for default</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/Lwt-Core-Globals.html#method_setBackupRestoreEnabled#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">3.0.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
     <h4 class="phpdocumentor-element__name" id="method_setCurrentUserId">
         setCurrentUserId()
         <a href="classes/Lwt-Core-Globals.html#method_setCurrentUserId" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1893,7 +2144,7 @@ to proceed. It provides a cleaner alternative to checking for null.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">245</span>
+    <span class="phpdocumentor-element-found-in__line">254</span>
 
     </aside>
 
@@ -1958,7 +2209,7 @@ the user context for all subsequent database operations.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">347</span>
+    <span class="phpdocumentor-element-found-in__line">356</span>
 
     </aside>
 
@@ -2023,7 +2274,7 @@ the admin context for authorization checks.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">150</span>
+    <span class="phpdocumentor-element-found-in__line">159</span>
 
     </aside>
 
@@ -2070,7 +2321,7 @@ the admin context for authorization checks.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">128</span>
+    <span class="phpdocumentor-element-found-in__line">137</span>
 
     </aside>
 
@@ -2117,7 +2368,7 @@ the admin context for authorization checks.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">172</span>
+    <span class="phpdocumentor-element-found-in__line">181</span>
 
     </aside>
 
@@ -2164,7 +2415,7 @@ the admin context for authorization checks.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">318</span>
+    <span class="phpdocumentor-element-found-in__line">327</span>
 
     </aside>
 
@@ -2229,7 +2480,7 @@ for user-scoped tables.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Globals.php"><a href="files/src-backend-core-globals.html"><abbr title="src/backend/Core/Globals.php">Globals.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">196</span>
+    <span class="phpdocumentor-element-found-in__line">205</span>
 
     </aside>
 
@@ -2387,6 +2638,7 @@ for user-scoped tables.</p>
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Lwt-Core-Globals.html#property_backupRestoreEnabled">$backupRestoreEnabled</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Globals.html#property_currentUserId">$currentUserId</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Globals.html#property_currentUserIsAdmin">$currentUserIsAdmin</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Globals.html#property_databaseName">$databaseName</a></li>
@@ -2405,12 +2657,14 @@ for user-scoped tables.</p>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_getDbConnection">getDbConnection()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_initialize">initialize()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_isAuthenticated">isAuthenticated()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Globals.html#method_isBackupRestoreEnabled">isBackupRestoreEnabled()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_isCurrentUserAdmin">isCurrentUserAdmin()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_isErrorDisplayEnabled">isErrorDisplayEnabled()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_isMultiUserEnabled">isMultiUserEnabled()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_query">query()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_requireUserId">requireUserId()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_reset">reset()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Globals.html#method_setBackupRestoreEnabled">setBackupRestoreEnabled()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_setCurrentUserId">setCurrentUserId()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_setCurrentUserIsAdmin">setCurrentUserIsAdmin()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Globals.html#method_setDatabaseName">setDatabaseName()</a></li>

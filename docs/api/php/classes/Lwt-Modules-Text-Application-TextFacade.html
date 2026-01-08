@@ -203,6 +203,42 @@
             </ul>
 
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/firebase.html" class="">Firebase</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/firebase-jwt.html" class="">JWT</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/guzzlehttp.html" class="">GuzzleHttp</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/guzzlehttp-cookie.html" class="">Cookie</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-exception.html" class="">Exception</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-handler.html" class="">Handler</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-promise.html" class="">Promise</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/guzzlehttp-psr7.html" class="">Psr7</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/league.html" class="">League</a>
 </h4>
     <ul class="phpdocumentor-list">
@@ -212,6 +248,10 @@
             </li>
                     <li>
                 <a href="namespaces/league-config.html" class="">Config</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/league-oauth2.html" class="">OAuth2</a>
                 
             </li>
             </ul>
@@ -417,6 +457,10 @@
                 
             </li>
                     <li>
+                <a href="namespaces/psr-http.html" class="">Http</a>
+                
+            </li>
+                    <li>
                 <a href="namespaces/psr-log.html" class="">Log</a>
                 
             </li>
@@ -524,6 +568,16 @@
             </li>
                     <li>
                 <a href="namespaces/symfony-contracts.html" class="">Contracts</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/thenetworg.html" class="">TheNetworg</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/thenetworg-oauth2.html" class="">OAuth2</a>
                 
             </li>
             </ul>
@@ -651,6 +705,16 @@
             </li>
                     <li>
                 <a href="packages/Lwt-Tests.html" class="">Tests</a>
+                
+            </li>
+            </ul>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Authentication.html" class="">Authentication</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="packages/Authentication-JWT.html" class="">JWT</a>
                 
             </li>
             </ul>
@@ -3258,7 +3322,7 @@ TextService::checkText() is kept for BC (outputs HTML directly).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Text/Application/TextFacade.php"><a href="files/src-modules-text-application-textfacade.html"><abbr title="src/Modules/Text/Application/TextFacade.php">TextFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">846</span>
+    <span class="phpdocumentor-element-found-in__line">842</span>
 
     </aside>
 
@@ -3812,7 +3876,7 @@ signature for BC with existing controllers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">prepareLongTextData</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$files</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$uploadText</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$paragraphHandling</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+                    <span class="phpdocumentor-signature__name">prepareLongTextData</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array{name: string, type: string, tmp_name: string, error: int, size: int}|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$uploadedFile</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$uploadText</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$paragraphHandling</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -3821,11 +3885,11 @@ signature for BC with existing controllers.</p>
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$files</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string|int, mixed&gt;</span>
+                <span class="phpdocumentor-argument-list__argument__name">$uploadedFile</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array{name: string, type: string, tmp_name: string, error: int, size: int}|null</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>$_FILES array</p>
+                    <section class="phpdocumentor-description"><p>Validated file data from InputValidator::getUploadedFile()</p>
 </section>
 
             </dd>
@@ -4072,7 +4136,7 @@ additional data (textId, redirect) for BC with existing controllers.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Text/Application/TextFacade.php"><a href="files/src-modules-text-application-textfacade.html"><abbr title="src/Modules/Text/Application/TextFacade.php">TextFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">793</span>
+    <span class="phpdocumentor-element-found-in__line">789</span>
 
     </aside>
 
@@ -4168,7 +4232,7 @@ additional data (textId, redirect) for BC with existing controllers.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Text/Application/TextFacade.php"><a href="files/src-modules-text-application-textfacade.html"><abbr title="src/Modules/Text/Application/TextFacade.php">TextFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">924</span>
+    <span class="phpdocumentor-element-found-in__line">920</span>
 
     </aside>
 
@@ -4320,7 +4384,7 @@ additional data (textId, redirect) for BC with existing controllers.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Text/Application/TextFacade.php"><a href="files/src-modules-text-application-textfacade.html"><abbr title="src/Modules/Text/Application/TextFacade.php">TextFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">868</span>
+    <span class="phpdocumentor-element-found-in__line">864</span>
 
     </aside>
 
@@ -4386,7 +4450,7 @@ additional data (textId, redirect) for BC with existing controllers.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Modules/Text/Application/TextFacade.php"><a href="files/src-modules-text-application-textfacade.html"><abbr title="src/Modules/Text/Application/TextFacade.php">TextFacade.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">753</span>
+    <span class="phpdocumentor-element-found-in__line">749</span>
 
     </aside>
 

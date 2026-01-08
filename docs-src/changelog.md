@@ -91,6 +91,10 @@ ones are marked like "v1.0.0-fork".
 * **TTS Settings Storage** ([#186](https://github.com/HugoFara/lwt/issues/186)):
   Text-to-Speech language settings (voice, rate, pitch) now use browser localStorage
   instead of cookies. Includes automatic migration from old cookie format.
+* **Icon Migration to Lucide SVG**: All 97 legacy Fugue PNG icons (16x16 pixels)
+  have been replaced with modern Lucide SVG icons. Benefits include scalable
+  vector graphics, CSS customization (colors, sizes), and reduced asset size.
+  The `IconHelper` class provides a unified interface for rendering icons.
 * **Removed SYSTEM_VARIABLES_ADMIN Privilege Requirement**
   ([#167](https://github.com/HugoFara/lwt/issues/167)): LWT no longer requires
   elevated database privileges for word imports. The `SET GLOBAL max_heap_table_size`
