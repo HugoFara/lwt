@@ -539,7 +539,7 @@ class SelectOptionsBuilder
     {
         $result = self::buildChooseOption();
         $result .= '<option disabled="disabled">------------</option>';
-        $result .= '<option value="test">Test Marked Terms</option>';
+        $result .= '<option value="test">Review Marked Terms</option>';
         $result .= '<option disabled="disabled">------------</option>';
         $result .= '<option value="spl1">Increase Status by 1 [+1]</option>';
         $result .= '<option value="smi1">Reduce Status by 1 [-1]</option>';
@@ -587,7 +587,7 @@ class SelectOptionsBuilder
     {
         $result = self::buildChooseOption();
         $result .= '<option disabled="disabled">------------</option>';
-        $result .= '<option value="testall">Test ALL Terms</option>';
+        $result .= '<option value="testall">Review ALL Terms</option>';
         $result .= '<option disabled="disabled">------------</option>';
         $result .= '<option value="spl1all">Increase Status by 1 [+1]</option>';
         $result .= '<option value="smi1all">Reduce Status by 1 [-1]</option>';
@@ -635,7 +635,7 @@ class SelectOptionsBuilder
     {
         $result = self::buildChooseOption();
         $result .= '<option disabled="disabled">------------</option>';
-        $result .= '<option value="test">Test Marked Texts</option>';
+        $result .= '<option value="test">Review Marked Texts</option>';
         $result .= '<option disabled="disabled">------------</option>';
         $result .= '<option value="addtag">Add Tag</option>';
         $result .= '<option value="deltag">Remove Tag</option>';

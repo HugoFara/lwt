@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 /**
- * Test Finished View - Shows completion message
+ * Review Finished View - Shows completion message
  *
  * Variables expected:
- * - $totalTests: int - Total tests done
- * - $tomorrowTests: int - Tests due tomorrow
+ * - $totalTests: int - Total reviews done
+ * - $tomorrowTests: int - Reviews due tomorrow
  * - $hidden: bool - Whether to hide initially (for AJAX)
  *
  * PHP version 8.1
@@ -26,12 +26,12 @@ $display = $hidden ? 'none' : 'inherit';
     <br /><br />
     <span class="red2">
         <span id="tests-done-today">
-            Nothing <?php echo $totalTests > 0 ? 'more ' : ''; ?>to test here!
+            Nothing <?php echo $totalTests > 0 ? 'more ' : ''; ?>to review here!
         </span>
         <br /><br />
         <span id="tests-tomorrow">
             Tomorrow you'll find here <?php echo $tomorrowTests; ?>
-            test<?php echo $tomorrowTests == 1 ? '' : 's'; ?>!
+            review<?php echo $tomorrowTests == 1 ? '' : 's'; ?>!
         </span>
     </span>
 </p>

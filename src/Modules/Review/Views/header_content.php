@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 /**
- * Test Header Content View - Test buttons and word count
+ * Review Header Content View - Review buttons and word count
  *
  * Variables expected:
  * - $title: string - Page title
@@ -22,7 +22,7 @@
 namespace Lwt\Views\Test;
 
 ?>
-<h1>TEST - <?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
+<h1>REVIEW - <?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
 <div class="test-word-count">
     Word<?php echo $totalCount > 1 ? 's' : ''; ?> due today:
     <?php echo $totalCount; ?>,

@@ -210,7 +210,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                             </a>
                             <a :href="'/test?text=' + lastText.id" class="button is-info is-light is-medium">
                                 <span class="icon"><i data-lucide="circle-help"></i></span>
-                                <span>Test</span>
+                                <span>Review</span>
                             </a>
                         </div>
                         <template x-if="lastText.annotated">

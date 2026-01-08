@@ -291,7 +291,7 @@ echo PageLayoutHelper::buildActionCard([
                                     <option value="exptsv">Export (TSV)</option>
                                 </optgroup>
                                 <optgroup label="Other">
-                                    <option value="test">Test Selection</option>
+                                    <option value="test">Review Selection</option>
                                 </optgroup>
                                 <optgroup label="Danger Zone">
                                     <option value="del">Delete Selected</option>

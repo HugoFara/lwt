@@ -128,9 +128,9 @@ foreach ($words as $record):
     }
     $score = $record['Score'];
     if ($score < 0) {
-        $scoreHtml = '<span class="tag is-danger is-light">0 ' . IconHelper::render('circle-x', ['title' => 'Test today!', 'alt' => 'Test today!']) . '</span>';
+        $scoreHtml = '<span class="tag is-danger is-light">0 ' . IconHelper::render('circle-x', ['title' => 'Review today!', 'alt' => 'Review today!']) . '</span>';
     } else {
-        $scoreHtml = '<span class="tag is-success is-light">' . floor((int)$score) . ($record['Score2'] < 0 ? ' ' . IconHelper::render('circle-dot', ['title' => 'Test tomorrow!', 'alt' => 'Test tomorrow!']) : ' ' . IconHelper::render('circle-check', ['title' => '-', 'alt' => '-'])) . '</span>';
+        $scoreHtml = '<span class="tag is-success is-light">' . floor((int)$score) . ($record['Score2'] < 0 ? ' ' . IconHelper::render('circle-dot', ['title' => 'Review tomorrow!', 'alt' => 'Review tomorrow!']) : ' ' . IconHelper::render('circle-check', ['title' => '-', 'alt' => '-'])) . '</span>';
     }
     $statusName = StatusHelper::getName((int)$record['WoStatus']);
     $statusAbbr = StatusHelper::getAbbr((int)$record['WoStatus']);

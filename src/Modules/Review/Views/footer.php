@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 /**
- * Test Footer View - Progress bar and statistics
+ * Review Footer View - Progress bar and statistics
  *
  * Variables expected:
- * - $remaining: int - Not yet tested count
+ * - $remaining: int - Not yet reviewed count
  * - $wrong: int - Wrong answers count
  * - $correct: int - Correct answers count
  *
@@ -34,7 +34,7 @@ $lCorrect = round($correct / $divisor, 0);
     </span>
     <span class="test-footer-stat test-progress-bar">
         <span id="not-tested-box" class="test-progress-notyet"
-            title="Not yet tested"
+            title="Not yet reviewed"
             style="width:<?php echo $lRemaining; ?>px"></span><span
             id="wrong-tests-box" class="test-progress-wrong"
             title="Wrong"
@@ -44,9 +44,9 @@ $lCorrect = round($correct / $divisor, 0);
             style="width:<?php echo $lCorrect; ?>px"></span>
     </span>
     <span class="test-footer-stat">
-        <span title="Total number of tests" id="total_tests"><?php echo $total; ?></span>
+        <span title="Total reviews" id="total_tests"><?php echo $total; ?></span>
         =
-        <span class="todosty" title="Not yet tested" id="not-tested"><?php echo $remaining; ?></span>
+        <span class="todosty" title="Not yet reviewed" id="not-tested"><?php echo $remaining; ?></span>
         +
         <span class="donewrongsty" title="Wrong" id="wrong-tests"><?php echo $wrong; ?></span>
         +

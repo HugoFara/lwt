@@ -12,11 +12,11 @@ LWT home screen
 
 ![Image](/assets/images/lwt_home_screen.jpg)  
 
-This is normal home screen of LWT. You may choose a language here, but you can do this also later. If you you choose a language, the language filter is pre-set to that language in some other screens. The last text you've read or tested is shown, and you may jump directly into reading, testing or printing of this last text.  
+This is normal home screen of LWT. You may choose a language here, but you can do this also later. If you you choose a language, the language filter is pre-set to that language in some other screens. The last text you've read or reviewed is shown, and you may jump directly into reading, reviewing or printing of this last text.  
 
 ## Languages
 
-The list of languages. Here you can add a new or edit an existent language. If no texts and no saved terms in a language exist, you can delete a language. If you change a language, all texts may be automatically reparsed to refresh (and correct) the cache of sentences and text items (depends on what language settings you have changed). You can do this also manually by clicking on the yellow flash icon. You can also test all (due) terms of a language or set a language as "current" language.  
+The list of languages. Here you can add a new or edit an existent language. If no texts and no saved terms in a language exist, you can delete a language. If you change a language, all texts may be automatically reparsed to refresh (and correct) the cache of sentences and text items (depends on what language settings you have changed). You can do this also manually by clicking on the yellow flash icon. You can also review all (due) terms of a language or set a language as "current" language.  
 
 ![Image](/assets/images/02.jpg)  
 
@@ -89,13 +89,13 @@ To understand all these options, please study also the [Language Setup guide](/r
 
 ## Texts
 
-The list of texts. You can filter this list according to language, title (wildcard = \*) or text tag(s) (see also below). The most important links for each text are "Read" and "Test" - that's the place to read, to listen, to save terms and to review and test your terms in sentence context. To see all terms of a text that you have saved, click on the numbers in column "Saved Wo+Ex". To print, archive, edit (and reparse), or to delete a text, click on the icons in column "Actions". There are more actions available, see "Multi Actions".  
+The list of texts. You can filter this list according to language, title (wildcard = \*) or text tag(s) (see also below). The most important links for each text are "Read" and "Review" - that's the place to read, to listen, to save terms and to review your terms in sentence context. To see all terms of a text that you have saved, click on the numbers in column "Saved Wo+Ex". To print, archive, edit (and reparse), or to delete a text, click on the icons in column "Actions". There are more actions available, see "Multi Actions".  
 
 ![Image](/assets/images/04.jpg)  
 
 ### Multi Actions for marked texts
 
-You can test the terms of the marked texts, delete or archive the marked texts. "Reparse Texts" rebuilds the sentence and the text item cache for all marked texts. "Set Term Sentences" sets a valid sentence (with the term in {..}) for all those saved or imported terms that occur in the text and that do not have a sentence at all or none with {term}. This makes it easy to "create" sentence examples for imported terms.  
+You can review the terms of the marked texts, delete or archive the marked texts. "Reparse Texts" rebuilds the sentence and the text item cache for all marked texts. "Set Term Sentences" sets a valid sentence (with the term in {..}) for all those saved or imported terms that occur in the text and that do not have a sentence at all or none with {term}. This makes it easy to "create" sentence examples for imported terms.  
 
 ![Image](/assets/images/14.jpg)  
 
@@ -213,33 +213,33 @@ With the checkbox \[Show All\] you can switch the display of text:
 
 ## Review terms
 
-Tests are only possible if a term has a translation. Terms with status "Ignored" and "Well Known" are never tested, and terms with a positive or zero score are not tested today. In summary, the term score must fall below zero to trigger the test. See also [Term Scores](/reference/term-scores). Terms that are due today are marked with a red bullet in the term table. Terms that are due tomorrow are marked with a yellow bullet in the term table.  
+Reviews are only possible if a term has a translation. Terms with status "Ignored" and "Well Known" are never reviewed, and terms with a positive or zero score are not reviewed today. In summary, the term score must fall below zero to trigger the review. See also [Term Scores](/reference/term-scores). Terms that are due today are marked with a red bullet in the term table. Terms that are due tomorrow are marked with a yellow bullet in the term table.  
 
-During a test, a status display (at the bottom of the test frame) shows you the elapsed time "mm:ss", a small bar graph, and the total, not yet tested, wrong and correct terms in this test.
+During a review, a status display (at the bottom of the review frame) shows you the elapsed time "mm:ss", a small bar graph, and the total, not yet reviewed, wrong and correct terms in this review.
 
 In the following, L1 denotes you mother tongue (= translations), and L2 the language you want to learn (= the terms, meaning words and expressions).
 
 ### Review terms in a text (L2 -> L1)
 
-This is Test #1 or #4: L2 -> L1 (recognition) - to train your ability to recognize a L2 term. You may test within sentence context (Button "..\[L2\].."), or just the term (Button "\[L2\]"). You can also use the Keyboard in the test frame, see [Keyboard Shortcuts](/reference/keyboard-shortcuts).  
+This is review mode #1 or #4: L2 -> L1 (recognition) - to train your ability to recognize a L2 term. You may review within sentence context (Button "..\[L2\].."), or just the term (Button "\[L2\]"). You can also use the Keyboard in the review frame, see [Keyboard Shortcuts](/reference/keyboard-shortcuts).  
 
 ![Image](/assets/images/07.jpg)  
 
 ### Review terms in a text (L1 -> L2)
 
-This is Test #2 or #5: L1 -> L2 (recall) - to train your ability to produce a term from L1. You may test within sentence context (Button "..\[L1\].."), or just the term (Button "\[L1\]"). You can also use the Keyboard in the test frame, see [Keyboard Shortcuts](/reference/keyboard-shortcuts).  
+This is review mode #2 or #5: L1 -> L2 (recall) - to train your ability to produce a term from L1. You may review within sentence context (Button "..\[L1\].."), or just the term (Button "\[L1\]"). You can also use the Keyboard in the review frame, see [Keyboard Shortcuts](/reference/keyboard-shortcuts).  
 
 ![Image](/assets/images/11.jpg)  
 
 ### Review terms in a text (••• -> L2)
 
-This is test #3: ••• -> L2 (recall) - to train your ability to produce a term only from the sentence context (Button "..\[••\].."). If you hover over "\[•••\]", a tooltip displays the translation of the term. You can also use the Keyboard in the test frame, see [Keyboard Shortcuts](/reference/keyboard-shortcuts).  
+This is review mode #3: ••• -> L2 (recall) - to train your ability to produce a term only from the sentence context (Button "..\[••\].."). If you hover over "\[•••\]", a tooltip displays the translation of the term. You can also use the Keyboard in the review frame, see [Keyboard Shortcuts](/reference/keyboard-shortcuts).  
 
 ![Image](/assets/images/12.jpg)  
 
 ### Review yourself in a table / word list format (Button "Table")
 
-This is test #6: The selected terms and expressions are presented as a table. You can make invisible either the columns "Term" or "Translation", and you can hide or show the columns "Sentence", "Romanization", "Status" and "Ed" (Edit). To reveal the invisible solution ("Term" or "Translation"), you just click into the empty table cell. You can review or test yourself with or without changing the status by clicking "+" or "-" in the "Status" column. A status in red signifies that the term is due for testing. You can also edit the term by clicking the yellow "Edit" icon. Columns 2 to 6 may also my sorted by clicking on the header row. The initial sort order is according to term score.  
+This is review mode #6: The selected terms and expressions are presented as a table. You can make invisible either the columns "Term" or "Translation", and you can hide or show the columns "Sentence", "Romanization", "Status" and "Ed" (Edit). To reveal the invisible solution ("Term" or "Translation"), you just click into the empty table cell. You can review yourself with or without changing the status by clicking "+" or "-" in the "Status" column. A status in red signifies that the term is due for review. You can also edit the term by clicking the yellow "Edit" icon. Columns 2 to 6 may also my sorted by clicking on the header row. The initial sort order is according to term score.  
 
 ![Image](/assets/images/32.jpg)  
 
@@ -293,7 +293,7 @@ The list of your saved words or expressions (= terms). You may filter the list o
 
 ### Multi Actions for marked terms
 
-Most actions are self-explanatory. "Test Marked Terms" starts a test with all marked terms. You may delete marked terms and change the status of marked terms. "Set Status Date to Today" is some kind of "trick" for vacations, illnesses, etc.  
+Most actions are self-explanatory. "Review Marked Terms" starts a review with all marked terms. You may delete marked terms and change the status of marked terms. "Set Status Date to Today" is some kind of "trick" for vacations, illnesses, etc.  
 
 "Export Marked Texts (Anki)" exports all terms that have been marked AND have a valid sentence with {term} for Anki. Terms that do not have a sentence with {term} will NOT be exported. Cloze testing of terms within sentence context can so be easily done in Anki. The export is tab-delimited: (1) term, (2) translation, (3) romanization, (4) Sentence without term (question of cloze test), (5) Sentence with term (answer of cloze test), (6) Language, (7) ID Number, (8) Tag list. Anki template decks (for Anki Version 1 and 2) are provided: "LWT.anki" and "LWT.apkg" in directory "anki".  
 
@@ -325,14 +325,14 @@ What is the difference between (active) texts and archived texts?
 * The result is stored in a cache of sentences and text items.
 * They use a lot of space in the database.
 * Reading with term creation/editing and dictionary lookup is possible.
-* Testing of a stored term that occurs in the text, is possible. A terms will be tested within the context of any sentence(s) in all active texts (the number of sentences may be set (1, 2, or 3) as a preference).
+* Review of a stored term that occurs in the text is possible. A term will be reviewed within the context of any sentence(s) in all active texts (the number of sentences may be set (1, 2, or 3) as a preference).
 
 ### Archived texts
 
 * They are not parsed and tokenized, only the text is stored.
 * Compared with active texts, they don't use much space in the database, because no sentences and no text items are stored.
 * Reading with term creation/editing and dictionary lookup is not possible.
-* Testing of a stored term, that occurs in the text, is possible, but a term will be tested ONLY within the context of the sentence(s) that has/have been stored with the term in the sentence field, if the term does not occur in any active text.
+* Review of a stored term that occurs in the text is possible, but a term will be reviewed ONLY within the context of the sentence(s) that has/have been stored with the term in the sentence field, if the term does not occur in any active text.
 
 ![Image](/assets/images/13.jpg)  
 
@@ -350,7 +350,7 @@ It's self-explanatory and shows your performance. The numbers in the first table
 
 Import a list of terms for a language, and set the status for all to a specified value. You can specify a file to upload or type/paste the data directly into the textbox. Format: one term per line, fields (columns) are separated either by comma ("CSV" file, e.g. used in LingQ as export format), TAB ("TSV" file, e.g. copy and paste from a spreadsheet program, not possible if you type in data manually) or # (if you type in data manually). The field/column assignment must be specified on the left.
 
-Important: You must import a term. The translation can be omitted if the status should be set to 98 or 99 (ignore/well known). Translation, romanization and sentence are all optional, but please understand that tests are only possible if terms have a translation. If a term already exists in the database (comparison is NOT case sensitive), it will not be overwritten; the line will be ignored. You can change this by setting "Overwrite existent terms" to "Yes". Be careful using this screen, a database backup before the import and double-checking everything is always advisable!  
+Important: You must import a term. The translation can be omitted if the status should be set to 98 or 99 (ignore/well known). Translation, romanization and sentence are all optional, but please understand that reviews are only possible if terms have a translation. If a term already exists in the database (comparison is NOT case sensitive), it will not be overwritten; the line will be ignored. You can change this by setting "Overwrite existent terms" to "Yes". Be careful using this screen, a database backup before the import and double-checking everything is always advisable!  
 
 ![Image](/assets/images/upload_terms.jpg)  
 
@@ -362,11 +362,11 @@ This screen offers a possibility to save, restore or empty the LWT database (ONL
 
 ## Settings
 
-In this screen you can adjust the program according to your needs. The geometric properties of the _Read Text_ and _Test_ screens can be changed. This is important because different browsers and font sizes may result in an unpleasant viewing experience.
+In this screen you can adjust the program according to your needs. The geometric properties of the _Read Text_ and _Review_ screens can be changed. This is important because different browsers and font sizes may result in an unpleasant viewing experience.
 
-The waiting time to display the next test and to hide the old message after a test assessment can be changed.
+The waiting time to display the next review and to hide the old message after a review assessment can be changed.
 
-The number of sentences displayed during testing and generated during term creation can be set to 1 (default), 2 or 3; if set to 2 or 3 you are able to do "MCD" (Massive-Context Cloze Deletion) testing, proposed by Khatzumoto @ AJATT.
+The number of sentences displayed during review and generated during term creation can be set to 1 (default), 2 or 3; if set to 2 or 3 you are able to do "MCD" (Massive-Context Cloze Deletion) reviews, proposed by Khatzumoto @ AJATT.
 
 The number of items per page on different screens can be set, and you can decide whether you want to see the word counts on the textpage immediately (page may load slow) or later (faster initial loading).  
 

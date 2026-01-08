@@ -232,12 +232,12 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
         </div>
     </div>
 
-    <!-- Test Screen Section -->
+    <!-- Review Screen Section -->
     <div class="card settings-section mb-4" x-data="{ open: false }">
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
-                <?php echo IconHelper::render('graduation-cap', ['alt' => 'Test Screen']); ?>
-                <span class="ml-2">Test Screen</span>
+                <?php echo IconHelper::render('graduation-cap', ['alt' => 'Review Screen']); ?>
+                <span class="ml-2">Review Screen</span>
             </p>
             <button type="button" class="card-header-icon" aria-label="toggle section">
                 <span class="icon">
@@ -248,7 +248,7 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
         <div class="card-content" x-show="open" x-transition>
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label" for="set-test-main-frame-waiting-time">Display Next Test After</label>
+                    <label class="label" for="set-test-main-frame-waiting-time">Display Next Review After</label>
                 </div>
                 <div class="field-body">
                     <div class="field has-addons">
@@ -258,7 +258,7 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                    min="0"
                                    id="set-test-main-frame-waiting-time"
                                    name="set-test-main-frame-waiting-time"
-                                   data_info="Waiting time after assessment to display next test"
+                                   data_info="Waiting time after assessment to display next review"
                                    value="<?php echo htmlspecialchars($settings['set-test-main-frame-waiting-time'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                    maxlength="4"
                                    style="width: 120px;"
@@ -396,12 +396,12 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
         </div>
     </div>
 
-    <!-- Testing & Terms Section -->
+    <!-- Review & Terms Section -->
     <div class="card settings-section mb-4" x-data="{ open: false }">
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
-                <?php echo IconHelper::render('spell-check', ['alt' => 'Testing & Terms']); ?>
-                <span class="ml-2">Testing &amp; Terms</span>
+                <?php echo IconHelper::render('spell-check', ['alt' => 'Review & Terms']); ?>
+                <span class="ml-2">Review &amp; Terms</span>
             </p>
             <button type="button" class="card-header-icon" aria-label="toggle section">
                 <span class="icon">
@@ -412,7 +412,7 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
         <div class="card-content" x-show="open" x-transition>
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label" for="set-test-sentence-count">Test Sentence Count</label>
+                    <label class="label" for="set-test-sentence-count">Review Sentence Count</label>
                 </div>
                 <div class="field-body">
                     <div class="field has-addons">
@@ -429,7 +429,7 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                             </span>
                         </div>
                     </div>
-                    <p class="help">Number of sentences displayed from text during testing</p>
+                    <p class="help">Number of sentences displayed from text during review</p>
                 </div>
             </div>
 

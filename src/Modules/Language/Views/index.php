@@ -178,7 +178,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                             <span class="icon">
                                 <i data-lucide="circle-help" style="width: 16px; height: 16px;"></i>
                             </span>
-                            <span>Test</span>
+                            <span>Review</span>
                         </a>
                         <template x-if="lang.textCount > 0">
                             <a

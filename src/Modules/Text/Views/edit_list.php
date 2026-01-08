@@ -225,7 +225,7 @@ echo PageLayoutHelper::buildActionCard([
                                     </a>
                                     <a :href="'/test?text=' + text.id" class="card-footer-item">
                                         <?php echo IconHelper::render('circle-help', ['size' => 16]); ?>
-                                        <span>Test</span>
+                                        <span>Review</span>
                                     </a>
                                     <div class="card-footer-item has-dropdown" x-data="{ open: false }">
                                         <a @click.prevent.stop="open = !open" class="dropdown-trigger-link">

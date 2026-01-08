@@ -53,7 +53,7 @@ $audioPosition = (int) ($audioPosition ?? 0);
         <div class="level-item">
           <div class="field is-grouped is-grouped-multiline">
             <div class="control">
-              <a href="/test?text=<?php echo $textId; ?>" class="button is-small">Test</a>
+              <a href="/test?text=<?php echo $textId; ?>" class="button is-small">Review</a>
             </div>
             <div class="control">
               <a href="/text/print-plain?text=<?php echo $textId; ?>" class="button is-small">Print</a>

@@ -15,4 +15,4 @@
 namespace Lwt\Views\Test;
 
 ?>
-<p class="center">&nbsp;<br />Sorry - No terms to display or to test at this time.</p>
+<p class="center">&nbsp;<br />Sorry - No terms to display or to review at this time.</p>

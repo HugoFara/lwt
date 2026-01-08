@@ -53,7 +53,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                     <?php echo IconHelper::render('book-open', ['title' => 'Read', 'alt' => 'Read']); ?>
                 </a>
                 <a href="/test?text=<?php echo $textId; ?>" target="_top">
-                    <?php echo IconHelper::render('circle-help', ['title' => 'Test', 'alt' => 'Test']); ?>
+                    <?php echo IconHelper::render('circle-help', ['title' => 'Review', 'alt' => 'Review']); ?>
                 </a>
                 <?php if ($mode !== 'edit'): ?>
                     <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>

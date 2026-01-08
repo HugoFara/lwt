@@ -294,7 +294,7 @@ class TestController extends BaseController
         // Get language settings
         $langIdFromSql = $this->reviewFacade->getLanguageIdFromTestSql($testsql);
         if ($langIdFromSql === null) {
-            PageLayoutHelper::renderPageStartNobody('Test', 'full-width');
+            PageLayoutHelper::renderPageStartNobody('Review', 'full-width');
             include __DIR__ . '/../Views/no_terms.php';
             PageLayoutHelper::renderPageEnd();
             return;
@@ -346,7 +346,7 @@ class TestController extends BaseController
             'property' => $testData['property']
         ];
 
-        PageLayoutHelper::renderPageStartNobody('Test', 'full-width');
+        PageLayoutHelper::renderPageStartNobody('Review', 'full-width');
         include __DIR__ . '/../Views/test_desktop.php';
         PageLayoutHelper::renderPageEnd();
     }
