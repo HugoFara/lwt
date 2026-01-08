@@ -199,16 +199,16 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                     <div class="box has-background-link-light" style="width: 280px; min-height: 180px;">
                         <p class="title is-5 mb-3" x-text="lastText.title"></p>
                         <!-- Statistics bar - colors match word status highlights -->
-                        <div class="mb-3" x-show="lastText.stats && lastText.stats.total > 0" :title="'Unknown: ' + (lastText.stats?.unknown || 0) + ', Learning: ' + ((lastText.stats?.s1 || 0) + (lastText.stats?.s2 || 0) + (lastText.stats?.s3 || 0) + (lastText.stats?.s4 || 0)) + ', Learned: ' + (lastText.stats?.s5 || 0) + ', Well-known: ' + (lastText.stats?.s99 || 0) + ', Ignored: ' + (lastText.stats?.s98 || 0)">
+                        <div class="mb-3" x-show="lastText.stats && lastText.stats.total > 0" :title="getStatsTitle()">
                             <div style="display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #ddd;">
-                                <div style="background: #5ABAFF;" :style="{ width: ((lastText.stats?.unknown || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
-                                <div style="background: #E85A3C;" :style="{ width: ((lastText.stats?.s1 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
-                                <div style="background: #E8893C;" :style="{ width: ((lastText.stats?.s2 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
-                                <div style="background: #E8B83C;" :style="{ width: ((lastText.stats?.s3 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
-                                <div style="background: #E8E23C;" :style="{ width: ((lastText.stats?.s4 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
-                                <div style="background: #66CC66;" :style="{ width: ((lastText.stats?.s5 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
-                                <div style="background: #CCFFCC;" :style="{ width: ((lastText.stats?.s99 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
-                                <div style="background: #888888;" :style="{ width: ((lastText.stats?.s98 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
+                                <div style="background: #5ABAFF;" :style="{ width: getStatPercent('unknown') + '%' }"></div>
+                                <div style="background: #E85A3C;" :style="{ width: getStatPercent('s1') + '%' }"></div>
+                                <div style="background: #E8893C;" :style="{ width: getStatPercent('s2') + '%' }"></div>
+                                <div style="background: #E8B83C;" :style="{ width: getStatPercent('s3') + '%' }"></div>
+                                <div style="background: #E8E23C;" :style="{ width: getStatPercent('s4') + '%' }"></div>
+                                <div style="background: #66CC66;" :style="{ width: getStatPercent('s5') + '%' }"></div>
+                                <div style="background: #CCFFCC;" :style="{ width: getStatPercent('s99') + '%' }"></div>
+                                <div style="background: #888888;" :style="{ width: getStatPercent('s98') + '%' }"></div>
                             </div>
                         </div>
                         <div class="buttons">

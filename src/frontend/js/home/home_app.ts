@@ -81,6 +81,8 @@ interface HomeData {
   checkPHPVersion(version: string): void;
   checkLWTUpdate(currentVersion: string): void;
   shouldUpdate(fromVersion: string, toVersion: string): boolean | null;
+  getStatPercent(key: string): number;
+  getStatsTitle(): string;
 }
 
 /**
@@ -288,6 +290,49 @@ export function homeData(): HomeData {
       }
 
       return null;
+    },
+
+    /**
+     * Get the percentage for a stats key (CSP-safe, no optional chaining).
+     */
+    getStatPercent(key: string): number {
+      if (!this.lastText || !this.lastText.stats) {
+        return 0;
+      }
+      const stats = this.lastText.stats;
+      const total = stats.total || 1;
+      let value = 0;
+      switch (key) {
+        case 'unknown': value = stats.unknown || 0; break;
+        case 's1': value = stats.s1 || 0; break;
+        case 's2': value = stats.s2 || 0; break;
+        case 's3': value = stats.s3 || 0; break;
+        case 's4': value = stats.s4 || 0; break;
+        case 's5': value = stats.s5 || 0; break;
+        case 's98': value = stats.s98 || 0; break;
+        case 's99': value = stats.s99 || 0; break;
+      }
+      return (value / total) * 100;
+    },
+
+    /**
+     * Get the title string for stats tooltip (CSP-safe, no optional chaining).
+     */
+    getStatsTitle(): string {
+      if (!this.lastText || !this.lastText.stats) {
+        return '';
+      }
+      const stats = this.lastText.stats;
+      const unknown = stats.unknown || 0;
+      const s1 = stats.s1 || 0;
+      const s2 = stats.s2 || 0;
+      const s3 = stats.s3 || 0;
+      const s4 = stats.s4 || 0;
+      const s5 = stats.s5 || 0;
+      const s98 = stats.s98 || 0;
+      const s99 = stats.s99 || 0;
+      const learning = s1 + s2 + s3 + s4;
+      return 'Unknown: ' + unknown + ', Learning: ' + learning + ', Learned: ' + s5 + ', Well-known: ' + s99 + ', Ignored: ' + s98;
     }
   };
 }
