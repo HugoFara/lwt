@@ -14,6 +14,7 @@
 
 namespace Lwt\Modules\Admin\Application\UseCases\Backup;
 
+use Lwt\Core\Globals;
 use Lwt\Modules\Admin\Domain\BackupRepositoryInterface;
 
 /**
@@ -38,23 +39,23 @@ class RestoreFromUpload
     /**
      * Execute the use case.
      *
-     * @param array{thefile?: array{tmp_name?: string, error?: int}} $fileData $_FILES data for uploaded file
+     * @param array{name: string, type: string, tmp_name: string, error: int, size: int}|null $fileData Validated file data from InputValidator::getUploadedFile()
      *
      * @return string Status message
      */
-    public function execute(array $fileData): string
+    public function execute(?array $fileData): string
     {
-        if (
-            !isset($fileData["thefile"]) ||
-            !isset($fileData["thefile"]["tmp_name"]) ||
-            $fileData["thefile"]["tmp_name"] == "" ||
-            !isset($fileData["thefile"]["error"]) ||
-            $fileData["thefile"]["error"] != 0
-        ) {
+        // Check if restore is enabled
+        if (!Globals::isBackupRestoreEnabled()) {
+            return "Error: Database restore is disabled. " .
+                "Set BACKUP_RESTORE_ENABLED=true in .env to enable.";
+        }
+
+        if ($fileData === null) {
             return "Error: No Restore file specified";
         }
 
-        $handle = @gzopen($fileData["thefile"]["tmp_name"], "r");
+        $handle = @gzopen($fileData["tmp_name"], "r");
         if ($handle === false) {
             return "Error: Restore file could not be opened";
         }

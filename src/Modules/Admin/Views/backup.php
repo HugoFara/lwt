@@ -26,6 +26,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 $prefinfo = (string)($prefinfo ?? '');
 
 $escapedDbName = htmlspecialchars(Globals::getDatabaseName(), ENT_QUOTES, 'UTF-8');
+$restoreEnabled = Globals::isBackupRestoreEnabled();
 $iniFile = php_ini_loaded_file();
 $escapedIniFile = htmlspecialchars($iniFile === false ? '' : $iniFile, ENT_QUOTES, 'UTF-8');
 $postMaxSize = ini_get('post_max_size');
@@ -111,6 +112,24 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
         </header>
 
         <div class="collapsible-content" x-show="open" x-collapse>
+            <?php if (!$restoreEnabled): ?>
+            <div class="notification is-danger is-light mt-4">
+                <div class="columns is-vcentered">
+                    <div class="column is-narrow">
+                        <span class="icon is-medium has-text-danger">
+                            <?php echo IconHelper::render('shield-x', ['width' => 24, 'height' => 24]); ?>
+                        </span>
+                    </div>
+                    <div class="column">
+                        <p class="has-text-weight-semibold mb-1">Restore Disabled</p>
+                        <p class="is-size-7">
+                            Database restore is disabled for security reasons in multi-user mode.<br>
+                            To enable, set <code>BACKUP_RESTORE_ENABLED=true</code> in your <code>.env</code> file.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <?php else: ?>
             <div class="content mt-4">
                 <p>
                     The database <strong><?php echo $escapedDbName; ?></strong>
@@ -133,6 +152,23 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                             <code>post_max_size = <?php echo $postMaxSize; ?></code> /
                             <code>upload_max_filesize = <?php echo $uploadMaxFilesize; ?></code><br>
                             If needed, increase these values in <code><?php echo $escapedIniFile; ?></code> and restart your server.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="notification is-info is-light">
+                <div class="columns is-vcentered">
+                    <div class="column is-narrow">
+                        <span class="icon is-medium has-text-info">
+                            <?php echo IconHelper::render('shield-check', ['width' => 24, 'height' => 24]); ?>
+                        </span>
+                    </div>
+                    <div class="column">
+                        <p class="has-text-weight-semibold mb-1">Security Note</p>
+                        <p class="is-size-7">
+                            Backup files are validated before restore. Only standard LWT backup SQL statements
+                            (DROP TABLE, CREATE TABLE, INSERT INTO) for known tables are allowed.
                         </p>
                     </div>
                 </div>
@@ -185,6 +221,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                 </p>
                 <p class="has-text-grey is-size-7">This may take a while. Please don't close this page.</p>
             </div>
+            <?php endif; ?>
         </div>
     </section>
 

@@ -20,6 +20,7 @@ namespace Lwt\Shared\Infrastructure\Database;
 
 use Lwt\Core\Globals;
 use Lwt\Modules\Tags\Application\TagsFacade;
+use Lwt\Shared\Infrastructure\Database\SqlValidator;
 
 /**
  * Database restore and truncation operations.
@@ -31,8 +32,9 @@ class Restore
     /**
      * Restore the database from a file.
      *
-     * @param resource $handle Backup file handle
-     * @param string   $title  File title
+     * @param resource $handle       Backup file handle
+     * @param string   $title        File title
+     * @param bool     $validateSql  Whether to validate SQL statements (default true)
      *
      * @return string Human-readable status message
      *
@@ -40,8 +42,9 @@ class Restore
      * @since 2.5.3-fork Function repaired
      * @since 2.7.0-fork $handle should be an *uncompressed* file.
      * @since 2.9.1-fork It can read SQL with more or less than one instruction a line
+     * @since 3.0.0 Added SQL validation for security hardening
      */
-    public static function restoreFile($handle, string $title): string
+    public static function restoreFile($handle, string $title, bool $validateSql = true): string
     {
         $message = "";
         $install_status = [
@@ -92,6 +95,21 @@ class Restore
             $install_status["errors"] = 1;
         }
         fclose($handle);
+
+        // Validate all queries before executing any (security hardening)
+        if ($validateSql && $install_status["errors"] == 0) {
+            $validator = new SqlValidator();
+            foreach ($queries_list as $query) {
+                $trimmedQuery = trim($query);
+                if ($trimmedQuery !== '' && !str_starts_with($trimmedQuery, '-- ')) {
+                    if (!$validator->validate($trimmedQuery)) {
+                        $message = "Security Error: " . ($validator->getFirstError() ?? "Invalid SQL detected");
+                        $install_status["errors"] = 1;
+                        break;
+                    }
+                }
+            }
+        }
 
         // Now run all queries
         $connection = Globals::getDbConnection();

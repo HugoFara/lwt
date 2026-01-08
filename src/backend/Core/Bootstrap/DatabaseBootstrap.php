@@ -101,5 +101,10 @@ class DatabaseBootstrap
         // Configure multi-user mode from environment
         $multiUserEnabled = EnvLoader::getBool('MULTI_USER_ENABLED', false);
         Globals::setMultiUserEnabled($multiUserEnabled);
+
+        // Configure backup restore (only if explicitly set in env)
+        if (EnvLoader::has('BACKUP_RESTORE_ENABLED')) {
+            Globals::setBackupRestoreEnabled(EnvLoader::getBool('BACKUP_RESTORE_ENABLED', true));
+        }
     }
 }

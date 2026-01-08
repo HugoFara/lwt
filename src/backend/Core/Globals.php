@@ -100,6 +100,15 @@ class Globals
     private static bool $currentUserIsAdmin = false;
 
     /**
+     * Whether backup restore is enabled.
+     *
+     * Disabled by default in multi-user mode for security.
+     *
+     * @var bool|null Null means use default based on multi-user mode
+     */
+    private static ?bool $backupRestoreEnabled = null;
+
+    /**
      * Initialize all global variables.
      *
      * This should be called once during application bootstrap.
@@ -362,6 +371,42 @@ class Globals
     }
 
     /**
+     * Set whether backup restore is enabled.
+     *
+     * @param bool|null $enabled Whether to enable backup restore, null for default
+     *
+     * @return void
+     *
+     * @since 3.0.0
+     */
+    public static function setBackupRestoreEnabled(?bool $enabled): void
+    {
+        self::$backupRestoreEnabled = $enabled;
+    }
+
+    /**
+     * Check if backup restore is enabled.
+     *
+     * In multi-user mode, backup restore is disabled by default for security.
+     * Single-user mode allows restore by default.
+     * This can be overridden by explicitly setting BACKUP_RESTORE_ENABLED.
+     *
+     * @return bool True if backup restore is enabled
+     *
+     * @since 3.0.0
+     */
+    public static function isBackupRestoreEnabled(): bool
+    {
+        // Explicit configuration takes precedence
+        if (self::$backupRestoreEnabled !== null) {
+            return self::$backupRestoreEnabled;
+        }
+
+        // Default: disabled in multi-user mode, enabled in single-user
+        return !self::$multiUserEnabled;
+    }
+
+    /**
      * Reset all globals to initial state.
      *
      * Primarily used for testing.
@@ -377,5 +422,6 @@ class Globals
         self::$currentUserId = null;
         self::$multiUserEnabled = false;
         self::$currentUserIsAdmin = false;
+        self::$backupRestoreEnabled = null;
     }
 }
