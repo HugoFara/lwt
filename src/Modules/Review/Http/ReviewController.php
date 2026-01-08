@@ -173,22 +173,22 @@ class ReviewController extends BaseController
         }
 
         /** @psalm-suppress InvalidScalarArgument */
-        $testsql = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
+        $reviewsql = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
 
-        if ($testsql === null) {
+        if ($reviewsql === null) {
             echo '<p>Sorry - Unable to generate review SQL</p>';
             return;
         }
 
         // Validate single language
-        $validation = $this->reviewFacade->validateReviewSelection($testsql);
+        $validation = $this->reviewFacade->validateReviewSelection($reviewsql);
         if (!$validation['valid']) {
             echo '<p>Sorry - ' . ($validation['error'] ?? 'Unknown error') . '</p>';
             return;
         }
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($testsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql);
         if ($langIdFromSql === null) {
             include __DIR__ . '/../Views/no_terms.php';
             PageLayoutHelper::renderPageEnd();
@@ -206,7 +206,7 @@ class ReviewController extends BaseController
         include __DIR__ . '/../Views/table_review_header.php';
 
         // Render table rows
-        $words = $this->reviewFacade->getTableReviewWords($testsql);
+        $words = $this->reviewFacade->getTableReviewWords($reviewsql);
         $regexWord = $langSettings['regexWord'] ?? '';
         $rtl = $langSettings['rtl'] ?? false;
 
@@ -285,8 +285,8 @@ class ReviewController extends BaseController
         }
 
         /** @psalm-suppress InvalidScalarArgument */
-        $testsql = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
-        if ($testsql === null) {
+        $reviewsql = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
+        if ($reviewsql === null) {
             $this->redirect('/text/edit');
         }
 
@@ -295,7 +295,7 @@ class ReviewController extends BaseController
         $baseType = $this->reviewFacade->getBaseReviewType($testType);
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($testsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql);
         if ($langIdFromSql === null) {
             PageLayoutHelper::renderPageStartNobody('Review', 'full-width');
             include __DIR__ . '/../Views/no_terms.php';

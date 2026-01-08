@@ -711,11 +711,11 @@ class ReviewServiceTest extends TestCase
         $this->assertEquals('lang', $identifier[0]);
 
         // 2. Get test SQL
-        $testsql = $this->service->getReviewSql($identifier[0], $identifier[1]);
-        $this->assertIsString($testsql);
+        $reviewsql = $this->service->getReviewSql($identifier[0], $identifier[1]);
+        $this->assertIsString($reviewsql);
 
         // 3. Validate selection
-        $validation = $this->service->validateReviewSelection($testsql);
+        $validation = $this->service->validateReviewSelection($reviewsql);
         $this->assertTrue($validation['valid']);
 
         // 4. Get language name
@@ -727,7 +727,7 @@ class ReviewServiceTest extends TestCase
         $this->assertNotEmpty($langSettings);
 
         // 6. Get test counts
-        $counts = $this->service->getReviewCounts($testsql);
+        $counts = $this->service->getReviewCounts($reviewsql);
         $this->assertArrayHasKey('due', $counts);
         $this->assertArrayHasKey('total', $counts);
     }

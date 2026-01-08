@@ -49,15 +49,15 @@ class ReviewApiHandler
     /**
      * Get the next word to test as structured data.
      *
-     * @param string $testsql  SQL projection query
+     * @param string $reviewsql  SQL projection query
      * @param bool   $wordMode Test is in word mode
      * @param int    $testtype Test type
      *
      * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
      */
-    public function getWordReviewData(string $testsql, bool $wordMode, int $testtype): array
+    public function getWordReviewData(string $reviewsql, bool $wordMode, int $testtype): array
     {
-        $wordRecord = $this->reviewFacade->getNextWord($testsql);
+        $wordRecord = $this->reviewFacade->getNextWord($reviewsql);
         if ($wordRecord === null || $wordRecord === []) {
             return [
                 "term_id" => 0,
@@ -454,14 +454,14 @@ class ReviewApiHandler
 
         // Handle legacy raw_sql case
         if ($identifier[0] === 'raw_sql') {
-            $testsql = is_string($identifier[1]) ? $identifier[1] : null;
+            $reviewsql = is_string($identifier[1]) ? $identifier[1] : null;
         } else {
             /** @var int|int[] $sel */
             $sel = $identifier[1];
-            $testsql = $this->reviewFacade->getReviewSql($identifier[0], $sel);
+            $reviewsql = $this->reviewFacade->getReviewSql($identifier[0], $sel);
         }
 
-        if ($testsql === null) {
+        if ($reviewsql === null) {
             return ['error' => 'Unable to generate test SQL'];
         }
 
@@ -470,7 +470,7 @@ class ReviewApiHandler
         $baseType = $this->reviewFacade->getBaseReviewType($testType);
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($testsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql);
         if ($langIdFromSql === null) {
             return ['error' => 'No words available for testing'];
         }
@@ -539,20 +539,20 @@ class ReviewApiHandler
         }
 
         $parsedSelection = $this->parseSelection($reviewKey, $selection);
-        $testsql = $this->reviewFacade->getReviewSql($reviewKey, $parsedSelection);
+        $reviewsql = $this->reviewFacade->getReviewSql($reviewKey, $parsedSelection);
 
-        if ($testsql === null) {
+        if ($reviewsql === null) {
             return ['error' => 'Unable to generate test SQL'];
         }
 
         // Validate single language
-        $validation = $this->reviewFacade->validateReviewSelection($testsql);
+        $validation = $this->reviewFacade->validateReviewSelection($reviewsql);
         if (!$validation['valid']) {
             return ['error' => $validation['error']];
         }
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($testsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql);
         if ($langIdFromSql === null) {
             return ['words' => [], 'langSettings' => null];
         }
@@ -568,7 +568,7 @@ class ReviewApiHandler
         );
 
         // Get words
-        $wordsResult = $this->reviewFacade->getTableReviewWords($testsql);
+        $wordsResult = $this->reviewFacade->getTableReviewWords($reviewsql);
         $words = [];
 
         if ($wordsResult instanceof \mysqli_result) {

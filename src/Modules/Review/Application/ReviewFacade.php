@@ -138,40 +138,40 @@ class ReviewFacade
     /**
      * Validate test selection.
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return array{valid: bool, langCount: int, error: string|null}
      */
-    public function validateReviewSelection(string $testsql): array
+    public function validateReviewSelection(string $reviewsql): array
     {
         // Create a raw SQL config for validation
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         return $this->repository->validateSingleLanguage($config);
     }
 
     /**
      * Get test counts.
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return array{due: int, total: int}
      */
-    public function getReviewCounts(string $testsql): array
+    public function getReviewCounts(string $reviewsql): array
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         return $this->repository->getReviewCounts($config);
     }
 
     /**
      * Get tomorrow's test count.
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return int
      */
-    public function getTomorrowReviewCount(string $testsql): int
+    public function getTomorrowReviewCount(string $reviewsql): int
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         $result = $this->getTomorrowCount->execute($config);
         return $result['count'];
     }
@@ -179,13 +179,13 @@ class ReviewFacade
     /**
      * Get the next word to test.
      *
-     * @param string $testsql SQL projection string
+     * @param string $reviewsql SQL projection string
      *
      * @return array|null Word record or null
      */
-    public function getNextWord(string $testsql): ?array
+    public function getNextWord(string $reviewsql): ?array
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         $word = $this->repository->findNextWordForReview($config);
 
         if ($word === null) {
@@ -266,13 +266,13 @@ class ReviewFacade
     /**
      * Get language ID from test SQL.
      *
-     * @param string $testsql Test SQL
+     * @param string $reviewsql Test SQL
      *
      * @return int|null
      */
-    public function getLanguageIdFromReviewSql(string $testsql): ?int
+    public function getLanguageIdFromReviewSql(string $reviewsql): ?int
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $testsql);
+        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         return $this->repository->getLanguageIdFromConfig($config);
     }
 
@@ -347,17 +347,17 @@ class ReviewFacade
     /**
      * Get table test words.
      *
-     * @param string $testsql SQL projection
+     * @param string $reviewsql SQL projection
      *
      * @return \mysqli_result|bool
      */
-    public function getTableReviewWords(string $testsql): \mysqli_result|bool
+    public function getTableReviewWords(string $reviewsql): \mysqli_result|bool
     {
         // For backward compatibility, return raw query result
         // New code should use getTableWords use case
         $sql = "SELECT DISTINCT WoID, WoText, WoTranslation, WoRomanization,
             WoSentence, WoStatus, WoTodayScore AS Score
-            FROM $testsql AND WoStatus BETWEEN 1 AND 5
+            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*'
             ORDER BY WoTodayScore, WoRandom * RAND()";
 
@@ -370,7 +370,7 @@ class ReviewFacade
      * @param int|null    $lang      Language ID
      * @param int|null    $text      Text ID
      * @param int|null    $selection Selection type
-     * @param string|null $testsql   Test SQL
+     * @param string|null $reviewsql   Test SQL
      *
      * @return string
      */
@@ -378,11 +378,11 @@ class ReviewFacade
         ?int $lang,
         ?int $text,
         ?int $selection = null,
-        ?string $testsql = null
+        ?string $reviewsql = null
     ): string {
         $config = $this->getReviewConfiguration->parseFromParams(
             $selection,
-            $testsql,
+            $reviewsql,
             $lang,
             $text
         );
