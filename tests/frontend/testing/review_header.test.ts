@@ -5,7 +5,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import {
   setUtteranceSetting,
-  resetReviewFrames,
   startWordReview,
   startTableReview
 } from '../../../src/frontend/js/modules/review/pages/review_header';
@@ -123,87 +122,7 @@ describe('review_header.ts', () => {
     });
   });
 
-  describe('resetReviewFrames', () => {
-    it('resets ro and ru frames to empty.html', () => {
-      const roFrame = { location: { href: '/test/1' } };
-      const ruFrame = { location: { href: '/test/2' } };
-
-      // Mock parent window with frames
-      Object.defineProperty(window, 'parent', {
-        value: {
-          frames: {
-            ro: roFrame,
-            ru: ruFrame
-          }
-        },
-        writable: true
-      });
-
-      resetReviewFrames();
-
-      expect(roFrame.location.href).toBe('empty.html');
-      expect(ruFrame.location.href).toBe('empty.html');
-    });
-
-    it('handles missing frames gracefully', () => {
-      // Mock parent window without frames
-      Object.defineProperty(window, 'parent', {
-        value: {
-          frames: {}
-        },
-        writable: true
-      });
-
-      // Should not throw
-      expect(() => resetReviewFrames()).not.toThrow();
-    });
-
-    it('handles only ro frame existing', () => {
-      const roFrame = { location: { href: '/test/1' } };
-
-      Object.defineProperty(window, 'parent', {
-        value: {
-          frames: {
-            ro: roFrame
-          }
-        },
-        writable: true
-      });
-
-      resetReviewFrames();
-
-      expect(roFrame.location.href).toBe('empty.html');
-    });
-
-    it('handles only ru frame existing', () => {
-      const ruFrame = { location: { href: '/test/2' } };
-
-      Object.defineProperty(window, 'parent', {
-        value: {
-          frames: {
-            ru: ruFrame
-          }
-        },
-        writable: true
-      });
-
-      resetReviewFrames();
-
-      expect(ruFrame.location.href).toBe('empty.html');
-    });
-  });
-
   describe('startWordReview', () => {
-    beforeEach(() => {
-      // Mock parent window without frames to avoid issues
-      Object.defineProperty(window, 'parent', {
-        value: {
-          frames: {}
-        },
-        writable: true
-      });
-    });
-
     it('navigates to word test URL with type and property', () => {
       startWordReview(1, 'lang=1');
 
@@ -221,34 +140,9 @@ describe('review_header.ts', () => {
 
       expect(window.location.href).toBe('/review?type=2&');
     });
-
-    it('calls resetReviewFrames before navigation', () => {
-      const roFrame = { location: { href: '/old' } };
-      Object.defineProperty(window, 'parent', {
-        value: {
-          frames: {
-            ro: roFrame
-          }
-        },
-        writable: true
-      });
-
-      startWordReview(1, 'test=1');
-
-      expect(roFrame.location.href).toBe('empty.html');
-    });
   });
 
   describe('startTableReview', () => {
-    beforeEach(() => {
-      Object.defineProperty(window, 'parent', {
-        value: {
-          frames: {}
-        },
-        writable: true
-      });
-    });
-
     it('navigates to table test URL', () => {
       startTableReview('lang=1&text=5');
 
@@ -259,22 +153,6 @@ describe('review_header.ts', () => {
       startTableReview('');
 
       expect(window.location.href).toBe('/review?type=table&');
-    });
-
-    it('calls resetReviewFrames before navigation', () => {
-      const ruFrame = { location: { href: '/old' } };
-      Object.defineProperty(window, 'parent', {
-        value: {
-          frames: {
-            ru: ruFrame
-          }
-        },
-        writable: true
-      });
-
-      startTableReview('test=1');
-
-      expect(ruFrame.location.href).toBe('empty.html');
     });
   });
 });

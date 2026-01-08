@@ -67,13 +67,6 @@ function registerRoutes(Router $router): void
     // Legacy route: /text/read?text=123
     $router->get('/text/read', 'Lwt\\Modules\\Text\\Http\\TextController@read', AUTH_MIDDLEWARE);
 
-    // Empty iframe placeholder (used in text read, test, and word pages)
-    // These are static files, no auth needed
-    $router->register('/empty.html', 'src/backend/Core/empty.html');
-    $router->register('/text/empty.html', 'src/backend/Core/empty.html');
-    $router->register('/test/empty.html', 'src/backend/Core/empty.html');
-    $router->register('/word/empty.html', 'src/backend/Core/empty.html');
-
     // Edit texts
     $router->registerWithMiddleware('/text/edit', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware('/texts', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);

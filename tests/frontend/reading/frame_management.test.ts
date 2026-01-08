@@ -7,8 +7,7 @@ import {
   hideRightFrames,
   cleanupRightFrames,
   successSound,
-  failureSound,
-  loadDictionaryFrame
+  failureSound
 } from '../../../src/frontend/js/modules/text/pages/reading/frame_management';
 
 // Mock word_popup module
@@ -131,66 +130,6 @@ describe('frame_management.ts', () => {
       hideRightFrames();
 
       // Verify that animation was initiated via requestAnimationFrame
-      expect(rafSpy).toHaveBeenCalled();
-      rafSpy.mockRestore();
-    });
-  });
-
-  // ===========================================================================
-  // loadDictionaryFrame Tests
-  // ===========================================================================
-
-  describe('loadDictionaryFrame', () => {
-    it('returns true and loads URL in ru frame when frame exists', () => {
-      const mockRuFrame = { location: { href: '' } };
-      (global as any).top = {
-        frames: {
-          ru: mockRuFrame
-        }
-      };
-      document.body.innerHTML = '<div id="frames-r"></div>';
-
-      const result = loadDictionaryFrame('https://dict.example.com/?word=test');
-
-      expect(result).toBe(true);
-      expect(mockRuFrame.location.href).toBe('https://dict.example.com/?word=test');
-    });
-
-    it('returns false when top.frames is undefined', () => {
-      (global as any).top = {};
-      document.body.innerHTML = '<div id="frames-r"></div>';
-
-      const result = loadDictionaryFrame('https://dict.example.com');
-
-      expect(result).toBe(false);
-    });
-
-    it('returns false when ru frame does not exist', () => {
-      (global as any).top = {
-        frames: {}
-      };
-      document.body.innerHTML = '<div id="frames-r"></div>';
-
-      const result = loadDictionaryFrame('https://dict.example.com');
-
-      expect(result).toBe(false);
-    });
-
-    it('shows the right frames panel after loading', () => {
-      const mockRuFrame = { location: { href: '' } };
-      (global as any).top = {
-        frames: {
-          ru: mockRuFrame
-        }
-      };
-      document.body.innerHTML = '<div id="frames-r" style="right: -100%;"></div>';
-      const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
-        cb(performance.now() + 1000);
-        return 1;
-      });
-
-      loadDictionaryFrame('https://dict.example.com');
-
       expect(rafSpy).toHaveBeenCalled();
       rafSpy.mockRestore();
     });
@@ -416,16 +355,8 @@ describe('frame_management.ts', () => {
 
     it('frame operations work without errors when frames container missing', () => {
       document.body.innerHTML = '<div>Empty page</div>';
-      // Setup mock frames to avoid error accessing undefined
-      const mockRuFrame = { location: { href: '' } };
-      (global as any).top = {
-        frames: {
-          ru: mockRuFrame
-        }
-      };
 
       expect(showRightFramesPanel()).toBe(false);
-      expect(loadDictionaryFrame('url1')).toBe(false);
       expect(hideRightFrames()).toBe(false);
     });
   });
@@ -435,20 +366,6 @@ describe('frame_management.ts', () => {
   // ===========================================================================
 
   describe('Edge Cases', () => {
-    it('loadDictionaryFrame handles URL with query parameters', () => {
-      const mockRuFrame = { location: { href: '' } };
-      (global as any).top = {
-        frames: {
-          ru: mockRuFrame
-        }
-      };
-      document.body.innerHTML = '<div id="frames-r"></div>';
-
-      loadDictionaryFrame('https://dict.example.com/?word=test%20value');
-
-      expect(mockRuFrame.location.href).toBe('https://dict.example.com/?word=test%20value');
-    });
-
     it('sound functions handle play() rejection', async () => {
       const mockSuccessSound = {
         pause: vi.fn(),

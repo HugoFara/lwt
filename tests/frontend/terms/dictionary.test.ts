@@ -19,7 +19,6 @@ import {
 // Mock dependencies
 vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
   showRightFramesPanel: vi.fn(),
-  loadDictionaryFrame: vi.fn(),
 }));
 
 describe('dictionary.ts', () => {

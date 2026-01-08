@@ -33,7 +33,7 @@ describe('api/review.ts', () => {
       vi.mocked(apiClient.apiGet).mockResolvedValue(mockResponse);
 
       const params = {
-        testKey: 'abc123',
+        reviewKey: 'abc123',
         selection: 'all',
         wordMode: true,
         lgId: 1,
@@ -44,7 +44,7 @@ describe('api/review.ts', () => {
       const result = await ReviewApi.getNextWord(params);
 
       expect(apiClient.apiGet).toHaveBeenCalledWith('/review/next-word', {
-        test_key: 'abc123',
+        review_key: 'abc123',
         selection: 'all',
         word_mode: true,
         language_id: 1,
@@ -59,7 +59,7 @@ describe('api/review.ts', () => {
       vi.mocked(apiClient.apiGet).mockResolvedValue(mockResponse);
 
       const params = {
-        testKey: 'key',
+        reviewKey: 'key',
         selection: 'selected',
         wordMode: false,
         lgId: 2,
@@ -70,7 +70,7 @@ describe('api/review.ts', () => {
       await ReviewApi.getNextWord(params);
 
       expect(apiClient.apiGet).toHaveBeenCalledWith('/review/next-word', {
-        test_key: 'key',
+        review_key: 'key',
         selection: 'selected',
         word_mode: false,
         language_id: 2,
@@ -95,7 +95,7 @@ describe('api/review.ts', () => {
       const result = await ReviewApi.getTomorrowCount('testKey123', 'all');
 
       expect(apiClient.apiGet).toHaveBeenCalledWith('/review/tomorrow-count', {
-        test_key: 'testKey123',
+        review_key: 'testKey123',
         selection: 'all',
       });
       expect(result.data?.count).toBe(42);
@@ -108,7 +108,7 @@ describe('api/review.ts', () => {
       await ReviewApi.getTomorrowCount('key', 'status1');
 
       expect(apiClient.apiGet).toHaveBeenCalledWith('/review/tomorrow-count', {
-        test_key: 'key',
+        review_key: 'key',
         selection: 'status1',
       });
     });

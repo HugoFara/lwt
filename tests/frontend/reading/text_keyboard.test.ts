@@ -4,8 +4,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Use vi.hoisted to define mock functions that will be available during vi.mock hoisting
-const { mockLoadDictionaryFrame, mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo, mockNewPosition, mockTermsApiSetStatus, mockTermsApiCreateQuick } = vi.hoisted(() => ({
-  mockLoadDictionaryFrame: vi.fn(),
+const { mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo, mockNewPosition, mockTermsApiSetStatus, mockTermsApiCreateQuick } = vi.hoisted(() => ({
   mockSpeechDispatcher: vi.fn(),
   mockOwin: vi.fn(),
   mockCClick: vi.fn(),
@@ -36,9 +35,6 @@ vi.mock('../../../src/frontend/js/modules/vocabulary/components/word_popup', () 
   closePopup: mockCClick
 }));
 
-vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
-  loadDictionaryFrame: mockLoadDictionaryFrame
-}));
 
 vi.mock('../../../src/frontend/js/modules/vocabulary/api/terms_api', () => ({
   TermsApi: {
@@ -123,7 +119,6 @@ describe('text_keyboard.ts', () => {
     resetReadingPosition();
 
     // Clear mock function calls between tests
-    mockLoadDictionaryFrame.mockClear();
     mockSpeechDispatcher.mockClear();
     mockOwin.mockClear();
     mockCClick.mockClear();

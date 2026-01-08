@@ -193,31 +193,11 @@ export function getNewWord(reviewData?: ReviewData): void {
 }
 
 /**
- * Prepare the review frames (clear and start timer).
+ * Initialize the review timer.
  *
  * @param timeData Time configuration data
  */
-export function prepareReviewFrames(timeData: TimeData): void {
-  const parentWindow = window.parent as Window & {
-    frames: { [key: string]: Window };
-  };
-
-  if (parentWindow.frames['ru']) {
-    parentWindow.frames['ru'].location.href = 'empty.html';
-  }
-  if (timeData.wait_time <= 0) {
-    if (parentWindow.frames['ro']) {
-      parentWindow.frames['ro'].location.href = 'empty.html';
-    }
-  } else {
-    setTimeout(function () {
-      if (parentWindow.frames['ro']) {
-        parentWindow.frames['ro'].location.href = 'empty.html';
-      }
-    }, timeData.wait_time);
-  }
-
-  // Initialize the elapsed timer
+export function initReviewTimer(timeData: TimeData): void {
   startElapsedTimer(
     timeData.time, timeData.start_time, 'timer', timeData.show_timer
   );
@@ -351,8 +331,8 @@ export function handleStatusChangeResult(
  * @param timeData Time configuration data
  */
 export function initAjaxReview(reviewData: ReviewData, timeData: TimeData): void {
-  // Initialize frames and timer
-  prepareReviewFrames(timeData);
+  // Initialize timer
+  initReviewTimer(timeData);
 
   // Get the first word
   getNewWord(reviewData);

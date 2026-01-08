@@ -9,7 +9,6 @@ import { getLangFromDict, createTheDictUrl, owin } from '@modules/vocabulary/ser
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { getAttrElement } from './text_annotations';
 import { closePopup } from '@modules/vocabulary/components/word_popup';
-import { loadDictionaryFrame } from '@modules/text/pages/reading/frame_management';
 import { getPositionFromId } from '@shared/utils/ajax_utilities';
 import { scrollTo } from '@shared/utils/hover_intent';
 import {
@@ -340,10 +339,8 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
     }
     // Use the translator URL directly with the current word
     const translatorUrl = createTheDictUrl(dict_link, txt);
-    if (popup) {
+    if (popup || open_url) {
       owin(translatorUrl);
-    } else if (open_url) {
-      loadDictionaryFrame(translatorUrl);
     }
     return false;
   }
@@ -362,20 +359,7 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
   if (keyCode === 71) { // G : edit term and open GTr (translator)
     const target_url = dictLinks.translator;
     setTimeout(function () {
-      let popup = target_url.startsWith('*');
-      try {
-        const final_url = new URL(target_url);
-        popup = popup || final_url.searchParams.has('lwt_popup');
-      } catch (err) {
-        if (!(err instanceof TypeError)) {
-          throw err;
-        }
-      }
-      if (popup) {
-        owin(createTheDictUrl(target_url, txt));
-      } else {
-        loadDictionaryFrame(createTheDictUrl(target_url, txt));
-      }
+      owin(createTheDictUrl(target_url, txt));
     }, 10);
     // Also open edit form (fall through to E key handler below)
   }

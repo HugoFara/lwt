@@ -31,28 +31,12 @@ export function setUtteranceSetting(): void {
 }
 
 /**
- * Reset the right frames to empty state.
- */
-export function resetReviewFrames(): void {
-  const parentWindow = window.parent as Window & {
-    frames: { [key: string]: Window };
-  };
-  if (parentWindow.frames['ro']) {
-    parentWindow.frames['ro'].location.href = 'empty.html';
-  }
-  if (parentWindow.frames['ru']) {
-    parentWindow.frames['ru'].location.href = 'empty.html';
-  }
-}
-
-/**
  * Start a word review of a specific type.
  *
  * @param type Review type (1-5)
  * @param property URL property string
  */
 export function startWordReview(type: number, property: string): void {
-  resetReviewFrames();
   window.location.href = '/review?type=' + type + '&' + property;
 }
 
@@ -62,7 +46,6 @@ export function startWordReview(type: number, property: string): void {
  * @param property URL property string
  */
 export function startTableReview(property: string): void {
-  resetReviewFrames();
   window.location.href = '/review?type=table&' + property;
 }
 

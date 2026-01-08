@@ -71,7 +71,6 @@ export interface BulkTranslateData {
 
   // Methods
   init(): void;
-  clearRightFrame(): void;
   setupFormSubmission(): void;
   setupInteractions(): void;
   markAll(): void;
@@ -143,9 +142,6 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
       // Setup Google Translate callback
       this.setupGoogleTranslateCallback();
 
-      // Clear right frame on load
-      this.clearRightFrame();
-
       // Set up form submission handler
       this.setupFormSubmission();
 
@@ -153,16 +149,6 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
       window.addEventListener('load', () => this.setupInteractions());
     },
 
-    /**
-     * Clear the right frame.
-     */
-    clearRightFrame(): void {
-      try {
-        window.parent.frames['ru' as unknown as number].location.href = 'empty.html';
-      } catch {
-        // Frame access denied
-      }
-    },
 
     /**
      * Setup form submission handler.
@@ -175,7 +161,6 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
           if (currentTranslation) {
             currentTranslation.setAttribute('name', currentTranslation.getAttribute('data_name') ?? '');
           }
-          this.clearRightFrame();
           return true;
         });
       }
@@ -345,19 +330,9 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
 
       window.WBLINK = dictLink;
 
-      let isPopup = false;
+      // Strip leading * (popup marker) if present
       if (dictLink.startsWith('*')) {
-        isPopup = true;
         dictLink = dictLink.substring(1);
-      }
-
-      try {
-        const finalUrl = new URL(dictLink);
-        isPopup = isPopup || finalUrl.searchParams.has('lwt_popup');
-      } catch (err) {
-        if (!(err instanceof TypeError)) {
-          throw err;
-        }
       }
 
       const parent = element.parentElement;
@@ -365,16 +340,7 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
       const termText = prevSibling?.textContent || '';
       const dictUrl = createTheDictUrl(dictLink, termText);
 
-      if (isPopup) {
-        owin(dictUrl);
-      } else {
-        try {
-          window.parent.frames['ru' as unknown as number].location.href = dictUrl;
-        } catch {
-          // Frame access denied, try opening in new window
-          owin(dictUrl);
-        }
-      }
+      owin(dictUrl);
 
       // Swap WoTranslation name attributes to track current input
       const currentTranslation = document.querySelector<HTMLElement>('[name="WoTranslation"]');

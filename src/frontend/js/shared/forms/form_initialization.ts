@@ -18,23 +18,6 @@ interface TextEditFormConfig {
 }
 
 /**
- * Clear the right frame on unload.
- * Used in word edit forms to clean up the dictionary frame.
- */
-export function clearRightFrameOnUnload(): void {
-  window.addEventListener('beforeunload', function () {
-    setTimeout(function () {
-      if (window.parent && window.parent.frames) {
-        const ruFrame = window.parent.frames['ru' as unknown as number];
-        if (ruFrame) {
-          ruFrame.location.href = 'empty.html';
-        }
-      }
-    }, 0);
-  });
-}
-
-/**
  * Change the language attribute of text inputs based on selected language.
  * This helps browsers apply appropriate fonts and input methods.
  *
@@ -86,11 +69,10 @@ export function initTextEditForm(): void {
 
 /**
  * Initialize word edit forms.
- * Sets up form change tracking and right frame cleanup.
+ * Sets up form change tracking.
  */
 export function initWordEditForm(): void {
   lwtFormCheck.askBeforeExit();
-  clearRightFrameOnUnload();
 }
 
 /**
@@ -115,12 +97,6 @@ export function autoInitializeForms(): void {
       }
     }
   });
-
-  // Auto-init forms with data-lwt-clear-frame attribute
-  const formsWithClearFrame = document.querySelectorAll('form[data-lwt-clear-frame="true"]');
-  if (formsWithClearFrame.length > 0) {
-    clearRightFrameOnUnload();
-  }
 
   // Auto-init forms with validate class that need exit confirmation
   // This handles forms that have class="validate"
