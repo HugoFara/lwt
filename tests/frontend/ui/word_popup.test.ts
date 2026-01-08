@@ -98,30 +98,6 @@ describe('word_popup.ts', () => {
   });
 
   // ===========================================================================
-  // nd Tests
-  // ===========================================================================
-
-  describe('nd', () => {
-    it('calls closePopup and returns true', async () => {
-      const { nd } = await importWordPopup();
-      const result = nd();
-      expect(result).toBe(true);
-    });
-
-    it('closes any open popup', async () => {
-      const { overlib, nd } = await importWordPopup();
-
-      overlib('Test content');
-      const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
-      expect(dialog.open).toBe(true);
-
-      nd();
-
-      expect(dialog.open).toBe(false);
-    });
-  });
-
-  // ===========================================================================
   // overlib Tests
   // ===========================================================================
 
@@ -403,7 +379,7 @@ describe('word_popup.ts', () => {
 
   describe('Integration', () => {
     it('full workflow: open, position, close', async () => {
-      const { overlib, setCurrentEvent, nd } = await importWordPopup();
+      const { overlib, setCurrentEvent, closePopup } = await importWordPopup();
 
       // Set event position
       const clickEvent = new MouseEvent('click', {
@@ -430,8 +406,7 @@ describe('word_popup.ts', () => {
       expect(title?.textContent).toBe('Vocabulary');
 
       // Close popup
-      const closeResult = nd();
-      expect(closeResult).toBe(true);
+      closePopup();
       expect(dialog.open).toBe(false);
     });
 

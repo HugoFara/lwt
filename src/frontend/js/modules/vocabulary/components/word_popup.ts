@@ -135,12 +135,6 @@ export function closePopup(): void {
   currentEvent = null;
 }
 
-// Legacy alias
-export function nd(): boolean {
-  closePopup();
-  return true;
-}
-
 /**
  * Show a popup dialog with content and title
  *
