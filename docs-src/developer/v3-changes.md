@@ -202,7 +202,9 @@ Services follow the pattern of extracting complex business logic for better test
 
 ### 6. Views Architecture
 
-Version 3 introduces a proper Views directory structure in `src/backend/Views/`:
+Version 3 introduces a proper Views directory structure.
+
+**Backend Views** (`src/backend/Views/`):
 
 | Directory | Purpose |
 |-----------|---------|
@@ -216,9 +218,32 @@ Version 3 introduces a proper Views directory structure in `src/backend/Views/`:
 | `TextPrint/` | Text printing templates |
 | `Word/` | Word/term templates |
 
-Additional helper classes:
+**Module Views** (`src/Modules/*/Views/`):
 
-- `TestViews.php` - Test interface view logic
+Each module contains its own Views directory with templates specific to that feature:
+
+| Module | Template Count | Key Templates |
+|--------|---------------|---------------|
+| Text | 18 | read_text.php, edit_form.php, import_long_form.php |
+| Vocabulary | 22 | form_edit_existing.php, list_table.php, upload_form.php |
+| Language | 5 | index.php, edit_form.php, new_form.php |
+| Tags | 5 | index.php, create_form.php, edit_form.php |
+| Review | 6 | test_form.php, test_result.php, next_word.php |
+| Feed | 8 | index.php, articles.php, import_article.php |
+| User | 6 | login.php, register.php, profile.php |
+| Admin | 8 | settings.php, backup.php, statistics.php |
+| Home | 2 | index.php, dashboard.php |
+| Dictionary | 2 | index.php, import.php |
+
+**View Helper Classes** (`src/Shared/UI/Helpers/`):
+
+| Class | Purpose |
+|-------|---------|
+| `FormHelper` | Form attribute generation (checked, selected) |
+| `PageLayoutHelper` | Page layout elements (navbar, footers) |
+| `IconHelper` | Lucide SVG icon rendering (replaced 97 legacy Fugue PNG icons) |
+| `TagHelper` | HTML tag utilities |
+| `SelectOptionsBuilder` | HTML select option building |
 
 ### 7. Legacy File Migration
 
@@ -905,6 +930,22 @@ $.post('api.php/v1/feeds/' + feedId + '/load', {
     name: name, source_uri: uri, options: opts
 });
 ```
+
+#### Module API Handlers
+
+In addition to the centralized API handlers, each module provides its own API handler in `src/Modules/*/Http/`:
+
+| Module | Handler | Key Endpoints |
+|--------|---------|---------------|
+| Text | `TextApiHandler` | `/api/v1/texts`, `/api/v1/texts/{id}` |
+| Vocabulary | `VocabularyApiHandler` | `/api/v1/terms`, `/api/v1/terms/{id}/status` |
+| Language | `LanguageApiHandler` | `/api/v1/languages`, `/api/v1/language-definitions` |
+| Tags | `TagsApiHandler` | `/api/v1/tags`, `/api/v1/text-tags` |
+| Review | `ReviewApiHandler` | `/api/v1/review/start`, `/api/v1/review/submit` |
+| Feed | `FeedApiHandler` | `/api/v1/feeds`, `/api/v1/feeds/{id}/articles` |
+| Admin | `AdminApiHandler` | `/api/v1/settings`, `/api/v1/backup` |
+| User | `UserApiHandler` | `/api/v1/auth/login`, `/api/v1/auth/logout` |
+| Dictionary | `DictionaryApiHandler` | `/api/v1/dictionary/lookup` |
 
 ## Code Monolith Splitting
 
