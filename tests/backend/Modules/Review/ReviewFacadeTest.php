@@ -324,10 +324,10 @@ class ReviewFacadeTest extends TestCase
 
     // ===== Session tests =====
 
-    public function testInitializeTestSession(): void
+    public function testInitializeReviewSession(): void
     {
-        $this->facade->initializeTestSession(10);
-        $data = $this->facade->getTestSessionData();
+        $this->facade->initializeReviewSession(10);
+        $data = $this->facade->getReviewSessionData();
 
         $this->assertIsArray($data);
         $this->assertArrayHasKey('start', $data);
@@ -341,7 +341,7 @@ class ReviewFacadeTest extends TestCase
 
     public function testUpdateSessionProgress(): void
     {
-        $this->facade->initializeTestSession(5);
+        $this->facade->initializeReviewSession(5);
 
         // Correct answer (positive change)
         $result1 = $this->facade->updateSessionProgress(1);
@@ -354,10 +354,10 @@ class ReviewFacadeTest extends TestCase
         $this->assertEquals(1, $result2['wrong']);
     }
 
-    public function testGetTestSessionDataReturnsExpectedStructure(): void
+    public function testGetReviewSessionDataReturnsExpectedStructure(): void
     {
         // Test that session data has the expected structure
-        $data = $this->facade->getTestSessionData();
+        $data = $this->facade->getReviewSessionData();
 
         $this->assertIsArray($data);
         $this->assertArrayHasKey('start', $data);

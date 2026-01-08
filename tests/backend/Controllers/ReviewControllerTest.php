@@ -381,7 +381,7 @@ class ReviewControllerTest extends TestCase
         $this->assertNull($text);
     }
 
-    public function testReviewServiceGetTestSessionData(): void
+    public function testReviewServiceGetReviewSessionData(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -389,7 +389,7 @@ class ReviewControllerTest extends TestCase
 
         $service = new ReviewService();
 
-        $sessionData = $service->getTestSessionData();
+        $sessionData = $service->getReviewSessionData();
         $this->assertIsArray($sessionData);
         $this->assertArrayHasKey('wrong', $sessionData);
         $this->assertArrayHasKey('correct', $sessionData);
@@ -740,16 +740,16 @@ class ReviewControllerTest extends TestCase
 
     // ===== Session progress tests =====
 
-    public function testReviewServiceInitializeTestSession(): void
+    public function testReviewServiceInitializeReviewSession(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $service = new ReviewService();
-        $service->initializeTestSession(10);
+        $service->initializeReviewSession(10);
 
-        $sessionData = $service->getTestSessionData();
+        $sessionData = $service->getReviewSessionData();
 
         $this->assertIsArray($sessionData);
         $this->assertArrayHasKey('start', $sessionData);
@@ -762,7 +762,7 @@ class ReviewControllerTest extends TestCase
         }
 
         $service = new ReviewService();
-        $service->initializeTestSession(10);
+        $service->initializeReviewSession(10);
 
         $result = $service->updateSessionProgress(1);
 
