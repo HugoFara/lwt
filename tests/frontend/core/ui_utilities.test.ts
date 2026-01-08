@@ -200,31 +200,28 @@ describe('ui_utilities.ts', () => {
   // ===========================================================================
 
   describe('showAllwordsClick', () => {
-    let locationHrefSpy: ReturnType<typeof vi.fn>;
+    let fetchSpy: ReturnType<typeof vi.spyOn>;
+    let reloadMock: ReturnType<typeof vi.fn>;
     let originalLocation: Location;
 
     beforeEach(() => {
+      fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({})
+      } as Response);
+
+      // Mock window.location.reload
       originalLocation = window.location;
-      locationHrefSpy = vi.fn();
-      // Mock window.location to capture href assignments
-      // Destructure to exclude href from spread (avoids duplicate key warning)
-      const { href: _originalHref, ...locationWithoutHref } = originalLocation;
+      reloadMock = vi.fn();
       Object.defineProperty(window, 'location', {
-        value: {
-          ...locationWithoutHref,
-          get href() {
-            return locationHrefSpy.mock.calls[locationHrefSpy.mock.calls.length - 1]?.[0] || '';
-          },
-          set href(value: string) {
-            locationHrefSpy(value);
-          }
-        },
+        value: { ...originalLocation, reload: reloadMock },
         writable: true,
         configurable: true
       });
     });
 
     afterEach(() => {
+      fetchSpy.mockRestore();
       Object.defineProperty(window, 'location', {
         value: originalLocation,
         writable: true,
@@ -232,49 +229,84 @@ describe('ui_utilities.ts', () => {
       });
     });
 
-    it('navigates to set mode endpoint with correct parameters', () => {
+    it('saves settings via API and reloads page', async () => {
       document.body.innerHTML = `
         <input type="checkbox" id="showallwords" checked />
         <input type="checkbox" id="showlearningtranslations" />
-        <span id="thetextid">42</span>
       `;
 
-      showAllwordsClick();
+      await showAllwordsClick();
 
-      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/text/set-mode'));
-      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('mode=1'));
-      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('text=42'));
+      expect(fetchSpy).toHaveBeenCalledWith('/api/v1/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'showallwords', value: '1' })
+      });
+      expect(fetchSpy).toHaveBeenCalledWith('/api/v1/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'showlearningtranslations', value: '0' })
+      });
+      expect(reloadMock).toHaveBeenCalled();
     });
 
-    it('sends mode=0 when showallwords is unchecked', () => {
+    it('sends value 0 when showallwords is unchecked', async () => {
       document.body.innerHTML = `
         <input type="checkbox" id="showallwords" />
         <input type="checkbox" id="showlearningtranslations" />
-        <span id="thetextid">42</span>
       `;
 
-      showAllwordsClick();
+      await showAllwordsClick();
 
-      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('mode=0'));
+      expect(fetchSpy).toHaveBeenCalledWith('/api/v1/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'showallwords', value: '0' })
+      });
     });
 
-    it('includes showLearning parameter', () => {
+    it('sends value 1 when showlearningtranslations is checked', async () => {
       document.body.innerHTML = `
         <input type="checkbox" id="showallwords" checked />
         <input type="checkbox" id="showlearningtranslations" checked />
-        <span id="thetextid">42</span>
       `;
 
-      showAllwordsClick();
+      await showAllwordsClick();
 
-      expect(locationHrefSpy).toHaveBeenCalledWith(expect.stringContaining('showLearning=1'));
+      expect(fetchSpy).toHaveBeenCalledWith('/api/v1/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'showlearningtranslations', value: '1' })
+      });
     });
 
-    it('handles missing elements gracefully', () => {
+    it('handles missing elements gracefully', async () => {
       document.body.innerHTML = '';
 
-      // Should not throw
-      expect(() => showAllwordsClick()).not.toThrow();
+      // Should not throw and still attempt to save
+      await expect(showAllwordsClick()).resolves.not.toThrow();
+    });
+
+    it('reverts checkbox states and shows alert on error', async () => {
+      fetchSpy.mockRejectedValue(new Error('Network error'));
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+      document.body.innerHTML = `
+        <input type="checkbox" id="showallwords" checked />
+        <input type="checkbox" id="showlearningtranslations" checked />
+      `;
+
+      await showAllwordsClick();
+
+      expect(alertSpy).toHaveBeenCalledWith('Failed to save settings. Please try again.');
+      // Checkboxes should be reverted (were checked, now should be unchecked)
+      const showAllEl = document.getElementById('showallwords') as HTMLInputElement;
+      const showLearningEl = document.getElementById('showlearningtranslations') as HTMLInputElement;
+      expect(showAllEl.checked).toBe(false);
+      expect(showLearningEl.checked).toBe(false);
+      expect(reloadMock).not.toHaveBeenCalled();
+
+      alertSpy.mockRestore();
     });
   });
 

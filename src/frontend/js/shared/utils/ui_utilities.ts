@@ -48,20 +48,49 @@ export function confirmDelete(): boolean {
 }
 
 /**
- * Enable/disable words hint.
- * Function called when clicking on "Show All".
+ * Save a setting via API.
+ *
+ * @param key - Setting key
+ * @param value - Setting value
  */
-export function showAllwordsClick(): void {
+async function saveSetting(key: string, value: string): Promise<void> {
+  const response = await fetch('/api/v1/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key, value })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to save setting: ${response.statusText}`);
+  }
+}
+
+/**
+ * Enable/disable words hint.
+ * Function called when clicking on "Show All" or "Learning Translations".
+ * Saves settings via AJAX and reloads the page to apply changes.
+ */
+export async function showAllwordsClick(): Promise<void> {
   const showAllEl = document.getElementById('showallwords') as HTMLInputElement | null;
   const showLearningEl = document.getElementById('showlearningtranslations') as HTMLInputElement | null;
-  const textEl = document.getElementById('thetextid');
 
   const showAll = showAllEl?.checked ? '1' : '0';
-  const showLeaning = showLearningEl?.checked ? '1' : '0';
-  const text = textEl?.textContent || '';
-  // Navigate to set mode endpoint and reload
-  window.location.href = '/text/set-mode?mode=' + showAll + '&showLearning=' + showLeaning +
-    '&text=' + text;
+  const showLearning = showLearningEl?.checked ? '1' : '0';
+
+  try {
+    // Save both settings in parallel
+    await Promise.all([
+      saveSetting('showallwords', showAll),
+      saveSetting('showlearningtranslations', showLearning)
+    ]);
+    // Reload to apply the new display settings
+    window.location.reload();
+  } catch (err) {
+    console.error('Failed to save display settings:', err);
+    alert('Failed to save settings. Please try again.');
+    // Revert checkbox states on error
+    if (showAllEl) showAllEl.checked = showAll !== '1';
+    if (showLearningEl) showLearningEl.checked = showLearning !== '1';
+  }
 }
 
 /**
