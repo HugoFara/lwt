@@ -207,15 +207,16 @@ describe('ui_utilities.ts', () => {
       originalLocation = window.location;
       locationHrefSpy = vi.fn();
       // Mock window.location to capture href assignments
+      // Destructure to exclude href from spread (avoids duplicate key warning)
+      const { href: _originalHref, ...locationWithoutHref } = originalLocation;
       Object.defineProperty(window, 'location', {
         value: {
-          ...originalLocation,
-          href: '',
-          set href(value: string) {
-            locationHrefSpy(value);
-          },
+          ...locationWithoutHref,
           get href() {
             return locationHrefSpy.mock.calls[locationHrefSpy.mock.calls.length - 1]?.[0] || '';
+          },
+          set href(value: string) {
+            locationHrefSpy(value);
           }
         },
         writable: true,

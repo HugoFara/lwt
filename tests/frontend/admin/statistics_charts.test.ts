@@ -341,6 +341,7 @@ describe('statistics_charts.ts', () => {
 
   describe('initStatisticsCharts', () => {
     it('does nothing when no data elements exist', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {}); // Suppress deprecation warning
       document.body.innerHTML = '<div>No statistics here</div>';
 
       initStatisticsCharts();
@@ -422,6 +423,7 @@ describe('statistics_charts.ts', () => {
     });
 
     it('handles empty intensity data array', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {}); // Suppress deprecation warning
       document.body.innerHTML = `
         <div id="statistics-intensity-data" data-languages='[]'></div>
         <canvas id="intensityChart"></canvas>
@@ -434,6 +436,7 @@ describe('statistics_charts.ts', () => {
     });
 
     it('handles missing data attribute on intensity element', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {}); // Suppress deprecation warning
       document.body.innerHTML = `
         <div id="statistics-intensity-data"></div>
         <canvas id="intensityChart"></canvas>
@@ -444,6 +447,7 @@ describe('statistics_charts.ts', () => {
     });
 
     it('handles missing data attribute on frequency element', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {}); // Suppress deprecation warning
       document.body.innerHTML = `
         <div id="statistics-frequency-data"></div>
         <canvas id="frequencyChart"></canvas>
@@ -486,6 +490,7 @@ describe('statistics_charts.ts', () => {
     });
 
     it('handles data element without canvas', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {}); // Suppress deprecation warning
       const intensityData = [
         { name: 'English', s1: 10, s2: 20, s3: 30, s4: 15, s5: 25, s99: 100 }
       ];

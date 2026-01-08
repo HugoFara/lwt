@@ -293,6 +293,7 @@ describe('expression_interactable.ts', () => {
 
   describe('edge cases', () => {
     it('handles empty config', () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {}); // Suppress expected error
       document.body.innerHTML = `
         <script data-lwt-multiword-config type="application/json">{}</script>
       `;

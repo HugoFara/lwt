@@ -641,7 +641,10 @@ describe('user_interactions.ts', () => {
   describe('readTextWithExternal', () => {
     it('makes fetch request with replaced placeholders', async () => {
       const mockAudio = { play: vi.fn() };
-      vi.spyOn(globalThis, 'Audio').mockImplementation(() => mockAudio as unknown as HTMLAudioElement);
+      // Use function (not arrow) for proper constructor mocking
+      vi.spyOn(globalThis, 'Audio').mockImplementation(function() {
+        return mockAudio as unknown as HTMLAudioElement;
+      });
 
       const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         json: () => Promise.resolve({ audio: 'data:audio/mp3;base64,test' }),

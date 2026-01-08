@@ -254,6 +254,7 @@ describe('tts_settings.ts', () => {
       });
 
       it('does not save when no language is set', () => {
+        vi.spyOn(console, 'error').mockImplementation(() => {}); // Suppress expected error
         const component = ttsSettingsApp();
 
         component.saveSettings();

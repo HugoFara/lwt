@@ -182,6 +182,7 @@ describe('word_upload.ts', () => {
       });
 
       it('handles fetch errors', async () => {
+        vi.spyOn(console, 'error').mockImplementation(() => {}); // Suppress expected error
         global.fetch = vi.fn(() => Promise.reject(new Error('Network error')));
 
         const component = wordUploadResultApp({ lastUpdate: '2024-01-01', rtl: false, recno: 10 });

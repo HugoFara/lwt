@@ -37,9 +37,13 @@ describe('core/language_settings.ts', () => {
     // Mock window.location with getter/setter for href
     locationHrefSpy = vi.fn();
     delete (window as unknown as { location: Location }).location;
+    // Destructure to exclude href from spread (avoids duplicate key warning)
+    const { href: _originalHref, ...locationWithoutHref } = originalLocation;
     window.location = {
-      ...originalLocation,
-      href: '',
+      ...locationWithoutHref,
+      get href() {
+        return locationHrefSpy.mock.calls[locationHrefSpy.mock.calls.length - 1]?.[0] || '';
+      },
       set href(value: string) {
         locationHrefSpy(value);
       },
@@ -507,6 +511,7 @@ describe('core/language_settings.ts', () => {
 
     it('iknowall handles zero text ID', async () => {
       vi.spyOn(window, 'confirm').mockReturnValue(true);
+      vi.spyOn(console, 'error').mockImplementation(() => {}); // Suppress expected error
 
       await iknowall(0);
 
