@@ -8,13 +8,14 @@ services:
         - DB_USER=root
         - DB_PASSWORD=root
         - DB_DATABASE=learning-with-texts
+        - APP_BASE_PATH=/lwt
     container_name: lwt
     depends_on:
       - db
     links:
       - db
     volumes:
-      - ./media:/var/www/media
+      - ./media:/var/www/html/lwt/media
     ports:
       - "8010:80"
     restart: unless-stopped

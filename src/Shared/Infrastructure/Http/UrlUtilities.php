@@ -32,6 +32,112 @@ namespace Lwt\Shared\Infrastructure\Http;
 class UrlUtilities
 {
     /**
+     * Cached base path value.
+     *
+     * @var string|null
+     */
+    private static ?string $basePath = null;
+
+    /**
+     * Get the configured application base path.
+     *
+     * Returns the APP_BASE_PATH environment variable value, normalized
+     * to ensure it starts with / and has no trailing slash.
+     *
+     * @return string The base path (e.g., '/lwt') or empty string for root
+     */
+    public static function getBasePath(): string
+    {
+        if (self::$basePath === null) {
+            $path = $_ENV['APP_BASE_PATH'] ?? getenv('APP_BASE_PATH') ?: '';
+
+            // Normalize: ensure starts with / (if not empty) and no trailing slash
+            if ($path !== '') {
+                $path = '/' . trim($path, '/');
+            }
+
+            self::$basePath = $path;
+        }
+
+        return self::$basePath;
+    }
+
+    /**
+     * Generate a URL with the application base path prepended.
+     *
+     * Use this for all internal links to ensure they work correctly
+     * when the application is installed in a subdirectory.
+     *
+     * @param string $path The path to generate URL for (must start with /)
+     *
+     * @return string The full URL path with base path prepended
+     *
+     * @example url('/login') returns '/lwt/login' if APP_BASE_PATH=/lwt
+     * @example url('/assets/css/main.css') returns '/lwt/assets/css/main.css'
+     */
+    public static function url(string $path): string
+    {
+        $basePath = self::getBasePath();
+
+        // Ensure path starts with /
+        if ($path !== '' && $path[0] !== '/') {
+            $path = '/' . $path;
+        }
+
+        // Avoid double slashes
+        if ($basePath !== '' && $path === '/') {
+            return $basePath;
+        }
+
+        return $basePath . $path;
+    }
+
+    /**
+     * Strip the base path from a request URI for route matching.
+     *
+     * This is used by the Router to normalize incoming requests so that
+     * routes like '/' work regardless of the configured APP_BASE_PATH.
+     *
+     * @param string $requestUri The full request URI
+     *
+     * @return string The path with base path stripped
+     *
+     * @example stripBasePath('/lwt/login') returns '/login' if APP_BASE_PATH=/lwt
+     * @example stripBasePath('/lwt') returns '/' if APP_BASE_PATH=/lwt
+     */
+    public static function stripBasePath(string $requestUri): string
+    {
+        $basePath = self::getBasePath();
+
+        if ($basePath === '') {
+            return $requestUri;
+        }
+
+        // Check if request starts with base path
+        if (str_starts_with($requestUri, $basePath)) {
+            $stripped = substr($requestUri, strlen($basePath));
+            // Ensure we return at least '/'
+            return $stripped === '' || $stripped === false ? '/' : $stripped;
+        }
+
+        // Request doesn't match base path - return as-is
+        // This handles cases like /favicon.ico at the actual root
+        return $requestUri;
+    }
+
+    /**
+     * Reset the cached base path.
+     *
+     * Useful for testing or when environment changes dynamically.
+     *
+     * @return void
+     */
+    public static function resetBasePath(): void
+    {
+        self::$basePath = null;
+    }
+
+    /**
      * Validate that a URL is safe to fetch (not pointing to internal/private IPs).
      *
      * Prevents SSRF attacks by blocking requests to:

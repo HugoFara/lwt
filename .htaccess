@@ -3,7 +3,12 @@
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
+
+    # RewriteBase configuration:
+    # - For root installation (http://example.com/): use RewriteBase /
+    # - For subdirectory installation (http://example.com/lwt/): use RewriteBase /lwt/
+    # Uncomment and adjust the line below based on your installation path:
+    # RewriteBase /
 
     # Deny access to sensitive files
     <FilesMatch "^(connect\.inc\.php|composer\.json|composer\.lock|\.env)$">

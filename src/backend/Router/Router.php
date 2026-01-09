@@ -16,6 +16,7 @@ namespace Lwt\Router;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Http\SecurityHeaders;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Router\Middleware\MiddlewareInterface;
 
 /**
@@ -313,6 +314,10 @@ class Router
 
         // Remove leading/trailing slashes for consistency
         $path = '/' . trim($path, '/');
+
+        // Strip the application base path for route matching
+        // This allows the app to work in subdirectories (e.g., /lwt/)
+        $path = UrlUtilities::stripBasePath($path);
 
         // Check for static assets
         $staticResult = $this->resolveStaticAsset($path);
@@ -1014,19 +1019,21 @@ class Router
     private function handle404(string $path)
     {
         http_response_code(404);
+        $cssUrl = UrlUtilities::url('/assets/css/standalone.css');
+        $homeUrl = UrlUtilities::url('/');
         ?>
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
             <title>404 - Page Not Found</title>
-            <link rel="stylesheet" href="/assets/css/standalone.css" type="text/css"/>
+            <link rel="stylesheet" href="<?php echo htmlspecialchars($cssUrl); ?>" type="text/css"/>
         </head>
         <body class="error-page">
             <div class="error">
                 <h1>404 - Page Not Found</h1>
                 <p>The requested page <code><?php echo htmlspecialchars($path); ?></code> was not found.</p>
-                <p><a href="/">Return to Home</a></p>
+                <p><a href="<?php echo htmlspecialchars($homeUrl); ?>">Return to Home</a></p>
             </div>
         </body>
         </html>
@@ -1044,13 +1051,14 @@ class Router
     private function handle500(string $message)
     {
         http_response_code(500);
+        $cssUrl = UrlUtilities::url('/assets/css/standalone.css');
         ?>
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
             <title>500 - Internal Server Error</title>
-            <link rel="stylesheet" href="/assets/css/standalone.css" type="text/css"/>
+            <link rel="stylesheet" href="<?php echo htmlspecialchars($cssUrl); ?>" type="text/css"/>
         </head>
         <body class="error-page">
             <div class="error">

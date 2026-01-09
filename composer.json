@@ -17,7 +17,10 @@
             "Lwt\\": "src/backend/",
             "Lwt\\Shared\\": "src/Shared/",
             "Lwt\\Modules\\": "src/Modules/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

@@ -47,22 +47,33 @@ RUN python3 -m venv /opt/lwt-parsers && \
 # Copy parser scripts first (for better caching)
 COPY parsers/ /opt/lwt/parsers/
 
-# Copy application files
-COPY . /var/www/html/lwt
+# Application base path configuration
+# Set to /lwt for subdirectory installation, or leave empty for root installation
+ARG APP_BASE_PATH=/lwt
 
-# creating .env configuration file
+# Copy application files
+# Files go to /var/www/html{APP_BASE_PATH} (e.g., /var/www/html/lwt or /var/www/html)
+COPY . /var/www/html${APP_BASE_PATH}
+
+# Database configuration
 ARG DB_HOSTNAME=db
 ARG DB_USER=root
 ARG DB_PASSWORD=root
 ARG DB_DATABASE=learning-with-texts
 
-RUN printf 'DB_HOST=%s\nDB_USER=%s\nDB_PASSWORD=%s\nDB_NAME=%s\n' \
+# Create .env configuration file with all settings
+RUN printf 'DB_HOST=%s\nDB_USER=%s\nDB_PASSWORD=%s\nDB_NAME=%s\nAPP_BASE_PATH=%s\n' \
     "$DB_HOSTNAME" \
     "$DB_USER" \
     "$DB_PASSWORD" \
     "$DB_DATABASE" \
-    > /var/www/html/lwt/.env
+    "$APP_BASE_PATH" \
+    > /var/www/html${APP_BASE_PATH}/.env
+
+# Configure Apache: enable mod_rewrite and AllowOverride for .htaccess
+RUN a2enmod rewrite \
+    && sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # Install PHP dependencies
-WORKDIR /var/www/html/lwt
+WORKDIR /var/www/html${APP_BASE_PATH}
 RUN composer install --no-dev --optimize-autoloader --no-interaction
