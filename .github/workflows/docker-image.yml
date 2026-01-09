@@ -9,9 +9,10 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  SUPPORTED_PLATFORMS: 'linux/amd64,linux/arm/v7,linux/arm64,linux/mips64le,linux/s390x'
-  # Note: rarer platforms. Not a real array since it starts with ","
-  ADDITIONAL_PLATFORMS: ${{ github.event_name == 'release' && ',linux/386,linux/arm/v5,linux/ppc64le' || '' }}
+  # Limited to platforms with official PHP and Composer images
+  SUPPORTED_PLATFORMS: 'linux/amd64,linux/arm64'
+  # Additional platforms on release (arm/v7 has PHP but may have MeCab issues)
+  ADDITIONAL_PLATFORMS: ${{ github.event_name == 'release' && ',linux/arm/v7' || '' }}
 
 jobs:
   build-and-push-image:
