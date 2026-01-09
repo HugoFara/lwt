@@ -29,7 +29,12 @@ use Lwt\Shared\Infrastructure\Database\Configuration;
 class DatabaseBootstrap
 {
     /**
-     * Load database configuration from .env file.
+     * Load database configuration from .env file or environment variables.
+     *
+     * Configuration sources (in order of priority):
+     * 1. .env file values (if file exists)
+     * 2. Environment variables (for Docker deployments)
+     * 3. Default values
      *
      * @return array{
      *     server: string,
@@ -43,19 +48,15 @@ class DatabaseBootstrap
     {
         $envPath = __DIR__ . '/../../../../.env';
 
-        // Load .env file
-        if (EnvLoader::load($envPath)) {
-            return EnvLoader::getDatabaseConfig();
-        }
+        // Try to load .env file (may not exist in Docker)
+        EnvLoader::load($envPath);
 
-        // No configuration found - use defaults
-        return [
-            'server' => 'localhost',
-            'userid' => 'root',
-            'passwd' => '',
-            'dbname' => 'learning-with-texts',
-            'socket' => '',
-        ];
+        // getDatabaseConfig() will check:
+        // 1. Values loaded from .env file
+        // 2. $_ENV superglobal
+        // 3. getenv() (environment variables from Docker)
+        // 4. Default values
+        return EnvLoader::getDatabaseConfig();
     }
 
     /**

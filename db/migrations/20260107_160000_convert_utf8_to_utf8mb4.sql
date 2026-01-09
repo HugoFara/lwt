@@ -39,12 +39,10 @@ ALTER TABLE words MODIFY WoSentence varchar(1000) CHARACTER SET utf8mb4 COLLATE 
 ALTER TABLE words MODIFY WoNotes varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL;
 
 -- textitems2 table - preserve binary collation on Ti2Text
+-- Note: Only modifying text columns. INT columns don't need charset conversion
+-- and their types must not be changed (they have FK constraints with specific types)
 ALTER TABLE textitems2 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE textitems2 MODIFY Ti2Text varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;
-ALTER TABLE textitems2 MODIFY Ti2LgID tinyint(3) unsigned NOT NULL;
-ALTER TABLE textitems2 MODIFY Ti2TxID smallint(5) unsigned NOT NULL;
-ALTER TABLE textitems2 MODIFY Ti2WoID mediumint(8) unsigned DEFAULT NULL;
-ALTER TABLE textitems2 MODIFY Ti2SeID mediumint(8) unsigned NOT NULL;
 
 -- tags table - preserve binary collation on TgText for case-sensitive tag matching
 ALTER TABLE tags DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

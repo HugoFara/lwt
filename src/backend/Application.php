@@ -286,13 +286,33 @@ class Application
     }
 
     /**
-     * Check if .env file exists.
+     * Check if configuration is available (either .env file or environment variables).
+     *
+     * For Docker deployments, configuration may come from environment variables
+     * instead of a .env file. We check for DB_HOST as the minimum required variable.
      *
      * @return bool
      */
     private function hasEnvFile(): bool
     {
-        return file_exists($this->basePath . '/.env');
+        // Check for .env file first
+        if (file_exists($this->basePath . '/.env')) {
+            return true;
+        }
+
+        // Check for environment variables (Docker deployment)
+        // DB_HOST is required, so if it's set via env, we have config
+        $dbHost = getenv('DB_HOST');
+        if ($dbHost !== false && $dbHost !== '') {
+            return true;
+        }
+
+        // Also check $_ENV (some setups use this)
+        if (isset($_ENV['DB_HOST']) && $_ENV['DB_HOST'] !== '') {
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -16,6 +16,7 @@ tools/*
 .phpdoc/*
 
 .dockerignore
+.env
 .git
 .gitignore
 

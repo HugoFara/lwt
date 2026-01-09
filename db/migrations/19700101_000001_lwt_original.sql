@@ -1,5 +1,5 @@
 -- Migrations already present in the original LWT
--- Made idempotent with IF NOT EXISTS / IF EXISTS clauses for MariaDB compatibility
+-- Made idempotent with IF NOT EXISTS clauses for MariaDB 10.5+ compatibility
 
 ALTER TABLE words
     ADD COLUMN IF NOT EXISTS WoTodayScore DOUBLE NOT NULL DEFAULT 0,
@@ -9,14 +9,11 @@ ALTER TABLE words
 ALTER TABLE words
     ADD COLUMN IF NOT EXISTS WoWordCount tinyint(3) unsigned NOT NULL DEFAULT 0 AFTER WoSentence;
 
--- Use separate statements for index creation to handle existing indexes gracefully
--- MariaDB doesn't have ADD INDEX IF NOT EXISTS, so we use DROP IF EXISTS + ADD
-ALTER TABLE words DROP INDEX IF EXISTS WoTodayScore;
-ALTER TABLE words ADD INDEX WoTodayScore (WoTodayScore);
-ALTER TABLE words DROP INDEX IF EXISTS WoTomorrowScore;
-ALTER TABLE words ADD INDEX WoTomorrowScore (WoTomorrowScore);
-ALTER TABLE words DROP INDEX IF EXISTS WoRandom;
-ALTER TABLE words ADD INDEX WoRandom (WoRandom);
+-- Add indexes if they don't exist (MariaDB 10.5+ supports ADD INDEX IF NOT EXISTS)
+ALTER TABLE words
+    ADD INDEX IF NOT EXISTS WoTodayScore (WoTodayScore),
+    ADD INDEX IF NOT EXISTS WoTomorrowScore (WoTomorrowScore),
+    ADD INDEX IF NOT EXISTS WoRandom (WoRandom);
 
 ALTER TABLE languages
     ADD COLUMN IF NOT EXISTS LgRightToLeft tinyint(1) UNSIGNED NOT NULL DEFAULT 0;
@@ -53,11 +50,7 @@ ALTER TABLE texts
 ALTER TABLE texts
     ADD COLUMN IF NOT EXISTS TxAudioPosition float NOT NULL DEFAULT 0;
 
-ALTER TABLE wordtags
-    DROP INDEX IF EXISTS WtWoID;
-
-ALTER TABLE texttags
-    DROP INDEX IF EXISTS TtTxID;
-
-ALTER TABLE archtexttags
-    DROP INDEX IF EXISTS AgAtID;
+-- Drop unused indexes (these are safe to drop - not used by FKs)
+ALTER TABLE wordtags DROP INDEX IF EXISTS WtWoID;
+ALTER TABLE texttags DROP INDEX IF EXISTS TtTxID;
+ALTER TABLE archtexttags DROP INDEX IF EXISTS AgAtID;

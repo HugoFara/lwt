@@ -5,7 +5,7 @@
 -- Table: local_dictionaries (metadata about imported dictionaries)
 CREATE TABLE IF NOT EXISTS `local_dictionaries` (
     `LdID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `LdLgID` TINYINT(3) UNSIGNED NOT NULL COMMENT 'Language ID this dictionary belongs to',
+    `LdLgID` INT(11) UNSIGNED NOT NULL COMMENT 'Language ID this dictionary belongs to',
     `LdName` VARCHAR(100) NOT NULL COMMENT 'Dictionary name',
     `LdDescription` VARCHAR(500) DEFAULT NULL COMMENT 'Optional description',
     `LdSourceFormat` VARCHAR(20) NOT NULL DEFAULT 'csv' COMMENT 'Original import format: csv, json, stardict',

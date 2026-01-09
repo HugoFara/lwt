@@ -18,9 +18,11 @@ services:
     depends_on:
       - db
     environment:
-      # Database configuration - reads from .env file
-      - DB_HOST=${DB_HOST:-db}
-      - DB_USER=${DB_USER:-root}
+      # Database configuration for Docker
+      # DB_HOST and DB_USER are hardcoded for the Docker setup
+      # DB_PASSWORD and DB_NAME can be customized via .env file
+      - DB_HOST=db
+      - DB_USER=root
       - DB_PASSWORD=${DB_PASSWORD:-root}
       - DB_NAME=${DB_NAME:-learning-with-texts}
       - APP_BASE_PATH=${APP_BASE_PATH:-/lwt}
