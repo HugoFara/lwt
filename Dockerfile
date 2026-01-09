@@ -14,7 +14,7 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
     echo 'mysqli.allow_local_infile = On' >> "$PHP_INI_DIR/php.ini"; \
     docker-php-ext-install pdo pdo_mysql mysqli
 
-# Install Python and MeCab for NLP parsing
+# Install Python, MeCab, and Composer dependencies
 ENV DEBIAN_FRONTEND=noninteractive
 RUN rm -rf /var/lib/apt/lists/* \
     && apt-get clean \
@@ -23,6 +23,8 @@ RUN rm -rf /var/lib/apt/lists/* \
     python3 \
     python3-pip \
     python3-venv \
+    unzip \
+    git \
     && apt-get install -y --no-install-recommends \
     mecab \
     libmecab-dev \
@@ -30,6 +32,9 @@ RUN rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /usr/local/etc \
     && (test -f /etc/mecabrc && ln -sf /etc/mecabrc /usr/local/etc/mecabrc || true)
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Create Python virtual environment and install NLP packages
 RUN python3 -m venv /opt/lwt-parsers && \
@@ -55,3 +60,7 @@ RUN printf 'DB_HOST=%s\nDB_USER=%s\nDB_PASSWORD=%s\nDB_NAME=%s\n' \
     "$DB_PASSWORD" \
     "$DB_DATABASE" \
     > /var/www/html/lwt/.env
+
+# Install PHP dependencies
+WORKDIR /var/www/html/lwt
+RUN composer install --no-dev --optimize-autoloader --no-interaction
