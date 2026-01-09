@@ -43,7 +43,8 @@ $actions = [];
 if (!$isNew) {
     $actions[] = ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'];
 }
-$actions[] = ['url' => '/text/import-long', 'label' => 'Long Text Import', 'icon' => 'file-up'];
+$actions[] = ['url' => '/book/import', 'label' => 'Import EPUB', 'icon' => 'book'];
+$actions[] = ['url' => '/books', 'label' => 'My Books', 'icon' => 'library'];
 $actions[] = ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'];
 $actions[] = ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'];
 if ($isNew) {
@@ -126,15 +127,17 @@ if ($isNew) {
                 <textarea <?php echo $scrdir; ?>
                           name="TxText"
                           id="TxText"
-                          class="textarea notempty checkbytes checkoutsidebmp"
-                          data_maxlength="65000"
+                          class="textarea notempty checkoutsidebmp"
                           data_info="Text"
                           rows="15"
                           placeholder="Paste or type your text here..."
                           title="The text you want to study"
                           required><?php echo \htmlspecialchars($text->text ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
-            <p class="help">Maximum 65,000 bytes. For longer texts, use the Long Text Import feature.</p>
+            <p class="help">
+                Long texts (over 60KB) will be automatically split into chapters and saved as a book.
+                For EPUB files, use the <a href="/book/import">Import EPUB</a> feature.
+            </p>
         </div>
 
         <!-- Annotated Text (only for existing texts) -->

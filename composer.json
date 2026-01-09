@@ -34,7 +34,8 @@
         "ext-dom": "*",
         "phpmailer/phpmailer": "^6.9",
         "league/oauth2-google": "^4.1",
-        "thenetworg/oauth2-azure": "^2.2"
+        "thenetworg/oauth2-azure": "^2.2",
+        "kiwilan/php-ebook": "^2.0"
     },
     "require-dev": {
         "vimeo/psalm": "^5.6",

@@ -28,6 +28,8 @@ use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Core\Globals;
 
 // Base path for legacy includes
 define('LWT_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
@@ -163,6 +165,18 @@ class TextController extends BaseController
         $media = isset($headerData['TxAudioURI']) ? trim((string) $headerData['TxAudioURI']) : '';
         $audioPosition = (int) ($headerData['TxAudioPosition'] ?? 0);
         $sourceUri = (string) ($headerData['TxSourceURI'] ?? '');
+
+        // Book/chapter context for navigation
+        $bookContext = null;
+        try {
+            $bookFacade = Container::getInstance()->getTyped(
+                \Lwt\Modules\Book\Application\BookFacade::class
+            );
+            $bookContext = $bookFacade->getBookContextForText($textId);
+        } catch (\Throwable $e) {
+            // Book module may not be available or no book context
+            $bookContext = null;
+        }
 
         // Save current text
         Settings::save('currenttext', $textId);
@@ -338,8 +352,20 @@ class TextController extends BaseController
         $txAudioUri = $this->param('TxAudioURI');
         $txSourceUri = $this->param('TxSourceURI');
 
-        // Validate text length
-        if (!$this->textService->validateTextLength($txText)) {
+        // Check if text needs auto-splitting (> 60KB)
+        $needsAutoSplit = false;
+        try {
+            $bookFacade = Container::getInstance()->getTyped(
+                \Lwt\Modules\Book\Application\BookFacade::class
+            );
+            $needsAutoSplit = $bookFacade->needsSplit($txText);
+        } catch (\Throwable $e) {
+            // Book module not available, fall back to length validation
+            $needsAutoSplit = false;
+        }
+
+        // If text is too long and we can't auto-split, reject it
+        if (!$needsAutoSplit && !$this->textService->validateTextLength($txText)) {
             $message = "Error: Text too long, must be below 65000 Bytes";
             if ($noPagestart) {
                 PageLayoutHelper::renderPageStart($this->languageService->getLanguageName($currentLang) . ' Texts', true);
@@ -362,6 +388,18 @@ class TextController extends BaseController
         $textId = $this->paramInt('TxID', 0) ?? 0;
         $isNew = str_starts_with($op, 'Save');
 
+        // Auto-split long texts into a book (only for new texts)
+        if ($needsAutoSplit && $isNew) {
+            return $this->handleAutoSplitImport(
+                $txLgId,
+                $txTitle,
+                $txText,
+                $txAudioUri,
+                $txSourceUri,
+                str_ends_with($op, "and Open")
+            );
+        }
+
         $result = $this->textService->saveTextAndReparse(
             $isNew ? 0 : $textId,
             $txLgId,
@@ -378,6 +416,78 @@ class TextController extends BaseController
         }
 
         return ['message' => $result['message'], 'redirect' => false];
+    }
+
+    /**
+     * Handle auto-split import for long texts.
+     *
+     * Creates a book with chapters for texts that exceed 60KB.
+     *
+     * @param int    $languageId Language ID
+     * @param string $title      Text title
+     * @param string $text       Text content
+     * @param string $audioUri   Audio URI
+     * @param string $sourceUri  Source URI
+     * @param bool   $openAfter  Whether to open the first chapter after import
+     *
+     * @return array{message: string, redirect: bool}
+     */
+    private function handleAutoSplitImport(
+        int $languageId,
+        string $title,
+        string $text,
+        string $audioUri,
+        string $sourceUri,
+        bool $openAfter
+    ): array {
+        try {
+            $bookFacade = Container::getInstance()->getTyped(
+                \Lwt\Modules\Book\Application\BookFacade::class
+            );
+
+            // Get tag IDs from request
+            $tagIds = [];
+            $tagInput = $this->param('TextTags');
+            if ($tagInput !== null && $tagInput !== '') {
+                $tagIds = array_map('intval', explode(',', $tagInput));
+                $tagIds = array_filter($tagIds, fn($id) => $id > 0);
+            }
+
+            // Get user ID for multi-user mode
+            $userId = Globals::getCurrentUserId();
+
+            // Create book from text
+            $result = $bookFacade->createBookFromText(
+                $languageId,
+                $title,
+                $text,
+                null, // No author for text imports
+                $audioUri,
+                $sourceUri,
+                $tagIds,
+                $userId
+            );
+
+            if (!$result['success']) {
+                return ['message' => 'Error: ' . $result['message'], 'redirect' => false];
+            }
+
+            // Redirect to book or first chapter
+            if ($openAfter && !empty($result['textIds'])) {
+                header('Location: /text/read?start=' . $result['textIds'][0]);
+                exit();
+            }
+
+            // Redirect to book page
+            if ($result['bookId'] !== null) {
+                header('Location: /book/' . $result['bookId']);
+                exit();
+            }
+
+            return ['message' => $result['message'], 'redirect' => true];
+        } catch (\Throwable $e) {
+            return ['message' => 'Error creating book: ' . $e->getMessage(), 'redirect' => false];
+        }
     }
 
     /**

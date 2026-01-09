@@ -281,6 +281,21 @@ function registerRoutes(Router $router): void
     // Feed wizard
     $router->registerWithMiddleware('/feeds/wizard', 'Lwt\\Modules\\Feed\\Http\\FeedController@wizard', AUTH_MIDDLEWARE);
 
+    // ==================== BOOK ROUTES (PROTECTED) ====================
+    // Book module routes for EPUB import and book management
+
+    // Books list
+    $router->registerWithMiddleware('/books', 'Lwt\\Modules\\Book\\Http\\BookController@index', AUTH_MIDDLEWARE);
+
+    // Book detail (chapters list)
+    $router->get('/book/{id:int}', 'Lwt\\Modules\\Book\\Http\\BookController@show', AUTH_MIDDLEWARE);
+
+    // Import EPUB form and processing
+    $router->registerWithMiddleware('/book/import', 'Lwt\\Modules\\Book\\Http\\BookController@import', AUTH_MIDDLEWARE);
+
+    // Delete book
+    $router->post('/book/{id:int}/delete', 'Lwt\\Modules\\Book\\Http\\BookController@delete', AUTH_MIDDLEWARE);
+
     // ==================== LOCAL DICTIONARY ROUTES (PROTECTED) ====================
     // All dictionary routes use DictionaryController from the Dictionary module
 

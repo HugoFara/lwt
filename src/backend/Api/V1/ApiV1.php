@@ -42,6 +42,8 @@ use Lwt\Modules\Tags\Http\TagApiHandler;
 use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler;
 use Lwt\Modules\Text\Http\TextApiHandler;
+use Lwt\Modules\Book\Http\BookApiHandler;
+use Lwt\Modules\Book\Application\BookFacade;
 use Lwt\Api\V1\Handlers\YouTubeApiHandler;
 use Lwt\Api\V1\Handlers\NlpServiceHandler;
 use Lwt\Core\Globals;
@@ -64,6 +66,7 @@ class ApiV1
     private TagApiHandler $tagHandler;
     private VocabularyApiHandler $termHandler;
     private TextApiHandler $textHandler;
+    private ?BookApiHandler $bookHandler = null;
     private YouTubeApiHandler $youtubeHandler;
     private NlpServiceHandler $nlpHandler;
 
@@ -93,6 +96,14 @@ class ApiV1
         $this->tagHandler = new TagApiHandler();
         $this->termHandler = new VocabularyApiHandler();
         $this->textHandler = new TextApiHandler();
+        try {
+            $this->bookHandler = new BookApiHandler(
+                Container::getInstance()->get(BookFacade::class)
+            );
+        } catch (\Throwable $e) {
+            // Book module not available
+            $this->bookHandler = null;
+        }
         $this->youtubeHandler = new YouTubeApiHandler();
         $this->nlpHandler = new NlpServiceHandler();
     }
@@ -244,6 +255,10 @@ class ApiV1
 
             case 'feeds':
                 $this->handleFeedsGet($fragments, $params);
+                break;
+
+            case 'books':
+                $this->handleBooksGet($fragments, $params);
                 break;
 
             case 'local-dictionaries':
@@ -794,6 +809,10 @@ class ApiV1
                 $this->handleFeedsPut($fragments, $params);
                 break;
 
+            case 'books':
+                $this->handleBooksPut($fragments, $params);
+                break;
+
             case 'local-dictionaries':
                 $this->handleLocalDictionariesPut($fragments, $params);
                 break;
@@ -945,6 +964,10 @@ class ApiV1
 
             case 'feeds':
                 $this->handleFeedsDelete($fragments, $params);
+                break;
+
+            case 'books':
+                $this->handleBooksDelete($fragments);
                 break;
 
             case 'local-dictionaries':
@@ -1271,6 +1294,80 @@ class ApiV1
             default:
                 Response::error('Expected "configured" or "video"', 404);
         }
+    }
+
+    // =========================================================================
+    // Book Request Handlers
+    // =========================================================================
+
+    /**
+     * Handle GET requests for books.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Query parameters
+     */
+    private function handleBooksGet(array $fragments, array $params): void
+    {
+        if ($this->bookHandler === null) {
+            Response::error('Book module not available', 503);
+        }
+
+        // GET /books/{id}/chapters - get chapters for a book
+        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'chapters') {
+            Response::success($this->bookHandler->getChapters(['id' => $fragments[1]]));
+            return;
+        }
+
+        // GET /books/{id} - get single book
+        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
+            Response::success($this->bookHandler->getBook(['id' => $fragments[1]]));
+            return;
+        }
+
+        // GET /books - list all books
+        Response::success($this->bookHandler->listBooks($params));
+    }
+
+    /**
+     * Handle PUT requests for books.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    PUT parameters
+     */
+    private function handleBooksPut(array $fragments, array $params): void
+    {
+        if ($this->bookHandler === null) {
+            Response::error('Book module not available', 503);
+        }
+
+        // PUT /books/{id}/progress - update reading progress
+        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'progress') {
+            $params['id'] = $fragments[1];
+            Response::success($this->bookHandler->updateProgress($params));
+            return;
+        }
+
+        Response::error('Expected "progress"', 404);
+    }
+
+    /**
+     * Handle DELETE requests for books.
+     *
+     * @param string[] $fragments Endpoint path segments
+     */
+    private function handleBooksDelete(array $fragments): void
+    {
+        if ($this->bookHandler === null) {
+            Response::error('Book module not available', 503);
+        }
+
+        // DELETE /books/{id} - delete a book
+        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
+            Response::success($this->bookHandler->deleteBook(['id' => $fragments[1]]));
+            return;
+        }
+
+        Response::error('Book ID (Integer) Expected', 404);
     }
 
     // =========================================================================
