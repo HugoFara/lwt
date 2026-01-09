@@ -14,7 +14,7 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
     echo 'mysqli.allow_local_infile = On' >> "$PHP_INI_DIR/php.ini"; \
     docker-php-ext-install pdo pdo_mysql mysqli
 
-# Install Python, MeCab, and Composer dependencies
+# Install Python and Composer dependencies
 ENV DEBIAN_FRONTEND=noninteractive
 RUN rm -rf /var/lib/apt/lists/* \
     && apt-get clean \
@@ -25,10 +25,12 @@ RUN rm -rf /var/lib/apt/lists/* \
     python3-venv \
     unzip \
     git \
-    && apt-get install -y --no-install-recommends \
-    mecab \
-    libmecab-dev \
-    mecab-ipadic-utf8 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install MeCab with error recovery for CI environments (QEMU emulation issues)
+RUN apt-get update \
+    && (apt-get install -y --no-install-recommends mecab libmecab-dev mecab-ipadic-utf8 \
+        || (dpkg --configure -a && apt-get install -y -f --no-install-recommends mecab libmecab-dev mecab-ipadic-utf8)) \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /usr/local/etc \
     && (test -f /etc/mecabrc && ln -sf /etc/mecabrc /usr/local/etc/mecabrc || true)
