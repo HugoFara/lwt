@@ -43,6 +43,7 @@ use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler;
 use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Api\V1\Handlers\YouTubeApiHandler;
+use Lwt\Api\V1\Handlers\NlpServiceHandler;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
 
@@ -64,6 +65,7 @@ class ApiV1
     private VocabularyApiHandler $termHandler;
     private TextApiHandler $textHandler;
     private YouTubeApiHandler $youtubeHandler;
+    private NlpServiceHandler $nlpHandler;
 
     /**
      * Endpoints that do not require authentication.
@@ -92,6 +94,7 @@ class ApiV1
         $this->termHandler = new VocabularyApiHandler();
         $this->textHandler = new TextApiHandler();
         $this->youtubeHandler = new YouTubeApiHandler();
+        $this->nlpHandler = new NlpServiceHandler();
     }
 
     /**
@@ -251,6 +254,10 @@ class ApiV1
                 $this->handleYouTubeGet($fragments, $params);
                 break;
 
+            case 'tts':
+                $this->handleTtsGet($fragments, $params);
+                break;
+
             default:
                 Response::error('Endpoint Not Found: ' . $fragments[0], 404);
         }
@@ -294,6 +301,10 @@ class ApiV1
 
             case 'local-dictionaries':
                 $this->handleLocalDictionariesPost($fragments, $params);
+                break;
+
+            case 'tts':
+                $this->handleTtsPost($fragments, $params);
                 break;
 
             default:
@@ -940,6 +951,10 @@ class ApiV1
                 $this->handleLocalDictionariesDelete($fragments);
                 break;
 
+            case 'tts':
+                $this->handleTtsDelete($fragments);
+                break;
+
             default:
                 Response::error('Endpoint Not Found On DELETE: ' . $fragments[0], 404);
         }
@@ -1123,6 +1138,107 @@ class ApiV1
         }
 
         Response::error('Dictionary ID (Integer) Expected', 404);
+    }
+
+    // =========================================================================
+    // TTS Request Handlers (Piper TTS via NLP microservice)
+    // =========================================================================
+
+    /**
+     * Handle GET requests for TTS endpoints.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Query parameters
+     */
+    private function handleTtsGet(array $fragments, array $params): void
+    {
+        switch ($fragments[1] ?? '') {
+            case 'voices':
+                if (($fragments[2] ?? '') === 'installed') {
+                    // GET /tts/voices/installed - get only installed voices
+                    Response::success(['voices' => $this->nlpHandler->getInstalledVoices()]);
+                } else {
+                    // GET /tts/voices - get all voices (installed + available)
+                    Response::success(['voices' => $this->nlpHandler->getVoices()]);
+                }
+                break;
+
+            default:
+                Response::error('Expected "voices"', 404);
+        }
+    }
+
+    /**
+     * Handle POST requests for TTS endpoints.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    POST parameters
+     */
+    private function handleTtsPost(array $fragments, array $params): void
+    {
+        switch ($fragments[1] ?? '') {
+            case 'speak':
+                // POST /tts/speak - synthesize speech
+                $text = $params['text'] ?? '';
+                $voiceId = $params['voice_id'] ?? '';
+
+                if ($text === '' || $voiceId === '') {
+                    Response::error('text and voice_id are required', 400);
+                }
+
+                $audioData = $this->nlpHandler->speak($text, $voiceId);
+                if ($audioData === null) {
+                    Response::error('TTS service unavailable or synthesis failed', 503);
+                }
+
+                Response::success(['audio' => $audioData]);
+                break;
+
+            case 'voices':
+                if (($fragments[2] ?? '') === 'download') {
+                    // POST /tts/voices/download - download a voice
+                    $voiceId = $params['voice_id'] ?? '';
+                    if ($voiceId === '') {
+                        Response::error('voice_id is required', 400);
+                    }
+
+                    $success = $this->nlpHandler->downloadVoice($voiceId);
+                    if (!$success) {
+                        Response::error('Voice download failed', 500);
+                    }
+
+                    Response::success(['success' => true, 'voice_id' => $voiceId]);
+                } else {
+                    Response::error('Expected "download"', 404);
+                }
+                break;
+
+            default:
+                Response::error('Expected "speak" or "voices/download"', 404);
+        }
+    }
+
+    /**
+     * Handle DELETE requests for TTS endpoints.
+     *
+     * @param string[] $fragments Endpoint path segments
+     */
+    private function handleTtsDelete(array $fragments): void
+    {
+        // DELETE /tts/voices/{id} - delete a voice
+        if (($fragments[1] ?? '') === 'voices' && isset($fragments[2]) && $fragments[2] !== '') {
+            $voiceId = $fragments[2];
+            $success = $this->nlpHandler->deleteVoice($voiceId);
+
+            if (!$success) {
+                Response::error('Voice not found or deletion failed', 404);
+            }
+
+            Response::success(['success' => true]);
+            return;
+        }
+
+        Response::error('Expected "voices/{id}"', 404);
     }
 
     // =========================================================================

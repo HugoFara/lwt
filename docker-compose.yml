@@ -17,6 +17,7 @@ services:
     container_name: lwt
     depends_on:
       - db
+      - nlp
     environment:
       # Database configuration for Docker
       # DB_HOST and DB_USER are hardcoded for the Docker setup
@@ -26,6 +27,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-root}
       - DB_NAME=${DB_NAME:-learning-with-texts}
       - APP_BASE_PATH=${APP_BASE_PATH:-/lwt}
+      - NLP_SERVICE_URL=http://nlp:8000
     volumes:
       - ./media:/var/www/html${APP_BASE_PATH:-/lwt}/media
     ports:
@@ -43,3 +45,21 @@ services:
     restart: unless-stopped
     volumes:
       - ./lwt_db_data:/var/lib/mysql
+
+  nlp:
+    build:
+      context: ./services/nlp
+    container_name: lwt_nlp
+    volumes:
+      - nlp_voices:/app/voices
+    environment:
+      PIPER_VOICES_DIR: /app/voices
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  nlp_voices:

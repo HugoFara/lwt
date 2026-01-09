@@ -63,6 +63,12 @@ class Endpoints
         'local-dictionaries/preview' => ['POST'],
         'local-dictionaries/entries' => ['GET', 'POST', 'PUT', 'DELETE'],
         'version' => ['GET'],
+
+        // TTS endpoints (Piper TTS via NLP microservice)
+        'tts/voices' => ['GET', 'DELETE'],  // GET for list, DELETE for tts/voices/{id}
+        'tts/voices/installed' => ['GET'],
+        'tts/voices/download' => ['POST'],
+        'tts/speak' => ['POST'],
     ];
 
     /**

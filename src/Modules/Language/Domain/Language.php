@@ -53,6 +53,7 @@ class Language
     private bool $showRomanization;
     private ?string $parserType;
     private int $localDictMode;
+    private ?string $piperVoiceId;
 
     /**
      * Private constructor - use factory methods instead.
@@ -80,7 +81,8 @@ class Language
         string $ttsVoiceApi,
         bool $showRomanization,
         ?string $parserType = null,
-        int $localDictMode = 0
+        int $localDictMode = 0,
+        ?string $piperVoiceId = null
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -105,6 +107,7 @@ class Language
         $this->showRomanization = $showRomanization;
         $this->parserType = $parserType;
         $this->localDictMode = $localDictMode;
+        $this->piperVoiceId = $piperVoiceId;
     }
 
     /**
@@ -181,6 +184,7 @@ class Language
      * @param bool        $showRomanization          Show romanization flag
      * @param string|null $parserType                Parser type (regex, character, mecab, etc.)
      * @param int         $localDictMode             Local dictionary mode (0-3)
+     * @param string|null $piperVoiceId              Piper TTS voice ID
      *
      * @return self
      *
@@ -209,7 +213,8 @@ class Language
         string $ttsVoiceApi,
         bool $showRomanization,
         ?string $parserType = null,
-        int $localDictMode = 0
+        int $localDictMode = 0,
+        ?string $piperVoiceId = null
     ): self {
         return new self(
             LanguageId::fromInt($id),
@@ -234,7 +239,8 @@ class Language
             $ttsVoiceApi,
             $showRomanization,
             $parserType,
-            $localDictMode
+            $localDictMode,
+            $piperVoiceId
         );
     }
 
@@ -563,6 +569,7 @@ class Language
             'ttsvoiceapi'        => $this->ttsVoiceApi,
             'showromanization'   => $this->showRomanization,
             'localdictmode'      => $this->localDictMode,
+            'pipervoiceid'       => $this->piperVoiceId,
         ]);
     }
 
@@ -753,6 +760,38 @@ class Language
             throw new \InvalidArgumentException('Local dictionary mode must be between 0 and 3');
         }
         $this->localDictMode = $mode;
+    }
+
+    /**
+     * Get the Piper TTS voice ID.
+     *
+     * @return string|null Piper voice ID or null if not set
+     */
+    public function piperVoiceId(): ?string
+    {
+        return $this->piperVoiceId;
+    }
+
+    /**
+     * Set the Piper TTS voice ID.
+     *
+     * @param string|null $voiceId Piper voice ID (e.g., "en_US-lessac-medium")
+     *
+     * @return void
+     */
+    public function setPiperVoiceId(?string $voiceId): void
+    {
+        $this->piperVoiceId = $voiceId !== '' ? $voiceId : null;
+    }
+
+    /**
+     * Check if Piper TTS is configured.
+     *
+     * @return bool
+     */
+    public function hasPiperTts(): bool
+    {
+        return $this->piperVoiceId !== null && $this->piperVoiceId !== '';
     }
 
     /**

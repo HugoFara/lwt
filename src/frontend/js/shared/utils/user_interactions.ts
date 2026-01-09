@@ -19,10 +19,11 @@ interface TextDictionary {
 
 // Type for language reading configuration
 interface ReadingConfiguration {
-  reading_mode: 'direct' | 'internal' | 'external';
+  reading_mode: 'direct' | 'internal' | 'external' | 'piper';
   name: string;
   abbreviation: string;
   voiceapi?: string;
+  piper_voice_id?: string;
 }
 
 // TTSLanguageSettings is imported from tts_storage.ts
@@ -340,6 +341,44 @@ export function readTextWithExternal(text: string, voice_api: string, lang: stri
 }
 
 /**
+ * Read text aloud using Piper TTS via the NLP microservice.
+ * Falls back to browser TTS if the service is unavailable.
+ *
+ * @param text Text to be read aloud
+ * @param voiceId Piper voice ID to use
+ * @param lang Language code for fallback browser TTS
+ */
+export async function readTextWithPiper(
+  text: string,
+  voiceId: string,
+  lang: string
+): Promise<void> {
+  try {
+    const response = await fetch(url('/api/v1/tts/speak'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice_id: voiceId })
+    });
+
+    if (!response.ok) {
+      throw new Error('TTS service unavailable');
+    }
+
+    const data = await response.json() as { audio?: string };
+    if (data.audio) {
+      const audio = new Audio(data.audio);
+      await audio.play();
+    } else {
+      throw new Error('No audio data returned');
+    }
+  } catch (error) {
+    // Fallback to browser TTS
+    console.warn('Piper TTS failed, falling back to browser:', error);
+    readRawTextAloud(text, lang);
+  }
+}
+
+/**
  * Retrieve TTS (Text-to-Speech) settings from localStorage for a specific language.
  * Reads Rate, Pitch, and Voice settings from localStorage.
  *
@@ -453,7 +492,10 @@ export function handleReadingConfiguration(
   term: string,
   languageId: number
 ): void {
-  if (language.reading_mode === 'direct' || language.reading_mode === 'internal') {
+  if (language.reading_mode === 'piper' && language.piper_voice_id) {
+    // Use Piper TTS via NLP microservice (with browser fallback)
+    readTextWithPiper(term, language.piper_voice_id, language.abbreviation);
+  } else if (language.reading_mode === 'direct' || language.reading_mode === 'internal') {
     const lang_settings = cookieTTSSettings(language.name);
     if (language.reading_mode === 'direct') {
       // No reparsing needed
