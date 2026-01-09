@@ -386,7 +386,11 @@ class TextApiHandler
                     $exprs[] = [
                         'code' => $code,
                         'text' => $record['TiText'],
-                        'remaining' => $code
+                        'remaining' => $code,
+                        'startPos' => $order,
+                        'wordId' => isset($record['WoID']) ? (int)$record['WoID'] : null,
+                        'status' => (int)($record['WoStatus'] ?? 0),
+                        'translation' => ExportService::replaceTabNewline($record['WoTranslation'] ?? ''),
                     ];
                 }
             }
@@ -433,9 +437,16 @@ class TextApiHandler
                     $wordData['notes'] = '';
                 }
 
-                // Add multiword references
+                // Add multiword references with full details
                 foreach ($exprs as $expr) {
-                    $wordData['mw' . $expr['code']] = $expr['text'];
+                    $wordData['mw' . $expr['code']] = [
+                        'text' => $expr['text'],
+                        'translation' => $expr['translation'],
+                        'status' => $expr['status'],
+                        'wordId' => $expr['wordId'],
+                        'startPos' => $expr['startPos'],
+                        'endPos' => $expr['startPos'] + ($expr['code'] - 1) * 2,
+                    ];
                 }
             }
 

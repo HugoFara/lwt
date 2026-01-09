@@ -482,10 +482,37 @@ span.mwsty
 }
 
 /* Multi-word mark */
-.mword 
+.mword
 {
   padding-left: 4px;
   padding-right: 4px;
+}
+
+/* Multi-word expression group wrapper - connected underline */
+.mw-group
+{
+  display: inline;
+  border-bottom: 2px solid;
+  padding-bottom: 1px;
+  cursor: pointer;
+}
+
+/* Status colors for multi-word groups */
+.mw-group.mw-status0 { border-color: #5ABAFF; }
+.mw-group.mw-status1 { border-color: #E85A3C; }
+.mw-group.mw-status2 { border-color: #E8893C; }
+.mw-group.mw-status3 { border-color: #E8B83C; }
+.mw-group.mw-status4 { border-color: #E8E23C; }
+.mw-group.mw-status5 { border-color: #66CC66; }
+.mw-group.mw-status99 { border-color: #CCFFCC; }
+.mw-group.mw-status98 { border-color: #888888; border-style: dashed; }
+
+/* Remove individual word underlines inside multi-word group */
+.mw-group .wsty,
+.mw-group .word,
+.mw-group .mword
+{
+  border-bottom: none !important;
 }
 
 span.todosty
