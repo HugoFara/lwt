@@ -1,0 +1,9 @@
+# Python NLP dependencies for LWT external parsers
+# Install with: pip install -r requirements.txt
+
+# Chinese tokenization
+jieba>=0.42.1
+
+# Japanese tokenization (requires system MeCab library)
+# On Debian/Ubuntu: apt-get install mecab mecab-ipadic-utf8
+mecab-python3>=1.0.6

@@ -18,6 +18,7 @@ use Lwt\Modules\Language\Domain\Language;
 use Lwt\Core\Parser\Parsers\RegexParser;
 use Lwt\Core\Parser\Parsers\CharacterParser;
 use Lwt\Core\Parser\Parsers\MecabParser;
+use Lwt\Core\Parser\Parsers\ExternalParser;
 
 /**
  * Registry for parser implementations.
@@ -35,12 +36,19 @@ class ParserRegistry
     /** @var string Default parser type when none specified */
     private const DEFAULT_PARSER = 'regex';
 
+    /** @var ExternalParserLoader|null Loader for external parser configs */
+    private ?ExternalParserLoader $externalLoader;
+
     /**
      * Create a new parser registry with default parsers.
+     *
+     * @param ExternalParserLoader|null $externalLoader Optional loader for external parsers
      */
-    public function __construct()
+    public function __construct(?ExternalParserLoader $externalLoader = null)
     {
+        $this->externalLoader = $externalLoader;
         $this->registerDefaultParsers();
+        $this->registerExternalParsers();
     }
 
     /**
@@ -53,6 +61,31 @@ class ParserRegistry
         $this->register(new RegexParser());
         $this->register(new CharacterParser());
         $this->register(new MecabParser());
+    }
+
+    /**
+     * Register external parsers from the configuration file.
+     *
+     * External parsers are loaded from config/parsers.php. This method
+     * creates ExternalParser instances for each configured parser.
+     *
+     * @return void
+     */
+    private function registerExternalParsers(): void
+    {
+        if ($this->externalLoader === null) {
+            return;
+        }
+
+        foreach ($this->externalLoader->getExternalParsers() as $config) {
+            // Skip if a parser with this type is already registered
+            // (built-in parsers take precedence)
+            if ($this->has($config->getType())) {
+                continue;
+            }
+
+            $this->register(new ExternalParser($config));
+        }
     }
 
     /**

@@ -19,6 +19,7 @@ namespace Lwt\Shared\Infrastructure\Container;
 
 use Lwt\Core\Parser\ParserRegistry;
 use Lwt\Core\Parser\ParsingCoordinator;
+use Lwt\Core\Parser\ExternalParserLoader;
 use Lwt\Modules\Vocabulary\Application\Services\WordService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Text\Application\Services\SentenceService;
@@ -53,8 +54,14 @@ class CoreServiceProvider implements ServiceProviderInterface
         // Parser Infrastructure (core cross-cutting services)
         // =====================
 
-        $container->singleton(ParserRegistry::class, function (Container $_c) {
-            return new ParserRegistry();
+        $container->singleton(ExternalParserLoader::class, function (Container $_c) {
+            return new ExternalParserLoader();
+        });
+
+        $container->singleton(ParserRegistry::class, function (Container $c) {
+            return new ParserRegistry(
+                $c->getTyped(ExternalParserLoader::class)
+            );
         });
 
         $container->singleton(ParsingCoordinator::class, function (Container $c) {
