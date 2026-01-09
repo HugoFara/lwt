@@ -9,6 +9,7 @@
 
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { url } from '@shared/utils/url';
 import {
   getLanguageStore,
   type LanguageStoreState
@@ -161,14 +162,14 @@ export function languageListData(): LanguageListComponentData {
      * Navigate to the edit page for a language.
      */
     navigateToEdit(id: number): void {
-      window.location.href = `/languages?chg=${id}`;
+      window.location.href = url(`/languages?chg=${id}`);
     },
 
     /**
      * Navigate to the new language page.
      */
     navigateToNew(): void {
-      window.location.href = '/languages?new=1';
+      window.location.href = url('/languages?new=1');
     },
 
     /**

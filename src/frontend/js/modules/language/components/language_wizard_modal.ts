@@ -11,6 +11,7 @@
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
 import { saveSetting } from '@shared/utils/ajax_utilities';
+import { url } from '@shared/utils/url';
 import {
   getLanguageStore,
   type LanguageStoreState
@@ -154,7 +155,7 @@ export function wizardModalData(): WizardModalComponentData {
       this.close();
 
       // Navigate to the new language form with wizard flag
-      window.location.href = '/languages?new=1&wizard=1';
+      window.location.href = url('/languages?new=1&wizard=1');
     }
   };
 }

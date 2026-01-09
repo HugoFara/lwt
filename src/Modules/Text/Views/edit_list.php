@@ -288,7 +288,7 @@ echo PageLayoutHelper::buildActionCard([
 
     <!-- Empty state -->
     <div x-show="!loading && languages.length === 0" class="notification is-info is-light">
-        <p>No texts found. <a href="/texts?new=1">Create your first text</a> to get started!</p>
+        <p>No texts found. <a href="<?php echo \Lwt\Shared\Infrastructure\Http\UrlUtilities::url('/texts?new=1'); ?>">Create your first text</a> to get started!</p>
     </div>
 </div>
 

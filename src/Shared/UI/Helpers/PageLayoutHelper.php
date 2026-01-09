@@ -167,7 +167,7 @@ HTML;
     {
         $buttonsHtml = '';
         foreach ($actions as $action) {
-            $url = htmlspecialchars($action['url'], ENT_QUOTES, 'UTF-8');
+            $url = htmlspecialchars(UrlUtilities::url($action['url']), ENT_QUOTES, 'UTF-8');
             $label = htmlspecialchars($action['label'], ENT_QUOTES, 'UTF-8');
             $icon = isset($action['icon']) ? IconHelper::render($action['icon'], ['alt' => $label]) : '';
             $class = isset($action['class']) ? ' ' . htmlspecialchars($action['class'], ENT_QUOTES, 'UTF-8') : '';
@@ -428,6 +428,7 @@ HTML;
         echo file_get_contents("UNLICENSE.md");
         echo '-->';
         echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
+        echo '<meta name="lwt-base-path" content="' . htmlspecialchars(UrlUtilities::getBasePath(), ENT_QUOTES, 'UTF-8') . '" />';
         echo '<link rel="shortcut icon" href="' . $favicon . '" type="image/x-icon"/>';
         echo '<link rel="apple-touch-icon" href="' . $icon57 . '" />';
         echo '<link rel="apple-touch-icon" sizes="72x72" href="' . $icon72 . '" />';

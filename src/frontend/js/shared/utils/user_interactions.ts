@@ -10,6 +10,7 @@ import { overlib, closePopup } from '@modules/vocabulary/components/word_popup';
 import { scrollTo } from '@shared/utils/hover_intent';
 import { getTTSSettingsWithMigration, type TTSLanguageSettings } from './tts_storage';
 import { getReadingPosition } from '@modules/text/stores/reading_state';
+import { url } from './url';
 
 // Type for text dictionary in newExpressionInteractable
 interface TextDictionary {
@@ -71,7 +72,7 @@ export function quickMenuRedirection(value: string): void {
 
   const route = quickMenuRoutes[value];
   if (route) {
-    top!.location.href = route;
+    top!.location.href = url(route);
   } else {
     // No fallback - all quick menu values should be mapped
     console.error('Quick menu: unknown value "' + value + '". Add it to quickMenuRoutes.');
@@ -499,7 +500,7 @@ export function speechDispatcher(
   const params = new URLSearchParams();
   params.append('language_id', String(languageId));
 
-  return fetch('/api/v1/languages/' + languageId + '/reading-configuration?' + params.toString())
+  return fetch(url('/api/v1/languages/' + languageId + '/reading-configuration?' + params.toString()))
     .then(response => response.json())
     .then((data: ReadingConfiguration) => {
       handleReadingConfiguration(data, term, languageId);

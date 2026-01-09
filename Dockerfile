@@ -16,15 +16,14 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
 
 # Install Python and Composer dependencies
 ENV DEBIAN_FRONTEND=noninteractive
-RUN rm -rf /var/lib/apt/lists/* \
-    && apt-get clean \
-    && apt-get update \
+RUN apt-get update --fix-missing \
     && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     python3-venv \
     unzip \
     git \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install MeCab with error recovery for CI environments (QEMU emulation issues)
@@ -65,3 +64,6 @@ RUN a2enmod rewrite \
 # Install PHP dependencies
 WORKDIR /var/www/html${APP_BASE_PATH}
 RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Set proper ownership for Apache (www-data user)
+RUN chown -R www-data:www-data /var/www/html${APP_BASE_PATH}

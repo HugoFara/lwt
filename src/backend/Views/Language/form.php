@@ -79,7 +79,7 @@ $parserInfo = $parserInfo ?? [];
 ]); ?>
 </script>
 
-<form class="validate" action="/languages" method="post" name="lg_form"
+<form class="validate" action="<?php echo url('/languages'); ?>" method="post" name="lg_form"
       x-data="{
           textSize: <?php echo $language->textsize ?: 100; ?>,
           parserType: '<?php echo htmlspecialchars($language->parsertype, ENT_QUOTES, 'UTF-8'); ?>',
@@ -659,7 +659,7 @@ $parserInfo = $parserInfo ?? [];
             <button type="button"
                     class="button is-light"
                     data-action="cancel-form"
-                    data-redirect="/languages">
+                    data-redirect="<?php echo url('/languages'); ?>">
                 Cancel
             </button>
         </div>

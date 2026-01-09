@@ -39,11 +39,15 @@ class SqlValidator
         'archtexttags',
         'feedlinks',
         'languages',
+        'local_dictionaries',
+        'local_dictionary_entries',
         'newsfeeds',
         'sentences',
         'settings',
         'tags',
         'tags2',
+        'temptextitems',
+        'tempwords',
         'textitems',
         'textitems2',
         'texts',
@@ -150,6 +154,11 @@ class SqlValidator
 
         if (str_starts_with(strtoupper($trimmedSql), 'INSERT INTO')) {
             return $this->validateInsert($trimmedSql);
+        }
+
+        // Allow SET FOREIGN_KEY_CHECKS for backup/restore operations
+        if (preg_match('/^SET\s+FOREIGN_KEY_CHECKS\s*=\s*[01]\s*$/i', $trimmedSql)) {
+            return true;
         }
 
         // Block all other statement types

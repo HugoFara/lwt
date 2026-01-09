@@ -208,6 +208,24 @@ class SqlValidatorTest extends TestCase
         $this->assertFalse($this->validator->validate($sql));
     }
 
+    public function testSetForeignKeyChecksDisableAllowed(): void
+    {
+        $sql = "SET FOREIGN_KEY_CHECKS = 0";
+        $this->assertTrue($this->validator->validate($sql));
+    }
+
+    public function testSetForeignKeyChecksEnableAllowed(): void
+    {
+        $sql = "SET FOREIGN_KEY_CHECKS = 1";
+        $this->assertTrue($this->validator->validate($sql));
+    }
+
+    public function testSetOtherVariableBlocked(): void
+    {
+        $sql = "SET autocommit = 0";
+        $this->assertFalse($this->validator->validate($sql));
+    }
+
     public function testSleepBlocked(): void
     {
         $sql = "INSERT INTO texts VALUES(1, 1, 'test', SLEEP(10))";
@@ -330,7 +348,7 @@ class SqlValidatorTest extends TestCase
     public function testGetAllowedTablesReturnsExpectedCount(): void
     {
         $tables = SqlValidator::getAllowedTables();
-        $this->assertCount(15, $tables);
+        $this->assertCount(19, $tables);
     }
 
     public function testGetAllowedTablesContainsLanguages(): void

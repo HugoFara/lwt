@@ -245,7 +245,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
             <!-- New text card -->
             <div class="column is-narrow">
-                <a href="<?php echo $base; ?>/text/new" class="box has-background-primary-light has-text-centered" style="width: 180px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <a href="<?php echo $base; ?>/texts?new=1" class="box has-background-primary-light has-text-centered" style="width: 180px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                     <span class="icon is-large has-text-primary">
                         <i data-lucide="plus" style="width: 48px; height: 48px;"></i>
                     </span>

@@ -22,3 +22,6 @@ tools/*
 
 # Media files for LWT
 media/*
+
+# Database data directory (created by docker-compose)
+lwt_db_data/*

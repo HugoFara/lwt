@@ -2713,3 +2713,5 @@ CREATE TABLE `local_dictionary_entries` (
   KEY `LeLdID` (`LeLdID`),
   KEY `LeTermLc` (`LeTermLc`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 1;

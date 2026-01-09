@@ -12,6 +12,7 @@
 import { getLibreTranslateTranslation } from '@modules/vocabulary/services/translation_api';
 import { deepFindValue, readTextWithExternal } from '@shared/utils/user_interactions';
 import { lwtFormCheck } from '@shared/forms/unloadformcheck';
+import { url } from '@shared/utils/url';
 
 /**
  * Build a URL query string from an object (replaces $.param).
@@ -719,7 +720,7 @@ export function initLanguageForm(): void {
   if (cancelBtn) {
     cancelBtn.addEventListener('click', () => {
       lwtFormCheck.resetDirty();
-      const redirect = cancelBtn.dataset.redirect || '/languages';
+      const redirect = cancelBtn.dataset.redirect || url('/languages');
       window.location.href = redirect;
     });
   }
