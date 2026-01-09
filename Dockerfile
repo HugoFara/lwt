@@ -55,20 +55,8 @@ ARG APP_BASE_PATH=/lwt
 # Files go to /var/www/html{APP_BASE_PATH} (e.g., /var/www/html/lwt or /var/www/html)
 COPY . /var/www/html${APP_BASE_PATH}
 
-# Database configuration
-ARG DB_HOSTNAME=db
-ARG DB_USER=root
-ARG DB_PASSWORD=root
-ARG DB_DATABASE=learning-with-texts
-
-# Create .env configuration file with all settings
-RUN printf 'DB_HOST=%s\nDB_USER=%s\nDB_PASSWORD=%s\nDB_NAME=%s\nAPP_BASE_PATH=%s\n' \
-    "$DB_HOSTNAME" \
-    "$DB_USER" \
-    "$DB_PASSWORD" \
-    "$DB_DATABASE" \
-    "$APP_BASE_PATH" \
-    > /var/www/html${APP_BASE_PATH}/.env
+# Note: Database configuration is provided at runtime via environment variables
+# or by mounting a .env file. See docker-compose.yml for examples.
 
 # Configure Apache: enable mod_rewrite and AllowOverride for .htaccess
 RUN a2enmod rewrite \

@@ -117,10 +117,17 @@ docker compose up
 ```bash
 git clone https://github.com/HugoFara/lwt.git
 cd lwt
+
+# Optional: customize settings (database password, etc.)
+cp .env.example .env
+# Edit .env with your preferences
+
 docker compose up
 ```
 
 Access at <http://localhost:8010/lwt/>
+
+Configuration is done via `.env` file (see `.env.example` for all options).
 
 ### Linux
 

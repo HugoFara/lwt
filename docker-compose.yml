@@ -1,32 +1,43 @@
+# LWT Docker Compose Configuration
+#
+# Usage:
+#   1. Copy .env.example to .env and configure your settings
+#   2. Run: docker compose up
+#   3. Access at http://localhost:8010/lwt/
+#
+# The .env file is automatically read by docker compose.
+
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        - DB_HOSTNAME=db
-        - DB_USER=root
-        - DB_PASSWORD=root
-        - DB_DATABASE=learning-with-texts
-        - APP_BASE_PATH=/lwt
+        - APP_BASE_PATH=${APP_BASE_PATH:-/lwt}
     container_name: lwt
     depends_on:
       - db
-    links:
-      - db
+    environment:
+      # Database configuration - reads from .env file
+      - DB_HOST=${DB_HOST:-db}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_NAME=${DB_NAME:-learning-with-texts}
+      - APP_BASE_PATH=${APP_BASE_PATH:-/lwt}
     volumes:
-      - ./media:/var/www/html/lwt/media
+      - ./media:/var/www/html${APP_BASE_PATH:-/lwt}/media
     ports:
       - "8010:80"
     restart: unless-stopped
+
   db:
     container_name: lwt_db
     environment:
-        MYSQL_ALLOW_EMPTY_PASSWORD: "no"
-        MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-    hostname: ${DB_HOSTNAME}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-learning-with-texts}
+    hostname: db
     image: mariadb:12.1
     restart: unless-stopped
     volumes:
-        - ./lwt_db_data:/var/lib/mysql
-  
+      - ./lwt_db_data:/var/lib/mysql

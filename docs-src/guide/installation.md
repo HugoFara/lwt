@@ -200,23 +200,50 @@ but it will use more or less 1 GB on your system.
 
 ### Using the installer
 
-For an light-weight installer, you may use
+For a light-weight installer, you may use
 [HugoFara/lwt-docker-installer](https://github.com/HugoFara/lwt-docker-installer).
 
 ### Build image from source
 
-Download the lwt, open a terminal inside it, then type
+1. Download or clone LWT:
 
-```bash
-docker compose up -d
-```
+   ```bash
+   git clone https://github.com/HugoFara/lwt.git
+   cd lwt
+   ```
 
-By default the server can be accessed on port 8010 (<http://localhost:8010/lwt>).
+2. (Optional) Configure your settings by copying `.env.example` to `.env`:
 
-To remove the created containers run
+   ```bash
+   cp .env.example .env
+   ```
+
+   Edit `.env` to customize:
+   * `DB_HOST=db` (use "db" for the Docker container)
+   * `DB_PASSWORD=your_secure_password` (change for security)
+   * `APP_BASE_PATH=/lwt` (URL path to access LWT)
+
+   If you skip this step, Docker will use sensible defaults (password: `root`).
+
+3. Start the containers:
+
+   ```bash
+   docker compose up -d
+   ```
+
+4. Access LWT at <http://localhost:8010/lwt>
+
+To stop and remove the containers:
 
 ```bash
 docker compose down
+```
+
+To also remove the database data:
+
+```bash
+docker compose down -v
+rm -rf lwt_db_data
 ```
 
 ## Dependency management with Composer
