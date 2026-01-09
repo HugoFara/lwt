@@ -1,5 +1,6 @@
 -- Migration: Add foreign key constraints for user ownership
 -- This establishes user ownership constraints for multi-user data isolation.
+-- Made idempotent for MariaDB compatibility
 -- NOTE: Inter-table FK constraints (texts→languages, etc.) are deferred to avoid
 -- breaking existing data manipulation code that uses temporary tables and bulk operations.
 
@@ -75,30 +76,39 @@ DELETE fl FROM feedlinks fl
 
 -- Foreign keys to users table (user ownership)
 -- These ensure data belongs to valid users and cascades deletion
+-- Made idempotent: drop if exists, then add
+
+ALTER TABLE languages DROP FOREIGN KEY IF EXISTS fk_languages_user;
 ALTER TABLE languages
     ADD CONSTRAINT fk_languages_user
     FOREIGN KEY (LgUsID) REFERENCES users(UsID) ON DELETE CASCADE;
 
+ALTER TABLE texts DROP FOREIGN KEY IF EXISTS fk_texts_user;
 ALTER TABLE texts
     ADD CONSTRAINT fk_texts_user
     FOREIGN KEY (TxUsID) REFERENCES users(UsID) ON DELETE CASCADE;
 
+ALTER TABLE archivedtexts DROP FOREIGN KEY IF EXISTS fk_archivedtexts_user;
 ALTER TABLE archivedtexts
     ADD CONSTRAINT fk_archivedtexts_user
     FOREIGN KEY (AtUsID) REFERENCES users(UsID) ON DELETE CASCADE;
 
+ALTER TABLE words DROP FOREIGN KEY IF EXISTS fk_words_user;
 ALTER TABLE words
     ADD CONSTRAINT fk_words_user
     FOREIGN KEY (WoUsID) REFERENCES users(UsID) ON DELETE CASCADE;
 
+ALTER TABLE tags DROP FOREIGN KEY IF EXISTS fk_tags_user;
 ALTER TABLE tags
     ADD CONSTRAINT fk_tags_user
     FOREIGN KEY (TgUsID) REFERENCES users(UsID) ON DELETE CASCADE;
 
+ALTER TABLE tags2 DROP FOREIGN KEY IF EXISTS fk_tags2_user;
 ALTER TABLE tags2
     ADD CONSTRAINT fk_tags2_user
     FOREIGN KEY (T2UsID) REFERENCES users(UsID) ON DELETE CASCADE;
 
+ALTER TABLE newsfeeds DROP FOREIGN KEY IF EXISTS fk_newsfeeds_user;
 ALTER TABLE newsfeeds
     ADD CONSTRAINT fk_newsfeeds_user
     FOREIGN KEY (NfUsID) REFERENCES users(UsID) ON DELETE CASCADE;

@@ -1,5 +1,6 @@
 -- Migration: Add password reset token columns to users table
 -- These columns support secure password reset functionality
+-- Made idempotent for MariaDB compatibility
 --
 -- Token workflow:
 -- 1. User requests password reset
@@ -11,6 +12,8 @@
 -- 7. If valid and not expired, password is updated and token cleared
 
 ALTER TABLE users
-ADD COLUMN UsPasswordResetToken varchar(64) DEFAULT NULL AFTER UsRememberTokenExpires,
-ADD COLUMN UsPasswordResetTokenExpires datetime DEFAULT NULL AFTER UsPasswordResetToken,
-ADD UNIQUE KEY UsPasswordResetToken (UsPasswordResetToken);
+ADD COLUMN IF NOT EXISTS UsPasswordResetToken varchar(64) DEFAULT NULL AFTER UsRememberTokenExpires,
+ADD COLUMN IF NOT EXISTS UsPasswordResetTokenExpires datetime DEFAULT NULL AFTER UsPasswordResetToken;
+
+ALTER TABLE users DROP INDEX IF EXISTS UsPasswordResetToken;
+ALTER TABLE users ADD UNIQUE KEY UsPasswordResetToken (UsPasswordResetToken);

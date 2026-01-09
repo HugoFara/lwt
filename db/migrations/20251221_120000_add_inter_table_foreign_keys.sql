@@ -1,6 +1,7 @@
 -- Migration: Add inter-table foreign key constraints
 -- This establishes referential integrity for all inter-table relationships.
 -- Critical change: textitems2.Ti2WoID uses NULL instead of 0 for unknown words.
+-- Made idempotent for MariaDB compatibility
 
 -- ============================================================================
 -- PART 0: Fix column type mismatches for FK compatibility
@@ -164,24 +165,30 @@ DELETE wt FROM wordtags wt
 -- ============================================================================
 -- PART 3: Language Reference FKs (ON DELETE CASCADE)
 -- When a language is deleted, all related content is deleted
+-- Made idempotent: drop if exists, then add
 -- ============================================================================
 
+ALTER TABLE texts DROP FOREIGN KEY IF EXISTS fk_texts_language;
 ALTER TABLE texts
     ADD CONSTRAINT fk_texts_language
     FOREIGN KEY (TxLgID) REFERENCES languages(LgID) ON DELETE CASCADE;
 
+ALTER TABLE archivedtexts DROP FOREIGN KEY IF EXISTS fk_archivedtexts_language;
 ALTER TABLE archivedtexts
     ADD CONSTRAINT fk_archivedtexts_language
     FOREIGN KEY (AtLgID) REFERENCES languages(LgID) ON DELETE CASCADE;
 
+ALTER TABLE words DROP FOREIGN KEY IF EXISTS fk_words_language;
 ALTER TABLE words
     ADD CONSTRAINT fk_words_language
     FOREIGN KEY (WoLgID) REFERENCES languages(LgID) ON DELETE CASCADE;
 
+ALTER TABLE sentences DROP FOREIGN KEY IF EXISTS fk_sentences_language;
 ALTER TABLE sentences
     ADD CONSTRAINT fk_sentences_language
     FOREIGN KEY (SeLgID) REFERENCES languages(LgID) ON DELETE CASCADE;
 
+ALTER TABLE newsfeeds DROP FOREIGN KEY IF EXISTS fk_newsfeeds_language;
 ALTER TABLE newsfeeds
     ADD CONSTRAINT fk_newsfeeds_language
     FOREIGN KEY (NfLgID) REFERENCES languages(LgID) ON DELETE CASCADE;
@@ -191,14 +198,17 @@ ALTER TABLE newsfeeds
 -- When a text is deleted, sentences/textitems/texttags are deleted
 -- ============================================================================
 
+ALTER TABLE sentences DROP FOREIGN KEY IF EXISTS fk_sentences_text;
 ALTER TABLE sentences
     ADD CONSTRAINT fk_sentences_text
     FOREIGN KEY (SeTxID) REFERENCES texts(TxID) ON DELETE CASCADE;
 
+ALTER TABLE textitems2 DROP FOREIGN KEY IF EXISTS fk_textitems2_text;
 ALTER TABLE textitems2
     ADD CONSTRAINT fk_textitems2_text
     FOREIGN KEY (Ti2TxID) REFERENCES texts(TxID) ON DELETE CASCADE;
 
+ALTER TABLE texttags DROP FOREIGN KEY IF EXISTS fk_texttags_text;
 ALTER TABLE texttags
     ADD CONSTRAINT fk_texttags_text
     FOREIGN KEY (TtTxID) REFERENCES texts(TxID) ON DELETE CASCADE;
@@ -208,40 +218,48 @@ ALTER TABLE texttags
 -- ============================================================================
 
 -- Sentence reference (ON DELETE CASCADE)
+ALTER TABLE textitems2 DROP FOREIGN KEY IF EXISTS fk_textitems2_sentence;
 ALTER TABLE textitems2
     ADD CONSTRAINT fk_textitems2_sentence
     FOREIGN KEY (Ti2SeID) REFERENCES sentences(SeID) ON DELETE CASCADE;
 
 -- Word reference (ON DELETE SET NULL)
 -- When a word is deleted, text items become "unknown" again (Ti2WoID = NULL)
+ALTER TABLE textitems2 DROP FOREIGN KEY IF EXISTS fk_textitems2_word;
 ALTER TABLE textitems2
     ADD CONSTRAINT fk_textitems2_word
     FOREIGN KEY (Ti2WoID) REFERENCES words(WoID) ON DELETE SET NULL;
 
 -- Word tags (ON DELETE CASCADE)
+ALTER TABLE wordtags DROP FOREIGN KEY IF EXISTS fk_wordtags_word;
 ALTER TABLE wordtags
     ADD CONSTRAINT fk_wordtags_word
     FOREIGN KEY (WtWoID) REFERENCES words(WoID) ON DELETE CASCADE;
 
+ALTER TABLE wordtags DROP FOREIGN KEY IF EXISTS fk_wordtags_tag;
 ALTER TABLE wordtags
     ADD CONSTRAINT fk_wordtags_tag
     FOREIGN KEY (WtTgID) REFERENCES tags(TgID) ON DELETE CASCADE;
 
 -- Text tags (ON DELETE CASCADE)
+ALTER TABLE texttags DROP FOREIGN KEY IF EXISTS fk_texttags_tag;
 ALTER TABLE texttags
     ADD CONSTRAINT fk_texttags_tag
     FOREIGN KEY (TtT2ID) REFERENCES tags2(T2ID) ON DELETE CASCADE;
 
 -- Archived text tags (ON DELETE CASCADE)
+ALTER TABLE archtexttags DROP FOREIGN KEY IF EXISTS fk_archtexttags_archivedtext;
 ALTER TABLE archtexttags
     ADD CONSTRAINT fk_archtexttags_archivedtext
     FOREIGN KEY (AgAtID) REFERENCES archivedtexts(AtID) ON DELETE CASCADE;
 
+ALTER TABLE archtexttags DROP FOREIGN KEY IF EXISTS fk_archtexttags_tag;
 ALTER TABLE archtexttags
     ADD CONSTRAINT fk_archtexttags_tag
     FOREIGN KEY (AgT2ID) REFERENCES tags2(T2ID) ON DELETE CASCADE;
 
 -- Feed links (ON DELETE CASCADE)
+ALTER TABLE feedlinks DROP FOREIGN KEY IF EXISTS fk_feedlinks_newsfeed;
 ALTER TABLE feedlinks
     ADD CONSTRAINT fk_feedlinks_newsfeed
     FOREIGN KEY (FlNfID) REFERENCES newsfeeds(NfID) ON DELETE CASCADE;

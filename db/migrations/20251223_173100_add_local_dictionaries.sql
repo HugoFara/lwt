@@ -1,5 +1,6 @@
 -- Migration: Add local dictionary support
 -- Adds tables for storing offline/local dictionaries and their entries
+-- Made idempotent for MariaDB compatibility
 
 -- Table: local_dictionaries (metadata about imported dictionaries)
 CREATE TABLE IF NOT EXISTS `local_dictionaries` (
@@ -41,8 +42,7 @@ CREATE TABLE IF NOT EXISTS `local_dictionary_entries` (
 
 -- Add local dict mode to languages table
 -- Values: 0=online only, 1=local first (fallback online), 2=local only, 3=combined
-ALTER TABLE `languages`
-    ADD COLUMN `LgLocalDictMode` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0
+ALTER TABLE languages
+    ADD COLUMN IF NOT EXISTS LgLocalDictMode TINYINT(1) UNSIGNED NOT NULL DEFAULT 0
     COMMENT 'Local dictionary mode: 0=online only, 1=local first, 2=local only, 3=combined'
-    AFTER `LgShowRomanization`;
-
+    AFTER LgShowRomanization;
