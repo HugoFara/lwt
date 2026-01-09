@@ -68,6 +68,53 @@ enable_php_extensions() {
     fi
 }
 
+# Install Python NLP parsers (optional)
+install_python_parsers() {
+    info "Installing Python NLP parsers for CJK language support..."
+
+    local python_packages="python3 python3-pip python3-venv"
+    local mecab_packages=""
+
+    # Detect MeCab packages based on package manager
+    case "$PKG_MANAGER" in
+        apt-get)
+            mecab_packages="mecab mecab-ipadic-utf8"
+            ;;
+        dnf|yum)
+            mecab_packages="mecab mecab-ipadic"
+            ;;
+        pacman)
+            mecab_packages="mecab mecab-ipadic"
+            ;;
+    esac
+
+    info "Installing Python and MeCab system packages..."
+    $PKG_INSTALL $python_packages $mecab_packages
+
+    info "Creating Python virtual environment..."
+    sudo python3 -m venv /opt/lwt-parsers
+
+    info "Installing Python NLP packages (jieba, mecab-python3)..."
+    sudo /opt/lwt-parsers/bin/pip install --no-cache-dir jieba mecab-python3
+
+    info "Python NLP parsers installed successfully"
+}
+
+# Copy parser scripts to installation location
+deploy_parser_scripts() {
+    local dest="$1"
+
+    if [ -d "parsers" ]; then
+        info "Copying parser scripts to /opt/lwt/parsers/..."
+        sudo mkdir -p /opt/lwt/parsers
+        sudo cp -r parsers/* /opt/lwt/parsers/
+        sudo chmod +x /opt/lwt/parsers/*.py
+        info "Parser scripts deployed"
+    else
+        warn "parsers/ directory not found - skipping parser scripts"
+    fi
+}
+
 # Generate a random password
 generate_password() {
     if command -v openssl > /dev/null 2>&1; then
@@ -273,6 +320,13 @@ main() {
     if [[ ! "$install_deps" =~ ^[Nn]$ ]]; then
         install_dependencies
         enable_php_extensions
+    fi
+
+    echo
+    read -rp "Install Python NLP parsers for Chinese/Japanese support? (Y/n): " install_parsers
+    if [[ ! "$install_parsers" =~ ^[Nn]$ ]]; then
+        install_python_parsers
+        deploy_parser_scripts "."
     fi
 
     configure_database_credentials

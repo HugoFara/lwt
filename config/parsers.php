@@ -68,6 +68,27 @@ declare(strict_types=1);
  * ];
  */
 return [
-    // Add your external parser configurations here.
-    // See the docblock above for configuration options.
+    // Jieba - Chinese word segmentation
+    // Requires: Python 3, jieba package
+    // Docker: Included by default
+    // Manual: pip install jieba
+    'jieba' => [
+        'name' => 'Jieba (Chinese)',
+        'binary' => '/opt/lwt-parsers/bin/python3',
+        'args' => ['/opt/lwt/parsers/jieba_tokenize.py'],
+        'input_mode' => 'stdin',
+        'output_format' => 'line',
+    ],
+
+    // MeCab Python - Japanese morphological analyzer
+    // Requires: Python 3, mecab-python3 package, system MeCab with dictionary
+    // Docker: Included by default
+    // Manual: apt-get install mecab mecab-ipadic-utf8 && pip install mecab-python3
+    'mecab-python' => [
+        'name' => 'MeCab Python (Japanese)',
+        'binary' => '/opt/lwt-parsers/bin/python3',
+        'args' => ['/opt/lwt/parsers/mecab_tokenize.py'],
+        'input_mode' => 'stdin',
+        'output_format' => 'line',
+    ],
 ];
