@@ -16,7 +16,13 @@
 | Chinese                                                                          | .!?:;。！？：；              | 一-龥 | Yes or No | Yes |
 | Japanese (Without MeCab)                                                         | .!?:;。！？：；              | 一-龥ぁ-ヾ | Yes or No | Yes |
 | Japanese (With MeCab)                                                            | .!?:;。！？：；              | mecab | Yes or No | Yes |
+| Japanese (With MeCab Python)                                                     | .!?:;。！？：；              | mecab-python | Yes or No | Yes |
+| Chinese (With Jieba)                                                             | .!?:;。！？：；              | jieba | No | Yes |
 | Korean                                                                           | .!?:;。！？：；              | 가-힣ᄀ-ᇂ | No | No or Yes |
+
+::: tip External Parsers
+For Chinese and Japanese, external NLP parsers (Jieba, MeCab) provide better word segmentation than character-by-character splitting. See the [Text Parsers](/reference/parsers) documentation for installation and configuration.
+:::
 
 * "\\'" = Apostrophe, and/or "\\-" = Dash, may be added to "RegExp Word Characters", then words like "aujourd'hui" or "non-government-owned" are one word, instead of two or more single words. If you omit "\\'" and/or "\\-" here, you can still create a multi-word expression "aujourd'hui", etc., later.  
 

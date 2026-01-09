@@ -77,6 +77,7 @@ export default defineConfig({
             { text: 'New Features', link: '/reference/new-features' },
             { text: 'Keyboard Shortcuts', link: '/reference/keyboard-shortcuts' },
             { text: 'Language Setup', link: '/reference/language-setup' },
+            { text: 'Text Parsers', link: '/reference/parsers' },
             { text: 'Term Scores', link: '/reference/term-scores' },
             { text: 'Export Templates', link: '/reference/export-templates' },
             { text: 'Database Schema', link: '/reference/database-schema' },
