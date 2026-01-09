@@ -19,17 +19,19 @@
 
 namespace Lwt\Modules\Language\Views;
 
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+$base = UrlUtilities::getBasePath();
 ?>
 <!-- Alpine.js Language List Component -->
-<div x-data="languageList" x-init="init()">
+<div x-data="languageList" x-init="init()" data-base-path="<?php echo $base; ?>">
     <!-- Action card - inside Alpine scope for store access -->
     <div class="card action-card mb-4">
         <div class="card-content">
             <div class="buttons is-centered">
-                <a href="/languages?new=1" class="button is-light is-primary">
+                <a href="<?php echo $base; ?>/languages?new=1" class="button is-light is-primary">
                     <span class="icon"><?php echo IconHelper::render('circle-plus', ['alt' => 'New Language']); ?></span>
                     <span>New Language</span>
                 </a>

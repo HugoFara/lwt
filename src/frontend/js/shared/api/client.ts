@@ -24,8 +24,33 @@ export interface ApiClientConfig {
   defaultHeaders?: Record<string, string>;
 }
 
+/**
+ * Get the application base path from meta tag.
+ */
+function getBasePath(): string {
+  const meta = document.querySelector('meta[name="lwt-base-path"]');
+  return meta ? meta.getAttribute('content') || '' : '';
+}
+
+/**
+ * Get the default API configuration.
+ * Lazily reads base path from meta tag.
+ */
+function getDefaultConfig(): ApiClientConfig {
+  return {
+    baseUrl: getBasePath() + '/api/v1',
+    defaultHeaders: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    }
+  };
+}
+
+// Use a getter to ensure base path is read after DOM is ready
 const defaultConfig: ApiClientConfig = {
-  baseUrl: '/api/v1',
+  get baseUrl() {
+    return getDefaultConfig().baseUrl;
+  },
   defaultHeaders: {
     'Content-Type': 'application/json',
     Accept: 'application/json'
