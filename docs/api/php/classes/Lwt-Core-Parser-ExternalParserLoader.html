@@ -664,6 +664,10 @@
 </h4>
     <ul class="phpdocumentor-list">
                     <li>
+                <a href="packages/Lwt-Config.html" class="">Config</a>
+                
+            </li>
+                    <li>
                 <a href="packages/Lwt-Api.html" class="">Api</a>
                 
             </li>
@@ -755,52 +759,56 @@
             <div class="phpdocumentor-column -nine phpdocumentor-content">
                                 <section>
                                         <ul class="phpdocumentor-breadcrumbs">
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/lwt.html">Lwt</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/lwt-core.html">Core</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/lwt-core-parser.html">Parser</a></li>
     </ul>
 
-    <article class="phpdocumentor-element -file">
-        <h2 class="phpdocumentor-content__title">import_long_check.php</h2>
+    <article class="phpdocumentor-element -class">
+        <h2 class="phpdocumentor-content__title">
+    ExternalParserLoader
 
-            <p class="phpdocumentor-summary">Long Text Import Check/Preview View</p>
+    
+            <div class="phpdocumentor-element__package">
+            in package
+            <ul class="phpdocumentor-breadcrumbs">
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Lwt.html">Lwt</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Lwt-Core.html">Core</a></li>
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Lwt-Core-Parser.html">Parser</a></li>
+                            </ul>
+        </div>
+    
+    
+    </h2>
 
-        
-            <section class="phpdocumentor-description"><p>Variables expected:</p>
-<ul>
-<li>$langId: int - Language ID</li>
-<li>$title: string - Text title</li>
-<li>$sourceUri: string - Source URI</li>
-<li>$textTags: string|null - JSON encoded text tags</li>
-<li>$texts: array - Array of text arrays (sentences per text)</li>
-<li>$textCount: int - Number of texts</li>
-</ul>
-<p>PHP version 8.1</p>
+<div class="phpdocumentor-label-line">
+
+
+</div>
+
+        <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ExternalParserLoader.php"><a href="files/src-backend-core-parser-externalparserloader.html"><abbr title="src/backend/Core/Parser/ExternalParserLoader.php">ExternalParserLoader.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">31</span>
+
+    </aside>
+
+            <p class="phpdocumentor-summary">Loads external parser configurations from the config file.</p>
+
+
+    <section class="phpdocumentor-description"><p>This class is responsible for loading and validating the external parser
+configurations from config/parsers.php. It provides a secure way to
+register additional parsers without allowing arbitrary code execution.</p>
 </section>
 
-        
+
     <h5 class="phpdocumentor-tag-list__heading" id="tags">
         Tags
-        <a href="files/src-backend-views-text-import-long-check.html#tags" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#tags" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h5>
     <dl class="phpdocumentor-tag-list">
                                     <dt class="phpdocumentor-tag-list__entry">
-                    <span class="phpdocumentor-tag__name">category</span>
-                </dt>
-                <dd class="phpdocumentor-tag-list__definition">
-                                                                                
-                                                 <section class="phpdocumentor-description"><p>Views</p>
-</section>
-
-                                    </dd>
-                                                <dt class="phpdocumentor-tag-list__entry">
-                    <span class="phpdocumentor-tag__name">license</span>
-                </dt>
-                <dd class="phpdocumentor-tag-list__definition">
-                                                                                
-                                                 <section class="phpdocumentor-description"><p>Unlicense <a href="http://unlicense.org/">http://unlicense.org/</a></p>
-</section>
-
-                                    </dd>
-                                                <dt class="phpdocumentor-tag-list__entry">
                     <span class="phpdocumentor-tag__name">since</span>
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
@@ -808,13 +816,13 @@
                                                                                 
                                              
                                     </dd>
-                        </dl>
+                                            </dl>
 
-
-        
+    
+    
 <h3 id="toc">
     Table of Contents
-    <a href="files/src-backend-views-text-import-long-check.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -824,20 +832,552 @@
 
 
 
+<h4 id="toc-constants">
+    Constants
+    <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -constant -private">
+    <a class="" href="classes/Lwt-Core-Parser-ExternalParserLoader.html#constant_CONFIG_FILENAME">CONFIG_FILENAME</a>
+    <span>
+        &nbsp;= &#039;config/parsers.php&#039;                            </span>
+</dt>
+
+    </dl>
 
 
+<h4 id="toc-properties">
+    Properties
+    <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
 
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -property -private">
+    <a class="" href="classes/Lwt-Core-Parser-ExternalParserLoader.html#property_cachedParsers">$cachedParsers</a>
+    <span>
+                        &nbsp;: array&lt;string|int, <a href="classes/Lwt-Core-Parser-ExternalParserConfig.html"><abbr title="\Lwt\Core\Parser\ExternalParserConfig">ExternalParserConfig</abbr></a>&gt;|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -private">
+    <a class="" href="classes/Lwt-Core-Parser-ExternalParserLoader.html#property_configPath">$configPath</a>
+    <span>
+                        &nbsp;: string|null            </span>
+</dt>
+
+    </dl>
+
+<h4 id="toc-methods">
+    Methods
+    <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method___construct">__construct()</a>
+    <span>
+                                &nbsp;: mixed    </span>
+</dt>
+<dd>Create a new loader.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_clearCache">clearCache()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Clear the cached parser configurations.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_getConfigPath">getConfigPath()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>Get the path to the configuration file.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_getExternalParsers">getExternalParsers()</a>
+    <span>
+                                &nbsp;: array&lt;string|int, <a href="classes/Lwt-Core-Parser-ExternalParserConfig.html"><abbr title="\Lwt\Core\Parser\ExternalParserConfig">ExternalParserConfig</abbr></a>&gt;    </span>
+</dt>
+<dd>Get all external parser configurations.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_getParser">getParser()</a>
+    <span>
+                                &nbsp;: <a href="classes/Lwt-Core-Parser-ExternalParserConfig.html"><abbr title="\Lwt\Core\Parser\ExternalParserConfig">ExternalParserConfig</abbr></a>|null    </span>
+</dt>
+<dd>Get a specific parser configuration by type.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_hasExternalParsers">hasExternalParsers()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Check if there are any external parsers configured.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_loadConfig">loadConfig()</a>
+    <span>
+                                &nbsp;: array&lt;string|int, mixed&gt;    </span>
+</dt>
+<dd>Load the raw configuration array from the config file.</dd>
+
+    </dl>
 
 
 
         
+    <section class="phpdocumentor-constants">
+        <h3 class="phpdocumentor-elements__header" id="constants">
+            Constants
+            <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article class="phpdocumentor-element -constant -private ">
+    <h4 class="phpdocumentor-element__name" id="constant_CONFIG_FILENAME">
+        CONFIG_FILENAME
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#constant_CONFIG_FILENAME" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ExternalParserLoader.php"><a href="files/src-backend-core-parser-externalparserloader.html"><abbr title="src/backend/Core/Parser/ExternalParserLoader.php">ExternalParserLoader.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">33</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">private</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">CONFIG_FILENAME</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;config/parsers.php&#039;</span>
+</code>
+
+
+    
+    
+    
 
         
+    </article>
+            </section>
+
+        
+    <section class="phpdocumentor-properties">
+        <h3 class="phpdocumentor-elements__header" id="properties">
+            Properties
+            <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -private
+                                                                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_cachedParsers">
+        $cachedParsers
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#property_cachedParsers" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                                            </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ExternalParserLoader.php"><a href="files/src-backend-core-parser-externalparserloader.html"><abbr title="src/backend/Core/Parser/ExternalParserLoader.php">ExternalParserLoader.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">38</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">private</span>
+            <span class="phpdocumentor-signature__type">array&lt;string|int, <a href="classes/Lwt-Core-Parser-ExternalParserConfig.html"><abbr title="\Lwt\Core\Parser\ExternalParserConfig">ExternalParserConfig</abbr></a>&gt;|null</span>
+    <span class="phpdocumentor-signature__name">$cachedParsers</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+        <section class="phpdocumentor-description"><p>Cached parser configs</p>
+</section>
+
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -private
+                                                                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_configPath">
+        $configPath
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#property_configPath" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                                            </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ExternalParserLoader.php"><a href="files/src-backend-core-parser-externalparserloader.html"><abbr title="src/backend/Core/Parser/ExternalParserLoader.php">ExternalParserLoader.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">35</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">private</span>
+            <span class="phpdocumentor-signature__type">string|null</span>
+    <span class="phpdocumentor-signature__name">$configPath</span>
+    </code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+            </section>
+
+            <section class="phpdocumentor-methods">
+        <h3 class="phpdocumentor-elements__header" id="methods">
+            Methods
+            <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method___construct">
+        __construct()
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ExternalParserLoader.php"><a href="files/src-backend-core-parser-externalparserloader.html"><abbr title="src/backend/Core/Parser/ExternalParserLoader.php">ExternalParserLoader.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">45</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Create a new loader.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$configPath</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$configPath</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Optional custom path to config file (for testing)</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_clearCache">
+        clearCache()
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_clearCache" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ExternalParserLoader.php"><a href="files/src-backend-core-parser-externalparserloader.html"><abbr title="src/backend/Core/Parser/ExternalParserLoader.php">ExternalParserLoader.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">179</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Clear the cached parser configurations.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">clearCache</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Useful for testing or when the config file has been modified.</p>
+</section>
+
+    
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getConfigPath">
+        getConfigPath()
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_getConfigPath" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ExternalParserLoader.php"><a href="files/src-backend-core-parser-externalparserloader.html"><abbr title="src/backend/Core/Parser/ExternalParserLoader.php">ExternalParserLoader.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">55</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Get the path to the configuration file.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getConfigPath</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>Absolute path to config file</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getExternalParsers">
+        getExternalParsers()
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_getExternalParsers" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ExternalParserLoader.php"><a href="files/src-backend-core-parser-externalparserloader.html"><abbr title="src/backend/Core/Parser/ExternalParserLoader.php">ExternalParserLoader.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">110</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Get all external parser configurations.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getExternalParsers</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, <a href="classes/Lwt-Core-Parser-ExternalParserConfig.html"><abbr title="\Lwt\Core\Parser\ExternalParserConfig">ExternalParserConfig</abbr></a>&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Returns an array of validated ExternalParserConfig objects for each
+parser defined in the config file. Invalid configurations are skipped
+with a warning logged.</p>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string|int, <a href="classes/Lwt-Core-Parser-ExternalParserConfig.html"><abbr title="\Lwt\Core\Parser\ExternalParserConfig">ExternalParserConfig</abbr></a>&gt;</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>Array of parser configurations</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getParser">
+        getParser()
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_getParser" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ExternalParserLoader.php"><a href="files/src-backend-core-parser-externalparserloader.html"><abbr title="src/backend/Core/Parser/ExternalParserLoader.php">ExternalParserLoader.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">163</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Get a specific parser configuration by type.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getParser</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$type</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Core-Parser-ExternalParserConfig.html"><abbr title="\Lwt\Core\Parser\ExternalParserConfig">ExternalParserConfig</abbr></a>|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$type</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Parser type identifier</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Lwt-Core-Parser-ExternalParserConfig.html"><abbr title="\Lwt\Core\Parser\ExternalParserConfig">ExternalParserConfig</abbr></a>|null</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>Parser config or null if not found</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_hasExternalParsers">
+        hasExternalParsers()
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_hasExternalParsers" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ExternalParserLoader.php"><a href="files/src-backend-core-parser-externalparserloader.html"><abbr title="src/backend/Core/Parser/ExternalParserLoader.php">ExternalParserLoader.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">151</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Check if there are any external parsers configured.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">hasExternalParsers</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>True if at least one external parser is configured</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_loadConfig">
+        loadConfig()
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_loadConfig" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ExternalParserLoader.php"><a href="files/src-backend-core-parser-externalparserloader.html"><abbr title="src/backend/Core/Parser/ExternalParserLoader.php">ExternalParserLoader.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">80</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Load the raw configuration array from the config file.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">loadConfig</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>Parser configurations (keys and values need validation)</p>
+</section>
+
+            </section>
+
+</article>
+            </section>
+
         <div class="phpdocumentor-modal" id="source-view">
     <div class="phpdocumentor-modal-bg" data-exit-button></div>
     <div class="phpdocumentor-modal-container">
         <div class="phpdocumentor-modal-content">
-            <pre style="max-height: 500px; overflow-y: scroll" data-src="files/src/backend/Views/Text/import_long_check.php.txt" class="language-php line-numbers linkable-line-numbers"></pre>
+            <pre style="max-height: 500px; overflow-y: scroll" data-src="files/src/backend/Core/Parser/ExternalParserLoader.php.txt" class="language-php line-numbers linkable-line-numbers"></pre>
         </div>
         <button data-exit-button class="phpdocumentor-modal__close">&times;</button>
     </div>
@@ -930,7 +1470,7 @@
     </article>
                                 </section>
                 <section class="phpdocumentor-on-this-page__sidebar">
-                            
+                                
     <section class="phpdocumentor-on-this-page__content">
         <strong class="phpdocumentor-on-this-page__title">On this page</strong>
 
@@ -938,10 +1478,38 @@
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                                                                                                                </ul>
+                                        <li><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#toc-constants">Constants</a></li>
+                                                            <li><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#toc-properties">Properties</a></li>
+                                                            <li><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#toc-methods">Methods</a></li>
+                                    </ul>
             </li>
-
+                            <li class="phpdocumentor-on-this-page-section__title">Constants</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#constant_CONFIG_FILENAME">CONFIG_FILENAME</a></li>
+                                            </ul>
+                </li>
             
+                            <li class="phpdocumentor-on-this-page-section__title">Properties</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#property_cachedParsers">$cachedParsers</a></li>
+                                                    <li class=""><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#property_configPath">$configPath</a></li>
+                                            </ul>
+                </li>
+            
+                        <li class="phpdocumentor-on-this-page-section__title">Methods</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                            <li class=""><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_clearCache">clearCache()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_getConfigPath">getConfigPath()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_getExternalParsers">getExternalParsers()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_getParser">getParser()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_hasExternalParsers">hasExternalParsers()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#method_loadConfig">loadConfig()</a></li>
+                                    </ul>
+            </li>
                     </ul>
     </section>
 
@@ -959,7 +1527,7 @@
     </section>
 </section>
         </div>
-        <a href="files/src-backend-views-text-import-long-check.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

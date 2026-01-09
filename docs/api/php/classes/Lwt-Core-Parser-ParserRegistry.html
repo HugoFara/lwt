@@ -664,6 +664,10 @@
 </h4>
     <ul class="phpdocumentor-list">
                     <li>
+                <a href="packages/Lwt-Config.html" class="">Config</a>
+                
+            </li>
+                    <li>
                 <a href="packages/Lwt-Api.html" class="">Api</a>
                 
             </li>
@@ -785,7 +789,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">30</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
@@ -848,6 +852,12 @@ Provides methods to select the appropriate parser for a language.</p>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -property -private">
+    <a class="" href="classes/Lwt-Core-Parser-ParserRegistry.html#property_externalLoader">$externalLoader</a>
+    <span>
+                        &nbsp;: <a href="classes/Lwt-Core-Parser-ExternalParserLoader.html"><abbr title="\Lwt\Core\Parser\ExternalParserLoader">ExternalParserLoader</abbr></a>|null            </span>
+</dt>
+
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
     <a class="" href="classes/Lwt-Core-Parser-ParserRegistry.html#property_parsers">$parsers</a>
     <span>
@@ -946,6 +956,13 @@ Provides methods to select the appropriate parser for a language.</p>
 </dt>
 <dd>Register the default built-in parsers.</dd>
 
+            <dt class="phpdocumentor-table-of-contents__entry -method -private">
+    <a class="" href="classes/Lwt-Core-Parser-ParserRegistry.html#method_registerExternalParsers">registerExternalParsers()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Register external parsers from the configuration file.</dd>
+
     </dl>
 
 
@@ -967,7 +984,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">36</span>
+    <span class="phpdocumentor-element-found-in__line">37</span>
 
     </aside>
 
@@ -1005,6 +1022,45 @@ Provides methods to select the appropriate parser for a language.</p>
             -private
                                                                     "
 >
+    <h4 class="phpdocumentor-element__name" id="property_externalLoader">
+        $externalLoader
+        <a href="classes/Lwt-Core-Parser-ParserRegistry.html#property_externalLoader" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                                            </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">40</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">private</span>
+            <span class="phpdocumentor-signature__type"><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html"><abbr title="\Lwt\Core\Parser\ExternalParserLoader">ExternalParserLoader</abbr></a>|null</span>
+    <span class="phpdocumentor-signature__name">$externalLoader</span>
+    </code>
+
+    
+        <section class="phpdocumentor-description"><p>Loader for external parser configs</p>
+</section>
+
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -private
+                                                                    "
+>
     <h4 class="phpdocumentor-element__name" id="property_parsers">
         $parsers
         <a href="classes/Lwt-Core-Parser-ParserRegistry.html#property_parsers" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1015,7 +1071,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">33</span>
+    <span class="phpdocumentor-element-found-in__line">34</span>
 
     </aside>
 
@@ -1059,7 +1115,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">41</span>
+    <span class="phpdocumentor-element-found-in__line">47</span>
 
     </aside>
 
@@ -1067,13 +1123,25 @@ Provides methods to select the appropriate parser for a language.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type"><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html"><abbr title="\Lwt\Core\Parser\ExternalParserLoader">ExternalParserLoader</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$externalLoader</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
     
-    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$externalLoader</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Lwt-Core-Parser-ExternalParserLoader.html"><abbr title="\Lwt\Core\Parser\ExternalParserLoader">ExternalParserLoader</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Optional loader for external parsers</p>
+</section>
+
+            </dd>
+            </dl>
+
     
 
         
@@ -1094,7 +1162,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">77</span>
+    <span class="phpdocumentor-element-found-in__line">110</span>
 
     </aside>
 
@@ -1149,7 +1217,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">99</span>
+    <span class="phpdocumentor-element-found-in__line">132</span>
 
     </aside>
 
@@ -1192,7 +1260,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">109</span>
+    <span class="phpdocumentor-element-found-in__line">142</span>
 
     </aside>
 
@@ -1235,7 +1303,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">141</span>
+    <span class="phpdocumentor-element-found-in__line">174</span>
 
     </aside>
 
@@ -1278,7 +1346,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">214</span>
+    <span class="phpdocumentor-element-found-in__line">247</span>
 
     </aside>
 
@@ -1333,7 +1401,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">122</span>
+    <span class="phpdocumentor-element-found-in__line">155</span>
 
     </aside>
 
@@ -1372,7 +1440,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">89</span>
+    <span class="phpdocumentor-element-found-in__line">122</span>
 
     </aside>
 
@@ -1427,7 +1495,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">65</span>
+    <span class="phpdocumentor-element-found-in__line">98</span>
 
     </aside>
 
@@ -1474,7 +1542,7 @@ Provides methods to select the appropriate parser for a language.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">156</span>
+    <span class="phpdocumentor-element-found-in__line">189</span>
 
     </aside>
 
@@ -1532,7 +1600,7 @@ Supports both explicit parser type and legacy detection.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">185</span>
+    <span class="phpdocumentor-element-found-in__line">218</span>
 
     </aside>
 
@@ -1587,7 +1655,7 @@ Supports both explicit parser type and legacy detection.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">51</span>
+    <span class="phpdocumentor-element-found-in__line">59</span>
 
     </aside>
 
@@ -1601,6 +1669,44 @@ Supports both explicit parser type and legacy detection.</p>
         </div>
     
     
+    
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -private
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_registerExternalParsers">
+        registerExternalParsers()
+        <a href="classes/Lwt-Core-Parser-ParserRegistry.html#method_registerExternalParsers" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/backend/Core/Parser/ParserRegistry.php"><a href="files/src-backend-core-parser-parserregistry.html"><abbr title="src/backend/Core/Parser/ParserRegistry.php">ParserRegistry.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">74</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Register external parsers from the configuration file.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">private</span>
+                    <span class="phpdocumentor-signature__name">registerExternalParsers</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>External parsers are loaded from config/parsers.php. This method
+creates ExternalParser instances for each configured parser.</p>
+</section>
+
     
     
 
@@ -1730,6 +1836,7 @@ Supports both explicit parser type and legacy detection.</p>
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Lwt-Core-Parser-ParserRegistry.html#property_externalLoader">$externalLoader</a></li>
                                                     <li class=""><a href="classes/Lwt-Core-Parser-ParserRegistry.html#property_parsers">$parsers</a></li>
                                             </ul>
                 </li>
@@ -1749,6 +1856,7 @@ Supports both explicit parser type and legacy detection.</p>
                                             <li class=""><a href="classes/Lwt-Core-Parser-ParserRegistry.html#method_resolveParserType">resolveParserType()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Parser-ParserRegistry.html#method_resolveParserTypeFromRow">resolveParserTypeFromRow()</a></li>
                                             <li class=""><a href="classes/Lwt-Core-Parser-ParserRegistry.html#method_registerDefaultParsers">registerDefaultParsers()</a></li>
+                                            <li class=""><a href="classes/Lwt-Core-Parser-ParserRegistry.html#method_registerExternalParsers">registerExternalParsers()</a></li>
                                     </ul>
             </li>
                     </ul>

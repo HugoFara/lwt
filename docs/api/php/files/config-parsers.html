@@ -664,6 +664,10 @@
 </h4>
     <ul class="phpdocumentor-list">
                     <li>
+                <a href="packages/Lwt-Config.html" class="">Config</a>
+                
+            </li>
+                    <li>
                 <a href="packages/Lwt-Api.html" class="">Api</a>
                 
             </li>
@@ -758,23 +762,21 @@
     </ul>
 
     <article class="phpdocumentor-element -file">
-        <h2 class="phpdocumentor-content__title">archived_form.php</h2>
+        <h2 class="phpdocumentor-content__title">parsers.php</h2>
 
-            <p class="phpdocumentor-summary">Archived Text Edit Form View</p>
+            <p class="phpdocumentor-summary">External Parser Allowlist Configuration.</p>
 
         
-            <section class="phpdocumentor-description"><p>Variables expected:</p>
-<ul>
-<li>$textId: int - Archived text ID</li>
-<li>$record: array - Archived text record with keys: AtLgID, AtTitle, AtText, AtAudioURI, AtSourceURI, annotlen</li>
-</ul>
+            <section class="phpdocumentor-description"><p>SECURITY: This file defines which external programs can be executed for text parsing.
+Only server administrators should modify this file. Never allow user input to determine
+parser paths or arguments.</p>
 <p>PHP version 8.1</p>
 </section>
 
         
     <h5 class="phpdocumentor-tag-list__heading" id="tags">
         Tags
-        <a href="files/src-backend-views-text-archived-form.html#tags" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="files/config-parsers.html#tags" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h5>
     <dl class="phpdocumentor-tag-list">
@@ -783,7 +785,7 @@
                 </dt>
                 <dd class="phpdocumentor-tag-list__definition">
                                                                                 
-                                                 <section class="phpdocumentor-description"><p>Lwt</p>
+                                                 <section class="phpdocumentor-description"><p>Configuration</p>
 </section>
 
                                     </dd>
@@ -820,22 +822,13 @@
                                                                                 
                                              
                                     </dd>
-                                                <dt class="phpdocumentor-tag-list__entry">
-                    <span class="phpdocumentor-tag__name">psalm-suppress</span>
-                </dt>
-                <dd class="phpdocumentor-tag-list__definition">
-                                                                                
-                                                 <section class="phpdocumentor-description"><p>UndefinedVariable, PossiblyUndefinedVariable - Variables are set by the including controller</p>
-</section>
-
-                                    </dd>
                         </dl>
 
 
         
 <h3 id="toc">
     Table of Contents
-    <a href="files/src-backend-views-text-archived-form.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="files/config-parsers.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -858,7 +851,7 @@
     <div class="phpdocumentor-modal-bg" data-exit-button></div>
     <div class="phpdocumentor-modal-container">
         <div class="phpdocumentor-modal-content">
-            <pre style="max-height: 500px; overflow-y: scroll" data-src="files/src/backend/Views/Text/archived_form.php.txt" class="language-php line-numbers linkable-line-numbers"></pre>
+            <pre style="max-height: 500px; overflow-y: scroll" data-src="files/config/parsers.php.txt" class="language-php line-numbers linkable-line-numbers"></pre>
         </div>
         <button data-exit-button class="phpdocumentor-modal__close">&times;</button>
     </div>
@@ -980,7 +973,7 @@
     </section>
 </section>
         </div>
-        <a href="files/src-backend-views-text-archived-form.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="files/config-parsers.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 
