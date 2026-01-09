@@ -84,6 +84,8 @@ class VocabularyApiHandler
             'id' => $term->id()->toInt(),
             'text' => $term->text(),
             'textLc' => $term->textLowercase(),
+            'lemma' => $term->lemma(),
+            'lemmaLc' => $term->lemmaLc(),
             'translation' => $term->translation(),
             'romanization' => $term->romanization(),
             'sentence' => $term->sentence(),
@@ -845,7 +847,7 @@ class VocabularyApiHandler
     public function getTermDetails(int $termId, ?string $ann = null): array
     {
         $record = QueryBuilder::table('words')
-            ->select(['WoID', 'WoText', 'WoTextLC', 'WoTranslation', 'WoRomanization', 'WoStatus', 'WoLgID', 'WoSentence', 'WoNotes'])
+            ->select(['WoID', 'WoText', 'WoTextLC', 'WoLemma', 'WoLemmaLC', 'WoTranslation', 'WoRomanization', 'WoStatus', 'WoLgID', 'WoSentence', 'WoNotes'])
             ->where('WoID', '=', $termId)
             ->firstPrepared();
 
@@ -872,6 +874,8 @@ class VocabularyApiHandler
             'id' => (int)$record['WoID'],
             'text' => (string)$record['WoText'],
             'textLc' => (string)$record['WoTextLC'],
+            'lemma' => (string)($record['WoLemma'] ?? ''),
+            'lemmaLc' => (string)($record['WoLemmaLC'] ?? ''),
             'translation' => $translation,
             'romanization' => (string)$record['WoRomanization'],
             'status' => (int)$record['WoStatus'],
@@ -1235,7 +1239,7 @@ class VocabularyApiHandler
         // If word ID provided, get existing term data
         if ($wordId !== null && $wordId > 0) {
             $termData = QueryBuilder::table('words')
-                ->select(['WoID', 'WoText', 'WoTextLC', 'WoTranslation', 'WoRomanization', 'WoSentence', 'WoNotes', 'WoStatus', 'WoLgID'])
+                ->select(['WoID', 'WoText', 'WoTextLC', 'WoLemma', 'WoLemmaLC', 'WoTranslation', 'WoRomanization', 'WoSentence', 'WoNotes', 'WoStatus', 'WoLgID'])
                 ->where('WoID', '=', $wordId)
                 ->firstPrepared();
 
@@ -1256,6 +1260,8 @@ class VocabularyApiHandler
                 'id' => (int) $termData['WoID'],
                 'text' => (string) $termData['WoText'],
                 'textLc' => (string) $termData['WoTextLC'],
+                'lemma' => (string) ($termData['WoLemma'] ?? ''),
+                'lemmaLc' => (string) ($termData['WoLemmaLC'] ?? ''),
                 'hex' => StringUtils::toClassName((string) $termData['WoTextLC']),
                 'translation' => (string) $termData['WoTranslation'],
                 'romanization' => (string) $termData['WoRomanization'],
@@ -1304,6 +1310,8 @@ class VocabularyApiHandler
             'id' => null,
             'text' => $text,
             'textLc' => $textLc,
+            'lemma' => '',
+            'lemmaLc' => '',
             'hex' => StringUtils::toClassName($textLc),
             'translation' => '',
             'romanization' => '',
@@ -1414,22 +1422,24 @@ class VocabularyApiHandler
         $romanization = trim($data['romanization'] ?? '');
         $sentence = trim($data['sentence'] ?? '');
         $notes = trim($data['notes'] ?? '');
+        $lemma = isset($data['lemma']) && $data['lemma'] !== '' ? trim($data['lemma']) : null;
+        $lemmaLc = $lemma !== null ? mb_strtolower($lemma, 'UTF-8') : null;
 
         // Insert the word
         $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
         // Use raw SQL for complex INSERT with dynamic columns
-        $bindings = [$langId, $textLc, $wordText, $status, $translation, $sentence, $notes, $romanization];
+        $bindings = [$langId, $textLc, $wordText, $lemma, $lemmaLc, $status, $translation, $sentence, $notes, $romanization];
         $sql = "INSERT INTO words (
-                WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
+                WoLgID, WoTextLC, WoText, WoLemma, WoLemmaLC, WoStatus, WoTranslation,
                 WoSentence, WoNotes, WoRomanization, WoStatusChanged,
                 {$scoreColumns}
-            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})"
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})"
             . UserScopedQuery::forTablePrepared('words', $bindings);
 
         $stmt = Connection::prepare($sql);
-        $stmt->bind('ississss', $langId, $textLc, $wordText, $status, $translation, $sentence, $notes, $romanization);
+        $stmt->bind('issssissss', $langId, $textLc, $wordText, $lemma, $lemmaLc, $status, $translation, $sentence, $notes, $romanization);
         $affected = $stmt->execute();
 
         if ($affected != 1) {
@@ -1460,6 +1470,8 @@ class VocabularyApiHandler
                 'id' => $wordId,
                 'text' => $wordText,
                 'textLc' => $textLc,
+                'lemma' => $lemma ?? '',
+                'lemmaLc' => $lemmaLc ?? '',
                 'hex' => StringUtils::toClassName($textLc),
                 'translation' => $translation === '*' ? '' : $translation,
                 'romanization' => $romanization,
@@ -1512,24 +1524,28 @@ class VocabularyApiHandler
         $romanization = trim($data['romanization'] ?? '');
         $sentence = trim($data['sentence'] ?? '');
         $notes = trim($data['notes'] ?? '');
+        $lemma = isset($data['lemma']) && $data['lemma'] !== '' ? trim($data['lemma']) : null;
+        $lemmaLc = $lemma !== null ? mb_strtolower($lemma, 'UTF-8') : null;
 
         // Update the word
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
 
         // Use raw SQL for dynamic score update
-        $bindings = [$translation, $romanization, $sentence, $notes, $status, $termId];
+        $bindings = [$translation, $romanization, $sentence, $notes, $lemma, $lemmaLc, $status, $termId];
         Connection::preparedExecute(
             "UPDATE words SET
              WoTranslation = ?,
              WoRomanization = ?,
              WoSentence = ?,
              WoNotes = ?,
+             WoLemma = ?,
+             WoLemmaLC = ?,
              WoStatus = ?,
              WoStatusChanged = NOW(),
              {$scoreUpdate}
              WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
-            [$translation, $romanization, $sentence, $notes, $status, $termId]
+            [$translation, $romanization, $sentence, $notes, $lemma, $lemmaLc, $status, $termId]
         );
 
         // Save tags if provided
@@ -1546,6 +1562,8 @@ class VocabularyApiHandler
                 'id' => $termId,
                 'text' => (string) $existing['WoText'],
                 'textLc' => (string) $existing['WoTextLC'],
+                'lemma' => $lemma ?? '',
+                'lemmaLc' => $lemmaLc ?? '',
                 'hex' => StringUtils::toClassName((string) $existing['WoTextLC']),
                 'translation' => $translation === '*' ? '' : $translation,
                 'romanization' => $romanization,

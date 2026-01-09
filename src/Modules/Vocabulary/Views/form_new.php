@@ -43,6 +43,13 @@ data-lwt-clear-frame="true">
             type="text" name="WoText" id="WoText" value="" maxlength="250" size="35" />
             <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?></td>
         </tr>
+        <tr>
+            <td class="td1 right">Lemma:</td>
+            <td class="td1"><input <?php echo $scrdir; ?>
+            type="text" class="checkoutsidebmp checklength" data_maxlength="250"
+            data_info="Lemma" name="WoLemma" id="WoLemma" value="" maxlength="250" size="35"
+            placeholder="Base form (optional)" /></td>
+        </tr>
         <?php echo (new FindSimilarTerms())->getTableRow(); ?>
         <tr>
             <td class="td1 right">Translation:</td>

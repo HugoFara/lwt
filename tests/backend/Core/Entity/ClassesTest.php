@@ -375,7 +375,7 @@ class ClassesTest extends TestCase
     public function testTermReconstitute(): void
     {
         $term = Term::reconstitute(
-            123, 1, 'Hello', 'hello', 3, 'Hola', 'Hello world.', 'My notes', 'heh-lo',
+            123, 1, 'Hello', 'hello', null, null, 3, 'Hola', 'Hello world.', 'My notes', 'heh-lo',
             1, new DateTimeImmutable('2024-01-01'), new DateTimeImmutable('2024-01-02'),
             0.5, 0.7, 0.3
         );
@@ -408,7 +408,7 @@ class ClassesTest extends TestCase
     public function testTermDecreaseStatus(): void
     {
         $term = Term::reconstitute(
-            1, 1, 'test', 'test', 3, '', '', '', '', 1,
+            1, 1, 'test', 'test', null, null, 3, '', '', '', '', 1,
             new DateTimeImmutable(), new DateTimeImmutable(), 0, 0, 0
         );
 
@@ -837,7 +837,7 @@ class ClassesTest extends TestCase
     public function testTermSetIdOnPersistedEntityFails(): void
     {
         $term = Term::reconstitute(
-            1, 1, 'test', 'test', 1, '', '', '', '', 1,
+            1, 1, 'test', 'test', null, null, 1, '', '', '', '', 1,
             new DateTimeImmutable(), new DateTimeImmutable(), 0, 0, 0
         );
 

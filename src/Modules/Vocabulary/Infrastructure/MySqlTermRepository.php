@@ -50,6 +50,8 @@ class MySqlTermRepository implements TermRepositoryInterface
         'languageId' => 'WoLgID',
         'text' => 'WoText',
         'textLowercase' => 'WoTextLC',
+        'lemma' => 'WoLemma',
+        'lemmaLc' => 'WoLemmaLC',
         'status' => 'WoStatus',
         'translation' => 'WoTranslation',
         'sentence' => 'WoSentence',
@@ -87,6 +89,8 @@ class MySqlTermRepository implements TermRepositoryInterface
             (int) $row['WoLgID'],
             (string) $row['WoText'],
             (string) $row['WoTextLC'],
+            isset($row['WoLemma']) && $row['WoLemma'] !== '' ? (string) $row['WoLemma'] : null,
+            isset($row['WoLemmaLC']) && $row['WoLemmaLC'] !== '' ? (string) $row['WoLemmaLC'] : null,
             (int) $row['WoStatus'],
             (string) ($row['WoTranslation'] ?? ''),
             (string) ($row['WoSentence'] ?? ''),
@@ -115,6 +119,8 @@ class MySqlTermRepository implements TermRepositoryInterface
             'WoLgID' => $term->languageId()->toInt(),
             'WoText' => $term->text(),
             'WoTextLC' => $term->textLowercase(),
+            'WoLemma' => $term->lemma(),
+            'WoLemmaLC' => $term->lemmaLc(),
             'WoStatus' => $term->status()->toInt(),
             'WoTranslation' => $term->translation(),
             'WoSentence' => $term->sentence(),
@@ -496,6 +502,51 @@ class MySqlTermRepository implements TermRepositoryInterface
             ->updatePrepared(['WoNotes' => $notes]);
 
         return $affected > 0;
+    }
+
+    /**
+     * Update the lemma (base form) of a term.
+     *
+     * @param int         $termId Term ID
+     * @param string|null $lemma  New lemma (null to clear)
+     *
+     * @return bool True if updated
+     */
+    public function updateLemma(int $termId, ?string $lemma): bool
+    {
+        $lemmaLc = $lemma !== null && $lemma !== '' ? mb_strtolower($lemma, 'UTF-8') : null;
+
+        $affected = $this->query()
+            ->where('WoID', '=', $termId)
+            ->updatePrepared([
+                'WoLemma' => $lemma,
+                'WoLemmaLC' => $lemmaLc,
+            ]);
+
+        return $affected > 0;
+    }
+
+    /**
+     * Find all terms sharing a lemma in a language (word family).
+     *
+     * @param int    $languageId Language ID
+     * @param string $lemmaLc    Lowercase lemma
+     *
+     * @return Term[]
+     */
+    public function findByLemma(int $languageId, string $lemmaLc): array
+    {
+        $rows = $this->query()
+            ->where('WoLgID', '=', $languageId)
+            ->where('WoLemmaLC', '=', $lemmaLc)
+            ->orderBy('WoWordCount')
+            ->orderBy('WoText')
+            ->getPrepared();
+
+        return array_map(
+            fn(array $row) => $this->mapToEntity($row),
+            $rows
+        );
     }
 
     /**

@@ -33,6 +33,16 @@ use Lwt\Shared\UI\Helpers\IconHelper;
    <td class="td1"><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="WoText" value="<?php echo htmlspecialchars($word['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="40" /> <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
    </td>
 </tr>
+<tr>
+   <td class="td1 right">Lemma:</td>
+   <td class="td1">
+       <input <?php echo $scrdir; ?> type="text"
+       class="checkoutsidebmp checklength" data_maxlength="250"
+       data_info="Lemma" name="WoLemma" id="WoLemma"
+       value="<?php echo htmlspecialchars($word['WoLemma'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="40"
+       placeholder="Base form (e.g., 'run' for 'running')" />
+   </td>
+</tr>
 <?php echo (new FindSimilarTerms())->getTableRow(); ?>
 <tr>
    <td class="td1 right">Translation:</td>

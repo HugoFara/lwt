@@ -22,6 +22,7 @@ import {
 export interface WordFormData {
   text: string;
   textLc: string;
+  lemma: string;
   translation: string;
   romanization: string;
   sentence: string;
@@ -34,6 +35,7 @@ export interface WordFormData {
  * Validation errors keyed by field name.
  */
 export interface ValidationErrors {
+  lemma: string | null;
   translation: string | null;
   romanization: string | null;
   sentence: string | null;
@@ -102,6 +104,7 @@ function createEmptyFormData(): WordFormData {
   return {
     text: '',
     textLc: '',
+    lemma: '',
     translation: '',
     romanization: '',
     sentence: '',
@@ -116,6 +119,7 @@ function createEmptyFormData(): WordFormData {
  */
 function createEmptyErrors(): ValidationErrors {
   return {
+    lemma: null,
     translation: null,
     romanization: null,
     sentence: null,
@@ -181,6 +185,7 @@ function createWordFormStore(): WordFormStoreState {
     get isDirty(): boolean {
       if (!this.originalData) return false;
       return (
+        this.formData.lemma !== this.originalData.lemma ||
         this.formData.translation !== this.originalData.translation ||
         this.formData.romanization !== this.originalData.romanization ||
         this.formData.sentence !== this.originalData.sentence ||
@@ -195,6 +200,7 @@ function createWordFormStore(): WordFormStoreState {
      */
     get isValid(): boolean {
       return (
+        this.errors.lemma === null &&
         this.errors.translation === null &&
         this.errors.romanization === null &&
         this.errors.sentence === null &&
@@ -250,6 +256,7 @@ function createWordFormStore(): WordFormStoreState {
         this.formData = {
           text: data.term.text,
           textLc: data.term.textLc,
+          lemma: data.term.lemma || '',
           translation: data.term.translation === '*' ? '' : data.term.translation,
           romanization: data.term.romanization,
           sentence: data.term.sentence,
@@ -296,6 +303,7 @@ function createWordFormStore(): WordFormStoreState {
      * Validate all form fields.
      */
     validate(): boolean {
+      this.validateField('lemma');
       this.validateField('translation');
       this.validateField('romanization');
       this.validateField('sentence');
@@ -308,6 +316,14 @@ function createWordFormStore(): WordFormStoreState {
      */
     validateField(field: keyof WordFormData): void {
       switch (field) {
+        case 'lemma':
+          if (this.formData.lemma.length > 250) {
+            this.errors.lemma = 'Lemma must be 250 characters or less';
+          } else {
+            this.errors.lemma = null;
+          }
+          break;
+
         case 'translation':
           if (this.formData.translation.length > 500) {
             this.errors.translation = 'Translation must be 500 characters or less';
@@ -366,6 +382,7 @@ function createWordFormStore(): WordFormStoreState {
             romanization: this.formData.romanization,
             sentence: this.formData.sentence,
             notes: this.formData.notes,
+            lemma: this.formData.lemma || undefined,
             status: this.formData.status,
             tags: this.formData.tags
           };
@@ -383,6 +400,7 @@ function createWordFormStore(): WordFormStoreState {
             romanization: this.formData.romanization,
             sentence: this.formData.sentence,
             notes: this.formData.notes,
+            lemma: this.formData.lemma || undefined,
             status: this.formData.status,
             tags: this.formData.tags
           };
