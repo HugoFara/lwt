@@ -15,19 +15,21 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
     docker-php-ext-install pdo pdo_mysql mysqli
 
 # Install Python and MeCab for NLP parsing
+ENV DEBIAN_FRONTEND=noninteractive
 RUN rm -rf /var/lib/apt/lists/* \
     && apt-get clean \
-    && apt-get update --fix-missing \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     python3-venv \
+    && apt-get install -y --no-install-recommends \
     mecab \
-    mecab-ipadic-utf8 \
     libmecab-dev \
+    mecab-ipadic-utf8 \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /usr/local/etc \
-    && ln -s /etc/mecabrc /usr/local/etc/mecabrc
+    && (test -f /etc/mecabrc && ln -sf /etc/mecabrc /usr/local/etc/mecabrc || true)
 
 # Create Python virtual environment and install NLP packages
 RUN python3 -m venv /opt/lwt-parsers && \

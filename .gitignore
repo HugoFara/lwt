@@ -2,6 +2,7 @@
 
 # Environment configuration (contains secrets)
 .env
+deploy.env
 # Local audio files (root media directory only)
 /media/
 # Text-to-Speech files
