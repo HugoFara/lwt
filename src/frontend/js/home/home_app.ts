@@ -27,6 +27,7 @@ interface HomeWarningsConfig {
   phpVersion: string;
   lwtVersion: string;
   lastText: LastTextInfo | null;
+  basePath: string;
 }
 
 interface Warning {
@@ -57,6 +58,9 @@ interface HomeData {
 
   // Last text info (dynamically updated when language changes)
   lastText: LastTextInfo | null;
+
+  // Base path for URLs (e.g., '/lwt' for subdirectory installation)
+  basePath: string;
 
   // Language change notification
   languageNotification: LanguageNotification;
@@ -93,6 +97,8 @@ export function homeData(): HomeData {
     collapsedMenus: [],
 
     lastText: null,
+
+    basePath: '',
 
     languageNotification: {
       message: '',
@@ -181,6 +187,9 @@ export function homeData(): HomeData {
 
         // Load initial last text info
         this.lastText = config.lastText;
+
+        // Load base path for URL generation
+        this.basePath = config.basePath || '';
 
         // Check all warnings
         this.checkCookies();

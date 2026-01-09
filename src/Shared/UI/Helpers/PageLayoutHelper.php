@@ -58,11 +58,14 @@ class PageLayoutHelper
         $languagesActive = $isLanguages ? ' is-active' : '';
         $adminActive = $isAdmin ? ' is-active' : '';
 
+        $base = UrlUtilities::getBasePath();
+        $logoUrl = UrlUtilities::url('/assets/images/lwt_icon.png');
+
         return <<<HTML
 <nav class="navbar is-light" role="navigation" aria-label="main navigation" x-data="navbar()">
     <div class="navbar-brand">
-        <a class="navbar-item" href="/">
-            <img src="/assets/images/lwt_icon.png" alt="LWT" width="28" height="28">
+        <a class="navbar-item" href="{$base}/">
+            <img src="{$logoUrl}" alt="LWT" width="28" height="28">
             <span class="ml-2 has-text-weight-semibold">LWT</span>
         </a>
 
@@ -77,7 +80,7 @@ class PageLayoutHelper
 
     <div class="navbar-menu" :class="{ 'is-active': isOpen }">
         <div class="navbar-start">
-            <a class="navbar-item" href="/">
+            <a class="navbar-item" href="{$base}/">
                 {$homeIcon}
                 <span class="ml-1">Home</span>
             </a>
@@ -88,14 +91,14 @@ class PageLayoutHelper
                     <span class="ml-1">Texts</span>
                 </a>
                 <div class="navbar-dropdown">
-                    <a class="navbar-item" href="/texts">Texts</a>
-                    <a class="navbar-item" href="/text/archived">Archived Texts</a>
+                    <a class="navbar-item" href="{$base}/texts">Texts</a>
+                    <a class="navbar-item" href="{$base}/text/archived">Archived Texts</a>
                     <hr class="navbar-divider">
-                    <a class="navbar-item" href="/tags/text">Text Tags</a>
-                    <a class="navbar-item" href="/text/check">Text Check</a>
+                    <a class="navbar-item" href="{$base}/tags/text">Text Tags</a>
+                    <a class="navbar-item" href="{$base}/text/check">Text Check</a>
                     <hr class="navbar-divider">
-                    <a class="navbar-item" href="/text/import-long">Long Text Import</a>
-                    <a class="navbar-item" href="/feeds">Newsfeed Import</a>
+                    <a class="navbar-item" href="{$base}/text/import-long">Long Text Import</a>
+                    <a class="navbar-item" href="{$base}/feeds">Newsfeed Import</a>
                 </div>
             </div>
 
@@ -105,10 +108,10 @@ class PageLayoutHelper
                     <span class="ml-1">Terms</span>
                 </a>
                 <div class="navbar-dropdown">
-                    <a class="navbar-item" href="/words/edit">Terms</a>
-                    <a class="navbar-item" href="/tags">Term Tags</a>
+                    <a class="navbar-item" href="{$base}/words/edit">Terms</a>
+                    <a class="navbar-item" href="{$base}/tags">Term Tags</a>
                     <hr class="navbar-divider">
-                    <a class="navbar-item" href="/word/upload">Import Terms</a>
+                    <a class="navbar-item" href="{$base}/word/upload">Import Terms</a>
                 </div>
             </div>
 
@@ -118,13 +121,13 @@ class PageLayoutHelper
                     <span class="ml-1">Languages</span>
                 </a>
                 <div class="navbar-dropdown">
-                    <a class="navbar-item" href="/languages">Languages</a>
+                    <a class="navbar-item" href="{$base}/languages">Languages</a>
                     <hr class="navbar-divider">
-                    <a class="navbar-item" href="/languages?new=1">Add New Language</a>
+                    <a class="navbar-item" href="{$base}/languages?new=1">Add New Language</a>
                 </div>
             </div>
 
-            <a class="navbar-item" href="/admin/statistics">
+            <a class="navbar-item" href="{$base}/admin/statistics">
                 {$statsIcon}
                 <span class="ml-1">Statistics</span>
             </a>
@@ -137,11 +140,11 @@ class PageLayoutHelper
                     <span class="ml-1">Admin</span>
                 </a>
                 <div class="navbar-dropdown is-right">
-                    <a class="navbar-item" href="/admin/backup">Database Operations</a>
-                    <a class="navbar-item" href="/admin/settings">Settings</a>
+                    <a class="navbar-item" href="{$base}/admin/backup">Database Operations</a>
+                    <a class="navbar-item" href="{$base}/admin/settings">Settings</a>
                     <hr class="navbar-divider">
-                    <a class="navbar-item" href="/admin/server-data">Server Data</a>
-                    <a class="navbar-item" href="/docs/info.html" target="_blank">Help</a>
+                    <a class="navbar-item" href="{$base}/admin/server-data">Server Data</a>
+                    <a class="navbar-item" href="{$base}/docs/info.html" target="_blank">Help</a>
                 </div>
             </div>
         </div>
@@ -201,7 +204,8 @@ HTML;
     public static function buildLogo(string $imagePath = 'assets/images/lwt_icon.png'): string
     {
         $path = StringUtils::getFilePath($imagePath);
-        return '<img class="lwtlogo" src="' . htmlspecialchars($path, ENT_QUOTES, 'UTF-8')
+        $url = UrlUtilities::url($path);
+        return '<img class="lwtlogo" src="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8')
             . '" title="LWT" alt="LWT logo" />';
     }
 
@@ -279,14 +283,22 @@ HTML;
      */
     public static function buildMetaTags(): string
     {
-        return <<<'HTML'
+        $basePath = UrlUtilities::getBasePath();
+        $favicon = UrlUtilities::url('/favicon.ico');
+        $icon57 = UrlUtilities::url('/assets/images/apple-touch-icon-57x57.png');
+        $icon72 = UrlUtilities::url('/assets/images/apple-touch-icon-72x72.png');
+        $icon114 = UrlUtilities::url('/assets/images/apple-touch-icon-114x114.png');
+        $startup = UrlUtilities::url('/assets/images/apple-touch-startup.png');
+
+        return <<<HTML
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon-57x57.png" />
-<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/apple-touch-icon-72x72.png" />
-<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/apple-touch-icon-114x114.png" />
-<link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />
+<meta name="lwt-base-path" content="{$basePath}" />
+<link rel="shortcut icon" href="{$favicon}" type="image/x-icon"/>
+<link rel="apple-touch-icon" href="{$icon57}" />
+<link rel="apple-touch-icon" sizes="72x72" href="{$icon72}" />
+<link rel="apple-touch-icon" sizes="114x114" href="{$icon114}" />
+<link rel="apple-touch-startup-image" href="{$startup}" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 HTML;
     }
@@ -346,6 +358,12 @@ HTML;
     {
         self::sendNoCacheHeaders();
 
+        $favicon = UrlUtilities::url('/favicon.ico');
+        $icon57 = UrlUtilities::url('/assets/images/apple-touch-icon-57x57.png');
+        $icon72 = UrlUtilities::url('/assets/images/apple-touch-icon-72x72.png');
+        $icon114 = UrlUtilities::url('/assets/images/apple-touch-icon-114x114.png');
+        $startup = UrlUtilities::url('/assets/images/apple-touch-startup.png');
+
         echo '<!DOCTYPE html>';
         echo '<html lang="en">';
         echo '<head>';
@@ -354,11 +372,11 @@ HTML;
         echo file_get_contents("UNLICENSE.md");
         echo '-->';
         echo '<meta name="viewport" content="width=900" />';
-        echo '<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>';
-        echo '<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon-57x57.png" />';
-        echo '<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/apple-touch-icon-72x72.png" />';
-        echo '<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/apple-touch-icon-114x114.png" />';
-        echo '<link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />';
+        echo '<link rel="shortcut icon" href="' . $favicon . '" type="image/x-icon"/>';
+        echo '<link rel="apple-touch-icon" href="' . $icon57 . '" />';
+        echo '<link rel="apple-touch-icon" sizes="72x72" href="' . $icon72 . '" />';
+        echo '<link rel="apple-touch-icon" sizes="114x114" href="' . $icon114 . '" />';
+        echo '<link rel="apple-touch-startup-image" href="' . $startup . '" />';
         echo '<meta name="apple-mobile-web-app-capable" content="yes" />';
 
         if (ViteHelper::shouldUse()) {
@@ -368,7 +386,7 @@ HTML;
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
-            echo '<link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />';
+            echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';
         }
 
         echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
@@ -396,6 +414,12 @@ HTML;
     ): void {
         self::sendNoCacheHeaders();
 
+        $favicon = UrlUtilities::url('/favicon.ico');
+        $icon57 = UrlUtilities::url('/assets/images/apple-touch-icon-57x57.png');
+        $icon72 = UrlUtilities::url('/assets/images/apple-touch-icon-72x72.png');
+        $icon114 = UrlUtilities::url('/assets/images/apple-touch-icon-114x114.png');
+        $startup = UrlUtilities::url('/assets/images/apple-touch-startup.png');
+
         echo '<!DOCTYPE html>';
         echo '<html lang="en">';
         echo '<head>';
@@ -404,11 +428,11 @@ HTML;
         echo file_get_contents("UNLICENSE.md");
         echo '-->';
         echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
-        echo '<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>';
-        echo '<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon-57x57.png" />';
-        echo '<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/apple-touch-icon-72x72.png" />';
-        echo '<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/apple-touch-icon-114x114.png" />';
-        echo '<link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />';
+        echo '<link rel="shortcut icon" href="' . $favicon . '" type="image/x-icon"/>';
+        echo '<link rel="apple-touch-icon" href="' . $icon57 . '" />';
+        echo '<link rel="apple-touch-icon" sizes="72x72" href="' . $icon72 . '" />';
+        echo '<link rel="apple-touch-icon" sizes="114x114" href="' . $icon114 . '" />';
+        echo '<link rel="apple-touch-startup-image" href="' . $startup . '" />';
         echo '<meta name="apple-mobile-web-app-capable" content="yes" />';
 
         if (ViteHelper::shouldUse()) {
@@ -418,8 +442,8 @@ HTML;
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
-            echo '<link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />';
-            echo '<script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>';
+            echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';
+            echo '<script type="text/javascript" src="' . UrlUtilities::url('/assets/js/pgm.js') . '" charset="utf-8"></script>';
         }
 
         echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
@@ -480,8 +504,8 @@ HTML;
         echo '<html lang="en">';
         echo '<head>';
         echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
-        echo '<link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />';
-        echo '<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>';
+        echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';
+        echo '<link rel="shortcut icon" href="' . UrlUtilities::url('/favicon.ico') . '" type="image/x-icon"/>';
         echo '<!--' . "\n";
         echo file_get_contents("UNLICENSE.md");
         echo '-->';

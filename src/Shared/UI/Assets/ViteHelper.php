@@ -19,6 +19,8 @@
 
 namespace Lwt\Shared\UI\Assets;
 
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
+
 /**
  * Helper class for Vite asset loading.
  *
@@ -110,7 +112,7 @@ HTML;
         // Load CSS files
         if (isset($entryData['css']) && is_array($entryData['css'])) {
             foreach ($entryData['css'] as $cssFile) {
-                $cssPath = '/assets/' . htmlspecialchars($cssFile);
+                $cssPath = UrlUtilities::url('/assets/' . htmlspecialchars($cssFile));
                 if ($asyncCss) {
                     // Async CSS loading using preload + onload pattern
                     // This eliminates render-blocking while ensuring CSS loads
@@ -124,7 +126,8 @@ HTML;
 
         // Load JS module
         if (isset($entryData['file'])) {
-            $html .= '<script type="module" src="/assets/' . htmlspecialchars($entryData['file']) . '"></script>' . "\n";
+            $jsPath = UrlUtilities::url('/assets/' . htmlspecialchars($entryData['file']));
+            $html .= '<script type="module" src="' . $jsPath . '"></script>' . "\n";
         }
 
         return $html;

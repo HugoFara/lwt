@@ -21,22 +21,24 @@ namespace Lwt\Modules\Home\Views;
 
 use Lwt\Core\ApplicationInfo;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
 /**
  * When on a WordPress server, make a logout button.
  *
- * @param bool $isWordPress Whether WordPress session is active
+ * @param bool   $isWordPress Whether WordPress session is active
+ * @param string $base        The application base path
  *
  * @return void
  */
-function renderWordPressLogout(bool $isWordPress): void
+function renderWordPressLogout(bool $isWordPress, string $base): void
 {
     if ($isWordPress) {
         ?>
 <div class="card menu menu-logout">
     <div class="card-content has-text-centered">
-        <a href="/wordpress/stop" class="button is-danger is-outlined">
+        <a href="<?php echo $base; ?>/wordpress/stop" class="button is-danger is-outlined">
             <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
             <span><strong>LOGOUT</strong> (from WordPress and LWT)</span>
         </a>
@@ -52,15 +54,17 @@ function renderWordPressLogout(bool $isWordPress): void
  * Outputs a JSON config element that is read by home_app.ts.
  *
  * @param array|null $lastTextInfo Current text info for Alpine.js initial state
+ * @param string     $base         The application base path
  *
  * @return void
  */
-function renderHomeConfig(?array $lastTextInfo): void
+function renderHomeConfig(?array $lastTextInfo, string $base): void
 {
     $config = [
         'phpVersion' => phpversion(),
         'lwtVersion' => ApplicationInfo::VERSION,
         'lastText' => $lastTextInfo,
+        'basePath' => $base,
     ];
     ?>
 <script type="application/json" id="home-warnings-config">
@@ -75,6 +79,9 @@ $currenttext = $dashboardData['current_text_id'];
 $langcnt = $dashboardData['language_count'];
 $isWordPress = $dashboardData['is_wordpress'];
 $currentTextInfo = $dashboardData['current_text_info'];
+
+// Get base path for URL generation
+$base = UrlUtilities::getBasePath();
 
 // Prepare last text info for Alpine.js
 $lastTextInfo = null;
@@ -158,14 +165,14 @@ if ($currentTextInfo !== null && $currenttext !== null) {
             <p class="has-text-centered mb-4">Your database is empty. Choose one of the options below to begin:</p>
             <div class="columns is-centered">
                 <div class="column is-narrow">
-                    <a href="/admin/install-demo" class="button is-medium is-info">
+                    <a href="<?php echo $base; ?>/admin/install-demo" class="button is-medium is-info">
                         <span class="icon"><i data-lucide="database"></i></span>
                         <span>Install Demo Database</span>
                     </a>
                     <p class="help has-text-centered mt-2">Try LWT with sample texts</p>
                 </div>
                 <div class="column is-narrow">
-                    <a href="/languages?new=1" class="button is-medium is-primary">
+                    <a href="<?php echo $base; ?>/languages?new=1" class="button is-medium is-primary">
                         <span class="icon"><i data-lucide="plus"></i></span>
                         <span>Create Your First Language</span>
                     </a>
@@ -184,7 +191,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
             <label class="label" for="filterlang">Language</label>
             <div class="control">
                 <div class="select is-medium">
-                    <select id="filterlang" data-action="set-lang" data-ajax="true" data-redirect="/">
+                    <select id="filterlang" data-action="set-lang" data-ajax="true" data-redirect="<?php echo $base; ?>/">
                         <?php echo SelectOptionsBuilder::forLanguages($languages, $currentlang, '[Select...]'); ?>
                     </select>
                 </div>
@@ -212,17 +219,17 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                             </div>
                         </div>
                         <div class="buttons">
-                            <a :href="'/text/read?start=' + lastText.id" class="button is-link is-medium">
+                            <a :href="basePath + '/text/read?start=' + lastText.id" class="button is-link is-medium">
                                 <span class="icon"><i data-lucide="book-open"></i></span>
                                 <span>Read</span>
                             </a>
-                            <a :href="'/review?text=' + lastText.id" class="button is-info is-light is-medium">
+                            <a :href="basePath + '/review?text=' + lastText.id" class="button is-info is-light is-medium">
                                 <span class="icon"><i data-lucide="circle-help"></i></span>
                                 <span>Review</span>
                             </a>
                         </div>
                         <template x-if="lastText.annotated">
-                            <a :href="'/text/print?text=' + lastText.id" class="button is-success is-light is-small">
+                            <a :href="basePath + '/text/print?text=' + lastText.id" class="button is-success is-light is-small">
                                 <span class="icon"><i data-lucide="check"></i></span>
                                 <span>Ann. Text</span>
                             </a>
@@ -238,7 +245,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
             <!-- New text card -->
             <div class="column is-narrow">
-                <a href="/text/new" class="box has-background-primary-light has-text-centered" style="width: 180px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <a href="<?php echo $base; ?>/text/new" class="box has-background-primary-light has-text-centered" style="width: 180px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                     <span class="icon is-large has-text-primary">
                         <i data-lucide="plus" style="width: 48px; height: 48px;"></i>
                     </span>
@@ -269,11 +276,11 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                 </button>
             </header>
             <div class="card-content menu-content">
-                <a href="/languages" class="button is-fullwidth is-link is-light mb-2" title="Manage Languages">
+                <a href="<?php echo $base; ?>/languages" class="button is-fullwidth is-link is-light mb-2" title="Manage Languages">
                     <span class="icon"><i data-lucide="list"></i></span>
                     <span>Manage Languages</span>
                 </a>
-                <a href="/languages?new=1" class="button is-fullwidth is-link is-light" title="Add New Language">
+                <a href="<?php echo $base; ?>/languages?new=1" class="button is-fullwidth is-link is-light" title="Add New Language">
                     <span class="icon"><i data-lucide="plus"></i></span>
                     <span>New Language</span>
                 </a>
@@ -297,15 +304,15 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                 </button>
             </header>
             <div class="card-content menu-content">
-                <a href="/texts" class="button is-fullwidth is-success is-light mb-2">
+                <a href="<?php echo $base; ?>/texts" class="button is-fullwidth is-success is-light mb-2">
                     <span class="icon"><i data-lucide="file-text"></i></span>
                     <span>Texts</span>
                 </a>
-                <a href="/tags/text" class="button is-fullwidth is-success is-light mb-2">
+                <a href="<?php echo $base; ?>/tags/text" class="button is-fullwidth is-success is-light mb-2">
                     <span class="icon"><i data-lucide="tags"></i></span>
                     <span>Text Tags</span>
                 </a>
-                <a href="/feeds?check_autoupdate=1" class="button is-fullwidth is-success is-light">
+                <a href="<?php echo $base; ?>/feeds?check_autoupdate=1" class="button is-fullwidth is-success is-light">
                     <span class="icon"><i data-lucide="newspaper"></i></span>
                     <span>Newsfeeds</span>
                 </a>
@@ -329,15 +336,15 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                 </button>
             </header>
             <div class="card-content menu-content">
-                <a href="/words/edit" class="button is-fullwidth is-link is-light mb-2" title="View and edit saved words and expressions">
+                <a href="<?php echo $base; ?>/words/edit" class="button is-fullwidth is-link is-light mb-2" title="View and edit saved words and expressions">
                     <span class="icon"><i data-lucide="list"></i></span>
                     <span>Terms</span>
                 </a>
-                <a href="/tags" class="button is-fullwidth is-link is-light mb-2">
+                <a href="<?php echo $base; ?>/tags" class="button is-fullwidth is-link is-light mb-2">
                     <span class="icon"><i data-lucide="tag"></i></span>
                     <span>Term Tags</span>
                 </a>
-                <a href="/word/upload" class="button is-fullwidth is-link is-light">
+                <a href="<?php echo $base; ?>/word/upload" class="button is-fullwidth is-link is-light">
                     <span class="icon"><i data-lucide="upload"></i></span>
                     <span>Import Terms</span>
                 </a>
@@ -361,15 +368,15 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                 </button>
             </header>
             <div class="card-content menu-content">
-                <a href="/admin/statistics" class="button is-fullwidth is-info is-light mb-2" title="Text statistics">
+                <a href="<?php echo $base; ?>/admin/statistics" class="button is-fullwidth is-info is-light mb-2" title="Text statistics">
                     <span class="icon"><i data-lucide="bar-chart-2"></i></span>
                     <span>Statistics</span>
                 </a>
-                <a href="docs/info.html" class="button is-fullwidth is-info is-light mb-2">
+                <a href="<?php echo $base; ?>/docs/info.html" class="button is-fullwidth is-info is-light mb-2">
                     <span class="icon"><i data-lucide="help-circle"></i></span>
                     <span>Help</span>
                 </a>
-                <a href="/admin/server-data" class="button is-fullwidth is-info is-light" title="Various data useful for debug">
+                <a href="<?php echo $base; ?>/admin/server-data" class="button is-fullwidth is-info is-light" title="Various data useful for debug">
                     <span class="icon"><i data-lucide="server"></i></span>
                     <span>Server Data</span>
                 </a>
@@ -393,11 +400,11 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                 </button>
             </header>
             <div class="card-content menu-content">
-                <a href="/admin/settings" class="button is-fullwidth is-light mb-2">
+                <a href="<?php echo $base; ?>/admin/settings" class="button is-fullwidth is-light mb-2">
                     <span class="icon"><i data-lucide="sliders"></i></span>
                     <span>Settings</span>
                 </a>
-                <a href="/admin/backup" class="button is-fullwidth is-light" title="Backup, restore or empty database">
+                <a href="<?php echo $base; ?>/admin/backup" class="button is-fullwidth is-light" title="Backup, restore or empty database">
                     <span class="icon"><i data-lucide="database"></i></span>
                     <span>Database</span>
                 </a>
@@ -405,7 +412,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
         </div>
     </div>
 
-    <?php renderWordPressLogout($isWordPress); ?>
+    <?php renderWordPressLogout($isWordPress, $base); ?>
 </div>
 
 <!-- Version info -->
@@ -430,4 +437,4 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
 </div><!-- End Alpine.js container -->
 
-<?php renderHomeConfig($lastTextInfo); ?>
+<?php renderHomeConfig($lastTextInfo, $base); ?>

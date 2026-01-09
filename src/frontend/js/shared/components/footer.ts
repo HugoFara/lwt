@@ -31,12 +31,21 @@ interface FooterData {
 }
 
 /**
+ * Get the application base path from meta tag.
+ */
+function getBasePath(): string {
+  const meta = document.querySelector('meta[name="lwt-base-path"]');
+  return meta ? meta.getAttribute('content') || '' : '';
+}
+
+/**
  * Alpine.js data component for the footer.
  */
 export function footerData(): FooterData {
+  const basePath = getBasePath();
   return {
     licenseUrl: 'http://unlicense.org/',
-    licenseImageUrl: '/assets/images/public_domain.png',
+    licenseImageUrl: basePath + '/assets/images/public_domain.png',
     projectUrl: 'https://sourceforge.net/projects/learning-with-texts/',
     publicDomainUrl: 'https://en.wikipedia.org/wiki/Public_domain_software',
 
