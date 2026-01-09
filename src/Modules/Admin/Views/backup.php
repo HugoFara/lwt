@@ -21,9 +21,11 @@
 namespace Lwt\Views\Admin;
 
 use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 $prefinfo = (string)($prefinfo ?? '');
+$base = UrlUtilities::getBasePath();
 
 $escapedDbName = htmlspecialchars(Globals::getDatabaseName(), ENT_QUOTES, 'UTF-8');
 $restoreEnabled = Globals::isBackupRestoreEnabled();
@@ -75,7 +77,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                 </div>
             </div>
 
-            <form action="/admin/backup" method="post" class="mt-4">
+            <form action="<?php echo $base; ?>/admin/backup" method="post" class="mt-4">
                 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                 <div class="field is-grouped is-grouped-right">
                     <div class="control">
@@ -174,7 +176,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                 </div>
             </div>
 
-            <form action="/admin/backup" method="post" enctype="multipart/form-data"
+            <form action="<?php echo $base; ?>/admin/backup" method="post" enctype="multipart/form-data"
                   @submit="restoring = true"
                   x-show="!restoring"
                   data-confirm-submit="Are you sure? This will REPLACE all existing data!">
@@ -254,7 +256,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
 
             <div class="field is-grouped is-grouped-right">
                 <div class="control">
-                    <a href="/admin/install-demo" class="button is-success is-outlined">
+                    <a href="<?php echo $base; ?>/admin/install-demo" class="button is-success is-outlined">
                         <?php echo IconHelper::render('download'); ?>
                         <span>Install Demo Database</span>
                     </a>
@@ -301,7 +303,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                 </div>
             </div>
 
-            <form action="/admin/backup" method="post"
+            <form action="<?php echo $base; ?>/admin/backup" method="post"
                   @submit="emptying = true"
                   x-show="!emptying"
                   data-confirm-submit="Are you sure? This will DELETE all your data!">
@@ -344,7 +346,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
     <!-- Back Button -->
     <div class="field">
         <div class="control">
-            <a href="/" class="button is-light">
+            <a href="<?php echo $base; ?>/" class="button is-light">
                 <?php echo IconHelper::render('arrow-left'); ?>
                 <span>Back to Main Menu</span>
             </a>

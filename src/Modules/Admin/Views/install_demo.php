@@ -21,10 +21,12 @@
 namespace Lwt\Views\Admin;
 
 use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 $prefinfo = (string)($prefinfo ?? '');
 $langcnt = (int)($langcnt ?? 0);
+$base = UrlUtilities::getBasePath();
 
 ?>
 <div class="container" x-data="{ confirmed: false, installing: false }">
@@ -77,7 +79,7 @@ $langcnt = (int)($langcnt ?? 0);
         </div>
 
         <!-- Install form -->
-        <form action="/admin/install-demo" method="post"
+        <form action="<?php echo $base; ?>/admin/install-demo" method="post"
               @submit="installing = true"
               x-show="!installing">
             <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
@@ -93,7 +95,7 @@ $langcnt = (int)($langcnt ?? 0);
                     </button>
                 </div>
                 <div class="control">
-                    <a href="/" class="button is-light">
+                    <a href="<?php echo $base; ?>/" class="button is-light">
                         <?php echo IconHelper::render('arrow-left'); ?>
                         <span>Back to Main Menu</span>
                     </a>
