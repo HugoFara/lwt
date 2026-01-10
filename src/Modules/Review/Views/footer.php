@@ -15,17 +15,26 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @var int $remaining
+ * @var int $wrong
+ * @var int $correct
  */
 
 namespace Lwt\Views\Review;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-$total = $wrong + $correct + $remaining;
+// Ensure variables are integers
+$remainingInt = (int) ($remaining ?? 0);
+$wrongInt = (int) ($wrong ?? 0);
+$correctInt = (int) ($correct ?? 0);
+
+$total = $wrongInt + $correctInt + $remainingInt;
 $divisor = $total > 0 ? $total / 100.0 : 1.0;
-$lRemaining = round($remaining / $divisor, 0);
-$lWrong = round($wrong / $divisor, 0);
-$lCorrect = round($correct / $divisor, 0);
+$lRemaining = (int) round($remainingInt / $divisor, 0);
+$lWrong = (int) round($wrongInt / $divisor, 0);
+$lCorrect = (int) round($correctInt / $divisor, 0);
 ?>
 <footer id="footer">
     <span class="test-footer-stat">
@@ -46,10 +55,10 @@ $lCorrect = round($correct / $divisor, 0);
     <span class="test-footer-stat">
         <span title="Total reviews" id="total_tests"><?php echo $total; ?></span>
         =
-        <span class="todosty" title="Not yet reviewed" id="not-tested"><?php echo $remaining; ?></span>
+        <span class="todosty" title="Not yet reviewed" id="not-tested"><?php echo $remainingInt; ?></span>
         +
-        <span class="donewrongsty" title="Wrong" id="wrong-tests"><?php echo $wrong; ?></span>
+        <span class="donewrongsty" title="Wrong" id="wrong-tests"><?php echo $wrongInt; ?></span>
         +
-        <span class="doneoksty" title="Correct" id="correct-tests"><?php echo $correct; ?></span>
+        <span class="doneoksty" title="Correct" id="correct-tests"><?php echo $correctInt; ?></span>
     </span>
 </footer>

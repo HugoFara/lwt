@@ -163,15 +163,17 @@ class GoogleTranslate
         return $domain;
     }
     /**
-     * @param (mixed|string)[] $array
+     * Case-insensitive array unique.
      *
-     * @psalm-param array{0?: mixed|string, 1?: mixed|string, 2?: mixed|string, 3?: mixed|string, 4?: 'WORLD'|mixed, key1?: 'Hello', key2?: 'HELLO', key3?: 'World', key4?: 'hello',...} $array
+     * @param array<array-key, string> $array
+     *
+     * @return array<array-key, string>
      */
     public static function arrayIunique(array $array): array
     {
         return array_intersect_key(
             $array,
-            array_unique(array_map("StrToLower", $array))
+            array_unique(array_map("strtolower", $array))
         );
     }
     public function setLangFrom(?string $lang): static
@@ -303,24 +305,42 @@ class GoogleTranslate
             return false;
         }
         $result = preg_replace('!([[,])(?=,)!', '$1[]', $curlResult);
+        /** @var array<int, mixed>|null $resultArray */
         $resultArray = json_decode($result, true);
+        if (!is_array($resultArray)) {
+            return false;
+        }
+        /** @var list<string> $finalResult */
         $finalResult = [];
-        if (!empty($resultArray[0])) {
+        if (!empty($resultArray[0]) && is_array($resultArray[0])) {
+            /** @var mixed $results */
             foreach ($resultArray[0] as $results) {
-                $finalResult[] = $results[0];
+                if (is_array($results) && isset($results[0])) {
+                    $finalResult[] = (string) $results[0];
+                }
             }
-            if (!empty($resultArray[1])) {
+            if (!empty($resultArray[1]) && is_array($resultArray[1])) {
+                /** @var mixed $v */
                 foreach ($resultArray[1] as $v) {
-                    foreach ($v[1] as $results) {
-                        $finalResult[] = $results;
+                    if (is_array($v) && isset($v[1]) && is_array($v[1])) {
+                        /** @var mixed $results */
+                        foreach ($v[1] as $results) {
+                            $finalResult[] = (string) $results;
+                        }
                     }
                 }
             }
-            if (!empty($resultArray[5])) {
+            if (!empty($resultArray[5]) && is_array($resultArray[5])) {
+                /** @var mixed $v */
                 foreach ($resultArray[5] as $v) {
-                    if ($v[0] == $string) {
-                        foreach ($v[2] as $results) {
-                            $finalResult[] = $results[0];
+                    if (is_array($v) && isset($v[0]) && $v[0] == $string) {
+                        if (isset($v[2]) && is_array($v[2])) {
+                            /** @var mixed $results */
+                            foreach ($v[2] as $results) {
+                                if (is_array($results) && isset($results[0])) {
+                                    $finalResult[] = (string) $results[0];
+                                }
+                            }
                         }
                     }
                 }

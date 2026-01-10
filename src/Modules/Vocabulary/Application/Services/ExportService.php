@@ -220,7 +220,7 @@ class ExportService
     /**
      * Format a single record for TSV export.
      *
-     * @param array $record Database record
+     * @param array<string, mixed> $record Database record
      *
      * @return string Formatted row
      */
@@ -230,10 +230,10 @@ class ExportService
             self::replaceTabNewline((string)$record["WoTranslation"]) . "\t" .
             self::replaceTabNewline((string)$record["WoSentence"]) . "\t" .
             self::replaceTabNewline((string)$record["WoRomanization"]) . "\t" .
-            ($record["WoStatus"] ?? '') . "\t" .
+            (string)($record["WoStatus"] ?? '') . "\t" .
             self::replaceTabNewline((string)$record["LgName"]) . "\t" .
-            ($record["WoID"] ?? '') . "\t" .
-            ($record["taglist"] ?? '') . "\r\n";
+            (string)($record["WoID"] ?? '') . "\t" .
+            (string)($record["taglist"] ?? '') . "\r\n";
     }
 
     /**

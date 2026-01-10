@@ -96,14 +96,15 @@ class ApiV1
     public function __construct()
     {
         $this->authHandler = new UserApiHandler();
-        $this->feedHandler = new FeedApiHandler(
-            Container::getInstance()->get(FeedFacade::class)
-        );
+        $container = Container::getInstance();
+        /** @var FeedFacade $feedFacade */
+        $feedFacade = $container->get(FeedFacade::class);
+        $this->feedHandler = new FeedApiHandler($feedFacade);
         $this->languageHandler = new LanguageApiHandler();
         $this->localDictionaryHandler = new DictionaryApiHandler();
-        $this->adminHandler = new AdminApiHandler(
-            Container::getInstance()->get(AdminFacade::class)
-        );
+        /** @var AdminFacade $adminFacade */
+        $adminFacade = $container->get(AdminFacade::class);
+        $this->adminHandler = new AdminApiHandler($adminFacade);
         $this->reviewHandler = new ReviewApiHandler();
         $this->tagHandler = new TagApiHandler();
         $this->termHandler = new TermCrudApiHandler();
@@ -114,9 +115,9 @@ class ApiV1
         $this->termStatusHandler = new TermStatusApiHandler();
         $this->textHandler = new TextApiHandler();
         try {
-            $this->bookHandler = new BookApiHandler(
-                Container::getInstance()->get(BookFacade::class)
-            );
+            /** @var BookFacade $bookFacade */
+            $bookFacade = $container->get(BookFacade::class);
+            $this->bookHandler = new BookApiHandler($bookFacade);
         } catch (\Throwable $e) {
             // Book module not available
             $this->bookHandler = null;
@@ -319,8 +320,8 @@ class ApiV1
 
             case 'settings':
                 Response::success($this->adminHandler->formatSaveSetting(
-                    $params['key'],
-                    $params['value']
+                    (string) ($params['key'] ?? ''),
+                    (string) ($params['value'] ?? '')
                 ));
                 break;
 
@@ -448,51 +449,54 @@ class ApiV1
 
     private function handleLanguagesGet(array $fragments): void
     {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
         // Handle /languages - list all languages with stats
-        if (!isset($fragments[1]) || $fragments[1] === '') {
+        if ($frag1 === '') {
             Response::success($this->languageHandler->formatGetAll());
             return;
         }
 
         // Handle /languages/definitions - get predefined language presets
-        if ($fragments[1] === 'definitions') {
+        if ($frag1 === 'definitions') {
             Response::success($this->languageHandler->formatGetDefinitions());
             return;
         }
 
         // Handle /languages/with-texts - returns languages that have texts with counts
-        if ($fragments[1] === 'with-texts') {
+        if ($frag1 === 'with-texts') {
             Response::success($this->languageHandler->formatLanguagesWithTexts());
             return;
         }
 
         // Handle /languages/with-archived-texts - returns languages that have archived texts with counts
-        if ($fragments[1] === 'with-archived-texts') {
+        if ($frag1 === 'with-archived-texts') {
             Response::success($this->languageHandler->formatLanguagesWithArchivedTexts());
             return;
         }
 
         // Handle /languages/{id} - get single language or sub-resources
-        if (!ctype_digit($fragments[1])) {
+        if (!ctype_digit($frag1)) {
             Response::error('Expected Language ID, "definitions", "with-texts", or "with-archived-texts"', 404);
         }
 
-        $langId = (int)$fragments[1];
+        $langId = (int) $frag1;
 
         // Handle /languages/{id}/stats
-        if (($fragments[2] ?? '') === 'stats') {
+        if ($frag2 === 'stats') {
             Response::success($this->languageHandler->formatGetStats($langId));
             return;
         }
 
         // Handle /languages/{id}/reading-configuration
-        if (($fragments[2] ?? '') === 'reading-configuration') {
+        if ($frag2 === 'reading-configuration') {
             Response::success($this->languageHandler->formatReadingConfiguration($langId));
             return;
         }
 
         // Handle /languages/{id} - get single language for editing
-        if (!isset($fragments[2]) || $fragments[2] === '') {
+        if ($frag2 === '') {
             $result = $this->languageHandler->formatGetOne($langId);
             if ($result === null) {
                 Response::error('Language not found', 404);
@@ -506,7 +510,9 @@ class ApiV1
 
     private function handleReviewGet(array $fragments, array $params): void
     {
-        switch ($fragments[1] ?? '') {
+        $frag1 = $this->frag($fragments, 1);
+
+        switch ($frag1) {
             case 'next-word':
                 Response::success($this->reviewHandler->formatNextWord($params));
                 break;
@@ -520,20 +526,21 @@ class ApiV1
                 Response::success($this->reviewHandler->formatTableWords($params));
                 break;
             default:
-                Response::error('Endpoint Not Found: ' . ($fragments[1] ?? ''), 404);
+                Response::error('Endpoint Not Found: ' . $frag1, 404);
         }
     }
 
     private function handleSentencesGet(array $fragments, array $params): void
     {
-        $languageId = (int)($params["language_id"] ?? 0);
-        $termLc = $params["term_lc"] ?? '';
+        $languageId = (int) ($params["language_id"] ?? 0);
+        $termLc = (string) ($params["term_lc"] ?? '');
+        $frag1 = $this->frag($fragments, 1);
 
-        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
+        if ($frag1 !== '' && ctype_digit($frag1)) {
             Response::success($this->languageHandler->formatSentencesWithRegisteredTerm(
                 $languageId,
                 $termLc,
-                (int)$fragments[1]
+                (int) $frag1
             ));
         } else {
             Response::success($this->languageHandler->formatSentencesWithNewTerm(
@@ -546,10 +553,12 @@ class ApiV1
 
     private function handleSettingsGet(array $fragments, array $params): void
     {
-        if (($fragments[1] ?? '') === 'theme-path') {
-            Response::success($this->adminHandler->formatThemePath($params['path']));
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === 'theme-path') {
+            Response::success($this->adminHandler->formatThemePath((string) ($params['path'] ?? '')));
         } else {
-            Response::error('Endpoint Not Found: ' . ($fragments[1] ?? ''), 404);
+            Response::error('Endpoint Not Found: ' . $frag1, 404);
         }
     }
 
@@ -560,72 +569,73 @@ class ApiV1
 
     private function handleTermsGet(array $fragments, array $params): void
     {
-        if (($fragments[1] ?? '') === 'list') {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === 'list') {
             // GET /terms/list - get paginated, filtered word list
             Response::success($this->wordListHandler->getWordList($params));
-        } elseif (($fragments[1] ?? '') === 'filter-options') {
+        } elseif ($frag1 === 'filter-options') {
             // GET /terms/filter-options - get filter dropdown options
-            $langId = isset($params['language_id']) && $params['language_id'] !== '' ? (int)$params['language_id'] : null;
+            $langId = isset($params['language_id']) && $params['language_id'] !== '' ? (int) $params['language_id'] : null;
             Response::success($this->wordListHandler->getFilterOptions($langId));
-        } elseif (($fragments[1] ?? '') === 'imported') {
+        } elseif ($frag1 === 'imported') {
             Response::success($this->wordListHandler->importedTermsList(
-                (string) $params["last_update"],
-                (int)$params["page"],
-                (int)$params["count"]
+                (string) ($params["last_update"] ?? ''),
+                (int) ($params["page"] ?? 0),
+                (int) ($params["count"] ?? 0)
             ));
-        } elseif (($fragments[1] ?? '') === 'for-edit') {
+        } elseif ($frag1 === 'for-edit') {
             // GET /terms/for-edit - get term data for editing in modal
             Response::success($this->termHandler->formatGetTermForEdit(
-                (int)($params['term_id'] ?? 0),
-                (int)($params['ord'] ?? 0),
-                isset($params['wid']) && $params['wid'] !== '' ? (int)$params['wid'] : null
+                (int) ($params['term_id'] ?? 0),
+                (int) ($params['ord'] ?? 0),
+                isset($params['wid']) && $params['wid'] !== '' ? (int) $params['wid'] : null
             ));
-        } elseif (($fragments[1] ?? '') === 'multi') {
+        } elseif ($frag1 === 'multi') {
             // GET /terms/multi - get multi-word expression data for editing
             Response::success($this->multiWordHandler->getMultiWordForEdit(
-                (int)($params['term_id'] ?? 0),
-                (int)($params['ord'] ?? 0),
+                (int) ($params['term_id'] ?? 0),
+                (int) ($params['ord'] ?? 0),
                 isset($params['txt']) ? (string) $params['txt'] : null,
-                isset($params['wid']) ? (int)$params['wid'] : null
+                isset($params['wid']) ? (int) $params['wid'] : null
             ));
-        } elseif (($fragments[1] ?? '') === 'family') {
+        } elseif ($frag1 === 'family') {
             // GET /terms/family?term_id=N - get word family for a term
             // GET /terms/family/suggestion?term_id=N&status=X - get family update suggestion
-            if (($fragments[2] ?? '') === 'suggestion') {
-                $termId = (int)($params['term_id'] ?? 0);
-                $newStatus = (int)($params['status'] ?? 0);
+            if ($frag2 === 'suggestion') {
+                $termId = (int) ($params['term_id'] ?? 0);
+                $newStatus = (int) ($params['status'] ?? 0);
                 Response::success($this->wordFamilyHandler->getFamilyUpdateSuggestion($termId, $newStatus));
             } else {
-                $termId = (int)($params['term_id'] ?? 0);
+                $termId = (int) ($params['term_id'] ?? 0);
                 if ($termId <= 0) {
                     Response::error('term_id is required', 400);
                 }
                 Response::success($this->wordFamilyHandler->getTermFamily($termId));
             }
-        } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
-            $termId = (int)$fragments[1];
-            if (($fragments[2] ?? '') === 'translations') {
+        } elseif ($frag1 !== '' && ctype_digit($frag1)) {
+            $termId = (int) $frag1;
+            if ($frag2 === 'translations') {
                 Response::success($this->textHandler->formatTermTranslations(
-                    (string)$params["term_lc"],
-                    (int)$params["text_id"]
+                    (string) ($params["term_lc"] ?? ''),
+                    (int) ($params["text_id"] ?? 0)
                 ));
-            } elseif (($fragments[2] ?? '') === 'details') {
+            } elseif ($frag2 === 'details') {
                 // GET /terms/{id}/details - get term details with sentence and tags
-                Response::success($this->termHandler->formatGetTermDetails(
-                    $termId,
-                    $params['ann'] ?? null
-                ));
-            } elseif (($fragments[2] ?? '') === 'family') {
+                $ann = isset($params['ann']) ? (string) $params['ann'] : null;
+                Response::success($this->termHandler->formatGetTermDetails($termId, $ann));
+            } elseif ($frag2 === 'family') {
                 // GET /terms/{id}/family - get word family for this term
                 Response::success($this->wordFamilyHandler->getTermFamily($termId));
-            } elseif (!isset($fragments[2])) {
+            } elseif ($frag2 === '') {
                 // GET /terms/{id} - get term by ID
                 Response::success($this->termHandler->formatGetTerm($termId));
             } else {
                 Response::error('Expected "translations", "details", "family", or no sub-path', 404);
             }
         } else {
-            Response::error('Endpoint Not Found: ' . ($fragments[1] ?? ''), 404);
+            Response::error('Endpoint Not Found: ' . $frag1, 404);
         }
     }
 
@@ -637,9 +647,11 @@ class ApiV1
      */
     private function handleWordFamiliesGet(array $fragments, array $params): void
     {
+        $frag1 = $this->frag($fragments, 1);
+
         // GET /word-families/stats?language_id=N - get lemma statistics for a language
-        if (($fragments[1] ?? '') === 'stats') {
-            $langId = (int)($params['language_id'] ?? 0);
+        if ($frag1 === 'stats') {
+            $langId = (int) ($params['language_id'] ?? 0);
             if ($langId <= 0) {
                 Response::error('language_id is required', 400);
             }
@@ -648,13 +660,13 @@ class ApiV1
         }
 
         // GET /word-families?language_id=N - get paginated list of word families
-        $langId = (int)($params['language_id'] ?? 0);
+        $langId = (int) ($params['language_id'] ?? 0);
         if ($langId <= 0) {
             Response::error('language_id is required', 400);
         }
 
         // Check if getting family by lemma
-        $lemmaLc = $params['lemma_lc'] ?? '';
+        $lemmaLc = (string) ($params['lemma_lc'] ?? '');
         if ($lemmaLc !== '') {
             // GET /word-families?language_id=N&lemma_lc=run - get specific family
             Response::success($this->wordFamilyHandler->getWordFamilyByLemma($langId, $lemmaLc));
@@ -667,26 +679,29 @@ class ApiV1
 
     private function handleTextsGet(array $fragments, array $params): void
     {
-        if (($fragments[1] ?? '') === 'statistics') {
-            $textIds = $params["text_ids"] ?? null;
-            if ($textIds === null) {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === 'statistics') {
+            $textIds = isset($params["text_ids"]) ? (string) $params["text_ids"] : '';
+            if ($textIds === '') {
                 Response::error('Missing required parameter: text_ids', 400);
                 return;
             }
             Response::success($this->adminHandler->formatTextsStatistics($textIds));
-        } elseif (($fragments[1] ?? '') === 'scoring') {
+        } elseif ($frag1 === 'scoring') {
             // Handle scoring endpoints
-            if (($fragments[2] ?? '') === 'recommended') {
+            if ($frag2 === 'recommended') {
                 // GET /texts/scoring/recommended?language_id=N - get recommended texts
-                $langId = (int)($params['language_id'] ?? 0);
+                $langId = (int) ($params['language_id'] ?? 0);
                 if ($langId <= 0) {
                     Response::error('language_id is required', 400);
                 }
                 Response::success($this->textHandler->formatGetRecommendedTexts($langId, $params));
             } else {
                 // GET /texts/scoring?text_id=N or text_ids=1,2,3 - get score(s)
-                $textId = isset($params['text_id']) ? (int)$params['text_id'] : 0;
-                $textIds = $params['text_ids'] ?? '';
+                $textId = isset($params['text_id']) ? (int) $params['text_id'] : 0;
+                $textIds = (string) ($params['text_ids'] ?? '');
 
                 if ($textId > 0) {
                     // Single text score
@@ -703,33 +718,27 @@ class ApiV1
                     Response::error('text_id or text_ids parameter is required', 400);
                 }
             }
-        } elseif (($fragments[1] ?? '') === 'by-language') {
+        } elseif ($frag1 === 'by-language') {
             // GET /texts/by-language/{langId} - get paginated texts for a language
-            if (!isset($fragments[2]) || !ctype_digit($fragments[2])) {
+            if ($frag2 === '' || !ctype_digit($frag2)) {
                 Response::error('Expected Language ID after "by-language"', 404);
             }
-            Response::success($this->textHandler->formatTextsByLanguage(
-                (int)$fragments[2],
-                $params
-            ));
-        } elseif (($fragments[1] ?? '') === 'archived-by-language') {
+            Response::success($this->textHandler->formatTextsByLanguage((int) $frag2, $params));
+        } elseif ($frag1 === 'archived-by-language') {
             // GET /texts/archived-by-language/{langId} - get paginated archived texts for a language
-            if (!isset($fragments[2]) || !ctype_digit($fragments[2])) {
+            if ($frag2 === '' || !ctype_digit($frag2)) {
                 Response::error('Expected Language ID after "archived-by-language"', 404);
             }
-            Response::success($this->textHandler->formatArchivedTextsByLanguage(
-                (int)$fragments[2],
-                $params
-            ));
-        } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
-            $textId = (int)$fragments[1];
-            if (($fragments[2] ?? '') === 'words') {
+            Response::success($this->textHandler->formatArchivedTextsByLanguage((int) $frag2, $params));
+        } elseif ($frag1 !== '' && ctype_digit($frag1)) {
+            $textId = (int) $frag1;
+            if ($frag2 === 'words') {
                 // GET /texts/{id}/words - get all words for client-side rendering
                 Response::success($this->textHandler->formatGetWords($textId));
-            } elseif (($fragments[2] ?? '') === 'print-items') {
+            } elseif ($frag2 === 'print-items') {
                 // GET /texts/{id}/print-items - get text items for print view
                 Response::success($this->textHandler->formatGetPrintItems($textId));
-            } elseif (($fragments[2] ?? '') === 'annotation') {
+            } elseif ($frag2 === 'annotation') {
                 // GET /texts/{id}/annotation - get annotation for improved text view
                 Response::success($this->textHandler->formatGetAnnotation($textId));
             } else {
@@ -746,69 +755,75 @@ class ApiV1
 
     private function handleTextsPost(array $fragments, array $params): void
     {
-        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === '' || !ctype_digit($frag1)) {
             Response::error('Text ID (Integer) Expected', 404);
         }
 
-        $textId = (int)$fragments[1];
+        $textId = (int) $frag1;
 
-        switch ($fragments[2] ?? '') {
+        switch ($frag2) {
             case 'annotation':
                 Response::success($this->textHandler->formatSetAnnotation(
                     $textId,
-                    $params['elem'],
-                    $params['data']
+                    (string) ($params['elem'] ?? ''),
+                    (string) ($params['data'] ?? '')
                 ));
                 break;
             case 'audio-position':
                 Response::success($this->textHandler->formatSetAudioPosition(
                     $textId,
-                    (int)$params['position']
+                    (int) ($params['position'] ?? 0)
                 ));
                 break;
             case 'reading-position':
                 Response::success($this->textHandler->formatSetTextPosition(
                     $textId,
-                    (int)$params['position']
+                    (int) ($params['position'] ?? 0)
                 ));
                 break;
             default:
-                Response::error('Endpoint Not Found: ' . ($fragments[2] ?? ''), 404);
+                Response::error('Endpoint Not Found: ' . $frag2, 404);
         }
     }
 
     private function handleTermsPost(array $fragments, array $params): void
     {
-        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
-            $termId = (int)$fragments[1];
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
 
-            if (($fragments[2] ?? '') === 'status') {
+        if ($frag1 !== '' && ctype_digit($frag1)) {
+            $termId = (int) $frag1;
+
+            if ($frag2 === 'status') {
                 $this->handleTermStatusPost($fragments, $termId);
-            } elseif (($fragments[2] ?? '') === 'translations') {
+            } elseif ($frag2 === 'translations') {
                 Response::success($this->termTranslationHandler->formatUpdateTranslation(
                     $termId,
-                    $params['translation']
+                    (string) ($params['translation'] ?? '')
                 ));
             } else {
                 Response::error('"status" or "translations" Expected', 404);
             }
-        } elseif (($fragments[1] ?? '') === 'new') {
+        } elseif ($frag1 === 'new') {
             Response::success($this->termTranslationHandler->formatAddTranslation(
-                $params['term_text'],
-                (int)($params['language_id'] ?? 0),
-                $params['translation']
+                (string) ($params['term_text'] ?? ''),
+                (int) ($params['language_id'] ?? 0),
+                (string) ($params['translation'] ?? '')
             ));
-        } elseif (($fragments[1] ?? '') === 'quick') {
+        } elseif ($frag1 === 'quick') {
             // POST /terms/quick - quick create term with status (98 or 99)
             Response::success($this->termHandler->formatQuickCreate(
-                (int)$params['text_id'],
-                (int)$params['position'],
-                (int)$params['status']
+                (int) ($params['text_id'] ?? 0),
+                (int) ($params['position'] ?? 0),
+                (int) ($params['status'] ?? 0)
             ));
-        } elseif (($fragments[1] ?? '') === 'full') {
+        } elseif ($frag1 === 'full') {
             // POST /terms/full - create term with full data
             Response::success($this->termHandler->formatCreateTermFull($params));
-        } elseif (($fragments[1] ?? '') === 'multi') {
+        } elseif ($frag1 === 'multi') {
             // POST /terms/multi - create multi-word expression
             Response::success($this->multiWordHandler->createMultiWordTerm($params));
         } else {
@@ -818,7 +833,9 @@ class ApiV1
 
     private function handleTermStatusPost(array $fragments, int $termId): void
     {
-        switch ($fragments[3] ?? '') {
+        $frag3 = $this->frag($fragments, 3);
+
+        switch ($frag3) {
             case 'down':
                 Response::success($this->termStatusHandler->formatIncrementStatus($termId, false));
                 break;
@@ -826,38 +843,38 @@ class ApiV1
                 Response::success($this->termStatusHandler->formatIncrementStatus($termId, true));
                 break;
             default:
-                if (ctype_digit($fragments[3] ?? '')) {
-                    Response::success($this->termStatusHandler->formatSetStatus(
-                        $termId,
-                        (int)$fragments[3]
-                    ));
+                if ($frag3 !== '' && ctype_digit($frag3)) {
+                    Response::success($this->termStatusHandler->formatSetStatus($termId, (int) $frag3));
                 } else {
-                    Response::error('Endpoint Not Found: ' . ($fragments[3] ?? ''), 404);
+                    Response::error('Endpoint Not Found: ' . $frag3, 404);
                 }
         }
     }
 
     private function handleFeedsPost(array $fragments, array $params): void
     {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
         // POST /feeds/articles/import - import articles as texts
-        if (($fragments[1] ?? '') === 'articles' && ($fragments[2] ?? '') === 'import') {
+        if ($frag1 === 'articles' && $frag2 === 'import') {
             Response::success($this->feedHandler->formatImportArticles($params));
             return;
         }
 
         // POST /feeds - create new feed
-        if (!isset($fragments[1]) || $fragments[1] === '') {
+        if ($frag1 === '') {
             Response::success($this->feedHandler->formatCreateFeed($params));
             return;
         }
 
         // POST /feeds/{id}/load - legacy feed load
-        if (ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'load') {
+        if (ctype_digit($frag1) && $frag2 === 'load') {
             Response::success($this->feedHandler->formatLoadFeed(
-                $params['name'],
-                (int)$fragments[1],
-                $params['source_uri'],
-                $params['options']
+                (string) ($params['name'] ?? ''),
+                (int) $frag1,
+                (string) ($params['source_uri'] ?? ''),
+                (string) ($params['options'] ?? '')
             ));
             return;
         }
@@ -867,21 +884,23 @@ class ApiV1
 
     private function handleFeedsGet(array $fragments, array $params): void
     {
+        $frag1 = $this->frag($fragments, 1);
+
         // GET /feeds/list - get paginated feed list
-        if (($fragments[1] ?? '') === 'list') {
+        if ($frag1 === 'list') {
             Response::success($this->feedHandler->formatGetFeedList($params));
             return;
         }
 
         // GET /feeds/articles - get articles for a feed
-        if (($fragments[1] ?? '') === 'articles') {
+        if ($frag1 === 'articles') {
             Response::success($this->feedHandler->formatGetArticles($params));
             return;
         }
 
         // GET /feeds/{id} - get single feed
-        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
-            Response::success($this->feedHandler->formatGetFeed((int)$fragments[1]));
+        if ($frag1 !== '' && ctype_digit($frag1)) {
+            Response::success($this->feedHandler->formatGetFeed((int) $frag1));
             return;
         }
 
@@ -900,7 +919,9 @@ class ApiV1
      */
     private function handlePut(array $fragments, array $params): void
     {
-        switch ($fragments[0]) {
+        $frag0 = $this->frag($fragments, 0);
+
+        switch ($frag0) {
             case 'languages':
                 $this->handleLanguagesPut($fragments, $params);
                 break;
@@ -930,17 +951,19 @@ class ApiV1
                 break;
 
             default:
-                Response::error('Endpoint Not Found On PUT: ' . $fragments[0], 404);
+                Response::error('Endpoint Not Found On PUT: ' . $frag0, 404);
         }
     }
 
     private function handleFeedsPut(array $fragments, array $params): void
     {
-        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === '' || !ctype_digit($frag1)) {
             Response::error('Feed ID (Integer) Expected', 404);
         }
 
-        $feedId = (int)$fragments[1];
+        $feedId = (int) $frag1;
         Response::success($this->feedHandler->formatUpdateFeed($feedId, $params));
     }
 
@@ -952,14 +975,17 @@ class ApiV1
      */
     private function handleLanguagesPut(array $fragments, array $params): void
     {
-        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === '' || !ctype_digit($frag1)) {
             Response::error('Language ID (Integer) Expected', 404);
         }
 
-        $langId = (int)$fragments[1];
+        $langId = (int) $frag1;
 
         // PUT /languages/{id} - update language
-        if (!isset($fragments[2]) || $fragments[2] === '') {
+        if ($frag2 === '') {
             Response::success($this->languageHandler->formatUpdate($langId, $params));
             return;
         }
@@ -969,7 +995,9 @@ class ApiV1
 
     private function handleReviewPut(array $fragments, array $params): void
     {
-        if (($fragments[1] ?? '') === 'status') {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === 'status') {
             // PUT /review/status - update word status during review
             Response::success($this->reviewHandler->formatUpdateStatus($params));
         } else {
@@ -979,38 +1007,45 @@ class ApiV1
 
     private function handleTermsPut(array $fragments, array $params): void
     {
-        if (($fragments[1] ?? '') === 'bulk-status') {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === 'bulk-status') {
             // PUT /terms/bulk-status - bulk update term statuses
-            $termIds = $params['term_ids'] ?? [];
-            $status = (int)($params['status'] ?? 0);
+            /** @var array<int> $termIds */
+            $termIds = is_array($params['term_ids'] ?? null) ? $params['term_ids'] : [];
+            $status = (int) ($params['status'] ?? 0);
             Response::success($this->termStatusHandler->formatBulkStatus($termIds, $status));
-        } elseif (($fragments[1] ?? '') === 'bulk-action') {
+        } elseif ($frag1 === 'bulk-action') {
             // PUT /terms/bulk-action - perform bulk action on selected terms
-            $ids = $params['ids'] ?? [];
-            $action = $params['action'] ?? '';
-            $data = $params['data'] ?? null;
+            /** @var array<int> $ids */
+            $ids = is_array($params['ids'] ?? null) ? $params['ids'] : [];
+            $action = (string) ($params['action'] ?? '');
+            $data = isset($params['data']) ? (string) $params['data'] : null;
             Response::success($this->wordListHandler->bulkAction($ids, $action, $data));
-        } elseif (($fragments[1] ?? '') === 'all-action') {
+        } elseif ($frag1 === 'all-action') {
             // PUT /terms/all-action - perform action on all filtered terms
-            $filters = $params['filters'] ?? [];
-            $action = $params['action'] ?? '';
-            $data = $params['data'] ?? null;
+            /** @var array<string, mixed> $filters */
+            $filters = is_array($params['filters'] ?? null) ? $params['filters'] : [];
+            $action = (string) ($params['action'] ?? '');
+            $data = isset($params['data']) ? (string) $params['data'] : null;
             Response::success($this->wordListHandler->allAction($filters, $action, $data));
-        } elseif (($fragments[1] ?? '') === 'family') {
+        } elseif ($frag1 === 'family') {
             // PUT /terms/family/status - update status for entire word family
             // PUT /terms/family/apply - apply suggested family update
-            if (($fragments[2] ?? '') === 'status') {
-                $langId = (int)($params['language_id'] ?? 0);
-                $lemmaLc = $params['lemma_lc'] ?? '';
-                $status = (int)($params['status'] ?? 0);
+            if ($frag2 === 'status') {
+                $langId = (int) ($params['language_id'] ?? 0);
+                $lemmaLc = (string) ($params['lemma_lc'] ?? '');
+                $status = (int) ($params['status'] ?? 0);
 
                 if ($langId <= 0 || $lemmaLc === '') {
                     Response::error('language_id and lemma_lc are required', 400);
                 }
                 Response::success($this->wordFamilyHandler->updateWordFamilyStatus($langId, $lemmaLc, $status));
-            } elseif (($fragments[2] ?? '') === 'apply') {
-                $termIds = $params['term_ids'] ?? [];
-                $status = (int)($params['status'] ?? 0);
+            } elseif ($frag2 === 'apply') {
+                /** @var array<int> $termIds */
+                $termIds = is_array($params['term_ids'] ?? null) ? $params['term_ids'] : [];
+                $status = (int) ($params['status'] ?? 0);
 
                 if (empty($termIds)) {
                     Response::error('term_ids is required', 400);
@@ -1019,25 +1054,25 @@ class ApiV1
             } else {
                 Response::error('Expected "status" or "apply"', 404);
             }
-        } elseif (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'inline-edit') {
+        } elseif ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'inline-edit') {
             // PUT /terms/{id}/inline-edit - inline edit translation or romanization
-            $termId = (int)$fragments[1];
-            $field = $params['field'] ?? '';
-            $value = $params['value'] ?? '';
+            $termId = (int) $frag1;
+            $field = (string) ($params['field'] ?? '');
+            $value = (string) ($params['value'] ?? '');
             Response::success($this->wordListHandler->inlineEdit($termId, $field, $value));
-        } elseif (($fragments[1] ?? '') === 'multi' && isset($fragments[2]) && ctype_digit($fragments[2])) {
+        } elseif ($frag1 === 'multi' && $frag2 !== '' && ctype_digit($frag2)) {
             // PUT /terms/multi/{id} - update multi-word expression
-            $termId = (int)$fragments[2];
+            $termId = (int) $frag2;
             Response::success($this->multiWordHandler->updateMultiWordTerm($termId, $params));
-        } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
-            $termId = (int)$fragments[1];
-            if (($fragments[2] ?? '') === 'translation') {
+        } elseif ($frag1 !== '' && ctype_digit($frag1)) {
+            $termId = (int) $frag1;
+            if ($frag2 === 'translation') {
                 // PUT /terms/{id}/translation - update translation
                 Response::success($this->termTranslationHandler->formatUpdateTranslation(
                     $termId,
-                    $params['translation'] ?? ''
+                    (string) ($params['translation'] ?? '')
                 ));
-            } elseif (!isset($fragments[2])) {
+            } elseif ($frag2 === '') {
                 // PUT /terms/{id} - update term with full data
                 Response::success($this->termHandler->formatUpdateTermFull($termId, $params));
             } else {
@@ -1050,13 +1085,16 @@ class ApiV1
 
     private function handleTextsPut(array $fragments, array $params): void
     {
-        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === '' || !ctype_digit($frag1)) {
             Response::error('Text ID (Integer) Expected', 404);
         }
 
-        $textId = (int)$fragments[1];
+        $textId = (int) $frag1;
 
-        switch ($fragments[2] ?? '') {
+        switch ($frag2) {
             case 'display-mode':
                 // PUT /texts/{id}/display-mode - set display mode settings
                 Response::success($this->textHandler->formatSetDisplayMode($textId, $params));
@@ -1088,7 +1126,9 @@ class ApiV1
      */
     private function handleDelete(array $fragments, array $params): void
     {
-        switch ($fragments[0]) {
+        $frag0 = $this->frag($fragments, 0);
+
+        switch ($frag0) {
             case 'languages':
                 $this->handleLanguagesDelete($fragments);
                 break;
@@ -1118,36 +1158,41 @@ class ApiV1
                 break;
 
             default:
-                Response::error('Endpoint Not Found On DELETE: ' . $fragments[0], 404);
+                Response::error('Endpoint Not Found On DELETE: ' . $frag0, 404);
         }
     }
 
     private function handleFeedsDelete(array $fragments, array $params): void
     {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
         // DELETE /feeds/articles/{feedId} - delete articles for a feed
-        if (($fragments[1] ?? '') === 'articles' && isset($fragments[2]) && ctype_digit($fragments[2])) {
-            $feedId = (int)$fragments[2];
-            $articleIds = $params['article_ids'] ?? [];
+        if ($frag1 === 'articles' && $frag2 !== '' && ctype_digit($frag2)) {
+            $feedId = (int) $frag2;
+            /** @var array<int> $articleIds */
+            $articleIds = is_array($params['article_ids'] ?? null) ? $params['article_ids'] : [];
             Response::success($this->feedHandler->formatDeleteArticles($feedId, $articleIds));
             return;
         }
 
         // DELETE /feeds/{id}/reset-errors - reset error articles
-        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'reset-errors') {
-            Response::success($this->feedHandler->formatResetErrorArticles((int)$fragments[1]));
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'reset-errors') {
+            Response::success($this->feedHandler->formatResetErrorArticles((int) $frag1));
             return;
         }
 
         // DELETE /feeds - bulk delete feeds (ids in body)
-        if (!isset($fragments[1]) || $fragments[1] === '') {
-            $feedIds = $params['feed_ids'] ?? [];
+        if ($frag1 === '') {
+            /** @var array<int> $feedIds */
+            $feedIds = is_array($params['feed_ids'] ?? null) ? $params['feed_ids'] : [];
             Response::success($this->feedHandler->formatDeleteFeeds($feedIds));
             return;
         }
 
         // DELETE /feeds/{id} - delete single feed
-        if (ctype_digit($fragments[1])) {
-            Response::success($this->feedHandler->formatDeleteFeeds([(int)$fragments[1]]));
+        if (ctype_digit($frag1)) {
+            Response::success($this->feedHandler->formatDeleteFeeds([(int) $frag1]));
             return;
         }
 
@@ -1161,21 +1206,25 @@ class ApiV1
      */
     private function handleLanguagesDelete(array $fragments): void
     {
-        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === '' || !ctype_digit($frag1)) {
             Response::error('Language ID (Integer) Expected', 404);
         }
 
-        $langId = (int)$fragments[1];
+        $langId = (int) $frag1;
         Response::success($this->languageHandler->formatDelete($langId));
     }
 
     private function handleTermsDelete(array $fragments): void
     {
-        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === '' || !ctype_digit($frag1)) {
             Response::error('Term ID (Integer) Expected', 404);
         }
 
-        $termId = (int)$fragments[1];
+        $termId = (int) $frag1;
         Response::success($this->termHandler->formatDeleteTerm($termId));
     }
 
@@ -1191,10 +1240,13 @@ class ApiV1
      */
     private function handleLocalDictionariesGet(array $fragments, array $params): void
     {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
         // GET /local-dictionaries/lookup - look up a term
-        if (($fragments[1] ?? '') === 'lookup') {
-            $languageId = (int)($params['language_id'] ?? 0);
-            $term = $params['term'] ?? '';
+        if ($frag1 === 'lookup') {
+            $languageId = (int) ($params['language_id'] ?? 0);
+            $term = (string) ($params['term'] ?? '');
 
             if ($languageId <= 0) {
                 Response::error('language_id is required', 400);
@@ -1208,19 +1260,19 @@ class ApiV1
         }
 
         // GET /local-dictionaries/entries/{dictId} - get entries for dictionary
-        if (($fragments[1] ?? '') === 'entries' && isset($fragments[2]) && ctype_digit($fragments[2])) {
-            Response::success($this->localDictionaryHandler->formatGetEntries((int)$fragments[2], $params));
+        if ($frag1 === 'entries' && $frag2 !== '' && ctype_digit($frag2)) {
+            Response::success($this->localDictionaryHandler->formatGetEntries((int) $frag2, $params));
             return;
         }
 
         // GET /local-dictionaries/{id} - get single dictionary
-        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
-            Response::success($this->localDictionaryHandler->formatGetDictionary((int)$fragments[1]));
+        if ($frag1 !== '' && ctype_digit($frag1)) {
+            Response::success($this->localDictionaryHandler->formatGetDictionary((int) $frag1));
             return;
         }
 
         // GET /local-dictionaries?language_id=N - list dictionaries for language
-        $languageId = (int)($params['language_id'] ?? 0);
+        $languageId = (int) ($params['language_id'] ?? 0);
         if ($languageId <= 0) {
             Response::error('language_id is required', 400);
         }
@@ -1236,37 +1288,40 @@ class ApiV1
      */
     private function handleLocalDictionariesPost(array $fragments, array $params): void
     {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
         // POST /local-dictionaries/preview - preview file before import
-        if (($fragments[1] ?? '') === 'preview') {
+        if ($frag1 === 'preview') {
             Response::success($this->localDictionaryHandler->formatPreview($params));
             return;
         }
 
         // POST /local-dictionaries/entries/{dictId} - add entry to dictionary
-        if (($fragments[1] ?? '') === 'entries' && isset($fragments[2]) && ctype_digit($fragments[2])) {
-            Response::success($this->localDictionaryHandler->formatAddEntry((int)$fragments[2], $params));
+        if ($frag1 === 'entries' && $frag2 !== '' && ctype_digit($frag2)) {
+            Response::success($this->localDictionaryHandler->formatAddEntry((int) $frag2, $params));
             return;
         }
 
         // POST /local-dictionaries/{id}/import - import entries into dictionary
-        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'import') {
-            Response::success($this->localDictionaryHandler->formatImport((int)$fragments[1], $params));
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'import') {
+            Response::success($this->localDictionaryHandler->formatImport((int) $frag1, $params));
             return;
         }
 
         // POST /local-dictionaries/{id}/clear - clear all entries
-        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'clear') {
-            Response::success($this->localDictionaryHandler->formatClearEntries((int)$fragments[1]));
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'clear') {
+            Response::success($this->localDictionaryHandler->formatClearEntries((int) $frag1));
             return;
         }
 
         // POST /local-dictionaries - create new dictionary
-        if (!isset($fragments[1]) || $fragments[1] === '') {
+        if ($frag1 === '') {
             Response::success($this->localDictionaryHandler->formatCreateDictionary($params));
             return;
         }
 
-        Response::error('Endpoint Not Found: local-dictionaries/' . ($fragments[1] ?? ''), 404);
+        Response::error('Endpoint Not Found: local-dictionaries/' . $frag1, 404);
     }
 
     /**
@@ -1277,9 +1332,12 @@ class ApiV1
      */
     private function handleLocalDictionariesPut(array $fragments, array $params): void
     {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
         // PUT /local-dictionaries/{id} - update dictionary
-        if (isset($fragments[1]) && ctype_digit($fragments[1]) && !isset($fragments[2])) {
-            Response::success($this->localDictionaryHandler->formatUpdateDictionary((int)$fragments[1], $params));
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === '') {
+            Response::success($this->localDictionaryHandler->formatUpdateDictionary((int) $frag1, $params));
             return;
         }
 
@@ -1293,9 +1351,11 @@ class ApiV1
      */
     private function handleLocalDictionariesDelete(array $fragments): void
     {
+        $frag1 = $this->frag($fragments, 1);
+
         // DELETE /local-dictionaries/{id} - delete dictionary
-        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
-            Response::success($this->localDictionaryHandler->formatDeleteDictionary((int)$fragments[1]));
+        if ($frag1 !== '' && ctype_digit($frag1)) {
+            Response::success($this->localDictionaryHandler->formatDeleteDictionary((int) $frag1));
             return;
         }
 
@@ -1310,20 +1370,21 @@ class ApiV1
      * Handle GET requests for TTS endpoints.
      *
      * @param string[] $fragments Endpoint path segments
-     * @param array    $params    Query parameters
+     * @param array    $_params   Query parameters (unused)
      */
-    private function handleTtsGet(array $fragments, array $params): void
+    private function handleTtsGet(array $fragments, array $_params): void
     {
-        switch ($fragments[1] ?? '') {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        switch ($frag1) {
             case 'voices':
-                if (($fragments[2] ?? '') === 'installed') {
+                if ($frag2 === 'installed') {
                     // GET /tts/voices/installed - get only installed voices
                     Response::success(['voices' => $this->nlpHandler->getInstalledVoices()]);
-                } else {
-                    // GET /tts/voices - get all voices (installed + available)
-                    Response::success(['voices' => $this->nlpHandler->getVoices()]);
                 }
-                break;
+                // GET /tts/voices - get all voices (installed + available)
+                Response::success(['voices' => $this->nlpHandler->getVoices()]);
 
             default:
                 Response::error('Expected "voices"', 404);
@@ -1338,11 +1399,14 @@ class ApiV1
      */
     private function handleTtsPost(array $fragments, array $params): void
     {
-        switch ($fragments[1] ?? '') {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        switch ($frag1) {
             case 'speak':
                 // POST /tts/speak - synthesize speech
-                $text = $params['text'] ?? '';
-                $voiceId = $params['voice_id'] ?? '';
+                $text = (string) ($params['text'] ?? '');
+                $voiceId = (string) ($params['voice_id'] ?? '');
 
                 if ($text === '' || $voiceId === '') {
                     Response::error('text and voice_id are required', 400);
@@ -1357,9 +1421,9 @@ class ApiV1
                 break;
 
             case 'voices':
-                if (($fragments[2] ?? '') === 'download') {
+                if ($frag2 === 'download') {
                     // POST /tts/voices/download - download a voice
-                    $voiceId = $params['voice_id'] ?? '';
+                    $voiceId = (string) ($params['voice_id'] ?? '');
                     if ($voiceId === '') {
                         Response::error('voice_id is required', 400);
                     }
@@ -1370,10 +1434,8 @@ class ApiV1
                     }
 
                     Response::success(['success' => true, 'voice_id' => $voiceId]);
-                } else {
-                    Response::error('Expected "download"', 404);
                 }
-                break;
+                Response::error('Expected "download"', 404);
 
             default:
                 Response::error('Expected "speak" or "voices/download"', 404);
@@ -1387,10 +1449,12 @@ class ApiV1
      */
     private function handleTtsDelete(array $fragments): void
     {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
         // DELETE /tts/voices/{id} - delete a voice
-        if (($fragments[1] ?? '') === 'voices' && isset($fragments[2]) && $fragments[2] !== '') {
-            $voiceId = $fragments[2];
-            $success = $this->nlpHandler->deleteVoice($voiceId);
+        if ($frag1 === 'voices' && $frag2 !== '') {
+            $success = $this->nlpHandler->deleteVoice($frag2);
 
             if (!$success) {
                 Response::error('Voice not found or deletion failed', 404);
@@ -1415,7 +1479,9 @@ class ApiV1
      */
     private function handleYouTubeGet(array $fragments, array $params): void
     {
-        switch ($fragments[1] ?? '') {
+        $frag1 = $this->frag($fragments, 1);
+
+        switch ($frag1) {
             case 'configured':
                 // GET /youtube/configured - check if YouTube API is configured
                 Response::success($this->youtubeHandler->formatIsConfigured());
@@ -1423,7 +1489,7 @@ class ApiV1
 
             case 'video':
                 // GET /youtube/video?video_id=xxx - get video info
-                $videoId = $params['video_id'] ?? '';
+                $videoId = (string) ($params['video_id'] ?? '');
                 if ($videoId === '') {
                     Response::error('video_id parameter is required', 400);
                 }
@@ -1443,11 +1509,14 @@ class ApiV1
      * Handle GET requests for Whisper endpoints.
      *
      * @param string[] $fragments Endpoint path segments
-     * @param array    $params    Query parameters
+     * @param array    $_params   Query parameters (unused)
      */
-    private function handleWhisperGet(array $fragments, array $params): void
+    private function handleWhisperGet(array $fragments, array $_params): void
     {
-        switch ($fragments[1] ?? '') {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        switch ($frag1) {
             case 'available':
                 // GET /whisper/available - check if Whisper is available
                 Response::success($this->whisperHandler->formatIsAvailable());
@@ -1465,21 +1534,19 @@ class ApiV1
 
             case 'status':
                 // GET /whisper/status/{job_id} - get job status
-                $jobId = $fragments[2] ?? '';
-                if ($jobId === '') {
+                if ($frag2 === '') {
                     Response::error('job_id is required', 400);
                 }
-                Response::success($this->whisperHandler->formatGetStatus($jobId));
+                Response::success($this->whisperHandler->formatGetStatus($frag2));
                 break;
 
             case 'result':
                 // GET /whisper/result/{job_id} - get completed result
-                $jobId = $fragments[2] ?? '';
-                if ($jobId === '') {
+                if ($frag2 === '') {
                     Response::error('job_id is required', 400);
                 }
                 try {
-                    Response::success($this->whisperHandler->formatGetResult($jobId));
+                    Response::success($this->whisperHandler->formatGetResult($frag2));
                 } catch (\RuntimeException $e) {
                     Response::error($e->getMessage(), 500);
                 }
@@ -1498,18 +1565,18 @@ class ApiV1
      */
     private function handleWhisperPost(array $fragments, array $params): void
     {
-        if (($fragments[1] ?? '') === 'transcribe') {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === 'transcribe') {
             // POST /whisper/transcribe - start transcription
+            /** @var array{name?: string, tmp_name?: string, size?: int}|null $file */
             $file = $_FILES['file'] ?? null;
             if ($file === null) {
                 Response::error('No file uploaded', 400);
             }
 
-            $language = $params['language'] ?? null;
-            if ($language === '') {
-                $language = null;
-            }
-            $model = $params['model'] ?? 'small';
+            $language = isset($params['language']) && $params['language'] !== '' ? (string) $params['language'] : null;
+            $model = (string) ($params['model'] ?? 'small');
 
             try {
                 Response::success($this->whisperHandler->formatStartTranscription(
@@ -1535,10 +1602,12 @@ class ApiV1
      */
     private function handleWhisperDelete(array $fragments): void
     {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
         // DELETE /whisper/job/{id} - cancel job
-        if (($fragments[1] ?? '') === 'job' && isset($fragments[2]) && $fragments[2] !== '') {
-            $jobId = $fragments[2];
-            Response::success($this->whisperHandler->formatCancelJob($jobId));
+        if ($frag1 === 'job' && $frag2 !== '') {
+            Response::success($this->whisperHandler->formatCancelJob($frag2));
             return;
         }
 
@@ -1561,15 +1630,18 @@ class ApiV1
             Response::error('Book module not available', 503);
         }
 
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
         // GET /books/{id}/chapters - get chapters for a book
-        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'chapters') {
-            Response::success($this->bookHandler->getChapters(['id' => $fragments[1]]));
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'chapters') {
+            Response::success($this->bookHandler->getChapters(['id' => $frag1]));
             return;
         }
 
         // GET /books/{id} - get single book
-        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
-            Response::success($this->bookHandler->getBook(['id' => $fragments[1]]));
+        if ($frag1 !== '' && ctype_digit($frag1)) {
+            Response::success($this->bookHandler->getBook(['id' => $frag1]));
             return;
         }
 
@@ -1589,9 +1661,12 @@ class ApiV1
             Response::error('Book module not available', 503);
         }
 
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
         // PUT /books/{id}/progress - update reading progress
-        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'progress') {
-            $params['id'] = $fragments[1];
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'progress') {
+            $params['id'] = $frag1;
             Response::success($this->bookHandler->updateProgress($params));
             return;
         }
@@ -1610,9 +1685,11 @@ class ApiV1
             Response::error('Book module not available', 503);
         }
 
+        $frag1 = $this->frag($fragments, 1);
+
         // DELETE /books/{id} - delete a book
-        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
-            Response::success($this->bookHandler->deleteBook(['id' => $fragments[1]]));
+        if ($frag1 !== '' && ctype_digit($frag1)) {
+            Response::success($this->bookHandler->deleteBook(['id' => $frag1]));
             return;
         }
 
@@ -1622,6 +1699,19 @@ class ApiV1
     // =========================================================================
     // Helper Methods
     // =========================================================================
+
+    /**
+     * Extract a fragment from the fragments array.
+     *
+     * @param array<int, string> $fragments The URL path fragments
+     * @param int                $index     The index to extract
+     *
+     * @return string The fragment at the index, or empty string if not present
+     */
+    private function frag(array $fragments, int $index): string
+    {
+        return $fragments[$index] ?? '';
+    }
 
     private function parseQueryParams(string $uri): array
     {
@@ -1644,6 +1734,7 @@ class ApiV1
         if ($input === false || $input === '') {
             return [];
         }
+        /** @var array|null $data */
         $data = json_decode($input, true);
         return is_array($data) ? $data : [];
     }

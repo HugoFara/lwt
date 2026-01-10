@@ -20,16 +20,17 @@
  *
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
  * @psalm-suppress TypeDoesNotContainType View included from different contexts
+ *
+ * @var int $textId
+ * @var \Lwt\Classes\Text $text
+ * @var bool $annotated
+ * @var array<int, string> $languageData
+ * @var array<int, array{id: int, name: string}> $languages
+ * @var bool $isNew
+ * @var string $scrdir
  */
 
 namespace Lwt\Views\Text;
-
-/** @var int $textId */
-/** @var \Lwt\Classes\Text $text */
-/** @var bool $annotated */
-/** @var array $languageData */
-/** @var array $languages */
-/** @var bool $isNew */
 
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
@@ -37,6 +38,27 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Core\Integration\YouTubeImport;
 
+// Type-safe variable extraction from controller context
+/** @var int $textId */
+/** @var object{id: int, lgid: int, title: string, text: string, source: string, media_uri: string} $text */
+/** @var bool $annotated */
+assert(is_array($languageData));
+/** @var array<int, string> $languageData */
+assert(is_array($languages));
+/** @var array<int, array{id: int, name: string}> $languages */
+/** @var bool $isNew */
+/** @var string $scrdir */
+
+// Extract typed properties from $text for use in template
+/** @var int */
+$textIdTyped = $textId;
+$textLgId = (int)$text->lgid;
+$textTitle = (string)$text->title;
+$textContent = (string)$text->text;
+$textSource = (string)$text->source;
+$textMediaUri = (string)$text->media_uri;
+/** @var string */
+$scrdirTyped = $scrdir;
 
 // Build actions based on whether this is a new or existing text
 $actions = [];
@@ -66,10 +88,10 @@ if ($isNew) {
 <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
 <form class="validate" method="post" enctype="multipart/form-data"
-      action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>"
+      action="/texts<?php echo $isNew ? '' : '#rec' . $textIdTyped; ?>"
       x-data="{ showAnnotation: <?php echo $isNew ? 'false' : 'true'; ?> }">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-    <input type="hidden" name="TxID" value="<?php echo $textId; ?>" />
+    <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
 
     <div class="box">
         <?php if ($isNew): ?>
@@ -182,7 +204,7 @@ if ($isNew) {
                             data-action="change-language"
                             title="Select the language of your text"
                             required>
-                        <?php echo SelectOptionsBuilder::forLanguages($languages, $text->lgid, "[Choose...]"); ?>
+                        <?php echo SelectOptionsBuilder::forLanguages($languages, $textLgId, "[Choose...]"); ?>
                     </select>
                 </div>
             </div>
@@ -203,7 +225,7 @@ if ($isNew) {
                        data_info="Title"
                        name="TxTitle"
                        id="TxTitle"
-                       value="<?php echo \htmlspecialchars($text->title ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       value="<?php echo \htmlspecialchars($textTitle, ENT_QUOTES, 'UTF-8'); ?>"
                        maxlength="200"
                        placeholder="Enter a descriptive title for your text"
                        title="A short, memorable title to identify this text"
@@ -220,7 +242,7 @@ if ($isNew) {
                 </span>
             </label>
             <div class="control">
-                <textarea <?php echo $scrdir; ?>
+                <textarea <?php echo $scrdirTyped; ?>
                           name="TxText"
                           id="TxText"
                           class="textarea notempty checkoutsidebmp"
@@ -228,7 +250,7 @@ if ($isNew) {
                           rows="15"
                           placeholder="Paste or type your text here..."
                           title="The text you want to study"
-                          required><?php echo \htmlspecialchars($text->text ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                          required><?php echo \htmlspecialchars($textContent, ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
             <p class="help">
                 Long texts (over 60KB) will be automatically split into chapters and saved as a book.
@@ -252,7 +274,7 @@ if ($isNew) {
                         <button type="button"
                                 class="button is-small is-info is-outlined"
                                 data-action="navigate"
-                                data-url="/text/print?text=<?php echo $textId; ?>">
+                                data-url="/text/print?text=<?php echo $textIdTyped; ?>">
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('printer', ['alt' => 'Print']); ?>
                             </span>
@@ -294,7 +316,7 @@ if ($isNew) {
                        data_info="Source URI"
                        name="TxSourceURI"
                        id="TxSourceURI"
-                       value="<?php echo \htmlspecialchars($text->source ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       value="<?php echo \htmlspecialchars($textSource, ENT_QUOTES, 'UTF-8'); ?>"
                        maxlength="1000"
                        placeholder="https://example.com/article"
                        title="Link to the original source of this text" />
@@ -306,7 +328,7 @@ if ($isNew) {
         <div class="field">
             <label class="label" title="Organize texts with tags for easy filtering">Tags</label>
             <div class="control">
-                <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getTextTagsHtml($textId); ?>
+                <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getTextTagsHtml($textIdTyped); ?>
             </div>
             <p class="help">Optional. Add tags to categorize and filter your texts.</p>
         </div>
@@ -321,7 +343,7 @@ if ($isNew) {
                        name="TxAudioURI"
                        id="TxAudioURI"
                        maxlength="2048"
-                       value="<?php echo \htmlspecialchars($text->media_uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       value="<?php echo \htmlspecialchars($textMediaUri, ENT_QUOTES, 'UTF-8'); ?>"
                        placeholder="media/audio.mp3 or https://example.com/video.mp4"
                        title="Audio or video file to play while reading" />
             </div>
@@ -364,7 +386,7 @@ if ($isNew) {
             <button type="button"
                     class="button is-light"
                     data-action="cancel-form"
-                    data-url="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>">
+                    data-url="/texts<?php echo $isNew ? '' : '#rec' . $textIdTyped; ?>">
                 Cancel
             </button>
         </div>

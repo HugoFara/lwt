@@ -21,6 +21,11 @@ namespace Lwt\Views\Feed;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
+/**
+ * @var array<int, array{LgID: int, LgName: string}> $languages Language records
+ * @var int $currentLang Current language ID (for pre-selection)
+ */
+
 $actions = [
     ['url' => '/feeds?page=1', 'label' => 'Feeds', 'icon' => 'list'],
     ['url' => '/feeds/wizard?step=1', 'label' => 'New Feed Wizard', 'icon' => 'wand-2', 'class' => 'is-info']
@@ -68,7 +73,7 @@ $actions = [
                         <div class="select is-fullwidth">
                             <select name="NfLgID" id="NfLgID">
                                 <?php foreach ($languages as $lang): ?>
-                                <option value="<?php echo $lang['LgID']; ?>"<?php if ($currentLang === (int)$lang['LgID']) echo ' selected'; ?>>
+                                <option value="<?php echo $lang['LgID']; ?>"<?php if ($currentLang === $lang['LgID']) echo ' selected'; ?>>
                                     <?php echo htmlspecialchars($lang['LgName'], ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                                 <?php endforeach; ?>

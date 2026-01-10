@@ -112,6 +112,7 @@ class Validation
                 )
             ) AS tag_exists"
                 . UserScopedQuery::forTablePrepared('words', $bindings);
+            /** @var int|string|null $r */
             $r = Connection::fetchValue($sql, 'tag_exists');
             if ($r == 0) {
                 $currenttag = '';
@@ -167,6 +168,7 @@ class Validation
                 ) as value"
                     . UserScopedQuery::forTablePrepared('texts', $bindings);
             }
+            /** @var int|string|null $r */
             $r = Connection::fetchValue($sql);
             if ($r == 0) {
                 $currenttag = '';
@@ -219,6 +221,7 @@ class Validation
                 ) as value"
                     . UserScopedQuery::forTablePrepared('texts', $bindings);
             }
+            /** @var int|string|null $r */
             $r = Connection::fetchValue($sql);
             if ($r == 0) {
                 $currenttag = '';

@@ -202,9 +202,10 @@ class TextNavigationService
      */
     public static function getTextTitle(int $textId): string
     {
+        /** @var string|null $result */
         $result = QueryBuilder::table('texts')
             ->where('TxID', '=', $textId)
             ->valuePrepared('TxTitle');
-        return $result !== null ? (string) $result : '';
+        return $result ?? '';
     }
 }

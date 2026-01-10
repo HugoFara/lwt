@@ -27,6 +27,18 @@ namespace Lwt\Views\Feed;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
+/**
+ * @var array<int, array{NfID: int, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string}> $feeds Feed data
+ * @var int $currentLang Current language filter
+ * @var string $currentQuery Search query
+ * @var int $currentPage Current page number
+ * @var int $currentSort Current sort index
+ * @var int $totalFeeds Total number of feeds
+ * @var int $pages Total pages
+ * @var int $maxPerPage Feeds per page
+ * @var \Lwt\Modules\Feed\Application\FeedFacade $feedService Feed service
+ */
+
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/feeds', 'label' => 'Feeds', 'icon' => 'list'],
     ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
@@ -134,7 +146,7 @@ echo PageLayoutHelper::buildActionCard([
 <?php
 $time = time();
 foreach ($feeds as $row):
-    $diff = $time - (int)$row['NfUpdate'];
+    $diff = $time - $row['NfUpdate'];
 ?>
 <tr>
     <td class="td1 center">
@@ -155,7 +167,7 @@ foreach ($feeds as $row):
         </span>
     </td>
     <td class="td1 center"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-    <td class="td1 center"><?php echo str_replace(',', ', ', (string) ($row['NfOptions'] ?? '')); ?></td>
+    <td class="td1 center"><?php echo str_replace(',', ', ', $row['NfOptions']); ?></td>
     <td class="td1 center" sorttable_customkey="<?php echo $diff; ?>">
         <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
     </td>

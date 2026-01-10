@@ -76,7 +76,7 @@ class FindSimilarTerms
             // Calculate combined similarity (character pairs + phonetic)
             $baseSimilarity = $this->calculator->getCombinedSimilarityRanking(
                 $comparedTermLc,
-                $record["WoTextLC"],
+                (string)$record["WoTextLC"],
                 $phoneticWeight
             );
 
@@ -122,7 +122,7 @@ class FindSimilarTerms
             ->where('WoID', '=', $termId)
             ->firstPrepared();
         if ($record !== null) {
-            $term = htmlspecialchars($record["WoText"] ?? '', ENT_QUOTES, 'UTF-8');
+            $term = htmlspecialchars((string)($record["WoText"] ?? ''), ENT_QUOTES, 'UTF-8');
             if (stripos($compare, $term) !== false) {
                 $term = '<span class="red3">' . $term . '</span>';
             } else {

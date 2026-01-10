@@ -66,7 +66,7 @@ class WordContextService
             $bindings,
             'TxLgID'
         );
-        return $langId !== null ? (int)$langId : null;
+        return $langId;
     }
 
     /**
@@ -165,7 +165,7 @@ class WordContextService
         }
 
         $sent = $this->sentenceService->formatSentence(
-            (int) $seid,
+            $seid,
             $termlc,
             (int) Settings::getWithDefault('set-term-sentence-count')
         );
@@ -191,7 +191,7 @@ class WordContextService
             [$textId, $ord],
             'Ti2SeID'
         );
-        return $seid !== null ? (int) $seid : null;
+        return $seid;
     }
 
     /**

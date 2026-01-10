@@ -19,12 +19,27 @@
  * @package  Lwt
  * @license  Unlicense <http://unlicense.org/>
  * @since    3.0.0
+ *
+ * @var int $textId
+ * @var int $langId
+ * @var string $title
+ * @var string|null $sourceUri
+ * @var string $media
+ * @var int $audioPosition
  */
 
 namespace Lwt\Views\Text;
 
 use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+
+// Type-safe variable extraction from controller context
+/** @var int $textId */
+/** @var int $langId */
+/** @var string $title */
+/** @var string|null $sourceUri */
+/** @var string $media */
+/** @var int $audioPosition */
 
 ?>
 <!-- Main navigation -->

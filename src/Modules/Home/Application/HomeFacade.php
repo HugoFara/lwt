@@ -97,6 +97,7 @@ class HomeFacade
         $placeholders = implode(', ', array_fill(0, count($prefixedTables), '?'));
         $bindings = array_merge([$dbname], $prefixedTables);
 
+        /** @var mixed $sizeRaw */
         $sizeRaw = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS size_mb
             FROM information_schema.TABLES
@@ -151,6 +152,7 @@ class HomeFacade
      */
     public function getLanguageName(int $languageId): string
     {
+        /** @var mixed $resultRaw */
         $resultRaw = \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('languages')
             ->where('LgID', '=', $languageId)
             ->valuePrepared('LgName');

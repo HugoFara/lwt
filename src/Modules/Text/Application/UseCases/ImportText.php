@@ -87,13 +87,14 @@ class ImportText
         TextParsing::parseAndSave($text, $languageId, $textId);
 
         $bindings = [$textId];
-        $sentenceCount = Connection::preparedFetchValue(
+        $sentenceCount = (int)Connection::preparedFetchValue(
             "SELECT COUNT(*) AS cnt FROM sentences WHERE SeTxID = ?"
             . UserScopedQuery::forTablePrepared('sentences', $bindings, '', 'texts'),
             $bindings,
             'cnt'
         );
-        $itemCount = Connection::preparedFetchValue(
+        $bindings = [$textId];
+        $itemCount = (int)Connection::preparedFetchValue(
             "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = ?"
             . UserScopedQuery::forTablePrepared('word_occurrences', $bindings, '', 'texts'),
             $bindings,
@@ -132,13 +133,13 @@ class ImportText
     /**
      * Apply tags to a text.
      *
-     * @param int   $textId Text ID
-     * @param array $tagIds Array of tag IDs
+     * @param int        $textId Text ID
+     * @param list<int>  $tagIds Array of tag IDs
      */
     private function applyTags(int $textId, array $tagIds): void
     {
         foreach ($tagIds as $tagId) {
-            $bindings = [$textId, (int) $tagId];
+            $bindings = [$textId, $tagId];
             Connection::preparedExecute(
                 "INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID) VALUES (?, ?)"
                 . UserScopedQuery::forTablePrepared('text_tag_map', $bindings, '', 'texts'),

@@ -95,6 +95,9 @@ abstract class AbstractRepository implements RepositoryInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param array<string, mixed> $criteria
+     * @param array<string, string>|null $orderBy
      */
     public function findBy(
         array $criteria,
@@ -104,6 +107,7 @@ abstract class AbstractRepository implements RepositoryInterface
     ): array {
         $query = $this->query();
 
+        /** @var mixed $value */
         foreach ($criteria as $field => $value) {
             $column = $this->columnMap[$field] ?? $field;
             if (is_array($value)) {
@@ -200,11 +204,14 @@ abstract class AbstractRepository implements RepositoryInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param array<string, mixed> $criteria
      */
     public function count(array $criteria = []): int
     {
         $query = $this->query();
 
+        /** @var mixed $value */
         foreach ($criteria as $field => $value) {
             $column = $this->columnMap[$field] ?? $field;
             if (is_array($value)) {

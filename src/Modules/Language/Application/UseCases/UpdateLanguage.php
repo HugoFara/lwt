@@ -190,27 +190,30 @@ class UpdateLanguage
     /**
      * Check if language changes require reparsing texts.
      *
-     * @param array $newData   New language data
-     * @param array $oldRecord Old language data
+     * @param array<string, string|int|bool|null> $newData   New language data
+     * @param array<string, mixed> $oldRecord Old language data
      *
      * @return bool
      */
     private function needsReparsing(array $newData, array $oldRecord): bool
     {
+        $getStr = static fn(array $arr, string $key): string =>
+            isset($arr[$key]) && is_string($arr[$key]) ? $arr[$key] : '';
+
         return (
-            ($newData["LgCharacterSubstitutions"] ?? '')
-            != ($oldRecord['LgCharacterSubstitutions'] ?? '')
+            $getStr($newData, "LgCharacterSubstitutions")
+            != $getStr($oldRecord, 'LgCharacterSubstitutions')
         ) || (
-            trim($newData["LgRegexpSplitSentences"] ?? '') !=
-            trim($oldRecord['LgRegexpSplitSentences'] ?? '')
+            trim($getStr($newData, "LgRegexpSplitSentences")) !=
+            trim($getStr($oldRecord, 'LgRegexpSplitSentences'))
         ) || (
-            ($newData["LgExceptionsSplitSentences"] ?? '')
-            != ($oldRecord['LgExceptionsSplitSentences'] ?? '')
+            $getStr($newData, "LgExceptionsSplitSentences")
+            != $getStr($oldRecord, 'LgExceptionsSplitSentences')
         ) || (
-            trim($newData["LgRegexpWordCharacters"] ?? '') !=
-            trim($oldRecord['LgRegexpWordCharacters'] ?? '')
-        ) || ((int)$newData["LgRemoveSpaces"] != (int)$oldRecord['LgRemoveSpaces']) ||
-        ((int)$newData["LgSplitEachChar"] != (int)$oldRecord['LgSplitEachChar']) ||
+            trim($getStr($newData, "LgRegexpWordCharacters")) !=
+            trim($getStr($oldRecord, 'LgRegexpWordCharacters'))
+        ) || ((int)($newData["LgRemoveSpaces"] ?? 0) != (int)($oldRecord['LgRemoveSpaces'] ?? 0)) ||
+        ((int)($newData["LgSplitEachChar"] ?? 0) != (int)($oldRecord['LgSplitEachChar'] ?? 0)) ||
         (($newData["LgParserType"] ?? null) != ($oldRecord['LgParserType'] ?? null));
     }
 
@@ -231,9 +234,40 @@ class UpdateLanguage
     }
 
     /**
+     * Get a string value from data array, defaulting to empty string.
+     *
+     * @param array<string, string|int|bool|null> $data Data array
+     * @param string $key Key to retrieve
+     *
+     * @return string Value as string
+     */
+    private function getString(array $data, string $key): string
+    {
+        $value = $data[$key] ?? '';
+        return is_string($value) ? $value : (string)$value;
+    }
+
+    /**
+     * Get a string or null value from data array.
+     *
+     * @param array<string, string|int|bool|null> $data Data array
+     * @param string $key Key to retrieve
+     *
+     * @return string|null Value as string or null
+     */
+    private function getStringOrNull(array $data, string $key): ?string
+    {
+        $value = $data[$key] ?? null;
+        if ($value === null) {
+            return null;
+        }
+        return is_string($value) ? $value : (string)$value;
+    }
+
+    /**
      * Build SQL and execute update for a language.
      *
-     * @param array $data Language data
+     * @param array<string, string|int|bool|null> $data Language data
      * @param int   $id   Language ID
      *
      * @return void
@@ -251,27 +285,27 @@ class UpdateLanguage
         ];
 
         $params = [
-            $this->emptyToNull($data["LgName"]),
-            $this->emptyToNull($data["LgDict1URI"]),
-            $this->emptyToNull($data["LgDict2URI"]),
-            $this->emptyToNull($data["LgGoogleTranslateURI"]),
+            $this->emptyToNull($this->getString($data, "LgName")),
+            $this->emptyToNull($this->getString($data, "LgDict1URI")),
+            $this->emptyToNull($this->getString($data, "LgDict2URI")),
+            $this->emptyToNull($this->getString($data, "LgGoogleTranslateURI")),
             (int)($data["LgDict1PopUp"] ?? false),
             (int)($data["LgDict2PopUp"] ?? false),
             (int)($data["LgGoogleTranslatePopUp"] ?? false),
-            $this->emptyToNull($data["LgSourceLang"] ?? null),
-            $this->emptyToNull($data["LgTargetLang"] ?? null),
-            $this->emptyToNull($data["LgExportTemplate"]),
-            $this->emptyToNull($data["LgTextSize"]),
-            $data["LgCharacterSubstitutions"],
-            $this->emptyToNull($data["LgRegexpSplitSentences"]),
-            $data["LgExceptionsSplitSentences"],
-            $this->emptyToNull($data["LgRegexpWordCharacters"]),
-            $data["LgParserType"] ?? null,
-            (int)$data["LgRemoveSpaces"],
-            (int)$data["LgSplitEachChar"],
-            (int)$data["LgRightToLeft"],
-            $data["LgTTSVoiceAPI"] ?? '',
-            (int)$data["LgShowRomanization"],
+            $this->emptyToNull($this->getStringOrNull($data, "LgSourceLang")),
+            $this->emptyToNull($this->getStringOrNull($data, "LgTargetLang")),
+            $this->emptyToNull($this->getString($data, "LgExportTemplate")),
+            $this->emptyToNull($this->getString($data, "LgTextSize")),
+            $this->getString($data, "LgCharacterSubstitutions"),
+            $this->emptyToNull($this->getString($data, "LgRegexpSplitSentences")),
+            $this->getString($data, "LgExceptionsSplitSentences"),
+            $this->emptyToNull($this->getString($data, "LgRegexpWordCharacters")),
+            $this->getStringOrNull($data, "LgParserType"),
+            (int)($data["LgRemoveSpaces"] ?? false),
+            (int)($data["LgSplitEachChar"] ?? false),
+            (int)($data["LgRightToLeft"] ?? false),
+            $this->getString($data, "LgTTSVoiceAPI"),
+            (int)($data["LgShowRomanization"] ?? false),
             (int)($data["LgLocalDictMode"] ?? 0),
         ];
 

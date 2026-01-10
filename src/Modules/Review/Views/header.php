@@ -13,6 +13,8 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @var int|null $textId
  */
 
 namespace Lwt\Views\Review;
@@ -20,6 +22,8 @@ namespace Lwt\Views\Review;
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 use Lwt\Modules\Text\Application\Services\TextNavigationService;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+
+/** @var int|null $textId */
 
 ?>
 <div class="flex-header">

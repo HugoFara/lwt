@@ -32,6 +32,22 @@ namespace Lwt\Views\Feed;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
+/**
+ * @var int $currentLang Current language filter
+ * @var string $currentQuery Search query
+ * @var string $currentQueryMode Query mode (title,desc,text or title)
+ * @var string $currentRegexMode Regex mode setting
+ * @var array<int, array<string, mixed>> $feeds Array of feed records
+ * @var int $currentFeed Current feed ID
+ * @var int $recno Total article count
+ * @var int $currentPage Current page number
+ * @var int $currentSort Current sort index
+ * @var int $maxPerPage Articles per page
+ * @var int $pages Total pages
+ * @var array<int, array{FlID: int|null, FlNfID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, FlText: string, TxID: int|null, TxArchivedAt: string|null}> $articles Array of feed article records
+ * @var int|null $feedTime Last update timestamp
+ */
+
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
     ['url' => '/feeds/edit?manage_feeds=1', 'label' => 'Manage Feeds', 'icon' => 'settings'],
@@ -133,12 +149,12 @@ echo PageLayoutHelper::buildActionCard([
   </tr>
     <?php foreach ($articles as $row): ?>
         <tr>
-        <?php if ($row['TxID'] && empty($row['TxArchivedAt'])): ?>
+        <?php if ($row['TxID'] !== null && $row['TxArchivedAt'] === null): ?>
             <td class="td1 center"><a href="/text/read?start=<?php echo $row['TxID']; ?>" >
             <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['title' => 'Read', 'alt' => '-']); ?></a>
-        <?php elseif ($row['TxID'] && !empty($row['TxArchivedAt'])): ?>
+        <?php elseif ($row['TxID'] !== null && $row['TxArchivedAt'] !== null): ?>
             <td class="td1 center"><span title="archived"><?php echo IconHelper::render('circle-x', ['alt' => '-']); ?></span>
-        <?php elseif (!empty($row['FlLink']) && str_starts_with((string)$row['FlLink'], ' ')): ?>
+        <?php elseif ($row['FlLink'] !== '' && str_starts_with($row['FlLink'], ' ')): ?>
             <td class="td1 center">
             <span class="not_found" name="<?php echo $row['FlID']; ?>" title="download error" @click="handleNotFoundClick($event)"><?php echo IconHelper::render('alert-circle', ['alt' => '-']); ?></span>
         <?php else: ?>
@@ -146,15 +162,15 @@ echo PageLayoutHelper::buildActionCard([
         <?php endif; ?>
         </td>
             <td class="td1 center">
-            <span title="<?php echo htmlentities((string)$row['FlDescription'], ENT_QUOTES, 'UTF-8', false); ?>"><b><?php echo $row['FlTitle']; ?></b></span>
+            <span title="<?php echo htmlentities($row['FlDescription'], ENT_QUOTES, 'UTF-8', false); ?>"><b><?php echo $row['FlTitle']; ?></b></span>
         <?php if ($row['FlAudio']): ?>
             <a href="<?php echo $row['FlAudio']; ?>" @click.prevent="openPopup('<?php echo $row['FlAudio']; ?>', 'audio')" target="_blank" rel="noopener">
             <?php echo IconHelper::render('volume-2', ['alt' => 'Audio']); ?></a>
         <?php endif; ?>
         </td>
             <td class="td1 center valign-middle">
-        <?php if (!empty($row['FlLink']) && !str_starts_with(trim((string)$row['FlLink']), '#')): ?>
-            <a href="<?php echo trim((string)$row['FlLink']); ?>" title="<?php echo trim((string)$row['FlLink']); ?>" @click.prevent="openPopup('<?php echo trim((string)$row['FlLink']); ?>', 'external')" target="_blank" rel="noopener">
+        <?php if ($row['FlLink'] !== '' && !str_starts_with(trim($row['FlLink']), '#')): ?>
+            <a href="<?php echo trim($row['FlLink']); ?>" title="<?php echo trim($row['FlLink']); ?>" @click.prevent="openPopup('<?php echo trim($row['FlLink']); ?>', 'external')" target="_blank" rel="noopener">
             <?php echo IconHelper::render('external-link', ['alt' => '-']); ?></a>
         <?php endif; ?>
         </td><td class="td1 center"><?php echo $row['FlDate']; ?></td></tr>

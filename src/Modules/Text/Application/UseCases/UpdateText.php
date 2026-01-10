@@ -68,6 +68,7 @@ class UpdateText
 
         // Check if text content changed
         $bindings1 = [$textId];
+        /** @var string|null $oldText */
         $oldText = Connection::preparedFetchValue(
             "SELECT TxText FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings1),
@@ -145,6 +146,7 @@ class UpdateText
     ): string {
         // Check if text content changed
         $bindings1 = [$textId];
+        /** @var string|null $oldText */
         $oldText = Connection::preparedFetchValue(
             "SELECT TxText FROM texts WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
             . UserScopedQuery::forTablePrepared('texts', $bindings1),

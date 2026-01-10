@@ -130,6 +130,7 @@ class TextStatisticsService
     {
         // Raw SQL needed for COUNT(DISTINCT LOWER())
         // word_occurrences inherits user context via Ti2TxID -> texts FK
+        /** @var int|string|null $count */
         $count = Connection::fetchValue(
             "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS cnt
             FROM word_occurrences
@@ -184,12 +185,12 @@ class TextStatisticsService
                 array_key_exists('lwt_translator', $url_query)
                 && $url_query['lwt_translator'] == "libretranslate"
             ) {
-                $tl = $url_query['target'];
-                $sl = $url_query['source'];
+                $tl = (string)($url_query['target'] ?? '');
+                $sl = (string)($url_query['source'] ?? '');
             } else {
                 // Defaulting to Google Translate query style
-                $tl = $url_query['tl'];
-                $sl = $url_query['sl'];
+                $tl = (string)($url_query['tl'] ?? '');
+                $sl = (string)($url_query['sl'] ?? '');
             }
         }
 

@@ -49,7 +49,11 @@ class UrlUtilities
     public static function getBasePath(): string
     {
         if (self::$basePath === null) {
-            $path = $_ENV['APP_BASE_PATH'] ?? getenv('APP_BASE_PATH') ?: '';
+            $envPath = $_ENV['APP_BASE_PATH'] ?? null;
+            if ($envPath === null) {
+                $envPath = getenv('APP_BASE_PATH');
+            }
+            $path = is_string($envPath) && $envPath !== '' ? $envPath : '';
 
             // Normalize: ensure starts with / (if not empty) and no trailing slash
             if ($path !== '') {
@@ -117,7 +121,7 @@ class UrlUtilities
         if (str_starts_with($requestUri, $basePath)) {
             $stripped = substr($requestUri, strlen($basePath));
             // Ensure we return at least '/'
-            return $stripped === '' || $stripped === false ? '/' : $stripped;
+            return $stripped === '' ? '/' : $stripped;
         }
 
         // Request doesn't match base path - return as-is
@@ -246,10 +250,10 @@ class UrlUtilities
 
         $ips = [];
         foreach ($records as $record) {
-            if (isset($record['ip'])) {
+            if (isset($record['ip']) && is_string($record['ip'])) {
                 $ips[] = $record['ip'];
             }
-            if (isset($record['ipv6'])) {
+            if (isset($record['ipv6']) && is_string($record['ipv6'])) {
                 $ips[] = $record['ipv6'];
             }
         }

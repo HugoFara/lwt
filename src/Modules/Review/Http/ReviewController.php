@@ -103,7 +103,9 @@ class ReviewController extends BaseController
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
         $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
-        $sessReviewSql = $_SESSION['reviewsql'] ?? null;
+        /** @var mixed $sessReviewSqlRaw */
+        $sessReviewSqlRaw = $_SESSION['reviewsql'] ?? null;
+        $sessReviewSql = is_string($sessReviewSqlRaw) ? $sessReviewSqlRaw : null;
 
         $testData = $this->reviewFacade->getReviewDataFromParams(
             $selection,
@@ -127,16 +129,21 @@ class ReviewController extends BaseController
         );
 
         // Initialize session
-        $this->reviewFacade->initializeReviewSession($testData['counts']['due']);
+        $dueCount = (int) ($testData['counts']['due'] ?? 0);
+        $this->reviewFacade->initializeReviewSession($dueCount);
 
         // Render header views
         include __DIR__ . '/../Views/header.php';
 
         // Prepare variables for header content
-        $title = $testData['title'];
-        $property = $testData['property'];
-        $totalDue = $testData['counts']['due'];
-        $totalCount = $testData['counts']['total'];
+        /** @var mixed $titleRaw */
+        $titleRaw = $testData['title'] ?? '';
+        $title = is_string($titleRaw) ? $titleRaw : '';
+        /** @var mixed $propertyRaw */
+        $propertyRaw = $testData['property'] ?? '';
+        $property = is_string($propertyRaw) ? $propertyRaw : '';
+        $totalDue = $dueCount;
+        $totalCount = (int) ($testData['counts']['total'] ?? 0);
 
         include __DIR__ . '/../Views/header_content.php';
     }
@@ -155,7 +162,9 @@ class ReviewController extends BaseController
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
         $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
-        $sessReviewSql = $_SESSION['reviewsql'] ?? null;
+        /** @var mixed $sessReviewSqlRaw */
+        $sessReviewSqlRaw = $_SESSION['reviewsql'] ?? null;
+        $sessReviewSql = is_string($sessReviewSqlRaw) ? $sessReviewSqlRaw : null;
 
         // Get review SQL
         $identifier = $this->reviewFacade->getReviewIdentifier(
@@ -196,7 +205,8 @@ class ReviewController extends BaseController
         }
 
         $langSettings = $this->reviewFacade->getLanguageSettings($langIdFromSql);
-        $textSize = round((($langSettings['textSize'] ?? 100) - 100) / 2, 0) + 100;
+        $textSizeRaw = isset($langSettings['textSize']) ? (int) $langSettings['textSize'] : 100;
+        $textSize = (int) round(($textSizeRaw - 100) / 2, 0) + 100;
 
         // Render table settings
         $settings = $this->reviewFacade->getTableReviewSettings();
@@ -207,8 +217,10 @@ class ReviewController extends BaseController
 
         // Render table rows
         $words = $this->reviewFacade->getTableReviewWords($reviewsql);
-        $regexWord = $langSettings['regexWord'] ?? '';
-        $rtl = $langSettings['rtl'] ?? false;
+        /** @var mixed $regexWordRaw */
+        $regexWordRaw = $langSettings['regexWord'] ?? '';
+        $regexWord = is_string($regexWordRaw) ? $regexWordRaw : '';
+        $rtl = (bool) ($langSettings['rtl'] ?? false);
 
         if ($words instanceof \mysqli_result) {
             while ($word = mysqli_fetch_assoc($words)) {
@@ -256,7 +268,9 @@ class ReviewController extends BaseController
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
         $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
-        $sessReviewSql = $_SESSION['reviewsql'] ?? null;
+        /** @var mixed $sessReviewSqlRaw */
+        $sessReviewSqlRaw = $_SESSION['reviewsql'] ?? null;
+        $sessReviewSql = is_string($sessReviewSqlRaw) ? $sessReviewSqlRaw : null;
         $testTypeParam = $this->param('type', '1');
         $isTableMode = $testTypeParam === 'table';
 
@@ -312,8 +326,14 @@ class ReviewController extends BaseController
         );
 
         // Initialize session
-        $this->reviewFacade->initializeReviewSession($testData['counts']['due']);
+        $dueCount = (int) ($testData['counts']['due'] ?? 0);
+        $this->reviewFacade->initializeReviewSession($dueCount);
         $sessionData = $this->reviewFacade->getReviewSessionData();
+
+        // Extract language settings with proper types
+        /** @var mixed $regexWordRaw */
+        $regexWordRaw = $langSettings['regexWord'] ?? '';
+        $wordRegex = is_string($regexWordRaw) ? $regexWordRaw : '';
 
         // Build config for JavaScript
         $config = [
@@ -325,7 +345,7 @@ class ReviewController extends BaseController
             'isTableMode' => $isTableMode,
             'wordMode' => $wordMode,
             'langId' => $langIdFromSql,
-            'wordRegex' => $langSettings['regexWord'] ?? '',
+            'wordRegex' => $wordRegex,
             'langSettings' => [
                 'name' => $langSettings['name'] ?? '',
                 'dict1Uri' => $langSettings['dict1Uri'] ?? '',
@@ -336,8 +356,8 @@ class ReviewController extends BaseController
                 'langCode' => $langCode
             ],
             'progress' => [
-                'total' => $testData['counts']['due'],
-                'remaining' => $testData['counts']['due'],
+                'total' => $dueCount,
+                'remaining' => $dueCount,
                 'wrong' => 0,
                 'correct' => 0
             ],

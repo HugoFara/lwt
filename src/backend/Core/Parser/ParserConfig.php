@@ -204,10 +204,10 @@ class ParserConfig
     {
         return new self(
             (int) ($row['LgID'] ?? 0),
-            $row['LgRegexpSplitSentences'] ?? '',
-            $row['LgExceptionsSplitSentences'] ?? '',
-            $row['LgRegexpWordCharacters'] ?? '',
-            $row['LgCharacterSubstitutions'] ?? '',
+            (string) ($row['LgRegexpSplitSentences'] ?? ''),
+            (string) ($row['LgExceptionsSplitSentences'] ?? ''),
+            (string) ($row['LgRegexpWordCharacters'] ?? ''),
+            (string) ($row['LgCharacterSubstitutions'] ?? ''),
             (bool) ($row['LgRemoveSpaces'] ?? false),
             (bool) ($row['LgSplitEachChar'] ?? false),
             (bool) ($row['LgRightToLeft'] ?? false)

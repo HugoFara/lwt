@@ -50,9 +50,9 @@ class CreateLanguage
             ->selectRaw('MIN(LgID) AS min_id')
             ->where('LgName', '=', '')
             ->firstPrepared();
-        $val = $row['min_id'] ?? null;
+        $existingId = isset($row['min_id']) && is_numeric($row['min_id']) ? (int)$row['min_id'] : null;
 
-        $this->buildLanguageSql($data, $val !== null ? (int)$val : null);
+        $this->buildLanguageSql($data, $existingId);
 
         return "Saved: 1";
     }
@@ -60,7 +60,7 @@ class CreateLanguage
     /**
      * Create a new language from data array (API-friendly version).
      *
-     * @param array $data Language data (camelCase keys)
+     * @param array<string, mixed> $data Language data (camelCase keys)
      *
      * @return int Created language ID, or 0 on failure
      */
@@ -73,18 +73,18 @@ class CreateLanguage
             ->selectRaw('MIN(LgID) AS min_id')
             ->where('LgName', '=', '')
             ->firstPrepared();
-        $val = $row['min_id'] ?? null;
+        $existingId = isset($row['min_id']) && is_numeric($row['min_id']) ? (int)$row['min_id'] : null;
 
-        $this->buildLanguageSql($normalizedData, $val !== null ? (int)$val : null);
+        $this->buildLanguageSql($normalizedData, $existingId);
 
-        if ($val !== null) {
-            return (int)$val;
+        if ($existingId !== null) {
+            return $existingId;
         }
 
         $row = QueryBuilder::table('languages')
             ->selectRaw('MAX(LgID) AS max_id')
             ->firstPrepared();
-        return (int)($row['max_id'] ?? 0);
+        return isset($row['max_id']) && is_numeric($row['max_id']) ? (int)$row['max_id'] : 0;
     }
 
     /**
@@ -172,9 +172,40 @@ class CreateLanguage
     }
 
     /**
+     * Get a string value from data array, defaulting to empty string.
+     *
+     * @param array<string, string|int|bool|null> $data Data array
+     * @param string $key Key to retrieve
+     *
+     * @return string Value as string
+     */
+    private function getString(array $data, string $key): string
+    {
+        $value = $data[$key] ?? '';
+        return is_string($value) ? $value : (string)$value;
+    }
+
+    /**
+     * Get a string or null value from data array.
+     *
+     * @param array<string, string|int|bool|null> $data Data array
+     * @param string $key Key to retrieve
+     *
+     * @return string|null Value as string or null
+     */
+    private function getStringOrNull(array $data, string $key): ?string
+    {
+        $value = $data[$key] ?? null;
+        if ($value === null) {
+            return null;
+        }
+        return is_string($value) ? $value : (string)$value;
+    }
+
+    /**
      * Build SQL and execute insert or update for a language.
      *
-     * @param array    $data Language data
+     * @param array<string, string|int|bool|null> $data Language data
      * @param int|null $id   Language ID for update, null for insert
      *
      * @return void
@@ -192,27 +223,27 @@ class CreateLanguage
         ];
 
         $params = [
-            $this->emptyToNull($data["LgName"]),
-            $this->emptyToNull($data["LgDict1URI"]),
-            $this->emptyToNull($data["LgDict2URI"]),
-            $this->emptyToNull($data["LgGoogleTranslateURI"]),
+            $this->emptyToNull($this->getString($data, "LgName")),
+            $this->emptyToNull($this->getString($data, "LgDict1URI")),
+            $this->emptyToNull($this->getString($data, "LgDict2URI")),
+            $this->emptyToNull($this->getString($data, "LgGoogleTranslateURI")),
             (int)($data["LgDict1PopUp"] ?? false),
             (int)($data["LgDict2PopUp"] ?? false),
             (int)($data["LgGoogleTranslatePopUp"] ?? false),
-            $this->emptyToNull($data["LgSourceLang"] ?? null),
-            $this->emptyToNull($data["LgTargetLang"] ?? null),
-            $this->emptyToNull($data["LgExportTemplate"]),
-            $this->emptyToNull($data["LgTextSize"]),
-            $data["LgCharacterSubstitutions"],
-            $this->emptyToNull($data["LgRegexpSplitSentences"]),
-            $data["LgExceptionsSplitSentences"],
-            $this->emptyToNull($data["LgRegexpWordCharacters"]),
-            $data["LgParserType"] ?? null,
-            (int)$data["LgRemoveSpaces"],
-            (int)$data["LgSplitEachChar"],
-            (int)$data["LgRightToLeft"],
-            $data["LgTTSVoiceAPI"] ?? '',
-            (int)$data["LgShowRomanization"],
+            $this->emptyToNull($this->getStringOrNull($data, "LgSourceLang")),
+            $this->emptyToNull($this->getStringOrNull($data, "LgTargetLang")),
+            $this->emptyToNull($this->getString($data, "LgExportTemplate")),
+            $this->emptyToNull($this->getString($data, "LgTextSize")),
+            $this->getString($data, "LgCharacterSubstitutions"),
+            $this->emptyToNull($this->getString($data, "LgRegexpSplitSentences")),
+            $this->getString($data, "LgExceptionsSplitSentences"),
+            $this->emptyToNull($this->getString($data, "LgRegexpWordCharacters")),
+            $this->getStringOrNull($data, "LgParserType"),
+            (int)($data["LgRemoveSpaces"] ?? false),
+            (int)($data["LgSplitEachChar"] ?? false),
+            (int)($data["LgRightToLeft"] ?? false),
+            $this->getString($data, "LgTTSVoiceAPI"),
+            (int)($data["LgShowRomanization"] ?? false),
             (int)($data["LgLocalDictMode"] ?? 0),
         ];
 

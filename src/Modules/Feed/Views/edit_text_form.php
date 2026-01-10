@@ -28,7 +28,29 @@ namespace Lwt\Views\Feed;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+// View variables - assert types for Psalm
+assert(is_array($texts));
+assert(is_array($row) && isset($row['NfLgID']) && isset($row['NfID']));
+assert(is_int($count));
+assert(is_string($tagName));
+assert(is_int($nfId));
+assert(is_int($maxTexts));
+assert(is_array($languages));
+assert(is_string($scrdir));
+
+/**
+ * @var array<int, array{TxTitle: string, TxText: string, TxSourceURI: string, TxAudioURI: string}> $texts
+ * @var array{NfLgID: int, NfID: int} $row
+ * @var int $count
+ * @var string $tagName
+ * @var int $nfId
+ * @var int $maxTexts
+ * @var array<int, array{LgID: int, LgName: string}> $languages
+ * @var string $scrdir
+ */
+
 foreach ($texts as $text):
+    /** @var array{TxTitle: string, TxText: string, TxSourceURI: string, TxAudioURI: string} $text */
 ?>
 <div class="box mb-4" x-data="{ isSelected: true }">
     <!-- Header with checkbox and title -->
@@ -75,7 +97,10 @@ foreach ($texts as $text):
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="feed[<?php echo $count; ?>][TxLgID]" class="notempty setfocus">
-                                <?php foreach ($languages as $rowLang): ?>
+                                <?php
+                                foreach ($languages as $rowLang):
+                                    /** @var array{LgID: int, LgName: string} $rowLang */
+                                ?>
                                 <option value="<?php echo $rowLang['LgID']; ?>"<?php
                                     if ($row['NfLgID'] === $rowLang['LgID']) {
                                         echo ' selected';

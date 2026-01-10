@@ -109,7 +109,7 @@ class Maintenance
 
             $fp = fopen($db_to_mecab, 'w');
             foreach ($rows as $record) {
-                fwrite($fp, $record['WoID'] . "\t" . $record['WoTextLC'] . "\n");
+                fwrite($fp, (string) $record['WoID'] . "\t" . (string) $record['WoTextLC'] . "\n");
             }
             fclose($fp);
 
@@ -191,6 +191,7 @@ class Maintenance
             ->selectRaw('GROUP_CONCAT(LgID) AS lang_ids')
             ->whereRaw("UPPER(LgRegexpWordCharacters)='MECAB'")
             ->first();
+        /** @var string|int|null $japid */
         $japid = $row !== null ? ($row['lang_ids'] ?? null) : null;
 
         if ($japid !== null && $japid !== '') {
@@ -203,13 +204,18 @@ class Maintenance
             ->orderBy('WoID')
             ->getPrepared();
         foreach ($rows as $rec) {
-            if ((int)$rec['LgSplitEachChar'] === 1) {
-                $textlc = preg_replace('/([^\s])/u', "$1 ", (string) $rec['WoTextLC']);
+            $splitEachChar = (int) $rec['LgSplitEachChar'];
+            $woTextLC = (string) $rec['WoTextLC'];
+            $regexpWordChars = (string) $rec['LgRegexpWordCharacters'];
+            $woID = (int) $rec['WoID'];
+
+            if ($splitEachChar === 1) {
+                $textlc = preg_replace('/([^\s])/u', "$1 ", $woTextLC);
             } else {
-                $textlc = (string) $rec['WoTextLC'];
+                $textlc = $woTextLC;
             }
             $wordCount = preg_match_all(
-                '/([' . $rec['LgRegexpWordCharacters'] . ']+)/u',
+                '/([' . $regexpWordChars . ']+)/u',
                 $textlc ?? '',
                 $ma
             );
@@ -217,9 +223,9 @@ class Maintenance
             if ($wordCount < 1) {
                 $wordCount = 1;
             }
-            $sqlarr[] = ' WHEN ' . $rec['WoID'] . ' THEN ' . $wordCount;
+            $sqlarr[] = ' WHEN ' . $woID . ' THEN ' . $wordCount;
             if (++$i % 1000 == 0) {
-                $max = $rec['WoID'];
+                $max = $woID;
                 $sqltext = "UPDATE words
                 SET WoWordCount = CASE WoID" . implode(' ', $sqlarr) . "
                 END

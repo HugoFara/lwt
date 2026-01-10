@@ -20,6 +20,9 @@
 
 use Lwt\Shared\UI\Helpers\FormHelper;
 
+// Validate injected variables
+assert(isset($email) && is_string($email));
+$error = isset($error) && is_string($error) ? $error : null;
 ?>
 <div class="container">
     <div class="columns is-centered">
@@ -37,7 +40,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                     </p>
                 </div>
 
-                <?php if (!empty($error)): ?>
+                <?php if ($error !== null): ?>
                 <div class="notification is-danger is-light">
                     <?= htmlspecialchars($error) ?>
                 </div>

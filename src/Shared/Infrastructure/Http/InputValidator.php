@@ -356,6 +356,7 @@ class InputValidator
         }
 
         $result = [];
+        /** @var mixed $value */
         foreach ($array as $value) {
             if (is_numeric($value)) {
                 $result[] = (int) $value;
@@ -390,6 +391,7 @@ class InputValidator
         }
 
         $result = [];
+        /** @var mixed $value */
         foreach ($array as $value) {
             if (is_string($value)) {
                 $result[] = $trim ? trim($value) : $value;
@@ -521,7 +523,9 @@ class InputValidator
         }
 
         // Verify the file was actually uploaded
-        if (!is_uploaded_file($file['tmp_name'])) {
+        /** @var string $tmpName */
+        $tmpName = $file['tmp_name'];
+        if (!is_uploaded_file($tmpName)) {
             return null;
         }
 
@@ -747,6 +751,7 @@ class InputValidator
             return $default;
         }
 
+        /** @var mixed $decoded */
         $decoded = json_decode($value, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -767,6 +772,7 @@ class InputValidator
     {
         $result = [];
 
+        /** @var mixed $default */
         foreach ($schema as $key => $default) {
             if (is_int($default)) {
                 $result[$key] = self::getInt($key, $default);
@@ -810,6 +816,7 @@ class InputValidator
         }
 
         if (isset($_SESSION[$sessKey])) {
+            /** @var mixed $value */
             $value = $_SESSION[$sessKey];
             return is_string($value) ? $value : $default;
         }
@@ -841,6 +848,7 @@ class InputValidator
         }
 
         if (isset($_SESSION[$sessKey])) {
+            /** @var mixed $value */
             $value = $_SESSION[$sessKey];
             return is_numeric($value) ? (int) $value : $default;
         }

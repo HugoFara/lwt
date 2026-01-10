@@ -40,13 +40,13 @@ class TextReadingService
     /**
      * Print the output when the word is a term.
      *
-     * @param int                   $actcode       Action code, > 1 for multiword
-     * @param bool                  $showAll       Show all words or not
-     * @param string                $spanid        ID for this span element
-     * @param string                $hidetag       Hide tag string
-     * @param int                   $currcharcount Current number of characters
-     * @param array<string, string> $record        Various data
-     * @param array                 $exprs         Current expressions (passed by reference)
+     * @param int                  $actcode       Action code, > 1 for multiword
+     * @param bool                 $showAll       Show all words or not
+     * @param string               $spanid        ID for this span element
+     * @param string               $hidetag       Hide tag string
+     * @param int                  $currcharcount Current number of characters
+     * @param array<string, mixed> $record        Various data from database
+     * @param array<int, array{0: int, 1: string, 2: int}> $exprs Current expressions (passed by reference)
      *
      * @return void
      */
@@ -62,74 +62,85 @@ class TextReadingService
         $actcode = (int)$record['Code'];
         if ($actcode > 1) {
             // A multiword, $actcode is the number of words composing it
-            if (empty($exprs) || $exprs[sizeof($exprs) - 1][1] != $record['TiText']) {
-                $exprs[] = array($actcode, $record['TiText'], $actcode);
+            $tiText = (string)($record['TiText'] ?? '');
+            $lastExpr = !empty($exprs) ? $exprs[sizeof($exprs) - 1] : null;
+            if ($lastExpr === null || $lastExpr[1] != $tiText) {
+                $exprs[] = array($actcode, $tiText, $actcode);
             }
 
             if (isset($record['WoID'])) {
+                $woId = (int)$record['WoID'];
+                $woStatus = (int)$record['WoStatus'];
+                $ti2Order = (int)$record['Ti2Order'];
+                $tiTextLC = (string)($record['TiTextLC'] ?? '');
                 $attributes = array(
                     'id' => $spanid,
                     'class' => implode(
                         " ",
                         [
                             $hidetag, "click", "mword", ($showAll ? 'mwsty' : 'wsty'),
-                            "order" . $record['Ti2Order'],
-                            'word' . $record['WoID'], 'status' . $record['WoStatus'],
-                            'TERM' . StringUtils::toClassName($record['TiTextLC'])
+                            "order" . $ti2Order,
+                            'word' . $woId, 'status' . $woStatus,
+                            'TERM' . StringUtils::toClassName($tiTextLC)
                         ]
                     ),
                     'data_pos' => $currcharcount,
-                    'data_order' => $record['Ti2Order'],
-                    'data_wid' => $record['WoID'],
+                    'data_order' => $ti2Order,
+                    'data_wid' => $woId,
                     'data_trans' => htmlspecialchars(
-                        ExportService::replaceTabNewline($record['WoTranslation'] ?? '') .
-                        (($tags = TagsFacade::getWordTagList((int)$record['WoID'], false)) ? ' [' . $tags . ']' : ''),
+                        ExportService::replaceTabNewline((string)($record['WoTranslation'] ?? '')) .
+                        (($tags = TagsFacade::getWordTagList($woId, false)) ? ' [' . $tags . ']' : ''),
                         ENT_QUOTES,
                         'UTF-8'
                     ),
-                    'data_rom' => htmlspecialchars($record['WoRomanization'] ?? '', ENT_QUOTES, 'UTF-8'),
-                    'data_status' => $record['WoStatus'],
+                    'data_rom' => htmlspecialchars((string)($record['WoRomanization'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                    'data_status' => $woStatus,
                     'data_code' => $actcode,
-                    'data_text' => htmlspecialchars($record['TiText'] ?? '', ENT_QUOTES, 'UTF-8')
+                    'data_text' => htmlspecialchars($tiText, ENT_QUOTES, 'UTF-8')
                 );
                 $span = '<span';
                 foreach ($attributes as $attr_name => $val) {
-                    $span .= ' ' . $attr_name . '="' . $val . '"';
+                    $span .= ' ' . $attr_name . '="' . (string)$val . '"';
                 }
                 $span .= '>';
                 if ($showAll) {
                     $span .= $actcode;
                 } else {
-                    $span .= htmlspecialchars($record['TiText'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $span .= htmlspecialchars($tiText, ENT_QUOTES, 'UTF-8');
                 }
                 $span .= '</span>';
                 echo $span;
             }
         } else {
             // Single word
+            $tiText = (string)($record['TiText'] ?? '');
+            $tiTextLC = (string)($record['TiTextLC'] ?? '');
+            $ti2Order = (int)$record['Ti2Order'];
             if (isset($record['WoID'])) {
                 // Word found status 1-5|98|99
+                $woId = (int)$record['WoID'];
+                $woStatus = (int)$record['WoStatus'];
                 $attributes = array(
                     'id' => $spanid,
                     'class' => implode(
                         " ",
                         [
-                            $hidetag, "click", "word", "wsty", "word" . $record['WoID'],
-                            'status' . $record['WoStatus'],
-                            'TERM' . StringUtils::toClassName($record['TiTextLC'])
+                            $hidetag, "click", "word", "wsty", "word" . $woId,
+                            'status' . $woStatus,
+                            'TERM' . StringUtils::toClassName($tiTextLC)
                         ]
                     ),
                     'data_pos' => $currcharcount,
-                    'data_order' => $record['Ti2Order'],
-                    'data_wid' => $record['WoID'],
+                    'data_order' => $ti2Order,
+                    'data_wid' => $woId,
                     'data_trans' => htmlspecialchars(
-                        ExportService::replaceTabNewline($record['WoTranslation'] ?? '') .
-                        (($tags = TagsFacade::getWordTagList((int)$record['WoID'], false)) ? ' [' . $tags . ']' : ''),
+                        ExportService::replaceTabNewline((string)($record['WoTranslation'] ?? '')) .
+                        (($tags = TagsFacade::getWordTagList($woId, false)) ? ' [' . $tags . ']' : ''),
                         ENT_QUOTES,
                         'UTF-8'
                     ),
-                    'data_rom' => htmlspecialchars($record['WoRomanization'] ?? '', ENT_QUOTES, 'UTF-8'),
-                    'data_status' => $record['WoStatus']
+                    'data_rom' => htmlspecialchars((string)($record['WoRomanization'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                    'data_status' => $woStatus
                 );
             } else {
                 // Not registered word (status 0)
@@ -139,11 +150,11 @@ class TextReadingService
                         " ",
                         [
                             $hidetag, "click", "word", "wsty", "status0",
-                            "TERM" . StringUtils::toClassName($record['TiTextLC'])
+                            "TERM" . StringUtils::toClassName($tiTextLC)
                         ]
                     ),
                     'data_pos' => $currcharcount,
-                    'data_order' => $record['Ti2Order'],
+                    'data_order' => $ti2Order,
                     'data_trans' => '',
                     'data_rom' => '',
                     'data_status' => '0',
@@ -151,17 +162,20 @@ class TextReadingService
                 );
             }
             foreach ($exprs as $expr) {
-                $attributes['data_mw' . $expr[0]] = htmlspecialchars($expr[1] ?? '', ENT_QUOTES, 'UTF-8');
+                $attributes['data_mw' . $expr[0]] = htmlspecialchars($expr[1], ENT_QUOTES, 'UTF-8');
             }
             $span = '<span';
             foreach ($attributes as $attr_name => $val) {
-                $span .= ' ' . $attr_name . '="' . $val . '"';
+                $span .= ' ' . $attr_name . '="' . (string)$val . '"';
             }
-            $span .= '>' . htmlspecialchars($record['TiText'] ?? '', ENT_QUOTES, 'UTF-8') . '</span>';
+            $span .= '>' . htmlspecialchars($tiText, ENT_QUOTES, 'UTF-8') . '</span>';
             echo $span;
             for ($i = sizeof($exprs) - 1; $i >= 0; $i--) {
-                $exprs[$i][2]--;
-                if ($exprs[$i][2] < 1) {
+                /** @var array{0: int, 1: string, 2: int} $currentExpr */
+                $currentExpr = $exprs[$i];
+                $currentExpr[2]--;
+                $exprs[$i] = $currentExpr;
+                if ($currentExpr[2] < 1) {
                     unset($exprs[$i]);
                     $exprs = array_values($exprs);
                 }
@@ -193,11 +207,11 @@ class TextReadingService
     /**
      * Process each text item (can be punctuation, term, etc...)
      *
-     * @param array $record        Text item information
+     * @param array<string, mixed> $record Text item information
      * @param int   $showAll       Show all words or not (0 or 1)
      * @param int   $currcharcount Current number of characters
      * @param bool  $hide          Should some item be hidden, depends on $showAll
-     * @param array $exprs         Current expressions
+     * @param array<int, array{0: int, 1: string, 2: int}> $exprs Current expressions
      *
      * @return void
      */
@@ -209,14 +223,15 @@ class TextReadingService
         array &$exprs = array()
     ): void {
         $actcode = (int)$record['Code'];
-        $spanid = 'ID-' . $record['Ti2Order'] . '-' . $actcode;
+        $order = (int)$record['Ti2Order'];
+        $spanid = 'ID-' . $order . '-' . $actcode;
 
         // Check if item should be hidden
         $hidetag = $hide ? ' hide' : '';
 
         if ($record['TiIsNotWord'] != 0) {
             // The current item is not a term (likely punctuation)
-            $text = $record['TiText'] ?? '';
+            $text = (string)($record['TiText'] ?? '');
             // Add 'punc' class for punctuation (non-whitespace non-words)
             $puncClass = (trim($text) !== '' && !ctype_space($text)) ? 'punc' : '';
             $classes = trim($hidetag . ' ' . $puncClass);
@@ -281,7 +296,7 @@ class TextReadingService
 
             $this->parseItem($record, $showAll, $currcharcount, $hide, $exprs);
             if ((int)$record['Code'] == 1) {
-                $currcharcount += $record['TiTextLength'];
+                $currcharcount += (int)$record['TiTextLength'];
                 $cnt++;
             }
             $last = max(

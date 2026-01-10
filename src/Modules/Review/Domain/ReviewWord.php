@@ -57,19 +57,24 @@ final class ReviewWord
     /**
      * Create from database record.
      *
-     * @param array $record Database record
+     * @param array<string, mixed> $record Database record
      *
      * @return self
      */
     public static function fromRecord(array $record): self
     {
+        /** @var mixed $romanization */
+        $romanization = $record['WoRomanization'] ?? null;
+        /** @var mixed $sentence */
+        $sentence = $record['WoSentence'] ?? null;
+
         return new self(
             (int) $record['WoID'],
-            $record['WoText'],
-            $record['WoTextLC'],
-            $record['WoTranslation'],
-            $record['WoRomanization'] ?? null,
-            $record['WoSentence'] ?? null,
+            (string) $record['WoText'],
+            (string) $record['WoTextLC'],
+            (string) $record['WoTranslation'],
+            is_string($romanization) ? $romanization : null,
+            is_string($sentence) ? $sentence : null,
             (int) $record['WoLgID'],
             (int) $record['WoStatus'],
             (int) ($record['Score'] ?? $record['WoTodayScore'] ?? 0),

@@ -497,7 +497,7 @@ class TextController extends BaseController
             }
 
             // Redirect to book or first chapter
-            if ($openAfter && !empty($result['textIds'])) {
+            if ($openAfter && isset($result['textIds']) && count($result['textIds']) > 0) {
                 header('Location: /text/read?start=' . $result['textIds'][0]);
                 exit();
             }
@@ -574,7 +574,7 @@ class TextController extends BaseController
         $isNew = false;
         $languageData = $this->textService->getLanguageDataForForm();
         $languages = $this->languageService->getLanguagesForSelect();
-        $scrdir = $this->languageService->getScriptDirectionTag($text->lgid);
+        $scrdir = $this->languageService->getScriptDirectionTag((int)$text->lgid);
 
         include LWT_TEXT_MODULE_VIEWS . '/edit_form.php';
     }
@@ -808,7 +808,7 @@ class TextController extends BaseController
             $message = $this->textService->deleteArchivedText($delId);
         } elseif ($unarchId !== null) {
             $result = $this->textService->unarchiveText($unarchId);
-            $message = $result['message'];
+            $message = (string)$result['message'];
         } elseif ($op == 'Change') {
             $txId = $this->paramInt('TxID', 0) ?? 0;
             $message = $this->textService->updateArchivedText(

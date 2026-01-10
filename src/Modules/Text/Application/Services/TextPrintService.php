@@ -403,7 +403,7 @@ class TextPrintService
 
             if ($isNotWord !== 0) {
                 // Non-word item (punctuation, etc.)
-                $text = $record['text'] ?? '';
+                $text = (string)($record['text'] ?? '');
                 $isParagraph = str_contains($text, '¶');
 
                 $currentItem = [
@@ -421,7 +421,7 @@ class TextPrintService
                 // Word item
                 $until = $order + 2 * ($wordCount - 1);
 
-                $translation = $record['translation'] ?? '';
+                $translation = (string)($record['translation'] ?? '');
                 if ($translation === '*') {
                     $translation = '';
                 }

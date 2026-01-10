@@ -110,8 +110,10 @@ class CsrfMiddleware implements MiddlewareInterface
 
         if (empty($authHeader) && function_exists('apache_request_headers')) {
             $headers = apache_request_headers();
-            $rawHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
-            $authHeader = is_string($rawHeader) ? $rawHeader : '';
+            if (is_array($headers)) {
+                $rawHeader = (string) ($headers['Authorization'] ?? $headers['authorization'] ?? '');
+                $authHeader = $rawHeader;
+            }
         }
 
         return str_starts_with(strtolower($authHeader), 'bearer ');

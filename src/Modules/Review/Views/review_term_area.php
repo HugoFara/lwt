@@ -13,9 +13,13 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @var array{rtl: bool, removeSpaces: bool, textSize: int} $langSettings
  */
 
 namespace Lwt\Views\Review;
+
+/** @var array{rtl: bool, removeSpaces: bool, textSize: int} $langSettings */
 
 ?>
 <div id="body">

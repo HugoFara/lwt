@@ -129,12 +129,13 @@ class GoogleController extends BaseController
 
         if ($pendingLink === null) {
             $this->redirect('/login');
-            return;
         }
 
         $email = $pendingLink['email'];
 
-        $error = $_SESSION['auth_error'] ?? null;
+        /** @var mixed $sessionError */
+        $sessionError = $_SESSION['auth_error'] ?? null;
+        $error = is_string($sessionError) ? $sessionError : null;
         unset($_SESSION['auth_error']);
 
         $this->render('Link Google Account', false);
@@ -157,7 +158,6 @@ class GoogleController extends BaseController
 
         if ($pendingLink === null) {
             $this->redirect('/login');
-            return;
         }
 
         $password = $this->post('password');
@@ -166,7 +166,6 @@ class GoogleController extends BaseController
         if ($action === 'cancel') {
             $this->googleAuthService->clearPendingLinkData();
             $this->redirect('/login');
-            return;
         }
 
         // Verify password and link accounts

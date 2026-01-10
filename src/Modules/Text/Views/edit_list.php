@@ -16,6 +16,9 @@
  * @since    3.0.0
  *
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
+ *
+ * @var string $message
+ * @var array<int, array{status: int, label: string}> $statuses
  */
 
 namespace Lwt\Views\Text;
@@ -25,8 +28,8 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Core\StringUtils;
 
+// Type-safe variable extraction from controller context
 /** @var string $message */
-/** @var array $statuses */
 
 ?>
 <link rel="stylesheet" type="text/css" href="<?php StringUtils::printFilePath('css/css_charts.css');?>" />

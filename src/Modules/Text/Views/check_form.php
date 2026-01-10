@@ -16,15 +16,18 @@
  * @since    3.0.0
  *
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
+ *
+ * @var string $languagesOption
+ * @var array<int, string> $languageData
  */
 
 namespace Lwt\Views\Text;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-/** @var string $languagesOption */
-/** @var array $languageData */
-
+// Type-safe variable extraction from controller context
+/** @var string $languagesOptionTyped */
+$languagesOptionTyped = $languagesOption;
 ?>
 <script type="application/json" id="language-data-config"><?php echo json_encode($languageData, JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 
@@ -43,7 +46,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
                             <select name="TxLgID" id="TxLgID" class="notempty setfocus" required>
-                                <?php echo $languagesOption; ?>
+                                <?php echo $languagesOptionTyped; ?>
                             </select>
                         </div>
                     </div>

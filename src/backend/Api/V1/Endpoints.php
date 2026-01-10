@@ -133,8 +133,9 @@ class Endpoints
         }
 
         // Check first segment for dynamic endpoints (e.g., terms/123/status)
-        $firstElem = preg_split('/\//', $endpoint)[0];
-        if (array_key_exists($firstElem, self::ROUTES)) {
+        $segments = preg_split('/\//', $endpoint);
+        $firstElem = $segments !== false && isset($segments[0]) ? $segments[0] : '';
+        if ($firstElem !== '' && array_key_exists($firstElem, self::ROUTES)) {
             return self::ROUTES[$firstElem];
         }
 
@@ -150,6 +151,7 @@ class Endpoints
      */
     public static function parseFragments(string $endpoint): array
     {
-        return preg_split("/\//", $endpoint);
+        $result = preg_split("/\//", $endpoint);
+        return $result !== false ? $result : [];
     }
 }

@@ -165,7 +165,7 @@ class TermStatusController extends VocabularyBaseController
             return;
         }
 
-        $apiHandler = new VocabularyApiHandler();
+        $apiHandler = new TermStatusApiHandler();
 
         // Handle status change (increment/decrement)
         if ($stchange !== null) {

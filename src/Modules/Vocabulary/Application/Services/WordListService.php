@@ -85,6 +85,7 @@ class WordListService
             return '';
         }
 
+        /** @var string $queryValue */
         $queryValue = ($regexMode == '') ?
             str_replace("*", "%", mb_strtolower($query, 'UTF-8')) :
             $query;
@@ -119,7 +120,7 @@ class WordListService
         if ($dbConn === null) {
             return '';
         }
-        $escapedValue = "'" . mysqli_real_escape_string($dbConn, $queryValue) . "'";
+        $escapedValue = "'" . (string) mysqli_real_escape_string($dbConn, $queryValue) . "'";
 
         $whQuery = "{$op} {$escapedValue}";
 
@@ -247,7 +248,7 @@ class WordListService
     /**
      * Get words list for display.
      *
-     * @param array $filters Filter parameters
+     * @param array{whLang?: string, whStat?: string, whQuery?: string, whTag?: string, textId?: string} $filters Filter parameters
      * @param int   $sort    Sort column index
      * @param int   $page    Page number
      * @param int   $perPage Items per page
@@ -344,7 +345,7 @@ class WordListService
     /**
      * Get words list with word count (for sort option 7).
      *
-     * @param array  $filters  Filter parameters
+     * @param array{whLang?: string, whStat?: string, whQuery?: string, whTag?: string, textId?: string} $filters Filter parameters
      * @param string $sortExpr Sort expression
      * @param string $limit    LIMIT clause
      *
@@ -920,7 +921,7 @@ class WordListService
             return null;
         }
 
-        $transl = ExportService::replaceTabNewline($record['WoTranslation']);
+        $transl = ExportService::replaceTabNewline((string)$record['WoTranslation']);
         if ($transl == '*') {
             $transl = '';
         }
@@ -932,7 +933,7 @@ class WordListService
             'WoTextLC' => $record['WoTextLC'],
             'WoTranslation' => $transl,
             'WoRomanization' => $record['WoRomanization'],
-            'WoSentence' => ExportService::replaceTabNewline($record['WoSentence'] ?? ''),
+            'WoSentence' => ExportService::replaceTabNewline((string)($record['WoSentence'] ?? '')),
             'WoStatus' => $record['WoStatus'],
             'LgName' => $record['LgName'],
             'LgRightToLeft' => $record['LgRightToLeft'],
@@ -944,25 +945,25 @@ class WordListService
     /**
      * Save a new word.
      *
-     * @param array $data Form data
+     * @param array<string, mixed> $data Form data
      *
      * @return string Result message
      */
     public function saveNewWord(array $data): string
     {
-        $translation = ExportService::replaceTabNewline($data['WoTranslation'] ?? '');
+        $translation = ExportService::replaceTabNewline((string)($data['WoTranslation'] ?? ''));
         if ($translation == '') {
             $translation = '*';
         }
 
-        $textLc = mb_strtolower($data["WoText"], 'UTF-8');
-        $sentence = ExportService::replaceTabNewline($data["WoSentence"] ?? '');
-        $romanization = $data["WoRomanization"] ?? '';
+        $textLc = mb_strtolower((string)$data["WoText"], 'UTF-8');
+        $sentence = ExportService::replaceTabNewline((string)($data["WoSentence"] ?? ''));
+        $romanization = (string)($data["WoRomanization"] ?? '');
 
         $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
-        $bindings = [$data["WoLgID"], $textLc, $data["WoText"], $data["WoStatus"], $translation, $sentence, $romanization];
+        $bindings = [(int)$data["WoLgID"], $textLc, (string)$data["WoText"], (int)$data["WoStatus"], $translation, $sentence, $romanization];
         $sql = "INSERT INTO words (WoLgID, WoTextLC, WoText, "
             . "WoStatus, WoTranslation, WoSentence, WoRomanization, WoStatusChanged, {$scoreColumns}"
             . UserScopedQuery::insertColumn('words')
@@ -988,7 +989,7 @@ class WordListService
                     'UPDATE word_occurrences
                     SET Ti2WoID = ?
                     WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?',
-                    [$wid, $data["WoLgID"], $textLc]
+                    [$wid, (int)$data["WoLgID"], $textLc]
                 );
             }
             return "Saved";
@@ -1000,26 +1001,26 @@ class WordListService
     /**
      * Update an existing word.
      *
-     * @param array $data Form data
+     * @param array<string, mixed> $data Form data
      *
      * @return string Result message
      */
     public function updateWord(array $data): string
     {
-        $translation = ExportService::replaceTabNewline($data['WoTranslation'] ?? '');
+        $translation = ExportService::replaceTabNewline((string)($data['WoTranslation'] ?? ''));
         if ($translation == '') {
             $translation = '*';
         }
 
-        $textLc = mb_strtolower($data["WoText"], 'UTF-8');
-        $sentence = ExportService::replaceTabNewline($data["WoSentence"] ?? '');
-        $romanization = $data["WoRomanization"] ?? '';
+        $textLc = mb_strtolower((string)$data["WoText"], 'UTF-8');
+        $sentence = ExportService::replaceTabNewline((string)($data["WoSentence"] ?? ''));
+        $romanization = (string)($data["WoRomanization"] ?? '');
 
-        $oldstatus = $data["WoOldStatus"];
-        $newstatus = $data["WoStatus"];
+        $oldstatus = (int)$data["WoOldStatus"];
+        $newstatus = (int)$data["WoStatus"];
 
         if ($oldstatus != $newstatus) {
-            $bindings = [$data["WoText"], $textLc, $translation, $sentence, $romanization, $newstatus, $data["WoID"]];
+            $bindings = [(string)$data["WoText"], $textLc, $translation, $sentence, $romanization, $newstatus, (int)$data["WoID"]];
             $affected = Connection::preparedExecute(
                 'UPDATE words
                 SET WoText = ?, WoTextLC = ?, WoTranslation = ?, WoSentence = ?,
@@ -1030,7 +1031,7 @@ class WordListService
                 $bindings
             );
         } else {
-            $bindings = [$data["WoText"], $textLc, $translation, $sentence, $romanization, $data["WoID"]];
+            $bindings = [(string)$data["WoText"], $textLc, $translation, $sentence, $romanization, (int)$data["WoID"]];
             $affected = Connection::preparedExecute(
                 'UPDATE words
                 SET WoText = ?, WoTextLC = ?, WoTranslation = ?, WoSentence = ?,

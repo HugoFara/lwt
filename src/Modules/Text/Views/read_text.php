@@ -25,6 +25,22 @@
  * @package  Lwt
  * @license  Unlicense <http://unlicense.org/>
  * @since    3.0.0
+ *
+ * @var int $textId
+ * @var int $langId
+ * @var string $textTitle
+ * @var string $annotatedText
+ * @var int $textPosition
+ * @var string $dictLink1
+ * @var string $dictLink2
+ * @var string $translatorLink
+ * @var int $textSize
+ * @var string $regexpWordChars
+ * @var bool $rtlScript
+ * @var int $modeTrans
+ * @var string $visitStatus
+ * @var string $termDelimiter
+ * @var string $hts
  */
 
 namespace Lwt\Views\Text;

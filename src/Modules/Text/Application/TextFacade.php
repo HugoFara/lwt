@@ -436,6 +436,8 @@ class TextFacade
 
     /**
      * Get Google Translate URIs by language.
+     *
+     * @return array<int, string> Map of language ID to translate URI
      */
     public function getLanguageTranslateUris(): array
     {
@@ -553,7 +555,7 @@ class TextFacade
                 'title' => (string) $record['TxTitle'],
                 'has_audio' => !empty($record['TxAudioURI']),
                 'source_uri' => (string) ($record['TxSourceURI'] ?? ''),
-                'has_source' => !empty($record['TxSourceURI']) && substr($record['TxSourceURI'], 0, 1) !== '#',
+                'has_source' => !empty($record['TxSourceURI']) && substr((string)($record['TxSourceURI'] ?? ''), 0, 1) !== '#',
                 'annotated' => !empty($record['annotlen']),
                 'taglist' => (string) $record['taglist']
             ];
@@ -716,8 +718,8 @@ class TextFacade
 
         foreach ($records as $record) {
             $sent = $this->sentenceService->formatSentence(
-                $record['SeID'],
-                $record['WoTextLC'],
+                (int)$record['SeID'],
+                (string)$record['WoTextLC'],
                 $sentenceCount
             );
             $bindings = [ExportService::replaceTabNewline($sent[1]), $record['WoID']];
@@ -788,7 +790,7 @@ class TextFacade
 
         $bindings2 = [$textId];
         TextParsing::parseAndSave(
-            Connection::preparedFetchValue(
+            (string)Connection::preparedFetchValue(
                 "SELECT TxText FROM texts WHERE TxID = ?"
                 . UserScopedQuery::forTablePrepared('texts', $bindings2),
                 $bindings2,
@@ -799,14 +801,14 @@ class TextFacade
         );
 
         $bindings3 = [$textId];
-        $sentenceCount = Connection::preparedFetchValue(
+        $sentenceCount = (int)Connection::preparedFetchValue(
             "SELECT COUNT(*) AS cnt FROM sentences WHERE SeTxID = ?"
             . UserScopedQuery::forTablePrepared('sentences', $bindings3, '', 'texts'),
             $bindings3,
             'cnt'
         );
         $bindings4 = [$textId];
-        $itemCount = Connection::preparedFetchValue(
+        $itemCount = (int)Connection::preparedFetchValue(
             "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = ?"
             . UserScopedQuery::forTablePrepared('word_occurrences', $bindings4, '', 'texts'),
             $bindings4,

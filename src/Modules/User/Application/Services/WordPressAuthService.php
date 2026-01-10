@@ -134,10 +134,11 @@ class WordPressAuthService
             return null;
         }
 
+        $wpUserId = (int) $current_user->ID;
         return [
-            'id' => (int) $current_user->ID,
-            'username' => $current_user->user_login ?? 'wp_user_' . $current_user->ID,
-            'email' => $current_user->user_email ?? 'wp_user_' . $current_user->ID . '@localhost'
+            'id' => $wpUserId,
+            'username' => $current_user->user_login ?? 'wp_user_' . $wpUserId,
+            'email' => $current_user->user_email ?? 'wp_user_' . $wpUserId . '@localhost'
         ];
     }
 

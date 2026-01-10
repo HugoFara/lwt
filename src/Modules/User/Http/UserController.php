@@ -76,11 +76,15 @@ class UserController extends BaseController
 
         // Check for flash message
         if (isset($_SESSION['auth_error'])) {
-            $error = $_SESSION['auth_error'];
+            /** @var mixed $sessionError */
+            $sessionError = $_SESSION['auth_error'];
+            $error = is_string($sessionError) ? $sessionError : null;
             unset($_SESSION['auth_error']);
         }
         if (isset($_SESSION['auth_username'])) {
-            $username = $_SESSION['auth_username'];
+            /** @var mixed $sessionUsername */
+            $sessionUsername = $_SESSION['auth_username'];
+            $username = is_string($sessionUsername) ? $sessionUsername : '';
             unset($_SESSION['auth_username']);
         }
 
@@ -122,7 +126,9 @@ class UserController extends BaseController
             }
 
             // Redirect to intended URL or home
-            $redirectTo = $_SESSION['auth_redirect'] ?? '/';
+            /** @var mixed $sessionRedirect */
+            $sessionRedirect = $_SESSION['auth_redirect'] ?? '/';
+            $redirectTo = is_string($sessionRedirect) ? $sessionRedirect : '/';
             unset($_SESSION['auth_redirect']);
             $this->redirect($redirectTo);
         } catch (AuthException $e) {
@@ -157,15 +163,21 @@ class UserController extends BaseController
 
         // Check for flash messages
         if (isset($_SESSION['auth_error'])) {
-            $error = $_SESSION['auth_error'];
+            /** @var mixed $sessionError */
+            $sessionError = $_SESSION['auth_error'];
+            $error = is_string($sessionError) ? $sessionError : null;
             unset($_SESSION['auth_error']);
         }
         if (isset($_SESSION['auth_username'])) {
-            $username = $_SESSION['auth_username'];
+            /** @var mixed $sessionUsername */
+            $sessionUsername = $_SESSION['auth_username'];
+            $username = is_string($sessionUsername) ? $sessionUsername : '';
             unset($_SESSION['auth_username']);
         }
         if (isset($_SESSION['auth_email'])) {
-            $email = $_SESSION['auth_email'];
+            /** @var mixed $sessionEmail */
+            $sessionEmail = $_SESSION['auth_email'];
+            $email = is_string($sessionEmail) ? $sessionEmail : '';
             unset($_SESSION['auth_email']);
         }
 
@@ -280,15 +292,21 @@ class UserController extends BaseController
         $email = '';
 
         if (isset($_SESSION['password_error'])) {
-            $error = $_SESSION['password_error'];
+            /** @var mixed $passwordError */
+            $passwordError = $_SESSION['password_error'];
+            $error = is_string($passwordError) ? $passwordError : null;
             unset($_SESSION['password_error']);
         }
         if (isset($_SESSION['password_success'])) {
-            $success = $_SESSION['password_success'];
+            /** @var mixed $passwordSuccess */
+            $passwordSuccess = $_SESSION['password_success'];
+            $success = is_string($passwordSuccess) ? $passwordSuccess : null;
             unset($_SESSION['password_success']);
         }
         if (isset($_SESSION['password_email'])) {
-            $email = $_SESSION['password_email'];
+            /** @var mixed $passwordEmail */
+            $passwordEmail = $_SESSION['password_email'];
+            $email = is_string($passwordEmail) ? $passwordEmail : '';
             unset($_SESSION['password_email']);
         }
 
@@ -353,7 +371,9 @@ class UserController extends BaseController
         }
 
         if (isset($_SESSION['password_error'])) {
-            $error = $_SESSION['password_error'];
+            /** @var mixed $passwordError */
+            $passwordError = $_SESSION['password_error'];
+            $error = is_string($passwordError) ? $passwordError : null;
             unset($_SESSION['password_error']);
         }
 

@@ -1418,45 +1418,54 @@ class FeedController
         $_SESSION['wizard']['rss_url'] = $row['NfSourceURI'];
 
         // Parse article tags
-        $articleTags = explode('|', str_replace('!?!', '|', (string)($row['NfArticleSectionTags'] ?? '')));
-        $_SESSION['wizard']['article_tags'] = '';
+        $articleTags = explode('|', str_replace('!?!', '|', $row['NfArticleSectionTags']));
+        $articleTagsHtml = '';
         foreach ($articleTags as $tag) {
             if (substr_compare(trim($tag), "redirect", 0, 8) == 0) {
                 $_SESSION['wizard']['redirect'] = trim($tag) . ' | ';
             } else {
-                $_SESSION['wizard']['article_tags'] .= '<li class="left">'
+                $articleTagsHtml .= '<li class="left">'
                 . IconHelper::render('x', ['class' => 'delete_selection', 'title' => 'Delete Selection', 'alt' => '-'])
                 . $tag .
                 '</li>';
             }
         }
+        $_SESSION['wizard']['article_tags'] = $articleTagsHtml;
 
         // Parse filter tags
-        $filterTags = explode('|', str_replace('!?!', '|', (string)($row['NfFilterTags'] ?? '')));
-        $_SESSION['wizard']['filter_tags'] = '';
+        $filterTags = explode('|', str_replace('!?!', '|', $row['NfFilterTags']));
+        $filterTagsHtml = '';
         foreach ($filterTags as $tag) {
             if (trim($tag) != '') {
-                $_SESSION['wizard']['filter_tags'] .= '<li class="left">'
+                $filterTagsHtml .= '<li class="left">'
                 . IconHelper::render('x', ['class' => 'delete_selection', 'title' => 'Delete Selection', 'alt' => '-'])
                 . $tag .
                 '</li>';
             }
         }
+        $_SESSION['wizard']['filter_tags'] = $filterTagsHtml;
 
         $feedData = $this->feedFacade->detectAndParseFeed($row['NfSourceURI']);
         if (!is_array($feedData) || empty($feedData)) {
-            unset($_SESSION['wizard']['feed']);
+            $wizardSession = isset($_SESSION['wizard']) && is_array($_SESSION['wizard'])
+                ? $_SESSION['wizard']
+                : [];
+            unset($wizardSession['feed']);
+            $_SESSION['wizard'] = $wizardSession;
             header("Location: /feeds/wizard?step=1&err=1");
             exit();
         }
+        // Update feed data with title
+        $feedData['feed_title'] = $row['NfName'];
         $_SESSION['wizard']['feed'] = $feedData;
-
-        $_SESSION['wizard']['feed']['feed_title'] = $row['NfName'];
         $_SESSION['wizard']['options'] = $row['NfOptions'];
 
-        $feedText = $_SESSION['wizard']['feed']['feed_text'] ?? '';
-        if ($feedText === '' || $feedText === false) {
-            $_SESSION['wizard']['feed']['feed_text'] = '';
+        $feedText = isset($feedData['feed_text']) && is_string($feedData['feed_text'])
+            ? $feedData['feed_text']
+            : '';
+        if ($feedText === '') {
+            $feedData['feed_text'] = '';
+            $_SESSION['wizard']['feed'] = $feedData;
             $_SESSION['wizard']['detected_feed'] = 'Detected: «Webpage Link»';
         } else {
             $_SESSION['wizard']['detected_feed'] = 'Detected: «' . $feedText . '»';
@@ -1465,22 +1474,20 @@ class FeedController
         $_SESSION['wizard']['lang'] = $row['NfLgID'];
 
         // Handle custom article source
-        $articleSource = $this->feedFacade->getNfOption($_SESSION['wizard']['options'], 'article_source');
+        $articleSource = $this->feedFacade->getNfOption($row['NfOptions'], 'article_source');
         $articleSourceStr = is_string($articleSource) ? $articleSource : '';
-        /** @var array<string|int, mixed> $feedData */
-        $feedData = $_SESSION['wizard']['feed'] ?? [];
-        $currentFeedText = $feedData['feed_text'] ?? '';
+        $currentFeedText = $feedText;
         if ($currentFeedText !== $articleSourceStr && $articleSourceStr !== '') {
-            $_SESSION['wizard']['feed']['feed_text'] = $articleSourceStr;
-            /** @var array<int|string, mixed> $feedArr */
-            $feedArr = $_SESSION['wizard']['feed'];
-            $feedLen = count(array_filter(array_keys($feedArr), 'is_numeric'));
+            $feedData['feed_text'] = $articleSourceStr;
+            $feedLen = count(array_filter(array_keys($feedData), 'is_numeric'));
             for ($i = 0; $i < $feedLen; $i++) {
-                $itemData = $feedArr[$i] ?? null;
-                if (is_array($itemData) && isset($itemData[$articleSourceStr])) {
-                    $_SESSION['wizard']['feed'][$i]['text'] = $itemData[$articleSourceStr];
+                $item = $feedData[$i] ?? null;
+                if (is_array($item) && isset($item[$articleSourceStr])) {
+                    $item['text'] = $item[$articleSourceStr];
+                    $feedData[$i] = $item;
                 }
             }
+            $_SESSION['wizard']['feed'] = $feedData;
         }
     }
 

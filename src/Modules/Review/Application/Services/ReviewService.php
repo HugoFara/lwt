@@ -190,6 +190,7 @@ class ReviewService
         ?string $reviewsql = null
     ): string {
         if ($lang !== null) {
+            /** @var mixed $nameRaw */
             $nameRaw = QueryBuilder::table('languages')
                 ->where('LgID', '=', $lang)
                 ->valuePrepared('LgName');
@@ -202,8 +203,9 @@ class ReviewService
                 ->join('languages', 'TxLgID', '=', 'LgID')
                 ->where('TxID', '=', $text)
                 ->firstPrepared();
-            $nameRaw = $row['LgName'] ?? null;
-            return is_string($nameRaw) ? $nameRaw : 'L2';
+            /** @var mixed $nameRawFromRow */
+            $nameRawFromRow = $row['LgName'] ?? null;
+            return is_string($nameRawFromRow) ? $nameRawFromRow : 'L2';
         }
 
         if ($selection !== null && $reviewsql !== null) {
@@ -212,7 +214,8 @@ class ReviewService
                 $validation = $this->validateReviewSelection($testSqlProjection);
                 if ($validation['langCount'] == 1) {
                     $bindings = [];
-                    $nameRaw = Connection::preparedFetchValue(
+                    /** @var mixed $nameRawFromQuery */
+                    $nameRawFromQuery = Connection::preparedFetchValue(
                         "SELECT LgName
                         FROM languages, {$testSqlProjection} AND LgID = WoLgID"
                         . UserScopedQuery::forTablePrepared('words', $bindings) . "
@@ -220,7 +223,7 @@ class ReviewService
                         $bindings,
                         'LgName'
                     );
-                    return is_string($nameRaw) ? $nameRaw : 'L2';
+                    return is_string($nameRawFromQuery) ? $nameRawFromQuery : 'L2';
                 }
             }
         }
@@ -426,6 +429,7 @@ class ReviewService
      */
     public function getLanguageIdFromReviewSql(string $reviewsql): ?int
     {
+        /** @var mixed $langIdRaw */
         $langIdRaw = Connection::fetchValue(
             "SELECT WoLgID FROM $reviewsql LIMIT 1",
             'WoLgID'
@@ -514,6 +518,7 @@ class ReviewService
      */
     public function getWordText(int $wordId): ?string
     {
+        /** @var mixed $textRaw */
         $textRaw = QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
             ->valuePrepared('WoText');
@@ -599,7 +604,7 @@ class ReviewService
      * @param int|null    $langId       Language ID
      * @param int|null    $textId       Text ID
      *
-     * @return array{title: string, property: string, counts: array{due: int, total: int}}|null
+     * @return array{title: string, property: string, reviewsql: string, counts: array{due: int, total: int}}|null
      */
     public function getReviewDataFromParams(
         ?int $selection,
@@ -607,13 +612,18 @@ class ReviewService
         ?int $langId,
         ?int $textId
     ): ?array {
+        $title = '';
+        $property = '';
+        $reviewsql = '';
+
         if ($selection !== null && $sessTestsql !== null) {
             $property = "selection=$selection";
-            $reviewsql = $this->buildSelectionReviewSql($selection, $sessTestsql);
+            $reviewsqlResult = $this->buildSelectionReviewSql($selection, $sessTestsql);
 
-            if ($reviewsql === null) {
+            if ($reviewsqlResult === null) {
                 return null;
             }
+            $reviewsql = $reviewsqlResult;
 
             $validation = $this->validateReviewSelection($reviewsql);
             if (!$validation['valid']) {
@@ -630,6 +640,7 @@ class ReviewService
             $title = 'Selected ' . $totalCount . ' Term' . ($totalCount < 2 ? '' : 's');
 
             $bindings = [];
+            /** @var mixed $langNameRaw */
             $langNameRaw = Connection::preparedFetchValue(
                 "SELECT LgName
                 FROM languages, {$reviewsql} AND LgID = WoLgID"
@@ -639,27 +650,29 @@ class ReviewService
                 'LgName'
             );
             $langName = is_string($langNameRaw) ? $langNameRaw : null;
-            if ($langName) {
+            if ($langName !== null && $langName !== '') {
                 $title .= ' IN ' . $langName;
             }
         } elseif ($langId !== null) {
             $property = "lang=$langId";
             $reviewsql = " words WHERE WoLgID = $langId ";
 
-            $langNameRaw = QueryBuilder::table('languages')
+            /** @var mixed $langNameRawFromLang */
+            $langNameRawFromLang = QueryBuilder::table('languages')
                 ->where('LgID', '=', $langId)
                 ->valuePrepared('LgName');
-            $langName = is_string($langNameRaw) ? $langNameRaw : 'Unknown';
+            $langName = is_string($langNameRawFromLang) ? $langNameRawFromLang : 'Unknown';
             $title = "All Terms in " . $langName;
         } elseif ($textId !== null) {
             $property = "text=$textId";
             $reviewsql = " words, word_occurrences
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
 
-            $title = QueryBuilder::table('texts')
+            /** @var mixed $titleRaw */
+            $titleRaw = QueryBuilder::table('texts')
                 ->where('TxID', '=', $textId)
                 ->valuePrepared('TxTitle');
-            $title = $title ?? 'Unknown Text';
+            $title = is_string($titleRaw) ? $titleRaw : 'Unknown Text';
 
             Settings::save('currenttext', (string) $textId);
         } else {
@@ -742,10 +755,10 @@ class ReviewService
     /**
      * Get test solution text.
      *
-     * @param int    $testType Test type (1-5)
-     * @param array  $wordData Word record data
-     * @param bool   $wordMode Whether in word mode (no sentence)
-     * @param string $wordText Word text for display
+     * @param int                  $testType Test type (1-5)
+     * @param array<string, mixed> $wordData Word record data
+     * @param bool                 $wordMode Whether in word mode (no sentence)
+     * @param string               $wordText Word text for display
      *
      * @return string Solution text
      */
@@ -760,7 +773,10 @@ class ReviewService
         if ($baseType == 1) {
             $tagList = TagsFacade::getWordTagList((int) $wordData['WoID'], false);
             $tagFormatted = $tagList !== '' ? ' [' . $tagList . ']' : '';
-            $trans = ExportService::replaceTabNewline($wordData['WoTranslation']) . $tagFormatted;
+            $translation = isset($wordData['WoTranslation']) && is_string($wordData['WoTranslation'])
+                ? $wordData['WoTranslation']
+                : '';
+            $trans = ExportService::replaceTabNewline($translation) . $tagFormatted;
             return $wordMode ? $trans : "[$trans]";
         }
 

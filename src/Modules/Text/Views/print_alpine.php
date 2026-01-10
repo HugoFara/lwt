@@ -14,6 +14,14 @@
  * @category User_Interface
  * @package  Lwt
  * @since    3.0.0
+ *
+ * @var int $textId
+ * @var string $mode
+ * @var array{title: string, sourceUri: string, audioUri: string, textSize: int, rtlScript: bool, hasAnnotation: bool} $viewData
+ * @var int $savedAnn
+ * @var int $savedStatus
+ * @var int $savedPlacement
+ * @var string|null $editFormHtml
  */
 
 namespace Lwt\Modules\Text\Views;
@@ -25,13 +33,22 @@ use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+// Type-safe variable extraction from controller context
+/** @var int $textId */
+/** @var string $mode */
+assert(is_array($viewData));
+/** @var array{title: string, sourceUri: string, audioUri: string, textSize: int, rtlScript: bool, hasAnnotation: bool} $viewData */
+/** @var int $savedAnn */
+/** @var int $savedStatus */
+/** @var int $savedPlacement */
+/** @var string|null $editFormHtml */
 
-$title = $viewData['title'] ?? '';
-$sourceUri = $viewData['sourceUri'] ?? '';
-$audioUri = $viewData['audioUri'] ?? '';
-$textSize = $viewData['textSize'] ?? 100;
-$rtlScript = (bool)($viewData['rtlScript'] ?? false);
-$hasAnnotation = (bool)($viewData['hasAnnotation'] ?? false);
+$title = (string)$viewData['title'];
+$sourceUri = (string)$viewData['sourceUri'];
+$audioUri = (string)$viewData['audioUri'];
+$textSize = (int)$viewData['textSize'];
+$rtlScript = (bool)$viewData['rtlScript'];
+$hasAnnotation = (bool)$viewData['hasAnnotation'];
 
 // Determine URLs based on mode
 $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';

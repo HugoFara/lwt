@@ -131,10 +131,10 @@ class TextApiHandler
      */
     public function saveImprText(int $textid, string $elem, object $data): array
     {
-        $newAnnotation = $data->{$elem};
+        $newAnnotation = (string)($data->{$elem} ?? '');
         $line = (int)substr($elem, 2);
         if (str_starts_with($elem, "rg") && $newAnnotation == "") {
-            $newAnnotation = $data->{'tx' . $line};
+            $newAnnotation = (string)($data->{'tx' . $line} ?? '');
         }
         $status = $this->saveImprTextData($textid, $line, $newAnnotation);
         if ($status != "OK") {
@@ -186,7 +186,11 @@ class TextApiHandler
      */
     public function formatSetAnnotation(int $textId, string $elem, string $data): array
     {
-        $result = $this->saveImprText($textId, $elem, json_decode($data));
+        $decoded = json_decode($data);
+        if (!is_object($decoded)) {
+            return ["error" => "Invalid JSON data"];
+        }
+        $result = $this->saveImprText($textId, $elem, $decoded);
         if (array_key_exists("error", $result)) {
             return ["error" => $result["error"]];
         }
@@ -391,7 +395,7 @@ class TextApiHandler
                         'startPos' => $order,
                         'wordId' => isset($record['WoID']) ? (int)$record['WoID'] : null,
                         'status' => (int)($record['WoStatus'] ?? 0),
-                        'translation' => ExportService::replaceTabNewline($record['WoTranslation'] ?? ''),
+                        'translation' => ExportService::replaceTabNewline((string)($record['WoTranslation'] ?? '')),
                     ];
                 }
             }
@@ -400,7 +404,7 @@ class TextApiHandler
             $hidden = $order <= $lastOrder;
 
             // Calculate hex for TERM class
-            $hex = StringUtils::toClassName($record['TiTextLC'] ?? '');
+            $hex = StringUtils::toClassName((string)($record['TiTextLC'] ?? ''));
 
             // Build word data
             $wordData = [
@@ -420,9 +424,9 @@ class TextApiHandler
                     // Known word
                     $wordData['wordId'] = (int)$record['WoID'];
                     $wordData['status'] = (int)$record['WoStatus'];
-                    $wordData['translation'] = ExportService::replaceTabNewline($record['WoTranslation'] ?? '');
-                    $wordData['romanization'] = $record['WoRomanization'] ?? '';
-                    $wordData['notes'] = $record['WoNotes'] ?? '';
+                    $wordData['translation'] = ExportService::replaceTabNewline((string)($record['WoTranslation'] ?? ''));
+                    $wordData['romanization'] = (string)($record['WoRomanization'] ?? '');
+                    $wordData['notes'] = (string)($record['WoNotes'] ?? '');
 
                     // Get tags
                     $tags = TagsFacade::getWordTagList((int)$record['WoID'], false);
@@ -1083,7 +1087,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
                 ->firstPrepared();
 
             if ($text !== null) {
-                $scoreArray['title'] = $text['TxTitle'];
+                $scoreArray['title'] = (string)$text['TxTitle'];
             }
 
             $result[] = $scoreArray;

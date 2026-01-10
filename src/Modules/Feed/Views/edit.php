@@ -24,6 +24,14 @@ namespace Lwt\Views\Feed;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
+/**
+ * @var array{NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string} $feed Feed data
+ * @var array<int, array{LgID: int, LgName: string}> $languages Language records
+ * @var array<string, string> $options Parsed feed options
+ * @var string|null $autoUpdateInterval Auto-update interval value
+ * @var string|null $autoUpdateUnit Auto-update unit (h/d/w)
+ */
+
 $actions = [
     ['url' => '/feeds?page=1', 'label' => 'Feeds', 'icon' => 'list'],
     ['url' => '/feeds/wizard?step=2&edit_feed=' . $feed['NfID'], 'label' => 'Feed Wizard', 'icon' => 'wand-2', 'class' => 'is-info']
@@ -61,7 +69,7 @@ $actions = [
       x-data="feedForm()"
       @submit="handleSubmit($event)">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-    <input type="hidden" name="NfID" value="<?php echo htmlspecialchars($feed['NfID'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+    <input type="hidden" name="NfID" value="<?php echo $feed['NfID'] ?? ''; ?>" />
     <input type="hidden" name="NfOptions" value="" />
     <input type="hidden" name="update_feed" value="1" />
 

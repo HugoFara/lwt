@@ -23,6 +23,20 @@
  * @package  Lwt
  * @license  Unlicense <http://unlicense.org/>
  * @since    3.0.0
+ *
+ * @var int $textId
+ * @var int $langId
+ * @var string $title
+ * @var string|null $sourceUri
+ * @var string $media
+ * @var int $audioPosition
+ * @var string $text
+ * @var string $languageName
+ * @var int $showAll
+ * @var int $showLearning
+ * @var string $languageCode
+ * @var string $phoneticText
+ * @var string|null $voiceApi
  */
 
 namespace Lwt\Views\Text;

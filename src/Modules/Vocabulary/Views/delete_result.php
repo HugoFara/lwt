@@ -17,18 +17,18 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @var int $wid
+ * @var int $textId
+ * @var bool $deleted
+ * @var string $term
+ * @var string $termLc
  */
 
 namespace Lwt\Modules\Vocabulary\Views;
 
 use Lwt\Core\StringUtils;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
-
-/** @var int $wid */
-/** @var int $textId */
-/** @var bool $deleted */
-/** @var string $term */
-/** @var string $termLc */
 
 $hex = StringUtils::toClassName($termLc);
 ?>

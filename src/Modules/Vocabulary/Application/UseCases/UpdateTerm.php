@@ -107,10 +107,10 @@ class UpdateTerm
             $term = $this->execute(
                 $termId,
                 isset($data['WoStatus']) ? (int) $data['WoStatus'] : null,
-                $data['WoTranslation'] ?? null,
-                $data['WoSentence'] ?? null,
-                $data['WoNotes'] ?? null,
-                $data['WoRomanization'] ?? null
+                isset($data['WoTranslation']) ? (string)$data['WoTranslation'] : null,
+                isset($data['WoSentence']) ? (string)$data['WoSentence'] : null,
+                isset($data['WoNotes']) ? (string)$data['WoNotes'] : null,
+                isset($data['WoRomanization']) ? (string)$data['WoRomanization'] : null
             );
 
             return [

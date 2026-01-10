@@ -190,6 +190,7 @@ class Container implements ContainerInterface
      */
     public function getTyped(string $id): object
     {
+        /** @var mixed $instance */
         $instance = $this->doGet($id);
         /** @var T */
         return $instance;
@@ -224,6 +225,7 @@ class Container implements ContainerInterface
         $this->resolving[$id] = true;
 
         try {
+            /** @var mixed $instance */
             $instance = $this->resolve($id);
         } finally {
             unset($this->resolving[$id]);
@@ -273,6 +275,7 @@ class Container implements ContainerInterface
         // Use registered binding if available
         if (isset($this->bindings[$id])) {
             $binding = $this->bindings[$id];
+            /** @var mixed $instance */
             $instance = ($binding['factory'])($this);
 
             if ($binding['singleton']) {
@@ -326,7 +329,8 @@ class Container implements ContainerInterface
 
         // No constructor = no dependencies
         if ($constructor === null) {
-            return new $class();
+            // @phpstan-ignore-next-line Class existence already checked via ReflectionClass
+            return $reflector->newInstance();
         }
 
         $parameters = $constructor->getParameters();
@@ -341,20 +345,38 @@ class Container implements ContainerInterface
      *
      * @param \ReflectionParameter[] $parameters Constructor parameters
      *
-     * @return array<int, mixed> Resolved dependencies
+     * @return list<mixed> Resolved dependencies
      *
      * @throws ContainerException If a dependency cannot be resolved
      */
     private function resolveDependencies(array $parameters): array
     {
-        $dependencies = [];
+        return array_values(array_map(
+            fn(\ReflectionParameter $param): mixed => $this->resolveDependency($param),
+            $parameters
+        ));
+    }
 
-        foreach ($parameters as $parameter) {
-            $dependency = $this->resolveDependency($parameter);
-            $dependencies[] = $dependency;
-        }
-
-        return $dependencies;
+    /**
+     * Resolve parameters with optional overrides.
+     *
+     * @param \ReflectionParameter[]   $parameters  Parameters to resolve
+     * @param array<string, mixed>     $overrides   Override values by parameter name
+     *
+     * @return list<mixed> Resolved dependencies
+     */
+    private function resolveParametersWithOverrides(array $parameters, array $overrides): array
+    {
+        return array_values(array_map(
+            function (\ReflectionParameter $param) use ($overrides): mixed {
+                $paramName = $param->getName();
+                if (array_key_exists($paramName, $overrides)) {
+                    return $overrides[$paramName];
+                }
+                return $this->resolveDependency($param);
+            },
+            $parameters
+        ));
     }
 
     /**
@@ -418,24 +440,12 @@ class Container implements ContainerInterface
      */
     public function call(string $class, string $method, array $params = []): mixed
     {
+        /** @var object $instance */
         $instance = $this->get($class);
         $reflector = new \ReflectionMethod($instance, $method);
 
         $parameters = $reflector->getParameters();
-        $dependencies = [];
-
-        foreach ($parameters as $parameter) {
-            $paramName = $parameter->getName();
-
-            // Use provided parameter if available
-            if (array_key_exists($paramName, $params)) {
-                $dependencies[] = $params[$paramName];
-                continue;
-            }
-
-            // Otherwise try to resolve from container
-            $dependencies[] = $this->resolveDependency($parameter);
-        }
+        $dependencies = $this->resolveParametersWithOverrides($parameters, $params);
 
         return $reflector->invokeArgs($instance, $dependencies);
     }
@@ -463,24 +473,11 @@ class Container implements ContainerInterface
         $constructor = $reflector->getConstructor();
 
         if ($constructor === null) {
-            return new $class();
+            return $reflector->newInstance();
         }
 
         $parameters = $constructor->getParameters();
-        $dependencies = [];
-
-        foreach ($parameters as $parameter) {
-            $paramName = $parameter->getName();
-
-            // Use provided parameter if available
-            if (array_key_exists($paramName, $params)) {
-                $dependencies[] = $params[$paramName];
-                continue;
-            }
-
-            // Otherwise try to resolve from container
-            $dependencies[] = $this->resolveDependency($parameter);
-        }
+        $dependencies = $this->resolveParametersWithOverrides($parameters, $params);
 
         return $reflector->newInstanceArgs($dependencies);
     }

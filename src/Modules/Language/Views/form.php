@@ -26,11 +26,54 @@ namespace Lwt\Modules\Language\Views;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 
+// Type assertions for view variables
+assert(is_object($language));
+assert(is_string($sourceLg));
+assert(is_string($targetLg));
+assert(is_bool($isNew));
+assert(is_array($parserInfo));
+assert(is_array($allLanguages));
+
+/**
+ * @var object $language Language view object with optional properties
+ * @var string $sourceLg
+ * @var string $targetLg
+ * @var bool $isNew
+ * @var array<string, array<string, mixed>> $parserInfo
+ * @var array<int, array{id: int, name: string}> $allLanguages
+ */
+
+// Extract typed values from language object
+$langId = isset($language->id) ? (int)$language->id : null;
+$langName = isset($language->name) && is_string($language->name) ? $language->name : '';
+$langTextSize = isset($language->textsize) && is_numeric($language->textsize) ? (int)$language->textsize : 100;
+$langParserType = isset($language->parsertype) && is_string($language->parsertype) ? $language->parsertype : 'regex';
+$langDict1Uri = isset($language->dict1uri) && is_string($language->dict1uri) ? $language->dict1uri : '';
+$langDict2Uri = isset($language->dict2uri) && is_string($language->dict2uri) ? $language->dict2uri : '';
+$langTranslatorUri = isset($language->translatoruri) && is_string($language->translatoruri) ? $language->translatoruri : '';
+$langDict1Popup = !empty($language->dict1popup);
+$langDict2Popup = !empty($language->dict2popup);
+$langTranslatorPopup = !empty($language->translatorpopup);
+$langSourceLang = isset($language->sourcelang) && is_string($language->sourcelang) ? $language->sourcelang : '';
+$langTargetLang = isset($language->targetlang) && is_string($language->targetlang) ? $language->targetlang : '';
+$langExportTemplate = isset($language->exporttemplate) && is_string($language->exporttemplate) ? $language->exporttemplate : '';
+$langRegexpSplitSentences = isset($language->regexpsplitsent) && is_string($language->regexpsplitsent) ? $language->regexpsplitsent : '';
+$langExceptionsSplitSentences = isset($language->exceptionsplitsent) && is_string($language->exceptionsplitsent) ? $language->exceptionsplitsent : '';
+$langRegexpWordCharacters = isset($language->regexpwordchar) && is_string($language->regexpwordchar) ? $language->regexpwordchar : '';
+$langCharSubstitutions = isset($language->charactersubst) && is_string($language->charactersubst) ? $language->charactersubst : '';
+$langRemoveSpaces = !empty($language->removespaces);
+$langSplitEachChar = !empty($language->spliteachchar);
+$langRightToLeft = !empty($language->rightoleft);
+$langShowRomanization = !empty($language->showromanization);
+$langTtsVoiceApi = isset($language->ttsvoiceapi) && is_string($language->ttsvoiceapi) ? $language->ttsvoiceapi : '';
+$langLocalDictMode = isset($language->localdictmode) && is_numeric($language->localdictmode) ? (int)$language->localdictmode : 0;
+$langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->pipervoiceid) ? $language->pipervoiceid : null;
+
 ?>
 <script type="application/json" id="language-form-config">
 <?php echo json_encode([
-    'languageId' => $language->id,
-    'languageName' => $language->name,
+    'languageId' => $langId,
+    'languageName' => $langName,
     'sourceLg' => $sourceLg,
     'targetLg' => $targetLg,
     'languageDefs' => LanguagePresets::getAll(),
@@ -40,9 +83,9 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 
 <form class="validate" action="<?php echo url('/languages'); ?>" method="post" name="lg_form"
       x-data="{
-          textSize: <?php echo $language->textsize ?: 100; ?>,
-          parserType: '<?php echo htmlspecialchars($language->parsertype ?? 'regex', ENT_QUOTES, 'UTF-8'); ?>',
-          showJapaneseOptions: <?php echo ($language->name === 'Japanese') ? 'true' : 'false'; ?>,
+          textSize: <?php echo $langTextSize; ?>,
+          parserType: '<?php echo htmlspecialchars($langParserType, ENT_QUOTES, 'UTF-8'); ?>',
+          showJapaneseOptions: <?php echo ($langName === 'Japanese') ? 'true' : 'false'; ?>,
           showTranslatorKey: false,
           sections: {
               dictionaries: true,
@@ -52,7 +95,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
           }
       }">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-    <input type="hidden" name="LgID" value="<?php echo $language->id; ?>" />
+    <input type="hidden" name="LgID" value="<?php echo $langId ?? ''; ?>" />
 
     <?php if (!$isNew): ?>
     <!-- Edit Warning -->
@@ -85,7 +128,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                        data_info="Study Language"
                        name="LgName"
                        id="LgName"
-                       value="<?php echo htmlspecialchars($language->name ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       value="<?php echo htmlspecialchars($langName, ENT_QUOTES, 'UTF-8'); ?>"
                        maxlength="40"
                        @input="showJapaneseOptions = ($event.target.value === 'Japanese')"
                        required />
@@ -120,14 +163,14 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                     <input type="url"
                            class="input notempty checkdicturl checkoutsidebmp"
                            name="LgDict1URI"
-                           value="<?php echo htmlspecialchars($language->dict1uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($langDict1Uri, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="200"
                            data_info="Dictionary 1 URI"
                            required />
                 </div>
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgDict1PopUp" id="LgDict1PopUp" value="1"
-                           <?php echo (bool)($language->dict1popup ?? false) ? 'checked' : ''; ?> />
+                           <?php echo $langDict1Popup ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some dictionaries cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
@@ -141,13 +184,13 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                     <input type="url"
                            class="input checkdicturl checkoutsidebmp"
                            name="LgDict2URI"
-                           value="<?php echo htmlspecialchars($language->dict2uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($langDict2Uri, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="200"
                            data_info="Dictionary 2 URI" />
                 </div>
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgDict2PopUp" id="LgDict2PopUp" value="1"
-                           <?php echo (bool)($language->dict2popup ?? false) ? 'checked' : ''; ?> />
+                           <?php echo $langDict2Popup ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some dictionaries cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
@@ -175,7 +218,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                         <input type="url"
                                class="input checkdicturl checkoutsidebmp"
                                name="LgGoogleTranslateURI"
-                               value="<?php echo htmlspecialchars($language->translator ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo htmlspecialchars($langTranslatorUri, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
                                data_info="GoogleTranslate URI"
                                placeholder="Translator URI" />
@@ -194,7 +237,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgGoogleTranslatePopUp" id="LgGoogleTranslatePopUp" value="1"
-                           <?php echo (bool)($language->translatorpopup ?? false) ? 'checked' : ''; ?> />
+                           <?php echo $langTranslatorPopup ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some translators cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
@@ -212,7 +255,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                                    class="input"
                                    name="LgSourceLang"
                                    id="LgSourceLang"
-                                   value="<?php echo htmlspecialchars($language->sourcelang ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php echo htmlspecialchars($langSourceLang, ENT_QUOTES, 'UTF-8'); ?>"
                                    maxlength="10"
                                    placeholder="e.g., de, ja, zh" />
                         </div>
@@ -227,7 +270,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                                    class="input"
                                    name="LgTargetLang"
                                    id="LgTargetLang"
-                                   value="<?php echo htmlspecialchars($language->targetlang ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php echo htmlspecialchars($langTargetLang, ENT_QUOTES, 'UTF-8'); ?>"
                                    maxlength="10"
                                    placeholder="e.g., en" />
                         </div>
@@ -254,16 +297,16 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                 <div class="control">
                     <div class="select">
                         <select name="LgLocalDictMode" id="LgLocalDictMode">
-                            <option value="0" <?php echo ($language->localdictmode ?? 0) == 0 ? 'selected' : ''; ?>>
+                            <option value="0" <?php echo $langLocalDictMode === 0 ? 'selected' : ''; ?>>
                                 Online dictionaries only
                             </option>
-                            <option value="1" <?php echo ($language->localdictmode ?? 0) == 1 ? 'selected' : ''; ?>>
+                            <option value="1" <?php echo $langLocalDictMode === 1 ? 'selected' : ''; ?>>
                                 Local first, online fallback
                             </option>
-                            <option value="2" <?php echo ($language->localdictmode ?? 0) == 2 ? 'selected' : ''; ?>>
+                            <option value="2" <?php echo $langLocalDictMode === 2 ? 'selected' : ''; ?>>
                                 Local dictionaries only
                             </option>
-                            <option value="3" <?php echo ($language->localdictmode ?? 0) == 3 ? 'selected' : ''; ?>>
+                            <option value="3" <?php echo $langLocalDictMode === 3 ? 'selected' : ''; ?>>
                                 Combined (show both)
                             </option>
                         </select>
@@ -271,8 +314,8 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                 </div>
                 <p class="help">
                     Configure how local (offline) dictionaries are used.
-                    <?php if (($language->id ?? 0) > 0): ?>
-                    <a href="/dictionaries?lang=<?php echo $language->id; ?>">
+                    <?php if ($langId !== null && $langId > 0): ?>
+                    <a href="/dictionaries?lang=<?php echo $langId; ?>">
                         Manage local dictionaries
                     </a>
                     <?php endif; ?>
@@ -309,7 +352,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                            class="input"
                            style="max-width: 120px;"
                            x-model="textSize"
-                           value="<?php echo $language->textsize; ?>" />
+                           value="<?php echo $langTextSize; ?>" />
                 </div>
                 <div class="field mt-2">
                     <div class="control">
@@ -347,22 +390,28 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                 <div class="control">
                     <div class="select is-fullwidth">
                         <select name="LgParserType" id="LgParserType" x-model="parserType">
-                            <?php foreach ($parserInfo as $type => $info): ?>
+                            <?php foreach ($parserInfo as $type => $info):
+                                $infoAvailable = isset($info['available']) && $info['available'];
+                                $infoName = isset($info['name']) && is_string($info['name']) ? $info['name'] : '';
+                            ?>
                             <option value="<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>"
-                                    <?php echo ($language->parsertype === $type) ? 'selected' : ''; ?>
-                                    <?php echo !$info['available'] ? 'disabled' : ''; ?>>
-                                <?php echo htmlspecialchars($info['name'], ENT_QUOTES, 'UTF-8'); ?>
-                                <?php echo !$info['available'] ? ' (unavailable)' : ''; ?>
+                                    <?php echo ($langParserType === $type) ? 'selected' : ''; ?>
+                                    <?php echo !$infoAvailable ? 'disabled' : ''; ?>>
+                                <?php echo htmlspecialchars($infoName, ENT_QUOTES, 'UTF-8'); ?>
+                                <?php echo !$infoAvailable ? ' (unavailable)' : ''; ?>
                             </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
                 <p class="help">Select the parsing algorithm for this language</p>
-                <?php foreach ($parserInfo as $type => $info): ?>
-                    <?php if (!$info['available'] && $info['message']): ?>
+                <?php foreach ($parserInfo as $type => $info):
+                    $infoAvailable = isset($info['available']) && $info['available'];
+                    $infoMessage = isset($info['message']) && is_string($info['message']) ? $info['message'] : '';
+                ?>
+                    <?php if (!$infoAvailable && $infoMessage !== ''): ?>
                     <p class="help is-warning" x-show="parserType === '<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>'" x-cloak>
-                        <?php echo htmlspecialchars($info['message'], ENT_QUOTES, 'UTF-8'); ?>
+                        <?php echo htmlspecialchars($infoMessage, ENT_QUOTES, 'UTF-8'); ?>
                     </p>
                     <?php endif; ?>
                 <?php endforeach; ?>
@@ -376,7 +425,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                            class="input checkoutsidebmp"
                            data_info="Character Substitutions"
                            name="LgCharacterSubstitutions"
-                           value="<?php echo htmlspecialchars($language->charactersubst ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($langCharSubstitutions, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="500" />
                 </div>
                 <p class="help">Replace characters before parsing (format: from=to, separated by |)</p>
@@ -393,7 +442,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                            class="input checkoutsidebmp"
                            :class="{ 'notempty': parserType === 'regex' }"
                            name="LgRegexpSplitSentences"
-                           value="<?php echo htmlspecialchars($language->regexpsplitsent ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($langRegexpSplitSentences, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="500"
                            data_info="RegExp Split Sentences"
                            :required="parserType === 'regex'" />
@@ -409,7 +458,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                            class="input checkoutsidebmp"
                            data_info="Exceptions Split Sentences"
                            name="LgExceptionsSplitSentences"
-                           value="<?php echo htmlspecialchars($language->exceptionsplitsent ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($langExceptionsSplitSentences, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="500" />
                 </div>
                 <p class="help">Words that should not trigger sentence splitting (e.g., Mr., Dr.)</p>
@@ -436,7 +485,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                            class="input notempty checkoutsidebmp"
                            data_info="RegExp Word Characters"
                            name="LgRegexpWordCharacters"
-                           value="<?php echo htmlspecialchars($language->regexpwordchar ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($langRegexpWordCharacters, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="500"
                            :required="parserType === 'regex'" />
                 </div>
@@ -453,7 +502,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                            name="LgSplitEachChar"
                            id="LgSplitEachChar"
                            value="1"
-                           <?php echo $language->spliteachchar ? "checked" : ""; ?> />
+                           <?php echo $langSplitEachChar ? "checked" : ""; ?> />
                     <strong>Make each character a word</strong>
                 </label>
                 <p class="help ml-5">For Chinese, Japanese, etc. (Use "Character" parser instead)</p>
@@ -479,7 +528,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                            name="LgRemoveSpaces"
                            id="LgRemoveSpaces"
                            value="1"
-                           <?php echo $language->removespaces ? "checked" : ""; ?> />
+                           <?php echo $langRemoveSpaces ? "checked" : ""; ?> />
                     <strong>Remove spaces</strong>
                 </label>
                 <p class="help ml-5">For Chinese, Japanese, etc.</p>
@@ -491,7 +540,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                            name="LgRightToLeft"
                            id="LgRightToLeft"
                            value="1"
-                           <?php echo $language->rightoleft ? "checked" : ""; ?> />
+                           <?php echo $langRightToLeft ? "checked" : ""; ?> />
                     <strong>Right-To-Left Script</strong>
                 </label>
                 <p class="help ml-5">For Arabic, Hebrew, Farsi, Urdu, etc.</p>
@@ -503,7 +552,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                            name="LgShowRomanization"
                            id="LgShowRomanization"
                            value="1"
-                           <?php echo $language->showromanization ? "checked" : ""; ?> />
+                           <?php echo $langShowRomanization ? "checked" : ""; ?> />
                     <strong>Show Romanization</strong>
                 </label>
                 <p class="help ml-5">
@@ -543,7 +592,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                            class="input checkoutsidebmp"
                            data_info="Export Template"
                            name="LgExportTemplate"
-                           value="<?php echo htmlspecialchars($language->exporttemplate ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($langExportTemplate, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="1000" />
                 </div>
                 <p class="help">Template for exporting terms (e.g., to Anki)</p>
@@ -566,7 +615,7 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
                               name="LgTTSVoiceAPI"
                               maxlength="2048"
                               rows="4"
-                              placeholder="JSON configuration for TTS API"><?php echo htmlspecialchars($language->ttsvoiceapi ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                              placeholder="JSON configuration for TTS API"><?php echo htmlspecialchars($langTtsVoiceApi, ENT_QUOTES, 'UTF-8'); ?></textarea>
                 </div>
                 <div class="buttons mt-3">
                     <button type="button"

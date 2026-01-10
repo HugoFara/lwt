@@ -487,7 +487,7 @@ class TextParsing
         if ($connection === null) {
             throw new \RuntimeException('Database connection not available');
         }
-        $escaped_file_name = mysqli_real_escape_string($connection, $file_name);
+        $escaped_file_name = (string) mysqli_real_escape_string($connection, $file_name);
         $sql = "LOAD DATA LOCAL INFILE '$escaped_file_name'
         INTO TABLE temp_word_occurrences
         FIELDS TERMINATED BY '\\t' LINES TERMINATED BY '\\n' (@word_count, @term)
@@ -973,9 +973,9 @@ class TextParsing
         foreach ($rows as $record) {
             if ($record['len'] == 1) {
                 $wo[] = array(
-                    \htmlspecialchars($record['word'] ?? '', ENT_QUOTES, 'UTF-8'),
+                    \htmlspecialchars((string) ($record['word'] ?? ''), ENT_QUOTES, 'UTF-8'),
                     $record['cnt'],
-                    \htmlspecialchars($record['WoTranslation'] ?? '', ENT_QUOTES, 'UTF-8')
+                    \htmlspecialchars((string) ($record['WoTranslation'] ?? ''), ENT_QUOTES, 'UTF-8')
                 );
             } else {
                 $nw[] = array(

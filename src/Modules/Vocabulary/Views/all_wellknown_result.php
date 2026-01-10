@@ -17,6 +17,12 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @var int $status
+ * @var int $count
+ * @var int $textId
+ * @var array<array{wid: int, hex: string, term: string, status: int}> $wordsData
+ * @var bool $useTooltips
  */
 
 namespace Lwt\Views\Word;

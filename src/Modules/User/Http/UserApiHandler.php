@@ -282,12 +282,14 @@ class UserApiHandler
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
 
         // Also check for Apache-specific header
-        if (empty($authHeader) && function_exists('apache_request_headers')) {
+        if ($authHeader === '' && function_exists('apache_request_headers')) {
             $headers = apache_request_headers();
-            $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            /** @var mixed $apacheAuthHeader */
+            $apacheAuthHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            $authHeader = is_string($apacheAuthHeader) ? $apacheAuthHeader : '';
         }
 
-        if (empty($authHeader)) {
+        if ($authHeader === '') {
             return null;
         }
 

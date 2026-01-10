@@ -142,13 +142,13 @@ class AnnotationService
             $savewordid = '';
             $until = $order;
             if ($record['TiIsNotWord'] != 0) {
-                $savenonterm = $record['TiText'];
+                $savenonterm = (string)$record['TiText'];
             } else {
                 $until = $order + 2 * ($actcode - 1);
-                $saveterm = $record['TiText'];
+                $saveterm = (string)$record['TiText'];
                 if (isset($record['WoID'])) {
-                    $savetrans = $record['WoTranslation'];
-                    $savewordid = $record['WoID'];
+                    $savetrans = (string)$record['WoTranslation'];
+                    $savewordid = (string)$record['WoID'];
                 }
             }
             // Append the annotation
@@ -234,7 +234,7 @@ class AnnotationService
      */
     public function getAnnotationLink(int $textId): string
     {
-        $length = QueryBuilder::table('texts')
+        $length = (int)QueryBuilder::table('texts')
             ->selectRaw('LENGTH(TxAnnotatedText) AS text_length')
             ->where('TxID', '=', $textId)
             ->valuePrepared('text_length');

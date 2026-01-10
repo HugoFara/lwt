@@ -17,19 +17,27 @@
  * @since    3.0.0
  *
  * @psalm-suppress UndefinedGlobalVariable Variables are injected by including file
+ *
+ * @var array<int, array{type: int, text: string, trans?: string, rom?: string}> $annotations
+ * @var int $textSize
+ * @var bool $rtlScript
  */
 
 namespace Lwt\Views\Text;
 
-// Variables injected from text_display_text.php:
-// $annotations, $textSize, $rtlScript
-// JavaScript moved to reading/annotation_interactions.ts
-
+// Type-safe variable extraction from controller context
+assert(is_array($annotations));
+/** @var array<int, array{type: int, text: string, trans?: string, rom?: string}> */
+$annotationsTyped = $annotations;
+/** @var int */
+$textSizeTyped = $textSize;
+/** @var bool */
+$rtlScriptTyped = $rtlScript;
 ?>
-<div id="print"<?php echo ($rtlScript ? ' dir="rtl"' : ''); ?>>
-<p style="font-size:<?php echo $textSize; ?>%;line-height: 1.35; margin-bottom: 10px; ">
+<div id="print"<?php echo ($rtlScriptTyped ? ' dir="rtl"' : ''); ?>>
+<p style="font-size:<?php echo $textSizeTyped; ?>%;line-height: 1.35; margin-bottom: 10px; ">
 <?php
-foreach ($annotations as $item) {
+foreach ($annotationsTyped as $item) {
     if ($item['type'] > -1) {
         // Regular word with annotation
         echo ' <ruby>
@@ -48,7 +56,7 @@ foreach ($annotations as $item) {
         echo str_replace(
             "¶",
             '</p>
-            <p style="font-size:' . $textSize .
+            <p style="font-size:' . $textSizeTyped .
             '%;line-height: 1.3; margin-bottom: 10px;">',
             " " . \htmlspecialchars($item['text'] ?? '', ENT_QUOTES, 'UTF-8')
         );

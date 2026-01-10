@@ -175,6 +175,7 @@ class ReviewApiHandler
             } elseif ($baseType == 2) {
                 if ($wordMode) {
                     // Type 5: Translation → Term (word mode) - show translation
+                    /** @var mixed $translationRaw */
                     $translationRaw = $wordRecord['WoTranslation'] ?? '';
                     $translation = is_string($translationRaw) ? $translationRaw : '';
                     $displayHtml = '<span class="word-test">'
@@ -201,7 +202,7 @@ class ReviewApiHandler
     /**
      * Build HTML for a sentence with ruby annotations.
      *
-     * @param array  $annotations     Word annotations keyed by order
+     * @param array<int, array{text: string, romanization: string|null, translation: string|null}> $annotations Word annotations keyed by order
      * @param string $targetWord      The target word being tested
      * @param int    $baseType        Test type (1=show term, 2=hide term, 3=hide term)
      * @param bool   $showRom         Show romanization
@@ -223,11 +224,13 @@ class ReviewApiHandler
         $targetWordLc = mb_strtolower($targetWord, 'UTF-8');
 
         foreach ($annotations as $ann) {
-            $text = $ann['text'];
+            $text = is_string($ann['text'] ?? null) ? $ann['text'] : '';
             $textLc = mb_strtolower($text, 'UTF-8');
             $isTarget = $textLc === $targetWordLc;
-            $rom = $ann['romanization'] ?? null;
-            $trans = $ann['translation'] ?? null;
+            $romRaw = $ann['romanization'] ?? null;
+            $transRaw = $ann['translation'] ?? null;
+            $rom = is_string($romRaw) ? $romRaw : null;
+            $trans = is_string($transRaw) ? $transRaw : null;
             $escapedText = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 
             // Handle the target word based on test type
@@ -274,16 +277,30 @@ class ReviewApiHandler
     /**
      * Get the next word to review based on request parameters.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
      * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
      */
     public function wordTestAjax(array $params): array
     {
-        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
+        /** @var mixed $reviewKeyRaw */
+        $reviewKeyRaw = $params['review_key'] ?? $params['test_key'] ?? '';
+        $reviewKey = is_string($reviewKeyRaw) ? $reviewKeyRaw : '';
+        /** @var mixed $selectionRaw */
+        $selectionRaw = $params['selection'] ?? '';
+        $selection = is_string($selectionRaw) ? $selectionRaw : '';
+
+        if ($reviewKey === '' || $selection === '') {
+            return [
+                "term_id" => 0,
+                "term_text" => '',
+                "group" => ''
+            ];
+        }
+
         $testSql = $this->reviewFacade->getReviewSql(
             $reviewKey,
-            $this->parseSelection($reviewKey, $params['selection'])
+            $this->parseSelection($reviewKey, $selection)
         );
         if ($testSql === null) {
             return [
@@ -292,26 +309,42 @@ class ReviewApiHandler
                 "group" => ''
             ];
         }
+
+        /** @var mixed $wordModeRaw */
+        $wordModeRaw = $params['word_mode'] ?? false;
+        /** @var mixed $typeRaw */
+        $typeRaw = $params['type'] ?? 1;
+
         return $this->getWordReviewData(
             $testSql,
-            filter_var($params['word_mode'], FILTER_VALIDATE_BOOLEAN),
-            (int)$params['type']
+            filter_var($wordModeRaw, FILTER_VALIDATE_BOOLEAN),
+            (int) $typeRaw
         );
     }
 
     /**
      * Return the number of reviews for tomorrow.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
      * @return array{count: int}
      */
     public function tomorrowTestCount(array $params): array
     {
-        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
+        /** @var mixed $reviewKeyRaw */
+        $reviewKeyRaw = $params['review_key'] ?? $params['test_key'] ?? '';
+        $reviewKey = is_string($reviewKeyRaw) ? $reviewKeyRaw : '';
+        /** @var mixed $selectionRaw */
+        $selectionRaw = $params['selection'] ?? '';
+        $selection = is_string($selectionRaw) ? $selectionRaw : '';
+
+        if ($reviewKey === '' || $selection === '') {
+            return ["count" => 0];
+        }
+
         $testSql = $this->reviewFacade->getReviewSql(
             $reviewKey,
-            $this->parseSelection($reviewKey, $params['selection'])
+            $this->parseSelection($reviewKey, $selection)
         );
         if ($testSql === null) {
             return ["count" => 0];
@@ -389,15 +422,19 @@ class ReviewApiHandler
         }
 
         if (!$result['success']) {
-            return ['error' => $result['error'] ?? 'Failed to update status'];
+            $errorMsg = isset($result['error']) && is_string($result['error'])
+                ? $result['error']
+                : 'Failed to update status';
+            return ['error' => $errorMsg];
         }
 
         // Return the new status and controls HTML
-        $statusAbbr = StatusHelper::getAbbr($result['newStatus']);
-        $controls = StatusHelper::buildReviewTableControls(1, $result['newStatus'], $wordId, $statusAbbr);
+        $newStatus = isset($result['newStatus']) ? (int) $result['newStatus'] : 1;
+        $statusAbbr = StatusHelper::getAbbr($newStatus);
+        $controls = StatusHelper::buildReviewTableControls(1, $newStatus, $wordId, $statusAbbr);
 
         return [
-            'status' => $result['newStatus'],
+            'status' => $newStatus,
             'controls' => $controls
         ];
     }
@@ -425,7 +462,7 @@ class ReviewApiHandler
     /**
      * Get full test configuration for Alpine.js initialization.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
      * @return array Test configuration
      */
@@ -441,7 +478,9 @@ class ReviewApiHandler
             ? (int)$params['type'] : 1;
         $isTableMode = ($params['type'] ?? '') === 'table';
 
-        $sessReviewSql = $_SESSION['reviewsql'] ?? null;
+        /** @var mixed $sessReviewSqlRaw */
+        $sessReviewSqlRaw = $_SESSION['reviewsql'] ?? null;
+        $sessReviewSql = is_string($sessReviewSqlRaw) ? $sessReviewSqlRaw : null;
 
         // Get test data
         $testData = $this->reviewFacade->getReviewDataFromParams(
@@ -500,7 +539,8 @@ class ReviewApiHandler
         );
 
         // Initialize session
-        $this->reviewFacade->initializeReviewSession($testData['counts']['due']);
+        $dueCount = (int) ($testData['counts']['due'] ?? 0);
+        $this->reviewFacade->initializeReviewSession($dueCount);
         $sessionData = $this->reviewFacade->getReviewSessionData();
 
         return [
@@ -523,8 +563,8 @@ class ReviewApiHandler
                 'langCode' => $langCode
             ],
             'progress' => [
-                'total' => $testData['counts']['due'],
-                'remaining' => $testData['counts']['due'],
+                'total' => $dueCount,
+                'remaining' => $dueCount,
                 'wrong' => 0,
                 'correct' => 0
             ],
@@ -540,14 +580,18 @@ class ReviewApiHandler
     /**
      * Get all words for table test mode.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
      * @return array Table words data
      */
     public function formatTableWords(array $params): array
     {
-        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
-        $selection = $params['selection'] ?? '';
+        /** @var mixed $reviewKeyRaw */
+        $reviewKeyRaw = $params['review_key'] ?? $params['test_key'] ?? '';
+        $reviewKey = is_string($reviewKeyRaw) ? $reviewKeyRaw : '';
+        /** @var mixed $selectionRaw */
+        $selectionRaw = $params['selection'] ?? '';
+        $selection = is_string($selectionRaw) ? $selectionRaw : '';
 
         if ($reviewKey === '' || $selection === '') {
             return ['error' => 'review_key and selection are required'];
@@ -573,7 +617,9 @@ class ReviewApiHandler
         }
 
         $langSettings = $this->reviewFacade->getLanguageSettings($langIdFromSql);
-        $regexWord = $langSettings['regexWord'] ?? '';
+        /** @var mixed $regexWordRaw */
+        $regexWordRaw = $langSettings['regexWord'] ?? '';
+        $regexWord = is_string($regexWordRaw) ? $regexWordRaw : '';
 
         // Get language code for TTS
         $languageService = new LanguageFacade();

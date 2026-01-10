@@ -141,14 +141,14 @@ class ArchiveText
 
         // Get statistics
         $bindings3 = [$textId];
-        $sentenceCount = Connection::preparedFetchValue(
+        $sentenceCount = (int)Connection::preparedFetchValue(
             "SELECT COUNT(*) AS cnt FROM sentences WHERE SeTxID = ?"
             . UserScopedQuery::forTablePrepared('sentences', $bindings3, '', 'texts'),
             $bindings3,
             'cnt'
         );
         $bindings4 = [$textId];
-        $itemCount = Connection::preparedFetchValue(
+        $itemCount = (int)Connection::preparedFetchValue(
             "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = ?"
             . UserScopedQuery::forTablePrepared('word_occurrences', $bindings4, '', 'texts'),
             $bindings4,

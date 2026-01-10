@@ -24,11 +24,25 @@ use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
+
+// Type-safe variable extraction from controller context
+/** @var int */
+$textIdTyped = $textId;
+assert(is_array($record));
+$recordLgId = (int)$record['TxLgID'];
+$recordTitle = (string)$record['TxTitle'];
+$recordText = (string)$record['TxText'];
+$recordAnnotLen = (int)$record['annotlen'];
+$recordSourceUri = (string)$record['TxSourceURI'];
+$recordAudioUri = (string)$record['TxAudioURI'];
+assert(is_array($languages));
+/** @var array<int, array{id: int, name: string}> */
+$languagesTyped = $languages;
 ?>
 <h2 class="title is-4">Edit Archived Text</h2>
 
-<form class="validate" action="<?php echo $phpSelf; ?>#rec<?php echo $textId; ?>" method="post">
-    <input type="hidden" name="TxID" value="<?php echo $textId; ?>" />
+<form class="validate" action="<?php echo $phpSelf; ?>#rec<?php echo $textIdTyped; ?>" method="post">
+    <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
 
     <div class="box">
         <!-- Language -->
@@ -41,7 +55,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
                             <select name="TxLgID" id="TxLgID" class="notempty setfocus" required>
-                                <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languages, $record['TxLgID'], '[Choose...]'); ?>
+                                <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languagesTyped, $recordLgId, '[Choose...]'); ?>
                             </select>
                         </div>
                     </div>
@@ -67,7 +81,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
                                data_info="Title"
                                name="TxTitle"
                                id="TxTitle"
-                               value="<?php echo htmlspecialchars($record['TxTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo htmlspecialchars($recordTitle, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
                                required />
                     </div>
@@ -94,7 +108,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
                                   data_maxlength="65000"
                                   data_info="Text"
                                   rows="15"
-                                  required><?php echo htmlspecialchars($record['TxText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                  required><?php echo htmlspecialchars($recordText, ENT_QUOTES, 'UTF-8'); ?></textarea>
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
@@ -113,7 +127,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
             <div class="field-body">
                 <div class="field">
                     <div class="control">
-                        <?php if ($record['annotlen']): ?>
+                        <?php if ($recordAnnotLen > 0): ?>
                         <div class="notification is-info is-light">
                             <span class="icon-text">
                                 <span class="icon has-text-success">
@@ -150,7 +164,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
                                data_info="Source URI"
                                name="TxSourceURI"
                                id="TxSourceURI"
-                               value="<?php echo htmlspecialchars($record['TxSourceURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo htmlspecialchars($recordSourceUri, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="1000"
                                placeholder="https://..." />
                     </div>
@@ -166,7 +180,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
             <div class="field-body">
                 <div class="field">
                     <div class="control">
-                        <?php /** @psalm-suppress PossiblyUndefinedVariable */ echo getArchivedTextTags($textId); ?>
+                        <?php echo (string)getArchivedTextTags($textIdTyped); ?>
                     </div>
                 </div>
             </div>
@@ -185,7 +199,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
                                data_info="Audio-URI"
                                name="TxAudioURI"
                                id="TxAudioURI"
-                               value="<?php echo htmlspecialchars($record['TxAudioURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo htmlspecialchars($recordAudioUri, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
                                placeholder="Path to audio file or URL" />
                     </div>
@@ -203,7 +217,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
             <button type="button"
                     class="button is-light"
                     data-action="cancel-navigate"
-                    data-url="/text/archived#rec<?php echo $textId; ?>">
+                    data-url="/text/archived#rec<?php echo $textIdTyped; ?>">
                 Cancel
             </button>
         </div>

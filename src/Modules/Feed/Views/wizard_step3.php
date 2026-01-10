@@ -21,18 +21,29 @@ namespace Lwt\Views\Feed;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+/**
+ * @var array{rss_url: string, feed: array<int|string, mixed>, feed_title?: string, article_section?: string, article_selector?: string, filter_tags?: string, host: array<string, string>, host2: array<string, string>, selected_feed: int, select_mode: string, hide_images: string, maxim: int, edit_feed?: int} $wizardData Wizard session data
+ * @var int $feedLen Number of feed items
+ * @var string $feedHtml HTML content of the selected feed item
+ */
+
 // Prepare feed items for JSON
 $feedItemsJson = [];
 for ($i = 0; $i < $feedLen; $i++) {
-    $feedHost = parse_url($wizardData['feed'][$i]['link'], PHP_URL_HOST) ?? '';
-    $hostStatus = $wizardData['host2'][$feedHost] ?? '-';
+    $feedItem = $wizardData['feed'][$i] ?? null;
+    if (!is_array($feedItem)) {
+        continue;
+    }
+    $link = isset($feedItem['link']) && is_string($feedItem['link']) ? $feedItem['link'] : '';
+    $feedHost = parse_url($link, PHP_URL_HOST) ?? '';
+    $hostStatus = is_string($feedHost) ? ($wizardData['host2'][$feedHost] ?? '-') : '-';
     $feedItemsJson[] = [
         'index' => $i,
-        'title' => $wizardData['feed'][$i]['title'] ?? '',
-        'link' => $wizardData['feed'][$i]['link'] ?? '',
-        'host' => $feedHost,
+        'title' => isset($feedItem['title']) && is_string($feedItem['title']) ? $feedItem['title'] : '',
+        'link' => $link,
+        'host' => is_string($feedHost) ? $feedHost : '',
         'hostStatus' => $hostStatus,
-        'hasHtml' => isset($wizardData['feed'][$i]['html']) || $i == $wizardData['selected_feed']
+        'hasHtml' => isset($feedItem['html']) || $i == $wizardData['selected_feed']
     ];
 }
 
@@ -53,13 +64,13 @@ $configJson = json_encode([
     'articleSelector' => $wizardData['article_selector'] ?? '',
     'filterTags' => $wizardData['filter_tags'] ?? '',
     'feedItems' => $feedItemsJson,
-    'selectedFeedIndex' => (int)($wizardData['selected_feed'] ?? 0),
+    'selectedFeedIndex' => $wizardData['selected_feed'],
     'settings' => [
         'selectionMode' => $selectionMode,
         'hideImages' => $wizardData['hide_images'] === 'yes',
         'isMinimized' => $wizardData['maxim'] == 0
     ],
-    'editFeedId' => isset($wizardData['edit_feed']) ? (int)$wizardData['edit_feed'] : null,
+    'editFeedId' => $wizardData['edit_feed'] ?? null,
     'multipleHosts' => count($wizardData['host'] ?? []) > 1
 ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
 ?>

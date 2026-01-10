@@ -88,6 +88,7 @@ class RateLimitStorage
     public function get(string $key): ?array
     {
         if ($this->useApcu) {
+            /** @var mixed $data */
             $data = apcu_fetch($key, $success);
             if ($success && is_array($data)) {
                 /** @var array{count: int, window_start: int} */
@@ -232,6 +233,7 @@ class RateLimitStorage
                 continue;
             }
 
+            /** @var mixed $decoded */
             $decoded = @json_decode($content, true);
             if (!is_array($decoded) || (isset($decoded['expires']) && $decoded['expires'] < $now)) {
                 @unlink($path);

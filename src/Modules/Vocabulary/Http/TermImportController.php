@@ -93,9 +93,9 @@ class TermImportController extends VocabularyBaseController
     /**
      * Handle saving bulk translated terms.
      *
-     * @param array<int, array<string, mixed>> $terms   Array of term data
-     * @param int                              $tid     Text ID
-     * @param bool                             $cleanUp Whether to clean up right frames after save
+     * @param array<int, array{lg: int, text: string, status: int, trans?: string}> $terms Array of term data
+     * @param int  $tid     Text ID
+     * @param bool $cleanUp Whether to clean up right frames after save
      *
      * @return void
      *
@@ -115,12 +115,13 @@ class TermImportController extends VocabularyBaseController
         $linkingService->linkNewWordsToTextItems($maxWoId);
 
         // Prepare data for view
+        /** @var list<array<string, mixed>> $newWords */
         $newWords = [];
         foreach ($res as $record) {
             $record['hex'] = StringUtils::toClassName(
-                Escaping::prepareTextdata($record['WoTextLC'])
+                Escaping::prepareTextdata((string)$record['WoTextLC'])
             );
-            $record['translation'] = $record['WoTranslation'];
+            $record['translation'] = (string)$record['WoTranslation'];
             $newWords[] = $record;
         }
 

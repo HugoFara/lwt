@@ -52,7 +52,7 @@ class MultiWordService
     /**
      * Create a new multi-word expression.
      *
-     * @param array $data Multi-word data:
+     * @param array<string, mixed> $data Multi-word data:
      *                    - lgid: Language ID
      *                    - textlc: Lowercase text
      *                    - text: Original text
@@ -98,7 +98,7 @@ class MultiWordService
         Maintenance::initWordCount();
         TagsFacade::saveWordTagsFromForm($wid);
         $this->expressionService->insertExpressions(
-            $data['textlc'],
+            (string) $data['textlc'],
             (int) $data['lgid'],
             $wid,
             (int) $data['wordcount'],

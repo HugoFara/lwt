@@ -338,13 +338,15 @@ class QueryBuilder
     ): static {
         // Handle simple equality: where('col', 'value')
         if ($value === null && !in_array(strtoupper((string)$operator), ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL'])) {
+            // When using 2-arg form, operator becomes the value
+            /** @psalm-suppress MixedAssignment - Intentionally accepting any type as value */
             $value = $operator;
             $operator = '=';
         }
 
         $this->wheres[] = [
             'column' => $column,
-            'operator' => strtoupper($operator),
+            'operator' => strtoupper((string) $operator),
             'value' => $value,
             'boolean' => strtoupper($boolean)
         ];
@@ -624,7 +626,7 @@ class QueryBuilder
             }
 
             if ($where['operator'] === 'RAW') {
-                $sql .= $where['value'];
+                $sql .= (string) $where['value'];
                 continue;
             }
 
@@ -634,9 +636,10 @@ class QueryBuilder
             }
 
             if (in_array($where['operator'], ['IN', 'NOT IN'])) {
+                $whereValues = is_array($where['value']) ? $where['value'] : [$where['value']];
                 $values = array_map(
                     fn(mixed $v): string => $this->quoteValue($v),
-                    $where['value']
+                    $whereValues
                 );
                 $sql .= $where['column'] . ' ' . $where['operator'] . ' (' . implode(', ', $values) . ')';
                 continue;
@@ -817,6 +820,7 @@ class QueryBuilder
         $this->applyUserScope();
 
         $setClauses = [];
+        /** @psalm-suppress MixedAssignment - $data values are intentionally mixed */
         foreach ($data as $column => $value) {
             $setClauses[] = $column . ' = ' . $this->quoteValue($value);
         }
@@ -971,7 +975,7 @@ class QueryBuilder
             }
 
             if ($where['operator'] === 'RAW') {
-                $sql .= $where['value'];
+                $sql .= (string) $where['value'];
                 continue;
             }
 
@@ -981,9 +985,11 @@ class QueryBuilder
             }
 
             if (in_array($where['operator'], ['IN', 'NOT IN'])) {
-                $placeholders = array_fill(0, count($where['value']), '?');
+                $whereValues = is_array($where['value']) ? $where['value'] : [$where['value']];
+                $placeholders = array_fill(0, count($whereValues), '?');
                 $sql .= $where['column'] . ' ' . $where['operator'] . ' (' . implode(', ', $placeholders) . ')';
-                foreach ($where['value'] as $v) {
+                /** @var mixed $v */
+                foreach ($whereValues as $v) {
                     $this->bindings[] = $v;
                 }
                 continue;
@@ -1122,6 +1128,7 @@ class QueryBuilder
 
         $params = [];
         foreach ($rows as $row) {
+            /** @psalm-suppress MixedAssignment - Row values are intentionally mixed */
             foreach (array_values($row) as $value) {
                 $params[] = $value;
             }
@@ -1146,6 +1153,7 @@ class QueryBuilder
 
         $setClauses = [];
         $setParams = [];
+        /** @psalm-suppress MixedAssignment - $data values are intentionally mixed */
         foreach ($data as $column => $value) {
             $setClauses[] = $column . ' = ?';
             $setParams[] = $value;

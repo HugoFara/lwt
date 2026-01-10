@@ -55,10 +55,12 @@ class GetAllTagNames
 
         if (!$refresh && isset($_SESSION[$cacheKey]) && isset($_SESSION['TAGS_URL_BASE'])) {
             if ($_SESSION['TAGS_URL_BASE'] === $urlBase) {
+                /** @var mixed $cached */
                 $cached = $_SESSION[$cacheKey];
                 if (is_array($cached)) {
-                    /** @var string[] $cached */
-                    return $cached;
+                    /** @var string[] $validCache */
+                    $validCache = $cached;
+                    return $validCache;
                 }
             }
         }
@@ -84,10 +86,12 @@ class GetAllTagNames
 
         if (!$refresh && isset($_SESSION[$cacheKey]) && isset($_SESSION['TEXTTAGS_URL_BASE'])) {
             if ($_SESSION['TEXTTAGS_URL_BASE'] === $urlBase) {
+                /** @var mixed $cached */
                 $cached = $_SESSION[$cacheKey];
                 if (is_array($cached)) {
-                    /** @var string[] $cached */
-                    return $cached;
+                    /** @var string[] $validCache */
+                    $validCache = $cached;
+                    return $validCache;
                 }
             }
         }

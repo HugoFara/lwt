@@ -55,7 +55,9 @@ class AuthMiddleware implements MiddlewareInterface
      */
     public function __construct(?UserFacade $userFacade = null)
     {
-        $this->userFacade = $userFacade ?? Container::getInstance()->get(UserFacade::class);
+        /** @var UserFacade */
+        $facade = $userFacade ?? Container::getInstance()->get(UserFacade::class);
+        $this->userFacade = $facade;
     }
 
     /**
@@ -173,8 +175,10 @@ class AuthMiddleware implements MiddlewareInterface
         // Apache may put it in a different location
         if (empty($authHeader) && function_exists('apache_request_headers')) {
             $headers = apache_request_headers();
-            $rawHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
-            $authHeader = is_string($rawHeader) ? $rawHeader : '';
+            if (is_array($headers)) {
+                $rawHeader = (string) ($headers['Authorization'] ?? $headers['authorization'] ?? '');
+                $authHeader = $rawHeader;
+            }
         }
 
         // Check for Bearer token

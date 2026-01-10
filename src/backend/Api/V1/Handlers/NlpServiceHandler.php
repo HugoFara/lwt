@@ -17,7 +17,7 @@ class NlpServiceHandler
 
     public function __construct()
     {
-        $this->baseUrl = EnvLoader::get('NLP_SERVICE_URL', 'http://nlp:8000');
+        $this->baseUrl = EnvLoader::get('NLP_SERVICE_URL', 'http://nlp:8000') ?? 'http://nlp:8000';
         $this->timeout = 30;
     }
 
@@ -80,8 +80,9 @@ class NlpServiceHandler
             return [];
         }
 
+        /** @var array{voices?: array}|null $data */
         $data = json_decode($response, true);
-        return $data['voices'] ?? [];
+        return is_array($data) && isset($data['voices']) ? $data['voices'] : [];
     }
 
     /**
@@ -100,8 +101,9 @@ class NlpServiceHandler
             return [];
         }
 
+        /** @var array{voices?: array}|null $data */
         $data = json_decode($response, true);
-        return $data['voices'] ?? [];
+        return is_array($data) && isset($data['voices']) ? $data['voices'] : [];
     }
 
     /**
@@ -194,8 +196,9 @@ class NlpServiceHandler
             return [];
         }
 
+        /** @var array{parsers?: array}|null $data */
         $data = json_decode($response, true);
-        return $data['parsers'] ?? [];
+        return is_array($data) && isset($data['parsers']) ? $data['parsers'] : [];
     }
 
     // =========================================================================
@@ -234,8 +237,9 @@ class NlpServiceHandler
             return null;
         }
 
+        /** @var array{lemma?: string}|null $data */
         $data = json_decode($response, true);
-        return $data['lemma'] ?? null;
+        return is_array($data) && isset($data['lemma']) ? $data['lemma'] : null;
     }
 
     /**
@@ -274,8 +278,9 @@ class NlpServiceHandler
             return array_fill_keys($words, null);
         }
 
+        /** @var array{results?: array<string, string|null>}|null $data */
         $data = json_decode($response, true);
-        return $data['results'] ?? array_fill_keys($words, null);
+        return is_array($data) && isset($data['results']) ? $data['results'] : array_fill_keys($words, null);
     }
 
     /**

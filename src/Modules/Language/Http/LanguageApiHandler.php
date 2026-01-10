@@ -80,8 +80,9 @@ class LanguageApiHandler
         }
 
         $abbr = $this->languageFacade->getLanguageCode($langId, LanguagePresets::getAll());
-        $piperVoiceIdRaw = $record["LgPiperVoiceId"] ?? null;
-        $piperVoiceId = is_string($piperVoiceIdRaw) ? $piperVoiceIdRaw : null;
+        $piperVoiceId = isset($record["LgPiperVoiceId"]) && is_string($record["LgPiperVoiceId"])
+            ? $record["LgPiperVoiceId"]
+            : null;
         $ttsVoiceApi = is_string($record["LgTTSVoiceAPI"]) ? $record["LgTTSVoiceAPI"] : '';
         $regexpWordChars = is_string($record["LgRegexpWordCharacters"]) ? $record["LgRegexpWordCharacters"] : '';
         $lgName = is_string($record["LgName"]) ? $record["LgName"] : '';
@@ -179,18 +180,18 @@ class LanguageApiHandler
     /**
      * Format response for phonetic reading.
      *
-     * @param array $params Request parameters with 'text' and either 'language_id' or 'lang'
+     * @param array{text?: string, language_id?: int|string, lang?: string} $params Request parameters
      *
      * @return array{phonetic_reading: string}
      */
     public function formatPhoneticReading(array $params): array
     {
-        $text = is_string($params['text'] ?? null) ? $params['text'] : '';
+        $text = $params['text'] ?? '';
         $languageId = $params['language_id'] ?? null;
-        if ($languageId !== null) {
+        if ($languageId !== null && is_numeric($languageId)) {
             return $this->getPhoneticReading($text, (int)$languageId);
         }
-        $lang = isset($params['lang']) && is_string($params['lang']) ? $params['lang'] : null;
+        $lang = $params['lang'] ?? null;
         return $this->getPhoneticReading($text, null, $lang);
     }
 

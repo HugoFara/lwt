@@ -354,7 +354,7 @@ class FeedFacade
      *
      * @param string $sourceUri Feed URL
      *
-     * @return array|false Feed data or false on error
+     * @return array<int|string, array<string, string>|string>|false Feed data or false on error
      */
     public function detectAndParseFeed(string $sourceUri): array|false
     {

@@ -97,11 +97,11 @@ class LanguagePresets
 
         // Convert from object format to legacy indexed array format
         $result = [];
-        /** @var array<string, array<string, mixed>> $decoded */
         foreach ($decoded as $name => $props) {
             if (!is_array($props)) {
                 continue;
             }
+            /** @var array<string, mixed> $props */
             $result[$name] = [
                 (string)($props['glosbeIso'] ?? ''),
                 (string)($props['googleIso'] ?? ''),

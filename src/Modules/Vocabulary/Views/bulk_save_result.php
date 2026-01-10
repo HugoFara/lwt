@@ -21,6 +21,11 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @var int $tid
+ * @var bool $cleanUp
+ * @var int $tooltipMode
+ * @var list<array<string, mixed>> $newWords
  */
 
 namespace Lwt\Views\Word;

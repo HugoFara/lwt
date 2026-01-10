@@ -78,12 +78,14 @@ class Migrations
             ->getPrepared();
         foreach ($rows as $record) {
             $id = (int) $record['TxID'];
+            $lgId = (int) $record['TxLgID'];
+            /** @var string|null $textValue */
             $textValue = QueryBuilder::table('texts')
                 ->where('TxID', '=', $id)
                 ->valuePrepared('TxText');
             TextParsing::parseAndSave(
                 (string)$textValue,
-                (int)$record['TxLgID'],
+                $lgId,
                 $id
             );
         }
@@ -246,6 +248,7 @@ class Migrations
         $currversion = ApplicationInfo::getVersionNumber();
 
         try {
+            /** @var string|null $dbversion */
             $dbversion = QueryBuilder::table('settings')
                 ->where('StKey', '=', 'dbversion')
                 ->valuePrepared('StValue');
@@ -349,7 +352,7 @@ class Migrations
             [$dbname]
         );
         foreach ($res as $row) {
-            $tables[] = $row['TABLE_NAME'];
+            $tables[] = (string) $row['TABLE_NAME'];
         }
 
         /// counter for cache rebuild

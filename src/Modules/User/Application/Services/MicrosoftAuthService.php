@@ -114,8 +114,8 @@ class MicrosoftAuthService
      */
     private function getDefaultRedirectUri(): string
     {
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-            ? 'https' : 'http';
+        $https = $_SERVER['HTTPS'] ?? '';
+        $protocol = ($https !== '' && $https !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
         return "{$protocol}://{$host}/microsoft/callback";
     }

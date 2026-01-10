@@ -57,7 +57,7 @@ class TagApiHandler
      */
     public function handleGet(array $fragments): void
     {
-        $type = $fragments[0] ?? '';
+        $type = isset($fragments[0]) ? (string) $fragments[0] : '';
 
         switch ($type) {
             case 'term':

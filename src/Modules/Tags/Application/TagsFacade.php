@@ -708,7 +708,9 @@ class TagsFacade
             return;
         }
 
-        $tagNames = array_map('strval', $termTags['TagList']);
+        /** @var array<int|string, scalar> $tagList */
+        $tagList = $termTags['TagList'];
+        $tagNames = array_map('strval', $tagList);
         self::saveWordTags($wordId, $tagNames);
     }
 
@@ -736,7 +738,9 @@ class TagsFacade
             return;
         }
 
-        $tagNames = array_map('strval', $textTags['TagList']);
+        /** @var array<int|string, scalar> $tagList */
+        $tagList = $textTags['TagList'];
+        $tagNames = array_map('strval', $tagList);
         self::saveTextTags($textId, $tagNames);
     }
 
@@ -761,7 +765,9 @@ class TagsFacade
             return;
         }
 
-        $tagNames = array_map('strval', $textTags['TagList']);
+        /** @var array<int|string, scalar> $tagList */
+        $tagList = $textTags['TagList'];
+        $tagNames = array_map('strval', $tagList);
         self::saveArchivedTextTags($textId, $tagNames);
     }
 
@@ -826,15 +832,17 @@ class TagsFacade
             return "Tag removed in 0 Terms";
         }
 
-        $tagId = Connection::preparedFetchValue(
+        /** @var int|string|null $tagIdRaw */
+        $tagIdRaw = Connection::preparedFetchValue(
             'SELECT TgID FROM tags WHERE TgText = ?',
             [$tagText],
             'TgID'
         );
 
-        if (!isset($tagId)) {
+        if ($tagIdRaw === null) {
             return "Tag " . $tagText . " not found";
         }
+        $tagId = (int) $tagIdRaw;
 
         $sql = 'SELECT WoID FROM words WHERE WoID IN ' . $idList
             . UserScopedQuery::forTable('words');
@@ -846,7 +854,7 @@ class TagsFacade
                 $count++;
                 QueryBuilder::table('word_tag_map')
                     ->where('WtWoID', '=', (int)$record['WoID'])
-                    ->where('WtTgID', '=', (int)$tagId)
+                    ->where('WtTgID', '=', $tagId)
                     ->delete();
             }
             mysqli_free_result($res);
@@ -910,15 +918,17 @@ class TagsFacade
             return "Tag removed in 0 Texts";
         }
 
-        $tagId = Connection::preparedFetchValue(
+        /** @var int|string|null $tagIdRaw */
+        $tagIdRaw = Connection::preparedFetchValue(
             'SELECT T2ID FROM text_tags WHERE T2Text = ?',
             [$tagText],
             'T2ID'
         );
 
-        if (!isset($tagId)) {
+        if ($tagIdRaw === null) {
             return "Tag " . $tagText . " not found";
         }
+        $tagId = (int) $tagIdRaw;
 
         $sql = 'SELECT TxID FROM texts WHERE TxID IN ' . $idList
             . UserScopedQuery::forTable('texts');
@@ -930,7 +940,7 @@ class TagsFacade
                 $count++;
                 QueryBuilder::table('text_tag_map')
                     ->where('TtTxID', '=', (int)$record['TxID'])
-                    ->where('TtT2ID', '=', (int)$tagId)
+                    ->where('TtT2ID', '=', $tagId)
                     ->delete();
             }
             mysqli_free_result($res);
@@ -997,15 +1007,17 @@ class TagsFacade
             return "Tag removed in 0 Texts";
         }
 
-        $tagId = Connection::preparedFetchValue(
+        /** @var int|string|null $tagIdRaw */
+        $tagIdRaw = Connection::preparedFetchValue(
             'SELECT T2ID FROM text_tags WHERE T2Text = ?',
             [$tagText],
             'T2ID'
         );
 
-        if (!isset($tagId)) {
+        if ($tagIdRaw === null) {
             return "Tag " . $tagText . " not found";
         }
+        $tagId = (int) $tagIdRaw;
 
         // Archived texts are in texts table with TxArchivedAt IS NOT NULL
         $sql = 'SELECT TxID FROM texts WHERE TxArchivedAt IS NOT NULL AND TxID IN ' . $idList
@@ -1018,7 +1030,7 @@ class TagsFacade
                 $count++;
                 QueryBuilder::table('text_tag_map')
                     ->where('TtTxID', '=', (int)$record['TxID'])
-                    ->where('TtT2ID', '=', (int)$tagId)
+                    ->where('TtT2ID', '=', $tagId)
                     ->delete();
             }
             mysqli_free_result($res);
@@ -1071,9 +1083,11 @@ class TagsFacade
         $count = 0;
         foreach ($rows as $record) {
             $count++;
-            $html .= '<option value="' . $record['TgID'] . '"' .
-                FormHelper::getSelected($selected, (int) $record['TgID']) . '>' .
-                htmlspecialchars($record['TgText'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
+            $tagId = (int) $record['TgID'];
+            $tagText = (string) ($record['TgText'] ?? '');
+            $html .= '<option value="' . $tagId . '"' .
+                FormHelper::getSelected($selected, $tagId) . '>' .
+                htmlspecialchars($tagText, ENT_QUOTES, 'UTF-8') . '</option>';
         }
 
         if ($count > 0) {
@@ -1124,9 +1138,11 @@ class TagsFacade
         $count = 0;
         foreach ($rows as $record) {
             $count++;
-            $html .= '<option value="' . $record['T2ID'] . '"' .
-                FormHelper::getSelected($selected, (int) $record['T2ID']) . '>' .
-                htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
+            $tagId = (int) $record['T2ID'];
+            $tagText = (string) ($record['T2Text'] ?? '');
+            $html .= '<option value="' . $tagId . '"' .
+                FormHelper::getSelected($selected, $tagId) . '>' .
+                htmlspecialchars($tagText, ENT_QUOTES, 'UTF-8') . '</option>';
         }
 
         if ($count > 0) {
@@ -1179,14 +1195,17 @@ class TagsFacade
         }
 
         foreach ($rows as $record) {
-            if ($record['TagName'] == 1) {
+            $tagName = (string) $record['TagName'];
+            $textId = (string) $record['TextID'];
+            $tagId = (int) $record['TagID'];
+            if ($tagName === '1') {
                 $untaggedOption = '<option disabled="disabled">--------</option>' .
-                    '<option value="' . $record['TextID'] . '&amp;texttag=-1"' .
+                    '<option value="' . $textId . '&amp;texttag=-1"' .
                     FormHelper::getSelected($selected, "-1") . '>UNTAGGED</option>';
             } else {
-                $html .= '<option value="' . $record['TextID'] . '&amp;texttag=' .
-                    $record['TagID'] . '"' . FormHelper::getSelected($selected, (int) $record['TagID']) .
-                    '>' . $record['TagName'] . '</option>';
+                $html .= '<option value="' . $textId . '&amp;texttag=' .
+                    $tagId . '"' . FormHelper::getSelected($selected, $tagId) .
+                    '>' . $tagName . '</option>';
             }
         }
 
@@ -1234,9 +1253,11 @@ class TagsFacade
         $count = 0;
         foreach ($rows as $record) {
             $count++;
-            $html .= '<option value="' . $record['T2ID'] . '"' .
-                FormHelper::getSelected($selected, (int) $record['T2ID']) . '>' .
-                htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
+            $tagId = (int) $record['T2ID'];
+            $tagText = (string) ($record['T2Text'] ?? '');
+            $html .= '<option value="' . $tagId . '"' .
+                FormHelper::getSelected($selected, $tagId) . '>' .
+                htmlspecialchars($tagText, ENT_QUOTES, 'UTF-8') . '</option>';
         }
 
         if ($count > 0) {
@@ -1260,22 +1281,24 @@ class TagsFacade
      */
     private static function getOrCreateTermTag(string $tagText): ?int
     {
-        $tagId = Connection::preparedFetchValue(
+        /** @var int|string|null $tagIdRaw */
+        $tagIdRaw = Connection::preparedFetchValue(
             'SELECT TgID FROM tags WHERE TgText = ?',
             [$tagText],
             'TgID'
         );
 
-        if (!isset($tagId)) {
+        if ($tagIdRaw === null) {
             QueryBuilder::table('tags')->insertPrepared(['TgText' => $tagText]);
-            $tagId = Connection::preparedFetchValue(
+            /** @var int|string|null $tagIdRaw */
+            $tagIdRaw = Connection::preparedFetchValue(
                 'SELECT TgID FROM tags WHERE TgText = ?',
                 [$tagText],
                 'TgID'
             );
         }
 
-        return isset($tagId) ? (int) $tagId : null;
+        return $tagIdRaw !== null ? (int) $tagIdRaw : null;
     }
 
     /**
@@ -1287,22 +1310,24 @@ class TagsFacade
      */
     private static function getOrCreateTextTag(string $tagText): ?int
     {
-        $tagId = Connection::preparedFetchValue(
+        /** @var int|string|null $tagIdRaw */
+        $tagIdRaw = Connection::preparedFetchValue(
             'SELECT T2ID FROM text_tags WHERE T2Text = ?',
             [$tagText],
             'T2ID'
         );
 
-        if (!isset($tagId)) {
+        if ($tagIdRaw === null) {
             QueryBuilder::table('text_tags')->insertPrepared(['T2Text' => $tagText]);
-            $tagId = Connection::preparedFetchValue(
+            /** @var int|string|null $tagIdRaw */
+            $tagIdRaw = Connection::preparedFetchValue(
                 'SELECT T2ID FROM text_tags WHERE T2Text = ?',
                 [$tagText],
                 'T2ID'
             );
         }
 
-        return isset($tagId) ? (int) $tagId : null;
+        return $tagIdRaw !== null ? (int) $tagIdRaw : null;
     }
 
     /**

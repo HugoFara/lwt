@@ -19,6 +19,12 @@
  * @since    3.0.0
  *
  * @psalm-suppress UndefinedGlobalVariable Variables are injected by including file
+ *
+ * @var string $title
+ * @var int $textId
+ * @var string $audio
+ * @var string|null $sourceUri
+ * @var string $textLinks
  */
 
 namespace Lwt\Views\Text;
@@ -29,8 +35,17 @@ namespace Lwt\Views\Text;
 use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+// Type-safe variable extraction from controller context
+/** @var string $titleTyped */
+$titleTyped = $title;
+/** @var string|null $sourceUriTyped */
+$sourceUriTyped = $sourceUri;
+/** @var string $textLinksTyped */
+$textLinksTyped = $textLinks;
+/** @var string $audioTyped */
+$audioTyped = $audio;
 ?>
-<h1><?php echo \htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h1>
+<h1><?php echo \htmlspecialchars($titleTyped, ENT_QUOTES, 'UTF-8'); ?></h1>
 <div class="flex-spaced">
     <div>
         <span id="hidet" class="click" data-action="hide-translations">
@@ -48,12 +63,12 @@ use Lwt\Shared\UI\Helpers\IconHelper;
     </div>
     <div>
         <?php
-        if ($sourceUri !== null && $sourceUri !== '') {
-            echo ' <a href="' . $sourceUri . '" target="_blank">';
+        if ($sourceUriTyped !== null && $sourceUriTyped !== '') {
+            echo ' <a href="' . $sourceUriTyped . '" target="_blank">';
             echo IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']);
             echo '</a>';
         }
-        echo $textLinks;
+        echo $textLinksTyped;
         ?>
     </div>
     <div>
@@ -63,5 +78,5 @@ use Lwt\Shared\UI\Helpers\IconHelper;
     </div>
 </div>
 <?php
-(new MediaService())->renderMediaPlayer($audio);
+(new MediaService())->renderMediaPlayer($audioTyped);
 ?>

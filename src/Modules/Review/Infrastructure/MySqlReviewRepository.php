@@ -230,6 +230,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getWordStatus(int $wordId): ?int
     {
+        /** @var mixed $status */
         $status = QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
             ->valuePrepared('WoStatus');
@@ -285,6 +286,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     {
         $reviewsql = $config->toSqlProjection();
 
+        /** @var mixed $langId */
         $langId = Connection::fetchValue(
             "SELECT WoLgID FROM $reviewsql LIMIT 1",
             'WoLgID'
@@ -327,6 +329,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     public function getLanguageName(ReviewConfiguration $config): string
     {
         if ($config->reviewKey === ReviewConfiguration::KEY_LANG) {
+            /** @var mixed $name */
             $name = QueryBuilder::table('languages')
                 ->where('LgID', '=', $config->selection)
                 ->valuePrepared('LgName');
@@ -339,7 +342,9 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
                 ->join('languages', 'TxLgID', '=', 'LgID')
                 ->where('TxID', '=', $config->selection)
                 ->firstPrepared();
-            return isset($row['LgName']) ? (string) $row['LgName'] : 'L2';
+            /** @var mixed $name */
+            $name = $row['LgName'] ?? null;
+            return is_string($name) ? $name : 'L2';
         }
 
         // For selection-based tests, get language from first word
@@ -348,6 +353,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
 
         if ($validation['langCount'] === 1) {
             $bindings = [];
+            /** @var mixed $name */
             $name = Connection::preparedFetchValue(
                 "SELECT LgName
                 FROM languages, {$reviewsql} AND LgID = WoLgID"
@@ -367,6 +373,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getWordText(int $wordId): ?string
     {
+        /** @var mixed $text */
         $text = QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
             ->valuePrepared('WoText');
@@ -469,6 +476,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
 
         if ($sentenceCount > 1) {
             // Get previous sentence
+            /** @var mixed $prevSeid */
             $prevSeid = Connection::fetchValue(
                 "SELECT SeID FROM sentences
                 WHERE SeID < $seid AND SeTxID = $txid
@@ -483,6 +491,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
 
         if ($sentenceCount > 2) {
             // Get next sentence
+            /** @var mixed $nextSeid */
             $nextSeid = Connection::fetchValue(
                 "SELECT SeID FROM sentences
                 WHERE SeID > $seid AND SeTxID = $txid

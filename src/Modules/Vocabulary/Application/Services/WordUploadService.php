@@ -72,6 +72,7 @@ class WordUploadService
     public function isLocalInfileEnabled(): bool
     {
         // Check MySQL server setting
+        /** @var int|string|null $serverValue */
         $serverValue = Connection::fetchValue("SELECT @@GLOBAL.local_infile as value");
         if (!in_array($serverValue, [1, '1', 'ON'])) {
             return false;
@@ -288,13 +289,13 @@ class WordUploadService
      * Import terms using PHP parsing (fallback when LOAD DATA not available).
      * Uses chunked batch inserts to handle large files without excessive memory.
      *
-     * @param int    $langId       Language ID
-     * @param array  $fields       Field indexes
-     * @param bool   $removeSpaces Whether to remove spaces
-     * @param string $delimiter    Field delimiter
-     * @param string $fileName     Path to input file
-     * @param int    $status       Word status
-     * @param bool   $ignoreFirst  Ignore first line
+     * @param int                                  $langId       Language ID
+     * @param array{txt: int, tr: int, ro: int, se: int} $fields Field indexes
+     * @param bool                                 $removeSpaces Whether to remove spaces
+     * @param string                               $delimiter    Field delimiter
+     * @param string                               $fileName     Path to input file
+     * @param int                                  $status       Word status
+     * @param bool                                 $ignoreFirst  Ignore first line
      *
      * @return void
      */
@@ -315,6 +316,7 @@ class WordUploadService
             return;
         }
 
+        /** @var list<list<int|string>> $rows */
         $rows = [];
         $lineNum = 0;
 
@@ -328,14 +330,17 @@ class WordUploadService
                 continue;
             }
 
+            /** @var list<string> $parsedLine */
             $parsedLine = explode($delimiter, $line);
 
-            if (!isset($parsedLine[$fields["txt"] - 1])) {
+            $txtIdx = $fields["txt"] - 1;
+            if (!isset($parsedLine[$txtIdx])) {
                 continue;
             }
 
-            $wotext = $parsedLine[$fields["txt"] - 1];
+            $wotext = $parsedLine[$txtIdx];
 
+            /** @var list<int|string> $row */
             $row = [];
             // Fill WoText and WoTextLC
             if ($removeSpaces) {
@@ -346,14 +351,18 @@ class WordUploadService
                 $row[] = mb_strtolower($wotext);
             }
 
-            if ($fields["tr"] != 0 && isset($parsedLine[$fields["tr"] - 1])) {
-                $row[] = $parsedLine[$fields["tr"] - 1];
+            $trIdx = $fields["tr"] - 1;
+            $roIdx = $fields["ro"] - 1;
+            $seIdx = $fields["se"] - 1;
+
+            if ($fields["tr"] != 0 && isset($parsedLine[$trIdx])) {
+                $row[] = $parsedLine[$trIdx];
             }
-            if ($fields["ro"] != 0 && isset($parsedLine[$fields["ro"] - 1])) {
-                $row[] = $parsedLine[$fields["ro"] - 1];
+            if ($fields["ro"] != 0 && isset($parsedLine[$roIdx])) {
+                $row[] = $parsedLine[$roIdx];
             }
-            if ($fields["se"] != 0 && isset($parsedLine[$fields["se"] - 1])) {
-                $row[] = $parsedLine[$fields["se"] - 1];
+            if ($fields["se"] != 0 && isset($parsedLine[$seIdx])) {
+                $row[] = $parsedLine[$seIdx];
             }
 
             $row[] = $langId;
@@ -379,8 +388,8 @@ class WordUploadService
     /**
      * Execute a batch insert for simple import.
      *
-     * @param array $rows   Array of row data
-     * @param array $fields Field indexes
+     * @param list<list<int|string>> $rows   Array of row data
+     * @param array{txt: int, tr: int, ro: int, se: int} $fields Field indexes
      *
      * @return void
      */
@@ -413,6 +422,7 @@ class WordUploadService
         $rowPlaceholders .= ')';
 
         $placeholders = array_fill(0, count($rows), $rowPlaceholders);
+        /** @var list<int|string> $params */
         $params = [];
         foreach ($rows as $row) {
             foreach ($row as $value) {
@@ -567,7 +577,7 @@ class WordUploadService
      * Uses chunked batch inserts to handle large files without excessive memory.
      *
      * @param bool   $removeSpaces Whether to remove spaces
-     * @param array  $fields       Field indexes
+     * @param array{txt: int, tr: int, ro: int, se: int, tl: int} $fields Field indexes
      * @param string $delimiter    Field delimiter
      * @param string $fileName     Path to input file
      * @param bool   $ignoreFirst  Ignore first line
@@ -589,6 +599,7 @@ class WordUploadService
             return;
         }
 
+        /** @var list<list<string>> $rows */
         $rows = [];
         $lineNum = 0;
 
@@ -602,14 +613,17 @@ class WordUploadService
                 continue;
             }
 
+            /** @var list<string> $parsedLine */
             $parsedLine = explode($delimiter, $line);
 
-            if (!isset($parsedLine[$fields["txt"] - 1])) {
+            $txtIdx = $fields["txt"] - 1;
+            if (!isset($parsedLine[$txtIdx])) {
                 continue;
             }
 
-            $wotext = $parsedLine[$fields["txt"] - 1];
+            $wotext = $parsedLine[$txtIdx];
 
+            /** @var list<string> $row */
             $row = [];
             // Fill WoText and WoTextLC
             if ($removeSpaces) {
@@ -620,17 +634,22 @@ class WordUploadService
                 $row[] = mb_strtolower($wotext);
             }
 
-            if ($fields["tr"] != 0 && isset($parsedLine[$fields["tr"] - 1])) {
-                $row[] = $parsedLine[$fields["tr"] - 1];
+            $trIdx = $fields["tr"] - 1;
+            $roIdx = $fields["ro"] - 1;
+            $seIdx = $fields["se"] - 1;
+            $tlIdx = $fields["tl"] - 1;
+
+            if ($fields["tr"] != 0 && isset($parsedLine[$trIdx])) {
+                $row[] = $parsedLine[$trIdx];
             }
-            if ($fields["ro"] != 0 && isset($parsedLine[$fields["ro"] - 1])) {
-                $row[] = $parsedLine[$fields["ro"] - 1];
+            if ($fields["ro"] != 0 && isset($parsedLine[$roIdx])) {
+                $row[] = $parsedLine[$roIdx];
             }
-            if ($fields["se"] != 0 && isset($parsedLine[$fields["se"] - 1])) {
-                $row[] = $parsedLine[$fields["se"] - 1];
+            if ($fields["se"] != 0 && isset($parsedLine[$seIdx])) {
+                $row[] = $parsedLine[$seIdx];
             }
-            if ($fields["tl"] != 0 && isset($parsedLine[$fields["tl"] - 1])) {
-                $row[] = str_replace(" ", ",", $parsedLine[$fields['tl'] - 1]);
+            if ($fields["tl"] != 0 && isset($parsedLine[$tlIdx])) {
+                $row[] = str_replace(" ", ",", $parsedLine[$tlIdx]);
             }
 
             $rows[] = $row;
@@ -653,8 +672,8 @@ class WordUploadService
     /**
      * Execute a batch insert for temp table import.
      *
-     * @param array $rows   Array of row data
-     * @param array $fields Field indexes
+     * @param list<list<string>> $rows   Array of row data
+     * @param array{txt: int, tr: int, ro: int, se: int, tl: int} $fields Field indexes
      *
      * @return void
      */
@@ -681,6 +700,7 @@ class WordUploadService
         $rowPlaceholders .= ')';
 
         $placeholders = array_fill(0, count($rows), $rowPlaceholders);
+        /** @var list<string> $params */
         $params = [];
         foreach ($rows as $row) {
             foreach ($row as $value) {
@@ -986,17 +1006,18 @@ class WordUploadService
     /**
      * Import tags only (no terms).
      *
-     * @param array  $fields      Field indexes
-     * @param string $tabType     Tab type (c, t, h)
-     * @param string $fileName    Path to input file
-     * @param bool   $ignoreFirst Ignore first line
+     * @param array{tl: int} $fields      Field indexes
+     * @param string         $tabType     Tab type (c, t, h)
+     * @param string         $fileName    Path to input file
+     * @param bool           $ignoreFirst Ignore first line
      *
      * @return void
      */
     public function importTagsOnly(array $fields, string $tabType, string $fileName, bool $ignoreFirst): void
     {
         $columns = '';
-        for ($j = 1; $j <= $fields["tl"]; $j++) {
+        $tlField = $fields["tl"];
+        for ($j = 1; $j <= $tlField; $j++) {
             $columns .= ($j == 1 ? '(' : ',') . ($j == $fields["tl"] ? '@taglist' : '@dummy');
         }
         $columns .= ')';
@@ -1035,12 +1056,14 @@ class WordUploadService
                     continue;
                 }
 
+                /** @var list<string> $parts */
                 $parts = explode($realDelimiter, $line);
-                if (!isset($parts[$fields["tl"] - 1])) {
+                $tlIdx = $tlField - 1;
+                if (!isset($parts[$tlIdx])) {
                     continue;
                 }
 
-                $tags = $parts[$fields["tl"] - 1];
+                $tags = $parts[$tlIdx];
                 $tags = str_replace(' ', ',', $tags);
                 $params[] = $tags;
                 $placeholders[] = "(?)";

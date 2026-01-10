@@ -73,7 +73,7 @@ class RssParser
      *
      * @param string $sourceUri Feed URL
      *
-     * @return array|null Feed data with feed_text indicator or null on error
+     * @return array<int|string, array<string, string>|string>|null Feed data with feed_text indicator or null on error
      */
     public function detectAndParse(string $sourceUri): ?array
     {

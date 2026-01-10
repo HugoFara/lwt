@@ -17,12 +17,25 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @var string $title
+ * @var string $property
+ * @var int $totalDue
+ * @var int $totalCount
+ * @var string $languageName
  */
 
 namespace Lwt\Views\Review;
 
+// Validate and cast injected variables
+assert(isset($title) && is_string($title));
+assert(isset($property) && is_string($property));
+assert(isset($totalDue) && is_int($totalDue));
+assert(isset($totalCount) && is_int($totalCount));
+assert(isset($languageName) && is_string($languageName));
+
 ?>
-<h1>REVIEW - <?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
+<h1>REVIEW - <?php echo \htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h1>
 <div class="test-word-count">
     Word<?php echo $totalCount > 1 ? 's' : ''; ?> due today:
     <?php echo $totalCount; ?>,

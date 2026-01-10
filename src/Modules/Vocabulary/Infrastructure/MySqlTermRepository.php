@@ -97,8 +97,8 @@ class MySqlTermRepository implements TermRepositoryInterface
             (string) ($row['WoNotes'] ?? ''),
             (string) ($row['WoRomanization'] ?? ''),
             (int) ($row['WoWordCount'] ?? 1),
-            $this->parseDateTime($row['WoCreated'] ?? null),
-            $this->parseDateTime($row['WoStatusChanged'] ?? null),
+            $this->parseDateTime(isset($row['WoCreated']) ? (string)$row['WoCreated'] : null),
+            $this->parseDateTime(isset($row['WoStatusChanged']) ? (string)$row['WoStatusChanged'] : null),
             (float) ($row['WoTodayScore'] ?? 0.0),
             (float) ($row['WoTomorrowScore'] ?? 0.0),
             (float) ($row['WoRandom'] ?? 0.0)
@@ -237,6 +237,7 @@ class MySqlTermRepository implements TermRepositoryInterface
     {
         $query = $this->query();
 
+        /** @var mixed $value */
         foreach ($criteria as $field => $value) {
             $column = $this->columnMap[$field] ?? $field;
             if (is_array($value)) {
