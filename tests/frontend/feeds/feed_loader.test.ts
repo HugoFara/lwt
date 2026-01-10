@@ -374,14 +374,14 @@ describe('feed_loader_component.ts', () => {
   // ===========================================================================
 
   describe('getStatusClass()', () => {
-    it('returns "red" for error status', () => {
+    it('returns "notification is-danger" for error status', () => {
       const component = feedLoaderData();
       component.feedStatuses = { 1: 'error' };
 
-      expect(component.getStatusClass(1)).toBe('red');
+      expect(component.getStatusClass(1)).toBe('notification is-danger');
     });
 
-    it('returns "msgblue" for other statuses', () => {
+    it('returns "notification is-info" for other statuses', () => {
       const component = feedLoaderData();
       component.feedStatuses = {
         1: 'waiting',
@@ -389,9 +389,9 @@ describe('feed_loader_component.ts', () => {
         3: 'success'
       };
 
-      expect(component.getStatusClass(1)).toBe('msgblue');
-      expect(component.getStatusClass(2)).toBe('msgblue');
-      expect(component.getStatusClass(3)).toBe('msgblue');
+      expect(component.getStatusClass(1)).toBe('notification is-info');
+      expect(component.getStatusClass(2)).toBe('notification is-info');
+      expect(component.getStatusClass(3)).toBe('notification is-info');
     });
   });
 

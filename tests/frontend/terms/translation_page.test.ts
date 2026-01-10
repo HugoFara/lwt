@@ -144,7 +144,7 @@ describe('translation_page.ts', () => {
       autoInitTranslationPages();
 
       expect(document.body.innerHTML).toContain('Term is not set!');
-      expect(document.body.innerHTML).toContain('msgblue');
+      expect(document.body.innerHTML).toContain('notification is-warning');
       expect(getGlosbeTranslation).not.toHaveBeenCalled();
     });
 
@@ -158,7 +158,7 @@ describe('translation_page.ts', () => {
       autoInitTranslationPages();
 
       expect(document.body.innerHTML).toContain('something wrong with the Glosbe API');
-      expect(document.body.innerHTML).toContain('red');
+      expect(document.body.innerHTML).toContain('notification is-danger');
       expect(getGlosbeTranslation).not.toHaveBeenCalled();
     });
 

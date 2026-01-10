@@ -314,31 +314,31 @@ class FlashMessageServiceTest extends TestCase
     public function testGetCssClassReturnsCorrectClassForInfo(): void
     {
         $class = FlashMessageService::getCssClass(FlashMessageService::TYPE_INFO);
-        $this->assertEquals('msgblue', $class);
+        $this->assertEquals('is-info', $class);
     }
 
     public function testGetCssClassReturnsCorrectClassForSuccess(): void
     {
         $class = FlashMessageService::getCssClass(FlashMessageService::TYPE_SUCCESS);
-        $this->assertEquals('msgblue', $class);
+        $this->assertEquals('is-success', $class);
     }
 
     public function testGetCssClassReturnsCorrectClassForWarning(): void
     {
         $class = FlashMessageService::getCssClass(FlashMessageService::TYPE_WARNING);
-        $this->assertEquals('warning-message', $class);
+        $this->assertEquals('is-warning', $class);
     }
 
     public function testGetCssClassReturnsCorrectClassForError(): void
     {
         $class = FlashMessageService::getCssClass(FlashMessageService::TYPE_ERROR);
-        $this->assertEquals('red', $class);
+        $this->assertEquals('is-danger', $class);
     }
 
     public function testGetCssClassReturnsDefaultForUnknownType(): void
     {
         $class = FlashMessageService::getCssClass('unknown_type');
-        $this->assertEquals('msgblue', $class);
+        $this->assertEquals('is-info', $class);
     }
 
     // ===================================
@@ -403,7 +403,7 @@ class FlashMessageServiceTest extends TestCase
         $this->assertCount(1, $messages);
         $this->assertEquals('Item created successfully', $messages[0]['message']);
         $this->assertEquals(FlashMessageService::TYPE_SUCCESS, $messages[0]['type']);
-        $this->assertEquals('msgblue', FlashMessageService::getCssClass($messages[0]['type']));
+        $this->assertEquals('is-success', FlashMessageService::getCssClass($messages[0]['type']));
 
         // Messages should be cleared after display
         $this->assertFalse($this->service->has());
@@ -443,7 +443,7 @@ class FlashMessageServiceTest extends TestCase
         $messages = $this->service->getAndClear();
 
         // Error messages should have different CSS class
-        $this->assertEquals('red', FlashMessageService::getCssClass($messages[0]['type']));
+        $this->assertEquals('is-danger', FlashMessageService::getCssClass($messages[0]['type']));
         $this->assertTrue(FlashMessageService::isError($messages[0]['type']));
     }
 }

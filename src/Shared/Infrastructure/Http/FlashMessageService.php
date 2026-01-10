@@ -234,19 +234,20 @@ class FlashMessageService
     }
 
     /**
-     * Get the CSS class for a message type.
+     * Get the Bulma notification CSS class for a message type.
      *
      * @param string $type Message type
      *
-     * @return string CSS class
+     * @return string Bulma notification class (e.g., 'is-success', 'is-danger')
      */
     public static function getCssClass(string $type): string
     {
         return match ($type) {
-            self::TYPE_SUCCESS => 'msgblue',
-            self::TYPE_WARNING => 'warning-message',
-            self::TYPE_ERROR => 'red',
-            default => 'msgblue',
+            self::TYPE_SUCCESS => 'is-success',
+            self::TYPE_WARNING => 'is-warning',
+            self::TYPE_ERROR => 'is-danger',
+            self::TYPE_INFO => 'is-info',
+            default => 'is-info',
         };
     }
 

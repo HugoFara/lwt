@@ -59,8 +59,10 @@ class TagsTest extends TestCase
         // We'll test the basic function structure
         $result = TagsFacade::addTagToWords('TestTag', '(1,2,3)');
 
-        $this->assertIsString($result, 'Should return a string message');
-        $this->assertStringContainsString('Tag added', $result, 'Should indicate tag was processed');
+        $this->assertIsArray($result, 'Should return an array');
+        $this->assertArrayHasKey('count', $result, 'Should have count key');
+        $this->assertArrayHasKey('error', $result, 'Should have error key');
+        $this->assertNull($result['error'], 'Should not have an error');
     }
 
     /**
@@ -75,14 +77,17 @@ class TagsTest extends TestCase
 
         // Test with special characters in tag name
         $result = TagsFacade::addTagToWords('Tag-With-Dashes', '(1)');
-        $this->assertIsString($result);
+        $this->assertIsArray($result);
+        $this->assertNull($result['error']);
 
         $result = TagsFacade::addTagToWords('Tag_With_Underscores', '(1)');
-        $this->assertIsString($result);
+        $this->assertIsArray($result);
+        $this->assertNull($result['error']);
 
         // Test with spaces
         $result = TagsFacade::addTagToWords('Tag With Spaces', '(1)');
-        $this->assertIsString($result);
+        $this->assertIsArray($result);
+        $this->assertNull($result['error']);
     }
 
     /**

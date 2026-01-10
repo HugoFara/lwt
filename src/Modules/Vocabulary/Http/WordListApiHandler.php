@@ -257,14 +257,22 @@ class WordListApiHandler
                 if ($data === null || $data === '') {
                     return ['success' => false, 'count' => 0, 'message' => 'Tag name required'];
                 }
-                $message = TagsFacade::addTagToWords($data, $idList);
+                $result = TagsFacade::addTagToWords($data, $idList);
+                if ($result['error'] !== null) {
+                    return ['success' => false, 'count' => 0, 'message' => $result['error']];
+                }
+                $message = "Tag added in {$result['count']} Terms";
                 break;
 
             case 'deltag':
                 if ($data === null || $data === '') {
                     return ['success' => false, 'count' => 0, 'message' => 'Tag name required'];
                 }
-                $message = TagsFacade::removeTagFromWords($data, $idList);
+                $result = TagsFacade::removeTagFromWords($data, $idList);
+                if ($result['error'] !== null) {
+                    return ['success' => false, 'count' => 0, 'message' => $result['error']];
+                }
+                $message = "Tag removed in {$result['count']} Terms";
                 break;
 
             default:

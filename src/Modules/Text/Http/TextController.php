@@ -304,7 +304,8 @@ class TextController extends BaseController
                 break;
 
             case 'addtag':
-                $message = TagsFacade::addTagToTexts($actionData, $list);
+                $result = TagsFacade::addTagToTexts($actionData, $list);
+                $message = $result['error'] ?? "Tag added in {$result['count']} Texts";
                 break;
 
             case 'deltag':
@@ -868,7 +869,8 @@ class TextController extends BaseController
 
             case 'addtag':
                 $list = "(" . implode(",", array_map('intval', $marked)) . ")";
-                $message = TagsFacade::addTagToArchivedTexts($actionData, $list);
+                $result = TagsFacade::addTagToArchivedTexts($actionData, $list);
+                $message = $result['error'] ?? "Tag added in {$result['count']} Texts";
                 break;
 
             case 'deltag':

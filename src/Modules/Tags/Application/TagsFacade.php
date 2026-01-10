@@ -781,17 +781,17 @@ class TagsFacade
      * @param string $tagText Tag text to add
      * @param string $idList  SQL list of word IDs, e.g. "(1,2,3)"
      *
-     * @return string Result message
+     * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function addTagToWords(string $tagText, string $idList): string
+    public static function addTagToWords(string $tagText, string $idList): array
     {
         if ($idList === '()') {
-            return "Tag added in 0 Terms";
+            return ['count' => 0, 'error' => null];
         }
 
         $tagId = self::getOrCreateTermTag($tagText);
         if ($tagId === null) {
-            return "Failed to create tag";
+            return ['count' => 0, 'error' => 'Failed to create tag'];
         }
 
         // Use raw SQL for LEFT JOIN with dynamic IN clause
@@ -815,7 +815,7 @@ class TagsFacade
 
         self::getAllTermTags(true);
 
-        return "Tag added in {$count} Terms";
+        return ['count' => $count, 'error' => null];
     }
 
     /**
@@ -824,12 +824,12 @@ class TagsFacade
      * @param string $tagText Tag text to remove
      * @param string $idList  SQL list of word IDs, e.g. "(1,2,3)"
      *
-     * @return string Result message
+     * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function removeTagFromWords(string $tagText, string $idList): string
+    public static function removeTagFromWords(string $tagText, string $idList): array
     {
         if ($idList === '()') {
-            return "Tag removed in 0 Terms";
+            return ['count' => 0, 'error' => null];
         }
 
         /** @var int|string|null $tagIdRaw */
@@ -840,7 +840,7 @@ class TagsFacade
         );
 
         if ($tagIdRaw === null) {
-            return "Tag " . $tagText . " not found";
+            return ['count' => 0, 'error' => "Tag {$tagText} not found"];
         }
         $tagId = (int) $tagIdRaw;
 
@@ -860,7 +860,7 @@ class TagsFacade
             mysqli_free_result($res);
         }
 
-        return "Tag removed in {$count} Terms";
+        return ['count' => $count, 'error' => null];
     }
 
     /**
@@ -869,17 +869,17 @@ class TagsFacade
      * @param string $tagText Tag text to add
      * @param string $idList  SQL list of text IDs, e.g. "(1,2,3)"
      *
-     * @return string Result message
+     * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function addTagToTexts(string $tagText, string $idList): string
+    public static function addTagToTexts(string $tagText, string $idList): array
     {
         if ($idList === '()') {
-            return "Tag added in 0 Texts";
+            return ['count' => 0, 'error' => null];
         }
 
         $tagId = self::getOrCreateTextTag($tagText);
         if ($tagId === null) {
-            return "Failed to create tag";
+            return ['count' => 0, 'error' => 'Failed to create tag'];
         }
 
         $sql = 'SELECT TxID FROM texts
@@ -901,7 +901,7 @@ class TagsFacade
 
         self::getAllTextTags(true);
 
-        return "Tag added in {$count} Texts";
+        return ['count' => $count, 'error' => null];
     }
 
     /**
@@ -910,12 +910,12 @@ class TagsFacade
      * @param string $tagText Tag text to remove
      * @param string $idList  SQL list of text IDs, e.g. "(1,2,3)"
      *
-     * @return string Result message
+     * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function removeTagFromTexts(string $tagText, string $idList): string
+    public static function removeTagFromTexts(string $tagText, string $idList): array
     {
         if ($idList === '()') {
-            return "Tag removed in 0 Texts";
+            return ['count' => 0, 'error' => null];
         }
 
         /** @var int|string|null $tagIdRaw */
@@ -926,7 +926,7 @@ class TagsFacade
         );
 
         if ($tagIdRaw === null) {
-            return "Tag " . $tagText . " not found";
+            return ['count' => 0, 'error' => "Tag {$tagText} not found"];
         }
         $tagId = (int) $tagIdRaw;
 
@@ -946,7 +946,7 @@ class TagsFacade
             mysqli_free_result($res);
         }
 
-        return "Tag removed in {$count} Texts";
+        return ['count' => $count, 'error' => null];
     }
 
     /**
@@ -955,17 +955,17 @@ class TagsFacade
      * @param string $tagText Tag text to add
      * @param string $idList  SQL list of archived text IDs, e.g. "(1,2,3)"
      *
-     * @return string Result message
+     * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function addTagToArchivedTexts(string $tagText, string $idList): string
+    public static function addTagToArchivedTexts(string $tagText, string $idList): array
     {
         if ($idList === '()') {
-            return "Tag added in 0 Texts";
+            return ['count' => 0, 'error' => null];
         }
 
         $tagId = self::getOrCreateTextTag($tagText);
         if ($tagId === null) {
-            return "Failed to create tag";
+            return ['count' => 0, 'error' => 'Failed to create tag'];
         }
 
         // Archived texts are in texts table with TxArchivedAt IS NOT NULL
@@ -988,7 +988,7 @@ class TagsFacade
 
         self::getAllTextTags(true);
 
-        return "Tag added in {$count} Texts";
+        return ['count' => $count, 'error' => null];
     }
 
     /**
@@ -997,14 +997,14 @@ class TagsFacade
      * @param string $tagText Tag text to remove
      * @param string $idList  SQL list of archived text IDs, e.g. "(1,2,3)"
      *
-     * @return string Result message
+     * @return array{count: int, error: ?string} Result with count and optional error
      */
     public static function removeTagFromArchivedTexts(
         string $tagText,
         string $idList
-    ): string {
+    ): array {
         if ($idList === '()') {
-            return "Tag removed in 0 Texts";
+            return ['count' => 0, 'error' => null];
         }
 
         /** @var int|string|null $tagIdRaw */
@@ -1015,7 +1015,7 @@ class TagsFacade
         );
 
         if ($tagIdRaw === null) {
-            return "Tag " . $tagText . " not found";
+            return ['count' => 0, 'error' => "Tag {$tagText} not found"];
         }
         $tagId = (int) $tagIdRaw;
 
@@ -1030,13 +1030,12 @@ class TagsFacade
                 $count++;
                 QueryBuilder::table('text_tag_map')
                     ->where('TtTxID', '=', (int)$record['TxID'])
-                    ->where('TtT2ID', '=', $tagId)
                     ->delete();
             }
             mysqli_free_result($res);
         }
 
-        return "Tag removed in {$count} Texts";
+        return ['count' => $count, 'error' => null];
     }
 
     // =====================

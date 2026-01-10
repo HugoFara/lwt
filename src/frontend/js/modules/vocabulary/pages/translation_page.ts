@@ -91,11 +91,15 @@ function initGlosbePage(config: GlosbeConfig): void {
   // Handle error state
   if (config.error) {
     if (config.error === 'empty_term') {
-      document.body.innerHTML = '<p class="msgblue">Term is not set!</p>';
+      document.body.innerHTML = '<div class="notification is-warning">' +
+        '<button class="delete" aria-label="close"></button>' +
+        'Term is not set!</div>';
     } else {
       document.body.innerHTML =
-        '<p class="red">There seems to be something wrong with the Glosbe API!</p>' +
-        '<p class="red">Please check the dictionaries in the Language Settings!</p>';
+        '<div class="notification is-danger">' +
+        '<button class="delete" aria-label="close"></button>' +
+        '<p>There seems to be something wrong with the Glosbe API!</p>' +
+        '<p>Please check the dictionaries in the Language Settings!</p></div>';
     }
     return;
   }

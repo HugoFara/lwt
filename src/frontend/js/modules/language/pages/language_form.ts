@@ -201,7 +201,7 @@ export const languageForm = {
           const statusEl = document.getElementById('translator_status');
           if (statusEl) {
             statusEl.innerHTML = '<a href="https://libretranslate.com/">LibreTranslate</a> online!';
-            statusEl.className = 'msgblue';
+            statusEl.className = 'notification is-success';
           }
         }
       })

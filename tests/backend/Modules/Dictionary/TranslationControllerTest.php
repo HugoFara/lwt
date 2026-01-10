@@ -453,8 +453,8 @@ class TranslationControllerTest extends TestCase
         $controller->google([]);
         $output = ob_get_clean();
 
-        // Should contain the "term not set" message class
-        $this->assertStringContainsString('msgblue', $output);
+        // Should contain the "term not set" notification class
+        $this->assertStringContainsString('notification is-warning', $output);
     }
 
     // ===== Edge case tests =====

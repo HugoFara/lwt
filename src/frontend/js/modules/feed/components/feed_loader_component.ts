@@ -166,8 +166,8 @@ export function feedLoaderData(config: FeedLoaderConfig = { feeds: [], redirectU
      */
     getStatusClass(feedId: number): string {
       const status = this.feedStatuses[feedId];
-      if (status === 'error') return 'red';
-      return 'msgblue';
+      if (status === 'error') return 'notification is-danger';
+      return 'notification is-info';
     },
 
     /**
