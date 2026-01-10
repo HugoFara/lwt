@@ -104,7 +104,7 @@ class TextServiceCrudTest extends TestCase
 
         // Clean up created texts
         foreach ($this->createdTextIds as $id) {
-            Connection::query("DELETE FROM textitems2 WHERE Ti2TxID = " . $id);
+            Connection::query("DELETE FROM word_occurrences WHERE Ti2TxID = " . $id);
             Connection::query("DELETE FROM sentences WHERE SeTxID = " . $id);
             Connection::query("DELETE FROM texts WHERE TxID = " . $id);
         }

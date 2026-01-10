@@ -207,10 +207,10 @@ class QueryBuilderUserScopeTest extends TestCase
         $this->assertEquals('TgUsID', UserScopedQuery::getUserIdColumn('tags'));
     }
 
-    public function testUserScopeAppliedToTags2Table(): void
+    public function testUserScopeAppliedToTextTagsTable(): void
     {
-        $this->assertTrue(UserScopedQuery::isUserScopedTable('tags2'));
-        $this->assertEquals('T2UsID', UserScopedQuery::getUserIdColumn('tags2'));
+        $this->assertTrue(UserScopedQuery::isUserScopedTable('text_tags'));
+        $this->assertEquals('T2UsID', UserScopedQuery::getUserIdColumn('text_tags'));
     }
 
     public function testUserScopeAppliedToNewsfeedsTable(): void
@@ -364,7 +364,7 @@ class QueryBuilderUserScopeTest extends TestCase
         $this->assertArrayHasKey('archivedtexts', $tables);
         $this->assertArrayHasKey('words', $tables);
         $this->assertArrayHasKey('tags', $tables);
-        $this->assertArrayHasKey('tags2', $tables);
+        $this->assertArrayHasKey('text_tags', $tables);
         $this->assertArrayHasKey('newsfeeds', $tables);
         $this->assertArrayHasKey('settings', $tables);
 
@@ -373,7 +373,7 @@ class QueryBuilderUserScopeTest extends TestCase
         $this->assertEquals('AtUsID', $tables['archivedtexts']);
         $this->assertEquals('WoUsID', $tables['words']);
         $this->assertEquals('TgUsID', $tables['tags']);
-        $this->assertEquals('T2UsID', $tables['tags2']);
+        $this->assertEquals('T2UsID', $tables['text_tags']);
         $this->assertEquals('NfUsID', $tables['newsfeeds']);
         $this->assertEquals('StUsID', $tables['settings']);
     }

@@ -143,7 +143,7 @@ class TextNavigationService
                 (texts
                     LEFT JOIN texttags ON TxID = TtTxID
                 )
-                LEFT JOIN tags2 ON T2ID = TtT2ID
+                LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages
             WHERE LgID = TxLgID AND LENGTH(TxAnnotatedText) > 0 '
             . $wh_lang . $wh_query . '
@@ -156,7 +156,7 @@ class TextNavigationService
                 (texts
                     LEFT JOIN texttags ON TxID = TtTxID
                 )
-                LEFT JOIN tags2 ON T2ID = TtT2ID
+                LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages
             WHERE LgID = TxLgID ' . $wh_lang . $wh_query . '
             GROUP BY TxID ' . $wh_tag . '

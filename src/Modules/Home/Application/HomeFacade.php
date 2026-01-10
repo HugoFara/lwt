@@ -84,8 +84,8 @@ class HomeFacade
         // Get the prefixed table names for all LWT tables
         $tableNames = [
             'archivedtexts', 'archtexttags', 'feedlinks', 'languages',
-            'newsfeeds', 'sentences', 'settings', 'tags', 'tags2',
-            'textitems2', 'texts', 'texttags', 'words', 'wordtags'
+            'newsfeeds', 'sentences', 'settings', 'tags', 'text_tags',
+            'word_occurrences', 'texts', 'texttags', 'words', 'wordtags'
         ];
 
         // Use Globals::table() to get properly prefixed table names

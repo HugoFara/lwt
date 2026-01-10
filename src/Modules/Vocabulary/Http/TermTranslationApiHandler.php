@@ -208,9 +208,9 @@ class TermTranslationApiHandler
         $wid = $stmt->insertId();
 
         // Update text items using prepared statement
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::preparedExecute(
-            "UPDATE textitems2
+            "UPDATE word_occurrences
             SET Ti2WoID = ?
             WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wid, $lang, $textlc]

@@ -51,14 +51,14 @@ class TextParsingTest extends TestCase
 
     private static function createTestLanguage(): void
     {
-        $textitems2 = Globals::table('textitems2');
+        $word_occurrences = Globals::table('word_occurrences');
         $languages = Globals::table('languages');
         $sentences = Globals::table('sentences');
         $texts = Globals::table('texts');
         $words = Globals::table('words');
 
         // Clean up any existing test language first
-        Connection::query("DELETE FROM $textitems2 WHERE Ti2LgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
+        Connection::query("DELETE FROM $word_occurrences WHERE Ti2LgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
         Connection::query("DELETE FROM $sentences WHERE SeLgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
         Connection::query("DELETE FROM $texts WHERE TxLgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
         Connection::query("DELETE FROM $words WHERE WoLgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
@@ -87,14 +87,14 @@ class TextParsingTest extends TestCase
         }
 
         if (self::$testLanguageId) {
-            $textitems2 = Globals::table('textitems2');
+            $word_occurrences = Globals::table('word_occurrences');
             $sentences = Globals::table('sentences');
             $texts = Globals::table('texts');
             $words = Globals::table('words');
             $languages = Globals::table('languages');
 
             // Clean up any test texts and associated data
-            Connection::query("DELETE FROM $textitems2 WHERE Ti2LgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM $word_occurrences WHERE Ti2LgID = " . self::$testLanguageId);
             Connection::query("DELETE FROM $sentences WHERE SeLgID = " . self::$testLanguageId);
             Connection::query("DELETE FROM $texts WHERE TxLgID = " . self::$testLanguageId);
             Connection::query("DELETE FROM $words WHERE WoLgID = " . self::$testLanguageId);
@@ -333,7 +333,7 @@ class TextParsingTest extends TestCase
 
         $texts = Globals::table('texts');
         $sentences = Globals::table('sentences');
-        $textitems2 = Globals::table('textitems2');
+        $word_occurrences = Globals::table('word_occurrences');
 
         // Create a test text
         $sql = "INSERT INTO $texts (TxLgID, TxTitle, TxText, TxAudioURI)
@@ -352,12 +352,12 @@ class TextParsingTest extends TestCase
 
         // Check that text items were created
         $itemCount = Connection::fetchValue(
-            "SELECT COUNT(*) as value FROM $textitems2 WHERE Ti2TxID = $textId"
+            "SELECT COUNT(*) as value FROM $word_occurrences WHERE Ti2TxID = $textId"
         );
         $this->assertGreaterThan(0, (int)$itemCount, 'Should create text items');
 
         // Clean up
-        Connection::query("DELETE FROM $textitems2 WHERE Ti2TxID = $textId");
+        Connection::query("DELETE FROM $word_occurrences WHERE Ti2TxID = $textId");
         Connection::query("DELETE FROM $sentences WHERE SeTxID = $textId");
         Connection::query("DELETE FROM $texts WHERE TxID = $textId");
     }
@@ -429,7 +429,7 @@ class TextParsingTest extends TestCase
      * recognized as a word (WordCount=1), not as a non-word (WordCount=0).
      *
      * This test verifies the behavior through the public parseAndSave() API
-     * and checks the final textitems2 table for correct word recognition.
+     * and checks the final word_occurrences table for correct word recognition.
      */
     public function testParseAndSaveLastWordRecognizedWithoutPunctuation(): void
     {
@@ -439,7 +439,7 @@ class TextParsingTest extends TestCase
 
         $texts = Globals::table('texts');
         $sentences = Globals::table('sentences');
-        $textitems2 = Globals::table('textitems2');
+        $word_occurrences = Globals::table('word_occurrences');
 
         // Test text WITHOUT punctuation
         $sql = "INSERT INTO $texts (TxLgID, TxTitle, TxText, TxAudioURI)
@@ -449,9 +449,9 @@ class TextParsingTest extends TestCase
 
         TextParsing::parseAndSave("Hello world", self::$testLanguageId, $textIdNoPunct);
 
-        // Query textitems2 to check word recognition
+        // Query word_occurrences to check word recognition
         $resultNoPunct = Connection::fetchAll(
-            "SELECT Ti2Text, Ti2WordCount FROM $textitems2
+            "SELECT Ti2Text, Ti2WordCount FROM $word_occurrences
              WHERE Ti2TxID = $textIdNoPunct ORDER BY Ti2Order"
         );
 
@@ -475,7 +475,7 @@ class TextParsingTest extends TestCase
         TextParsing::parseAndSave("Hello world.", self::$testLanguageId, $textIdWithPunct);
 
         $resultWithPunct = Connection::fetchAll(
-            "SELECT Ti2Text, Ti2WordCount FROM $textitems2
+            "SELECT Ti2Text, Ti2WordCount FROM $word_occurrences
              WHERE Ti2TxID = $textIdWithPunct ORDER BY Ti2Order"
         );
 
@@ -497,7 +497,7 @@ class TextParsingTest extends TestCase
         $this->assertEquals(0, (int)$punctItem['Ti2WordCount'], 'Punctuation should have WordCount=0');
 
         // Clean up
-        Connection::query("DELETE FROM $textitems2 WHERE Ti2TxID IN ($textIdNoPunct, $textIdWithPunct)");
+        Connection::query("DELETE FROM $word_occurrences WHERE Ti2TxID IN ($textIdNoPunct, $textIdWithPunct)");
         Connection::query("DELETE FROM $sentences WHERE SeTxID IN ($textIdNoPunct, $textIdWithPunct)");
         Connection::query("DELETE FROM $texts WHERE TxID IN ($textIdNoPunct, $textIdWithPunct)");
     }

@@ -350,7 +350,7 @@ class TextApiHandler
         }
 
         // Get all text items with word info
-        $records = QueryBuilder::table('textitems2')
+        $records = QueryBuilder::table('word_occurrences')
             ->select([
                 'CASE WHEN `Ti2WordCount`>0 THEN Ti2WordCount ELSE 1 END AS Code',
                 'CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE `WoText` END AS TiText',
@@ -366,8 +366,8 @@ class TextApiHandler
                 'WoRomanization',
                 'WoNotes'
             ])
-            ->leftJoin('words', 'textitems2.Ti2WoID', '=', 'words.WoID')
-            ->where('textitems2.Ti2TxID', '=', $textId)
+            ->leftJoin('words', 'word_occurrences.Ti2WoID', '=', 'words.WoID')
+            ->where('word_occurrences.Ti2TxID', '=', $textId)
             ->orderBy('Ti2Order', 'ASC')
             ->orderBy('Ti2WordCount', 'DESC')
             ->getPrepared();

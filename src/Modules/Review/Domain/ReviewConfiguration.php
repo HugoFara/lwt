@@ -177,10 +177,10 @@ final readonly class ReviewConfiguration
         $selectionInt = is_int($this->selection) ? $this->selection : (int) (is_array($this->selection) ? ($this->selection[0] ?? 0) : $this->selection);
         return match ($this->reviewKey) {
             self::KEY_LANG => " words WHERE WoLgID = {$selectionInt} ",
-            self::KEY_TEXT => " words, textitems2
+            self::KEY_TEXT => " words, word_occurrences
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = {$selectionInt} ",
             self::KEY_WORDS => " words WHERE WoID IN (" . implode(',', (array) $this->selection) . ") ",
-            self::KEY_TEXTS => " words, textitems2
+            self::KEY_TEXTS => " words, word_occurrences
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ("
                 . implode(',', (array) $this->selection) . ") ",
             self::KEY_RAW_SQL => is_string($this->selection) ? $this->selection : '',

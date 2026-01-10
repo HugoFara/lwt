@@ -56,12 +56,12 @@ class ValidationTest extends TestCase
     {
         // Clean up any existing test data first
         Connection::query("DELETE FROM texttags WHERE TtTxID IN (SELECT TxID FROM texts WHERE TxTitle = 'Test Validation Text')");
-        Connection::query("DELETE FROM textitems2 WHERE Ti2TxID IN (SELECT TxID FROM texts WHERE TxTitle = 'Test Validation Text')");
+        Connection::query("DELETE FROM word_occurrences WHERE Ti2TxID IN (SELECT TxID FROM texts WHERE TxTitle = 'Test Validation Text')");
         Connection::query("DELETE FROM sentences WHERE SeTxID IN (SELECT TxID FROM texts WHERE TxTitle = 'Test Validation Text')");
         Connection::query("DELETE FROM texts WHERE TxTitle = 'Test Validation Text'");
         Connection::query("DELETE FROM languages WHERE LgName = 'Test Validation Language'");
         Connection::query("DELETE FROM tags WHERE TgText = 'test_validation_tag'");
-        Connection::query("DELETE FROM tags2 WHERE T2Text = 'test_validation_tag2'");
+        Connection::query("DELETE FROM text_tags WHERE T2Text = 'test_validation_tag2'");
 
         // Create test language
         $sql = "INSERT INTO languages (
@@ -96,7 +96,7 @@ class ValidationTest extends TestCase
         self::$testTagId = mysqli_insert_id(Globals::getDbConnection());
 
         // Create test tag2 (for texts)
-        $sql = "INSERT INTO tags2 (T2Text, T2Comment) VALUES ('test_validation_tag2', 'Test tag2')";
+        $sql = "INSERT INTO text_tags (T2Text, T2Comment) VALUES ('test_validation_tag2', 'Test tag2')";
         Connection::query($sql);
         self::$testTag2Id = mysqli_insert_id(Globals::getDbConnection());
     }
@@ -109,7 +109,7 @@ class ValidationTest extends TestCase
 
         // Clean up test data in reverse order
         if (self::$testTag2Id) {
-            Connection::query("DELETE FROM tags2 WHERE T2ID = " . self::$testTag2Id);
+            Connection::query("DELETE FROM text_tags WHERE T2ID = " . self::$testTag2Id);
         }
         if (self::$testTagId) {
             Connection::query("DELETE FROM tags WHERE TgID = " . self::$testTagId);
@@ -469,7 +469,7 @@ class ValidationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = Validation::archTextTag("1'; DROP TABLE tags2; --", '1');
+        $result = Validation::archTextTag("1'; DROP TABLE text_tags; --", '1');
         $this->assertEquals('', $result, 'SQL injection with DROP should be rejected');
     }
 

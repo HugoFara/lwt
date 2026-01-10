@@ -404,7 +404,7 @@ class WordListApiHandler
             }
         }
 
-        // Get term tags (from tags table - tags2 is for text tags)
+        // Get term tags (from tags table - text_tags is for text tags)
         $tags = [];
         $tagResult = QueryBuilder::table('tags')
             ->select(['TgID', 'TgText'])

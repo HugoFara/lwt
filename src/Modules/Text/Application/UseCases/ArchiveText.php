@@ -40,7 +40,7 @@ class ArchiveText
     public function execute(int $textId): string
     {
         // Delete parsed data
-        $count3 = QueryBuilder::table('textitems2')
+        $count3 = QueryBuilder::table('word_occurrences')
             ->where('Ti2TxID', '=', $textId)
             ->delete();
         $count2 = QueryBuilder::table('sentences')
@@ -103,7 +103,7 @@ class ArchiveText
 
         foreach ($ids as $textId) {
             // Delete parsed data
-            QueryBuilder::table('textitems2')
+            QueryBuilder::table('word_occurrences')
                 ->where('Ti2TxID', '=', $textId)
                 ->delete();
             QueryBuilder::table('sentences')
@@ -231,8 +231,8 @@ class ArchiveText
         );
         $bindings5 = [$textId];
         $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = ?"
-            . UserScopedQuery::forTablePrepared('textitems2', $bindings5, '', 'texts'),
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = ?"
+            . UserScopedQuery::forTablePrepared('word_occurrences', $bindings5, '', 'texts'),
             $bindings5,
             'cnt'
         );

@@ -1096,7 +1096,7 @@ class WordUploadService
             QueryBuilder::table('sentences')
                 ->where('SeLgID', '=', $langId)
                 ->delete();
-            QueryBuilder::table('textitems2')
+            QueryBuilder::table('word_occurrences')
                 ->where('Ti2LgID', '=', $langId)
                 ->delete();
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
@@ -1133,7 +1133,7 @@ class WordUploadService
             }
 
             if (!empty($allPlaceholders)) {
-                $sql = "INSERT INTO textitems2 (
+                $sql = "INSERT INTO word_occurrences (
                     Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
                 ) VALUES " . implode(',', $allPlaceholders);
                 Connection::preparedExecute($sql, $allParams);
@@ -1163,7 +1163,7 @@ class WordUploadService
     {
         $bindings = [];
         $sql = "UPDATE words
-            JOIN textitems2
+            JOIN word_occurrences
             ON WoWordCount=1 AND Ti2WoID IS NULL AND lower(Ti2Text)=WoTextLC AND Ti2LgID = WoLgID
             SET Ti2WoID=WoID"
             . UserScopedQuery::forTablePrepared('words', $bindings);

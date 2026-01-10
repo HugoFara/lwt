@@ -31,9 +31,9 @@ class TagTypeTest extends TestCase
         $this->assertEquals('tags', TagType::TERM->tableName());
     }
 
-    public function testTableNameReturnsTags2ForText(): void
+    public function testTableNameReturnsTextTagsForText(): void
     {
-        $this->assertEquals('tags2', TagType::TEXT->tableName());
+        $this->assertEquals('text_tags', TagType::TEXT->tableName());
     }
 
     // ===== columnPrefix Tests =====

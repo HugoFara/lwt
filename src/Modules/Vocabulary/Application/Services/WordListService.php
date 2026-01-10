@@ -236,7 +236,7 @@ class WordListService
         } else {
             $sql = 'select count(*) as value from (select WoID from (' .
                 'words left JOIN wordtags' .
-                ' ON WoID = WtWoID), textitems2' .
+                ' ON WoID = WtWoID), word_occurrences' .
                 ' where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' .
                 $textId . ')' . $whLang . $whStat . $whQuery .
                 ' group by WoID ' . $whTag . ') as dummy';
@@ -331,7 +331,7 @@ class WordListService
                     from ((words
                     left JOIN wordtags ON WoID = WtWoID)
                     left join tags on TgID = WtTgID),
-                    languages, textitems2
+                    languages, word_occurrences
                     where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' .
                     $textId . ') and WoLgID = LgID ' . $whLang . $whStat . $whQuery . '
                     group by WoID ' . $whTag . '
@@ -370,7 +370,7 @@ class WordListService
                     from ((words left JOIN wordtags
                     ON WoID = WtWoID)
                     left join tags on TgID = WtTgID),
-                    languages, textitems2
+                    languages, word_occurrences
                     where Ti2LgID = WoLgID and Ti2WoID = WoID and WoLgID = LgID
                     and Ti2TxID in (' . $textId . ') ' .
                     $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag .
@@ -389,7 +389,7 @@ class WordListService
                     left join tags on TgID = WtTgID),
                     languages
                     where WoLgID = LgID and WoID NOT IN (SELECT DISTINCT Ti2WoID
-                    from textitems2 where Ti2LgID = LgID) ' .
+                    from word_occurrences where Ti2LgID = LgID) ' .
                     $whLang . $whStat . $whQuery . '
                     group by WoID ' . $whTag . '
                     UNION
@@ -404,7 +404,7 @@ class WordListService
                     from ((words left JOIN wordtags
                     ON WoID = WtWoID)
                     left join tags on TgID = WtTgID),
-                    languages, textitems2
+                    languages, word_occurrences
                     where Ti2LgID = WoLgID and Ti2WoID = WoID and WoLgID = LgID ' .
                     $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag .
                     ' order by ' . $sortExpr . ' ' . $limit;
@@ -424,12 +424,12 @@ class WordListService
     {
         // Delete multi-word text items first (before word deletion triggers FK SET NULL)
         Connection::query(
-            'DELETE FROM textitems2
+            'DELETE FROM word_occurrences
             WHERE Ti2WordCount > 1 AND Ti2WoID in ' . $idList
         );
 
         // Delete words - FK constraints handle:
-        // - Single-word textitems2.Ti2WoID set to NULL (ON DELETE SET NULL)
+        // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
         // - wordtags deleted (ON DELETE CASCADE)
         $message = Connection::execute(
             'DELETE FROM words WHERE WoID in ' . $idList,
@@ -582,7 +582,7 @@ class WordListService
             from (
                 words
                 left JOIN wordtags ON WoID = WtWoID
-            ), textitems2
+            ), word_occurrences
             where Ti2LgID = WoLgID and Ti2WoID = WoID and
             Ti2TxID in (' . $textId . ')' . $whLang . $whStat . $whQuery .
             ' group by WoID ' . $whTag;
@@ -611,12 +611,12 @@ class WordListService
     {
         // Delete multi-word text items first (before word deletion triggers FK SET NULL)
         Connection::preparedExecute(
-            'DELETE FROM textitems2 WHERE Ti2WordCount > 1 AND Ti2WoID = ?',
+            'DELETE FROM word_occurrences WHERE Ti2WordCount > 1 AND Ti2WoID = ?',
             [$wordId]
         );
 
         // Delete word - FK constraints handle:
-        // - Single-word textitems2.Ti2WoID set to NULL (ON DELETE SET NULL)
+        // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
         // - wordtags deleted (ON DELETE CASCADE)
         $bindings = [$wordId];
         Connection::preparedExecute(
@@ -706,7 +706,7 @@ class WordListService
             from ((words left JOIN wordtags
             ON WoID = WtWoID) left join tags
             on TgID = WtTgID), languages,
-            textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID
+            word_occurrences where Ti2LgID = WoLgID and Ti2WoID = WoID
             and Ti2TxID in (' . $textId . ') and WoLgID = LgID AND
             WoTranslation != \'*\' and WoSentence like concat(\'%{\',WoText,\'}%\') ' .
             $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag;
@@ -769,7 +769,7 @@ class WordListService
             from ((words left JOIN wordtags
             ON WoID = WtWoID) left join tags
             on TgID = WtTgID), languages,
-            textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID
+            word_occurrences where Ti2LgID = WoLgID and Ti2WoID = WoID
             and Ti2TxID in (' . $textId . ') and WoLgID = LgID ' .
             $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag;
     }
@@ -833,7 +833,7 @@ class WordListService
             from ((words left JOIN wordtags
             ON WoID = WtWoID) left join tags
             on TgID = WtTgID), languages,
-            textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID
+            word_occurrences where Ti2LgID = WoLgID and Ti2WoID = WoID
             and Ti2TxID in (' . $textId . ') and WoLgID = LgID ' .
             $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag;
     }
@@ -868,7 +868,7 @@ class WordListService
 
         return 'select distinct WoID
         from (words left JOIN wordtags
-        ON WoID = WtWoID), textitems2
+        ON WoID = WtWoID), word_occurrences
         where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' .
         $textId . ')' . $whLang . $whStat . $whQuery . '
         group by WoID ' . $whTag;
@@ -985,7 +985,7 @@ class WordListService
                 (new ExpressionService())->insertExpressions($textLc, (int)$data["WoLgID"], (int)$wid, $len, 1);
             } else {
                 Connection::preparedExecute(
-                    'UPDATE textitems2
+                    'UPDATE word_occurrences
                     SET Ti2WoID = ?
                     WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?',
                     [$wid, $data["WoLgID"], $textLc]

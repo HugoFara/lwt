@@ -222,7 +222,7 @@ class UpdateText
     private function reparseText(int $textId, int $languageId, string $text): void
     {
         // Delete old parsed data
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2TxID', '=', $textId)
             ->delete();
         QueryBuilder::table('sentences')

@@ -94,8 +94,8 @@ class ImportText
             'cnt'
         );
         $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = ?"
-            . UserScopedQuery::forTablePrepared('textitems2', $bindings, '', 'texts'),
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = ?"
+            . UserScopedQuery::forTablePrepared('word_occurrences', $bindings, '', 'texts'),
             $bindings,
             'cnt'
         );

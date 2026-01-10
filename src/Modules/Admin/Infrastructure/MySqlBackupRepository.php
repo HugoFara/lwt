@@ -35,8 +35,8 @@ class MySqlBackupRepository implements BackupRepositoryInterface
      * @var string[]
      */
     private const BACKUP_TABLES = [
-        'archivedtexts', 'archtexttags', 'feedlinks', 'languages', 'textitems2',
-        'newsfeeds', 'sentences', 'settings', 'tags', 'tags2', 'texts', 'texttags',
+        'archivedtexts', 'archtexttags', 'feedlinks', 'languages', 'word_occurrences',
+        'newsfeeds', 'sentences', 'settings', 'tags', 'text_tags', 'texts', 'texttags',
         'words', 'wordtags'
     ];
 
@@ -47,7 +47,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
      */
     private const OFFICIAL_BACKUP_TABLES = [
         'archivedtexts', 'archtexttags', 'languages', 'sentences', 'settings',
-        'tags', 'tags2', 'textitems', 'texts', 'texttags', 'words', 'wordtags'
+        'tags', 'text_tags', 'textitems', 'texts', 'texttags', 'words', 'wordtags'
     ];
 
     /**
@@ -84,7 +84,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 $out .= str_replace("\n", " ", (string) $row2[1]) . ";\n";
             }
 
-            if ($table !== 'sentences' && $table !== 'textitems2') {
+            if ($table !== 'sentences' && $table !== 'word_occurrences') {
                 while ($row = mysqli_fetch_row($result)) {
                     $return = 'INSERT INTO ' . $table . ' VALUES(';
                     for ($j = 0; $j < $num_fields; $j++) {
@@ -261,7 +261,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 PRIMARY KEY (`TgID`),
                 UNIQUE KEY `TgText` (`TgText`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n",
-            'tags2' => "CREATE TABLE `tags2` (
+            'text_tags' => "CREATE TABLE `text_tags` (
                 `T2ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `T2Text` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
                 `T2Comment` varchar(200) NOT NULL DEFAULT '',

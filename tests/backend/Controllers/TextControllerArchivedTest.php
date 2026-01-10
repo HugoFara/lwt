@@ -499,7 +499,7 @@ class TextControllerArchivedTest extends TestCase
             "SELECT TxID AS value FROM " . Globals::table('texts') . " WHERE TxTitle = 'TempUnarchiveTest' LIMIT 1"
         );
         if ($restoredId) {
-            Connection::query("DELETE FROM " . Globals::table('textitems2') . " WHERE Ti2TxID = {$restoredId}");
+            Connection::query("DELETE FROM " . Globals::table('word_occurrences') . " WHERE Ti2TxID = {$restoredId}");
             Connection::query("DELETE FROM " . Globals::table('sentences') . " WHERE SeTxID = {$restoredId}");
             Connection::query("DELETE FROM " . Globals::table('texts') . " WHERE TxID = {$restoredId}");
         }
@@ -547,7 +547,7 @@ class TextControllerArchivedTest extends TestCase
         mysqli_free_result($res);
 
         foreach ($restoredIds as $restoredId) {
-            Connection::query("DELETE FROM " . Globals::table('textitems2') . " WHERE Ti2TxID = {$restoredId}");
+            Connection::query("DELETE FROM " . Globals::table('word_occurrences') . " WHERE Ti2TxID = {$restoredId}");
             Connection::query("DELETE FROM " . Globals::table('sentences') . " WHERE SeTxID = {$restoredId}");
             Connection::query("DELETE FROM " . Globals::table('texts') . " WHERE TxID = {$restoredId}");
         }

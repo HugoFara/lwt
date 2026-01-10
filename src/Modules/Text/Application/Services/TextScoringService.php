@@ -157,9 +157,9 @@ class TextScoringService
         ];
 
         // Count total unique words in text
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         $totalQuery = "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS cnt
-            FROM textitems2
+            FROM word_occurrences
             WHERE Ti2WordCount = 1 AND Ti2TxID = ?";
 
         /** @var int|string|null $total */
@@ -168,7 +168,7 @@ class TextScoringService
 
         // Count unknown words (not in vocabulary)
         $unknownQuery = "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS cnt
-            FROM textitems2
+            FROM word_occurrences
             WHERE Ti2WordCount = 1 AND Ti2WoID IS NULL AND Ti2TxID = ?";
 
         /** @var int|string|null $unknown */
@@ -179,7 +179,7 @@ class TextScoringService
         // Note: textIds must be integers so direct interpolation is safe
         $bindings = [];
         $statusQuery = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS unique_cnt, WoStatus AS status
-            FROM textitems2, words
+            FROM word_occurrences, words
             WHERE Ti2WoID IS NOT NULL AND Ti2TxID = {$textId} AND Ti2WoID = WoID"
             . UserScopedQuery::forTablePrepared('words', $bindings, 'words')
             . " GROUP BY Ti2TxID, WoStatus";
@@ -228,9 +228,9 @@ class TextScoringService
         $inClause = implode(',', array_map('intval', $textIds));
 
         // Count total unique words per text
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         $totalQuery = "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS cnt
-            FROM textitems2
+            FROM word_occurrences
             WHERE Ti2WordCount = 1 AND Ti2TxID IN ($inClause)
             GROUP BY Ti2TxID";
 
@@ -244,7 +244,7 @@ class TextScoringService
 
         // Count unknown words per text
         $unknownQuery = "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS cnt
-            FROM textitems2
+            FROM word_occurrences
             WHERE Ti2WordCount = 1 AND Ti2WoID IS NULL AND Ti2TxID IN ($inClause)
             GROUP BY Ti2TxID";
 
@@ -260,7 +260,7 @@ class TextScoringService
         // Note: Using raw query with integer IDs which is safe
         $bindings = [];
         $statusQuery = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS unique_cnt, WoStatus AS status
-            FROM textitems2, words
+            FROM word_occurrences, words
             WHERE Ti2WoID IS NOT NULL AND Ti2TxID IN ({$inClause}) AND Ti2WoID = WoID"
             . UserScopedQuery::forTablePrepared('words', $bindings, 'words')
             . " GROUP BY Ti2TxID, WoStatus";
@@ -296,9 +296,9 @@ class TextScoringService
     private function getUnknownWords(int $textId, int $limit): array
     {
         // Get unique unknown words, ordered by frequency in text (most common first)
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         $sql = "SELECT LOWER(Ti2Text) AS word, COUNT(*) AS freq
-            FROM textitems2
+            FROM word_occurrences
             WHERE Ti2WordCount = 1 AND Ti2WoID IS NULL AND Ti2TxID = ?
             GROUP BY LOWER(Ti2Text)
             ORDER BY freq DESC, word ASC

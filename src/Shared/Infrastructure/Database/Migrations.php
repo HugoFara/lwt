@@ -65,9 +65,9 @@ class Migrations
     public static function reparseAllTexts(): void
     {
         // Use DELETE instead of TRUNCATE to respect foreign key constraints
-        // Delete textitems2 first (child), then sentences (parent)
+        // Delete word_occurrences first (child), then sentences (parent)
         // Use raw DELETE FROM to delete all records
-        Connection::execute("DELETE FROM textitems2");
+        Connection::execute("DELETE FROM word_occurrences");
         Connection::execute("DELETE FROM sentences");
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         Maintenance::initWordCount();
@@ -342,7 +342,7 @@ class Migrations
              WHERE TABLE_SCHEMA = ?
              AND TABLE_NAME IN (
                 'languages', 'texts', 'archivedtexts', 'words', 'sentences',
-                'textitems2', 'textitems', 'tags', 'tags2', 'wordtags',
+                'word_occurrences', 'word_occurrences', 'textitems', 'tags', 'text_tags', 'text_tags', 'wordtags',
                 'texttags', 'archtexttags', 'newsfeeds', 'feedlinks',
                 'settings', '_migrations', 'tts'
              )",
@@ -368,12 +368,12 @@ class Migrations
         // Update the database (if necessary)
         self::update();
 
-        if (!in_array("textitems2", $tables)) {
+        if (!in_array("word_occurrences", $tables) && !in_array("word_occurrences", $tables)) {
             // Add data from the old database system
             if (in_array("textitems", $tables)) {
                 // Complex migration query - use raw SQL
                 Connection::execute(
-                    "INSERT INTO textitems2 (
+                    "INSERT INTO word_occurrences (
                         Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount,
                         Ti2Text
                     )
@@ -421,10 +421,10 @@ class Migrations
                 FROM (wordtags LEFT JOIN words ON WtWoID = WoID)
                 WHERE WoID IS NULL"
             );
-            // Clean up orphaned texttags (tags2 deleted)
+            // Clean up orphaned texttags (text_tags deleted)
             Connection::execute(
                 "DELETE texttags
-                FROM (texttags LEFT JOIN tags2 ON TtT2ID = T2ID)
+                FROM (texttags LEFT JOIN text_tags ON TtT2ID = T2ID)
                 WHERE T2ID IS NULL"
             );
             // Clean up orphaned texttags (texts deleted)
@@ -433,12 +433,12 @@ class Migrations
                 FROM (texttags LEFT JOIN texts ON TtTxID = TxID)
                 WHERE TxID IS NULL"
             );
-            // Clean up orphaned archtexttags (tags2 deleted)
+            // Clean up orphaned archtexttags (text_tags deleted)
             Connection::execute(
                 "DELETE archtexttags
                 FROM (
                     archtexttags
-                    LEFT JOIN tags2 ON AgT2ID = T2ID
+                    LEFT JOIN text_tags ON AgT2ID = T2ID
                 )
                 WHERE T2ID IS NULL"
             );

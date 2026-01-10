@@ -112,7 +112,7 @@ class TextControllerReadTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM " . Globals::table('textitems2') . " WHERE Ti2TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
+        Connection::query("DELETE FROM " . Globals::table('word_occurrences') . " WHERE Ti2TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
         Connection::query("DELETE FROM " . Globals::table('sentences') . " WHERE SeTxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
         Connection::query("DELETE FROM " . Globals::table('texts') . " WHERE TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
         Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgName = 'ReadControllerTestLang'");

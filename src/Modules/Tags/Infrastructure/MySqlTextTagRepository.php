@@ -27,13 +27,13 @@ use Lwt\Modules\Tags\Domain\ValueObject\TagId;
 /**
  * MySQL implementation of TagRepositoryInterface for text tags.
  *
- * Operates on the 'tags2' table for text/document tags.
+ * Operates on the 'text_tags' table for text/document tags.
  *
  * @since 3.0.0
  */
 class MySqlTextTagRepository implements TagRepositoryInterface
 {
-    private const TABLE_NAME = 'tags2';
+    private const TABLE_NAME = 'text_tags';
     private const COL_PREFIX = 'T2';
 
     /**

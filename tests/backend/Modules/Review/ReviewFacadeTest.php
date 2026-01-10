@@ -155,7 +155,7 @@ class ReviewFacadeTest extends TestCase
         $sql = $config->toSqlProjection();
 
         $this->assertStringContainsString('words', $sql);
-        $this->assertStringContainsString('textitems2', $sql);
+        $this->assertStringContainsString('word_occurrences', $sql);
         $this->assertStringContainsString('Ti2TxID = 10', $sql);
     }
 
@@ -310,7 +310,7 @@ class ReviewFacadeTest extends TestCase
         $sql = $this->facade->getReviewSql(ReviewConfiguration::KEY_TEXT, 42);
 
         $this->assertIsString($sql);
-        $this->assertStringContainsString('textitems2', $sql);
+        $this->assertStringContainsString('word_occurrences', $sql);
         $this->assertStringContainsString('Ti2TxID = 42', $sql);
     }
 

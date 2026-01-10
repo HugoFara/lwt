@@ -62,12 +62,12 @@ class WordDiscoveryService
      */
     public function getUnknownWordsInText(int $textId): array
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         // words has WoUsID - user scope auto-applied
         $bindings = [$textId];
         return Connection::preparedFetchAll(
             "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
-             FROM (textitems2 LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
+             FROM (word_occurrences LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
              WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
              ORDER BY Ti2Order"
              . UserScopedQuery::forTablePrepared('words', $bindings, 'words'),
@@ -84,12 +84,12 @@ class WordDiscoveryService
      */
     public function getAllUnknownWordsInText(int $textId): array
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         // words has WoUsID - user scope auto-applied
         $bindings = [$textId];
         return Connection::preparedFetchAll(
             "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
-             FROM (textitems2 LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
+             FROM (word_occurrences LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
              WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
              ORDER BY Ti2Order"
              . UserScopedQuery::forTablePrepared('words', $bindings, 'words'),
@@ -111,10 +111,10 @@ class WordDiscoveryService
         int $offset,
         int $limit
     ): array {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         return Connection::preparedFetchAll(
             "SELECT Ti2Text AS word, Ti2LgID, MIN(Ti2Order) AS pos
-             FROM textitems2
+             FROM word_occurrences
              WHERE Ti2WoID IS NULL AND Ti2TxID = ? AND Ti2WordCount = 1
              GROUP BY LOWER(Ti2Text)
              ORDER BY pos

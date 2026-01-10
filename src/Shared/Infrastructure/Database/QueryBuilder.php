@@ -81,7 +81,7 @@ class QueryBuilder
         'archivedtexts' => 'AtUsID',
         'words' => 'WoUsID',
         'tags' => 'TgUsID',
-        'tags2' => 'T2UsID',
+        'text_tags' => 'T2UsID',
         'newsfeeds' => 'NfUsID',
         'settings' => 'StUsID',
         'local_dictionaries' => 'LdUsID',

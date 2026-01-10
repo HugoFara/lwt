@@ -97,7 +97,7 @@ class ReviewServiceTest extends TestCase
             "SELECT LAST_INSERT_ID() AS value"
         );
 
-        // Create test sentence (required for FK constraint on textitems2)
+        // Create test sentence (required for FK constraint on word_occurrences)
         Connection::query(
             "INSERT INTO sentences (SeLgID, SeTxID, SeOrder, SeFirstPos, SeText) " .
             "VALUES (" . self::$testLangId . ", " . self::$testTextId . ", 1, 1, 'This is a test.')"
@@ -122,7 +122,7 @@ class ReviewServiceTest extends TestCase
         // Create text items linking words to text
         foreach (self::$testWordIds as $index => $wordId) {
             Connection::query(
-                "INSERT INTO textitems2 (Ti2TxID, Ti2LgID, Ti2WoID, Ti2SeID, Ti2Order, " .
+                "INSERT INTO word_occurrences (Ti2TxID, Ti2LgID, Ti2WoID, Ti2SeID, Ti2Order, " .
                 "Ti2WordCount, Ti2Text) " .
                 "VALUES (" . self::$testTextId . ", " . self::$testLangId . ", {$wordId}, " .
                 self::$testSentenceId . ", {$index}, 1, 'testword" . ($index + 1) . "')"
@@ -137,7 +137,7 @@ class ReviewServiceTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM textitems2 WHERE Ti2TxID = " . self::$testTextId);
+        Connection::query("DELETE FROM word_occurrences WHERE Ti2TxID = " . self::$testTextId);
         Connection::query("DELETE FROM words WHERE WoLgID = " . self::$testLangId);
         Connection::query("DELETE FROM texts WHERE TxID = " . self::$testTextId);
     }
@@ -209,7 +209,7 @@ class ReviewServiceTest extends TestCase
 
         $this->assertIsString($sql);
         $this->assertStringContainsString('words', $sql);
-        $this->assertStringContainsString('textitems2', $sql);
+        $this->assertStringContainsString('word_occurrences', $sql);
     }
 
     // ===== validateReviewSelection() tests =====

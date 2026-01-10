@@ -119,12 +119,12 @@ class AnnotationService
             CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END AS TiIsNotWord,
             WoID, WoTranslation
             FROM (
-                textitems2
+                word_occurrences
                 LEFT JOIN words
                 ON Ti2WoID = WoID AND Ti2LgID = WoLgID
             )
             WHERE Ti2TxID = ?"
-            . UserScopedQuery::forTablePrepared('textitems2', $bindings) . "
+            . UserScopedQuery::forTablePrepared('word_occurrences', $bindings) . "
             ORDER BY Ti2Order ASC, Ti2WordCount DESC";
 
         $until = 0;

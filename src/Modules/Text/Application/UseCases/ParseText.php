@@ -123,7 +123,7 @@ class ParseText
 
         // Get words from texts
         $sql = "SELECT DISTINCT Ti2WoID, Ti2SeID
-            FROM textitems2, sentences, texts
+            FROM word_occurrences, sentences, texts
             WHERE Ti2TxID IN ({$placeholders})
             AND Ti2SeID = SeID
             AND Ti2TxID = TxID
@@ -132,7 +132,7 @@ class ParseText
 
         if ($activeOnly) {
             $sql = "SELECT DISTINCT Ti2WoID, Ti2SeID
-                FROM textitems2, sentences, texts, words
+                FROM word_occurrences, sentences, texts, words
                 WHERE Ti2TxID IN ({$placeholders})
                 AND Ti2SeID = SeID
                 AND Ti2TxID = TxID

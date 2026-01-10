@@ -152,15 +152,15 @@ class MaintenanceTest extends TestCase
         $this->assertTrue(true, 'adjustAutoIncrement should complete without error for tags');
     }
 
-    public function testAdjustAutoIncrementTags2(): void
+    public function testAdjustAutoIncrementTextTags(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        // Test with tags2 table
-        Maintenance::adjustAutoIncrement('tags2', 'T2ID');
-        $this->assertTrue(true, 'adjustAutoIncrement should complete without error for tags2');
+        // Test with text_tags table
+        Maintenance::adjustAutoIncrement('text_tags', 'T2ID');
+        $this->assertTrue(true, 'adjustAutoIncrement should complete without error for text_tags');
     }
 
     public function testAdjustAutoIncrementArchivdtexts(): void

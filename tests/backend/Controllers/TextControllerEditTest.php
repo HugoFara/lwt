@@ -110,7 +110,7 @@ class TextControllerEditTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM textitems2 WHERE Ti2TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
+        Connection::query("DELETE FROM word_occurrences WHERE Ti2TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
         Connection::query("DELETE FROM sentences WHERE SeTxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
         Connection::query("DELETE FROM texts WHERE TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
         Connection::query("DELETE FROM languages WHERE LgName = 'EditControllerTestLang'");

@@ -75,7 +75,7 @@ class MySqlTextTagAssociation implements TagAssociationInterface
     public function getTagTextsForItem(int $itemId): array
     {
         $rows = Connection::preparedFetchAll(
-            'SELECT T2Text FROM texttags, tags2 WHERE T2ID = TtT2ID AND TtTxID = ? ORDER BY T2Text',
+            'SELECT T2Text FROM texttags, text_tags WHERE T2ID = TtT2ID AND TtTxID = ? ORDER BY T2Text',
             [$itemId]
         );
 
@@ -117,7 +117,7 @@ class MySqlTextTagAssociation implements TagAssociationInterface
             // Associate using INSERT...SELECT to handle concurrent inserts
             Connection::preparedExecute(
                 'INSERT IGNORE INTO texttags (TtTxID, TtT2ID)
-                SELECT ?, T2ID FROM tags2 WHERE T2Text = ?',
+                SELECT ?, T2ID FROM text_tags WHERE T2Text = ?',
                 [$itemId, $tagName]
             );
         }
@@ -215,7 +215,7 @@ class MySqlTextTagAssociation implements TagAssociationInterface
     {
         // Delete texttags where the tag no longer exists
         return Connection::preparedExecute(
-            'DELETE FROM texttags WHERE TtT2ID NOT IN (SELECT T2ID FROM tags2)',
+            'DELETE FROM texttags WHERE TtT2ID NOT IN (SELECT T2ID FROM text_tags)',
             []
         );
     }

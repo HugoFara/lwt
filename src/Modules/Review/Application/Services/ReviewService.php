@@ -120,7 +120,7 @@ class ReviewService
             case 'texts':
                 // Test text items from a list of texts ID
                 $idString = is_array($selection) ? implode(",", $selection) : (string)$selection;
-                $reviewsql = " words, textitems2
+                $reviewsql = " words, word_occurrences
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($idString) ";
                 // Note: Multi-language validation is done by caller via validateReviewSelection()
                 break;
@@ -132,7 +132,7 @@ class ReviewService
             case 'text':
                 // Test text items from a specific text ID
                 $textId = is_array($selection) ? ($selection[0] ?? 0) : $selection;
-                $reviewsql = " words, textitems2
+                $reviewsql = " words, word_occurrences
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
                 break;
             default:
@@ -346,19 +346,19 @@ class ReviewService
     {
         // Find sentence with at least 70% known words
         // This is a complex query with subqueries - using raw SQL
-        // textitems2 inherits user context via Ti2TxID -> texts FK, so no user_id needed
+        // word_occurrences inherits user context via Ti2TxID -> texts FK, so no user_id needed
         $sql = "SELECT DISTINCT ti.Ti2SeID AS SeID,
             1 - IFNULL(sUnknownCount.c, 0) / sWordCount.c AS KnownRatio
-            FROM textitems2 ti
+            FROM word_occurrences ti
             JOIN (
                 SELECT t.Ti2SeID, COUNT(*) AS c
-                FROM textitems2 t
+                FROM word_occurrences t
                 WHERE t.Ti2WordCount = 1
                 GROUP BY t.Ti2SeID
             ) AS sWordCount ON sWordCount.Ti2SeID = ti.Ti2SeID
             LEFT JOIN (
                 SELECT t.Ti2SeID, COUNT(*) AS c
-                FROM textitems2 t
+                FROM word_occurrences t
                 WHERE t.Ti2WordCount = 1 AND t.Ti2WoID IS NULL
                 GROUP BY t.Ti2SeID
             ) AS sUnknownCount ON sUnknownCount.Ti2SeID = ti.Ti2SeID
@@ -651,7 +651,7 @@ class ReviewService
             $title = "All Terms in " . ($langName ?? 'Unknown');
         } elseif ($textId !== null) {
             $property = "text=$textId";
-            $reviewsql = " words, textitems2
+            $reviewsql = " words, word_occurrences
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
 
             $title = QueryBuilder::table('texts')

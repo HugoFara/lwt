@@ -89,7 +89,7 @@ class ExportAndAnnotationTest extends TestCase
         $ann = (new AnnotationService())->createAnnotation($textId);
 
         $this->assertIsString($ann);
-        // Even with no textitems2, should return some annotation structure
+        // Even with no word_occurrences, should return some annotation structure
 
         // Clean up
         Connection::query("DELETE FROM texts WHERE TxID = $textId");

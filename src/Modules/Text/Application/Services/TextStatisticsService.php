@@ -61,11 +61,11 @@ class TextStatisticsService
         );
 
         // Raw SQL needed for complex aggregation with DISTINCT LOWER()
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         $bindings = [];
         $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS unique_cnt,
             COUNT(LOWER(Ti2Text)) AS total
-            FROM textitems2
+            FROM word_occurrences
             WHERE Ti2WordCount = 1 AND Ti2TxID IN($textsId)
             GROUP BY Ti2TxID";
         $res = Connection::query($sql);
@@ -79,10 +79,10 @@ class TextStatisticsService
         }
 
         // Raw SQL needed for complex aggregation with DISTINCT
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS unique_cnt,
             COUNT(Ti2WoID) AS total
-            FROM textitems2
+            FROM word_occurrences
             WHERE Ti2WordCount > 1 AND Ti2TxID IN({$textsId})
             GROUP BY Ti2TxID";
         $res = Connection::query($sql);
@@ -96,12 +96,12 @@ class TextStatisticsService
         }
 
         // Raw SQL needed for complex aggregation with DISTINCT and implicit JOIN
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         // words has user scope (WoUsID), need to apply user filtering
         $bindings = [];
         $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS unique_cnt,
             COUNT(Ti2WoID) AS total, WoStatus AS status
-            FROM textitems2, words
+            FROM word_occurrences, words
             WHERE Ti2WoID != 0 AND Ti2TxID IN({$textsId}) AND Ti2WoID = WoID"
             . UserScopedQuery::forTablePrepared('words', $bindings, 'words') .
             " GROUP BY Ti2TxID, WoStatus";
@@ -129,10 +129,10 @@ class TextStatisticsService
     public function getTodoWordsCount(int $textId): int
     {
         // Raw SQL needed for COUNT(DISTINCT LOWER())
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         $count = Connection::fetchValue(
             "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS cnt
-            FROM textitems2
+            FROM word_occurrences
             WHERE Ti2WordCount=1 AND Ti2WoID IS NULL AND Ti2TxID=$textId",
             'cnt'
         );

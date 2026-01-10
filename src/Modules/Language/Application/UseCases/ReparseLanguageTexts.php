@@ -49,7 +49,7 @@ class ReparseLanguageTexts
         $sentencesDeleted = QueryBuilder::table('sentences')
             ->where('SeLgID', '=', $id)
             ->delete();
-        $textItemsDeleted = QueryBuilder::table('textitems2')
+        $textItemsDeleted = QueryBuilder::table('word_occurrences')
             ->where('Ti2LgID', '=', $id)
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
@@ -68,7 +68,7 @@ class ReparseLanguageTexts
         $sentencesAdded = QueryBuilder::table('sentences')
             ->where('SeLgID', '=', $id)
             ->count();
-        $textItemsAdded = QueryBuilder::table('textitems2')
+        $textItemsAdded = QueryBuilder::table('word_occurrences')
             ->where('Ti2LgID', '=', $id)
             ->count();
 
@@ -90,7 +90,7 @@ class ReparseLanguageTexts
         $sentencesDeleted = QueryBuilder::table('sentences')
             ->where('SeLgID', '=', $id)
             ->delete();
-        $textItemsDeleted = QueryBuilder::table('textitems2')
+        $textItemsDeleted = QueryBuilder::table('word_occurrences')
             ->where('Ti2LgID', '=', $id)
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
@@ -109,7 +109,7 @@ class ReparseLanguageTexts
         $sentencesAdded = QueryBuilder::table('sentences')
             ->where('SeLgID', '=', $id)
             ->count();
-        $textItemsAdded = QueryBuilder::table('textitems2')
+        $textItemsAdded = QueryBuilder::table('word_occurrences')
             ->where('Ti2LgID', '=', $id)
             ->count();
 
@@ -133,7 +133,7 @@ class ReparseLanguageTexts
         QueryBuilder::table('sentences')
             ->where('SeLgID', '=', $id)
             ->delete();
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2LgID', '=', $id)
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');

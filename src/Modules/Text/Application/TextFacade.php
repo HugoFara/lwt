@@ -535,14 +535,14 @@ class TextFacade
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 (texts LEFT JOIN texttags ON TxID = TtTxID)
-                LEFT JOIN tags2 ON T2ID = TtT2ID
+                LEFT JOIN text_tags ON T2ID = TtT2ID
             )
             WHERE TxLgID = ?
             GROUP BY TxID
             ORDER BY {$sortColumn}
             LIMIT ?, ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings2)
-            . UserScopedQuery::forTablePrepared('tags2', $bindings2),
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings2),
             $bindings2
         );
 
@@ -606,14 +606,14 @@ class TextFacade
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 (archivedtexts LEFT JOIN archtexttags ON AtID = AgAtID)
-                LEFT JOIN tags2 ON T2ID = AgT2ID
+                LEFT JOIN text_tags ON T2ID = AgT2ID
             )
             WHERE AtLgID = ?
             GROUP BY AtID
             ORDER BY {$sortColumn}
             LIMIT ?, ?"
             . UserScopedQuery::forTablePrepared('archivedtexts', $bindings2)
-            . UserScopedQuery::forTablePrepared('tags2', $bindings2),
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings2),
             $bindings2
         );
 
@@ -702,14 +702,14 @@ class TextFacade
             : "";
 
         $sql = "SELECT WoID, WoTextLC, MIN(Ti2SeID) AS SeID
-            FROM words, textitems2
+            FROM words, word_occurrences
             WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ({$placeholders})
             {$statusFilter}
             AND IFNULL(WoSentence,'') NOT LIKE CONCAT('%{',WoText,'}%')
             GROUP BY WoID
             ORDER BY WoID, MIN(Ti2SeID)"
             . UserScopedQuery::forTablePrepared('words', $ids)
-            . UserScopedQuery::forTablePrepared('textitems2', $ids, '', 'texts');
+            . UserScopedQuery::forTablePrepared('word_occurrences', $ids, '', 'texts');
 
         $records = Connection::preparedFetchAll($sql, $ids);
         $sentenceCount = (int) Settings::getWithDefault('set-term-sentence-count');
@@ -781,7 +781,7 @@ class TextFacade
         $sentencesDeleted = QueryBuilder::table('sentences')
             ->where('SeTxID', '=', $textId)
             ->delete();
-        $textitemsDeleted = QueryBuilder::table('textitems2')
+        $textitemsDeleted = QueryBuilder::table('word_occurrences')
             ->where('Ti2TxID', '=', $textId)
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
@@ -807,8 +807,8 @@ class TextFacade
         );
         $bindings4 = [$textId];
         $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = ?"
-            . UserScopedQuery::forTablePrepared('textitems2', $bindings4, '', 'texts'),
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = ?"
+            . UserScopedQuery::forTablePrepared('word_occurrences', $bindings4, '', 'texts'),
             $bindings4,
             'cnt'
         );

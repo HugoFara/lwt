@@ -283,7 +283,7 @@ class ParsingCoordinator
         if ($hasmultiword) {
             $bindings = [$lid, $tid, $lid, $lid, $tid, $lid];
             $stmt = Connection::prepare(
-                "INSERT INTO textitems2 (
+                "INSERT INTO word_occurrences (
                     Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
                 ) SELECT WoID, ?, ?, sent, TiOrder - (2*(n-1)) TiOrder,
                 n TiWordCount, word
@@ -305,7 +305,7 @@ class ParsingCoordinator
         } else {
             $bindings = [$lid, $tid, $lid];
             Connection::preparedExecute(
-                "INSERT INTO textitems2 (
+                "INSERT INTO word_occurrences (
                     Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
                 ) SELECT WoID, ?, ?, TiSeID, TiOrder, TiWordCount, TiText
                 FROM temptextitems

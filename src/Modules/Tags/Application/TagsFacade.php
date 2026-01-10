@@ -910,7 +910,7 @@ class TagsFacade
         }
 
         $tagId = Connection::preparedFetchValue(
-            'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+            'SELECT T2ID FROM text_tags WHERE T2Text = ?',
             [$tagText],
             'T2ID'
         );
@@ -996,7 +996,7 @@ class TagsFacade
         }
 
         $tagId = Connection::preparedFetchValue(
-            'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+            'SELECT T2ID FROM text_tags WHERE T2Text = ?',
             [$tagText],
             'T2ID'
         );
@@ -1101,7 +1101,7 @@ class TagsFacade
         if ($langId === '') {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM texts, tags2, texttags
+                FROM texts, text_tags, texttags
                 WHERE T2ID = TtT2ID AND TtTxID = TxID
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1110,7 +1110,7 @@ class TagsFacade
         } else {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM texts, tags2, texttags
+                FROM texts, text_tags, texttags
                 WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxLgID = ?
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1158,7 +1158,7 @@ class TagsFacade
                 GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
                 FROM texts
                 LEFT JOIN texttags ON TxID = TtTxID
-                LEFT JOIN tags2 ON TtT2ID = T2ID
+                LEFT JOIN text_tags ON TtT2ID = T2ID
                 WHERE TxLgID = ?
                 GROUP BY UPPER(TagName)',
                 [$langId]
@@ -1169,7 +1169,7 @@ class TagsFacade
                 GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
                 FROM texts
                 LEFT JOIN texttags ON TxID = TtTxID
-                LEFT JOIN tags2 ON TtT2ID = T2ID
+                LEFT JOIN text_tags ON TtT2ID = T2ID
                 GROUP BY UPPER(TagName)',
                 []
             );
@@ -1210,7 +1210,7 @@ class TagsFacade
         if ($langId === '') {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM archivedtexts, tags2, archtexttags
+                FROM archivedtexts, text_tags, archtexttags
                 WHERE T2ID = AgT2ID AND AgAtID = AtID
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1219,7 +1219,7 @@ class TagsFacade
         } else {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM archivedtexts, tags2, archtexttags
+                FROM archivedtexts, text_tags, archtexttags
                 WHERE T2ID = AgT2ID AND AgAtID = AtID AND AtLgID = ?
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1284,15 +1284,15 @@ class TagsFacade
     private static function getOrCreateTextTag(string $tagText): ?int
     {
         $tagId = Connection::preparedFetchValue(
-            'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+            'SELECT T2ID FROM text_tags WHERE T2Text = ?',
             [$tagText],
             'T2ID'
         );
 
         if (!isset($tagId)) {
-            QueryBuilder::table('tags2')->insertPrepared(['T2Text' => $tagText]);
+            QueryBuilder::table('text_tags')->insertPrepared(['T2Text' => $tagText]);
             $tagId = Connection::preparedFetchValue(
-                'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+                'SELECT T2ID FROM text_tags WHERE T2Text = ?',
                 [$tagText],
                 'T2ID'
             );

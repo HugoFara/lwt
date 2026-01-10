@@ -23,7 +23,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php
  * These tests verify that:
  * 1. Ti2WoID is nullable (can store NULL for unknown words)
  * 2. CASCADE delete works correctly for all FK relationships
- * 3. SET NULL works for textitems2.Ti2WoID when words are deleted
+ * 3. SET NULL works for word_occurrences.Ti2WoID when words are deleted
  * 4. FK constraints prevent orphaned references
  */
 class ForeignKeyTest extends TestCase
@@ -66,7 +66,7 @@ class ForeignKeyTest extends TestCase
                 "SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
                  WHERE TABLE_SCHEMA = '$testDbname'
                  AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-                 AND TABLE_NAME = 'textitems2'",
+                 AND TABLE_NAME = 'word_occurrences'",
                 'cnt'
             );
             self::$hasForeignKeys = ($fkCount > 0);
@@ -105,13 +105,13 @@ class ForeignKeyTest extends TestCase
         }
 
         // Clean up test data after each test
-        Connection::query("DELETE FROM textitems2 WHERE Ti2Text LIKE 'fktest_%'");
+        Connection::query("DELETE FROM word_occurrences WHERE Ti2Text LIKE 'fktest_%'");
         Connection::query("DELETE FROM sentences WHERE SeText LIKE 'FK Test%'");
         Connection::query("DELETE FROM texts WHERE TxTitle LIKE 'FK_Test_%'");
         Connection::query("DELETE FROM words WHERE WoText LIKE 'fktest_%'");
         Connection::query("DELETE FROM wordtags WHERE WtWoID NOT IN (SELECT WoID FROM words)");
         Connection::query("DELETE FROM tags WHERE TgText LIKE 'fktest_%'");
-        Connection::query("DELETE FROM tags2 WHERE T2Text LIKE 'fktest_%'");
+        Connection::query("DELETE FROM text_tags WHERE T2Text LIKE 'fktest_%'");
         Connection::query("DELETE FROM archivedtexts WHERE AtTitle LIKE 'FK_Test_%'");
         Connection::query("DELETE FROM newsfeeds WHERE NfName LIKE 'FK_Test_%'");
     }
@@ -129,13 +129,13 @@ class ForeignKeyTest extends TestCase
 
         // Insert text item with NULL Ti2WoID
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+            "INSERT INTO word_occurrences (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
              VALUES (NULL, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_unknown')"
         );
 
         // Verify it was inserted with NULL
         $result = Connection::fetchValue(
-            "SELECT Ti2WoID FROM textitems2 WHERE Ti2Text = 'fktest_unknown'",
+            "SELECT Ti2WoID FROM word_occurrences WHERE Ti2Text = 'fktest_unknown'",
             'Ti2WoID'
         );
 
@@ -152,12 +152,12 @@ class ForeignKeyTest extends TestCase
         $wordId = $this->createTestWord('fktest_known');
 
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+            "INSERT INTO word_occurrences (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
              VALUES ($wordId, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_known')"
         );
 
         $result = Connection::fetchValue(
-            "SELECT Ti2WoID FROM textitems2 WHERE Ti2Text = 'fktest_known'",
+            "SELECT Ti2WoID FROM word_occurrences WHERE Ti2Text = 'fktest_known'",
             'Ti2WoID'
         );
 
@@ -194,7 +194,7 @@ class ForeignKeyTest extends TestCase
     }
 
     /**
-     * Test that deleting a text cascades to textitems2.
+     * Test that deleting a text cascades to word_occurrences.
      */
     public function testTextDeleteCascadesToTextItems(): void
     {
@@ -203,13 +203,13 @@ class ForeignKeyTest extends TestCase
         $sentenceId = $this->createTestSentence($textId, 'FK Test sentence');
 
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+            "INSERT INTO word_occurrences (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
              VALUES (NULL, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_cascade')"
         );
 
         // Verify text item exists
         $beforeCount = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = $textId",
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = $textId",
             'cnt'
         );
         $this->assertEquals(1, $beforeCount, 'TextItem should exist before delete');
@@ -219,7 +219,7 @@ class ForeignKeyTest extends TestCase
 
         // Verify text item was cascaded
         $afterCount = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = $textId",
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = $textId",
             'cnt'
         );
         $this->assertEquals(0, $afterCount, 'TextItem should be deleted via CASCADE');
@@ -236,13 +236,13 @@ class ForeignKeyTest extends TestCase
         $wordId = $this->createTestWord('fktest_setnull');
 
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+            "INSERT INTO word_occurrences (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
              VALUES ($wordId, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_setnull')"
         );
 
         // Verify Ti2WoID is set
         $beforeWoId = Connection::fetchValue(
-            "SELECT Ti2WoID FROM textitems2 WHERE Ti2Text = 'fktest_setnull'",
+            "SELECT Ti2WoID FROM word_occurrences WHERE Ti2Text = 'fktest_setnull'",
             'Ti2WoID'
         );
         $this->assertEquals($wordId, (int) $beforeWoId, 'Ti2WoID should be set before word delete');
@@ -252,13 +252,13 @@ class ForeignKeyTest extends TestCase
 
         // Verify Ti2WoID is now NULL but text item still exists
         $count = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2Text = 'fktest_setnull'",
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2Text = 'fktest_setnull'",
             'cnt'
         );
         $this->assertEquals(1, $count, 'TextItem should still exist after word deletion');
 
         $afterWoId = Connection::fetchValue(
-            "SELECT Ti2WoID FROM textitems2 WHERE Ti2Text = 'fktest_setnull'",
+            "SELECT Ti2WoID FROM word_occurrences WHERE Ti2Text = 'fktest_setnull'",
             'Ti2WoID'
         );
         $this->assertNull($afterWoId, 'Ti2WoID should be NULL after word deletion');
@@ -345,10 +345,10 @@ class ForeignKeyTest extends TestCase
         $textId = $this->createTestText('FK_Test_TextTag');
 
         Connection::query(
-            "INSERT INTO tags2 (T2Text, T2Comment) VALUES ('fktest_texttag', 'Test text tag')"
+            "INSERT INTO text_tags (T2Text, T2Comment) VALUES ('fktest_texttag', 'Test text tag')"
         );
         $tagId = (int) Connection::fetchValue(
-            "SELECT T2ID FROM tags2 WHERE T2Text = 'fktest_texttag'",
+            "SELECT T2ID FROM text_tags WHERE T2Text = 'fktest_texttag'",
             'T2ID'
         );
 
@@ -408,7 +408,7 @@ class ForeignKeyTest extends TestCase
         );
 
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+            "INSERT INTO word_occurrences (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
              VALUES (NULL, $langId, $textId, $sentenceId, 1, 1, 'fktest_fullcascade')"
         );
 
@@ -420,7 +420,7 @@ class ForeignKeyTest extends TestCase
             "SELECT COUNT(*) AS cnt FROM sentences WHERE SeID = $sentenceId", 'cnt'
         ));
         $this->assertEquals(1, (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = $textId", 'cnt'
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = $textId", 'cnt'
         ));
 
         // Delete language - should cascade through entire chain
@@ -434,7 +434,7 @@ class ForeignKeyTest extends TestCase
             "SELECT COUNT(*) AS cnt FROM sentences WHERE SeID = $sentenceId", 'cnt'
         ), 'Sentence should be deleted via CASCADE');
         $this->assertEquals(0, (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = $textId", 'cnt'
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = $textId", 'cnt'
         ), 'TextItem should be deleted via CASCADE');
     }
 
@@ -498,10 +498,10 @@ class ForeignKeyTest extends TestCase
         );
 
         Connection::query(
-            "INSERT INTO tags2 (T2Text, T2Comment) VALUES ('fktest_archtag', 'Arch tag')"
+            "INSERT INTO text_tags (T2Text, T2Comment) VALUES ('fktest_archtag', 'Arch tag')"
         );
         $tagId = (int) Connection::fetchValue(
-            "SELECT T2ID FROM tags2 WHERE T2Text = 'fktest_archtag'",
+            "SELECT T2ID FROM text_tags WHERE T2Text = 'fktest_archtag'",
             'T2ID'
         );
 
@@ -570,7 +570,7 @@ class ForeignKeyTest extends TestCase
         $sentenceId = $this->createTestSentence($textId, 'FK Test sentence');
 
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+            "INSERT INTO word_occurrences (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
              VALUES (16777215, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_invalid')"
         );
     }

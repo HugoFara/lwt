@@ -96,7 +96,7 @@ class TextPrintServiceTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM textitems2 WHERE Ti2TxID = " . self::$testTextId);
+        Connection::query("DELETE FROM word_occurrences WHERE Ti2TxID = " . self::$testTextId);
         Connection::query("DELETE FROM sentences WHERE SeTxID = " . self::$testTextId);
         Connection::query("DELETE FROM texts WHERE TxTitle = 'TextPrintTestText'");
         Connection::query("DELETE FROM languages WHERE LgName = 'TextPrintTestLang'");

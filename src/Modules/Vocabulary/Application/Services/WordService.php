@@ -286,9 +286,9 @@ class WordService
      */
     public function getTermFromTextItem(int $textId, int $ord): ?array
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         return Connection::preparedFetchOne(
-            "SELECT Ti2Text, Ti2LgID FROM textitems2
+            "SELECT Ti2Text, Ti2LgID FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
             [$textId, $ord]
         );
@@ -305,9 +305,9 @@ class WordService
      */
     public function linkToTextItems(int $wordId, int $langId, string $textlc): void
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::preparedExecute(
-            "UPDATE textitems2 SET Ti2WoID = ?
+            "UPDATE word_occurrences SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wordId, $langId, $textlc]
         );
@@ -349,9 +349,9 @@ class WordService
      */
     public function getSentenceForTerm(int $textId, int $ord, string $termlc): string
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         $seid = Connection::preparedFetchValue(
-            "SELECT Ti2SeID FROM textitems2
+            "SELECT Ti2SeID FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
             [$textId, $ord],
             'Ti2SeID'
@@ -423,13 +423,13 @@ class WordService
     public function delete(int $wordId): string
     {
         // Delete multi-word text items first (before word deletion triggers FK SET NULL)
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2WoID', '=', $wordId)
             ->where('Ti2WordCount', '>', 1)
             ->deletePrepared();
 
         // Delete the word - FK constraints handle:
-        // - Single-word textitems2.Ti2WoID set to NULL (ON DELETE SET NULL)
+        // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
         // - wordtags deleted (ON DELETE CASCADE)
         QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
@@ -454,13 +454,13 @@ class WordService
         $ids = array_map('intval', $wordIds);
 
         // Delete multi-word text items first (before word deletion triggers FK SET NULL)
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2WordCount', '>', 1)
             ->whereIn('Ti2WoID', $ids)
             ->deletePrepared();
 
         // Delete words - FK constraints handle:
-        // - Single-word textitems2.Ti2WoID set to NULL (ON DELETE SET NULL)
+        // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
         // - wordtags deleted (ON DELETE CASCADE)
         $count = QueryBuilder::table('words')
             ->whereIn('WoID', $ids)
@@ -618,12 +618,12 @@ class WordService
      */
     public function getUnknownWordsInText(int $textId): array
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         // words has WoUsID - user scope auto-applied
         $bindings = [$textId];
         return Connection::preparedFetchAll(
             "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
-             FROM (textitems2 LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
+             FROM (word_occurrences LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
              WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
              ORDER BY Ti2Order"
              . UserScopedQuery::forTablePrepared('words', $bindings, 'words'),
@@ -700,10 +700,10 @@ class WordService
     public function linkAllTextItems(): void
     {
         // words has WoUsID - user scope auto-applied
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::execute(
             "UPDATE words
-             JOIN textitems2
+             JOIN word_occurrences
              ON Ti2WoID IS NULL AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
              SET Ti2WoID = WoID"
         );
@@ -775,8 +775,8 @@ class WordService
             . UserScopedQuery::forTablePrepared('words', $params, 'words');
         } else {
             $params[] = (int)$filters['textId'];
-            // textitems2 inherits user context via Ti2TxID -> texts FK
-            $sql = "SELECT DISTINCT WoID FROM (words LEFT JOIN wordtags ON WoID = WtWoID), textitems2
+            // word_occurrences inherits user context via Ti2TxID -> texts FK
+            $sql = "SELECT DISTINCT WoID FROM (words LEFT JOIN wordtags ON WoID = WtWoID), word_occurrences
             WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ?
             AND {$whereClause}
             GROUP BY WoID {$whTag}"
@@ -931,10 +931,10 @@ class WordService
      */
     public function getWordAtPosition(int $textId, int $ord): ?string
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         $word = Connection::preparedFetchValue(
             "SELECT Ti2Text
-             FROM textitems2
+             FROM word_occurrences
              WHERE Ti2WordCount = 1 AND Ti2TxID = ? AND Ti2Order = ?",
             [$textId, $ord],
             'Ti2Text'
@@ -975,9 +975,9 @@ class WordService
 
         $wid = (int) Connection::preparedInsert($sql, $bindings);
 
-        // Link to text items (textitems2 inherits user context via Ti2TxID -> texts FK)
+        // Link to text items (word_occurrences inherits user context via Ti2TxID -> texts FK)
         Connection::preparedExecute(
-            "UPDATE textitems2 SET Ti2WoID = ?
+            "UPDATE word_occurrences SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wid, $langId, $termlc]
         );
@@ -1086,7 +1086,7 @@ class WordService
 
         \Lwt\Shared\Infrastructure\Database\Maintenance::adjustAutoIncrement('words', 'WoID');
 
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2WordCount', '>', 1)
             ->where('Ti2WoID', '=', $wordId)
             ->delete();
@@ -1140,12 +1140,12 @@ class WordService
      */
     public function getAllUnknownWordsInText(int $textId): array
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         // words has WoUsID - user scope auto-applied
         $bindings = [$textId];
         return Connection::preparedFetchAll(
             "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
-             FROM (textitems2 LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
+             FROM (word_occurrences LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
              WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
              ORDER BY Ti2Order"
              . UserScopedQuery::forTablePrepared('words', $bindings, 'words'),
@@ -1263,9 +1263,9 @@ class WordService
 
         $wid = (int) Connection::preparedInsert($sql, $bindings);
 
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::preparedExecute(
-            "UPDATE textitems2 SET Ti2WoID = ?
+            "UPDATE word_occurrences SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wid, $langId, $wordlc]
         );
@@ -1319,10 +1319,10 @@ class WordService
 
         // Associate existing textitems
         // words has WoUsID - user scope auto-applied
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::execute(
             "UPDATE words
-            JOIN textitems2
+            JOIN word_occurrences
             ON Ti2WoID IS NULL AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
             SET Ti2WoID = WoID",
             ''
@@ -1406,10 +1406,10 @@ class WordService
      */
     public function linkNewWordsToTextItems(int $maxWoId): void
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         // words has WoUsID - user scope auto-applied
         Connection::preparedExecute(
-            "UPDATE textitems2
+            "UPDATE word_occurrences
              JOIN words
              ON LOWER(Ti2Text) = WoTextLC AND Ti2WordCount = 1 AND Ti2LgID = WoLgID AND WoID > ?
              SET Ti2WoID = WoID",
@@ -1460,10 +1460,10 @@ class WordService
         int $offset,
         int $limit
     ): array {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         return Connection::preparedFetchAll(
             "SELECT Ti2Text AS word, Ti2LgID, MIN(Ti2Order) AS pos
-             FROM textitems2
+             FROM word_occurrences
              WHERE Ti2WoID IS NULL AND Ti2TxID = ? AND Ti2WordCount = 1
              GROUP BY LOWER(Ti2Text)
              ORDER BY pos
@@ -1650,10 +1650,10 @@ class WordService
      */
     public function getSentenceIdAtPosition(int $textId, int $ord): ?int
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         $seid = Connection::preparedFetchValue(
             "SELECT Ti2SeID
-             FROM textitems2
+             FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2Order = ?",
             [$textId, $ord],
             'Ti2SeID'

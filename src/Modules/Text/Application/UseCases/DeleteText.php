@@ -38,7 +38,7 @@ class DeleteText
      */
     public function execute(int $textId): string
     {
-        $count3 = QueryBuilder::table('textitems2')
+        $count3 = QueryBuilder::table('word_occurrences')
             ->where('Ti2TxID', '=', $textId)
             ->delete();
         $count2 = QueryBuilder::table('sentences')
@@ -71,7 +71,7 @@ class DeleteText
         $ids = array_map('intval', $textIds);
 
         // Delete text items
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->whereIn('Ti2TxID', $ids)
             ->delete();
 

@@ -831,10 +831,10 @@ class FeedFacade
                         foreach ($text['TagList'] as $tag) {
                             if (!in_array($tag, $sessionTextTags, true)) {
                                 $bindings = [$tag];
-                                $sql = 'INSERT INTO tags2 (T2Text'
-                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('tags2')
+                                $sql = 'INSERT INTO text_tags (T2Text'
+                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('text_tags')
                                     . ') VALUES (?'
-                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValuePrepared('tags2', $bindings)
+                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValuePrepared('text_tags', $bindings)
                                     . ')';
                                 \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute($sql, $bindings);
                             }
@@ -879,9 +879,9 @@ class FeedFacade
                         $tagBindings = array_values(array_merge([$id], $currentTagList));
                         \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute(
                             'INSERT INTO texttags (TtTxID, TtT2ID)
-                            SELECT ?, T2ID FROM tags2
+                            SELECT ?, T2ID FROM text_tags
                             WHERE T2Text IN (' . $tagPlaceholders . ')'
-                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('tags2', $tagBindings),
+                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('text_tags', $tagBindings),
                             $tagBindings
                         );
                     }
@@ -899,9 +899,9 @@ class FeedFacade
                 $tagQueryBindings = array_values($currentTagList);
                 $rows = \Lwt\Shared\Infrastructure\Database\Connection::preparedFetchAll(
                     "SELECT TtTxID FROM texttags
-                    JOIN tags2 ON TtT2ID=T2ID
+                    JOIN text_tags ON TtT2ID=T2ID
                     WHERE T2Text IN (" . $tagPlaceholders . ")"
-                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('tags2', $tagQueryBindings),
+                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('text_tags', $tagQueryBindings),
                     $tagQueryBindings
                 );
                 foreach ($rows as $row) {
@@ -916,7 +916,7 @@ class FeedFacade
                 $textItem = array_slice($textItem, 0, $textCount - (int)$nfMaxTexts);
 
                 foreach ($textItem as $textID) {
-                    $message3 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('textitems2')
+                    $message3 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('word_occurrences')
                         ->where('Ti2TxID', '=', $textID)
                         ->delete();
                     $message2 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('sentences')

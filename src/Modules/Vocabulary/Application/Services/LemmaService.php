@@ -604,7 +604,7 @@ class LemmaService
     private function fetchUnmatchedTextItems(int $languageId, ?int $textId = null): array
     {
         $sql = "SELECT ti.Ti2ID, ti.Ti2Text, LOWER(ti.Ti2Text) as Ti2TextLC, ti.Ti2TxID
-                FROM textitems2 ti
+                FROM word_occurrences ti
                 WHERE ti.Ti2LgID = ?
                   AND ti.Ti2WoID IS NULL
                   AND ti.Ti2WordCount = 1";
@@ -678,7 +678,7 @@ class LemmaService
         $bindings = array_merge([$wordId], $itemIds);
 
         return Connection::preparedExecute(
-            "UPDATE textitems2 SET Ti2WoID = ? WHERE Ti2ID IN ({$placeholders})",
+            "UPDATE word_occurrences SET Ti2WoID = ? WHERE Ti2ID IN ({$placeholders})",
             $bindings
         );
     }
@@ -696,7 +696,7 @@ class LemmaService
 
         // Count unmatched items
         $unmatchedCount = (int) Connection::preparedFetchValue(
-            "SELECT COUNT(*) as cnt FROM textitems2
+            "SELECT COUNT(*) as cnt FROM word_occurrences
              WHERE Ti2LgID = ? AND Ti2WoID IS NULL AND Ti2WordCount = 1",
             $bindings,
             'cnt'
@@ -705,7 +705,7 @@ class LemmaService
         // Count unique unmatched words
         $bindings = [$languageId];
         $uniqueWords = (int) Connection::preparedFetchValue(
-            "SELECT COUNT(DISTINCT LOWER(Ti2Text)) as cnt FROM textitems2
+            "SELECT COUNT(DISTINCT LOWER(Ti2Text)) as cnt FROM word_occurrences
              WHERE Ti2LgID = ? AND Ti2WoID IS NULL AND Ti2WordCount = 1",
             $bindings,
             'cnt'
@@ -715,7 +715,7 @@ class LemmaService
         $bindings = [$languageId, $languageId];
         $matchableByLemma = (int) Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT LOWER(ti.Ti2Text)) as cnt
-             FROM textitems2 ti
+             FROM word_occurrences ti
              JOIN words w ON w.WoLgID = ? AND LOWER(ti.Ti2Text) = w.WoLemmaLC
              WHERE ti.Ti2LgID = ?
                AND ti.Ti2WoID IS NULL
@@ -749,7 +749,7 @@ class LemmaService
     {
         // This uses a subquery to find the best matching word for each unmatched text item
         // Preference: exact text match > lemma match > first word with matching lemma
-        $sql = "UPDATE textitems2 ti
+        $sql = "UPDATE word_occurrences ti
                 JOIN (
                     SELECT ti2.Ti2ID,
                            (SELECT w.WoID FROM words w
@@ -763,7 +763,7 @@ class LemmaService
                             END, w.WoID
                             LIMIT 1
                            ) as MatchedWoID
-                    FROM textitems2 ti2
+                    FROM word_occurrences ti2
                     WHERE ti2.Ti2LgID = ?
                       AND ti2.Ti2WoID IS NULL
                       AND ti2.Ti2WordCount = 1";
@@ -943,7 +943,7 @@ class LemmaService
     private function getWordOccurrenceCount(int $wordId): int
     {
         return (int) Connection::preparedFetchValue(
-            "SELECT COUNT(*) as cnt FROM textitems2 WHERE Ti2WoID = ?",
+            "SELECT COUNT(*) as cnt FROM word_occurrences WHERE Ti2WoID = ?",
             [$wordId],
             'cnt'
         );

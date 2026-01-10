@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS settings (
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS textitems2 (
+CREATE TABLE IF NOT EXISTS word_occurrences (
     Ti2WoID mediumint(8) unsigned DEFAULT NULL,
     Ti2LgID tinyint(3) unsigned NOT NULL,
     Ti2TxID smallint(5) unsigned NOT NULL,
@@ -219,7 +219,7 @@ CREATE TABLE IF NOT EXISTS wordtags (
     KEY WtTgID (WtTgID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS tags2 (
+CREATE TABLE IF NOT EXISTS text_tags (
     T2ID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
     T2UsID int(10) unsigned DEFAULT NULL,
     T2Text varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -227,7 +227,7 @@ CREATE TABLE IF NOT EXISTS tags2 (
     PRIMARY KEY (T2ID),
     KEY T2UsID (T2UsID),
     UNIQUE KEY T2Text (T2Text),
-    CONSTRAINT fk_tags2_user FOREIGN KEY (T2UsID) REFERENCES users(UsID) ON DELETE CASCADE
+    CONSTRAINT fk_text_tags_user FOREIGN KEY (T2UsID) REFERENCES users(UsID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS texttags (
@@ -290,8 +290,8 @@ CREATE TABLE IF NOT EXISTS _prefix_migration_log (
 -- This ensures they are only applied once and allows for proper data cleanup.
 -- The migration adds 16 FK constraints:
 -- - Language references: texts, words, sentences, archivedtexts, newsfeeds -> languages
--- - Text references: sentences, textitems2, texttags -> texts
--- - Other: textitems2 -> sentences, textitems2 -> words (SET NULL),
---   wordtags -> words/tags, texttags -> tags2, archtexttags -> archivedtexts/tags2,
+-- - Text references: sentences, word_occurrences, texttags -> texts
+-- - Other: word_occurrences -> sentences, word_occurrences -> words (SET NULL),
+--   wordtags -> words/tags, texttags -> text_tags, archtexttags -> archivedtexts/text_tags,
 --   feedlinks -> newsfeeds
 -- ============================================================================

@@ -429,7 +429,7 @@ class DatabaseConnectTest extends TestCase
         $result = Validation::archTextTag("1 OR 1=1", '1');
         $this->assertEquals('', $result, 'SQL injection in tag should be rejected');
 
-        $result = Validation::archTextTag("1'; DROP TABLE tags2; --", '1');
+        $result = Validation::archTextTag("1'; DROP TABLE text_tags; --", '1');
         $this->assertEquals('', $result, 'SQL injection with DROP should be rejected');
 
         // SQL injection attempts in language

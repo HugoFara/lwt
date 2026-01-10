@@ -225,13 +225,13 @@ class WordCrudService
     public function delete(int $wordId): string
     {
         // Delete multi-word text items first (before word deletion triggers FK SET NULL)
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2WoID', '=', $wordId)
             ->where('Ti2WordCount', '>', 1)
             ->deletePrepared();
 
         // Delete the word - FK constraints handle:
-        // - Single-word textitems2.Ti2WoID set to NULL (ON DELETE SET NULL)
+        // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
         // - wordtags deleted (ON DELETE CASCADE)
         QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)

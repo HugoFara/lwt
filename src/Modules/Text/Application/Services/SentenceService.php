@@ -104,7 +104,7 @@ class SentenceService
                     group_concat(Ti2Text ORDER BY Ti2Order asc SEPARATOR '\\t'),
                     '\\t'
                 ) val
-                FROM sentences, textitems2
+                FROM sentences, word_occurrences
                 WHERE lower(SeText) LIKE ?
                 AND SeID = Ti2SeID AND SeLgID = ? AND Ti2WordCount<2
                 GROUP BY SeID HAVING val LIKE ?
@@ -178,7 +178,7 @@ class SentenceService
                     group_concat(Ti2Text ORDER BY Ti2Order asc SEPARATOR '\\t'),
                     '\\t'
                 ) val
-                FROM sentences, textitems2
+                FROM sentences, word_occurrences
                 WHERE lower(SeText) LIKE ?
                 AND SeID = Ti2SeID AND SeLgID = ? AND Ti2WordCount<2
                 GROUP BY SeID HAVING val LIKE ?
@@ -225,7 +225,7 @@ class SentenceService
     {
         if ($wid === null) {
             $sql = "SELECT DISTINCT SeID, SeText
-                FROM sentences, textitems2
+                FROM sentences, word_occurrences
                 WHERE LOWER(Ti2Text) = ?
                 AND Ti2WoID IS NULL AND SeID = Ti2SeID AND SeLgID = ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
@@ -235,7 +235,7 @@ class SentenceService
             return $this->executeSentencesContainingWordQuery($wordlc, $lid, $limit);
         } else {
             $sql = "SELECT DISTINCT SeID, SeText
-                FROM sentences, textitems2
+                FROM sentences, word_occurrences
                 WHERE Ti2WoID = ? AND SeID = Ti2SeID AND SeLgID = ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
             $params = [$wid, $lid];
@@ -269,7 +269,7 @@ class SentenceService
                 '​', group_concat(Ti2Text ORDER BY Ti2Order asc SEPARATOR '​'), '​'
             ) AS SeText, Ti2TxID AS SeTxID, LgRegexpWordCharacters,
             LgRemoveSpaces, LgSplitEachChar
-            FROM textitems2, languages
+            FROM word_occurrences, languages
             WHERE Ti2LgID = LgID AND Ti2WordCount < 2 AND Ti2SeID = ?
             AND Ti2Text != '¶'",
             [$seid]
@@ -306,14 +306,14 @@ class SentenceService
         $sejs = str_replace('​', '', preg_replace($pattern, '{$0}', $text));
 
         if ($mode > 1) {
-            // Always use textitems2 to get proper sentence content with word boundaries
+            // Always use word_occurrences to get proper sentence content with word boundaries
             $prevseSent = Connection::preparedFetchValue(
                 "SELECT concat(
                     '​',
                     group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
                     '​'
                 ) AS sentence_text
-                from sentences, textitems2
+                from sentences, word_occurrences
                 where Ti2SeID = SeID and SeID < ? and SeTxID = ?
                 and trim(SeText) not in ('¶', '')
                 and Ti2Text != '¶'
@@ -332,14 +332,14 @@ class SentenceService
         }
 
         if ($mode > 2) {
-            // Always use textitems2 to get proper sentence content with word boundaries
+            // Always use word_occurrences to get proper sentence content with word boundaries
             $nextSent = Connection::preparedFetchValue(
                 "SELECT concat(
                     '​',
                     group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
                     '​'
                 ) as value
-                from sentences, textitems2
+                from sentences, word_occurrences
                 where Ti2SeID = SeID and SeID > ?
                 and SeTxID = ? and trim(SeText) not in ('¶','')
                 and Ti2Text != '¶'
@@ -399,7 +399,7 @@ class SentenceService
     /**
      * Get the formatted text of a sentence by its ID.
      *
-     * Reconstructs the sentence from textitems2 table with proper spacing.
+     * Reconstructs the sentence from word_occurrences table with proper spacing.
      * Use this instead of reading SeText directly from sentences table.
      *
      * @param int $seid Sentence ID
@@ -416,7 +416,7 @@ class SentenceService
                 LgRegexpWordCharacters,
                 LgRemoveSpaces,
                 LgSplitEachChar
-            FROM textitems2
+            FROM word_occurrences
             JOIN languages ON Ti2LgID = LgID
             WHERE Ti2WordCount < 2
               AND Ti2SeID = ?
@@ -460,7 +460,7 @@ class SentenceService
     {
         // Get the sentence ID for this position
         $seid = Connection::preparedFetchValue(
-            "SELECT Ti2SeID FROM textitems2 WHERE Ti2TxID = ? AND Ti2Order = ?",
+            "SELECT Ti2SeID FROM word_occurrences WHERE Ti2TxID = ? AND Ti2Order = ?",
             [$textId, $position],
             'Ti2SeID'
         );
@@ -473,7 +473,7 @@ class SentenceService
         $langRecord = Connection::preparedFetchOne(
             "SELECT LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar,
                     LgRegexpSplitSentences
-             FROM textitems2
+             FROM word_occurrences
              JOIN languages ON Ti2LgID = LgID
              WHERE Ti2TxID = ? LIMIT 1",
             [$textId]
@@ -496,7 +496,7 @@ class SentenceService
 
         $tokens = Connection::preparedFetchAll(
             "SELECT Ti2Order, Ti2Text, Ti2WordCount
-             FROM textitems2
+             FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2SeID = ?
                AND Ti2Order >= ? AND Ti2Order <= ?
                AND Ti2Text != '¶'

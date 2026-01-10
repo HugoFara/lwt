@@ -31,13 +31,13 @@ enum TagType: string
     /**
      * Get the main table name for this tag type.
      *
-     * @return string Table name ('tags' or 'tags2')
+     * @return string Table name ('tags' or 'text_tags')
      */
     public function tableName(): string
     {
         return match ($this) {
             self::TERM => 'tags',
-            self::TEXT => 'tags2',
+            self::TEXT => 'text_tags',
         };
     }
 

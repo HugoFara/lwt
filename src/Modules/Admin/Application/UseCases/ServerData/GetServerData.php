@@ -64,8 +64,8 @@ class GetServerData
 
         $tableNames = [
             'archivedtexts', 'archtexttags', 'feedlinks', 'languages',
-            'newsfeeds', 'sentences', 'settings', 'tags', 'tags2',
-            'textitems2', 'texts', 'texttags', 'words', 'wordtags'
+            'newsfeeds', 'sentences', 'settings', 'tags', 'text_tags',
+            'word_occurrences', 'texts', 'texttags', 'words', 'wordtags'
         ];
 
         $prefixedTables = array_map(

@@ -144,7 +144,7 @@ class Restore
 
         /** @psalm-suppress TypeDoesNotContainType - Value can change in loop */
         if ($install_status["errors"] == 0) {
-            // Drop legacy textitems table if it exists (replaced by textitems2)
+            // Drop legacy textitems table if it exists (replaced by word_occurrences)
             Connection::execute("DROP TABLE IF EXISTS textitems");
             Migrations::checkAndUpdate();
             Migrations::reparseAllTexts();
@@ -187,7 +187,7 @@ class Restore
         Connection::execute('DELETE FROM ' . Globals::table('archtexttags'));
         Connection::execute('DELETE FROM ' . Globals::table('texttags'));
         Connection::execute('DELETE FROM ' . Globals::table('wordtags'));
-        Connection::execute('DELETE FROM ' . Globals::table('textitems2'));
+        Connection::execute('DELETE FROM ' . Globals::table('word_occurrences'));
         Connection::execute('DELETE FROM ' . Globals::table('feedlinks'));
 
         // Level 2: Tables with FKs to languages only
@@ -199,7 +199,7 @@ class Restore
 
         // Level 3: Parent tables with no FKs to other content tables
         Connection::execute('DELETE FROM ' . Globals::table('tags'));
-        Connection::execute('DELETE FROM ' . Globals::table('tags2'));
+        Connection::execute('DELETE FROM ' . Globals::table('text_tags'));
         Connection::execute('DELETE FROM ' . Globals::table('languages'));
 
         QueryBuilder::table('settings')

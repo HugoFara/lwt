@@ -166,7 +166,7 @@ class ExpressionService
             $sql = "SELECT
             GROUP_CONCAT(Ti2Text ORDER BY Ti2Order SEPARATOR ' ') AS SeText, SeID,
             SeTxID, SeFirstPos, SeTxID
-            FROM textitems2
+            FROM word_occurrences
             JOIN sentences
             ON SeID=Ti2SeID AND SeLgID = Ti2LgID
             WHERE Ti2LgID = ?
@@ -314,7 +314,7 @@ class ExpressionService
                 return ['placeholders' => $placeholders, 'params' => $params];
             }
 
-            $sql = "INSERT INTO textitems2
+            $sql = "INSERT INTO word_occurrences
                  (Ti2WoID,Ti2LgID,Ti2TxID,Ti2SeID,Ti2Order,Ti2WordCount,Ti2Text)
                  VALUES " . implode(',', $placeholders);
             Connection::preparedExecute($sql, $params);

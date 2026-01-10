@@ -246,7 +246,7 @@ class TextReadingService
      */
     public function mainWordLoop(int $textId, int $showAll): void
     {
-        $res = QueryBuilder::table('textitems2')
+        $res = QueryBuilder::table('word_occurrences')
             ->selectRaw('CASE WHEN `Ti2WordCount`>0 THEN Ti2WordCount ELSE 1 END AS Code')
             ->selectRaw('CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE `WoText` END AS TiText')
             ->selectRaw('CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN LOWER(Ti2Text) ELSE `WoTextLC` END AS TiTextLC')

@@ -152,14 +152,14 @@ class ListTexts
             FROM (
                 (texts
                 LEFT JOIN texttags ON TxID = TtTxID)
-                LEFT JOIN tags2 ON T2ID = TtT2ID
+                LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages
             WHERE LgID=TxLgID {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
             ORDER BY {$sortColumn}
             {$limit}"
             . UserScopedQuery::forTable('texts')
-            . UserScopedQuery::forTable('tags2')
+            . UserScopedQuery::forTable('text_tags')
             . UserScopedQuery::forTable('languages');
 
         $res = Connection::query($sql);
@@ -228,14 +228,14 @@ class ListTexts
             FROM (
                 (archivedtexts
                 LEFT JOIN archtexttags ON AtID = AgAtID)
-                LEFT JOIN tags2 ON T2ID = AgT2ID
+                LEFT JOIN text_tags ON T2ID = AgT2ID
             ), languages
             WHERE LgID=AtLgID {$whLang}{$whQuery}
             GROUP BY AtID {$whTag}
             ORDER BY {$sortColumn}
             {$limit}"
             . UserScopedQuery::forTable('archivedtexts')
-            . UserScopedQuery::forTable('tags2')
+            . UserScopedQuery::forTable('text_tags')
             . UserScopedQuery::forTable('languages');
 
         $res = Connection::query($sql);

@@ -154,7 +154,7 @@ class WordContextService
     {
         /** @var int|null $seid */
         $seid = Connection::preparedFetchValue(
-            "SELECT Ti2SeID FROM textitems2
+            "SELECT Ti2SeID FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
             [$textId, $ord],
             'Ti2SeID'
@@ -186,7 +186,7 @@ class WordContextService
         /** @var int|null $seid */
         $seid = Connection::preparedFetchValue(
             "SELECT Ti2SeID
-             FROM textitems2
+             FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2Order = ?",
             [$textId, $ord],
             'Ti2SeID'

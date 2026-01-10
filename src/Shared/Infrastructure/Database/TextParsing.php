@@ -302,7 +302,7 @@ class TextParsing
             pclose($handle);
 
             Connection::execute(
-                "CREATE TEMPORARY TABLE IF NOT EXISTS temptextitems2 (
+                "CREATE TEMPORARY TABLE IF NOT EXISTS tempword_occurrences (
                     TiCount smallint(5) unsigned NOT NULL,
                     TiSeID mediumint(8) unsigned NOT NULL,
                     TiOrder smallint(5) unsigned NOT NULL,
@@ -390,7 +390,7 @@ class TextParsing
 
             if (!empty($placeholders)) {
                 Connection::preparedExecute(
-                    "INSERT INTO temptextitems2 (
+                    "INSERT INTO tempword_occurrences (
                         TiSeID, TiCount, TiOrder, TiText, TiWordCount
                     ) VALUES " . implode(',', $placeholders),
                     $flatParams
@@ -398,7 +398,7 @@ class TextParsing
             }
             // Delete elements TiOrder=@order
             Connection::preparedExecute(
-                "DELETE FROM temptextitems2 WHERE TiOrder=?",
+                "DELETE FROM tempword_occurrences WHERE TiOrder=?",
                 [$order]
             );
             Connection::query(
@@ -407,10 +407,10 @@ class TextParsing
                 )
                 SELECT MIN(TiCount) s, TiSeID, TiOrder, TiWordCount,
                 group_concat(TiText ORDER BY TiCount SEPARATOR '')
-                FROM temptextitems2
+                FROM tempword_occurrences
                 GROUP BY TiOrder"
             );
-            Connection::execute("DROP TABLE temptextitems2");
+            Connection::execute("DROP TABLE tempword_occurrences");
         } finally {
             if (file_exists($file_name)) {
                 unlink($file_name);
@@ -1064,7 +1064,7 @@ class TextParsing
         if ($hasmultiword) {
             $bindings = [$lid, $tid, $lid, $lid, $tid, $lid];
             $stmt = Connection::prepare(
-                "INSERT INTO textitems2 (
+                "INSERT INTO word_occurrences (
                     Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
                 ) SELECT WoID, ?, ?, sent, TiOrder - (2*(n-1)) TiOrder,
                 n TiWordCount, word
@@ -1086,7 +1086,7 @@ class TextParsing
         } else {
             $bindings = [$lid, $tid, $lid];
             Connection::preparedExecute(
-                "INSERT INTO textitems2 (
+                "INSERT INTO word_occurrences (
                     Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
                 )
                 SELECT WoID, ?, ?, TiSeID, TiOrder, TiWordCount, TiText

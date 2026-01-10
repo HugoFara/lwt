@@ -44,8 +44,8 @@ class TextCreationAdapter implements TextCreationInterface
     ): int {
         // Ensure tag exists - use raw SQL for INSERT IGNORE
         $bindings = [$tagName];
-        $sql = "INSERT IGNORE INTO tags2 (T2Text) VALUES (?)"
-            . UserScopedQuery::forTablePrepared('tags2', $bindings);
+        $sql = "INSERT IGNORE INTO text_tags (T2Text) VALUES (?)"
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings);
         Connection::preparedExecute($sql, $bindings);
 
         // Create the text
@@ -68,9 +68,9 @@ class TextCreationAdapter implements TextCreationInterface
         // Apply tag to the text
         $bindings = [(int) $textId, $tagName];
         $sql = "INSERT INTO texttags (TtTxID, TtT2ID)
-             SELECT ?, T2ID FROM tags2
+             SELECT ?, T2ID FROM text_tags
              WHERE T2Text = ?"
-            . UserScopedQuery::forTablePrepared('tags2', $bindings);
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings);
         Connection::preparedExecute($sql, $bindings);
 
         return (int) $textId;
@@ -84,9 +84,9 @@ class TextCreationAdapter implements TextCreationInterface
         // Get all text IDs with this tag
         $bindings = [$tagName];
         $sql = "SELECT TtTxID FROM texttags
-             JOIN tags2 ON TtT2ID = T2ID
+             JOIN text_tags ON TtT2ID = T2ID
              WHERE T2Text = ?"
-            . UserScopedQuery::forTablePrepared('tags2', $bindings);
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings);
         $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $textIds = [];
@@ -106,7 +106,7 @@ class TextCreationAdapter implements TextCreationInterface
 
         foreach ($textsToArchive as $textId) {
             // Delete textitems
-            $stats['textitems'] += QueryBuilder::table('textitems2')
+            $stats['textitems'] += QueryBuilder::table('word_occurrences')
                 ->where('Ti2TxID', '=', $textId)
                 ->delete();
 
@@ -163,9 +163,9 @@ class TextCreationAdapter implements TextCreationInterface
     {
         $bindings = [$tagName];
         $sql = "SELECT COUNT(DISTINCT TtTxID) as cnt FROM texttags
-             JOIN tags2 ON TtT2ID = T2ID
+             JOIN text_tags ON TtT2ID = T2ID
              WHERE T2Text = ?"
-            . UserScopedQuery::forTablePrepared('tags2', $bindings);
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings);
 
         $row = Connection::preparedFetchOne($sql, $bindings);
         return (int) ($row['cnt'] ?? 0);

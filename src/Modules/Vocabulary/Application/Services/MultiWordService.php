@@ -219,7 +219,7 @@ class MultiWordService
 
         Maintenance::adjustAutoIncrement('words', 'WoID');
 
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2WordCount', '>', 1)
             ->where('Ti2WoID', '=', $wordId)
             ->delete();
