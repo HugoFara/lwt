@@ -89,7 +89,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
             <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml($termId); ?>
         </td>
     </tr>
-    <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">
+    <tr class="<?php echo ($showRoman ? '' : 'is-hidden'); ?>">
         <td class="has-text-right">Romaniz.:</td>
         <td class="">
             <input type="text" class="checkoutsidebmp" data_info="Romanization"

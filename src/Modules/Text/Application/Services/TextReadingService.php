@@ -319,6 +319,6 @@ class TextReadingService
             }
         }
 
-        echo '<span id="totalcharcount" class="hide">' . $currcharcount . '</span>';
+        echo '<span id="totalcharcount" class="is-hidden">' . $currcharcount . '</span>';
     }
 }

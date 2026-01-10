@@ -64,7 +64,7 @@ assert(is_string($transl));
        <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml($word['WoID']); ?>
    </td>
 </tr>
-<tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">
+<tr class="<?php echo ($showRoman ? '' : 'is-hidden'); ?>">
    <td class="has-text-right">Romaniz.:</td>
    <td class="">
        <input type="text" class="checkoutsidebmp" data_info="Romanization" name="WoRomanization" maxlength="100" size="40"

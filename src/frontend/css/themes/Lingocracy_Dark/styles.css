@@ -472,9 +472,6 @@ input[type="radio"]:checked + .wrap_radio>span {
 th.clickable,.clickedit {
     cursor: pointer;
 }
-.hide {
-    display: none;
-}
 a {
     text-decoration: none;
     border-radius: 3px;
@@ -569,9 +566,6 @@ img {
     display: block;
     width: 75px;
   }
-.inline {
-    display: inline;
-}
 .grayborder {
     /*border: 1pt solid #808080;*/
     border: 1pt solid #8f8f8f;

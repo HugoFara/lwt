@@ -605,11 +605,6 @@ th.clickable
   cursor: pointer;
 }
 
-.hide
-{
-  display: none;
-}
-
 a
 {
   text-decoration: none;
@@ -741,11 +736,6 @@ img.lwtlogoright
 #floatdiv > * {
   display: block;
   width: 75px;
-}
-
-.inline
-{
-  display: inline;
 }
 
 .grayborder

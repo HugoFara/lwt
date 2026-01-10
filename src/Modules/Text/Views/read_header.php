@@ -134,7 +134,7 @@ assert(is_string($media));
         <input type="checkbox" id="showlearningtranslations"
         <?php echo \Lwt\Shared\UI\Helpers\FormHelper::getChecked($showLearning); ?> data-action="toggle-show-all" />
 </div>
-    <div id="thetextid" class="hide"><?php echo $textId; ?></div>
+    <div id="thetextid" class="is-hidden"><?php echo $textId; ?></div>
     <div><button id="readTextButton">Read in browser</button></div>
 </div>
 
