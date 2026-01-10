@@ -1,0 +1,389 @@
+<?php declare(strict_types=1);
+/**
+ * Word Discovery Service - Finding and creating unknown words
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Modules\Vocabulary\Application\Services
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Modules\Vocabulary\Application\Services;
+
+require_once __DIR__ . '/ExportService.php';
+require_once __DIR__ . '/WordContextService.php';
+require_once __DIR__ . '/WordLinkingService.php';
+
+use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
+
+/**
+ * Service for discovering and creating unknown words.
+ *
+ * Handles:
+ * - Finding unknown words in texts
+ * - Quick word creation with status
+ * - Hover-based word creation
+ * - Bulk word status operations
+ *
+ * @since 3.0.0
+ */
+class WordDiscoveryService
+{
+    private WordContextService $contextService;
+    private WordLinkingService $linkingService;
+
+    /**
+     * Constructor.
+     *
+     * @param WordContextService|null $contextService Context service
+     * @param WordLinkingService|null $linkingService Linking service
+     */
+    public function __construct(
+        ?WordContextService $contextService = null,
+        ?WordLinkingService $linkingService = null
+    ) {
+        $this->contextService = $contextService ?? new WordContextService();
+        $this->linkingService = $linkingService ?? new WordLinkingService();
+    }
+
+    /**
+     * Get unknown words in a text (words without a WoID).
+     *
+     * @param int $textId Text ID
+     *
+     * @return array<int, array<string, mixed>> Array of rows with Ti2Text and Ti2TextLC columns
+     */
+    public function getUnknownWordsInText(int $textId): array
+    {
+        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // words has WoUsID - user scope auto-applied
+        $bindings = [$textId];
+        return Connection::preparedFetchAll(
+            "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
+             FROM (textitems2 LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
+             WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
+             ORDER BY Ti2Order"
+             . UserScopedQuery::forTablePrepared('words', $bindings, 'words'),
+            $bindings
+        );
+    }
+
+    /**
+     * Get all unknown words in a text (words without a WoID).
+     *
+     * @param int $textId Text ID
+     *
+     * @return array<int, array<string, mixed>> Array of rows with Ti2Text and Ti2TextLC columns
+     */
+    public function getAllUnknownWordsInText(int $textId): array
+    {
+        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // words has WoUsID - user scope auto-applied
+        $bindings = [$textId];
+        return Connection::preparedFetchAll(
+            "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
+             FROM (textitems2 LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
+             WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
+             ORDER BY Ti2Order"
+             . UserScopedQuery::forTablePrepared('words', $bindings, 'words'),
+            $bindings
+        );
+    }
+
+    /**
+     * Get unknown words for bulk translation with pagination.
+     *
+     * @param int $textId Text ID
+     * @param int $offset Starting position
+     * @param int $limit  Number of words to return
+     *
+     * @return array<int, array<string, mixed>> Array of rows with word, Ti2LgID, pos columns
+     */
+    public function getUnknownWordsForBulkTranslate(
+        int $textId,
+        int $offset,
+        int $limit
+    ): array {
+        // textitems2 inherits user context via Ti2TxID -> texts FK
+        return Connection::preparedFetchAll(
+            "SELECT Ti2Text AS word, Ti2LgID, MIN(Ti2Order) AS pos
+             FROM textitems2
+             WHERE Ti2WoID IS NULL AND Ti2TxID = ? AND Ti2WordCount = 1
+             GROUP BY LOWER(Ti2Text)
+             ORDER BY pos
+             LIMIT ?, ?",
+            [$textId, $offset, $limit]
+        );
+    }
+
+    /**
+     * Create a word with a specific status.
+     *
+     * @param int    $langId Language ID
+     * @param string $term   The term text
+     * @param string $termlc Lowercase version of the term
+     * @param int    $status Status to set (98=ignored, 99=well-known)
+     *
+     * @return array{id: int, rows: int} Word ID and number of inserted rows
+     */
+    public function createWithStatus(int $langId, string $term, string $termlc, int $status): array
+    {
+        // Check if already exists
+        $bindings = [$termlc];
+        /** @var int|null $existingId */
+        $existingId = Connection::preparedFetchValue(
+            "SELECT WoID FROM words WHERE WoTextLC = ?"
+            . UserScopedQuery::forTablePrepared('words', $bindings),
+            $bindings,
+            'WoID'
+        );
+
+        if ($existingId !== null) {
+            return ['id' => $existingId, 'rows' => 0];
+        }
+
+        $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
+
+        $bindings = [$langId, $term, $termlc, $status];
+        $sql = "INSERT INTO words (
+                WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}"
+                . UserScopedQuery::insertColumn('words')
+            . ") VALUES (?, ?, ?, ?, NOW(), {$scoreValues}"
+                . UserScopedQuery::insertValuePrepared('words', $bindings)
+            . ")";
+
+        $wid = Connection::preparedInsert($sql, $bindings);
+        return ['id' => (int)$wid, 'rows' => 1];
+    }
+
+    /**
+     * Insert a word with a specific status and link to text items.
+     *
+     * Used for quick insert operations (mark as known/ignored).
+     *
+     * @param int    $textId Text ID (to get language)
+     * @param string $term   Word text
+     * @param int    $status Status (98=ignored, 99=well-known)
+     *
+     * @return array{id: int, term: string, termlc: string, hex: string}
+     */
+    public function insertWordWithStatus(int $textId, string $term, int $status): array
+    {
+        $termlc = mb_strtolower($term, 'UTF-8');
+        $langId = $this->contextService->getLanguageIdFromText($textId);
+
+        if ($langId === null) {
+            throw new \RuntimeException("Text ID $textId not found");
+        }
+
+        $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
+
+        $bindings = [$langId, $term, $termlc, $status];
+        $sql = "INSERT INTO words (
+                WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged, {$scoreColumns}"
+                . UserScopedQuery::insertColumn('words')
+            . ") VALUES (?, ?, ?, ?, 1, NOW(), {$scoreValues}"
+                . UserScopedQuery::insertValuePrepared('words', $bindings)
+            . ")";
+
+        $wid = (int) Connection::preparedInsert($sql, $bindings);
+
+        // Link to text items
+        $this->linkingService->linkToTextItems($wid, $langId, $termlc);
+
+        return [
+            'id' => $wid,
+            'term' => $term,
+            'termlc' => $termlc,
+            'hex' => StringUtils::toClassName($termlc)
+        ];
+    }
+
+    /**
+     * Create a word on hover with optional translation.
+     *
+     * Used when user hovers and clicks to set a word status directly from the text.
+     *
+     * @param int    $textId      Text ID
+     * @param string $text        Word text
+     * @param int    $status      Word status (1-5)
+     * @param string $translation Optional translation
+     *
+     * @return array{
+     *     wid: int,
+     *     word: string,
+     *     wordRaw: string,
+     *     translation: string,
+     *     status: int,
+     *     hex: string
+     * }
+     */
+    public function createOnHover(
+        int $textId,
+        string $text,
+        int $status,
+        string $translation = '*'
+    ): array {
+        $wordlc = mb_strtolower($text, 'UTF-8');
+
+        $langId = $this->contextService->getLanguageIdFromText($textId);
+        if ($langId === null) {
+            throw new \RuntimeException("Text ID $textId not found");
+        }
+
+        $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
+
+        $bindings = [$langId, $wordlc, $text, $status, $translation];
+        $sql = "INSERT INTO words (
+                WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
+                WoRomanization, WoStatusChanged, {$scoreColumns}"
+                . UserScopedQuery::insertColumn('words')
+            . ") VALUES (?, ?, ?, ?, ?, '', '', NOW(), {$scoreValues}"
+                . UserScopedQuery::insertValuePrepared('words', $bindings)
+            . ")";
+
+        $wid = (int) Connection::preparedInsert($sql, $bindings);
+
+        // Link to text items
+        $this->linkingService->linkToTextItems($wid, $langId, $wordlc);
+
+        $hex = StringUtils::toClassName(
+            Escaping::prepareTextdata($wordlc)
+        );
+
+        return [
+            'wid' => $wid,
+            'word' => $text,
+            'wordRaw' => $text,
+            'translation' => $translation,
+            'status' => $status,
+            'hex' => $hex
+        ];
+    }
+
+    /**
+     * Process a single word for the "mark all as well-known" operation.
+     *
+     * @param int    $status New word status
+     * @param string $term   Word text
+     * @param string $termlc Lowercase word text
+     * @param int    $langId Language ID
+     *
+     * @return array{int, array{wid: int, hex: string, term: string, status: int}|null} Rows modified and word data
+     */
+    public function processWordForWellKnown(int $status, string $term, string $termlc, int $langId): array
+    {
+        $bindings = [$termlc];
+        $wid = Connection::preparedFetchValue(
+            "SELECT WoID FROM words WHERE WoTextLC = ?"
+            . UserScopedQuery::forTablePrepared('words', $bindings),
+            $bindings,
+            'WoID'
+        );
+
+        if ($wid !== null) {
+            return [0, null];
+        }
+
+        try {
+            $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
+            $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
+
+            $bindings = [$langId, $term, $termlc, $status];
+            $sql = "INSERT INTO words (
+                    WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}"
+                    . UserScopedQuery::insertColumn('words')
+                . ") VALUES (?, ?, ?, ?, NOW(), {$scoreValues}"
+                    . UserScopedQuery::insertValuePrepared('words', $bindings)
+                . ")";
+
+            $stmt = Connection::prepare($sql);
+            $stmt->bindValues($bindings);
+            $rows = $stmt->execute();
+            $wid = (int) $stmt->insertId();
+
+            if ($rows == 0) {
+                \Lwt\Shared\UI\Helpers\PageLayoutHelper::renderMessage(
+                    "WARNING: No rows modified!",
+                    false
+                );
+            }
+
+            $wordData = [
+                'wid' => $wid,
+                'hex' => StringUtils::toClassName($termlc),
+                'term' => $term,
+                'status' => $status
+            ];
+
+            return [$rows, $wordData];
+        } catch (\RuntimeException $e) {
+            throw new \RuntimeException("Could not modify words: " . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Update word status.
+     *
+     * @param int $wordId Word ID
+     * @param int $status New status (1-5, 98, 99)
+     *
+     * @return string Result message
+     */
+    public function setStatus(int $wordId, int $status): string
+    {
+        $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
+        $bindings = [$status, $wordId];
+        $sql = "UPDATE words SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate} WHERE WoID = ?"
+            . UserScopedQuery::forTablePrepared('words', $bindings);
+        Connection::preparedExecute($sql, $bindings);
+        return 'Status changed';
+    }
+
+    /**
+     * Mark all unknown words in a text with a specific status.
+     *
+     * @param int $textId Text ID
+     * @param int $status Status to apply (98=ignored, 99=well-known)
+     *
+     * @return array{int, array<array{wid: int, hex: string, term: string, status: int}>} Total count and words data
+     */
+    public function markAllWordsWithStatus(int $textId, int $status): array
+    {
+        $langId = $this->contextService->getLanguageIdFromText($textId);
+        if ($langId === null) {
+            throw new \RuntimeException("Text ID $textId not found");
+        }
+
+        $wordsData = [];
+        $count = 0;
+        $records = $this->getAllUnknownWordsInText($textId);
+        foreach ($records as $record) {
+            list($modified_rows, $wordData) = $this->processWordForWellKnown(
+                $status,
+                (string) $record['Ti2Text'],
+                (string) $record['Ti2TextLC'],
+                $langId
+            );
+            if ($wordData !== null) {
+                $wordsData[] = $wordData;
+            }
+            $count += $modified_rows;
+        }
+
+        // Associate existing textitems
+        $this->linkingService->linkAllTextItems();
+
+        return array($count, $wordsData);
+    }
+}

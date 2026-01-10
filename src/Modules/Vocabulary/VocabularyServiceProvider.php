@@ -60,6 +60,13 @@ use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
+use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
+use Lwt\Modules\Vocabulary\Application\Services\WordLinkingService;
+use Lwt\Modules\Vocabulary\Application\Services\MultiWordService;
+use Lwt\Modules\Vocabulary\Application\Services\WordBulkService;
+use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
+use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
+use Lwt\Modules\Text\Application\Services\SentenceService;
 
 /**
  * Service provider for the Vocabulary module.
@@ -139,6 +146,50 @@ class VocabularyServiceProvider implements ServiceProviderInterface
 
         $container->singleton(ExportService::class, function (Container $_c) {
             return new ExportService();
+        });
+
+        // Register SentenceService (from Text module)
+        $container->singleton(SentenceService::class, function (Container $_c) {
+            return new SentenceService();
+        });
+
+        // Register WordContextService
+        $container->singleton(WordContextService::class, function (Container $c) {
+            return new WordContextService(
+                $c->getTyped(SentenceService::class)
+            );
+        });
+
+        // Register WordLinkingService
+        $container->singleton(WordLinkingService::class, function (Container $_c) {
+            return new WordLinkingService();
+        });
+
+        // Register MultiWordService
+        $container->singleton(MultiWordService::class, function (Container $c) {
+            return new MultiWordService(
+                $c->getTyped(ExpressionService::class)
+            );
+        });
+
+        // Register WordBulkService
+        $container->singleton(WordBulkService::class, function (Container $_c) {
+            return new WordBulkService();
+        });
+
+        // Register WordDiscoveryService
+        $container->singleton(WordDiscoveryService::class, function (Container $c) {
+            return new WordDiscoveryService(
+                $c->getTyped(WordContextService::class),
+                $c->getTyped(WordLinkingService::class)
+            );
+        });
+
+        // Register WordCrudService
+        $container->singleton(WordCrudService::class, function (Container $c) {
+            return new WordCrudService(
+                $c->getTyped(MySqlTermRepository::class)
+            );
         });
 
         // Register Lemmatizer
