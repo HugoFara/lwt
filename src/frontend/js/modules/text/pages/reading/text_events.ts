@@ -27,7 +27,8 @@ import {
   showMultiWordPopup,
   buildKnownWordPopupContent,
   buildUnknownWordPopupContent,
-  overlib
+  showPopup,
+  closePopup
 } from '@modules/vocabulary/services/word_popup_interface';
 import { getContextFromElement } from '@modules/vocabulary/services/word_actions';
 import {
@@ -256,9 +257,9 @@ function handleWordClickApiMode(
 
   // Show popup with API-based content
   if (typeof content === 'string') {
-    overlib(content, 'Word');
+    showPopup(content, 'Word');
   } else {
-    overlib(content.outerHTML, 'Word');
+    showPopup(content.outerHTML, 'Word');
   }
 }
 
@@ -339,26 +340,11 @@ export function prepareTextInteractions(): void {
     processMultiWordAnnotations.call(el);
   });
 
-  // Word click events
-  document.querySelectorAll<HTMLElement>('.word').forEach((el) => {
-    el.addEventListener('click', function(this: HTMLElement) {
-      handleWordClick.call(this);
-    });
-  });
-
   const thetext = document.getElementById('thetext');
   if (thetext) {
     // Multi-word selection via native text selection
     // When user selects multiple words, the multi-word modal opens
     setupMultiWordSelection(thetext);
-
-    // Multi-word click events (delegated)
-    thetext.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.classList.contains('mword')) {
-        handleMultiWordClick.call(target);
-      }
-    });
 
     // Multi-word double-click events (delegated)
     thetext.addEventListener('dblclick', (e) => {
@@ -368,12 +354,24 @@ export function prepareTextInteractions(): void {
       }
     });
 
-    // Hover intent for words
+    // Hover intent for words - shows popup on hover
     hoverIntent(thetext, {
-      over: handleWordHoverOver,
-      out: handleWordHoverOut,
+      over: function(this: HTMLElement) {
+        // First highlight words
+        handleWordHoverOver.call(this);
+        // Then show popup
+        if (this.classList.contains('word')) {
+          handleWordClick.call(this);
+        } else if (this.classList.contains('mword')) {
+          handleMultiWordClick.call(this);
+        }
+      },
+      out: function(this: HTMLElement) {
+        handleWordHoverOut.call(this);
+        closePopup();
+      },
       interval: 150,
-      selector: '.wsty,.mwsty'
+      selector: '.word,.mword'
     });
   }
 

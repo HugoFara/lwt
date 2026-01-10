@@ -26,7 +26,7 @@ import { parseInlineMarkdown } from '@shared/utils/inline_markdown';
 import { getLanguageId } from '@modules/language/stores/language_config';
 
 // Import the popup system
-import { overlib } from '@modules/vocabulary/components/word_popup';
+import { showPopup } from '@modules/vocabulary/components/word_popup';
 
 // Import local dictionary API
 import {
@@ -46,7 +46,7 @@ import {
 } from '@modules/vocabulary/services/word_actions';
 
 // Re-export for backward compatibility
-export { overlib, closePopup } from '@modules/vocabulary/components/word_popup';
+export { showPopup, closePopup } from '@modules/vocabulary/components/word_popup';
 
 // Note: The following functions are used in HTML string templates (onclick handlers)
 // and accessed via window at runtime: showRightFramesPanel, confirmDelete, successSound, failureSound
@@ -628,7 +628,7 @@ export function showIgnoredWordPopup(
   rtl: boolean,
   ann: string
 ): boolean {
-  return overlib(
+  return showPopup(
     createAudioButton(txt) +
     '<b>' + escapeHtmlWithAnnotation(hints, ann) + '</b><br/>' +
     createNewWordLink(txid, torder, wid) + ' | ' +
@@ -668,7 +668,7 @@ export function showWellKnownWordPopup(
   rtl: boolean,
   ann: string
 ): boolean {
-  return overlib(
+  return showPopup(
     createAudioButton(txt) +
     '<b>' + escapeHtmlWithAnnotation(hints, ann) + '</b><br/> ' +
     createNewWordLink(txid, torder, wid) + ' | ' +
@@ -710,7 +710,7 @@ export function showLearningWordPopup(
   rtl: boolean,
   ann: string
 ): boolean {
-  return overlib(
+  return showPopup(
     createAudioButton(txt) +
     '<b>' + escapeHtmlWithAnnotation(hints, ann) + '</b><br/>' +
     createStatusChangeLinks(txid, torder, wid, stat) + ' <br /> ' +
@@ -750,7 +750,7 @@ export function showUnknownWordPopup(
   multi_words: (string | undefined)[],
   rtl: boolean
 ): boolean {
-  return overlib(
+  return showPopup(
     createAudioButton(txt) + '<b>' + escapeHtml(hints) + '</b><br /> ' +
     createWellKnownWordLink(txid, torder, txt) + ' <br /> ' +
     createIgnoreWordLink(txid, torder, txt) +
@@ -789,7 +789,7 @@ export function showMultiWordPopup(
   wcnt: string,
   ann: string
 ): boolean {
-  return overlib(
+  return showPopup(
     createAudioButton(txt) + '<b>' + escapeHtmlWithAnnotation(hints, ann) + '</b><br /> ' +
     createStatusChangeLinks(txid, torder, wid, stat) + ' <br /> ' +
     createEditMultiWordLink(txid, torder, wid) + ' | ' +
@@ -802,7 +802,7 @@ export function showMultiWordPopup(
 }
 
 /**
- * Make an overlib dialog so that the user can say if he knows the word or not.
+ * Make a popup dialog so that the user can say if he knows the word or not.
  *
  * @param wblink1 Dictionary 1 URI
  * @param wblink2 Dictionary 2 URI
@@ -814,7 +814,7 @@ export function showMultiWordPopup(
  * @param stat    Word learning status
  * @param sent    Lookup sentence in Google Translate
  * @param todo    If 1, the user should say if he knows the word.
- * @returns An overlib object
+ * @returns true for compatibility
  */
 export function showReviewWordPopup(
   wblink1: string,
@@ -837,11 +837,11 @@ export function showReviewWordPopup(
   if (c === s) cc = String(c);
   let ww: string = stat + ' ▶ ' + w;
   if (w === s) ww = String(w);
-  let overlib_string = '';
+  let popupContent = '';
   if (todo === 1) {
-    overlib_string += '<center><hr noshade size=1 /><b>';
+    popupContent += '<center><hr noshade size=1 /><b>';
     if (s >= 1 && s <= 5) {
-      overlib_string +=
+      popupContent +=
         createReviewStatusLink(
           wid,
           1,
@@ -856,11 +856,11 @@ export function showReviewWordPopup(
         ) +
         '<hr noshade size=1 />';
     }
-    overlib_string +=
+    popupContent +=
       createReviewStatusChangeLinks(wid, stat) +
       '</b></center><hr noshade size=1 />';
   }
-  overlib_string += '<b>' + escapeHtml(createWordTooltip(txt, trans, roman, String(stat))) +
+  popupContent += '<b>' + escapeHtml(createWordTooltip(txt, trans, roman, String(stat))) +
     '</b><br />' +
     ' <a href="/word/edit-term?wid=' + wid +
     '" target="ro" onclick="showRightFramesPanel();">' +
@@ -871,7 +871,7 @@ export function showReviewWordPopup(
     createTheDictLink(wblink3, txt, 'Trans', '') +
     createTheDictLink(wblink3, sent, 'Trans', '<br />Lookup Sentence:');
 
-  return overlib(overlib_string, 'Got it?');
+  return showPopup(popupContent, 'Got it?');
 }
 
 /**
@@ -1182,7 +1182,7 @@ export function createEditMultiWordLink(
 }
 
 /**
- * Create an overlib title for a multiword edition.
+ * Create a popup title for a multiword edition.
  *
  * @param text
  * @param txid
@@ -1200,7 +1200,7 @@ export function createEditMultiWordTitleLink(
 }
 
 /**
- * Create or edit a multiword with overlib.
+ * Create or edit a multiword via popup.
  *
  * @param len    Number of words in the multi-word
  * @param txid   Text ID
@@ -1220,7 +1220,7 @@ export function createOrEditMultiWordLink(
 }
 
 /**
- * Create or edit a right-to-left multiword with overlib.
+ * Create or edit a right-to-left multiword via popup.
  *
  * @param len    Number of words in the multi-word
  * @param txid   Text ID
@@ -1262,7 +1262,7 @@ export function createEditWordLink(
 }
 
 /**
- * Make a link to edit a word for an overlib title, displaying the word's text.
+ * Make a link to edit a word for a popup title, displaying the word's text.
  *
  * @param text Word text
  * @param txid Text ID
@@ -1283,7 +1283,7 @@ export function createEditWordTitleLink(
 }
 
 /**
- * Make a link to delete a word with overlib.
+ * Make a link to delete a word.
  *
  * @param txid Text ID
  * @param wid  Word ID

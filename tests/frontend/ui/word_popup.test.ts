@@ -67,10 +67,10 @@ describe('word_popup.ts', () => {
 
   describe('closePopup', () => {
     it('closes dialog when popup is open', async () => {
-      const { overlib, closePopup } = await importWordPopup();
+      const { showPopup, closePopup } = await importWordPopup();
 
       // Open a popup
-      overlib('Test content', 'Test Title');
+      showPopup('Test content', 'Test Title');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       expect(dialog.open).toBe(true);
@@ -87,9 +87,9 @@ describe('word_popup.ts', () => {
     });
 
     it('does not throw when called multiple times', async () => {
-      const { overlib, closePopup } = await importWordPopup();
+      const { showPopup, closePopup } = await importWordPopup();
 
-      overlib('Test content');
+      showPopup('Test content');
       closePopup();
 
       // Second close should not throw
@@ -98,20 +98,20 @@ describe('word_popup.ts', () => {
   });
 
   // ===========================================================================
-  // overlib Tests
+  // showPopup Tests
   // ===========================================================================
 
-  describe('overlib', () => {
+  describe('showPopup', () => {
     it('returns true for compatibility', async () => {
-      const { overlib } = await importWordPopup();
-      const result = overlib('Test content');
+      const { showPopup } = await importWordPopup();
+      const result = showPopup('Test content');
       expect(result).toBe(true);
     });
 
     it('creates popup container if not exists', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Test content');
+      showPopup('Test content');
 
       const container = document.getElementById('lwt-word-popup');
       expect(container).not.toBeNull();
@@ -119,53 +119,53 @@ describe('word_popup.ts', () => {
     });
 
     it('sets content on container', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('<p>Hello World</p>');
+      showPopup('<p>Hello World</p>');
 
       const content = document.querySelector('.lwt-popup-content');
       expect(content?.innerHTML).toBe('<p>Hello World</p>');
     });
 
     it('sets title from parameter', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Content', 'My Title');
+      showPopup('Content', 'My Title');
 
       const title = document.querySelector('.lwt-popup-title');
       expect(title?.textContent).toBe('My Title');
     });
 
     it('uses default title when not provided', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Content');
+      showPopup('Content');
 
       const title = document.querySelector('.lwt-popup-title');
       expect(title?.textContent).toBe('Word');
     });
 
     it('opens the dialog', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Test content');
+      showPopup('Test content');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       expect(dialog.open).toBe(true);
     });
 
     it('closes existing popup before opening new one', async () => {
-      const { overlib, setCurrentEvent } = await importWordPopup();
+      const { showPopup, setCurrentEvent } = await importWordPopup();
 
       // Open first popup
-      overlib('First content');
+      showPopup('First content');
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
 
       // Set different position for second popup
       setCurrentEvent(new MouseEvent('click', { clientX: 200, clientY: 200 }));
 
       // Open second popup
-      overlib('Second content');
+      showPopup('Second content');
 
       // Content should be updated
       const content = document.querySelector('.lwt-popup-content');
@@ -176,19 +176,19 @@ describe('word_popup.ts', () => {
     });
 
     it('reuses existing container', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('First');
-      overlib('Second');
+      showPopup('First');
+      showPopup('Second');
 
       const containers = document.querySelectorAll('#lwt-word-popup');
       expect(containers.length).toBe(1);
     });
 
     it('creates proper dialog structure', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Test content', 'Test Title');
+      showPopup('Test content', 'Test Title');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       const titlebar = dialog.querySelector('.lwt-popup-titlebar');
@@ -203,9 +203,9 @@ describe('word_popup.ts', () => {
     });
 
     it('close button closes the dialog', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Test content');
+      showPopup('Test content');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       const closeBtn = dialog.querySelector('.lwt-popup-close') as HTMLButtonElement;
@@ -224,7 +224,7 @@ describe('word_popup.ts', () => {
 
   describe('setCurrentEvent', () => {
     it('stores the event for positioning', async () => {
-      const { overlib, setCurrentEvent } = await importWordPopup();
+      const { showPopup, setCurrentEvent } = await importWordPopup();
 
       // Create a MouseEvent
       const mockEvent = new MouseEvent('click', {
@@ -234,7 +234,7 @@ describe('word_popup.ts', () => {
       });
 
       setCurrentEvent(mockEvent);
-      overlib('Test content');
+      showPopup('Test content');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       // Dialog should be positioned with fixed positioning
@@ -247,9 +247,9 @@ describe('word_popup.ts', () => {
     });
 
     it('uses center positioning when no event set', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Test content');
+      showPopup('Test content');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       expect(dialog.style.left).toBe('50%');
@@ -281,10 +281,10 @@ describe('word_popup.ts', () => {
     });
 
     it('stores event before calling handler', async () => {
-      const { overlib, withEventPosition } = await importWordPopup();
+      const { showPopup, withEventPosition } = await importWordPopup();
 
       const handler = vi.fn(() => {
-        overlib('Test');
+        showPopup('Test');
       });
 
       const wrapped = withEventPosition(handler);
@@ -379,7 +379,7 @@ describe('word_popup.ts', () => {
 
   describe('Integration', () => {
     it('full workflow: open, position, close', async () => {
-      const { overlib, setCurrentEvent, closePopup } = await importWordPopup();
+      const { showPopup, setCurrentEvent, closePopup } = await importWordPopup();
 
       // Set event position
       const clickEvent = new MouseEvent('click', {
@@ -389,7 +389,7 @@ describe('word_popup.ts', () => {
       setCurrentEvent(clickEvent);
 
       // Open popup
-      const openResult = overlib('<b>Term</b>: Definition', 'Vocabulary');
+      const openResult = showPopup('<b>Term</b>: Definition', 'Vocabulary');
       expect(openResult).toBe(true);
 
       // Verify container exists and is open
@@ -411,22 +411,22 @@ describe('word_popup.ts', () => {
     });
 
     it('multiple popups update content', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('First popup');
+      showPopup('First popup');
 
       const content = document.querySelector('.lwt-popup-content');
       expect(content?.innerHTML).toBe('First popup');
 
-      overlib('Second popup');
+      showPopup('Second popup');
 
       expect(content?.innerHTML).toBe('Second popup');
     });
 
     it('clicking outside dialog (backdrop) closes it', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Test content');
+      showPopup('Test content');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       expect(dialog.open).toBe(true);
@@ -440,9 +440,9 @@ describe('word_popup.ts', () => {
     });
 
     it('clicking inside dialog content does not close it', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Test content');
+      showPopup('Test content');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       const content = document.querySelector('.lwt-popup-content') as HTMLElement;
@@ -465,20 +465,20 @@ describe('word_popup.ts', () => {
 
   describe('Edge Cases', () => {
     it('handles empty content', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      expect(() => overlib('')).not.toThrow();
-      expect(overlib('')).toBe(true);
+      expect(() => showPopup('')).not.toThrow();
+      expect(showPopup('')).toBe(true);
 
       const content = document.querySelector('.lwt-popup-content');
       expect(content?.innerHTML).toBe('');
     });
 
     it('handles HTML content with special characters', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
       const htmlContent = '<a href="test?a=1&b=2">Link</a>';
-      expect(() => overlib(htmlContent)).not.toThrow();
+      expect(() => showPopup(htmlContent)).not.toThrow();
 
       const content = document.querySelector('.lwt-popup-content');
       // Browser normalizes & to &amp; in innerHTML
@@ -488,21 +488,21 @@ describe('word_popup.ts', () => {
     });
 
     it('handles undefined title', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      expect(() => overlib('Content', undefined)).not.toThrow();
+      expect(() => showPopup('Content', undefined)).not.toThrow();
 
       const title = document.querySelector('.lwt-popup-title');
       expect(title?.textContent).toBe('Word');
     });
 
     it('handles non-MouseEvent for positioning', async () => {
-      const { overlib, setCurrentEvent } = await importWordPopup();
+      const { showPopup, setCurrentEvent } = await importWordPopup();
 
       const keyEvent = new KeyboardEvent('keydown');
       setCurrentEvent(keyEvent);
 
-      overlib('Test');
+      showPopup('Test');
 
       // Should use center positioning for non-mouse events
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
@@ -511,16 +511,16 @@ describe('word_popup.ts', () => {
     });
 
     it('closePopup clears event reference', async () => {
-      const { overlib, setCurrentEvent, closePopup } = await importWordPopup();
+      const { showPopup, setCurrentEvent, closePopup } = await importWordPopup();
 
       const mouseEvent = new MouseEvent('click', { clientX: 100, clientY: 100 });
       setCurrentEvent(mouseEvent);
-      overlib('Test');
+      showPopup('Test');
 
       closePopup();
 
       // Open new popup - should use center positioning (no event)
-      overlib('New popup');
+      showPopup('New popup');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       expect(dialog.style.left).toBe('50%');
@@ -528,10 +528,10 @@ describe('word_popup.ts', () => {
     });
 
     it('handles rapid open/close cycles', async () => {
-      const { overlib, closePopup } = await importWordPopup();
+      const { showPopup, closePopup } = await importWordPopup();
 
       for (let i = 0; i < 10; i++) {
-        overlib(`Content ${i}`);
+        showPopup(`Content ${i}`);
         closePopup();
       }
 
@@ -539,12 +539,12 @@ describe('word_popup.ts', () => {
       expect(dialog.open).toBe(false);
 
       // Final open
-      overlib('Final content');
+      showPopup('Final content');
       expect(dialog.open).toBe(true);
     });
 
     it('positions dialog within viewport bounds', async () => {
-      const { overlib, setCurrentEvent } = await importWordPopup();
+      const { showPopup, setCurrentEvent } = await importWordPopup();
 
       // Set click position near right edge
       const mockEvent = new MouseEvent('click', {
@@ -554,7 +554,7 @@ describe('word_popup.ts', () => {
       });
 
       setCurrentEvent(mockEvent);
-      overlib('Test content');
+      showPopup('Test content');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       const leftPos = parseInt(dialog.style.left, 10);
@@ -570,27 +570,27 @@ describe('word_popup.ts', () => {
 
   describe('Accessibility', () => {
     it('close button has aria-label', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Test content');
+      showPopup('Test content');
 
       const closeBtn = document.querySelector('.lwt-popup-close');
       expect(closeBtn?.getAttribute('aria-label')).toBe('Close');
     });
 
     it('close button has type button', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Test content');
+      showPopup('Test content');
 
       const closeBtn = document.querySelector('.lwt-popup-close') as HTMLButtonElement;
       expect(closeBtn?.type).toBe('button');
     });
 
     it('dialog can be closed with Escape key', async () => {
-      const { overlib } = await importWordPopup();
+      const { showPopup } = await importWordPopup();
 
-      overlib('Test content');
+      showPopup('Test content');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       expect(dialog.open).toBe(true);

@@ -552,12 +552,12 @@ describe('word_popup_interface.ts', () => {
   });
 
   // ===========================================================================
-  // run_overlib_status_* Integration Tests (these call overlib)
+  // Popup Integration Tests (these call showPopup)
   // ===========================================================================
 
   // Note: These tests are skipped because they require the word popup dialog
   // which is not properly set up in the test environment
-  describe.skip('run_overlib functions (require popup dialog)', () => {
+  describe.skip('popup functions (require popup dialog)', () => {
     it('showIgnoredWordPopup returns boolean', () => {
       const result = showIgnoredWordPopup(
         'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',

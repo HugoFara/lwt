@@ -142,7 +142,7 @@ export function closePopup(): void {
  * @param title Title for the popup header
  * @returns true for compatibility
  */
-export function overlib(content: string, title?: string): boolean {
+export function showPopup(content: string, title?: string): boolean {
   // Close any existing popup
   closePopup();
 
