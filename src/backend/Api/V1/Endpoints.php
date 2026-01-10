@@ -20,7 +20,7 @@ class Endpoints
         'auth/logout' => ['POST'],
         'auth/me' => ['GET'],
 
-        'languages' => ['GET', 'POST'],
+        'languages' => ['GET', 'POST', 'DELETE'],
         'languages/definitions' => ['GET'],
         'languages/with-texts' => ['GET'],
         'languages/with-archived-texts' => ['GET'],

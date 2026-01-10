@@ -46,11 +46,11 @@ namespace Lwt\Views\Feed;
         $diff = $time - (int)$row['NfUpdate'];
     ?>
     <tr>
-        <td class="td1 center">
+        <td class="td1 has-text-centered">
             <input class="markcheck" type="checkbox" name="selected_feed[]" value="<?php echo $row['NfID']; ?>" checked="checked" />
         </td>
-        <td class="td1 center" colspan="2"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-        <td class="td1 center" sorttable_customkey="<?php echo $diff; ?>">
+        <td class="td1 has-text-centered" colspan="2"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+        <td class="td1 has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
             <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
         </td>
     </tr>

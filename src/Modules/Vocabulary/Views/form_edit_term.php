@@ -55,45 +55,45 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($termlc, ENT_QUOTES, 'UTF-8'); ?>" />
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr title="Only change uppercase/lowercase!">
-        <td class="td1 right"><b>Edit Term:</b></td>
+        <td class="td1 has-text-right"><b>Edit Term:</b></td>
         <td class="td1"><input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="Term" type="text" name="WoText" id="wordfield" value="<?php echo htmlspecialchars($term, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" /> <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
     </td></tr>
     <tr>
-        <td class="td1 right">Lemma:</td>
+        <td class="td1 has-text-right">Lemma:</td>
         <td class="td1"><input <?php echo $scrdir; ?> type="text" class="checkoutsidebmp checklength" data_maxlength="250" data_info="Lemma" name="WoLemma" id="WoLemma" value="<?php echo htmlspecialchars($lemma, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" placeholder="Base form (e.g., 'run' for 'running')" /></td>
     </tr>
         <?php echo (new FindSimilarTerms())->getTableRow(); ?>
     <tr>
-        <td class="td1 right">Translation:</td>
+        <td class="td1 has-text-right">Translation:</td>
         <td class="td1"><textarea name="WoTranslation" class="setfocus textarea-noreturn checklength checkoutsidebmp" data_maxlength="500" data_info="Translation" cols="35" rows="3"><?php echo htmlspecialchars($transl, ENT_QUOTES, 'UTF-8'); ?></textarea></td>
     </tr>
     <tr>
-        <td class="td1 right">Tags:</td>
+        <td class="td1 has-text-right">Tags:</td>
         <td class="td1">
             <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml($wid); ?>
         </td>
     </tr>
     <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">
-        <td class="td1 right">Romaniz.:</td>
+        <td class="td1 has-text-right">Romaniz.:</td>
         <td class="td1"><input type="text" class="checkoutsidebmp" data_info="Romanization" name="WoRomanization" maxlength="100" size="35" value="<?php echo htmlspecialchars($rom, ENT_QUOTES, 'UTF-8'); ?>" /></td>
     </tr>
     <tr>
-        <td class="td1 right">Sentence<br />Term in {...}:</td>
+        <td class="td1 has-text-right">Sentence<br />Term in {...}:</td>
         <td class="td1"><textarea <?php echo $scrdir; ?> name="WoSentence" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence" cols="35" rows="3"><?php echo htmlspecialchars($sentence, ENT_QUOTES, 'UTF-8'); ?></textarea></td>
     </tr>
     <tr>
-        <td class="td1 right">Notes:</td>
+        <td class="td1 has-text-right">Notes:</td>
         <td class="td1"><textarea name="WoNotes" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Notes" cols="35" rows="3"><?php echo htmlspecialchars($notes, ENT_QUOTES, 'UTF-8'); ?></textarea></td>
     </tr>
         <?php echo (new FindSimilarTerms())->getTableRow(); ?>
     <tr>
-        <td class="td1 right">Status:</td>
+        <td class="td1 has-text-right">Status:</td>
         <td class="td1">
             <?php echo SelectOptionsBuilder::forWordStatusRadio($status); ?>
         </td>
     </tr>
     <tr>
-        <td class="td1 right" colspan="2">
+        <td class="td1 has-text-right" colspan="2">
             <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin($lang, $term, 'document.forms[0].WoSentence', true); ?>
             &nbsp; &nbsp; &nbsp;
             <input type="submit" name="op" value="Change" />

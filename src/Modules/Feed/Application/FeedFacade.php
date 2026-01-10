@@ -991,7 +991,7 @@ class FeedFacade
         echo '</template>';
 
         // Continue button with Alpine click handler
-        echo '<div class="center"><button @click="handleContinue()">Continue</button></div>';
+        echo '<div class="has-text-centered"><button @click="handleContinue()">Continue</button></div>';
 
         echo '</div>';
     }

@@ -122,7 +122,7 @@ echo PageLayoutHelper::buildActionCard([
 <tr><td class="td1 center feeds-filter-cell">
 <input type="button" value="Mark All" @click="markAll()" />
 <input type="button" value="Mark None" @click="markNone()" />
-</td><td class="td1 center" colspan="2">Marked Newsfeeds:&nbsp;
+</td><td class="td1 has-text-centered" colspan="2">Marked Newsfeeds:&nbsp;
 <select name="markaction" id="markaction" disabled="disabled" @change="handleMarkAction($event)">
     <option value="">[Choose...]</option>
     <option disabled="disabled">------------</option>
@@ -149,7 +149,7 @@ foreach ($feeds as $row):
     $diff = $time - $row['NfUpdate'];
 ?>
 <tr>
-    <td class="td1 center">
+    <td class="td1 has-text-centered">
         <input type="checkbox" name="marked[]" class="markcheck" value="<?php echo $row['NfID']; ?>" />
     </td>
     <td class="td1 center nowrap">
@@ -166,9 +166,9 @@ foreach ($feeds as $row):
             <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
         </span>
     </td>
-    <td class="td1 center"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-    <td class="td1 center"><?php echo str_replace(',', ', ', $row['NfOptions']); ?></td>
-    <td class="td1 center" sorttable_customkey="<?php echo $diff; ?>">
+    <td class="td1 has-text-centered"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+    <td class="td1 has-text-centered"><?php echo str_replace(',', ', ', $row['NfOptions']); ?></td>
+    <td class="td1 has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
         <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
     </td>
 </tr>

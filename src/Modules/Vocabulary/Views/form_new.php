@@ -45,14 +45,14 @@ data-lwt-clear-frame="true">
     <input type="hidden" name="tid" value="<?php echo $textId; ?>" />
     <table class="tab2" cellspacing="0" cellpadding="5">
         <tr>
-            <td class="td1 right"><b>New Term:</b></td>
+            <td class="td1 has-text-right"><b>New Term:</b></td>
             <td class="td1"><input <?php echo $scrdir; ?>
             class="notempty setfocus checkoutsidebmp" data_info="New Term"
             type="text" name="WoText" id="WoText" value="" maxlength="250" size="35" />
             <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?></td>
         </tr>
         <tr>
-            <td class="td1 right">Lemma:</td>
+            <td class="td1 has-text-right">Lemma:</td>
             <td class="td1"><input <?php echo $scrdir; ?>
             type="text" class="checkoutsidebmp checklength" data_maxlength="250"
             data_info="Lemma" name="WoLemma" id="WoLemma" value="" maxlength="250" size="35"
@@ -60,44 +60,44 @@ data-lwt-clear-frame="true">
         </tr>
         <?php echo (new FindSimilarTerms())->getTableRow(); ?>
         <tr>
-            <td class="td1 right">Translation:</td>
+            <td class="td1 has-text-right">Translation:</td>
             <td class="td1">
                 <textarea class="textarea-noreturn checklength checkoutsidebmp"
                 data_maxlength="500" data_info="Translation" name="WoTranslation" cols="35" rows="3"></textarea>
             </td>
         </tr>
         <tr>
-            <td class="td1 right">Tags:</td>
+            <td class="td1 has-text-right">Tags:</td>
             <td class="td1">
             <?php echo TagsFacade::getWordTagsHtml(0); ?>
         </td>
         </tr>
         <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">
-            <td class="td1 right">Romaniz.:</td>
+            <td class="td1 has-text-right">Romaniz.:</td>
             <td class="td1">
                 <input type="text" class="checkoutsidebmp" data_info="Romanization" name="WoRomanization" value="" maxlength="100" size="35" />
             </td>
         </tr>
         <tr>
-            <td class="td1 right">Sentence<br />Term in {...}:</td>
+            <td class="td1 has-text-right">Sentence<br />Term in {...}:</td>
             <td class="td1">
                 <textarea <?php echo $scrdir; ?> name="WoSentence" id="WoSentence" cols="35" rows="3" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence"></textarea>
             </td>
         </tr>
         <tr>
-            <td class="td1 right">Notes:</td>
+            <td class="td1 has-text-right">Notes:</td>
             <td class="td1">
                 <textarea name="WoNotes" id="WoNotes" cols="35" rows="3" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Notes"></textarea>
             </td>
         </tr>
         <tr>
-            <td class="td1 right">Status:</td>
+            <td class="td1 has-text-right">Status:</td>
             <td class="td1">
                 <?php echo SelectOptionsBuilder::forWordStatusRadio(1); ?>
             </td>
         </tr>
         <tr>
-            <td class="td1 right" colspan="2">  &nbsp;
+            <td class="td1 has-text-right" colspan="2">  &nbsp;
                 <?php /** @psalm-suppress PossiblyUndefinedVariable */ echo $dictService->createDictLinksInEditWin3($lang, 'WoSentence', 'WoText'); ?>
                 &nbsp; &nbsp;
                 <input type="submit" name="op" value="Save" />

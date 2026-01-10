@@ -885,10 +885,10 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         '<form action="" method="post">
             <table class="tab2" cellspacing="0" cellpadding="5">
                 <tr>
-                    <th class="th1 center">Text</th>
-                    <th class="th1 center">Dict.</th>
-                    <th class="th1 center">Edit<br />Term</th>
-                    <th class="th1 center">
+                    <th class="th1 has-text-centered">Text</th>
+                    <th class="th1 has-text-centered">Dict.</th>
+                    <th class="th1 has-text-centered">Edit<br />Term</th>
+                    <th class="th1 has-text-centered">
                         Term Translations (Delim.: ' .
                         htmlspecialchars(Settings::getWithDefault('set-term-translation-delimiters'), ENT_QUOTES, 'UTF-8') . ')
                         <br />
@@ -902,10 +902,10 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
             if ((int)$vals[0] > -1) {
                 if ($nontermbuffer != '') {
                     $r .= '<tr>
-                        <td class="td1 center" style="font-size:' . $textsize . '%;">' .
+                        <td class="td1 has-text-centered" style="font-size:' . $textsize . '%;">' .
                             $nontermbuffer .
                         '</td>
-                        <td class="td1 right" colspan="3">
+                        <td class="td1 has-text-right" colspan="3">
                         ' . IconHelper::render('check', ['title' => "Back to 'Display/Print Mode'", 'alt' => "Back to 'Display/Print Mode'", 'class' => 'click', 'data-action' => 'back-to-print-mode', 'data-textid' => (string)$textid]) . '
                         </td>
                     </tr>';
@@ -941,15 +941,15 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
                 }
                 $termText = $vals[1] ?? '';
                 $r .= '<tr>
-                    <td class="td1 center" style="font-size:' . $textsize . '%;"' .
+                    <td class="td1 has-text-centered" style="font-size:' . $textsize . '%;"' .
                     ($rtlScript ? ' dir="rtl"' : '') . '>
                         <span id="term' . $i . '">' . htmlspecialchars($termText, ENT_QUOTES, 'UTF-8') .
                         '</span>
                     </td>
-                    <td class="td1 center" nowrap="nowrap">' .
+                    <td class="td1 has-text-centered" nowrap="nowrap">' .
                         $dictionaryAdapter->makeDictLinks($langid, $termText) .
                     '</td>
-                    <td class="td1 center">
+                    <td class="td1 has-text-centered">
                         <span id="editlink' . $i . '">' . $wordLink . '</span>
                     </td>
                     <td class="td1" style="font-size:90%;">
@@ -968,19 +968,19 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         }
         if ($nontermbuffer != '') {
             $r .= '<tr>
-                <td class="td1 center" style="font-size:' . $textsize . '%;">' .
+                <td class="td1 has-text-centered" style="font-size:' . $textsize . '%;">' .
                 $nontermbuffer .
                 '</td>
-                <td class="td1 right" colspan="3">
+                <td class="td1 has-text-right" colspan="3">
                     ' . IconHelper::render('check', ['title' => "Back to 'Display/Print Mode'", 'alt' => "Back to 'Display/Print Mode'", 'class' => 'click', 'data-action' => 'back-to-print-mode', 'data-textid' => (string)$textid]) . '
                 </td>
             </tr>';
         }
         $r .= '
-                    <th class="th1 center">Text</th>
-                    <th class="th1 center">Dict.</th>
-                    <th class="th1 center">Edit<br />Term</th>
-                    <th class="th1 center">
+                    <th class="th1 has-text-centered">Text</th>
+                    <th class="th1 has-text-centered">Dict.</th>
+                    <th class="th1 has-text-centered">Edit<br />Term</th>
+                    <th class="th1 has-text-centered">
                         Term Translations (Delim.: ' .
                         htmlspecialchars(Settings::getWithDefault('set-term-translation-delimiters'), ENT_QUOTES, 'UTF-8') . ')
                         <br />

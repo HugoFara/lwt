@@ -30,7 +30,7 @@ assert(isset($hidden) && is_bool($hidden));
 
 $display = $hidden ? 'none' : 'inherit';
 ?>
-<p id="test-finished-area" class="center" style="display: <?php echo $display; ?>;">
+<p id="test-finished-area" class="has-text-centered" style="display: <?php echo $display; ?>;">
     <img src="/assets/images/ok.png" alt="Done!" />
     <br /><br />
     <span class="red2">

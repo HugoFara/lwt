@@ -55,7 +55,7 @@ class YouTubeImport
     {
         ?>
 <tr>
-  <td class="td1 right">YouTube Video Id:</td>
+  <td class="td1 has-text-right">YouTube Video Id:</td>
   <td class="td1">
     <input type="text" id="ytVideoId" />
     <input type="button" value="Fetch Text from Youtube" data-action="fetch-youtube" />

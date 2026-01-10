@@ -15,4 +15,4 @@
 namespace Lwt\Views\Review;
 
 ?>
-<p class="center">&nbsp;<br />Sorry - No terms to display or to review at this time.</p>
+<p class="has-text-centered">&nbsp;<br />Sorry - No terms to display or to review at this time.</p>

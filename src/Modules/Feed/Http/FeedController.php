@@ -549,7 +549,7 @@ class FeedController
         echo '<div :class="getStatusClass(feed.id)"><p x-text="feedMessages[feed.id]"></p></div>';
         echo '</template>';
 
-        echo '<div class="center"><button @click="handleContinue()">Continue</button></div>';
+        echo '<div class="has-text-centered"><button @click="handleContinue()">Continue</button></div>';
         echo '</div>';
     }
 
@@ -1400,7 +1400,7 @@ class FeedController
             if (substr_compare(trim($tag), "redirect", 0, 8) == 0) {
                 $this->wizardSession->setRedirect(trim($tag) . ' | ');
             } else {
-                $articleTagsHtml .= '<li class="left">'
+                $articleTagsHtml .= '<li class="has-text-left">'
                 . IconHelper::render('x', ['class' => 'delete_selection', 'title' => 'Delete Selection', 'alt' => '-'])
                 . $tag .
                 '</li>';
@@ -1413,7 +1413,7 @@ class FeedController
         $filterTagsHtml = '';
         foreach ($filterTags as $tag) {
             if (trim($tag) != '') {
-                $filterTagsHtml .= '<li class="left">'
+                $filterTagsHtml .= '<li class="has-text-left">'
                 . IconHelper::render('x', ['class' => 'delete_selection', 'title' => 'Delete Selection', 'alt' => '-'])
                 . $tag .
                 '</li>';

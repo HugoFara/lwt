@@ -234,10 +234,11 @@ class AnnotationService
      */
     public function getAnnotationLink(int $textId): string
     {
-        $length = (int)QueryBuilder::table('texts')
+        $row = QueryBuilder::table('texts')
             ->selectRaw('LENGTH(TxAnnotatedText) AS text_length')
             ->where('TxID', '=', $textId)
-            ->valuePrepared('text_length');
+            ->firstPrepared();
+        $length = (int)($row['text_length'] ?? 0);
         if ($length > 0) {
             return ' &nbsp;<a href="print_impr_text.php?text=' . $textId .
             '" target="_top">' . IconHelper::render('check', ['title' => 'Annotated Text', 'alt' => 'Annotated Text']) . '</a>';

@@ -326,38 +326,38 @@ export function showExportTemplateHelp(): void {
 
     <table>
       <tr><th colspan="2">Placeholders: <code>%...</code> = Raw Text</th></tr>
-      <tr><td class="center"><code>%w</code></td><td>Term (Word/Expression) - as <b>raw text</b>.</td></tr>
-      <tr><td class="center"><code>%t</code></td><td>Translation - as <b>raw text</b>.</td></tr>
-      <tr><td class="center"><code>%s</code></td><td>Sentence, curly braces removed - as <b>raw text</b>.</td></tr>
-      <tr><td class="center"><code>%c</code></td><td>The sentence, but the "{xxx}" parts are replaced by "[...]" (cloze test question) - as <b>raw text</b>.</td></tr>
-      <tr><td class="center"><code>%d</code></td><td>The sentence, but the "{xxx}" parts are replaced by "[xxx]" (cloze test solution) - as <b>raw text</b>.</td></tr>
-      <tr><td class="center"><code>%r</code></td><td>Romanization - as <b>raw text</b>.</td></tr>
-      <tr><td class="center"><code>%a</code></td><td>Status (1..5, 98, 99) - as <b>raw text</b>.</td></tr>
-      <tr><td class="center"><code>%k</code></td><td>Term in lowercase (key) - as <b>raw text</b>.</td></tr>
-      <tr><td class="center"><code>%z</code></td><td>Tag List - as <b>raw text</b>.</td></tr>
-      <tr><td class="center"><code>%l</code></td><td>Language - as <b>raw text</b>.</td></tr>
-      <tr><td class="center"><code>%n</code></td><td>Word Number in LWT (key in table "words") - as <b>raw text</b>.</td></tr>
-      <tr><td class="center"><code>%%</code></td><td>Just one percent sign "%".</td></tr>
+      <tr><td class="has-text-centered"><code>%w</code></td><td>Term (Word/Expression) - as <b>raw text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>%t</code></td><td>Translation - as <b>raw text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>%s</code></td><td>Sentence, curly braces removed - as <b>raw text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>%c</code></td><td>The sentence, but the "{xxx}" parts are replaced by "[...]" (cloze test question) - as <b>raw text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>%d</code></td><td>The sentence, but the "{xxx}" parts are replaced by "[xxx]" (cloze test solution) - as <b>raw text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>%r</code></td><td>Romanization - as <b>raw text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>%a</code></td><td>Status (1..5, 98, 99) - as <b>raw text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>%k</code></td><td>Term in lowercase (key) - as <b>raw text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>%z</code></td><td>Tag List - as <b>raw text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>%l</code></td><td>Language - as <b>raw text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>%n</code></td><td>Word Number in LWT (key in table "words") - as <b>raw text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>%%</code></td><td>Just one percent sign "%".</td></tr>
 
       <tr><th colspan="2">Placeholders: <code>$...</code> = HTML Text (escaped: &lt; &gt; &amp; &quot;)</th></tr>
-      <tr><td class="center"><code>$w</code></td><td>Term (Word/Expression) - as <b>HTML text</b>.</td></tr>
-      <tr><td class="center"><code>$t</code></td><td>Translation - as <b>HTML text</b>.</td></tr>
-      <tr><td class="center"><code>$s</code></td><td>Sentence, curly braces removed - as <b>HTML text</b>.</td></tr>
-      <tr><td class="center"><code>$c</code></td><td>The sentence, but the "{xxx}" parts are replaced by "[...]" (cloze test question) - as <b>HTML text</b>.</td></tr>
-      <tr><td class="center"><code>$d</code></td><td>The sentence, but the "{xxx}" parts are replaced by "[xxx]" (cloze test solution) - as <b>HTML text</b>.</td></tr>
-      <tr><td class="center"><code>$x</code></td><td>The sentence in Anki2 cloze test notation: the "{xxx}" parts are replaced by "{{c1::xxx}}" - as <b>HTML text</b>.</td></tr>
-      <tr><td class="center"><code>$y</code></td><td>The sentence in Anki2 cloze test notation, with translation: the "{xxx}" parts are replaced by "{{c1::xxx::translation}}" - as <b>HTML text</b>.</td></tr>
-      <tr><td class="center"><code>$r</code></td><td>Romanization - as <b>HTML text</b>.</td></tr>
-      <tr><td class="center"><code>$k</code></td><td>Term in lowercase (key) - as <b>HTML text</b>.</td></tr>
-      <tr><td class="center"><code>$z</code></td><td>Tag List - as <b>HTML text</b>.</td></tr>
-      <tr><td class="center"><code>$l</code></td><td>Language - as <b>HTML text</b>.</td></tr>
-      <tr><td class="center"><code>$$</code></td><td>Just one dollar sign "$".</td></tr>
+      <tr><td class="has-text-centered"><code>$w</code></td><td>Term (Word/Expression) - as <b>HTML text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>$t</code></td><td>Translation - as <b>HTML text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>$s</code></td><td>Sentence, curly braces removed - as <b>HTML text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>$c</code></td><td>The sentence, but the "{xxx}" parts are replaced by "[...]" (cloze test question) - as <b>HTML text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>$d</code></td><td>The sentence, but the "{xxx}" parts are replaced by "[xxx]" (cloze test solution) - as <b>HTML text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>$x</code></td><td>The sentence in Anki2 cloze test notation: the "{xxx}" parts are replaced by "{{c1::xxx}}" - as <b>HTML text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>$y</code></td><td>The sentence in Anki2 cloze test notation, with translation: the "{xxx}" parts are replaced by "{{c1::xxx::translation}}" - as <b>HTML text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>$r</code></td><td>Romanization - as <b>HTML text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>$k</code></td><td>Term in lowercase (key) - as <b>HTML text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>$z</code></td><td>Tag List - as <b>HTML text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>$l</code></td><td>Language - as <b>HTML text</b>.</td></tr>
+      <tr><td class="has-text-centered"><code>$$</code></td><td>Just one dollar sign "$".</td></tr>
 
       <tr><th colspan="2">Special Characters: <code>\\...</code></th></tr>
-      <tr><td class="center"><code>\\t</code></td><td>TAB character (HEX 9).</td></tr>
-      <tr><td class="center"><code>\\n</code></td><td>NEWLINE character (HEX 10).</td></tr>
-      <tr><td class="center"><code>\\r</code></td><td>CARRIAGE RETURN character (HEX 13).</td></tr>
-      <tr><td class="center"><code>\\\\</code></td><td>Just one backslash "\\".</td></tr>
+      <tr><td class="has-text-centered"><code>\\t</code></td><td>TAB character (HEX 9).</td></tr>
+      <tr><td class="has-text-centered"><code>\\n</code></td><td>NEWLINE character (HEX 10).</td></tr>
+      <tr><td class="has-text-centered"><code>\\r</code></td><td>CARRIAGE RETURN character (HEX 13).</td></tr>
+      <tr><td class="has-text-centered"><code>\\\\</code></td><td>Just one backslash "\\".</td></tr>
     </table>
   `;
 

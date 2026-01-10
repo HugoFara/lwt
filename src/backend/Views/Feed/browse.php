@@ -134,7 +134,7 @@ echo PageLayoutHelper::buildActionCard([
   <tr><td class="td1 center feeds-filter-cell">
   <input type="button" value="Mark All" @click="markAll()" />
   <input type="button" value="Mark None" @click="markNone()" />
-  </td><td class="td1 center">
+  </td><td class="td1 has-text-centered">
   Marked Texts:&nbsp;
   <input id="markaction" type="submit" value="Get Marked Texts" />&nbsp;&nbsp;
   </td></tr></table>
@@ -150,18 +150,18 @@ echo PageLayoutHelper::buildActionCard([
     foreach ($articles as $row): ?>
         <tr>
         <?php if ($row['TxID']): ?>
-            <td class="td1 center"><a href="/text/read?start=<?php echo $row['TxID']; ?>" >
+            <td class="td1 has-text-centered"><a href="/text/read?start=<?php echo $row['TxID']; ?>" >
             <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['title' => 'Read', 'alt' => '-']); ?></a>
         <?php elseif ($row['AtID']): ?>
-            <td class="td1 center"><span title="archived"><?php echo IconHelper::render('circle-x', ['alt' => '-']); ?></span>
+            <td class="td1 has-text-centered"><span title="archived"><?php echo IconHelper::render('circle-x', ['alt' => '-']); ?></span>
         <?php elseif (!empty($row['FlLink']) && str_starts_with((string)$row['FlLink'], ' ')): ?>
-            <td class="td1 center">
+            <td class="td1 has-text-centered">
             <span class="not_found" name="<?php echo $row['FlID']; ?>" title="download error" @click="handleNotFoundClick($event)"><?php echo IconHelper::render('alert-circle', ['alt' => '-']); ?></span>
         <?php else: ?>
-            <td class="td1 center"><input type="checkbox" class="markcheck" name="marked_items[]" value="<?php echo $row['FlID']; ?>" />
+            <td class="td1 has-text-centered"><input type="checkbox" class="markcheck" name="marked_items[]" value="<?php echo $row['FlID']; ?>" />
         <?php endif; ?>
         </td>
-            <td class="td1 center">
+            <td class="td1 has-text-centered">
             <span title="<?php echo htmlentities((string)$row['FlDescription'], ENT_QUOTES, 'UTF-8', false); ?>"><b><?php echo $row['FlTitle']; ?></b></span>
         <?php if ($row['FlAudio']): ?>
             <a href="<?php echo $row['FlAudio']; ?>" @click.prevent="openPopup('<?php echo $row['FlAudio']; ?>', 'audio')" target="_blank" rel="noopener">
@@ -173,7 +173,7 @@ echo PageLayoutHelper::buildActionCard([
             <a href="<?php echo trim((string)$row['FlLink']); ?>" title="<?php echo trim((string)$row['FlLink']); ?>" @click.prevent="openPopup('<?php echo trim((string)$row['FlLink']); ?>', 'external')" target="_blank" rel="noopener">
             <?php echo IconHelper::render('external-link', ['alt' => '-']); ?></a>
         <?php endif; ?>
-        </td><td class="td1 center"><?php echo $row['FlDate']; ?></td></tr>
+        </td><td class="td1 has-text-centered"><?php echo $row['FlDate']; ?></td></tr>
     <?php endforeach; ?>
 
     </table>

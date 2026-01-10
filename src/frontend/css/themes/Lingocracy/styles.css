@@ -260,15 +260,6 @@ img {
 .scoregreen {
 	color: #006400;
 }
-.left {
-	text-align: left;
-}
-.right {
-	text-align: right;
-}
-.center {
-	text-align: center;
-}
 .bigger {
 	font-size: 130%;
 }
