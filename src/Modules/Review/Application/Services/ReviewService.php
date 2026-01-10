@@ -24,6 +24,7 @@ use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Tags\Application\TagsFacade;
+use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 
 /**
  * Service class for managing word reviews.
@@ -48,13 +49,24 @@ class ReviewService
     private SentenceService $sentenceService;
 
     /**
+     * Session state manager instance
+     *
+     * @var SessionStateManager
+     */
+    private SessionStateManager $sessionManager;
+
+    /**
      * Constructor - initialize dependencies.
      *
-     * @param SentenceService|null $sentenceService Sentence service (optional)
+     * @param SentenceService|null      $sentenceService Sentence service (optional)
+     * @param SessionStateManager|null  $sessionManager  Session state manager (optional)
      */
-    public function __construct(?SentenceService $sentenceService = null)
-    {
+    public function __construct(
+        ?SentenceService $sentenceService = null,
+        ?SessionStateManager $sessionManager = null
+    ) {
         $this->sentenceService = $sentenceService ?? new SentenceService();
+        $this->sessionManager = $sessionManager ?? new SessionStateManager();
     }
 
     /**
@@ -698,18 +710,20 @@ class ReviewService
      */
     public function updateSessionProgress(int $statusChange): array
     {
-        $total = (int) ($_SESSION['reviewtotal'] ?? 0);
-        $wrong = (int) ($_SESSION['reviewwrong'] ?? 0);
-        $correct = (int) ($_SESSION['reviewcorrect'] ?? 0);
+        $sessionData = $this->sessionManager->getRawSessionData();
+        $total = $sessionData['total'];
+        $wrong = $sessionData['wrong'];
+        $correct = $sessionData['correct'];
         $remaining = $total - $correct - $wrong;
 
         if ($remaining > 0) {
-            if ($statusChange >= 0) {
+            $isCorrect = $statusChange >= 0;
+            $this->sessionManager->recordAnswer($isCorrect);
+
+            if ($isCorrect) {
                 $correct++;
-                $_SESSION['reviewcorrect'] = $correct;
             } else {
                 $wrong++;
-                $_SESSION['reviewwrong'] = $wrong;
             }
             $remaining--;
         }
@@ -731,10 +745,26 @@ class ReviewService
      */
     public function initializeReviewSession(int $totalDue): void
     {
-        $_SESSION['reviewstart'] = time() + 2;
-        $_SESSION['reviewcorrect'] = 0;
-        $_SESSION['reviewwrong'] = 0;
-        $_SESSION['reviewtotal'] = $totalDue;
+        $session = $this->sessionManager->getSession();
+        if ($session !== null) {
+            // Update existing session with new total
+            $newSession = new \Lwt\Modules\Review\Domain\ReviewSession(
+                time() + 2,
+                $totalDue,
+                0,
+                0
+            );
+            $this->sessionManager->saveSession($newSession);
+        } else {
+            // Create new session
+            $newSession = new \Lwt\Modules\Review\Domain\ReviewSession(
+                time() + 2,
+                $totalDue,
+                0,
+                0
+            );
+            $this->sessionManager->saveSession($newSession);
+        }
     }
 
     /**
@@ -744,11 +774,12 @@ class ReviewService
      */
     public function getReviewSessionData(): array
     {
+        $data = $this->sessionManager->getRawSessionData();
         return [
-            'start' => (int) ($_SESSION['reviewstart'] ?? 0),
-            'correct' => (int) ($_SESSION['reviewcorrect'] ?? 0),
-            'wrong' => (int) ($_SESSION['reviewwrong'] ?? 0),
-            'total' => (int) ($_SESSION['reviewtotal'] ?? 0)
+            'start' => $data['start'],
+            'correct' => $data['correct'],
+            'wrong' => $data['wrong'],
+            'total' => $data['total']
         ];
     }
 

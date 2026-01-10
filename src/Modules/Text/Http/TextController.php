@@ -30,6 +30,7 @@ use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Core\StringUtils;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Core\Globals;
+use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 
 // Base path for legacy includes
 define('LWT_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
@@ -324,7 +325,8 @@ class TextController extends BaseController
                 break;
 
             case 'review':
-                $_SESSION['reviewsql'] = $list;
+                $sessionManager = new SessionStateManager();
+                $sessionManager->saveCriteria('texts', array_map('intval', $marked));
                 header("Location: /review?selection=3");
                 exit();
         }

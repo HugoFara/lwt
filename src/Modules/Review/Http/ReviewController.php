@@ -20,6 +20,7 @@ use Lwt\Controllers\BaseController;
 use Lwt\Core\Exception\ValidationException;
 use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Domain\ReviewConfiguration;
+use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
@@ -53,20 +54,24 @@ class ReviewController extends BaseController
 {
     private ReviewFacade $reviewFacade;
     private LanguageFacade $languageService;
+    private SessionStateManager $sessionManager;
 
     /**
      * Create a new ReviewController.
      *
-     * @param ReviewFacade|null   $reviewFacade    Review facade (optional for BC)
-     * @param LanguageFacade|null $languageService Language facade (optional for BC)
+     * @param ReviewFacade|null        $reviewFacade    Review facade (optional for BC)
+     * @param LanguageFacade|null      $languageService Language facade (optional for BC)
+     * @param SessionStateManager|null $sessionManager  Session state manager (optional for BC)
      */
     public function __construct(
         ?ReviewFacade $reviewFacade = null,
-        ?LanguageFacade $languageService = null
+        ?LanguageFacade $languageService = null,
+        ?SessionStateManager $sessionManager = null
     ) {
         parent::__construct();
         $this->reviewFacade = $reviewFacade ?? new ReviewFacade();
         $this->languageService = $languageService ?? new LanguageFacade();
+        $this->sessionManager = $sessionManager ?? new SessionStateManager();
     }
 
     /**
@@ -103,9 +108,12 @@ class ReviewController extends BaseController
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
         $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
-        /** @var mixed $sessReviewSqlRaw */
-        $sessReviewSqlRaw = $_SESSION['reviewsql'] ?? null;
-        $sessReviewSql = is_string($sessReviewSqlRaw) ? $sessReviewSqlRaw : null;
+
+        // Get selection data from session criteria
+        $sessReviewSql = null;
+        if ($selection !== null && $this->sessionManager->hasCriteria()) {
+            $sessReviewSql = $this->sessionManager->getSelectionString();
+        }
 
         $testData = $this->reviewFacade->getReviewDataFromParams(
             $selection,
@@ -162,9 +170,12 @@ class ReviewController extends BaseController
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
         $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
-        /** @var mixed $sessReviewSqlRaw */
-        $sessReviewSqlRaw = $_SESSION['reviewsql'] ?? null;
-        $sessReviewSql = is_string($sessReviewSqlRaw) ? $sessReviewSqlRaw : null;
+
+        // Get selection data from session criteria
+        $sessReviewSql = null;
+        if ($selection !== null && $this->sessionManager->hasCriteria()) {
+            $sessReviewSql = $this->sessionManager->getSelectionString();
+        }
 
         // Get review SQL
         $identifier = $this->reviewFacade->getReviewIdentifier(
@@ -240,7 +251,7 @@ class ReviewController extends BaseController
     private function getReviewProperty(): string
     {
         $selection = $this->param('selection');
-        if ($selection !== '' && isset($_SESSION['reviewsql'])) {
+        if ($selection !== '' && $this->sessionManager->hasCriteria()) {
             return "selection=" . $selection;
         }
         $lang = $this->param('lang');
@@ -268,9 +279,13 @@ class ReviewController extends BaseController
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
         $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
-        /** @var mixed $sessReviewSqlRaw */
-        $sessReviewSqlRaw = $_SESSION['reviewsql'] ?? null;
-        $sessReviewSql = is_string($sessReviewSqlRaw) ? $sessReviewSqlRaw : null;
+
+        // Get selection data from session criteria
+        $sessReviewSql = null;
+        if ($selection !== null && $this->sessionManager->hasCriteria()) {
+            $sessReviewSql = $this->sessionManager->getSelectionString();
+        }
+
         $testTypeParam = $this->param('type', '1');
         $isTableMode = $testTypeParam === 'table';
 

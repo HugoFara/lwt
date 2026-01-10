@@ -18,6 +18,7 @@ namespace Lwt\Modules\Review\Http;
 
 use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Domain\ReviewConfiguration;
+use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
@@ -35,15 +36,20 @@ require_once __DIR__ . '/../../../backend/View/Helper/StatusHelper.php';
 class ReviewApiHandler
 {
     private ReviewFacade $reviewFacade;
+    private SessionStateManager $sessionManager;
 
     /**
      * Constructor.
      *
-     * @param ReviewFacade|null $reviewFacade Review facade (optional)
+     * @param ReviewFacade|null        $reviewFacade   Review facade (optional)
+     * @param SessionStateManager|null $sessionManager Session state manager (optional)
      */
-    public function __construct(?ReviewFacade $reviewFacade = null)
-    {
+    public function __construct(
+        ?ReviewFacade $reviewFacade = null,
+        ?SessionStateManager $sessionManager = null
+    ) {
         $this->reviewFacade = $reviewFacade ?? new ReviewFacade();
+        $this->sessionManager = $sessionManager ?? new SessionStateManager();
     }
 
     /**
@@ -478,9 +484,11 @@ class ReviewApiHandler
             ? (int)$params['type'] : 1;
         $isTableMode = ($params['type'] ?? '') === 'table';
 
-        /** @var mixed $sessReviewSqlRaw */
-        $sessReviewSqlRaw = $_SESSION['reviewsql'] ?? null;
-        $sessReviewSql = is_string($sessReviewSqlRaw) ? $sessReviewSqlRaw : null;
+        // Get selection data from session criteria
+        $sessReviewSql = null;
+        if ($selection !== null && $this->sessionManager->hasCriteria()) {
+            $sessReviewSql = $this->sessionManager->getSelectionString();
+        }
 
         // Get test data
         $testData = $this->reviewFacade->getReviewDataFromParams(
