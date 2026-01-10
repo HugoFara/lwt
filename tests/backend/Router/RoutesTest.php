@@ -165,19 +165,23 @@ class RoutesTest extends TestCase
 
     public static function wordRoutesProvider(): array
     {
-        $vocabularyController = 'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController';
+        $termEditController = 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController';
+        $termDisplayController = 'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController';
+        $termStatusController = 'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController';
+        $termImportController = 'Lwt\\Modules\\Vocabulary\\Http\\TermImportController';
+        $multiWordController = 'Lwt\\Modules\\Vocabulary\\Http\\MultiWordController';
         return [
-            'word edit' => ['/word/edit', "{$vocabularyController}@editWord"],
-            'word edit-term' => ['/word/edit-term', "{$vocabularyController}@editTerm"],
-            'words edit list' => ['/words/edit', "{$vocabularyController}@listEditAlpine"],
-            'word edit-multi' => ['/word/edit-multi', "{$vocabularyController}@editMulti"],
-            'words list' => ['/words', "{$vocabularyController}@listEditAlpine"],
-            'word new' => ['/word/new', "{$vocabularyController}@createWord"],
-            'word show' => ['/word/show', "{$vocabularyController}@showWord"],
-            'word inline-edit' => ['/word/inline-edit', "{$vocabularyController}@inlineEdit"],
-            'word bulk-translate' => ['/word/bulk-translate', "{$vocabularyController}@bulkTranslate"],
-            'word set-all-status' => ['/word/set-all-status', "{$vocabularyController}@markAllWords"],
-            'word upload' => ['/word/upload', "{$vocabularyController}@upload"],
+            'word edit' => ['/word/edit', "{$termEditController}@editWord"],
+            'word edit-term' => ['/word/edit-term', "{$termEditController}@editTerm"],
+            'words edit list' => ['/words/edit', "{$termDisplayController}@listEditAlpine"],
+            'word edit-multi' => ['/word/edit-multi', "{$multiWordController}@editMulti"],
+            'words list' => ['/words', "{$termDisplayController}@listEditAlpine"],
+            'word new' => ['/word/new', "{$termEditController}@createWord"],
+            'word show' => ['/word/show', "{$termDisplayController}@showWord"],
+            'word inline-edit' => ['/word/inline-edit', "{$termEditController}@inlineEdit"],
+            'word bulk-translate' => ['/word/bulk-translate', "{$termImportController}@bulkTranslate"],
+            'word set-all-status' => ['/word/set-all-status', "{$termStatusController}@markAllWords"],
+            'word upload' => ['/word/upload', "{$termImportController}@upload"],
         ];
     }
 

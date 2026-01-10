@@ -91,158 +91,163 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware('/text/archived', 'Lwt\\Modules\\Text\\Http\\TextController@archived', AUTH_MIDDLEWARE);
 
     // ==================== WORD/TERM ROUTES (PROTECTED) ====================
-    // All word/term routes now use VocabularyController from the Vocabulary module
+    // Split into focused controllers: TermEditController, TermDisplayController,
+    // TermStatusController, TermApiController, TermImportController, MultiWordController
 
-    // Edit word
+    // Edit word (TermEditController)
     $router->registerWithMiddleware(
         '/word/edit',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@editWord',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWord',
         AUTH_MIDDLEWARE
     );
 
-    // Edit term while testing
+    // Edit term while testing (TermEditController)
     $router->registerWithMiddleware(
         '/word/edit-term',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@editTerm',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editTerm',
         AUTH_MIDDLEWARE
     );
 
-    // Edit words (list) - Alpine.js SPA version
+    // Edit words (list) - Alpine.js SPA version (TermDisplayController)
     $router->registerWithMiddleware(
         '/words/edit',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@listEditAlpine',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController@listEditAlpine',
         AUTH_MIDDLEWARE
     );
 
-    // Edit multi-word
+    // Edit multi-word (MultiWordController)
     $router->registerWithMiddleware(
         '/word/edit-multi',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@editMulti',
+        'Lwt\\Modules\\Vocabulary\\Http\\MultiWordController@editMulti',
         AUTH_MIDDLEWARE
     );
 
-    // All words (list view) - Alpine.js SPA version
+    // All words (list view) - Alpine.js SPA version (TermDisplayController)
     $router->registerWithMiddleware(
         '/words',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@listEditAlpine',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController@listEditAlpine',
         AUTH_MIDDLEWARE
     );
 
-    // New word
+    // New word (TermEditController)
     $router->registerWithMiddleware(
         '/word/new',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@createWord',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@createWord',
         AUTH_MIDDLEWARE
     );
 
-    // Show word - new RESTful route with typed parameter
-    $router->get('/word/{wid:int}', 'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@showWord', AUTH_MIDDLEWARE);
+    // Show word - new RESTful route with typed parameter (TermDisplayController)
+    $router->get('/word/{wid:int}', 'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController@showWord', AUTH_MIDDLEWARE);
     // Legacy route for backward compatibility
-    $router->get('/word/show', 'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@showWord', AUTH_MIDDLEWARE);
+    $router->get('/word/show', 'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController@showWord', AUTH_MIDDLEWARE);
 
-    // Inline edit
+    // Inline edit (TermEditController)
     $router->registerWithMiddleware(
         '/word/inline-edit',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@inlineEdit',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@inlineEdit',
         AUTH_MIDDLEWARE
     );
 
-    // Bulk translate
+    // Bulk translate (TermImportController)
     $router->registerWithMiddleware(
         '/word/bulk-translate',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@bulkTranslate',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermImportController@bulkTranslate',
         AUTH_MIDDLEWARE
     );
 
-    // Create term from hover (Vocabulary module)
+    // Create term from hover (TermDisplayController)
     $router->registerWithMiddleware(
         '/vocabulary/term-hover',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@hoverCreate',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController@hoverCreate',
         AUTH_MIDDLEWARE
     );
 
-    // Vocabulary module routes (new modular architecture)
+    // Similar terms lookup (TermDisplayController)
     $router->registerWithMiddleware(
         '/vocabulary/similar-terms',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@similarTerms',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController@similarTerms',
         AUTH_MIDDLEWARE
     );
 
-    // Vocabulary JSON API routes (for AJAX calls)
+    // Vocabulary JSON API routes (TermApiController)
     $router->registerWithMiddleware(
         '/vocabulary/term',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@getTermJson',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermApiController@getTermJson',
         AUTH_MIDDLEWARE,
         'GET'
     );
     $router->registerWithMiddleware(
         '/vocabulary/term',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@createJson',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermApiController@createJson',
         AUTH_MIDDLEWARE,
         'POST'
     );
     $router->registerWithMiddleware(
         '/vocabulary/term',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@updateJson',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermApiController@updateJson',
         AUTH_MIDDLEWARE,
         'PUT'
     );
-    // Update term status
+    // Update term status (TermStatusController)
     // New RESTful route: PUT /vocabulary/term/123/status
-    $router->put('/vocabulary/term/{wid:int}/status', 'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@updateStatus', AUTH_MIDDLEWARE);
+    $router->put('/vocabulary/term/{wid:int}/status', 'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@updateStatus', AUTH_MIDDLEWARE);
     // Legacy route: PUT /vocabulary/term/status?wid=123
-    $router->put('/vocabulary/term/status', 'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@updateStatus', AUTH_MIDDLEWARE);
+    $router->put('/vocabulary/term/status', 'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@updateStatus', AUTH_MIDDLEWARE);
+    // Delete term (TermApiController)
     $router->registerWithMiddleware(
         '/vocabulary/term/delete',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@delete',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermApiController@delete',
         AUTH_MIDDLEWARE,
         'POST'
     );
 
-    // Set all words status (wellknown/ignore)
+    // Set all words status (wellknown/ignore) (TermStatusController)
     $router->registerWithMiddleware(
         '/word/set-all-status',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@markAllWords',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@markAllWords',
         AUTH_MIDDLEWARE
     );
 
-    // Upload words
+    // Upload words (TermImportController)
     $router->registerWithMiddleware(
         '/word/upload',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@upload',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermImportController@upload',
         AUTH_MIDDLEWARE
     );
 
     // Legacy PHP endpoint replacements (iframe-based status changes)
     // These render HTML responses for display in iframes during text reading
+    // Status controllers (TermStatusController)
     $router->registerWithMiddleware(
         '/word/set-status',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@setWordStatusView',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@setWordStatusView',
         AUTH_MIDDLEWARE
     );
     $router->registerWithMiddleware(
         '/word/set-review-status',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@setReviewStatusView',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@setReviewStatusView',
         AUTH_MIDDLEWARE
     );
+    // Delete controllers
     $router->registerWithMiddleware(
         '/word/delete-term',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@deleteWordView',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@deleteWordView',
         AUTH_MIDDLEWARE
     );
     $router->registerWithMiddleware(
         '/word/delete-multi',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@deleteMultiWordView',
+        'Lwt\\Modules\\Vocabulary\\Http\\MultiWordController@deleteMultiWordView',
         AUTH_MIDDLEWARE
     );
+    // Insert with status (TermStatusController)
     $router->registerWithMiddleware(
         '/word/insert-wellknown',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@insertWellknown',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@insertWellknown',
         AUTH_MIDDLEWARE
     );
     $router->registerWithMiddleware(
         '/word/insert-ignore',
-        'Lwt\\Modules\\Vocabulary\\Http\\VocabularyController@insertIgnore',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@insertIgnore',
         AUTH_MIDDLEWARE
     );
 
