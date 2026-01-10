@@ -756,7 +756,7 @@ class FeedFacade
      *
      * @param array{article: \Lwt\Modules\Feed\Domain\Article, text_id: int|null, archived_id: int|null, status?: string} $item Article result with status
      *
-     * @return array{FlID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, TxID: int|null, AtID: int|null} Legacy array format
+     * @return array{FlID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, TxID: int|null, ArchivedTxID: int|null} Legacy array format
      */
     private function articleToLegacyArray(array $item): array
     {
@@ -773,7 +773,7 @@ class FeedFacade
             'FlDate' => $article->date(),
             'FlAudio' => $article->audio(),
             'TxID' => $item['text_id'],
-            'AtID' => $item['archived_id'],
+            'ArchivedTxID' => $item['archived_id'],
         ];
     }
 
@@ -905,7 +905,7 @@ class FeedFacade
                     $tagQueryBindings
                 );
                 foreach ($rows as $row) {
-                    $textItem[] = $row['TtTxID'];
+                    $textItem[] = (int)$row['TtTxID'];
                 }
             }
             $textCount = count($textItem);
@@ -915,49 +915,26 @@ class FeedFacade
                 sort($textItem, SORT_NUMERIC);
                 $textItem = array_slice($textItem, 0, $textCount - (int)$nfMaxTexts);
 
-                foreach ($textItem as $textID) {
+                foreach ($textItem as $txId) {
                     $message3 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('word_occurrences')
-                        ->where('Ti2TxID', '=', $textID)
+                        ->where('Ti2TxID', '=', $txId)
                         ->delete();
                     $message2 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('sentences')
-                        ->where('SeTxID', '=', $textID)
+                        ->where('SeTxID', '=', $txId)
                         ->delete();
 
-                    $bindings = [$textID];
-                    $message4 += (int)\Lwt\Shared\Infrastructure\Database\Connection::execute(
-                        'INSERT INTO archived_texts (
-                            AtLgID, AtTitle, AtText, AtAnnotatedText,
-                            AtAudioURI, AtSourceURI'
-                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('archived_texts')
-                        . ') SELECT TxLgID, TxTitle, TxText, TxAnnotatedText,
-                        TxAudioURI, TxSourceURI'
-                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValue('archived_texts')
-                        . ' FROM texts
-                        WHERE TxID = ' . (int)$textID
-                        . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTable('texts')
+                    // Archive the text (soft delete - set TxArchivedAt)
+                    $bindings = [$txId];
+                    $message4 += \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute(
+                        'UPDATE texts SET TxArchivedAt = NOW(), TxPosition = 0, TxAudioPosition = 0
+                         WHERE TxID = ? AND TxArchivedAt IS NULL'
+                        . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('texts', $bindings),
+                        $bindings
                     );
 
-                    $archiveId = (int)\Lwt\Shared\Infrastructure\Database\Connection::lastInsertId();
-                    \Lwt\Shared\Infrastructure\Database\Connection::execute(
-                        'INSERT INTO archived_text_tag_map (AgAtID, AgT2ID)
-                        SELECT ' . $archiveId . ', TtT2ID FROM text_tag_map
-                        WHERE TtTxID = ' . (int)$textID
-                    );
+                    $message1 = $message4; // Same count for archiving
 
-                    $message1 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('texts')
-                        ->where('TxID', '=', $textID)
-                        ->delete();
-
-                    \Lwt\Shared\Infrastructure\Database\Maintenance::adjustAutoIncrement('texts', 'TxID');
                     \Lwt\Shared\Infrastructure\Database\Maintenance::adjustAutoIncrement('sentences', 'SeID');
-
-                    // Clean orphaned text tags
-                    \Lwt\Shared\Infrastructure\Database\Connection::execute(
-                        "DELETE text_tag_map
-                        FROM (text_tag_map
-                            LEFT JOIN texts ON TtTxID = TxID
-                        ) WHERE TxID IS NULL"
-                    );
                 }
             }
         }

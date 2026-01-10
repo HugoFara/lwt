@@ -810,16 +810,16 @@ class TextController extends BaseController
             $result = $this->textService->unarchiveText($unarchId);
             $message = $result['message'];
         } elseif ($op == 'Change') {
-            $atId = $this->paramInt('AtID', 0) ?? 0;
+            $txId = $this->paramInt('TxID', 0) ?? 0;
             $message = $this->textService->updateArchivedText(
-                $atId,
-                $this->paramInt('AtLgID', 0) ?? 0,
-                $this->param('AtTitle'),
-                $this->param('AtText'),
-                $this->param('AtAudioURI'),
-                $this->param('AtSourceURI')
+                $txId,
+                $this->paramInt('TxLgID', 0) ?? 0,
+                $this->param('TxTitle'),
+                $this->param('TxText'),
+                $this->param('TxAudioURI'),
+                $this->param('TxSourceURI')
             );
-            TagsFacade::saveArchivedTextTagsFromForm($atId);
+            TagsFacade::saveArchivedTextTagsFromForm($txId);
         }
 
         // Display edit form or list

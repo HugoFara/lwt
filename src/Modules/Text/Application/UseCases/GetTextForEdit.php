@@ -68,11 +68,11 @@ class GetTextForEdit
     {
         $bindings = [$textId];
         return Connection::preparedFetchOne(
-            "SELECT AtLgID, AtTitle, AtText, AtAudioURI, AtSourceURI,
-            LENGTH(AtAnnotatedText) AS annotlen
-            FROM archived_texts
-            WHERE AtID = ?"
-            . UserScopedQuery::forTablePrepared('archived_texts', $bindings),
+            "SELECT TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
+            LENGTH(TxAnnotatedText) AS annotlen
+            FROM texts
+            WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
+            . UserScopedQuery::forTablePrepared('texts', $bindings),
             $bindings
         );
     }

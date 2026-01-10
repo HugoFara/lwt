@@ -45,23 +45,6 @@ CREATE TABLE IF NOT EXISTS users (
 -- NOTE: Admin user should be created through the setup wizard or registration page.
 -- For security, no default admin is inserted. Multi-user mode requires explicit setup.
 
-CREATE TABLE IF NOT EXISTS archived_texts (
-    AtID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-    AtUsID int(10) unsigned DEFAULT NULL,
-    AtLgID tinyint(3) unsigned NOT NULL,
-    AtTitle varchar(200) NOT NULL,
-    AtText text NOT NULL,
-    AtAnnotatedText longtext NOT NULL DEFAULT '',
-    AtAudioURI varchar(200) DEFAULT NULL,
-    AtSourceURI varchar(1000) DEFAULT NULL,
-    PRIMARY KEY (AtID),
-    KEY AtUsID (AtUsID),
-    KEY AtLgID (AtLgID),
-    KEY AtLgIDSourceURI (AtSourceURI(20),AtLgID),
-    CONSTRAINT fk_archived_texts_user FOREIGN KEY (AtUsID) REFERENCES users(UsID) ON DELETE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE IF NOT EXISTS languages (
     LgID tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
     LgUsID int(10) unsigned DEFAULT NULL,
@@ -157,10 +140,12 @@ CREATE TABLE IF NOT EXISTS texts (
     TxSourceURI varchar(1000) DEFAULT NULL,
     TxPosition smallint(5) DEFAULT 0,
     TxAudioPosition float DEFAULT 0,
+    TxArchivedAt DATETIME DEFAULT NULL,
     PRIMARY KEY (TxID),
     KEY TxUsID (TxUsID),
     KEY TxLgID (TxLgID),
     KEY TxLgIDSourceURI (TxSourceURI(20),TxLgID),
+    KEY TxArchivedAt (TxArchivedAt),
     CONSTRAINT fk_texts_user FOREIGN KEY (TxUsID) REFERENCES users(UsID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -268,13 +253,6 @@ CREATE TABLE IF NOT EXISTS feed_links (
     UNIQUE KEY FlTitle (FlNfID,FlTitle)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS archived_text_tag_map (
-    AgAtID smallint(5) unsigned NOT NULL,
-    AgT2ID smallint(5) unsigned NOT NULL,
-    PRIMARY KEY (AgAtID,AgT2ID),
-    KEY AgT2ID (AgT2ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 -- Prefix migration tracking table for multi-user conversion
 CREATE TABLE IF NOT EXISTS _prefix_migration_log (
     prefix VARCHAR(40) NOT NULL,
@@ -288,10 +266,9 @@ CREATE TABLE IF NOT EXISTS _prefix_migration_log (
 -- Inter-table foreign key constraints
 -- NOTE: FK constraints are added via migration 20251221_120000_add_inter_table_foreign_keys.sql
 -- This ensures they are only applied once and allows for proper data cleanup.
--- The migration adds 16 FK constraints:
--- - Language references: texts, words, sentences, archived_texts, news_feeds -> languages
+-- The migration adds FK constraints:
+-- - Language references: texts, words, sentences, news_feeds -> languages
 -- - Text references: sentences, word_occurrences, text_tag_map -> texts
 -- - Other: word_occurrences -> sentences, word_occurrences -> words (SET NULL),
---   word_tag_map -> words/tags, text_tag_map -> text_tags, archived_text_tag_map -> archived_texts/text_tags,
---   feed_links -> news_feeds
+--   word_tag_map -> words/tags, text_tag_map -> text_tags, feed_links -> news_feeds
 -- ============================================================================

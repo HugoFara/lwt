@@ -197,14 +197,12 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
             $bindings[] = '%' . $search . '%';
         }
 
-        // Complex query with LEFT JOINs to texts and archived_texts
+        // Complex query with LEFT JOIN to texts (archived texts are in same table with TxArchivedAt)
         $sql = "SELECT FlID, FlNfID, FlTitle, FlLink, FlDescription, FlDate, FlAudio, FlText,
-                       TxID, AtID
+                       TxID, TxArchivedAt
                 FROM feed_links
                 LEFT JOIN texts ON TxSourceURI = TRIM(FlLink)"
                 . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts')
-                . " LEFT JOIN archived_texts ON AtSourceURI = TRIM(FlLink)"
-                . UserScopedQuery::forTablePrepared('archived_texts', $bindings, 'archived_texts')
                 . " WHERE FlNfID IN ($feedIdList) $searchClause"
                 . " ORDER BY $orderBy $direction"
                 . " LIMIT $offset, $limit";
@@ -220,13 +218,16 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
         foreach ($rows as $row) {
             $article = $this->mapToEntity($row);
             $textId = isset($row['TxID']) ? (int) $row['TxID'] : null;
-            $archivedId = isset($row['AtID']) ? (int) $row['AtID'] : null;
+            // Archived texts are identified by TxArchivedAt being non-null
+            $isArchived = $textId !== null && isset($row['TxArchivedAt']) && $row['TxArchivedAt'] !== null;
+            $archivedId = $isArchived ? $textId : null;
+            $activeTextId = ($textId !== null && !$isArchived) ? $textId : null;
 
             $result[] = [
                 'article' => $article,
-                'text_id' => $textId,
+                'text_id' => $activeTextId,
                 'archived_id' => $archivedId,
-                'status' => $article->determineStatus($textId, $archivedId),
+                'status' => $article->determineStatus($activeTextId, $archivedId),
             ];
         }
 

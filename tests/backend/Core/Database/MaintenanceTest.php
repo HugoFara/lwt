@@ -163,15 +163,14 @@ class MaintenanceTest extends TestCase
         $this->assertTrue(true, 'adjustAutoIncrement should complete without error for text_tags');
     }
 
-    public function testAdjustAutoIncrementArchivdtexts(): void
+    /**
+     * Note: archived_texts table no longer exists - it's merged into texts with TxArchivedAt column.
+     */
+    public function testArchivedTextsMergedIntoTexts(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        // Test with archived_texts table
-        Maintenance::adjustAutoIncrement('archived_texts', 'AtID');
-        $this->assertTrue(true, 'adjustAutoIncrement should complete without error for archived_texts');
+        // archived_texts is no longer a separate table
+        // Archived texts are now identified by TxArchivedAt IS NOT NULL in the texts table
+        $this->assertTrue(true, 'archived_texts merged into texts table with TxArchivedAt column');
     }
 
     public function testAdjustAutoIncrementEmptyTable(): void

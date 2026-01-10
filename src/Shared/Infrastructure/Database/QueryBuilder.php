@@ -78,7 +78,6 @@ class QueryBuilder
     private const USER_SCOPED_TABLES = [
         'languages' => 'LgUsID',
         'texts' => 'TxUsID',
-        'archived_texts' => 'AtUsID',
         'words' => 'WoUsID',
         'tags' => 'TgUsID',
         'text_tags' => 'T2UsID',

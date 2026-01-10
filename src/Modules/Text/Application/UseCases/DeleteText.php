@@ -101,13 +101,15 @@ class DeleteText
      */
     public function deleteArchivedText(int $textId): string
     {
-        $deleted = QueryBuilder::table('archived_texts')
-            ->where('AtID', '=', $textId)
-            ->delete();
-        $message = "Archived Texts deleted: $deleted";
-        Maintenance::adjustAutoIncrement('archived_texts', 'AtID');
-        $this->cleanupArchivedTextTags();
-        return $message;
+        $bindings = [$textId];
+        $deleted = Connection::preparedExecute(
+            "DELETE FROM texts WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
+            . UserScopedQuery::forTablePrepared('texts', $bindings),
+            $bindings
+        );
+        Maintenance::adjustAutoIncrement('texts', 'TxID');
+        $this->cleanupTextTags();
+        return "Archived Texts deleted: $deleted";
     }
 
     /**
@@ -123,12 +125,16 @@ class DeleteText
             return "Multiple Actions: 0";
         }
 
-        $affectedRows = QueryBuilder::table('archived_texts')
-            ->whereIn('AtID', array_map('intval', $textIds))
-            ->delete();
-        Maintenance::adjustAutoIncrement('archived_texts', 'AtID');
-        $this->cleanupArchivedTextTags();
-        return "Archived Texts deleted: $affectedRows";
+        $ids = array_map('intval', $textIds);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $deleted = Connection::preparedExecute(
+            "DELETE FROM texts WHERE TxID IN ({$placeholders}) AND TxArchivedAt IS NOT NULL"
+            . UserScopedQuery::forTablePrepared('texts', $ids),
+            $ids
+        );
+        Maintenance::adjustAutoIncrement('texts', 'TxID');
+        $this->cleanupTextTags();
+        return "Archived Texts deleted: $deleted";
     }
 
     /**
@@ -146,25 +152,6 @@ class DeleteText
             )
             WHERE TxID IS NULL"
             . UserScopedQuery::forTable('text_tag_map', '', 'texts'),
-            ''
-        );
-    }
-
-    /**
-     * Clean up orphaned archived text tags.
-     *
-     * @return void
-     */
-    private function cleanupArchivedTextTags(): void
-    {
-        Connection::execute(
-            "DELETE archived_text_tag_map
-            FROM (
-                archived_text_tag_map
-                LEFT JOIN archived_texts ON AgAtID = AtID
-            )
-            WHERE AtID IS NULL"
-            . UserScopedQuery::forTable('archived_text_tag_map', '', 'archived_texts'),
             ''
         );
     }

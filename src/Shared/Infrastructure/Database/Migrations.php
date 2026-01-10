@@ -341,10 +341,10 @@ class Migrations
              FROM INFORMATION_SCHEMA.TABLES
              WHERE TABLE_SCHEMA = ?
              AND TABLE_NAME IN (
-                'languages', 'texts', 'archived_texts', 'words', 'sentences',
-                'word_occurrences', 'word_occurrences', 'textitems', 'tags', 'text_tags', 'text_tags', 'word_tag_map',
-                'text_tag_map', 'archived_text_tag_map', 'news_feeds', 'feed_links',
-                'settings', '_migrations', 'tts'
+                'languages', 'texts', 'words', 'sentences',
+                'word_occurrences', 'tags', 'text_tags', 'word_tag_map',
+                'text_tag_map', 'news_feeds', 'feed_links',
+                'settings', '_migrations'
              )",
             [$dbname]
         );
@@ -432,24 +432,6 @@ class Migrations
                 "DELETE text_tag_map
                 FROM (text_tag_map LEFT JOIN texts ON TtTxID = TxID)
                 WHERE TxID IS NULL"
-            );
-            // Clean up orphaned archived_text_tag_map (text_tags deleted)
-            Connection::execute(
-                "DELETE archived_text_tag_map
-                FROM (
-                    archived_text_tag_map
-                    LEFT JOIN text_tags ON AgT2ID = T2ID
-                )
-                WHERE T2ID IS NULL"
-            );
-            // Clean up orphaned archived_text_tag_map (archived_texts deleted)
-            Connection::execute(
-                "DELETE archived_text_tag_map
-                FROM (
-                    archived_text_tag_map
-                    LEFT JOIN archived_texts ON AgAtID = AtID
-                )
-                WHERE AtID IS NULL"
             );
             Maintenance::optimizeDatabase();
             Settings::save('lastscorecalc', $today);

@@ -114,7 +114,7 @@ class ListTexts
             SELECT TxID FROM (
                 texts
                 LEFT JOIN text_tag_map ON TxID = TtTxID
-            ) WHERE (1=1) {$whLang}{$whQuery}
+            ) WHERE TxArchivedAt IS NULL {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
         ) AS dummy" . UserScopedQuery::forTable('texts');
         return (int) Connection::fetchValue($sql, 'cnt');
@@ -154,7 +154,7 @@ class ListTexts
                 LEFT JOIN text_tag_map ON TxID = TtTxID)
                 LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages
-            WHERE LgID=TxLgID {$whLang}{$whQuery}
+            WHERE LgID=TxLgID AND TxArchivedAt IS NULL {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
             ORDER BY {$sortColumn}
             {$limit}"
@@ -188,12 +188,12 @@ class ListTexts
         string $whTag
     ): int {
         $sql = "SELECT COUNT(*) AS cnt FROM (
-            SELECT AtID FROM (
-                archived_texts
-                LEFT JOIN archived_text_tag_map ON AtID = AgAtID
-            ) WHERE (1=1) {$whLang}{$whQuery}
-            GROUP BY AtID {$whTag}
-        ) AS dummy" . UserScopedQuery::forTable('archived_texts');
+            SELECT TxID FROM (
+                texts
+                LEFT JOIN text_tag_map ON TxID = TtTxID
+            ) WHERE TxArchivedAt IS NOT NULL {$whLang}{$whQuery}
+            GROUP BY TxID {$whTag}
+        ) AS dummy" . UserScopedQuery::forTable('texts');
         return (int) Connection::fetchValue($sql, 'cnt');
     }
 
@@ -217,24 +217,24 @@ class ListTexts
         int $page,
         int $perPage
     ): array {
-        $sorts = ['AtTitle', 'AtID desc', 'AtID'];
+        $sorts = ['TxTitle', 'TxID desc', 'TxID'];
         $sortColumn = $sorts[max(0, min($sort - 1, count($sorts) - 1))];
         $offset = ($page - 1) * $perPage;
         $limit = "LIMIT {$offset},{$perPage}";
 
-        $sql = "SELECT AtID, AtTitle, LgName, AtAudioURI, AtSourceURI,
-            LENGTH(AtAnnotatedText) AS annotlen,
+        $sql = "SELECT TxID, TxTitle, LgName, TxAudioURI, TxSourceURI,
+            LENGTH(TxAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                (archived_texts
-                LEFT JOIN archived_text_tag_map ON AtID = AgAtID)
-                LEFT JOIN text_tags ON T2ID = AgT2ID
+                (texts
+                LEFT JOIN text_tag_map ON TxID = TtTxID)
+                LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages
-            WHERE LgID=AtLgID {$whLang}{$whQuery}
-            GROUP BY AtID {$whTag}
+            WHERE LgID=TxLgID AND TxArchivedAt IS NOT NULL {$whLang}{$whQuery}
+            GROUP BY TxID {$whTag}
             ORDER BY {$sortColumn}
             {$limit}"
-            . UserScopedQuery::forTable('archived_texts')
+            . UserScopedQuery::forTable('texts')
             . UserScopedQuery::forTable('text_tags')
             . UserScopedQuery::forTable('languages');
 

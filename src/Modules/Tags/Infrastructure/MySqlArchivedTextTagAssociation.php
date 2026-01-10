@@ -3,6 +3,8 @@
  * MySQL Archived Text Tag Association
  *
  * Infrastructure adapter for archived text-tag associations using MySQL.
+ * Archived texts now share the text_tag_map table with active texts,
+ * differentiated by TxArchivedAt IS NOT NULL.
  *
  * PHP version 8.1
  *
@@ -24,15 +26,16 @@ use Lwt\Modules\Tags\Domain\TagRepositoryInterface;
 /**
  * MySQL implementation of TagAssociationInterface for archived text-tag links.
  *
- * Operates on the 'archived_text_tag_map' junction table.
+ * Operates on the 'text_tag_map' junction table for archived texts
+ * (texts where TxArchivedAt IS NOT NULL).
  *
  * @since 3.0.0
  */
 class MySqlArchivedTextTagAssociation implements TagAssociationInterface
 {
-    private const TABLE_NAME = 'archived_text_tag_map';
-    private const ITEM_COLUMN = 'AgAtID';
-    private const TAG_COLUMN = 'AgT2ID';
+    private const TABLE_NAME = 'text_tag_map';
+    private const ITEM_COLUMN = 'TtTxID';
+    private const TAG_COLUMN = 'TtT2ID';
 
     private TagRepositoryInterface $tagRepository;
 
@@ -75,7 +78,7 @@ class MySqlArchivedTextTagAssociation implements TagAssociationInterface
     public function getTagTextsForItem(int $itemId): array
     {
         $rows = Connection::preparedFetchAll(
-            'SELECT T2Text FROM archived_text_tag_map, text_tags WHERE T2ID = AgT2ID AND AgAtID = ? ORDER BY T2Text',
+            'SELECT T2Text FROM text_tag_map, text_tags WHERE T2ID = TtT2ID AND TtTxID = ? ORDER BY T2Text',
             [$itemId]
         );
 
@@ -116,7 +119,7 @@ class MySqlArchivedTextTagAssociation implements TagAssociationInterface
 
             // Associate using INSERT...SELECT to handle concurrent inserts
             Connection::preparedExecute(
-                'INSERT IGNORE INTO archived_text_tag_map (AgAtID, AgT2ID)
+                'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID)
                 SELECT ?, T2ID FROM text_tags WHERE T2Text = ?',
                 [$itemId, $tagName]
             );
@@ -213,21 +216,28 @@ class MySqlArchivedTextTagAssociation implements TagAssociationInterface
      */
     public function cleanupOrphanedLinks(): int
     {
-        // Delete archived_text_tag_map where the tag no longer exists
+        // Delete text_tag_map where the tag no longer exists
         return Connection::preparedExecute(
-            'DELETE FROM archived_text_tag_map WHERE AgT2ID NOT IN (SELECT T2ID FROM text_tags)',
+            'DELETE FROM text_tag_map WHERE TtT2ID NOT IN (SELECT T2ID FROM text_tags)',
             []
         );
     }
 
     /**
      * {@inheritdoc}
+     *
+     * Returns count of archived texts with this tag (TxArchivedAt IS NOT NULL).
      */
     public function getItemCount(int $tagId): int
     {
-        return $this->query()
-            ->where(self::TAG_COLUMN, '=', $tagId)
-            ->count();
+        // Count only archived texts with this tag
+        $row = Connection::preparedFetchOne(
+            'SELECT COUNT(*) as cnt FROM text_tag_map
+             JOIN texts ON TtTxID = TxID
+             WHERE TtT2ID = ? AND TxArchivedAt IS NOT NULL',
+            [$tagId]
+        );
+        return (int) ($row['cnt'] ?? 0);
     }
 
     /**

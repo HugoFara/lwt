@@ -195,10 +195,14 @@ class QueryBuilderUserScopeTest extends TestCase
         $this->assertEquals('TxUsID', UserScopedQuery::getUserIdColumn('texts'));
     }
 
-    public function testUserScopeAppliedToArchivedTextsTable(): void
+    /**
+     * Note: archived_texts table no longer exists - it's merged into texts with TxArchivedAt column.
+     */
+    public function testArchivedTextsNoLongerSeparateTable(): void
     {
-        $this->assertTrue(UserScopedQuery::isUserScopedTable('archived_texts'));
-        $this->assertEquals('AtUsID', UserScopedQuery::getUserIdColumn('archived_texts'));
+        // archived_texts is not a separate table anymore
+        $this->assertFalse(UserScopedQuery::isUserScopedTable('archived_texts'));
+        $this->assertNull(UserScopedQuery::getUserIdColumn('archived_texts'));
     }
 
     public function testUserScopeAppliedToTagsTable(): void
@@ -361,7 +365,8 @@ class QueryBuilderUserScopeTest extends TestCase
 
         $this->assertArrayHasKey('languages', $tables);
         $this->assertArrayHasKey('texts', $tables);
-        $this->assertArrayHasKey('archived_texts', $tables);
+        // archived_texts merged into texts table
+        $this->assertArrayNotHasKey('archived_texts', $tables);
         $this->assertArrayHasKey('words', $tables);
         $this->assertArrayHasKey('tags', $tables);
         $this->assertArrayHasKey('text_tags', $tables);
@@ -370,7 +375,6 @@ class QueryBuilderUserScopeTest extends TestCase
 
         $this->assertEquals('LgUsID', $tables['languages']);
         $this->assertEquals('TxUsID', $tables['texts']);
-        $this->assertEquals('AtUsID', $tables['archived_texts']);
         $this->assertEquals('WoUsID', $tables['words']);
         $this->assertEquals('TgUsID', $tables['tags']);
         $this->assertEquals('T2UsID', $tables['text_tags']);

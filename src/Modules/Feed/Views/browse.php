@@ -133,10 +133,10 @@ echo PageLayoutHelper::buildActionCard([
   </tr>
     <?php foreach ($articles as $row): ?>
         <tr>
-        <?php if ($row['TxID']): ?>
+        <?php if ($row['TxID'] && empty($row['TxArchivedAt'])): ?>
             <td class="td1 center"><a href="/text/read?start=<?php echo $row['TxID']; ?>" >
             <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['title' => 'Read', 'alt' => '-']); ?></a>
-        <?php elseif ($row['AtID']): ?>
+        <?php elseif ($row['TxID'] && !empty($row['TxArchivedAt'])): ?>
             <td class="td1 center"><span title="archived"><?php echo IconHelper::render('circle-x', ['alt' => '-']); ?></span>
         <?php elseif (!empty($row['FlLink']) && str_starts_with((string)$row['FlLink'], ' ')): ?>
             <td class="td1 center">

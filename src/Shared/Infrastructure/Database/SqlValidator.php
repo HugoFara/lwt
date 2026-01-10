@@ -35,8 +35,6 @@ class SqlValidator
      * @var string[]
      */
     private const ALLOWED_TABLES = [
-        'archived_texts',
-        'archived_text_tag_map',
         'feed_links',
         'languages',
         'local_dictionaries',
@@ -48,7 +46,6 @@ class SqlValidator
         'temp_word_occurrences',
         'temp_words',
         'text_tags',
-        'textitems',
         'word_occurrences',
         'texts',
         'text_tag_map',

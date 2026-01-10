@@ -292,7 +292,6 @@ if (!in_array($fkMigration, $appliedMigrations)) {
     $fkConstraints = [
         // Language references
         "ALTER TABLE texts ADD CONSTRAINT fk_texts_language FOREIGN KEY (TxLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
-        "ALTER TABLE archived_texts ADD CONSTRAINT fk_archived_texts_language FOREIGN KEY (AtLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
         "ALTER TABLE words ADD CONSTRAINT fk_words_language FOREIGN KEY (WoLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
         "ALTER TABLE sentences ADD CONSTRAINT fk_sentences_language FOREIGN KEY (SeLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
         "ALTER TABLE news_feeds ADD CONSTRAINT fk_news_feeds_language FOREIGN KEY (NfLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
@@ -310,9 +309,6 @@ if (!in_array($fkMigration, $appliedMigrations)) {
         "ALTER TABLE word_tag_map ADD CONSTRAINT fk_word_tag_map_tag FOREIGN KEY (WtTgID) REFERENCES tags(TgID) ON DELETE CASCADE",
         // Text tags
         "ALTER TABLE text_tag_map ADD CONSTRAINT fk_text_tag_map_text_tag FOREIGN KEY (TtT2ID) REFERENCES text_tags(T2ID) ON DELETE CASCADE",
-        // Archived text tags
-        "ALTER TABLE archived_text_tag_map ADD CONSTRAINT fk_archived_text_tag_map_archivedtext FOREIGN KEY (AgAtID) REFERENCES archived_texts(AtID) ON DELETE CASCADE",
-        "ALTER TABLE archived_text_tag_map ADD CONSTRAINT fk_archived_text_tag_map_text_tag FOREIGN KEY (AgT2ID) REFERENCES text_tags(T2ID) ON DELETE CASCADE",
         // Feed links
         "ALTER TABLE feed_links ADD CONSTRAINT fk_feed_links_newsfeed FOREIGN KEY (FlNfID) REFERENCES news_feeds(NfID) ON DELETE CASCADE",
     ];
@@ -355,7 +351,6 @@ if (!in_array($columnDefaultsMigration, $appliedMigrations)) {
         "ALTER TABLE languages MODIFY COLUMN LgExceptionsSplitSentences varchar(500) NOT NULL DEFAULT ''",
         "ALTER TABLE languages MODIFY COLUMN LgRegexpWordCharacters varchar(500) NOT NULL DEFAULT 'a-zA-ZÀ-ÖØ-öø-ȳ'",
         "ALTER TABLE texts MODIFY COLUMN TxAnnotatedText longtext NOT NULL DEFAULT ''",
-        "ALTER TABLE archived_texts MODIFY COLUMN AtAnnotatedText longtext NOT NULL DEFAULT ''",
         "ALTER TABLE feed_links MODIFY COLUMN FlAudio varchar(200) NOT NULL DEFAULT ''",
         "ALTER TABLE feed_links MODIFY COLUMN FlText longtext NOT NULL DEFAULT ''",
     ];

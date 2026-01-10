@@ -957,18 +957,19 @@ class TagsFacade
             return "Failed to create tag";
         }
 
-        $sql = 'SELECT AtID FROM archived_texts
-            LEFT JOIN archived_text_tag_map ON AtID = AgAtID AND AgT2ID = ' . $tagId . '
-            WHERE AgT2ID IS NULL AND AtID IN ' . $idList
-            . UserScopedQuery::forTable('archived_texts');
+        // Archived texts are in texts table with TxArchivedAt IS NOT NULL
+        $sql = 'SELECT TxID FROM texts
+            LEFT JOIN text_tag_map ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
+            WHERE TtT2ID IS NULL AND TxArchivedAt IS NOT NULL AND TxID IN ' . $idList
+            . UserScopedQuery::forTable('texts');
         $res = Connection::query($sql);
 
         $count = 0;
         if ($res instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($res)) {
                 $count += (int) Connection::execute(
-                    'INSERT IGNORE INTO archived_text_tag_map (AgAtID, AgT2ID)
-                    VALUES(' . (int)$record['AtID'] . ', ' . $tagId . ')'
+                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID)
+                    VALUES(' . (int)$record['TxID'] . ', ' . $tagId . ')'
                 );
             }
             mysqli_free_result($res);
@@ -1005,17 +1006,18 @@ class TagsFacade
             return "Tag " . $tagText . " not found";
         }
 
-        $sql = 'SELECT AtID FROM archived_texts WHERE AtID IN ' . $idList
-            . UserScopedQuery::forTable('archived_texts');
+        // Archived texts are in texts table with TxArchivedAt IS NOT NULL
+        $sql = 'SELECT TxID FROM texts WHERE TxArchivedAt IS NOT NULL AND TxID IN ' . $idList
+            . UserScopedQuery::forTable('texts');
         $res = Connection::query($sql);
 
         $count = 0;
         if ($res instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($res)) {
                 $count++;
-                QueryBuilder::table('archived_text_tag_map')
-                    ->where('AgAtID', '=', (int)$record['AtID'])
-                    ->where('AgT2ID', '=', (int)$tagId)
+                QueryBuilder::table('text_tag_map')
+                    ->where('TtTxID', '=', (int)$record['TxID'])
+                    ->where('TtT2ID', '=', (int)$tagId)
                     ->delete();
             }
             mysqli_free_result($res);
@@ -1207,11 +1209,12 @@ class TagsFacade
         $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
         $html .= '[Filter off]</option>';
 
+        // Archived texts are in texts table with TxArchivedAt IS NOT NULL
         if ($langId === '') {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM archived_texts, text_tags, archived_text_tag_map
-                WHERE T2ID = AgT2ID AND AgAtID = AtID
+                FROM texts, text_tags, text_tag_map
+                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxArchivedAt IS NOT NULL
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
                 []
@@ -1219,8 +1222,8 @@ class TagsFacade
         } else {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM archived_texts, text_tags, archived_text_tag_map
-                WHERE T2ID = AgT2ID AND AgAtID = AtID AND AtLgID = ?
+                FROM texts, text_tags, text_tag_map
+                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxArchivedAt IS NOT NULL AND TxLgID = ?
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
                 [$langId]

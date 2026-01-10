@@ -58,7 +58,6 @@ class Maintenance
      */
     public static function optimizeDatabase(): void
     {
-        self::adjustAutoIncrement('archived_texts', 'AtID');
         self::adjustAutoIncrement('languages', 'LgID');
         self::adjustAutoIncrement('sentences', 'SeID');
         self::adjustAutoIncrement('texts', 'TxID');

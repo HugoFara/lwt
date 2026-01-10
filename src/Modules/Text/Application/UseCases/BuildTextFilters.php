@@ -81,6 +81,9 @@ class BuildTextFilters
     /**
      * Build WHERE clause for archived text query filtering.
      *
+     * Note: Archived texts are now stored in the texts table with TxArchivedAt set,
+     * so they use the same Tx column prefix as active texts.
+     *
      * @param string $query     Search query string
      * @param string $queryMode Query mode
      * @param string $regexMode Regex mode
@@ -92,7 +95,7 @@ class BuildTextFilters
         string $queryMode,
         string $regexMode
     ): array {
-        return $this->buildQueryWhereClause($query, $queryMode, $regexMode, 'At');
+        return $this->buildQueryWhereClause($query, $queryMode, $regexMode, 'Tx');
     }
 
     /**
@@ -156,6 +159,9 @@ class BuildTextFilters
     /**
      * Build HAVING clause for archived text tag filtering.
      *
+     * Note: Archived texts now use the same text_tag_map table as active texts,
+     * so they use the same TtT2ID column.
+     *
      * @param string|int $tag1  First tag filter
      * @param string|int $tag2  Second tag filter
      * @param string     $tag12 AND/OR operator
@@ -164,7 +170,7 @@ class BuildTextFilters
      */
     public function buildArchivedTagHavingClause($tag1, $tag2, string $tag12): string
     {
-        return $this->buildTagHavingClause($tag1, $tag2, $tag12, 'AgT2ID');
+        return $this->buildTagHavingClause($tag1, $tag2, $tag12, 'TtT2ID');
     }
 
     /**

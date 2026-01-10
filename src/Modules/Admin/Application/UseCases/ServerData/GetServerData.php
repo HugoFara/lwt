@@ -63,9 +63,9 @@ class GetServerData
         $dbname = Globals::getDatabaseName();
 
         $tableNames = [
-            'archived_texts', 'archived_text_tag_map', 'feed_links', 'languages',
-            'news_feeds', 'sentences', 'settings', 'tags', 'text_tags',
-            'word_occurrences', 'texts', 'text_tag_map', 'words', 'word_tag_map'
+            'feed_links', 'languages', 'news_feeds', 'sentences', 'settings',
+            'tags', 'text_tags', 'word_occurrences', 'texts', 'text_tag_map',
+            'words', 'word_tag_map'
         ];
 
         $prefixedTables = array_map(

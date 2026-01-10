@@ -57,6 +57,20 @@ class MySqlTextRepository extends AbstractRepository implements TextRepositoryIn
     ];
 
     /**
+     * Override base query to filter out archived texts.
+     *
+     * Active texts have TxArchivedAt IS NULL. Archived texts use
+     * a separate set of methods that explicitly include TxArchivedAt IS NOT NULL.
+     *
+     * @return \Lwt\Shared\Infrastructure\Database\QueryBuilder
+     */
+    protected function query(): \Lwt\Shared\Infrastructure\Database\QueryBuilder
+    {
+        return \Lwt\Shared\Infrastructure\Database\QueryBuilder::table($this->tableName)
+            ->whereNull('TxArchivedAt');
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function mapToEntity(array $row): Text

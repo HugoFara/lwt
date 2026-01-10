@@ -142,14 +142,14 @@ class Validation
                 $sql = "select (
                     " . $currenttag_int . " in (
                         select T2ID
-                        from archived_texts,
+                        from texts,
                         text_tags,
-                        archived_text_tag_map
-                        where T2ID = AgT2ID and AgAtID = AtID
+                        text_tag_map
+                        where T2ID = TtT2ID and TtTxID = TxID and TxArchivedAt IS NOT NULL
                         group by T2ID order by T2Text
                     )
                 ) as value"
-                    . UserScopedQuery::forTablePrepared('archived_texts', $bindings);
+                    . UserScopedQuery::forTablePrepared('texts', $bindings);
             } else {
                 if (!is_numeric($currentlang)) {
                     return '';
@@ -158,14 +158,14 @@ class Validation
                 $sql = "select (
                     " . $currenttag_int . " in (
                         select T2ID
-                        from archived_texts,
+                        from texts,
                         text_tags,
-                        archived_text_tag_map
-                        where T2ID = AgT2ID and AgAtID = AtID and AtLgID = " . $currentlang_int . "
+                        text_tag_map
+                        where T2ID = TtT2ID and TtTxID = TxID and TxArchivedAt IS NOT NULL and TxLgID = " . $currentlang_int . "
                         group by T2ID order by T2Text
                     )
                 ) as value"
-                    . UserScopedQuery::forTablePrepared('archived_texts', $bindings);
+                    . UserScopedQuery::forTablePrepared('texts', $bindings);
             }
             $r = Connection::fetchValue($sql);
             if ($r == 0) {

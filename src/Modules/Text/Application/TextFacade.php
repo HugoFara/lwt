@@ -586,14 +586,14 @@ class TextFacade
         int $perPage,
         int $sort
     ): array {
-        $sorts = ['AtTitle', 'AtID DESC', 'AtID ASC'];
+        $sorts = ['TxTitle', 'TxID DESC', 'TxID ASC'];
         $sortColumn = $sorts[max(0, min($sort - 1, count($sorts) - 1))];
         $offset = ($page - 1) * $perPage;
 
         $bindings1 = [$langId];
         $total = (int) Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM archived_texts WHERE AtLgID = ?"
-            . UserScopedQuery::forTablePrepared('archived_texts', $bindings1),
+            "SELECT COUNT(*) AS cnt FROM texts WHERE TxLgID = ? AND TxArchivedAt IS NOT NULL"
+            . UserScopedQuery::forTablePrepared('texts', $bindings1),
             $bindings1,
             'cnt'
         );
@@ -601,18 +601,18 @@ class TextFacade
 
         $bindings2 = [$langId, $offset, $perPage];
         $records = Connection::preparedFetchAll(
-            "SELECT AtID, AtTitle, AtAudioURI, AtSourceURI,
-            LENGTH(AtAnnotatedText) AS annotlen,
+            "SELECT TxID, TxTitle, TxAudioURI, TxSourceURI,
+            LENGTH(TxAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                (archived_texts LEFT JOIN archived_text_tag_map ON AtID = AgAtID)
-                LEFT JOIN text_tags ON T2ID = AgT2ID
+                (texts LEFT JOIN text_tag_map ON TxID = TtTxID)
+                LEFT JOIN text_tags ON T2ID = TtT2ID
             )
-            WHERE AtLgID = ?
-            GROUP BY AtID
+            WHERE TxLgID = ? AND TxArchivedAt IS NOT NULL
+            GROUP BY TxID
             ORDER BY {$sortColumn}
             LIMIT ?, ?"
-            . UserScopedQuery::forTablePrepared('archived_texts', $bindings2)
+            . UserScopedQuery::forTablePrepared('texts', $bindings2)
             . UserScopedQuery::forTablePrepared('text_tags', $bindings2),
             $bindings2
         );
@@ -620,11 +620,11 @@ class TextFacade
         $texts = [];
         foreach ($records as $record) {
             $texts[] = [
-                'id' => (int) $record['AtID'],
-                'title' => (string) $record['AtTitle'],
-                'has_audio' => !empty($record['AtAudioURI']),
-                'source_uri' => (string) ($record['AtSourceURI'] ?? ''),
-                'has_source' => !empty($record['AtSourceURI']),
+                'id' => (int) $record['TxID'],
+                'title' => (string) $record['TxTitle'],
+                'has_audio' => !empty($record['TxAudioURI']),
+                'source_uri' => (string) ($record['TxSourceURI'] ?? ''),
+                'has_source' => !empty($record['TxSourceURI']),
                 'annotated' => !empty($record['annotlen']),
                 'taglist' => (string) $record['taglist']
             ];

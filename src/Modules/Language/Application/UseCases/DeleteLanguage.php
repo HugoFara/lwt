@@ -101,9 +101,11 @@ class DeleteLanguage
         return [
             'texts' => QueryBuilder::table('texts')
                 ->where('TxLgID', '=', $id)
+                ->whereNull('TxArchivedAt')
                 ->count(),
-            'archivedTexts' => QueryBuilder::table('archived_texts')
-                ->where('AtLgID', '=', $id)
+            'archivedTexts' => QueryBuilder::table('texts')
+                ->where('TxLgID', '=', $id)
+                ->whereNotNull('TxArchivedAt')
                 ->count(),
             'words' => QueryBuilder::table('words')
                 ->where('WoLgID', '=', $id)

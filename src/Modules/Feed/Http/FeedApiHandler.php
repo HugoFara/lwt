@@ -362,7 +362,7 @@ class FeedApiHandler
         // Get language name
         $langResult = QueryBuilder::table('languages')
             ->select(['LgName'])
-            ->where('LgID', '=', (int)$feed['NfLgID'])
+            ->where('LgID', '=', $feed['NfLgID'])
             ->firstPrepared();
         if ($langResult !== null) {
             $feed['LgName'] = (string)$langResult['LgName'];
@@ -531,11 +531,10 @@ class FeedApiHandler
         $sorts = ['FlDate DESC', 'FlDate ASC', 'FlTitle ASC'];
         $orderBy = $sorts[$sort - 1] ?? 'FlDate DESC';
 
-        // Get articles with import status
-        $sql = "SELECT fl.*, tx.TxID, at.AtID
+        // Get articles with import status (archived texts are in texts table with TxArchivedAt)
+        $sql = "SELECT fl.*, tx.TxID, tx.TxArchivedAt
                 FROM feed_links fl
                 LEFT JOIN texts tx ON tx.TxSourceURI = TRIM(fl.FlLink)
-                LEFT JOIN archived_texts at ON at.AtSourceURI = TRIM(fl.FlLink)
                 WHERE $where
                 ORDER BY $orderBy
                 LIMIT ?, ?";
@@ -560,8 +559,8 @@ class FeedApiHandler
             ],
             'feed' => [
                 'id' => (int)$feed['NfID'],
-                'name' => (string)$feed['NfName'],
-                'langId' => (int)$feed['NfLgID']
+                'name' => $feed['NfName'],
+                'langId' => $feed['NfLgID']
             ]
         ];
     }
@@ -575,19 +574,22 @@ class FeedApiHandler
      */
     private function formatArticleRecord(array $row): array
     {
+        $textId = isset($row['TxID']) && $row['TxID'] !== null && $row['TxID'] !== ''
+            ? (int)$row['TxID'] : null;
+        $isArchived = $textId !== null && !empty($row['TxArchivedAt']);
+
         $status = 'new';
-        if (!empty($row['TxID'])) {
+        if ($textId !== null && !$isArchived) {
             $status = 'imported';
-        } elseif (!empty($row['AtID'])) {
+        } elseif ($isArchived) {
             $status = 'archived';
         } elseif (str_starts_with((string)$row['FlLink'], ' ')) {
             $status = 'error';
         }
 
-        $textId = isset($row['TxID']) && $row['TxID'] !== null && $row['TxID'] !== ''
-            ? (int)$row['TxID'] : null;
-        $archivedTextId = isset($row['AtID']) && $row['AtID'] !== null && $row['AtID'] !== ''
-            ? (int)$row['AtID'] : null;
+        // For archived texts, report the same TxID as archivedTextId
+        $archivedTextId = $isArchived ? $textId : null;
+        $activeTextId = ($textId !== null && !$isArchived) ? $textId : null;
 
         return [
             'id' => (int)$row['FlID'],
@@ -598,7 +600,7 @@ class FeedApiHandler
             'audio' => (string)$row['FlAudio'],
             'hasText' => !empty($row['FlText']),
             'status' => $status,
-            'textId' => $textId,
+            'textId' => $activeTextId,
             'archivedTextId' => $archivedTextId
         ];
     }

@@ -129,9 +129,10 @@ class ListLanguages
     public function getLanguagesWithArchivedTextCounts(): array
     {
         $records = QueryBuilder::table('languages')
-            ->select(['languages.LgID', 'languages.LgName', 'COUNT(archived_texts.AtID) AS text_count'])
-            ->join('archived_texts', 'archived_texts.AtLgID', '=', 'languages.LgID')
+            ->select(['languages.LgID', 'languages.LgName', 'COUNT(texts.TxID) AS text_count'])
+            ->join('texts', 'texts.TxLgID', '=', 'languages.LgID')
             ->where('languages.LgName', '<>', '')
+            ->whereNotNull('texts.TxArchivedAt')
             ->groupBy(['languages.LgID', 'languages.LgName'])
             ->orderBy('languages.LgName')
             ->getPrepared();
@@ -159,9 +160,11 @@ class ListLanguages
         return [
             'texts' => QueryBuilder::table('texts')
                 ->where('TxLgID', '=', $lid)
+                ->whereNull('TxArchivedAt')
                 ->count(),
-            'archivedTexts' => QueryBuilder::table('archived_texts')
-                ->where('AtLgID', '=', $lid)
+            'archivedTexts' => QueryBuilder::table('texts')
+                ->where('TxLgID', '=', $lid)
+                ->whereNotNull('TxArchivedAt')
                 ->count(),
             'words' => QueryBuilder::table('words')
                 ->where('WoLgID', '=', $lid)

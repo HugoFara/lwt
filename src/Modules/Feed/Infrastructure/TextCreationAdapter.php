@@ -115,42 +115,18 @@ class TextCreationAdapter implements TextCreationInterface
                 ->where('SeTxID', '=', $textId)
                 ->delete();
 
-            // Archive the text
+            // Archive the text (soft delete - set TxArchivedAt)
             $bindings = [$textId];
-            $sql = "INSERT INTO archived_texts (
-                    AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
-                    . UserScopedQuery::insertColumn('archived_texts')
-                . ")
-                SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
-                    . UserScopedQuery::insertValue('archived_texts')
-                . " FROM texts WHERE TxID = ?"
+            $sql = "UPDATE texts SET TxArchivedAt = NOW(), TxPosition = 0, TxAudioPosition = 0
+                    WHERE TxID = ? AND TxArchivedAt IS NULL"
                 . UserScopedQuery::forTablePrepared('texts', $bindings);
-            Connection::preparedExecute($sql, $bindings);
+            $archived = Connection::preparedExecute($sql, $bindings);
 
-            $archiveId = (int) Connection::lastInsertId();
+            if ($archived > 0) {
+                $stats['archived']++;
+            }
 
-            // Copy tags to archive
-            Connection::preparedExecute(
-                "INSERT INTO archived_text_tag_map (AgAtID, AgT2ID)
-                 SELECT ?, TtT2ID FROM text_tag_map
-                 WHERE TtTxID = ?",
-                [$archiveId, $textId]
-            );
-
-            // Delete original text
-            $stats['archived'] += QueryBuilder::table('texts')
-                ->where('TxID', '=', $textId)
-                ->delete();
-
-            Maintenance::adjustAutoIncrement('texts', 'TxID');
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
-
-            // Clean orphaned text tags
-            Connection::execute(
-                "DELETE text_tag_map FROM (
-                    text_tag_map LEFT JOIN texts ON TtTxID = TxID
-                ) WHERE TxID IS NULL"
-            );
         }
 
         return $stats;
@@ -178,18 +154,9 @@ class TextCreationAdapter implements TextCreationInterface
     {
         $trimmedUri = trim($sourceUri);
 
-        // Check texts table
-        $textExists = QueryBuilder::table('texts')
+        // Check texts table (includes both active and archived texts)
+        return QueryBuilder::table('texts')
             ->where('TxSourceURI', '=', $trimmedUri)
-            ->existsPrepared();
-
-        if ($textExists) {
-            return true;
-        }
-
-        // Check archived_texts table
-        return QueryBuilder::table('archived_texts')
-            ->where('AtSourceURI', '=', $trimmedUri)
             ->existsPrepared();
     }
 }

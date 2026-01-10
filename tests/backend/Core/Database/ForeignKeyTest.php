@@ -112,7 +112,6 @@ class ForeignKeyTest extends TestCase
         Connection::query("DELETE FROM word_tag_map WHERE WtWoID NOT IN (SELECT WoID FROM words)");
         Connection::query("DELETE FROM tags WHERE TgText LIKE 'fktest_%'");
         Connection::query("DELETE FROM text_tags WHERE T2Text LIKE 'fktest_%'");
-        Connection::query("DELETE FROM archived_texts WHERE AtTitle LIKE 'FK_Test_%'");
         Connection::query("DELETE FROM news_feeds WHERE NfName LIKE 'FK_Test_%'");
     }
 
@@ -483,18 +482,23 @@ class ForeignKeyTest extends TestCase
     }
 
     /**
-     * Test that deleting an archived text cascades to archived_text_tag_map.
+     * Test that deleting an archived text (soft delete) preserves tags.
+     *
+     * Note: Archived texts are now in the texts table with TxArchivedAt set.
+     * Tags remain associated since the text still exists.
      */
-    public function testArchivedTextDeleteCascadesToArchTextTags(): void
+    public function testArchivedTextPreservesTags(): void
     {
         $this->requireForeignKeys();
+
+        // Create a text with a tag
         Connection::query(
-            "INSERT INTO archived_texts (AtLgID, AtTitle, AtText, AtAnnotatedText)
+            "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText)
              VALUES (" . self::$testLangId . ", 'FK_Test_Archived', 'Archived content', '')"
         );
-        $archId = (int) Connection::fetchValue(
-            "SELECT AtID FROM archived_texts WHERE AtTitle = 'FK_Test_Archived'",
-            'AtID'
+        $textId = (int) Connection::fetchValue(
+            "SELECT TxID FROM texts WHERE TxTitle = 'FK_Test_Archived'",
+            'TxID'
         );
 
         Connection::query(
@@ -505,24 +509,20 @@ class ForeignKeyTest extends TestCase
             'T2ID'
         );
 
-        Connection::query("INSERT INTO archived_text_tag_map (AgAtID, AgT2ID) VALUES ($archId, $tagId)");
+        Connection::query("INSERT INTO text_tag_map (TtTxID, TtT2ID) VALUES ($textId, $tagId)");
 
-        // Verify archtexttag exists
-        $beforeCount = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM archived_text_tag_map WHERE AgAtID = $archId",
-            'cnt'
-        );
-        $this->assertEquals(1, $beforeCount, 'ArchTextTag should exist before delete');
+        // Archive the text (soft delete)
+        Connection::query("UPDATE texts SET TxArchivedAt = NOW() WHERE TxID = $textId");
 
-        // Delete archived text
-        Connection::query("DELETE FROM archived_texts WHERE AtID = $archId");
-
-        // Verify archtexttag was cascaded
+        // Verify tag association still exists (text is archived, not deleted)
         $afterCount = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM archived_text_tag_map WHERE AgAtID = $archId",
+            "SELECT COUNT(*) AS cnt FROM text_tag_map WHERE TtTxID = $textId",
             'cnt'
         );
-        $this->assertEquals(0, $afterCount, 'ArchTextTag should be deleted via CASCADE');
+        $this->assertEquals(1, $afterCount, 'TextTag should still exist after archiving');
+
+        // Clean up
+        Connection::query("DELETE FROM texts WHERE TxID = $textId");
     }
 
     // ===== FK Constraint Enforcement Tests =====
