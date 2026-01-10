@@ -249,6 +249,10 @@ class ApiV1
                 $this->handleTermsGet($fragments, $params);
                 break;
 
+            case 'word-families':
+                $this->handleWordFamiliesGet($fragments, $params);
+                break;
+
             case 'texts':
                 $this->handleTextsGet($fragments, $params);
                 break;
@@ -558,6 +562,20 @@ class ApiV1
                 $params['txt'] ?? null,
                 isset($params['wid']) ? (int)$params['wid'] : null
             ));
+        } elseif (($fragments[1] ?? '') === 'family') {
+            // GET /terms/family?term_id=N - get word family for a term
+            // GET /terms/family/suggestion?term_id=N&status=X - get family update suggestion
+            if (($fragments[2] ?? '') === 'suggestion') {
+                $termId = (int)($params['term_id'] ?? 0);
+                $newStatus = (int)($params['status'] ?? 0);
+                Response::success($this->termHandler->formatGetFamilyUpdateSuggestion($termId, $newStatus));
+            } else {
+                $termId = (int)($params['term_id'] ?? 0);
+                if ($termId <= 0) {
+                    Response::error('term_id is required', 400);
+                }
+                Response::success($this->termHandler->formatGetTermFamily($termId));
+            }
         } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
             $termId = (int)$fragments[1];
             if (($fragments[2] ?? '') === 'translations') {
@@ -571,15 +589,54 @@ class ApiV1
                     $termId,
                     $params['ann'] ?? null
                 ));
+            } elseif (($fragments[2] ?? '') === 'family') {
+                // GET /terms/{id}/family - get word family for this term
+                Response::success($this->termHandler->formatGetTermFamily($termId));
             } elseif (!isset($fragments[2])) {
                 // GET /terms/{id} - get term by ID
                 Response::success($this->termHandler->formatGetTerm($termId));
             } else {
-                Response::error('Expected "translations", "details", or no sub-path', 404);
+                Response::error('Expected "translations", "details", "family", or no sub-path', 404);
             }
         } else {
             Response::error('Endpoint Not Found: ' . ($fragments[1] ?? ''), 404);
         }
+    }
+
+    /**
+     * Handle GET requests for word families.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Query parameters
+     */
+    private function handleWordFamiliesGet(array $fragments, array $params): void
+    {
+        // GET /word-families/stats?language_id=N - get lemma statistics for a language
+        if (($fragments[1] ?? '') === 'stats') {
+            $langId = (int)($params['language_id'] ?? 0);
+            if ($langId <= 0) {
+                Response::error('language_id is required', 400);
+            }
+            Response::success($this->termHandler->formatGetLemmaStatistics($langId));
+            return;
+        }
+
+        // GET /word-families?language_id=N - get paginated list of word families
+        $langId = (int)($params['language_id'] ?? 0);
+        if ($langId <= 0) {
+            Response::error('language_id is required', 400);
+        }
+
+        // Check if getting family by lemma
+        $lemmaLc = $params['lemma_lc'] ?? '';
+        if ($lemmaLc !== '') {
+            // GET /word-families?language_id=N&lemma_lc=run - get specific family
+            Response::success($this->termHandler->formatGetWordFamilyByLemma($langId, $lemmaLc));
+            return;
+        }
+
+        // GET /word-families?language_id=N&page=1&per_page=50 - get list of families
+        Response::success($this->termHandler->formatGetWordFamilyList($langId, $params));
     }
 
     private function handleTextsGet(array $fragments, array $params): void
@@ -884,6 +941,29 @@ class ApiV1
             $action = $params['action'] ?? '';
             $data = $params['data'] ?? null;
             Response::success($this->termHandler->formatAllAction($filters, $action, $data));
+        } elseif (($fragments[1] ?? '') === 'family') {
+            // PUT /terms/family/status - update status for entire word family
+            // PUT /terms/family/apply - apply suggested family update
+            if (($fragments[2] ?? '') === 'status') {
+                $langId = (int)($params['language_id'] ?? 0);
+                $lemmaLc = $params['lemma_lc'] ?? '';
+                $status = (int)($params['status'] ?? 0);
+
+                if ($langId <= 0 || $lemmaLc === '') {
+                    Response::error('language_id and lemma_lc are required', 400);
+                }
+                Response::success($this->termHandler->formatUpdateWordFamilyStatus($langId, $lemmaLc, $status));
+            } elseif (($fragments[2] ?? '') === 'apply') {
+                $termIds = $params['term_ids'] ?? [];
+                $status = (int)($params['status'] ?? 0);
+
+                if (empty($termIds)) {
+                    Response::error('term_ids is required', 400);
+                }
+                Response::success($this->termHandler->formatApplyFamilyUpdate($termIds, $status));
+            } else {
+                Response::error('Expected "status" or "apply"', 404);
+            }
         } elseif (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'inline-edit') {
             // PUT /terms/{id}/inline-edit - inline edit translation or romanization
             $termId = (int)$fragments[1];
@@ -909,7 +989,7 @@ class ApiV1
                 Response::error('Expected "translation" or no sub-path', 404);
             }
         } else {
-            Response::error('Term ID (Integer), "bulk-status", or "multi/{id}" Expected', 404);
+            Response::error('Term ID (Integer), "bulk-status", "family", or "multi/{id}" Expected', 404);
         }
     }
 

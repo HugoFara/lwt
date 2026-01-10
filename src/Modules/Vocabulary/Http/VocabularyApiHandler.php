@@ -842,7 +842,7 @@ class VocabularyApiHandler
      * @param int         $termId Term ID
      * @param string|null $ann    Annotation to highlight in translation
      *
-     * @return array{id: int, text: string, textLc: string, translation: string, romanization: string, status: int, langId: int, sentence: string, notes: string, tags: array<string>, statusLabel: string}|array{error: string}
+     * @return array{id: int, text: string, textLc: string, lemma: string, lemmaLc: string, translation: string, romanization: string, status: int, langId: int, sentence: string, notes: string, tags: array<string>, statusLabel: string}|array{error: string}
      */
     public function getTermDetails(int $termId, ?string $ann = null): array
     {
@@ -2191,5 +2191,253 @@ class VocabularyApiHandler
     public function formatImportedTerms(string $lastUpdate, int $page, int $count): array
     {
         return $this->importedTermsList($lastUpdate, $page, $count);
+    }
+
+    // =========================================================================
+    // Word Family API Methods (Phase 3)
+    // =========================================================================
+
+    /**
+     * Get word family for a term.
+     *
+     * Returns all words sharing the same lemma with statistics.
+     *
+     * @param int $termId Term ID
+     *
+     * @return array Word family data or error
+     */
+    public function getTermFamily(int $termId): array
+    {
+        $lemmaService = $this->getLemmaService();
+        $family = $lemmaService->getWordFamilyDetails($termId);
+
+        if ($family === null) {
+            return ['error' => 'Term not found'];
+        }
+
+        return $family;
+    }
+
+    /**
+     * Get word family by lemma.
+     *
+     * @param int    $langId  Language ID
+     * @param string $lemmaLc Lowercase lemma
+     *
+     * @return array Word family data or error
+     */
+    public function getWordFamilyByLemma(int $langId, string $lemmaLc): array
+    {
+        $lemmaService = $this->getLemmaService();
+        $family = $lemmaService->getWordFamilyByLemma($langId, $lemmaLc);
+
+        if ($family === null) {
+            return ['error' => 'Word family not found'];
+        }
+
+        return $family;
+    }
+
+    /**
+     * Get paginated list of word families for a language.
+     *
+     * @param int    $langId  Language ID
+     * @param int    $page    Page number
+     * @param int    $perPage Items per page
+     * @param string $sortBy  Sort field
+     * @param string $sortDir Sort direction
+     *
+     * @return array{families: array, pagination: array}
+     */
+    public function getWordFamilyList(
+        int $langId,
+        int $page = 1,
+        int $perPage = 50,
+        string $sortBy = 'lemma',
+        string $sortDir = 'asc'
+    ): array {
+        $lemmaService = $this->getLemmaService();
+        return $lemmaService->getWordFamilyList($langId, $page, $perPage, $sortBy, $sortDir);
+    }
+
+    /**
+     * Update status for all words in a word family.
+     *
+     * @param int    $langId  Language ID
+     * @param string $lemmaLc Lowercase lemma
+     * @param int    $status  New status
+     *
+     * @return array{success: bool, count?: int, error?: string}
+     */
+    public function updateWordFamilyStatus(int $langId, string $lemmaLc, int $status): array
+    {
+        if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+            return ['success' => false, 'error' => 'Invalid status'];
+        }
+
+        $lemmaService = $this->getLemmaService();
+        $count = $lemmaService->updateWordFamilyStatus($langId, $lemmaLc, $status);
+
+        return ['success' => true, 'count' => $count];
+    }
+
+    /**
+     * Get suggestion for updating related word family members after status change.
+     *
+     * @param int $termId    Term that was updated
+     * @param int $newStatus New status that was set
+     *
+     * @return array{suggestion: string, affected_count: int, term_ids: int[]}
+     */
+    public function getFamilyUpdateSuggestion(int $termId, int $newStatus): array
+    {
+        $lemmaService = $this->getLemmaService();
+        return $lemmaService->getSuggestedFamilyUpdate($termId, $newStatus);
+    }
+
+    /**
+     * Apply suggested family update (bulk status change).
+     *
+     * @param int[] $termIds Term IDs to update
+     * @param int   $status  New status
+     *
+     * @return array{success: bool, count: int}
+     */
+    public function applyFamilyUpdate(array $termIds, int $status): array
+    {
+        if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+            return ['success' => false, 'count' => 0];
+        }
+
+        $lemmaService = $this->getLemmaService();
+        $count = $lemmaService->bulkUpdateTermStatus($termIds, $status);
+
+        return ['success' => true, 'count' => $count];
+    }
+
+    /**
+     * Get lemma statistics for a language.
+     *
+     * @param int $langId Language ID
+     *
+     * @return array Statistics data
+     */
+    public function getLemmaStatistics(int $langId): array
+    {
+        $lemmaService = $this->getLemmaService();
+
+        return [
+            'basic' => $lemmaService->getLemmaStatistics($langId),
+            'aggregate' => $lemmaService->getLemmaAggregateStats($langId),
+        ];
+    }
+
+    /**
+     * Get the LemmaService instance.
+     *
+     * @return \Lwt\Modules\Vocabulary\Application\Services\LemmaService
+     */
+    private function getLemmaService(): \Lwt\Modules\Vocabulary\Application\Services\LemmaService
+    {
+        return new \Lwt\Modules\Vocabulary\Application\Services\LemmaService();
+    }
+
+    // =========================================================================
+    // Word Family API Response Formatters
+    // =========================================================================
+
+    /**
+     * Format response for getting term family.
+     *
+     * @param int $termId Term ID
+     *
+     * @return array
+     */
+    public function formatGetTermFamily(int $termId): array
+    {
+        return $this->getTermFamily($termId);
+    }
+
+    /**
+     * Format response for getting word family by lemma.
+     *
+     * @param int    $langId  Language ID
+     * @param string $lemmaLc Lowercase lemma
+     *
+     * @return array
+     */
+    public function formatGetWordFamilyByLemma(int $langId, string $lemmaLc): array
+    {
+        return $this->getWordFamilyByLemma($langId, $lemmaLc);
+    }
+
+    /**
+     * Format response for getting word family list.
+     *
+     * @param int    $langId  Language ID
+     * @param array  $params  Query parameters
+     *
+     * @return array
+     */
+    public function formatGetWordFamilyList(int $langId, array $params = []): array
+    {
+        $page = max(1, (int) ($params['page'] ?? 1));
+        $perPage = max(1, min(100, (int) ($params['per_page'] ?? 50)));
+        $sortBy = $params['sort_by'] ?? 'lemma';
+        $sortDir = $params['sort_dir'] ?? 'asc';
+
+        return $this->getWordFamilyList($langId, $page, $perPage, $sortBy, $sortDir);
+    }
+
+    /**
+     * Format response for updating word family status.
+     *
+     * @param int    $langId  Language ID
+     * @param string $lemmaLc Lowercase lemma
+     * @param int    $status  New status
+     *
+     * @return array
+     */
+    public function formatUpdateWordFamilyStatus(int $langId, string $lemmaLc, int $status): array
+    {
+        return $this->updateWordFamilyStatus($langId, $lemmaLc, $status);
+    }
+
+    /**
+     * Format response for getting family update suggestion.
+     *
+     * @param int $termId    Term ID
+     * @param int $newStatus New status
+     *
+     * @return array
+     */
+    public function formatGetFamilyUpdateSuggestion(int $termId, int $newStatus): array
+    {
+        return $this->getFamilyUpdateSuggestion($termId, $newStatus);
+    }
+
+    /**
+     * Format response for applying family update.
+     *
+     * @param array $termIds Term IDs
+     * @param int   $status  New status
+     *
+     * @return array
+     */
+    public function formatApplyFamilyUpdate(array $termIds, int $status): array
+    {
+        return $this->applyFamilyUpdate($termIds, $status);
+    }
+
+    /**
+     * Format response for getting lemma statistics.
+     *
+     * @param int $langId Language ID
+     *
+     * @return array
+     */
+    public function formatGetLemmaStatistics(int $langId): array
+    {
+        return $this->getLemmaStatistics($langId);
     }
 }

@@ -204,4 +204,60 @@ class LemmaServiceTest extends TestCase
         $this->assertArrayHasKey('unmatched', $result);
         $this->assertArrayHasKey('errors', $result);
     }
+
+    // =========================================================================
+    // Phase 3: Word Family Tests (Unit tests without database)
+    // =========================================================================
+
+    public function testUpdateWordFamilyStatusRejectsInvalidStatus(): void
+    {
+        // This tests the input validation which happens before database access
+        $result = $this->service->updateWordFamilyStatus(1, 'run', 10);
+
+        $this->assertSame(0, $result);
+    }
+
+    public function testUpdateWordFamilyStatusRejectsStatus0(): void
+    {
+        $result = $this->service->updateWordFamilyStatus(1, 'run', 0);
+
+        $this->assertSame(0, $result);
+    }
+
+    public function testUpdateWordFamilyStatusRejectsStatus100(): void
+    {
+        $result = $this->service->updateWordFamilyStatus(1, 'run', 100);
+
+        $this->assertSame(0, $result);
+    }
+
+    public function testGetWordFamilyByLemmaReturnsNullForEmptyLemma(): void
+    {
+        // This tests the early return for empty lemma
+        $result = $this->service->getWordFamilyByLemma(1, '');
+
+        $this->assertNull($result);
+    }
+
+    public function testBulkUpdateTermStatusRejectsEmptyTermIds(): void
+    {
+        // This tests input validation before database access
+        $result = $this->service->bulkUpdateTermStatus([], 5);
+
+        $this->assertSame(0, $result);
+    }
+
+    public function testBulkUpdateTermStatusRejectsInvalidStatus(): void
+    {
+        $result = $this->service->bulkUpdateTermStatus([1, 2, 3], 10);
+
+        $this->assertSame(0, $result);
+    }
+
+    public function testBulkUpdateTermStatusRejectsStatus0(): void
+    {
+        $result = $this->service->bulkUpdateTermStatus([1, 2, 3], 0);
+
+        $this->assertSame(0, $result);
+    }
 }
