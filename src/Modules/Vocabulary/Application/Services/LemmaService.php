@@ -30,6 +30,7 @@ use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
  * - Suggesting lemmas for new words
  * - Batch lemmatization of existing vocabulary
  * - Word family queries
+ * - NLP integration via factory pattern
  *
  * @since 3.0.0
  */
@@ -50,6 +51,63 @@ class LemmaService
     ) {
         $this->lemmatizer = $lemmatizer ?? new DictionaryLemmatizer();
         $this->repository = $repository ?? new MySqlTermRepository();
+    }
+
+    /**
+     * Get the best available lemmatizer for a language.
+     *
+     * Uses the LemmatizerFactory to select the appropriate lemmatizer
+     * based on language configuration and availability.
+     *
+     * @param string $languageCode ISO language code
+     *
+     * @return LemmatizerInterface
+     */
+    public function getLemmatizerForLanguage(string $languageCode): LemmatizerInterface
+    {
+        return LemmatizerFactory::getBestAvailable($languageCode);
+    }
+
+    /**
+     * Get a lemmatizer by type.
+     *
+     * @param string $type Lemmatizer type ('dictionary', 'spacy', 'hybrid')
+     *
+     * @return LemmatizerInterface
+     */
+    public function getLemmatizerByType(string $type): LemmatizerInterface
+    {
+        return LemmatizerFactory::createLemmatizer($type);
+    }
+
+    /**
+     * Check if NLP service (spaCy) is available.
+     *
+     * @return bool
+     */
+    public function isNlpServiceAvailable(): bool
+    {
+        return LemmatizerFactory::isNlpServiceAvailable();
+    }
+
+    /**
+     * Get languages supported by the NLP service.
+     *
+     * @return string[]
+     */
+    public function getNlpSupportedLanguages(): array
+    {
+        return LemmatizerFactory::getNlpSupportedLanguages();
+    }
+
+    /**
+     * Get all languages potentially supported by NLP (including uninstalled models).
+     *
+     * @return string[]
+     */
+    public function getAllNlpLanguages(): array
+    {
+        return LemmatizerFactory::getAllNlpLanguages();
     }
 
     /**

@@ -197,4 +197,132 @@ class NlpServiceHandler
         $data = json_decode($response, true);
         return $data['parsers'] ?? [];
     }
+
+    // =========================================================================
+    // Lemmatization Methods
+    // =========================================================================
+
+    /**
+     * Lemmatize a single word using the NLP service.
+     *
+     * @param string $word         The word to lemmatize
+     * @param string $languageCode ISO language code (e.g., 'en', 'de')
+     * @param string $lemmatizer   Lemmatizer type: 'spacy' (default)
+     *
+     * @return string|null The lemma, or null if word is already base form or error
+     */
+    public function lemmatize(string $word, string $languageCode, string $lemmatizer = 'spacy'): ?string
+    {
+        $payload = json_encode([
+            'word' => $word,
+            'language' => $languageCode,
+            'lemmatizer' => $lemmatizer,
+        ]);
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => 'Content-Type: application/json',
+                'content' => $payload,
+                'timeout' => $this->timeout,
+                'ignore_errors' => true,
+            ]
+        ]);
+
+        $response = @file_get_contents($this->baseUrl . '/lemmatize/', false, $context);
+        if ($response === false) {
+            return null;
+        }
+
+        $data = json_decode($response, true);
+        return $data['lemma'] ?? null;
+    }
+
+    /**
+     * Lemmatize multiple words using the NLP service.
+     *
+     * @param array  $words        Words to lemmatize
+     * @param string $languageCode ISO language code
+     * @param string $lemmatizer   Lemmatizer type: 'spacy' (default)
+     *
+     * @return array<string, string|null> Mapping of words to lemmas
+     */
+    public function lemmatizeBatch(array $words, string $languageCode, string $lemmatizer = 'spacy'): array
+    {
+        if (empty($words)) {
+            return [];
+        }
+
+        $payload = json_encode([
+            'words' => $words,
+            'language' => $languageCode,
+            'lemmatizer' => $lemmatizer,
+        ]);
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => 'Content-Type: application/json',
+                'content' => $payload,
+                'timeout' => $this->timeout,
+                'ignore_errors' => true,
+            ]
+        ]);
+
+        $response = @file_get_contents($this->baseUrl . '/lemmatize/batch', false, $context);
+        if ($response === false) {
+            return array_fill_keys($words, null);
+        }
+
+        $data = json_decode($response, true);
+        return $data['results'] ?? array_fill_keys($words, null);
+    }
+
+    /**
+     * Get list of available lemmatizers and their supported languages.
+     *
+     * @return array Lemmatizer information
+     */
+    public function getAvailableLemmatizers(): array
+    {
+        $context = stream_context_create([
+            'http' => ['method' => 'GET', 'timeout' => 10]
+        ]);
+
+        $response = @file_get_contents($this->baseUrl . '/lemmatize/available', false, $context);
+        if ($response === false) {
+            return [];
+        }
+
+        return json_decode($response, true) ?? [];
+    }
+
+    /**
+     * Check if a language is supported for lemmatization.
+     *
+     * @param string $languageCode ISO language code
+     *
+     * @return array Language support information
+     */
+    public function checkLemmatizationSupport(string $languageCode): array
+    {
+        $context = stream_context_create([
+            'http' => ['method' => 'GET', 'timeout' => 10]
+        ]);
+
+        $response = @file_get_contents(
+            $this->baseUrl . '/lemmatize/languages/' . urlencode($languageCode),
+            false,
+            $context
+        );
+
+        if ($response === false) {
+            return [
+                'language' => $languageCode,
+                'spacy' => ['supported' => false, 'installed' => false, 'model' => null]
+            ];
+        }
+
+        return json_decode($response, true) ?? [];
+    }
 }
