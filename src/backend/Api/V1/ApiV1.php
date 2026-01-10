@@ -674,6 +674,35 @@ class ApiV1
                 return;
             }
             Response::success($this->adminHandler->formatTextsStatistics($textIds));
+        } elseif (($fragments[1] ?? '') === 'scoring') {
+            // Handle scoring endpoints
+            if (($fragments[2] ?? '') === 'recommended') {
+                // GET /texts/scoring/recommended?language_id=N - get recommended texts
+                $langId = (int)($params['language_id'] ?? 0);
+                if ($langId <= 0) {
+                    Response::error('language_id is required', 400);
+                }
+                Response::success($this->textHandler->formatGetRecommendedTexts($langId, $params));
+            } else {
+                // GET /texts/scoring?text_id=N or text_ids=1,2,3 - get score(s)
+                $textId = isset($params['text_id']) ? (int)$params['text_id'] : 0;
+                $textIds = $params['text_ids'] ?? '';
+
+                if ($textId > 0) {
+                    // Single text score
+                    Response::success($this->textHandler->formatGetTextScore($textId));
+                } elseif ($textIds !== '') {
+                    // Multiple text scores
+                    $ids = array_map('intval', explode(',', $textIds));
+                    $ids = array_filter($ids, fn($id) => $id > 0);
+                    if (empty($ids)) {
+                        Response::error('No valid text IDs provided', 400);
+                    }
+                    Response::success($this->textHandler->formatGetTextScores($ids));
+                } else {
+                    Response::error('text_id or text_ids parameter is required', 400);
+                }
+            }
         } elseif (($fragments[1] ?? '') === 'by-language') {
             // GET /texts/by-language/{langId} - get paginated texts for a language
             if (!isset($fragments[2]) || !ctype_digit($fragments[2])) {

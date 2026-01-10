@@ -58,6 +58,8 @@ class Endpoints
         'word-families/stats' => ['GET'],
         'texts' => ['GET', 'POST', 'PUT'],
         'texts/statistics' => ['GET'],
+        'texts/scoring' => ['GET'],
+        'texts/scoring/recommended' => ['GET'],
         'texts/by-language' => ['GET'],
         'texts/archived-by-language' => ['GET'],
         'feeds' => ['GET', 'POST', 'PUT', 'DELETE'],
