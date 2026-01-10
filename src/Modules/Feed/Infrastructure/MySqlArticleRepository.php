@@ -78,7 +78,7 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
      *
      * @param Article $entity
      *
-     * @return array<string, mixed>
+     * @return array<string, scalar|null>
      */
     protected function mapToRow(object $entity): array
     {

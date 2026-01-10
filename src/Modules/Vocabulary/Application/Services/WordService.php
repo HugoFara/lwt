@@ -828,10 +828,10 @@ class WordService
     /**
      * Build the query condition for word search with placeholders.
      *
-     * @param string   $queryMode  Query mode
-     * @param string   $regexMode  Regex mode (empty for LIKE, 'REGEXP' for regex)
-     * @param array    &$params    Reference to params array to add values
-     * @param string   $queryValue The query value to search for
+     * @param string            $queryMode  Query mode
+     * @param string            $regexMode  Regex mode (empty for LIKE, 'REGEXP' for regex)
+     * @param array<int, mixed> &$params    Reference to params array to add values
+     * @param string            $queryValue The query value to search for
      *
      * @return string SQL condition with placeholders
      */

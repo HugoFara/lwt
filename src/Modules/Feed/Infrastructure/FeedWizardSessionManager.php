@@ -647,6 +647,7 @@ class FeedWizardSessionManager
         if (!isset($feed[$index]) || !is_array($feed[$index])) {
             return null;
         }
+        /** @var array<string, mixed> */
         return $feed[$index];
     }
 

@@ -88,7 +88,7 @@ class MySqlUserRepository implements UserRepositoryInterface
      *
      * @param User $entity The user entity
      *
-     * @return array<string, mixed>
+     * @return array<string, scalar|null>
      */
     private function mapToRow(User $entity): array
     {

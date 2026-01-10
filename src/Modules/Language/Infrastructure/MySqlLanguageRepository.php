@@ -120,7 +120,7 @@ class MySqlLanguageRepository implements LanguageRepositoryInterface
      *
      * @param Language $entity The language entity
      *
-     * @return array<string, mixed>
+     * @return array<string, scalar|null>
      */
     private function mapToRow(Language $entity): array
     {

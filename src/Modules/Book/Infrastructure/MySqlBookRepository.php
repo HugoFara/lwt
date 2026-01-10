@@ -129,7 +129,7 @@ class MySqlBookRepository implements BookRepositoryInterface
      *
      * @param Book $entity
      *
-     * @return array<string, mixed>
+     * @return array<string, scalar|null>
      */
     protected function mapToRow(object $entity): array
     {

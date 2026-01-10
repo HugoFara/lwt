@@ -76,7 +76,7 @@ class MySqlFeedRepository extends AbstractRepository implements FeedRepositoryIn
      *
      * @param Feed $entity
      *
-     * @return array<string, mixed>
+     * @return array<string, scalar|null>
      */
     protected function mapToRow(object $entity): array
     {

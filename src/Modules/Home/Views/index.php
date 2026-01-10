@@ -76,7 +76,10 @@ function renderHomeConfig(?array $lastTextInfo, string $base): void
 // Validate injected variables from controller
 assert(isset($dashboardData) && is_array($dashboardData));
 assert(isset($languages) && is_array($languages));
-/** @var array<int, array{id: int, name: string}> $languages */
+/**
+ * @var array<int, array{id: int, name: string}> $languages
+ * @psalm-var list<array{id: int, name: string}> $languages
+ */
 
 // Extract variables from dashboard data with proper types
 /** @var int $currentlang */
@@ -202,7 +205,10 @@ if ($currentTextInfo !== null && $currenttext !== null) {
             <div class="control">
                 <div class="select is-medium">
                     <select id="filterlang" data-action="set-lang" data-ajax="true" data-redirect="<?php echo $base; ?>/">
-                        <?php echo SelectOptionsBuilder::forLanguages($languages, $currentlang, '[Select...]'); ?>
+                        <?php
+                        /** @var list<array{id: int, name: string}> $languages */
+                        echo SelectOptionsBuilder::forLanguages($languages, $currentlang, '[Select...]');
+                        ?>
                     </select>
                 </div>
             </div>

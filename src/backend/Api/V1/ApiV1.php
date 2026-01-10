@@ -1800,7 +1800,7 @@ class ApiV1
     /**
      * Parse JSON body for PUT/DELETE requests.
      *
-     * @return array Parsed body data
+     * @return array<string, mixed> Parsed body data
      */
     private static function parseJsonBody(): array
     {
@@ -1808,7 +1808,7 @@ class ApiV1
         if ($input === false || $input === '') {
             return [];
         }
-        /** @var array|null $data */
+        /** @var array<string, mixed>|null $data */
         $data = json_decode($input, true);
         return is_array($data) ? $data : [];
     }
@@ -1827,14 +1827,33 @@ class ApiV1
         }
 
         // Get body data based on method
-        $bodyData = [];
-        if ($method === 'POST') {
-            $bodyData = !empty($_POST) ? $_POST : self::parseJsonBody();
-        } elseif (in_array($method, ['PUT', 'DELETE'])) {
-            $bodyData = self::parseJsonBody();
-        }
+        $bodyData = self::getRequestBody($method);
 
         $api = new self();
         $api->handle($method, $_SERVER['REQUEST_URI'] ?? '/', $bodyData);
+    }
+
+    /**
+     * Get request body data based on HTTP method.
+     *
+     * @param string $method HTTP method
+     *
+     * @return array<string, mixed>
+     */
+    private static function getRequestBody(string $method): array
+    {
+        if ($method === 'POST') {
+            if (!empty($_POST)) {
+                /** @var array<string, mixed> */
+                return $_POST;
+            }
+            return self::parseJsonBody();
+        }
+
+        if (in_array($method, ['PUT', 'DELETE'])) {
+            return self::parseJsonBody();
+        }
+
+        return [];
     }
 }

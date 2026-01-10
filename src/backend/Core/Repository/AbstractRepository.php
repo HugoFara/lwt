@@ -147,6 +147,8 @@ abstract class AbstractRepository implements RepositoryInterface
      *
      * @psalm-suppress InvalidReturnStatement
      *
+     * @param array<string, mixed> $criteria
+     *
      * @return object|null
      * @psalm-return T|null
      */
