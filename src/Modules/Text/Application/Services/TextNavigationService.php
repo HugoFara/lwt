@@ -59,8 +59,8 @@ class TextNavigationService
             $params[] = $currentlang;
         }
 
-        $currentquery = InputValidator::getStringParam("query");
-        $currentquerymode = InputValidator::getStringParam("query_mode", 'title,text');
+        $currentquery = InputValidator::getString("query");
+        $currentquerymode = InputValidator::getString("query_mode", 'title,text');
         $currentregexmode = Settings::getWithDefault("set-regex-mode");
         $wh_query = '';
         if ($currentquery != '') {
@@ -87,14 +87,14 @@ class TextNavigationService
         }
 
         $currenttag1 = Validation::textTag(
-            InputValidator::getStringParam("tag1"),
+            InputValidator::getString("tag1"),
             $currentlang
         );
         $currenttag2 = Validation::textTag(
-            InputValidator::getStringParam("tag2"),
+            InputValidator::getString("tag2"),
             $currentlang
         );
-        $currenttag12 = InputValidator::getStringParam("tag12");
+        $currenttag12 = InputValidator::getString("tag12");
         $wh_tag1 = null;
         $wh_tag2 = null;
         if ($currenttag1 == '' && $currenttag2 == '') {
