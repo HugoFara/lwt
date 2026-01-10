@@ -143,7 +143,6 @@ class RoutesTest extends TestCase
             'text display' => ['/text/display', "{$textController}@display"],
             'text print' => ['/text/print', "{$textPrintController}@printAnnotated"],
             'text print-plain' => ['/text/print-plain', "{$textPrintController}@printPlain"],
-            'text import-long' => ['/text/import-long', "{$textController}@importLong"],
             'text set-mode' => ['/text/set-mode', "{$textController}@setMode"],
             'text check' => ['/text/check', "{$textController}@check"],
             'text archived' => ['/text/archived', "{$textController}@archived"],
@@ -426,7 +425,6 @@ class RoutesTest extends TestCase
         // This test ensures naming conventions are followed
         $routes = [
             // New routes should use hyphens for word separation
-            '/text/import-long' => 'should use hyphens',
             '/word/edit-multi' => 'should use hyphens',
             '/word/inline-edit' => 'should use hyphens',
             '/word/bulk-translate' => 'should use hyphens',

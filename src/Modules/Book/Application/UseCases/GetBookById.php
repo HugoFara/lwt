@@ -68,9 +68,13 @@ class GetBookById
 
         $chapters = $this->bookRepository->getChapters($bookId);
 
+        // Book retrieved from repository always has an ID
+        $id = $book->id();
+        assert($id !== null, 'Book retrieved by ID must have an ID');
+
         return [
             'book' => [
-                'id' => $book->id(),
+                'id' => $id,
                 'title' => $book->title(),
                 'author' => $book->author(),
                 'description' => $book->description(),

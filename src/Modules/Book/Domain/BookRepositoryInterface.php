@@ -27,6 +27,27 @@ namespace Lwt\Modules\Book\Domain;
 interface BookRepositoryInterface
 {
     /**
+     * Begin a database transaction.
+     *
+     * @return void
+     */
+    public function beginTransaction(): void;
+
+    /**
+     * Commit the current database transaction.
+     *
+     * @return void
+     */
+    public function commit(): void;
+
+    /**
+     * Rollback the current database transaction.
+     *
+     * @return void
+     */
+    public function rollback(): void;
+
+    /**
      * Find a book by its ID.
      *
      * @param int $id Book ID

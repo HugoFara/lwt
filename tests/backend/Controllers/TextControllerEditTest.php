@@ -180,17 +180,6 @@ class TextControllerEditTest extends TestCase
         $this->assertTrue(method_exists($controller, 'display'));
     }
 
-    public function testControllerHasImportLongMethod(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
-
-        $this->assertTrue(method_exists($controller, 'importLong'));
-    }
-
     public function testControllerHasSetModeMethod(): void
     {
         if (!self::$dbConnected) {
@@ -638,55 +627,6 @@ class TextControllerEditTest extends TestCase
         $this->assertIsArray($result);
         $this->assertArrayHasKey(self::$testLangId, $result);
         $this->assertStringContainsString('translate.test', $result[self::$testLangId]);
-    }
-
-    // ===== Long text preparation tests =====
-
-    public function testPrepareLongTextDataFromText(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $service = new TextFacade();
-
-        // Test with simple text
-        $result = $service->prepareLongTextData(null, "Test text content.", 1);
-
-        $this->assertIsString($result);
-        $this->assertEquals("Test text content.", $result);
-    }
-
-    public function testPrepareLongTextDataWithParagraphHandling(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $service = new TextFacade();
-
-        // Test with paragraph handling mode 2 (keep paragraphs)
-        $text = "Para 1.\n\nPara 2.";
-        $result = $service->prepareLongTextData(null, $text, 2);
-
-        $this->assertIsString($result);
-        $this->assertStringContainsString("\n", $result);
-    }
-
-    public function testSplitLongText(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $service = new TextFacade();
-
-        // Test splitting text into chunks
-        $text = "First sentence. Second sentence. Third sentence. Fourth sentence. Fifth sentence.";
-        $result = $service->splitLongText($text, self::$testLangId, 2);
-
-        $this->assertIsArray($result);
-        // Should split into multiple chunks based on maxSent parameter
     }
 
     // ===== Text per page settings tests =====

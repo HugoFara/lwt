@@ -664,45 +664,6 @@ class TextServiceTest extends TestCase
         $this->assertNull($result);
     }
 
-    // ===== Long text import tests =====
-
-    public function testPrepareLongTextDataReturnsString(): void
-    {
-        $result = $this->service->prepareLongTextData(null, "Test text\n\nParagraph 2", 2);
-        $this->assertIsString($result);
-    }
-
-    public function testPrepareLongTextDataHandlesNewlines(): void
-    {
-        $result = $this->service->prepareLongTextData(null, "Line 1\nLine 2", 1);
-        $this->assertIsString($result);
-    }
-
-    public function testPrepareLongTextDataHandlesDoubleParagraphs(): void
-    {
-        $result = $this->service->prepareLongTextData(null, "Para 1\n\nPara 2", 2);
-        $this->assertStringContainsString("\n", $result);
-    }
-
-    public function testSplitLongTextReturnsArray(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        // Need an existing language ID for this test
-        $langId = (int) Connection::fetchValue(
-            "SELECT LgID AS value FROM " . Globals::table('languages') . " LIMIT 1"
-        );
-
-        if ($langId === 0) {
-            $this->markTestSkipped('No language available for testing');
-        }
-
-        $result = $this->service->splitLongText("Test sentence. Another sentence.", $langId, 5);
-        $this->assertIsArray($result);
-    }
-
     // ===== Unarchive text tests =====
 
     public function testUnarchiveTextReturnsArrayForNonexistent(): void

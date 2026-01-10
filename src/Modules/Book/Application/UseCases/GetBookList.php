@@ -78,18 +78,24 @@ class GetBookList
         $totalPages = (int) ceil($total / $perPage);
 
         $bookData = array_map(
-            fn(Book $book) => [
-                'id' => $book->id(),
-                'title' => $book->title(),
-                'author' => $book->author(),
-                'languageId' => $book->languageId(),
-                'sourceType' => $book->sourceType(),
-                'totalChapters' => $book->totalChapters(),
-                'currentChapter' => $book->currentChapter(),
-                'progress' => $book->getProgressPercent(),
-                'createdAt' => $book->createdAt(),
-                'updatedAt' => $book->updatedAt(),
-            ],
+            function (Book $book): array {
+                // Books from repository always have IDs
+                $id = $book->id();
+                assert($id !== null, 'Book from repository must have an ID');
+
+                return [
+                    'id' => $id,
+                    'title' => $book->title(),
+                    'author' => $book->author(),
+                    'languageId' => $book->languageId(),
+                    'sourceType' => $book->sourceType(),
+                    'totalChapters' => $book->totalChapters(),
+                    'currentChapter' => $book->currentChapter(),
+                    'progress' => $book->getProgressPercent(),
+                    'createdAt' => $book->createdAt(),
+                    'updatedAt' => $book->updatedAt(),
+                ];
+            },
             $books
         );
 

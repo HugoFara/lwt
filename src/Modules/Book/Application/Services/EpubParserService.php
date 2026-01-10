@@ -15,6 +15,10 @@
 namespace Lwt\Modules\Book\Application\Services;
 
 use Kiwilan\Ebook\Ebook;
+use Kiwilan\Ebook\Formats\Epub\EpubModule;
+use Kiwilan\Ebook\Formats\Epub\Parser\EpubChapter;
+use Kiwilan\Ebook\Formats\Epub\Parser\EpubHtml;
+use Kiwilan\Ebook\Models\BookAuthor;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -55,6 +59,9 @@ class EpubParserService
 
         try {
             $ebook = Ebook::read($filePath);
+            if ($ebook === null) {
+                throw new RuntimeException("Failed to read EPUB file: {$filePath}");
+            }
         } catch (\Throwable $e) {
             throw new RuntimeException("Failed to parse EPUB file: {$e->getMessage()}", 0, $e);
         }
@@ -64,7 +71,7 @@ class EpubParserService
             'author' => $this->extractAuthor($ebook),
             'description' => $ebook->getDescription(),
             'language' => $ebook->getLanguage(),
-            'sourceHash' => hash_file('sha256', $filePath),
+            'sourceHash' => (string) hash_file('sha256', $filePath),
         ];
 
         $chapters = $this->extractChapters($ebook);
@@ -89,9 +96,10 @@ class EpubParserService
             return $author->getName();
         }
 
-        $creators = $ebook->getCreators();
-        if (!empty($creators)) {
-            return $creators[0]->getName();
+        /** @var BookAuthor[] $authors */
+        $authors = $ebook->getAuthors();
+        if (!empty($authors)) {
+            return $authors[0]->getName();
         }
 
         return null;
@@ -109,12 +117,14 @@ class EpubParserService
         $chapters = [];
         $chapterNum = 1;
 
-        // Try to get chapters from the ebook
-        $ebookChapters = $ebook->getChapters();
+        // Try to get chapters from the ebook via the EPUB parser
+        $epubModule = $this->getEpubModule($ebook);
+        if ($epubModule !== null) {
+            /** @var EpubChapter[] $ebookChapters */
+            $ebookChapters = $epubModule->getChapters();
 
-        if ($ebookChapters !== null && count($ebookChapters) > 0) {
             foreach ($ebookChapters as $chapter) {
-                $content = $this->cleanHtmlContent($chapter->getContent() ?? '');
+                $content = $this->cleanHtmlContent($chapter->content());
 
                 // Skip empty chapters
                 if (trim($content) === '') {
@@ -123,7 +133,7 @@ class EpubParserService
 
                 $chapters[] = [
                     'num' => $chapterNum,
-                    'title' => $chapter->getTitle() ?? "Chapter {$chapterNum}",
+                    'title' => $chapter->label() ?: "Chapter {$chapterNum}",
                     'content' => $content,
                 ];
                 $chapterNum++;
@@ -139,6 +149,22 @@ class EpubParserService
     }
 
     /**
+     * Get the EpubModule from an Ebook.
+     *
+     * @param Ebook $ebook The ebook object
+     *
+     * @return EpubModule|null The EPUB module or null if not an EPUB
+     */
+    private function getEpubModule(Ebook $ebook): ?EpubModule
+    {
+        $parser = $ebook->getParser();
+        if ($parser === null) {
+            return null;
+        }
+        return $parser->getEpub();
+    }
+
+    /**
      * Extract content from HTML files in the EPUB as fallback.
      *
      * @param Ebook $ebook The ebook object
@@ -150,11 +176,13 @@ class EpubParserService
         $chapters = [];
         $chapterNum = 1;
 
-        // Try to get pages/HTML content
-        $pages = $ebook->getPages();
-        if ($pages !== null) {
-            foreach ($pages as $page) {
-                $content = $this->cleanHtmlContent($page->getContent() ?? '');
+        // Try to get HTML content via the EPUB module
+        $epubModule = $this->getEpubModule($ebook);
+        if ($epubModule !== null) {
+            /** @var EpubHtml[] $htmlFiles */
+            $htmlFiles = $epubModule->getHtml();
+            foreach ($htmlFiles as $htmlFile) {
+                $content = $this->cleanHtmlContent($htmlFile->getBody() ?? '');
 
                 if (trim($content) === '') {
                     continue;
@@ -302,6 +330,9 @@ class EpubParserService
 
         try {
             $ebook = Ebook::read($filePath);
+            if ($ebook === null) {
+                return null;
+            }
 
             return [
                 'title' => $ebook->getTitle() ?? 'Unknown Title',

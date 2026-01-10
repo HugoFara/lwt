@@ -241,12 +241,12 @@ class CreateBookFromTexts
      * Apply tags to a text.
      *
      * @param int   $textId Text ID
-     * @param array $tagIds Array of tag IDs
+     * @param int[] $tagIds Array of tag IDs
      */
     private function applyTags(int $textId, array $tagIds): void
     {
         foreach ($tagIds as $tagId) {
-            $bindings = [$textId, (int) $tagId];
+            $bindings = [$textId, $tagId];
             Connection::preparedExecute(
                 "INSERT IGNORE INTO " . Globals::table('texttags') .
                 " (TtTxID, TtT2ID) VALUES (?, ?)",

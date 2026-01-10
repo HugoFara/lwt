@@ -68,6 +68,34 @@ class MySqlBookRepository implements BookRepositoryInterface
     /**
      * {@inheritdoc}
      */
+    public function beginTransaction(): void
+    {
+        Globals::getDbConnection()->begin_transaction();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function commit(): void
+    {
+        Globals::getDbConnection()->commit();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rollback(): void
+    {
+        Globals::getDbConnection()->rollback();
+    }
+
+    /**
+     * Map a database row to a Book entity.
+     *
+     * @param array $row Database row
+     *
+     * @return Book
+     */
     protected function mapToEntity(array $row): Book
     {
         return Book::reconstitute(
