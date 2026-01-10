@@ -223,7 +223,8 @@ abstract class VocabularyBaseController
             throw new \RuntimeException("View not found: $view");
         }
 
-        extract($data);
+        // EXTR_SKIP prevents overwriting existing variables
+        extract($data, EXTR_SKIP);
         require $viewFile;
     }
 }

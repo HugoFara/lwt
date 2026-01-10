@@ -38,9 +38,9 @@ class DownloadBackup
     /**
      * Execute the use case - generate and output backup file.
      *
-     * @return void Outputs file and exits
+     * @return never Outputs file and terminates
      */
-    public function execute(): void
+    public function execute(): never
     {
         $fname = "lwt-backup-exp_version-" . date('Y-m-d-H-i-s') . ".sql.gz";
         $out = "-- " . $fname . "\n";
