@@ -144,7 +144,7 @@ class Validation
                         select T2ID
                         from archivedtexts,
                         text_tags,
-                        archtexttags
+                        archived_text_tag_map
                         where T2ID = AgT2ID and AgAtID = AtID
                         group by T2ID order by T2Text
                     )
@@ -160,7 +160,7 @@ class Validation
                         select T2ID
                         from archivedtexts,
                         text_tags,
-                        archtexttags
+                        archived_text_tag_map
                         where T2ID = AgT2ID and AgAtID = AtID and AtLgID = " . $currentlang_int . "
                         group by T2ID order by T2Text
                     )
@@ -197,7 +197,7 @@ class Validation
                 $sql = "select (
                     $currenttag_int in (
                         select T2ID
-                        from texts, text_tags, texttags
+                        from texts, text_tags, text_tag_map
                         where T2ID = TtT2ID and TtTxID = TxID
                         group by T2ID
                         order by T2Text
@@ -212,7 +212,7 @@ class Validation
                 $sql = "select (
                     $currenttag_int in (
                         select T2ID
-                        from texts, text_tags, texttags
+                        from texts, text_tags, text_tag_map
                         where T2ID = TtT2ID and TtTxID = TxID and TxLgID = $currentlang_int
                         group by T2ID order by T2Text
                     )

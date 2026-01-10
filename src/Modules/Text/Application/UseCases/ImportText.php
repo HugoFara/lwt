@@ -140,8 +140,8 @@ class ImportText
         foreach ($tagIds as $tagId) {
             $bindings = [$textId, (int) $tagId];
             Connection::preparedExecute(
-                "INSERT IGNORE INTO texttags (TtTxID, TtT2ID) VALUES (?, ?)"
-                . UserScopedQuery::forTablePrepared('texttags', $bindings, '', 'texts'),
+                "INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID) VALUES (?, ?)"
+                . UserScopedQuery::forTablePrepared('text_tag_map', $bindings, '', 'texts'),
                 $bindings
             );
         }

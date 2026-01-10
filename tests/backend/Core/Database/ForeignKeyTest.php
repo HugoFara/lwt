@@ -337,7 +337,7 @@ class ForeignKeyTest extends TestCase
     }
 
     /**
-     * Test that deleting a text cascades to texttags.
+     * Test that deleting a text cascades to text_tag_map.
      */
     public function testTextDeleteCascadesToTextTags(): void
     {
@@ -352,11 +352,11 @@ class ForeignKeyTest extends TestCase
             'T2ID'
         );
 
-        Connection::query("INSERT INTO texttags (TtTxID, TtT2ID) VALUES ($textId, $tagId)");
+        Connection::query("INSERT INTO text_tag_map (TtTxID, TtT2ID) VALUES ($textId, $tagId)");
 
         // Verify texttag exists
         $beforeCount = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM texttags WHERE TtTxID = $textId",
+            "SELECT COUNT(*) AS cnt FROM text_tag_map WHERE TtTxID = $textId",
             'cnt'
         );
         $this->assertEquals(1, $beforeCount, 'Texttag should exist before delete');
@@ -366,7 +366,7 @@ class ForeignKeyTest extends TestCase
 
         // Verify texttag was cascaded
         $afterCount = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM texttags WHERE TtTxID = $textId",
+            "SELECT COUNT(*) AS cnt FROM text_tag_map WHERE TtTxID = $textId",
             'cnt'
         );
         $this->assertEquals(0, $afterCount, 'Texttag should be deleted via CASCADE');
@@ -483,7 +483,7 @@ class ForeignKeyTest extends TestCase
     }
 
     /**
-     * Test that deleting an archived text cascades to archtexttags.
+     * Test that deleting an archived text cascades to archived_text_tag_map.
      */
     public function testArchivedTextDeleteCascadesToArchTextTags(): void
     {
@@ -505,11 +505,11 @@ class ForeignKeyTest extends TestCase
             'T2ID'
         );
 
-        Connection::query("INSERT INTO archtexttags (AgAtID, AgT2ID) VALUES ($archId, $tagId)");
+        Connection::query("INSERT INTO archived_text_tag_map (AgAtID, AgT2ID) VALUES ($archId, $tagId)");
 
         // Verify archtexttag exists
         $beforeCount = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM archtexttags WHERE AgAtID = $archId",
+            "SELECT COUNT(*) AS cnt FROM archived_text_tag_map WHERE AgAtID = $archId",
             'cnt'
         );
         $this->assertEquals(1, $beforeCount, 'ArchTextTag should exist before delete');
@@ -519,7 +519,7 @@ class ForeignKeyTest extends TestCase
 
         // Verify archtexttag was cascaded
         $afterCount = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM archtexttags WHERE AgAtID = $archId",
+            "SELECT COUNT(*) AS cnt FROM archived_text_tag_map WHERE AgAtID = $archId",
             'cnt'
         );
         $this->assertEquals(0, $afterCount, 'ArchTextTag should be deleted via CASCADE');

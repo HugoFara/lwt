@@ -67,7 +67,7 @@ class TextCreationAdapter implements TextCreationInterface
 
         // Apply tag to the text
         $bindings = [(int) $textId, $tagName];
-        $sql = "INSERT INTO texttags (TtTxID, TtT2ID)
+        $sql = "INSERT INTO text_tag_map (TtTxID, TtT2ID)
              SELECT ?, T2ID FROM text_tags
              WHERE T2Text = ?"
             . UserScopedQuery::forTablePrepared('text_tags', $bindings);
@@ -83,7 +83,7 @@ class TextCreationAdapter implements TextCreationInterface
     {
         // Get all text IDs with this tag
         $bindings = [$tagName];
-        $sql = "SELECT TtTxID FROM texttags
+        $sql = "SELECT TtTxID FROM text_tag_map
              JOIN text_tags ON TtT2ID = T2ID
              WHERE T2Text = ?"
             . UserScopedQuery::forTablePrepared('text_tags', $bindings);
@@ -131,8 +131,8 @@ class TextCreationAdapter implements TextCreationInterface
 
             // Copy tags to archive
             Connection::preparedExecute(
-                "INSERT INTO archtexttags (AgAtID, AgT2ID)
-                 SELECT ?, TtT2ID FROM texttags
+                "INSERT INTO archived_text_tag_map (AgAtID, AgT2ID)
+                 SELECT ?, TtT2ID FROM text_tag_map
                  WHERE TtTxID = ?",
                 [$archiveId, $textId]
             );
@@ -147,8 +147,8 @@ class TextCreationAdapter implements TextCreationInterface
 
             // Clean orphaned text tags
             Connection::execute(
-                "DELETE texttags FROM (
-                    texttags LEFT JOIN texts ON TtTxID = TxID
+                "DELETE text_tag_map FROM (
+                    text_tag_map LEFT JOIN texts ON TtTxID = TxID
                 ) WHERE TxID IS NULL"
             );
         }
@@ -162,7 +162,7 @@ class TextCreationAdapter implements TextCreationInterface
     public function countTextsWithTag(string $tagName): int
     {
         $bindings = [$tagName];
-        $sql = "SELECT COUNT(DISTINCT TtTxID) as cnt FROM texttags
+        $sql = "SELECT COUNT(DISTINCT TtTxID) as cnt FROM text_tag_map
              JOIN text_tags ON TtT2ID = T2ID
              WHERE T2Text = ?"
             . UserScopedQuery::forTablePrepared('text_tags', $bindings);

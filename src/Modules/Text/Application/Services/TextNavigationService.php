@@ -141,7 +141,7 @@ class TextNavigationService
             $sql = 'SELECT TxID
             FROM (
                 (texts
-                    LEFT JOIN texttags ON TxID = TtTxID
+                    LEFT JOIN text_tag_map ON TxID = TtTxID
                 )
                 LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages
@@ -154,7 +154,7 @@ class TextNavigationService
             $sql = 'SELECT TxID
             FROM (
                 (texts
-                    LEFT JOIN texttags ON TxID = TtTxID
+                    LEFT JOIN text_tag_map ON TxID = TtTxID
                 )
                 LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages

@@ -139,13 +139,13 @@ class DeleteText
     private function cleanupTextTags(): void
     {
         Connection::execute(
-            "DELETE texttags
+            "DELETE text_tag_map
             FROM (
-                texttags
+                text_tag_map
                 LEFT JOIN texts ON TtTxID = TxID
             )
             WHERE TxID IS NULL"
-            . UserScopedQuery::forTable('texttags', '', 'texts'),
+            . UserScopedQuery::forTable('text_tag_map', '', 'texts'),
             ''
         );
     }
@@ -158,13 +158,13 @@ class DeleteText
     private function cleanupArchivedTextTags(): void
     {
         Connection::execute(
-            "DELETE archtexttags
+            "DELETE archived_text_tag_map
             FROM (
-                archtexttags
+                archived_text_tag_map
                 LEFT JOIN archivedtexts ON AgAtID = AtID
             )
             WHERE AtID IS NULL"
-            . UserScopedQuery::forTable('archtexttags', '', 'archivedtexts'),
+            . UserScopedQuery::forTable('archived_text_tag_map', '', 'archivedtexts'),
             ''
         );
     }

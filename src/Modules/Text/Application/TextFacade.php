@@ -534,7 +534,7 @@ class TextFacade
             LENGTH(TxAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                (texts LEFT JOIN texttags ON TxID = TtTxID)
+                (texts LEFT JOIN text_tag_map ON TxID = TtTxID)
                 LEFT JOIN text_tags ON T2ID = TtT2ID
             )
             WHERE TxLgID = ?
@@ -605,7 +605,7 @@ class TextFacade
             LENGTH(AtAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                (archivedtexts LEFT JOIN archtexttags ON AtID = AgAtID)
+                (archivedtexts LEFT JOIN archived_text_tag_map ON AtID = AgAtID)
                 LEFT JOIN text_tags ON T2ID = AgT2ID
             )
             WHERE AtLgID = ?

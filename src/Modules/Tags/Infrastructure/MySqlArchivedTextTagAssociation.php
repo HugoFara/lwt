@@ -24,13 +24,13 @@ use Lwt\Modules\Tags\Domain\TagRepositoryInterface;
 /**
  * MySQL implementation of TagAssociationInterface for archived text-tag links.
  *
- * Operates on the 'archtexttags' junction table.
+ * Operates on the 'archived_text_tag_map' junction table.
  *
  * @since 3.0.0
  */
 class MySqlArchivedTextTagAssociation implements TagAssociationInterface
 {
-    private const TABLE_NAME = 'archtexttags';
+    private const TABLE_NAME = 'archived_text_tag_map';
     private const ITEM_COLUMN = 'AgAtID';
     private const TAG_COLUMN = 'AgT2ID';
 
@@ -75,7 +75,7 @@ class MySqlArchivedTextTagAssociation implements TagAssociationInterface
     public function getTagTextsForItem(int $itemId): array
     {
         $rows = Connection::preparedFetchAll(
-            'SELECT T2Text FROM archtexttags, text_tags WHERE T2ID = AgT2ID AND AgAtID = ? ORDER BY T2Text',
+            'SELECT T2Text FROM archived_text_tag_map, text_tags WHERE T2ID = AgT2ID AND AgAtID = ? ORDER BY T2Text',
             [$itemId]
         );
 
@@ -116,7 +116,7 @@ class MySqlArchivedTextTagAssociation implements TagAssociationInterface
 
             // Associate using INSERT...SELECT to handle concurrent inserts
             Connection::preparedExecute(
-                'INSERT IGNORE INTO archtexttags (AgAtID, AgT2ID)
+                'INSERT IGNORE INTO archived_text_tag_map (AgAtID, AgT2ID)
                 SELECT ?, T2ID FROM text_tags WHERE T2Text = ?',
                 [$itemId, $tagName]
             );
@@ -213,9 +213,9 @@ class MySqlArchivedTextTagAssociation implements TagAssociationInterface
      */
     public function cleanupOrphanedLinks(): int
     {
-        // Delete archtexttags where the tag no longer exists
+        // Delete archived_text_tag_map where the tag no longer exists
         return Connection::preparedExecute(
-            'DELETE FROM archtexttags WHERE AgT2ID NOT IN (SELECT T2ID FROM text_tags)',
+            'DELETE FROM archived_text_tag_map WHERE AgT2ID NOT IN (SELECT T2ID FROM text_tags)',
             []
         );
     }

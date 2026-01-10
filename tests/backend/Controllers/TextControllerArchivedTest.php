@@ -118,7 +118,7 @@ class TextControllerArchivedTest extends TestCase
             // Clean up archived texts
             if (self::$testArchivedTextId > 0) {
                 Connection::query(
-                    "DELETE FROM " . Globals::table('archtexttags') . " WHERE AgAtID = " . self::$testArchivedTextId
+                    "DELETE FROM " . Globals::table('archived_text_tag_map') . " WHERE AgAtID = " . self::$testArchivedTextId
                 );
                 Connection::query(
                     "DELETE FROM " . Globals::table('archivedtexts') . " WHERE AtID = " . self::$testArchivedTextId
@@ -126,7 +126,7 @@ class TextControllerArchivedTest extends TestCase
             }
             if (self::$testArchivedText2Id > 0) {
                 Connection::query(
-                    "DELETE FROM " . Globals::table('archtexttags') . " WHERE AgAtID = " . self::$testArchivedText2Id
+                    "DELETE FROM " . Globals::table('archived_text_tag_map') . " WHERE AgAtID = " . self::$testArchivedText2Id
                 );
                 Connection::query(
                     "DELETE FROM " . Globals::table('archivedtexts') . " WHERE AtID = " . self::$testArchivedText2Id

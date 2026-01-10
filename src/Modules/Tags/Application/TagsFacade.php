@@ -551,7 +551,7 @@ class TagsFacade
      */
     public static function getTextTagsHtml(int $textId): string
     {
-        $html = '<ul id="texttags" class="respinput">';
+        $html = '<ul id="text_tag_map" class="respinput">';
 
         if ($textId > 0) {
             $tagNames = self::getTextAssociation()->getTagTextsForItem($textId);
@@ -572,7 +572,7 @@ class TagsFacade
      */
     public static function getArchivedTextTagsHtml(int $textId): string
     {
-        $html = '<ul id="texttags" class="respinput">';
+        $html = '<ul id="text_tag_map" class="respinput">';
 
         if ($textId > 0) {
             $tagNames = self::getArchivedTextAssociation()->getTagTextsForItem($textId);
@@ -874,7 +874,7 @@ class TagsFacade
         }
 
         $sql = 'SELECT TxID FROM texts
-            LEFT JOIN texttags ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
+            LEFT JOIN text_tag_map ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
             WHERE TtT2ID IS NULL AND TxID IN ' . $idList
             . UserScopedQuery::forTable('texts');
         $res = Connection::query($sql);
@@ -883,7 +883,7 @@ class TagsFacade
         if ($res instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($res)) {
                 $count += (int) Connection::execute(
-                    'INSERT IGNORE INTO texttags (TtTxID, TtT2ID)
+                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID)
                     VALUES(' . (int)$record['TxID'] . ', ' . $tagId . ')'
                 );
             }
@@ -927,7 +927,7 @@ class TagsFacade
         if ($res instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($res)) {
                 $count++;
-                QueryBuilder::table('texttags')
+                QueryBuilder::table('text_tag_map')
                     ->where('TtTxID', '=', (int)$record['TxID'])
                     ->where('TtT2ID', '=', (int)$tagId)
                     ->delete();
@@ -958,7 +958,7 @@ class TagsFacade
         }
 
         $sql = 'SELECT AtID FROM archivedtexts
-            LEFT JOIN archtexttags ON AtID = AgAtID AND AgT2ID = ' . $tagId . '
+            LEFT JOIN archived_text_tag_map ON AtID = AgAtID AND AgT2ID = ' . $tagId . '
             WHERE AgT2ID IS NULL AND AtID IN ' . $idList
             . UserScopedQuery::forTable('archivedtexts');
         $res = Connection::query($sql);
@@ -967,7 +967,7 @@ class TagsFacade
         if ($res instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($res)) {
                 $count += (int) Connection::execute(
-                    'INSERT IGNORE INTO archtexttags (AgAtID, AgT2ID)
+                    'INSERT IGNORE INTO archived_text_tag_map (AgAtID, AgT2ID)
                     VALUES(' . (int)$record['AtID'] . ', ' . $tagId . ')'
                 );
             }
@@ -1013,7 +1013,7 @@ class TagsFacade
         if ($res instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($res)) {
                 $count++;
-                QueryBuilder::table('archtexttags')
+                QueryBuilder::table('archived_text_tag_map')
                     ->where('AgAtID', '=', (int)$record['AtID'])
                     ->where('AgT2ID', '=', (int)$tagId)
                     ->delete();
@@ -1101,7 +1101,7 @@ class TagsFacade
         if ($langId === '') {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM texts, text_tags, texttags
+                FROM texts, text_tags, text_tag_map
                 WHERE T2ID = TtT2ID AND TtTxID = TxID
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1110,7 +1110,7 @@ class TagsFacade
         } else {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM texts, text_tags, texttags
+                FROM texts, text_tags, text_tag_map
                 WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxLgID = ?
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1157,7 +1157,7 @@ class TagsFacade
                 'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
                 GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
                 FROM texts
-                LEFT JOIN texttags ON TxID = TtTxID
+                LEFT JOIN text_tag_map ON TxID = TtTxID
                 LEFT JOIN text_tags ON TtT2ID = T2ID
                 WHERE TxLgID = ?
                 GROUP BY UPPER(TagName)',
@@ -1168,7 +1168,7 @@ class TagsFacade
                 'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
                 GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
                 FROM texts
-                LEFT JOIN texttags ON TxID = TtTxID
+                LEFT JOIN text_tag_map ON TxID = TtTxID
                 LEFT JOIN text_tags ON TtT2ID = T2ID
                 GROUP BY UPPER(TagName)',
                 []
@@ -1210,7 +1210,7 @@ class TagsFacade
         if ($langId === '') {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM archivedtexts, text_tags, archtexttags
+                FROM archivedtexts, text_tags, archived_text_tag_map
                 WHERE T2ID = AgT2ID AND AgAtID = AtID
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1219,7 +1219,7 @@ class TagsFacade
         } else {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM archivedtexts, text_tags, archtexttags
+                FROM archivedtexts, text_tags, archived_text_tag_map
                 WHERE T2ID = AgT2ID AND AgAtID = AtID AND AtLgID = ?
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",

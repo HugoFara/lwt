@@ -326,7 +326,7 @@ class SqlValidatorTest extends TestCase
     {
         return [
             ['archivedtexts'],
-            ['archtexttags'],
+            ['archived_text_tag_map'],
             ['feedlinks'],
             ['languages'],
             ['newsfeeds'],
@@ -337,7 +337,7 @@ class SqlValidatorTest extends TestCase
             ['textitems'],
             ['word_occurrences'],
             ['texts'],
-            ['texttags'],
+            ['text_tag_map'],
             ['words'],
             ['wordtags'],
         ];

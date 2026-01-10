@@ -24,13 +24,13 @@ use Lwt\Modules\Tags\Domain\TagRepositoryInterface;
 /**
  * MySQL implementation of TagAssociationInterface for text-tag links.
  *
- * Operates on the 'texttags' junction table.
+ * Operates on the 'text_tag_map' junction table.
  *
  * @since 3.0.0
  */
 class MySqlTextTagAssociation implements TagAssociationInterface
 {
-    private const TABLE_NAME = 'texttags';
+    private const TABLE_NAME = 'text_tag_map';
     private const ITEM_COLUMN = 'TtTxID';
     private const TAG_COLUMN = 'TtT2ID';
 
@@ -75,7 +75,7 @@ class MySqlTextTagAssociation implements TagAssociationInterface
     public function getTagTextsForItem(int $itemId): array
     {
         $rows = Connection::preparedFetchAll(
-            'SELECT T2Text FROM texttags, text_tags WHERE T2ID = TtT2ID AND TtTxID = ? ORDER BY T2Text',
+            'SELECT T2Text FROM text_tag_map, text_tags WHERE T2ID = TtT2ID AND TtTxID = ? ORDER BY T2Text',
             [$itemId]
         );
 
@@ -116,7 +116,7 @@ class MySqlTextTagAssociation implements TagAssociationInterface
 
             // Associate using INSERT...SELECT to handle concurrent inserts
             Connection::preparedExecute(
-                'INSERT IGNORE INTO texttags (TtTxID, TtT2ID)
+                'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID)
                 SELECT ?, T2ID FROM text_tags WHERE T2Text = ?',
                 [$itemId, $tagName]
             );
@@ -213,9 +213,9 @@ class MySqlTextTagAssociation implements TagAssociationInterface
      */
     public function cleanupOrphanedLinks(): int
     {
-        // Delete texttags where the tag no longer exists
+        // Delete text_tag_map where the tag no longer exists
         return Connection::preparedExecute(
-            'DELETE FROM texttags WHERE TtT2ID NOT IN (SELECT T2ID FROM text_tags)',
+            'DELETE FROM text_tag_map WHERE TtT2ID NOT IN (SELECT T2ID FROM text_tags)',
             []
         );
     }

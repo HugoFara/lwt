@@ -299,7 +299,7 @@ if (!in_array($fkMigration, $appliedMigrations)) {
         // Text references
         "ALTER TABLE sentences ADD CONSTRAINT fk_sentences_text FOREIGN KEY (SeTxID) REFERENCES texts(TxID) ON DELETE CASCADE",
         "ALTER TABLE word_occurrences ADD CONSTRAINT fk_word_occurrences_text FOREIGN KEY (Ti2TxID) REFERENCES texts(TxID) ON DELETE CASCADE",
-        "ALTER TABLE texttags ADD CONSTRAINT fk_texttags_text FOREIGN KEY (TtTxID) REFERENCES texts(TxID) ON DELETE CASCADE",
+        "ALTER TABLE text_tag_map ADD CONSTRAINT fk_text_tag_map_text FOREIGN KEY (TtTxID) REFERENCES texts(TxID) ON DELETE CASCADE",
         // Sentence reference
         "ALTER TABLE word_occurrences ADD CONSTRAINT fk_word_occurrences_sentence FOREIGN KEY (Ti2SeID) REFERENCES sentences(SeID) ON DELETE CASCADE",
         // Word reference (SET NULL for unknown words)
@@ -309,10 +309,10 @@ if (!in_array($fkMigration, $appliedMigrations)) {
         "ALTER TABLE wordtags ADD CONSTRAINT fk_wordtags_word FOREIGN KEY (WtWoID) REFERENCES words(WoID) ON DELETE CASCADE",
         "ALTER TABLE wordtags ADD CONSTRAINT fk_wordtags_tag FOREIGN KEY (WtTgID) REFERENCES tags(TgID) ON DELETE CASCADE",
         // Text tags
-        "ALTER TABLE texttags ADD CONSTRAINT fk_texttags_text_tag FOREIGN KEY (TtT2ID) REFERENCES text_tags(T2ID) ON DELETE CASCADE",
+        "ALTER TABLE text_tag_map ADD CONSTRAINT fk_text_tag_map_text_tag FOREIGN KEY (TtT2ID) REFERENCES text_tags(T2ID) ON DELETE CASCADE",
         // Archived text tags
-        "ALTER TABLE archtexttags ADD CONSTRAINT fk_archtexttags_archivedtext FOREIGN KEY (AgAtID) REFERENCES archivedtexts(AtID) ON DELETE CASCADE",
-        "ALTER TABLE archtexttags ADD CONSTRAINT fk_archtexttags_text_tag FOREIGN KEY (AgT2ID) REFERENCES text_tags(T2ID) ON DELETE CASCADE",
+        "ALTER TABLE archived_text_tag_map ADD CONSTRAINT fk_archived_text_tag_map_archivedtext FOREIGN KEY (AgAtID) REFERENCES archivedtexts(AtID) ON DELETE CASCADE",
+        "ALTER TABLE archived_text_tag_map ADD CONSTRAINT fk_archived_text_tag_map_text_tag FOREIGN KEY (AgT2ID) REFERENCES text_tags(T2ID) ON DELETE CASCADE",
         // Feed links
         "ALTER TABLE feedlinks ADD CONSTRAINT fk_feedlinks_newsfeed FOREIGN KEY (FlNfID) REFERENCES newsfeeds(NfID) ON DELETE CASCADE",
     ];

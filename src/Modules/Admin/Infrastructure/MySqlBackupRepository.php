@@ -35,8 +35,8 @@ class MySqlBackupRepository implements BackupRepositoryInterface
      * @var string[]
      */
     private const BACKUP_TABLES = [
-        'archivedtexts', 'archtexttags', 'feedlinks', 'languages', 'word_occurrences',
-        'newsfeeds', 'sentences', 'settings', 'tags', 'text_tags', 'texts', 'texttags',
+        'archivedtexts', 'archived_text_tag_map', 'feedlinks', 'languages', 'word_occurrences',
+        'newsfeeds', 'sentences', 'settings', 'tags', 'text_tags', 'texts', 'text_tag_map',
         'words', 'wordtags'
     ];
 
@@ -46,8 +46,8 @@ class MySqlBackupRepository implements BackupRepositoryInterface
      * @var string[]
      */
     private const OFFICIAL_BACKUP_TABLES = [
-        'archivedtexts', 'archtexttags', 'languages', 'sentences', 'settings',
-        'tags', 'text_tags', 'textitems', 'texts', 'texttags', 'words', 'wordtags'
+        'archivedtexts', 'archived_text_tag_map', 'languages', 'sentences', 'settings',
+        'tags', 'text_tags', 'textitems', 'texts', 'text_tag_map', 'words', 'wordtags'
     ];
 
     /**
@@ -213,7 +213,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 PRIMARY KEY (`AtID`),
                 KEY `AtLgID` (`AtLgID`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n",
-            'archtexttags' => "CREATE TABLE `archtexttags` (
+            'archived_text_tag_map' => "CREATE TABLE `archived_text_tag_map` (
                 `AgAtID` int(11) unsigned NOT NULL,
                 `AgT2ID` int(11) unsigned NOT NULL,
                 PRIMARY KEY (`AgAtID`,`AgT2ID`),
@@ -297,7 +297,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 PRIMARY KEY (`TxID`),
                 KEY `TxLgID` (`TxLgID`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n",
-            'texttags' => "CREATE TABLE `texttags` (
+            'text_tag_map' => "CREATE TABLE `text_tag_map` (
                 `TtTxID` int(11) unsigned NOT NULL,
                 `TtT2ID` int(11) unsigned NOT NULL,
                 PRIMARY KEY (`TtTxID`,`TtT2ID`),

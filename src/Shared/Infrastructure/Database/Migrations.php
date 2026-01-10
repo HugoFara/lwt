@@ -343,7 +343,7 @@ class Migrations
              AND TABLE_NAME IN (
                 'languages', 'texts', 'archivedtexts', 'words', 'sentences',
                 'word_occurrences', 'word_occurrences', 'textitems', 'tags', 'text_tags', 'text_tags', 'wordtags',
-                'texttags', 'archtexttags', 'newsfeeds', 'feedlinks',
+                'text_tag_map', 'archived_text_tag_map', 'newsfeeds', 'feedlinks',
                 'settings', '_migrations', 'tts'
              )",
             [$dbname]
@@ -421,32 +421,32 @@ class Migrations
                 FROM (wordtags LEFT JOIN words ON WtWoID = WoID)
                 WHERE WoID IS NULL"
             );
-            // Clean up orphaned texttags (text_tags deleted)
+            // Clean up orphaned text_tag_map (text_tags deleted)
             Connection::execute(
-                "DELETE texttags
-                FROM (texttags LEFT JOIN text_tags ON TtT2ID = T2ID)
+                "DELETE text_tag_map
+                FROM (text_tag_map LEFT JOIN text_tags ON TtT2ID = T2ID)
                 WHERE T2ID IS NULL"
             );
-            // Clean up orphaned texttags (texts deleted)
+            // Clean up orphaned text_tag_map (texts deleted)
             Connection::execute(
-                "DELETE texttags
-                FROM (texttags LEFT JOIN texts ON TtTxID = TxID)
+                "DELETE text_tag_map
+                FROM (text_tag_map LEFT JOIN texts ON TtTxID = TxID)
                 WHERE TxID IS NULL"
             );
-            // Clean up orphaned archtexttags (text_tags deleted)
+            // Clean up orphaned archived_text_tag_map (text_tags deleted)
             Connection::execute(
-                "DELETE archtexttags
+                "DELETE archived_text_tag_map
                 FROM (
-                    archtexttags
+                    archived_text_tag_map
                     LEFT JOIN text_tags ON AgT2ID = T2ID
                 )
                 WHERE T2ID IS NULL"
             );
-            // Clean up orphaned archtexttags (archivedtexts deleted)
+            // Clean up orphaned archived_text_tag_map (archivedtexts deleted)
             Connection::execute(
-                "DELETE archtexttags
+                "DELETE archived_text_tag_map
                 FROM (
-                    archtexttags
+                    archived_text_tag_map
                     LEFT JOIN archivedtexts ON AgAtID = AtID
                 )
                 WHERE AtID IS NULL"

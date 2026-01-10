@@ -21,8 +21,8 @@ namespace Lwt\Modules\Tags\Domain;
  *
  * Implementations handle specific entity types:
  * - Words (wordtags table)
- * - Texts (texttags table)
- * - Archived texts (archtexttags table)
+ * - Texts (text_tag_map table)
+ * - Archived texts (archived_text_tag_map table)
  *
  * @since 3.0.0
  */

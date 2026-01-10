@@ -308,7 +308,7 @@ class MySqlTextTagRepository implements TagRepositoryInterface
      */
     public function getUsageCount(int $tagId): int
     {
-        return QueryBuilder::table('texttags')
+        return QueryBuilder::table('text_tag_map')
             ->where('TtT2ID', '=', $tagId)
             ->count();
     }
@@ -322,7 +322,7 @@ class MySqlTextTagRepository implements TagRepositoryInterface
      */
     public function getArchivedUsageCount(int $tagId): int
     {
-        return QueryBuilder::table('archtexttags')
+        return QueryBuilder::table('archived_text_tag_map')
             ->where('AgT2ID', '=', $tagId)
             ->count();
     }

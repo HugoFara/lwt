@@ -105,7 +105,7 @@ class TagTypeTest extends TestCase
 
     public function testAssociationTableReturnsTexttagsForText(): void
     {
-        $this->assertEquals('texttags', TagType::TEXT->associationTable());
+        $this->assertEquals('text_tag_map', TagType::TEXT->associationTable());
     }
 
     // ===== label Tests =====

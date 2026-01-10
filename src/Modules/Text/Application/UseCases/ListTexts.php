@@ -113,7 +113,7 @@ class ListTexts
         $sql = "SELECT COUNT(*) AS cnt FROM (
             SELECT TxID FROM (
                 texts
-                LEFT JOIN texttags ON TxID = TtTxID
+                LEFT JOIN text_tag_map ON TxID = TtTxID
             ) WHERE (1=1) {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
         ) AS dummy" . UserScopedQuery::forTable('texts');
@@ -151,7 +151,7 @@ class ListTexts
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 (texts
-                LEFT JOIN texttags ON TxID = TtTxID)
+                LEFT JOIN text_tag_map ON TxID = TtTxID)
                 LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages
             WHERE LgID=TxLgID {$whLang}{$whQuery}
@@ -190,7 +190,7 @@ class ListTexts
         $sql = "SELECT COUNT(*) AS cnt FROM (
             SELECT AtID FROM (
                 archivedtexts
-                LEFT JOIN archtexttags ON AtID = AgAtID
+                LEFT JOIN archived_text_tag_map ON AtID = AgAtID
             ) WHERE (1=1) {$whLang}{$whQuery}
             GROUP BY AtID {$whTag}
         ) AS dummy" . UserScopedQuery::forTable('archivedtexts');
@@ -227,7 +227,7 @@ class ListTexts
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 (archivedtexts
-                LEFT JOIN archtexttags ON AtID = AgAtID)
+                LEFT JOIN archived_text_tag_map ON AtID = AgAtID)
                 LEFT JOIN text_tags ON T2ID = AgT2ID
             ), languages
             WHERE LgID=AtLgID {$whLang}{$whQuery}

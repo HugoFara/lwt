@@ -65,11 +65,11 @@ class ArchiveText
         // Copy tags
         $bindings2 = [$archivedId, $textId];
         Connection::preparedExecute(
-            "INSERT INTO archtexttags (AgAtID, AgT2ID)
+            "INSERT INTO archived_text_tag_map (AgAtID, AgT2ID)
             SELECT ?, TtT2ID
-            FROM texttags
+            FROM text_tag_map
             WHERE TtTxID = ?"
-            . UserScopedQuery::forTablePrepared('texttags', $bindings2, '', 'texts'),
+            . UserScopedQuery::forTablePrepared('text_tag_map', $bindings2, '', 'texts'),
             $bindings2
         );
 
@@ -130,11 +130,11 @@ class ArchiveText
             // Copy tags
             $bindings2 = [$id, $textId];
             Connection::preparedExecute(
-                "INSERT INTO archtexttags (AgAtID, AgT2ID)
+                "INSERT INTO archived_text_tag_map (AgAtID, AgT2ID)
                 SELECT ?, TtT2ID
-                FROM texttags
+                FROM text_tag_map
                 WHERE TtTxID = ?"
-                . UserScopedQuery::forTablePrepared('texttags', $bindings2, '', 'texts'),
+                . UserScopedQuery::forTablePrepared('text_tag_map', $bindings2, '', 'texts'),
                 $bindings2
             );
 
@@ -194,11 +194,11 @@ class ArchiveText
         // Copy tags
         $bindings2 = [$textId, $archivedId];
         Connection::preparedExecute(
-            "INSERT INTO texttags (TtTxID, TtT2ID)
+            "INSERT INTO text_tag_map (TtTxID, TtT2ID)
             SELECT ?, AgT2ID
-            FROM archtexttags
+            FROM archived_text_tag_map
             WHERE AgAtID = ?"
-            . UserScopedQuery::forTablePrepared('archtexttags', $bindings2, '', 'archivedtexts'),
+            . UserScopedQuery::forTablePrepared('archived_text_tag_map', $bindings2, '', 'archivedtexts'),
             $bindings2
         );
 
@@ -285,11 +285,11 @@ class ArchiveText
 
             $bindings2 = [$id, $ida];
             Connection::preparedExecute(
-                "INSERT INTO texttags (TtTxID, TtT2ID)
+                "INSERT INTO text_tag_map (TtTxID, TtT2ID)
                 SELECT ?, AgT2ID
-                FROM archtexttags
+                FROM archived_text_tag_map
                 WHERE AgAtID = ?"
-                . UserScopedQuery::forTablePrepared('archtexttags', $bindings2, '', 'archivedtexts'),
+                . UserScopedQuery::forTablePrepared('archived_text_tag_map', $bindings2, '', 'archivedtexts'),
                 $bindings2
             );
 
@@ -319,13 +319,13 @@ class ArchiveText
     private function cleanupTextTags(): void
     {
         Connection::execute(
-            "DELETE texttags
+            "DELETE text_tag_map
             FROM (
-                texttags
+                text_tag_map
                 LEFT JOIN texts ON TtTxID = TxID
             )
             WHERE TxID IS NULL"
-            . UserScopedQuery::forTable('texttags', '', 'texts'),
+            . UserScopedQuery::forTable('text_tag_map', '', 'texts'),
             ''
         );
     }
@@ -336,13 +336,13 @@ class ArchiveText
     private function cleanupArchivedTextTags(): void
     {
         Connection::execute(
-            "DELETE archtexttags
+            "DELETE archived_text_tag_map
             FROM (
-                archtexttags
+                archived_text_tag_map
                 LEFT JOIN archivedtexts ON AgAtID = AtID
             )
             WHERE AtID IS NULL"
-            . UserScopedQuery::forTable('archtexttags', '', 'archivedtexts'),
+            . UserScopedQuery::forTable('archived_text_tag_map', '', 'archivedtexts'),
             ''
         );
     }

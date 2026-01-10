@@ -184,8 +184,8 @@ class Restore
         // exist on a table, even if those constraints would allow the operation.
 
         // Level 1: Tables with FKs to multiple parents
-        Connection::execute('DELETE FROM ' . Globals::table('archtexttags'));
-        Connection::execute('DELETE FROM ' . Globals::table('texttags'));
+        Connection::execute('DELETE FROM ' . Globals::table('archived_text_tag_map'));
+        Connection::execute('DELETE FROM ' . Globals::table('text_tag_map'));
         Connection::execute('DELETE FROM ' . Globals::table('wordtags'));
         Connection::execute('DELETE FROM ' . Globals::table('word_occurrences'));
         Connection::execute('DELETE FROM ' . Globals::table('feedlinks'));

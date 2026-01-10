@@ -878,7 +878,7 @@ class FeedFacade
                         /** @var list<mixed> $tagBindings */
                         $tagBindings = array_values(array_merge([$id], $currentTagList));
                         \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute(
-                            'INSERT INTO texttags (TtTxID, TtT2ID)
+                            'INSERT INTO text_tag_map (TtTxID, TtT2ID)
                             SELECT ?, T2ID FROM text_tags
                             WHERE T2Text IN (' . $tagPlaceholders . ')'
                             . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('text_tags', $tagBindings),
@@ -898,7 +898,7 @@ class FeedFacade
                 /** @var list<mixed> $tagQueryBindings */
                 $tagQueryBindings = array_values($currentTagList);
                 $rows = \Lwt\Shared\Infrastructure\Database\Connection::preparedFetchAll(
-                    "SELECT TtTxID FROM texttags
+                    "SELECT TtTxID FROM text_tag_map
                     JOIN text_tags ON TtT2ID=T2ID
                     WHERE T2Text IN (" . $tagPlaceholders . ")"
                     . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('text_tags', $tagQueryBindings),
@@ -939,8 +939,8 @@ class FeedFacade
 
                     $archiveId = (int)\Lwt\Shared\Infrastructure\Database\Connection::lastInsertId();
                     \Lwt\Shared\Infrastructure\Database\Connection::execute(
-                        'INSERT INTO archtexttags (AgAtID, AgT2ID)
-                        SELECT ' . $archiveId . ', TtT2ID FROM texttags
+                        'INSERT INTO archived_text_tag_map (AgAtID, AgT2ID)
+                        SELECT ' . $archiveId . ', TtT2ID FROM text_tag_map
                         WHERE TtTxID = ' . (int)$textID
                     );
 
@@ -953,8 +953,8 @@ class FeedFacade
 
                     // Clean orphaned text tags
                     \Lwt\Shared\Infrastructure\Database\Connection::execute(
-                        "DELETE texttags
-                        FROM (texttags
+                        "DELETE text_tag_map
+                        FROM (text_tag_map
                             LEFT JOIN texts ON TtTxID = TxID
                         ) WHERE TxID IS NULL"
                     );

@@ -36,7 +36,7 @@ class SqlValidator
      */
     private const ALLOWED_TABLES = [
         'archivedtexts',
-        'archtexttags',
+        'archived_text_tag_map',
         'feedlinks',
         'languages',
         'local_dictionaries',
@@ -51,7 +51,7 @@ class SqlValidator
         'textitems',
         'word_occurrences',
         'texts',
-        'texttags',
+        'text_tag_map',
         'words',
         'wordtags',
     ];
