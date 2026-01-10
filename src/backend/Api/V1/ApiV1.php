@@ -46,6 +46,7 @@ use Lwt\Modules\Book\Http\BookApiHandler;
 use Lwt\Modules\Book\Application\BookFacade;
 use Lwt\Api\V1\Handlers\YouTubeApiHandler;
 use Lwt\Api\V1\Handlers\NlpServiceHandler;
+use Lwt\Api\V1\Handlers\WhisperApiHandler;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
 
@@ -69,6 +70,7 @@ class ApiV1
     private ?BookApiHandler $bookHandler = null;
     private YouTubeApiHandler $youtubeHandler;
     private NlpServiceHandler $nlpHandler;
+    private WhisperApiHandler $whisperHandler;
 
     /**
      * Endpoints that do not require authentication.
@@ -106,6 +108,7 @@ class ApiV1
         }
         $this->youtubeHandler = new YouTubeApiHandler();
         $this->nlpHandler = new NlpServiceHandler();
+        $this->whisperHandler = new WhisperApiHandler();
     }
 
     /**
@@ -277,6 +280,10 @@ class ApiV1
                 $this->handleTtsGet($fragments, $params);
                 break;
 
+            case 'whisper':
+                $this->handleWhisperGet($fragments, $params);
+                break;
+
             default:
                 Response::error('Endpoint Not Found: ' . $fragments[0], 404);
         }
@@ -324,6 +331,10 @@ class ApiV1
 
             case 'tts':
                 $this->handleTtsPost($fragments, $params);
+                break;
+
+            case 'whisper':
+                $this->handleWhisperPost($fragments, $params);
                 break;
 
             default:
@@ -1058,6 +1069,10 @@ class ApiV1
                 $this->handleTtsDelete($fragments);
                 break;
 
+            case 'whisper':
+                $this->handleWhisperDelete($fragments);
+                break;
+
             default:
                 Response::error('Endpoint Not Found On DELETE: ' . $fragments[0], 404);
         }
@@ -1374,6 +1389,116 @@ class ApiV1
             default:
                 Response::error('Expected "configured" or "video"', 404);
         }
+    }
+
+    // =========================================================================
+    // Whisper Request Handlers (Audio/Video Transcription via NLP microservice)
+    // =========================================================================
+
+    /**
+     * Handle GET requests for Whisper endpoints.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Query parameters
+     */
+    private function handleWhisperGet(array $fragments, array $params): void
+    {
+        switch ($fragments[1] ?? '') {
+            case 'available':
+                // GET /whisper/available - check if Whisper is available
+                Response::success($this->whisperHandler->formatIsAvailable());
+                break;
+
+            case 'languages':
+                // GET /whisper/languages - get supported languages
+                Response::success($this->whisperHandler->formatGetLanguages());
+                break;
+
+            case 'models':
+                // GET /whisper/models - get available models
+                Response::success($this->whisperHandler->formatGetModels());
+                break;
+
+            case 'status':
+                // GET /whisper/status/{job_id} - get job status
+                $jobId = $fragments[2] ?? '';
+                if ($jobId === '') {
+                    Response::error('job_id is required', 400);
+                }
+                Response::success($this->whisperHandler->formatGetStatus($jobId));
+                break;
+
+            case 'result':
+                // GET /whisper/result/{job_id} - get completed result
+                $jobId = $fragments[2] ?? '';
+                if ($jobId === '') {
+                    Response::error('job_id is required', 400);
+                }
+                try {
+                    Response::success($this->whisperHandler->formatGetResult($jobId));
+                } catch (\RuntimeException $e) {
+                    Response::error($e->getMessage(), 500);
+                }
+                break;
+
+            default:
+                Response::error('Expected "available", "languages", "models", "status/{id}", or "result/{id}"', 404);
+        }
+    }
+
+    /**
+     * Handle POST requests for Whisper endpoints.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    POST parameters
+     */
+    private function handleWhisperPost(array $fragments, array $params): void
+    {
+        if (($fragments[1] ?? '') === 'transcribe') {
+            // POST /whisper/transcribe - start transcription
+            $file = $_FILES['file'] ?? null;
+            if ($file === null) {
+                Response::error('No file uploaded', 400);
+            }
+
+            $language = $params['language'] ?? null;
+            if ($language === '') {
+                $language = null;
+            }
+            $model = $params['model'] ?? 'small';
+
+            try {
+                Response::success($this->whisperHandler->formatStartTranscription(
+                    $file,
+                    $language,
+                    $model
+                ));
+            } catch (\InvalidArgumentException $e) {
+                Response::error($e->getMessage(), 400);
+            } catch (\RuntimeException $e) {
+                Response::error($e->getMessage(), 503);
+            }
+            return;
+        }
+
+        Response::error('Expected "transcribe"', 404);
+    }
+
+    /**
+     * Handle DELETE requests for Whisper endpoints.
+     *
+     * @param string[] $fragments Endpoint path segments
+     */
+    private function handleWhisperDelete(array $fragments): void
+    {
+        // DELETE /whisper/job/{id} - cancel job
+        if (($fragments[1] ?? '') === 'job' && isset($fragments[2]) && $fragments[2] !== '') {
+            $jobId = $fragments[2];
+            Response::success($this->whisperHandler->formatCancelJob($jobId));
+            return;
+        }
+
+        Response::error('Expected "job/{id}"', 404);
     }
 
     // =========================================================================

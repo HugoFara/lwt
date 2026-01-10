@@ -1,13 +1,16 @@
 /**
- * File Import - Handle import of subtitles and EPUB files on text edit form.
+ * File Import - Handle import of subtitles, EPUB, and audio/video files on text edit form.
  *
  * Supports:
  * - SRT/VTT subtitles: Parse client-side and populate textarea
  * - EPUB files: Redirect to dedicated book import page
+ * - Audio/Video files: Use Whisper transcription (handled by whisper_import.ts)
  *
  * @license unlicense
  * @since   3.0.0
  */
+
+import { isAudioVideoFile, handleFileSelection as handleWhisperFileSelection } from './whisper_import';
 
 /**
  * Parsed subtitle result.
@@ -272,8 +275,12 @@ function handleFileImport(file: File): void {
     handleEpubFile(file);
   } else if (ext === 'srt' || ext === 'vtt') {
     handleSubtitleFile(file);
+  } else if (isAudioVideoFile(file.name)) {
+    // Audio/video files are handled by whisper_import.ts
+    // The handleWhisperFileSelection will show the transcription options
+    handleWhisperFileSelection(file);
   } else {
-    setImportStatus('Unsupported file type. Use .epub, .srt, or .vtt files.', true);
+    setImportStatus('Unsupported file type. Use .epub, .srt, .vtt, or audio/video files.', true);
   }
 }
 

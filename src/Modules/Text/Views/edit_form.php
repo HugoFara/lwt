@@ -72,6 +72,102 @@ if ($isNew) {
     <input type="hidden" name="TxID" value="<?php echo $textId; ?>" />
 
     <div class="box">
+        <?php if ($isNew): ?>
+        <!-- Import from File (FIRST for new texts) -->
+        <div class="field">
+            <label class="label">Import from File</label>
+            <div class="file has-name is-fullwidth">
+                <label class="file-label">
+                    <input class="file-input" type="file" name="importFile" id="importFile"
+                           accept=".srt,.vtt,.epub,.mp3,.mp4,.wav,.webm,.ogg,.m4a,.mkv,.flac"
+                           onchange="this.closest('.file').querySelector('.file-name').textContent = this.files[0]?.name || 'No file selected'" />
+                    <span class="file-cta">
+                        <span class="file-icon">
+                            <?php echo IconHelper::render('file-up', ['alt' => 'Upload']); ?>
+                        </span>
+                        <span class="file-label">Choose file...</span>
+                    </span>
+                    <span class="file-name">No file selected</span>
+                </label>
+            </div>
+            <p class="help">
+                Supported: EPUB books, SRT/VTT subtitles, audio/video (MP3, MP4, WAV, WebM, OGG, M4A, FLAC, MKV - requires Whisper).
+            </p>
+            <p id="importFileStatus" class="help"></p>
+
+            <!-- Whisper Transcription Options (shown when audio/video selected) -->
+            <div id="whisperOptions" class="box mt-3" style="display: none;">
+                <h4 class="subtitle is-6 mb-3">
+                    <?php echo IconHelper::render('mic', ['alt' => 'Transcription']); ?>
+                    Transcription Options
+                </h4>
+
+                <div class="field">
+                    <label class="label is-small" for="whisperLanguage">Transcription Language</label>
+                    <div class="control">
+                        <div class="select is-small is-fullwidth">
+                            <select id="whisperLanguage" name="whisperLanguage">
+                                <option value="">Auto-detect</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="help">Leave as auto-detect or select to improve accuracy.</p>
+                </div>
+
+                <div class="field">
+                    <label class="label is-small" for="whisperModel">Model Size</label>
+                    <div class="control">
+                        <div class="select is-small is-fullwidth">
+                            <select id="whisperModel" name="whisperModel">
+                                <option value="base">Base (fast, good quality)</option>
+                                <option value="small" selected>Small (balanced)</option>
+                                <option value="medium">Medium (better quality, slower)</option>
+                                <option value="large">Large (best quality, slowest)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="help">Larger models are more accurate but take longer to process.</p>
+                </div>
+
+                <div class="field">
+                    <div class="control">
+                        <button type="button" class="button is-info" id="startTranscription">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('mic', ['alt' => 'Transcribe']); ?>
+                            </span>
+                            <span>Start Transcription</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Transcription Progress -->
+                <div id="whisperProgress" class="notification is-info is-light mt-3" style="display: none;">
+                    <div class="level mb-2">
+                        <div class="level-left">
+                            <span id="whisperStatusText">Preparing transcription...</span>
+                        </div>
+                        <div class="level-right">
+                            <button type="button" class="button is-small is-danger is-outlined" id="whisperCancel">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                    <progress class="progress is-info" id="whisperProgressBar" value="0" max="100"></progress>
+                </div>
+            </div>
+
+            <!-- Whisper Unavailable Message -->
+            <div id="whisperUnavailable" class="notification is-warning is-light mt-3" style="display: none;">
+                <span class="icon-text">
+                    <span class="icon">
+                        <?php echo IconHelper::render('alert-triangle', ['alt' => 'Warning']); ?>
+                    </span>
+                    <span>Whisper transcription is not available. Please ensure the NLP service is running.</span>
+                </span>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Language -->
         <div class="field">
             <label class="label" for="TxLgID">
@@ -138,31 +234,6 @@ if ($isNew) {
                 Long texts (over 60KB) will be automatically split into chapters and saved as a book.
             </p>
         </div>
-
-        <?php if ($isNew): ?>
-        <!-- Import from File -->
-        <div class="field">
-            <label class="label">Import from File</label>
-            <div class="file has-name is-fullwidth">
-                <label class="file-label">
-                    <input class="file-input" type="file" name="importFile" id="importFile"
-                           accept=".srt,.vtt,.epub"
-                           onchange="this.closest('.file').querySelector('.file-name').textContent = this.files[0]?.name || 'No file selected'" />
-                    <span class="file-cta">
-                        <span class="file-icon">
-                            <?php echo IconHelper::render('file-up', ['alt' => 'Upload']); ?>
-                        </span>
-                        <span class="file-label">Choose file...</span>
-                    </span>
-                    <span class="file-name">No file selected</span>
-                </label>
-            </div>
-            <p class="help">
-                Supported: EPUB books, SRT/VTT subtitles. Subtitles populate the text area; EPUBs open the book importer.
-            </p>
-            <p id="importFileStatus" class="help"></p>
-        </div>
-        <?php endif; ?>
 
         <!-- Annotated Text (only for existing texts) -->
         <?php if (!$isNew): ?>
