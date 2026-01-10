@@ -216,7 +216,7 @@ class MultiWordController extends VocabularyBaseController
             if ($wordData === null) {
                 throw new \RuntimeException("Cannot access term and language: multi-word not found");
             }
-            PageLayoutHelper::renderPageStartNobody("Edit Term: " . $wordData['text']);
+            PageLayoutHelper::renderPageStartNobody("Edit Term: " . (string) $wordData['text']);
             $this->displayEditMultiWordForm($wid, $wordData, $tid, $ord);
         }
     }
@@ -245,18 +245,19 @@ class MultiWordController extends VocabularyBaseController
             // Get text from existing word
             $wordData = $multiWordService->getMultiWordData($existingWid);
             if ($wordData !== null) {
+                /** @var string $termText */
                 $termText = $wordData['text'];
             }
         }
 
         $scrdir = $this->languageFacade->getScriptDirectionTag((int) $lgid);
-        $seid = $wordService->getSentenceIdAtPosition($tid, $ord) ?? 0;
+        $seid = $contextService->getSentenceIdAtPosition($tid, $ord) ?? 0;
         $sent = $this->getSentenceService()->formatSentence(
             $seid,
             $textlc,
             (int) Settings::getWithDefault('set-term-sentence-count')
         );
-        $showRoman = $wordService->shouldShowRomanization($tid);
+        $showRoman = $contextService->shouldShowRomanization($tid);
 
         // Variables for view
         $term = (object) [
@@ -282,10 +283,10 @@ class MultiWordController extends VocabularyBaseController
     /**
      * Display form for editing existing multi-word.
      *
-     * @param int   $wid      Word ID
-     * @param array $wordData Word data from service
-     * @param int   $tid      Text ID
-     * @param int   $ord      Text order
+     * @param int                        $wid      Word ID
+     * @param array{lgid: int, text: string, textlc: string, translation: string, romanization: string, sentence: string, status: int} $wordData Word data from service
+     * @param int                        $tid      Text ID
+     * @param int                        $ord      Text order
      *
      * @return void
      */

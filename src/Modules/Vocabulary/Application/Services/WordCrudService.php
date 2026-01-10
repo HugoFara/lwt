@@ -155,7 +155,7 @@ class WordCrudService
 
         if (isset($data['WoOldStatus']) && $data['WoOldStatus'] != $data['WoStatus']) {
             // Status changed - update status and timestamp
-            $bindings[] = $data['WoStatus'];
+            $bindings[] = (int) $data['WoStatus'];
             $bindings[] = $wordId;
             $sql = "UPDATE words SET
                 WoText = ?, WoTranslation = ?, WoSentence = ?, WoNotes = ?, WoRomanization = ?,

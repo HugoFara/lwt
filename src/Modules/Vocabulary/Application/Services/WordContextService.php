@@ -59,6 +59,7 @@ class WordContextService
     public function getLanguageIdFromText(int $textId): ?int
     {
         $bindings = [$textId];
+        /** @var int|null $langId */
         $langId = Connection::preparedFetchValue(
             "SELECT TxLgID FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings),
@@ -151,6 +152,7 @@ class WordContextService
      */
     public function getSentenceForTerm(int $textId, int $ord, string $termlc): string
     {
+        /** @var int|null $seid */
         $seid = Connection::preparedFetchValue(
             "SELECT Ti2SeID FROM textitems2
              WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
@@ -181,6 +183,7 @@ class WordContextService
      */
     public function getSentenceIdAtPosition(int $textId, int $ord): ?int
     {
+        /** @var int|null $seid */
         $seid = Connection::preparedFetchValue(
             "SELECT Ti2SeID
              FROM textitems2

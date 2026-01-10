@@ -207,7 +207,7 @@ class WordBulkService
      *
      * Used by the bulk translate feature to save multiple words at once.
      *
-     * @param array $terms Array of term data, each with keys: lg, text, status, trans
+     * @param array<int, array{lg: int, text: string, status: int, trans?: string}> $terms Array of term data
      *
      * @return int The max word ID before insertion (for finding new words)
      */
@@ -230,8 +230,8 @@ class WordBulkService
 
         // Insert each term using prepared statements for safety
         foreach ($terms as $row) {
-            $trans = (!isset($row['trans']) || $row['trans'] == '') ? '*' : (string) $row['trans'];
-            $textlc = mb_strtolower((string) $row['text'], 'UTF-8');
+            $trans = (!isset($row['trans']) || $row['trans'] == '') ? '*' : $row['trans'];
+            $textlc = mb_strtolower($row['text'], 'UTF-8');
 
             $bindings = [$row['lg'], $textlc, $row['text'], $row['status'], $trans];
             $sql = "INSERT INTO words (

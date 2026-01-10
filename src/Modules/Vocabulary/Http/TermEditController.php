@@ -196,11 +196,13 @@ class TermEditController extends VocabularyBaseController
      */
     private function displayEditWordForm(int $wid, int $textId, int $ord, string $fromAnn): void
     {
-        $wordService = $this->getWordService();
+        $crudService = $this->getCrudService();
+        $contextService = $this->getContextService();
+        $linkingService = $this->getLinkingService();
 
         if ($wid == -1) {
             // Get the term from text items
-            $termData = $wordService->getTermFromTextItem($textId, $ord);
+            $termData = $linkingService->getTermFromTextItem($textId, $ord);
             if ($termData === null) {
                 throw new \RuntimeException("Cannot access term and language: term not found in text");
             }
@@ -209,7 +211,7 @@ class TermEditController extends VocabularyBaseController
             $termlc = mb_strtolower($term, 'UTF-8');
 
             // Check if word already exists
-            $existingId = $wordService->findByText($termlc, $lang);
+            $existingId = $crudService->findByText($termlc, $lang);
             if ($existingId !== null) {
                 $new = false;
                 $wid = $existingId;
@@ -218,7 +220,7 @@ class TermEditController extends VocabularyBaseController
             }
         } else {
             // Get existing word data
-            $wordData = $wordService->findById($wid);
+            $wordData = $crudService->findById($wid);
             if ($wordData === null) {
                 throw new \RuntimeException("Cannot access term and language: word ID not found");
             }
@@ -232,12 +234,12 @@ class TermEditController extends VocabularyBaseController
         PageLayoutHelper::renderPageStartNobody($titletext);
 
         $scrdir = $this->languageFacade->getScriptDirectionTag($lang);
-        $langData = $wordService->getLanguageData($lang);
+        $langData = $contextService->getLanguageData($lang);
         $showRoman = $langData['showRoman'];
 
         if ($new) {
             // New word form
-            $sentence = $wordService->getSentenceForTerm($textId, $ord, $termlc);
+            $sentence = $contextService->getSentenceForTerm($textId, $ord, $termlc);
             $transUri = $langData['translateUri'];
             $lgname = $langData['name'];
             $langShort = array_key_exists($lgname, LanguagePresets::getAll()) ?
@@ -259,7 +261,7 @@ class TermEditController extends VocabularyBaseController
             ]);
         } else {
             // Edit existing word form
-            $wordData = $wordService->findById($wid);
+            $wordData = $crudService->findById($wid);
             if ($wordData === null) {
                 throw new \RuntimeException("Cannot access word data: word ID not found");
             }
@@ -271,7 +273,7 @@ class TermEditController extends VocabularyBaseController
 
             $sentence = ExportService::replaceTabNewline($wordData['WoSentence']);
             if ($sentence == '' && $textId !== 0 && $ord !== 0) {
-                $sentence = $wordService->getSentenceForTerm($textId, $ord, $termlc);
+                $sentence = $contextService->getSentenceForTerm($textId, $ord, $termlc);
             }
 
             $transl = ExportService::replaceTabNewline($wordData['WoTranslation']);
@@ -553,12 +555,13 @@ class TermEditController extends VocabularyBaseController
     public function createWord(array $params): void
     {
         $op = InputValidator::getString('op');
-        $wordService = $this->getWordService();
+        $crudService = $this->getCrudService();
+        $contextService = $this->getContextService();
 
         // Handle save operation
         if ($op === 'Save') {
             $requestData = $this->getWordFormData();
-            $result = $wordService->create($requestData);
+            $result = $crudService->create($requestData);
 
             $titletext = "New Term: " . htmlspecialchars($result['textlc'] ?? '', ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
@@ -581,14 +584,14 @@ class TermEditController extends VocabularyBaseController
                 echo '<p>' . $result['message'] . '</p>';
 
                 $woLgId = InputValidator::getInt('WoLgID', 0) ?? 0;
-                $len = $wordService->getWordCount($wid);
+                $len = $crudService->getWordCount($wid);
                 if ($len > 1) {
                     $this->getExpressionService()->insertExpressions($result['textlc'], $woLgId, $wid, $len, 0);
                 } elseif ($len == 1) {
-                    $wordService->linkToTextItems($wid, $woLgId, $result['textlc']);
+                    $this->getLinkingService()->linkToTextItems($wid, $woLgId, $result['textlc']);
 
                     // Prepare view variables
-                    $hex = $wordService->textToClassName($result['textlc']);
+                    $hex = $contextService->textToClassName($result['textlc']);
                     $translation = ExportService::replaceTabNewline(InputValidator::getString('WoTranslation'));
                     if ($translation === '') {
                         $translation = '*';
@@ -619,7 +622,7 @@ class TermEditController extends VocabularyBaseController
             $textId = InputValidator::getInt('text', 0) ?? 0;
             $scrdir = $this->languageFacade->getScriptDirectionTag($lang);
 
-            $langData = $wordService->getLanguageData($lang);
+            $langData = $contextService->getLanguageData($lang);
             $showRoman = $langData['showRoman'];
             $dictService = $this->dictionaryAdapter;
 

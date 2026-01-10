@@ -19,6 +19,7 @@ use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
 use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
 use Lwt\Modules\Vocabulary\Application\Services\WordBulkService;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
+use Lwt\Modules\Vocabulary\Application\Services\WordLinkingService;
 use Lwt\Modules\Vocabulary\Application\Services\MultiWordService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
@@ -49,6 +50,7 @@ abstract class VocabularyBaseController
     protected ?WordContextService $contextService = null;
     protected ?WordBulkService $bulkService = null;
     protected ?WordDiscoveryService $discoveryService = null;
+    protected ?WordLinkingService $linkingService = null;
     protected ?MultiWordService $multiWordService = null;
     protected ?SentenceService $sentenceService = null;
     protected ?ExpressionService $expressionService = null;
@@ -126,6 +128,19 @@ abstract class VocabularyBaseController
             $this->discoveryService = new WordDiscoveryService();
         }
         return $this->discoveryService;
+    }
+
+    /**
+     * Get WordLinkingService (lazy loaded).
+     *
+     * @return WordLinkingService
+     */
+    protected function getLinkingService(): WordLinkingService
+    {
+        if ($this->linkingService === null) {
+            $this->linkingService = new WordLinkingService();
+        }
+        return $this->linkingService;
     }
 
     /**
