@@ -772,117 +772,6 @@ class TextFacadeTest extends TestCase
         $this->assertEquals('Term sentences set: 5', $result);
     }
 
-    // =======================
-    // LONG TEXT IMPORT METHODS
-    // =======================
-
-    public function testPrepareSimpleLongTextDataDelegatesToImportText(): void
-    {
-        $this->importText
-            ->expects($this->once())
-            ->method('prepareLongTextData')
-            ->with('Pasted content', null)
-            ->willReturn('Pasted content');
-
-        $result = $this->facade->prepareSimpleLongTextData('Pasted content', null);
-
-        $this->assertEquals('Pasted content', $result);
-    }
-
-    public function testPrepareSimpleLongTextDataWithFile(): void
-    {
-        $file = ['tmp_name' => '/tmp/upload.txt', 'error' => 0];
-
-        $this->importText
-            ->expects($this->once())
-            ->method('prepareLongTextData')
-            ->with(null, $file)
-            ->willReturn('File content');
-
-        $result = $this->facade->prepareSimpleLongTextData(null, $file);
-
-        $this->assertEquals('File content', $result);
-    }
-
-    public function testPrepareSimpleLongTextDataWithNull(): void
-    {
-        $this->importText
-            ->expects($this->once())
-            ->method('prepareLongTextData')
-            ->with(null, null)
-            ->willReturn(null);
-
-        $result = $this->facade->prepareSimpleLongTextData(null, null);
-
-        $this->assertNull($result);
-    }
-
-    public function testSplitTextIntoChunksDelegatesToImportText(): void
-    {
-        $expected = ['Chunk 1', 'Chunk 2'];
-
-        $this->importText
-            ->expects($this->once())
-            ->method('splitLongText')
-            ->with('Long text content', 60000)
-            ->willReturn($expected);
-
-        $result = $this->facade->splitTextIntoChunks('Long text content');
-
-        $this->assertCount(2, $result);
-    }
-
-    public function testSplitTextIntoChunksWithCustomMaxLength(): void
-    {
-        $this->importText
-            ->expects($this->once())
-            ->method('splitLongText')
-            ->with('Content', 500)
-            ->willReturn(['Chunk 1']);
-
-        $result = $this->facade->splitTextIntoChunks('Content', 500);
-
-        $this->assertCount(1, $result);
-    }
-
-    public function testImportLongTextChunksDelegatesToImportText(): void
-    {
-        $expected = ['success' => true, 'imported' => 5];
-
-        $this->importText
-            ->expects($this->once())
-            ->method('saveLongTextImport')
-            ->with(1, 'Base Title', ['chunk1', 'chunk2'], '', '', [])
-            ->willReturn($expected);
-
-        $result = $this->facade->importLongTextChunks(1, 'Base Title', ['chunk1', 'chunk2']);
-
-        $this->assertIsArray($result);
-        $this->assertTrue($result['success']);
-    }
-
-    public function testImportLongTextChunksWithAllOptions(): void
-    {
-        $expected = ['success' => true, 'imported' => 3];
-
-        $this->importText
-            ->expects($this->once())
-            ->method('saveLongTextImport')
-            ->with(1, 'Title', ['c1', 'c2'], 'audio.mp3', 'https://source.com', [1, 2])
-            ->willReturn($expected);
-
-        $result = $this->facade->importLongTextChunks(
-            1,
-            'Title',
-            ['c1', 'c2'],
-            'audio.mp3',
-            'https://source.com',
-            [1, 2]
-        );
-
-        $this->assertEquals(3, $result['imported']);
-    }
-
     // ======================
     // TEXT READING METHODS
     // ======================
@@ -1123,34 +1012,6 @@ class TextFacadeTest extends TestCase
     // BC METHOD TESTS (Database required)
     // ===========================
 
-    public function testPrepareLongTextDataWithEmptyInput(): void
-    {
-        $facade = new TextFacade();
-        $result = $facade->prepareLongTextData(null, '', 1);
-        $this->assertIsString($result);
-    }
-
-    public function testPrepareLongTextDataWithParagraphHandlingMode1(): void
-    {
-        $facade = new TextFacade();
-        $result = $facade->prepareLongTextData(null, "Line 1\nLine 2", 1);
-        $this->assertIsString($result);
-    }
-
-    public function testPrepareLongTextDataWithParagraphHandlingMode2(): void
-    {
-        $facade = new TextFacade();
-        $result = $facade->prepareLongTextData(null, "Para 1\n\nPara 2", 2);
-        $this->assertIsString($result);
-    }
-
-    public function testPrepareLongTextDataRemovesExtraWhitespace(): void
-    {
-        $facade = new TextFacade();
-        $result = $facade->prepareLongTextData(null, "Text  with   extra    spaces", 1);
-        $this->assertStringNotContainsString('  ', $result);
-    }
-
     public function testGetTextsForLanguageReturnsValidStructure(): void
     {
         if (!self::$dbConnected) {
@@ -1217,16 +1078,6 @@ class TextFacadeTest extends TestCase
         $this->assertNull($result);
     }
 
-    public function testSplitLongTextReturnsArray(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-        $facade = new TextFacade();
-        $result = $facade->splitLongText('Test sentence one. Test sentence two.', 1, 10);
-        $this->assertIsArray($result);
-    }
-
     public function testSetTermSentencesWithServiceWithEmptyArray(): void
     {
         if (!self::$dbConnected) {
@@ -1236,18 +1087,6 @@ class TextFacadeTest extends TestCase
         $result = $facade->setTermSentencesWithService([]);
         $this->assertIsString($result);
         $this->assertStringContainsString('0', $result);
-    }
-
-    public function testSaveLongTextImportWithMismatchedCountReturnsFalse(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-        $facade = new TextFacade();
-        $result = $facade->saveLongTextImport(1, 'Test', '', ['text1', 'text2'], 5);
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('success', $result);
-        $this->assertFalse($result['success']);
     }
 
     public function testSaveTextAndReparseReturnsArray(): void

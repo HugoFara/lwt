@@ -35,6 +35,11 @@ use Lwt\Modules\Vocabulary\Application\UseCases\UpdateTermStatus;
 
 // Services
 use Lwt\Modules\Vocabulary\Application\Services\SimilarityCalculator;
+use Lwt\Modules\Vocabulary\Application\Services\LemmaService;
+
+// Lemmatizers
+use Lwt\Modules\Vocabulary\Domain\LemmatizerInterface;
+use Lwt\Modules\Vocabulary\Infrastructure\Lemmatizers\DictionaryLemmatizer;
 
 // Infrastructure
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
@@ -44,12 +49,24 @@ use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 
 // HTTP
 use Lwt\Modules\Vocabulary\Http\VocabularyController;
-use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler;
+use Lwt\Modules\Vocabulary\Http\TermCrudApiHandler;
+use Lwt\Modules\Vocabulary\Http\WordFamilyApiHandler;
+use Lwt\Modules\Vocabulary\Http\MultiWordApiHandler;
+use Lwt\Modules\Vocabulary\Http\WordListApiHandler;
+use Lwt\Modules\Vocabulary\Http\TermTranslationApiHandler;
+use Lwt\Modules\Vocabulary\Http\TermStatusApiHandler;
 use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
+use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
+use Lwt\Modules\Vocabulary\Application\Services\WordLinkingService;
+use Lwt\Modules\Vocabulary\Application\Services\MultiWordService;
+use Lwt\Modules\Vocabulary\Application\Services\WordBulkService;
+use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
+use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
+use Lwt\Modules\Text\Application\Services\SentenceService;
 
 /**
  * Service provider for the Vocabulary module.
@@ -131,6 +148,67 @@ class VocabularyServiceProvider implements ServiceProviderInterface
             return new ExportService();
         });
 
+        // Register SentenceService (from Text module)
+        $container->singleton(SentenceService::class, function (Container $_c) {
+            return new SentenceService();
+        });
+
+        // Register WordContextService
+        $container->singleton(WordContextService::class, function (Container $c) {
+            return new WordContextService(
+                $c->getTyped(SentenceService::class)
+            );
+        });
+
+        // Register WordLinkingService
+        $container->singleton(WordLinkingService::class, function (Container $_c) {
+            return new WordLinkingService();
+        });
+
+        // Register MultiWordService
+        $container->singleton(MultiWordService::class, function (Container $c) {
+            return new MultiWordService(
+                $c->getTyped(ExpressionService::class)
+            );
+        });
+
+        // Register WordBulkService
+        $container->singleton(WordBulkService::class, function (Container $_c) {
+            return new WordBulkService();
+        });
+
+        // Register WordDiscoveryService
+        $container->singleton(WordDiscoveryService::class, function (Container $c) {
+            return new WordDiscoveryService(
+                $c->getTyped(WordContextService::class),
+                $c->getTyped(WordLinkingService::class)
+            );
+        });
+
+        // Register WordCrudService
+        $container->singleton(WordCrudService::class, function (Container $c) {
+            return new WordCrudService(
+                $c->getTyped(MySqlTermRepository::class)
+            );
+        });
+
+        // Register Lemmatizer
+        $container->singleton(LemmatizerInterface::class, function (Container $_c) {
+            return new DictionaryLemmatizer();
+        });
+
+        $container->singleton(DictionaryLemmatizer::class, function (Container $c): DictionaryLemmatizer {
+            /** @var DictionaryLemmatizer */
+            return $c->getTyped(LemmatizerInterface::class);
+        });
+
+        $container->singleton(LemmaService::class, function (Container $c) {
+            return new LemmaService(
+                $c->getTyped(LemmatizerInterface::class),
+                $c->getTyped(MySqlTermRepository::class)
+            );
+        });
+
         // Register Facade
         $container->singleton(VocabularyFacade::class, function (Container $c) {
             return new VocabularyFacade(
@@ -158,12 +236,52 @@ class VocabularyServiceProvider implements ServiceProviderInterface
             );
         });
 
-        // Register API Handler
-        $container->singleton(VocabularyApiHandler::class, function (Container $c) {
-            return new VocabularyApiHandler(
+        // Register Term CRUD API Handler
+        $container->singleton(TermCrudApiHandler::class, function (Container $c) {
+            return new TermCrudApiHandler(
                 $c->getTyped(VocabularyFacade::class),
                 $c->getTyped(FindSimilarTerms::class),
+                $c->getTyped(DictionaryAdapter::class),
+                $c->getTyped(WordContextService::class),
+                $c->getTyped(WordDiscoveryService::class),
+                $c->getTyped(WordLinkingService::class)
+            );
+        });
+
+        // Register Word Family API Handler
+        $container->singleton(WordFamilyApiHandler::class, function (Container $c) {
+            return new WordFamilyApiHandler(
+                $c->getTyped(LemmaService::class)
+            );
+        });
+
+        // Register Multi-word API Handler
+        $container->singleton(MultiWordApiHandler::class, function (Container $c) {
+            return new MultiWordApiHandler(
+                $c->getTyped(MultiWordService::class),
+                $c->getTyped(WordContextService::class)
+            );
+        });
+
+        // Register Word List API Handler
+        $container->singleton(WordListApiHandler::class, function (Container $c) {
+            return new WordListApiHandler(
+                $c->getTyped(WordListService::class)
+            );
+        });
+
+        // Register Term Translation API Handler
+        $container->singleton(TermTranslationApiHandler::class, function (Container $c) {
+            return new TermTranslationApiHandler(
+                $c->getTyped(FindSimilarTerms::class),
                 $c->getTyped(DictionaryAdapter::class)
+            );
+        });
+
+        // Register Term Status API Handler
+        $container->singleton(TermStatusApiHandler::class, function (Container $c) {
+            return new TermStatusApiHandler(
+                $c->getTyped(VocabularyFacade::class)
             );
         });
     }

@@ -49,6 +49,7 @@ class CreateTerm
      * @param string $notes         Personal notes
      * @param string $romanization  Romanization/phonetic
      * @param int    $wordCount     Word count (for multi-word expressions)
+     * @param string|null $lemma    Lemma (base form of the word)
      *
      * @return Term The created term entity
      *
@@ -62,7 +63,8 @@ class CreateTerm
         string $sentence = '',
         string $notes = '',
         string $romanization = '',
-        int $wordCount = 0
+        int $wordCount = 0,
+        ?string $lemma = null
     ): Term {
         // Validate and clean text
         $cleanText = trim(Escaping::prepareTextdata($text));
@@ -91,6 +93,15 @@ class CreateTerm
             $wordCount = $this->calculateWordCount($cleanText);
         }
 
+        // Process lemma
+        $lemmaLc = null;
+        if ($lemma !== null && $lemma !== '') {
+            $lemma = trim($lemma);
+            $lemmaLc = mb_strtolower($lemma, 'UTF-8');
+        } else {
+            $lemma = null;
+        }
+
         // Create the term entity using reconstitute with ID 0 (new)
         $now = new DateTimeImmutable();
         $term = Term::reconstitute(
@@ -98,6 +109,8 @@ class CreateTerm
             $languageId,
             $cleanText,
             $textLc,
+            $lemma,
+            $lemmaLc,
             $status,
             $normalizedTranslation,
             $cleanSentence,

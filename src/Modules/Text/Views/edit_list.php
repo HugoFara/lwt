@@ -36,7 +36,6 @@ use Lwt\Core\StringUtils;
 <?php
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
-    ['url' => '/text/import-long', 'label' => 'Long Text Import', 'icon' => 'file-up'],
     ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'],
     ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'],
 ]);

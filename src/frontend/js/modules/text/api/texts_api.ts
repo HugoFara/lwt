@@ -39,6 +39,18 @@ export interface TextReadingConfig {
 }
 
 /**
+ * Multi-word expression reference data.
+ */
+export interface MultiWordRef {
+  text: string;
+  translation: string;
+  status: number;
+  wordId: number | null;
+  startPos: number;
+  endPos: number;
+}
+
+/**
  * Word data for client-side rendering.
  */
 export interface TextWord {
@@ -56,8 +68,8 @@ export interface TextWord {
   romanization?: string;
   notes?: string;
   tags?: string;
-  // Multiword references (mw2, mw3, etc.)
-  [key: `mw${number}`]: string | undefined;
+  // Multiword references (mw2, mw3, etc.) - now includes full expression details
+  [key: `mw${number}`]: MultiWordRef | undefined;
 }
 
 /**

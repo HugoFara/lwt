@@ -218,6 +218,79 @@ describe('Words Management', () => {
     });
   });
 
+  describe('Lemma Field', () => {
+    it('should have lemma field when editing a word', () => {
+      cy.visit('/words/edit');
+      cy.get('body').then(($body) => {
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
+          cy.get('a[href*="chg="]')
+            .first()
+            .then(($link) => {
+              const href = $link.attr('href');
+              if (href) {
+                const match = href.match(/chg=(\d+)/);
+                if (match) {
+                  cy.visit(`/words/edit?chg=${match[1]}`);
+                  cy.get('input[name="WoLemma"]').should('exist');
+                }
+              }
+            });
+        } else {
+          cy.log('No words found - lemma field test skipped');
+        }
+      });
+    });
+
+    it('should have placeholder text for lemma field', () => {
+      cy.visit('/words/edit');
+      cy.get('body').then(($body) => {
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
+          cy.get('a[href*="chg="]')
+            .first()
+            .then(($link) => {
+              const href = $link.attr('href');
+              if (href) {
+                const match = href.match(/chg=(\d+)/);
+                if (match) {
+                  cy.visit(`/words/edit?chg=${match[1]}`);
+                  cy.get('input[name="WoLemma"]')
+                    .should('have.attr', 'placeholder')
+                    .and('include', 'Base form');
+                }
+              }
+            });
+        } else {
+          cy.log('No words found - lemma placeholder test skipped');
+        }
+      });
+    });
+
+    it('should allow entering a lemma value', () => {
+      cy.visit('/words/edit');
+      cy.get('body').then(($body) => {
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
+          cy.get('a[href*="chg="]')
+            .first()
+            .then(($link) => {
+              const href = $link.attr('href');
+              if (href) {
+                const match = href.match(/chg=(\d+)/);
+                if (match) {
+                  cy.visit(`/words/edit?chg=${match[1]}`);
+                  cy.get('input[name="WoLemma"]')
+                    .clear()
+                    .type('testlemma')
+                    .should('have.value', 'testlemma');
+                }
+              }
+            });
+        } else {
+          cy.log('No words found - lemma input test skipped');
+        }
+      });
+    });
+  });
+
   describe('Bulk Operations', () => {
     it('should have select all functionality when words exist', () => {
       cy.visit('/words/edit');

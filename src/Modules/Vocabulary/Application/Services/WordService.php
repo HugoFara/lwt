@@ -78,6 +78,7 @@ class WordService
      *                    - WoSentence: Example sentence
      *                    - WoNotes: Personal notes
      *                    - WoRomanization: Romanization/phonetic
+     *                    - WoLemma: Lemma/base form (optional)
      *
      * @return array{id: int, message: string, success: bool, textlc: string, text: string}
      */
@@ -87,6 +88,12 @@ class WordService
         $textlc = mb_strtolower($text, 'UTF-8');
         $translation = $this->normalizeTranslation($data['WoTranslation'] ?? '');
 
+        // Handle lemma field
+        $lemma = isset($data['WoLemma']) && $data['WoLemma'] !== ''
+            ? trim($data['WoLemma'])
+            : null;
+        $lemmaLc = $lemma !== null ? mb_strtolower($lemma, 'UTF-8') : null;
+
         try {
             $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
             $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
@@ -95,6 +102,8 @@ class WordService
                 $data['WoLgID'],
                 $textlc,
                 $text,
+                $lemma,
+                $lemmaLc,
                 $data['WoStatus'],
                 $translation,
                 ExportService::replaceTabNewline($data['WoSentence'] ?? ''),
@@ -102,10 +111,10 @@ class WordService
                 $data['WoRomanization'] ?? ''
             ];
             $sql = "INSERT INTO words (
-                    WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
+                    WoLgID, WoTextLC, WoText, WoLemma, WoLemmaLC, WoStatus, WoTranslation,
                     WoSentence, WoNotes, WoRomanization, WoStatusChanged, {$scoreColumns}"
                     . UserScopedQuery::insertColumn('words')
-                . ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues}"
+                . ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues}"
                     . UserScopedQuery::insertValuePrepared('words', $bindings)
                 . ")";
 
@@ -153,9 +162,15 @@ class WordService
         $notes = ExportService::replaceTabNewline($data['WoNotes'] ?? '');
         $roman = $data['WoRomanization'] ?? '';
 
+        // Handle lemma field
+        $lemma = isset($data['WoLemma']) && $data['WoLemma'] !== ''
+            ? trim($data['WoLemma'])
+            : null;
+        $lemmaLc = $lemma !== null ? mb_strtolower($lemma, 'UTF-8') : null;
+
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
 
-        $bindings = [$text, $translation, $sentence, $notes, $roman];
+        $bindings = [$text, $translation, $sentence, $notes, $roman, $lemma, $lemmaLc];
 
         if (isset($data['WoOldStatus']) && $data['WoOldStatus'] != $data['WoStatus']) {
             // Status changed - update status and timestamp
@@ -163,6 +178,7 @@ class WordService
             $bindings[] = $wordId;
             $sql = "UPDATE words SET
                 WoText = ?, WoTranslation = ?, WoSentence = ?, WoNotes = ?, WoRomanization = ?,
+                WoLemma = ?, WoLemmaLC = ?,
                 WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
                 WHERE WoID = ?"
                 . UserScopedQuery::forTablePrepared('words', $bindings);
@@ -171,7 +187,8 @@ class WordService
             // Status unchanged
             $bindings[] = $wordId;
             $sql = "UPDATE words SET
-                WoText = ?, WoTranslation = ?, WoSentence = ?, WoNotes = ?, WoRomanization = ?, {$scoreUpdate}
+                WoText = ?, WoTranslation = ?, WoSentence = ?, WoNotes = ?, WoRomanization = ?,
+                WoLemma = ?, WoLemmaLC = ?, {$scoreUpdate}
                 WHERE WoID = ?"
                 . UserScopedQuery::forTablePrepared('words', $bindings);
             Connection::preparedExecute($sql, $bindings);
@@ -229,6 +246,8 @@ class WordService
             'WoLgID' => $term->languageId()->toInt(),
             'WoText' => $term->text(),
             'WoTextLC' => $term->textLowercase(),
+            'WoLemma' => $term->lemma(),
+            'WoLemmaLC' => $term->lemmaLc(),
             'WoStatus' => $term->status()->toInt(),
             'WoTranslation' => $term->translation(),
             'WoSentence' => $sentence,

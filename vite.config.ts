@@ -1,10 +1,56 @@
-import { defineConfig, type PluginOption } from 'vite';
+import { defineConfig, type PluginOption, build } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
 import purgecss from 'vite-plugin-purgecss';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
+
+/**
+ * Plugin to build the service worker separately.
+ * The SW must be served from the root for proper scope.
+ */
+function buildServiceWorker(): PluginOption {
+  return {
+    name: 'build-service-worker',
+    apply: 'build',
+    async closeBundle() {
+      await build({
+        configFile: false,
+        build: {
+          outDir: resolve(__dirname),
+          emptyOutDir: false,
+          lib: {
+            entry: resolve(__dirname, 'src/frontend/js/sw.ts'),
+            formats: ['iife'],
+            name: 'sw',
+            fileName: () => 'sw.js',
+          },
+          rollupOptions: {
+            output: {
+              inlineDynamicImports: true,
+            },
+          },
+          minify: 'terser',
+          terserOptions: {
+            compress: {
+              drop_console: false, // Keep console for SW debugging
+              drop_debugger: true,
+            },
+          },
+        },
+        resolve: {
+          alias: {
+            '@': resolve(__dirname, 'src/frontend/js'),
+            '@shared': resolve(__dirname, 'src/frontend/js/shared'),
+            '@modules': resolve(__dirname, 'src/frontend/js/modules'),
+          },
+        },
+      });
+      console.log('Service worker built successfully');
+    },
+  };
+}
 
 export default defineConfig({
   root: resolve(__dirname, 'src/frontend'),
@@ -47,6 +93,8 @@ export default defineConfig({
     legacy({
       targets: ['defaults', 'not IE 11']
     }),
+    // Build service worker for PWA support
+    buildServiceWorker(),
     // PurgeCSS to remove unused CSS (especially from Bulma)
     // Cast needed due to vite-plugin-purgecss type issues with 'enforce' property
     purgecss({

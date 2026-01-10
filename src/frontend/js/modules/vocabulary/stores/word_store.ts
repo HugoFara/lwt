@@ -10,7 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { TermsApi } from '@modules/vocabulary/api/terms_api';
-import { TextsApi, type TextWord, type TextReadingConfig, type DictLinks } from '@modules/text/api/texts_api';
+import { TextsApi, type TextWord, type TextReadingConfig, type DictLinks, type MultiWordRef } from '@modules/text/api/texts_api';
 import { injectTextStyles, generateParagraphStyles } from '@modules/text/pages/reading/text_styles';
 import { renderText, updateWordStatusInDOM, updateWordTranslationInDOM, type RenderSettings } from '@modules/text/pages/reading/text_renderer';
 
@@ -32,6 +32,8 @@ export interface WordData {
   romanization: string;
   notes?: string;
   tags?: string;
+  // Multiword references (mw2, mw3, etc.) - full expression details
+  [key: `mw${number}`]: MultiWordRef | undefined;
 }
 
 /**
@@ -256,6 +258,14 @@ function createWordStore(): WordStoreState {
           notes: word.notes ?? '',
           tags: word.tags
         };
+
+        // Copy multiword references (mw2, mw3, etc.)
+        for (let i = 2; i <= 9; i++) {
+          const mwKey = `mw${i}` as const;
+          if (word[mwKey]) {
+            wordData[mwKey] = word[mwKey];
+          }
+        }
 
         this.words.push(wordData);
 

@@ -9,6 +9,7 @@
  */
 
 import type { WordData } from '@modules/vocabulary/stores/word_store';
+import type { MultiWordRef } from '@modules/text/api/texts_api';
 import { parseInlineMarkdown } from '@shared/utils/inline_markdown';
 
 /**
@@ -235,8 +236,43 @@ function isLeadingPunctuation(word: WordData): boolean {
 }
 
 /**
+ * Find the best multi-word reference for a word that starts at its position.
+ * Returns the longest (highest word count) multi-word expression that starts at this word's position.
+ */
+function findStartingMultiWord(word: WordData): MultiWordRef | null {
+  if (word.isNotWord) return null;
+
+  let bestMw: MultiWordRef | null = null;
+  let bestCode = 0;
+
+  // Check mw2 through mw9 for multi-word references
+  for (let i = 2; i <= 9; i++) {
+    const mwKey = `mw${i}` as const;
+    const mwRef = word[mwKey];
+    if (mwRef && mwRef.startPos === word.position && i > bestCode) {
+      bestMw = mwRef;
+      bestCode = i;
+    }
+  }
+
+  return bestMw;
+}
+
+/**
+ * Escape HTML special characters for use in attributes.
+ */
+function escapeAttr(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/**
  * Render all words as HTML, grouped by sentences.
  * Words and adjacent punctuation are wrapped together to prevent line breaks.
+ * Multi-word expressions are wrapped in mw-group spans with connected underlines.
  */
 export function renderText(words: WordData[], settings: RenderSettings): string {
   if (words.length === 0) return '';
@@ -246,17 +282,39 @@ export function renderText(words: WordData[], settings: RenderSettings): string 
   let sentenceOpen = false;
   let i = 0;
 
+  // Track active multi-word expression
+  let activeMw: MultiWordRef | null = null;
+  let mwGroupOpen = false;
+
   while (i < words.length) {
     const word = words[i];
 
     // Handle sentence boundaries
     if (word.sentenceId !== currentSentenceId) {
+      // Close multi-word group if open (shouldn't span sentences, but handle gracefully)
+      if (mwGroupOpen) {
+        parts.push('</span>');
+        mwGroupOpen = false;
+        activeMw = null;
+      }
       if (sentenceOpen) {
         parts.push('</span>');
       }
       currentSentenceId = word.sentenceId;
       parts.push(`<span id="sent_${currentSentenceId}">`);
       sentenceOpen = true;
+    }
+
+    // Check if this word starts a new multi-word expression
+    if (!word.isNotWord && !mwGroupOpen) {
+      const startingMw = findStartingMultiWord(word);
+      if (startingMw) {
+        activeMw = startingMw;
+        const mwText = escapeAttr(startingMw.text);
+        const mwTrans = escapeAttr(startingMw.translation);
+        parts.push(`<span class="mw-group mw-status${startingMw.status}" data-mw-text="${mwText}" data-mw-trans="${mwTrans}" data-mw-status="${startingMw.status}">`);
+        mwGroupOpen = true;
+      }
     }
 
     // Check if this is a word (not punctuation/whitespace)
@@ -269,6 +327,7 @@ export function renderText(words: WordData[], settings: RenderSettings): string 
 
       // Add the word
       group.push(renderWord(word, settings));
+      const renderedWordPosition = word.position;
       i++;
 
       // Collect trailing punctuation
@@ -283,6 +342,13 @@ export function renderText(words: WordData[], settings: RenderSettings): string 
       } else {
         parts.push(group[0]);
       }
+
+      // Check if we should close the multi-word group
+      if (mwGroupOpen && activeMw && renderedWordPosition >= activeMw.endPos) {
+        parts.push('</span>');
+        mwGroupOpen = false;
+        activeMw = null;
+      }
     } else if (isLeadingPunctuation(word)) {
       // Leading punctuation - collect it with the following word
       const group: string[] = [];
@@ -290,8 +356,28 @@ export function renderText(words: WordData[], settings: RenderSettings): string 
       i++;
 
       // Get the following word if it exists and is in the same sentence
+      let renderedWordPosition = -1;
       if (i < words.length && !words[i].isNotWord && words[i].sentenceId === currentSentenceId) {
+        // Check if this word starts a multi-word (before rendering it)
+        if (!mwGroupOpen) {
+          const startingMw = findStartingMultiWord(words[i]);
+          if (startingMw) {
+            // Close the current group first, open mw-group, then re-open word-group
+            // Actually, we need to handle this more carefully - put the leading punc outside the mw-group
+            // For simplicity, just render the leading punctuation outside and start fresh
+            parts.push(group[0]); // Add the leading punctuation
+            group.length = 0; // Clear the group
+
+            activeMw = startingMw;
+            const mwText = escapeAttr(startingMw.text);
+            const mwTrans = escapeAttr(startingMw.translation);
+            parts.push(`<span class="mw-group mw-status${startingMw.status}" data-mw-text="${mwText}" data-mw-trans="${mwTrans}" data-mw-status="${startingMw.status}">`);
+            mwGroupOpen = true;
+          }
+        }
+
         group.push(renderWord(words[i], settings));
+        renderedWordPosition = words[i].position;
         i++;
 
         // Also collect any trailing punctuation after the word
@@ -304,14 +390,26 @@ export function renderText(words: WordData[], settings: RenderSettings): string 
       // Wrap in a non-breaking group
       if (group.length > 1) {
         parts.push(`<span class="word-group">${group.join('')}</span>`);
-      } else {
+      } else if (group.length === 1) {
         parts.push(group[0]);
+      }
+
+      // Check if we should close the multi-word group
+      if (mwGroupOpen && activeMw && renderedWordPosition >= activeMw.endPos) {
+        parts.push('</span>');
+        mwGroupOpen = false;
+        activeMw = null;
       }
     } else {
       // Regular non-word (whitespace or other punctuation)
       parts.push(renderWord(word, settings));
       i++;
     }
+  }
+
+  // Close any open multi-word group
+  if (mwGroupOpen) {
+    parts.push('</span>');
   }
 
   // Close last sentence

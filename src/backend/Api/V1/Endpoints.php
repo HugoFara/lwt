@@ -50,6 +50,12 @@ class Endpoints
         'terms/filter-options' => ['GET'],
         'terms/bulk-action' => ['PUT'],
         'terms/all-action' => ['PUT'],
+        'terms/family' => ['GET'],
+        'terms/family/status' => ['PUT'],
+        'terms/family/suggestion' => ['GET'],
+        'terms/family/apply' => ['PUT'],
+        'word-families' => ['GET'],
+        'word-families/stats' => ['GET'],
         'texts' => ['GET', 'POST', 'PUT'],
         'texts/statistics' => ['GET'],
         'texts/by-language' => ['GET'],
@@ -58,11 +64,20 @@ class Endpoints
         'feeds/list' => ['GET'],
         'feeds/articles' => ['GET'],
         'feeds/articles/import' => ['POST'],
+        'books' => ['GET'],
+        'books/chapters' => ['GET'],
+        'books/progress' => ['PUT'],
         'local-dictionaries' => ['GET', 'POST', 'PUT', 'DELETE'],
         'local-dictionaries/lookup' => ['GET'],
         'local-dictionaries/preview' => ['POST'],
         'local-dictionaries/entries' => ['GET', 'POST', 'PUT', 'DELETE'],
         'version' => ['GET'],
+
+        // TTS endpoints (Piper TTS via NLP microservice)
+        'tts/voices' => ['GET', 'DELETE'],  // GET for list, DELETE for tts/voices/{id}
+        'tts/voices/installed' => ['GET'],
+        'tts/voices/download' => ['POST'],
+        'tts/speak' => ['POST'],
     ];
 
     /**

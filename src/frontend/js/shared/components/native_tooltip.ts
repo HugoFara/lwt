@@ -32,13 +32,52 @@ function getAttr(el: HTMLElement, attr: string): string {
 }
 
 /**
+ * Get status name from status number.
+ */
+function getStatusName(status: number): string {
+  if (status === 0) return 'Unknown [?]';
+  if (status < 5) return 'Learning [' + status + ']';
+  if (status === 5) return 'Learned [5]';
+  if (status === 98) return 'Ignored [Ign]';
+  if (status === 99) return 'Well Known [WKn]';
+  return 'Unknown';
+}
+
+/**
+ * Escape HTML special characters.
+ */
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
  * Generate tooltip content for a word element.
  * Replicates the functionality of jQuery's tooltip_wsty_content.
+ * If the word is inside a multi-word group, shows the multi-word expression info.
  *
  * @param element The word element to generate tooltip content for
  * @returns HTML string for the tooltip content
  */
 export function generateWordTooltipContent(element: HTMLElement): string {
+  // Check if element is inside a multi-word group
+  const mwGroup = element.closest('.mw-group') as HTMLElement | null;
+  if (mwGroup) {
+    const mwText = mwGroup.getAttribute('data-mw-text') || '';
+    const mwTrans = mwGroup.getAttribute('data-mw-trans') || '';
+    const mwStatus = parseInt(mwGroup.getAttribute('data-mw-status') || '0', 10);
+
+    let title = `<p><b style='font-size:120%'>${escapeHtml(mwText)}</b></p>`;
+    if (mwTrans && mwTrans !== '*') {
+      title += `<p><b>Transl.</b>: ${escapeHtml(mwTrans)}</p>`;
+    }
+    title += `<p><b>Status</b>: <span class="status${mwStatus}">${getStatusName(mwStatus)}</span></p>`;
+    title += `<p style="font-size:80%;color:#666;">(multi-word expression)</p>`;
+    return title;
+  }
+
+  // Regular single-word tooltip
   const delimiter = getDelimiter();
   const re = new RegExp('([' + delimiter + '])(?! )', 'g');
 
@@ -55,14 +94,8 @@ export function generateWordTooltipContent(element: HTMLElement): string {
   const transAttr = getAttr(element, 'data_trans');
   let trans = transAttr.replace(re, '$1 ');
 
-  let statname = '';
   const status = parseInt(getAttr(element, 'data_status') || '0', 10);
-
-  if (status === 0) statname = 'Unknown [?]';
-  else if (status < 5) statname = 'Learning [' + status + ']';
-  if (status === 5) statname = 'Learned [5]';
-  if (status === 98) statname = 'Ignored [Ign]';
-  if (status === 99) statname = 'Well Known [WKn]';
+  const statname = getStatusName(status);
 
   if (roman !== '') {
     title += '<p><b>Roman.</b>: ' + roman + '</p>';

@@ -34,6 +34,13 @@ import '@shared/utils/inline_markdown';
 import '@shared/stores/lwt_state';
 import '@shared/stores/app_data';
 
+// PWA support
+import '@shared/pwa/register';
+
+// Offline support
+import '@shared/offline/offline-button';
+import '@shared/offline/offline-indicator';
+
 // Shared API client
 import '@shared/api/client';
 
@@ -121,6 +128,7 @@ import '@modules/text/pages/texts_grouped_app';
 import '@modules/text/pages/archived_texts_grouped_app';
 import '@modules/text/pages/text_status_chart';
 import '@modules/text/pages/youtube_import';
+import '@modules/text/pages/file_import';
 import '@modules/text/pages/text_check_display';
 import '@modules/text/pages/text_print_app';
 

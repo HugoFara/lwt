@@ -79,6 +79,28 @@ VALUES
   ('1', '8');
 
 DROP
+  TABLE IF EXISTS books;
+CREATE TABLE `books` (
+  `BkID` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `BkUsID` int(10) unsigned DEFAULT NULL,
+  `BkLgID` tinyint(3) unsigned NOT NULL,
+  `BkTitle` varchar(200) NOT NULL,
+  `BkAuthor` varchar(200) DEFAULT NULL,
+  `BkDescription` text DEFAULT NULL,
+  `BkCoverPath` varchar(500) DEFAULT NULL COMMENT 'Path to cover image file',
+  `BkSourceType` enum('text','epub','pdf') NOT NULL DEFAULT 'text',
+  `BkSourceHash` varchar(64) DEFAULT NULL COMMENT 'SHA-256 hash for duplicate detection',
+  `BkTotalChapters` smallint(5) unsigned NOT NULL DEFAULT 0,
+  `BkCurrentChapter` smallint(5) unsigned NOT NULL DEFAULT 1,
+  `BkCreated` timestamp NOT NULL DEFAULT current_timestamp(),
+  `BkUpdated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`BkID`),
+  KEY `idx_books_language` (`BkLgID`),
+  KEY `idx_books_user` (`BkUsID`),
+  KEY `idx_books_source_hash` (`BkSourceHash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP
   TABLE IF EXISTS newsfeeds;
 
 CREATE TABLE `newsfeeds` (
@@ -554,8 +576,12 @@ CREATE TABLE `texts` (
   `TxSourceURI` varchar(1000) DEFAULT NULL,
   `TxPosition` smallint(5) NOT NULL DEFAULT '0',
   `TxAudioPosition` float NOT NULL DEFAULT '0',
+  `TxBkID` smallint(5) unsigned DEFAULT NULL,
+  `TxChapterNum` smallint(5) unsigned DEFAULT NULL,
+  `TxChapterTitle` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`TxID`),
-  KEY `TxLgID` (`TxLgID`)
+  KEY `TxLgID` (`TxLgID`),
+  KEY `idx_texts_book` (`TxBkID`, `TxChapterNum`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO texts (TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI)
 VALUES

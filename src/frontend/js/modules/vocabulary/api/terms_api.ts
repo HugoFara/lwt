@@ -21,6 +21,8 @@ export interface Term {
   id: number;
   text: string;
   textLc: string;
+  lemma?: string;
+  lemmaLc?: string;
   translation: string;
   romanization?: string;
   notes?: string;
@@ -152,6 +154,7 @@ export interface TermCreateFullRequest {
   romanization?: string;
   sentence?: string;
   notes?: string;
+  lemma?: string;
   status: number;
   tags?: string[];
 }
@@ -164,6 +167,7 @@ export interface TermUpdateFullRequest {
   romanization?: string;
   sentence?: string;
   notes?: string;
+  lemma?: string;
   status: number;
   tags?: string[];
 }
@@ -177,6 +181,8 @@ export interface TermFullResponse {
     id: number;
     text: string;
     textLc: string;
+    lemma: string;
+    lemmaLc: string;
     hex: string;
     translation: string;
     romanization: string;
@@ -214,6 +220,8 @@ export interface TermForEdit {
   id: number | null;
   text: string;
   textLc: string;
+  lemma: string;
+  lemmaLc: string;
   hex: string;
   translation: string;
   romanization: string;

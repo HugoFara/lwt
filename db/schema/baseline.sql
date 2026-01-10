@@ -170,6 +170,8 @@ CREATE TABLE IF NOT EXISTS words (
     WoLgID tinyint(3) unsigned NOT NULL,
     WoText varchar(250) NOT NULL,
     WoTextLC varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+    WoLemma varchar(250) DEFAULT NULL,
+    WoLemmaLC varchar(250) DEFAULT NULL,
     WoStatus tinyint(4) NOT NULL,
     WoTranslation varchar(500) NOT NULL DEFAULT '*',
     WoRomanization varchar(100) DEFAULT NULL,
@@ -193,6 +195,7 @@ CREATE TABLE IF NOT EXISTS words (
     KEY WoTodayScore (WoTodayScore),
     KEY WoTomorrowScore (WoTomorrowScore),
     KEY WoRandom (WoRandom),
+    KEY idx_words_lemma (WoLemmaLC, WoLgID),
     CONSTRAINT fk_words_user FOREIGN KEY (WoUsID) REFERENCES users(UsID) ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;

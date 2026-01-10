@@ -60,12 +60,12 @@ class LanguageApiHandler
      *
      * @param int $langId Language ID
      *
-     * @return array{name: string, voiceapi: string, word_parsing: string, abbreviation: mixed, reading_mode: string}
+     * @return array{name: string, voiceapi: string, word_parsing: string, abbreviation: mixed, reading_mode: string, piper_voice_id?: string}
      */
     public function getReadingConfiguration(int $langId): array
     {
         $record = QueryBuilder::table('languages')
-            ->select(['LgName', 'LgTTSVoiceAPI', 'LgRegexpWordCharacters'])
+            ->select(['LgName', 'LgTTSVoiceAPI', 'LgRegexpWordCharacters', 'LgPiperVoiceId'])
             ->where('LgID', '=', $langId)
             ->firstPrepared();
 
@@ -80,8 +80,12 @@ class LanguageApiHandler
         }
 
         $abbr = $this->languageFacade->getLanguageCode($langId, LanguagePresets::getAll());
+        $piperVoiceId = $record["LgPiperVoiceId"] ?? null;
 
-        if ($record["LgTTSVoiceAPI"] != '') {
+        // Priority: Piper > External API > Internal (MeCab) > Direct
+        if ($piperVoiceId !== null && $piperVoiceId !== '') {
+            $readingMode = "piper";
+        } elseif ($record["LgTTSVoiceAPI"] != '') {
             $readingMode = "external";
         } elseif ($record["LgRegexpWordCharacters"] == "mecab") {
             $readingMode = "internal";
@@ -89,13 +93,19 @@ class LanguageApiHandler
             $readingMode = "direct";
         }
 
-        return [
+        $result = [
             "name" => $record["LgName"],
             "voiceapi" => $record["LgTTSVoiceAPI"],
             "word_parsing" => $record["LgRegexpWordCharacters"],
             "abbreviation" => $abbr,
             "reading_mode" => $readingMode
         ];
+
+        if ($piperVoiceId !== null && $piperVoiceId !== '') {
+            $result["piper_voice_id"] = $piperVoiceId;
+        }
+
+        return $result;
     }
 
     /**

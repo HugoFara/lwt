@@ -197,6 +197,26 @@ interface TermRepositoryInterface
     public function updateRomanization(int $termId, string $romanization): bool;
 
     /**
+     * Update the lemma (base form) of a term.
+     *
+     * @param int         $termId Term ID
+     * @param string|null $lemma  New lemma (null to clear)
+     *
+     * @return bool True if updated
+     */
+    public function updateLemma(int $termId, ?string $lemma): bool;
+
+    /**
+     * Find all terms sharing a lemma in a language (word family).
+     *
+     * @param int    $languageId Language ID
+     * @param string $lemmaLc    Lowercase lemma
+     *
+     * @return Term[]
+     */
+    public function findByLemma(int $languageId, string $lemmaLc): array;
+
+    /**
      * Get statistics for terms.
      *
      * @param int|null $languageId Language ID (null for all)

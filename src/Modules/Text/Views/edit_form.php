@@ -43,7 +43,8 @@ $actions = [];
 if (!$isNew) {
     $actions[] = ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'];
 }
-$actions[] = ['url' => '/text/import-long', 'label' => 'Long Text Import', 'icon' => 'file-up'];
+$actions[] = ['url' => '/book/import', 'label' => 'Import EPUB', 'icon' => 'book'];
+$actions[] = ['url' => '/books', 'label' => 'My Books', 'icon' => 'library'];
 $actions[] = ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'];
 $actions[] = ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'];
 if ($isNew) {
@@ -64,13 +65,109 @@ if ($isNew) {
 
 <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
-<form class="validate" method="post"
+<form class="validate" method="post" enctype="multipart/form-data"
       action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>"
       x-data="{ showAnnotation: <?php echo $isNew ? 'false' : 'true'; ?> }">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="TxID" value="<?php echo $textId; ?>" />
 
     <div class="box">
+        <?php if ($isNew): ?>
+        <!-- Import from File (FIRST for new texts) -->
+        <div class="field">
+            <label class="label">Import from File</label>
+            <div class="file has-name is-fullwidth">
+                <label class="file-label">
+                    <input class="file-input" type="file" name="importFile" id="importFile"
+                           accept=".srt,.vtt,.epub,.mp3,.mp4,.wav,.webm,.ogg,.m4a,.mkv,.flac"
+                           onchange="this.closest('.file').querySelector('.file-name').textContent = this.files[0]?.name || 'No file selected'" />
+                    <span class="file-cta">
+                        <span class="file-icon">
+                            <?php echo IconHelper::render('file-up', ['alt' => 'Upload']); ?>
+                        </span>
+                        <span class="file-label">Choose file...</span>
+                    </span>
+                    <span class="file-name">No file selected</span>
+                </label>
+            </div>
+            <p class="help">
+                Supported: EPUB books, SRT/VTT subtitles, audio/video (MP3, MP4, WAV, WebM, OGG, M4A, FLAC, MKV - requires Whisper).
+            </p>
+            <p id="importFileStatus" class="help"></p>
+
+            <!-- Whisper Transcription Options (shown when audio/video selected) -->
+            <div id="whisperOptions" class="box mt-3" style="display: none;">
+                <h4 class="subtitle is-6 mb-3">
+                    <?php echo IconHelper::render('mic', ['alt' => 'Transcription']); ?>
+                    Transcription Options
+                </h4>
+
+                <div class="field">
+                    <label class="label is-small" for="whisperLanguage">Transcription Language</label>
+                    <div class="control">
+                        <div class="select is-small is-fullwidth">
+                            <select id="whisperLanguage" name="whisperLanguage">
+                                <option value="">Auto-detect</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="help">Leave as auto-detect or select to improve accuracy.</p>
+                </div>
+
+                <div class="field">
+                    <label class="label is-small" for="whisperModel">Model Size</label>
+                    <div class="control">
+                        <div class="select is-small is-fullwidth">
+                            <select id="whisperModel" name="whisperModel">
+                                <option value="base">Base (fast, good quality)</option>
+                                <option value="small" selected>Small (balanced)</option>
+                                <option value="medium">Medium (better quality, slower)</option>
+                                <option value="large">Large (best quality, slowest)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="help">Larger models are more accurate but take longer to process.</p>
+                </div>
+
+                <div class="field">
+                    <div class="control">
+                        <button type="button" class="button is-info" id="startTranscription">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('mic', ['alt' => 'Transcribe']); ?>
+                            </span>
+                            <span>Start Transcription</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Transcription Progress -->
+                <div id="whisperProgress" class="notification is-info is-light mt-3" style="display: none;">
+                    <div class="level mb-2">
+                        <div class="level-left">
+                            <span id="whisperStatusText">Preparing transcription...</span>
+                        </div>
+                        <div class="level-right">
+                            <button type="button" class="button is-small is-danger is-outlined" id="whisperCancel">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                    <progress class="progress is-info" id="whisperProgressBar" value="0" max="100"></progress>
+                </div>
+            </div>
+
+            <!-- Whisper Unavailable Message -->
+            <div id="whisperUnavailable" class="notification is-warning is-light mt-3" style="display: none;">
+                <span class="icon-text">
+                    <span class="icon">
+                        <?php echo IconHelper::render('alert-triangle', ['alt' => 'Warning']); ?>
+                    </span>
+                    <span>Whisper transcription is not available. Please ensure the NLP service is running.</span>
+                </span>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Language -->
         <div class="field">
             <label class="label" for="TxLgID">
@@ -126,15 +223,16 @@ if ($isNew) {
                 <textarea <?php echo $scrdir; ?>
                           name="TxText"
                           id="TxText"
-                          class="textarea notempty checkbytes checkoutsidebmp"
-                          data_maxlength="65000"
+                          class="textarea notempty checkoutsidebmp"
                           data_info="Text"
                           rows="15"
                           placeholder="Paste or type your text here..."
                           title="The text you want to study"
                           required><?php echo \htmlspecialchars($text->text ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
-            <p class="help">Maximum 65,000 bytes. For longer texts, use the Long Text Import feature.</p>
+            <p class="help">
+                Long texts (over 60KB) will be automatically split into chapters and saved as a book.
+            </p>
         </div>
 
         <!-- Annotated Text (only for existing texts) -->

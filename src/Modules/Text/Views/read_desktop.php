@@ -96,6 +96,94 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
   </div>
   <?php endif; ?>
 
+  <!-- Chapter navigation (if part of a book) -->
+  <?php if (isset($bookContext) && $bookContext !== null): ?>
+  <div class="box py-2 px-4 mb-0" style="border-radius: 0; background: #f5f5f5;">
+    <div class="level is-mobile">
+      <div class="level-left">
+        <div class="level-item">
+          <a href="/book/<?php echo (int) $bookContext['bookId']; ?>" class="has-text-grey-dark" title="View book">
+            <span class="icon is-small mr-1">
+              <i class="fas fa-book"></i>
+            </span>
+            <strong><?php echo htmlspecialchars($bookContext['bookTitle']); ?></strong>
+          </a>
+          <span class="has-text-grey ml-2">
+            — Ch. <?php echo (int) $bookContext['chapterNum']; ?>/<?php echo (int) $bookContext['totalChapters']; ?>
+            <?php if (!empty($bookContext['chapterTitle'])): ?>
+              <em class="ml-1"><?php echo htmlspecialchars($bookContext['chapterTitle']); ?></em>
+            <?php endif; ?>
+          </span>
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <div class="buttons has-addons mb-0">
+            <!-- Previous chapter -->
+            <?php if ($bookContext['prevTextId'] !== null): ?>
+            <a href="/text/read?text=<?php echo (int) $bookContext['prevTextId']; ?>"
+               class="button is-small" title="Previous chapter">
+              <span class="icon is-small">
+                <i class="fas fa-chevron-left"></i>
+              </span>
+              <span>Prev</span>
+            </a>
+            <?php else: ?>
+            <button class="button is-small" disabled title="No previous chapter">
+              <span class="icon is-small">
+                <i class="fas fa-chevron-left"></i>
+              </span>
+              <span>Prev</span>
+            </button>
+            <?php endif; ?>
+
+            <!-- Chapter dropdown -->
+            <div class="dropdown is-hoverable">
+              <div class="dropdown-trigger">
+                <button class="button is-small">
+                  <span>Ch. <?php echo (int) $bookContext['chapterNum']; ?></span>
+                  <span class="icon is-small">
+                    <i class="fas fa-angle-down"></i>
+                  </span>
+                </button>
+              </div>
+              <div class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                <div class="dropdown-content">
+                  <?php foreach ($bookContext['chapters'] as $chapter): ?>
+                  <a href="/text/read?text=<?php echo (int) $chapter['textId']; ?>"
+                     class="dropdown-item <?php echo ($chapter['chapterNum'] === $bookContext['chapterNum']) ? 'is-active' : ''; ?>">
+                    <?php echo (int) $chapter['chapterNum']; ?>.
+                    <?php echo htmlspecialchars($chapter['title'] ?: 'Chapter ' . $chapter['chapterNum']); ?>
+                  </a>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+            </div>
+
+            <!-- Next chapter -->
+            <?php if ($bookContext['nextTextId'] !== null): ?>
+            <a href="/text/read?text=<?php echo (int) $bookContext['nextTextId']; ?>"
+               class="button is-small" title="Next chapter">
+              <span>Next</span>
+              <span class="icon is-small">
+                <i class="fas fa-chevron-right"></i>
+              </span>
+            </a>
+            <?php else: ?>
+            <button class="button is-small" disabled title="No next chapter">
+              <span>Next</span>
+              <span class="icon is-small">
+                <i class="fas fa-chevron-right"></i>
+              </span>
+            </button>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
   <!-- Loading state -->
   <div x-show="isLoading" class="has-text-centered py-6">
     <div class="loading-spinner"></div>

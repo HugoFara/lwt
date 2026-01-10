@@ -41,6 +41,8 @@ class Term
     private LanguageId $languageId;
     private string $text;
     private string $textLowercase;
+    private ?string $lemma = null;
+    private ?string $lemmaLc = null;
     private TermStatus $status;
     private string $translation;
     private string $sentence;
@@ -61,6 +63,8 @@ class Term
         LanguageId $languageId,
         string $text,
         string $textLowercase,
+        ?string $lemma,
+        ?string $lemmaLc,
         TermStatus $status,
         string $translation,
         string $sentence,
@@ -77,6 +81,8 @@ class Term
         $this->languageId = $languageId;
         $this->text = $text;
         $this->textLowercase = $textLowercase;
+        $this->lemma = $lemma;
+        $this->lemmaLc = $lemmaLc;
         $this->status = $status;
         $this->translation = $translation;
         $this->sentence = $sentence;
@@ -118,6 +124,8 @@ class Term
             $languageId,
             $trimmedText,
             mb_strtolower($trimmedText, 'UTF-8'),
+            null, // lemma
+            null, // lemmaLc
             TermStatus::new(),
             $translation,
             '',
@@ -142,6 +150,8 @@ class Term
      * @param int               $languageId      The language ID
      * @param string            $text            The term text
      * @param string            $textLowercase   The lowercase text
+     * @param string|null       $lemma           The lemma (base form)
+     * @param string|null       $lemmaLc         The lowercase lemma
      * @param int               $status          The status value
      * @param string            $translation     The translation
      * @param string            $sentence        The example sentence
@@ -163,6 +173,8 @@ class Term
         int $languageId,
         string $text,
         string $textLowercase,
+        ?string $lemma,
+        ?string $lemmaLc,
         int $status,
         string $translation,
         string $sentence,
@@ -180,6 +192,8 @@ class Term
             LanguageId::fromInt($languageId),
             $text,
             $textLowercase,
+            $lemma,
+            $lemmaLc,
             TermStatus::fromInt($status),
             $translation,
             $sentence,
@@ -316,6 +330,24 @@ class Term
     }
 
     /**
+     * Update the lemma (base form).
+     *
+     * @param string|null $lemma The new lemma, or null to clear
+     *
+     * @return void
+     */
+    public function updateLemma(?string $lemma): void
+    {
+        if ($lemma === null || $lemma === '') {
+            $this->lemma = null;
+            $this->lemmaLc = null;
+        } else {
+            $this->lemma = trim($lemma);
+            $this->lemmaLc = mb_strtolower($this->lemma, 'UTF-8');
+        }
+    }
+
+    /**
      * Update review scores.
      *
      * @param float $todayScore    Today's score
@@ -409,6 +441,16 @@ class Term
     public function textLowercase(): string
     {
         return $this->textLowercase;
+    }
+
+    public function lemma(): ?string
+    {
+        return $this->lemma;
+    }
+
+    public function lemmaLc(): ?string
+    {
+        return $this->lemmaLc;
     }
 
     public function status(): TermStatus

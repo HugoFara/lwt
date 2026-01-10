@@ -28,6 +28,8 @@ use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Core\Globals;
 
 // Base path for legacy includes
 define('LWT_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
@@ -163,6 +165,18 @@ class TextController extends BaseController
         $media = isset($headerData['TxAudioURI']) ? trim((string) $headerData['TxAudioURI']) : '';
         $audioPosition = (int) ($headerData['TxAudioPosition'] ?? 0);
         $sourceUri = (string) ($headerData['TxSourceURI'] ?? '');
+
+        // Book/chapter context for navigation
+        $bookContext = null;
+        try {
+            $bookFacade = Container::getInstance()->getTyped(
+                \Lwt\Modules\Book\Application\BookFacade::class
+            );
+            $bookContext = $bookFacade->getBookContextForText($textId);
+        } catch (\Throwable $e) {
+            // Book module may not be available or no book context
+            $bookContext = null;
+        }
 
         // Save current text
         Settings::save('currenttext', $textId);
@@ -338,8 +352,44 @@ class TextController extends BaseController
         $txAudioUri = $this->param('TxAudioURI');
         $txSourceUri = $this->param('TxSourceURI');
 
-        // Validate text length
-        if (!$this->textService->validateTextLength($txText)) {
+        // Check for uploaded subtitle file (.srt, .vtt) - server-side fallback
+        $importFile = InputValidator::getUploadedFile('importFile');
+        if ($importFile !== null) {
+            $extension = strtolower(pathinfo($importFile['name'], PATHINFO_EXTENSION));
+            // Only handle subtitle files here; EPUB files are handled by /book/import
+            if ($extension === 'srt' || $extension === 'vtt') {
+                $subtitleService = new \Lwt\Modules\Text\Application\Services\SubtitleParserService();
+                $fileContent = file_get_contents($importFile['tmp_name']);
+                if ($fileContent !== false) {
+                    $format = $subtitleService->detectFormat($importFile['name'], $fileContent);
+                    if ($format !== null) {
+                        $parseResult = $subtitleService->parse($fileContent, $format);
+                        if ($parseResult['success']) {
+                            $txText = $parseResult['text'];
+                            // Auto-set title from filename if empty
+                            if ($txTitle === '') {
+                                $txTitle = pathinfo($importFile['name'], PATHINFO_FILENAME);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check if text needs auto-splitting (> 60KB)
+        $needsAutoSplit = false;
+        try {
+            $bookFacade = Container::getInstance()->getTyped(
+                \Lwt\Modules\Book\Application\BookFacade::class
+            );
+            $needsAutoSplit = $bookFacade->needsSplit($txText);
+        } catch (\Throwable $e) {
+            // Book module not available, fall back to length validation
+            $needsAutoSplit = false;
+        }
+
+        // If text is too long and we can't auto-split, reject it
+        if (!$needsAutoSplit && !$this->textService->validateTextLength($txText)) {
             $message = "Error: Text too long, must be below 65000 Bytes";
             if ($noPagestart) {
                 PageLayoutHelper::renderPageStart($this->languageService->getLanguageName($currentLang) . ' Texts', true);
@@ -362,6 +412,18 @@ class TextController extends BaseController
         $textId = $this->paramInt('TxID', 0) ?? 0;
         $isNew = str_starts_with($op, 'Save');
 
+        // Auto-split long texts into a book (only for new texts)
+        if ($needsAutoSplit && $isNew) {
+            return $this->handleAutoSplitImport(
+                $txLgId,
+                $txTitle,
+                $txText,
+                $txAudioUri,
+                $txSourceUri,
+                str_ends_with($op, "and Open")
+            );
+        }
+
         $result = $this->textService->saveTextAndReparse(
             $isNew ? 0 : $textId,
             $txLgId,
@@ -378,6 +440,78 @@ class TextController extends BaseController
         }
 
         return ['message' => $result['message'], 'redirect' => false];
+    }
+
+    /**
+     * Handle auto-split import for long texts.
+     *
+     * Creates a book with chapters for texts that exceed 60KB.
+     *
+     * @param int    $languageId Language ID
+     * @param string $title      Text title
+     * @param string $text       Text content
+     * @param string $audioUri   Audio URI
+     * @param string $sourceUri  Source URI
+     * @param bool   $openAfter  Whether to open the first chapter after import
+     *
+     * @return array{message: string, redirect: bool}
+     */
+    private function handleAutoSplitImport(
+        int $languageId,
+        string $title,
+        string $text,
+        string $audioUri,
+        string $sourceUri,
+        bool $openAfter
+    ): array {
+        try {
+            $bookFacade = Container::getInstance()->getTyped(
+                \Lwt\Modules\Book\Application\BookFacade::class
+            );
+
+            // Get tag IDs from request
+            $tagIds = [];
+            $tagInput = $this->param('TextTags');
+            if ($tagInput !== null && $tagInput !== '') {
+                $tagIds = array_map('intval', explode(',', $tagInput));
+                $tagIds = array_filter($tagIds, fn($id) => $id > 0);
+            }
+
+            // Get user ID for multi-user mode
+            $userId = Globals::getCurrentUserId();
+
+            // Create book from text
+            $result = $bookFacade->createBookFromText(
+                $languageId,
+                $title,
+                $text,
+                null, // No author for text imports
+                $audioUri,
+                $sourceUri,
+                $tagIds,
+                $userId
+            );
+
+            if (!$result['success']) {
+                return ['message' => 'Error: ' . $result['message'], 'redirect' => false];
+            }
+
+            // Redirect to book or first chapter
+            if ($openAfter && !empty($result['textIds'])) {
+                header('Location: /text/read?start=' . $result['textIds'][0]);
+                exit();
+            }
+
+            // Redirect to book page
+            if ($result['bookId'] !== null) {
+                header('Location: /book/' . $result['bookId']);
+                exit();
+            }
+
+            return ['message' => $result['message'], 'redirect' => true];
+        } catch (\Throwable $e) {
+            return ['message' => 'Error creating book: ' . $e->getMessage(), 'redirect' => false];
+        }
     }
 
     /**
@@ -545,149 +679,6 @@ class TextController extends BaseController
         PageLayoutHelper::renderPageStartNobody('Display');
         include LWT_TEXT_MODULE_VIEWS . '/display_main.php';
         PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Import long text (replaces text_import_long.php)
-     *
-     * @param array $params Route parameters
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedVariable Variables are used in included view files
-     */
-    public function importLong(array $params): void
-    {
-        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-
-        PageLayoutHelper::renderPageStart('Long Text Import', true);
-
-        $maxInputVars = ini_get('max_input_vars');
-        if ($maxInputVars === false || $maxInputVars == '') {
-            $maxInputVars = 1000;
-        }
-        $maxInputVars = (int) $maxInputVars;
-
-        $op = $this->param('op');
-
-        if (substr($op, 0, 5) == 'NEXT ') {
-            $this->importLongCheck($maxInputVars);
-        } elseif (substr($op, 0, 5) == 'Creat') {
-            $this->importLongSave();
-        } else {
-            $this->importLongForm($maxInputVars);
-        }
-
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Display the long text import form.
-     *
-     * @param int $maxInputVars Maximum input variables
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedVariable Variables are used in included view files
-     */
-    private function importLongForm(int $maxInputVars): void
-    {
-        $translateUris = $this->textService->getLanguageTranslateUris();
-        $languageData = [];
-        foreach ($translateUris as $lgId => $uri) {
-            $languageData[$lgId] = UrlUtilities::langFromDict($uri);
-        }
-
-        $languages = $this->languageService->getLanguagesForSelect();
-        $languagesOption = SelectOptionsBuilder::forLanguages(
-            $languages,
-            Settings::get('currentlanguage'),
-            '[Choose...]'
-        );
-
-        include LWT_TEXT_MODULE_VIEWS . '/import_long_form.php';
-    }
-
-    /**
-     * Check/preview long text import.
-     *
-     * @param int $maxInputVars Maximum input variables
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedVariable Variables are used in included view files
-     */
-    private function importLongCheck(int $maxInputVars): void
-    {
-        $langId = $this->paramInt('LgID', 0) ?? 0;
-        $title = $this->param('TxTitle');
-        $paragraphHandling = $this->paramInt('paragraph_handling', 0) ?? 0;
-        $maxSent = $this->paramInt('maxsent', 0) ?? 0;
-        $sourceUri = $this->param('TxSourceURI');
-        $textTags = null;
-        $textTagsArray = $this->paramArray('TextTags');
-        if (!empty($textTagsArray)) {
-            $textTags = json_encode($textTagsArray);
-        }
-
-        $data = $this->textService->prepareLongTextData(
-            InputValidator::getUploadedFile('thefile'),
-            $this->param('Upload'),
-            $paragraphHandling
-        );
-
-        if ($data == "") {
-            $message = "Error: No text specified!";
-            $this->message($message, false);
-            return;
-        }
-
-        $texts = $this->textService->splitLongText($data, $langId, $maxSent);
-        $textCount = count($texts);
-
-        if ($textCount > $maxInputVars - 20) {
-            $message = "Error: Too many texts (" . $textCount . " > " .
-                ($maxInputVars - 20) .
-                "). You must increase 'Maximum Sentences per Text'!";
-            $this->message($message, false);
-            return;
-        }
-
-        $scrdir = $this->languageService->getScriptDirectionTag($langId);
-        include LWT_TEXT_MODULE_VIEWS . '/import_long_check.php';
-    }
-
-    /**
-     * Save long text import.
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedVariable Variables are used in included view files
-     */
-    private function importLongSave(): void
-    {
-        $langId = $this->paramInt('LgID', 0) ?? 0;
-        $title = $this->param('TxTitle');
-        $sourceUri = $this->param('TxSourceURI');
-
-        // TextTags comes as JSON-encoded string from hidden field
-        $textTagsJson = $this->param('TextTags');
-        $textTags = ($textTagsJson !== '') ? json_decode($textTagsJson, true) : null;
-
-        $textCount = $this->paramInt('TextCount', 0) ?? 0;
-        $texts = $this->paramArray('text');
-
-        $result = $this->textService->saveLongTextImport(
-            $langId,
-            $title,
-            $sourceUri,
-            $texts,
-            $textCount,
-            $textTags
-        );
-
-        $message = $result['message'];
-        include LWT_TEXT_MODULE_VIEWS . '/import_long_result.php';
     }
 
     /**

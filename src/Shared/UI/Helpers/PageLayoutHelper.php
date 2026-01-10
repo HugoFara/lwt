@@ -97,7 +97,6 @@ class PageLayoutHelper
                     <a class="navbar-item" href="{$base}/tags/text">Text Tags</a>
                     <a class="navbar-item" href="{$base}/text/check">Text Check</a>
                     <hr class="navbar-divider">
-                    <a class="navbar-item" href="{$base}/text/import-long">Long Text Import</a>
                     <a class="navbar-item" href="{$base}/feeds">Newsfeed Import</a>
                 </div>
             </div>
@@ -289,16 +288,19 @@ HTML;
         $icon72 = UrlUtilities::url('/assets/images/apple-touch-icon-72x72.png');
         $icon114 = UrlUtilities::url('/assets/images/apple-touch-icon-114x114.png');
         $startup = UrlUtilities::url('/assets/images/apple-touch-startup.png');
+        $manifest = UrlUtilities::url('/assets/manifest.json');
 
         return <<<HTML
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="lwt-base-path" content="{$basePath}" />
+<meta name="theme-color" content="#3273dc" />
 <link rel="shortcut icon" href="{$favicon}" type="image/x-icon"/>
 <link rel="apple-touch-icon" href="{$icon57}" />
 <link rel="apple-touch-icon" sizes="72x72" href="{$icon72}" />
 <link rel="apple-touch-icon" sizes="114x114" href="{$icon114}" />
 <link rel="apple-touch-startup-image" href="{$startup}" />
+<link rel="manifest" href="{$manifest}" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 HTML;
     }
@@ -377,6 +379,8 @@ HTML;
         echo '<link rel="apple-touch-icon" sizes="72x72" href="' . $icon72 . '" />';
         echo '<link rel="apple-touch-icon" sizes="114x114" href="' . $icon114 . '" />';
         echo '<link rel="apple-touch-startup-image" href="' . $startup . '" />';
+        echo '<link rel="manifest" href="' . UrlUtilities::url('/assets/manifest.json') . '" />';
+        echo '<meta name="theme-color" content="#3273dc" />';
         echo '<meta name="apple-mobile-web-app-capable" content="yes" />';
 
         if (ViteHelper::shouldUse()) {
@@ -434,6 +438,8 @@ HTML;
         echo '<link rel="apple-touch-icon" sizes="72x72" href="' . $icon72 . '" />';
         echo '<link rel="apple-touch-icon" sizes="114x114" href="' . $icon114 . '" />';
         echo '<link rel="apple-touch-startup-image" href="' . $startup . '" />';
+        echo '<link rel="manifest" href="' . UrlUtilities::url('/assets/manifest.json') . '" />';
+        echo '<meta name="theme-color" content="#3273dc" />';
         echo '<meta name="apple-mobile-web-app-capable" content="yes" />';
 
         if (ViteHelper::shouldUse()) {

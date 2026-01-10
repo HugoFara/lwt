@@ -34,6 +34,9 @@ composer.phar
 /assets/js/vite/
 /assets/css/vite/
 
+# Service Worker (built from src/frontend/js/sw.ts)
+/sw.js
+
 # Editor
 .vscode
 

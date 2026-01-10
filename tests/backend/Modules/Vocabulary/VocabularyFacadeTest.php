@@ -84,6 +84,8 @@ class VocabularyFacadeTest extends TestCase
             $languageId,
             $text,
             mb_strtolower($text, 'UTF-8'),
+            null, // lemma
+            null, // lemmaLc
             $status,
             $translation,
             'Example sentence',

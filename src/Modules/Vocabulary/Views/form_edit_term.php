@@ -35,6 +35,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 /** @var int $lang */
 /** @var string $term */
 /** @var string $termlc */
+/** @var string $lemma */
 /** @var string $scrdir */
 /** @var bool $showRoman */
 /** @var string $transl */
@@ -56,6 +57,10 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1 right"><b>Edit Term:</b></td>
         <td class="td1"><input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="Term" type="text" name="WoText" id="wordfield" value="<?php echo htmlspecialchars($term, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" /> <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
     </td></tr>
+    <tr>
+        <td class="td1 right">Lemma:</td>
+        <td class="td1"><input <?php echo $scrdir; ?> type="text" class="checkoutsidebmp checklength" data_maxlength="250" data_info="Lemma" name="WoLemma" id="WoLemma" value="<?php echo htmlspecialchars($lemma ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" placeholder="Base form (e.g., 'run' for 'running')" /></td>
+    </tr>
         <?php echo (new FindSimilarTerms())->getTableRow(); ?>
     <tr>
         <td class="td1 right">Translation:</td>
