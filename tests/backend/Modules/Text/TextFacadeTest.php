@@ -230,11 +230,12 @@ class TextFacadeTest extends TestCase
             ->expects($this->once())
             ->method('deleteArchivedText')
             ->with(5)
-            ->willReturn('Archived text deleted');
+            ->willReturn(['count' => 1]);
 
         $result = $this->facade->deleteArchivedText(5);
 
-        $this->assertEquals('Archived text deleted', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(1, $result['count']);
     }
 
     public function testDeleteArchivedTextsDelegatesToDeleteText(): void
@@ -243,11 +244,12 @@ class TextFacadeTest extends TestCase
             ->expects($this->once())
             ->method('deleteArchivedTexts')
             ->with([1, 2, 3])
-            ->willReturn('3 archived texts deleted');
+            ->willReturn(['count' => 3]);
 
         $result = $this->facade->deleteArchivedTexts([1, 2, 3]);
 
-        $this->assertEquals('3 archived texts deleted', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(3, $result['count']);
     }
 
     public function testUnarchiveTextDelegatesToArchiveText(): void
@@ -272,11 +274,12 @@ class TextFacadeTest extends TestCase
             ->expects($this->once())
             ->method('unarchiveMultiple')
             ->with([1, 2, 3])
-            ->willReturn('3 texts unarchived');
+            ->willReturn(['count' => 3]);
 
         $result = $this->facade->unarchiveTexts([1, 2, 3]);
 
-        $this->assertEquals('3 texts unarchived', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(3, $result['count']);
     }
 
     public function testUpdateArchivedTextDelegatesToUpdateText(): void
@@ -537,11 +540,12 @@ class TextFacadeTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with(5)
-            ->willReturn('Text deleted');
+            ->willReturn(['texts' => 1, 'sentences' => 5, 'textItems' => 20]);
 
         $result = $this->facade->deleteText(5);
 
-        $this->assertEquals('Text deleted', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(1, $result['texts']);
     }
 
     public function testArchiveTextDelegatesToArchiveText(): void
@@ -550,11 +554,12 @@ class TextFacadeTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with(5)
-            ->willReturn('Text archived');
+            ->willReturn(['sentences' => 5, 'textItems' => 20, 'archived' => 1]);
 
         $result = $this->facade->archiveText(5);
 
-        $this->assertEquals('Text archived', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(1, $result['archived']);
     }
 
     public function testGetTextCountDelegatesToListTexts(): void
@@ -661,11 +666,12 @@ class TextFacadeTest extends TestCase
             ->expects($this->once())
             ->method('deleteMultiple')
             ->with([1, 2, 3])
-            ->willReturn('3 texts deleted');
+            ->willReturn(['count' => 3]);
 
         $result = $this->facade->deleteTexts([1, 2, 3]);
 
-        $this->assertEquals('3 texts deleted', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(3, $result['count']);
     }
 
     public function testArchiveTextsDelegatesToArchiveText(): void
@@ -674,11 +680,12 @@ class TextFacadeTest extends TestCase
             ->expects($this->once())
             ->method('archiveMultiple')
             ->with([1, 2, 3])
-            ->willReturn('3 texts archived');
+            ->willReturn(['count' => 3]);
 
         $result = $this->facade->archiveTexts([1, 2, 3]);
 
-        $this->assertEquals('3 texts archived', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(3, $result['count']);
     }
 
     public function testRebuildTextsDelegatesToUpdateText(): void

@@ -284,16 +284,20 @@ class TextFacade
 
     /**
      * Delete an active text.
+     *
+     * @return array{texts: int, sentences: int, textItems: int}
      */
-    public function deleteText(int $textId): string
+    public function deleteText(int $textId): array
     {
         return $this->deleteText->execute($textId);
     }
 
     /**
      * Archive an active text.
+     *
+     * @return array{sentences: int, textItems: int, archived: int}
      */
-    public function archiveText(int $textId): string
+    public function archiveText(int $textId): array
     {
         return $this->archiveText->execute($textId);
     }

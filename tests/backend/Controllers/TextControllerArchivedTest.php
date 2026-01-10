@@ -429,9 +429,10 @@ class TextControllerArchivedTest extends TestCase
         );
         $tempId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
 
-        $message = $service->deleteArchivedText($tempId);
+        $result = $service->deleteArchivedText($tempId);
 
-        $this->assertIsString($message);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('count', $result);
 
         // Verify deletion
         $this->assertNull($service->getArchivedTextById($tempId));
@@ -458,10 +459,11 @@ class TextControllerArchivedTest extends TestCase
         );
         $tempId2 = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
 
-        $message = $service->deleteArchivedTexts([$tempId1, $tempId2]);
+        $result = $service->deleteArchivedTexts([$tempId1, $tempId2]);
 
-        $this->assertIsString($message);
-        $this->assertStringContainsString('2', $message);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('count', $result);
+        $this->assertEquals(2, $result['count']);
 
         // Verify deletion
         $this->assertNull($service->getArchivedTextById($tempId1));
@@ -489,7 +491,8 @@ class TextControllerArchivedTest extends TestCase
         $result = $service->unarchiveText($tempArchivedId);
 
         $this->assertIsArray($result);
-        $this->assertArrayHasKey('message', $result);
+        $this->assertArrayHasKey('success', $result);
+        $this->assertArrayHasKey('textId', $result);
 
         // The archived text should be gone
         $this->assertNull($service->getArchivedTextById($tempArchivedId));
@@ -526,11 +529,11 @@ class TextControllerArchivedTest extends TestCase
         );
         $tempId2 = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
 
-        $message = $service->unarchiveTexts([$tempId1, $tempId2]);
+        $result = $service->unarchiveTexts([$tempId1, $tempId2]);
 
-        $this->assertIsString($message);
-        // Message format is "Unarchived Text(s): N" (capital U)
-        $this->assertStringContainsString('Unarchived', $message);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('count', $result);
+        $this->assertEquals(2, $result['count']);
 
         // Verify archived texts are gone
         $this->assertNull($service->getArchivedTextById($tempId1));

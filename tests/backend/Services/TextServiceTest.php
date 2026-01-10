@@ -509,7 +509,8 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->deleteArchivedTexts([]);
-        $this->assertEquals('Multiple Actions: 0', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['count']);
     }
 
     public function testDeleteTextsWithEmptyArrayReturnsMessage(): void
@@ -519,7 +520,8 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->deleteTexts([]);
-        $this->assertEquals('Multiple Actions: 0', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['count']);
     }
 
     public function testArchiveTextsWithEmptyArrayReturnsMessage(): void
@@ -529,7 +531,8 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->archiveTexts([]);
-        $this->assertEquals('Multiple Actions: 0', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['count']);
     }
 
     public function testUnarchiveTextsWithEmptyArrayReturnsMessage(): void
@@ -539,7 +542,8 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->unarchiveTexts([]);
-        $this->assertEquals('Multiple Actions: 0', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['count']);
     }
 
     public function testRebuildTextsWithEmptyArrayReturnsMessage(): void
@@ -674,8 +678,9 @@ class TextServiceTest extends TestCase
 
         $result = $this->service->unarchiveText(999999);
         $this->assertIsArray($result);
-        $this->assertArrayHasKey('message', $result);
+        $this->assertArrayHasKey('success', $result);
         $this->assertArrayHasKey('textId', $result);
+        $this->assertFalse($result['success']);
         $this->assertNull($result['textId']);
     }
 

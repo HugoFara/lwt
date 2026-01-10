@@ -317,7 +317,9 @@ class LanguageServiceTest extends TestCase
 
         $result = $this->service->create();
 
-        $this->assertStringContainsString('Saved', $result);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['success']);
+        $this->assertArrayHasKey('id', $result);
 
         // Verify language was created
         $languages = $this->service->getAllLanguages();
@@ -386,7 +388,8 @@ class LanguageServiceTest extends TestCase
 
         $result = $this->service->update($id);
 
-        $this->assertStringContainsString('Updated', $result);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['success']);
 
         $lang = $this->service->getById($id);
         $this->assertEquals('TestLang_Updated', $lang->name());
@@ -416,7 +419,9 @@ class LanguageServiceTest extends TestCase
 
         $result = $this->service->update(999999);
 
-        $this->assertStringContainsString('Cannot access language data', $result);
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('Cannot access language data', $result['error']);
     }
 
     public function testUpdateIndicatesReparsingNotNeeded(): void
@@ -444,8 +449,11 @@ class LanguageServiceTest extends TestCase
 
         $result = $this->service->update($id);
 
-        // When no parsing-related fields change, it says "Reparsing not needed"
-        $this->assertStringContainsString('Reparsing not needed', $result);
+        // When no parsing-related fields change, reparsed count should be null or 0
+        $this->assertIsArray($result);
+        $this->assertTrue($result['success']);
+        // reparsed is null when no texts need reparsing
+        $this->assertTrue($result['reparsed'] === null || $result['reparsed'] === 0);
     }
 
     // ===== delete() tests =====
@@ -460,7 +468,8 @@ class LanguageServiceTest extends TestCase
 
         $result = $this->service->delete($id);
 
-        $this->assertStringContainsString('Deleted', $result);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['success']);
         $this->assertFalse($this->service->exists($id));
     }
 
@@ -480,7 +489,9 @@ class LanguageServiceTest extends TestCase
 
         $result = $this->service->delete($id);
 
-        $this->assertStringContainsString('must first delete', $result);
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('must first delete', $result['error']);
         $this->assertTrue($this->service->exists($id));
 
         // Cleanup
@@ -503,7 +514,9 @@ class LanguageServiceTest extends TestCase
 
         $result = $this->service->delete($id);
 
-        $this->assertStringContainsString('must first delete', $result);
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('must first delete', $result['error']);
         $this->assertTrue($this->service->exists($id));
 
         // Cleanup
@@ -717,9 +730,10 @@ class LanguageServiceTest extends TestCase
 
         $result = $this->service->refresh($id);
 
-        $this->assertStringContainsString('Sentences deleted', $result);
-        $this->assertStringContainsString('Text items deleted', $result);
-        $this->assertStringContainsString('Sentences added', $result);
-        $this->assertStringContainsString('Text items added', $result);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('sentencesDeleted', $result);
+        $this->assertArrayHasKey('textItemsDeleted', $result);
+        $this->assertArrayHasKey('sentencesAdded', $result);
+        $this->assertArrayHasKey('textItemsAdded', $result);
     }
 }

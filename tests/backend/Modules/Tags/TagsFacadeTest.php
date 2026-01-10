@@ -423,7 +423,8 @@ class TagsFacadeTest extends TestCase
         }
 
         $result = $this->termTagService->deleteMultiple([]);
-        $this->assertStringContainsString('0', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['count']);
     }
 
     // ===== CRUD operation tests (integration) =====

@@ -246,9 +246,10 @@ class TextServiceCrudTest extends TestCase
         $textId = $this->createTestText('Delete Test', 'To be deleted.');
 
         // Delete the text
-        $message = $this->service->deleteText($textId);
+        $result = $this->service->deleteText($textId);
 
-        $this->assertIsString($message);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('texts', $result);
 
         // Verify deletion
         $result = $this->service->getTextById($textId);
@@ -268,11 +269,11 @@ class TextServiceCrudTest extends TestCase
         $textId2 = $this->createTestText('Delete Multi 2', 'Second to delete.');
 
         // Delete both texts
-        $message = $this->service->deleteTexts([$textId1, $textId2]);
+        $result = $this->service->deleteTexts([$textId1, $textId2]);
 
-        $this->assertIsString($message);
-        // Message format is "deleted_count / archived_count / sentence_count"
-        $this->assertStringContainsString('2', $message);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('count', $result);
+        $this->assertEquals(2, $result['count']);
 
         // Verify deletion
         $this->assertNull($this->service->getTextById($textId1));
@@ -288,9 +289,10 @@ class TextServiceCrudTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $message = $this->service->deleteTexts([]);
+        $result = $this->service->deleteTexts([]);
 
-        $this->assertEquals('Multiple Actions: 0', $message);
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['count']);
     }
 
     // ===== Archive tests =====
@@ -304,9 +306,10 @@ class TextServiceCrudTest extends TestCase
         $textId = $this->createTestText('Archive Test', 'Content to archive.');
 
         // Archive the text
-        $message = $this->service->archiveText($textId);
+        $result = $this->service->archiveText($textId);
 
-        $this->assertIsString($message);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('archived', $result);
 
         // Original text should be gone
         $this->assertNull($this->service->getTextById($textId));
@@ -335,11 +338,11 @@ class TextServiceCrudTest extends TestCase
         $textId2 = $this->createTestText('Archive Multi 2', 'Second to archive.');
 
         // Archive both
-        $message = $this->service->archiveTexts([$textId1, $textId2]);
+        $result = $this->service->archiveTexts([$textId1, $textId2]);
 
-        $this->assertIsString($message);
-        // Message format is "Archived Text(s): N"
-        $this->assertStringContainsStringIgnoringCase('archived', $message);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('count', $result);
+        $this->assertEquals(2, $result['count']);
 
         // Original texts should be gone
         $this->assertNull($this->service->getTextById($textId1));
@@ -373,7 +376,7 @@ class TextServiceCrudTest extends TestCase
         $result = $this->service->unarchiveText($archivedId);
 
         $this->assertIsArray($result);
-        $this->assertArrayHasKey('message', $result);
+        $this->assertArrayHasKey('success', $result);
         $this->assertArrayHasKey('textId', $result);
 
         // If successfully unarchived, check new text exists
@@ -400,9 +403,10 @@ class TextServiceCrudTest extends TestCase
         $archivedId2 = $this->createTestArchivedText('Unarchive Multi 2', 'Second to unarchive.');
 
         // Unarchive both
-        $message = $this->service->unarchiveTexts([$archivedId1, $archivedId2]);
+        $result = $this->service->unarchiveTexts([$archivedId1, $archivedId2]);
 
-        $this->assertIsString($message);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('count', $result);
 
         // Find created texts
         $res = Connection::query(
@@ -468,9 +472,10 @@ class TextServiceCrudTest extends TestCase
 
         $archivedId = $this->createTestArchivedText('Delete Archived Test', 'To be deleted.');
 
-        $message = $this->service->deleteArchivedText($archivedId);
+        $result = $this->service->deleteArchivedText($archivedId);
 
-        $this->assertIsString($message);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('count', $result);
 
         // Verify deletion
         $this->assertNull($this->service->getArchivedTextById($archivedId));
@@ -488,9 +493,10 @@ class TextServiceCrudTest extends TestCase
         $id1 = $this->createTestArchivedText('Delete Archived Multi 1', 'First.');
         $id2 = $this->createTestArchivedText('Delete Archived Multi 2', 'Second.');
 
-        $message = $this->service->deleteArchivedTexts([$id1, $id2]);
+        $result = $this->service->deleteArchivedTexts([$id1, $id2]);
 
-        $this->assertIsString($message);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('count', $result);
 
         // Verify deletion
         $this->assertNull($this->service->getArchivedTextById($id1));

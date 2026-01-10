@@ -242,7 +242,8 @@ class LanguageControllerTest extends TestCase
 
         $result = $service->create();
 
-        $this->assertStringContainsString('Saved', $result);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['success']);
         $this->assertArrayHasKey('TestLang_ControllerCreate', $service->getAllLanguages());
     }
 
@@ -271,7 +272,8 @@ class LanguageControllerTest extends TestCase
 
         $result = $service->update($id);
 
-        $this->assertStringContainsString('Updated', $result);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['success']);
         $lang = $service->getById($id);
         $this->assertEquals('TestLang_ControllerUpdated', $lang->name());
     }
@@ -293,7 +295,8 @@ class LanguageControllerTest extends TestCase
 
         $result = $service->delete($id);
 
-        $this->assertStringContainsString('Deleted', $result);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['success']);
         $this->assertFalse($service->exists($id));
     }
 
@@ -308,8 +311,9 @@ class LanguageControllerTest extends TestCase
 
         $result = $service->refresh($id);
 
-        $this->assertStringContainsString('Sentences deleted', $result);
-        $this->assertStringContainsString('Text items deleted', $result);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('sentencesDeleted', $result);
+        $this->assertArrayHasKey('textItemsDeleted', $result);
     }
 
     // ===== Integration tests with service =====
@@ -416,7 +420,8 @@ class LanguageControllerTest extends TestCase
 
         $result = $service->create();
 
-        $this->assertStringContainsString('Saved', $result);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['success']);
     }
 
     public function testServiceHandlesUnicodeInName(): void
@@ -443,7 +448,8 @@ class LanguageControllerTest extends TestCase
 
         $result = $service->create();
 
-        $this->assertStringContainsString('Saved', $result);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['success']);
 
         $langs = $service->getAllLanguages();
         $this->assertArrayHasKey('TestLang_日本語', $langs);
