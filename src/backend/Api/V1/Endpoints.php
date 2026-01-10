@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 namespace Lwt\Api\V1;
 
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
+
 /**
  * Registry of API V1 endpoints.
  *
@@ -88,19 +90,19 @@ class Endpoints
      * @param string $method     HTTP method (e.g. 'GET' or 'POST')
      * @param string $requestUri The URI being requested
      *
-     * @return string The matching endpoint path
+     * @return string|JsonResponse The matching endpoint path or error response
      */
-    public static function resolve(string $method, string $requestUri): string
+    public static function resolve(string $method, string $requestUri): string|JsonResponse
     {
         $uriQuery = parse_url($requestUri, PHP_URL_PATH);
 
         // Support both legacy /api.php/v1/ and new /api/v1/ URL formats
         $matching = preg_match('/(.*?\/api(?:\.php)?\/v\d\/).+/', $uriQuery, $matches);
         if (!$matching) {
-            Response::error('Unrecognized URL format ' . $uriQuery, 400);
+            return Response::error('Unrecognized URL format ' . $uriQuery, 400);
         }
         if (count($matches) == 0) {
-            Response::error('Wrong API Location: ' . $uriQuery, 404);
+            return Response::error('Wrong API Location: ' . $uriQuery, 404);
         }
 
         // endpoint without prepending URL, like 'version'
@@ -108,12 +110,12 @@ class Endpoints
 
         $methodsAllowed = self::getMethodsForEndpoint($reqEndpoint);
         if ($methodsAllowed === null) {
-            Response::error('Endpoint Not Found: ' . $reqEndpoint, 404);
+            return Response::error('Endpoint Not Found: ' . $reqEndpoint, 404);
         }
 
         // Validate request method for the endpoint
         if (!in_array($method, $methodsAllowed)) {
-            Response::error('Method Not Allowed', 405);
+            return Response::error('Method Not Allowed', 405);
         }
 
         return $reqEndpoint;

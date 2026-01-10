@@ -138,23 +138,39 @@ class ApiV1
      */
     public function handle(string $method, string $uri, ?array $postData): void
     {
-        $endpoint = Endpoints::resolve($method, $uri);
+        $endpointResult = Endpoints::resolve($method, $uri);
+
+        // Check if resolution returned an error response
+        if ($endpointResult instanceof \Lwt\Shared\Infrastructure\Http\JsonResponse) {
+            $endpointResult->send();
+            return;
+        }
+
+        $endpoint = $endpointResult;
         $fragments = Endpoints::parseFragments($endpoint);
 
         // Validate authentication for protected endpoints
         if (!$this->isPublicEndpoint($endpoint)) {
-            $this->validateAuth();
+            $authError = $this->validateAuth();
+            if ($authError !== null) {
+                $authError->send();
+                return;
+            }
         }
 
         if ($method === 'GET') {
-            $this->handleGet($fragments, $this->parseQueryParams($uri));
+            $response = $this->handleGet($fragments, $this->parseQueryParams($uri));
         } elseif ($method === 'POST') {
-            $this->handlePost($fragments, $postData ?? []);
+            $response = $this->handlePost($fragments, $postData ?? []);
         } elseif ($method === 'PUT') {
-            $this->handlePut($fragments, $postData ?? []);
+            $response = $this->handlePut($fragments, $postData ?? []);
         } elseif ($method === 'DELETE') {
-            $this->handleDelete($fragments, $this->parseQueryParams($uri));
+            $response = $this->handleDelete($fragments, $postData ?? []);
+        } else {
+            $response = Response::error('Method Not Allowed', 405);
         }
+
+        $response->send();
     }
 
     /**
@@ -189,20 +205,21 @@ class ApiV1
      * Validate authentication for the current request.
      *
      * Checks for Bearer token or session authentication.
-     * Responds with 401 Unauthorized if authentication fails.
      *
-     * @return void
+     * @return \Lwt\Shared\Infrastructure\Http\JsonResponse|null Error response or null if valid
      */
-    private function validateAuth(): void
+    private function validateAuth(): ?\Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         // Skip auth validation if multi-user mode is not enabled
         if (!Globals::isMultiUserEnabled()) {
-            return;
+            return null;
         }
 
         if (!$this->authHandler->isAuthenticated()) {
-            Response::error('Authentication required', 401);
+            return Response::error('Authentication required', 401);
         }
+
+        return null;
     }
 
     /**
@@ -211,98 +228,80 @@ class ApiV1
      * @param list<string>         $fragments Endpoint path segments
      * @param array<string, mixed> $params    Query parameters
      */
-    private function handleGet(array $fragments, array $params): void
+    private function handleGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         switch ($fragments[0]) {
             case 'auth':
-                $this->handleAuthGet($fragments);
-                break;
+                return $this->handleAuthGet($fragments);
 
             case 'version':
-                Response::success([
+                return Response::success([
                     "version" => self::VERSION,
                     "release_date" => self::RELEASE_DATE
                 ]);
                 break;
 
             case 'media-files':
-                Response::success($this->adminHandler->formatMediaFiles());
-                break;
+                return Response::success($this->adminHandler->formatMediaFiles());
 
             case 'phonetic-reading':
                 /** @var array{text?: string, language_id?: int|string, lang?: string} $params */
-                Response::success($this->languageHandler->formatPhoneticReading($params));
-                break;
+                return Response::success($this->languageHandler->formatPhoneticReading($params));
 
             case 'languages':
-                $this->handleLanguagesGet($fragments);
-                break;
+                return $this->handleLanguagesGet($fragments);
 
             case 'review':
-                $this->handleReviewGet($fragments, $params);
-                break;
+                return $this->handleReviewGet($fragments, $params);
 
             case 'sentences-with-term':
-                $this->handleSentencesGet($fragments, $params);
-                break;
+                return $this->handleSentencesGet($fragments, $params);
 
             case 'similar-terms':
-                Response::success($this->languageHandler->formatSimilarTerms(
+                return Response::success($this->languageHandler->formatSimilarTerms(
                     (int)($params["language_id"] ?? 0),
                     (string)$params["term"]
                 ));
                 break;
 
             case 'statuses':
-                Response::success(\Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses());
-                break;
+                return Response::success(\Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses());
 
             case 'tags':
-                $this->handleTagsGet($fragments);
-                break;
+                return $this->handleTagsGet($fragments);
 
             case 'settings':
-                $this->handleSettingsGet($fragments, $params);
-                break;
+                return $this->handleSettingsGet($fragments, $params);
 
             case 'terms':
-                $this->handleTermsGet($fragments, $params);
-                break;
+                return $this->handleTermsGet($fragments, $params);
 
             case 'word-families':
-                $this->handleWordFamiliesGet($fragments, $params);
-                break;
+                return $this->handleWordFamiliesGet($fragments, $params);
 
             case 'texts':
-                $this->handleTextsGet($fragments, $params);
-                break;
+                return $this->handleTextsGet($fragments, $params);
 
             case 'feeds':
-                $this->handleFeedsGet($fragments, $params);
-                break;
+                return $this->handleFeedsGet($fragments, $params);
 
             case 'books':
-                $this->handleBooksGet($fragments, $params);
-                break;
+                return $this->handleBooksGet($fragments, $params);
 
             case 'local-dictionaries':
-                $this->handleLocalDictionariesGet($fragments, $params);
-                break;
+                return $this->handleLocalDictionariesGet($fragments, $params);
 
             case 'youtube':
-                $this->handleYouTubeGet($fragments, $params);
-                break;
+                return $this->handleYouTubeGet($fragments, $params);
 
             case 'tts':
-                $this->handleTtsGet($fragments, $params);
-                break;
+                return $this->handleTtsGet($fragments, $params);
 
             case 'whisper':
-                $this->handleWhisperGet($fragments, $params);
-                break;
+                return $this->handleWhisperGet($fragments, $params);
 
             default:
-                Response::error('Endpoint Not Found: ' . $fragments[0], 404);
+                return Response::error('Endpoint Not Found: ' . $fragments[0], 404);
         }
     }
 
@@ -312,50 +311,42 @@ class ApiV1
      * @param list<string>         $fragments Endpoint path segments
      * @param array<string, mixed> $params    POST parameters
      */
-    private function handlePost(array $fragments, array $params): void
+    private function handlePost(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         switch ($fragments[0]) {
             case 'auth':
-                $this->handleAuthPost($fragments, $params);
-                break;
+                return $this->handleAuthPost($fragments, $params);
 
             case 'settings':
-                Response::success($this->adminHandler->formatSaveSetting(
+                return Response::success($this->adminHandler->formatSaveSetting(
                     (string) ($params['key'] ?? ''),
                     (string) ($params['value'] ?? '')
                 ));
                 break;
 
             case 'languages':
-                $this->handleLanguagesPost($fragments, $params);
-                break;
+                return $this->handleLanguagesPost($fragments, $params);
 
             case 'texts':
-                $this->handleTextsPost($fragments, $params);
-                break;
+                return $this->handleTextsPost($fragments, $params);
 
             case 'terms':
-                $this->handleTermsPost($fragments, $params);
-                break;
+                return $this->handleTermsPost($fragments, $params);
 
             case 'feeds':
-                $this->handleFeedsPost($fragments, $params);
-                break;
+                return $this->handleFeedsPost($fragments, $params);
 
             case 'local-dictionaries':
-                $this->handleLocalDictionariesPost($fragments, $params);
-                break;
+                return $this->handleLocalDictionariesPost($fragments, $params);
 
             case 'tts':
-                $this->handleTtsPost($fragments, $params);
-                break;
+                return $this->handleTtsPost($fragments, $params);
 
             case 'whisper':
-                $this->handleWhisperPost($fragments, $params);
-                break;
+                return $this->handleWhisperPost($fragments, $params);
 
             default:
-                Response::error('Endpoint Not Found On POST: ' . $fragments[0], 404);
+                return Response::error('Endpoint Not Found On POST: ' . $fragments[0], 404);
         }
     }
 
@@ -365,12 +356,11 @@ class ApiV1
      * @param list<string>         $fragments Endpoint path segments
      * @param array<string, mixed> $params    POST parameters
      */
-    private function handleLanguagesPost(array $fragments, array $params): void
+    private function handleLanguagesPost(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         // POST /languages - create new language
         if (!isset($fragments[1]) || $fragments[1] === '') {
-            Response::success($this->languageHandler->formatCreate($params));
-            return;
+            return Response::success($this->languageHandler->formatCreate($params));
         }
 
         // POST /languages/{id}/refresh - reparse texts
@@ -378,19 +368,17 @@ class ApiV1
             $langId = (int)$fragments[1];
 
             if (($fragments[2] ?? '') === 'refresh') {
-                Response::success($this->languageHandler->formatRefresh($langId));
-                return;
+                return Response::success($this->languageHandler->formatRefresh($langId));
             }
 
             if (($fragments[2] ?? '') === 'set-default') {
-                Response::success($this->languageHandler->formatSetDefault($langId));
-                return;
+                return Response::success($this->languageHandler->formatSetDefault($langId));
             }
 
-            Response::error('Expected "refresh" or "set-default"', 404);
+            return Response::error('Expected "refresh" or "set-default"', 404);
         }
 
-        Response::error('Language ID (Integer) Expected', 404);
+        return Response::error('Language ID (Integer) Expected', 404);
     }
 
     // =========================================================================
@@ -402,15 +390,14 @@ class ApiV1
      *
      * @param list<string> $fragments Endpoint path segments
      */
-    private function handleAuthGet(array $fragments): void
+    private function handleAuthGet(array $fragments): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         switch ($fragments[1] ?? '') {
             case 'me':
                 // GET /auth/me - get current user info
-                Response::success($this->authHandler->formatMe());
-                break;
+                return Response::success($this->authHandler->formatMe());
             default:
-                Response::error('Endpoint Not Found: auth/' . ($fragments[1] ?? ''), 404);
+                return Response::error('Endpoint Not Found: auth/' . ($fragments[1] ?? ''), 404);
         }
     }
 
@@ -420,27 +407,23 @@ class ApiV1
      * @param list<string>         $fragments Endpoint path segments
      * @param array<string, mixed> $params    POST parameters
      */
-    private function handleAuthPost(array $fragments, array $params): void
+    private function handleAuthPost(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         switch ($fragments[1] ?? '') {
             case 'login':
                 // POST /auth/login - authenticate user
-                Response::success($this->authHandler->formatLogin($params));
-                break;
+                return Response::success($this->authHandler->formatLogin($params));
             case 'register':
                 // POST /auth/register - create new user
-                Response::success($this->authHandler->formatRegister($params));
-                break;
+                return Response::success($this->authHandler->formatRegister($params));
             case 'refresh':
                 // POST /auth/refresh - refresh API token
-                Response::success($this->authHandler->formatRefresh());
-                break;
+                return Response::success($this->authHandler->formatRefresh());
             case 'logout':
                 // POST /auth/logout - invalidate token and logout
-                Response::success($this->authHandler->formatLogout());
-                break;
+                return Response::success($this->authHandler->formatLogout());
             default:
-                Response::error('Endpoint Not Found: auth/' . ($fragments[1] ?? ''), 404);
+                return Response::error('Endpoint Not Found: auth/' . ($fragments[1] ?? ''), 404);
         }
     }
 
@@ -451,90 +434,79 @@ class ApiV1
     /**
      * @param list<string> $fragments
      */
-    private function handleLanguagesGet(array $fragments): void
+    private function handleLanguagesGet(array $fragments): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
         // Handle /languages - list all languages with stats
         if ($frag1 === '') {
-            Response::success($this->languageHandler->formatGetAll());
-            return;
+            return Response::success($this->languageHandler->formatGetAll());
         }
 
         // Handle /languages/definitions - get predefined language presets
         if ($frag1 === 'definitions') {
-            Response::success($this->languageHandler->formatGetDefinitions());
-            return;
+            return Response::success($this->languageHandler->formatGetDefinitions());
         }
 
         // Handle /languages/with-texts - returns languages that have texts with counts
         if ($frag1 === 'with-texts') {
-            Response::success($this->languageHandler->formatLanguagesWithTexts());
-            return;
+            return Response::success($this->languageHandler->formatLanguagesWithTexts());
         }
 
         // Handle /languages/with-archived-texts - returns languages that have archived texts with counts
         if ($frag1 === 'with-archived-texts') {
-            Response::success($this->languageHandler->formatLanguagesWithArchivedTexts());
-            return;
+            return Response::success($this->languageHandler->formatLanguagesWithArchivedTexts());
         }
 
         // Handle /languages/{id} - get single language or sub-resources
         if (!ctype_digit($frag1)) {
-            Response::error('Expected Language ID, "definitions", "with-texts", or "with-archived-texts"', 404);
+            return Response::error('Expected Language ID, "definitions", "with-texts", or "with-archived-texts"', 404);
         }
 
         $langId = (int) $frag1;
 
         // Handle /languages/{id}/stats
         if ($frag2 === 'stats') {
-            Response::success($this->languageHandler->formatGetStats($langId));
-            return;
+            return Response::success($this->languageHandler->formatGetStats($langId));
         }
 
         // Handle /languages/{id}/reading-configuration
         if ($frag2 === 'reading-configuration') {
-            Response::success($this->languageHandler->formatReadingConfiguration($langId));
-            return;
+            return Response::success($this->languageHandler->formatReadingConfiguration($langId));
         }
 
         // Handle /languages/{id} - get single language for editing
         if ($frag2 === '') {
             $result = $this->languageHandler->formatGetOne($langId);
             if ($result === null) {
-                Response::error('Language not found', 404);
+                return Response::error('Language not found', 404);
             }
-            Response::success($result);
-            return;
+            return Response::success($result);
         }
 
-        Response::error('Expected "reading-configuration", "stats", or no sub-path', 404);
+        return Response::error('Expected "reading-configuration", "stats", or no sub-path', 404);
     }
 
     /**
      * @param list<string> $fragments
      * @param array<string, mixed> $params
      */
-    private function handleReviewGet(array $fragments, array $params): void
+    private function handleReviewGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
         switch ($frag1) {
             case 'next-word':
-                Response::success($this->reviewHandler->formatNextWord($params));
-                break;
+                return Response::success($this->reviewHandler->formatNextWord($params));
             case 'tomorrow-count':
-                Response::success($this->reviewHandler->formatTomorrowCount($params));
-                break;
+                return Response::success($this->reviewHandler->formatTomorrowCount($params));
             case 'config':
-                Response::success($this->reviewHandler->formatTestConfig($params));
-                break;
+                return Response::success($this->reviewHandler->formatTestConfig($params));
             case 'table-words':
-                Response::success($this->reviewHandler->formatTableWords($params));
-                break;
+                return Response::success($this->reviewHandler->formatTableWords($params));
             default:
-                Response::error('Endpoint Not Found: ' . $frag1, 404);
+                return Response::error('Endpoint Not Found: ' . $frag1, 404);
         }
     }
 
@@ -542,20 +514,20 @@ class ApiV1
      * @param list<string> $fragments
      * @param array<string, mixed> $params
      */
-    private function handleSentencesGet(array $fragments, array $params): void
+    private function handleSentencesGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $languageId = (int) ($params["language_id"] ?? 0);
         $termLc = (string) ($params["term_lc"] ?? '');
         $frag1 = $this->frag($fragments, 1);
 
         if ($frag1 !== '' && ctype_digit($frag1)) {
-            Response::success($this->languageHandler->formatSentencesWithRegisteredTerm(
+            return Response::success($this->languageHandler->formatSentencesWithRegisteredTerm(
                 $languageId,
                 $termLc,
                 (int) $frag1
             ));
         } else {
-            Response::success($this->languageHandler->formatSentencesWithNewTerm(
+            return Response::success($this->languageHandler->formatSentencesWithNewTerm(
                 $languageId,
                 $termLc,
                 array_key_exists("advanced_search", $params)
@@ -567,21 +539,21 @@ class ApiV1
      * @param list<string> $fragments
      * @param array<string, mixed> $params
      */
-    private function handleSettingsGet(array $fragments, array $params): void
+    private function handleSettingsGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
         if ($frag1 === 'theme-path') {
-            Response::success($this->adminHandler->formatThemePath((string) ($params['path'] ?? '')));
+            return Response::success($this->adminHandler->formatThemePath((string) ($params['path'] ?? '')));
         } else {
-            Response::error('Endpoint Not Found: ' . $frag1, 404);
+            return Response::error('Endpoint Not Found: ' . $frag1, 404);
         }
     }
 
     /**
      * @param list<string> $fragments
      */
-    private function handleTagsGet(array $fragments): void
+    private function handleTagsGet(array $fragments): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $this->tagHandler->handleGet(array_slice($fragments, 1));
     }
@@ -590,34 +562,34 @@ class ApiV1
      * @param list<string> $fragments
      * @param array<string, mixed> $params
      */
-    private function handleTermsGet(array $fragments, array $params): void
+    private function handleTermsGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
         if ($frag1 === 'list') {
             // GET /terms/list - get paginated, filtered word list
-            Response::success($this->wordListHandler->getWordList($params));
+            return Response::success($this->wordListHandler->getWordList($params));
         } elseif ($frag1 === 'filter-options') {
             // GET /terms/filter-options - get filter dropdown options
             $langId = isset($params['language_id']) && $params['language_id'] !== '' ? (int) $params['language_id'] : null;
-            Response::success($this->wordListHandler->getFilterOptions($langId));
+            return Response::success($this->wordListHandler->getFilterOptions($langId));
         } elseif ($frag1 === 'imported') {
-            Response::success($this->wordListHandler->importedTermsList(
+            return Response::success($this->wordListHandler->importedTermsList(
                 (string) ($params["last_update"] ?? ''),
                 (int) ($params["page"] ?? 0),
                 (int) ($params["count"] ?? 0)
             ));
         } elseif ($frag1 === 'for-edit') {
             // GET /terms/for-edit - get term data for editing in modal
-            Response::success($this->termHandler->formatGetTermForEdit(
+            return Response::success($this->termHandler->formatGetTermForEdit(
                 (int) ($params['term_id'] ?? 0),
                 (int) ($params['ord'] ?? 0),
                 isset($params['wid']) && $params['wid'] !== '' ? (int) $params['wid'] : null
             ));
         } elseif ($frag1 === 'multi') {
             // GET /terms/multi - get multi-word expression data for editing
-            Response::success($this->multiWordHandler->getMultiWordForEdit(
+            return Response::success($this->multiWordHandler->getMultiWordForEdit(
                 (int) ($params['term_id'] ?? 0),
                 (int) ($params['ord'] ?? 0),
                 isset($params['txt']) ? (string) $params['txt'] : null,
@@ -629,36 +601,36 @@ class ApiV1
             if ($frag2 === 'suggestion') {
                 $termId = (int) ($params['term_id'] ?? 0);
                 $newStatus = (int) ($params['status'] ?? 0);
-                Response::success($this->wordFamilyHandler->getFamilyUpdateSuggestion($termId, $newStatus));
+                return Response::success($this->wordFamilyHandler->getFamilyUpdateSuggestion($termId, $newStatus));
             } else {
                 $termId = (int) ($params['term_id'] ?? 0);
                 if ($termId <= 0) {
-                    Response::error('term_id is required', 400);
+                    return Response::error('term_id is required', 400);
                 }
-                Response::success($this->wordFamilyHandler->getTermFamily($termId));
+                return Response::success($this->wordFamilyHandler->getTermFamily($termId));
             }
         } elseif ($frag1 !== '' && ctype_digit($frag1)) {
             $termId = (int) $frag1;
             if ($frag2 === 'translations') {
-                Response::success($this->textHandler->formatTermTranslations(
+                return Response::success($this->textHandler->formatTermTranslations(
                     (string) ($params["term_lc"] ?? ''),
                     (int) ($params["text_id"] ?? 0)
                 ));
             } elseif ($frag2 === 'details') {
                 // GET /terms/{id}/details - get term details with sentence and tags
                 $ann = isset($params['ann']) ? (string) $params['ann'] : null;
-                Response::success($this->termHandler->formatGetTermDetails($termId, $ann));
+                return Response::success($this->termHandler->formatGetTermDetails($termId, $ann));
             } elseif ($frag2 === 'family') {
                 // GET /terms/{id}/family - get word family for this term
-                Response::success($this->wordFamilyHandler->getTermFamily($termId));
+                return Response::success($this->wordFamilyHandler->getTermFamily($termId));
             } elseif ($frag2 === '') {
                 // GET /terms/{id} - get term by ID
-                Response::success($this->termHandler->formatGetTerm($termId));
+                return Response::success($this->termHandler->formatGetTerm($termId));
             } else {
-                Response::error('Expected "translations", "details", "family", or no sub-path', 404);
+                return Response::error('Expected "translations", "details", "family", or no sub-path', 404);
             }
         } else {
-            Response::error('Endpoint Not Found: ' . $frag1, 404);
+            return Response::error('Endpoint Not Found: ' . $frag1, 404);
         }
     }
 
@@ -668,7 +640,7 @@ class ApiV1
      * @param list<string>         $fragments Endpoint path segments
      * @param array<string, mixed> $params    Query parameters
      */
-    private function handleWordFamiliesGet(array $fragments, array $params): void
+    private function handleWordFamiliesGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
@@ -676,35 +648,33 @@ class ApiV1
         if ($frag1 === 'stats') {
             $langId = (int) ($params['language_id'] ?? 0);
             if ($langId <= 0) {
-                Response::error('language_id is required', 400);
+                return Response::error('language_id is required', 400);
             }
-            Response::success($this->wordFamilyHandler->getLemmaStatistics($langId));
-            return;
+            return Response::success($this->wordFamilyHandler->getLemmaStatistics($langId));
         }
 
         // GET /word-families?language_id=N - get paginated list of word families
         $langId = (int) ($params['language_id'] ?? 0);
         if ($langId <= 0) {
-            Response::error('language_id is required', 400);
+            return Response::error('language_id is required', 400);
         }
 
         // Check if getting family by lemma
         $lemmaLc = (string) ($params['lemma_lc'] ?? '');
         if ($lemmaLc !== '') {
             // GET /word-families?language_id=N&lemma_lc=run - get specific family
-            Response::success($this->wordFamilyHandler->getWordFamilyByLemma($langId, $lemmaLc));
-            return;
+            return Response::success($this->wordFamilyHandler->getWordFamilyByLemma($langId, $lemmaLc));
         }
 
         // GET /word-families?language_id=N&page=1&per_page=50 - get list of families
-        Response::success($this->wordFamilyHandler->getWordFamilyListFromParams($langId, $params));
+        return Response::success($this->wordFamilyHandler->getWordFamilyListFromParams($langId, $params));
     }
 
     /**
      * @param list<string>         $fragments
      * @param array<string, mixed> $params
      */
-    private function handleTextsGet(array $fragments, array $params): void
+    private function handleTextsGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -712,19 +682,18 @@ class ApiV1
         if ($frag1 === 'statistics') {
             $textIds = isset($params["text_ids"]) ? (string) $params["text_ids"] : '';
             if ($textIds === '') {
-                Response::error('Missing required parameter: text_ids', 400);
-                return;
+                return Response::error('Missing required parameter: text_ids', 400);
             }
-            Response::success($this->adminHandler->formatTextsStatistics($textIds));
+            return Response::success($this->adminHandler->formatTextsStatistics($textIds));
         } elseif ($frag1 === 'scoring') {
             // Handle scoring endpoints
             if ($frag2 === 'recommended') {
                 // GET /texts/scoring/recommended?language_id=N - get recommended texts
                 $langId = (int) ($params['language_id'] ?? 0);
                 if ($langId <= 0) {
-                    Response::error('language_id is required', 400);
+                    return Response::error('language_id is required', 400);
                 }
-                Response::success($this->textHandler->formatGetRecommendedTexts($langId, $params));
+                return Response::success($this->textHandler->formatGetRecommendedTexts($langId, $params));
             } else {
                 // GET /texts/scoring?text_id=N or text_ids=1,2,3 - get score(s)
                 $textId = isset($params['text_id']) ? (int) $params['text_id'] : 0;
@@ -732,47 +701,47 @@ class ApiV1
 
                 if ($textId > 0) {
                     // Single text score
-                    Response::success($this->textHandler->formatGetTextScore($textId));
+                    return Response::success($this->textHandler->formatGetTextScore($textId));
                 } elseif ($textIds !== '') {
                     // Multiple text scores
                     $ids = array_map('intval', explode(',', $textIds));
                     $ids = array_filter($ids, fn($id) => $id > 0);
                     if (empty($ids)) {
-                        Response::error('No valid text IDs provided', 400);
+                        return Response::error('No valid text IDs provided', 400);
                     }
-                    Response::success($this->textHandler->formatGetTextScores($ids));
+                    return Response::success($this->textHandler->formatGetTextScores($ids));
                 } else {
-                    Response::error('text_id or text_ids parameter is required', 400);
+                    return Response::error('text_id or text_ids parameter is required', 400);
                 }
             }
         } elseif ($frag1 === 'by-language') {
             // GET /texts/by-language/{langId} - get paginated texts for a language
             if ($frag2 === '' || !ctype_digit($frag2)) {
-                Response::error('Expected Language ID after "by-language"', 404);
+                return Response::error('Expected Language ID after "by-language"', 404);
             }
-            Response::success($this->textHandler->formatTextsByLanguage((int) $frag2, $params));
+            return Response::success($this->textHandler->formatTextsByLanguage((int) $frag2, $params));
         } elseif ($frag1 === 'archived-by-language') {
             // GET /texts/archived-by-language/{langId} - get paginated archived texts for a language
             if ($frag2 === '' || !ctype_digit($frag2)) {
-                Response::error('Expected Language ID after "archived-by-language"', 404);
+                return Response::error('Expected Language ID after "archived-by-language"', 404);
             }
-            Response::success($this->textHandler->formatArchivedTextsByLanguage((int) $frag2, $params));
+            return Response::success($this->textHandler->formatArchivedTextsByLanguage((int) $frag2, $params));
         } elseif ($frag1 !== '' && ctype_digit($frag1)) {
             $textId = (int) $frag1;
             if ($frag2 === 'words') {
                 // GET /texts/{id}/words - get all words for client-side rendering
-                Response::success($this->textHandler->formatGetWords($textId));
+                return Response::success($this->textHandler->formatGetWords($textId));
             } elseif ($frag2 === 'print-items') {
                 // GET /texts/{id}/print-items - get text items for print view
-                Response::success($this->textHandler->formatGetPrintItems($textId));
+                return Response::success($this->textHandler->formatGetPrintItems($textId));
             } elseif ($frag2 === 'annotation') {
                 // GET /texts/{id}/annotation - get annotation for improved text view
-                Response::success($this->textHandler->formatGetAnnotation($textId));
+                return Response::success($this->textHandler->formatGetAnnotation($textId));
             } else {
-                Response::error('Expected "words", "print-items", or "annotation"', 404);
+                return Response::error('Expected "words", "print-items", or "annotation"', 404);
             }
         } else {
-            Response::error('Expected "statistics", "by-language", "archived-by-language", or text ID', 404);
+            return Response::error('Expected "statistics", "by-language", "archived-by-language", or text ID', 404);
         }
     }
 
@@ -784,39 +753,39 @@ class ApiV1
      * @param list<string>         $fragments
      * @param array<string, mixed> $params
      */
-    private function handleTextsPost(array $fragments, array $params): void
+    private function handleTextsPost(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
         if ($frag1 === '' || !ctype_digit($frag1)) {
-            Response::error('Text ID (Integer) Expected', 404);
+            return Response::error('Text ID (Integer) Expected', 404);
         }
 
         $textId = (int) $frag1;
 
         switch ($frag2) {
             case 'annotation':
-                Response::success($this->textHandler->formatSetAnnotation(
+                return Response::success($this->textHandler->formatSetAnnotation(
                     $textId,
                     (string) ($params['elem'] ?? ''),
                     (string) ($params['data'] ?? '')
                 ));
                 break;
             case 'audio-position':
-                Response::success($this->textHandler->formatSetAudioPosition(
+                return Response::success($this->textHandler->formatSetAudioPosition(
                     $textId,
                     (int) ($params['position'] ?? 0)
                 ));
                 break;
             case 'reading-position':
-                Response::success($this->textHandler->formatSetTextPosition(
+                return Response::success($this->textHandler->formatSetTextPosition(
                     $textId,
                     (int) ($params['position'] ?? 0)
                 ));
                 break;
             default:
-                Response::error('Endpoint Not Found: ' . $frag2, 404);
+                return Response::error('Endpoint Not Found: ' . $frag2, 404);
         }
     }
 
@@ -824,7 +793,7 @@ class ApiV1
      * @param list<string>         $fragments
      * @param array<string, mixed> $params
      */
-    private function handleTermsPost(array $fragments, array $params): void
+    private function handleTermsPost(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -833,36 +802,36 @@ class ApiV1
             $termId = (int) $frag1;
 
             if ($frag2 === 'status') {
-                $this->handleTermStatusPost($fragments, $termId);
+                return $this->handleTermStatusPost($fragments, $termId);
             } elseif ($frag2 === 'translations') {
-                Response::success($this->termTranslationHandler->formatUpdateTranslation(
+                return Response::success($this->termTranslationHandler->formatUpdateTranslation(
                     $termId,
                     (string) ($params['translation'] ?? '')
                 ));
             } else {
-                Response::error('"status" or "translations" Expected', 404);
+                return Response::error('"status" or "translations" Expected', 404);
             }
         } elseif ($frag1 === 'new') {
-            Response::success($this->termTranslationHandler->formatAddTranslation(
+            return Response::success($this->termTranslationHandler->formatAddTranslation(
                 (string) ($params['term_text'] ?? ''),
                 (int) ($params['language_id'] ?? 0),
                 (string) ($params['translation'] ?? '')
             ));
         } elseif ($frag1 === 'quick') {
             // POST /terms/quick - quick create term with status (98 or 99)
-            Response::success($this->termHandler->formatQuickCreate(
+            return Response::success($this->termHandler->formatQuickCreate(
                 (int) ($params['text_id'] ?? 0),
                 (int) ($params['position'] ?? 0),
                 (int) ($params['status'] ?? 0)
             ));
         } elseif ($frag1 === 'full') {
             // POST /terms/full - create term with full data
-            Response::success($this->termHandler->formatCreateTermFull($params));
+            return Response::success($this->termHandler->formatCreateTermFull($params));
         } elseif ($frag1 === 'multi') {
             // POST /terms/multi - create multi-word expression
-            Response::success($this->multiWordHandler->createMultiWordTerm($params));
+            return Response::success($this->multiWordHandler->createMultiWordTerm($params));
         } else {
-            Response::error('Term ID (Integer), "new", "quick", or "multi" Expected', 404);
+            return Response::error('Term ID (Integer), "new", "quick", or "multi" Expected', 404);
         }
     }
 
@@ -870,22 +839,20 @@ class ApiV1
      * @param list<string> $fragments
      * @param int          $termId
      */
-    private function handleTermStatusPost(array $fragments, int $termId): void
+    private function handleTermStatusPost(array $fragments, int $termId): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag3 = $this->frag($fragments, 3);
 
         switch ($frag3) {
             case 'down':
-                Response::success($this->termStatusHandler->formatIncrementStatus($termId, false));
-                break;
+                return Response::success($this->termStatusHandler->formatIncrementStatus($termId, false));
             case 'up':
-                Response::success($this->termStatusHandler->formatIncrementStatus($termId, true));
-                break;
+                return Response::success($this->termStatusHandler->formatIncrementStatus($termId, true));
             default:
                 if ($frag3 !== '' && ctype_digit($frag3)) {
-                    Response::success($this->termStatusHandler->formatSetStatus($termId, (int) $frag3));
+                    return Response::success($this->termStatusHandler->formatSetStatus($termId, (int) $frag3));
                 } else {
-                    Response::error('Endpoint Not Found: ' . $frag3, 404);
+                    return Response::error('Endpoint Not Found: ' . $frag3, 404);
                 }
         }
     }
@@ -894,64 +861,58 @@ class ApiV1
      * @param list<string>         $fragments
      * @param array<string, mixed> $params
      */
-    private function handleFeedsPost(array $fragments, array $params): void
+    private function handleFeedsPost(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
         // POST /feeds/articles/import - import articles as texts
         if ($frag1 === 'articles' && $frag2 === 'import') {
-            Response::success($this->feedHandler->formatImportArticles($params));
-            return;
+            return Response::success($this->feedHandler->formatImportArticles($params));
         }
 
         // POST /feeds - create new feed
         if ($frag1 === '') {
-            Response::success($this->feedHandler->formatCreateFeed($params));
-            return;
+            return Response::success($this->feedHandler->formatCreateFeed($params));
         }
 
         // POST /feeds/{id}/load - legacy feed load
         if (ctype_digit($frag1) && $frag2 === 'load') {
-            Response::success($this->feedHandler->formatLoadFeed(
+            return Response::success($this->feedHandler->formatLoadFeed(
                 (string) ($params['name'] ?? ''),
                 (int) $frag1,
                 (string) ($params['source_uri'] ?? ''),
                 (string) ($params['options'] ?? '')
             ));
-            return;
         }
 
-        Response::error('Expected "articles/import", feed data, or "{id}/load"', 404);
+        return Response::error('Expected "articles/import", feed data, or "{id}/load"', 404);
     }
 
     /**
      * @param list<string>         $fragments
      * @param array<string, mixed> $params
      */
-    private function handleFeedsGet(array $fragments, array $params): void
+    private function handleFeedsGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
         // GET /feeds/list - get paginated feed list
         if ($frag1 === 'list') {
-            Response::success($this->feedHandler->formatGetFeedList($params));
-            return;
+            return Response::success($this->feedHandler->formatGetFeedList($params));
         }
 
         // GET /feeds/articles - get articles for a feed
         if ($frag1 === 'articles') {
-            Response::success($this->feedHandler->formatGetArticles($params));
-            return;
+            return Response::success($this->feedHandler->formatGetArticles($params));
         }
 
         // GET /feeds/{id} - get single feed
         if ($frag1 !== '' && ctype_digit($frag1)) {
-            Response::success($this->feedHandler->formatGetFeed((int) $frag1));
-            return;
+            return Response::success($this->feedHandler->formatGetFeed((int) $frag1));
         }
 
-        Response::error('Expected "list", "articles", or feed ID', 404);
+        return Response::error('Expected "list", "articles", or feed ID', 404);
     }
 
     // =========================================================================
@@ -964,41 +925,34 @@ class ApiV1
      * @param list<string>         $fragments Endpoint path segments
      * @param array<string, mixed> $params    Request body parameters
      */
-    private function handlePut(array $fragments, array $params): void
+    private function handlePut(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag0 = $this->frag($fragments, 0);
 
         switch ($frag0) {
             case 'languages':
-                $this->handleLanguagesPut($fragments, $params);
-                break;
+                return $this->handleLanguagesPut($fragments, $params);
 
             case 'review':
-                $this->handleReviewPut($fragments, $params);
-                break;
+                return $this->handleReviewPut($fragments, $params);
 
             case 'terms':
-                $this->handleTermsPut($fragments, $params);
-                break;
+                return $this->handleTermsPut($fragments, $params);
 
             case 'texts':
-                $this->handleTextsPut($fragments, $params);
-                break;
+                return $this->handleTextsPut($fragments, $params);
 
             case 'feeds':
-                $this->handleFeedsPut($fragments, $params);
-                break;
+                return $this->handleFeedsPut($fragments, $params);
 
             case 'books':
-                $this->handleBooksPut($fragments, $params);
-                break;
+                return $this->handleBooksPut($fragments, $params);
 
             case 'local-dictionaries':
-                $this->handleLocalDictionariesPut($fragments, $params);
-                break;
+                return $this->handleLocalDictionariesPut($fragments, $params);
 
             default:
-                Response::error('Endpoint Not Found On PUT: ' . $frag0, 404);
+                return Response::error('Endpoint Not Found On PUT: ' . $frag0, 404);
         }
     }
 
@@ -1006,16 +960,16 @@ class ApiV1
      * @param list<string>         $fragments
      * @param array<string, mixed> $params
      */
-    private function handleFeedsPut(array $fragments, array $params): void
+    private function handleFeedsPut(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
         if ($frag1 === '' || !ctype_digit($frag1)) {
-            Response::error('Feed ID (Integer) Expected', 404);
+            return Response::error('Feed ID (Integer) Expected', 404);
         }
 
         $feedId = (int) $frag1;
-        Response::success($this->feedHandler->formatUpdateFeed($feedId, $params));
+        return Response::success($this->feedHandler->formatUpdateFeed($feedId, $params));
     }
 
     /**
@@ -1024,39 +978,38 @@ class ApiV1
      * @param list<string>         $fragments Endpoint path segments
      * @param array<string, mixed> $params    Request body parameters
      */
-    private function handleLanguagesPut(array $fragments, array $params): void
+    private function handleLanguagesPut(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
         if ($frag1 === '' || !ctype_digit($frag1)) {
-            Response::error('Language ID (Integer) Expected', 404);
+            return Response::error('Language ID (Integer) Expected', 404);
         }
 
         $langId = (int) $frag1;
 
         // PUT /languages/{id} - update language
         if ($frag2 === '') {
-            Response::success($this->languageHandler->formatUpdate($langId, $params));
-            return;
+            return Response::success($this->languageHandler->formatUpdate($langId, $params));
         }
 
-        Response::error('Unexpected sub-path for PUT /languages/{id}', 404);
+        return Response::error('Unexpected sub-path for PUT /languages/{id}', 404);
     }
 
     /**
      * @param list<string>         $fragments
      * @param array<string, mixed> $params
      */
-    private function handleReviewPut(array $fragments, array $params): void
+    private function handleReviewPut(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
         if ($frag1 === 'status') {
             // PUT /review/status - update word status during review
-            Response::success($this->reviewHandler->formatUpdateStatus($params));
+            return Response::success($this->reviewHandler->formatUpdateStatus($params));
         } else {
-            Response::error('Expected "status"', 404);
+            return Response::error('Expected "status"', 404);
         }
     }
 
@@ -1064,7 +1017,7 @@ class ApiV1
      * @param list<string>         $fragments
      * @param array<string, mixed> $params
      */
-    private function handleTermsPut(array $fragments, array $params): void
+    private function handleTermsPut(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -1074,21 +1027,21 @@ class ApiV1
             /** @var array<int> $termIds */
             $termIds = is_array($params['term_ids'] ?? null) ? $params['term_ids'] : [];
             $status = (int) ($params['status'] ?? 0);
-            Response::success($this->termStatusHandler->formatBulkStatus($termIds, $status));
+            return Response::success($this->termStatusHandler->formatBulkStatus($termIds, $status));
         } elseif ($frag1 === 'bulk-action') {
             // PUT /terms/bulk-action - perform bulk action on selected terms
             /** @var array<int> $ids */
             $ids = is_array($params['ids'] ?? null) ? $params['ids'] : [];
             $action = (string) ($params['action'] ?? '');
             $data = isset($params['data']) ? (string) $params['data'] : null;
-            Response::success($this->wordListHandler->bulkAction($ids, $action, $data));
+            return Response::success($this->wordListHandler->bulkAction($ids, $action, $data));
         } elseif ($frag1 === 'all-action') {
             // PUT /terms/all-action - perform action on all filtered terms
             /** @var array<string, mixed> $filters */
             $filters = is_array($params['filters'] ?? null) ? $params['filters'] : [];
             $action = (string) ($params['action'] ?? '');
             $data = isset($params['data']) ? (string) $params['data'] : null;
-            Response::success($this->wordListHandler->allAction($filters, $action, $data));
+            return Response::success($this->wordListHandler->allAction($filters, $action, $data));
         } elseif ($frag1 === 'family') {
             // PUT /terms/family/status - update status for entire word family
             // PUT /terms/family/apply - apply suggested family update
@@ -1098,47 +1051,47 @@ class ApiV1
                 $status = (int) ($params['status'] ?? 0);
 
                 if ($langId <= 0 || $lemmaLc === '') {
-                    Response::error('language_id and lemma_lc are required', 400);
+                    return Response::error('language_id and lemma_lc are required', 400);
                 }
-                Response::success($this->wordFamilyHandler->updateWordFamilyStatus($langId, $lemmaLc, $status));
+                return Response::success($this->wordFamilyHandler->updateWordFamilyStatus($langId, $lemmaLc, $status));
             } elseif ($frag2 === 'apply') {
                 /** @var array<int> $termIds */
                 $termIds = is_array($params['term_ids'] ?? null) ? $params['term_ids'] : [];
                 $status = (int) ($params['status'] ?? 0);
 
                 if (empty($termIds)) {
-                    Response::error('term_ids is required', 400);
+                    return Response::error('term_ids is required', 400);
                 }
-                Response::success($this->wordFamilyHandler->applyFamilyUpdate($termIds, $status));
+                return Response::success($this->wordFamilyHandler->applyFamilyUpdate($termIds, $status));
             } else {
-                Response::error('Expected "status" or "apply"', 404);
+                return Response::error('Expected "status" or "apply"', 404);
             }
         } elseif ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'inline-edit') {
             // PUT /terms/{id}/inline-edit - inline edit translation or romanization
             $termId = (int) $frag1;
             $field = (string) ($params['field'] ?? '');
             $value = (string) ($params['value'] ?? '');
-            Response::success($this->wordListHandler->inlineEdit($termId, $field, $value));
+            return Response::success($this->wordListHandler->inlineEdit($termId, $field, $value));
         } elseif ($frag1 === 'multi' && $frag2 !== '' && ctype_digit($frag2)) {
             // PUT /terms/multi/{id} - update multi-word expression
             $termId = (int) $frag2;
-            Response::success($this->multiWordHandler->updateMultiWordTerm($termId, $params));
+            return Response::success($this->multiWordHandler->updateMultiWordTerm($termId, $params));
         } elseif ($frag1 !== '' && ctype_digit($frag1)) {
             $termId = (int) $frag1;
             if ($frag2 === 'translation') {
                 // PUT /terms/{id}/translation - update translation
-                Response::success($this->termTranslationHandler->formatUpdateTranslation(
+                return Response::success($this->termTranslationHandler->formatUpdateTranslation(
                     $termId,
                     (string) ($params['translation'] ?? '')
                 ));
             } elseif ($frag2 === '') {
                 // PUT /terms/{id} - update term with full data
-                Response::success($this->termHandler->formatUpdateTermFull($termId, $params));
+                return Response::success($this->termHandler->formatUpdateTermFull($termId, $params));
             } else {
-                Response::error('Expected "translation" or no sub-path', 404);
+                return Response::error('Expected "translation" or no sub-path', 404);
             }
         } else {
-            Response::error('Term ID (Integer), "bulk-status", "family", or "multi/{id}" Expected', 404);
+            return Response::error('Term ID (Integer), "bulk-status", "family", or "multi/{id}" Expected', 404);
         }
     }
 
@@ -1146,13 +1099,13 @@ class ApiV1
      * @param list<string>         $fragments
      * @param array<string, mixed> $params
      */
-    private function handleTextsPut(array $fragments, array $params): void
+    private function handleTextsPut(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
         if ($frag1 === '' || !ctype_digit($frag1)) {
-            Response::error('Text ID (Integer) Expected', 404);
+            return Response::error('Text ID (Integer) Expected', 404);
         }
 
         $textId = (int) $frag1;
@@ -1160,18 +1113,15 @@ class ApiV1
         switch ($frag2) {
             case 'display-mode':
                 // PUT /texts/{id}/display-mode - set display mode settings
-                Response::success($this->textHandler->formatSetDisplayMode($textId, $params));
-                break;
+                return Response::success($this->textHandler->formatSetDisplayMode($textId, $params));
             case 'mark-all-wellknown':
                 // PUT /texts/{id}/mark-all-wellknown - mark all unknown as well-known
-                Response::success($this->textHandler->formatMarkAllWellKnown($textId));
-                break;
+                return Response::success($this->textHandler->formatMarkAllWellKnown($textId));
             case 'mark-all-ignored':
                 // PUT /texts/{id}/mark-all-ignored - mark all unknown as ignored
-                Response::success($this->textHandler->formatMarkAllIgnored($textId));
-                break;
+                return Response::success($this->textHandler->formatMarkAllIgnored($textId));
             default:
-                Response::error('Expected "display-mode", "mark-all-wellknown", or "mark-all-ignored"', 404);
+                return Response::error('Expected "display-mode", "mark-all-wellknown", or "mark-all-ignored"', 404);
         }
     }
 
@@ -1187,41 +1137,34 @@ class ApiV1
      *
      * @psalm-suppress UnusedParam
      */
-    private function handleDelete(array $fragments, array $params): void
+    private function handleDelete(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag0 = $this->frag($fragments, 0);
 
         switch ($frag0) {
             case 'languages':
-                $this->handleLanguagesDelete($fragments);
-                break;
+                return $this->handleLanguagesDelete($fragments);
 
             case 'terms':
-                $this->handleTermsDelete($fragments);
-                break;
+                return $this->handleTermsDelete($fragments);
 
             case 'feeds':
-                $this->handleFeedsDelete($fragments, $params);
-                break;
+                return $this->handleFeedsDelete($fragments, $params);
 
             case 'books':
-                $this->handleBooksDelete($fragments);
-                break;
+                return $this->handleBooksDelete($fragments);
 
             case 'local-dictionaries':
-                $this->handleLocalDictionariesDelete($fragments);
-                break;
+                return $this->handleLocalDictionariesDelete($fragments);
 
             case 'tts':
-                $this->handleTtsDelete($fragments);
-                break;
+                return $this->handleTtsDelete($fragments);
 
             case 'whisper':
-                $this->handleWhisperDelete($fragments);
-                break;
+                return $this->handleWhisperDelete($fragments);
 
             default:
-                Response::error('Endpoint Not Found On DELETE: ' . $frag0, 404);
+                return Response::error('Endpoint Not Found On DELETE: ' . $frag0, 404);
         }
     }
 
@@ -1229,7 +1172,7 @@ class ApiV1
      * @param list<string>         $fragments
      * @param array<string, mixed> $params
      */
-    private function handleFeedsDelete(array $fragments, array $params): void
+    private function handleFeedsDelete(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -1239,31 +1182,27 @@ class ApiV1
             $feedId = (int) $frag2;
             /** @var array<int> $articleIds */
             $articleIds = is_array($params['article_ids'] ?? null) ? $params['article_ids'] : [];
-            Response::success($this->feedHandler->formatDeleteArticles($feedId, $articleIds));
-            return;
+            return Response::success($this->feedHandler->formatDeleteArticles($feedId, $articleIds));
         }
 
         // DELETE /feeds/{id}/reset-errors - reset error articles
         if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'reset-errors') {
-            Response::success($this->feedHandler->formatResetErrorArticles((int) $frag1));
-            return;
+            return Response::success($this->feedHandler->formatResetErrorArticles((int) $frag1));
         }
 
         // DELETE /feeds - bulk delete feeds (ids in body)
         if ($frag1 === '') {
             /** @var array<int> $feedIds */
             $feedIds = is_array($params['feed_ids'] ?? null) ? $params['feed_ids'] : [];
-            Response::success($this->feedHandler->formatDeleteFeeds($feedIds));
-            return;
+            return Response::success($this->feedHandler->formatDeleteFeeds($feedIds));
         }
 
         // DELETE /feeds/{id} - delete single feed
         if (ctype_digit($frag1)) {
-            Response::success($this->feedHandler->formatDeleteFeeds([(int) $frag1]));
-            return;
+            return Response::success($this->feedHandler->formatDeleteFeeds([(int) $frag1]));
         }
 
-        Response::error('Expected feed ID or "articles/{feedId}"', 404);
+        return Response::error('Expected feed ID or "articles/{feedId}"', 404);
     }
 
     /**
@@ -1271,31 +1210,31 @@ class ApiV1
      *
      * @param list<string> $fragments Endpoint path segments
      */
-    private function handleLanguagesDelete(array $fragments): void
+    private function handleLanguagesDelete(array $fragments): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
         if ($frag1 === '' || !ctype_digit($frag1)) {
-            Response::error('Language ID (Integer) Expected', 404);
+            return Response::error('Language ID (Integer) Expected', 404);
         }
 
         $langId = (int) $frag1;
-        Response::success($this->languageHandler->formatDelete($langId));
+        return Response::success($this->languageHandler->formatDelete($langId));
     }
 
     /**
      * @param list<string> $fragments
      */
-    private function handleTermsDelete(array $fragments): void
+    private function handleTermsDelete(array $fragments): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
         if ($frag1 === '' || !ctype_digit($frag1)) {
-            Response::error('Term ID (Integer) Expected', 404);
+            return Response::error('Term ID (Integer) Expected', 404);
         }
 
         $termId = (int) $frag1;
-        Response::success($this->termHandler->formatDeleteTerm($termId));
+        return Response::success($this->termHandler->formatDeleteTerm($termId));
     }
 
     // =========================================================================
@@ -1308,7 +1247,7 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $params    Query parameters
      */
-    private function handleLocalDictionariesGet(array $fragments, array $params): void
+    private function handleLocalDictionariesGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -1319,35 +1258,32 @@ class ApiV1
             $term = (string) ($params['term'] ?? '');
 
             if ($languageId <= 0) {
-                Response::error('language_id is required', 400);
+                return Response::error('language_id is required', 400);
             }
             if ($term === '') {
-                Response::error('term is required', 400);
+                return Response::error('term is required', 400);
             }
 
-            Response::success($this->localDictionaryHandler->formatLookup($languageId, $term));
-            return;
+            return Response::success($this->localDictionaryHandler->formatLookup($languageId, $term));
         }
 
         // GET /local-dictionaries/entries/{dictId} - get entries for dictionary
         if ($frag1 === 'entries' && $frag2 !== '' && ctype_digit($frag2)) {
-            Response::success($this->localDictionaryHandler->formatGetEntries((int) $frag2, $params));
-            return;
+            return Response::success($this->localDictionaryHandler->formatGetEntries((int) $frag2, $params));
         }
 
         // GET /local-dictionaries/{id} - get single dictionary
         if ($frag1 !== '' && ctype_digit($frag1)) {
-            Response::success($this->localDictionaryHandler->formatGetDictionary((int) $frag1));
-            return;
+            return Response::success($this->localDictionaryHandler->formatGetDictionary((int) $frag1));
         }
 
         // GET /local-dictionaries?language_id=N - list dictionaries for language
         $languageId = (int) ($params['language_id'] ?? 0);
         if ($languageId <= 0) {
-            Response::error('language_id is required', 400);
+            return Response::error('language_id is required', 400);
         }
 
-        Response::success($this->localDictionaryHandler->formatGetDictionaries($languageId));
+        return Response::success($this->localDictionaryHandler->formatGetDictionaries($languageId));
     }
 
     /**
@@ -1356,42 +1292,37 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $params    POST parameters
      */
-    private function handleLocalDictionariesPost(array $fragments, array $params): void
+    private function handleLocalDictionariesPost(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
         // POST /local-dictionaries/preview - preview file before import
         if ($frag1 === 'preview') {
-            Response::success($this->localDictionaryHandler->formatPreview($params));
-            return;
+            return Response::success($this->localDictionaryHandler->formatPreview($params));
         }
 
         // POST /local-dictionaries/entries/{dictId} - add entry to dictionary
         if ($frag1 === 'entries' && $frag2 !== '' && ctype_digit($frag2)) {
-            Response::success($this->localDictionaryHandler->formatAddEntry((int) $frag2, $params));
-            return;
+            return Response::success($this->localDictionaryHandler->formatAddEntry((int) $frag2, $params));
         }
 
         // POST /local-dictionaries/{id}/import - import entries into dictionary
         if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'import') {
-            Response::success($this->localDictionaryHandler->formatImport((int) $frag1, $params));
-            return;
+            return Response::success($this->localDictionaryHandler->formatImport((int) $frag1, $params));
         }
 
         // POST /local-dictionaries/{id}/clear - clear all entries
         if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'clear') {
-            Response::success($this->localDictionaryHandler->formatClearEntries((int) $frag1));
-            return;
+            return Response::success($this->localDictionaryHandler->formatClearEntries((int) $frag1));
         }
 
         // POST /local-dictionaries - create new dictionary
         if ($frag1 === '') {
-            Response::success($this->localDictionaryHandler->formatCreateDictionary($params));
-            return;
+            return Response::success($this->localDictionaryHandler->formatCreateDictionary($params));
         }
 
-        Response::error('Endpoint Not Found: local-dictionaries/' . $frag1, 404);
+        return Response::error('Endpoint Not Found: local-dictionaries/' . $frag1, 404);
     }
 
     /**
@@ -1400,18 +1331,17 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $params    Request body parameters
      */
-    private function handleLocalDictionariesPut(array $fragments, array $params): void
+    private function handleLocalDictionariesPut(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
         // PUT /local-dictionaries/{id} - update dictionary
         if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === '') {
-            Response::success($this->localDictionaryHandler->formatUpdateDictionary((int) $frag1, $params));
-            return;
+            return Response::success($this->localDictionaryHandler->formatUpdateDictionary((int) $frag1, $params));
         }
 
-        Response::error('Dictionary ID (Integer) Expected', 404);
+        return Response::error('Dictionary ID (Integer) Expected', 404);
     }
 
     /**
@@ -1419,17 +1349,16 @@ class ApiV1
      *
      * @param list<string> $fragments Endpoint path segments
      */
-    private function handleLocalDictionariesDelete(array $fragments): void
+    private function handleLocalDictionariesDelete(array $fragments): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
         // DELETE /local-dictionaries/{id} - delete dictionary
         if ($frag1 !== '' && ctype_digit($frag1)) {
-            Response::success($this->localDictionaryHandler->formatDeleteDictionary((int) $frag1));
-            return;
+            return Response::success($this->localDictionaryHandler->formatDeleteDictionary((int) $frag1));
         }
 
-        Response::error('Dictionary ID (Integer) Expected', 404);
+        return Response::error('Dictionary ID (Integer) Expected', 404);
     }
 
     // =========================================================================
@@ -1442,7 +1371,7 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $_params   Query parameters (unused)
      */
-    private function handleTtsGet(array $fragments, array $_params): void
+    private function handleTtsGet(array $fragments, array $_params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -1451,13 +1380,13 @@ class ApiV1
             case 'voices':
                 if ($frag2 === 'installed') {
                     // GET /tts/voices/installed - get only installed voices
-                    Response::success(['voices' => $this->nlpHandler->getInstalledVoices()]);
+                    return Response::success(['voices' => $this->nlpHandler->getInstalledVoices()]);
                 }
                 // GET /tts/voices - get all voices (installed + available)
-                Response::success(['voices' => $this->nlpHandler->getVoices()]);
+                return Response::success(['voices' => $this->nlpHandler->getVoices()]);
 
             default:
-                Response::error('Expected "voices"', 404);
+                return Response::error('Expected "voices"', 404);
         }
     }
 
@@ -1467,7 +1396,7 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $params    POST parameters
      */
-    private function handleTtsPost(array $fragments, array $params): void
+    private function handleTtsPost(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -1479,36 +1408,35 @@ class ApiV1
                 $voiceId = (string) ($params['voice_id'] ?? '');
 
                 if ($text === '' || $voiceId === '') {
-                    Response::error('text and voice_id are required', 400);
+                    return Response::error('text and voice_id are required', 400);
                 }
 
                 $audioData = $this->nlpHandler->speak($text, $voiceId);
                 if ($audioData === null) {
-                    Response::error('TTS service unavailable or synthesis failed', 503);
+                    return Response::error('TTS service unavailable or synthesis failed', 503);
                 }
 
-                Response::success(['audio' => $audioData]);
-                break;
+                return Response::success(['audio' => $audioData]);
 
             case 'voices':
                 if ($frag2 === 'download') {
                     // POST /tts/voices/download - download a voice
                     $voiceId = (string) ($params['voice_id'] ?? '');
                     if ($voiceId === '') {
-                        Response::error('voice_id is required', 400);
+                        return Response::error('voice_id is required', 400);
                     }
 
                     $success = $this->nlpHandler->downloadVoice($voiceId);
                     if (!$success) {
-                        Response::error('Voice download failed', 500);
+                        return Response::error('Voice download failed', 500);
                     }
 
-                    Response::success(['success' => true, 'voice_id' => $voiceId]);
+                    return Response::success(['success' => true, 'voice_id' => $voiceId]);
                 }
-                Response::error('Expected "download"', 404);
+                return Response::error('Expected "download"', 404);
 
             default:
-                Response::error('Expected "speak" or "voices/download"', 404);
+                return Response::error('Expected "speak" or "voices/download"', 404);
         }
     }
 
@@ -1517,7 +1445,7 @@ class ApiV1
      *
      * @param list<string> $fragments Endpoint path segments
      */
-    private function handleTtsDelete(array $fragments): void
+    private function handleTtsDelete(array $fragments): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -1527,14 +1455,13 @@ class ApiV1
             $success = $this->nlpHandler->deleteVoice($frag2);
 
             if (!$success) {
-                Response::error('Voice not found or deletion failed', 404);
+                return Response::error('Voice not found or deletion failed', 404);
             }
 
-            Response::success(['success' => true]);
-            return;
+            return Response::success(['success' => true]);
         }
 
-        Response::error('Expected "voices/{id}"', 404);
+        return Response::error('Expected "voices/{id}"', 404);
     }
 
     // =========================================================================
@@ -1547,27 +1474,25 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $params    Query parameters
      */
-    private function handleYouTubeGet(array $fragments, array $params): void
+    private function handleYouTubeGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
         switch ($frag1) {
             case 'configured':
                 // GET /youtube/configured - check if YouTube API is configured
-                Response::success($this->youtubeHandler->formatIsConfigured());
-                break;
+                return Response::success($this->youtubeHandler->formatIsConfigured());
 
             case 'video':
                 // GET /youtube/video?video_id=xxx - get video info
                 $videoId = (string) ($params['video_id'] ?? '');
                 if ($videoId === '') {
-                    Response::error('video_id parameter is required', 400);
+                    return Response::error('video_id parameter is required', 400);
                 }
-                Response::success($this->youtubeHandler->formatGetVideoInfo($videoId));
-                break;
+                return Response::success($this->youtubeHandler->formatGetVideoInfo($videoId));
 
             default:
-                Response::error('Expected "configured" or "video"', 404);
+                return Response::error('Expected "configured" or "video"', 404);
         }
     }
 
@@ -1581,7 +1506,7 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $_params   Query parameters (unused)
      */
-    private function handleWhisperGet(array $fragments, array $_params): void
+    private function handleWhisperGet(array $fragments, array $_params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -1589,41 +1514,37 @@ class ApiV1
         switch ($frag1) {
             case 'available':
                 // GET /whisper/available - check if Whisper is available
-                Response::success($this->whisperHandler->formatIsAvailable());
-                break;
+                return Response::success($this->whisperHandler->formatIsAvailable());
 
             case 'languages':
                 // GET /whisper/languages - get supported languages
-                Response::success($this->whisperHandler->formatGetLanguages());
-                break;
+                return Response::success($this->whisperHandler->formatGetLanguages());
 
             case 'models':
                 // GET /whisper/models - get available models
-                Response::success($this->whisperHandler->formatGetModels());
-                break;
+                return Response::success($this->whisperHandler->formatGetModels());
 
             case 'status':
                 // GET /whisper/status/{job_id} - get job status
                 if ($frag2 === '') {
-                    Response::error('job_id is required', 400);
+                    return Response::error('job_id is required', 400);
                 }
-                Response::success($this->whisperHandler->formatGetStatus($frag2));
-                break;
+                return Response::success($this->whisperHandler->formatGetStatus($frag2));
 
             case 'result':
                 // GET /whisper/result/{job_id} - get completed result
                 if ($frag2 === '') {
-                    Response::error('job_id is required', 400);
+                    return Response::error('job_id is required', 400);
                 }
                 try {
-                    Response::success($this->whisperHandler->formatGetResult($frag2));
+                    return Response::success($this->whisperHandler->formatGetResult($frag2));
                 } catch (\RuntimeException $e) {
-                    Response::error($e->getMessage(), 500);
+                    return Response::error($e->getMessage(), 500);
                 }
                 break;
 
             default:
-                Response::error('Expected "available", "languages", "models", "status/{id}", or "result/{id}"', 404);
+                return Response::error('Expected "available", "languages", "models", "status/{id}", or "result/{id}"', 404);
         }
     }
 
@@ -1633,7 +1554,7 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $params    POST parameters
      */
-    private function handleWhisperPost(array $fragments, array $params): void
+    private function handleWhisperPost(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
@@ -1642,27 +1563,26 @@ class ApiV1
             /** @var array{name?: string, tmp_name?: string, size?: int}|null $file */
             $file = $_FILES['file'] ?? null;
             if ($file === null) {
-                Response::error('No file uploaded', 400);
+                return Response::error('No file uploaded', 400);
             }
 
             $language = isset($params['language']) && $params['language'] !== '' ? (string) $params['language'] : null;
             $model = (string) ($params['model'] ?? 'small');
 
             try {
-                Response::success($this->whisperHandler->formatStartTranscription(
+                return Response::success($this->whisperHandler->formatStartTranscription(
                     $file,
                     $language,
                     $model
                 ));
             } catch (\InvalidArgumentException $e) {
-                Response::error($e->getMessage(), 400);
+                return Response::error($e->getMessage(), 400);
             } catch (\RuntimeException $e) {
-                Response::error($e->getMessage(), 503);
+                return Response::error($e->getMessage(), 503);
             }
-            return;
         }
 
-        Response::error('Expected "transcribe"', 404);
+        return Response::error('Expected "transcribe"', 404);
     }
 
     /**
@@ -1670,18 +1590,17 @@ class ApiV1
      *
      * @param list<string> $fragments Endpoint path segments
      */
-    private function handleWhisperDelete(array $fragments): void
+    private function handleWhisperDelete(array $fragments): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
         // DELETE /whisper/job/{id} - cancel job
         if ($frag1 === 'job' && $frag2 !== '') {
-            Response::success($this->whisperHandler->formatCancelJob($frag2));
-            return;
+            return Response::success($this->whisperHandler->formatCancelJob($frag2));
         }
 
-        Response::error('Expected "job/{id}"', 404);
+        return Response::error('Expected "job/{id}"', 404);
     }
 
     // =========================================================================
@@ -1694,10 +1613,10 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $params    Query parameters
      */
-    private function handleBooksGet(array $fragments, array $params): void
+    private function handleBooksGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         if ($this->bookHandler === null) {
-            Response::error('Book module not available', 503);
+            return Response::error('Book module not available', 503);
         }
 
         $frag1 = $this->frag($fragments, 1);
@@ -1705,18 +1624,16 @@ class ApiV1
 
         // GET /books/{id}/chapters - get chapters for a book
         if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'chapters') {
-            Response::success($this->bookHandler->getChapters(['id' => $frag1]));
-            return;
+            return Response::success($this->bookHandler->getChapters(['id' => $frag1]));
         }
 
         // GET /books/{id} - get single book
         if ($frag1 !== '' && ctype_digit($frag1)) {
-            Response::success($this->bookHandler->getBook(['id' => $frag1]));
-            return;
+            return Response::success($this->bookHandler->getBook(['id' => $frag1]));
         }
 
         // GET /books - list all books
-        Response::success($this->bookHandler->listBooks($params));
+        return Response::success($this->bookHandler->listBooks($params));
     }
 
     /**
@@ -1725,10 +1642,10 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $params    PUT parameters
      */
-    private function handleBooksPut(array $fragments, array $params): void
+    private function handleBooksPut(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         if ($this->bookHandler === null) {
-            Response::error('Book module not available', 503);
+            return Response::error('Book module not available', 503);
         }
 
         $frag1 = $this->frag($fragments, 1);
@@ -1737,11 +1654,10 @@ class ApiV1
         // PUT /books/{id}/progress - update reading progress
         if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'progress') {
             $params['id'] = $frag1;
-            Response::success($this->bookHandler->updateProgress($params));
-            return;
+            return Response::success($this->bookHandler->updateProgress($params));
         }
 
-        Response::error('Expected "progress"', 404);
+        return Response::error('Expected "progress"', 404);
     }
 
     /**
@@ -1749,21 +1665,20 @@ class ApiV1
      *
      * @param list<string> $fragments Endpoint path segments
      */
-    private function handleBooksDelete(array $fragments): void
+    private function handleBooksDelete(array $fragments): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
         if ($this->bookHandler === null) {
-            Response::error('Book module not available', 503);
+            return Response::error('Book module not available', 503);
         }
 
         $frag1 = $this->frag($fragments, 1);
 
         // DELETE /books/{id} - delete a book
         if ($frag1 !== '' && ctype_digit($frag1)) {
-            Response::success($this->bookHandler->deleteBook(['id' => $frag1]));
-            return;
+            return Response::success($this->bookHandler->deleteBook(['id' => $frag1]));
         }
 
-        Response::error('Book ID (Integer) Expected', 404);
+        return Response::error('Book ID (Integer) Expected', 404);
     }
 
     // =========================================================================
@@ -1823,7 +1738,8 @@ class ApiV1
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
         if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE'])) {
-            Response::error('Method Not Allowed', 405);
+            Response::error('Method Not Allowed', 405)->send();
+            return;
         }
 
         // Get body data based on method

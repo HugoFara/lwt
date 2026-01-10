@@ -18,6 +18,7 @@ namespace Lwt\Modules\Tags\Http;
 
 use Lwt\Api\V1\Response;
 use Lwt\Modules\Tags\Application\TagsFacade;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
 
 /**
  * API handler for tag endpoints.
@@ -53,22 +54,20 @@ class TagApiHandler
      *
      * @param array $fragments URL path fragments after /tags
      *
-     * @return void
+     * @return JsonResponse
      */
-    public function handleGet(array $fragments): void
+    public function handleGet(array $fragments): JsonResponse
     {
         $type = isset($fragments[0]) ? (string) $fragments[0] : '';
 
         switch ($type) {
             case 'term':
-                Response::success(TagsFacade::getAllTermTags());
-                break;
+                return Response::success(TagsFacade::getAllTermTags());
             case 'text':
-                Response::success(TagsFacade::getAllTextTags());
-                break;
+                return Response::success(TagsFacade::getAllTextTags());
             default:
                 // Return both tag types
-                Response::success([
+                return Response::success([
                     'term' => TagsFacade::getAllTermTags(),
                     'text' => TagsFacade::getAllTextTags(),
                 ]);
@@ -81,16 +80,15 @@ class TagApiHandler
      * @param string $method    HTTP method
      * @param array  $fragments URL fragments
      *
-     * @return void
+     * @return JsonResponse
      */
-    public function handle(string $method, array $fragments): void
+    public function handle(string $method, array $fragments): JsonResponse
     {
         switch (strtoupper($method)) {
             case 'GET':
-                $this->handleGet($fragments);
-                break;
+                return $this->handleGet($fragments);
             default:
-                Response::error('Method not allowed', 405);
+                return Response::error('Method not allowed', 405);
         }
     }
 }
