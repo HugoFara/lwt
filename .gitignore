@@ -59,8 +59,11 @@ coverage.xml
 # Vitest coverage report
 /coverage/
 
-# Cypress coverage
-/cypress/
+# Cypress artifacts (keep e2e tests tracked)
+/cypress/screenshots/
+/cypress/videos/
+/cypress/downloads/
+/cypress/coverage/
 
 # Lighthouse reports
 /lighthouse-reports/

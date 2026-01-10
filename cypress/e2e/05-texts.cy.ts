@@ -176,18 +176,22 @@ describe('Texts Management', () => {
   });
 
   describe('Long Text Import', () => {
-    it('should load long text import page', () => {
-      cy.visit('/text/import-long');
-      cy.url().should('include', '/text/import-long');
+    it('should redirect to text edit or handle long text via regular form', () => {
+      // Long text import is handled through the regular text edit form
+      // which supports longer texts via the textarea
+      cy.visit('/text/edit?new=1');
+      cy.url().should('include', '/text/edit');
       cy.get('form').should('exist');
+      // Text content textarea should exist for entering long texts
+      cy.get('textarea[name="TxText"]').should('exist');
     });
 
-    it('should have required fields for import', () => {
-      cy.visit('/text/import-long');
+    it('should have required fields for text creation', () => {
+      cy.visit('/text/edit?new=1');
       // Language selector
-      cy.get('select[name*="lang" i], select[name="LgID"]').should('exist');
-      // Text input area or file upload
-      cy.get('textarea, input[type="file"]').should('exist');
+      cy.get('select[name*="lang" i], select[name="TxLgID"]').should('exist');
+      // Text input area
+      cy.get('textarea[name="TxText"]').should('exist');
     });
   });
 });

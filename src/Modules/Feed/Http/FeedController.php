@@ -560,7 +560,7 @@ class FeedController
         );
         PageLayoutHelper::renderPageStart($this->languageFacade->getLanguageName($currentLang) . ' Feeds', true);
 
-        $currentFeed = InputValidator::getStringParam("selected_feed");
+        $currentFeed = InputValidator::getString("selected_feed");
 
         $editText = 0;
         $message = '';
@@ -781,8 +781,8 @@ class FeedController
      */
     private function renderFeedsIndex(int $currentLang, int $currentFeed): void
     {
-        $currentQuery = InputValidator::getStringParam("query");
-        $currentQueryMode = InputValidator::getStringParam("query_mode", 'title,desc,text');
+        $currentQuery = InputValidator::getString("query");
+        $currentQueryMode = InputValidator::getString("query_mode", 'title,desc,text');
         $currentRegexMode = Settings::getWithDefault("set-regex-mode");
 
         $filterData = $this->feedFacade->buildQueryFilter($currentQuery, $currentQueryMode, $currentRegexMode);
@@ -886,9 +886,9 @@ class FeedController
             InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
         $currentSort = InputValidator::getIntWithDb("sort", 'currentmanagefeedssort', 2);
-        $currentQuery = InputValidator::getStringParam("query");
+        $currentQuery = InputValidator::getString("query");
         $currentPage = InputValidator::getIntParam("page", 1, 1);
-        $currentFeed = InputValidator::getStringParam("selected_feed");
+        $currentFeed = InputValidator::getString("selected_feed");
 
         // Build query pattern for prepared statement (no SQL escaping needed)
         $queryPattern = ($currentQuery != '') ? ('%' . str_replace("*", "%", $currentQuery) . '%') : null;
