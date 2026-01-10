@@ -62,8 +62,6 @@ class Configuration
      * @param string $socket Database socket
      *
      * @return \mysqli Connection to the database
-     *
-     * @psalm-suppress UndefinedDocblockClass
      */
     public static function connect(
         string $server,

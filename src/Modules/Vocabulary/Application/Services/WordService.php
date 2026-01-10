@@ -509,6 +509,7 @@ class WordService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
@@ -532,6 +533,7 @@ class WordService
         }
 
         // Absolute status
+        /** @var array<int, int> $bindings */
         $bindings = array_merge([$status], $ids);
         $sql = "UPDATE words
                 SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
@@ -554,6 +556,7 @@ class WordService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
@@ -579,6 +582,7 @@ class WordService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
@@ -601,6 +605,7 @@ class WordService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
@@ -623,6 +628,7 @@ class WordService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
@@ -754,6 +760,7 @@ class WordService
     public function getFilteredWordIds(array $filters): array
     {
         $conditions = ['1=1'];
+        /** @var array<int, mixed> $params */
         $params = [];
 
         // Language filter
@@ -1210,6 +1217,7 @@ class WordService
             $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
             $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
+            /** @var list<int|string> $bindings */
             $bindings = [$langId, $term, $termlc, $status];
             $sql = "INSERT INTO words (
                     WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}"
@@ -1469,10 +1477,10 @@ class WordService
         );
 
         return [
-            'name' => $record['LgName'] ?? '',
-            'dict1' => $record['LgDict1URI'] ?? '',
-            'dict2' => $record['LgDict2URI'] ?? '',
-            'translate' => $record['LgGoogleTranslateURI'] ?? '',
+            'name' => (string) ($record['LgName'] ?? ''),
+            'dict1' => (string) ($record['LgDict1URI'] ?? ''),
+            'dict2' => (string) ($record['LgDict2URI'] ?? ''),
+            'translate' => (string) ($record['LgGoogleTranslateURI'] ?? ''),
         ];
     }
 

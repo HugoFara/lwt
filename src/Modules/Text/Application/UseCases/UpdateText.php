@@ -193,7 +193,8 @@ class UpdateText
         }
 
         $count = 0;
-        $ids = array_map('intval', $textIds);
+        /** @var array<int, int> $ids */
+        $ids = array_values(array_map('intval', $textIds));
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         $records = Connection::preparedFetchAll(

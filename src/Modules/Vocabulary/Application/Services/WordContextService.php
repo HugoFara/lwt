@@ -113,10 +113,10 @@ class WordContextService
         );
 
         return [
-            'name' => $record['LgName'] ?? '',
-            'dict1' => $record['LgDict1URI'] ?? '',
-            'dict2' => $record['LgDict2URI'] ?? '',
-            'translate' => $record['LgGoogleTranslateURI'] ?? '',
+            'name' => (string) ($record['LgName'] ?? ''),
+            'dict1' => (string) ($record['LgDict1URI'] ?? ''),
+            'dict2' => (string) ($record['LgDict2URI'] ?? ''),
+            'translate' => (string) ($record['LgGoogleTranslateURI'] ?? ''),
         ];
     }
 

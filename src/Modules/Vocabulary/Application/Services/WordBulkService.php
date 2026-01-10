@@ -77,6 +77,7 @@ class WordBulkService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
@@ -100,6 +101,7 @@ class WordBulkService
         }
 
         // Absolute status
+        /** @var array<int, int> $bindings */
         $bindings = array_merge([$status], $ids);
         $sql = "UPDATE words
                 SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
@@ -122,6 +124,7 @@ class WordBulkService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
@@ -147,6 +150,7 @@ class WordBulkService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
@@ -169,6 +173,7 @@ class WordBulkService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
@@ -191,6 +196,7 @@ class WordBulkService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 

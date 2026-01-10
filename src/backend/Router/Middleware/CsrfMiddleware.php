@@ -274,11 +274,15 @@ HTML;
             @session_start();
         }
 
-        if (!isset($_SESSION[self::SESSION_TOKEN]) || $_SESSION[self::SESSION_TOKEN] === '') {
-            $_SESSION[self::SESSION_TOKEN] = bin2hex(random_bytes(32));
+        /** @var mixed $sessionValue */
+        $sessionValue = $_SESSION[self::SESSION_TOKEN] ?? '';
+        $token = is_string($sessionValue) ? $sessionValue : '';
+        if ($token === '') {
+            $token = bin2hex(random_bytes(32));
+            $_SESSION[self::SESSION_TOKEN] = $token;
         }
 
-        return $_SESSION[self::SESSION_TOKEN];
+        return $token;
     }
 
     /**

@@ -4,7 +4,7 @@
  *
  * Variables expected:
  * - $textId: int - Text ID (0 for new text)
- * - $text: Lwt\Classes\Text - Text object
+ * - $text: object{id: int, lgid: int, title: string, text: string, source: string, media_uri: string} - Text object
  * - $annotated: bool - Whether the text has annotations
  * - $languageData: array - Mapping of language ID to language code
  * - $isNew: bool - Whether this is a new text
@@ -22,7 +22,7 @@
  * @psalm-suppress TypeDoesNotContainType View included from different contexts
  *
  * @var int $textId
- * @var \Lwt\Classes\Text $text
+ * @var object{id: int, lgid: int, title: string, text: string, source: string, media_uri: string} $text
  * @var bool $annotated
  * @var array<int, string> $languageData
  * @var array<int, array{id: int, name: string}> $languages
@@ -40,29 +40,29 @@ use Lwt\Core\Integration\YouTubeImport;
 
 // Type-safe variable extraction from controller context
 /** @var int $textId */
-/** @var object{id: int, lgid: int, title: string, text: string, source: string, media_uri: string} $text */
 /** @var bool $annotated */
 assert(is_array($languageData));
 /** @var array<int, string> $languageData */
 assert(is_array($languages));
-/** @var array<int, array{id: int, name: string}> $languages */
+/** @var array<int, array{id: int, name: string}> $languagesTyped */
+$languagesTyped = $languages;
 /** @var bool $isNew */
 /** @var string $scrdir */
 
 // Extract typed properties from $text for use in template
-/** @var int */
+assert(is_object($text) && property_exists($text, 'lgid'));
+/** @var int $textIdTyped */
 $textIdTyped = $textId;
-/** @var int */
+/** @var int $textLgId */
 $textLgId = $text->lgid;
-/** @var string */
+/** @var string $textTitle */
 $textTitle = $text->title;
-/** @var string */
+/** @var string $textContent */
 $textContent = $text->text;
-/** @var string */
+/** @var string $textSource */
 $textSource = $text->source;
-/** @var string */
+/** @var string $textMediaUri */
 $textMediaUri = $text->media_uri;
-/** @var string */
 $scrdirTyped = $scrdir;
 
 // Build actions based on whether this is a new or existing text
@@ -209,7 +209,7 @@ if ($isNew) {
                             data-action="change-language"
                             title="Select the language of your text"
                             required>
-                        <?php echo SelectOptionsBuilder::forLanguages($languages, $textLgId, "[Choose...]"); ?>
+                        <?php echo SelectOptionsBuilder::forLanguages($languagesTyped, $textLgId, "[Choose...]"); ?>
                     </select>
                 </div>
             </div>

@@ -45,8 +45,6 @@ use Lwt\Core\Globals;
  * @category Database
  * @package  Lwt\Database
  * @since    3.0.0
- *
- * @psalm-suppress UnusedClass This class will be used by services in Phase 9
  */
 class UserScopedQuery
 {
@@ -213,15 +211,13 @@ class UserScopedQuery
      * Returns a SQL fragment like " AND WoUsID = 1" when user scope
      * should be applied, or empty string otherwise.
      *
-     * @param string $tableName   The table name (without prefix)
-     * @param string $alias       Optional table alias to prefix the column
-     * @param string $parentTable Optional parent table for inherited scope (unused, for API compat)
-     *
-     * @psalm-suppress PossiblyUnusedParam $parentTable kept for API compatibility
+     * @param string $tableName    The table name (without prefix)
+     * @param string $alias        Optional table alias to prefix the column
+     * @param string $_parentTable Optional parent table for inherited scope (unused, kept for API compat)
      *
      * @return string SQL WHERE condition fragment (includes leading AND)
      */
-    public static function forTable(string $tableName, string $alias = '', string $parentTable = ''): string
+    public static function forTable(string $tableName, string $alias = '', string $_parentTable = ''): string
     {
         if (!Globals::isMultiUserEnabled()) {
             return '';
@@ -247,12 +243,10 @@ class UserScopedQuery
      * Returns a SQL fragment like " AND WoUsID = ?" and adds the user ID
      * to the provided bindings array.
      *
-     * @param string             $tableName   The table name (without prefix)
-     * @param array<int, mixed>  &$bindings   Reference to bindings array
-     * @param string             $alias       Optional table alias
-     * @param string             $parentTable Optional parent table for inherited scope (unused, for API compat)
-     *
-     * @psalm-suppress PossiblyUnusedParam $parentTable kept for API compatibility
+     * @param string             $tableName    The table name (without prefix)
+     * @param array<int, mixed>  &$bindings    Reference to bindings array
+     * @param string             $alias        Optional table alias
+     * @param string             $_parentTable Optional parent table for inherited scope (unused, kept for API compat)
      *
      * @return string SQL WHERE condition fragment (includes leading AND)
      */
@@ -260,7 +254,7 @@ class UserScopedQuery
         string $tableName,
         array &$bindings,
         string $alias = '',
-        string $parentTable = ''
+        string $_parentTable = ''
     ): string {
         if (!Globals::isMultiUserEnabled()) {
             return '';

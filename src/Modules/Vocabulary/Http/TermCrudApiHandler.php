@@ -785,7 +785,11 @@ class TermCrudApiHandler
         // Save tags if provided
         $tags = [];
         if (isset($data['tags']) && is_array($data['tags'])) {
-            $tags = $data['tags'];
+            /** @var array<array-key, string> $tags */
+            $tags = array_map(
+                static fn($tag): string => is_scalar($tag) ? (string) $tag : '',
+                $data['tags']
+            );
             TagsFacade::saveWordTagsFromArray($termId, $tags);
         }
 

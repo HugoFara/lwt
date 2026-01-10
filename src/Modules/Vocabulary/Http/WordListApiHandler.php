@@ -486,7 +486,7 @@ class WordListApiHandler
      * @param int    $offset     Offset for pagination
      * @param int    $maxTerms   Maximum terms to return
      *
-     * @return array<array<float|int|null|string>>
+     * @return array<int, array<string, mixed>>
      */
     public function selectImportedTerms(string $lastUpdate, int $offset, int $maxTerms): array
     {
@@ -517,7 +517,7 @@ class WordListApiHandler
      * @param int    $currentpage Current page number
      * @param int    $recno       Number of imported terms
      *
-     * @return array{navigation: array{current_page: int, total_pages: int}, terms: array<array<float|int|null|string>>}
+     * @return array{navigation: array{current_page: int, total_pages: int}, terms: array<int, array<string, mixed>>}
      */
     public function importedTermsList(string $lastUpdate, int $currentpage, int $recno): array
     {

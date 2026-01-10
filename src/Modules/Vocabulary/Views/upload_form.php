@@ -28,6 +28,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 // Type assertions for variables passed from controller
 assert($currentLanguage === null || is_int($currentLanguage) || is_string($currentLanguage));
 assert(is_array($languages));
+/** @var array<int, array{id: int, name: string}> $languages */
 
 $langToUse = $currentLanguage;
 

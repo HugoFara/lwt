@@ -882,7 +882,7 @@ class LemmaService
      *
      * @param int $termId Term ID
      *
-     * @return array|null
+     * @return array{lemma: string, lemmaLc: string, langId: int, terms: array, stats: array}|null
      */
     private function buildSingleTermFamily(int $termId): ?array
     {
@@ -1255,6 +1255,7 @@ class LemmaService
         }
 
         $placeholders = implode(',', array_fill(0, count($termIds), '?'));
+        /** @var array<int, int> $bindings */
         $bindings = array_merge([$status], $termIds);
 
         return Connection::preparedExecute(

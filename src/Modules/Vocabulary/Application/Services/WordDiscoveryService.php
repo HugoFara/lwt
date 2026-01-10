@@ -299,6 +299,7 @@ class WordDiscoveryService
             $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
             $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
+            /** @var list<int|string> $bindings */
             $bindings = [$langId, $term, $termlc, $status];
             $sql = "INSERT INTO words (
                     WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}"

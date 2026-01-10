@@ -175,7 +175,7 @@ class MultiWordService
      *
      * @param int $wordId Word ID
      *
-     * @return array|null Multi-word data or null if not found
+     * @return array{text: string, lgid: int, translation: string, sentence: string, notes: string, romanization: string, status: int}|null Multi-word data or null if not found
      */
     public function getMultiWordData(int $wordId): ?array
     {

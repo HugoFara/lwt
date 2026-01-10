@@ -93,7 +93,7 @@ class WordUploadService
      * @param array $columns Column assignments from form (Col1-Col5)
      * @param bool  $removeSpaces Whether language removes spaces
      *
-     * @return array{columns: array, fields: array}
+     * @return array{columns: array<int, string>, fields: array{txt: int, tr: int, ro: int, se: int, tl: int}}
      */
     public function parseColumnMapping(array $columns, bool $removeSpaces): array
     {
@@ -200,7 +200,7 @@ class WordUploadService
      * Import terms using simple import (no tags, no overwrite).
      *
      * @param int    $langId        Language ID
-     * @param array  $fields        Field indexes
+     * @param array{txt: int, tr: int, ro: int, se: int, tl?: int} $fields Field indexes
      * @param string $columnsClause SQL columns clause
      * @param string $delimiter     Field delimiter
      * @param string $fileName      Path to input file
@@ -290,7 +290,7 @@ class WordUploadService
      * Uses chunked batch inserts to handle large files without excessive memory.
      *
      * @param int                                  $langId       Language ID
-     * @param array{txt: int, tr: int, ro: int, se: int} $fields Field indexes
+     * @param array{txt: int, tr: int, ro: int, se: int, tl?: int} $fields Field indexes
      * @param bool                                 $removeSpaces Whether to remove spaces
      * @param string                               $delimiter    Field delimiter
      * @param string                               $fileName     Path to input file
@@ -389,7 +389,7 @@ class WordUploadService
      * Execute a batch insert for simple import.
      *
      * @param list<list<int|string>> $rows   Array of row data
-     * @param array{txt: int, tr: int, ro: int, se: int} $fields Field indexes
+     * @param array{txt: int, tr: int, ro: int, se: int, tl?: int} $fields Field indexes
      *
      * @return void
      */
@@ -451,7 +451,7 @@ class WordUploadService
      * Import terms with complete processing (handles tags, overwrite modes).
      *
      * @param int    $langId        Language ID
-     * @param array  $fields        Field indexes
+     * @param array{txt: int, tr: int, ro: int, se: int, tl: int} $fields Field indexes
      * @param string $columnsClause SQL columns clause
      * @param string $delimiter     Field delimiter
      * @param string $fileName      Path to input file

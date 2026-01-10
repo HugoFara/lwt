@@ -82,20 +82,47 @@ class PreparedStatement
     }
 
     /**
+     * @var list<int|float|string|null> Bound parameters for execution
+     */
+    private array $boundParams = [];
+
+    /**
+     * Normalize mixed params array to list of scalars.
+     *
+     * @param array<int, mixed> $params
+     * @return list<int|float|string|null>
+     */
+    private static function normalizeParams(array $params): array
+    {
+        $result = [];
+        /** @var mixed $value */
+        foreach (array_values($params) as $value) {
+            // Convert to scalar or null - non-scalars become their string representation
+            if ($value === null || is_int($value) || is_float($value) || is_string($value)) {
+                $result[] = $value;
+            } elseif (is_bool($value)) {
+                $result[] = $value ? 1 : 0;
+            } else {
+                $result[] = (string)$value;
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Bind parameters to the prepared statement.
      *
-     * @param string $types  Type string (i=integer, d=double, s=string, b=blob)
-     * @param mixed  ...$params Parameters to bind
+     * Uses PHP 8.1's execute() with params array instead of bind_param()
+     * to avoid reference-related issues.
+     *
+     * @param string $types  Type string (i=integer, d=double, s=string, b=blob) - kept for API compatibility
+     * @param int|float|string|null  ...$params Parameters to bind
      *
      * @return $this For method chaining
      *
-     * @throws \RuntimeException If binding fails
-     *
-     * @psalm-suppress UnsupportedReferenceUsage Required for mysqli_stmt::bind_param
-     * @psalm-suppress MixedAssignment Params are intentionally mixed for DB binding
-     * @psalm-suppress MixedArgument Params are intentionally mixed for DB binding
+     * @throws \RuntimeException If parameter count doesn't match
      */
-    public function bind(string $types, mixed ...$params): static
+    public function bind(string $types, int|float|string|null ...$params): static
     {
         if (strlen($types) !== count($params)) {
             throw new \RuntimeException(
@@ -104,24 +131,7 @@ class PreparedStatement
             );
         }
 
-        if (count($params) > 0) {
-            // mysqli_stmt::bind_param requires references
-            $refs = [];
-            $refs[] = $types;
-            foreach ($params as $key => $_) {
-                $refs[] = &$params[$key];
-            }
-
-            if (!$this->stmt->bind_param(...$refs)) {
-                throw new DatabaseException(
-                    'Failed to bind parameters: ' . $this->stmt->error,
-                    0,
-                    null,
-                    $this->sql,
-                    $this->stmt->errno
-                );
-            }
-        }
+        $this->boundParams = array_values($params);
 
         return $this;
     }
@@ -129,54 +139,22 @@ class PreparedStatement
     /**
      * Bind parameters using an associative array.
      *
-     * Automatically determines types based on PHP types:
-     * - int -> 'i'
-     * - float -> 'd'
-     * - string/other -> 's'
-     * - null -> 's' (will bind as NULL)
+     * Uses PHP 8.1's execute() with params array instead of bind_param().
      *
      * @param array<int, mixed> $params Parameters to bind (indexed array)
      *
      * @return $this For method chaining
-     *
-     * @psalm-suppress PossiblyUnusedReturnValue Return value available for method chaining
-     * @psalm-suppress MixedAssignment Params are intentionally mixed for DB binding
      */
     public function bindValues(array $params): static
     {
-        if (empty($params)) {
-            return $this;
-        }
-
-        $types = '';
-        foreach ($params as $value) {
-            $types .= $this->getParamType($value);
-        }
-
-        return $this->bind($types, ...array_values($params));
-    }
-
-    /**
-     * Determine the mysqli type character for a value.
-     *
-     * @param mixed $value The value to check
-     *
-     * @return string The type character (i, d, s, or b)
-     */
-    private function getParamType(mixed $value): string
-    {
-        if (is_int($value)) {
-            return 'i';
-        }
-        if (is_float($value)) {
-            return 'd';
-        }
-        // Strings, nulls, and everything else treated as string
-        return 's';
+        $this->boundParams = self::normalizeParams($params);
+        return $this;
     }
 
     /**
      * Execute the prepared statement.
+     *
+     * Uses PHP 8.1's execute() with params array.
      *
      * @return int Number of affected rows (for INSERT/UPDATE/DELETE), -1 on error
      *
@@ -184,7 +162,8 @@ class PreparedStatement
      */
     public function execute(): int
     {
-        if (!$this->stmt->execute()) {
+        $params = empty($this->boundParams) ? null : $this->boundParams;
+        if (!$this->stmt->execute($params)) {
             throw new DatabaseException(
                 'Failed to execute statement: ' . $this->stmt->error,
                 0,
@@ -200,11 +179,14 @@ class PreparedStatement
     /**
      * Execute and fetch all rows as an associative array.
      *
+     * Uses PHP 8.1's execute() with params array.
+     *
      * @return array<int, array<string, mixed>> Array of rows
      */
     public function fetchAll(): array
     {
-        if (!$this->stmt->execute()) {
+        $params = empty($this->boundParams) ? null : $this->boundParams;
+        if (!$this->stmt->execute($params)) {
             throw new DatabaseException(
                 'Failed to execute statement: ' . $this->stmt->error,
                 0,
@@ -232,11 +214,14 @@ class PreparedStatement
     /**
      * Execute and fetch the first row.
      *
+     * Uses PHP 8.1's execute() with params array.
+     *
      * @return array<string, mixed>|null The first row or null if no results
      */
     public function fetchOne(): ?array
     {
-        if (!$this->stmt->execute()) {
+        $params = empty($this->boundParams) ? null : $this->boundParams;
+        if (!$this->stmt->execute($params)) {
             throw new DatabaseException(
                 'Failed to execute statement: ' . $this->stmt->error,
                 0,

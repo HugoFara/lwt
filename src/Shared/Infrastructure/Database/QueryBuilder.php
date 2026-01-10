@@ -337,19 +337,30 @@ class QueryBuilder
         string $boolean = 'AND'
     ): static {
         // Handle simple equality: where('col', 'value')
-        if ($value === null && !in_array(strtoupper((string)$operator), ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL'])) {
-            // When using 2-arg form, operator becomes the value
-            /** @psalm-suppress MixedAssignment - Intentionally accepting any type as value */
-            $value = $operator;
-            $operator = '=';
-        }
+        // When using 2-arg form like where('col', 'value'), operator is actually the value
+        $operatorStr = is_array($operator) ? '' : (string)$operator;
+        $isOperatorString = $value === null && in_array(
+            strtoupper($operatorStr),
+            ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL']
+        );
 
-        $this->wheres[] = [
-            'column' => $column,
-            'operator' => strtoupper((string) $operator),
-            'value' => $value,
-            'boolean' => strtoupper($boolean)
-        ];
+        if ($isOperatorString) {
+            // Standard 3-arg form: where('col', '=', 'value')
+            $this->wheres[] = [
+                'column' => $column,
+                'operator' => strtoupper($operatorStr),
+                'value' => $value,
+                'boolean' => strtoupper($boolean)
+            ];
+        } else {
+            // 2-arg form: where('col', 'value') - operator becomes the value
+            $this->wheres[] = [
+                'column' => $column,
+                'operator' => '=',
+                'value' => $operator,
+                'boolean' => strtoupper($boolean)
+            ];
+        }
 
         return $this;
     }
@@ -811,7 +822,7 @@ class QueryBuilder
     /**
      * Update matching rows.
      *
-     * @param array<string, mixed> $data Column => value pairs to update
+     * @param array<string, string|int|float|bool|null> $data Column => value pairs to update
      *
      * @return int Number of affected rows
      */
@@ -820,7 +831,6 @@ class QueryBuilder
         $this->applyUserScope();
 
         $setClauses = [];
-        /** @psalm-suppress MixedAssignment - $data values are intentionally mixed */
         foreach ($data as $column => $value) {
             $setClauses[] = $column . ' = ' . $this->quoteValue($value);
         }
@@ -1099,7 +1109,7 @@ class QueryBuilder
      *
      * Automatically injects user_id when multi-user mode is enabled.
      *
-     * @param array<int, array<string, mixed>> $rows Array of column => value pairs
+     * @param array<int, array<string, string|int|float|bool|null>> $rows Array of column => value pairs
      *
      * @return int Number of inserted rows
      */
@@ -1113,7 +1123,7 @@ class QueryBuilder
         $userScopeData = $this->getUserScopeInsertData();
         if (!empty($userScopeData)) {
             $rows = array_map(
-                fn($row) => array_merge($userScopeData, $row),
+                fn(array $row): array => array_merge($userScopeData, $row),
                 $rows
             );
         }
@@ -1126,10 +1136,10 @@ class QueryBuilder
         $sql .= ' (' . implode(', ', $columns) . ')';
         $sql .= ' VALUES ' . implode(', ', $placeholderGroups);
 
+        /** @var list<string|int|float|bool|null> $params */
         $params = [];
         foreach ($rows as $row) {
-            /** @psalm-suppress MixedAssignment - Row values are intentionally mixed */
-            foreach (array_values($row) as $value) {
+            foreach ($row as $value) {
                 $params[] = $value;
             }
         }
@@ -1140,11 +1150,9 @@ class QueryBuilder
     /**
      * Update matching rows using prepared statement.
      *
-     * @param array<string, mixed> $data Column => value pairs to update
+     * @param array<string, string|int|float|bool|null> $data Column => value pairs to update
      *
      * @return int Number of affected rows
-     *
-     * @psalm-suppress PossiblyUnusedReturnValue Return value available for caller use
      */
     public function updatePrepared(array $data): int
     {
@@ -1152,8 +1160,8 @@ class QueryBuilder
         $this->resetBindings();
 
         $setClauses = [];
+        /** @var list<string|int|float|bool|null> $setParams */
         $setParams = [];
-        /** @psalm-suppress MixedAssignment - $data values are intentionally mixed */
         foreach ($data as $column => $value) {
             $setClauses[] = $column . ' = ?';
             $setParams[] = $value;

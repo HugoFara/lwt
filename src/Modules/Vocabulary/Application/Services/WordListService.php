@@ -562,7 +562,7 @@ class WordListService
      * @param string $whQuery Query condition
      * @param string $whTag   Tag condition
      *
-     * @return array Array of word IDs
+     * @return int[] Array of word IDs
      */
     public function getFilteredWordIds(
         string $textId,

@@ -59,9 +59,9 @@ class TextDisplayService
         Settings::save('currenttext', $textId);
 
         return [
-            'title' => $record['TxTitle'],
+            'title' => (string) $record['TxTitle'],
             'audio' => $audio,
-            'sourceUri' => $record['TxSourceURI']
+            'sourceUri' => $record['TxSourceURI'] !== null ? (string) $record['TxSourceURI'] : null
         ];
     }
 
