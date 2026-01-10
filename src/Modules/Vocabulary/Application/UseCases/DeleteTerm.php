@@ -68,16 +68,19 @@ class DeleteTerm
     }
 
     /**
-     * Execute and return result message (backward compatible).
+     * Execute and return structured result.
      *
      * @param int $termId Term ID to delete
      *
-     * @return string Result message
+     * @return array{success: bool, error: ?string}
      */
-    public function executeWithMessage(int $termId): string
+    public function executeWithResult(int $termId): array
     {
         $deleted = $this->execute($termId);
 
-        return $deleted ? 'Term deleted' : 'Term not found';
+        return [
+            'success' => $deleted,
+            'error' => $deleted ? null : 'Term not found'
+        ];
     }
 }

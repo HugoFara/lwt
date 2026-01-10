@@ -162,9 +162,9 @@ class AdminFacade
     /**
      * Save all settings from form.
      *
-     * @return string Status message
+     * @return array{success: bool}
      */
-    public function saveAllSettings(): string
+    public function saveAllSettings(): array
     {
         return $this->saveAllSettings->execute();
     }
@@ -172,9 +172,9 @@ class AdminFacade
     /**
      * Reset all settings to defaults.
      *
-     * @return string Status message
+     * @return array{success: bool}
      */
-    public function resetAllSettings(): string
+    public function resetAllSettings(): array
     {
         return $this->resetAllSettings->execute();
     }
@@ -201,9 +201,9 @@ class AdminFacade
      *
      * @param array{name: string, type: string, tmp_name: string, error: int, size: int}|null $fileData Validated file data from InputValidator::getUploadedFile()
      *
-     * @return string Status message
+     * @return array{success: bool, error: ?string}
      */
-    public function restoreFromUpload(?array $fileData): string
+    public function restoreFromUpload(?array $fileData): array
     {
         return $this->restoreFromUpload->execute($fileData);
     }
@@ -231,9 +231,9 @@ class AdminFacade
     /**
      * Empty the database.
      *
-     * @return string Status message
+     * @return array{success: bool}
      */
-    public function emptyDatabase(): string
+    public function emptyDatabase(): array
     {
         return $this->emptyDatabase->execute();
     }
@@ -385,9 +385,9 @@ class AdminFacade
      *
      * @param DatabaseConnectionDTO $connection Connection data
      *
-     * @return string Status message
+     * @return array{success: bool, error: ?string}
      */
-    public function testConnection(DatabaseConnectionDTO $connection): string
+    public function testConnection(DatabaseConnectionDTO $connection): array
     {
         return $this->testConnection->execute($connection);
     }

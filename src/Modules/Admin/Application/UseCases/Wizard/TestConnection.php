@@ -44,9 +44,9 @@ class TestConnection
      *
      * @param DatabaseConnectionDTO $connection Connection data to test
      *
-     * @return string Status message
+     * @return array{success: bool, error: ?string}
      */
-    public function execute(DatabaseConnectionDTO $connection): string
+    public function execute(DatabaseConnectionDTO $connection): array
     {
         return $this->repository->testConnection($connection);
     }
@@ -56,23 +56,11 @@ class TestConnection
      *
      * @param array<string, mixed> $formData Form input data
      *
-     * @return string Status message
+     * @return array{success: bool, error: ?string}
      */
-    public function executeFromForm(array $formData): string
+    public function executeFromForm(array $formData): array
     {
         $dto = DatabaseConnectionDTO::fromFormData($formData);
         return $this->repository->testConnection($dto);
-    }
-
-    /**
-     * Check if connection was successful.
-     *
-     * @param string $message Status message from execute()
-     *
-     * @return bool True if connection succeeded
-     */
-    public function isSuccess(string $message): bool
-    {
-        return str_contains($message, 'success');
     }
 }

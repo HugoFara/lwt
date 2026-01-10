@@ -173,13 +173,13 @@ class FileSystemEnvRepository
      *
      * @param DatabaseConnectionDTO $dto Connection data to test
      *
-     * @return string Status message
+     * @return array{success: bool, error: ?string}
      */
-    public function testConnection(DatabaseConnectionDTO $dto): string
+    public function testConnection(DatabaseConnectionDTO $dto): array
     {
         $mysqli = mysqli_init();
         if ($mysqli === false) {
-            return "MySQL is not accessible!";
+            return ['success' => false, 'error' => "MySQL is not accessible!"];
         }
 
         try {
@@ -203,16 +203,19 @@ class FileSystemEnvRepository
             }
 
             if (!$success) {
-                return "Can't connect!";
+                return ['success' => false, 'error' => "Can't connect!"];
             } elseif (mysqli_errno($mysqli) != 0) {
-                return "ERROR: " . mysqli_error($mysqli) .
-                    " error number: " . mysqli_errno($mysqli);
+                return [
+                    'success' => false,
+                    'error' => "ERROR: " . mysqli_error($mysqli) .
+                        " error number: " . mysqli_errno($mysqli)
+                ];
             }
 
             mysqli_close($mysqli);
-            return "Connection established with success!";
+            return ['success' => true, 'error' => null];
         } catch (\Exception $except) {
-            return (string) $except;
+            return ['success' => false, 'error' => (string) $except];
         }
     }
 

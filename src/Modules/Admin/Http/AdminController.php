@@ -111,9 +111,10 @@ class AdminController extends BaseController
 
         // Handle operations
         if ($this->hasParam('restore')) {
-            $message = $this->adminFacade->restoreFromUpload(
+            $result = $this->adminFacade->restoreFromUpload(
                 InputValidator::getUploadedFile('thefile')
             );
+            $message = $result['success'] ? 'Database restored' : ($result['error'] ?? 'Restore failed');
         } elseif ($this->hasParam('backup')) {
             $this->adminFacade->downloadBackup();
             // downloadBackup exits, so we never reach here
@@ -121,7 +122,8 @@ class AdminController extends BaseController
             $this->adminFacade->downloadOfficialBackup();
             // downloadOfficialBackup exits, so we never reach here
         } elseif ($this->hasParam('empty')) {
-            $message = $this->adminFacade->emptyDatabase();
+            $result = $this->adminFacade->emptyDatabase();
+            $message = $result['success'] ? 'Database emptied' : 'Empty database failed';
         }
 
         // Get view data (used by included view)
@@ -173,7 +175,8 @@ class AdminController extends BaseController
                     'tbpref' => 'string',
                 ]);
                 $conn = $this->adminFacade->createConnectionFromForm($formData);
-                $errorMessage = $this->adminFacade->testConnection($conn);
+                $result = $this->adminFacade->testConnection($conn);
+                $errorMessage = $result['success'] ? null : $result['error'];
             } elseif ($op === "Change") {
                 $formData = InputValidator::getMany([
                     'hostname' => 'string',
@@ -242,9 +245,11 @@ class AdminController extends BaseController
         $op = $this->param('op');
         if ($op !== '') {
             if ($op === 'Save') {
-                $message = $this->adminFacade->saveAllSettings();
+                $result = $this->adminFacade->saveAllSettings();
+                $message = $result['success'] ? 'Settings saved' : 'Failed to save settings';
             } else {
-                $message = $this->adminFacade->resetAllSettings();
+                $result = $this->adminFacade->resetAllSettings();
+                $message = $result['success'] ? 'Settings reset to defaults' : 'Failed to reset settings';
             }
         }
 

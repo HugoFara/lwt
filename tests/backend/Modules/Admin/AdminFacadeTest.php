@@ -406,7 +406,7 @@ class AdminFacadeTest extends TestCase
         $this->assertInstanceOf(DatabaseConnectionDTO::class, $result);
     }
 
-    public function testTestConnectionReturnsString(): void
+    public function testTestConnectionReturnsArray(): void
     {
         $settingsRepo = $this->createMock(SettingsRepositoryInterface::class);
         $backupRepo = $this->createMock(BackupRepositoryInterface::class);
@@ -421,9 +421,12 @@ class AdminFacadeTest extends TestCase
         );
 
         $result = $facade->testConnection($connection);
-        $this->assertIsString($result);
-        // Should contain error message for failed connection
-        $this->assertNotEmpty($result);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('success', $result);
+        $this->assertArrayHasKey('error', $result);
+        // Should return failed connection result
+        $this->assertFalse($result['success']);
+        $this->assertNotNull($result['error']);
     }
 
     // ===== Method existence tests =====
