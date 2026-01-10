@@ -111,16 +111,16 @@ echo PageLayoutHelper::buildActionCard([
 <input id="map" type="hidden" name="selected_feed" value="" />
 <?php if ($totalFeeds > 0): ?>
 <form name="form2" action="" method="get">
-<table class="tab2" cellspacing="0" cellpadding="5">
+<table class="table is-bordered is-fullwidth">
 <tr>
-    <th class="th1" colspan="3">
+    <th class="" colspan="3">
         Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
     </th>
 </tr>
-<tr><td class="td1 center feeds-filter-cell">
+<tr><td class="has-text-centered feeds-filter-cell">
 <input type="button" value="Mark All" @click="markAll()" />
 <input type="button" value="Mark None" @click="markNone()" />
-</td><td class="td1 has-text-centered" colspan="2">Marked Newsfeeds:&nbsp;
+</td><td class="has-text-centered" colspan="2">Marked Newsfeeds:&nbsp;
 <select name="markaction" id="markaction" disabled="disabled" @change="handleMarkAction($event)">
     <option value="">[Choose...]</option>
     <option disabled="disabled">------------</option>
@@ -133,13 +133,13 @@ echo PageLayoutHelper::buildActionCard([
     <option value="del">Delete</option>
 </select></td></tr>
 </table>
-<table class="sortable tab2" cellspacing="0" cellpadding="5">
+<table class="table is-bordered is-fullwidth sortable">
 <tr>
-    <th class="th1 sorttable_nosort">Mark</th>
-    <th class="th1 sorttable_nosort">Actions</th>
-    <th class="th1 clickable">Newsfeeds</th>
-    <th class="th1 sorttable_nosort">Options</th>
-    <th class="th1 sorttable_numeric clickable">Last Update</th>
+    <th class="sorttable_nosort">Mark</th>
+    <th class="sorttable_nosort">Actions</th>
+    <th class="clickable">Newsfeeds</th>
+    <th class="sorttable_nosort">Options</th>
+    <th class="sorttable_numeric clickable">Last Update</th>
 </tr>
 <?php
 $time = time();
@@ -149,10 +149,10 @@ foreach ($feedsArr as $row):
     $diff = $time - (int)$row['NfUpdate'];
 ?>
 <tr>
-    <td class="td1 has-text-centered">
+    <td class="has-text-centered">
         <input type="checkbox" name="marked[]" class="markcheck" value="<?php echo $row['NfID']; ?>" />
     </td>
-    <td class="td1 center nowrap">
+    <td class="has-text-centered nowrap">
         <a href="/feeds/edit?edit_feed=1&amp;selected_feed=<?php echo $row['NfID']; ?>">
             <?php echo IconHelper::render('rss', ['title' => 'Edit', 'alt' => 'Edit']); ?>
         </a>
@@ -166,9 +166,9 @@ foreach ($feedsArr as $row):
             <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
         </span>
     </td>
-    <td class="td1 has-text-centered"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-    <td class="td1 has-text-centered"><?php echo str_replace(',', ', ', (string) ($row['NfOptions'] ?? '')); ?></td>
-    <td class="td1 has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
+    <td class="has-text-centered"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+    <td class="has-text-centered"><?php echo str_replace(',', ', ', (string) ($row['NfOptions'] ?? '')); ?></td>
+    <td class="has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
         <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
     </td>
 </tr>
@@ -177,9 +177,9 @@ foreach ($feedsArr as $row):
 </form>
 <?php if ($pages > 1): ?>
 <form name="form3" method="get" action="">
-<table class="tab2" cellspacing="0" cellpadding="5">
-<tr><th class="th1 feeds-filter-cell"><?php echo $totalFeeds; ?></th>
-<th class="th1"><?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form3', ['query' => $currentQuery, 'sort' => $currentSort, 'manage_feeds' => 1]); ?></th>
+<table class="table is-bordered is-fullwidth">
+<tr><th class="feeds-filter-cell"><?php echo $totalFeeds; ?></th>
+<th class=""><?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form3', ['query' => $currentQuery, 'sort' => $currentSort, 'manage_feeds' => 1]); ?></th>
 </tr></table>
 </form>
 <?php endif; ?>

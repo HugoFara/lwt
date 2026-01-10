@@ -30,14 +30,14 @@ assert(is_string($scrdir));
 assert(is_string($ann));
 
 ?>
-<table class="tab2" cellspacing="0" cellpadding="5">
+<table class="table is-bordered is-fullwidth">
 <tr>
-    <td class="td1 right word-show-label">Term:</td>
-    <td class="td1 word-show-term" <?php echo $scrdir; ?>><b><?php echo htmlspecialchars($word['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></b></td>
+    <td class="has-text-right word-show-label">Term:</td>
+    <td class="word-show-term" <?php echo $scrdir; ?>><b><?php echo htmlspecialchars($word['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></b></td>
 </tr>
 <tr>
-    <td class="td1 has-text-right">Translation:</td>
-    <td class="td1 word-show-value"><b><?php
+    <td class="has-text-right">Translation:</td>
+    <td class="word-show-value"><b><?php
     $translationHtml = StringUtils::parseInlineMarkdown($word['translation'] ?? '');
     if (!empty($ann)) {
         // Highlight annotation in the rendered HTML
@@ -53,29 +53,29 @@ assert(is_string($ann));
 </tr>
 <?php if (isset($word['notes']) && $word['notes'] !== '') : ?>
 <tr>
-    <td class="td1 has-text-right">Notes:</td>
-    <td class="td1 word-show-value"><?php echo StringUtils::parseInlineMarkdown($word['notes']); ?></td>
+    <td class="has-text-right">Notes:</td>
+    <td class="word-show-value"><?php echo StringUtils::parseInlineMarkdown($word['notes']); ?></td>
 </tr>
 <?php endif; ?>
 <?php if ($tags !== '') : ?>
 <tr>
-    <td class="td1 has-text-right">Tags:</td>
-    <td class="td1 word-show-value"><?php echo \Lwt\Shared\UI\Helpers\TagHelper::render($tags); ?></td>
+    <td class="has-text-right">Tags:</td>
+    <td class="word-show-value"><?php echo \Lwt\Shared\UI\Helpers\TagHelper::render($tags); ?></td>
 </tr>
 <?php endif; ?>
 <?php if ($word['romanization'] !== '') : ?>
 <tr>
-    <td class="td1 has-text-right">Romaniz.:</td>
-    <td class="td1 word-show-value"><b><?php echo htmlspecialchars($word['romanization'] ?? '', ENT_QUOTES, 'UTF-8'); ?></b></td>
+    <td class="has-text-right">Romaniz.:</td>
+    <td class="word-show-value"><b><?php echo htmlspecialchars($word['romanization'] ?? '', ENT_QUOTES, 'UTF-8'); ?></b></td>
 </tr>
 <?php endif; ?>
 <tr>
-    <td class="td1 has-text-right">Sentence<br />Term in {...}:</td>
-    <td class="td1" <?php echo $scrdir; ?>><?php echo htmlspecialchars($word['sentence'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+    <td class="has-text-right">Sentence<br />Term in {...}:</td>
+    <td class="" <?php echo $scrdir; ?>><?php echo htmlspecialchars($word['sentence'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
 </tr>
 <tr>
-    <td class="td1 has-text-right">Status:</td>
-    <td class="td1"><?php echo (string)get_colored_status_msg($word['status']); ?></td>
+    <td class="has-text-right">Status:</td>
+    <td class=""><?php echo (string)get_colored_status_msg($word['status']); ?></td>
 </tr>
 </table>
 

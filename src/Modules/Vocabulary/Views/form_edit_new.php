@@ -62,10 +62,10 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($termlc, ENT_QUOTES, 'UTF-8'); ?>" />
 <input type="hidden" name="tid" value="<?php echo $textId; ?>" />
 <input type="hidden" name="ord" value="<?php echo $ord; ?>" />
-<table class="tab2" cellspacing="0" cellpadding="5">
+<table class="table is-bordered is-fullwidth">
    <tr title="Only change uppercase/lowercase!">
-       <td class="td1 has-text-right"><b>New Term:</b></td>
-       <td class="td1">
+       <td class="has-text-right"><b>New Term:</b></td>
+       <td class="">
            <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp"
            data_info="New Term" type="text"
            name="WoText" id="wordfield" value="<?php echo htmlspecialchars($term, ENT_QUOTES, 'UTF-8'); ?>"
@@ -75,8 +75,8 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
    </tr>
    <?php echo (new FindSimilarTerms())->getTableRow(); ?>
    <tr>
-       <td class="td1 has-text-right">Translation:</td>
-       <td class="td1">
+       <td class="has-text-right">Translation:</td>
+       <td class="">
            <textarea name="WoTranslation"
            class="setfocus textarea-noreturn checklength checkoutsidebmp"
            data_maxlength="500"
@@ -84,22 +84,22 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        </td>
    </tr>
    <tr>
-       <td class="td1 has-text-right">Tags:</td>
-       <td class="td1">
+       <td class="has-text-right">Tags:</td>
+       <td class="">
            <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml(0); ?>
        </td>
    </tr>
    <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">
-       <td class="td1 has-text-right">Romaniz.:</td>
-       <td class="td1">
+       <td class="has-text-right">Romaniz.:</td>
+       <td class="">
            <input type="text" class="checkoutsidebmp" data_info="Romanization"
            name="WoRomanization"
            value="" maxlength="100" size="35" />
        </td>
    </tr>
    <tr>
-       <td class="td1 has-text-right">Sentence<br />Term in {...}:</td>
-       <td class="td1">
+       <td class="has-text-right">Sentence<br />Term in {...}:</td>
+       <td class="">
            <textarea <?php echo $scrdir; ?> name="WoSentence"
            class="textarea-noreturn checklength checkoutsidebmp"
            data_maxlength="1000" data_info="Sentence" cols="35"
@@ -107,8 +107,8 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        </td>
    </tr>
    <tr>
-       <td class="td1 has-text-right">Notes:</td>
-       <td class="td1">
+       <td class="has-text-right">Notes:</td>
+       <td class="">
            <textarea name="WoNotes"
            class="textarea-noreturn checklength checkoutsidebmp"
            data_maxlength="1000" data_info="Notes" cols="35"
@@ -117,13 +117,13 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
    </tr>
    <?php echo (new FindSimilarTerms())->getTableRow(); ?>
    <tr>
-       <td class="td1 has-text-right">Status:</td>
-       <td class="td1">
+       <td class="has-text-right">Status:</td>
+       <td class="">
            <?php echo SelectOptionsBuilder::forWordStatusRadio(1); ?>
        </td>
    </tr>
    <tr>
-       <td class="td1 has-text-right" colspan="2">
+       <td class="has-text-right" colspan="2">
            <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin(
                $lang,
                $term,

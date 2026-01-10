@@ -22,23 +22,23 @@ namespace Lwt\Views\Feed;
 ?>
 <div x-data="feedMultiLoad()">
 <form name="form1" action="/feeds" data-auto-submit-button="querybutton">
-<table class="tab3" style="border-left: none;border-top: none; background-color:inherit" cellspacing="0" cellpadding="5">
+<table class="table is-bordered" style="border-left: none;border-top: none; background-color:inherit">
 <tr>
-<th class="th1 borderleft" colspan="2">Language:<select name="filterlang"
+<th class="borderleft" colspan="2">Language:<select name="filterlang"
 @change="handleLanguageFilter($event)">
     <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
 </select>
 </th>
-<th class="th1 borderright" colspan="2">
+<th class="borderright" colspan="2">
 <input type="button" value="Mark All" @click="markAll()" />
 <input type="button" value="Mark None" @click="markNone()" /></th>
 </tr>
 <tr>
-<td colspan="4" style="padding-left: 0px;padding-right: 0px;border-bottom: none;width: 100%;border-left: none;background-color: transparent;"><table class="sortable tab2" cellspacing="0" cellpadding="5">
+<td colspan="4" style="padding-left: 0px;padding-right: 0px;border-bottom: none;width: 100%;border-left: none;background-color: transparent;"><table class="table is-bordered is-fullwidth sortable">
 <tr>
-<th class="th1 sorttable_nosort">Mark</th>
-<th class="th1 clickable" colspan="2">Newsfeeds</th>
-<th class="th1 sorttable_numeric clickable">Last Update</th>
+<th class="sorttable_nosort">Mark</th>
+<th class="clickable" colspan="2">Newsfeeds</th>
+<th class="sorttable_numeric clickable">Last Update</th>
 </tr>
     <?php
     $time = time();
@@ -46,11 +46,11 @@ namespace Lwt\Views\Feed;
         $diff = $time - (int)$row['NfUpdate'];
     ?>
     <tr>
-        <td class="td1 has-text-centered">
+        <td class="has-text-centered">
             <input class="markcheck" type="checkbox" name="selected_feed[]" value="<?php echo $row['NfID']; ?>" checked="checked" />
         </td>
-        <td class="td1 has-text-centered" colspan="2"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-        <td class="td1 has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
+        <td class="has-text-centered" colspan="2"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+        <td class="has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
             <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
         </td>
     </tr>
@@ -59,10 +59,10 @@ namespace Lwt\Views\Feed;
 </td>
 </tr>
 <tr>
-<th class="th1 borderleft" colspan="3"><input id="map" type="hidden" name="selected_feed" value="" />
+<th class="borderleft" colspan="3"><input id="map" type="hidden" name="selected_feed" value="" />
 <input type="hidden" name="load_feed" value="1" />
 <button id="markaction" @click="collectAndSubmit()">Update Marked Newsfeeds</button></th>
-<th class="th1 borderright">
+<th class="borderright">
     <input type="button" value="Cancel" @click="cancel()" /></th></tr>
 </table>
 </form>

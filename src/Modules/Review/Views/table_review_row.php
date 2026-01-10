@@ -61,13 +61,13 @@ $sent1 = str_replace(
 );
 ?>
 <tr>
-    <td class="td1 has-text-centered" nowrap="nowrap">
+    <td class="has-text-centered" nowrap="nowrap">
         <a href="edit_tword.php?wid=<?php echo $woId; ?>" target="ro"
             data-action="show-right-frames">
             <?php echo IconHelper::render('file-pen-line', ['title' => 'Edit Term', 'alt' => 'Edit Term']); ?>
         </a>
     </td>
-    <td class="td1 has-text-centered" nowrap="nowrap">
+    <td class="has-text-centered" nowrap="nowrap">
         <span id="STAT<?php echo $woId; ?>">
             <?php echo StatusHelper::buildReviewTableControls(
                 $woScore,
@@ -77,24 +77,24 @@ $sent1 = str_replace(
             ); ?>
         </span>
     </td>
-    <td class="td1 has-text-centered" style="font-size:<?php echo $textSize; ?>%;">
+    <td class="has-text-centered" style="font-size:<?php echo $textSize; ?>%;">
         <?php echo $span1; ?>
         <span id="TERM<?php echo $woId; ?>">
             <?php echo \htmlspecialchars($woText, ENT_QUOTES, 'UTF-8'); ?>
         </span>
         <?php echo $span2; ?>
     </td>
-    <td class="td1 has-text-centered">
+    <td class="has-text-centered">
         <span id="TRAN<?php echo $woId; ?>">
             <?php echo StringUtils::parseInlineMarkdown($woTranslation); ?>
         </span>
     </td>
-    <td class="td1 has-text-centered">
+    <td class="has-text-centered">
         <span id="ROMA<?php echo $woId; ?>">
             <?php echo \htmlspecialchars($woRomanization, ENT_QUOTES, 'UTF-8'); ?>
         </span>
     </td>
-    <td class="td1 center test-sentence-cell">
+    <td class="has-text-centered test-sentence-cell">
         <?php echo $span1; ?>
         <span id="SENT<?php echo $woId; ?>"><?php echo $sent1; ?></span>
         <?php echo $span2; ?>

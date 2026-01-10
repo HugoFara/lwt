@@ -16,10 +16,10 @@ namespace Lwt\Views\Review;
 
 ?>
 <tr>
-    <th class="th1">Ed</th>
-    <th class="th1 clickable">Status</th>
-    <th class="th1 clickable">Term</th>
-    <th class="th1 clickable">Translation</th>
-    <th class="th1 clickable">Romanization</th>
-    <th class="th1 clickable">Sentence</th>
+    <th class="">Ed</th>
+    <th class="clickable">Status</th>
+    <th class="clickable">Term</th>
+    <th class="clickable">Translation</th>
+    <th class="clickable">Romanization</th>
+    <th class="clickable">Sentence</th>
 </tr>
