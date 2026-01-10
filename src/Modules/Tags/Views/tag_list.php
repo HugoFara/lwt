@@ -107,7 +107,7 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
             </div>
             <div class="level-item">
-                <?php echo PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form1'); ?>
+                <?php echo PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form1', ['query' => $currentQuery, 'sort' => $currentSort]); ?>
             </div>
             <div class="level-right">
                 <div class="level-item">
@@ -336,7 +336,7 @@ echo PageLayoutHelper::buildActionCard([
     </div>
     <div class="level-right">
         <div class="level-item">
-            <?php echo PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form2'); ?>
+            <?php echo PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form2', ['query' => $currentQuery, 'sort' => $currentSort]); ?>
         </div>
     </div>
 </nav>

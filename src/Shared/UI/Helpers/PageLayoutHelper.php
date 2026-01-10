@@ -210,10 +210,11 @@ HTML;
     /**
      * Generate pagination controls HTML.
      *
-     * @param int    $currentPage Current page number
-     * @param int    $totalPages  Total number of pages
-     * @param string $scriptUrl   Base URL for pagination links
-     * @param string $formName    Form name for JavaScript reference (unused, kept for BC)
+     * @param int                  $currentPage    Current page number
+     * @param int                  $totalPages     Total number of pages
+     * @param string               $scriptUrl      Base URL for pagination links
+     * @param string               $formName       Form name for JavaScript reference (unused, kept for BC)
+     * @param array<string, mixed> $preserveParams Query parameters to preserve in pagination links
      *
      * @return string HTML pagination controls
      */
@@ -221,18 +222,34 @@ HTML;
         int $currentPage,
         int $totalPages,
         string $scriptUrl,
-        string $formName
+        string $formName,
+        array $preserveParams = []
     ): string {
         $result = '';
         $margerStyle = 'style="margin-left: 4px; margin-right: 4px;"';
-        $scriptUrl = htmlspecialchars($scriptUrl, ENT_QUOTES, 'UTF-8');
+        $escapedUrl = htmlspecialchars($scriptUrl, ENT_QUOTES, 'UTF-8');
+
+        // Build query string from preserved params (excluding page)
+        unset($preserveParams['page']);
+        $baseQuery = '';
+        if (!empty($preserveParams)) {
+            // Filter out empty values
+            $filtered = array_filter($preserveParams, fn($v) => $v !== '' && $v !== null);
+            if (!empty($filtered)) {
+                $baseQuery = http_build_query($filtered) . '&';
+            }
+        }
+
+        // Helper to build page URL
+        $pageUrl = fn(int $page): string =>
+            $escapedUrl . '?' . $baseQuery . 'page=' . $page;
 
         // Previous page controls
         if ($currentPage > 1) {
-            $result .= '<a href="' . $scriptUrl . '?page=1" ' . $margerStyle . '>';
+            $result .= '<a href="' . $pageUrl(1) . '" ' . $margerStyle . '>';
             $result .= IconHelper::render('chevrons-left', ['title' => 'First Page', 'alt' => 'First Page']);
             $result .= '</a>';
-            $result .= '<a href="' . $scriptUrl . '?page=' . ($currentPage - 1) . '" ' . $margerStyle . '>';
+            $result .= '<a href="' . $pageUrl($currentPage - 1) . '" ' . $margerStyle . '>';
             $result .= IconHelper::render('chevron-left', ['title' => 'Previous Page', 'alt' => 'Previous Page']);
             $result .= '</a>';
         }
@@ -242,7 +259,12 @@ HTML;
         if ($totalPages == 1) {
             $result .= '1';
         } else {
-            $result .= '<select name="page" data-action="pager-navigate" data-base-url="' . $scriptUrl . '">';
+            // Pass preserved params as data attribute for JS navigation
+            $jsonParams = json_encode($preserveParams);
+            $dataParams = !empty($preserveParams) && $jsonParams !== false
+                ? ' data-preserve-params="' . htmlspecialchars($jsonParams, ENT_QUOTES, 'UTF-8') . '"'
+                : '';
+            $result .= '<select name="page" data-action="pager-navigate" data-base-url="' . $escapedUrl . '"' . $dataParams . '>';
             $result .= SelectOptionsBuilder::forPagination($currentPage, $totalPages);
             $result .= '</select>';
         }
@@ -250,10 +272,10 @@ HTML;
 
         // Next page controls
         if ($currentPage < $totalPages) {
-            $result .= '<a href="' . $scriptUrl . '?page=' . ($currentPage + 1) . '" ' . $margerStyle . '>';
+            $result .= '<a href="' . $pageUrl($currentPage + 1) . '" ' . $margerStyle . '>';
             $result .= IconHelper::render('chevron-right', ['title' => 'Next Page', 'alt' => 'Next Page']);
             $result .= '</a>';
-            $result .= '<a href="' . $scriptUrl . '?page=' . $totalPages . '" ' . $margerStyle . '>';
+            $result .= '<a href="' . $pageUrl($totalPages) . '" ' . $margerStyle . '>';
             $result .= IconHelper::render('chevrons-right', ['title' => 'Last Page', 'alt' => 'Last Page']);
             $result .= '</a>';
         }

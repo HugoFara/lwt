@@ -59,12 +59,8 @@ class TextNavigationService
             $params[] = $currentlang;
         }
 
-        $currentquery = InputValidator::getStringWithSession("query", "currenttextquery");
-        $currentquerymode = InputValidator::getStringWithSession(
-            "query_mode",
-            "currenttextquerymode",
-            'title,text'
-        );
+        $currentquery = InputValidator::getStringParam("query");
+        $currentquerymode = InputValidator::getStringParam("query_mode", 'title,text');
         $currentregexmode = Settings::getWithDefault("set-regex-mode");
         $wh_query = '';
         if ($currentquery != '') {
@@ -91,14 +87,14 @@ class TextNavigationService
         }
 
         $currenttag1 = Validation::textTag(
-            InputValidator::getStringWithSession("tag1", "currenttexttag1"),
+            InputValidator::getStringParam("tag1"),
             $currentlang
         );
         $currenttag2 = Validation::textTag(
-            InputValidator::getStringWithSession("tag2", "currenttexttag2"),
+            InputValidator::getStringParam("tag2"),
             $currentlang
         );
-        $currenttag12 = InputValidator::getStringWithSession("tag12", "currenttexttag12");
+        $currenttag12 = InputValidator::getStringParam("tag12");
         $wh_tag1 = null;
         $wh_tag2 = null;
         if ($currenttag1 == '' && $currenttag2 == '') {

@@ -338,11 +338,11 @@ abstract class AbstractCrudController extends BaseController
     // ==================== HELPER METHODS ====================
 
     /**
-     * Get current page number from request/session.
+     * Get current page number from request.
      *
-     * @param string $requestKey  Request parameter name
-     * @param string $sessionKey  Session key for persistence
-     * @param int    $default     Default page number
+     * @param string $requestKey Request parameter name
+     * @param string $sessionKey Unused, kept for BC (was session key)
+     * @param int    $default    Default page number
      *
      * @return int Current page number
      */
@@ -351,7 +351,7 @@ abstract class AbstractCrudController extends BaseController
         string $sessionKey = 'currentpage',
         int $default = 1
     ): int {
-        return InputValidator::getIntWithSession($requestKey, $sessionKey, $default);
+        return InputValidator::getIntParam($requestKey, $default, 1);
     }
 
     /**
@@ -372,10 +372,10 @@ abstract class AbstractCrudController extends BaseController
     }
 
     /**
-     * Get current search query from request/session.
+     * Get current search query from request.
      *
      * @param string $requestKey Request parameter name
-     * @param string $sessionKey Session key for persistence
+     * @param string $sessionKey Unused, kept for BC (was session key)
      * @param string $default    Default query
      *
      * @return string Current search query
@@ -385,7 +385,7 @@ abstract class AbstractCrudController extends BaseController
         string $sessionKey = 'currentquery',
         string $default = ''
     ): string {
-        return InputValidator::getStringWithSession($requestKey, $sessionKey, $default);
+        return InputValidator::getStringParam($requestKey, $default);
     }
 
     /**

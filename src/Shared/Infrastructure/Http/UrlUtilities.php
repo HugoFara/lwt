@@ -329,6 +329,41 @@ class UrlUtilities
     }
 
     /**
+     * Build a URL with query parameters.
+     *
+     * Constructs a URL by combining a path with query parameters.
+     * Empty/null parameter values are filtered out.
+     *
+     * @param string               $path   The URL path (will have base path prepended)
+     * @param array<string, mixed> $params Query parameters to append
+     *
+     * @return string The complete URL with query string
+     *
+     * @example buildUrl('/tags', ['page' => 2, 'query' => 'test']) returns '/tags?page=2&query=test'
+     * @example buildUrl('/tags', ['page' => 1, 'query' => '']) returns '/tags?page=1'
+     */
+    public static function buildUrl(string $path, array $params = []): string
+    {
+        $url = self::url($path);
+
+        if (empty($params)) {
+            return $url;
+        }
+
+        // Filter out empty/null values but keep '0' and false
+        $filtered = array_filter(
+            $params,
+            fn($v) => $v !== '' && $v !== null
+        );
+
+        if (empty($filtered)) {
+            return $url;
+        }
+
+        return $url . '?' . http_build_query($filtered);
+    }
+
+    /**
      * Get a two-letter language code from dictionary source language.
      *
      * @param string $url Input URL, usually Google Translate or LibreTranslate

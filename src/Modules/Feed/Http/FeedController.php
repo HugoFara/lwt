@@ -570,10 +570,7 @@ class FeedController
         );
         PageLayoutHelper::renderPageStart($this->languageFacade->getLanguageName($currentLang) . ' Feeds', true);
 
-        $currentFeed = InputValidator::getStringWithSession(
-            "selected_feed",
-            "currentrssfeed"
-        );
+        $currentFeed = InputValidator::getStringParam("selected_feed");
 
         $editText = 0;
         $message = '';
@@ -790,8 +787,8 @@ class FeedController
      */
     private function renderFeedsIndex(int $currentLang, int $currentFeed): void
     {
-        $currentQuery = InputValidator::getStringWithSession("query", "currentrssquery");
-        $currentQueryMode = InputValidator::getStringWithSession("query_mode", "currentrssquerymode", 'title,desc,text');
+        $currentQuery = InputValidator::getStringParam("query");
+        $currentQueryMode = InputValidator::getStringParam("query_mode", 'title,desc,text');
         $currentRegexMode = Settings::getWithDefault("set-regex-mode");
 
         $filterData = $this->feedFacade->buildQueryFilter($currentQuery, $currentQueryMode, $currentRegexMode);
@@ -801,14 +798,13 @@ class FeedController
             if (!$this->feedFacade->validateRegexPattern($currentQuery)) {
                 $currentQuery = '';
                 $searchTerm = '';
-                InputValidator::clearSessionKey('currentwordquery');
                 if (InputValidator::has('query')) {
                     echo '<p id="hide3" class="warning-message">+++ Warning: Invalid Search +++</p>';
                 }
             }
         }
 
-        $currentPage = InputValidator::getIntWithSession("page", "currentrsspage", 1);
+        $currentPage = InputValidator::getIntParam("page", 1, 1);
         $currentSort = InputValidator::getIntWithDb("sort", 'currentrsssort', 2);
 
         $feeds = $this->feedFacade->getFeeds($currentLang ?: null);
@@ -893,12 +889,9 @@ class FeedController
             InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
         $currentSort = InputValidator::getIntWithDb("sort", 'currentmanagefeedssort', 2);
-        $currentQuery = InputValidator::getStringWithSession("query", "currentmanagefeedsquery");
-        $currentPage = InputValidator::getIntWithSession("page", "currentmanagefeedspage", 1);
-        $currentFeed = InputValidator::getStringWithSession(
-            "selected_feed",
-            "currentmanagefeedsfeed"
-        );
+        $currentQuery = InputValidator::getStringParam("query");
+        $currentPage = InputValidator::getIntParam("page", 1, 1);
+        $currentFeed = InputValidator::getStringParam("selected_feed");
 
         // Build query pattern for prepared statement (no SQL escaping needed)
         $queryPattern = ($currentQuery != '') ? ('%' . str_replace("*", "%", $currentQuery) . '%') : null;

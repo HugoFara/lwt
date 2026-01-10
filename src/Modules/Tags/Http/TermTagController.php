@@ -64,10 +64,10 @@ class TermTagController extends AbstractCrudController
      */
     public function index(array $params): void
     {
-        // Load filter/sort/page settings
+        // Load filter/sort/page settings from URL params (sort persists to DB)
         $this->currentSort = InputValidator::getIntWithDb("sort", 'currenttagsort', 1);
-        $this->currentPage = InputValidator::getIntWithSession("page", "currenttagpage", 1);
-        $this->currentQuery = InputValidator::getStringWithSession("query", "currenttagquery");
+        $this->currentPage = InputValidator::getIntParam("page", 1, 1);
+        $this->currentQuery = InputValidator::getStringParam("query");
 
         parent::index($params);
     }

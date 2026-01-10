@@ -62,10 +62,10 @@ class TextTagController extends AbstractCrudController
      */
     public function index(array $params): void
     {
-        // Load filter/sort/page settings
+        // Load filter/sort/page settings from URL params (sort persists to DB)
         $this->currentSort = InputValidator::getIntWithDb("sort", 'currenttextagsort', 1);
-        $this->currentPage = InputValidator::getIntWithSession("page", "currenttextagpage", 1);
-        $this->currentQuery = InputValidator::getStringWithSession("query", "currenttextagquery");
+        $this->currentPage = InputValidator::getIntParam("page", 1, 1);
+        $this->currentQuery = InputValidator::getStringParam("query");
 
         parent::index($params);
     }

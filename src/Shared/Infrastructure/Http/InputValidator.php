@@ -808,6 +808,49 @@ class InputValidator
         }
     }
 
+    // ===== URL-only parameter methods (no session persistence) =====
+
+    /**
+     * Get a string parameter from the request only.
+     *
+     * Unlike getStringWithSession(), this does not persist to or read from session.
+     * Use this for URL-based pagination and filtering.
+     *
+     * @param string $key     Request parameter key
+     * @param string $default Default value if not present
+     *
+     * @return string The parameter value or default
+     */
+    public static function getStringParam(string $key, string $default = ''): string
+    {
+        return self::getString($key, $default);
+    }
+
+    /**
+     * Get an integer parameter from the request only.
+     *
+     * Unlike getIntWithSession(), this does not persist to or read from session.
+     * Use this for URL-based pagination and filtering.
+     *
+     * @param string   $key     Request parameter key
+     * @param int      $default Default value if not present
+     * @param int|null $min     Minimum allowed value (null for no minimum)
+     * @param int|null $max     Maximum allowed value (null for no maximum)
+     *
+     * @return int The parameter value or default
+     */
+    public static function getIntParam(
+        string $key,
+        int $default = 0,
+        ?int $min = null,
+        ?int $max = null
+    ): int {
+        $value = self::getInt($key, $default, $min, $max);
+        return $value ?? $default;
+    }
+
+    // ===== Session persistence methods (deprecated) =====
+
     /**
      * Get a string from request, persisting to session.
      *
@@ -819,6 +862,9 @@ class InputValidator
      * @param string $default Default value if neither exists
      *
      * @return string The current value
+     *
+     * @deprecated Use getStringParam() instead. Session persistence for pagination
+     *             is being replaced with URL query parameters.
      */
     public static function getStringWithSession(
         string $reqKey,
@@ -851,6 +897,9 @@ class InputValidator
      * @param int    $default Default value if neither exists
      *
      * @return int The current value
+     *
+     * @deprecated Use getIntParam() instead. Session persistence for pagination
+     *             is being replaced with URL query parameters.
      */
     public static function getIntWithSession(
         string $reqKey,

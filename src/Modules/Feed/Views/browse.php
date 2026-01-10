@@ -106,7 +106,7 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
             </div>
             <div class="level-item">
-                <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form1'); ?>
+                <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form1', ['selected_feed' => $currentFeed, 'query' => $currentQuery, 'query_mode' => $currentQueryMode, 'sort' => $currentSort]); ?>
             </div>
             <div class="level-right">
                 <div class="level-item">
@@ -183,7 +183,7 @@ echo PageLayoutHelper::buildActionCard([
     <form name="form3" method="get" action ="">
         <table class="tab2" cellspacing="0" cellpadding="5">
         <tr><th class="th1 feeds-filter-cell"><?php echo $recno; ?></th><th class="th1">
-    <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form3'); ?>
+    <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form3', ['selected_feed' => $currentFeed, 'query' => $currentQuery, 'query_mode' => $currentQueryMode, 'sort' => $currentSort]); ?>
         </th></tr></table></form>
 <?php endif; ?>
 <?php else: ?>
