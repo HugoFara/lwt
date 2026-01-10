@@ -35,6 +35,12 @@ use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\User\Http\WordPressController;
 use Lwt\Modules\User\Http\GoogleController;
 
+// Infrastructure
+use Lwt\Modules\User\Infrastructure\AuthFormDataManager;
+
+// Shared Services
+use Lwt\Shared\Infrastructure\Http\FlashMessageService;
+
 // WordPress integration
 use Lwt\Modules\User\Application\Services\WordPressAuthService;
 
@@ -79,10 +85,24 @@ class UserServiceProvider implements ServiceProviderInterface
             );
         });
 
+        // Register Auth Form Data Manager
+        $container->singleton(AuthFormDataManager::class, function (Container $_c) {
+            return new AuthFormDataManager();
+        });
+
+        // Register FlashMessageService if not already registered
+        if (!$container->has(FlashMessageService::class)) {
+            $container->singleton(FlashMessageService::class, function (Container $_c) {
+                return new FlashMessageService();
+            });
+        }
+
         // Register Controller
         $container->bind(UserController::class, function (Container $c) {
             return new UserController(
-                $c->getTyped(UserFacade::class)
+                $c->getTyped(UserFacade::class),
+                $c->getTyped(FlashMessageService::class),
+                $c->getTyped(AuthFormDataManager::class)
             );
         });
 

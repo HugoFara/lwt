@@ -18,6 +18,8 @@ use Lwt\Controllers\BaseController;
 use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Application\UserFacade;
+use Lwt\Modules\User\Infrastructure\AuthFormDataManager;
+use Lwt\Shared\Infrastructure\Http\FlashMessageService;
 
 /**
  * Controller for user authentication operations.
@@ -36,14 +38,35 @@ class UserController extends BaseController
     private UserFacade $userFacade;
 
     /**
+     * Flash message service.
+     *
+     * @var FlashMessageService
+     */
+    private FlashMessageService $flash;
+
+    /**
+     * Auth form data manager.
+     *
+     * @var AuthFormDataManager
+     */
+    private AuthFormDataManager $formData;
+
+    /**
      * Create a new UserController.
      *
-     * @param UserFacade|null $userFacade User facade (optional for BC)
+     * @param UserFacade|null          $userFacade User facade (optional for BC)
+     * @param FlashMessageService|null $flash      Flash message service
+     * @param AuthFormDataManager|null $formData   Form data manager
      */
-    public function __construct(?UserFacade $userFacade = null)
-    {
+    public function __construct(
+        ?UserFacade $userFacade = null,
+        ?FlashMessageService $flash = null,
+        ?AuthFormDataManager $formData = null
+    ) {
         parent::__construct();
         $this->userFacade = $userFacade ?? $this->createDefaultFacade();
+        $this->flash = $flash ?? new FlashMessageService();
+        $this->formData = $formData ?? new AuthFormDataManager();
     }
 
     /**
@@ -71,22 +94,12 @@ class UserController extends BaseController
             $this->redirect('/');
         }
 
-        $error = null;
-        $username = '';
+        // Get flash error messages
+        $errorMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_ERROR);
+        $error = !empty($errorMessages) ? $errorMessages[0]['message'] : null;
 
-        // Check for flash message
-        if (isset($_SESSION['auth_error'])) {
-            /** @var mixed $sessionError */
-            $sessionError = $_SESSION['auth_error'];
-            $error = is_string($sessionError) ? $sessionError : null;
-            unset($_SESSION['auth_error']);
-        }
-        if (isset($_SESSION['auth_username'])) {
-            /** @var mixed $sessionUsername */
-            $sessionUsername = $_SESSION['auth_username'];
-            $username = is_string($sessionUsername) ? $sessionUsername : '';
-            unset($_SESSION['auth_username']);
-        }
+        // Get persisted form data
+        $username = $this->formData->getAndClearUsername();
 
         $this->render('Login', false);
         require __DIR__ . '/../Views/login.php';
@@ -112,8 +125,8 @@ class UserController extends BaseController
 
         // Basic validation
         if (empty($usernameOrEmail) || empty($password)) {
-            $this->setFlashError('Please enter your username/email and password');
-            $_SESSION['auth_username'] = $usernameOrEmail;
+            $this->flash->error('Please enter your username/email and password');
+            $this->formData->setUsername($usernameOrEmail);
             $this->redirect('/login');
         }
 
@@ -126,14 +139,11 @@ class UserController extends BaseController
             }
 
             // Redirect to intended URL or home
-            /** @var mixed $sessionRedirect */
-            $sessionRedirect = $_SESSION['auth_redirect'] ?? '/';
-            $redirectTo = is_string($sessionRedirect) ? $sessionRedirect : '/';
-            unset($_SESSION['auth_redirect']);
+            $redirectTo = $this->formData->getAndClearRedirectUrl('/');
             $this->redirect($redirectTo);
         } catch (AuthException $e) {
-            $this->setFlashError($e->getMessage());
-            $_SESSION['auth_username'] = $usernameOrEmail;
+            $this->flash->error($e->getMessage());
+            $this->formData->setUsername($usernameOrEmail);
             $this->redirect('/login');
         }
     }
@@ -157,29 +167,13 @@ class UserController extends BaseController
             $this->redirect('/');
         }
 
-        $error = null;
-        $username = '';
-        $email = '';
+        // Get flash error messages
+        $errorMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_ERROR);
+        $error = !empty($errorMessages) ? $errorMessages[0]['message'] : null;
 
-        // Check for flash messages
-        if (isset($_SESSION['auth_error'])) {
-            /** @var mixed $sessionError */
-            $sessionError = $_SESSION['auth_error'];
-            $error = is_string($sessionError) ? $sessionError : null;
-            unset($_SESSION['auth_error']);
-        }
-        if (isset($_SESSION['auth_username'])) {
-            /** @var mixed $sessionUsername */
-            $sessionUsername = $_SESSION['auth_username'];
-            $username = is_string($sessionUsername) ? $sessionUsername : '';
-            unset($_SESSION['auth_username']);
-        }
-        if (isset($_SESSION['auth_email'])) {
-            /** @var mixed $sessionEmail */
-            $sessionEmail = $_SESSION['auth_email'];
-            $email = is_string($sessionEmail) ? $sessionEmail : '';
-            unset($_SESSION['auth_email']);
-        }
+        // Get persisted form data
+        $username = $this->formData->getAndClearUsername();
+        $email = $this->formData->getAndClearEmail();
 
         $this->render('Register', false);
         require __DIR__ . '/../Views/register.php';
@@ -210,18 +204,18 @@ class UserController extends BaseController
         $passwordConfirm = $this->post('password_confirm');
 
         // Store form data for repopulation
-        $_SESSION['auth_username'] = $username;
-        $_SESSION['auth_email'] = $email;
+        $this->formData->setUsername($username);
+        $this->formData->setEmail($email);
 
         // Basic validation
         if (empty($username) || empty($email) || empty($password)) {
-            $this->setFlashError('Please fill in all required fields');
+            $this->flash->error('Please fill in all required fields');
             $this->redirect('/register');
         }
 
         // Password confirmation
         if ($password !== $passwordConfirm) {
-            $this->setFlashError('Passwords do not match');
+            $this->flash->error('Passwords do not match');
             $this->redirect('/register');
         }
 
@@ -232,16 +226,17 @@ class UserController extends BaseController
             $this->userFacade->setCurrentUser($user);
 
             // Clear stored form data
-            unset($_SESSION['auth_username'], $_SESSION['auth_email']);
+            $this->formData->clearUsername();
+            $this->formData->clearEmail();
 
             // Redirect to home with success message
-            $_SESSION['auth_success'] = 'Account created successfully. Welcome to LWT!';
+            $this->flash->success('Account created successfully. Welcome to LWT!');
             $this->redirect('/');
         } catch (\InvalidArgumentException $e) {
-            $this->setFlashError($e->getMessage());
+            $this->flash->error($e->getMessage());
             $this->redirect('/register');
         } catch (\RuntimeException $e) {
-            $this->setFlashError('Registration failed. Please try again.');
+            $this->flash->error('Registration failed. Please try again.');
             $this->redirect('/register');
         }
     }
@@ -287,28 +282,15 @@ class UserController extends BaseController
             $this->redirect('/');
         }
 
-        $error = null;
-        $success = null;
-        $email = '';
+        // Get flash messages
+        $errorMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_ERROR);
+        $error = !empty($errorMessages) ? $errorMessages[0]['message'] : null;
 
-        if (isset($_SESSION['password_error'])) {
-            /** @var mixed $passwordError */
-            $passwordError = $_SESSION['password_error'];
-            $error = is_string($passwordError) ? $passwordError : null;
-            unset($_SESSION['password_error']);
-        }
-        if (isset($_SESSION['password_success'])) {
-            /** @var mixed $passwordSuccess */
-            $passwordSuccess = $_SESSION['password_success'];
-            $success = is_string($passwordSuccess) ? $passwordSuccess : null;
-            unset($_SESSION['password_success']);
-        }
-        if (isset($_SESSION['password_email'])) {
-            /** @var mixed $passwordEmail */
-            $passwordEmail = $_SESSION['password_email'];
-            $email = is_string($passwordEmail) ? $passwordEmail : '';
-            unset($_SESSION['password_email']);
-        }
+        $successMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_SUCCESS);
+        $success = !empty($successMessages) ? $successMessages[0]['message'] : null;
+
+        // Get persisted form data
+        $email = $this->formData->getAndClearPasswordEmail();
 
         $this->render('Forgot Password', false);
         require __DIR__ . '/../Views/forgot_password.php';
@@ -331,14 +313,14 @@ class UserController extends BaseController
         $email = $this->post('email');
 
         if (empty($email)) {
-            $_SESSION['password_error'] = 'Please enter your email address';
+            $this->flash->error('Please enter your email address');
             $this->redirect('/password/forgot');
         }
 
         // Always show success message (prevents email enumeration)
         $this->userFacade->requestPasswordReset($email);
 
-        $_SESSION['password_success'] = 'If an account exists with that email, you will receive a password reset link shortly.';
+        $this->flash->success('If an account exists with that email, you will receive a password reset link shortly.');
         $this->redirect('/password/forgot');
     }
 
@@ -357,25 +339,21 @@ class UserController extends BaseController
         }
 
         $token = $this->get('token');
-        $error = null;
 
         if (empty($token)) {
-            $_SESSION['password_error'] = 'Invalid or missing reset token';
+            $this->flash->error('Invalid or missing reset token');
             $this->redirect('/password/forgot');
         }
 
         // Validate token before showing form
         if (!$this->userFacade->validatePasswordResetToken($token)) {
-            $_SESSION['password_error'] = 'This password reset link has expired or is invalid. Please request a new one.';
+            $this->flash->error('This password reset link has expired or is invalid. Please request a new one.');
             $this->redirect('/password/forgot');
         }
 
-        if (isset($_SESSION['password_error'])) {
-            /** @var mixed $passwordError */
-            $passwordError = $_SESSION['password_error'];
-            $error = is_string($passwordError) ? $passwordError : null;
-            unset($_SESSION['password_error']);
-        }
+        // Get flash error messages
+        $errorMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_ERROR);
+        $error = !empty($errorMessages) ? $errorMessages[0]['message'] : null;
 
         $this->render('Reset Password', false);
         require __DIR__ . '/../Views/reset_password.php';
@@ -400,17 +378,17 @@ class UserController extends BaseController
         $passwordConfirm = $this->post('password_confirm');
 
         if (empty($token)) {
-            $_SESSION['password_error'] = 'Invalid reset token';
+            $this->flash->error('Invalid reset token');
             $this->redirect('/password/forgot');
         }
 
         if (empty($password)) {
-            $_SESSION['password_error'] = 'Please enter a new password';
+            $this->flash->error('Please enter a new password');
             $this->redirect('/password/reset?token=' . urlencode($token));
         }
 
         if ($password !== $passwordConfirm) {
-            $_SESSION['password_error'] = 'Passwords do not match';
+            $this->flash->error('Passwords do not match');
             $this->redirect('/password/reset?token=' . urlencode($token));
         }
 
@@ -418,14 +396,14 @@ class UserController extends BaseController
             $success = $this->userFacade->completePasswordReset($token, $password);
 
             if ($success) {
-                $_SESSION['auth_success'] = 'Your password has been reset successfully. Please log in with your new password.';
+                $this->flash->success('Your password has been reset successfully. Please log in with your new password.');
                 $this->redirect('/login');
             } else {
-                $_SESSION['password_error'] = 'This password reset link has expired or is invalid. Please request a new one.';
+                $this->flash->error('This password reset link has expired or is invalid. Please request a new one.');
                 $this->redirect('/password/forgot');
             }
         } catch (\InvalidArgumentException $e) {
-            $_SESSION['password_error'] = $e->getMessage();
+            $this->flash->error($e->getMessage());
             $this->redirect('/password/reset?token=' . urlencode($token));
         }
     }
@@ -476,21 +454,6 @@ class UserController extends BaseController
     // =========================================================================
     // Helper Methods
     // =========================================================================
-
-    /**
-     * Set a flash error message.
-     *
-     * @param string $message The error message
-     *
-     * @return void
-     */
-    private function setFlashError(string $message): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            @session_start();
-        }
-        $_SESSION['auth_error'] = $message;
-    }
 
     /**
      * Check if user registration is enabled.
