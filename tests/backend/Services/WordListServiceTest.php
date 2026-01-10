@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
-use Lwt\Modules\Vocabulary\Application\Services\WordService;
+use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
@@ -20,7 +20,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExportService.php';
 // LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/WordService.php';
+require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/WordCrudService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/WordListService.php';
 
 /**
@@ -283,7 +283,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create test words
@@ -317,7 +317,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create a word to delete
@@ -346,7 +346,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create words to delete
@@ -380,7 +380,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create a word with status 1
@@ -408,7 +408,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create a word with status 2
@@ -434,7 +434,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create a word
@@ -458,7 +458,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create a word with sentence
@@ -487,7 +487,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create a word with mixed case
@@ -515,7 +515,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create a word in lowercase
@@ -585,7 +585,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create a word
@@ -682,7 +682,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create test words
@@ -719,7 +719,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create test word
@@ -762,7 +762,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         $data = [
@@ -789,7 +789,7 @@ class WordListServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $wordService = new WordService();
+        $wordService = new WordCrudService();
         $listService = new WordListService();
 
         // Create word first
