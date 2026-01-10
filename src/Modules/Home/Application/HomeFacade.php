@@ -97,7 +97,7 @@ class HomeFacade
         $placeholders = implode(', ', array_fill(0, count($prefixedTables), '?'));
         $bindings = array_merge([$dbname], $prefixedTables);
 
-        $size = Connection::preparedFetchValue(
+        $sizeRaw = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS size_mb
             FROM information_schema.TABLES
             WHERE table_schema = ?
@@ -106,7 +106,7 @@ class HomeFacade
             'size_mb'
         );
 
-        return $size !== null ? (float)$size : 0.0;
+        return is_numeric($sizeRaw) ? (float)$sizeRaw : 0.0;
     }
 
     /**
@@ -151,10 +151,10 @@ class HomeFacade
      */
     public function getLanguageName(int $languageId): string
     {
-        $result = \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('languages')
+        $resultRaw = \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('languages')
             ->where('LgID', '=', $languageId)
             ->valuePrepared('LgName');
 
-        return $result !== null ? (string)$result : '';
+        return is_string($resultRaw) ? $resultRaw : '';
     }
 }

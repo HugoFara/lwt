@@ -110,7 +110,8 @@ class CsrfMiddleware implements MiddlewareInterface
 
         if (empty($authHeader) && function_exists('apache_request_headers')) {
             $headers = apache_request_headers();
-            $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            $rawHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            $authHeader = is_string($rawHeader) ? $rawHeader : '';
         }
 
         return str_starts_with(strtolower($authHeader), 'bearer ');
@@ -128,8 +129,8 @@ class CsrfMiddleware implements MiddlewareInterface
             @session_start();
         }
 
-        $expectedToken = $_SESSION[self::SESSION_TOKEN] ?? null;
-        if ($expectedToken === null || $expectedToken === '') {
+        $expectedTokenRaw = $_SESSION[self::SESSION_TOKEN] ?? null;
+        if (!is_string($expectedTokenRaw) || $expectedTokenRaw === '') {
             return false;
         }
 
@@ -140,7 +141,7 @@ class CsrfMiddleware implements MiddlewareInterface
         }
 
         // Use timing-safe comparison
-        return hash_equals($expectedToken, $providedToken);
+        return hash_equals($expectedTokenRaw, $providedToken);
     }
 
     /**

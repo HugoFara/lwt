@@ -90,23 +90,27 @@ class LanguagePresets
             );
         }
 
-        $languages = json_decode($jsonContent, true);
-        if ($languages === null) {
+        $decoded = json_decode($jsonContent, true);
+        if (!is_array($decoded)) {
             throw new \RuntimeException("Invalid JSON in language definitions file");
         }
 
         // Convert from object format to legacy indexed array format
         $result = [];
-        foreach ($languages as $name => $props) {
+        /** @var array<string, array<string, mixed>> $decoded */
+        foreach ($decoded as $name => $props) {
+            if (!is_array($props)) {
+                continue;
+            }
             $result[$name] = [
-                $props['glosbeIso'],
-                $props['googleIso'],
-                $props['biggerFont'],
-                $props['wordCharRegExp'],
-                $props['sentSplRegExp'],
-                $props['makeCharacterWord'],
-                $props['removeSpaces'],
-                $props['rightToLeft']
+                (string)($props['glosbeIso'] ?? ''),
+                (string)($props['googleIso'] ?? ''),
+                (bool)($props['biggerFont'] ?? false),
+                (string)($props['wordCharRegExp'] ?? ''),
+                (string)($props['sentSplRegExp'] ?? ''),
+                (bool)($props['makeCharacterWord'] ?? false),
+                (bool)($props['removeSpaces'] ?? false),
+                (bool)($props['rightToLeft'] ?? false)
             ];
         }
 

@@ -173,7 +173,8 @@ class AuthMiddleware implements MiddlewareInterface
         // Apache may put it in a different location
         if (empty($authHeader) && function_exists('apache_request_headers')) {
             $headers = apache_request_headers();
-            $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            $rawHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            $authHeader = is_string($rawHeader) ? $rawHeader : '';
         }
 
         // Check for Bearer token

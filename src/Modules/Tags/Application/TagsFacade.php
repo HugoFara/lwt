@@ -650,7 +650,8 @@ class TagsFacade
 
             // Create tag if it doesn't exist
             // Use INSERT IGNORE to handle race condition / stale cache (Issue #120)
-            if (!isset($_SESSION['TAGS']) || !in_array($tag, $_SESSION['TAGS'])) {
+            $sessionTags = isset($_SESSION['TAGS']) && is_array($_SESSION['TAGS']) ? $_SESSION['TAGS'] : [];
+            if (!in_array($tag, $sessionTags, true)) {
                 Connection::preparedExecute(
                     'INSERT IGNORE INTO tags (TgText) VALUES (?)',
                     [$tag]

@@ -89,7 +89,11 @@ class RateLimitStorage
     {
         if ($this->useApcu) {
             $data = apcu_fetch($key, $success);
-            return $success ? $data : null;
+            if ($success && is_array($data)) {
+                /** @var array{count: int, window_start: int} */
+                return $data;
+            }
+            return null;
         }
 
         return $this->getFromFile($key);
@@ -228,8 +232,8 @@ class RateLimitStorage
                 continue;
             }
 
-            $stored = @json_decode($content, true);
-            if (!is_array($stored) || (isset($stored['expires']) && $stored['expires'] < $now)) {
+            $decoded = @json_decode($content, true);
+            if (!is_array($decoded) || (isset($decoded['expires']) && $decoded['expires'] < $now)) {
                 @unlink($path);
                 $cleaned++;
             }

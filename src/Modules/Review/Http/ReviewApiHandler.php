@@ -66,6 +66,11 @@ class ReviewApiHandler
             ];
         }
 
+        // Extract typed values from word record
+        $woText = is_string($wordRecord['WoText']) ? $wordRecord['WoText'] : '';
+        $woTextLC = is_string($wordRecord['WoTextLC']) ? $wordRecord['WoTextLC'] : '';
+        $woID = is_numeric($wordRecord['WoID']) ? (int)$wordRecord['WoID'] : 0;
+
         // Check context annotation settings
         $settings = $this->reviewFacade->getTableReviewSettings();
         $showContextRom = (bool) ($settings['contextRom'] ?? 0);
@@ -74,21 +79,21 @@ class ReviewApiHandler
 
         // Get sentence context
         if ($wordMode) {
-            $sent = "{" . $wordRecord['WoText'] . "}";
+            $sent = "{" . $woText . "}";
             $annotations = [];
         } elseif ($useAnnotations) {
             $sentenceData = $this->reviewFacade->getSentenceWithAnnotations(
-                (int)$wordRecord['WoID'],
-                $wordRecord['WoTextLC']
+                $woID,
+                $woTextLC
             );
-            $sent = $sentenceData['sentence'] ?? "{" . $wordRecord['WoText'] . "}";
+            $sent = $sentenceData['sentence'] ?? "{" . $woText . "}";
             $annotations = $sentenceData['annotations'] ?? [];
         } else {
             $sentenceData = $this->reviewFacade->getSentenceForWord(
-                (int)$wordRecord['WoID'],
-                $wordRecord['WoTextLC']
+                $woID,
+                $woTextLC
             );
-            $sent = $sentenceData['sentence'] ?? "{" . $wordRecord['WoText'] . "}";
+            $sent = $sentenceData['sentence'] ?? "{" . $woText . "}";
             $annotations = [];
         }
 
@@ -140,7 +145,7 @@ class ReviewApiHandler
     ): array {
         $baseType = $this->reviewFacade->getBaseReviewType($testType);
         $wordMode = $this->reviewFacade->isWordMode($testType);
-        $wordText = $wordRecord['WoText'];
+        $wordText = is_string($wordRecord['WoText']) ? $wordRecord['WoText'] : '';
 
         // Extract the word from sentence (marked with {})
         if (preg_match('/\{([^}]+)\}/', $sentence, $matches)) {
@@ -170,7 +175,8 @@ class ReviewApiHandler
             } elseif ($baseType == 2) {
                 if ($wordMode) {
                     // Type 5: Translation → Term (word mode) - show translation
-                    $translation = $wordRecord['WoTranslation'] ?? '';
+                    $translationRaw = $wordRecord['WoTranslation'] ?? '';
+                    $translation = is_string($translationRaw) ? $translationRaw : '';
                     $displayHtml = '<span class="word-test">'
                         . htmlspecialchars($translation, ENT_QUOTES, 'UTF-8')
                         . '</span>';

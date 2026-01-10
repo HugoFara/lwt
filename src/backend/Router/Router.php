@@ -655,6 +655,8 @@ class Router
      * @param array<string, mixed> $params       The extracted parameters
      *
      * @return array<string, mixed> Parameters with types coerced
+     *
+     * @psalm-suppress MixedAssignment - Dynamic type coercion by design
      */
     private function coerceParams(string $routePattern, array $params): array
     {
@@ -902,6 +904,8 @@ class Router
      * @param array<string, mixed> $routeParams     Route parameters
      *
      * @return array<int, mixed> Ordered arguments for the method
+     *
+     * @psalm-suppress MixedAssignment - Dynamic argument building via reflection
      */
     private function buildMethodArguments(
         string $controllerClass,

@@ -70,6 +70,50 @@ class FeedController
     }
 
     /**
+     * Get the wizard session data as typed array.
+     *
+     * @return array<string, mixed>
+     */
+    private function getWizardSession(): array
+    {
+        if (!isset($_SESSION['wizard']) || !is_array($_SESSION['wizard'])) {
+            $_SESSION['wizard'] = [];
+        }
+        return $_SESSION['wizard'];
+    }
+
+    /**
+     * Get the wizard feed data as typed array.
+     *
+     * @return array<int|string, mixed>
+     */
+    private function getWizardFeed(): array
+    {
+        $wizard = $this->getWizardSession();
+        if (!isset($wizard['feed']) || !is_array($wizard['feed'])) {
+            return [];
+        }
+        return $wizard['feed'];
+    }
+
+    /**
+     * Get a string value from wizard session.
+     *
+     * @param string $key     Key to retrieve
+     * @param string $default Default value
+     *
+     * @return string
+     */
+    private function getWizardString(string $key, string $default = ''): string
+    {
+        $wizard = $this->getWizardSession();
+        if (!isset($wizard[$key])) {
+            return $default;
+        }
+        return is_string($wizard[$key]) ? $wizard[$key] : $default;
+    }
+
+    /**
      * Get the FeedFacade instance.
      *
      * @return FeedFacade
@@ -651,7 +695,7 @@ class FeedController
                 /** @var array<string> $errLinks */
                 $errLinks = $texts['error']['link'] ?? [];
                 foreach ($errLinks as $errLink) {
-                    $this->feedFacade->markLinkAsError((string)$errLink);
+                    $this->feedFacade->markLinkAsError($errLink);
                 }
                 unset($texts['error']);
             }
@@ -727,7 +771,9 @@ class FeedController
         }
 
         if (isset($_SESSION['feed_loaded'])) {
-            foreach ($_SESSION['feed_loaded'] as $lf) {
+            /** @var array<string> $feedLoaded */
+            $feedLoaded = $_SESSION['feed_loaded'];
+            foreach ($feedLoaded as $lf) {
                 if (substr($lf, 0, 5) == "Error") {
                     echo "\n<div class=\"red\"><p>";
                 } else {
@@ -829,8 +875,10 @@ class FeedController
 
         // Format last update for view
         $lastUpdateFormatted = null;
-        if ($feedTime !== null && $feedTime !== '' && $feedTime !== 0) {
-            $diff = time() - (int)$feedTime;
+        /** @psalm-suppress RedundantCastGivenDocblockType */
+        $feedTimeInt = is_numeric($feedTime) ? (int)$feedTime : 0;
+        if ($feedTimeInt !== 0) {
+            $diff = time() - $feedTimeInt;
             $lastUpdateFormatted = $this->feedFacade->formatLastUpdate($diff);
         }
 
@@ -1017,7 +1065,9 @@ class FeedController
             return;
         }
 
-        foreach ($_SESSION['feed_loaded'] as $lf) {
+        /** @var array<string> $feedLoaded */
+        $feedLoaded = $_SESSION['feed_loaded'];
+        foreach ($feedLoaded as $lf) {
             echo "\n<div class=\"msgblue\"><p class=\"hide_message\">+++ ", $lf, " +++</p></div>";
         }
         unset($_SESSION['feed_loaded']);
@@ -1217,7 +1267,9 @@ class FeedController
         PageLayoutHelper::renderPageStart('Feed Wizard', false);
 
         $errorMessage = InputValidator::has('err') ? true : null;
-        $rssUrl = $_SESSION['wizard']['rss_url'] ?? null;
+        /** @var array{rss_url?: string, feed?: array<string|int, mixed>} $wizard */
+        $wizard = $_SESSION['wizard'] ?? [];
+        $rssUrl = $wizard['rss_url'] ?? null;
 
         include $this->viewPath . 'wizard_step1.php';
 
@@ -1243,13 +1295,17 @@ class FeedController
         // Process session parameters
         $this->processStep2SessionParams();
 
-        $feedLen = count(array_filter(array_keys($_SESSION['wizard']['feed']), 'is_numeric'));
+        /** @var array{feed?: array<string|int, mixed>} $wizardSession */
+        $wizardSession = $_SESSION['wizard'] ?? [];
+        /** @var array<string|int, mixed> $feedData */
+        $feedData = $wizardSession['feed'] ?? [];
+        $feedLen = count(array_filter(array_keys($feedData), 'is_numeric'));
 
         // Handle article section change
         $nfArticleSection = InputValidator::getString('NfArticleSection');
         if (
             $nfArticleSection !== '' &&
-            ($nfArticleSection != $_SESSION['wizard']['feed']['feed_text'])
+            ($nfArticleSection != ($feedData['feed_text'] ?? ''))
         ) {
             $this->updateFeedArticleSource($nfArticleSection, $feedLen);
         }
@@ -1274,7 +1330,8 @@ class FeedController
     {
         $this->processStep3SessionParams();
 
-        $feedLen = count(array_filter(array_keys($_SESSION['wizard']['feed']), 'is_numeric'));
+        $feedData = $this->getWizardFeed();
+        $feedLen = count(array_filter(array_keys($feedData), 'is_numeric'));
 
         PageLayoutHelper::renderPageStartNobody("Feed Wizard");
 
@@ -1301,7 +1358,8 @@ class FeedController
             $_SESSION['wizard']['filter_tags'] = $filterTags;
         }
 
-        $autoUpdI = $this->feedFacade->getNfOption($_SESSION['wizard']['options'], 'autoupdate');
+        $options = $this->getWizardString('options');
+        $autoUpdI = $this->feedFacade->getNfOption($options, 'autoupdate');
         if ($autoUpdI === null || !is_string($autoUpdI)) {
             $autoUpdV = null;
             $autoUpdI = null;
@@ -1432,6 +1490,8 @@ class FeedController
      * @param string $rssUrl Feed URL
      *
      * @return void
+     *
+     * @psalm-suppress MixedArrayAccess,MixedAssignment,MixedOperand - Session wizard data
      */
     private function loadNewFeedFromUrl(string $rssUrl): void
     {
@@ -1479,6 +1539,8 @@ class FeedController
      * Process step 2 session parameters.
      *
      * @return void
+     *
+     * @psalm-suppress MixedArrayAccess,MixedAssignment - Session wizard data
      */
     private function processStep2SessionParams(): void
     {
@@ -1535,6 +1597,8 @@ class FeedController
      * Process step 3 session parameters.
      *
      * @return void
+     *
+     * @psalm-suppress MixedArrayAccess,MixedAssignment - Session wizard data
      */
     private function processStep3SessionParams(): void
     {
@@ -1615,6 +1679,8 @@ class FeedController
      * @param int    $feedLen        Number of feed items
      *
      * @return void
+     *
+     * @psalm-suppress MixedArrayAccess,MixedAssignment,MixedArrayOffset - Session wizard data
      */
     private function updateFeedArticleSource(string $articleSection, int $feedLen): void
     {
@@ -1636,6 +1702,8 @@ class FeedController
      * Get HTML content for step 2 feed preview.
      *
      * @return string HTML content
+     *
+     * @psalm-suppress MixedArrayAccess,MixedArgument,MixedAssignment,MixedOperand,MixedArrayOffset - Session wizard data
      */
     private function getStep2FeedHtml(): string
     {
@@ -1662,6 +1730,8 @@ class FeedController
      * Get HTML content for step 3 feed preview.
      *
      * @return string HTML content
+     *
+     * @psalm-suppress MixedArrayAccess,MixedArgument,MixedAssignment,MixedOperand,MixedArrayOffset - Session wizard data
      */
     private function getStep3FeedHtml(): string
     {

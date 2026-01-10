@@ -190,10 +190,10 @@ class ReviewService
         ?string $reviewsql = null
     ): string {
         if ($lang !== null) {
-            $name = QueryBuilder::table('languages')
+            $nameRaw = QueryBuilder::table('languages')
                 ->where('LgID', '=', $lang)
                 ->valuePrepared('LgName');
-            return $name !== null ? (string) $name : 'L2';
+            return is_string($nameRaw) ? $nameRaw : 'L2';
         }
 
         if ($text !== null) {
@@ -202,8 +202,8 @@ class ReviewService
                 ->join('languages', 'TxLgID', '=', 'LgID')
                 ->where('TxID', '=', $text)
                 ->firstPrepared();
-            $name = $row['LgName'] ?? null;
-            return $name !== null ? (string) $name : 'L2';
+            $nameRaw = $row['LgName'] ?? null;
+            return is_string($nameRaw) ? $nameRaw : 'L2';
         }
 
         if ($selection !== null && $reviewsql !== null) {
@@ -212,7 +212,7 @@ class ReviewService
                 $validation = $this->validateReviewSelection($testSqlProjection);
                 if ($validation['langCount'] == 1) {
                     $bindings = [];
-                    $name = Connection::preparedFetchValue(
+                    $nameRaw = Connection::preparedFetchValue(
                         "SELECT LgName
                         FROM languages, {$testSqlProjection} AND LgID = WoLgID"
                         . UserScopedQuery::forTablePrepared('words', $bindings) . "
@@ -220,7 +220,7 @@ class ReviewService
                         $bindings,
                         'LgName'
                     );
-                    return $name !== null ? (string) $name : 'L2';
+                    return is_string($nameRaw) ? $nameRaw : 'L2';
                 }
             }
         }
@@ -426,11 +426,11 @@ class ReviewService
      */
     public function getLanguageIdFromReviewSql(string $reviewsql): ?int
     {
-        $langId = Connection::fetchValue(
+        $langIdRaw = Connection::fetchValue(
             "SELECT WoLgID FROM $reviewsql LIMIT 1",
             'WoLgID'
         );
-        return $langId !== null ? (int) $langId : null;
+        return is_numeric($langIdRaw) ? (int) $langIdRaw : null;
     }
 
     /**
@@ -514,10 +514,10 @@ class ReviewService
      */
     public function getWordText(int $wordId): ?string
     {
-        $text = QueryBuilder::table('words')
+        $textRaw = QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
             ->valuePrepared('WoText');
-        return $text !== null ? (string) $text : null;
+        return is_string($textRaw) ? $textRaw : null;
     }
 
     /**
@@ -630,7 +630,7 @@ class ReviewService
             $title = 'Selected ' . $totalCount . ' Term' . ($totalCount < 2 ? '' : 's');
 
             $bindings = [];
-            $langName = Connection::preparedFetchValue(
+            $langNameRaw = Connection::preparedFetchValue(
                 "SELECT LgName
                 FROM languages, {$reviewsql} AND LgID = WoLgID"
                 . UserScopedQuery::forTablePrepared('words', $bindings) . "
@@ -638,6 +638,7 @@ class ReviewService
                 $bindings,
                 'LgName'
             );
+            $langName = is_string($langNameRaw) ? $langNameRaw : null;
             if ($langName) {
                 $title .= ' IN ' . $langName;
             }
@@ -645,10 +646,11 @@ class ReviewService
             $property = "lang=$langId";
             $reviewsql = " words WHERE WoLgID = $langId ";
 
-            $langName = QueryBuilder::table('languages')
+            $langNameRaw = QueryBuilder::table('languages')
                 ->where('LgID', '=', $langId)
                 ->valuePrepared('LgName');
-            $title = "All Terms in " . ($langName ?? 'Unknown');
+            $langName = is_string($langNameRaw) ? $langNameRaw : 'Unknown';
+            $title = "All Terms in " . $langName;
         } elseif ($textId !== null) {
             $property = "text=$textId";
             $reviewsql = " words, word_occurrences

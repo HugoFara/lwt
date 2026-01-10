@@ -84,14 +84,26 @@ class WordService
      */
     public function create(array $data): array
     {
-        $text = trim(Escaping::prepareTextdata($data['WoText']));
+        // Extract typed values from data array
+        /** @var string $woText */
+        $woText = isset($data['WoText']) && is_string($data['WoText']) ? $data['WoText'] : '';
+        /** @var string $woTranslation */
+        $woTranslation = isset($data['WoTranslation']) && is_string($data['WoTranslation']) ? $data['WoTranslation'] : '';
+        /** @var string $woSentence */
+        $woSentence = isset($data['WoSentence']) && is_string($data['WoSentence']) ? $data['WoSentence'] : '';
+        /** @var string $woNotes */
+        $woNotes = isset($data['WoNotes']) && is_string($data['WoNotes']) ? $data['WoNotes'] : '';
+        /** @var string $woRomanization */
+        $woRomanization = isset($data['WoRomanization']) && is_string($data['WoRomanization']) ? $data['WoRomanization'] : '';
+        /** @var string|null $woLemma */
+        $woLemma = isset($data['WoLemma']) && is_string($data['WoLemma']) && $data['WoLemma'] !== '' ? $data['WoLemma'] : null;
+
+        $text = trim(Escaping::prepareTextdata($woText));
         $textlc = mb_strtolower($text, 'UTF-8');
-        $translation = $this->normalizeTranslation($data['WoTranslation'] ?? '');
+        $translation = $this->normalizeTranslation($woTranslation);
 
         // Handle lemma field
-        $lemma = isset($data['WoLemma']) && $data['WoLemma'] !== ''
-            ? trim($data['WoLemma'])
-            : null;
+        $lemma = $woLemma !== null ? trim($woLemma) : null;
         $lemmaLc = $lemma !== null ? mb_strtolower($lemma, 'UTF-8') : null;
 
         try {
@@ -106,9 +118,9 @@ class WordService
                 $lemmaLc,
                 $data['WoStatus'],
                 $translation,
-                ExportService::replaceTabNewline($data['WoSentence'] ?? ''),
-                ExportService::replaceTabNewline($data['WoNotes'] ?? ''),
-                $data['WoRomanization'] ?? ''
+                ExportService::replaceTabNewline($woSentence),
+                ExportService::replaceTabNewline($woNotes),
+                $woRomanization
             ];
             $sql = "INSERT INTO words (
                     WoLgID, WoTextLC, WoText, WoLemma, WoLemmaLC, WoStatus, WoTranslation,
@@ -155,17 +167,29 @@ class WordService
      */
     public function update(int $wordId, array $data): array
     {
-        $text = trim(Escaping::prepareTextdata($data['WoText']));
+        // Extract typed values from data array
+        /** @var string $woText */
+        $woText = isset($data['WoText']) && is_string($data['WoText']) ? $data['WoText'] : '';
+        /** @var string $woTranslation */
+        $woTranslation = isset($data['WoTranslation']) && is_string($data['WoTranslation']) ? $data['WoTranslation'] : '';
+        /** @var string $woSentence */
+        $woSentence = isset($data['WoSentence']) && is_string($data['WoSentence']) ? $data['WoSentence'] : '';
+        /** @var string $woNotes */
+        $woNotes = isset($data['WoNotes']) && is_string($data['WoNotes']) ? $data['WoNotes'] : '';
+        /** @var string $woRomanization */
+        $woRomanization = isset($data['WoRomanization']) && is_string($data['WoRomanization']) ? $data['WoRomanization'] : '';
+        /** @var string|null $woLemma */
+        $woLemma = isset($data['WoLemma']) && is_string($data['WoLemma']) && $data['WoLemma'] !== '' ? $data['WoLemma'] : null;
+
+        $text = trim(Escaping::prepareTextdata($woText));
         $textlc = mb_strtolower($text, 'UTF-8');
-        $translation = $this->normalizeTranslation($data['WoTranslation'] ?? '');
-        $sentence = ExportService::replaceTabNewline($data['WoSentence'] ?? '');
-        $notes = ExportService::replaceTabNewline($data['WoNotes'] ?? '');
-        $roman = $data['WoRomanization'] ?? '';
+        $translation = $this->normalizeTranslation($woTranslation);
+        $sentence = ExportService::replaceTabNewline($woSentence);
+        $notes = ExportService::replaceTabNewline($woNotes);
+        $roman = $woRomanization;
 
         // Handle lemma field
-        $lemma = isset($data['WoLemma']) && $data['WoLemma'] !== ''
-            ? trim($data['WoLemma'])
-            : null;
+        $lemma = $woLemma !== null ? trim($woLemma) : null;
         $lemmaLc = $lemma !== null ? mb_strtolower($lemma, 'UTF-8') : null;
 
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
