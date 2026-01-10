@@ -615,69 +615,11 @@ img
   border: 0pt none;
 }
 
-.red2
-{
-  color: #FF0000;
-  font-weight: bold;
-}
-
-.red3
-{
-  color: #FF0000;
-}
-
 /* Warning message for invalid search */
 .warning-message
 {
   color: red;
   text-align: center;
-}
-
-.scorered
-{
-  font-weight: bold;
-  color: #FF0000;
-}
-
-.scoregreen
-{
-  color: #006400;
-}
-
-.backgray
-{
-  background-color: #DDDDDD;
-}
-
-.backlightyellow
-{
-  background-color: #FFFACD;
-}
-
-.small
-{
-  color: black;
-  font-size: 60%;
-}
-
-.smallgray
-{
-  color: gray;
-  font-size: 60%;
-}
-
-.smallgray2
-{
-  color: gray;
-  font-size: 80%;
-}
-
-.smallgray3
-{
-  color: gray;
-  font-size: 70%;
-  width: 850px;
-  margin-bottom: 20px;
 }
 
 #learnstatus
@@ -727,12 +669,6 @@ img.lwtlogoright
   display: block;
   width: 75px;
 }
-
-.grayborder
-{
-  border: 1pt solid #808080;
-}
-
 
 #printoptions
 {
@@ -834,16 +770,6 @@ footer
   height: 45px;
   line-height: 30px;
   border-top: 1px solid #000000;
-}
-
-/** 
-* Separate a footer section from the document 
-*/
-.graydotted
-{
-  margin-top: 30px;
-  padding-top: 5px;
-  border-top: 1px dotted #808080;
 }
 
 /**

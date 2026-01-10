@@ -33,7 +33,7 @@ $display = $hidden ? 'none' : 'inherit';
 <p id="test-finished-area" class="has-text-centered" style="display: <?php echo $display; ?>;">
     <img src="/assets/images/ok.png" alt="Done!" />
     <br /><br />
-    <span class="red2">
+    <span class="has-text-danger has-text-weight-bold">
         <span id="tests-done-today">
             Nothing <?php echo $totalTests > 0 ? 'more ' : ''; ?>to review here!
         </span>

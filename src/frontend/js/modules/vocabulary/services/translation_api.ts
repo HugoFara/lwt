@@ -162,7 +162,7 @@ export function getTranslationFromGlosbeApi(data: GlosbeResponse): void {
         translationsEl.insertAdjacentHTML('afterend',
           '<hr /><p>&nbsp;</p><h3><a href="http://glosbe.com/' +
           data.from + '/en/' + data.phrase + '">Glosbe Dictionary (' +
-          data.from + '-en):  &nbsp; <span class="red2">' +
+          data.from + '-en):  &nbsp; <span class="has-text-danger has-text-weight-bold">' +
           data.phrase + '</span></a></h3>&nbsp;<p id="translations"></p>'
         );
         getGlosbeTranslation(data.phrase, data.from, 'en');

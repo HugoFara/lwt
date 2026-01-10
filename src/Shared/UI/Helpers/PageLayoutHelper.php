@@ -360,7 +360,7 @@ HTML;
      */
     public static function buildExecutionTime(float $executionTime): string
     {
-        return '<p class="smallgray2">' . round($executionTime, 5) . ' secs</p>';
+        return '<p class="has-text-grey is-size-7">' . round($executionTime, 5) . ' secs</p>';
     }
 
     // =========================================================================

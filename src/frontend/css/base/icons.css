@@ -183,17 +183,6 @@ button .icon,
   vertical-align: top;
 }
 
-/**
- * Score indicators in word lists.
- */
-.scorered .icon {
-  color: #dc3545;
-}
-
-.scoregreen .icon {
-  color: #28a745;
-}
-
 /* ==========================================================================
    Action Icon Groups
    ========================================================================== */

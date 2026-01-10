@@ -61,7 +61,7 @@ describe('text_check_display.ts', () => {
       displayStatistics(words, [], []);
 
       const html = document.getElementById('check_text')!.innerHTML;
-      expect(html).toContain('class="red2"');
+      expect(html).toContain('class="has-text-danger has-text-weight-bold"');
       expect(html).toContain('translation here');
     });
 

@@ -428,42 +428,6 @@ a:link,a:visited,a:active,a:focus,a:hover {
 img {
     border: 0pt none;
 }
-.red2 {
-    color: #FF0000;
-    font-weight: bold;
-}
-.red3 {
-	color: #FF0000;
-}
-.scorered {
-    font-weight: bold;
-    color: #FF0000;
-}
-.scoregreen {
-    color: #006400;
-}
-.backgray {
-    /*background-color: #DDDDDD;*/
-    background-color: #222222;
-}
-.backlightyellow {
-    background-color: #111111;
-    color: #E4E433;
-}
-.smallgray { 
-    color: gray;
-    font-size:60%;
-}
-.smallgray2 { 
-    color: gray;
-    font-size:80%;
-}
-.smallgray3 { 
-    color: gray;
-    font-size:70%;
-    width: 850px;
-    margin-bottom: 20px;
-}
 #learnstatus {
     /*color: #000000;*/
     color: #FFFFFF;
@@ -508,11 +472,6 @@ img {
     width: 75px;
   }
 
-.grayborder {
-    /*border: 1pt solid #808080;*/
-    border: 1pt solid #8f8f8f;
-}
-
 /**
 * General footer style.
 */
@@ -530,14 +489,6 @@ footer
   font-size: 14px;
 }
 
-/** 
-* Separate a footer section from the document 
-*/
-.graydotted {
-    margin-top: 30px;
-    padding-top: 5px;
-    border-top: 1px dotted #8f8f8f;
-}
 #printoptions {
     margin-bottom: 15px;
     padding-bottom: 15px;

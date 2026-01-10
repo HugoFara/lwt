@@ -280,7 +280,7 @@ class TranslationController extends BaseController
         $glosbeUrl = $this->translationService->buildGlosbeUrl($phrase, $from, $dest);
         $titleText = '<a href="' . $glosbeUrl . '">Glosbe Dictionary (' .
             htmlspecialchars($from, ENT_QUOTES, 'UTF-8') . "-" . htmlspecialchars($dest, ENT_QUOTES, 'UTF-8') . "):  &nbsp; " .
-            '<span class="red2">' . htmlspecialchars($phrase, ENT_QUOTES, 'UTF-8') . "</span></a>";
+            '<span class="has-text-danger has-text-weight-bold">' . htmlspecialchars($phrase, ENT_QUOTES, 'UTF-8') . "</span></a>";
 
         echo '<h3>' . $titleText .
             ' <span id="del_translation" class="click" data-action="delete-translation">' .

@@ -51,11 +51,11 @@ export function displayStatistics(
   multiWords: WordEntry[],
   nonWords: NonWordEntry[]
 ): void {
-  let h = '<h4>Word List <span class="red2">(red = already saved)</span></h4>' +
+  let h = '<h4>Word List <span class="has-text-danger has-text-weight-bold">(red = already saved)</span></h4>' +
     '<ul class="wordlist">';
 
   words.forEach((v) => {
-    h += '<li><span' + (v[2] === '' ? '' : ' class="red2"') + '>[' + v[0] + '] — ' +
+    h += '<li><span' + (v[2] === '' ? '' : ' class="has-text-danger has-text-weight-bold"') + '>[' + v[0] + '] — ' +
       v[1] + (v[2] === '' ? '' : ' — ' + v[2]) + '</span></li>';
   });
 

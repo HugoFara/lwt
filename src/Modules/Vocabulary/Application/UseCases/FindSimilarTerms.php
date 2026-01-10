@@ -124,11 +124,11 @@ class FindSimilarTerms
         if ($record !== null) {
             $term = htmlspecialchars((string)($record["WoText"] ?? ''), ENT_QUOTES, 'UTF-8');
             if (stripos($compare, $term) !== false) {
-                $term = '<span class="red3">' . $term . '</span>';
+                $term = '<span class="has-text-danger">' . $term . '</span>';
             } else {
                 $term = str_replace(
                     $compare,
-                    '<span class="red3"><u>' . $compare . '</u></span>',
+                    '<span class="has-text-danger"><u>' . $compare . '</u></span>',
                     $term
                 );
             }
