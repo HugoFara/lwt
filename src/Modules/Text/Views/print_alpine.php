@@ -34,21 +34,26 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Type-safe variable extraction from controller context
+assert(is_int($textId));
 /** @var int $textId */
+assert(is_string($mode));
 /** @var string $mode */
 assert(is_array($viewData));
 /** @var array{title: string, sourceUri: string, audioUri: string, textSize: int, rtlScript: bool, hasAnnotation: bool} $viewData */
+assert(is_int($savedAnn));
 /** @var int $savedAnn */
+assert(is_int($savedStatus));
 /** @var int $savedStatus */
+assert(is_int($savedPlacement));
 /** @var int $savedPlacement */
 /** @var string|null $editFormHtml */
 
-$title = (string)$viewData['title'];
-$sourceUri = (string)$viewData['sourceUri'];
-$audioUri = (string)$viewData['audioUri'];
-$textSize = (int)$viewData['textSize'];
-$rtlScript = (bool)$viewData['rtlScript'];
-$hasAnnotation = (bool)$viewData['hasAnnotation'];
+$title = $viewData['title'];
+$sourceUri = $viewData['sourceUri'];
+$audioUri = $viewData['audioUri'];
+$textSize = $viewData['textSize'];
+$rtlScript = $viewData['rtlScript'];
+$hasAnnotation = $viewData['hasAnnotation'];
 
 // Determine URLs based on mode
 $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';

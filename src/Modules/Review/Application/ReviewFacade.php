@@ -181,7 +181,7 @@ class ReviewFacade
      *
      * @param string $reviewsql SQL projection string
      *
-     * @return array|null Word record or null
+     * @return array<string, mixed>|null Word record or null
      */
     public function getNextWord(string $reviewsql): ?array
     {

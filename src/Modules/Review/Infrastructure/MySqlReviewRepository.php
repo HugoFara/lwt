@@ -266,16 +266,23 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             ];
         }
 
+        /** @var mixed $nameVal */
+        $nameVal = $record['LgName'] ?? '';
+        /** @var mixed $regexVal */
+        $regexVal = $record['LgRegexpWordCharacters'] ?? '';
+        /** @var mixed $ttsVal */
+        $ttsVal = $record['LgTTSVoiceAPI'] ?? null;
+
         return [
-            'name' => $record['LgName'],
-            'dict1Uri' => $record['LgDict1URI'] ?? '',
-            'dict2Uri' => $record['LgDict2URI'] ?? '',
-            'translateUri' => $record['LgGoogleTranslateURI'] ?? '',
+            'name' => is_string($nameVal) ? $nameVal : '',
+            'dict1Uri' => is_string($record['LgDict1URI'] ?? '') ? (string) ($record['LgDict1URI'] ?? '') : '',
+            'dict2Uri' => is_string($record['LgDict2URI'] ?? '') ? (string) ($record['LgDict2URI'] ?? '') : '',
+            'translateUri' => is_string($record['LgGoogleTranslateURI'] ?? '') ? (string) ($record['LgGoogleTranslateURI'] ?? '') : '',
             'textSize' => (int) $record['LgTextSize'],
             'removeSpaces' => (bool) $record['LgRemoveSpaces'],
-            'regexWord' => $record['LgRegexpWordCharacters'],
+            'regexWord' => is_string($regexVal) ? $regexVal : '',
             'rtl' => (bool) $record['LgRightToLeft'],
-            'ttsVoiceApi' => $record['LgTTSVoiceAPI'] ?? null
+            'ttsVoiceApi' => is_string($ttsVal) ? $ttsVal : null
         ];
     }
 

@@ -323,7 +323,7 @@ class LanguageApiHandler
     /**
      * Format response for creating a new language.
      *
-     * @param array $data Language data from request
+     * @param array<string, mixed> $data Language data from request
      *
      * @return array{success: bool, id?: int, error?: string}
      */
@@ -352,7 +352,7 @@ class LanguageApiHandler
      * Format response for updating a language.
      *
      * @param int   $id   Language ID
-     * @param array $data Language data from request
+     * @param array<string, mixed> $data Language data from request
      *
      * @return array{success: bool, reparsed?: int, error?: string, message?: string}
      */

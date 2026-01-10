@@ -17,18 +17,19 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
- *
- * @var int $wid
- * @var int $textId
- * @var bool $deleted
- * @var string $term
- * @var string $termLc
  */
 
 namespace Lwt\Modules\Vocabulary\Views;
 
 use Lwt\Core\StringUtils;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
+
+// Type assertions for variables passed from controller
+assert(is_int($wid));
+assert(is_int($textId));
+assert(is_bool($deleted));
+assert(is_string($term));
+assert(is_string($termLc));
 
 $hex = StringUtils::toClassName($termLc);
 ?>

@@ -116,7 +116,7 @@ class ReviewApiHandler
         );
 
         return [
-            "term_id" => $wordRecord['WoID'],
+            "term_id" => is_numeric($wordRecord['WoID']) ? (int) $wordRecord['WoID'] : 0,
             "solution" => $solution,
             "term_text" => $save,
             "group" => $htmlSentence
@@ -126,10 +126,10 @@ class ReviewApiHandler
     /**
      * Format term for test display.
      *
-     * @param array  $wordRecord      Word database record
+     * @param array<string, mixed>  $wordRecord      Word database record
      * @param string $sentence        Sentence containing the word (word marked with {})
      * @param int    $testType        Test type (1-5)
-     * @param array  $annotations     Word annotations (keyed by order)
+     * @param array<int, array{text: string, romanization: string|null, translation: string|null, isTarget?: bool, order?: int}>  $annotations     Word annotations (keyed by order)
      * @param bool   $showContextRom  Show romanization on context words
      * @param bool   $showContextTrans Show translation on context words
      *
@@ -202,7 +202,7 @@ class ReviewApiHandler
     /**
      * Build HTML for a sentence with ruby annotations.
      *
-     * @param array<int, array{text: string, romanization: string|null, translation: string|null}> $annotations Word annotations keyed by order
+     * @param array<int, array{text: string, romanization: string|null, translation: string|null, isTarget?: bool, order?: int}> $annotations Word annotations keyed by order
      * @param string $targetWord      The target word being tested
      * @param int    $baseType        Test type (1=show term, 2=hide term, 3=hide term)
      * @param bool   $showRom         Show romanization
@@ -377,9 +377,9 @@ class ReviewApiHandler
     /**
      * Format response for getting next word test.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
-     * @return array
+     * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
      */
     public function formatNextWord(array $params): array
     {
@@ -389,7 +389,7 @@ class ReviewApiHandler
     /**
      * Format response for tomorrow count.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
      * @return array{count: int}
      */

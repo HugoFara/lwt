@@ -22,10 +22,6 @@
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  *
- * @var int $tid
- * @var bool $cleanUp
- * @var int $tooltipMode
- * @var list<array<string, mixed>> $newWords
  */
 
 namespace Lwt\Views\Word;
@@ -33,6 +29,12 @@ namespace Lwt\Views\Word;
 use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Shared\UI\Helpers\IconHelper;
+
+// Type assertions for variables passed from controller
+assert(is_int($tid));
+assert(is_bool($cleanUp));
+assert(is_int($tooltipMode));
+assert(is_array($newWords));
 
 ?>
 <p id="displ_message">

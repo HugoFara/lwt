@@ -24,12 +24,13 @@ namespace Lwt\Modules\Vocabulary\Views;
 
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
-/** @var int $wid */
-/** @var int $textId */
-/** @var int $ord */
-/** @var int $status */
-/** @var string $hex */
-/** @var string $word */
+// Type assertions for variables passed from controller
+assert(is_int($wid));
+assert(is_int($textId));
+assert(is_int($ord));
+assert(is_int($status));
+assert(is_string($hex));
+assert(is_string($word));
 
 $statusName = $status === 99 ? 'Well-Known' : 'Ignored';
 ?>

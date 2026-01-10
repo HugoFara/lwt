@@ -123,34 +123,40 @@ class CreateLanguage
     /**
      * Normalize language data from API request to database fields.
      *
-     * @param array $data API request data (camelCase keys)
+     * @param array<string, mixed> $data API request data (camelCase keys)
      *
-     * @return array Normalized data (LgXxx keys)
+     * @return array<string, bool|int|null|string> Normalized data (LgXxx keys)
      */
     private function normalizeLanguageData(array $data): array
     {
+        $getStr = static fn(string $key, string $default = ''): string =>
+            isset($data[$key]) && is_string($data[$key]) ? $data[$key] : $default;
+
+        $getStrOrNull = static fn(string $key): ?string =>
+            isset($data[$key]) && is_string($data[$key]) ? $data[$key] : null;
+
         return [
-            'LgName' => $data['name'] ?? '',
-            'LgDict1URI' => $data['dict1Uri'] ?? '',
-            'LgDict2URI' => $data['dict2Uri'] ?? '',
-            'LgGoogleTranslateURI' => $data['translatorUri'] ?? '',
+            'LgName' => $getStr('name'),
+            'LgDict1URI' => $getStr('dict1Uri'),
+            'LgDict2URI' => $getStr('dict2Uri'),
+            'LgGoogleTranslateURI' => $getStr('translatorUri'),
             'LgDict1PopUp' => !empty($data['dict1PopUp']),
             'LgDict2PopUp' => !empty($data['dict2PopUp']),
             'LgGoogleTranslatePopUp' => !empty($data['translatorPopUp']),
-            'LgSourceLang' => $data['sourceLang'] ?? null,
-            'LgTargetLang' => $data['targetLang'] ?? null,
-            'LgExportTemplate' => $data['exportTemplate'] ?? '',
+            'LgSourceLang' => $getStrOrNull('sourceLang'),
+            'LgTargetLang' => $getStrOrNull('targetLang'),
+            'LgExportTemplate' => $getStr('exportTemplate'),
             'LgTextSize' => (string)($data['textSize'] ?? '100'),
-            'LgCharacterSubstitutions' => $data['characterSubstitutions'] ?? '',
-            'LgRegexpSplitSentences' => $data['regexpSplitSentences'] ?? '.!?',
-            'LgExceptionsSplitSentences' => $data['exceptionsSplitSentences'] ?? '',
-            'LgRegexpWordCharacters' => $data['regexpWordCharacters'] ?? 'a-zA-Z',
-            'LgParserType' => $data['parserType'] ?? null,
+            'LgCharacterSubstitutions' => $getStr('characterSubstitutions'),
+            'LgRegexpSplitSentences' => $getStr('regexpSplitSentences', '.!?'),
+            'LgExceptionsSplitSentences' => $getStr('exceptionsSplitSentences'),
+            'LgRegexpWordCharacters' => $getStr('regexpWordCharacters', 'a-zA-Z'),
+            'LgParserType' => $getStrOrNull('parserType'),
             'LgRemoveSpaces' => !empty($data['removeSpaces']),
             'LgSplitEachChar' => !empty($data['splitEachChar']),
             'LgRightToLeft' => !empty($data['rightToLeft']),
-            'LgTTSVoiceAPI' => $data['ttsVoiceApi'] ?? '',
-            'LgShowRomanization' => $data['showRomanization'] ?? false,
+            'LgTTSVoiceAPI' => $getStr('ttsVoiceApi'),
+            'LgShowRomanization' => !empty($data['showRomanization']),
             'LgLocalDictMode' => (int)($data['localDictMode'] ?? 0),
         ];
     }

@@ -113,10 +113,10 @@ class FeedFacade
     {
         $feeds = $this->getFeedList->executeAll($langId);
 
-        return array_map(
+        return array_values(array_map(
             fn(Feed $feed) => $this->feedToArray($feed),
             $feeds
-        );
+        ));
     }
 
     /**

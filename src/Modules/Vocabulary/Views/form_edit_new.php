@@ -33,6 +33,19 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
+// Type assertions for variables passed from controller
+assert(is_int($lang));
+assert(is_int($textId));
+assert(is_int($ord));
+assert(is_string($fromAnn));
+assert(is_string($term));
+assert(is_string($termlc));
+assert(is_string($scrdir));
+assert(is_bool($showRoman));
+assert(is_string($sentence));
+assert(is_string($transUri));
+assert(is_string($langShort));
+
 $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
 

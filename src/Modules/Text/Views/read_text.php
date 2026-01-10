@@ -47,8 +47,14 @@ namespace Lwt\Views\Text;
 
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 
+// Type-safe variable extraction from controller context
+assert(is_int($textId));
+assert(is_int($langId));
+assert(is_string($annotatedText));
+
 // Compute annotations JSON safely
 $annotationJson = (new AnnotationService())->annotationToJson($annotatedText);
+/** @var array<int, mixed>|null */
 $annotations = json_decode($annotationJson !== false ? $annotationJson : '[]', true);
 
 // Build variable array for JavaScript - will be merged into LWT_DATA by TypeScript

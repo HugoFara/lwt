@@ -17,17 +17,18 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
- *
- * @var int $status
- * @var int $count
- * @var int $textId
- * @var array<array{wid: int, hex: string, term: string, status: int}> $wordsData
- * @var bool $useTooltips
  */
 
 namespace Lwt\Views\Word;
 
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
+
+// Type assertions for variables passed from controller
+assert(is_int($status));
+assert(is_int($count));
+assert(is_int($textId));
+assert(is_array($wordsData));
+assert(is_bool($useTooltips));
 
 ?>
 <p>

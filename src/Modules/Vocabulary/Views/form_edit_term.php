@@ -31,18 +31,19 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-/** @var int $wid */
-/** @var int $lang */
-/** @var string $term */
-/** @var string $termlc */
-/** @var string $lemma */
-/** @var string $scrdir */
-/** @var bool $showRoman */
-/** @var string $transl */
-/** @var string $sentence */
-/** @var string $notes */
-/** @var string $rom */
-/** @var int $status */
+// Type assertions for variables passed from controller
+assert(is_int($wid));
+assert(is_int($lang));
+assert(is_string($term));
+assert(is_string($termlc));
+assert(is_string($lemma));
+assert(is_string($scrdir));
+assert(is_bool($showRoman));
+assert(is_string($transl));
+assert(is_string($sentence));
+assert(is_string($notes));
+assert(is_string($rom));
+assert(is_int($status));
 
 $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
@@ -59,7 +60,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     </td></tr>
     <tr>
         <td class="td1 right">Lemma:</td>
-        <td class="td1"><input <?php echo $scrdir; ?> type="text" class="checkoutsidebmp checklength" data_maxlength="250" data_info="Lemma" name="WoLemma" id="WoLemma" value="<?php echo htmlspecialchars($lemma ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" placeholder="Base form (e.g., 'run' for 'running')" /></td>
+        <td class="td1"><input <?php echo $scrdir; ?> type="text" class="checkoutsidebmp checklength" data_maxlength="250" data_info="Lemma" name="WoLemma" id="WoLemma" value="<?php echo htmlspecialchars($lemma, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" placeholder="Base form (e.g., 'run' for 'running')" /></td>
     </tr>
         <?php echo (new FindSimilarTerms())->getTableRow(); ?>
     <tr>
@@ -74,7 +75,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     </tr>
     <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">
         <td class="td1 right">Romaniz.:</td>
-        <td class="td1"><input type="text" class="checkoutsidebmp" data_info="Romanization" name="WoRomanization" maxlength="100" size="35" value="<?php echo htmlspecialchars($rom ?? '', ENT_QUOTES, 'UTF-8'); ?>" /></td>
+        <td class="td1"><input type="text" class="checkoutsidebmp" data_info="Romanization" name="WoRomanization" maxlength="100" size="35" value="<?php echo htmlspecialchars($rom, ENT_QUOTES, 'UTF-8'); ?>" /></td>
     </tr>
     <tr>
         <td class="td1 right">Sentence<br />Term in {...}:</td>

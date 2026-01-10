@@ -24,6 +24,11 @@ namespace Lwt\Views\Word;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
+// Type assertions for variables passed from controller
+assert(is_string($lastUpdate));
+assert(is_bool($rtl));
+assert(is_int($recno));
+
 // Action buttons for navigation
 $actions = [
     ['url' => '/word/upload', 'label' => 'Import More Terms', 'icon' => 'file-up', 'class' => 'is-primary'],

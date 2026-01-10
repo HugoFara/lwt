@@ -345,14 +345,17 @@ class UrlUtilities
             return '';
         }
         parse_str($query, $parsed_query);
+        /** @var array<string, string|list<string>> $parsed_query */
         if (
             array_key_exists("lwt_translator", $parsed_query)
             && $parsed_query["lwt_translator"] == "libretranslate"
         ) {
-            return $parsed_query["source"] ?? "";
+            $source = $parsed_query["source"] ?? "";
+            return is_string($source) ? $source : "";
         }
         // Fallback to Google Translate
-        return $parsed_query["sl"] ?? "";
+        $sl = $parsed_query["sl"] ?? "";
+        return is_string($sl) ? $sl : "";
     }
 
     /**
@@ -372,13 +375,16 @@ class UrlUtilities
             return '';
         }
         parse_str($query, $parsed_query);
+        /** @var array<string, string|list<string>> $parsed_query */
         if (
             array_key_exists("lwt_translator", $parsed_query)
             && $parsed_query["lwt_translator"] == "libretranslate"
         ) {
-            return $parsed_query["target"] ?? "";
+            $target = $parsed_query["target"] ?? "";
+            return is_string($target) ? $target : "";
         }
         // Fallback to Google Translate
-        return $parsed_query["tl"] ?? "";
+        $tl = $parsed_query["tl"] ?? "";
+        return is_string($tl) ? $tl : "";
     }
 }

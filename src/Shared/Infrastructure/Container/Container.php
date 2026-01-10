@@ -434,7 +434,7 @@ class Container implements ContainerInterface
      *
      * @param string $class  The class name
      * @param string $method The method name
-     * @param array  $params Additional parameters to pass
+     * @param array<string, mixed>  $params Additional parameters to pass
      *
      * @return mixed The method return value
      */
@@ -454,7 +454,7 @@ class Container implements ContainerInterface
      * Make a new instance of a class (always fresh, never cached).
      *
      * @param string $class  The class name
-     * @param array  $params Constructor parameters to override
+     * @param array<string, mixed>  $params Constructor parameters to override
      *
      * @return object The new instance
      */

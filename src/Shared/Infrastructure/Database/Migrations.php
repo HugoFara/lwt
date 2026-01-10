@@ -118,7 +118,13 @@ class Migrations
     {
         try {
             $rows = Connection::fetchAll("SELECT filename FROM _migrations");
-            return array_column($rows, 'filename');
+            $filenames = [];
+            foreach ($rows as $row) {
+                if (isset($row['filename']) && is_string($row['filename'])) {
+                    $filenames[] = $row['filename'];
+                }
+            }
+            return $filenames;
         } catch (\RuntimeException $e) {
             // Table doesn't exist yet
             return [];
@@ -180,8 +186,11 @@ class Migrations
         }
 
         foreach ($rows as $row) {
-            $filename = $row['filename'];
-            $storedChecksum = $row['checksum'];
+            $filename = $row['filename'] ?? null;
+            $storedChecksum = $row['checksum'] ?? null;
+            if (!is_string($filename) || !is_string($storedChecksum)) {
+                continue;
+            }
             $filepath = $migrationsDir . $filename;
 
             if (!file_exists($filepath)) {

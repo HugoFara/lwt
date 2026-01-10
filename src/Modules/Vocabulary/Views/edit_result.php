@@ -30,6 +30,20 @@ namespace Lwt\Views\Word;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
+// Type assertions for variables passed from controller
+assert(is_string($message));
+assert(is_int($wid));
+assert(is_int($textId));
+assert($hex === null || is_string($hex));
+assert(is_string($translation));
+assert(is_int($status));
+assert(is_int($oldStatus));
+assert(is_string($romanization));
+assert(is_string($text));
+assert(is_string($fromAnn));
+assert(is_bool($isNew));
+/** @var string $textlc */
+
 $tagList = TagsFacade::getWordTagList($wid, false);
 $tagFormatted = $tagList !== '' ? ' [' . str_replace(',', ', ', $tagList) . ']' : '';
 
@@ -54,11 +68,12 @@ if ($fromAnn === "") {
 } else {
     // Annotation mode
     $config['fromAnn'] = (int)$fromAnn;
-    $config['textlc'] = $textlc ?? '';
+    /** @psalm-suppress PossiblyUndefinedVariable */
+    $config['textlc'] = $textlc;
 }
 
 ?>
-<p>OK: <?php echo htmlspecialchars($message ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+<p>OK: <?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></p>
 
 <script type="application/json" data-lwt-edit-result-config>
 <?php echo json_encode($config, JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

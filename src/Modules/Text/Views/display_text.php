@@ -43,7 +43,7 @@ foreach ($annotationsTyped as $item) {
         echo ' <ruby>
             <rb>
                 <span class="click anntermruby" style="color:black;"' .
-                ($item['rom'] === '' ? '' : (' title="' . \htmlspecialchars($item['rom'] ?? '', ENT_QUOTES, 'UTF-8') . '"')) . '>' .
+                (($item['rom'] ?? '') === '' ? '' : (' title="' . \htmlspecialchars($item['rom'] ?? '', ENT_QUOTES, 'UTF-8') . '"')) . '>' .
                     \htmlspecialchars($item['text'] ?? '', ENT_QUOTES, 'UTF-8') .
                 '</span>
             </rb>

@@ -52,11 +52,16 @@ assert(is_array($languages));
 // Extract typed properties from $text for use in template
 /** @var int */
 $textIdTyped = $textId;
-$textLgId = (int)$text->lgid;
-$textTitle = (string)$text->title;
-$textContent = (string)$text->text;
-$textSource = (string)$text->source;
-$textMediaUri = (string)$text->media_uri;
+/** @var int */
+$textLgId = $text->lgid;
+/** @var string */
+$textTitle = $text->title;
+/** @var string */
+$textContent = $text->text;
+/** @var string */
+$textSource = $text->source;
+/** @var string */
+$textMediaUri = $text->media_uri;
 /** @var string */
 $scrdirTyped = $scrdir;
 
@@ -294,7 +299,7 @@ if ($isNew) {
                         <button type="button"
                                 class="button is-small is-outlined"
                                 data-action="navigate"
-                                data-url="print_impr_text.php?edit=1&amp;text=<?php echo $textId; ?>">
+                                data-url="print_impr_text.php?edit=1&amp;text=<?php echo $textIdTyped; ?>">
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('plus', ['alt' => 'Create']); ?>
                             </span>

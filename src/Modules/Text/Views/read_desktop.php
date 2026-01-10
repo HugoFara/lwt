@@ -34,12 +34,20 @@ use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 // Type-safe variable extraction from controller context
-/** @var int $textId */
-/** @var int $langId */
-/** @var string $title */
-/** @var string|null $sourceUri */
-/** @var string $media */
-/** @var int $audioPosition */
+assert(is_int($textId));
+assert(is_int($langId));
+assert(is_string($title));
+assert(is_string($media));
+assert(is_int($audioPosition));
+// Note: $sourceUri is typed as string|null in file-level docblock
+
+// Book context for chapter navigation (optional)
+if (!isset($bookContext) || !is_array($bookContext)) {
+    $bookContext = null;
+}
+/**
+ * @var array{bookId: int, bookTitle: string, chapterNum: int, totalChapters: int, chapterTitle: string, prevTextId: int|null, nextTextId: int|null, chapters: array<int, array{textId: int, chapterNum: int, title: string}>}|null $bookContext
+ */
 
 ?>
 <!-- Main navigation -->
@@ -52,8 +60,11 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
       <div class="level-left">
         <div class="level-item">
           <strong x-text="title || 'Loading...'"></strong>
-          <?php if (isset($sourceUri) && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')): ?>
-          <?php echo \Lwt\Shared\UI\Helpers\IconHelper::link('external-link', $sourceUri, ['alt' => 'Source'], ['target' => '_blank', 'rel' => 'noopener', 'class' => 'ml-2', 'title' => 'Source']); ?>
+          <?php
+          /** @var string|null $sourceUri */
+          $sourceUriTyped = $sourceUri;
+          if ($sourceUriTyped !== null && $sourceUriTyped !== '' && !str_starts_with(trim($sourceUriTyped), '#')): ?>
+          <?php echo \Lwt\Shared\UI\Helpers\IconHelper::link('external-link', $sourceUriTyped, ['alt' => 'Source'], ['target' => '_blank', 'rel' => 'noopener', 'class' => 'ml-2', 'title' => 'Source']); ?>
           <?php endif; ?>
         </div>
       </div>
@@ -112,21 +123,33 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
   <?php endif; ?>
 
   <!-- Chapter navigation (if part of a book) -->
-  <?php if (isset($bookContext) && $bookContext !== null): ?>
+  <?php if ($bookContext !== null): ?>
+  <?php
+  // Extract typed values for template use (types from docblock)
+  $bookId = $bookContext['bookId'];
+  $bookTitle = $bookContext['bookTitle'];
+  $chapterNum = $bookContext['chapterNum'];
+  $totalChapters = $bookContext['totalChapters'];
+  $chapterTitle = $bookContext['chapterTitle'];
+  $prevTextId = $bookContext['prevTextId'];
+  $nextTextId = $bookContext['nextTextId'];
+  /** @var array<int, array{textId: int, chapterNum: int, title: string}> */
+  $chapters = $bookContext['chapters'];
+  ?>
   <div class="box py-2 px-4 mb-0" style="border-radius: 0; background: #f5f5f5;">
     <div class="level is-mobile">
       <div class="level-left">
         <div class="level-item">
-          <a href="/book/<?php echo (int) $bookContext['bookId']; ?>" class="has-text-grey-dark" title="View book">
+          <a href="/book/<?php echo $bookId; ?>" class="has-text-grey-dark" title="View book">
             <span class="icon is-small mr-1">
               <i class="fas fa-book"></i>
             </span>
-            <strong><?php echo htmlspecialchars($bookContext['bookTitle']); ?></strong>
+            <strong><?php echo htmlspecialchars($bookTitle); ?></strong>
           </a>
           <span class="has-text-grey ml-2">
-            — Ch. <?php echo (int) $bookContext['chapterNum']; ?>/<?php echo (int) $bookContext['totalChapters']; ?>
-            <?php if (!empty($bookContext['chapterTitle'])): ?>
-              <em class="ml-1"><?php echo htmlspecialchars($bookContext['chapterTitle']); ?></em>
+            — Ch. <?php echo $chapterNum; ?>/<?php echo $totalChapters; ?>
+            <?php if ($chapterTitle !== ''): ?>
+              <em class="ml-1"><?php echo htmlspecialchars($chapterTitle); ?></em>
             <?php endif; ?>
           </span>
         </div>
@@ -135,8 +158,8 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
         <div class="level-item">
           <div class="buttons has-addons mb-0">
             <!-- Previous chapter -->
-            <?php if ($bookContext['prevTextId'] !== null): ?>
-            <a href="/text/read?text=<?php echo (int) $bookContext['prevTextId']; ?>"
+            <?php if ($prevTextId !== null): ?>
+            <a href="/text/read?text=<?php echo $prevTextId; ?>"
                class="button is-small" title="Previous chapter">
               <span class="icon is-small">
                 <i class="fas fa-chevron-left"></i>
@@ -156,7 +179,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
             <div class="dropdown is-hoverable">
               <div class="dropdown-trigger">
                 <button class="button is-small">
-                  <span>Ch. <?php echo (int) $bookContext['chapterNum']; ?></span>
+                  <span>Ch. <?php echo $chapterNum; ?></span>
                   <span class="icon is-small">
                     <i class="fas fa-angle-down"></i>
                   </span>
@@ -164,10 +187,10 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
               </div>
               <div class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                 <div class="dropdown-content">
-                  <?php foreach ($bookContext['chapters'] as $chapter): ?>
-                  <a href="/text/read?text=<?php echo (int) $chapter['textId']; ?>"
-                     class="dropdown-item <?php echo ($chapter['chapterNum'] === $bookContext['chapterNum']) ? 'is-active' : ''; ?>">
-                    <?php echo (int) $chapter['chapterNum']; ?>.
+                  <?php foreach ($chapters as $chapter): ?>
+                  <a href="/text/read?text=<?php echo $chapter['textId']; ?>"
+                     class="dropdown-item <?php echo ($chapter['chapterNum'] === $chapterNum) ? 'is-active' : ''; ?>">
+                    <?php echo $chapter['chapterNum']; ?>.
                     <?php echo htmlspecialchars($chapter['title'] ?: 'Chapter ' . $chapter['chapterNum']); ?>
                   </a>
                   <?php endforeach; ?>
@@ -176,8 +199,8 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
             </div>
 
             <!-- Next chapter -->
-            <?php if ($bookContext['nextTextId'] !== null): ?>
-            <a href="/text/read?text=<?php echo (int) $bookContext['nextTextId']; ?>"
+            <?php if ($nextTextId !== null): ?>
+            <a href="/text/read?text=<?php echo $nextTextId; ?>"
                class="button is-small" title="Next chapter">
               <span>Next</span>
               <span class="icon is-small">

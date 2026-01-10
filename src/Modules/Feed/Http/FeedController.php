@@ -79,6 +79,7 @@ class FeedController
         if (!isset($_SESSION['wizard']) || !is_array($_SESSION['wizard'])) {
             $_SESSION['wizard'] = [];
         }
+        /** @var array<string, mixed> */
         return $_SESSION['wizard'];
     }
 
@@ -767,7 +768,9 @@ class FeedController
     private function displayFeedMessages(string $message): void
     {
         if (InputValidator::has('checked_feeds_save')) {
-            $message = $this->feedFacade->saveTextsFromFeed(InputValidator::getArray('feed'));
+            /** @var array<int, array{Nf_ID: int|string, TagList: array<string>, Nf_Max_Texts: int|null, TxLgID: int, TxTitle: string, TxText: string, TxAudioURI: string, TxSourceURI: string}> $feedData */
+            $feedData = InputValidator::getArray('feed');
+            $message = $this->feedFacade->saveTextsFromFeed($feedData);
         }
 
         if (isset($_SESSION['feed_loaded'])) {

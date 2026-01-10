@@ -22,6 +22,13 @@ namespace Lwt\Views\Word;
 
 use Lwt\Core\StringUtils;
 
+// Type assertions for variables passed from controller
+/** @var array{text: string, translation: string, notes?: string, romanization: string, sentence: string, status: int, langId: int} $word */
+assert(is_array($word));
+assert(is_string($tags));
+assert(is_string($scrdir));
+assert(is_string($ann));
+
 ?>
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
@@ -44,7 +51,7 @@ use Lwt\Core\StringUtils;
     }
     ?></b></td>
 </tr>
-<?php if (!empty($word['notes'])) : ?>
+<?php if (isset($word['notes']) && $word['notes'] !== '') : ?>
 <tr>
     <td class="td1 right">Notes:</td>
     <td class="td1 word-show-value"><?php echo StringUtils::parseInlineMarkdown($word['notes']); ?></td>
@@ -68,7 +75,7 @@ use Lwt\Core\StringUtils;
 </tr>
 <tr>
     <td class="td1 right">Status:</td>
-    <td class="td1"><?php echo get_colored_status_msg($word['status']); ?></td>
+    <td class="td1"><?php echo (string)get_colored_status_msg($word['status']); ?></td>
 </tr>
 </table>
 

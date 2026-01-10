@@ -340,12 +340,13 @@ class InputValidator
      *
      * Filters out non-numeric values and returns only valid integers.
      *
-     * @param string $key     Parameter name
-     * @param array  $default Default value if not set
+     * @param string     $key     Parameter name
+     * @param list<int>  $default Default value if not set
      *
      * @return int[] Array of validated integers
      *
-     * @psalm-return array<int>
+     * @psalm-param list<int> $default
+     * @psalm-return list<int>
      */
     public static function getIntArray(string $key, array $default = []): array
     {
@@ -371,13 +372,14 @@ class InputValidator
      *
      * Filters out non-string values.
      *
-     * @param string $key     Parameter name
-     * @param array  $default Default value if not set
-     * @param bool   $trim    Whether to trim whitespace (default: true)
+     * @param string        $key     Parameter name
+     * @param list<string>  $default Default value if not set
+     * @param bool          $trim    Whether to trim whitespace (default: true)
      *
      * @return string[] Array of validated strings
      *
-     * @psalm-return array<string>
+     * @psalm-param list<string> $default
+     * @psalm-return list<string>
      */
     public static function getStringArray(
         string $key,

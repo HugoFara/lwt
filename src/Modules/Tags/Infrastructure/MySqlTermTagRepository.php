@@ -299,6 +299,7 @@ class MySqlTermTagRepository implements TagRepositoryInterface
             ->orderBy('TgText', 'ASC')
             ->getPrepared();
 
+        /** @var list<string> */
         return array_column($rows, 'TgText');
     }
 
@@ -339,7 +340,7 @@ class MySqlTermTagRepository implements TagRepositoryInterface
      *
      * @param string $query Filter query string
      *
-     * @return array{clause: string, params: array<string>}
+     * @return array{clause: string, params: list<string>}
      */
     private function buildWhereClause(string $query): array
     {

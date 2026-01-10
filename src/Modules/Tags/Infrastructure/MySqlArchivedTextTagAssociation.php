@@ -69,7 +69,7 @@ class MySqlArchivedTextTagAssociation implements TagAssociationInterface
             ->where(self::ITEM_COLUMN, '=', $itemId)
             ->getPrepared();
 
-        return array_column($rows, self::TAG_COLUMN);
+        return array_map('intval', array_column($rows, self::TAG_COLUMN));
     }
 
     /**
@@ -82,6 +82,7 @@ class MySqlArchivedTextTagAssociation implements TagAssociationInterface
             [$itemId]
         );
 
+        /** @var list<string> */
         return array_column($rows, 'T2Text');
     }
 
