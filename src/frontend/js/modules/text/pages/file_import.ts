@@ -1,8 +1,9 @@
 /**
- * Subtitle Import - Parse SRT/VTT subtitle files and populate the text form.
+ * File Import - Handle import of subtitles and EPUB files on text edit form.
  *
- * Handles client-side parsing of subtitle files to provide immediate
- * preview in the textarea before saving.
+ * Supports:
+ * - SRT/VTT subtitles: Parse client-side and populate textarea
+ * - EPUB files: Redirect to dedicated book import page
  *
  * @license unlicense
  * @since   3.0.0
@@ -41,25 +42,38 @@ function getInputByName(name: string): string {
 }
 
 /**
- * Update the status message for subtitle import.
+ * Update the status message for file import.
  */
-function setSubtitleStatus(msg: string, isError = false): void {
-  const statusEl = document.getElementById('subtitleStatus');
+function setImportStatus(msg: string, isError = false, isInfo = false): void {
+  const statusEl = document.getElementById('importFileStatus');
   if (statusEl) {
     statusEl.textContent = msg;
-    statusEl.classList.toggle('has-text-danger', isError);
-    statusEl.classList.toggle('has-text-success', !isError && msg !== '');
+    statusEl.classList.remove('has-text-danger', 'has-text-success', 'has-text-info');
+    if (isError) {
+      statusEl.classList.add('has-text-danger');
+    } else if (isInfo) {
+      statusEl.classList.add('has-text-info');
+    } else if (msg) {
+      statusEl.classList.add('has-text-success');
+    }
   }
+}
+
+/**
+ * Get file extension in lowercase.
+ */
+function getFileExtension(filename: string): string {
+  return filename.split('.').pop()?.toLowerCase() ?? '';
 }
 
 /**
  * Detect subtitle format from filename and content.
  */
-function detectFormat(
+function detectSubtitleFormat(
   filename: string,
   content: string
 ): 'srt' | 'vtt' | null {
-  const ext = filename.split('.').pop()?.toLowerCase();
+  const ext = getFileExtension(filename);
   if (ext === 'srt') return 'srt';
   if (ext === 'vtt') return 'vtt';
 
@@ -74,10 +88,7 @@ function detectFormat(
  * Parse SRT format content.
  */
 function parseSrt(content: string): string {
-  // Normalize line endings
   content = content.replace(/\r\n|\r/g, '\n');
-
-  // Split by blank lines (cue boundaries)
   const blocks = content.trim().split(/\n\s*\n/);
   const texts: string[] = [];
 
@@ -90,14 +101,8 @@ function parseSrt(content: string): string {
 
     for (const line of lines) {
       const trimmedLine = line.trim();
-
-      // Skip sequence number (line that's just digits)
       if (/^\d+$/.test(trimmedLine)) continue;
-
-      // Skip timecode line (contains -->)
       if (trimmedLine.includes('-->')) continue;
-
-      // Keep text content (strip HTML tags)
       if (trimmedLine) {
         const cleanLine = trimmedLine.replace(/<[^>]*>/g, '');
         if (cleanLine) textLines.push(cleanLine);
@@ -116,27 +121,17 @@ function parseSrt(content: string): string {
  * Parse VTT format content.
  */
 function parseVtt(content: string): string {
-  // Normalize line endings
   content = content.replace(/\r\n|\r/g, '\n');
-
-  // Remove WEBVTT header
   content = content.replace(/^WEBVTT[^\n]*\n/, '');
 
-  // Split by blank lines
   const blocks = content.trim().split(/\n\s*\n/);
   const texts: string[] = [];
 
   for (const block of blocks) {
     const trimmedBlock = block.trim();
     if (!trimmedBlock) continue;
-
-    // Skip NOTE blocks
     if (trimmedBlock.startsWith('NOTE')) continue;
-
-    // Skip STYLE blocks
     if (trimmedBlock.startsWith('STYLE')) continue;
-
-    // Skip REGION blocks
     if (trimmedBlock.startsWith('REGION')) continue;
 
     const lines = trimmedBlock.split('\n');
@@ -146,20 +141,16 @@ function parseVtt(content: string): string {
     for (const line of lines) {
       const trimmedLine = line.trim();
 
-      // Skip cue identifier (line before timecode)
       if (!foundTimecode && !trimmedLine.includes('-->')) {
         continue;
       }
 
-      // Skip timecode line
       if (trimmedLine.includes('-->')) {
         foundTimecode = true;
         continue;
       }
 
-      // Keep text content (after timecode)
       if (foundTimecode && trimmedLine) {
-        // Strip VTT styling tags
         let cleanLine = trimmedLine.replace(/<\/?(?:c|v|lang|b|i|u|ruby|rt)[^>]*>/g, '');
         cleanLine = cleanLine.replace(/<[^>]*>/g, '');
         if (cleanLine) textLines.push(cleanLine);
@@ -189,13 +180,12 @@ function parseSubtitle(content: string, format: 'srt' | 'vtt'): SubtitleParseRes
     text = parseVtt(content);
   }
 
-  // Clean up the text
   text = text
-    .replace(/[^\S\n]+/g, ' ')  // Normalize spaces
+    .replace(/[^\S\n]+/g, ' ')
     .split('\n')
     .map((line) => line.trim())
     .join('\n')
-    .replace(/\n{3,}/g, '\n\n')  // Max 2 consecutive newlines
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 
   if (!text) {
@@ -208,76 +198,100 @@ function parseSubtitle(content: string, format: 'srt' | 'vtt'): SubtitleParseRes
 }
 
 /**
- * Handle subtitle file selection.
+ * Handle subtitle file - parse and populate textarea.
  */
 function handleSubtitleFile(file: File): void {
-  setSubtitleStatus('Reading file...');
-
-  const format = detectFormat(file.name, '');
-  if (!format) {
-    // We'll detect from content after reading
-  }
+  setImportStatus('Reading subtitle file...');
 
   const reader = new FileReader();
 
   reader.onload = (e) => {
     const content = e.target?.result as string;
     if (!content) {
-      setSubtitleStatus('Failed to read file', true);
+      setImportStatus('Failed to read file', true);
       return;
     }
 
-    const detectedFormat = detectFormat(file.name, content);
-    if (!detectedFormat) {
-      setSubtitleStatus('Unsupported file format. Use .srt or .vtt files.', true);
+    const format = detectSubtitleFormat(file.name, content);
+    if (!format) {
+      setImportStatus('Could not detect subtitle format', true);
       return;
     }
 
-    const result = parseSubtitle(content, detectedFormat);
+    const result = parseSubtitle(content, format);
 
     if (!result.success) {
-      setSubtitleStatus(result.error ?? 'Failed to parse subtitle file', true);
+      setImportStatus(result.error ?? 'Failed to parse subtitle file', true);
       return;
     }
 
-    // Populate form fields
     setInputByName('TxText', result.text);
 
-    // Auto-fill title if empty
     if (!getInputByName('TxTitle')) {
       const titleFromFile = file.name.replace(/\.(srt|vtt)$/i, '');
       setInputByName('TxTitle', titleFromFile);
     }
 
-    setSubtitleStatus(
-      `Imported ${result.cueCount} subtitle cue${result.cueCount !== 1 ? 's' : ''} from ${detectedFormat.toUpperCase()} file`
+    setImportStatus(
+      `Imported ${result.cueCount} subtitle cue${result.cueCount !== 1 ? 's' : ''} from ${format.toUpperCase()}`
     );
   };
 
   reader.onerror = () => {
-    setSubtitleStatus('Error reading file', true);
+    setImportStatus('Error reading file', true);
   };
 
   reader.readAsText(file);
 }
 
 /**
- * Initialize subtitle import functionality.
+ * Handle EPUB file - redirect to book import page.
  */
-export function initSubtitleImport(): void {
-  const fileInput = document.querySelector<HTMLInputElement>(
-    'input[name="subtitleFile"]'
-  );
+function handleEpubFile(file: File): void {
+  setImportStatus('Redirecting to EPUB importer...', false, true);
+
+  // Store file info for the book import page
+  // We'll use sessionStorage to pass the filename hint
+  sessionStorage.setItem('pendingEpubImport', JSON.stringify({
+    filename: file.name,
+    timestamp: Date.now()
+  }));
+
+  // Redirect to book import page
+  // The user will need to re-select the file there (browser security limitation)
+  window.location.href = '/book/import?from=text';
+}
+
+/**
+ * Handle file selection based on type.
+ */
+function handleFileImport(file: File): void {
+  const ext = getFileExtension(file.name);
+
+  if (ext === 'epub') {
+    handleEpubFile(file);
+  } else if (ext === 'srt' || ext === 'vtt') {
+    handleSubtitleFile(file);
+  } else {
+    setImportStatus('Unsupported file type. Use .epub, .srt, or .vtt files.', true);
+  }
+}
+
+/**
+ * Initialize file import functionality.
+ */
+export function initFileImport(): void {
+  const fileInput = document.querySelector<HTMLInputElement>('#importFile');
 
   if (!fileInput) return;
 
   fileInput.addEventListener('change', () => {
     const file = fileInput.files?.[0];
     if (file) {
-      handleSubtitleFile(file);
+      handleFileImport(file);
     }
   });
 }
 
 // Auto-initialize on document ready
-document.addEventListener('DOMContentLoaded', initSubtitleImport);
+document.addEventListener('DOMContentLoaded', initFileImport);

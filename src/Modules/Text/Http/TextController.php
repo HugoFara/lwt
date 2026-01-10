@@ -352,20 +352,24 @@ class TextController extends BaseController
         $txAudioUri = $this->param('TxAudioURI');
         $txSourceUri = $this->param('TxSourceURI');
 
-        // Check for uploaded subtitle file (.srt, .vtt)
-        $subtitleFile = InputValidator::getUploadedFile('subtitleFile');
-        if ($subtitleFile !== null) {
-            $subtitleService = new \Lwt\Modules\Text\Application\Services\SubtitleParserService();
-            $fileContent = file_get_contents($subtitleFile['tmp_name']);
-            if ($fileContent !== false) {
-                $format = $subtitleService->detectFormat($subtitleFile['name'], $fileContent);
-                if ($format !== null) {
-                    $parseResult = $subtitleService->parse($fileContent, $format);
-                    if ($parseResult['success']) {
-                        $txText = $parseResult['text'];
-                        // Auto-set title from filename if empty
-                        if ($txTitle === '') {
-                            $txTitle = pathinfo($subtitleFile['name'], PATHINFO_FILENAME);
+        // Check for uploaded subtitle file (.srt, .vtt) - server-side fallback
+        $importFile = InputValidator::getUploadedFile('importFile');
+        if ($importFile !== null) {
+            $extension = strtolower(pathinfo($importFile['name'], PATHINFO_EXTENSION));
+            // Only handle subtitle files here; EPUB files are handled by /book/import
+            if ($extension === 'srt' || $extension === 'vtt') {
+                $subtitleService = new \Lwt\Modules\Text\Application\Services\SubtitleParserService();
+                $fileContent = file_get_contents($importFile['tmp_name']);
+                if ($fileContent !== false) {
+                    $format = $subtitleService->detectFormat($importFile['name'], $fileContent);
+                    if ($format !== null) {
+                        $parseResult = $subtitleService->parse($fileContent, $format);
+                        if ($parseResult['success']) {
+                            $txText = $parseResult['text'];
+                            // Auto-set title from filename if empty
+                            if ($txTitle === '') {
+                                $txTitle = pathinfo($importFile['name'], PATHINFO_FILENAME);
+                            }
                         }
                     }
                 }

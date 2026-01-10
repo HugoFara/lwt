@@ -136,32 +136,31 @@ if ($isNew) {
             </div>
             <p class="help">
                 Long texts (over 60KB) will be automatically split into chapters and saved as a book.
-                For EPUB files, use the <a href="/book/import">Import EPUB</a> feature.
             </p>
         </div>
 
         <?php if ($isNew): ?>
-        <!-- Subtitle File Import -->
+        <!-- Import from File -->
         <div class="field">
-            <label class="label">Import from Subtitle File</label>
+            <label class="label">Import from File</label>
             <div class="file has-name is-fullwidth">
                 <label class="file-label">
-                    <input class="file-input" type="file" name="subtitleFile"
-                           accept=".srt,.vtt"
+                    <input class="file-input" type="file" name="importFile" id="importFile"
+                           accept=".srt,.vtt,.epub"
                            onchange="this.closest('.file').querySelector('.file-name').textContent = this.files[0]?.name || 'No file selected'" />
                     <span class="file-cta">
                         <span class="file-icon">
-                            <?php echo IconHelper::render('file-text', ['alt' => 'Upload']); ?>
+                            <?php echo IconHelper::render('file-up', ['alt' => 'Upload']); ?>
                         </span>
-                        <span class="file-label">Choose .srt or .vtt file...</span>
+                        <span class="file-label">Choose file...</span>
                     </span>
                     <span class="file-name">No file selected</span>
                 </label>
             </div>
             <p class="help">
-                Optional. Select a subtitle file to extract text into the textarea above.
+                Supported: EPUB books, SRT/VTT subtitles. Subtitles populate the text area; EPUBs open the book importer.
             </p>
-            <p id="subtitleStatus" class="help"></p>
+            <p id="importFileStatus" class="help"></p>
         </div>
         <?php endif; ?>
 

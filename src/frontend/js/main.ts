@@ -121,7 +121,7 @@ import '@modules/text/pages/texts_grouped_app';
 import '@modules/text/pages/archived_texts_grouped_app';
 import '@modules/text/pages/text_status_chart';
 import '@modules/text/pages/youtube_import';
-import '@modules/text/pages/subtitle_import';
+import '@modules/text/pages/file_import';
 import '@modules/text/pages/text_check_display';
 import '@modules/text/pages/text_print_app';
 

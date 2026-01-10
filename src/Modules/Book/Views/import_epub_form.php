@@ -36,6 +36,15 @@ $actions = [
 
 <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
+<?php if (isset($_GET['from']) && $_GET['from'] === 'text'): ?>
+<div class="notification is-info is-light">
+    <p>
+        <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'mr-2']); ?>
+        EPUB files are imported as books with chapters. Please select your EPUB file below.
+    </p>
+</div>
+<?php endif; ?>
+
 <form enctype="multipart/form-data" class="validate" action="/book/import" method="post">
     <?php echo FormHelper::csrfField(); ?>
 
