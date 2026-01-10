@@ -116,9 +116,6 @@ class Settings
         if ($v === '') {
             return 'Value is an empty string!';
         }
-        QueryBuilder::table('settings')
-            ->where('StKey', '=', $k)
-            ->deletePrepared();
         if (isset($dft[$k]) && $dft[$k]['num']) {
             $v = (int)$v;
             if (isset($dft[$k]['min']) && $v < $dft[$k]['min']) {
@@ -128,9 +125,15 @@ class Settings
                 $v = $dft[$k]['dft'];
             }
         }
-        $dum = QueryBuilder::table('settings')
-            ->insertPrepared(['StKey' => $k, 'StValue' => (string)$v]);
-        return "OK: $dum rows changed";
+        // Use INSERT ... ON DUPLICATE KEY UPDATE for atomic upsert
+        // Settings table has composite primary key (StKey, StUsID)
+        // StUsID defaults to 0 for single-user mode
+        Connection::preparedExecute(
+            "INSERT INTO settings (StKey, StUsID, StValue) VALUES (?, 0, ?)
+             ON DUPLICATE KEY UPDATE StValue = ?",
+            [$k, (string)$v, (string)$v]
+        );
+        return "OK: Setting saved";
     }
 
     /**

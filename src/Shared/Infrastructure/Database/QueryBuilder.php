@@ -336,16 +336,18 @@ class QueryBuilder
         mixed $value = null,
         string $boolean = 'AND'
     ): static {
-        // Handle simple equality: where('col', 'value')
-        // When using 2-arg form like where('col', 'value'), operator is actually the value
+        // Determine if this is a 2-arg form (where('col', 'value')) or 3-arg form (where('col', '=', 'value'))
+        //
+        // Logic:
+        // - If $value is not null, it's definitely 3-arg form
+        // - If $value is null and $operator is a known SQL operator, it's 3-arg form with null value
+        // - If $value is null and $operator is NOT a known SQL operator, it's 2-arg form
         $operatorStr = is_array($operator) ? '' : (string)$operator;
-        $isOperatorString = $value === null && in_array(
-            strtoupper($operatorStr),
-            ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL']
-        );
+        $validOperators = ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL'];
+        $isKnownOperator = in_array(strtoupper($operatorStr), $validOperators);
 
-        if ($isOperatorString) {
-            // Standard 3-arg form: where('col', '=', 'value')
+        if ($value !== null || $isKnownOperator) {
+            // 3-arg form: where('col', '=', 'value') or where('col', 'IS NULL')
             $this->wheres[] = [
                 'column' => $column,
                 'operator' => strtoupper($operatorStr),
