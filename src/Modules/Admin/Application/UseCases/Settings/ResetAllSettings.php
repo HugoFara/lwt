@@ -40,11 +40,11 @@ class ResetAllSettings
      *
      * Deletes all settings with 'set-' prefix, restoring defaults.
      *
-     * @return string Status message
+     * @return array{success: bool}
      */
-    public function execute(): string
+    public function execute(): array
     {
         $this->repository->deleteByPattern('set-%');
-        return 'All Settings reset to default values';
+        return ['success' => true];
     }
 }

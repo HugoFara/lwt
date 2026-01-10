@@ -40,22 +40,26 @@ class DeleteLanguage
      *
      * @param int $id Language ID
      *
-     * @return string Result message
+     * @return array{success: bool, count: int, error: ?string}
      */
-    public function execute(int $id): string
+    public function execute(int $id): array
     {
         // Check for related data
         $stats = $this->getRelatedDataCounts($id);
 
         if ($stats['texts'] > 0 || $stats['archivedTexts'] > 0 ||
             $stats['words'] > 0 || $stats['feeds'] > 0) {
-            return 'You must first delete texts, archived texts, news_feeds and words with this language!';
+            return [
+                'success' => false,
+                'count' => 0,
+                'error' => 'You must first delete texts, archived texts, news_feeds and words with this language!'
+            ];
         }
 
         $affected = QueryBuilder::table('languages')
             ->where('LgID', '=', $id)
             ->delete();
-        return "Deleted: " . $affected;
+        return ['success' => $affected > 0, 'count' => $affected, 'error' => null];
     }
 
     /**

@@ -37,9 +37,9 @@ class ArchiveText
      *
      * @param int $textId Text ID
      *
-     * @return string Result message
+     * @return array{sentences: int, textItems: int, archived: int} Counts
      */
-    public function execute(int $textId): string
+    public function execute(int $textId): array
     {
         // Delete parsed data
         $count3 = QueryBuilder::table('word_occurrences')
@@ -60,7 +60,7 @@ class ArchiveText
 
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-        return "Sentences deleted: $count2, Text items deleted: $count3, Archived: $archived";
+        return ['sentences' => $count2, 'textItems' => $count3, 'archived' => $archived];
     }
 
     /**
@@ -68,12 +68,12 @@ class ArchiveText
      *
      * @param array $textIds Array of text IDs
      *
-     * @return string Result message
+     * @return array{count: int} Count of archived texts
      */
-    public function archiveMultiple(array $textIds): string
+    public function archiveMultiple(array $textIds): array
     {
         if (empty($textIds)) {
-            return "Multiple Actions: 0";
+            return ['count' => 0];
         }
 
         $ids = array_map('intval', $textIds);
@@ -100,7 +100,7 @@ class ArchiveText
 
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-        return "Archived Text(s): {$count}";
+        return ['count' => $count];
     }
 
     /**
@@ -110,7 +110,7 @@ class ArchiveText
      *
      * @param int $textId Text ID (archived)
      *
-     * @return array{message: string, textId: int|null} Result with message and text ID
+     * @return array{success: bool, textId: ?int, unarchived: int, sentences: int, textItems: int, error: ?string}
      */
     public function unarchive(int $textId): array
     {
@@ -124,7 +124,14 @@ class ArchiveText
         );
 
         if ($text === null) {
-            return ['message' => 'Archived text not found', 'textId' => null];
+            return [
+                'success' => false,
+                'textId' => null,
+                'unarchived' => 0,
+                'sentences' => 0,
+                'textItems' => 0,
+                'error' => 'Archived text not found'
+            ];
         }
 
         // Unarchive
@@ -155,9 +162,14 @@ class ArchiveText
             'cnt'
         );
 
-        $message = "Unarchived: $unarchived / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
-
-        return ['message' => $message, 'textId' => $textId];
+        return [
+            'success' => true,
+            'textId' => $textId,
+            'unarchived' => $unarchived,
+            'sentences' => $sentenceCount,
+            'textItems' => $itemCount,
+            'error' => null
+        ];
     }
 
     /**
@@ -165,12 +177,12 @@ class ArchiveText
      *
      * @param array $textIds Array of archived text IDs
      *
-     * @return string Result message
+     * @return array{count: int} Count of unarchived texts
      */
-    public function unarchiveMultiple(array $textIds): string
+    public function unarchiveMultiple(array $textIds): array
     {
         if (empty($textIds)) {
-            return "Multiple Actions: 0";
+            return ['count' => 0];
         }
 
         $ids = array_map('intval', $textIds);
@@ -178,11 +190,11 @@ class ArchiveText
 
         foreach ($ids as $textId) {
             $result = $this->unarchive($textId);
-            if ($result['textId'] !== null) {
+            if ($result['success']) {
                 $count++;
             }
         }
 
-        return "Unarchived Text(s): {$count}";
+        return ['count' => $count];
     }
 }

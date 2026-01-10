@@ -34,9 +34,9 @@ class DeleteText
      *
      * @param int $textId Text ID
      *
-     * @return string Result message
+     * @return array{texts: int, sentences: int, textItems: int} Counts of deleted items
      */
-    public function execute(int $textId): string
+    public function execute(int $textId): array
     {
         $count3 = QueryBuilder::table('word_occurrences')
             ->where('Ti2TxID', '=', $textId)
@@ -52,7 +52,7 @@ class DeleteText
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         $this->cleanupTextTags();
 
-        return "Texts deleted: $count1 / Sentences deleted: $count2 / Text items deleted: $count3";
+        return ['texts' => $count1, 'sentences' => $count2, 'textItems' => $count3];
     }
 
     /**
@@ -60,12 +60,12 @@ class DeleteText
      *
      * @param array $textIds Array of text IDs
      *
-     * @return string Result message
+     * @return array{count: int} Count of deleted texts
      */
-    public function deleteMultiple(array $textIds): string
+    public function deleteMultiple(array $textIds): array
     {
         if (empty($textIds)) {
-            return "Multiple Actions: 0";
+            return ['count' => 0];
         }
 
         $ids = array_map('intval', $textIds);
@@ -89,7 +89,7 @@ class DeleteText
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         $this->cleanupTextTags();
 
-        return "Texts deleted: $affectedRows";
+        return ['count' => $affectedRows];
     }
 
     /**
@@ -97,9 +97,9 @@ class DeleteText
      *
      * @param int $textId Archived text ID
      *
-     * @return string Result message
+     * @return array{count: int} Count of deleted texts
      */
-    public function deleteArchivedText(int $textId): string
+    public function deleteArchivedText(int $textId): array
     {
         $bindings = [$textId];
         $deleted = Connection::preparedExecute(
@@ -109,7 +109,7 @@ class DeleteText
         );
         Maintenance::adjustAutoIncrement('texts', 'TxID');
         $this->cleanupTextTags();
-        return "Archived Texts deleted: $deleted";
+        return ['count' => $deleted];
     }
 
     /**
@@ -117,12 +117,12 @@ class DeleteText
      *
      * @param array $textIds Array of archived text IDs
      *
-     * @return string Result message
+     * @return array{count: int} Count of deleted texts
      */
-    public function deleteArchivedTexts(array $textIds): string
+    public function deleteArchivedTexts(array $textIds): array
     {
         if (empty($textIds)) {
-            return "Multiple Actions: 0";
+            return ['count' => 0];
         }
 
         /** @var array<int, int> $ids */
@@ -135,7 +135,7 @@ class DeleteText
         );
         Maintenance::adjustAutoIncrement('texts', 'TxID');
         $this->cleanupTextTags();
-        return "Archived Texts deleted: $deleted";
+        return ['count' => $deleted];
     }
 
     /**

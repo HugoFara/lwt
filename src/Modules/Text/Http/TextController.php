@@ -296,11 +296,13 @@ class TextController extends BaseController
 
         switch ($markAction) {
             case 'del':
-                $message = $this->textService->deleteTexts($marked);
+                $result = $this->textService->deleteTexts($marked);
+                $message = "Texts deleted: {$result['count']}";
                 break;
 
             case 'arch':
-                $message = $this->textService->archiveTexts($marked);
+                $result = $this->textService->archiveTexts($marked);
+                $message = "Archived Text(s): {$result['count']}";
                 break;
 
             case 'addtag':
@@ -864,7 +866,8 @@ class TextController extends BaseController
 
         switch ($markAction) {
             case 'del':
-                $message = $this->textService->deleteArchivedTexts($marked);
+                $result = $this->textService->deleteArchivedTexts($marked);
+                $message = "Archived Texts deleted: {$result['count']}";
                 break;
 
             case 'addtag':
@@ -880,7 +883,8 @@ class TextController extends BaseController
                 exit();
 
             case 'unarch':
-                $message = $this->textService->unarchiveTexts($marked);
+                $result = $this->textService->unarchiveTexts($marked);
+                $message = "Unarchived Text(s): {$result['count']}";
                 break;
         }
 

@@ -89,19 +89,32 @@ class LanguageController extends BaseController
         // Handle actions
         $refreshId = $this->paramInt('refresh');
         if ($refreshId !== null) {
-            $message = $this->languageFacade->refresh($refreshId);
+            $result = $this->languageFacade->refresh($refreshId);
+            $message = "Sentences deleted: {$result['sentencesDeleted']} / " .
+                "Text items deleted: {$result['textItemsDeleted']} / " .
+                "Sentences added: {$result['sentencesAdded']} / " .
+                "Text items added: {$result['textItemsAdded']}";
         }
 
         $delId = $this->paramInt('del');
         $op = $this->param('op');
         if ($delId !== null) {
-            $message = $this->languageFacade->delete($delId);
+            $result = $this->languageFacade->delete($delId);
+            $message = $result['error'] ?? "Deleted: {$result['count']}";
         } elseif ($op !== '') {
             if ($op === 'Save') {
-                $message = $this->languageFacade->create();
+                $result = $this->languageFacade->create();
+                $message = $result['success'] ? "Saved: 1" : "Error creating language";
             } elseif ($op === 'Change') {
                 $lgId = $this->paramInt('LgID', 0) ?? 0;
-                $message = $this->languageFacade->update($lgId);
+                $result = $this->languageFacade->update($lgId);
+                if ($result['error'] !== null) {
+                    $message = $result['error'];
+                } elseif ($result['reparsed'] !== null) {
+                    $message = "Updated: 1 / Reparsed texts: {$result['reparsed']}";
+                } else {
+                    $message = "Updated: 1 / Reparsing not needed";
+                }
             }
         }
 

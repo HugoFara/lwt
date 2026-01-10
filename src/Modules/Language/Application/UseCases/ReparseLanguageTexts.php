@@ -42,9 +42,9 @@ class ReparseLanguageTexts
      *
      * @param int $id Language ID
      *
-     * @return string Result message
+     * @return array{sentencesDeleted: int, textItemsDeleted: int, sentencesAdded: int, textItemsAdded: int}
      */
-    public function execute(int $id): string
+    public function execute(int $id): array
     {
         $sentencesDeleted = QueryBuilder::table('sentences')
             ->where('SeLgID', '=', $id)
@@ -72,10 +72,12 @@ class ReparseLanguageTexts
             ->where('Ti2LgID', '=', $id)
             ->count();
 
-        return "Sentences deleted: " . $sentencesDeleted .
-            " / Text items deleted: " . $textItemsDeleted .
-            " / Sentences added: " . $sentencesAdded .
-            " / Text items added: " . $textItemsAdded;
+        return [
+            'sentencesDeleted' => $sentencesDeleted,
+            'textItemsDeleted' => $textItemsDeleted,
+            'sentencesAdded' => $sentencesAdded,
+            'textItemsAdded' => $textItemsAdded
+        ];
     }
 
     /**

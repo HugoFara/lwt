@@ -140,22 +140,28 @@ class TextFacade
 
     /**
      * Delete an archived text.
+     *
+     * @return array{count: int}
      */
-    public function deleteArchivedText(int $textId): string
+    public function deleteArchivedText(int $textId): array
     {
         return $this->deleteText->deleteArchivedText($textId);
     }
 
     /**
      * Delete multiple archived texts.
+     *
+     * @return array{count: int}
      */
-    public function deleteArchivedTexts(array $textIds): string
+    public function deleteArchivedTexts(array $textIds): array
     {
         return $this->deleteText->deleteArchivedTexts($textIds);
     }
 
     /**
      * Unarchive a text.
+     *
+     * @return array{success: bool, textId: ?int, unarchived: int, sentences: int, textItems: int, error: ?string}
      */
     public function unarchiveText(int $archivedId): array
     {
@@ -164,8 +170,10 @@ class TextFacade
 
     /**
      * Unarchive multiple texts.
+     *
+     * @return array{count: int}
      */
-    public function unarchiveTexts(array $archivedIds): string
+    public function unarchiveTexts(array $archivedIds): array
     {
         return $this->archiveText->unarchiveMultiple($archivedIds);
     }
@@ -352,16 +360,20 @@ class TextFacade
 
     /**
      * Delete multiple active texts.
+     *
+     * @return array{count: int}
      */
-    public function deleteTexts(array $textIds): string
+    public function deleteTexts(array $textIds): array
     {
         return $this->deleteText->deleteMultiple($textIds);
     }
 
     /**
      * Archive multiple texts.
+     *
+     * @return array{count: int}
      */
-    public function archiveTexts(array $textIds): string
+    public function archiveTexts(array $textIds): array
     {
         return $this->archiveText->archiveMultiple($textIds);
     }

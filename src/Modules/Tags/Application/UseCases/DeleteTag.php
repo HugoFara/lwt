@@ -60,16 +60,16 @@ class DeleteTag
     }
 
     /**
-     * Delete a single tag and return message.
+     * Delete a single tag and return result.
      *
      * @param int $id Tag ID
      *
-     * @return string Result message
+     * @return array{success: bool, count: int} Result
      */
-    public function executeWithMessage(int $id): string
+    public function executeWithResult(int $id): array
     {
         $deleted = $this->execute($id);
-        return $deleted ? "Deleted" : "Deleted (0 rows affected)";
+        return ['success' => $deleted, 'count' => $deleted ? 1 : 0];
     }
 
     /**
@@ -95,16 +95,16 @@ class DeleteTag
     }
 
     /**
-     * Delete multiple tags and return message.
+     * Delete multiple tags and return result.
      *
      * @param int[] $ids Tag IDs
      *
-     * @return string Result message
+     * @return array{success: bool, count: int} Result
      */
-    public function executeMultipleWithMessage(array $ids): string
+    public function executeMultipleWithResult(array $ids): array
     {
         $deleted = $this->executeMultiple($ids);
-        return $deleted > 0 ? "Deleted" : "Deleted (0 rows affected)";
+        return ['success' => $deleted > 0, 'count' => $deleted];
     }
 
     /**
@@ -126,15 +126,15 @@ class DeleteTag
     }
 
     /**
-     * Delete all tags matching filter and return message.
+     * Delete all tags matching filter and return result.
      *
      * @param string $query Filter query
      *
-     * @return string Result message
+     * @return array{success: bool, count: int} Result
      */
-    public function executeAllWithMessage(string $query = ''): string
+    public function executeAllWithResult(string $query = ''): array
     {
         $deleted = $this->executeAll($query);
-        return $deleted > 0 ? "Deleted" : "Deleted (0 rows affected)";
+        return ['success' => $deleted > 0, 'count' => $deleted];
     }
 }

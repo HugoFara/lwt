@@ -62,20 +62,20 @@ class CreateTag
     }
 
     /**
-     * Execute and return result message (backward compatible).
+     * Execute and return result.
      *
      * @param string $text    Tag text
      * @param string $comment Tag comment
      *
-     * @return string Result message ("Saved" or error)
+     * @return array{success: bool, tag: ?Tag, error: ?string} Result
      */
-    public function executeWithMessage(string $text, string $comment = ''): string
+    public function executeWithResult(string $text, string $comment = ''): array
     {
         try {
-            $this->execute($text, $comment);
-            return "Saved";
+            $tag = $this->execute($text, $comment);
+            return ['success' => true, 'tag' => $tag, 'error' => null];
         } catch (\Exception $e) {
-            return "Error: " . $e->getMessage();
+            return ['success' => false, 'tag' => null, 'error' => $e->getMessage()];
         }
     }
 }

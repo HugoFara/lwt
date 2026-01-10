@@ -40,11 +40,11 @@ class EmptyDatabase
     /**
      * Execute the use case.
      *
-     * @return string Status message
+     * @return array{success: bool}
      */
-    public function execute(): string
+    public function execute(): array
     {
         $this->repository->truncateUserTables();
-        return "Database content has been deleted (but settings have been kept)";
+        return ['success' => true];
     }
 }

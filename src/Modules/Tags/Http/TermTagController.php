@@ -92,7 +92,8 @@ class TermTagController extends AbstractCrudController
         $text = $this->param('TgText', '');
         $comment = $this->param('TgComment', '');
 
-        return $this->facade->create($text, $comment);
+        $result = $this->facade->create($text, $comment);
+        return $result['success'] ? "Saved" : "Error: " . ($result['error'] ?? 'Unknown error');
     }
 
     /**
@@ -107,7 +108,8 @@ class TermTagController extends AbstractCrudController
         $text = $this->param('TgText', '');
         $comment = $this->param('TgComment', '');
 
-        return $this->facade->update($id, $text, $comment);
+        $result = $this->facade->update($id, $text, $comment);
+        return $result['success'] ? "Updated" : "Error: " . ($result['error'] ?? 'Unknown error');
     }
 
     /**
@@ -119,7 +121,8 @@ class TermTagController extends AbstractCrudController
      */
     protected function handleDelete(int $id): string
     {
-        return $this->facade->delete($id);
+        $result = $this->facade->delete($id);
+        return $result['success'] ? "Deleted" : "Deleted (0 rows affected)";
     }
 
     /**
@@ -135,7 +138,7 @@ class TermTagController extends AbstractCrudController
         if ($action === 'del') {
             $result = $this->facade->deleteMultiple($ids);
             $this->facade->cleanupOrphanedLinks();
-            return $result;
+            return $result['count'] > 0 ? "Deleted" : "Deleted (0 rows affected)";
         }
 
         return parent::handleBulkAction($action, $ids);
@@ -151,7 +154,8 @@ class TermTagController extends AbstractCrudController
     protected function processAllAction(string $action): string
     {
         if ($action === 'delall') {
-            return $this->facade->deleteAll($this->currentQuery);
+            $result = $this->facade->deleteAll($this->currentQuery);
+            return $result['count'] > 0 ? "Deleted" : "Deleted (0 rows affected)";
         }
 
         return parent::processAllAction($action);

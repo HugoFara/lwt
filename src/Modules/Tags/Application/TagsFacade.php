@@ -173,12 +173,12 @@ class TagsFacade
      * @param string $text    Tag text
      * @param string $comment Tag comment
      *
-     * @return string Result message
+     * @return array{success: bool, tag: ?Tag, error: ?string} Result
      */
-    public function create(string $text, string $comment = ''): string
+    public function create(string $text, string $comment = ''): array
     {
         $useCase = new CreateTag($this->repository);
-        return $useCase->executeWithMessage($text, $comment);
+        return $useCase->executeWithResult($text, $comment);
     }
 
     /**
@@ -188,12 +188,12 @@ class TagsFacade
      * @param string $text    New tag text
      * @param string $comment New tag comment
      *
-     * @return string Result message
+     * @return array{success: bool, tag: ?Tag, error: ?string} Result
      */
-    public function update(int $id, string $text, string $comment): string
+    public function update(int $id, string $text, string $comment): array
     {
         $useCase = new UpdateTag($this->repository);
-        return $useCase->executeWithMessage($id, $text, $comment);
+        return $useCase->executeWithResult($id, $text, $comment);
     }
 
     /**
@@ -201,12 +201,12 @@ class TagsFacade
      *
      * @param int $id Tag ID
      *
-     * @return string Result message
+     * @return array{success: bool, count: int} Result
      */
-    public function delete(int $id): string
+    public function delete(int $id): array
     {
         $useCase = new DeleteTag($this->repository, $this->association);
-        return $useCase->executeWithMessage($id);
+        return $useCase->executeWithResult($id);
     }
 
     /**
@@ -214,12 +214,12 @@ class TagsFacade
      *
      * @param int[] $ids Tag IDs
      *
-     * @return string Result message
+     * @return array{success: bool, count: int} Result
      */
-    public function deleteMultiple(array $ids): string
+    public function deleteMultiple(array $ids): array
     {
         $useCase = new DeleteTag($this->repository, $this->association);
-        return $useCase->executeMultipleWithMessage($ids);
+        return $useCase->executeMultipleWithResult($ids);
     }
 
     /**
@@ -227,12 +227,12 @@ class TagsFacade
      *
      * @param string $query Filter query
      *
-     * @return string Result message
+     * @return array{success: bool, count: int} Result
      */
-    public function deleteAll(string $query = ''): string
+    public function deleteAll(string $query = ''): array
     {
         $useCase = new DeleteTag($this->repository, $this->association);
-        return $useCase->executeAllWithMessage($query);
+        return $useCase->executeAllWithResult($query);
     }
 
     /**

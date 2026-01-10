@@ -39,9 +39,9 @@ class CreateLanguage
     /**
      * Create a new language from request data.
      *
-     * @return string Result message
+     * @return array{success: bool, id: int}
      */
-    public function execute(): string
+    public function execute(): array
     {
         $data = $this->getLanguageDataFromRequest();
 
@@ -54,7 +54,16 @@ class CreateLanguage
 
         $this->buildLanguageSql($data, $existingId);
 
-        return "Saved: 1";
+        if ($existingId !== null) {
+            return ['success' => true, 'id' => $existingId];
+        }
+
+        $row = QueryBuilder::table('languages')
+            ->selectRaw('MAX(LgID) AS max_id')
+            ->firstPrepared();
+        $newId = isset($row['max_id']) && is_numeric($row['max_id']) ? (int)$row['max_id'] : 0;
+
+        return ['success' => true, 'id' => $newId];
     }
 
     /**

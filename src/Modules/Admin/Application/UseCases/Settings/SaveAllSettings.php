@@ -60,9 +60,9 @@ class SaveAllSettings
     /**
      * Execute the use case - save all settings from request.
      *
-     * @return string Status message
+     * @return array{success: bool}
      */
-    public function execute(): string
+    public function execute(): array
     {
         foreach (self::SETTING_KEYS as $key) {
             if ($key === 'set-tts') {
@@ -76,7 +76,7 @@ class SaveAllSettings
             Settings::save($key, $value);
         }
 
-        return 'Settings saved';
+        return ['success' => true];
     }
 
     /**
@@ -84,9 +84,9 @@ class SaveAllSettings
      *
      * @param array<string, string> $data Settings data
      *
-     * @return string Status message
+     * @return array{success: bool}
      */
-    public function executeWithData(array $data): string
+    public function executeWithData(array $data): array
     {
         foreach (self::SETTING_KEYS as $key) {
             if (isset($data[$key])) {
@@ -98,6 +98,6 @@ class SaveAllSettings
             }
         }
 
-        return 'Settings saved';
+        return ['success' => true];
     }
 }

@@ -46,9 +46,9 @@ class UpdateLanguage
      *
      * @param int $id Language ID
      *
-     * @return string Result message
+     * @return array{success: bool, reparsed: ?int, error: ?string}
      */
-    public function execute(int $id): string
+    public function execute(int $id): array
     {
         $data = $this->getLanguageDataFromRequest();
 
@@ -57,7 +57,7 @@ class UpdateLanguage
             ->where('LgID', '=', $id)
             ->getPrepared();
         if (empty($records)) {
-            return "Cannot access language data";
+            return ['success' => false, 'reparsed' => null, 'error' => 'Cannot access language data'];
         }
         $record = $records[0];
 
@@ -66,16 +66,13 @@ class UpdateLanguage
 
         // Update language
         $this->buildLanguageSql($data, $id);
-        $message = "Updated: 1";
 
+        $reparseCount = null;
         if ($needReParse) {
             $reparseCount = $this->reparseUseCase->reparseTexts($id);
-            $message .= " / Reparsed texts: " . $reparseCount;
-        } else {
-            $message .= " / Reparsing not needed";
         }
 
-        return $message;
+        return ['success' => true, 'reparsed' => $reparseCount, 'error' => null];
     }
 
     /**

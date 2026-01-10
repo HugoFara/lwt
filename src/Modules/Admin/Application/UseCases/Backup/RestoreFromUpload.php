@@ -41,25 +41,28 @@ class RestoreFromUpload
      *
      * @param array{name: string, type: string, tmp_name: string, error: int, size: int}|null $fileData Validated file data from InputValidator::getUploadedFile()
      *
-     * @return string Status message
+     * @return array{success: bool, error: ?string}
      */
-    public function execute(?array $fileData): string
+    public function execute(?array $fileData): array
     {
         // Check if restore is enabled
         if (!Globals::isBackupRestoreEnabled()) {
-            return "Error: Database restore is disabled. " .
-                "Set BACKUP_RESTORE_ENABLED=true in .env to enable.";
+            return [
+                'success' => false,
+                'error' => "Database restore is disabled. Set BACKUP_RESTORE_ENABLED=true in .env to enable."
+            ];
         }
 
         if ($fileData === null) {
-            return "Error: No Restore file specified";
+            return ['success' => false, 'error' => "No Restore file specified"];
         }
 
         $handle = @gzopen($fileData["tmp_name"], "r");
         if ($handle === false) {
-            return "Error: Restore file could not be opened";
+            return ['success' => false, 'error' => "Restore file could not be opened"];
         }
 
-        return $this->repository->restoreFromHandle($handle, "Database");
+        $this->repository->restoreFromHandle($handle, "Database");
+        return ['success' => true, 'error' => null];
     }
 }

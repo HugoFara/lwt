@@ -222,9 +222,9 @@ class LanguageFacade
     /**
      * Save a new language to the database from request data.
      *
-     * @return string Result message
+     * @return array{success: bool, id: int}
      */
-    public function create(): string
+    public function create(): array
     {
         return $this->createLanguage->execute();
     }
@@ -246,9 +246,9 @@ class LanguageFacade
      *
      * @param int $id Language ID
      *
-     * @return string Result message
+     * @return array{success: bool, reparsed: ?int, error: ?string}
      */
-    public function update(int $id): string
+    public function update(int $id): array
     {
         return $this->updateLanguage->execute($id);
     }
@@ -271,9 +271,9 @@ class LanguageFacade
      *
      * @param int $id Language ID
      *
-     * @return string Result message
+     * @return array{success: bool, count: int, error: ?string}
      */
-    public function delete(int $id): string
+    public function delete(int $id): array
     {
         return $this->deleteLanguage->execute($id);
     }
@@ -311,9 +311,9 @@ class LanguageFacade
      *
      * @param int $id Language ID
      *
-     * @return string Result message
+     * @return array{sentencesDeleted: int, textItemsDeleted: int, sentencesAdded: int, textItemsAdded: int}
      */
-    public function refresh(int $id): string
+    public function refresh(int $id): array
     {
         return $this->reparseLanguageTexts->execute($id);
     }

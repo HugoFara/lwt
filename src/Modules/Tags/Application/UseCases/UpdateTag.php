@@ -67,21 +67,21 @@ class UpdateTag
     }
 
     /**
-     * Execute and return result message (backward compatible).
+     * Execute and return result.
      *
      * @param int    $id      Tag ID
      * @param string $text    New tag text
      * @param string $comment New tag comment
      *
-     * @return string Result message ("Updated" or error)
+     * @return array{success: bool, tag: ?Tag, error: ?string} Result
      */
-    public function executeWithMessage(int $id, string $text, string $comment): string
+    public function executeWithResult(int $id, string $text, string $comment): array
     {
         try {
-            $this->execute($id, $text, $comment);
-            return "Updated";
+            $tag = $this->execute($id, $text, $comment);
+            return ['success' => true, 'tag' => $tag, 'error' => null];
         } catch (\Exception $e) {
-            return "Error: " . $e->getMessage();
+            return ['success' => false, 'tag' => null, 'error' => $e->getMessage()];
         }
     }
 }
