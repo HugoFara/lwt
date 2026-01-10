@@ -49,7 +49,7 @@ class DeleteLanguage
 
         if ($stats['texts'] > 0 || $stats['archivedTexts'] > 0 ||
             $stats['words'] > 0 || $stats['feeds'] > 0) {
-            return 'You must first delete texts, archived texts, newsfeeds and words with this language!';
+            return 'You must first delete texts, archived texts, news_feeds and words with this language!';
         }
 
         $affected = QueryBuilder::table('languages')
@@ -101,14 +101,16 @@ class DeleteLanguage
         return [
             'texts' => QueryBuilder::table('texts')
                 ->where('TxLgID', '=', $id)
+                ->whereNull('TxArchivedAt')
                 ->count(),
-            'archivedTexts' => QueryBuilder::table('archivedtexts')
-                ->where('AtLgID', '=', $id)
+            'archivedTexts' => QueryBuilder::table('texts')
+                ->where('TxLgID', '=', $id)
+                ->whereNotNull('TxArchivedAt')
                 ->count(),
             'words' => QueryBuilder::table('words')
                 ->where('WoLgID', '=', $id)
                 ->count(),
-            'feeds' => QueryBuilder::table('newsfeeds')
+            'feeds' => QueryBuilder::table('news_feeds')
                 ->where('NfLgID', '=', $id)
                 ->count(),
         ];

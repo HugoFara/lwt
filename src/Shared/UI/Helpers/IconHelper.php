@@ -212,15 +212,15 @@ class IconHelper
 
         // Handle empty icon (spacer)
         if ($lucideName === '') {
-            $width = $attrs['size'] ?? 16;
-            $style = 'display:inline-block;width:' . (int)$width . 'px';
+            $width = (int) ($attrs['size'] ?? 16);
+            $style = 'display:inline-block;width:' . $width . 'px';
             return '<span class="icon-spacer" style="' . $style . '"></span>';
         }
 
         // Build CSS classes
         $classes = ['icon'];
         if (isset($attrs['class'])) {
-            $classes[] = $attrs['class'];
+            $classes[] = (string) $attrs['class'];
         }
         if (isset(self::MUTED_ICONS[$legacyName])) {
             $classes[] = 'icon-muted';
@@ -230,14 +230,15 @@ class IconHelper
         }
 
         // Extract known attributes
-        $title = $attrs['title'] ?? '';
-        $alt = $attrs['alt'] ?? $title;
-        $size = $attrs['size'] ?? 16;
-        $id = $attrs['id'] ?? '';
+        $title = (string) ($attrs['title'] ?? '');
+        $alt = (string) ($attrs['alt'] ?? $title);
+        $size = (int) ($attrs['size'] ?? 16);
+        $id = (string) ($attrs['id'] ?? '');
 
         // Build additional attributes
         $extraAttrs = '';
         $skipKeys = ['class', 'title', 'alt', 'size', 'id'];
+        /** @var mixed $value */
         foreach ($attrs as $key => $value) {
             if (!in_array($key, $skipKeys, true)) {
                 $extraAttrs .= ' ' . htmlspecialchars($key);
@@ -258,7 +259,7 @@ class IconHelper
         if ($alt !== '') {
             $html .= ' aria-label="' . htmlspecialchars($alt) . '"';
         }
-        $html .= ' style="width:' . (int)$size . 'px;height:' . (int)$size . 'px"';
+        $html .= ' style="width:' . $size . 'px;height:' . $size . 'px"';
         $html .= $extraAttrs;
         $html .= '></i>';
 
@@ -275,7 +276,7 @@ class IconHelper
      */
     public static function clickable(string $name, array $attrs = []): string
     {
-        $classes = isset($attrs['class']) ? $attrs['class'] . ' click' : 'click';
+        $classes = isset($attrs['class']) ? (string) $attrs['class'] . ' click' : 'click';
         $attrs['class'] = $classes;
         return self::render($name, $attrs);
     }
@@ -296,8 +297,8 @@ class IconHelper
         array $attrs = [],
         array $linkAttrs = []
     ): string {
-        $linkClass = $linkAttrs['class'] ?? '';
-        $linkTitle = $linkAttrs['title'] ?? ($attrs['title'] ?? '');
+        $linkClass = (string) ($linkAttrs['class'] ?? '');
+        $linkTitle = (string) ($linkAttrs['title'] ?? ($attrs['title'] ?? ''));
 
         $html = '<a href="' . htmlspecialchars($href) . '"';
         if ($linkClass !== '') {
@@ -309,6 +310,7 @@ class IconHelper
 
         // Add any extra link attributes
         $skipKeys = ['class', 'title', 'href'];
+        /** @var mixed $value */
         foreach ($linkAttrs as $key => $value) {
             if (!in_array($key, $skipKeys, true)) {
                 $html .= ' ' . htmlspecialchars($key);

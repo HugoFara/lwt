@@ -78,11 +78,10 @@ class QueryBuilder
     private const USER_SCOPED_TABLES = [
         'languages' => 'LgUsID',
         'texts' => 'TxUsID',
-        'archivedtexts' => 'AtUsID',
         'words' => 'WoUsID',
         'tags' => 'TgUsID',
-        'tags2' => 'T2UsID',
-        'newsfeeds' => 'NfUsID',
+        'text_tags' => 'T2UsID',
+        'news_feeds' => 'NfUsID',
         'settings' => 'StUsID',
         'local_dictionaries' => 'LdUsID',
     ];
@@ -337,18 +336,33 @@ class QueryBuilder
         mixed $value = null,
         string $boolean = 'AND'
     ): static {
-        // Handle simple equality: where('col', 'value')
-        if ($value === null && !in_array(strtoupper((string)$operator), ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL'])) {
-            $value = $operator;
-            $operator = '=';
-        }
+        // Determine if this is a 2-arg form (where('col', 'value')) or 3-arg form (where('col', '=', 'value'))
+        //
+        // Logic:
+        // - If $value is not null, it's definitely 3-arg form
+        // - If $value is null and $operator is a known SQL operator, it's 3-arg form with null value
+        // - If $value is null and $operator is NOT a known SQL operator, it's 2-arg form
+        $operatorStr = is_array($operator) ? '' : (string)$operator;
+        $validOperators = ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL'];
+        $isKnownOperator = in_array(strtoupper($operatorStr), $validOperators);
 
-        $this->wheres[] = [
-            'column' => $column,
-            'operator' => strtoupper($operator),
-            'value' => $value,
-            'boolean' => strtoupper($boolean)
-        ];
+        if ($value !== null || $isKnownOperator) {
+            // 3-arg form: where('col', '=', 'value') or where('col', 'IS NULL')
+            $this->wheres[] = [
+                'column' => $column,
+                'operator' => strtoupper($operatorStr),
+                'value' => $value,
+                'boolean' => strtoupper($boolean)
+            ];
+        } else {
+            // 2-arg form: where('col', 'value') - operator becomes the value
+            $this->wheres[] = [
+                'column' => $column,
+                'operator' => '=',
+                'value' => $operator,
+                'boolean' => strtoupper($boolean)
+            ];
+        }
 
         return $this;
     }
@@ -625,7 +639,7 @@ class QueryBuilder
             }
 
             if ($where['operator'] === 'RAW') {
-                $sql .= $where['value'];
+                $sql .= (string) $where['value'];
                 continue;
             }
 
@@ -635,9 +649,10 @@ class QueryBuilder
             }
 
             if (in_array($where['operator'], ['IN', 'NOT IN'])) {
+                $whereValues = is_array($where['value']) ? $where['value'] : [$where['value']];
                 $values = array_map(
                     fn(mixed $v): string => $this->quoteValue($v),
-                    $where['value']
+                    $whereValues
                 );
                 $sql .= $where['column'] . ' ' . $where['operator'] . ' (' . implode(', ', $values) . ')';
                 continue;
@@ -809,7 +824,7 @@ class QueryBuilder
     /**
      * Update matching rows.
      *
-     * @param array<string, mixed> $data Column => value pairs to update
+     * @param array<string, string|int|float|bool|null> $data Column => value pairs to update
      *
      * @return int Number of affected rows
      */
@@ -972,7 +987,7 @@ class QueryBuilder
             }
 
             if ($where['operator'] === 'RAW') {
-                $sql .= $where['value'];
+                $sql .= (string) $where['value'];
                 continue;
             }
 
@@ -982,9 +997,11 @@ class QueryBuilder
             }
 
             if (in_array($where['operator'], ['IN', 'NOT IN'])) {
-                $placeholders = array_fill(0, count($where['value']), '?');
+                $whereValues = is_array($where['value']) ? $where['value'] : [$where['value']];
+                $placeholders = array_fill(0, count($whereValues), '?');
                 $sql .= $where['column'] . ' ' . $where['operator'] . ' (' . implode(', ', $placeholders) . ')';
-                foreach ($where['value'] as $v) {
+                /** @var mixed $v */
+                foreach ($whereValues as $v) {
                     $this->bindings[] = $v;
                 }
                 continue;
@@ -1094,7 +1111,7 @@ class QueryBuilder
      *
      * Automatically injects user_id when multi-user mode is enabled.
      *
-     * @param array<int, array<string, mixed>> $rows Array of column => value pairs
+     * @param array<int, array<string, string|int|float|bool|null>> $rows Array of column => value pairs
      *
      * @return int Number of inserted rows
      */
@@ -1108,7 +1125,7 @@ class QueryBuilder
         $userScopeData = $this->getUserScopeInsertData();
         if (!empty($userScopeData)) {
             $rows = array_map(
-                fn($row) => array_merge($userScopeData, $row),
+                fn(array $row): array => array_merge($userScopeData, $row),
                 $rows
             );
         }
@@ -1121,9 +1138,10 @@ class QueryBuilder
         $sql .= ' (' . implode(', ', $columns) . ')';
         $sql .= ' VALUES ' . implode(', ', $placeholderGroups);
 
+        /** @var list<string|int|float|bool|null> $params */
         $params = [];
         foreach ($rows as $row) {
-            foreach (array_values($row) as $value) {
+            foreach ($row as $value) {
                 $params[] = $value;
             }
         }
@@ -1134,11 +1152,9 @@ class QueryBuilder
     /**
      * Update matching rows using prepared statement.
      *
-     * @param array<string, mixed> $data Column => value pairs to update
+     * @param array<string, string|int|float|bool|null> $data Column => value pairs to update
      *
      * @return int Number of affected rows
-     *
-     * @psalm-suppress PossiblyUnusedReturnValue Return value available for caller use
      */
     public function updatePrepared(array $data): int
     {
@@ -1146,6 +1162,7 @@ class QueryBuilder
         $this->resetBindings();
 
         $setClauses = [];
+        /** @var list<string|int|float|bool|null> $setParams */
         $setParams = [];
         foreach ($data as $column => $value) {
             $setClauses[] = $column . ' = ?';

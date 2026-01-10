@@ -266,17 +266,17 @@ class TermEditController extends VocabularyBaseController
                 throw new \RuntimeException("Cannot access word data: word ID not found");
             }
 
-            $status = $wordData['WoStatus'];
+            $status = (int)$wordData['WoStatus'];
             if ($fromAnn == '' && $status >= 98) {
                 $status = 1;
             }
 
-            $sentence = ExportService::replaceTabNewline($wordData['WoSentence']);
+            $sentence = ExportService::replaceTabNewline((string)$wordData['WoSentence']);
             if ($sentence == '' && $textId !== 0 && $ord !== 0) {
                 $sentence = $contextService->getSentenceForTerm($textId, $ord, $termlc);
             }
 
-            $transl = ExportService::replaceTabNewline($wordData['WoTranslation']);
+            $transl = ExportService::replaceTabNewline((string)$wordData['WoTranslation']);
             if ($transl == '*') {
                 $transl = '';
             }
@@ -400,12 +400,14 @@ class TermEditController extends VocabularyBaseController
 
             $message = 'Updated';
 
+            /** @var int|null $lang */
             $lang = QueryBuilder::table('words')
                 ->where('WoID', '=', $wid)
                 ->valuePrepared('WoLgID');
             if (!isset($lang)) {
                 throw new \RuntimeException('Cannot retrieve language: word not found');
             }
+            /** @var string|null $regexword */
             $regexword = QueryBuilder::table('languages')
                 ->where('LgID', '=', $lang)
                 ->valuePrepared('LgRegexpWordCharacters');
@@ -460,14 +462,14 @@ class TermEditController extends VocabularyBaseController
         if ($record !== null) {
             $term = (string) $record['WoText'];
             $lang = (int) $record['WoLgID'];
-            $transl = ExportService::replaceTabNewline($record['WoTranslation']);
+            $transl = ExportService::replaceTabNewline((string)$record['WoTranslation']);
             if ($transl == '*') {
                 $transl = '';
             }
-            $sentence = ExportService::replaceTabNewline($record['WoSentence']);
-            $notes = ExportService::replaceTabNewline($record['WoNotes'] ?? '');
-            $rom = $record['WoRomanization'];
-            $status = $record['WoStatus'];
+            $sentence = ExportService::replaceTabNewline((string)$record['WoSentence']);
+            $notes = ExportService::replaceTabNewline((string)($record['WoNotes'] ?? ''));
+            $rom = (string)$record['WoRomanization'];
+            $status = (int)$record['WoStatus'];
             $showRoman = (bool) QueryBuilder::table('languages')
                 ->where('LgID', '=', $lang)
                 ->valuePrepared('LgShowRomanization');

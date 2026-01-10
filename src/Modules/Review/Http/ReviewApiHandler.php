@@ -18,6 +18,7 @@ namespace Lwt\Modules\Review\Http;
 
 use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Domain\ReviewConfiguration;
+use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
@@ -35,15 +36,20 @@ require_once __DIR__ . '/../../../backend/View/Helper/StatusHelper.php';
 class ReviewApiHandler
 {
     private ReviewFacade $reviewFacade;
+    private SessionStateManager $sessionManager;
 
     /**
      * Constructor.
      *
-     * @param ReviewFacade|null $reviewFacade Review facade (optional)
+     * @param ReviewFacade|null        $reviewFacade   Review facade (optional)
+     * @param SessionStateManager|null $sessionManager Session state manager (optional)
      */
-    public function __construct(?ReviewFacade $reviewFacade = null)
-    {
+    public function __construct(
+        ?ReviewFacade $reviewFacade = null,
+        ?SessionStateManager $sessionManager = null
+    ) {
         $this->reviewFacade = $reviewFacade ?? new ReviewFacade();
+        $this->sessionManager = $sessionManager ?? new SessionStateManager();
     }
 
     /**
@@ -66,6 +72,11 @@ class ReviewApiHandler
             ];
         }
 
+        // Extract typed values from word record
+        $woText = is_string($wordRecord['WoText']) ? $wordRecord['WoText'] : '';
+        $woTextLC = is_string($wordRecord['WoTextLC']) ? $wordRecord['WoTextLC'] : '';
+        $woID = is_numeric($wordRecord['WoID']) ? (int)$wordRecord['WoID'] : 0;
+
         // Check context annotation settings
         $settings = $this->reviewFacade->getTableReviewSettings();
         $showContextRom = (bool) ($settings['contextRom'] ?? 0);
@@ -74,21 +85,21 @@ class ReviewApiHandler
 
         // Get sentence context
         if ($wordMode) {
-            $sent = "{" . $wordRecord['WoText'] . "}";
+            $sent = "{" . $woText . "}";
             $annotations = [];
         } elseif ($useAnnotations) {
             $sentenceData = $this->reviewFacade->getSentenceWithAnnotations(
-                (int)$wordRecord['WoID'],
-                $wordRecord['WoTextLC']
+                $woID,
+                $woTextLC
             );
-            $sent = $sentenceData['sentence'] ?? "{" . $wordRecord['WoText'] . "}";
+            $sent = $sentenceData['sentence'] ?? "{" . $woText . "}";
             $annotations = $sentenceData['annotations'] ?? [];
         } else {
             $sentenceData = $this->reviewFacade->getSentenceForWord(
-                (int)$wordRecord['WoID'],
-                $wordRecord['WoTextLC']
+                $woID,
+                $woTextLC
             );
-            $sent = $sentenceData['sentence'] ?? "{" . $wordRecord['WoText'] . "}";
+            $sent = $sentenceData['sentence'] ?? "{" . $woText . "}";
             $annotations = [];
         }
 
@@ -111,7 +122,7 @@ class ReviewApiHandler
         );
 
         return [
-            "term_id" => $wordRecord['WoID'],
+            "term_id" => is_numeric($wordRecord['WoID']) ? (int) $wordRecord['WoID'] : 0,
             "solution" => $solution,
             "term_text" => $save,
             "group" => $htmlSentence
@@ -121,10 +132,10 @@ class ReviewApiHandler
     /**
      * Format term for test display.
      *
-     * @param array  $wordRecord      Word database record
+     * @param array<string, mixed>  $wordRecord      Word database record
      * @param string $sentence        Sentence containing the word (word marked with {})
      * @param int    $testType        Test type (1-5)
-     * @param array  $annotations     Word annotations (keyed by order)
+     * @param array<int, array{text: string, romanization: string|null, translation: string|null, isTarget?: bool, order?: int}>  $annotations     Word annotations (keyed by order)
      * @param bool   $showContextRom  Show romanization on context words
      * @param bool   $showContextTrans Show translation on context words
      *
@@ -140,7 +151,7 @@ class ReviewApiHandler
     ): array {
         $baseType = $this->reviewFacade->getBaseReviewType($testType);
         $wordMode = $this->reviewFacade->isWordMode($testType);
-        $wordText = $wordRecord['WoText'];
+        $wordText = is_string($wordRecord['WoText']) ? $wordRecord['WoText'] : '';
 
         // Extract the word from sentence (marked with {})
         if (preg_match('/\{([^}]+)\}/', $sentence, $matches)) {
@@ -170,7 +181,9 @@ class ReviewApiHandler
             } elseif ($baseType == 2) {
                 if ($wordMode) {
                     // Type 5: Translation → Term (word mode) - show translation
-                    $translation = $wordRecord['WoTranslation'] ?? '';
+                    /** @var mixed $translationRaw */
+                    $translationRaw = $wordRecord['WoTranslation'] ?? '';
+                    $translation = is_string($translationRaw) ? $translationRaw : '';
                     $displayHtml = '<span class="word-test">'
                         . htmlspecialchars($translation, ENT_QUOTES, 'UTF-8')
                         . '</span>';
@@ -195,7 +208,7 @@ class ReviewApiHandler
     /**
      * Build HTML for a sentence with ruby annotations.
      *
-     * @param array  $annotations     Word annotations keyed by order
+     * @param array<int, array{text: string, romanization: string|null, translation: string|null, isTarget?: bool, order?: int}> $annotations Word annotations keyed by order
      * @param string $targetWord      The target word being tested
      * @param int    $baseType        Test type (1=show term, 2=hide term, 3=hide term)
      * @param bool   $showRom         Show romanization
@@ -217,11 +230,13 @@ class ReviewApiHandler
         $targetWordLc = mb_strtolower($targetWord, 'UTF-8');
 
         foreach ($annotations as $ann) {
-            $text = $ann['text'];
+            $text = is_string($ann['text'] ?? null) ? $ann['text'] : '';
             $textLc = mb_strtolower($text, 'UTF-8');
             $isTarget = $textLc === $targetWordLc;
-            $rom = $ann['romanization'] ?? null;
-            $trans = $ann['translation'] ?? null;
+            $romRaw = $ann['romanization'] ?? null;
+            $transRaw = $ann['translation'] ?? null;
+            $rom = is_string($romRaw) ? $romRaw : null;
+            $trans = is_string($transRaw) ? $transRaw : null;
             $escapedText = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 
             // Handle the target word based on test type
@@ -268,16 +283,30 @@ class ReviewApiHandler
     /**
      * Get the next word to review based on request parameters.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
      * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
      */
     public function wordTestAjax(array $params): array
     {
-        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
+        /** @var mixed $reviewKeyRaw */
+        $reviewKeyRaw = $params['review_key'] ?? $params['test_key'] ?? '';
+        $reviewKey = is_string($reviewKeyRaw) ? $reviewKeyRaw : '';
+        /** @var mixed $selectionRaw */
+        $selectionRaw = $params['selection'] ?? '';
+        $selection = is_string($selectionRaw) ? $selectionRaw : '';
+
+        if ($reviewKey === '' || $selection === '') {
+            return [
+                "term_id" => 0,
+                "term_text" => '',
+                "group" => ''
+            ];
+        }
+
         $testSql = $this->reviewFacade->getReviewSql(
             $reviewKey,
-            $this->parseSelection($reviewKey, $params['selection'])
+            $this->parseSelection($reviewKey, $selection)
         );
         if ($testSql === null) {
             return [
@@ -286,26 +315,42 @@ class ReviewApiHandler
                 "group" => ''
             ];
         }
+
+        /** @var mixed $wordModeRaw */
+        $wordModeRaw = $params['word_mode'] ?? false;
+        /** @var mixed $typeRaw */
+        $typeRaw = $params['type'] ?? 1;
+
         return $this->getWordReviewData(
             $testSql,
-            filter_var($params['word_mode'], FILTER_VALIDATE_BOOLEAN),
-            (int)$params['type']
+            filter_var($wordModeRaw, FILTER_VALIDATE_BOOLEAN),
+            (int) $typeRaw
         );
     }
 
     /**
      * Return the number of reviews for tomorrow.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
      * @return array{count: int}
      */
     public function tomorrowTestCount(array $params): array
     {
-        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
+        /** @var mixed $reviewKeyRaw */
+        $reviewKeyRaw = $params['review_key'] ?? $params['test_key'] ?? '';
+        $reviewKey = is_string($reviewKeyRaw) ? $reviewKeyRaw : '';
+        /** @var mixed $selectionRaw */
+        $selectionRaw = $params['selection'] ?? '';
+        $selection = is_string($selectionRaw) ? $selectionRaw : '';
+
+        if ($reviewKey === '' || $selection === '') {
+            return ["count" => 0];
+        }
+
         $testSql = $this->reviewFacade->getReviewSql(
             $reviewKey,
-            $this->parseSelection($reviewKey, $params['selection'])
+            $this->parseSelection($reviewKey, $selection)
         );
         if ($testSql === null) {
             return ["count" => 0];
@@ -338,9 +383,9 @@ class ReviewApiHandler
     /**
      * Format response for getting next word test.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
-     * @return array
+     * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
      */
     public function formatNextWord(array $params): array
     {
@@ -350,7 +395,7 @@ class ReviewApiHandler
     /**
      * Format response for tomorrow count.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
      * @return array{count: int}
      */
@@ -383,15 +428,19 @@ class ReviewApiHandler
         }
 
         if (!$result['success']) {
-            return ['error' => $result['error'] ?? 'Failed to update status'];
+            $errorMsg = isset($result['error']) && is_string($result['error'])
+                ? $result['error']
+                : 'Failed to update status';
+            return ['error' => $errorMsg];
         }
 
         // Return the new status and controls HTML
-        $statusAbbr = StatusHelper::getAbbr($result['newStatus']);
-        $controls = StatusHelper::buildReviewTableControls(1, $result['newStatus'], $wordId, $statusAbbr);
+        $newStatus = isset($result['newStatus']) ? (int) $result['newStatus'] : 1;
+        $statusAbbr = StatusHelper::getAbbr($newStatus);
+        $controls = StatusHelper::buildReviewTableControls(1, $newStatus, $wordId, $statusAbbr);
 
         return [
-            'status' => $result['newStatus'],
+            'status' => $newStatus,
             'controls' => $controls
         ];
     }
@@ -419,7 +468,7 @@ class ReviewApiHandler
     /**
      * Get full test configuration for Alpine.js initialization.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
      * @return array Test configuration
      */
@@ -435,7 +484,11 @@ class ReviewApiHandler
             ? (int)$params['type'] : 1;
         $isTableMode = ($params['type'] ?? '') === 'table';
 
-        $sessReviewSql = $_SESSION['reviewsql'] ?? null;
+        // Get selection data from session criteria
+        $sessReviewSql = null;
+        if ($selection !== null && $this->sessionManager->hasCriteria()) {
+            $sessReviewSql = $this->sessionManager->getSelectionString();
+        }
 
         // Get test data
         $testData = $this->reviewFacade->getReviewDataFromParams(
@@ -494,7 +547,8 @@ class ReviewApiHandler
         );
 
         // Initialize session
-        $this->reviewFacade->initializeReviewSession($testData['counts']['due']);
+        $dueCount = (int) ($testData['counts']['due'] ?? 0);
+        $this->reviewFacade->initializeReviewSession($dueCount);
         $sessionData = $this->reviewFacade->getReviewSessionData();
 
         return [
@@ -517,8 +571,8 @@ class ReviewApiHandler
                 'langCode' => $langCode
             ],
             'progress' => [
-                'total' => $testData['counts']['due'],
-                'remaining' => $testData['counts']['due'],
+                'total' => $dueCount,
+                'remaining' => $dueCount,
                 'wrong' => 0,
                 'correct' => 0
             ],
@@ -534,14 +588,18 @@ class ReviewApiHandler
     /**
      * Get all words for table test mode.
      *
-     * @param array $params Request parameters
+     * @param array<string, mixed> $params Request parameters
      *
      * @return array Table words data
      */
     public function formatTableWords(array $params): array
     {
-        $reviewKey = $params['review_key'] ?? $params['test_key'] ?? '';
-        $selection = $params['selection'] ?? '';
+        /** @var mixed $reviewKeyRaw */
+        $reviewKeyRaw = $params['review_key'] ?? $params['test_key'] ?? '';
+        $reviewKey = is_string($reviewKeyRaw) ? $reviewKeyRaw : '';
+        /** @var mixed $selectionRaw */
+        $selectionRaw = $params['selection'] ?? '';
+        $selection = is_string($selectionRaw) ? $selectionRaw : '';
 
         if ($reviewKey === '' || $selection === '') {
             return ['error' => 'review_key and selection are required'];
@@ -567,7 +625,9 @@ class ReviewApiHandler
         }
 
         $langSettings = $this->reviewFacade->getLanguageSettings($langIdFromSql);
-        $regexWord = $langSettings['regexWord'] ?? '';
+        /** @var mixed $regexWordRaw */
+        $regexWordRaw = $langSettings['regexWord'] ?? '';
+        $regexWord = is_string($regexWordRaw) ? $regexWordRaw : '';
 
         // Get language code for TTS
         $languageService = new LanguageFacade();

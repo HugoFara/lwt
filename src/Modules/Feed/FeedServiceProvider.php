@@ -28,6 +28,10 @@ use Lwt\Modules\Feed\Domain\TextCreationInterface;
 use Lwt\Modules\Feed\Infrastructure\MySqlFeedRepository;
 use Lwt\Modules\Feed\Infrastructure\MySqlArticleRepository;
 use Lwt\Modules\Feed\Infrastructure\TextCreationAdapter;
+use Lwt\Modules\Feed\Infrastructure\FeedWizardSessionManager;
+
+// Shared Infrastructure
+use Lwt\Shared\Infrastructure\Http\FlashMessageService;
 
 // Services
 use Lwt\Modules\Feed\Application\Services\RssParser;
@@ -90,11 +94,22 @@ class FeedServiceProvider implements ServiceProviderInterface
             );
         });
 
+        // Register Session Managers
+        $container->singleton(FeedWizardSessionManager::class, function (Container $_c) {
+            return new FeedWizardSessionManager();
+        });
+
+        $container->singleton(FlashMessageService::class, function (Container $_c) {
+            return new FlashMessageService();
+        });
+
         // Register Controller
         $container->singleton(FeedController::class, function (Container $c) {
             return new FeedController(
                 $c->getTyped(FeedFacade::class),
-                $c->getTyped(LanguageFacade::class)
+                $c->getTyped(LanguageFacade::class),
+                $c->getTyped(FeedWizardSessionManager::class),
+                $c->getTyped(FlashMessageService::class)
             );
         });
 

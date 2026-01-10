@@ -66,14 +66,14 @@ class UserApiHandler
     /**
      * Handle user login and return API token.
      *
-     * @param array{username?: string, email?: string, password?: string} $params Login credentials
+     * @param array<string, mixed> $params Login credentials (username or email, password)
      *
      * @return array<string, mixed>
      */
     public function formatLogin(array $params): array
     {
-        $usernameOrEmail = $params['username'] ?? $params['email'] ?? '';
-        $password = $params['password'] ?? '';
+        $usernameOrEmail = (string)($params['username'] ?? $params['email'] ?? '');
+        $password = (string)($params['password'] ?? '');
 
         if (empty($usernameOrEmail) || empty($password)) {
             return [
@@ -105,16 +105,16 @@ class UserApiHandler
     /**
      * Handle user registration and return API token.
      *
-     * @param array{username?: string, email?: string, password?: string, password_confirm?: string} $params Registration data
+     * @param array<string, mixed> $params Registration data (username, email, password, password_confirm)
      *
      * @return array<string, mixed>
      */
     public function formatRegister(array $params): array
     {
-        $username = trim($params['username'] ?? '');
-        $email = trim($params['email'] ?? '');
-        $password = $params['password'] ?? '';
-        $passwordConfirm = $params['password_confirm'] ?? '';
+        $username = trim((string)($params['username'] ?? ''));
+        $email = trim((string)($params['email'] ?? ''));
+        $password = (string)($params['password'] ?? '');
+        $passwordConfirm = (string)($params['password_confirm'] ?? '');
 
         // Validate required fields
         if (empty($username)) {
@@ -282,12 +282,14 @@ class UserApiHandler
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
 
         // Also check for Apache-specific header
-        if (empty($authHeader) && function_exists('apache_request_headers')) {
+        if ($authHeader === '' && function_exists('apache_request_headers')) {
             $headers = apache_request_headers();
-            $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            /** @var mixed $apacheAuthHeader */
+            $apacheAuthHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            $authHeader = is_string($apacheAuthHeader) ? $apacheAuthHeader : '';
         }
 
-        if (empty($authHeader)) {
+        if ($authHeader === '') {
             return null;
         }
 

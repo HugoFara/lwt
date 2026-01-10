@@ -37,7 +37,7 @@ class ParserConfig
      * @param bool   $removeSpaces              Whether to remove spaces (CJK languages)
      * @param bool   $splitEachChar             Whether to split each character (CJK languages)
      * @param bool   $rightToLeft               Whether text is right-to-left
-     * @param array  $parserOptions             Additional parser-specific options
+     * @param array<string, mixed>  $parserOptions  Additional parser-specific options
      */
     public function __construct(
         private int $languageId,
@@ -48,6 +48,7 @@ class ParserConfig
         private bool $removeSpaces,
         private bool $splitEachChar,
         private bool $rightToLeft,
+        /** @var array<string, mixed> */
         private array $parserOptions = []
     ) {
     }
@@ -204,10 +205,10 @@ class ParserConfig
     {
         return new self(
             (int) ($row['LgID'] ?? 0),
-            $row['LgRegexpSplitSentences'] ?? '',
-            $row['LgExceptionsSplitSentences'] ?? '',
-            $row['LgRegexpWordCharacters'] ?? '',
-            $row['LgCharacterSubstitutions'] ?? '',
+            (string) ($row['LgRegexpSplitSentences'] ?? ''),
+            (string) ($row['LgExceptionsSplitSentences'] ?? ''),
+            (string) ($row['LgRegexpWordCharacters'] ?? ''),
+            (string) ($row['LgCharacterSubstitutions'] ?? ''),
             (bool) ($row['LgRemoveSpaces'] ?? false),
             (bool) ($row['LgSplitEachChar'] ?? false),
             (bool) ($row['LgRightToLeft'] ?? false)

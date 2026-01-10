@@ -52,7 +52,7 @@ class MultiWordService
     /**
      * Create a new multi-word expression.
      *
-     * @param array $data Multi-word data:
+     * @param array<string, mixed> $data Multi-word data:
      *                    - lgid: Language ID
      *                    - textlc: Lowercase text
      *                    - text: Original text
@@ -98,7 +98,7 @@ class MultiWordService
         Maintenance::initWordCount();
         TagsFacade::saveWordTagsFromForm($wid);
         $this->expressionService->insertExpressions(
-            $data['textlc'],
+            (string) $data['textlc'],
             (int) $data['lgid'],
             $wid,
             (int) $data['wordcount'],
@@ -175,7 +175,7 @@ class MultiWordService
      *
      * @param int $wordId Word ID
      *
-     * @return array|null Multi-word data or null if not found
+     * @return array{text: string, lgid: int, translation: string, sentence: string, notes: string, romanization: string, status: int}|null Multi-word data or null if not found
      */
     public function getMultiWordData(int $wordId): ?array
     {
@@ -219,7 +219,7 @@ class MultiWordService
 
         Maintenance::adjustAutoIncrement('words', 'WoID');
 
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2WordCount', '>', 1)
             ->where('Ti2WoID', '=', $wordId)
             ->delete();

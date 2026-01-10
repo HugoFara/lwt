@@ -19,10 +19,11 @@
 
 namespace Lwt\Modules\User\Views;
 
-// Default variables
-$error = isset($error) && is_string($error) ? $error : null;
-$username = $username ?? '';
-$email = $email ?? '';
+// Validate injected variables from controller
+assert(isset($username) && is_string($username));
+assert(isset($email) && is_string($email));
+assert(isset($error) && (is_string($error) || $error === null));
+/** @var string|null $error */
 ?>
 
 <section class="section">

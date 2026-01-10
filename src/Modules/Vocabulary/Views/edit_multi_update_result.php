@@ -18,15 +18,20 @@
 
 namespace Lwt\Views\Word;
 
+// Type assertions for variables passed from controller
+assert(is_string($termJson));
+assert(is_int($oldStatusValue));
+
 // Decode the term JSON to include in our config
+/** @var array{woid: int, text: string, translation: string, romanization: string, status: int} $termData */
 $termData = json_decode($termJson, true);
 ?>
 <script type="application/json" data-lwt-edit-multi-update-result-config>
 <?php echo json_encode([
-    'wid' => (int) $termData['woid'],
+    'wid' => $termData['woid'],
     'text' => $termData['text'],
     'translation' => $termData['translation'],
     'romanization' => $termData['romanization'],
-    'status' => (int) $termData['status'],
+    'status' => $termData['status'],
     'oldStatus' => $oldStatusValue
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

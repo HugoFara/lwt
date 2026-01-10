@@ -23,6 +23,20 @@
  * @package  Lwt
  * @license  Unlicense <http://unlicense.org/>
  * @since    3.0.0
+ *
+ * @var int $textId
+ * @var int $langId
+ * @var string $title
+ * @var string|null $sourceUri
+ * @var string $media
+ * @var int $audioPosition
+ * @var string $text
+ * @var string $languageName
+ * @var int $showAll
+ * @var int $showLearning
+ * @var string $languageCode
+ * @var string $phoneticText
+ * @var string|null $voiceApi
  */
 
 namespace Lwt\Views\Text;
@@ -32,9 +46,16 @@ use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Modules\Text\Application\Services\TextNavigationService;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
+// Type-safe variable extraction from controller context
+assert(is_int($textId));
+assert(is_int($langId));
+$title = isset($title) && is_string($title) ? $title : '';
+$sourceUri = isset($sourceUri) && is_string($sourceUri) ? $sourceUri : null;
+assert(is_string($media));
+
 ?>
 <script type="application/json" id="text-header-config"><?php echo json_encode([
-    'textId' => (int) $textId,
+    'textId' => $textId,
     'phoneticText' => $phoneticText,
     'languageCode' => $languageCode,
     'voiceApi' => $voiceApi
@@ -83,8 +104,8 @@ use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
 <h1>READ &#x25B6;
     <?php
-    echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8');
-    if (isset($sourceUri) && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')) {
+    echo \htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+    if ($sourceUri !== null && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')) {
         ?>
     <a href="<?php echo $sourceUri ?>" target="_blank">
         <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']); ?>

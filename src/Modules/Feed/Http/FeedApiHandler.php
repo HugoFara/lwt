@@ -57,7 +57,7 @@ class FeedApiHandler
         $placeholderRow = '(?, ?, ?, ?, ?, ?, ?)';
         $placeholders = array_fill(0, count($feed), $placeholderRow);
 
-        $sql = 'INSERT IGNORE INTO feedlinks
+        $sql = 'INSERT IGNORE INTO feed_links
                 (FlTitle, FlLink, FlText, FlDescription, FlDate, FlAudio, FlNfID)
                 VALUES ' . implode(', ', $placeholders);
 
@@ -97,7 +97,7 @@ class FeedApiHandler
     public function getFeedResult(int $importedFeed, int $nif, string $nfname, int $nfid, string $nfoptions): string
     {
         // Update feed timestamp using QueryBuilder
-        QueryBuilder::table('newsfeeds')
+        QueryBuilder::table('news_feeds')
             ->where('NfID', '=', $nfid)
             ->updatePrepared(['NfUpdate' => time()]);
 
@@ -129,15 +129,15 @@ class FeedApiHandler
             $msg .= ", $nif dublicated article";
         }
 
-        // Count total feedlinks using QueryBuilder
-        $row = QueryBuilder::table('feedlinks')
+        // Count total feed_links using QueryBuilder
+        $row = QueryBuilder::table('feed_links')
             ->select(['COUNT(*) AS total'])
             ->where('FlNfID', '=', $nfid)
             ->firstPrepared();
 
         $to = ($row !== null ? (int)$row['total'] : 0) - $nfMaxLinks;
         if ($to > 0) {
-            QueryBuilder::table('feedlinks')
+            QueryBuilder::table('feed_links')
                 ->whereIn('FlNfID', [$nfid])
                 ->orderBy('FlDate', 'ASC')
                 ->limit($to)
@@ -237,7 +237,7 @@ class FeedApiHandler
 
         // Count total using raw SQL with fixed table name
         $total = (int)Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM newsfeeds WHERE $where",
+            "SELECT COUNT(*) AS cnt FROM news_feeds WHERE $where",
             $queryParams,
             'cnt'
         );
@@ -255,8 +255,8 @@ class FeedApiHandler
 
         // Get feeds with language names and article counts
         $sql = "SELECT nf.*, lg.LgName,
-                       (SELECT COUNT(*) FROM feedlinks WHERE FlNfID = NfID) AS articleCount
-                FROM newsfeeds nf
+                       (SELECT COUNT(*) FROM feed_links WHERE FlNfID = NfID) AS articleCount
+                FROM news_feeds nf
                 LEFT JOIN languages lg ON lg.LgID = nf.NfLgID
                 WHERE $where
                 ORDER BY $orderBy
@@ -362,14 +362,14 @@ class FeedApiHandler
         // Get language name
         $langResult = QueryBuilder::table('languages')
             ->select(['LgName'])
-            ->where('LgID', '=', (int)$feed['NfLgID'])
+            ->where('LgID', '=', $feed['NfLgID'])
             ->firstPrepared();
         if ($langResult !== null) {
             $feed['LgName'] = (string)$langResult['LgName'];
         }
 
         // Get article count
-        $countResult = QueryBuilder::table('feedlinks')
+        $countResult = QueryBuilder::table('feed_links')
             ->select(['COUNT(*) AS cnt'])
             ->where('FlNfID', '=', $feedId)
             ->firstPrepared();
@@ -515,7 +515,7 @@ class FeedApiHandler
 
         // Count total using raw SQL with fixed table name
         $total = (int)Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM feedlinks WHERE $where",
+            "SELECT COUNT(*) AS cnt FROM feed_links WHERE $where",
             $queryParams,
             'cnt'
         );
@@ -531,11 +531,10 @@ class FeedApiHandler
         $sorts = ['FlDate DESC', 'FlDate ASC', 'FlTitle ASC'];
         $orderBy = $sorts[$sort - 1] ?? 'FlDate DESC';
 
-        // Get articles with import status
-        $sql = "SELECT fl.*, tx.TxID, at.AtID
-                FROM feedlinks fl
+        // Get articles with import status (archived texts are in texts table with TxArchivedAt)
+        $sql = "SELECT fl.*, tx.TxID, tx.TxArchivedAt
+                FROM feed_links fl
                 LEFT JOIN texts tx ON tx.TxSourceURI = TRIM(fl.FlLink)
-                LEFT JOIN archivedtexts at ON at.AtSourceURI = TRIM(fl.FlLink)
                 WHERE $where
                 ORDER BY $orderBy
                 LIMIT ?, ?";
@@ -560,8 +559,8 @@ class FeedApiHandler
             ],
             'feed' => [
                 'id' => (int)$feed['NfID'],
-                'name' => (string)$feed['NfName'],
-                'langId' => (int)$feed['NfLgID']
+                'name' => $feed['NfName'],
+                'langId' => $feed['NfLgID']
             ]
         ];
     }
@@ -575,19 +574,22 @@ class FeedApiHandler
      */
     private function formatArticleRecord(array $row): array
     {
+        $textId = isset($row['TxID']) && $row['TxID'] !== null && $row['TxID'] !== ''
+            ? (int)$row['TxID'] : null;
+        $isArchived = $textId !== null && !empty($row['TxArchivedAt']);
+
         $status = 'new';
-        if (!empty($row['TxID'])) {
+        if ($textId !== null && !$isArchived) {
             $status = 'imported';
-        } elseif (!empty($row['AtID'])) {
+        } elseif ($isArchived) {
             $status = 'archived';
         } elseif (str_starts_with((string)$row['FlLink'], ' ')) {
             $status = 'error';
         }
 
-        $textId = isset($row['TxID']) && $row['TxID'] !== null && $row['TxID'] !== ''
-            ? (int)$row['TxID'] : null;
-        $archivedTextId = isset($row['AtID']) && $row['AtID'] !== null && $row['AtID'] !== ''
-            ? (int)$row['AtID'] : null;
+        // For archived texts, report the same TxID as archivedTextId
+        $archivedTextId = $isArchived ? $textId : null;
+        $activeTextId = ($textId !== null && !$isArchived) ? $textId : null;
 
         return [
             'id' => (int)$row['FlID'],
@@ -598,7 +600,7 @@ class FeedApiHandler
             'audio' => (string)$row['FlAudio'],
             'hasText' => !empty($row['FlText']),
             'status' => $status,
-            'textId' => $textId,
+            'textId' => $activeTextId,
             'archivedTextId' => $archivedTextId
         ];
     }
@@ -619,7 +621,7 @@ class FeedApiHandler
         } else {
             // Delete specific articles
             $ids = array_map('intval', $articleIds);
-            $deleted = QueryBuilder::table('feedlinks')
+            $deleted = QueryBuilder::table('feed_links')
                 ->whereIn('FlID', $ids)
                 ->whereIn('FlNfID', [$feedId])
                 ->delete();

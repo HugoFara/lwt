@@ -127,11 +127,11 @@ class TermCrudApiHandler
     public function createTerm(array $data): array
     {
         $langId = (int) ($data['langId'] ?? 0);
-        $text = trim($data['text'] ?? '');
+        $text = trim((string)($data['text'] ?? ''));
         $status = (int) ($data['status'] ?? 1);
-        $translation = trim($data['translation'] ?? '*');
-        $romanization = trim($data['romanization'] ?? '');
-        $sentence = trim($data['sentence'] ?? '');
+        $translation = trim((string)($data['translation'] ?? '*'));
+        $romanization = trim((string)($data['romanization'] ?? ''));
+        $sentence = trim((string)($data['sentence'] ?? ''));
 
         if ($langId === 0 || $text === '') {
             return ['success' => false, 'error' => 'Language ID and text are required'];
@@ -181,13 +181,13 @@ class TermCrudApiHandler
 
         $updates = [];
         if (isset($data['translation'])) {
-            $updates['translation'] = trim($data['translation']) ?: '*';
+            $updates['translation'] = trim((string)$data['translation']) ?: '*';
         }
         if (isset($data['romanization'])) {
-            $updates['romanization'] = trim($data['romanization']);
+            $updates['romanization'] = trim((string)$data['romanization']);
         }
         if (isset($data['sentence'])) {
-            $updates['sentence'] = trim($data['sentence']);
+            $updates['sentence'] = trim((string)$data['sentence']);
         }
 
         try {
@@ -322,10 +322,10 @@ class TermCrudApiHandler
         }
 
         // Get tags for the word - using JOIN with user-scoped tables
-        $tagsResult = QueryBuilder::table('wordtags')
+        $tagsResult = QueryBuilder::table('word_tag_map')
             ->select(['tags.TgText'])
-            ->join('tags', 'tags.TgID', '=', 'wordtags.WtTgID')
-            ->where('wordtags.WtWoID', '=', $termId)
+            ->join('tags', 'tags.TgID', '=', 'word_tag_map.WtTgID')
+            ->where('word_tag_map.WtWoID', '=', $termId)
             ->orderBy('tags.TgText')
             ->getPrepared();
         $tags = array_map(fn($row) => (string)$row['TgText'], $tagsResult);
@@ -479,10 +479,10 @@ class TermCrudApiHandler
             }
 
             // Get tags for the word
-            $tagsResult = QueryBuilder::table('wordtags')
+            $tagsResult = QueryBuilder::table('word_tag_map')
                 ->select(['tags.TgText'])
-                ->join('tags', 'tags.TgID', '=', 'wordtags.WtTgID')
-                ->where('wordtags.WtWoID', '=', $wordId)
+                ->join('tags', 'tags.TgID', '=', 'word_tag_map.WtTgID')
+                ->where('word_tag_map.WtWoID', '=', $wordId)
                 ->orderBy('tags.TgText')
                 ->getPrepared();
             $tags = array_map(fn($row) => (string)$row['TgText'], $tagsResult);
@@ -645,15 +645,15 @@ class TermCrudApiHandler
             return ['error' => 'Status must be 1-5, 98, or 99'];
         }
 
-        $translation = trim($data['translation'] ?? '');
+        $translation = trim((string)($data['translation'] ?? ''));
         if ($translation === '') {
             $translation = '*';
         }
 
-        $romanization = trim($data['romanization'] ?? '');
-        $sentence = trim($data['sentence'] ?? '');
-        $notes = trim($data['notes'] ?? '');
-        $lemma = isset($data['lemma']) && $data['lemma'] !== '' ? trim($data['lemma']) : null;
+        $romanization = trim((string)($data['romanization'] ?? ''));
+        $sentence = trim((string)($data['sentence'] ?? ''));
+        $notes = trim((string)($data['notes'] ?? ''));
+        $lemma = isset($data['lemma']) && $data['lemma'] !== '' ? trim((string)$data['lemma']) : null;
         $lemmaLc = $lemma !== null ? mb_strtolower($lemma, 'UTF-8') : null;
 
         // Insert the word
@@ -680,17 +680,20 @@ class TermCrudApiHandler
         $wordId = $stmt->insertId();
 
         // Update text items to link to this word
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::preparedExecute(
-            "UPDATE textitems2
+            "UPDATE word_occurrences
              SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wordId, $langId, $textLc]
         );
 
         // Save tags if provided
-        $tags = $data['tags'] ?? [];
-        if (is_array($tags) && count($tags) > 0) {
+        /** @var array<int|string>|null $rawTags */
+        $rawTags = $data['tags'] ?? null;
+        if (is_array($rawTags) && count($rawTags) > 0) {
+            /** @var array<string> $tags */
+            $tags = array_map('strval', $rawTags);
             TagsFacade::saveWordTagsFromArray((int)$wordId, $tags);
         }
 
@@ -747,15 +750,15 @@ class TermCrudApiHandler
             return ['error' => 'Status must be 1-5, 98, or 99'];
         }
 
-        $translation = trim($data['translation'] ?? '');
+        $translation = trim((string)($data['translation'] ?? ''));
         if ($translation === '') {
             $translation = '*';
         }
 
-        $romanization = trim($data['romanization'] ?? '');
-        $sentence = trim($data['sentence'] ?? '');
-        $notes = trim($data['notes'] ?? '');
-        $lemma = isset($data['lemma']) && $data['lemma'] !== '' ? trim($data['lemma']) : null;
+        $romanization = trim((string)($data['romanization'] ?? ''));
+        $sentence = trim((string)($data['sentence'] ?? ''));
+        $notes = trim((string)($data['notes'] ?? ''));
+        $lemma = isset($data['lemma']) && $data['lemma'] !== '' ? trim((string)$data['lemma']) : null;
         $lemmaLc = $lemma !== null ? mb_strtolower($lemma, 'UTF-8') : null;
 
         // Update the word
@@ -782,7 +785,11 @@ class TermCrudApiHandler
         // Save tags if provided
         $tags = [];
         if (isset($data['tags']) && is_array($data['tags'])) {
-            $tags = $data['tags'];
+            /** @var array<array-key, string> $tags */
+            $tags = array_map(
+                static fn($tag): string => is_scalar($tag) ? (string) $tag : '',
+                $data['tags']
+            );
             TagsFacade::saveWordTagsFromArray($termId, $tags);
         }
 

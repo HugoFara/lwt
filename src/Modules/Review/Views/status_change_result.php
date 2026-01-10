@@ -17,12 +17,25 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @var string $wordText
+ * @var int $oldStatus
+ * @var int $newStatus
+ * @var int $oldScore
+ * @var int $newScore
  */
 
 namespace Lwt\Views\Review;
 
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\View\Helper\StatusHelper;
+
+// Validate and cast injected variables
+assert(isset($wordText) && is_string($wordText));
+assert(isset($oldStatus) && is_int($oldStatus));
+assert(isset($newStatus) && is_int($newStatus));
+assert(isset($oldScore) && is_int($oldScore));
+assert(isset($newScore) && is_int($newScore));
 
 PageLayoutHelper::renderPageStart("Term: " . $wordText, false);
 

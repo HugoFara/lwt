@@ -26,87 +26,41 @@ use Lwt\Shared\Infrastructure\Database\Settings;
 class SessionCleaner
 {
     /**
-     * Clear all session filters.
+     * Clear settings when changing the current language.
      *
-     * Called when changing the current language.
+     * Note: Pagination/filter state is now stored in URL parameters,
+     * so session clearing is no longer needed. This method only clears
+     * database settings that should reset on language change.
      *
      * @return void
      */
     public function clearAllFilters(): void
     {
-        // Text filters
-        unset($_SESSION['currenttextpage']);
-        unset($_SESSION['currenttextquery']);
-        unset($_SESSION['currenttextquerymode']);
-        unset($_SESSION['currenttexttag1']);
-        unset($_SESSION['currenttexttag2']);
-        unset($_SESSION['currenttexttag12']);
-
-        // Word filters
-        unset($_SESSION['currentwordpage']);
-        unset($_SESSION['currentwordquery']);
-        unset($_SESSION['currentwordquerymode']);
-        unset($_SESSION['currentwordstatus']);
-        unset($_SESSION['currentwordtext']);
-        unset($_SESSION['currentwordtag1']);
-        unset($_SESSION['currentwordtag2']);
-        unset($_SESSION['currentwordtag12']);
-        unset($_SESSION['currentwordtextmode']);
-        unset($_SESSION['currentwordtexttag']);
-
-        // Archive filters
-        unset($_SESSION['currentarchivepage']);
-        unset($_SESSION['currentarchivequery']);
-        unset($_SESSION['currentarchivequerymode']);
-        unset($_SESSION['currentarchivetexttag1']);
-        unset($_SESSION['currentarchivetexttag2']);
-        unset($_SESSION['currentarchivetexttag12']);
-
-        // RSS filters
-        unset($_SESSION['currentrsspage']);
-        unset($_SESSION['currentrssfeed']);
-        unset($_SESSION['currentrssquery']);
-        unset($_SESSION['currentrssquerymode']);
-
-        // Feed filters
-        unset($_SESSION['currentfeedspage']);
-        unset($_SESSION['currentmanagefeedsquery']);
-
-        // Clear current text setting
+        // Clear current text setting (database-stored)
         Settings::save('currenttext', '');
     }
 
     /**
-     * Clear text-related session filters only.
+     * Clear text-related filters.
      *
      * @return void
+     *
+     * @deprecated No longer needed - pagination state is now in URL params
      */
     public function clearTextFilters(): void
     {
-        unset($_SESSION['currenttextpage']);
-        unset($_SESSION['currenttextquery']);
-        unset($_SESSION['currenttextquerymode']);
-        unset($_SESSION['currenttexttag1']);
-        unset($_SESSION['currenttexttag2']);
-        unset($_SESSION['currenttexttag12']);
+        // No-op: pagination state is now in URL parameters
     }
 
     /**
-     * Clear word-related session filters only.
+     * Clear word-related filters.
      *
      * @return void
+     *
+     * @deprecated No longer needed - pagination state is now in URL params
      */
     public function clearWordFilters(): void
     {
-        unset($_SESSION['currentwordpage']);
-        unset($_SESSION['currentwordquery']);
-        unset($_SESSION['currentwordquerymode']);
-        unset($_SESSION['currentwordstatus']);
-        unset($_SESSION['currentwordtext']);
-        unset($_SESSION['currentwordtag1']);
-        unset($_SESSION['currentwordtag2']);
-        unset($_SESSION['currentwordtag12']);
-        unset($_SESSION['currentwordtextmode']);
-        unset($_SESSION['currentwordtexttag']);
+        // No-op: pagination state is now in URL parameters
     }
 }

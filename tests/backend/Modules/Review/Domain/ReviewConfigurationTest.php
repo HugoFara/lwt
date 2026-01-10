@@ -262,7 +262,7 @@ class ReviewConfigurationTest extends TestCase
         $sql = $config->toSqlProjection();
 
         $this->assertStringContainsString('words', $sql);
-        $this->assertStringContainsString('textitems2', $sql);
+        $this->assertStringContainsString('word_occurrences', $sql);
         $this->assertStringContainsString('Ti2TxID = 123', $sql);
     }
 
@@ -281,7 +281,7 @@ class ReviewConfigurationTest extends TestCase
         $sql = $config->toSqlProjection();
 
         $this->assertStringContainsString('words', $sql);
-        $this->assertStringContainsString('textitems2', $sql);
+        $this->assertStringContainsString('word_occurrences', $sql);
         $this->assertStringContainsString('Ti2TxID IN (100,200)', $sql);
     }
 

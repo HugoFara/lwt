@@ -55,7 +55,9 @@ class AdminMiddleware implements MiddlewareInterface
      */
     public function __construct(?UserFacade $userFacade = null)
     {
-        $this->userFacade = $userFacade ?? Container::getInstance()->get(UserFacade::class);
+        /** @var UserFacade */
+        $facade = $userFacade ?? Container::getInstance()->get(UserFacade::class);
+        $this->userFacade = $facade;
     }
 
     /**
@@ -127,7 +129,10 @@ class AdminMiddleware implements MiddlewareInterface
 
         if (empty($authHeader) && function_exists('apache_request_headers')) {
             $headers = apache_request_headers();
-            $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            if (is_array($headers)) {
+                $rawHeader = (string) ($headers['Authorization'] ?? $headers['authorization'] ?? '');
+                $authHeader = $rawHeader;
+            }
         }
 
         if (preg_match('/^Bearer\s+(.+)$/i', $authHeader, $matches)) {

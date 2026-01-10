@@ -27,13 +27,13 @@ use Lwt\Modules\Tags\Domain\ValueObject\TagId;
 /**
  * MySQL implementation of TagRepositoryInterface for text tags.
  *
- * Operates on the 'tags2' table for text/document tags.
+ * Operates on the 'text_tags' table for text/document tags.
  *
  * @since 3.0.0
  */
 class MySqlTextTagRepository implements TagRepositoryInterface
 {
-    private const TABLE_NAME = 'tags2';
+    private const TABLE_NAME = 'text_tags';
     private const COL_PREFIX = 'T2';
 
     /**
@@ -300,6 +300,7 @@ class MySqlTextTagRepository implements TagRepositoryInterface
             ->orderBy('T2Text', 'ASC')
             ->getPrepared();
 
+        /** @var list<string> */
         return array_column($rows, 'T2Text');
     }
 
@@ -308,7 +309,7 @@ class MySqlTextTagRepository implements TagRepositoryInterface
      */
     public function getUsageCount(int $tagId): int
     {
-        return QueryBuilder::table('texttags')
+        return QueryBuilder::table('text_tag_map')
             ->where('TtT2ID', '=', $tagId)
             ->count();
     }
@@ -322,7 +323,7 @@ class MySqlTextTagRepository implements TagRepositoryInterface
      */
     public function getArchivedUsageCount(int $tagId): int
     {
-        return QueryBuilder::table('archtexttags')
+        return QueryBuilder::table('archived_text_tag_map')
             ->where('AgT2ID', '=', $tagId)
             ->count();
     }
@@ -354,7 +355,7 @@ class MySqlTextTagRepository implements TagRepositoryInterface
      *
      * @param string $query Filter query string
      *
-     * @return array{clause: string, params: array<string>}
+     * @return array{clause: string, params: list<string>}
      */
     private function buildWhereClause(string $query): array
     {

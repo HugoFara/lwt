@@ -30,6 +30,13 @@ use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+// Type assertions for variables passed from controller
+assert(is_string($currentquery));
+assert(is_int($recno));
+assert(is_int($currentpage));
+assert(is_int($pages));
+assert(is_int($currentsort));
+
 ?>
 
 <!-- NOTE: Search bar planned for future UI refactoring.

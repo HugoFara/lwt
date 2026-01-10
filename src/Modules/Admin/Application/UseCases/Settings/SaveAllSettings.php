@@ -40,7 +40,7 @@ class SaveAllSettings
         'set-term-sentence-count',
         'set-tts',
         'set-hts',
-        'set-archivedtexts-per-page',
+        'set-archived_texts-per-page',
         'set-texts-per-page',
         'set-terms-per-page',
         'set-regex-mode',

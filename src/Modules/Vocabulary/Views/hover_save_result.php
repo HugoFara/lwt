@@ -25,12 +25,19 @@ namespace Lwt\Modules\Vocabulary\Views;
 
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
-/** @var int $status */
+// Type assertions for variables passed from controller
+assert(is_string($word));
+assert(is_string($wordRaw));
+assert(is_int($status));
+assert(is_string($translation));
+assert(is_int($wid));
+assert(is_string($hex));
+assert(is_int($textId));
 
 ?>
-<p>Status: <?php echo get_colored_status_msg($status); ?></p><br />
+<p>Status: <?php echo (string)get_colored_status_msg($status); ?></p><br />
 <?php if ($translation != '*'): ?>
-<p>Translation: <b><?php echo htmlspecialchars($translation ?? '', ENT_QUOTES, 'UTF-8'); ?></b></p>
+<p>Translation: <b><?php echo htmlspecialchars($translation, ENT_QUOTES, 'UTF-8'); ?></b></p>
 <?php endif; ?>
 
 <script type="application/json" data-lwt-hover-save-result-config>

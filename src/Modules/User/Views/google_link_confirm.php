@@ -22,6 +22,9 @@ namespace Lwt\Modules\User\Views;
 
 use Lwt\Shared\UI\Helpers\FormHelper;
 
+// Validate injected variables
+assert(isset($email) && is_string($email));
+$error = isset($error) && is_string($error) ? $error : null;
 ?>
 <section class="section">
     <div class="container">

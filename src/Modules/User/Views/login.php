@@ -18,14 +18,17 @@
 
 namespace Lwt\Modules\User\Views;
 
-// Default variables
-$error = isset($error) && is_string($error) ? $error : null;
+// Validate injected variables from controller
+assert(isset($username) && is_string($username));
+assert(isset($error) && (is_string($error) || $error === null));
+/** @var string|null $error */
 $success = null;
-$username = $username ?? '';
 
 // Check for success message (e.g., after password reset)
 if (isset($_SESSION['auth_success'])) {
-    $success = $_SESSION['auth_success'];
+    /** @var mixed $authSuccess */
+    $authSuccess = $_SESSION['auth_success'];
+    $success = is_string($authSuccess) ? $authSuccess : null;
     unset($_SESSION['auth_success']);
 }
 ?>
@@ -156,7 +159,7 @@ if (isset($_SESSION['auth_success'])) {
                     </p>
 
                     <!-- Google login link (if configured) -->
-                    <?php if (!empty($_ENV['GOOGLE_CLIENT_ID'])): ?>
+                    <?php if (($_ENV['GOOGLE_CLIENT_ID'] ?? '') !== ''): ?>
                     <p class="has-text-centered mt-3">
                         <a href="/google/start" class="button is-light is-fullwidth">
                             <span class="icon-text">
@@ -175,7 +178,7 @@ if (isset($_SESSION['auth_success'])) {
                     <?php endif; ?>
 
                     <!-- Microsoft login link (if configured) -->
-                    <?php if (!empty($_ENV['MICROSOFT_CLIENT_ID'])): ?>
+                    <?php if (($_ENV['MICROSOFT_CLIENT_ID'] ?? '') !== ''): ?>
                     <p class="has-text-centered mt-3">
                         <a href="/microsoft/start" class="button is-light is-fullwidth">
                             <span class="icon-text">

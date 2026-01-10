@@ -590,7 +590,7 @@ class IntegrationTest extends TestCase
         $tag_id = (int)Connection::lastInsertId();
 
         Connection::query(
-            "INSERT INTO wordtags (WtWoID, WtTgID) VALUES ($word_id, $tag_id)"
+            "INSERT INTO word_tag_map (WtWoID, WtTgID) VALUES ($word_id, $tag_id)"
         );
 
         // Test getting tag list
@@ -598,7 +598,7 @@ class IntegrationTest extends TestCase
         $this->assertStringContainsString('testtag1', $tag_list);
 
         // Clean up
-        Connection::query("DELETE FROM wordtags WHERE WtWoID = $word_id");
+        Connection::query("DELETE FROM word_tag_map WHERE WtWoID = $word_id");
         Connection::query("DELETE FROM words WHERE WoID = $word_id");
         Connection::query("DELETE FROM tags WHERE TgID = $tag_id");
         Connection::query("DELETE FROM languages WHERE LgID = $lang_id");

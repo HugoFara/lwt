@@ -142,10 +142,10 @@ class TermTranslationApiHandler
      */
     public function getTermTags(int $termId): array
     {
-        $tagsResult = QueryBuilder::table('wordtags')
+        $tagsResult = QueryBuilder::table('word_tag_map')
             ->select(['tags.TgText'])
-            ->join('tags', 'tags.TgID', '=', 'wordtags.WtTgID')
-            ->where('wordtags.WtWoID', '=', $termId)
+            ->join('tags', 'tags.TgID', '=', 'word_tag_map.WtTgID')
+            ->where('word_tag_map.WtWoID', '=', $termId)
             ->orderBy('tags.TgText')
             ->getPrepared();
 
@@ -208,9 +208,9 @@ class TermTranslationApiHandler
         $wid = $stmt->insertId();
 
         // Update text items using prepared statement
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::preparedExecute(
-            "UPDATE textitems2
+            "UPDATE word_occurrences
             SET Ti2WoID = ?
             WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wid, $lang, $textlc]

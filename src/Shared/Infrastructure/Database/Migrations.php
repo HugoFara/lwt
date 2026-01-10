@@ -65,9 +65,9 @@ class Migrations
     public static function reparseAllTexts(): void
     {
         // Use DELETE instead of TRUNCATE to respect foreign key constraints
-        // Delete textitems2 first (child), then sentences (parent)
+        // Delete word_occurrences first (child), then sentences (parent)
         // Use raw DELETE FROM to delete all records
-        Connection::execute("DELETE FROM textitems2");
+        Connection::execute("DELETE FROM word_occurrences");
         Connection::execute("DELETE FROM sentences");
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         Maintenance::initWordCount();
@@ -78,12 +78,14 @@ class Migrations
             ->getPrepared();
         foreach ($rows as $record) {
             $id = (int) $record['TxID'];
+            $lgId = (int) $record['TxLgID'];
+            /** @var string|null $textValue */
             $textValue = QueryBuilder::table('texts')
                 ->where('TxID', '=', $id)
                 ->valuePrepared('TxText');
             TextParsing::parseAndSave(
                 (string)$textValue,
-                (int)$record['TxLgID'],
+                $lgId,
                 $id
             );
         }
@@ -116,7 +118,13 @@ class Migrations
     {
         try {
             $rows = Connection::fetchAll("SELECT filename FROM _migrations");
-            return array_column($rows, 'filename');
+            $filenames = [];
+            foreach ($rows as $row) {
+                if (isset($row['filename']) && is_string($row['filename'])) {
+                    $filenames[] = $row['filename'];
+                }
+            }
+            return $filenames;
         } catch (\RuntimeException $e) {
             // Table doesn't exist yet
             return [];
@@ -178,8 +186,11 @@ class Migrations
         }
 
         foreach ($rows as $row) {
-            $filename = $row['filename'];
-            $storedChecksum = $row['checksum'];
+            $filename = $row['filename'] ?? null;
+            $storedChecksum = $row['checksum'] ?? null;
+            if (!is_string($filename) || !is_string($storedChecksum)) {
+                continue;
+            }
             $filepath = $migrationsDir . $filename;
 
             if (!file_exists($filepath)) {
@@ -246,6 +257,7 @@ class Migrations
         $currversion = ApplicationInfo::getVersionNumber();
 
         try {
+            /** @var string|null $dbversion */
             $dbversion = QueryBuilder::table('settings')
                 ->where('StKey', '=', 'dbversion')
                 ->valuePrepared('StValue');
@@ -341,15 +353,15 @@ class Migrations
              FROM INFORMATION_SCHEMA.TABLES
              WHERE TABLE_SCHEMA = ?
              AND TABLE_NAME IN (
-                'languages', 'texts', 'archivedtexts', 'words', 'sentences',
-                'textitems2', 'textitems', 'tags', 'tags2', 'wordtags',
-                'texttags', 'archtexttags', 'newsfeeds', 'feedlinks',
-                'settings', '_migrations', 'tts'
+                'languages', 'texts', 'words', 'sentences',
+                'word_occurrences', 'tags', 'text_tags', 'word_tag_map',
+                'text_tag_map', 'news_feeds', 'feed_links',
+                'settings', '_migrations'
              )",
             [$dbname]
         );
         foreach ($res as $row) {
-            $tables[] = $row['TABLE_NAME'];
+            $tables[] = (string) $row['TABLE_NAME'];
         }
 
         /// counter for cache rebuild
@@ -368,12 +380,12 @@ class Migrations
         // Update the database (if necessary)
         self::update();
 
-        if (!in_array("textitems2", $tables)) {
+        if (!in_array("word_occurrences", $tables) && !in_array("word_occurrences", $tables)) {
             // Add data from the old database system
             if (in_array("textitems", $tables)) {
                 // Complex migration query - use raw SQL
                 Connection::execute(
-                    "INSERT INTO textitems2 (
+                    "INSERT INTO word_occurrences (
                         Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount,
                         Ti2Text
                     )
@@ -409,47 +421,29 @@ class Migrations
                 SET " . TermStatusService::makeScoreRandomInsertUpdate('u') . "
                 WHERE WoTodayScore>=-100 AND WoStatus<98"
             );
-            // Clean up orphaned wordtags (tags deleted)
+            // Clean up orphaned word_tag_map (tags deleted)
             Connection::execute(
-                "DELETE wordtags
-                FROM (wordtags LEFT JOIN tags on WtTgID = TgID)
+                "DELETE word_tag_map
+                FROM (word_tag_map LEFT JOIN tags on WtTgID = TgID)
                 WHERE TgID IS NULL"
             );
-            // Clean up orphaned wordtags (words deleted)
+            // Clean up orphaned word_tag_map (words deleted)
             Connection::execute(
-                "DELETE wordtags
-                FROM (wordtags LEFT JOIN words ON WtWoID = WoID)
+                "DELETE word_tag_map
+                FROM (word_tag_map LEFT JOIN words ON WtWoID = WoID)
                 WHERE WoID IS NULL"
             );
-            // Clean up orphaned texttags (tags2 deleted)
+            // Clean up orphaned text_tag_map (text_tags deleted)
             Connection::execute(
-                "DELETE texttags
-                FROM (texttags LEFT JOIN tags2 ON TtT2ID = T2ID)
+                "DELETE text_tag_map
+                FROM (text_tag_map LEFT JOIN text_tags ON TtT2ID = T2ID)
                 WHERE T2ID IS NULL"
             );
-            // Clean up orphaned texttags (texts deleted)
+            // Clean up orphaned text_tag_map (texts deleted)
             Connection::execute(
-                "DELETE texttags
-                FROM (texttags LEFT JOIN texts ON TtTxID = TxID)
+                "DELETE text_tag_map
+                FROM (text_tag_map LEFT JOIN texts ON TtTxID = TxID)
                 WHERE TxID IS NULL"
-            );
-            // Clean up orphaned archtexttags (tags2 deleted)
-            Connection::execute(
-                "DELETE archtexttags
-                FROM (
-                    archtexttags
-                    LEFT JOIN tags2 ON AgT2ID = T2ID
-                )
-                WHERE T2ID IS NULL"
-            );
-            // Clean up orphaned archtexttags (archivedtexts deleted)
-            Connection::execute(
-                "DELETE archtexttags
-                FROM (
-                    archtexttags
-                    LEFT JOIN archivedtexts ON AgAtID = AtID
-                )
-                WHERE AtID IS NULL"
             );
             Maintenance::optimizeDatabase();
             Settings::save('lastscorecalc', $today);

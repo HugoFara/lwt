@@ -91,16 +91,16 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         // Find sentence with at least 70% known words
         $sql = "SELECT DISTINCT ti.Ti2SeID AS SeID,
             1 - IFNULL(sUnknownCount.c, 0) / sWordCount.c AS KnownRatio
-            FROM textitems2 ti
+            FROM word_occurrences ti
             JOIN (
                 SELECT t.Ti2SeID, COUNT(*) AS c
-                FROM textitems2 t
+                FROM word_occurrences t
                 WHERE t.Ti2WordCount = 1
                 GROUP BY t.Ti2SeID
             ) AS sWordCount ON sWordCount.Ti2SeID = ti.Ti2SeID
             LEFT JOIN (
                 SELECT t.Ti2SeID, COUNT(*) AS c
-                FROM textitems2 t
+                FROM word_occurrences t
                 WHERE t.Ti2WordCount = 1 AND t.Ti2WoID IS NULL
                 GROUP BY t.Ti2SeID
             ) AS sUnknownCount ON sUnknownCount.Ti2SeID = ti.Ti2SeID
@@ -230,6 +230,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getWordStatus(int $wordId): ?int
     {
+        /** @var mixed $status */
         $status = QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
             ->valuePrepared('WoStatus');
@@ -265,16 +266,23 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             ];
         }
 
+        /** @var mixed $nameVal */
+        $nameVal = $record['LgName'] ?? '';
+        /** @var mixed $regexVal */
+        $regexVal = $record['LgRegexpWordCharacters'] ?? '';
+        /** @var mixed $ttsVal */
+        $ttsVal = $record['LgTTSVoiceAPI'] ?? null;
+
         return [
-            'name' => $record['LgName'],
-            'dict1Uri' => $record['LgDict1URI'] ?? '',
-            'dict2Uri' => $record['LgDict2URI'] ?? '',
-            'translateUri' => $record['LgGoogleTranslateURI'] ?? '',
+            'name' => is_string($nameVal) ? $nameVal : '',
+            'dict1Uri' => is_string($record['LgDict1URI'] ?? '') ? (string) ($record['LgDict1URI'] ?? '') : '',
+            'dict2Uri' => is_string($record['LgDict2URI'] ?? '') ? (string) ($record['LgDict2URI'] ?? '') : '',
+            'translateUri' => is_string($record['LgGoogleTranslateURI'] ?? '') ? (string) ($record['LgGoogleTranslateURI'] ?? '') : '',
             'textSize' => (int) $record['LgTextSize'],
             'removeSpaces' => (bool) $record['LgRemoveSpaces'],
-            'regexWord' => $record['LgRegexpWordCharacters'],
+            'regexWord' => is_string($regexVal) ? $regexVal : '',
             'rtl' => (bool) $record['LgRightToLeft'],
-            'ttsVoiceApi' => $record['LgTTSVoiceAPI'] ?? null
+            'ttsVoiceApi' => is_string($ttsVal) ? $ttsVal : null
         ];
     }
 
@@ -285,6 +293,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     {
         $reviewsql = $config->toSqlProjection();
 
+        /** @var mixed $langId */
         $langId = Connection::fetchValue(
             "SELECT WoLgID FROM $reviewsql LIMIT 1",
             'WoLgID'
@@ -327,6 +336,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
     public function getLanguageName(ReviewConfiguration $config): string
     {
         if ($config->reviewKey === ReviewConfiguration::KEY_LANG) {
+            /** @var mixed $name */
             $name = QueryBuilder::table('languages')
                 ->where('LgID', '=', $config->selection)
                 ->valuePrepared('LgName');
@@ -339,7 +349,9 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
                 ->join('languages', 'TxLgID', '=', 'LgID')
                 ->where('TxID', '=', $config->selection)
                 ->firstPrepared();
-            return isset($row['LgName']) ? (string) $row['LgName'] : 'L2';
+            /** @var mixed $name */
+            $name = $row['LgName'] ?? null;
+            return is_string($name) ? $name : 'L2';
         }
 
         // For selection-based tests, get language from first word
@@ -348,6 +360,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
 
         if ($validation['langCount'] === 1) {
             $bindings = [];
+            /** @var mixed $name */
             $name = Connection::preparedFetchValue(
                 "SELECT LgName
                 FROM languages, {$reviewsql} AND LgID = WoLgID"
@@ -367,6 +380,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getWordText(int $wordId): ?string
     {
+        /** @var mixed $text */
         $text = QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
             ->valuePrepared('WoText');
@@ -406,16 +420,16 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         // First, find the best sentence (same logic as getSentenceForWord)
         $sql = "SELECT DISTINCT ti.Ti2SeID AS SeID, ti.Ti2TxID AS TxID,
             1 - IFNULL(sUnknownCount.c, 0) / sWordCount.c AS KnownRatio
-            FROM textitems2 ti
+            FROM word_occurrences ti
             JOIN (
                 SELECT t.Ti2SeID, COUNT(*) AS c
-                FROM textitems2 t
+                FROM word_occurrences t
                 WHERE t.Ti2WordCount = 1
                 GROUP BY t.Ti2SeID
             ) AS sWordCount ON sWordCount.Ti2SeID = ti.Ti2SeID
             LEFT JOIN (
                 SELECT t.Ti2SeID, COUNT(*) AS c
-                FROM textitems2 t
+                FROM word_occurrences t
                 WHERE t.Ti2WordCount = 1 AND t.Ti2WoID IS NULL
                 GROUP BY t.Ti2SeID
             ) AS sUnknownCount ON sUnknownCount.Ti2SeID = ti.Ti2SeID
@@ -469,6 +483,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
 
         if ($sentenceCount > 1) {
             // Get previous sentence
+            /** @var mixed $prevSeid */
             $prevSeid = Connection::fetchValue(
                 "SELECT SeID FROM sentences
                 WHERE SeID < $seid AND SeTxID = $txid
@@ -483,6 +498,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
 
         if ($sentenceCount > 2) {
             // Get next sentence
+            /** @var mixed $nextSeid */
             $nextSeid = Connection::fetchValue(
                 "SELECT SeID FROM sentences
                 WHERE SeID > $seid AND SeTxID = $txid
@@ -504,7 +520,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         // Fetch all text items with their word data
         $sql = "SELECT ti.Ti2Order, ti.Ti2Text, ti.Ti2WordCount, ti.Ti2WoID,
                 w.WoTextLC, w.WoRomanization, w.WoTranslation
-            FROM textitems2 ti
+            FROM word_occurrences ti
             LEFT JOIN words w ON ti.Ti2WoID = w.WoID
             WHERE ti.Ti2SeID IN ($seidList) AND ti.Ti2WordCount < 2
             AND ti.Ti2Text != '¶'

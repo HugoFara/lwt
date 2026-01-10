@@ -129,9 +129,10 @@ class ListLanguages
     public function getLanguagesWithArchivedTextCounts(): array
     {
         $records = QueryBuilder::table('languages')
-            ->select(['languages.LgID', 'languages.LgName', 'COUNT(archivedtexts.AtID) AS text_count'])
-            ->join('archivedtexts', 'archivedtexts.AtLgID', '=', 'languages.LgID')
+            ->select(['languages.LgID', 'languages.LgName', 'COUNT(texts.TxID) AS text_count'])
+            ->join('texts', 'texts.TxLgID', '=', 'languages.LgID')
             ->where('languages.LgName', '<>', '')
+            ->whereNotNull('texts.TxArchivedAt')
             ->groupBy(['languages.LgID', 'languages.LgName'])
             ->orderBy('languages.LgName')
             ->getPrepared();
@@ -159,14 +160,16 @@ class ListLanguages
         return [
             'texts' => QueryBuilder::table('texts')
                 ->where('TxLgID', '=', $lid)
+                ->whereNull('TxArchivedAt')
                 ->count(),
-            'archivedTexts' => QueryBuilder::table('archivedtexts')
-                ->where('AtLgID', '=', $lid)
+            'archivedTexts' => QueryBuilder::table('texts')
+                ->where('TxLgID', '=', $lid)
+                ->whereNotNull('TxArchivedAt')
                 ->count(),
             'words' => QueryBuilder::table('words')
                 ->where('WoLgID', '=', $lid)
                 ->count(),
-            'feeds' => QueryBuilder::table('newsfeeds')
+            'feeds' => QueryBuilder::table('news_feeds')
                 ->where('NfLgID', '=', $lid)
                 ->count(),
         ];
@@ -179,7 +182,7 @@ class ListLanguages
      */
     private function getFeedCounts(): array
     {
-        $records = QueryBuilder::table('newsfeeds')
+        $records = QueryBuilder::table('news_feeds')
             ->select(['NfLgID', 'COUNT(*) as value'])
             ->groupBy('NfLgID')
             ->getPrepared();
@@ -197,10 +200,10 @@ class ListLanguages
      */
     private function getArticleCounts(): array
     {
-        $records = QueryBuilder::table('newsfeeds')
-            ->selectRaw('newsfeeds.NfLgID, COUNT(*) AS article_count')
-            ->join('feedlinks', 'newsfeeds.NfID', '=', 'feedlinks.FlNfID')
-            ->groupBy('newsfeeds.NfLgID')
+        $records = QueryBuilder::table('news_feeds')
+            ->selectRaw('news_feeds.NfLgID, COUNT(*) AS article_count')
+            ->join('feed_links', 'news_feeds.NfID', '=', 'feed_links.FlNfID')
+            ->groupBy('news_feeds.NfLgID')
             ->getPrepared();
         $counts = [];
         foreach ($records as $record) {

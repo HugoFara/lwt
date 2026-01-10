@@ -27,6 +27,14 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+
+// Type assertions for variables passed from controller
+assert(is_int($lang));
+assert(is_int($textId));
+assert(is_string($scrdir));
+assert(is_bool($showRoman));
+assert($dictService instanceof DictionaryAdapter);
 
 $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>

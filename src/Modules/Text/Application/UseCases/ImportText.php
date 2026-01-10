@@ -87,15 +87,16 @@ class ImportText
         TextParsing::parseAndSave($text, $languageId, $textId);
 
         $bindings = [$textId];
-        $sentenceCount = Connection::preparedFetchValue(
+        $sentenceCount = (int)Connection::preparedFetchValue(
             "SELECT COUNT(*) AS cnt FROM sentences WHERE SeTxID = ?"
             . UserScopedQuery::forTablePrepared('sentences', $bindings, '', 'texts'),
             $bindings,
             'cnt'
         );
-        $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = ?"
-            . UserScopedQuery::forTablePrepared('textitems2', $bindings, '', 'texts'),
+        $bindings = [$textId];
+        $itemCount = (int)Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = ?"
+            . UserScopedQuery::forTablePrepared('word_occurrences', $bindings, '', 'texts'),
             $bindings,
             'cnt'
         );
@@ -127,23 +128,5 @@ class ImportText
     private function removeSoftHyphens(string $text): string
     {
         return str_replace("\xC2\xAD", "", $text);
-    }
-
-    /**
-     * Apply tags to a text.
-     *
-     * @param int   $textId Text ID
-     * @param array $tagIds Array of tag IDs
-     */
-    private function applyTags(int $textId, array $tagIds): void
-    {
-        foreach ($tagIds as $tagId) {
-            $bindings = [$textId, (int) $tagId];
-            Connection::preparedExecute(
-                "INSERT IGNORE INTO texttags (TtTxID, TtT2ID) VALUES (?, ?)"
-                . UserScopedQuery::forTablePrepared('texttags', $bindings, '', 'texts'),
-                $bindings
-            );
-        }
     }
 }

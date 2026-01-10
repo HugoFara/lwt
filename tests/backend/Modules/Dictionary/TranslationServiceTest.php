@@ -102,7 +102,7 @@ class TranslationServiceTest extends TestCase
         }
 
         // Clean up in reverse order
-        Connection::query("DELETE FROM textitems2 WHERE Ti2TxID = " . self::$testTextId);
+        Connection::query("DELETE FROM word_occurrences WHERE Ti2TxID = " . self::$testTextId);
         Connection::query("DELETE FROM sentences WHERE SeLgID = " . self::$testLangId);
         Connection::query("DELETE FROM texts WHERE TxTitle = 'TranslationServiceTestText'");
         Connection::query("DELETE FROM words WHERE WoLgID = " . self::$testLangId);

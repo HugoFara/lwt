@@ -16,6 +16,9 @@
  * @since    3.0.0
  *
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
+ *
+ * @var string $message
+ * @var int $activeLanguageId
  */
 
 namespace Lwt\Views\Text;
@@ -24,7 +27,11 @@ use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-PageLayoutHelper::renderMessage($message, false);
+// Type-safe variable extraction from controller context
+/** @var string $messageTyped */
+$messageTyped = $message;
+
+PageLayoutHelper::renderMessage($messageTyped, false);
 
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],

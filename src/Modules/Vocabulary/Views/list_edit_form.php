@@ -17,6 +17,14 @@ use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
+
+// Type assertions for variables passed from controller
+/** @var array{WoID: int, WoLgID: int, WoText: string, WoTextLC: string, WoStatus: int, LgName?: string, WoLemma?: string, WoRomanization?: string, WoSentence?: string} $word */
+assert(is_array($word));
+assert(is_string($scrdir));
+assert(is_bool($showRoman));
+assert(is_string($transl));
+
 ?>
 <h2>Edit Term</h2>
 <form name="editword" class="validate" action="/words/edit#rec<?php echo $word['WoID']; ?>" method="post">
@@ -47,13 +55,13 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 <tr>
    <td class="td1 right">Translation:</td>
    <td class="td1">
-       <textarea class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="500" data_info="Translation" name="WoTranslation" cols="40" rows="3"><?php echo htmlspecialchars($transl ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+       <textarea class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="500" data_info="Translation" name="WoTranslation" cols="40" rows="3"><?php echo htmlspecialchars($transl, ENT_QUOTES, 'UTF-8'); ?></textarea>
    </td>
 </tr>
 <tr>
    <td class="td1 right">Tags:</td>
    <td class="td1">
-       <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml((int)$word['WoID']); ?>
+       <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml($word['WoID']); ?>
    </td>
 </tr>
 <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">
@@ -75,7 +83,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 </tr>
 <tr>
    <td class="td1 right" colspan="2">  &nbsp;
-       <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin2((int)$word['WoLgID'], 'WoSentence', 'WoText'); ?>
+       <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin2($word['WoLgID'], 'WoSentence', 'WoText'); ?>
        &nbsp; &nbsp;
        <input type="button" value="Cancel" data-action="cancel-navigate" data-url="/words/edit#rec<?php echo $word['WoID']; ?>" />
        <input type="submit" name="op" value="Change" />

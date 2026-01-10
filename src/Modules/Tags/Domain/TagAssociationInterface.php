@@ -20,9 +20,9 @@ namespace Lwt\Modules\Tags\Domain;
  * Interface for managing tag associations with entities.
  *
  * Implementations handle specific entity types:
- * - Words (wordtags table)
- * - Texts (texttags table)
- * - Archived texts (archtexttags table)
+ * - Words (word_tag_map table)
+ * - Texts (text_tag_map table)
+ * - Archived texts (archived_text_tag_map table)
  *
  * @since 3.0.0
  */

@@ -114,8 +114,8 @@ class GoogleAuthService
      */
     private function getDefaultRedirectUri(): string
     {
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-            ? 'https' : 'http';
+        $https = $_SERVER['HTTPS'] ?? '';
+        $protocol = ($https !== '' && $https !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
         return "{$protocol}://{$host}/google/callback";
     }
@@ -180,14 +180,16 @@ class GoogleAuthService
                 'code' => $code,
             ]);
 
+            /** @var \League\OAuth2\Client\Token\AccessToken $accessToken */
+            $accessToken = $token;
             /** @var GoogleUser $googleUser */
-            $googleUser = $provider->getResourceOwner($token);
+            $googleUser = $provider->getResourceOwner($accessToken);
 
             /** @var string $googleId */
             $googleId = (string) $googleUser->getId();
             /** @var string $email */
             $email = (string) $googleUser->getEmail();
-            $name = (string) $googleUser->getName();
+            $name = $googleUser->getName();
 
             if ($googleId === '' || $email === '') {
                 return [

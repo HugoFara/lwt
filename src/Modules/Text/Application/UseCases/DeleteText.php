@@ -38,7 +38,7 @@ class DeleteText
      */
     public function execute(int $textId): string
     {
-        $count3 = QueryBuilder::table('textitems2')
+        $count3 = QueryBuilder::table('word_occurrences')
             ->where('Ti2TxID', '=', $textId)
             ->delete();
         $count2 = QueryBuilder::table('sentences')
@@ -71,7 +71,7 @@ class DeleteText
         $ids = array_map('intval', $textIds);
 
         // Delete text items
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->whereIn('Ti2TxID', $ids)
             ->delete();
 
@@ -101,13 +101,15 @@ class DeleteText
      */
     public function deleteArchivedText(int $textId): string
     {
-        $deleted = QueryBuilder::table('archivedtexts')
-            ->where('AtID', '=', $textId)
-            ->delete();
-        $message = "Archived Texts deleted: $deleted";
-        Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
-        $this->cleanupArchivedTextTags();
-        return $message;
+        $bindings = [$textId];
+        $deleted = Connection::preparedExecute(
+            "DELETE FROM texts WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
+            . UserScopedQuery::forTablePrepared('texts', $bindings),
+            $bindings
+        );
+        Maintenance::adjustAutoIncrement('texts', 'TxID');
+        $this->cleanupTextTags();
+        return "Archived Texts deleted: $deleted";
     }
 
     /**
@@ -123,12 +125,17 @@ class DeleteText
             return "Multiple Actions: 0";
         }
 
-        $affectedRows = QueryBuilder::table('archivedtexts')
-            ->whereIn('AtID', array_map('intval', $textIds))
-            ->delete();
-        Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
-        $this->cleanupArchivedTextTags();
-        return "Archived Texts deleted: $affectedRows";
+        /** @var array<int, int> $ids */
+        $ids = array_values(array_map('intval', $textIds));
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $deleted = Connection::preparedExecute(
+            "DELETE FROM texts WHERE TxID IN ({$placeholders}) AND TxArchivedAt IS NOT NULL"
+            . UserScopedQuery::forTablePrepared('texts', $ids),
+            $ids
+        );
+        Maintenance::adjustAutoIncrement('texts', 'TxID');
+        $this->cleanupTextTags();
+        return "Archived Texts deleted: $deleted";
     }
 
     /**
@@ -139,32 +146,13 @@ class DeleteText
     private function cleanupTextTags(): void
     {
         Connection::execute(
-            "DELETE texttags
+            "DELETE text_tag_map
             FROM (
-                texttags
+                text_tag_map
                 LEFT JOIN texts ON TtTxID = TxID
             )
             WHERE TxID IS NULL"
-            . UserScopedQuery::forTable('texttags', '', 'texts'),
-            ''
-        );
-    }
-
-    /**
-     * Clean up orphaned archived text tags.
-     *
-     * @return void
-     */
-    private function cleanupArchivedTextTags(): void
-    {
-        Connection::execute(
-            "DELETE archtexttags
-            FROM (
-                archtexttags
-                LEFT JOIN archivedtexts ON AgAtID = AtID
-            )
-            WHERE AtID IS NULL"
-            . UserScopedQuery::forTable('archtexttags', '', 'archivedtexts'),
+            . UserScopedQuery::forTable('text_tag_map', '', 'texts'),
             ''
         );
     }

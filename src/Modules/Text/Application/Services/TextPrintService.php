@@ -258,7 +258,7 @@ class TextPrintService
                     Ti2Order,
                     CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END as TiIsNotWord,
                     WoID, WoTranslation, WoRomanization, WoStatus
-                FROM textitems2
+                FROM word_occurrences
                 LEFT JOIN words ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
                 WHERE Ti2TxID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings, 'words') . "
@@ -373,7 +373,7 @@ class TextPrintService
                     CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END as isNotWord,
                     WoID AS wordId, WoTranslation AS translation,
                     WoRomanization AS romanization, WoStatus AS status
-                FROM textitems2
+                FROM word_occurrences
                 LEFT JOIN words ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
                 WHERE Ti2TxID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings, 'words') . "
@@ -403,7 +403,7 @@ class TextPrintService
 
             if ($isNotWord !== 0) {
                 // Non-word item (punctuation, etc.)
-                $text = $record['text'] ?? '';
+                $text = (string)($record['text'] ?? '');
                 $isParagraph = str_contains($text, '¶');
 
                 $currentItem = [
@@ -421,7 +421,7 @@ class TextPrintService
                 // Word item
                 $until = $order + 2 * ($wordCount - 1);
 
-                $translation = $record['translation'] ?? '';
+                $translation = (string)($record['translation'] ?? '');
                 if ($translation === '*') {
                     $translation = '';
                 }

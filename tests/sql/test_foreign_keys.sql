@@ -12,18 +12,17 @@
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- Clean up any previous test data
-DELETE FROM textitems2 WHERE Ti2TxID IN (SELECT TxID FROM texts WHERE TxTitle LIKE 'FK_TEST_%');
+DELETE FROM word_occurrences WHERE Ti2TxID IN (SELECT TxID FROM texts WHERE TxTitle LIKE 'FK_TEST_%');
 DELETE FROM sentences WHERE SeTxID IN (SELECT TxID FROM texts WHERE TxTitle LIKE 'FK_TEST_%');
-DELETE FROM texttags WHERE TtTxID IN (SELECT TxID FROM texts WHERE TxTitle LIKE 'FK_TEST_%');
+DELETE FROM text_tag_map WHERE TtTxID IN (SELECT TxID FROM texts WHERE TxTitle LIKE 'FK_TEST_%');
 DELETE FROM texts WHERE TxTitle LIKE 'FK_TEST_%';
-DELETE FROM wordtags WHERE WtWoID IN (SELECT WoID FROM words WHERE WoText LIKE 'fktest_%');
+DELETE FROM word_tag_map WHERE WtWoID IN (SELECT WoID FROM words WHERE WoText LIKE 'fktest_%');
 DELETE FROM words WHERE WoText LIKE 'fktest_%';
-DELETE FROM archtexttags WHERE AgAtID IN (SELECT AtID FROM archivedtexts WHERE AtTitle LIKE 'FK_TEST_%');
-DELETE FROM archivedtexts WHERE AtTitle LIKE 'FK_TEST_%';
-DELETE FROM feedlinks WHERE FlTitle LIKE 'FK_TEST_%';
-DELETE FROM newsfeeds WHERE NfName LIKE 'FK_TEST_%';
+-- Note: archivedtexts merged into texts table, cleanup already handled by texts DELETE above
+DELETE FROM feed_links WHERE FlTitle LIKE 'FK_TEST_%';
+DELETE FROM news_feeds WHERE NfName LIKE 'FK_TEST_%';
 DELETE FROM tags WHERE TgText LIKE 'fktest_%';
-DELETE FROM tags2 WHERE T2Text LIKE 'fktest_%';
+DELETE FROM text_tags WHERE T2Text LIKE 'fktest_%';
 DELETE FROM languages WHERE LgName LIKE 'FK_TEST_%';
 
 SELECT '=== Starting Foreign Key Tests ===' AS status;
@@ -53,11 +52,11 @@ VALUES (@test_lang_id, @test_text_id, 1, 'Test sentence', 1);
 SET @test_sentence_id = LAST_INSERT_ID();
 
 -- Insert text item with NULL Ti2WoID (unknown word)
-INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
+INSERT INTO word_occurrences (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
 VALUES (NULL, @test_lang_id, @test_text_id, @test_sentence_id, 1, 1, 'unknownword', '');
 
 SELECT IF(COUNT(*) = 1, 'PASS: Ti2WoID can be NULL', 'FAIL: Ti2WoID NULL insert failed') AS result
-FROM textitems2 WHERE Ti2WoID IS NULL AND Ti2Text = 'unknownword';
+FROM word_occurrences WHERE Ti2WoID IS NULL AND Ti2Text = 'unknownword';
 
 -- ============================================================================
 -- Test 2: FK texts -> languages (ON DELETE CASCADE)
@@ -116,10 +115,10 @@ SELECT IF(COUNT(*) = 0, 'PASS: Sentence deleted via CASCADE', 'FAIL: Sentence no
 FROM sentences WHERE SeID = @sent_test_sentence_id;
 
 -- ============================================================================
--- Test 4: FK textitems2 -> texts (ON DELETE CASCADE)
+-- Test 4: FK word_occurrences -> texts (ON DELETE CASCADE)
 -- ============================================================================
 
-SELECT '--- Test 4: textitems2 -> texts CASCADE ---' AS test;
+SELECT '--- Test 4: word_occurrences -> texts CASCADE ---' AS test;
 
 INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText)
 VALUES (@test_lang_id, 'FK_TEST_TextItems_Cascade', 'Test', '');
@@ -131,25 +130,25 @@ VALUES (@test_lang_id, @ti_test_text_id, 1, 'Sentence', 1);
 
 SET @ti_test_sentence_id = LAST_INSERT_ID();
 
-INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
+INSERT INTO word_occurrences (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
 VALUES (NULL, @test_lang_id, @ti_test_text_id, @ti_test_sentence_id, 1, 1, 'testword', '');
 
 -- Verify text item exists
 SELECT IF(COUNT(*) = 1, 'SETUP: TextItem created', 'SETUP FAIL') AS result
-FROM textitems2 WHERE Ti2TxID = @ti_test_text_id;
+FROM word_occurrences WHERE Ti2TxID = @ti_test_text_id;
 
--- Delete text - should cascade to textitems2 (via sentences cascade)
+-- Delete text - should cascade to word_occurrences (via sentences cascade)
 DELETE FROM texts WHERE TxID = @ti_test_text_id;
 
 -- Verify text item was deleted
 SELECT IF(COUNT(*) = 0, 'PASS: TextItem deleted via CASCADE', 'FAIL: TextItem not deleted') AS result
-FROM textitems2 WHERE Ti2TxID = @ti_test_text_id;
+FROM word_occurrences WHERE Ti2TxID = @ti_test_text_id;
 
 -- ============================================================================
--- Test 5: FK textitems2 -> words (ON DELETE SET NULL)
+-- Test 5: FK word_occurrences -> words (ON DELETE SET NULL)
 -- ============================================================================
 
-SELECT '--- Test 5: textitems2 -> words SET NULL ---' AS test;
+SELECT '--- Test 5: word_occurrences -> words SET NULL ---' AS test;
 
 INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText)
 VALUES (@test_lang_id, 'FK_TEST_SetNull', 'Test', '');
@@ -168,29 +167,29 @@ VALUES (@test_lang_id, 'fktest_word', 'fktest_word', 1, 'test translation', 1);
 SET @sn_test_word_id = LAST_INSERT_ID();
 
 -- Create text item linked to word
-INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
+INSERT INTO word_occurrences (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
 VALUES (@sn_test_word_id, @test_lang_id, @sn_test_text_id, @sn_test_sentence_id, 1, 1, 'fktest_word', '');
 
 -- Verify link exists
 SELECT IF(Ti2WoID = @sn_test_word_id, 'SETUP: TextItem linked to word', 'SETUP FAIL') AS result
-FROM textitems2 WHERE Ti2TxID = @sn_test_text_id AND Ti2Order = 1;
+FROM word_occurrences WHERE Ti2TxID = @sn_test_text_id AND Ti2Order = 1;
 
 -- Delete word - Ti2WoID should become NULL
 DELETE FROM words WHERE WoID = @sn_test_word_id;
 
 -- Verify Ti2WoID is now NULL (not deleted, just unlinked)
 SELECT IF(Ti2WoID IS NULL, 'PASS: Ti2WoID set to NULL', 'FAIL: Ti2WoID not NULL') AS result
-FROM textitems2 WHERE Ti2TxID = @sn_test_text_id AND Ti2Order = 1;
+FROM word_occurrences WHERE Ti2TxID = @sn_test_text_id AND Ti2Order = 1;
 
 -- Verify text item still exists
 SELECT IF(COUNT(*) = 1, 'PASS: TextItem preserved after word deletion', 'FAIL: TextItem deleted') AS result
-FROM textitems2 WHERE Ti2TxID = @sn_test_text_id AND Ti2Order = 1;
+FROM word_occurrences WHERE Ti2TxID = @sn_test_text_id AND Ti2Order = 1;
 
 -- ============================================================================
--- Test 6: FK wordtags -> words (ON DELETE CASCADE)
+-- Test 6: FK word_tag_map -> words (ON DELETE CASCADE)
 -- ============================================================================
 
-SELECT '--- Test 6: wordtags -> words CASCADE ---' AS test;
+SELECT '--- Test 6: word_tag_map -> words CASCADE ---' AS test;
 
 -- Create word and tag
 INSERT INTO words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoWordCount)
@@ -201,24 +200,24 @@ SET @wt_test_word_id = LAST_INSERT_ID();
 INSERT INTO tags (TgText, TgComment) VALUES ('fktest_tag', 'Test tag');
 SET @wt_test_tag_id = LAST_INSERT_ID();
 
-INSERT INTO wordtags (WtWoID, WtTgID) VALUES (@wt_test_word_id, @wt_test_tag_id);
+INSERT INTO word_tag_map (WtWoID, WtTgID) VALUES (@wt_test_word_id, @wt_test_tag_id);
 
 -- Verify wordtag exists
 SELECT IF(COUNT(*) = 1, 'SETUP: Wordtag created', 'SETUP FAIL') AS result
-FROM wordtags WHERE WtWoID = @wt_test_word_id;
+FROM word_tag_map WHERE WtWoID = @wt_test_word_id;
 
--- Delete word - should cascade to wordtags
+-- Delete word - should cascade to word_tag_map
 DELETE FROM words WHERE WoID = @wt_test_word_id;
 
 -- Verify wordtag was deleted
 SELECT IF(COUNT(*) = 0, 'PASS: Wordtag deleted via CASCADE', 'FAIL: Wordtag not deleted') AS result
-FROM wordtags WHERE WtWoID = @wt_test_word_id;
+FROM word_tag_map WHERE WtWoID = @wt_test_word_id;
 
 -- ============================================================================
--- Test 7: FK wordtags -> tags (ON DELETE CASCADE)
+-- Test 7: FK word_tag_map -> tags (ON DELETE CASCADE)
 -- ============================================================================
 
-SELECT '--- Test 7: wordtags -> tags CASCADE ---' AS test;
+SELECT '--- Test 7: word_tag_map -> tags CASCADE ---' AS test;
 
 -- Create word and tag
 INSERT INTO words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoWordCount)
@@ -229,153 +228,157 @@ SET @wt2_test_word_id = LAST_INSERT_ID();
 INSERT INTO tags (TgText, TgComment) VALUES ('fktest_tag2', 'Test tag 2');
 SET @wt2_test_tag_id = LAST_INSERT_ID();
 
-INSERT INTO wordtags (WtWoID, WtTgID) VALUES (@wt2_test_word_id, @wt2_test_tag_id);
+INSERT INTO word_tag_map (WtWoID, WtTgID) VALUES (@wt2_test_word_id, @wt2_test_tag_id);
 
 -- Verify wordtag exists
 SELECT IF(COUNT(*) = 1, 'SETUP: Wordtag created', 'SETUP FAIL') AS result
-FROM wordtags WHERE WtTgID = @wt2_test_tag_id;
+FROM word_tag_map WHERE WtTgID = @wt2_test_tag_id;
 
--- Delete tag - should cascade to wordtags
+-- Delete tag - should cascade to word_tag_map
 DELETE FROM tags WHERE TgID = @wt2_test_tag_id;
 
 -- Verify wordtag was deleted
 SELECT IF(COUNT(*) = 0, 'PASS: Wordtag deleted via tag CASCADE', 'FAIL: Wordtag not deleted') AS result
-FROM wordtags WHERE WtTgID = @wt2_test_tag_id;
+FROM word_tag_map WHERE WtTgID = @wt2_test_tag_id;
 
 -- ============================================================================
--- Test 8: FK texttags -> texts (ON DELETE CASCADE)
+-- Test 8: FK text_tag_map -> texts (ON DELETE CASCADE)
 -- ============================================================================
 
-SELECT '--- Test 8: texttags -> texts CASCADE ---' AS test;
+SELECT '--- Test 8: text_tag_map -> texts CASCADE ---' AS test;
 
 INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText)
 VALUES (@test_lang_id, 'FK_TEST_TextTag', 'Test', '');
 
 SET @tt_test_text_id = LAST_INSERT_ID();
 
-INSERT INTO tags2 (T2Text, T2Comment) VALUES ('fktest_texttag', 'Test text tag');
+INSERT INTO text_tags (T2Text, T2Comment) VALUES ('fktest_texttag', 'Test text tag');
 SET @tt_test_tag_id = LAST_INSERT_ID();
 
-INSERT INTO texttags (TtTxID, TtT2ID) VALUES (@tt_test_text_id, @tt_test_tag_id);
+INSERT INTO text_tag_map (TtTxID, TtT2ID) VALUES (@tt_test_text_id, @tt_test_tag_id);
 
 -- Verify texttag exists
 SELECT IF(COUNT(*) = 1, 'SETUP: Texttag created', 'SETUP FAIL') AS result
-FROM texttags WHERE TtTxID = @tt_test_text_id;
+FROM text_tag_map WHERE TtTxID = @tt_test_text_id;
 
--- Delete text - should cascade to texttags
+-- Delete text - should cascade to text_tag_map
 DELETE FROM texts WHERE TxID = @tt_test_text_id;
 
 -- Verify texttag was deleted
 SELECT IF(COUNT(*) = 0, 'PASS: Texttag deleted via CASCADE', 'FAIL: Texttag not deleted') AS result
-FROM texttags WHERE TtTxID = @tt_test_text_id;
+FROM text_tag_map WHERE TtTxID = @tt_test_text_id;
 
 -- ============================================================================
--- Test 9: FK archivedtexts -> languages (ON DELETE CASCADE)
+-- Test 9: FK archived texts (in texts table) -> languages (ON DELETE CASCADE)
+-- Note: Archived texts are now stored in the texts table with TxArchivedAt set
 -- ============================================================================
 
-SELECT '--- Test 9: archivedtexts -> languages CASCADE ---' AS test;
+SELECT '--- Test 9: archived texts -> languages CASCADE ---' AS test;
 
 INSERT INTO languages (LgName, LgDict1URI, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters)
 VALUES ('FK_TEST_Archive_Lang', 'https://test.com/###', '', '.!?', '', 'a-zA-Z');
 
 SET @arch_lang_id = LAST_INSERT_ID();
 
-INSERT INTO archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText)
-VALUES (@arch_lang_id, 'FK_TEST_Archived', 'Archived content', '');
+-- Insert archived text (texts with TxArchivedAt set)
+INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxArchivedAt)
+VALUES (@arch_lang_id, 'FK_TEST_Archived', 'Archived content', '', NOW());
 
 SET @arch_text_id = LAST_INSERT_ID();
 
 -- Verify archived text exists
 SELECT IF(COUNT(*) = 1, 'SETUP: ArchivedText created', 'SETUP FAIL') AS result
-FROM archivedtexts WHERE AtID = @arch_text_id;
+FROM texts WHERE TxID = @arch_text_id AND TxArchivedAt IS NOT NULL;
 
 -- Delete language - should cascade to archived texts
 DELETE FROM languages WHERE LgID = @arch_lang_id;
 
 -- Verify archived text was deleted
 SELECT IF(COUNT(*) = 0, 'PASS: ArchivedText deleted via CASCADE', 'FAIL: ArchivedText not deleted') AS result
-FROM archivedtexts WHERE AtID = @arch_text_id;
+FROM texts WHERE TxID = @arch_text_id;
 
 -- ============================================================================
--- Test 10: FK archtexttags -> archivedtexts (ON DELETE CASCADE)
+-- Test 10: FK text_tag_map -> texts (archived texts) (ON DELETE CASCADE)
+-- Note: Archived texts now use the same text_tag_map table as active texts
 -- ============================================================================
 
-SELECT '--- Test 10: archtexttags -> archivedtexts CASCADE ---' AS test;
+SELECT '--- Test 10: text_tag_map -> archived texts CASCADE ---' AS test;
 
-INSERT INTO archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText)
-VALUES (@test_lang_id, 'FK_TEST_ArchTag', 'Archived', '');
+-- Insert archived text
+INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxArchivedAt)
+VALUES (@test_lang_id, 'FK_TEST_ArchTag', 'Archived', '', NOW());
 
 SET @att_arch_id = LAST_INSERT_ID();
 
-INSERT INTO tags2 (T2Text, T2Comment) VALUES ('fktest_archtag', 'Arch tag');
+INSERT INTO text_tags (T2Text, T2Comment) VALUES ('fktest_archtag', 'Arch tag');
 SET @att_tag_id = LAST_INSERT_ID();
 
-INSERT INTO archtexttags (AgAtID, AgT2ID) VALUES (@att_arch_id, @att_tag_id);
+INSERT INTO text_tag_map (TtTxID, TtT2ID) VALUES (@att_arch_id, @att_tag_id);
 
--- Verify archtexttag exists
+-- Verify text_tag_map exists for archived text
 SELECT IF(COUNT(*) = 1, 'SETUP: ArchTextTag created', 'SETUP FAIL') AS result
-FROM archtexttags WHERE AgAtID = @att_arch_id;
+FROM text_tag_map WHERE TtTxID = @att_arch_id;
 
--- Delete archived text - should cascade to archtexttags
-DELETE FROM archivedtexts WHERE AtID = @att_arch_id;
+-- Delete archived text - should cascade to text_tag_map
+DELETE FROM texts WHERE TxID = @att_arch_id;
 
--- Verify archtexttag was deleted
+-- Verify text_tag_map entry was deleted
 SELECT IF(COUNT(*) = 0, 'PASS: ArchTextTag deleted via CASCADE', 'FAIL: ArchTextTag not deleted') AS result
-FROM archtexttags WHERE AgAtID = @att_arch_id;
+FROM text_tag_map WHERE TtTxID = @att_arch_id;
 
 -- ============================================================================
--- Test 11: FK newsfeeds -> languages (ON DELETE CASCADE)
+-- Test 11: FK news_feeds -> languages (ON DELETE CASCADE)
 -- ============================================================================
 
-SELECT '--- Test 11: newsfeeds -> languages CASCADE ---' AS test;
+SELECT '--- Test 11: news_feeds -> languages CASCADE ---' AS test;
 
 INSERT INTO languages (LgName, LgDict1URI, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters)
 VALUES ('FK_TEST_Feed_Lang', 'https://test.com/###', '', '.!?', '', 'a-zA-Z');
 
 SET @feed_lang_id = LAST_INSERT_ID();
 
-INSERT INTO newsfeeds (NfLgID, NfName, NfSourceURI, NfArticleSectionTags, NfFilterTags, NfUpdate, NfOptions)
+INSERT INTO news_feeds (NfLgID, NfName, NfSourceURI, NfArticleSectionTags, NfFilterTags, NfUpdate, NfOptions)
 VALUES (@feed_lang_id, 'FK_TEST_Feed', 'https://test.com/feed', '', '', 0, '');
 
 SET @feed_id = LAST_INSERT_ID();
 
 -- Verify newsfeed exists
 SELECT IF(COUNT(*) = 1, 'SETUP: Newsfeed created', 'SETUP FAIL') AS result
-FROM newsfeeds WHERE NfID = @feed_id;
+FROM news_feeds WHERE NfID = @feed_id;
 
--- Delete language - should cascade to newsfeeds
+-- Delete language - should cascade to news_feeds
 DELETE FROM languages WHERE LgID = @feed_lang_id;
 
 -- Verify newsfeed was deleted
 SELECT IF(COUNT(*) = 0, 'PASS: Newsfeed deleted via CASCADE', 'FAIL: Newsfeed not deleted') AS result
-FROM newsfeeds WHERE NfID = @feed_id;
+FROM news_feeds WHERE NfID = @feed_id;
 
 -- ============================================================================
--- Test 12: FK feedlinks -> newsfeeds (ON DELETE CASCADE)
+-- Test 12: FK feed_links -> news_feeds (ON DELETE CASCADE)
 -- ============================================================================
 
-SELECT '--- Test 12: feedlinks -> newsfeeds CASCADE ---' AS test;
+SELECT '--- Test 12: feed_links -> news_feeds CASCADE ---' AS test;
 
-INSERT INTO newsfeeds (NfLgID, NfName, NfSourceURI, NfArticleSectionTags, NfFilterTags, NfUpdate, NfOptions)
+INSERT INTO news_feeds (NfLgID, NfName, NfSourceURI, NfArticleSectionTags, NfFilterTags, NfUpdate, NfOptions)
 VALUES (@test_lang_id, 'FK_TEST_FeedLink', 'https://test.com/feed2', '', '', 0, '');
 
 SET @fl_feed_id = LAST_INSERT_ID();
 
-INSERT INTO feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate, FlAudio, FlText)
+INSERT INTO feed_links (FlNfID, FlTitle, FlLink, FlDescription, FlDate, FlAudio, FlText)
 VALUES (@fl_feed_id, 'FK_TEST_Link', 'https://test.com/article', 'Test', NOW(), '', '');
 
 SET @feedlink_id = LAST_INSERT_ID();
 
 -- Verify feedlink exists
 SELECT IF(COUNT(*) = 1, 'SETUP: Feedlink created', 'SETUP FAIL') AS result
-FROM feedlinks WHERE FlID = @feedlink_id;
+FROM feed_links WHERE FlID = @feedlink_id;
 
--- Delete newsfeed - should cascade to feedlinks
-DELETE FROM newsfeeds WHERE NfID = @fl_feed_id;
+-- Delete newsfeed - should cascade to feed_links
+DELETE FROM news_feeds WHERE NfID = @fl_feed_id;
 
 -- Verify feedlink was deleted
 SELECT IF(COUNT(*) = 0, 'PASS: Feedlink deleted via CASCADE', 'FAIL: Feedlink not deleted') AS result
-FROM feedlinks WHERE FlID = @feedlink_id;
+FROM feed_links WHERE FlID = @feedlink_id;
 
 -- ============================================================================
 -- Test 13: Verify FK constraint prevents invalid references
@@ -427,14 +430,14 @@ VALUES (@fc_lang_id, @fc_text_id, 1, 'Full cascade sentence', 1);
 
 SET @fc_sentence_id = LAST_INSERT_ID();
 
-INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
+INSERT INTO word_occurrences (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
 VALUES (NULL, @fc_lang_id, @fc_text_id, @fc_sentence_id, 1, 1, 'cascadeword', '');
 
 -- Verify all exist
 SELECT IF(
     (SELECT COUNT(*) FROM texts WHERE TxID = @fc_text_id) = 1 AND
     (SELECT COUNT(*) FROM sentences WHERE SeID = @fc_sentence_id) = 1 AND
-    (SELECT COUNT(*) FROM textitems2 WHERE Ti2TxID = @fc_text_id) = 1,
+    (SELECT COUNT(*) FROM word_occurrences WHERE Ti2TxID = @fc_text_id) = 1,
     'SETUP: Full chain created', 'SETUP FAIL'
 ) AS result;
 
@@ -445,7 +448,7 @@ DELETE FROM languages WHERE LgID = @fc_lang_id;
 SELECT IF(
     (SELECT COUNT(*) FROM texts WHERE TxID = @fc_text_id) = 0 AND
     (SELECT COUNT(*) FROM sentences WHERE SeID = @fc_sentence_id) = 0 AND
-    (SELECT COUNT(*) FROM textitems2 WHERE Ti2TxID = @fc_text_id) = 0,
+    (SELECT COUNT(*) FROM word_occurrences WHERE Ti2TxID = @fc_text_id) = 0,
     'PASS: Full chain deleted via CASCADE', 'FAIL: Some records remain'
 ) AS result;
 
@@ -456,18 +459,17 @@ SELECT IF(
 SELECT '--- Cleanup ---' AS status;
 
 -- Clean up remaining test data
-DELETE FROM textitems2 WHERE Ti2TxID IN (SELECT TxID FROM texts WHERE TxTitle LIKE 'FK_TEST_%');
+DELETE FROM word_occurrences WHERE Ti2TxID IN (SELECT TxID FROM texts WHERE TxTitle LIKE 'FK_TEST_%');
 DELETE FROM sentences WHERE SeTxID IN (SELECT TxID FROM texts WHERE TxTitle LIKE 'FK_TEST_%');
-DELETE FROM texttags WHERE TtTxID IN (SELECT TxID FROM texts WHERE TxTitle LIKE 'FK_TEST_%');
+DELETE FROM text_tag_map WHERE TtTxID IN (SELECT TxID FROM texts WHERE TxTitle LIKE 'FK_TEST_%');
 DELETE FROM texts WHERE TxTitle LIKE 'FK_TEST_%';
-DELETE FROM wordtags WHERE WtWoID IN (SELECT WoID FROM words WHERE WoText LIKE 'fktest_%');
+DELETE FROM word_tag_map WHERE WtWoID IN (SELECT WoID FROM words WHERE WoText LIKE 'fktest_%');
 DELETE FROM words WHERE WoText LIKE 'fktest_%';
-DELETE FROM archtexttags WHERE AgAtID IN (SELECT AtID FROM archivedtexts WHERE AtTitle LIKE 'FK_TEST_%');
-DELETE FROM archivedtexts WHERE AtTitle LIKE 'FK_TEST_%';
-DELETE FROM feedlinks WHERE FlTitle LIKE 'FK_TEST_%';
-DELETE FROM newsfeeds WHERE NfName LIKE 'FK_TEST_%';
+-- Note: archivedtexts merged into texts table, cleanup already handled by texts DELETE above
+DELETE FROM feed_links WHERE FlTitle LIKE 'FK_TEST_%';
+DELETE FROM news_feeds WHERE NfName LIKE 'FK_TEST_%';
 DELETE FROM tags WHERE TgText LIKE 'fktest_%';
-DELETE FROM tags2 WHERE T2Text LIKE 'fktest_%';
+DELETE FROM text_tags WHERE T2Text LIKE 'fktest_%';
 DELETE FROM languages WHERE LgName LIKE 'FK_TEST_%';
 
 SELECT '=== All Foreign Key Tests Complete ===' AS status;

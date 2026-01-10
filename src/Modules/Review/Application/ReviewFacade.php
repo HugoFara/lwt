@@ -181,7 +181,7 @@ class ReviewFacade
      *
      * @param string $reviewsql SQL projection string
      *
-     * @return array|null Word record or null
+     * @return array<string, mixed>|null Word record or null
      */
     public function getNextWord(string $reviewsql): ?array
     {
@@ -621,10 +621,10 @@ class ReviewFacade
     /**
      * Get test solution.
      *
-     * @param int    $testType Test type
-     * @param array  $wordData Word data
-     * @param bool   $wordMode Word mode
-     * @param string $wordText Word text
+     * @param int                  $testType Test type
+     * @param array<string, mixed> $wordData Word data
+     * @param bool                 $wordMode Word mode
+     * @param string               $wordText Word text
      *
      * @return string
      */
@@ -639,7 +639,10 @@ class ReviewFacade
         if ($baseType === 1) {
             $tagList = \Lwt\Modules\Tags\Application\TagsFacade::getWordTagList((int) $wordData['WoID'], false);
             $tagFormatted = $tagList !== '' ? ' [' . $tagList . ']' : '';
-            $trans = \Lwt\Modules\Vocabulary\Application\Services\ExportService::replaceTabNewline($wordData['WoTranslation']) . $tagFormatted;
+            $translation = isset($wordData['WoTranslation']) && is_string($wordData['WoTranslation'])
+                ? $wordData['WoTranslation']
+                : '';
+            $trans = \Lwt\Modules\Vocabulary\Application\Services\ExportService::replaceTabNewline($translation) . $tagFormatted;
             return $wordMode ? $trans : "[$trans]";
         }
 

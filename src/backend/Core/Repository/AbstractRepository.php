@@ -95,6 +95,9 @@ abstract class AbstractRepository implements RepositoryInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param array<string, mixed> $criteria
+     * @param array<string, string>|null $orderBy
      */
     public function findBy(
         array $criteria,
@@ -104,6 +107,7 @@ abstract class AbstractRepository implements RepositoryInterface
     ): array {
         $query = $this->query();
 
+        /** @var mixed $value */
         foreach ($criteria as $field => $value) {
             $column = $this->columnMap[$field] ?? $field;
             if (is_array($value)) {
@@ -142,11 +146,17 @@ abstract class AbstractRepository implements RepositoryInterface
      * {@inheritdoc}
      *
      * @psalm-suppress InvalidReturnStatement
+     *
+     * @param array<string, mixed> $criteria
+     *
+     * @return object|null
+     * @psalm-return T|null
      */
     public function findOneBy(array $criteria): ?object
     {
         $results = $this->findBy($criteria, null, 1);
 
+        /** @psalm-var T|null */
         return $results[0] ?? null;
     }
 
@@ -200,11 +210,14 @@ abstract class AbstractRepository implements RepositoryInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param array<string, mixed> $criteria
      */
     public function count(array $criteria = []): int
     {
         $query = $this->query();
 
+        /** @var mixed $value */
         foreach ($criteria as $field => $value) {
             $column = $this->columnMap[$field] ?? $field;
             if (is_array($value)) {
@@ -245,7 +258,7 @@ abstract class AbstractRepository implements RepositoryInterface
      *
      * @param object $entity The entity
      *
-     * @return array<string, mixed> Database row data
+     * @return array<string, scalar|null> Database row data
      *
      * @psalm-param T $entity
      */

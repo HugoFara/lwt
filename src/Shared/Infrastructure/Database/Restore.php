@@ -47,6 +47,7 @@ class Restore
     public static function restoreFile($handle, string $title, bool $validateSql = true): string
     {
         $message = "";
+        $hasErrors = false;
         $install_status = [
             "queries" => 0,
             "successes" => 0,
@@ -69,6 +70,7 @@ class Restore
                     $message = "Error: Invalid $title Restore file " .
                     "(possibly not created by LWT backup)";
                     $install_status["errors"] = 1;
+                    $hasErrors = true;
                     break;
                 }
                 $start = false;
@@ -90,14 +92,15 @@ class Restore
             }
         }
 
-        if (!feof($handle) && $install_status["errors"] == 0) {
+        if (!feof($handle) && !$hasErrors) {
             $message = "Error: cannot read the end of the demo file!";
             $install_status["errors"] = 1;
+            $hasErrors = true;
         }
         fclose($handle);
 
         // Validate all queries before executing any (security hardening)
-        if ($validateSql && $install_status["errors"] == 0) {
+        if ($validateSql && !$hasErrors) {
             $validator = new SqlValidator();
             foreach ($queries_list as $query) {
                 $trimmedQuery = trim($query);
@@ -105,6 +108,7 @@ class Restore
                     if (!$validator->validate($trimmedQuery)) {
                         $message = "Security Error: " . ($validator->getFirstError() ?? "Invalid SQL detected");
                         $install_status["errors"] = 1;
+                        $hasErrors = true;
                         break;
                     }
                 }
@@ -113,7 +117,7 @@ class Restore
 
         // Now run all queries
         $connection = Globals::getDbConnection();
-        if ($install_status["errors"] == 0 && $connection !== null) {
+        if (!$hasErrors && $connection !== null) {
             foreach ($queries_list as $query) {
                 $sql_line = trim(
                     str_replace("\r", "", str_replace("\n", "", $query))
@@ -127,6 +131,7 @@ class Restore
                         $install_status["queries"]++;
                         if ($res == false) {
                             $install_status["errors"]++;
+                            $hasErrors = true;
                         } else {
                             $install_status["successes"]++;
                             if (str_starts_with($query, "INSERT INTO")) {
@@ -142,9 +147,8 @@ class Restore
             }
         }
 
-        /** @psalm-suppress TypeDoesNotContainType - Value can change in loop */
-        if ($install_status["errors"] == 0) {
-            // Drop legacy textitems table if it exists (replaced by textitems2)
+        if (!$hasErrors) {
+            // Drop legacy textitems table if it exists (replaced by word_occurrences)
             Connection::execute("DROP TABLE IF EXISTS textitems");
             Migrations::checkAndUpdate();
             Migrations::reparseAllTexts();
@@ -184,22 +188,20 @@ class Restore
         // exist on a table, even if those constraints would allow the operation.
 
         // Level 1: Tables with FKs to multiple parents
-        Connection::execute('DELETE FROM ' . Globals::table('archtexttags'));
-        Connection::execute('DELETE FROM ' . Globals::table('texttags'));
-        Connection::execute('DELETE FROM ' . Globals::table('wordtags'));
-        Connection::execute('DELETE FROM ' . Globals::table('textitems2'));
-        Connection::execute('DELETE FROM ' . Globals::table('feedlinks'));
+        Connection::execute('DELETE FROM ' . Globals::table('text_tag_map'));
+        Connection::execute('DELETE FROM ' . Globals::table('word_tag_map'));
+        Connection::execute('DELETE FROM ' . Globals::table('word_occurrences'));
+        Connection::execute('DELETE FROM ' . Globals::table('feed_links'));
 
         // Level 2: Tables with FKs to languages only
         Connection::execute('DELETE FROM ' . Globals::table('sentences'));
-        Connection::execute('DELETE FROM ' . Globals::table('newsfeeds'));
+        Connection::execute('DELETE FROM ' . Globals::table('news_feeds'));
         Connection::execute('DELETE FROM ' . Globals::table('texts'));
-        Connection::execute('DELETE FROM ' . Globals::table('archivedtexts'));
         Connection::execute('DELETE FROM ' . Globals::table('words'));
 
         // Level 3: Parent tables with no FKs to other content tables
         Connection::execute('DELETE FROM ' . Globals::table('tags'));
-        Connection::execute('DELETE FROM ' . Globals::table('tags2'));
+        Connection::execute('DELETE FROM ' . Globals::table('text_tags'));
         Connection::execute('DELETE FROM ' . Globals::table('languages'));
 
         QueryBuilder::table('settings')

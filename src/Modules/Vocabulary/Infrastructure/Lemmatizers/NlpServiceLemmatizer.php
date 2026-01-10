@@ -101,7 +101,7 @@ class NlpServiceLemmatizer implements LemmatizerInterface
             return array_fill_keys($wordForms, null);
         }
 
-        return $this->handler->lemmatizeBatch($wordForms, $langCode, $this->lemmatizer);
+        return $this->handler->lemmatizeBatch(array_values($wordForms), $langCode, $this->lemmatizer);
     }
 
     /**

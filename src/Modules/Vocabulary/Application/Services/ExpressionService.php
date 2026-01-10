@@ -158,7 +158,7 @@ class ExpressionService
 
         $removeSpaces = $record["LgRemoveSpaces"] == 1;
         $splitEachChar = $record['LgSplitEachChar'] != 0;
-        $termchar = $record['LgRegexpWordCharacters'];
+        $termchar = (string)$record['LgRegexpWordCharacters'];
         $likeTextlc = "%$textlc%";
         if ($removeSpaces && !$splitEachChar) {
             // Complex JOIN query - use raw SQL with UserScopedQuery
@@ -166,7 +166,7 @@ class ExpressionService
             $sql = "SELECT
             GROUP_CONCAT(Ti2Text ORDER BY Ti2Order SEPARATOR ' ') AS SeText, SeID,
             SeTxID, SeFirstPos, SeTxID
-            FROM textitems2
+            FROM word_occurrences
             JOIN sentences
             ON SeID=Ti2SeID AND SeLgID = Ti2LgID
             WHERE Ti2LgID = ?
@@ -190,7 +190,7 @@ class ExpressionService
         $matches = null;
         $rSflag = false; // Flag to prevent repeat space-removal processing
         foreach ($rows as $record) {
-            $string = ' ' . $record['SeText'] . ' ';
+            $string = ' ' . (string)$record['SeText'] . ' ';
             if ($splitEachChar) {
                 $string = preg_replace('/([^\s])/u', "$1 ", $string);
             } elseif ($removeSpaces && !$rSflag) {
@@ -314,7 +314,7 @@ class ExpressionService
                 return ['placeholders' => $placeholders, 'params' => $params];
             }
 
-            $sql = "INSERT INTO textitems2
+            $sql = "INSERT INTO word_occurrences
                  (Ti2WoID,Ti2LgID,Ti2TxID,Ti2SeID,Ti2Order,Ti2WordCount,Ti2Text)
                  VALUES " . implode(',', $placeholders);
             Connection::preparedExecute($sql, $params);
@@ -341,11 +341,11 @@ class ExpressionService
             ->where('WoID', '=', $wid)
             ->getPrepared()[0] ?? null;
 
-        $woStatus = $record["WoStatus"] ?? 1;
+        $woStatus = (int)($record["WoStatus"] ?? 1);
         $attrs = [
             "class" => "click mword {$showType}wsty TERM$hex word$wid status" . $woStatus,
-            "data_trans" => $record["WoTranslation"] ?? '',
-            "data_rom" => $record["WoRomanization"] ?? '',
+            "data_trans" => (string)($record["WoTranslation"] ?? ''),
+            "data_rom" => (string)($record["WoRomanization"] ?? ''),
             "data_code" => $len,
             "data_status" => $woStatus,
             "data_wid" => $wid
@@ -383,11 +383,11 @@ class ExpressionService
             ->where('WoID', '=', $wid)
             ->getPrepared()[0] ?? null;
 
-        $woStatus = $record["WoStatus"] ?? 1;
+        $woStatus = (int)($record["WoStatus"] ?? 1);
         $attrs = [
             "class" => "click mword {$showType}wsty TERM$hex word$wid status" . $woStatus,
-            "data_trans" => $record["WoTranslation"] ?? '',
-            "data_rom" => $record["WoRomanization"] ?? '',
+            "data_trans" => (string)($record["WoTranslation"] ?? ''),
+            "data_rom" => (string)($record["WoRomanization"] ?? ''),
             "data_code" => $len,
             "data_status" => $woStatus,
             "data_wid" => $wid

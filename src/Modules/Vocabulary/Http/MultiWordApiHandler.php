@@ -81,17 +81,17 @@ class MultiWordApiHandler
                 ->where('WoID', '=', $wordId)
                 ->valuePrepared('WoWordCount');
 
-            $text = (string) $data['text'];
+            $text = $data['text'];
             return [
                 'id' => $wordId,
                 'text' => $text,
                 'textLc' => mb_strtolower($text, 'UTF-8'),
-                'translation' => (string) $data['translation'],
-                'romanization' => (string) $data['romanization'],
-                'sentence' => (string) $data['sentence'],
-                'notes' => (string) ($data['notes'] ?? ''),
-                'status' => (int) $data['status'],
-                'langId' => (int) $data['lgid'],
+                'translation' => $data['translation'],
+                'romanization' => $data['romanization'],
+                'sentence' => $data['sentence'],
+                'notes' => $data['notes'],
+                'status' => $data['status'],
+                'langId' => $data['lgid'],
                 'wordCount' => $wordCount,
                 'isNew' => false
             ];
@@ -222,12 +222,12 @@ class MultiWordApiHandler
             return ['error' => 'Multi-word expression not found'];
         }
 
-        $oldStatus = (int) $existing['status'];
+        $oldStatus = $existing['status'];
         $newStatus = (int) ($data['status'] ?? $oldStatus);
 
         try {
             $this->multiWordService->updateMultiWord($termId, [
-                'text' => (string) $existing['text'], // Don't change text
+                'text' => $existing['text'], // Don't change text
                 'translation' => (string) ($data['translation'] ?? $existing['translation'] ?? ''),
                 'sentence' => (string) ($data['sentence'] ?? $existing['sentence'] ?? ''),
                 'notes' => (string) ($data['notes'] ?? $existing['notes'] ?? ''),

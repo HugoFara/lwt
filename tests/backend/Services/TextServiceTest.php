@@ -169,7 +169,7 @@ class TextServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getArchivedTextCount(' AND AtLgID = 1', '', '');
+        $result = $this->service->getArchivedTextCount(' AND TxLgID = 1', '', '');
         $this->assertIsInt($result);
         $this->assertGreaterThanOrEqual(0, $result);
     }
@@ -261,8 +261,8 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->buildArchivedQueryWhereClause('test', 'title,text', '');
-        $this->assertStringContainsString('AtTitle', $result['clause']);
-        $this->assertStringContainsString('AtText', $result['clause']);
+        $this->assertStringContainsString('TxTitle', $result['clause']);
+        $this->assertStringContainsString('TxText', $result['clause']);
         $this->assertStringContainsString('OR', $result['clause']);
         $this->assertEquals(['test', 'test'], $result['params']);
     }
@@ -274,8 +274,8 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->buildArchivedQueryWhereClause('test', 'title', '');
-        $this->assertStringContainsString('AtTitle', $result['clause']);
-        $this->assertStringNotContainsString('AtText', $result['clause']);
+        $this->assertStringContainsString('TxTitle', $result['clause']);
+        $this->assertStringNotContainsString('TxText', $result['clause']);
         $this->assertEquals(['test'], $result['params']);
     }
 
@@ -286,8 +286,8 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->buildArchivedQueryWhereClause('test', 'text', '');
-        $this->assertStringNotContainsString('AtTitle LIKE', $result['clause']);
-        $this->assertStringContainsString('AtText', $result['clause']);
+        $this->assertStringNotContainsString('TxTitle LIKE', $result['clause']);
+        $this->assertStringContainsString('TxText', $result['clause']);
         $this->assertEquals(['test'], $result['params']);
     }
 
@@ -303,7 +303,7 @@ class TextServiceTest extends TestCase
     {
         $result = $this->service->buildArchivedTagHavingClause('1', '', '');
         $this->assertStringContainsString('HAVING', $result);
-        $this->assertStringContainsString('AgT2ID', $result);
+        $this->assertStringContainsString('TtT2ID', $result);
     }
 
     public function testBuildArchivedTagHavingClauseForUntagged(): void

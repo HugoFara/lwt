@@ -17,7 +17,7 @@ class NlpServiceHandler
 
     public function __construct()
     {
-        $this->baseUrl = EnvLoader::get('NLP_SERVICE_URL', 'http://nlp:8000');
+        $this->baseUrl = EnvLoader::get('NLP_SERVICE_URL', 'http://nlp:8000') ?? 'http://nlp:8000';
         $this->timeout = 30;
     }
 
@@ -80,8 +80,9 @@ class NlpServiceHandler
             return [];
         }
 
+        /** @var array{voices?: array}|null $data */
         $data = json_decode($response, true);
-        return $data['voices'] ?? [];
+        return is_array($data) && isset($data['voices']) ? $data['voices'] : [];
     }
 
     /**
@@ -100,8 +101,9 @@ class NlpServiceHandler
             return [];
         }
 
+        /** @var array{voices?: array}|null $data */
         $data = json_decode($response, true);
-        return $data['voices'] ?? [];
+        return is_array($data) && isset($data['voices']) ? $data['voices'] : [];
     }
 
     /**
@@ -155,7 +157,7 @@ class NlpServiceHandler
      *
      * @param string $text The text to parse
      * @param string $parser Parser type: 'mecab' or 'jieba'
-     * @return array|null Parsed result with sentences and tokens, or null on failure
+     * @return array<array-key, mixed>|null Parsed result with sentences and tokens, or null on failure
      */
     public function parse(string $text, string $parser): ?array
     {
@@ -175,7 +177,9 @@ class NlpServiceHandler
             return null;
         }
 
-        return json_decode($response, true);
+        /** @var array<array-key, mixed>|null $result */
+        $result = json_decode($response, true);
+        return is_array($result) ? $result : null;
     }
 
     /**
@@ -194,8 +198,9 @@ class NlpServiceHandler
             return [];
         }
 
+        /** @var array{parsers?: array}|null $data */
         $data = json_decode($response, true);
-        return $data['parsers'] ?? [];
+        return is_array($data) && isset($data['parsers']) ? $data['parsers'] : [];
     }
 
     // =========================================================================
@@ -234,16 +239,17 @@ class NlpServiceHandler
             return null;
         }
 
+        /** @var array{lemma?: string}|null $data */
         $data = json_decode($response, true);
-        return $data['lemma'] ?? null;
+        return is_array($data) && isset($data['lemma']) ? $data['lemma'] : null;
     }
 
     /**
      * Lemmatize multiple words using the NLP service.
      *
-     * @param array  $words        Words to lemmatize
-     * @param string $languageCode ISO language code
-     * @param string $lemmatizer   Lemmatizer type: 'spacy' (default)
+     * @param list<string> $words        Words to lemmatize
+     * @param string       $languageCode ISO language code
+     * @param string       $lemmatizer   Lemmatizer type: 'spacy' (default)
      *
      * @return array<string, string|null> Mapping of words to lemmas
      */
@@ -271,17 +277,23 @@ class NlpServiceHandler
 
         $response = @file_get_contents($this->baseUrl . '/lemmatize/batch', false, $context);
         if ($response === false) {
+            /** @var array<string, null> */
             return array_fill_keys($words, null);
         }
 
+        /** @var array{results?: array<string, string|null>}|null $data */
         $data = json_decode($response, true);
-        return $data['results'] ?? array_fill_keys($words, null);
+        if (is_array($data) && isset($data['results'])) {
+            return $data['results'];
+        }
+        /** @var array<string, null> */
+        return array_fill_keys($words, null);
     }
 
     /**
      * Get list of available lemmatizers and their supported languages.
      *
-     * @return array Lemmatizer information
+     * @return array<array-key, mixed> Lemmatizer information
      */
     public function getAvailableLemmatizers(): array
     {
@@ -294,7 +306,9 @@ class NlpServiceHandler
             return [];
         }
 
-        return json_decode($response, true) ?? [];
+        /** @var array<array-key, mixed>|null $result */
+        $result = json_decode($response, true);
+        return is_array($result) ? $result : [];
     }
 
     /**
@@ -302,7 +316,7 @@ class NlpServiceHandler
      *
      * @param string $languageCode ISO language code
      *
-     * @return array Language support information
+     * @return array<array-key, mixed> Language support information
      */
     public function checkLemmatizationSupport(string $languageCode): array
     {
@@ -323,6 +337,8 @@ class NlpServiceHandler
             ];
         }
 
-        return json_decode($response, true) ?? [];
+        /** @var array<array-key, mixed>|null $result */
+        $result = json_decode($response, true);
+        return is_array($result) ? $result : [];
     }
 }

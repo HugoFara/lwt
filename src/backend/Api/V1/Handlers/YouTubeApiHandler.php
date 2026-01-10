@@ -135,14 +135,19 @@ class YouTubeApiHandler
             ];
         }
 
-        if (empty($data['items'])) {
+        if (!isset($data['items']) || !is_array($data['items']) || empty($data['items'])) {
             return [
                 'success' => false,
                 'error' => 'Video not found.',
             ];
         }
 
-        $snippet = $data['items'][0]['snippet'] ?? [];
+        /** @var mixed $firstItem */
+        $firstItem = $data['items'][0];
+        /** @var array{title?: string, description?: string} $snippet */
+        $snippet = is_array($firstItem) && isset($firstItem['snippet']) && is_array($firstItem['snippet'])
+            ? $firstItem['snippet']
+            : [];
 
         return [
             'success' => true,

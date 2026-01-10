@@ -84,14 +84,26 @@ class WordService
      */
     public function create(array $data): array
     {
-        $text = trim(Escaping::prepareTextdata($data['WoText']));
+        // Extract typed values from data array
+        /** @var string $woText */
+        $woText = isset($data['WoText']) && is_string($data['WoText']) ? $data['WoText'] : '';
+        /** @var string $woTranslation */
+        $woTranslation = isset($data['WoTranslation']) && is_string($data['WoTranslation']) ? $data['WoTranslation'] : '';
+        /** @var string $woSentence */
+        $woSentence = isset($data['WoSentence']) && is_string($data['WoSentence']) ? $data['WoSentence'] : '';
+        /** @var string $woNotes */
+        $woNotes = isset($data['WoNotes']) && is_string($data['WoNotes']) ? $data['WoNotes'] : '';
+        /** @var string $woRomanization */
+        $woRomanization = isset($data['WoRomanization']) && is_string($data['WoRomanization']) ? $data['WoRomanization'] : '';
+        /** @var string|null $woLemma */
+        $woLemma = isset($data['WoLemma']) && is_string($data['WoLemma']) && $data['WoLemma'] !== '' ? $data['WoLemma'] : null;
+
+        $text = trim(Escaping::prepareTextdata($woText));
         $textlc = mb_strtolower($text, 'UTF-8');
-        $translation = $this->normalizeTranslation($data['WoTranslation'] ?? '');
+        $translation = $this->normalizeTranslation($woTranslation);
 
         // Handle lemma field
-        $lemma = isset($data['WoLemma']) && $data['WoLemma'] !== ''
-            ? trim($data['WoLemma'])
-            : null;
+        $lemma = $woLemma !== null ? trim($woLemma) : null;
         $lemmaLc = $lemma !== null ? mb_strtolower($lemma, 'UTF-8') : null;
 
         try {
@@ -106,9 +118,9 @@ class WordService
                 $lemmaLc,
                 $data['WoStatus'],
                 $translation,
-                ExportService::replaceTabNewline($data['WoSentence'] ?? ''),
-                ExportService::replaceTabNewline($data['WoNotes'] ?? ''),
-                $data['WoRomanization'] ?? ''
+                ExportService::replaceTabNewline($woSentence),
+                ExportService::replaceTabNewline($woNotes),
+                $woRomanization
             ];
             $sql = "INSERT INTO words (
                     WoLgID, WoTextLC, WoText, WoLemma, WoLemmaLC, WoStatus, WoTranslation,
@@ -155,17 +167,29 @@ class WordService
      */
     public function update(int $wordId, array $data): array
     {
-        $text = trim(Escaping::prepareTextdata($data['WoText']));
+        // Extract typed values from data array
+        /** @var string $woText */
+        $woText = isset($data['WoText']) && is_string($data['WoText']) ? $data['WoText'] : '';
+        /** @var string $woTranslation */
+        $woTranslation = isset($data['WoTranslation']) && is_string($data['WoTranslation']) ? $data['WoTranslation'] : '';
+        /** @var string $woSentence */
+        $woSentence = isset($data['WoSentence']) && is_string($data['WoSentence']) ? $data['WoSentence'] : '';
+        /** @var string $woNotes */
+        $woNotes = isset($data['WoNotes']) && is_string($data['WoNotes']) ? $data['WoNotes'] : '';
+        /** @var string $woRomanization */
+        $woRomanization = isset($data['WoRomanization']) && is_string($data['WoRomanization']) ? $data['WoRomanization'] : '';
+        /** @var string|null $woLemma */
+        $woLemma = isset($data['WoLemma']) && is_string($data['WoLemma']) && $data['WoLemma'] !== '' ? $data['WoLemma'] : null;
+
+        $text = trim(Escaping::prepareTextdata($woText));
         $textlc = mb_strtolower($text, 'UTF-8');
-        $translation = $this->normalizeTranslation($data['WoTranslation'] ?? '');
-        $sentence = ExportService::replaceTabNewline($data['WoSentence'] ?? '');
-        $notes = ExportService::replaceTabNewline($data['WoNotes'] ?? '');
-        $roman = $data['WoRomanization'] ?? '';
+        $translation = $this->normalizeTranslation($woTranslation);
+        $sentence = ExportService::replaceTabNewline($woSentence);
+        $notes = ExportService::replaceTabNewline($woNotes);
+        $roman = $woRomanization;
 
         // Handle lemma field
-        $lemma = isset($data['WoLemma']) && $data['WoLemma'] !== ''
-            ? trim($data['WoLemma'])
-            : null;
+        $lemma = $woLemma !== null ? trim($woLemma) : null;
         $lemmaLc = $lemma !== null ? mb_strtolower($lemma, 'UTF-8') : null;
 
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
@@ -174,7 +198,7 @@ class WordService
 
         if (isset($data['WoOldStatus']) && $data['WoOldStatus'] != $data['WoStatus']) {
             // Status changed - update status and timestamp
-            $bindings[] = $data['WoStatus'];
+            $bindings[] = (int)$data['WoStatus'];
             $bindings[] = $wordId;
             $sql = "UPDATE words SET
                 WoText = ?, WoTranslation = ?, WoSentence = ?, WoNotes = ?, WoRomanization = ?,
@@ -286,9 +310,9 @@ class WordService
      */
     public function getTermFromTextItem(int $textId, int $ord): ?array
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         return Connection::preparedFetchOne(
-            "SELECT Ti2Text, Ti2LgID FROM textitems2
+            "SELECT Ti2Text, Ti2LgID FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
             [$textId, $ord]
         );
@@ -305,9 +329,9 @@ class WordService
      */
     public function linkToTextItems(int $wordId, int $langId, string $textlc): void
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::preparedExecute(
-            "UPDATE textitems2 SET Ti2WoID = ?
+            "UPDATE word_occurrences SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wordId, $langId, $textlc]
         );
@@ -349,9 +373,10 @@ class WordService
      */
     public function getSentenceForTerm(int $textId, int $ord, string $termlc): string
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
+        /** @var int|null $seid */
         $seid = Connection::preparedFetchValue(
-            "SELECT Ti2SeID FROM textitems2
+            "SELECT Ti2SeID FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
             [$textId, $ord],
             'Ti2SeID'
@@ -362,7 +387,7 @@ class WordService
         }
 
         $sent = $this->sentenceService->formatSentence(
-            (int) $seid,
+            $seid,
             $termlc,
             (int) Settings::getWithDefault('set-term-sentence-count')
         );
@@ -423,14 +448,14 @@ class WordService
     public function delete(int $wordId): string
     {
         // Delete multi-word text items first (before word deletion triggers FK SET NULL)
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2WoID', '=', $wordId)
             ->where('Ti2WordCount', '>', 1)
             ->deletePrepared();
 
         // Delete the word - FK constraints handle:
-        // - Single-word textitems2.Ti2WoID set to NULL (ON DELETE SET NULL)
-        // - wordtags deleted (ON DELETE CASCADE)
+        // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
+        // - word_tag_map deleted (ON DELETE CASCADE)
         QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
             ->deletePrepared();
@@ -454,14 +479,14 @@ class WordService
         $ids = array_map('intval', $wordIds);
 
         // Delete multi-word text items first (before word deletion triggers FK SET NULL)
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2WordCount', '>', 1)
             ->whereIn('Ti2WoID', $ids)
             ->deletePrepared();
 
         // Delete words - FK constraints handle:
-        // - Single-word textitems2.Ti2WoID set to NULL (ON DELETE SET NULL)
-        // - wordtags deleted (ON DELETE CASCADE)
+        // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
+        // - word_tag_map deleted (ON DELETE CASCADE)
         $count = QueryBuilder::table('words')
             ->whereIn('WoID', $ids)
             ->deletePrepared();
@@ -484,6 +509,7 @@ class WordService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
@@ -507,6 +533,7 @@ class WordService
         }
 
         // Absolute status
+        /** @var array<int, int> $bindings */
         $bindings = array_merge([$status], $ids);
         $sql = "UPDATE words
                 SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
@@ -529,6 +556,7 @@ class WordService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
@@ -554,6 +582,7 @@ class WordService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
@@ -576,6 +605,7 @@ class WordService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
@@ -598,6 +628,7 @@ class WordService
             return 0;
         }
 
+        /** @var array<int, int> $ids */
         $ids = array_map('intval', $wordIds);
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
@@ -618,12 +649,12 @@ class WordService
      */
     public function getUnknownWordsInText(int $textId): array
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         // words has WoUsID - user scope auto-applied
         $bindings = [$textId];
         return Connection::preparedFetchAll(
             "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
-             FROM (textitems2 LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
+             FROM (word_occurrences LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
              WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
              ORDER BY Ti2Order"
              . UserScopedQuery::forTablePrepared('words', $bindings, 'words'),
@@ -641,13 +672,14 @@ class WordService
     public function getTextLanguageId(int $textId): ?int
     {
         $bindings = [$textId];
+        /** @var int|null $langId */
         $langId = Connection::preparedFetchValue(
             "SELECT TxLgID FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings),
             $bindings,
             'TxLgID'
         );
-        return $langId !== null ? (int)$langId : null;
+        return $langId;
     }
 
     /**
@@ -700,10 +732,10 @@ class WordService
     public function linkAllTextItems(): void
     {
         // words has WoUsID - user scope auto-applied
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::execute(
             "UPDATE words
-             JOIN textitems2
+             JOIN word_occurrences
              ON Ti2WoID IS NULL AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
              SET Ti2WoID = WoID"
         );
@@ -728,6 +760,7 @@ class WordService
     public function getFilteredWordIds(array $filters): array
     {
         $conditions = ['1=1'];
+        /** @var array<int, mixed> $params */
         $params = [];
 
         // Language filter
@@ -743,11 +776,11 @@ class WordService
 
         // Query filter - builds LIKE/REGEXP condition with placeholders
         if (!empty($filters['query'])) {
-            $regexMode = $filters['regexMode'] ?? '';
-            $queryMode = $filters['queryMode'] ?? 'term,rom,transl';
+            $regexMode = (string)($filters['regexMode'] ?? '');
+            $queryMode = (string)($filters['queryMode'] ?? 'term,rom,transl');
             $queryValue = ($regexMode == '') ?
-                str_replace("*", "%", mb_strtolower($filters['query'], 'UTF-8')) :
-                $filters['query'];
+                str_replace("*", "%", mb_strtolower((string)$filters['query'], 'UTF-8')) :
+                (string)$filters['query'];
 
             $queryCondition = $this->buildQueryConditionWithPlaceholders($queryMode, $regexMode, $params, $queryValue);
             $conditions[] = $queryCondition;
@@ -757,9 +790,9 @@ class WordService
         $whTag = '';
         if (!empty($filters['tag1']) || !empty($filters['tag2'])) {
             $whTag = $this->buildTagCondition(
-                $filters['tag1'] ?? '',
-                $filters['tag2'] ?? '',
-                $filters['tag12'] ?? ''
+                (string)($filters['tag1'] ?? ''),
+                (string)($filters['tag2'] ?? ''),
+                (string)($filters['tag12'] ?? '')
             );
         }
 
@@ -768,15 +801,15 @@ class WordService
         // Build SQL
         if (empty($filters['textId'])) {
             // words has WoUsID - user scope auto-applied
-            // wordtags inherits user context via WtWoID -> words FK
-            $sql = "SELECT DISTINCT WoID FROM (words LEFT JOIN wordtags ON WoID = WtWoID)
+            // word_tag_map inherits user context via WtWoID -> words FK
+            $sql = "SELECT DISTINCT WoID FROM (words LEFT JOIN word_tag_map ON WoID = WtWoID)
             WHERE {$whereClause}
             GROUP BY WoID {$whTag}"
             . UserScopedQuery::forTablePrepared('words', $params, 'words');
         } else {
             $params[] = (int)$filters['textId'];
-            // textitems2 inherits user context via Ti2TxID -> texts FK
-            $sql = "SELECT DISTINCT WoID FROM (words LEFT JOIN wordtags ON WoID = WtWoID), textitems2
+            // word_occurrences inherits user context via Ti2TxID -> texts FK
+            $sql = "SELECT DISTINCT WoID FROM (words LEFT JOIN word_tag_map ON WoID = WtWoID), word_occurrences
             WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ?
             AND {$whereClause}
             GROUP BY WoID {$whTag}"
@@ -795,10 +828,10 @@ class WordService
     /**
      * Build the query condition for word search with placeholders.
      *
-     * @param string   $queryMode  Query mode
-     * @param string   $regexMode  Regex mode (empty for LIKE, 'REGEXP' for regex)
-     * @param array    &$params    Reference to params array to add values
-     * @param string   $queryValue The query value to search for
+     * @param string            $queryMode  Query mode
+     * @param string            $regexMode  Regex mode (empty for LIKE, 'REGEXP' for regex)
+     * @param array<int, mixed> &$params    Reference to params array to add values
+     * @param string            $queryValue The query value to search for
      *
      * @return string SQL condition with placeholders
      */
@@ -916,7 +949,7 @@ class WordService
 
         return [
             'text' => (string) $record['WoText'],
-            'translation' => ExportService::replaceTabNewline($record['WoTranslation']),
+            'translation' => ExportService::replaceTabNewline((string)$record['WoTranslation']),
             'romanization' => (string) $record['WoRomanization']
         ];
     }
@@ -931,15 +964,16 @@ class WordService
      */
     public function getWordAtPosition(int $textId, int $ord): ?string
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
+        /** @var string|null $word */
         $word = Connection::preparedFetchValue(
             "SELECT Ti2Text
-             FROM textitems2
+             FROM word_occurrences
              WHERE Ti2WordCount = 1 AND Ti2TxID = ? AND Ti2Order = ?",
             [$textId, $ord],
             'Ti2Text'
         );
-        return $word !== null ? (string) $word : null;
+        return $word;
     }
 
     /**
@@ -975,9 +1009,9 @@ class WordService
 
         $wid = (int) Connection::preparedInsert($sql, $bindings);
 
-        // Link to text items (textitems2 inherits user context via Ti2TxID -> texts FK)
+        // Link to text items (word_occurrences inherits user context via Ti2TxID -> texts FK)
         Connection::preparedExecute(
-            "UPDATE textitems2 SET Ti2WoID = ?
+            "UPDATE word_occurrences SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wid, $langId, $termlc]
         );
@@ -1000,13 +1034,14 @@ class WordService
     public function getWordText(int $wordId): ?string
     {
         $bindings = [$wordId];
+        /** @var string|null $term */
         $term = Connection::preparedFetchValue(
             "SELECT WoText FROM words WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
             $bindings,
             'WoText'
         );
-        return $term !== null ? (string) $term : null;
+        return $term;
     }
 
     /**
@@ -1059,6 +1094,7 @@ class WordService
         Connection::preparedExecute($sql, $bindings);
 
         $bindings = [$wordId];
+        /** @var string|null $result */
         $result = Connection::preparedFetchValue(
             "SELECT WoRomanization FROM words WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
@@ -1066,7 +1102,7 @@ class WordService
             'WoRomanization'
         );
 
-        return ($result === '' || $result === null) ? '*' : (string) $result;
+        return ($result === '' || $result === null) ? '*' : $result;
     }
 
     /**
@@ -1086,7 +1122,7 @@ class WordService
 
         \Lwt\Shared\Infrastructure\Database\Maintenance::adjustAutoIncrement('words', 'WoID');
 
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2WordCount', '>', 1)
             ->where('Ti2WoID', '=', $wordId)
             ->delete();
@@ -1115,7 +1151,7 @@ class WordService
             return null;
         }
 
-        $translation = ExportService::replaceTabNewline($record['WoTranslation']);
+        $translation = ExportService::replaceTabNewline((string)$record['WoTranslation']);
         if ($translation === '*') {
             $translation = '';
         }
@@ -1124,9 +1160,9 @@ class WordService
             'langId' => (int) $record['WoLgID'],
             'text' => (string) $record['WoText'],
             'translation' => $translation,
-            'sentence' => (string) $record['WoSentence'],
+            'sentence' => (string) ($record['WoSentence'] ?? ''),
             'notes' => (string) ($record['WoNotes'] ?? ''),
-            'romanization' => (string) $record['WoRomanization'],
+            'romanization' => (string) ($record['WoRomanization'] ?? ''),
             'status' => (int) $record['WoStatus']
         ];
     }
@@ -1140,12 +1176,12 @@ class WordService
      */
     public function getAllUnknownWordsInText(int $textId): array
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         // words has WoUsID - user scope auto-applied
         $bindings = [$textId];
         return Connection::preparedFetchAll(
             "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
-             FROM (textitems2 LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
+             FROM (word_occurrences LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
              WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
              ORDER BY Ti2Order"
              . UserScopedQuery::forTablePrepared('words', $bindings, 'words'),
@@ -1181,6 +1217,7 @@ class WordService
             $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
             $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
+            /** @var list<int|string> $bindings */
             $bindings = [$langId, $term, $termlc, $status];
             $sql = "INSERT INTO words (
                     WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}"
@@ -1263,9 +1300,9 @@ class WordService
 
         $wid = (int) Connection::preparedInsert($sql, $bindings);
 
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::preparedExecute(
-            "UPDATE textitems2 SET Ti2WoID = ?
+            "UPDATE word_occurrences SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wid, $langId, $wordlc]
         );
@@ -1295,6 +1332,7 @@ class WordService
     public function markAllWordsWithStatus(int $textId, int $status): array
     {
         $bindings = [$textId];
+        /** @var int|null $langId */
         $langId = Connection::preparedFetchValue(
             "SELECT TxLgID FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings),
@@ -1307,9 +1345,9 @@ class WordService
         foreach ($records as $record) {
             list($modified_rows, $wordData) = $this->processWordForWellKnown(
                 $status,
-                $record['Ti2Text'],
-                $record['Ti2TextLC'],
-                (int) $langId
+                (string)$record['Ti2Text'],
+                (string)$record['Ti2TextLC'],
+                $langId ?? 0
             );
             if ($wordData !== null) {
                 $wordsData[] = $wordData;
@@ -1319,10 +1357,10 @@ class WordService
 
         // Associate existing textitems
         // words has WoUsID - user scope auto-applied
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::execute(
             "UPDATE words
-            JOIN textitems2
+            JOIN word_occurrences
             ON Ti2WoID IS NULL AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
             SET Ti2WoID = WoID",
             ''
@@ -1338,7 +1376,7 @@ class WordService
      *
      * Used by the bulk translate feature to save multiple words at once.
      *
-     * @param array $terms Array of term data, each with keys: lg, text, status, trans
+     * @param array<int, array{lg: int, text: string, status: int, trans?: string}> $terms Array of term data
      *
      * @return int The max word ID before insertion (for finding new words)
      */
@@ -1406,10 +1444,10 @@ class WordService
      */
     public function linkNewWordsToTextItems(int $maxWoId): void
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         // words has WoUsID - user scope auto-applied
         Connection::preparedExecute(
-            "UPDATE textitems2
+            "UPDATE word_occurrences
              JOIN words
              ON LOWER(Ti2Text) = WoTextLC AND Ti2WordCount = 1 AND Ti2LgID = WoLgID AND WoID > ?
              SET Ti2WoID = WoID",
@@ -1439,10 +1477,10 @@ class WordService
         );
 
         return [
-            'name' => $record['LgName'] ?? '',
-            'dict1' => $record['LgDict1URI'] ?? '',
-            'dict2' => $record['LgDict2URI'] ?? '',
-            'translate' => $record['LgGoogleTranslateURI'] ?? '',
+            'name' => (string) ($record['LgName'] ?? ''),
+            'dict1' => (string) ($record['LgDict1URI'] ?? ''),
+            'dict2' => (string) ($record['LgDict2URI'] ?? ''),
+            'translate' => (string) ($record['LgGoogleTranslateURI'] ?? ''),
         ];
     }
 
@@ -1460,10 +1498,10 @@ class WordService
         int $offset,
         int $limit
     ): array {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         return Connection::preparedFetchAll(
             "SELECT Ti2Text AS word, Ti2LgID, MIN(Ti2Order) AS pos
-             FROM textitems2
+             FROM word_occurrences
              WHERE Ti2WoID IS NULL AND Ti2TxID = ? AND Ti2WordCount = 1
              GROUP BY LOWER(Ti2Text)
              ORDER BY pos
@@ -1495,18 +1533,18 @@ class WordService
         $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
-        $sentence = ExportService::replaceTabNewline($data['sentence']);
-        $notes = ExportService::replaceTabNewline($data['notes'] ?? '');
+        $sentence = ExportService::replaceTabNewline((string)$data['sentence']);
+        $notes = ExportService::replaceTabNewline((string)($data['notes'] ?? ''));
 
         $bindings = [
             (int) $data['lgid'],
-            $data['textlc'],
-            $data['text'],
+            (string) $data['textlc'],
+            (string) $data['text'],
             (int) $data['status'],
-            $data['translation'],
+            (string) $data['translation'],
             $sentence,
             $notes,
-            $data['roman'],
+            (string) $data['roman'],
             (int) $data['wordcount']
         ];
 
@@ -1522,7 +1560,7 @@ class WordService
 
         \Lwt\Shared\Infrastructure\Database\Maintenance::initWordCount();
         TagsFacade::saveWordTagsFromForm($wid);
-        $this->expressionService->insertExpressions($data['textlc'], (int) $data['lgid'], $wid, (int) $data['wordcount'], 0);
+        $this->expressionService->insertExpressions((string) $data['textlc'], (int) $data['lgid'], $wid, (int) $data['wordcount'], 0);
 
         return [
             'id' => $wid,
@@ -1543,17 +1581,17 @@ class WordService
     public function updateMultiWord(int $wordId, array $data, int $oldStatus, int $newStatus): array
     {
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
-        $sentence = ExportService::replaceTabNewline($data['sentence']);
-        $notes = ExportService::replaceTabNewline($data['notes'] ?? '');
+        $sentence = ExportService::replaceTabNewline((string)$data['sentence']);
+        $notes = ExportService::replaceTabNewline((string)($data['notes'] ?? ''));
 
         if ($oldStatus != $newStatus) {
             // Status changed - update status and timestamp
             $bindings = [
-                $data['text'],
-                $data['translation'],
+                (string)$data['text'],
+                (string)$data['translation'],
                 $sentence,
                 $notes,
-                $data['roman'],
+                (string)$data['roman'],
                 $newStatus,
                 $wordId
             ];
@@ -1566,11 +1604,11 @@ class WordService
         } else {
             // Status unchanged
             $bindings = [
-                $data['text'],
-                $data['translation'],
+                (string)$data['text'],
+                (string)$data['translation'],
                 $sentence,
                 $notes,
-                $data['roman'],
+                (string)$data['roman'],
                 $wordId
             ];
             $sql = "UPDATE words SET
@@ -1613,10 +1651,10 @@ class WordService
         return [
             'text' => (string) $record['WoText'],
             'lgid' => (int) $record['WoLgID'],
-            'translation' => ExportService::replaceTabNewline($record['WoTranslation']),
-            'sentence' => ExportService::replaceTabNewline($record['WoSentence']),
-            'notes' => ExportService::replaceTabNewline($record['WoNotes'] ?? ''),
-            'romanization' => (string) $record['WoRomanization'],
+            'translation' => ExportService::replaceTabNewline((string)$record['WoTranslation']),
+            'sentence' => ExportService::replaceTabNewline((string)($record['WoSentence'] ?? '')),
+            'notes' => ExportService::replaceTabNewline((string)($record['WoNotes'] ?? '')),
+            'romanization' => (string) ($record['WoRomanization'] ?? ''),
             'status' => (int) $record['WoStatus']
         ];
     }
@@ -1631,13 +1669,14 @@ class WordService
     public function getLanguageIdFromText(int $textId): ?int
     {
         $bindings = [$textId];
+        /** @var int|null $lgid */
         $lgid = Connection::preparedFetchValue(
             "SELECT TxLgID FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings),
             $bindings,
             'TxLgID'
         );
-        return $lgid !== null ? (int) $lgid : null;
+        return $lgid;
     }
 
     /**
@@ -1650,15 +1689,16 @@ class WordService
      */
     public function getSentenceIdAtPosition(int $textId, int $ord): ?int
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
+        /** @var int|null $seid */
         $seid = Connection::preparedFetchValue(
             "SELECT Ti2SeID
-             FROM textitems2
+             FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2Order = ?",
             [$textId, $ord],
             'Ti2SeID'
         );
-        return $seid !== null ? (int) $seid : null;
+        return $seid;
     }
 
     /**
@@ -1711,6 +1751,7 @@ class WordService
     public function findMultiWordByText(string $textlc, int $langId): ?int
     {
         $bindings = [$langId, $textlc];
+        /** @var int|null $wid */
         $wid = Connection::preparedFetchValue(
             "SELECT WoID FROM words
              WHERE WoLgID = ? AND WoTextLC = ?"
@@ -1718,7 +1759,7 @@ class WordService
             $bindings,
             'WoID'
         );
-        return $wid !== null ? (int) $wid : null;
+        return $wid;
     }
 
     /**

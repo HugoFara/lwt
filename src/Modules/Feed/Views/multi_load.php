@@ -19,6 +19,13 @@
 
 namespace Lwt\Views\Feed;
 
+/**
+ * @var array<int, array{NfID: int, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string}> $feeds Feed data
+ * @var int $currentLang Current language filter
+ * @var array<int, array{id: int, name: string}> $languages Language records (transformed for SelectOptionsBuilder)
+ * @var \Lwt\Modules\Feed\Application\FeedFacade $feedService Feed service
+ */
+
 ?>
 <div x-data="feedMultiLoad()">
 <form name="form1" action="/feeds" data-auto-submit-button="querybutton">
@@ -43,7 +50,7 @@ namespace Lwt\Views\Feed;
     <?php
     $time = time();
     foreach ($feeds as $row):
-        $diff = $time - (int)$row['NfUpdate'];
+        $diff = $time - $row['NfUpdate'];
     ?>
     <tr>
         <td class="td1 center">

@@ -195,10 +195,14 @@ class QueryBuilderUserScopeTest extends TestCase
         $this->assertEquals('TxUsID', UserScopedQuery::getUserIdColumn('texts'));
     }
 
-    public function testUserScopeAppliedToArchivedTextsTable(): void
+    /**
+     * Note: archived_texts table no longer exists - it's merged into texts with TxArchivedAt column.
+     */
+    public function testArchivedTextsNoLongerSeparateTable(): void
     {
-        $this->assertTrue(UserScopedQuery::isUserScopedTable('archivedtexts'));
-        $this->assertEquals('AtUsID', UserScopedQuery::getUserIdColumn('archivedtexts'));
+        // archived_texts is not a separate table anymore
+        $this->assertFalse(UserScopedQuery::isUserScopedTable('archived_texts'));
+        $this->assertNull(UserScopedQuery::getUserIdColumn('archived_texts'));
     }
 
     public function testUserScopeAppliedToTagsTable(): void
@@ -207,16 +211,16 @@ class QueryBuilderUserScopeTest extends TestCase
         $this->assertEquals('TgUsID', UserScopedQuery::getUserIdColumn('tags'));
     }
 
-    public function testUserScopeAppliedToTags2Table(): void
+    public function testUserScopeAppliedToTextTagsTable(): void
     {
-        $this->assertTrue(UserScopedQuery::isUserScopedTable('tags2'));
-        $this->assertEquals('T2UsID', UserScopedQuery::getUserIdColumn('tags2'));
+        $this->assertTrue(UserScopedQuery::isUserScopedTable('text_tags'));
+        $this->assertEquals('T2UsID', UserScopedQuery::getUserIdColumn('text_tags'));
     }
 
     public function testUserScopeAppliedToNewsfeedsTable(): void
     {
-        $this->assertTrue(UserScopedQuery::isUserScopedTable('newsfeeds'));
-        $this->assertEquals('NfUsID', UserScopedQuery::getUserIdColumn('newsfeeds'));
+        $this->assertTrue(UserScopedQuery::isUserScopedTable('news_feeds'));
+        $this->assertEquals('NfUsID', UserScopedQuery::getUserIdColumn('news_feeds'));
     }
 
     public function testUserScopeAppliedToSettingsTable(): void
@@ -361,20 +365,20 @@ class QueryBuilderUserScopeTest extends TestCase
 
         $this->assertArrayHasKey('languages', $tables);
         $this->assertArrayHasKey('texts', $tables);
-        $this->assertArrayHasKey('archivedtexts', $tables);
+        // archived_texts merged into texts table
+        $this->assertArrayNotHasKey('archived_texts', $tables);
         $this->assertArrayHasKey('words', $tables);
         $this->assertArrayHasKey('tags', $tables);
-        $this->assertArrayHasKey('tags2', $tables);
-        $this->assertArrayHasKey('newsfeeds', $tables);
+        $this->assertArrayHasKey('text_tags', $tables);
+        $this->assertArrayHasKey('news_feeds', $tables);
         $this->assertArrayHasKey('settings', $tables);
 
         $this->assertEquals('LgUsID', $tables['languages']);
         $this->assertEquals('TxUsID', $tables['texts']);
-        $this->assertEquals('AtUsID', $tables['archivedtexts']);
         $this->assertEquals('WoUsID', $tables['words']);
         $this->assertEquals('TgUsID', $tables['tags']);
-        $this->assertEquals('T2UsID', $tables['tags2']);
-        $this->assertEquals('NfUsID', $tables['newsfeeds']);
+        $this->assertEquals('T2UsID', $tables['text_tags']);
+        $this->assertEquals('NfUsID', $tables['news_feeds']);
         $this->assertEquals('StUsID', $tables['settings']);
     }
 

@@ -15,9 +15,18 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @var array{total_tests: int} $reviewData
+ * @var int $waitTime
+ * @var int $startTime
  */
 
 namespace Lwt\Views\Review;
+
+// Validate and cast injected variables
+assert(isset($reviewData) && is_array($reviewData));
+assert(isset($waitTime) && is_int($waitTime));
+assert(isset($startTime) && is_int($startTime));
 
 $timeData = [
     'wait_time' => $waitTime,

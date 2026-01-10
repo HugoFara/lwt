@@ -62,6 +62,7 @@ class GetDashboardData
      */
     private function getCurrentTextInfo(int $textId): ?array
     {
+        /** @var mixed $title */
         $title = QueryBuilder::table('texts')
             ->where('TxID', '=', $textId)
             ->valuePrepared('TxTitle');
@@ -100,6 +101,7 @@ class GetDashboardData
      */
     private function getLanguageName(int $languageId): string
     {
+        /** @var mixed $result */
         $result = QueryBuilder::table('languages')
             ->where('LgID', '=', $languageId)
             ->valuePrepared('LgName');

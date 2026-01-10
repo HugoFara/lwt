@@ -75,9 +75,9 @@ PRIMARY KEY (AtID),
 KEY AtLgID (AtLgID)
 ```
 
-## Table "tags2"
+## Table "text_tags"
 
-Text tags and comments
+Text tags and comments (formerly "tags2")
 
 ```sql
 T2ID smallint(5) unsigned NOT NULL AUTO\_INCREMENT,  
@@ -182,9 +182,9 @@ KEY SeTxID (SeTxID),
 KEY SeOrder (SeOrder)
 ```
 
-## Table "textitems2"
+## Table "word_occurrences"
 
-Text items cache, no backup needed
+Word occurrences cache, no backup needed (formerly "textitems2")
 
 ```sql
 Ti2WoID mediumint(8) unsigned NOT NULL,  

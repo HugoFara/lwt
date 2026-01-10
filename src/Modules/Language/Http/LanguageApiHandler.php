@@ -80,23 +80,28 @@ class LanguageApiHandler
         }
 
         $abbr = $this->languageFacade->getLanguageCode($langId, LanguagePresets::getAll());
-        $piperVoiceId = $record["LgPiperVoiceId"] ?? null;
+        $piperVoiceId = isset($record["LgPiperVoiceId"]) && is_string($record["LgPiperVoiceId"])
+            ? $record["LgPiperVoiceId"]
+            : null;
+        $ttsVoiceApi = is_string($record["LgTTSVoiceAPI"]) ? $record["LgTTSVoiceAPI"] : '';
+        $regexpWordChars = is_string($record["LgRegexpWordCharacters"]) ? $record["LgRegexpWordCharacters"] : '';
+        $lgName = is_string($record["LgName"]) ? $record["LgName"] : '';
 
         // Priority: Piper > External API > Internal (MeCab) > Direct
         if ($piperVoiceId !== null && $piperVoiceId !== '') {
             $readingMode = "piper";
-        } elseif ($record["LgTTSVoiceAPI"] != '') {
+        } elseif ($ttsVoiceApi !== '') {
             $readingMode = "external";
-        } elseif ($record["LgRegexpWordCharacters"] == "mecab") {
+        } elseif ($regexpWordChars === "mecab") {
             $readingMode = "internal";
         } else {
             $readingMode = "direct";
         }
 
         $result = [
-            "name" => $record["LgName"],
-            "voiceapi" => $record["LgTTSVoiceAPI"],
-            "word_parsing" => $record["LgRegexpWordCharacters"],
+            "name" => $lgName,
+            "voiceapi" => $ttsVoiceApi,
+            "word_parsing" => $regexpWordChars,
             "abbreviation" => $abbr,
             "reading_mode" => $readingMode
         ];
@@ -163,7 +168,9 @@ class LanguageApiHandler
      *
      * @param int $langId Language ID
      *
-     * @return array{name: string, voiceapi: string, word_parsing: string, abbreviation: mixed, reading_mode: string}
+     * @return (mixed|string)[]
+     *
+     * @psalm-return array{name: string, voiceapi: string, word_parsing: string, abbreviation: mixed, reading_mode: string, piper_voice_id?: string}
      */
     public function formatReadingConfiguration(int $langId): array
     {
@@ -173,17 +180,19 @@ class LanguageApiHandler
     /**
      * Format response for phonetic reading.
      *
-     * @param array $params Request parameters with 'text' and either 'language_id' or 'lang'
+     * @param array{text?: string, language_id?: int|string, lang?: string} $params Request parameters
      *
      * @return array{phonetic_reading: string}
      */
     public function formatPhoneticReading(array $params): array
     {
+        $text = $params['text'] ?? '';
         $languageId = $params['language_id'] ?? null;
-        if ($languageId !== null) {
-            return $this->getPhoneticReading($params['text'], (int)$languageId);
+        if ($languageId !== null && is_numeric($languageId)) {
+            return $this->getPhoneticReading($text, (int)$languageId);
         }
-        return $this->getPhoneticReading($params['text'], null, $params['lang']);
+        $lang = $params['lang'] ?? null;
+        return $this->getPhoneticReading($text, null, $lang);
     }
 
     /**
@@ -314,19 +323,20 @@ class LanguageApiHandler
     /**
      * Format response for creating a new language.
      *
-     * @param array $data Language data from request
+     * @param array<string, mixed> $data Language data from request
      *
      * @return array{success: bool, id?: int, error?: string}
      */
     public function formatCreate(array $data): array
     {
         // Validate required fields
-        if (empty($data['name'])) {
+        $name = isset($data['name']) && is_string($data['name']) ? $data['name'] : '';
+        if ($name === '') {
             return ['success' => false, 'error' => 'Language name is required'];
         }
 
         // Check for duplicate name
-        if ($this->languageFacade->isDuplicateName($data['name'])) {
+        if ($this->languageFacade->isDuplicateName($name)) {
             return ['success' => false, 'error' => 'A language with this name already exists'];
         }
 
@@ -342,7 +352,7 @@ class LanguageApiHandler
      * Format response for updating a language.
      *
      * @param int   $id   Language ID
-     * @param array $data Language data from request
+     * @param array<string, mixed> $data Language data from request
      *
      * @return array{success: bool, reparsed?: int, error?: string, message?: string}
      */
@@ -355,12 +365,13 @@ class LanguageApiHandler
         }
 
         // Validate required fields
-        if (empty($data['name'])) {
+        $name = isset($data['name']) && is_string($data['name']) ? $data['name'] : '';
+        if ($name === '') {
             return ['success' => false, 'error' => 'Language name is required'];
         }
 
         // Check for duplicate name (excluding current)
-        if ($this->languageFacade->isDuplicateName($data['name'], $id)) {
+        if ($this->languageFacade->isDuplicateName($name, $id)) {
             return ['success' => false, 'error' => 'A language with this name already exists'];
         }
 

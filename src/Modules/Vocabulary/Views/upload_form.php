@@ -25,8 +25,10 @@ use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
-/** @var string $currentLanguage */
-/** @var array $languages */
+// Type assertions for variables passed from controller
+assert($currentLanguage === null || is_int($currentLanguage) || is_string($currentLanguage));
+assert(is_array($languages));
+/** @var array<int, array{id: int, name: string}> $languages */
 
 $langToUse = $currentLanguage;
 

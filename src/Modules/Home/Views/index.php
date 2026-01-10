@@ -73,12 +73,25 @@ function renderHomeConfig(?array $lastTextInfo, string $base): void
     <?php
 }
 
-// Extract variables from dashboard data
+// Validate injected variables from controller
+assert(isset($dashboardData) && is_array($dashboardData));
+assert(isset($languages) && is_array($languages));
+/**
+ * @var array<int, array{id: int, name: string}> $languages
+ * @psalm-var list<array{id: int, name: string}> $languages
+ */
+
+// Extract variables from dashboard data with proper types
+/** @var int $currentlang */
 $currentlang = $dashboardData['current_language_id'] ?? 0;
-$currenttext = $dashboardData['current_text_id'];
-$langcnt = $dashboardData['language_count'];
-$isWordPress = $dashboardData['is_wordpress'];
-$currentTextInfo = $dashboardData['current_text_info'];
+/** @var int|null $currenttext */
+$currenttext = $dashboardData['current_text_id'] ?? null;
+/** @var int $langcnt */
+$langcnt = $dashboardData['language_count'] ?? 0;
+/** @var bool $isWordPress */
+$isWordPress = $dashboardData['is_wordpress'] ?? false;
+/** @var array<string, mixed>|null $currentTextInfo */
+$currentTextInfo = $dashboardData['current_text_info'] ?? null;
 
 // Get base path for URL generation
 $base = UrlUtilities::getBasePath();
@@ -107,10 +120,10 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
     $lastTextInfo = [
         'id' => $currenttext,
-        'title' => $currentTextInfo['title'],
-        'language_id' => $currentTextInfo['language_id'],
-        'language_name' => $currentTextInfo['language_name'],
-        'annotated' => $currentTextInfo['annotated'],
+        'title' => isset($currentTextInfo['title']) ? (string) $currentTextInfo['title'] : '',
+        'language_id' => isset($currentTextInfo['language_id']) ? (int) $currentTextInfo['language_id'] : 0,
+        'language_name' => isset($currentTextInfo['language_name']) ? (string) $currentTextInfo['language_name'] : '',
+        'annotated' => isset($currentTextInfo['annotated']) ? (bool) $currentTextInfo['annotated'] : false,
         'stats' => $stats,
     ];
 }
@@ -192,7 +205,10 @@ if ($currentTextInfo !== null && $currenttext !== null) {
             <div class="control">
                 <div class="select is-medium">
                     <select id="filterlang" data-action="set-lang" data-ajax="true" data-redirect="<?php echo $base; ?>/">
-                        <?php echo SelectOptionsBuilder::forLanguages($languages, $currentlang, '[Select...]'); ?>
+                        <?php
+                        /** @var list<array{id: int, name: string}> $languages */
+                        echo SelectOptionsBuilder::forLanguages($languages, $currentlang, '[Select...]');
+                        ?>
                     </select>
                 </div>
             </div>

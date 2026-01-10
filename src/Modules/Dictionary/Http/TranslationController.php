@@ -110,7 +110,10 @@ class TranslationController extends BaseController
         PageLayoutHelper::renderPageStartNobody('Google Translate');
 
         if ($text === '') {
-            echo '<p class="msgblue">Term is not set!</p>';
+            echo '<div class="notification is-warning">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Term is not set!' .
+                '</div>';
             PageLayoutHelper::renderPageEnd();
             return;
         }

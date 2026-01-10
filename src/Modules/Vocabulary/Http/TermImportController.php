@@ -67,6 +67,7 @@ class TermImportController extends VocabularyBaseController
         // Handle form submission (save terms)
         $termsArray = InputValidator::getArray('term');
         if (!empty($termsArray)) {
+            /** @var array<int, array{lg: int, text: string, status: int, trans?: string}> $terms */
             $terms = $termsArray;
             $cnt = count($terms);
 
@@ -93,9 +94,9 @@ class TermImportController extends VocabularyBaseController
     /**
      * Handle saving bulk translated terms.
      *
-     * @param array<int, array<string, mixed>> $terms   Array of term data
-     * @param int                              $tid     Text ID
-     * @param bool                             $cleanUp Whether to clean up right frames after save
+     * @param array<int, array{lg: int, text: string, status: int, trans?: string}> $terms Array of term data
+     * @param int  $tid     Text ID
+     * @param bool $cleanUp Whether to clean up right frames after save
      *
      * @return void
      *
@@ -115,12 +116,13 @@ class TermImportController extends VocabularyBaseController
         $linkingService->linkNewWordsToTextItems($maxWoId);
 
         // Prepare data for view
+        /** @var list<array<string, mixed>> $newWords */
         $newWords = [];
         foreach ($res as $record) {
             $record['hex'] = StringUtils::toClassName(
-                Escaping::prepareTextdata($record['WoTextLC'])
+                Escaping::prepareTextdata((string)$record['WoTextLC'])
             );
-            $record['translation'] = $record['WoTranslation'];
+            $record['translation'] = (string)$record['WoTranslation'];
             $newWords[] = $record;
         }
 
@@ -242,7 +244,9 @@ class TermImportController extends VocabularyBaseController
         $columns = array_unique($columns);
 
         $parsed = $uploadService->parseColumnMapping($columns, $removeSpaces);
+        /** @var array<int, string> $col */
         $col = $parsed['columns'];
+        /** @var array{txt: int, tr: int, ro: int, se: int, tl: int} $fields */
         $fields = $parsed['fields'];
 
         // Check for file upload vs text input
@@ -293,7 +297,7 @@ class TermImportController extends VocabularyBaseController
                 include $this->viewPath . 'upload_result.php';
             } elseif ($fields["tl"] > 0) {
                 // Import tags only
-                $uploadService->importTagsOnly($fields, $tabType, $fileName, $ignoreFirst);
+                $uploadService->importTagsOnly(['tl' => $fields['tl']], $tabType, $fileName, $ignoreFirst);
                 echo '<p>Tags imported successfully.</p>';
             } else {
                 echo '<p class="msgred">Error: No term column specified</p>';
@@ -311,7 +315,7 @@ class TermImportController extends VocabularyBaseController
      *
      * @param WordUploadService       $uploadService  The upload service
      * @param int                     $langId         Language ID
-     * @param array<string, int>      $fields         Field indexes
+     * @param array{txt: int, tr: int, ro: int, se: int, tl: int} $fields Field indexes
      * @param array<int, string>      $col            Column mapping
      * @param string                  $tabType        Tab type (c, t, h)
      * @param string                  $fileName       Path to input file

@@ -222,18 +222,8 @@ class VocabularyServiceProvider implements ServiceProviderInterface
         });
 
         // Register CreateTermFromHover Use Case
-        $container->singleton(CreateTermFromHover::class, function (Container $_c) {
+        $container->singleton(CreateTermFromHover::class, function (Container $_c): CreateTermFromHover {
             return new CreateTermFromHover();
-        });
-
-        // Register Controller
-        $container->singleton(VocabularyController::class, function (Container $c) {
-            return new VocabularyController(
-                $c->getTyped(VocabularyFacade::class),
-                $c->getTyped(CreateTermFromHover::class),
-                $c->getTyped(FindSimilarTerms::class),
-                $c->getTyped(DictionaryAdapter::class)
-            );
         });
 
         // Register Term CRUD API Handler

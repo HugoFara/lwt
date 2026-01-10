@@ -22,27 +22,42 @@
 
 namespace Lwt\Modules\Tags\Views;
 
-/** @var string $mode */
-/** @var array|null $tag */
-/** @var \Lwt\Modules\Tags\Application\TagsFacade $service */
-/** @var string $formFieldPrefix */
-
 use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Modules\Tags\Application\TagsFacade;
+
+/**
+ * @var string $mode
+ * @var array{id?: int, text?: string, comment?: string}|null $tag
+ * @var TagsFacade $service
+ * @var string $formFieldPrefix
+ */
+
+// Ensure variables are properly typed for Psalm
+assert(is_string($mode));
+assert($tag === null || is_array($tag));
+assert($service instanceof TagsFacade);
+assert(is_string($formFieldPrefix));
 
 $isEdit = $mode === 'edit';
 $pageTitle = $isEdit ? 'Edit Tag' : 'New Tag';
 $formName = $isEdit ? 'edittag' : 'newtag';
 $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
+$tagId = $tag !== null && isset($tag['id']) ? $tag['id'] : 0;
 $actionUrl = $isEdit && $tag !== null ?
-    $phpSelf . '#rec' . $tag['id'] :
+    $phpSelf . '#rec' . $tagId :
     $phpSelf;
+$baseUrl = $service->getBaseUrl();
 $cancelUrl = $isEdit && $tag !== null ?
-    $service->getBaseUrl() . '#rec' . $tag['id'] :
-    $service->getBaseUrl();
+    $baseUrl . '#rec' . $tagId :
+    $baseUrl;
 $submitValue = $isEdit ? 'Change' : 'Save';
 
-$tagText = $isEdit && $tag !== null ? htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8') : '';
-$tagComment = $isEdit && $tag !== null ? htmlspecialchars($tag['comment'] ?? '', ENT_QUOTES, 'UTF-8') : '';
+$tagText = '';
+$tagComment = '';
+if ($isEdit && $tag !== null) {
+    $tagText = htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8');
+    $tagComment = htmlspecialchars($tag['comment'] ?? '', ENT_QUOTES, 'UTF-8');
+}
 
 ?>
 <h2 class="title is-4"><?php echo $pageTitle; ?></h2>
@@ -54,7 +69,7 @@ $tagComment = $isEdit && $tag !== null ? htmlspecialchars($tag['comment'] ?? '',
           charCount: <?php echo strlen($tagComment); ?>
       }">
     <?php if ($isEdit && $tag !== null): ?>
-    <input type="hidden" name="<?php echo $formFieldPrefix; ?>ID" value="<?php echo $tag['id']; ?>" />
+    <input type="hidden" name="<?php echo $formFieldPrefix; ?>ID" value="<?php echo $tagId; ?>" />
     <?php endif; ?>
 
     <div class="box">

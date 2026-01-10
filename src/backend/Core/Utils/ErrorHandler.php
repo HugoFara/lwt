@@ -59,27 +59,4 @@ class ErrorHandler
         <a href="https://discord.gg/xrkRZR2jtt">Discord</a>.</p>';
         exit('</body></html>');
     }
-
-    /**
-     * Display an error message vanishing after a few seconds.
-     *
-     * @param string $msg    Message to display.
-     * @param bool   $noback If true, don't display a button to go back
-     *
-     * @return string HTML-formatted string for an automating vanishing message.
-     */
-    public static function messageWithHide(string $msg, bool $noback): string
-    {
-        if (trim($msg) == '') {
-            return '';
-        }
-        if (substr($msg, 0, 5) == "Error") {
-            return '<p class="red">*** ' . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . ' ***' .
-            ($noback ?
-            '' :
-            '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" data-action="back" />' ) .
-            '</p>';
-        }
-        return '<p id="hide3" class="msgblue">+++ ' . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . ' +++</p>';
-    }
 }

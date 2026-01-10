@@ -103,7 +103,7 @@ class TextPrintControllerTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM " . Globals::table('textitems2') . " WHERE Ti2TxID = " . self::$testTextId);
+        Connection::query("DELETE FROM " . Globals::table('word_occurrences') . " WHERE Ti2TxID = " . self::$testTextId);
         Connection::query("DELETE FROM " . Globals::table('sentences') . " WHERE SeTxID = " . self::$testTextId);
         Connection::query("DELETE FROM " . Globals::table('texts') . " WHERE TxTitle = 'PrintControllerTestText'");
         Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgName = 'PrintControllerTestLang'");

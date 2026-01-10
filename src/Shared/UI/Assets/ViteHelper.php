@@ -55,6 +55,7 @@ class ViteHelper
         curl_setopt($ch, CURLOPT_TIMEOUT, 1);
         curl_setopt($ch, CURLOPT_NOBODY, true);
         curl_exec($ch);
+        /** @var int $httpCode */
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
@@ -73,7 +74,9 @@ class ViteHelper
             if (file_exists($path)) {
                 $content = file_get_contents($path);
                 if ($content !== false) {
-                    self::$manifest = json_decode($content, true);
+                    /** @var array<string, mixed>|null $decoded */
+                    $decoded = json_decode($content, true);
+                    self::$manifest = is_array($decoded) ? $decoded : null;
                 }
             }
         }
@@ -106,13 +109,18 @@ HTML;
             return '<!-- Vite manifest not found or entry missing -->';
         }
 
+        /** @var array{file?: string, css?: array<string>}|mixed $entryData */
         $entryData = $manifest[$entry];
+        if (!is_array($entryData)) {
+            return '<!-- Invalid manifest entry -->';
+        }
         $html = '';
 
         // Load CSS files
         if (isset($entryData['css']) && is_array($entryData['css'])) {
+            /** @var mixed $cssFile */
             foreach ($entryData['css'] as $cssFile) {
-                $cssPath = UrlUtilities::url('/assets/' . htmlspecialchars($cssFile));
+                $cssPath = UrlUtilities::url('/assets/' . htmlspecialchars((string) $cssFile));
                 if ($asyncCss) {
                     // Async CSS loading using preload + onload pattern
                     // This eliminates render-blocking while ensuring CSS loads
@@ -125,7 +133,7 @@ HTML;
         }
 
         // Load JS module
-        if (isset($entryData['file'])) {
+        if (isset($entryData['file']) && is_string($entryData['file'])) {
             $jsPath = UrlUtilities::url('/assets/' . htmlspecialchars($entryData['file']));
             $html .= '<script type="module" src="' . $jsPath . '"></script>' . "\n";
         }

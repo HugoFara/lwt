@@ -31,12 +31,26 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+// Type assertions for variables passed from controller
+assert(is_object($term));
+assert(is_int($tid));
+assert(is_int($ord));
+assert(is_int($len));
+assert(is_string($scrdir));
+assert(is_string($sentence));
+assert(is_bool($showRoman));
+
+// Extract typed properties from term object
+$termLgid = (int)$term->lgid;
+$termText = (string)($term->text ?? '');
+$termTextlc = (string)($term->textlc ?? '');
+
 ?>
 <form name="newword" class="validate" action="/word/edit-multi" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-<input type="hidden" name="WoLgID" id="langfield" value="<?php echo $term->lgid; ?>" />
-<input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($term->textlc ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+<input type="hidden" name="WoLgID" id="langfield" value="<?php echo $termLgid; ?>" />
+<input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($termTextlc, ENT_QUOTES, 'UTF-8'); ?>" />
 <input type="hidden" name="tid" value="<?php echo $tid; ?>" />
 <input type="hidden" name="ord" value="<?php echo $ord; ?>" />
 <input type="hidden" name="len" value="<?php echo $len; ?>" />
@@ -44,7 +58,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr title="Only change uppercase/lowercase!">
         <td class="td1 right"><b>New Term:</b></td>
         <td class="td1">
-            <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="New Term" type="text" name="WoText" id="wordfield" value="<?php echo htmlspecialchars($term->text ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
+            <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="New Term" type="text" name="WoText" id="wordfield" value="<?php echo htmlspecialchars($termText, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
             <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
@@ -88,8 +102,8 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr>
         <td class="td1 right" colspan="2">
             <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin(
-                $term->lgid ?? 0,
-                $term->text ?? '',
+                $termLgid,
+                $termText,
                 'document.forms[0].WoSentence',
                 !InputValidator::hasFromGet('nodict')
             ); ?>
@@ -101,5 +115,5 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 </form>
 <?php
 // Display example sentences button
-echo (new SentenceService())->renderExampleSentencesArea($term->lgid ?? 0, $term->textlc, 'document.forms.newword.WoSentence', -1);
+echo (new SentenceService())->renderExampleSentencesArea($termLgid, $termTextlc, 'document.forms.newword.WoSentence', -1);
 ?>

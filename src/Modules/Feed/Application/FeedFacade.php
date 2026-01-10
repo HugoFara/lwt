@@ -103,7 +103,7 @@ class FeedFacade
     // =========================================================================
 
     /**
-     * Get all newsfeeds for a language (or all languages).
+     * Get all news_feeds for a language (or all languages).
      *
      * @param int|null $langId Language ID filter (null for all)
      *
@@ -113,10 +113,10 @@ class FeedFacade
     {
         $feeds = $this->getFeedList->executeAll($langId);
 
-        return array_map(
+        return array_values(array_map(
             fn(Feed $feed) => $this->feedToArray($feed),
             $feeds
-        );
+        ));
     }
 
     /**
@@ -133,7 +133,7 @@ class FeedFacade
     }
 
     /**
-     * Count newsfeeds with optional language and query filter.
+     * Count news_feeds with optional language and query filter.
      *
      * @param int|null    $langId       Language ID filter (null for all)
      * @param string|null $queryPattern LIKE pattern for name filter
@@ -354,7 +354,7 @@ class FeedFacade
      *
      * @param string $sourceUri Feed URL
      *
-     * @return array|false Feed data or false on error
+     * @return array<int|string, array<string, string>|string>|false Feed data or false on error
      */
     public function detectAndParseFeed(string $sourceUri): array|false
     {
@@ -756,7 +756,7 @@ class FeedFacade
      *
      * @param array{article: \Lwt\Modules\Feed\Domain\Article, text_id: int|null, archived_id: int|null, status?: string} $item Article result with status
      *
-     * @return array{FlID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, TxID: int|null, AtID: int|null} Legacy array format
+     * @return array{FlID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, TxID: int|null, ArchivedTxID: int|null} Legacy array format
      */
     private function articleToLegacyArray(array $item): array
     {
@@ -773,7 +773,7 @@ class FeedFacade
             'FlDate' => $article->date(),
             'FlAudio' => $article->audio(),
             'TxID' => $item['text_id'],
-            'AtID' => $item['archived_id'],
+            'ArchivedTxID' => $item['archived_id'],
         ];
     }
 
@@ -831,10 +831,10 @@ class FeedFacade
                         foreach ($text['TagList'] as $tag) {
                             if (!in_array($tag, $sessionTextTags, true)) {
                                 $bindings = [$tag];
-                                $sql = 'INSERT INTO tags2 (T2Text'
-                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('tags2')
+                                $sql = 'INSERT INTO text_tags (T2Text'
+                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('text_tags')
                                     . ') VALUES (?'
-                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValuePrepared('tags2', $bindings)
+                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValuePrepared('text_tags', $bindings)
                                     . ')';
                                 \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute($sql, $bindings);
                             }
@@ -878,10 +878,10 @@ class FeedFacade
                         /** @var list<mixed> $tagBindings */
                         $tagBindings = array_values(array_merge([$id], $currentTagList));
                         \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute(
-                            'INSERT INTO texttags (TtTxID, TtT2ID)
-                            SELECT ?, T2ID FROM tags2
+                            'INSERT INTO text_tag_map (TtTxID, TtT2ID)
+                            SELECT ?, T2ID FROM text_tags
                             WHERE T2Text IN (' . $tagPlaceholders . ')'
-                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('tags2', $tagBindings),
+                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('text_tags', $tagBindings),
                             $tagBindings
                         );
                     }
@@ -898,14 +898,14 @@ class FeedFacade
                 /** @var list<mixed> $tagQueryBindings */
                 $tagQueryBindings = array_values($currentTagList);
                 $rows = \Lwt\Shared\Infrastructure\Database\Connection::preparedFetchAll(
-                    "SELECT TtTxID FROM texttags
-                    JOIN tags2 ON TtT2ID=T2ID
+                    "SELECT TtTxID FROM text_tag_map
+                    JOIN text_tags ON TtT2ID=T2ID
                     WHERE T2Text IN (" . $tagPlaceholders . ")"
-                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('tags2', $tagQueryBindings),
+                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('text_tags', $tagQueryBindings),
                     $tagQueryBindings
                 );
                 foreach ($rows as $row) {
-                    $textItem[] = $row['TtTxID'];
+                    $textItem[] = (int)$row['TtTxID'];
                 }
             }
             $textCount = count($textItem);
@@ -915,49 +915,26 @@ class FeedFacade
                 sort($textItem, SORT_NUMERIC);
                 $textItem = array_slice($textItem, 0, $textCount - (int)$nfMaxTexts);
 
-                foreach ($textItem as $textID) {
-                    $message3 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('textitems2')
-                        ->where('Ti2TxID', '=', $textID)
+                foreach ($textItem as $txId) {
+                    $message3 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('word_occurrences')
+                        ->where('Ti2TxID', '=', $txId)
                         ->delete();
                     $message2 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('sentences')
-                        ->where('SeTxID', '=', $textID)
+                        ->where('SeTxID', '=', $txId)
                         ->delete();
 
-                    $bindings = [$textID];
-                    $message4 += (int)\Lwt\Shared\Infrastructure\Database\Connection::execute(
-                        'INSERT INTO archivedtexts (
-                            AtLgID, AtTitle, AtText, AtAnnotatedText,
-                            AtAudioURI, AtSourceURI'
-                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('archivedtexts')
-                        . ') SELECT TxLgID, TxTitle, TxText, TxAnnotatedText,
-                        TxAudioURI, TxSourceURI'
-                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValue('archivedtexts')
-                        . ' FROM texts
-                        WHERE TxID = ' . (int)$textID
-                        . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTable('texts')
+                    // Archive the text (soft delete - set TxArchivedAt)
+                    $bindings = [$txId];
+                    $message4 += \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute(
+                        'UPDATE texts SET TxArchivedAt = NOW(), TxPosition = 0, TxAudioPosition = 0
+                         WHERE TxID = ? AND TxArchivedAt IS NULL'
+                        . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('texts', $bindings),
+                        $bindings
                     );
 
-                    $archiveId = (int)\Lwt\Shared\Infrastructure\Database\Connection::lastInsertId();
-                    \Lwt\Shared\Infrastructure\Database\Connection::execute(
-                        'INSERT INTO archtexttags (AgAtID, AgT2ID)
-                        SELECT ' . $archiveId . ', TtT2ID FROM texttags
-                        WHERE TtTxID = ' . (int)$textID
-                    );
+                    $message1 = $message4; // Same count for archiving
 
-                    $message1 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('texts')
-                        ->where('TxID', '=', $textID)
-                        ->delete();
-
-                    \Lwt\Shared\Infrastructure\Database\Maintenance::adjustAutoIncrement('texts', 'TxID');
                     \Lwt\Shared\Infrastructure\Database\Maintenance::adjustAutoIncrement('sentences', 'SeID');
-
-                    // Clean orphaned text tags
-                    \Lwt\Shared\Infrastructure\Database\Connection::execute(
-                        "DELETE texttags
-                        FROM (texttags
-                            LEFT JOIN texts ON TtTxID = TxID
-                        ) WHERE TxID IS NULL"
-                    );
                 }
             }
         }
@@ -1003,7 +980,8 @@ class FeedFacade
 
         // Show progress UI
         if ($config['count'] != 1) {
-            echo '<div class="msgblue"><p>UPDATING <span x-text="loadedCount">0</span>/' .
+            echo '<div class="notification is-info">' .
+                '<p>UPDATING <span x-text="loadedCount">0</span>/' .
                 $config['count'] . ' FEEDS</p></div>';
         }
 

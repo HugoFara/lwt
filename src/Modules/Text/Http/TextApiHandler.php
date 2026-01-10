@@ -28,6 +28,7 @@ use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Modules\Text\Application\Services\TextPrintService;
+use Lwt\Modules\Text\Application\Services\TextScoringService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/WordDiscoveryService.php';
@@ -130,10 +131,10 @@ class TextApiHandler
      */
     public function saveImprText(int $textid, string $elem, object $data): array
     {
-        $newAnnotation = $data->{$elem};
+        $newAnnotation = (string)($data->{$elem} ?? '');
         $line = (int)substr($elem, 2);
         if (str_starts_with($elem, "rg") && $newAnnotation == "") {
-            $newAnnotation = $data->{'tx' . $line};
+            $newAnnotation = (string)($data->{'tx' . $line} ?? '');
         }
         $status = $this->saveImprTextData($textid, $line, $newAnnotation);
         if ($status != "OK") {
@@ -185,7 +186,11 @@ class TextApiHandler
      */
     public function formatSetAnnotation(int $textId, string $elem, string $data): array
     {
-        $result = $this->saveImprText($textId, $elem, json_decode($data));
+        $decoded = json_decode($data);
+        if (!is_object($decoded)) {
+            return ["error" => "Invalid JSON data"];
+        }
+        $result = $this->saveImprText($textId, $elem, $decoded);
         if (array_key_exists("error", $result)) {
             return ["error" => $result["error"]];
         }
@@ -349,7 +354,7 @@ class TextApiHandler
         }
 
         // Get all text items with word info
-        $records = QueryBuilder::table('textitems2')
+        $records = QueryBuilder::table('word_occurrences')
             ->select([
                 'CASE WHEN `Ti2WordCount`>0 THEN Ti2WordCount ELSE 1 END AS Code',
                 'CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE `WoText` END AS TiText',
@@ -365,8 +370,8 @@ class TextApiHandler
                 'WoRomanization',
                 'WoNotes'
             ])
-            ->leftJoin('words', 'textitems2.Ti2WoID', '=', 'words.WoID')
-            ->where('textitems2.Ti2TxID', '=', $textId)
+            ->leftJoin('words', 'word_occurrences.Ti2WoID', '=', 'words.WoID')
+            ->where('word_occurrences.Ti2TxID', '=', $textId)
             ->orderBy('Ti2Order', 'ASC')
             ->orderBy('Ti2WordCount', 'DESC')
             ->getPrepared();
@@ -390,7 +395,7 @@ class TextApiHandler
                         'startPos' => $order,
                         'wordId' => isset($record['WoID']) ? (int)$record['WoID'] : null,
                         'status' => (int)($record['WoStatus'] ?? 0),
-                        'translation' => ExportService::replaceTabNewline($record['WoTranslation'] ?? ''),
+                        'translation' => ExportService::replaceTabNewline((string)($record['WoTranslation'] ?? '')),
                     ];
                 }
             }
@@ -399,7 +404,7 @@ class TextApiHandler
             $hidden = $order <= $lastOrder;
 
             // Calculate hex for TERM class
-            $hex = StringUtils::toClassName($record['TiTextLC'] ?? '');
+            $hex = StringUtils::toClassName((string)($record['TiTextLC'] ?? ''));
 
             // Build word data
             $wordData = [
@@ -419,9 +424,9 @@ class TextApiHandler
                     // Known word
                     $wordData['wordId'] = (int)$record['WoID'];
                     $wordData['status'] = (int)$record['WoStatus'];
-                    $wordData['translation'] = ExportService::replaceTabNewline($record['WoTranslation'] ?? '');
-                    $wordData['romanization'] = $record['WoRomanization'] ?? '';
-                    $wordData['notes'] = $record['WoNotes'] ?? '';
+                    $wordData['translation'] = ExportService::replaceTabNewline((string)($record['WoTranslation'] ?? ''));
+                    $wordData['romanization'] = (string)($record['WoRomanization'] ?? '');
+                    $wordData['notes'] = (string)($record['WoNotes'] ?? '');
 
                     // Get tags
                     $tags = TagsFacade::getWordTagList((int)$record['WoID'], false);
@@ -1011,5 +1016,86 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
     public function formatEditTermForm(int $textId): array
     {
         return ['html' => $this->editTermForm($textId)];
+    }
+
+    // =========================================================================
+    // Text Scoring API (comprehensibility/difficulty analysis)
+    // =========================================================================
+
+    /**
+     * Get the difficulty score for a single text.
+     *
+     * @param int $textId Text ID to score
+     *
+     * @return array<string, mixed>
+     */
+    public function formatGetTextScore(int $textId): array
+    {
+        $scoringService = new TextScoringService();
+        $score = $scoringService->scoreText($textId);
+        return $score->toArray();
+    }
+
+    /**
+     * Get scores for multiple texts.
+     *
+     * @param int[] $textIds Array of text IDs
+     *
+     * @return array{scores: array<int, array<string, mixed>>}
+     */
+    public function formatGetTextScores(array $textIds): array
+    {
+        $scoringService = new TextScoringService();
+        $scores = $scoringService->scoreTexts($textIds);
+
+        $result = [];
+        foreach ($scores as $textId => $score) {
+            $result[$textId] = $score->toArray();
+        }
+
+        return ['scores' => $result];
+    }
+
+    /**
+     * Get recommended texts for a language based on comprehensibility.
+     *
+     * @param int   $languageId Language ID
+     * @param array $params     Query parameters (target, limit)
+     *
+     * @return array{recommendations: array<array<string, mixed>>, target_comprehensibility: float}
+     */
+    public function formatGetRecommendedTexts(int $languageId, array $params): array
+    {
+        $target = isset($params['target']) ? (float)$params['target'] : 0.95;
+        $limit = isset($params['limit']) ? min(50, max(1, (int)$params['limit'])) : 10;
+
+        // Clamp target between 0.5 and 1.0
+        $target = max(0.5, min(1.0, $target));
+
+        $scoringService = new TextScoringService();
+        $recommendations = $scoringService->getRecommendedTexts($languageId, $target, $limit);
+
+        // Convert to arrays and add text titles
+        $result = [];
+        foreach ($recommendations as $score) {
+            $scoreArray = $score->toArray();
+
+            // Fetch text title
+            $text = QueryBuilder::table('texts')
+                ->select(['TxTitle'])
+                ->where('TxID', '=', $score->textId)
+                ->firstPrepared();
+
+            if ($text !== null) {
+                $scoreArray['title'] = (string)$text['TxTitle'];
+            }
+
+            $result[] = $scoreArray;
+        }
+
+        return [
+            'recommendations' => $result,
+            'target_comprehensibility' => $target
+        ];
     }
 }

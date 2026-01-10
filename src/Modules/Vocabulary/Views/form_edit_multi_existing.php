@@ -35,15 +35,34 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+// Type assertions for variables passed from controller
+assert(is_object($term));
+assert(is_int($tid));
+assert(is_int($ord));
+assert(is_string($scrdir));
+assert(is_string($sentence));
+assert(is_string($notes));
+assert(is_string($transl));
+assert(is_string($romanization));
+assert(is_int($status));
+assert(is_int($originalStatus));
+assert(is_bool($showRoman));
+
+// Extract typed properties from term object
+$termId = (int)$term->id;
+$termLgid = (int)$term->lgid;
+$termText = (string)($term->text ?? '');
+$termTextlc = (string)($term->textlc ?? '');
+
 ?>
 <form name="editword" class="validate" action="/word/edit-multi" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-<input type="hidden" name="WoLgID" id="langfield" value="<?php echo $term->lgid; ?>" />
-<input type="hidden" name="WoID" value="<?php echo $term->id; ?>" />
+<input type="hidden" name="WoLgID" id="langfield" value="<?php echo $termLgid; ?>" />
+<input type="hidden" name="WoID" value="<?php echo $termId; ?>" />
 <input type="hidden" name="WoOldStatus" value="<?php echo $originalStatus; ?>" />
 <input type="hidden" name="WoStatus" value="<?php echo $status; ?>" />
-<input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($term->textlc ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+<input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($termTextlc, ENT_QUOTES, 'UTF-8'); ?>" />
 <input type="hidden" name="tid" value="<?php echo $tid; ?>" />
 <input type="hidden" name="ord" value="<?php echo $ord; ?>" />
 <table class="tab2" cellspacing="0" cellpadding="5">
@@ -52,7 +71,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1">
             <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp"
             data_info="Term" type="text" name="WoText" id="wordfield"
-            value="<?php echo htmlspecialchars($term->text ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
+            value="<?php echo htmlspecialchars($termText, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
             <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
@@ -61,13 +80,13 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1 right">Translation:</td>
         <td class="td1">
             <textarea name="WoTranslation" class="setfocus textarea-noreturn checklength checkoutsidebmp"
-            data_maxlength="500" data_info="Translation" cols="35" rows="3"><?php echo htmlspecialchars($transl ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+            data_maxlength="500" data_info="Translation" cols="35" rows="3"><?php echo htmlspecialchars($transl, ENT_QUOTES, 'UTF-8'); ?></textarea>
         </td>
     </tr>
     <tr>
         <td class="td1 right">Tags:</td>
         <td class="td1">
-            <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml($term->id); ?>
+            <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml($termId); ?>
         </td>
     </tr>
     <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">
@@ -75,7 +94,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1">
             <input type="text" class="checkoutsidebmp" data_info="Romanization"
             name="WoRomanization" maxlength="100" size="35"
-            value="<?php echo htmlspecialchars($romanization ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+            value="<?php echo htmlspecialchars($romanization, ENT_QUOTES, 'UTF-8'); ?>" />
         </td>
     </tr>
     <tr>
@@ -83,7 +102,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1">
             <textarea <?php echo $scrdir; ?> name="WoSentence"
             class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000"
-            data_info="Sentence" cols="35" rows="3"><?php echo htmlspecialchars($sentence ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+            data_info="Sentence" cols="35" rows="3"><?php echo htmlspecialchars($sentence, ENT_QUOTES, 'UTF-8'); ?></textarea>
         </td>
     </tr>
     <tr>
@@ -91,7 +110,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1">
             <textarea name="WoNotes"
             class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000"
-            data_info="Notes" cols="35" rows="3"><?php echo htmlspecialchars($notes ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+            data_info="Notes" cols="35" rows="3"><?php echo htmlspecialchars($notes, ENT_QUOTES, 'UTF-8'); ?></textarea>
         </td>
     </tr>
     <tr>
@@ -103,8 +122,8 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr>
         <td class="td1 right" colspan="2">
             <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin(
-                $term->lgid ?? 0,
-                $term->text ?? '',
+                $termLgid,
+                $termText,
                 'document.forms[0].WoSentence',
                 !InputValidator::hasFromGet('nodict')
             ); ?>
@@ -116,5 +135,5 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 </form>
 <?php
 // Display example sentences button
-echo (new SentenceService())->renderExampleSentencesArea($term->lgid ?? 0, $term->textlc, 'document.forms.editword.WoSentence', $term->id);
+echo (new SentenceService())->renderExampleSentencesArea($termLgid, $termTextlc, 'document.forms.editword.WoSentence', $termId);
 ?>

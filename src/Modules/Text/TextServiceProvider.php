@@ -48,6 +48,7 @@ use Lwt\Modules\Text\Http\TextApiHandler;
 // Module services
 use Lwt\Modules\Text\Application\Services\TextPrintService;
 use Lwt\Modules\Text\Application\Services\TextDisplayService;
+use Lwt\Modules\Text\Application\Services\TextScoringService;
 
 /**
  * Service provider for the Text module.
@@ -112,6 +113,11 @@ class TextServiceProvider implements ServiceProviderInterface
 
         $container->singleton(TextDisplayService::class, function (Container $_c) {
             return new TextDisplayService();
+        });
+
+        // Text scoring service for difficulty/comprehensibility analysis
+        $container->singleton(TextScoringService::class, function (Container $_c) {
+            return new TextScoringService();
         });
     }
 

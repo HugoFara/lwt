@@ -49,7 +49,11 @@ class UrlUtilities
     public static function getBasePath(): string
     {
         if (self::$basePath === null) {
-            $path = $_ENV['APP_BASE_PATH'] ?? getenv('APP_BASE_PATH') ?: '';
+            $envPath = $_ENV['APP_BASE_PATH'] ?? null;
+            if ($envPath === null) {
+                $envPath = getenv('APP_BASE_PATH');
+            }
+            $path = is_string($envPath) && $envPath !== '' ? $envPath : '';
 
             // Normalize: ensure starts with / (if not empty) and no trailing slash
             if ($path !== '') {
@@ -117,7 +121,7 @@ class UrlUtilities
         if (str_starts_with($requestUri, $basePath)) {
             $stripped = substr($requestUri, strlen($basePath));
             // Ensure we return at least '/'
-            return $stripped === '' || $stripped === false ? '/' : $stripped;
+            return $stripped === '' ? '/' : $stripped;
         }
 
         // Request doesn't match base path - return as-is
@@ -246,10 +250,10 @@ class UrlUtilities
 
         $ips = [];
         foreach ($records as $record) {
-            if (isset($record['ip'])) {
+            if (isset($record['ip']) && is_string($record['ip'])) {
                 $ips[] = $record['ip'];
             }
-            if (isset($record['ipv6'])) {
+            if (isset($record['ipv6']) && is_string($record['ipv6'])) {
                 $ips[] = $record['ipv6'];
             }
         }
@@ -325,6 +329,41 @@ class UrlUtilities
     }
 
     /**
+     * Build a URL with query parameters.
+     *
+     * Constructs a URL by combining a path with query parameters.
+     * Empty/null parameter values are filtered out.
+     *
+     * @param string               $path   The URL path (will have base path prepended)
+     * @param array<string, mixed> $params Query parameters to append
+     *
+     * @return string The complete URL with query string
+     *
+     * @example buildUrl('/tags', ['page' => 2, 'query' => 'test']) returns '/tags?page=2&query=test'
+     * @example buildUrl('/tags', ['page' => 1, 'query' => '']) returns '/tags?page=1'
+     */
+    public static function buildUrl(string $path, array $params = []): string
+    {
+        $url = self::url($path);
+
+        if (empty($params)) {
+            return $url;
+        }
+
+        // Filter out empty/null values but keep '0' and false
+        $filtered = array_filter(
+            $params,
+            fn($v) => $v !== '' && $v !== null
+        );
+
+        if (empty($filtered)) {
+            return $url;
+        }
+
+        return $url . '?' . http_build_query($filtered);
+    }
+
+    /**
      * Get a two-letter language code from dictionary source language.
      *
      * @param string $url Input URL, usually Google Translate or LibreTranslate
@@ -341,14 +380,17 @@ class UrlUtilities
             return '';
         }
         parse_str($query, $parsed_query);
+        /** @var array<string, string|list<string>> $parsed_query */
         if (
             array_key_exists("lwt_translator", $parsed_query)
             && $parsed_query["lwt_translator"] == "libretranslate"
         ) {
-            return $parsed_query["source"] ?? "";
+            $source = $parsed_query["source"] ?? "";
+            return is_string($source) ? $source : "";
         }
         // Fallback to Google Translate
-        return $parsed_query["sl"] ?? "";
+        $sl = $parsed_query["sl"] ?? "";
+        return is_string($sl) ? $sl : "";
     }
 
     /**
@@ -368,13 +410,16 @@ class UrlUtilities
             return '';
         }
         parse_str($query, $parsed_query);
+        /** @var array<string, string|list<string>> $parsed_query */
         if (
             array_key_exists("lwt_translator", $parsed_query)
             && $parsed_query["lwt_translator"] == "libretranslate"
         ) {
-            return $parsed_query["target"] ?? "";
+            $target = $parsed_query["target"] ?? "";
+            return is_string($target) ? $target : "";
         }
         // Fallback to Google Translate
-        return $parsed_query["tl"] ?? "";
+        $tl = $parsed_query["tl"] ?? "";
+        return is_string($tl) ? $tl : "";
     }
 }

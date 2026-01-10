@@ -325,21 +325,22 @@ class SqlValidatorTest extends TestCase
     public static function provideAllowedTables(): array
     {
         return [
-            ['archivedtexts'],
-            ['archtexttags'],
-            ['feedlinks'],
+            ['feed_links'],
             ['languages'],
-            ['newsfeeds'],
+            ['local_dictionaries'],
+            ['local_dictionary_entries'],
+            ['news_feeds'],
             ['sentences'],
             ['settings'],
             ['tags'],
-            ['tags2'],
-            ['textitems'],
-            ['textitems2'],
+            ['temp_word_occurrences'],
+            ['temp_words'],
+            ['text_tags'],
+            ['word_occurrences'],
             ['texts'],
-            ['texttags'],
+            ['text_tag_map'],
             ['words'],
-            ['wordtags'],
+            ['word_tag_map'],
         ];
     }
 
@@ -348,7 +349,10 @@ class SqlValidatorTest extends TestCase
     public function testGetAllowedTablesReturnsExpectedCount(): void
     {
         $tables = SqlValidator::getAllowedTables();
-        $this->assertCount(19, $tables);
+        // 14 tables: feed_links, languages, local_dictionaries, local_dictionary_entries,
+        // news_feeds, sentences, settings, tags, temp_word_occurrences, temp_words,
+        // text_tags, word_occurrences, texts, text_tag_map, words, word_tag_map
+        $this->assertCount(16, $tables);
     }
 
     public function testGetAllowedTablesContainsLanguages(): void

@@ -3,8 +3,8 @@
  * Archived Text Edit Form View
  *
  * Variables expected:
- * - $textId: int - Archived text ID
- * - $record: array - Archived text record with keys: AtLgID, AtTitle, AtText, AtAudioURI, AtSourceURI, annotlen
+ * - $textId: int - Archived text ID (same as TxID, but with TxArchivedAt IS NOT NULL)
+ * - $record: array - Archived text record with keys: TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI, annotlen
  *
  * PHP version 8.1
  *
@@ -24,24 +24,38 @@ use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
+
+// Type-safe variable extraction from controller context
+/** @var int */
+$textIdTyped = $textId;
+assert(is_array($record));
+$recordLgId = (int)$record['TxLgID'];
+$recordTitle = (string)$record['TxTitle'];
+$recordText = (string)$record['TxText'];
+$recordAnnotLen = (int)$record['annotlen'];
+$recordSourceUri = (string)$record['TxSourceURI'];
+$recordAudioUri = (string)$record['TxAudioURI'];
+assert(is_array($languages));
+/** @var array<int, array{id: int, name: string}> */
+$languagesTyped = $languages;
 ?>
 <h2 class="title is-4">Edit Archived Text</h2>
 
-<form class="validate" action="<?php echo $phpSelf; ?>#rec<?php echo $textId; ?>" method="post">
-    <input type="hidden" name="AtID" value="<?php echo $textId; ?>" />
+<form class="validate" action="<?php echo $phpSelf; ?>#rec<?php echo $textIdTyped; ?>" method="post">
+    <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
 
     <div class="box">
         <!-- Language -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label" for="AtLgID">Language</label>
+                <label class="label" for="TxLgID">Language</label>
             </div>
             <div class="field-body">
                 <div class="field has-addons">
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
-                            <select name="AtLgID" id="AtLgID" class="notempty setfocus" required>
-                                <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languages, $record['AtLgID'], '[Choose...]'); ?>
+                            <select name="TxLgID" id="TxLgID" class="notempty setfocus" required>
+                                <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languagesTyped, $recordLgId, '[Choose...]'); ?>
                             </select>
                         </div>
                     </div>
@@ -57,7 +71,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
         <!-- Title -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label" for="AtTitle">Title</label>
+                <label class="label" for="TxTitle">Title</label>
             </div>
             <div class="field-body">
                 <div class="field has-addons">
@@ -65,9 +79,9 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
                         <input type="text"
                                class="input notempty checkoutsidebmp"
                                data_info="Title"
-                               name="AtTitle"
-                               id="AtTitle"
-                               value="<?php echo htmlspecialchars($record['AtTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               name="TxTitle"
+                               id="TxTitle"
+                               value="<?php echo htmlspecialchars($recordTitle, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
                                required />
                     </div>
@@ -83,18 +97,18 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
         <!-- Text Content -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label" for="AtText">Text</label>
+                <label class="label" for="TxText">Text</label>
             </div>
             <div class="field-body">
                 <div class="field has-addons">
                     <div class="control is-expanded">
-                        <textarea name="AtText"
-                                  id="AtText"
+                        <textarea name="TxText"
+                                  id="TxText"
                                   class="textarea notempty checkbytes checkoutsidebmp"
                                   data_maxlength="65000"
                                   data_info="Text"
                                   rows="15"
-                                  required><?php echo htmlspecialchars($record['AtText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                  required><?php echo htmlspecialchars($recordText, ENT_QUOTES, 'UTF-8'); ?></textarea>
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
@@ -113,7 +127,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
             <div class="field-body">
                 <div class="field">
                     <div class="control">
-                        <?php if ($record['annotlen']): ?>
+                        <?php if ($recordAnnotLen > 0): ?>
                         <div class="notification is-info is-light">
                             <span class="icon-text">
                                 <span class="icon has-text-success">
@@ -140,7 +154,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
         <!-- Source URI -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label" for="AtSourceURI">Source URI</label>
+                <label class="label" for="TxSourceURI">Source URI</label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -148,9 +162,9 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
                         <input type="url"
                                class="input checkurl checkoutsidebmp"
                                data_info="Source URI"
-                               name="AtSourceURI"
-                               id="AtSourceURI"
-                               value="<?php echo htmlspecialchars($record['AtSourceURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               name="TxSourceURI"
+                               id="TxSourceURI"
+                               value="<?php echo htmlspecialchars($recordSourceUri, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="1000"
                                placeholder="https://..." />
                     </div>
@@ -166,7 +180,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
             <div class="field-body">
                 <div class="field">
                     <div class="control">
-                        <?php /** @psalm-suppress PossiblyUndefinedVariable */ echo getArchivedTextTags($textId); ?>
+                        <?php echo (string)getArchivedTextTags($textIdTyped); ?>
                     </div>
                 </div>
             </div>
@@ -175,7 +189,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
         <!-- Audio URI -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label" for="AtAudioURI">Audio URI</label>
+                <label class="label" for="TxAudioURI">Audio URI</label>
             </div>
             <div class="field-body">
                 <div class="field has-addons">
@@ -183,14 +197,14 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
                         <input type="text"
                                class="input checkoutsidebmp"
                                data_info="Audio-URI"
-                               name="AtAudioURI"
-                               id="AtAudioURI"
-                               value="<?php echo htmlspecialchars($record['AtAudioURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               name="TxAudioURI"
+                               id="TxAudioURI"
+                               value="<?php echo htmlspecialchars($recordAudioUri, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
                                placeholder="Path to audio file or URL" />
                     </div>
                     <div class="control" id="mediaselect">
-                        <?php echo (new MediaService())->getMediaPathSelector('AtAudioURI'); ?>
+                        <?php echo (new MediaService())->getMediaPathSelector('TxAudioURI'); ?>
                     </div>
                 </div>
             </div>
@@ -203,7 +217,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
             <button type="button"
                     class="button is-light"
                     data-action="cancel-navigate"
-                    data-url="/text/archived#rec<?php echo $textId; ?>">
+                    data-url="/text/archived#rec<?php echo $textIdTyped; ?>">
                 Cancel
             </button>
         </div>

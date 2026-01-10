@@ -15,9 +15,18 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @var int $totalTests
+ * @var int $tomorrowTests
+ * @var bool $hidden
  */
 
 namespace Lwt\Views\Review;
+
+// Validate and cast injected variables
+assert(isset($totalTests) && is_int($totalTests));
+assert(isset($tomorrowTests) && is_int($tomorrowTests));
+assert(isset($hidden) && is_bool($hidden));
 
 $display = $hidden ? 'none' : 'inherit';
 ?>

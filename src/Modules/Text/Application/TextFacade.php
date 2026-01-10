@@ -436,6 +436,8 @@ class TextFacade
 
     /**
      * Get Google Translate URIs by language.
+     *
+     * @return array<int, string> Map of language ID to translate URI
      */
     public function getLanguageTranslateUris(): array
     {
@@ -534,15 +536,15 @@ class TextFacade
             LENGTH(TxAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                (texts LEFT JOIN texttags ON TxID = TtTxID)
-                LEFT JOIN tags2 ON T2ID = TtT2ID
+                (texts LEFT JOIN text_tag_map ON TxID = TtTxID)
+                LEFT JOIN text_tags ON T2ID = TtT2ID
             )
             WHERE TxLgID = ?
             GROUP BY TxID
             ORDER BY {$sortColumn}
             LIMIT ?, ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings2)
-            . UserScopedQuery::forTablePrepared('tags2', $bindings2),
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings2),
             $bindings2
         );
 
@@ -553,7 +555,7 @@ class TextFacade
                 'title' => (string) $record['TxTitle'],
                 'has_audio' => !empty($record['TxAudioURI']),
                 'source_uri' => (string) ($record['TxSourceURI'] ?? ''),
-                'has_source' => !empty($record['TxSourceURI']) && substr($record['TxSourceURI'], 0, 1) !== '#',
+                'has_source' => !empty($record['TxSourceURI']) && substr((string)($record['TxSourceURI'] ?? ''), 0, 1) !== '#',
                 'annotated' => !empty($record['annotlen']),
                 'taglist' => (string) $record['taglist']
             ];
@@ -586,14 +588,14 @@ class TextFacade
         int $perPage,
         int $sort
     ): array {
-        $sorts = ['AtTitle', 'AtID DESC', 'AtID ASC'];
+        $sorts = ['TxTitle', 'TxID DESC', 'TxID ASC'];
         $sortColumn = $sorts[max(0, min($sort - 1, count($sorts) - 1))];
         $offset = ($page - 1) * $perPage;
 
         $bindings1 = [$langId];
         $total = (int) Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM archivedtexts WHERE AtLgID = ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
+            "SELECT COUNT(*) AS cnt FROM texts WHERE TxLgID = ? AND TxArchivedAt IS NOT NULL"
+            . UserScopedQuery::forTablePrepared('texts', $bindings1),
             $bindings1,
             'cnt'
         );
@@ -601,30 +603,30 @@ class TextFacade
 
         $bindings2 = [$langId, $offset, $perPage];
         $records = Connection::preparedFetchAll(
-            "SELECT AtID, AtTitle, AtAudioURI, AtSourceURI,
-            LENGTH(AtAnnotatedText) AS annotlen,
+            "SELECT TxID, TxTitle, TxAudioURI, TxSourceURI,
+            LENGTH(TxAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                (archivedtexts LEFT JOIN archtexttags ON AtID = AgAtID)
-                LEFT JOIN tags2 ON T2ID = AgT2ID
+                (texts LEFT JOIN text_tag_map ON TxID = TtTxID)
+                LEFT JOIN text_tags ON T2ID = TtT2ID
             )
-            WHERE AtLgID = ?
-            GROUP BY AtID
+            WHERE TxLgID = ? AND TxArchivedAt IS NOT NULL
+            GROUP BY TxID
             ORDER BY {$sortColumn}
             LIMIT ?, ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings2)
-            . UserScopedQuery::forTablePrepared('tags2', $bindings2),
+            . UserScopedQuery::forTablePrepared('texts', $bindings2)
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings2),
             $bindings2
         );
 
         $texts = [];
         foreach ($records as $record) {
             $texts[] = [
-                'id' => (int) $record['AtID'],
-                'title' => (string) $record['AtTitle'],
-                'has_audio' => !empty($record['AtAudioURI']),
-                'source_uri' => (string) ($record['AtSourceURI'] ?? ''),
-                'has_source' => !empty($record['AtSourceURI']),
+                'id' => (int) $record['TxID'],
+                'title' => (string) $record['TxTitle'],
+                'has_audio' => !empty($record['TxAudioURI']),
+                'source_uri' => (string) ($record['TxSourceURI'] ?? ''),
+                'has_source' => !empty($record['TxSourceURI']),
                 'annotated' => !empty($record['annotlen']),
                 'taglist' => (string) $record['taglist']
             ];
@@ -693,7 +695,8 @@ class TextFacade
             return "Multiple Actions: 0";
         }
 
-        $ids = array_map('intval', $textIds);
+        /** @var array<int, int> $ids */
+        $ids = array_values(array_map('intval', $textIds));
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
         $count = 0;
 
@@ -702,22 +705,22 @@ class TextFacade
             : "";
 
         $sql = "SELECT WoID, WoTextLC, MIN(Ti2SeID) AS SeID
-            FROM words, textitems2
+            FROM words, word_occurrences
             WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ({$placeholders})
             {$statusFilter}
             AND IFNULL(WoSentence,'') NOT LIKE CONCAT('%{',WoText,'}%')
             GROUP BY WoID
             ORDER BY WoID, MIN(Ti2SeID)"
             . UserScopedQuery::forTablePrepared('words', $ids)
-            . UserScopedQuery::forTablePrepared('textitems2', $ids, '', 'texts');
+            . UserScopedQuery::forTablePrepared('word_occurrences', $ids, '', 'texts');
 
         $records = Connection::preparedFetchAll($sql, $ids);
         $sentenceCount = (int) Settings::getWithDefault('set-term-sentence-count');
 
         foreach ($records as $record) {
             $sent = $this->sentenceService->formatSentence(
-                $record['SeID'],
-                $record['WoTextLC'],
+                (int)$record['SeID'],
+                (string)$record['WoTextLC'],
                 $sentenceCount
             );
             $bindings = [ExportService::replaceTabNewline($sent[1]), $record['WoID']];
@@ -781,14 +784,14 @@ class TextFacade
         $sentencesDeleted = QueryBuilder::table('sentences')
             ->where('SeTxID', '=', $textId)
             ->delete();
-        $textitemsDeleted = QueryBuilder::table('textitems2')
+        $textitemsDeleted = QueryBuilder::table('word_occurrences')
             ->where('Ti2TxID', '=', $textId)
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
         $bindings2 = [$textId];
         TextParsing::parseAndSave(
-            Connection::preparedFetchValue(
+            (string)Connection::preparedFetchValue(
                 "SELECT TxText FROM texts WHERE TxID = ?"
                 . UserScopedQuery::forTablePrepared('texts', $bindings2),
                 $bindings2,
@@ -799,16 +802,16 @@ class TextFacade
         );
 
         $bindings3 = [$textId];
-        $sentenceCount = Connection::preparedFetchValue(
+        $sentenceCount = (int)Connection::preparedFetchValue(
             "SELECT COUNT(*) AS cnt FROM sentences WHERE SeTxID = ?"
             . UserScopedQuery::forTablePrepared('sentences', $bindings3, '', 'texts'),
             $bindings3,
             'cnt'
         );
         $bindings4 = [$textId];
-        $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = ?"
-            . UserScopedQuery::forTablePrepared('textitems2', $bindings4, '', 'texts'),
+        $itemCount = (int)Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = ?"
+            . UserScopedQuery::forTablePrepared('word_occurrences', $bindings4, '', 'texts'),
             $bindings4,
             'cnt'
         );

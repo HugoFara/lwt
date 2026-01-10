@@ -13,11 +13,15 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @var array{edit: int, status: int, term: int, trans: int, rom: int, sentence: int} $settings
  */
 
 namespace Lwt\Views\Review;
 
 use Lwt\Shared\UI\Helpers\FormHelper;
+
+/** @var array{edit: int, status: int, term: int, trans: int, rom: int, sentence: int} $settings */
 
 ?>
 <p>

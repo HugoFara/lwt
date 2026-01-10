@@ -35,8 +35,19 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-/** @var int $lang */
-/** @var int $status */
+// Type assertions for variables passed from controller
+assert(is_int($lang));
+assert(is_int($wid));
+assert(is_string($fromAnn));
+assert(is_string($term));
+assert(is_string($termlc));
+assert(is_string($scrdir));
+assert(is_bool($showRoman));
+/** @var array{WoStatus: int, WoLemma?: string, WoRomanization?: string, WoNotes?: string} $wordData */
+assert(is_array($wordData));
+assert(is_string($sentence));
+assert(is_int($status));
+assert(is_string($transl));
 
 $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
@@ -124,7 +135,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
            <?php
            /** @psalm-suppress PossiblyUndefinedVariable */
            if ($fromAnn !== '') {
-               echo createDictLinksInEditWin2(
+               echo (string)createDictLinksInEditWin2(
                    $lang,
                    'WoSentence',
                    'WoText'

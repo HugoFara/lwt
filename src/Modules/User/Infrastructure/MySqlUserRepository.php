@@ -68,16 +68,16 @@ class MySqlUserRepository implements UserRepositoryInterface
             (string) $row['UsEmail'],
             $row['UsPasswordHash'] !== null ? (string) $row['UsPasswordHash'] : null,
             $row['UsApiToken'] !== null ? (string) $row['UsApiToken'] : null,
-            $this->parseNullableDateTime($row['UsApiTokenExpires'] ?? null),
+            $this->parseNullableDateTime($this->getNullableString($row['UsApiTokenExpires'] ?? null)),
             ($row['UsRememberToken'] ?? null) !== null ? (string) $row['UsRememberToken'] : null,
-            $this->parseNullableDateTime($row['UsRememberTokenExpires'] ?? null),
+            $this->parseNullableDateTime($this->getNullableString($row['UsRememberTokenExpires'] ?? null)),
             ($row['UsPasswordResetToken'] ?? null) !== null ? (string) $row['UsPasswordResetToken'] : null,
-            $this->parseNullableDateTime($row['UsPasswordResetTokenExpires'] ?? null),
+            $this->parseNullableDateTime($this->getNullableString($row['UsPasswordResetTokenExpires'] ?? null)),
             $row['UsWordPressId'] !== null ? (int) $row['UsWordPressId'] : null,
             ($row['UsGoogleId'] ?? null) !== null ? (string) $row['UsGoogleId'] : null,
             ($row['UsMicrosoftId'] ?? null) !== null ? (string) $row['UsMicrosoftId'] : null,
-            $this->parseDateTime($row['UsCreated'] ?? null),
-            $this->parseNullableDateTime($row['UsLastLogin'] ?? null),
+            $this->parseDateTime($this->getNullableString($row['UsCreated'] ?? null)),
+            $this->parseNullableDateTime($this->getNullableString($row['UsLastLogin'] ?? null)),
             (bool) ($row['UsIsActive'] ?? true),
             (string) ($row['UsRole'] ?? User::ROLE_USER)
         );
@@ -88,7 +88,7 @@ class MySqlUserRepository implements UserRepositoryInterface
      *
      * @param User $entity The user entity
      *
-     * @return array<string, mixed>
+     * @return array<string, scalar|null>
      */
     private function mapToRow(User $entity): array
     {
@@ -126,6 +126,18 @@ class MySqlUserRepository implements UserRepositoryInterface
             return new DateTimeImmutable();
         }
         return new DateTimeImmutable($datetime);
+    }
+
+    /**
+     * Get a nullable string from a mixed value.
+     *
+     * @param mixed $value The value to convert
+     *
+     * @return string|null
+     */
+    private function getNullableString(mixed $value): ?string
+    {
+        return $value !== null ? (string) $value : null;
     }
 
     /**

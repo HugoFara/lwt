@@ -25,14 +25,36 @@
  * @package  Lwt
  * @license  Unlicense <http://unlicense.org/>
  * @since    3.0.0
+ *
+ * @var int $textId
+ * @var int $langId
+ * @var string $textTitle
+ * @var string $annotatedText
+ * @var int $textPosition
+ * @var string $dictLink1
+ * @var string $dictLink2
+ * @var string $translatorLink
+ * @var int $textSize
+ * @var string $regexpWordChars
+ * @var bool $rtlScript
+ * @var int $modeTrans
+ * @var string $visitStatus
+ * @var string $termDelimiter
+ * @var string $hts
  */
 
 namespace Lwt\Views\Text;
 
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 
+// Type-safe variable extraction from controller context
+assert(is_int($textId));
+assert(is_int($langId));
+assert(is_string($annotatedText));
+
 // Compute annotations JSON safely
 $annotationJson = (new AnnotationService())->annotationToJson($annotatedText);
+/** @var array<int, mixed>|null */
 $annotations = json_decode($annotationJson !== false ? $annotationJson : '[]', true);
 
 // Build variable array for JavaScript - will be merged into LWT_DATA by TypeScript

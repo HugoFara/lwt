@@ -607,7 +607,7 @@ class TagsTest extends TestCase
         $result = TagsFacade::getTextTagsHtml(1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
-        $this->assertStringContainsString('id="texttags"', $result);
+        $this->assertStringContainsString('id="text_tag_map"', $result);
         $this->assertStringContainsString('</ul>', $result);
     }
 
@@ -640,7 +640,7 @@ class TagsTest extends TestCase
         $result = TagsFacade::getArchivedTextTagsHtml(1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
-        $this->assertStringContainsString('id="texttags"', $result);
+        $this->assertStringContainsString('id="text_tag_map"', $result);
         $this->assertStringContainsString('</ul>', $result);
     }
 
@@ -810,9 +810,9 @@ class TagsTest extends TestCase
             }
             throw $e;
         } finally {
-            // Cleanup: remove the test tag, wordtags associations, word, and language
+            // Cleanup: remove the test tag, word_tag_map associations, word, and language
             Connection::preparedExecute(
-                'DELETE FROM wordtags WHERE WtWoID = ?',
+                'DELETE FROM word_tag_map WHERE WtWoID = ?',
                 [$wordId]
             );
             Connection::preparedExecute(

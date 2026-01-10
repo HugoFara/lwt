@@ -111,7 +111,7 @@ class CreateTermFromHover
 
         // Link to text items (cross-module operation)
         Connection::preparedExecute(
-            "UPDATE textitems2 SET Ti2WoID = ?
+            "UPDATE word_occurrences SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wid, $langId, $wordlc]
         );

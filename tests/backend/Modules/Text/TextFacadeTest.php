@@ -159,12 +159,12 @@ class TextFacadeTest extends TestCase
         $this->listTexts
             ->expects($this->once())
             ->method('getArchivedTextCount')
-            ->with(' AND AtLgID = 1', " AND AtTitle LIKE '%test%'", '')
+            ->with(' AND TxLgID = 1', " AND TxTitle LIKE '%test%'", '')
             ->willReturn(42);
 
         $result = $this->facade->getArchivedTextCount(
-            ' AND AtLgID = 1',
-            " AND AtTitle LIKE '%test%'",
+            ' AND TxLgID = 1',
+            " AND TxTitle LIKE '%test%'",
             ''
         );
 
@@ -174,8 +174,8 @@ class TextFacadeTest extends TestCase
     public function testGetArchivedTextsListDelegatesToListTexts(): void
     {
         $expected = [
-            ['AtID' => 1, 'AtTitle' => 'Test Text 1'],
-            ['AtID' => 2, 'AtTitle' => 'Test Text 2'],
+            ['TxID' => 1, 'TxTitle' => 'Test Text 1'],
+            ['TxID' => 2, 'TxTitle' => 'Test Text 2'],
         ];
 
         $this->listTexts
@@ -187,16 +187,16 @@ class TextFacadeTest extends TestCase
         $result = $this->facade->getArchivedTextsList('', '', '', 1, 1, 10);
 
         $this->assertCount(2, $result);
-        $this->assertEquals('Test Text 1', $result[0]['AtTitle']);
+        $this->assertEquals('Test Text 1', $result[0]['TxTitle']);
     }
 
     public function testGetArchivedTextByIdDelegatesToGetTextForEdit(): void
     {
         $expected = [
-            'AtID' => 5,
-            'AtTitle' => 'Archived Text',
-            'AtText' => 'Content',
-            'AtLgID' => 1,
+            'TxID' => 5,
+            'TxTitle' => 'Archived Text',
+            'TxText' => 'Content',
+            'TxLgID' => 1,
         ];
 
         $this->getTextForEdit
@@ -208,8 +208,8 @@ class TextFacadeTest extends TestCase
         $result = $this->facade->getArchivedTextById(5);
 
         $this->assertIsArray($result);
-        $this->assertEquals(5, $result['AtID']);
-        $this->assertEquals('Archived Text', $result['AtTitle']);
+        $this->assertEquals(5, $result['TxID']);
+        $this->assertEquals('Archived Text', $result['TxTitle']);
     }
 
     public function testGetArchivedTextByIdReturnsNullForNotFound(): void
@@ -305,7 +305,7 @@ class TextFacadeTest extends TestCase
 
     public function testBuildArchivedQueryWhereClauseDelegatesToFilterBuilder(): void
     {
-        $expected = ['clause' => " AND AtTitle LIKE '%test%'", 'params' => []];
+        $expected = ['clause' => " AND TxTitle LIKE '%test%'", 'params' => []];
 
         $this->buildTextFilters
             ->expects($this->once())

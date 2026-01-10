@@ -24,15 +24,16 @@ namespace Lwt\Modules\Vocabulary\Views;
 use Lwt\Core\StringUtils;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
-/** @var int $wid */
-/** @var int $textId */
-/** @var int $ord */
-/** @var int $status */
-/** @var \Lwt\Modules\Vocabulary\Domain\Term $term */
+// Type assertions for variables passed from controller
+assert(is_int($wid));
+assert(is_int($textId));
+assert(is_int($ord));
+assert(is_int($status));
+assert($term instanceof \Lwt\Modules\Vocabulary\Domain\Term);
 
 $hex = StringUtils::toClassName($term->textLowercase());
 ?>
-<p>Status: <?php echo get_colored_status_msg($status); ?></p>
+<p>Status: <?php echo (string)get_colored_status_msg($status); ?></p>
 
 <script type="application/json" data-lwt-set-status-result-config>
 <?php echo json_encode([

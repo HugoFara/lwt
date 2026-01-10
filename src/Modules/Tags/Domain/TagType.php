@@ -31,13 +31,13 @@ enum TagType: string
     /**
      * Get the main table name for this tag type.
      *
-     * @return string Table name ('tags' or 'tags2')
+     * @return string Table name ('tags' or 'text_tags')
      */
     public function tableName(): string
     {
         return match ($this) {
             self::TERM => 'tags',
-            self::TEXT => 'tags2',
+            self::TEXT => 'text_tags',
         };
     }
 
@@ -97,16 +97,16 @@ enum TagType: string
     /**
      * Get the primary association table for this tag type.
      *
-     * For term tags, this is 'wordtags'.
-     * For text tags, this is 'texttags'.
+     * For term tags, this is 'word_tag_map'.
+     * For text tags, this is 'text_tag_map'.
      *
      * @return string Table name
      */
     public function associationTable(): string
     {
         return match ($this) {
-            self::TERM => 'wordtags',
-            self::TEXT => 'texttags',
+            self::TERM => 'word_tag_map',
+            self::TEXT => 'text_tag_map',
         };
     }
 

@@ -83,9 +83,9 @@ class HomeFacade
 
         // Get the prefixed table names for all LWT tables
         $tableNames = [
-            'archivedtexts', 'archtexttags', 'feedlinks', 'languages',
-            'newsfeeds', 'sentences', 'settings', 'tags', 'tags2',
-            'textitems2', 'texts', 'texttags', 'words', 'wordtags'
+            'feed_links', 'languages', 'news_feeds', 'sentences', 'settings',
+            'tags', 'text_tags', 'word_occurrences', 'texts', 'text_tag_map',
+            'words', 'word_tag_map'
         ];
 
         // Use Globals::table() to get properly prefixed table names
@@ -97,7 +97,8 @@ class HomeFacade
         $placeholders = implode(', ', array_fill(0, count($prefixedTables), '?'));
         $bindings = array_merge([$dbname], $prefixedTables);
 
-        $size = Connection::preparedFetchValue(
+        /** @var mixed $sizeRaw */
+        $sizeRaw = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS size_mb
             FROM information_schema.TABLES
             WHERE table_schema = ?
@@ -106,7 +107,7 @@ class HomeFacade
             'size_mb'
         );
 
-        return $size !== null ? (float)$size : 0.0;
+        return is_numeric($sizeRaw) ? (float)$sizeRaw : 0.0;
     }
 
     /**
@@ -151,10 +152,11 @@ class HomeFacade
      */
     public function getLanguageName(int $languageId): string
     {
-        $result = \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('languages')
+        /** @var mixed $resultRaw */
+        $resultRaw = \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('languages')
             ->where('LgID', '=', $languageId)
             ->valuePrepared('LgName');
 
-        return $result !== null ? (string)$result : '';
+        return is_string($resultRaw) ? $resultRaw : '';
     }
 }

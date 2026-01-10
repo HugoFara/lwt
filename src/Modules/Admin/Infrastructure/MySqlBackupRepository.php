@@ -35,9 +35,8 @@ class MySqlBackupRepository implements BackupRepositoryInterface
      * @var string[]
      */
     private const BACKUP_TABLES = [
-        'archivedtexts', 'archtexttags', 'feedlinks', 'languages', 'textitems2',
-        'newsfeeds', 'sentences', 'settings', 'tags', 'tags2', 'texts', 'texttags',
-        'words', 'wordtags'
+        'feed_links', 'languages', 'word_occurrences', 'news_feeds', 'sentences',
+        'settings', 'tags', 'text_tags', 'texts', 'text_tag_map', 'words', 'word_tag_map'
     ];
 
     /**
@@ -46,8 +45,8 @@ class MySqlBackupRepository implements BackupRepositoryInterface
      * @var string[]
      */
     private const OFFICIAL_BACKUP_TABLES = [
-        'archivedtexts', 'archtexttags', 'languages', 'sentences', 'settings',
-        'tags', 'tags2', 'textitems', 'texts', 'texttags', 'words', 'wordtags'
+        'languages', 'sentences', 'settings', 'tags', 'text_tags',
+        'word_occurrences', 'texts', 'text_tag_map', 'words', 'word_tag_map'
     ];
 
     /**
@@ -84,7 +83,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 $out .= str_replace("\n", " ", (string) $row2[1]) . ";\n";
             }
 
-            if ($table !== 'sentences' && $table !== 'textitems2') {
+            if ($table !== 'sentences' && $table !== 'word_occurrences') {
                 while ($row = mysqli_fetch_row($result)) {
                     $return = 'INSERT INTO ' . $table . ' VALUES(';
                     for ($j = 0; $j < $num_fields; $j++) {
@@ -138,7 +137,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 );
                 $num_fields = mysqli_num_fields($result);
             } elseif (
-                $table !== 'sentences' && $table !== 'textitems' &&
+                $table !== 'sentences' && $table !== 'word_occurrences' &&
                 $table !== 'settings'
             ) {
                 $result = Connection::querySelect('SELECT * FROM ' . $table);
@@ -149,7 +148,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
             $out .= $this->getOfficialTableSchema($table);
 
             if (
-                $table !== 'sentences' && $table !== 'textitems' &&
+                $table !== 'sentences' && $table !== 'word_occurrences' &&
                 $table !== 'settings' && $result !== null
             ) {
                 while ($row = mysqli_fetch_row($result)) {
@@ -202,24 +201,8 @@ class MySqlBackupRepository implements BackupRepositoryInterface
     private function getOfficialTableSchema(string $table): string
     {
         $schemas = [
-            'archivedtexts' => "CREATE TABLE `archivedtexts` (
-                `AtID` int(11) unsigned NOT NULL AUTO_INCREMENT,
-                `AtLgID` int(11) unsigned NOT NULL,
-                `AtTitle` varchar(200) NOT NULL,
-                `AtText` text NOT NULL,
-                `AtAnnotatedText` longtext NOT NULL,
-                `AtAudioURI` varchar(200) DEFAULT NULL,
-                `AtSourceURI` varchar(1000) DEFAULT NULL,
-                PRIMARY KEY (`AtID`),
-                KEY `AtLgID` (`AtLgID`)
-            ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n",
-            'archtexttags' => "CREATE TABLE `archtexttags` (
-                `AgAtID` int(11) unsigned NOT NULL,
-                `AgT2ID` int(11) unsigned NOT NULL,
-                PRIMARY KEY (`AgAtID`,`AgT2ID`),
-                KEY `AgAtID` (`AgAtID`),
-                KEY `AgT2ID` (`AgT2ID`)
-            ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n",
+            // Note: archived_texts and archived_text_tag_map have been merged into
+            // the texts and text_tag_map tables with TxArchivedAt column.
             'languages' => "CREATE TABLE `languages` (
                 `LgID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `LgName` varchar(40) NOT NULL,
@@ -261,31 +244,32 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 PRIMARY KEY (`TgID`),
                 UNIQUE KEY `TgText` (`TgText`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n",
-            'tags2' => "CREATE TABLE `tags2` (
+            'text_tags' => "CREATE TABLE `text_tags` (
                 `T2ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `T2Text` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
                 `T2Comment` varchar(200) NOT NULL DEFAULT '',
                 PRIMARY KEY (`T2ID`),
                 UNIQUE KEY `T2Text` (`T2Text`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n",
-            'textitems' => "CREATE TABLE `textitems` (
-                `TiID` int(11) unsigned NOT NULL AUTO_INCREMENT,
-                `TiLgID` int(11) unsigned NOT NULL,
-                `TiTxID` int(11) unsigned NOT NULL,
-                `TiSeID` int(11) unsigned NOT NULL,
-                `TiOrder` int(11) unsigned NOT NULL,
-                `TiWordCount` int(1) unsigned NOT NULL,
-                `TiText` varchar(250) NOT NULL,
-                `TiTextLC` varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-                `TiIsNotWord` tinyint(1) NOT NULL,
-                PRIMARY KEY (`TiID`),
-                KEY `TiLgID` (`TiLgID`),
-                KEY `TiTxID` (`TiTxID`),
-                KEY `TiSeID` (`TiSeID`),
-                KEY `TiOrder` (`TiOrder`),
-                KEY `TiTextLC` (`TiTextLC`),
-                KEY `TiIsNotWord` (`TiIsNotWord`)
-            ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n",
+            'word_occurrences' => "CREATE TABLE `word_occurrences` (
+                `Ti2ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                `Ti2WoID` int(11) unsigned DEFAULT NULL,
+                `Ti2LgID` int(11) unsigned NOT NULL,
+                `Ti2TxID` int(11) unsigned NOT NULL,
+                `Ti2SeID` int(11) unsigned NOT NULL,
+                `Ti2Order` int(11) unsigned NOT NULL,
+                `Ti2WordCount` int(1) unsigned NOT NULL,
+                `Ti2Text` varchar(250) NOT NULL,
+                `Ti2TextLC` varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+                `Ti2Translation` text DEFAULT NULL,
+                PRIMARY KEY (`Ti2ID`),
+                KEY `Ti2WoID` (`Ti2WoID`),
+                KEY `Ti2LgID` (`Ti2LgID`),
+                KEY `Ti2TxID` (`Ti2TxID`),
+                KEY `Ti2SeID` (`Ti2SeID`),
+                KEY `Ti2Order` (`Ti2Order`),
+                KEY `Ti2TextLC` (`Ti2TextLC`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n",
             'texts' => "CREATE TABLE `texts` (
                 `TxID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `TxLgID` int(11) unsigned NOT NULL,
@@ -297,7 +281,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 PRIMARY KEY (`TxID`),
                 KEY `TxLgID` (`TxLgID`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n",
-            'texttags' => "CREATE TABLE `texttags` (
+            'text_tag_map' => "CREATE TABLE `text_tag_map` (
                 `TtTxID` int(11) unsigned NOT NULL,
                 `TtT2ID` int(11) unsigned NOT NULL,
                 PRIMARY KEY (`TtTxID`,`TtT2ID`),
@@ -330,7 +314,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 KEY `WoTomorrowScore` (`WoTomorrowScore`),
                 KEY `WoRandom` (`WoRandom`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n",
-            'wordtags' => "CREATE TABLE `wordtags` (
+            'word_tag_map' => "CREATE TABLE `word_tag_map` (
                 `WtWoID` int(11) unsigned NOT NULL,
                 `WtTgID` int(11) unsigned NOT NULL,
                 PRIMARY KEY (`WtWoID`,`WtTgID`),

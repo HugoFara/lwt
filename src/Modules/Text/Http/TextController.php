@@ -30,6 +30,7 @@ use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Core\StringUtils;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Core\Globals;
+use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 
 // Base path for legacy includes
 define('LWT_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
@@ -324,7 +325,8 @@ class TextController extends BaseController
                 break;
 
             case 'review':
-                $_SESSION['reviewsql'] = $list;
+                $sessionManager = new SessionStateManager();
+                $sessionManager->saveCriteria('texts', array_map('intval', $marked));
                 header("Location: /review?selection=3");
                 exit();
         }
@@ -497,7 +499,7 @@ class TextController extends BaseController
             }
 
             // Redirect to book or first chapter
-            if ($openAfter && !empty($result['textIds'])) {
+            if ($openAfter && isset($result['textIds']) && count($result['textIds']) > 0) {
                 header('Location: /text/read?start=' . $result['textIds'][0]);
                 exit();
             }
@@ -574,7 +576,7 @@ class TextController extends BaseController
         $isNew = false;
         $languageData = $this->textService->getLanguageDataForForm();
         $languages = $this->languageService->getLanguagesForSelect();
-        $scrdir = $this->languageService->getScriptDirectionTag($text->lgid);
+        $scrdir = $this->languageService->getScriptDirectionTag((int)$text->lgid);
 
         include LWT_TEXT_MODULE_VIEWS . '/edit_form.php';
     }
@@ -808,18 +810,18 @@ class TextController extends BaseController
             $message = $this->textService->deleteArchivedText($delId);
         } elseif ($unarchId !== null) {
             $result = $this->textService->unarchiveText($unarchId);
-            $message = $result['message'];
+            $message = (string)$result['message'];
         } elseif ($op == 'Change') {
-            $atId = $this->paramInt('AtID', 0) ?? 0;
+            $txId = $this->paramInt('TxID', 0) ?? 0;
             $message = $this->textService->updateArchivedText(
-                $atId,
-                $this->paramInt('AtLgID', 0) ?? 0,
-                $this->param('AtTitle'),
-                $this->param('AtText'),
-                $this->param('AtAudioURI'),
-                $this->param('AtSourceURI')
+                $txId,
+                $this->paramInt('TxLgID', 0) ?? 0,
+                $this->param('TxTitle'),
+                $this->param('TxText'),
+                $this->param('TxAudioURI'),
+                $this->param('TxSourceURI')
             );
-            TagsFacade::saveArchivedTextTagsFromForm($atId);
+            TagsFacade::saveArchivedTextTagsFromForm($txId);
         }
 
         // Display edit form or list

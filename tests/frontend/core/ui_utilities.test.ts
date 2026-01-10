@@ -11,7 +11,7 @@ vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', 
 
 // Now import the module
 const ui_utilities = await import('../../../src/frontend/js/shared/utils/ui_utilities');
-const { markClick, confirmDelete, showAllwordsClick, noShowAfter3Secs, setTheFocus, wrapRadioButtons } = ui_utilities;
+const { markClick, confirmDelete, showAllwordsClick, initAutoHideNotifications, initNotificationCloseButtons, setTheFocus, wrapRadioButtons } = ui_utilities;
 
 describe('ui_utilities.ts', () => {
   beforeEach(() => {
@@ -100,24 +100,82 @@ describe('ui_utilities.ts', () => {
   });
 
   // ===========================================================================
-  // noShowAfter3Secs Tests
+  // initAutoHideNotifications Tests
   // ===========================================================================
 
-  describe('noShowAfter3Secs', () => {
-    it('slides up element with id hide3', () => {
+  describe('initAutoHideNotifications', () => {
+    it('slides up elements with data-auto-hide attribute', () => {
+      document.body.innerHTML = '<div class="notification is-success" data-auto-hide="true">Message</div>';
+
+      initAutoHideNotifications();
+
+      // slideUp is called - element still exists in DOM
+      expect(document.querySelector('[data-auto-hide]')).not.toBeNull();
+    });
+
+    it('slides up legacy hide3 element', () => {
       document.body.innerHTML = '<div id="hide3">Message</div>';
 
-      noShowAfter3Secs();
+      initAutoHideNotifications();
 
-      // slideUp is called - in jsdom it may not fully animate
-      // We verify the function doesn't throw
+      // slideUp is called - element still exists in DOM
       expect(document.getElementById('hide3')).not.toBeNull();
     });
 
-    it('handles missing hide3 element gracefully', () => {
+    it('handles missing elements gracefully', () => {
       document.body.innerHTML = '';
 
-      expect(() => noShowAfter3Secs()).not.toThrow();
+      expect(() => initAutoHideNotifications()).not.toThrow();
+    });
+  });
+
+  // ===========================================================================
+  // initNotificationCloseButtons Tests
+  // ===========================================================================
+
+  describe('initNotificationCloseButtons', () => {
+    it('removes notification when close button is clicked', () => {
+      document.body.innerHTML = `
+        <div class="notification is-danger">
+          <button class="delete"></button>
+          Error message
+        </div>
+      `;
+
+      initNotificationCloseButtons();
+
+      const deleteButton = document.querySelector('.delete') as HTMLElement;
+      deleteButton.click();
+
+      expect(document.querySelector('.notification')).toBeNull();
+    });
+
+    it('handles multiple notifications', () => {
+      document.body.innerHTML = `
+        <div class="notification is-success" id="notif1">
+          <button class="delete"></button>
+          Success
+        </div>
+        <div class="notification is-danger" id="notif2">
+          <button class="delete"></button>
+          Error
+        </div>
+      `;
+
+      initNotificationCloseButtons();
+
+      // Close first notification
+      const firstDelete = document.querySelector('#notif1 .delete') as HTMLElement;
+      firstDelete.click();
+
+      expect(document.getElementById('notif1')).toBeNull();
+      expect(document.getElementById('notif2')).not.toBeNull();
+    });
+
+    it('handles no notifications gracefully', () => {
+      document.body.innerHTML = '';
+
+      expect(() => initNotificationCloseButtons()).not.toThrow();
     });
   });
 
@@ -523,15 +581,15 @@ describe('ui_utilities.ts', () => {
       expect(fileInput).not.toBeNull();
     });
 
-    it('schedules noShowAfter3Secs', () => {
-      document.body.innerHTML = '<div id="hide3">Message</div>';
+    it('schedules initAutoHideNotifications', () => {
+      document.body.innerHTML = '<div class="notification" data-auto-hide="true">Message</div>';
 
       prepareMainAreas();
 
       // Should schedule the hide operation
       vi.advanceTimersByTime(3000);
       // Function was called - element exists
-      expect(document.getElementById('hide3')).not.toBeNull();
+      expect(document.querySelector('[data-auto-hide]')).not.toBeNull();
     });
 
     it('handles annotation inputs', () => {
@@ -563,20 +621,20 @@ describe('ui_utilities.ts', () => {
   });
 
   // ===========================================================================
-  // slideUp animation (internal) via noShowAfter3Secs
+  // slideUp animation (internal) via initAutoHideNotifications
   // ===========================================================================
 
   describe('slideUp animation', () => {
     it('hides element after animation completes', () => {
-      document.body.innerHTML = '<div id="hide3" style="height: 100px;">Message</div>';
+      document.body.innerHTML = '<div class="notification" data-auto-hide="true" style="height: 100px;">Message</div>';
 
-      noShowAfter3Secs();
+      initAutoHideNotifications();
 
       // Advance through the animation (400ms default)
       vi.advanceTimersByTime(400);
 
       // Element should be hidden after animation
-      const element = document.getElementById('hide3');
+      const element = document.querySelector('.notification') as HTMLElement;
       expect(element?.style.display).toBe('none');
     });
   });

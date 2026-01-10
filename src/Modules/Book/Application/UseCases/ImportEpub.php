@@ -291,7 +291,7 @@ class ImportEpub
      * @param int[]    $tagIds       Tag IDs to apply
      * @param int|null $userId       User ID
      *
-     * @return int|null Text ID or null on failure
+     * @return int Text ID
      */
     private function createChapterText(
         int $bookId,
@@ -301,7 +301,7 @@ class ImportEpub
         string $content,
         array $tagIds,
         ?int $userId
-    ): ?int {
+    ): int {
         // Validate content length
         if (strlen($content) > 65000) {
             // Truncate if still too long (shouldn't happen with proper splitting)
@@ -365,7 +365,7 @@ class ImportEpub
         foreach ($tagIds as $tagId) {
             $bindings = [$textId, $tagId];
             Connection::preparedExecute(
-                "INSERT IGNORE INTO " . Globals::table('texttags') .
+                "INSERT IGNORE INTO " . Globals::table('text_tag_map') .
                 " (TtTxID, TtT2ID) VALUES (?, ?)",
                 $bindings
             );

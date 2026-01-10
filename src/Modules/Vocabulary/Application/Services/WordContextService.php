@@ -66,7 +66,7 @@ class WordContextService
             $bindings,
             'TxLgID'
         );
-        return $langId !== null ? (int)$langId : null;
+        return $langId;
     }
 
     /**
@@ -113,10 +113,10 @@ class WordContextService
         );
 
         return [
-            'name' => $record['LgName'] ?? '',
-            'dict1' => $record['LgDict1URI'] ?? '',
-            'dict2' => $record['LgDict2URI'] ?? '',
-            'translate' => $record['LgGoogleTranslateURI'] ?? '',
+            'name' => (string) ($record['LgName'] ?? ''),
+            'dict1' => (string) ($record['LgDict1URI'] ?? ''),
+            'dict2' => (string) ($record['LgDict2URI'] ?? ''),
+            'translate' => (string) ($record['LgGoogleTranslateURI'] ?? ''),
         ];
     }
 
@@ -154,7 +154,7 @@ class WordContextService
     {
         /** @var int|null $seid */
         $seid = Connection::preparedFetchValue(
-            "SELECT Ti2SeID FROM textitems2
+            "SELECT Ti2SeID FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
             [$textId, $ord],
             'Ti2SeID'
@@ -165,7 +165,7 @@ class WordContextService
         }
 
         $sent = $this->sentenceService->formatSentence(
-            (int) $seid,
+            $seid,
             $termlc,
             (int) Settings::getWithDefault('set-term-sentence-count')
         );
@@ -186,12 +186,12 @@ class WordContextService
         /** @var int|null $seid */
         $seid = Connection::preparedFetchValue(
             "SELECT Ti2SeID
-             FROM textitems2
+             FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2Order = ?",
             [$textId, $ord],
             'Ti2SeID'
         );
-        return $seid !== null ? (int) $seid : null;
+        return $seid;
     }
 
     /**

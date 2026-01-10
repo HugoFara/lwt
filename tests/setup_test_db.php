@@ -134,7 +134,7 @@ function hasForeignKeys(\mysqli $conn, string $dbName): bool
         "SELECT COUNT(*) as cnt FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
          WHERE TABLE_SCHEMA = '$dbName'
          AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-         AND TABLE_NAME = 'textitems2'"
+         AND TABLE_NAME = 'word_occurrences'"
     );
     if ($result) {
         $row = mysqli_fetch_assoc($result);
@@ -292,29 +292,25 @@ if (!in_array($fkMigration, $appliedMigrations)) {
     $fkConstraints = [
         // Language references
         "ALTER TABLE texts ADD CONSTRAINT fk_texts_language FOREIGN KEY (TxLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
-        "ALTER TABLE archivedtexts ADD CONSTRAINT fk_archivedtexts_language FOREIGN KEY (AtLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
         "ALTER TABLE words ADD CONSTRAINT fk_words_language FOREIGN KEY (WoLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
         "ALTER TABLE sentences ADD CONSTRAINT fk_sentences_language FOREIGN KEY (SeLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
-        "ALTER TABLE newsfeeds ADD CONSTRAINT fk_newsfeeds_language FOREIGN KEY (NfLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
+        "ALTER TABLE news_feeds ADD CONSTRAINT fk_news_feeds_language FOREIGN KEY (NfLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
         // Text references
         "ALTER TABLE sentences ADD CONSTRAINT fk_sentences_text FOREIGN KEY (SeTxID) REFERENCES texts(TxID) ON DELETE CASCADE",
-        "ALTER TABLE textitems2 ADD CONSTRAINT fk_textitems2_text FOREIGN KEY (Ti2TxID) REFERENCES texts(TxID) ON DELETE CASCADE",
-        "ALTER TABLE texttags ADD CONSTRAINT fk_texttags_text FOREIGN KEY (TtTxID) REFERENCES texts(TxID) ON DELETE CASCADE",
+        "ALTER TABLE word_occurrences ADD CONSTRAINT fk_word_occurrences_text FOREIGN KEY (Ti2TxID) REFERENCES texts(TxID) ON DELETE CASCADE",
+        "ALTER TABLE text_tag_map ADD CONSTRAINT fk_text_tag_map_text FOREIGN KEY (TtTxID) REFERENCES texts(TxID) ON DELETE CASCADE",
         // Sentence reference
-        "ALTER TABLE textitems2 ADD CONSTRAINT fk_textitems2_sentence FOREIGN KEY (Ti2SeID) REFERENCES sentences(SeID) ON DELETE CASCADE",
+        "ALTER TABLE word_occurrences ADD CONSTRAINT fk_word_occurrences_sentence FOREIGN KEY (Ti2SeID) REFERENCES sentences(SeID) ON DELETE CASCADE",
         // Word reference (SET NULL for unknown words)
-        "ALTER TABLE textitems2 MODIFY COLUMN Ti2WoID mediumint(8) unsigned DEFAULT NULL",
-        "ALTER TABLE textitems2 ADD CONSTRAINT fk_textitems2_word FOREIGN KEY (Ti2WoID) REFERENCES words(WoID) ON DELETE SET NULL",
+        "ALTER TABLE word_occurrences MODIFY COLUMN Ti2WoID mediumint(8) unsigned DEFAULT NULL",
+        "ALTER TABLE word_occurrences ADD CONSTRAINT fk_word_occurrences_word FOREIGN KEY (Ti2WoID) REFERENCES words(WoID) ON DELETE SET NULL",
         // Word tags
-        "ALTER TABLE wordtags ADD CONSTRAINT fk_wordtags_word FOREIGN KEY (WtWoID) REFERENCES words(WoID) ON DELETE CASCADE",
-        "ALTER TABLE wordtags ADD CONSTRAINT fk_wordtags_tag FOREIGN KEY (WtTgID) REFERENCES tags(TgID) ON DELETE CASCADE",
+        "ALTER TABLE word_tag_map ADD CONSTRAINT fk_word_tag_map_word FOREIGN KEY (WtWoID) REFERENCES words(WoID) ON DELETE CASCADE",
+        "ALTER TABLE word_tag_map ADD CONSTRAINT fk_word_tag_map_tag FOREIGN KEY (WtTgID) REFERENCES tags(TgID) ON DELETE CASCADE",
         // Text tags
-        "ALTER TABLE texttags ADD CONSTRAINT fk_texttags_tag FOREIGN KEY (TtT2ID) REFERENCES tags2(T2ID) ON DELETE CASCADE",
-        // Archived text tags
-        "ALTER TABLE archtexttags ADD CONSTRAINT fk_archtexttags_archivedtext FOREIGN KEY (AgAtID) REFERENCES archivedtexts(AtID) ON DELETE CASCADE",
-        "ALTER TABLE archtexttags ADD CONSTRAINT fk_archtexttags_tag FOREIGN KEY (AgT2ID) REFERENCES tags2(T2ID) ON DELETE CASCADE",
+        "ALTER TABLE text_tag_map ADD CONSTRAINT fk_text_tag_map_text_tag FOREIGN KEY (TtT2ID) REFERENCES text_tags(T2ID) ON DELETE CASCADE",
         // Feed links
-        "ALTER TABLE feedlinks ADD CONSTRAINT fk_feedlinks_newsfeed FOREIGN KEY (FlNfID) REFERENCES newsfeeds(NfID) ON DELETE CASCADE",
+        "ALTER TABLE feed_links ADD CONSTRAINT fk_feed_links_newsfeed FOREIGN KEY (FlNfID) REFERENCES news_feeds(NfID) ON DELETE CASCADE",
     ];
 
     $fkCount = 0;
@@ -355,9 +351,8 @@ if (!in_array($columnDefaultsMigration, $appliedMigrations)) {
         "ALTER TABLE languages MODIFY COLUMN LgExceptionsSplitSentences varchar(500) NOT NULL DEFAULT ''",
         "ALTER TABLE languages MODIFY COLUMN LgRegexpWordCharacters varchar(500) NOT NULL DEFAULT 'a-zA-ZÀ-ÖØ-öø-ȳ'",
         "ALTER TABLE texts MODIFY COLUMN TxAnnotatedText longtext NOT NULL DEFAULT ''",
-        "ALTER TABLE archivedtexts MODIFY COLUMN AtAnnotatedText longtext NOT NULL DEFAULT ''",
-        "ALTER TABLE feedlinks MODIFY COLUMN FlAudio varchar(200) NOT NULL DEFAULT ''",
-        "ALTER TABLE feedlinks MODIFY COLUMN FlText longtext NOT NULL DEFAULT ''",
+        "ALTER TABLE feed_links MODIFY COLUMN FlAudio varchar(200) NOT NULL DEFAULT ''",
+        "ALTER TABLE feed_links MODIFY COLUMN FlText longtext NOT NULL DEFAULT ''",
     ];
 
     foreach ($columnDefaults as $sql) {

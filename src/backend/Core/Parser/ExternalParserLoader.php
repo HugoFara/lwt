@@ -128,6 +128,7 @@ class ExternalParserLoader
             }
 
             try {
+                /** @var array<string, mixed> $parserConfig */
                 $parsers[] = ExternalParserConfig::fromArray($type, $parserConfig);
             } catch (InvalidArgumentException $e) {
                 // Log warning but continue with other parsers

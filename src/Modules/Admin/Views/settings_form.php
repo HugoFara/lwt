@@ -774,16 +774,16 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
 
                 <div class="column is-half">
                     <div class="field">
-                        <label class="label" for="set-archivedtexts-per-page">Archived Texts per Page</label>
+                        <label class="label" for="set-archived_texts-per-page">Archived Texts per Page</label>
                         <div class="field has-addons">
                             <div class="control is-expanded">
                                 <input class="input notempty posintnumber"
                                        type="number"
                                        min="0"
-                                       id="set-archivedtexts-per-page"
-                                       name="set-archivedtexts-per-page"
+                                       id="set-archived_texts-per-page"
+                                       name="set-archived_texts-per-page"
                                        data_info="Archived Texts per Page"
-                                       value="<?php echo htmlspecialchars($settings['set-archivedtexts-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                       value="<?php echo htmlspecialchars($settings['set-archived_texts-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                        maxlength="4"
                                        required />
                             </div>

@@ -133,14 +133,36 @@ function slideUp(element: HTMLElement, duration = 400, callback?: () => void): v
 }
 
 /**
- * Hide the 'nodata' message after 3 seconds.
- * Used to automatically dismiss status messages.
+ * Auto-hide notifications marked with data-auto-hide attribute.
+ * Used to automatically dismiss success/info messages after 3 seconds.
  */
-export function noShowAfter3Secs(): void {
-  const element = document.getElementById('hide3');
-  if (element) {
+export function initAutoHideNotifications(): void {
+  // Handle new data-auto-hide attribute on Bulma notifications
+  const autoHideElements = document.querySelectorAll<HTMLElement>('[data-auto-hide="true"]');
+  autoHideElements.forEach(element => {
     slideUp(element);
+  });
+
+  // Legacy: handle old #hide3 element if present
+  const legacyElement = document.getElementById('hide3');
+  if (legacyElement) {
+    slideUp(legacyElement);
   }
+}
+
+/**
+ * Initialize Bulma notification close buttons.
+ * Adds click handler to .delete buttons inside .notification elements.
+ */
+export function initNotificationCloseButtons(): void {
+  document.querySelectorAll('.notification .delete').forEach(button => {
+    button.addEventListener('click', () => {
+      const notification = button.parentElement;
+      if (notification) {
+        notification.remove();
+      }
+    });
+  });
 }
 
 /**
@@ -399,7 +421,10 @@ export function prepareMainAreas(): void {
     showSimilarTerms();
   }
 
-  window.setTimeout(noShowAfter3Secs, 3000);
+  // Initialize Bulma notification close buttons
+  initNotificationCloseButtons();
+  // Auto-hide notifications after 3 seconds
+  window.setTimeout(initAutoHideNotifications, 3000);
   // Auto-dismiss messages with hide_message class
   initHideMessages();
 }

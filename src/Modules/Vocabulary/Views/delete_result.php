@@ -24,11 +24,12 @@ namespace Lwt\Modules\Vocabulary\Views;
 use Lwt\Core\StringUtils;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
-/** @var int $wid */
-/** @var int $textId */
-/** @var bool $deleted */
-/** @var string $term */
-/** @var string $termLc */
+// Type assertions for variables passed from controller
+assert(is_int($wid));
+assert(is_int($textId));
+assert(is_bool($deleted));
+assert(is_string($term));
+assert(is_string($termLc));
 
 $hex = StringUtils::toClassName($termLc);
 ?>

@@ -29,9 +29,7 @@ class SqlFileParser
      *
      * @param string $filename File name
      *
-     * @return string[]
-     *
-     * @psalm-return list{0?: string,...}
+     * @return list<string>
      */
     public static function parseFile(string $filename): array
     {

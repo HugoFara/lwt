@@ -23,6 +23,13 @@ namespace Lwt\Views\Word;
 
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
+// Type assertions for variables passed from controller
+assert(is_int($status));
+assert(is_int($count));
+assert(is_int($textId));
+assert(is_array($wordsData));
+assert(is_bool($useTooltips));
+
 ?>
 <p>
 <?php

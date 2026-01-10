@@ -149,39 +149,17 @@ class AdminApiHandler
     }
 
     /**
-     * Clear all session settings when changing language.
+     * Clear session settings when changing language.
+     *
+     * Note: Pagination/filter state is now stored in URL parameters,
+     * so session clearing is no longer needed. This method is kept
+     * for backwards compatibility but is now a no-op.
      *
      * @return void
      */
     private function clearSessionSettings(): void
     {
-        // Text filters
-        unset($_SESSION['currenttextpage']);
-        unset($_SESSION['currenttextquery']);
-        unset($_SESSION['currenttextquerymode']);
-        unset($_SESSION['currenttexttag1']);
-        unset($_SESSION['currenttexttag2']);
-        unset($_SESSION['currenttexttag12']);
-
-        // Word filters
-        unset($_SESSION['currentwordpage']);
-        unset($_SESSION['currentwordquery']);
-        unset($_SESSION['currentwordquerymode']);
-        unset($_SESSION['currentwordstatus']);
-        unset($_SESSION['currentwordtext']);
-        unset($_SESSION['currentwordtag1']);
-        unset($_SESSION['currentwordtag2']);
-        unset($_SESSION['currentwordtag12']);
-        unset($_SESSION['currentwordtextmode']);
-        unset($_SESSION['currentwordtexttag']);
-
-        // Archive filters
-        unset($_SESSION['currentarchivepage']);
-        unset($_SESSION['currentarchivequery']);
-        unset($_SESSION['currentarchivequerymode']);
-        unset($_SESSION['currentarchivetexttag1']);
-        unset($_SESSION['currentarchivetexttag2']);
-        unset($_SESSION['currentarchivetexttag12']);
+        // No-op: pagination state is now in URL parameters, not session
     }
 
     /**

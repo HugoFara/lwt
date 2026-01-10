@@ -119,12 +119,12 @@ class AnnotationService
             CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END AS TiIsNotWord,
             WoID, WoTranslation
             FROM (
-                textitems2
+                word_occurrences
                 LEFT JOIN words
                 ON Ti2WoID = WoID AND Ti2LgID = WoLgID
             )
             WHERE Ti2TxID = ?"
-            . UserScopedQuery::forTablePrepared('textitems2', $bindings) . "
+            . UserScopedQuery::forTablePrepared('word_occurrences', $bindings) . "
             ORDER BY Ti2Order ASC, Ti2WordCount DESC";
 
         $until = 0;
@@ -142,13 +142,13 @@ class AnnotationService
             $savewordid = '';
             $until = $order;
             if ($record['TiIsNotWord'] != 0) {
-                $savenonterm = $record['TiText'];
+                $savenonterm = (string)$record['TiText'];
             } else {
                 $until = $order + 2 * ($actcode - 1);
-                $saveterm = $record['TiText'];
+                $saveterm = (string)$record['TiText'];
                 if (isset($record['WoID'])) {
-                    $savetrans = $record['WoTranslation'];
-                    $savewordid = $record['WoID'];
+                    $savetrans = (string)$record['WoTranslation'];
+                    $savewordid = (string)$record['WoID'];
                 }
             }
             // Append the annotation
@@ -234,7 +234,7 @@ class AnnotationService
      */
     public function getAnnotationLink(int $textId): string
     {
-        $length = QueryBuilder::table('texts')
+        $length = (int)QueryBuilder::table('texts')
             ->selectRaw('LENGTH(TxAnnotatedText) AS text_length')
             ->where('TxID', '=', $textId)
             ->valuePrepared('text_length');

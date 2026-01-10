@@ -88,8 +88,13 @@ class RateLimitStorage
     public function get(string $key): ?array
     {
         if ($this->useApcu) {
+            /** @var mixed $data */
             $data = apcu_fetch($key, $success);
-            return $success ? $data : null;
+            if ($success && is_array($data)) {
+                /** @var array{count: int, window_start: int} */
+                return $data;
+            }
+            return null;
         }
 
         return $this->getFromFile($key);
@@ -146,7 +151,17 @@ class RateLimitStorage
             return null;
         }
 
-        return $stored['data'] ?? null;
+        // Validate the data structure
+        $data = $stored['data'] ?? null;
+        if (!is_array($data) || !isset($data['count'], $data['window_start'])) {
+            @unlink($file);
+            return null;
+        }
+
+        return [
+            'count' => (int) $data['count'],
+            'window_start' => (int) $data['window_start']
+        ];
     }
 
     /**
@@ -228,8 +243,9 @@ class RateLimitStorage
                 continue;
             }
 
-            $stored = @json_decode($content, true);
-            if (!is_array($stored) || (isset($stored['expires']) && $stored['expires'] < $now)) {
+            /** @var mixed $decoded */
+            $decoded = @json_decode($content, true);
+            if (!is_array($decoded) || (isset($decoded['expires']) && $decoded['expires'] < $now)) {
                 @unlink($path);
                 $cleaned++;
             }

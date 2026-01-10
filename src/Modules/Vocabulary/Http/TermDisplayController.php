@@ -255,14 +255,14 @@ class TermDisplayController extends VocabularyBaseController
         );
 
         // Render page
-        PageLayoutHelper::renderPageStart("New Term: " . $result['word'], false);
+        PageLayoutHelper::renderPageStart("New Term: " . (string)$result['word'], false);
 
         // Prepare view variables
-        $word = $result['word'];
-        $wordRaw = $result['wordRaw'];
-        $wid = $result['wid'];
-        $hex = $result['hex'];
-        $translation = $result['translation'];
+        $word = (string)$result['word'];
+        $wordRaw = (string)$result['wordRaw'];
+        $wid = (int)$result['wid'];
+        $hex = (string)$result['hex'];
+        $translation = (string)$result['translation'];
 
         $this->render('hover_save_result', [
             'word' => $word,

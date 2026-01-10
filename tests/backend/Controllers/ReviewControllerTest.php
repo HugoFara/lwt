@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Modules\Review\Http\ReviewController;
 use Lwt\Modules\Review\Application\ReviewFacade;
+use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
@@ -533,7 +534,9 @@ class ReviewControllerTest extends TestCase
         }
 
         $_REQUEST['selection'] = '1';
-        $_SESSION['reviewsql'] = 'SELECT * FROM words';
+        // Use SessionStateManager to store criteria instead of raw SQL
+        $sessionManager = new SessionStateManager();
+        $sessionManager->saveCriteria('texts', [1, 2, 3]);
 
         $controller = $this->createController();
 
@@ -545,6 +548,9 @@ class ReviewControllerTest extends TestCase
         $result = $method->invoke($controller);
 
         $this->assertEquals('selection=1', $result);
+
+        // Clean up
+        $sessionManager->clearCriteria();
     }
 
     public function testGetTestPropertyWithLang(): void

@@ -44,8 +44,8 @@ class TextCreationAdapter implements TextCreationInterface
     ): int {
         // Ensure tag exists - use raw SQL for INSERT IGNORE
         $bindings = [$tagName];
-        $sql = "INSERT IGNORE INTO tags2 (T2Text) VALUES (?)"
-            . UserScopedQuery::forTablePrepared('tags2', $bindings);
+        $sql = "INSERT IGNORE INTO text_tags (T2Text) VALUES (?)"
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings);
         Connection::preparedExecute($sql, $bindings);
 
         // Create the text
@@ -67,10 +67,10 @@ class TextCreationAdapter implements TextCreationInterface
 
         // Apply tag to the text
         $bindings = [(int) $textId, $tagName];
-        $sql = "INSERT INTO texttags (TtTxID, TtT2ID)
-             SELECT ?, T2ID FROM tags2
+        $sql = "INSERT INTO text_tag_map (TtTxID, TtT2ID)
+             SELECT ?, T2ID FROM text_tags
              WHERE T2Text = ?"
-            . UserScopedQuery::forTablePrepared('tags2', $bindings);
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings);
         Connection::preparedExecute($sql, $bindings);
 
         return (int) $textId;
@@ -83,10 +83,10 @@ class TextCreationAdapter implements TextCreationInterface
     {
         // Get all text IDs with this tag
         $bindings = [$tagName];
-        $sql = "SELECT TtTxID FROM texttags
-             JOIN tags2 ON TtT2ID = T2ID
+        $sql = "SELECT TtTxID FROM text_tag_map
+             JOIN text_tags ON TtT2ID = T2ID
              WHERE T2Text = ?"
-            . UserScopedQuery::forTablePrepared('tags2', $bindings);
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings);
         $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $textIds = [];
@@ -106,7 +106,7 @@ class TextCreationAdapter implements TextCreationInterface
 
         foreach ($textsToArchive as $textId) {
             // Delete textitems
-            $stats['textitems'] += QueryBuilder::table('textitems2')
+            $stats['textitems'] += QueryBuilder::table('word_occurrences')
                 ->where('Ti2TxID', '=', $textId)
                 ->delete();
 
@@ -115,42 +115,18 @@ class TextCreationAdapter implements TextCreationInterface
                 ->where('SeTxID', '=', $textId)
                 ->delete();
 
-            // Archive the text
+            // Archive the text (soft delete - set TxArchivedAt)
             $bindings = [$textId];
-            $sql = "INSERT INTO archivedtexts (
-                    AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
-                    . UserScopedQuery::insertColumn('archivedtexts')
-                . ")
-                SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
-                    . UserScopedQuery::insertValue('archivedtexts')
-                . " FROM texts WHERE TxID = ?"
+            $sql = "UPDATE texts SET TxArchivedAt = NOW(), TxPosition = 0, TxAudioPosition = 0
+                    WHERE TxID = ? AND TxArchivedAt IS NULL"
                 . UserScopedQuery::forTablePrepared('texts', $bindings);
-            Connection::preparedExecute($sql, $bindings);
+            $archived = Connection::preparedExecute($sql, $bindings);
 
-            $archiveId = (int) Connection::lastInsertId();
+            if ($archived > 0) {
+                $stats['archived']++;
+            }
 
-            // Copy tags to archive
-            Connection::preparedExecute(
-                "INSERT INTO archtexttags (AgAtID, AgT2ID)
-                 SELECT ?, TtT2ID FROM texttags
-                 WHERE TtTxID = ?",
-                [$archiveId, $textId]
-            );
-
-            // Delete original text
-            $stats['archived'] += QueryBuilder::table('texts')
-                ->where('TxID', '=', $textId)
-                ->delete();
-
-            Maintenance::adjustAutoIncrement('texts', 'TxID');
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
-
-            // Clean orphaned text tags
-            Connection::execute(
-                "DELETE texttags FROM (
-                    texttags LEFT JOIN texts ON TtTxID = TxID
-                ) WHERE TxID IS NULL"
-            );
         }
 
         return $stats;
@@ -162,10 +138,10 @@ class TextCreationAdapter implements TextCreationInterface
     public function countTextsWithTag(string $tagName): int
     {
         $bindings = [$tagName];
-        $sql = "SELECT COUNT(DISTINCT TtTxID) as cnt FROM texttags
-             JOIN tags2 ON TtT2ID = T2ID
+        $sql = "SELECT COUNT(DISTINCT TtTxID) as cnt FROM text_tag_map
+             JOIN text_tags ON TtT2ID = T2ID
              WHERE T2Text = ?"
-            . UserScopedQuery::forTablePrepared('tags2', $bindings);
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings);
 
         $row = Connection::preparedFetchOne($sql, $bindings);
         return (int) ($row['cnt'] ?? 0);
@@ -178,18 +154,9 @@ class TextCreationAdapter implements TextCreationInterface
     {
         $trimmedUri = trim($sourceUri);
 
-        // Check texts table
-        $textExists = QueryBuilder::table('texts')
+        // Check texts table (includes both active and archived texts)
+        return QueryBuilder::table('texts')
             ->where('TxSourceURI', '=', $trimmedUri)
-            ->existsPrepared();
-
-        if ($textExists) {
-            return true;
-        }
-
-        // Check archivedtexts table
-        return QueryBuilder::table('archivedtexts')
-            ->where('AtSourceURI', '=', $trimmedUri)
             ->existsPrepared();
     }
 }

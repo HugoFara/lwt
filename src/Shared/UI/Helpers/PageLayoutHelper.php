@@ -210,10 +210,11 @@ HTML;
     /**
      * Generate pagination controls HTML.
      *
-     * @param int    $currentPage Current page number
-     * @param int    $totalPages  Total number of pages
-     * @param string $scriptUrl   Base URL for pagination links
-     * @param string $formName    Form name for JavaScript reference (unused, kept for BC)
+     * @param int                  $currentPage    Current page number
+     * @param int                  $totalPages     Total number of pages
+     * @param string               $scriptUrl      Base URL for pagination links
+     * @param string               $formName       Form name for JavaScript reference (unused, kept for BC)
+     * @param array<string, mixed> $preserveParams Query parameters to preserve in pagination links
      *
      * @return string HTML pagination controls
      */
@@ -221,18 +222,34 @@ HTML;
         int $currentPage,
         int $totalPages,
         string $scriptUrl,
-        string $formName
+        string $formName,
+        array $preserveParams = []
     ): string {
         $result = '';
         $margerStyle = 'style="margin-left: 4px; margin-right: 4px;"';
-        $scriptUrl = htmlspecialchars($scriptUrl, ENT_QUOTES, 'UTF-8');
+        $escapedUrl = htmlspecialchars($scriptUrl, ENT_QUOTES, 'UTF-8');
+
+        // Build query string from preserved params (excluding page)
+        unset($preserveParams['page']);
+        $baseQuery = '';
+        if (!empty($preserveParams)) {
+            // Filter out empty values
+            $filtered = array_filter($preserveParams, fn($v) => $v !== '' && $v !== null);
+            if (!empty($filtered)) {
+                $baseQuery = http_build_query($filtered) . '&';
+            }
+        }
+
+        // Helper to build page URL
+        $pageUrl = fn(int $page): string =>
+            $escapedUrl . '?' . $baseQuery . 'page=' . $page;
 
         // Previous page controls
         if ($currentPage > 1) {
-            $result .= '<a href="' . $scriptUrl . '?page=1" ' . $margerStyle . '>';
+            $result .= '<a href="' . $pageUrl(1) . '" ' . $margerStyle . '>';
             $result .= IconHelper::render('chevrons-left', ['title' => 'First Page', 'alt' => 'First Page']);
             $result .= '</a>';
-            $result .= '<a href="' . $scriptUrl . '?page=' . ($currentPage - 1) . '" ' . $margerStyle . '>';
+            $result .= '<a href="' . $pageUrl($currentPage - 1) . '" ' . $margerStyle . '>';
             $result .= IconHelper::render('chevron-left', ['title' => 'Previous Page', 'alt' => 'Previous Page']);
             $result .= '</a>';
         }
@@ -242,7 +259,12 @@ HTML;
         if ($totalPages == 1) {
             $result .= '1';
         } else {
-            $result .= '<select name="page" data-action="pager-navigate" data-base-url="' . $scriptUrl . '">';
+            // Pass preserved params as data attribute for JS navigation
+            $jsonParams = json_encode($preserveParams);
+            $dataParams = !empty($preserveParams) && $jsonParams !== false
+                ? ' data-preserve-params="' . htmlspecialchars($jsonParams, ENT_QUOTES, 'UTF-8') . '"'
+                : '';
+            $result .= '<select name="page" data-action="pager-navigate" data-base-url="' . $escapedUrl . '"' . $dataParams . '>';
             $result .= SelectOptionsBuilder::forPagination($currentPage, $totalPages);
             $result .= '</select>';
         }
@@ -250,10 +272,10 @@ HTML;
 
         // Next page controls
         if ($currentPage < $totalPages) {
-            $result .= '<a href="' . $scriptUrl . '?page=' . ($currentPage + 1) . '" ' . $margerStyle . '>';
+            $result .= '<a href="' . $pageUrl($currentPage + 1) . '" ' . $margerStyle . '>';
             $result .= IconHelper::render('chevron-right', ['title' => 'Next Page', 'alt' => 'Next Page']);
             $result .= '</a>';
-            $result .= '<a href="' . $scriptUrl . '?page=' . $totalPages . '" ' . $margerStyle . '>';
+            $result .= '<a href="' . $pageUrl($totalPages) . '" ' . $margerStyle . '>';
             $result .= IconHelper::render('chevrons-right', ['title' => 'Last Page', 'alt' => 'Last Page']);
             $result .= '</a>';
         }
@@ -523,9 +545,9 @@ HTML;
     /**
      * Display a message (success/error) to the user.
      *
-     * Renders a message with appropriate styling. Error messages
-     * (starting with "Error") are shown in red with a back button.
-     * Success messages are shown in blue and auto-hide.
+     * Renders a Bulma notification with appropriate styling. Error messages
+     * (starting with "Error") are shown as danger notifications with a back button.
+     * Success messages are shown as success notifications and auto-hide.
      *
      * @param string $message  The message to display
      * @param bool   $autoHide Whether to auto-hide the message (default: true)
@@ -534,17 +556,31 @@ HTML;
      */
     public static function renderMessage(string $message, bool $autoHide = true): void
     {
-        if (trim($message) == '') {
+        if (trim($message) === '') {
             return;
         }
-        if (substr($message, 0, 5) == "Error") {
-            echo '<p class="red">*** ' . \htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . ' ***' .
-                ($autoHide ?
-                '' :
-                '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" data-action="go-back" />' ) .
-                '</p>';
+
+        $escapedMessage = \htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+        $isError = str_starts_with($message, 'Error');
+
+        if ($isError) {
+            $backButton = $autoHide
+                ? ''
+                : '<button class="button is-small mt-2" data-action="go-back">' .
+                  IconHelper::render('arrow-left', ['alt' => 'Go back']) .
+                  '<span class="ml-1">Go back and correct</span></button>';
+
+            echo '<div class="notification is-danger">' .
+                '<button class="delete" aria-label="close"></button>' .
+                '<strong>Error:</strong> ' . $escapedMessage .
+                $backButton .
+                '</div>';
         } else {
-            echo '<p id="hide3" class="msgblue">+++ ' . \htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . ' +++</p>';
+            $autoHideAttr = $autoHide ? ' data-auto-hide="true"' : '';
+            echo '<div class="notification is-success"' . $autoHideAttr . '>' .
+                '<button class="delete" aria-label="close"></button>' .
+                $escapedMessage .
+                '</div>';
         }
     }
 }

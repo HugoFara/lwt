@@ -223,7 +223,7 @@ class MigrationsTest extends TestCase
 
         // Clean up any texts that reference non-existent languages
         // to avoid "Language data not found" errors
-        Connection::query("DELETE FROM textitems2 WHERE Ti2TxID IN (
+        Connection::query("DELETE FROM word_occurrences WHERE Ti2TxID IN (
             SELECT TxID FROM texts WHERE TxLgID NOT IN (SELECT LgID FROM languages)
         )");
         Connection::query("DELETE FROM sentences WHERE SeTxID IN (
@@ -276,7 +276,7 @@ class MigrationsTest extends TestCase
         // Verify core tables exist
         $tables = [
             'languages', 'texts', 'words', 'sentences',
-            'settings', 'tags', 'tags2', 'textitems2'
+            'settings', 'tags', 'text_tags', 'word_occurrences'
         ];
 
         foreach ($tables as $table) {

@@ -45,23 +45,6 @@ CREATE TABLE IF NOT EXISTS users (
 -- NOTE: Admin user should be created through the setup wizard or registration page.
 -- For security, no default admin is inserted. Multi-user mode requires explicit setup.
 
-CREATE TABLE IF NOT EXISTS archivedtexts (
-    AtID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-    AtUsID int(10) unsigned DEFAULT NULL,
-    AtLgID tinyint(3) unsigned NOT NULL,
-    AtTitle varchar(200) NOT NULL,
-    AtText text NOT NULL,
-    AtAnnotatedText longtext NOT NULL DEFAULT '',
-    AtAudioURI varchar(200) DEFAULT NULL,
-    AtSourceURI varchar(1000) DEFAULT NULL,
-    PRIMARY KEY (AtID),
-    KEY AtUsID (AtUsID),
-    KEY AtLgID (AtLgID),
-    KEY AtLgIDSourceURI (AtSourceURI(20),AtLgID),
-    CONSTRAINT fk_archivedtexts_user FOREIGN KEY (AtUsID) REFERENCES users(UsID) ON DELETE CASCADE
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE IF NOT EXISTS languages (
     LgID tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
     LgUsID int(10) unsigned DEFAULT NULL,
@@ -116,7 +99,7 @@ CREATE TABLE IF NOT EXISTS settings (
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS textitems2 (
+CREATE TABLE IF NOT EXISTS word_occurrences (
     Ti2WoID mediumint(8) unsigned DEFAULT NULL,
     Ti2LgID tinyint(3) unsigned NOT NULL,
     Ti2TxID smallint(5) unsigned NOT NULL,
@@ -128,7 +111,7 @@ CREATE TABLE IF NOT EXISTS textitems2 (
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS temptextitems (
+CREATE TABLE IF NOT EXISTS temp_word_occurrences (
     TiCount smallint(5) unsigned NOT NULL,
     TiSeID mediumint(8) unsigned NOT NULL,
     TiOrder smallint(5) unsigned NOT NULL,
@@ -136,7 +119,7 @@ CREATE TABLE IF NOT EXISTS temptextitems (
     TiText varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
 ) ENGINE=MEMORY DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS tempwords (
+CREATE TABLE IF NOT EXISTS temp_words (
     WoText varchar(250) DEFAULT NULL,
     WoTextLC varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
     WoTranslation varchar(500) NOT NULL DEFAULT '*',
@@ -157,10 +140,12 @@ CREATE TABLE IF NOT EXISTS texts (
     TxSourceURI varchar(1000) DEFAULT NULL,
     TxPosition smallint(5) DEFAULT 0,
     TxAudioPosition float DEFAULT 0,
+    TxArchivedAt DATETIME DEFAULT NULL,
     PRIMARY KEY (TxID),
     KEY TxUsID (TxUsID),
     KEY TxLgID (TxLgID),
     KEY TxLgIDSourceURI (TxSourceURI(20),TxLgID),
+    KEY TxArchivedAt (TxArchivedAt),
     CONSTRAINT fk_texts_user FOREIGN KEY (TxUsID) REFERENCES users(UsID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -212,14 +197,14 @@ CREATE TABLE IF NOT EXISTS tags (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-CREATE TABLE IF NOT EXISTS wordtags (
+CREATE TABLE IF NOT EXISTS word_tag_map (
     WtWoID mediumint(8) unsigned NOT NULL,
     WtTgID smallint(5) unsigned NOT NULL,
     PRIMARY KEY (WtWoID,WtTgID),
     KEY WtTgID (WtTgID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS tags2 (
+CREATE TABLE IF NOT EXISTS text_tags (
     T2ID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
     T2UsID int(10) unsigned DEFAULT NULL,
     T2Text varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -227,16 +212,16 @@ CREATE TABLE IF NOT EXISTS tags2 (
     PRIMARY KEY (T2ID),
     KEY T2UsID (T2UsID),
     UNIQUE KEY T2Text (T2Text),
-    CONSTRAINT fk_tags2_user FOREIGN KEY (T2UsID) REFERENCES users(UsID) ON DELETE CASCADE
+    CONSTRAINT fk_text_tags_user FOREIGN KEY (T2UsID) REFERENCES users(UsID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS texttags (
+CREATE TABLE IF NOT EXISTS text_tag_map (
     TtTxID smallint(5) unsigned NOT NULL,
     TtT2ID smallint(5) unsigned NOT NULL,
     PRIMARY KEY (TtTxID,TtT2ID), KEY TtT2ID (TtT2ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS newsfeeds (
+CREATE TABLE IF NOT EXISTS news_feeds (
     NfID tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
     NfUsID int(10) unsigned DEFAULT NULL,
     NfLgID tinyint(3) unsigned NOT NULL,
@@ -250,10 +235,10 @@ CREATE TABLE IF NOT EXISTS newsfeeds (
     KEY NfUsID (NfUsID),
     KEY NfLgID (NfLgID),
     KEY NfUpdate (NfUpdate),
-    CONSTRAINT fk_newsfeeds_user FOREIGN KEY (NfUsID) REFERENCES users(UsID) ON DELETE CASCADE
+    CONSTRAINT fk_news_feeds_user FOREIGN KEY (NfUsID) REFERENCES users(UsID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS feedlinks (
+CREATE TABLE IF NOT EXISTS feed_links (
     FlID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
     FlTitle varchar(200) NOT NULL,
     FlLink varchar(400) NOT NULL,
@@ -266,13 +251,6 @@ CREATE TABLE IF NOT EXISTS feedlinks (
     KEY FlLink (FlLink),
     KEY FlDate (FlDate),
     UNIQUE KEY FlTitle (FlNfID,FlTitle)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS archtexttags (
-    AgAtID smallint(5) unsigned NOT NULL,
-    AgT2ID smallint(5) unsigned NOT NULL,
-    PRIMARY KEY (AgAtID,AgT2ID),
-    KEY AgT2ID (AgT2ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Prefix migration tracking table for multi-user conversion
@@ -288,10 +266,9 @@ CREATE TABLE IF NOT EXISTS _prefix_migration_log (
 -- Inter-table foreign key constraints
 -- NOTE: FK constraints are added via migration 20251221_120000_add_inter_table_foreign_keys.sql
 -- This ensures they are only applied once and allows for proper data cleanup.
--- The migration adds 16 FK constraints:
--- - Language references: texts, words, sentences, archivedtexts, newsfeeds -> languages
--- - Text references: sentences, textitems2, texttags -> texts
--- - Other: textitems2 -> sentences, textitems2 -> words (SET NULL),
---   wordtags -> words/tags, texttags -> tags2, archtexttags -> archivedtexts/tags2,
---   feedlinks -> newsfeeds
+-- The migration adds FK constraints:
+-- - Language references: texts, words, sentences, news_feeds -> languages
+-- - Text references: sentences, word_occurrences, text_tag_map -> texts
+-- - Other: word_occurrences -> sentences, word_occurrences -> words (SET NULL),
+--   word_tag_map -> words/tags, text_tag_map -> text_tags, feed_links -> news_feeds
 -- ============================================================================

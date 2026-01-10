@@ -63,7 +63,7 @@ class ListTexts
      */
     public function getArchivedTextsPerPage(): int
     {
-        return (int) Settings::getWithDefault('set-archivedtexts-per-page');
+        return (int) Settings::getWithDefault('set-archived_texts-per-page');
     }
 
     /**
@@ -113,8 +113,8 @@ class ListTexts
         $sql = "SELECT COUNT(*) AS cnt FROM (
             SELECT TxID FROM (
                 texts
-                LEFT JOIN texttags ON TxID = TtTxID
-            ) WHERE (1=1) {$whLang}{$whQuery}
+                LEFT JOIN text_tag_map ON TxID = TtTxID
+            ) WHERE TxArchivedAt IS NULL {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
         ) AS dummy" . UserScopedQuery::forTable('texts');
         return (int) Connection::fetchValue($sql, 'cnt');
@@ -151,15 +151,15 @@ class ListTexts
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 (texts
-                LEFT JOIN texttags ON TxID = TtTxID)
-                LEFT JOIN tags2 ON T2ID = TtT2ID
+                LEFT JOIN text_tag_map ON TxID = TtTxID)
+                LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages
-            WHERE LgID=TxLgID {$whLang}{$whQuery}
+            WHERE LgID=TxLgID AND TxArchivedAt IS NULL {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
             ORDER BY {$sortColumn}
             {$limit}"
             . UserScopedQuery::forTable('texts')
-            . UserScopedQuery::forTable('tags2')
+            . UserScopedQuery::forTable('text_tags')
             . UserScopedQuery::forTable('languages');
 
         $res = Connection::query($sql);
@@ -188,12 +188,12 @@ class ListTexts
         string $whTag
     ): int {
         $sql = "SELECT COUNT(*) AS cnt FROM (
-            SELECT AtID FROM (
-                archivedtexts
-                LEFT JOIN archtexttags ON AtID = AgAtID
-            ) WHERE (1=1) {$whLang}{$whQuery}
-            GROUP BY AtID {$whTag}
-        ) AS dummy" . UserScopedQuery::forTable('archivedtexts');
+            SELECT TxID FROM (
+                texts
+                LEFT JOIN text_tag_map ON TxID = TtTxID
+            ) WHERE TxArchivedAt IS NOT NULL {$whLang}{$whQuery}
+            GROUP BY TxID {$whTag}
+        ) AS dummy" . UserScopedQuery::forTable('texts');
         return (int) Connection::fetchValue($sql, 'cnt');
     }
 
@@ -217,25 +217,25 @@ class ListTexts
         int $page,
         int $perPage
     ): array {
-        $sorts = ['AtTitle', 'AtID desc', 'AtID'];
+        $sorts = ['TxTitle', 'TxID desc', 'TxID'];
         $sortColumn = $sorts[max(0, min($sort - 1, count($sorts) - 1))];
         $offset = ($page - 1) * $perPage;
         $limit = "LIMIT {$offset},{$perPage}";
 
-        $sql = "SELECT AtID, AtTitle, LgName, AtAudioURI, AtSourceURI,
-            LENGTH(AtAnnotatedText) AS annotlen,
+        $sql = "SELECT TxID, TxTitle, LgName, TxAudioURI, TxSourceURI,
+            LENGTH(TxAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                (archivedtexts
-                LEFT JOIN archtexttags ON AtID = AgAtID)
-                LEFT JOIN tags2 ON T2ID = AgT2ID
+                (texts
+                LEFT JOIN text_tag_map ON TxID = TtTxID)
+                LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages
-            WHERE LgID=AtLgID {$whLang}{$whQuery}
-            GROUP BY AtID {$whTag}
+            WHERE LgID=TxLgID AND TxArchivedAt IS NOT NULL {$whLang}{$whQuery}
+            GROUP BY TxID {$whTag}
             ORDER BY {$sortColumn}
             {$limit}"
-            . UserScopedQuery::forTable('archivedtexts')
-            . UserScopedQuery::forTable('tags2')
+            . UserScopedQuery::forTable('texts')
+            . UserScopedQuery::forTable('text_tags')
             . UserScopedQuery::forTable('languages');
 
         $res = Connection::query($sql);

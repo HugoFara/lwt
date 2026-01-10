@@ -148,6 +148,7 @@ class PasswordService
      */
     public function getHashInfo(string $hash): array
     {
+        /** @var array{algo: int|string|null, algoName: string, options: array<string, int>} */
         return password_get_info($hash);
     }
 

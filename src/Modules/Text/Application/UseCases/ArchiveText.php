@@ -23,8 +23,8 @@ use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 /**
  * Use case for archiving and unarchiving texts.
  *
- * Handles moving texts between active (texts table) and archived
- * (archivedtexts table) states, including tag migration and cleanup.
+ * Texts are archived by setting TxArchivedAt to the current timestamp.
+ * Unarchiving sets TxArchivedAt back to NULL.
  *
  * @since 3.0.0
  */
@@ -33,6 +33,8 @@ class ArchiveText
     /**
      * Archive an active text.
      *
+     * Sets TxArchivedAt to current timestamp and deletes parsed data.
+     *
      * @param int $textId Text ID
      *
      * @return string Result message
@@ -40,49 +42,25 @@ class ArchiveText
     public function execute(int $textId): string
     {
         // Delete parsed data
-        $count3 = QueryBuilder::table('textitems2')
+        $count3 = QueryBuilder::table('word_occurrences')
             ->where('Ti2TxID', '=', $textId)
             ->delete();
         $count2 = QueryBuilder::table('sentences')
             ->where('SeTxID', '=', $textId)
             ->delete();
 
-        // Copy to archived texts
-        $bindings1 = [$textId];
-        $inserted = Connection::preparedExecute(
-            "INSERT INTO archivedtexts (
-                AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
-                . UserScopedQuery::insertColumn('archivedtexts')
-            . ") SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
-                . UserScopedQuery::insertValue('archivedtexts')
-            . " FROM texts
-            WHERE TxID = ?"
-            . UserScopedQuery::forTablePrepared('texts', $bindings1),
-            $bindings1
-        );
-        $archivedId = Connection::lastInsertId();
-
-        // Copy tags
-        $bindings2 = [$archivedId, $textId];
-        Connection::preparedExecute(
-            "INSERT INTO archtexttags (AgAtID, AgT2ID)
-            SELECT ?, TtT2ID
-            FROM texttags
-            WHERE TtTxID = ?"
-            . UserScopedQuery::forTablePrepared('texttags', $bindings2, '', 'texts'),
-            $bindings2
+        // Mark as archived
+        $bindings = [$textId];
+        $archived = Connection::preparedExecute(
+            "UPDATE texts SET TxArchivedAt = NOW(), TxPosition = 0, TxAudioPosition = 0
+            WHERE TxID = ? AND TxArchivedAt IS NULL"
+            . UserScopedQuery::forTablePrepared('texts', $bindings),
+            $bindings
         );
 
-        // Delete from texts
-        $count1 = QueryBuilder::table('texts')
-            ->where('TxID', '=', $textId)
-            ->delete();
-
-        Maintenance::adjustAutoIncrement('texts', 'TxID');
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
-        $this->cleanupTextTags();
 
-        return "Texts deleted: $count1, Sentences deleted: $count2, Text items deleted: $count3, Archived: $inserted";
+        return "Sentences deleted: $count2, Text items deleted: $count3, Archived: $archived";
     }
 
     /**
@@ -98,252 +76,113 @@ class ArchiveText
             return "Multiple Actions: 0";
         }
 
-        $count = 0;
         $ids = array_map('intval', $textIds);
+        $count = 0;
 
         foreach ($ids as $textId) {
             // Delete parsed data
-            QueryBuilder::table('textitems2')
+            QueryBuilder::table('word_occurrences')
                 ->where('Ti2TxID', '=', $textId)
                 ->delete();
             QueryBuilder::table('sentences')
                 ->where('SeTxID', '=', $textId)
                 ->delete();
 
-            // Copy to archived
-            $bindings1 = [$textId];
-            $mess = Connection::preparedExecute(
-                "INSERT INTO archivedtexts (
-                    AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
-                    . UserScopedQuery::insertColumn('archivedtexts')
-                . ") SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
-                    . UserScopedQuery::insertValue('archivedtexts')
-                . " FROM texts
-                WHERE TxID = ?"
-                . UserScopedQuery::forTablePrepared('texts', $bindings1),
-                $bindings1
+            // Mark as archived
+            $bindings = [$textId];
+            $count += Connection::preparedExecute(
+                "UPDATE texts SET TxArchivedAt = NOW(), TxPosition = 0, TxAudioPosition = 0
+                WHERE TxID = ? AND TxArchivedAt IS NULL"
+                . UserScopedQuery::forTablePrepared('texts', $bindings),
+                $bindings
             );
-            $count += $mess;
-
-            $id = Connection::lastInsertId();
-
-            // Copy tags
-            $bindings2 = [$id, $textId];
-            Connection::preparedExecute(
-                "INSERT INTO archtexttags (AgAtID, AgT2ID)
-                SELECT ?, TtT2ID
-                FROM texttags
-                WHERE TtTxID = ?"
-                . UserScopedQuery::forTablePrepared('texttags', $bindings2, '', 'texts'),
-                $bindings2
-            );
-
-            // Delete from texts
-            QueryBuilder::table('texts')
-                ->where('TxID', '=', $textId)
-                ->delete();
         }
 
-        Maintenance::adjustAutoIncrement('texts', 'TxID');
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
-        $this->cleanupTextTags();
 
         return "Archived Text(s): {$count}";
     }
 
     /**
-     * Unarchive a text (move from archived to active).
+     * Unarchive a text (restore from archived state).
      *
-     * @param int $archivedId Archived text ID
+     * Sets TxArchivedAt to NULL and re-parses the text.
      *
-     * @return array{message: string, textId: int|null} Result with message and new text ID
+     * @param int $textId Text ID (archived)
+     *
+     * @return array{message: string, textId: int|null} Result with message and text ID
      */
-    public function unarchive(int $archivedId): array
+    public function unarchive(int $textId): array
     {
         // Get language ID first
-        $bindings = [$archivedId];
-        $lgId = Connection::preparedFetchValue(
-            "SELECT AtLgID FROM archivedtexts
-            WHERE AtID = ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings),
-            $bindings,
-            'AtLgID'
+        $bindings = [$textId];
+        $text = Connection::preparedFetchOne(
+            "SELECT TxLgID, TxText FROM texts
+            WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
+            . UserScopedQuery::forTablePrepared('texts', $bindings),
+            $bindings
         );
 
-        if ($lgId === null) {
+        if ($text === null) {
             return ['message' => 'Archived text not found', 'textId' => null];
         }
 
-        // Insert into active texts
-        $bindings1 = [$archivedId];
-        $inserted = Connection::preparedExecute(
-            "INSERT INTO texts (
-                TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
-                . UserScopedQuery::insertColumn('texts')
-            . ") SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
-                . UserScopedQuery::insertValue('texts')
-            . " FROM archivedtexts
-            WHERE AtID = ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
-            $bindings1
-        );
-        $insertedMsg = "Texts added: $inserted";
-
-        $textId = Connection::lastInsertId();
-
-        // Copy tags
-        $bindings2 = [$textId, $archivedId];
-        Connection::preparedExecute(
-            "INSERT INTO texttags (TtTxID, TtT2ID)
-            SELECT ?, AgT2ID
-            FROM archtexttags
-            WHERE AgAtID = ?"
-            . UserScopedQuery::forTablePrepared('archtexttags', $bindings2, '', 'archivedtexts'),
+        // Unarchive
+        $bindings2 = [$textId];
+        $unarchived = Connection::preparedExecute(
+            "UPDATE texts SET TxArchivedAt = NULL
+            WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
+            . UserScopedQuery::forTablePrepared('texts', $bindings2),
             $bindings2
         );
 
-        // Parse the text
-        $bindings3 = [$textId];
-        $textContent = Connection::preparedFetchValue(
-            "SELECT TxText FROM texts WHERE TxID = ?"
-            . UserScopedQuery::forTablePrepared('texts', $bindings3),
-            $bindings3,
-            'TxText'
-        );
-        TextParsing::parseAndSave((string)($textContent ?? ''), (int) $lgId, (int)$textId);
-
-        // Delete from archived
-        $deleted = QueryBuilder::table('archivedtexts')
-            ->where('AtID', '=', $archivedId)
-            ->delete();
-        $deleted = "Archived Texts deleted: $deleted";
-
-        Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
-        $this->cleanupArchivedTextTags();
+        // Re-parse the text
+        TextParsing::parseAndSave((string)($text['TxText'] ?? ''), (int) $text['TxLgID'], $textId);
 
         // Get statistics
-        $bindings4 = [$textId];
-        $sentenceCount = Connection::preparedFetchValue(
+        $bindings3 = [$textId];
+        $sentenceCount = (int)Connection::preparedFetchValue(
             "SELECT COUNT(*) AS cnt FROM sentences WHERE SeTxID = ?"
-            . UserScopedQuery::forTablePrepared('sentences', $bindings4, '', 'texts'),
+            . UserScopedQuery::forTablePrepared('sentences', $bindings3, '', 'texts'),
+            $bindings3,
+            'cnt'
+        );
+        $bindings4 = [$textId];
+        $itemCount = (int)Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = ?"
+            . UserScopedQuery::forTablePrepared('word_occurrences', $bindings4, '', 'texts'),
             $bindings4,
             'cnt'
         );
-        $bindings5 = [$textId];
-        $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = ?"
-            . UserScopedQuery::forTablePrepared('textitems2', $bindings5, '', 'texts'),
-            $bindings5,
-            'cnt'
-        );
 
-        $message = "{$deleted} / {$insertedMsg} / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
+        $message = "Unarchived: $unarchived / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
 
-        return ['message' => $message, 'textId' => (int) $textId];
+        return ['message' => $message, 'textId' => $textId];
     }
 
     /**
      * Unarchive multiple texts.
      *
-     * @param array $archivedIds Array of archived text IDs
+     * @param array $textIds Array of archived text IDs
      *
      * @return string Result message
      */
-    public function unarchiveMultiple(array $archivedIds): string
+    public function unarchiveMultiple(array $textIds): string
     {
-        if (empty($archivedIds)) {
+        if (empty($textIds)) {
             return "Multiple Actions: 0";
         }
 
+        $ids = array_map('intval', $textIds);
         $count = 0;
-        $ids = array_map('intval', $archivedIds);
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-        $records = Connection::preparedFetchAll(
-            "SELECT AtID, AtLgID FROM archivedtexts WHERE AtID IN ({$placeholders})"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $ids),
-            $ids
-        );
-
-        foreach ($records as $record) {
-            $ida = $record['AtID'];
-            $bindings1 = [$ida];
-            $mess = Connection::preparedExecute(
-                "INSERT INTO texts (
-                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
-                    . UserScopedQuery::insertColumn('texts')
-                . ") SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
-                    . UserScopedQuery::insertValue('texts')
-                . " FROM archivedtexts
-                WHERE AtID = ?"
-                . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
-                $bindings1
-            );
-            $count += $mess;
-
-            $id = Connection::lastInsertId();
-
-            $bindings2 = [$id, $ida];
-            Connection::preparedExecute(
-                "INSERT INTO texttags (TtTxID, TtT2ID)
-                SELECT ?, AgT2ID
-                FROM archtexttags
-                WHERE AgAtID = ?"
-                . UserScopedQuery::forTablePrepared('archtexttags', $bindings2, '', 'archivedtexts'),
-                $bindings2
-            );
-
-            $bindings3 = [$id];
-            $textContent = Connection::preparedFetchValue(
-                "SELECT TxText FROM texts WHERE TxID = ?"
-                . UserScopedQuery::forTablePrepared('texts', $bindings3),
-                $bindings3,
-                'TxText'
-            );
-            TextParsing::parseAndSave((string)($textContent ?? ''), (int) $record['AtLgID'], (int)$id);
-
-            QueryBuilder::table('archivedtexts')
-                ->where('AtID', '=', $ida)
-                ->delete();
+        foreach ($ids as $textId) {
+            $result = $this->unarchive($textId);
+            if ($result['textId'] !== null) {
+                $count++;
+            }
         }
 
-        Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
-        $this->cleanupArchivedTextTags();
-
         return "Unarchived Text(s): {$count}";
-    }
-
-    /**
-     * Clean up orphaned text tags.
-     */
-    private function cleanupTextTags(): void
-    {
-        Connection::execute(
-            "DELETE texttags
-            FROM (
-                texttags
-                LEFT JOIN texts ON TtTxID = TxID
-            )
-            WHERE TxID IS NULL"
-            . UserScopedQuery::forTable('texttags', '', 'texts'),
-            ''
-        );
-    }
-
-    /**
-     * Clean up orphaned archived text tags.
-     */
-    private function cleanupArchivedTextTags(): void
-    {
-        Connection::execute(
-            "DELETE archtexttags
-            FROM (
-                archtexttags
-                LEFT JOIN archivedtexts ON AgAtID = AtID
-            )
-            WHERE AtID IS NULL"
-            . UserScopedQuery::forTable('archtexttags', '', 'archivedtexts'),
-            ''
-        );
     }
 }

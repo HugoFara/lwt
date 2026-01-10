@@ -38,9 +38,9 @@ class WordLinkingService
      */
     public function getTermFromTextItem(int $textId, int $ord): ?array
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         return Connection::preparedFetchOne(
-            "SELECT Ti2Text, Ti2LgID FROM textitems2
+            "SELECT Ti2Text, Ti2LgID FROM word_occurrences
              WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
             [$textId, $ord]
         );
@@ -57,9 +57,9 @@ class WordLinkingService
      */
     public function linkToTextItems(int $wordId, int $langId, string $textlc): void
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::preparedExecute(
-            "UPDATE textitems2 SET Ti2WoID = ?
+            "UPDATE word_occurrences SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wordId, $langId, $textlc]
         );
@@ -73,10 +73,10 @@ class WordLinkingService
     public function linkAllTextItems(): void
     {
         // words has WoUsID - user scope auto-applied
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         Connection::execute(
             "UPDATE words
-             JOIN textitems2
+             JOIN word_occurrences
              ON Ti2WoID IS NULL AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
              SET Ti2WoID = WoID"
         );
@@ -92,11 +92,11 @@ class WordLinkingService
      */
     public function getWordAtPosition(int $textId, int $ord): ?string
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         /** @var string|null $word */
         $word = Connection::preparedFetchValue(
             "SELECT Ti2Text
-             FROM textitems2
+             FROM word_occurrences
              WHERE Ti2WordCount = 1 AND Ti2TxID = ? AND Ti2Order = ?",
             [$textId, $ord],
             'Ti2Text'
@@ -115,10 +115,10 @@ class WordLinkingService
      */
     public function linkNewWordsToTextItems(int $maxWoId): void
     {
-        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // word_occurrences inherits user context via Ti2TxID -> texts FK
         // words has WoUsID - user scope auto-applied
         Connection::preparedExecute(
-            "UPDATE textitems2
+            "UPDATE word_occurrences
              JOIN words
              ON LOWER(Ti2Text) = WoTextLC AND Ti2WordCount = 1 AND Ti2LgID = WoLgID AND WoID > ?
              SET Ti2WoID = WoID",

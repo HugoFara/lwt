@@ -88,7 +88,9 @@ class WordPressAuthService
         if (!function_exists('is_user_logged_in')) {
             return false;
         }
-        return \is_user_logged_in();
+        /** @var bool */
+        $isLoggedIn = \is_user_logged_in();
+        return $isLoggedIn;
     }
 
     /**
@@ -109,7 +111,12 @@ class WordPressAuthService
             \get_currentuserinfo();
         }
 
-        return isset($current_user->ID) ? (int) $current_user->ID : null;
+        /** @var object{ID?: int|string}|null $current_user */
+        if (!is_object($current_user) || !isset($current_user->ID)) {
+            return null;
+        }
+
+        return (int) $current_user->ID;
     }
 
     /**
@@ -130,14 +137,23 @@ class WordPressAuthService
             \get_currentuserinfo();
         }
 
-        if (!isset($current_user->ID)) {
+        /** @var object{ID?: int|string, user_login?: mixed, user_email?: mixed}|null $current_user */
+        if (!is_object($current_user) || !isset($current_user->ID)) {
             return null;
         }
 
+        $wpUserId = (int) $current_user->ID;
+        $username = isset($current_user->user_login) && is_string($current_user->user_login)
+            ? $current_user->user_login
+            : 'wp_user_' . $wpUserId;
+        $email = isset($current_user->user_email) && is_string($current_user->user_email)
+            ? $current_user->user_email
+            : 'wp_user_' . $wpUserId . '@localhost';
+
         return [
-            'id' => (int) $current_user->ID,
-            'username' => $current_user->user_login ?? 'wp_user_' . $current_user->ID,
-            'email' => $current_user->user_email ?? 'wp_user_' . $current_user->ID . '@localhost'
+            'id' => $wpUserId,
+            'username' => $username,
+            'email' => $email
         ];
     }
 

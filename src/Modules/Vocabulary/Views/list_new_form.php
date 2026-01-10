@@ -18,6 +18,13 @@ namespace Lwt\Views\Word;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
+
+// Type assertions for variables passed from controller
+assert(is_int($lgid));
+assert(is_string($scrdir));
+assert(is_bool($showRoman));
+assert(is_string($languageName));
+
 ?>
 <h2>New Term</h2>
 <form name="newword" class="validate" action="/words/edit" method="post" data-lwt-form-check="true">
@@ -65,7 +72,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 <td class="td1 right" colspan="2">  &nbsp;
 <?php
 /** @psalm-suppress PossiblyUndefinedVariable */
-echo createDictLinksInEditWin2(
+echo (string)createDictLinksInEditWin2(
     $lgid,
     'WoSentence',
     'WoText'

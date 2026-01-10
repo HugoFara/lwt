@@ -33,7 +33,7 @@ class MySqlFeedRepository extends AbstractRepository implements FeedRepositoryIn
     /**
      * @var string Table name without prefix
      */
-    protected string $tableName = 'newsfeeds';
+    protected string $tableName = 'news_feeds';
 
     /**
      * @var string Primary key column
@@ -76,7 +76,7 @@ class MySqlFeedRepository extends AbstractRepository implements FeedRepositoryIn
      *
      * @param Feed $entity
      *
-     * @return array<string, mixed>
+     * @return array<string, scalar|null>
      */
     protected function mapToRow(object $entity): array
     {

@@ -62,10 +62,10 @@ class LanguageFacadeTest extends TestCase
 
         if (self::$dbConnected) {
             // Clean up any lingering test data from previous runs
-            Connection::query("DELETE FROM newsfeeds WHERE NfLgID IN (SELECT LgID FROM languages WHERE LgName LIKE 'TestLang_%' OR LgName LIKE 'DuplicateTest_%')");
+            Connection::query("DELETE FROM news_feeds WHERE NfLgID IN (SELECT LgID FROM languages WHERE LgName LIKE 'TestLang_%' OR LgName LIKE 'DuplicateTest_%')");
             Connection::query("DELETE FROM languages WHERE LgName LIKE 'TestLang_%' OR LgName LIKE 'DuplicateTest_%'");
             // Also clean up orphaned feeds that reference non-existent languages
-            Connection::query("DELETE FROM newsfeeds WHERE NfLgID NOT IN (SELECT LgID FROM languages)");
+            Connection::query("DELETE FROM news_feeds WHERE NfLgID NOT IN (SELECT LgID FROM languages)");
         }
     }
 
@@ -81,7 +81,7 @@ class LanguageFacadeTest extends TestCase
         }
 
         // Clean up any test languages created during tests
-        Connection::query("DELETE FROM newsfeeds WHERE NfLgID IN (SELECT LgID FROM languages WHERE LgName LIKE 'TestLang_%' OR LgName LIKE 'DuplicateTest_%')");
+        Connection::query("DELETE FROM news_feeds WHERE NfLgID IN (SELECT LgID FROM languages WHERE LgName LIKE 'TestLang_%' OR LgName LIKE 'DuplicateTest_%')");
         Connection::query("DELETE FROM languages WHERE LgName LIKE 'TestLang_%' OR LgName LIKE 'DuplicateTest_%'");
     }
 

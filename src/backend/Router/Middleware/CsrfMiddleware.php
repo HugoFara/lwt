@@ -110,7 +110,10 @@ class CsrfMiddleware implements MiddlewareInterface
 
         if (empty($authHeader) && function_exists('apache_request_headers')) {
             $headers = apache_request_headers();
-            $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+            if (is_array($headers)) {
+                $rawHeader = (string) ($headers['Authorization'] ?? $headers['authorization'] ?? '');
+                $authHeader = $rawHeader;
+            }
         }
 
         return str_starts_with(strtolower($authHeader), 'bearer ');
@@ -128,8 +131,8 @@ class CsrfMiddleware implements MiddlewareInterface
             @session_start();
         }
 
-        $expectedToken = $_SESSION[self::SESSION_TOKEN] ?? null;
-        if ($expectedToken === null || $expectedToken === '') {
+        $expectedTokenRaw = $_SESSION[self::SESSION_TOKEN] ?? null;
+        if (!is_string($expectedTokenRaw) || $expectedTokenRaw === '') {
             return false;
         }
 
@@ -140,7 +143,7 @@ class CsrfMiddleware implements MiddlewareInterface
         }
 
         // Use timing-safe comparison
-        return hash_equals($expectedToken, $providedToken);
+        return hash_equals($expectedTokenRaw, $providedToken);
     }
 
     /**
@@ -271,11 +274,15 @@ HTML;
             @session_start();
         }
 
-        if (!isset($_SESSION[self::SESSION_TOKEN]) || $_SESSION[self::SESSION_TOKEN] === '') {
-            $_SESSION[self::SESSION_TOKEN] = bin2hex(random_bytes(32));
+        /** @var mixed $sessionValue */
+        $sessionValue = $_SESSION[self::SESSION_TOKEN] ?? '';
+        $token = is_string($sessionValue) ? $sessionValue : '';
+        if ($token === '') {
+            $token = bin2hex(random_bytes(32));
+            $_SESSION[self::SESSION_TOKEN] = $token;
         }
 
-        return $_SESSION[self::SESSION_TOKEN];
+        return $token;
     }
 
     /**

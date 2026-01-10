@@ -211,7 +211,7 @@ class ParserRegistry
     /**
      * Resolve parser type from a database row.
      *
-     * @param array $row Database row with Lg* prefixed columns
+     * @param array<string, mixed> $row Database row with Lg* prefixed columns
      *
      * @return string Resolved parser type
      */
@@ -220,11 +220,11 @@ class ParserRegistry
         // Check explicit parser type first
         $parserType = $row['LgParserType'] ?? null;
         if ($parserType !== null && $parserType !== '') {
-            return $parserType;
+            return (string) $parserType;
         }
 
         // Legacy detection: check magic word
-        $wordChars = strtoupper(trim($row['LgRegexpWordCharacters'] ?? ''));
+        $wordChars = strtoupper(trim((string) ($row['LgRegexpWordCharacters'] ?? '')));
         if ($wordChars === 'MECAB') {
             return 'mecab';
         }

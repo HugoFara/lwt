@@ -68,6 +68,7 @@ class UpdateText
 
         // Check if text content changed
         $bindings1 = [$textId];
+        /** @var string|null $oldText */
         $oldText = Connection::preparedFetchValue(
             "SELECT TxText FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings1),
@@ -145,20 +146,21 @@ class UpdateText
     ): string {
         // Check if text content changed
         $bindings1 = [$textId];
+        /** @var string|null $oldText */
         $oldText = Connection::preparedFetchValue(
-            "SELECT AtText FROM archivedtexts WHERE AtID = ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
+            "SELECT TxText FROM texts WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
+            . UserScopedQuery::forTablePrepared('texts', $bindings1),
             $bindings1,
-            'AtText'
+            'TxText'
         );
         $textsdiffer = $text !== $oldText;
 
         $bindings2 = [$languageId, $title, $text, $audioUri, $sourceUri, $textId];
         $affected = Connection::preparedExecute(
-            "UPDATE archivedtexts SET
-                AtLgID = ?, AtTitle = ?, AtText = ?, AtAudioURI = ?, AtSourceURI = ?
-             WHERE AtID = ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings2),
+            "UPDATE texts SET
+                TxLgID = ?, TxTitle = ?, TxText = ?, TxAudioURI = ?, TxSourceURI = ?
+             WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
+            . UserScopedQuery::forTablePrepared('texts', $bindings2),
             $bindings2
         );
 
@@ -168,8 +170,8 @@ class UpdateText
         if ($affected > 0 && $textsdiffer) {
             $bindings3 = [$textId];
             Connection::preparedExecute(
-                "UPDATE archivedtexts SET AtAnnotatedText = '' WHERE AtID = ?"
-                . UserScopedQuery::forTablePrepared('archivedtexts', $bindings3),
+                "UPDATE texts SET TxAnnotatedText = '' WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
+                . UserScopedQuery::forTablePrepared('texts', $bindings3),
                 $bindings3
             );
         }
@@ -191,7 +193,8 @@ class UpdateText
         }
 
         $count = 0;
-        $ids = array_map('intval', $textIds);
+        /** @var array<int, int> $ids */
+        $ids = array_values(array_map('intval', $textIds));
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         $records = Connection::preparedFetchAll(
@@ -222,7 +225,7 @@ class UpdateText
     private function reparseText(int $textId, int $languageId, string $text): void
     {
         // Delete old parsed data
-        QueryBuilder::table('textitems2')
+        QueryBuilder::table('word_occurrences')
             ->where('Ti2TxID', '=', $textId)
             ->delete();
         QueryBuilder::table('sentences')

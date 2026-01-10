@@ -58,6 +58,8 @@ class Endpoints
         'word-families/stats' => ['GET'],
         'texts' => ['GET', 'POST', 'PUT'],
         'texts/statistics' => ['GET'],
+        'texts/scoring' => ['GET'],
+        'texts/scoring/recommended' => ['GET'],
         'texts/by-language' => ['GET'],
         'texts/archived-by-language' => ['GET'],
         'feeds' => ['GET', 'POST', 'PUT', 'DELETE'],
@@ -131,8 +133,9 @@ class Endpoints
         }
 
         // Check first segment for dynamic endpoints (e.g., terms/123/status)
-        $firstElem = preg_split('/\//', $endpoint)[0];
-        if (array_key_exists($firstElem, self::ROUTES)) {
+        $segments = preg_split('/\//', $endpoint);
+        $firstElem = $segments !== false && isset($segments[0]) ? $segments[0] : '';
+        if ($firstElem !== '' && array_key_exists($firstElem, self::ROUTES)) {
             return self::ROUTES[$firstElem];
         }
 
@@ -144,10 +147,15 @@ class Endpoints
      *
      * @param string $endpoint Endpoint path
      *
-     * @return string[] Endpoint path segments
+     * @return list<string> Endpoint path segments
      */
     public static function parseFragments(string $endpoint): array
     {
-        return preg_split("/\//", $endpoint);
+        $result = preg_split("/\//", $endpoint);
+        if ($result === false) {
+            return [];
+        }
+        /** @var list<string> */
+        return $result;
     }
 }

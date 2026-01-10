@@ -340,12 +340,13 @@ class InputValidator
      *
      * Filters out non-numeric values and returns only valid integers.
      *
-     * @param string $key     Parameter name
-     * @param array  $default Default value if not set
+     * @param string     $key     Parameter name
+     * @param list<int>  $default Default value if not set
      *
      * @return int[] Array of validated integers
      *
-     * @psalm-return array<int>
+     * @psalm-param list<int> $default
+     * @psalm-return list<int>
      */
     public static function getIntArray(string $key, array $default = []): array
     {
@@ -356,6 +357,7 @@ class InputValidator
         }
 
         $result = [];
+        /** @var mixed $value */
         foreach ($array as $value) {
             if (is_numeric($value)) {
                 $result[] = (int) $value;
@@ -370,13 +372,14 @@ class InputValidator
      *
      * Filters out non-string values.
      *
-     * @param string $key     Parameter name
-     * @param array  $default Default value if not set
-     * @param bool   $trim    Whether to trim whitespace (default: true)
+     * @param string        $key     Parameter name
+     * @param list<string>  $default Default value if not set
+     * @param bool          $trim    Whether to trim whitespace (default: true)
      *
      * @return string[] Array of validated strings
      *
-     * @psalm-return array<string>
+     * @psalm-param list<string> $default
+     * @psalm-return list<string>
      */
     public static function getStringArray(
         string $key,
@@ -390,6 +393,7 @@ class InputValidator
         }
 
         $result = [];
+        /** @var mixed $value */
         foreach ($array as $value) {
             if (is_string($value)) {
                 $result[] = $trim ? trim($value) : $value;
@@ -521,7 +525,9 @@ class InputValidator
         }
 
         // Verify the file was actually uploaded
-        if (!is_uploaded_file($file['tmp_name'])) {
+        /** @var string $tmpName */
+        $tmpName = $file['tmp_name'];
+        if (!is_uploaded_file($tmpName)) {
             return null;
         }
 
@@ -747,6 +753,7 @@ class InputValidator
             return $default;
         }
 
+        /** @var mixed $decoded */
         $decoded = json_decode($value, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -767,6 +774,7 @@ class InputValidator
     {
         $result = [];
 
+        /** @var mixed $default */
         foreach ($schema as $key => $default) {
             if (is_int($default)) {
                 $result[$key] = self::getInt($key, $default);
@@ -787,6 +795,63 @@ class InputValidator
     // ===== Session persistence methods =====
 
     /**
+     * Clear a session key.
+     *
+     * @param string $sessKey Session key to clear
+     *
+     * @return void
+     */
+    public static function clearSessionKey(string $sessKey): void
+    {
+        if (isset($_SESSION[$sessKey])) {
+            unset($_SESSION[$sessKey]);
+        }
+    }
+
+    // ===== URL-only parameter methods (no session persistence) =====
+
+    /**
+     * Get a string parameter from the request only.
+     *
+     * Unlike getStringWithSession(), this does not persist to or read from session.
+     * Use this for URL-based pagination and filtering.
+     *
+     * @param string $key     Request parameter key
+     * @param string $default Default value if not present
+     *
+     * @return string The parameter value or default
+     */
+    public static function getStringParam(string $key, string $default = ''): string
+    {
+        return self::getString($key, $default);
+    }
+
+    /**
+     * Get an integer parameter from the request only.
+     *
+     * Unlike getIntWithSession(), this does not persist to or read from session.
+     * Use this for URL-based pagination and filtering.
+     *
+     * @param string   $key     Request parameter key
+     * @param int      $default Default value if not present
+     * @param int|null $min     Minimum allowed value (null for no minimum)
+     * @param int|null $max     Maximum allowed value (null for no maximum)
+     *
+     * @return int The parameter value or default
+     */
+    public static function getIntParam(
+        string $key,
+        int $default = 0,
+        ?int $min = null,
+        ?int $max = null
+    ): int {
+        $value = self::getInt($key, $default, $min, $max);
+        return $value ?? $default;
+    }
+
+    // ===== Session persistence methods (deprecated) =====
+
+    /**
      * Get a string from request, persisting to session.
      *
      * If the request parameter exists, updates the session with its value.
@@ -797,6 +862,9 @@ class InputValidator
      * @param string $default Default value if neither exists
      *
      * @return string The current value
+     *
+     * @deprecated Use getStringParam() instead. Session persistence for pagination
+     *             is being replaced with URL query parameters.
      */
     public static function getStringWithSession(
         string $reqKey,
@@ -810,6 +878,7 @@ class InputValidator
         }
 
         if (isset($_SESSION[$sessKey])) {
+            /** @var mixed $value */
             $value = $_SESSION[$sessKey];
             return is_string($value) ? $value : $default;
         }
@@ -828,6 +897,9 @@ class InputValidator
      * @param int    $default Default value if neither exists
      *
      * @return int The current value
+     *
+     * @deprecated Use getIntParam() instead. Session persistence for pagination
+     *             is being replaced with URL query parameters.
      */
     public static function getIntWithSession(
         string $reqKey,
@@ -841,6 +913,7 @@ class InputValidator
         }
 
         if (isset($_SESSION[$sessKey])) {
+            /** @var mixed $value */
             $value = $_SESSION[$sessKey];
             return is_numeric($value) ? (int) $value : $default;
         }

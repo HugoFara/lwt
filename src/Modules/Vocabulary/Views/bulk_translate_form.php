@@ -25,6 +25,15 @@ namespace Lwt\Views\Word;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+// Type assertions for variables passed from controller
+assert(is_int($tid));
+assert($sl === null || is_string($sl));
+assert($tl === null || is_string($tl));
+assert(is_array($dictionaries));
+/** @var list<array{word: string, Ti2LgID: int|string}> $terms */
+assert(is_array($terms));
+assert($nextOffset === null || is_int($nextOffset));
+
 ?>
 <script type="application/json" id="bulk-translate-config">
 <?php echo json_encode([
@@ -156,7 +165,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                                value="<?php echo $value ?>" />
                         <input type="hidden"
                                name="term[<?php echo $cnt ?>][lg]"
-                               value="<?php echo \htmlspecialchars($record['Ti2LgID'] ?? '', ENT_QUOTES, 'UTF-8') ?>" />
+                               value="<?php echo \htmlspecialchars((string)($record['Ti2LgID'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" />
                     </td>
                 </tr>
                 <?php

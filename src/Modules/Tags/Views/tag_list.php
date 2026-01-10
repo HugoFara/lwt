@@ -30,18 +30,32 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\FormHelper;
+use Lwt\Modules\Tags\Application\TagsFacade;
 
-/** @var string $message */
-/** @var array $tags */
-/** @var int $totalCount */
-/** @var array $pagination */
-/** @var string $currentQuery */
-/** @var int $currentSort */
-/** @var \Lwt\Modules\Tags\Application\TagsFacade $service */
-/** @var bool $isTextTag */
+/**
+ * @var string $message
+ * @var array<int, array{id: int, text: string, comment: string, usageCount: int, archivedUsageCount?: int}> $tags
+ * @var int $totalCount
+ * @var array{pages: int, currentPage: int, perPage: int} $pagination
+ * @var string $currentQuery
+ * @var int $currentSort
+ * @var TagsFacade $service
+ * @var bool $isTextTag
+ */
+
+// Ensure variables are properly typed for Psalm
+assert(is_string($message));
+assert(is_array($tags));
+assert(is_int($totalCount));
+assert(is_array($pagination));
+assert(is_string($currentQuery));
+assert(is_int($currentSort));
+assert($service instanceof TagsFacade);
+assert(is_bool($isTextTag));
 
 $baseUrl = $service->getBaseUrl();
 $tagTypeLabel = $service->getTagTypeLabel();
+/** @var array<int, array{value: int, text: string}> $sortOptions */
 $sortOptions = $service->getSortOptions();
 $itemLabel = $isTextTag ? 'Texts' : 'Terms';
 
@@ -93,7 +107,7 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
             </div>
             <div class="level-item">
-                <?php echo PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form1'); ?>
+                <?php echo PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form1', ['query' => $currentQuery, 'sort' => $currentSort]); ?>
             </div>
             <div class="level-right">
                 <div class="level-item">
@@ -280,7 +294,7 @@ echo PageLayoutHelper::buildActionCard([
             </div>
         </div>
 
-        <?php if (!empty($tag['comment'])): ?>
+        <?php if ($tag['comment'] !== ''): ?>
         <p class="has-text-grey mb-2"><?php echo htmlspecialchars($tag['comment'], ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
 
@@ -322,7 +336,7 @@ echo PageLayoutHelper::buildActionCard([
     </div>
     <div class="level-right">
         <div class="level-item">
-            <?php echo PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form2'); ?>
+            <?php echo PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form2', ['query' => $currentQuery, 'sort' => $currentSort]); ?>
         </div>
     </div>
 </nav>

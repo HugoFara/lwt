@@ -24,6 +24,14 @@ namespace Lwt\Views\Feed;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+/**
+ * @var array{rss_url: string, feed: array<int|string, mixed>, lang?: int, options?: string, redirect?: string, article_section?: string, edit_feed?: int} $wizardData Wizard session data
+ * @var array<int, array{LgID: int, LgName: string}> $languages Language records
+ * @var string|null $autoUpdI Auto update interval value
+ * @var string|null $autoUpdV Auto update interval unit
+ * @var \Lwt\Modules\Feed\Application\FeedFacade $service Feed service
+ */
+
 // Prepare languages array for JSON
 $languagesJson = array_map(
     /** @param array{LgID: int|string, LgName: string} $lang */
@@ -34,35 +42,39 @@ $languagesJson = array_map(
 );
 
 // Prepare options for JSON config
+$options = $wizardData['options'] ?? '';
+$maxLinksValue = $service->getNfOption($options, 'max_links');
+$maxTextsValue = $service->getNfOption($options, 'max_texts');
+$charsetValue = $service->getNfOption($options, 'charset');
+$tagValue = $service->getNfOption($options, 'tag');
+
 $optionsConfig = [
-    'editText' => $service->getNfOption($wizardData['options'], 'edit_text') !== null,
+    'editText' => $service->getNfOption($options, 'edit_text') !== null,
     'autoUpdate' => [
         'enabled' => $autoUpdI !== null,
         'interval' => $autoUpdI !== null ? (int)$autoUpdI : null,
         'unit' => $autoUpdV ?? 'h'
     ],
     'maxLinks' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'max_links') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'max_links') !== null
-            ? (int)$service->getNfOption($wizardData['options'], 'max_links') : null
+        'enabled' => $maxLinksValue !== null,
+        'value' => is_string($maxLinksValue) && is_numeric($maxLinksValue) ? (int)$maxLinksValue : null
     ],
     'maxTexts' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'max_texts') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'max_texts') !== null
-            ? (int)$service->getNfOption($wizardData['options'], 'max_texts') : null
+        'enabled' => $maxTextsValue !== null,
+        'value' => is_string($maxTextsValue) && is_numeric($maxTextsValue) ? (int)$maxTextsValue : null
     ],
     'charset' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'charset') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'charset') ?? ''
+        'enabled' => $charsetValue !== null,
+        'value' => is_string($charsetValue) ? $charsetValue : ''
     ],
     'tag' => [
-        'enabled' => $service->getNfOption($wizardData['options'], 'tag') !== null,
-        'value' => $service->getNfOption($wizardData['options'], 'tag') ?? ''
+        'enabled' => $tagValue !== null,
+        'value' => is_string($tagValue) ? $tagValue : ''
     ]
 ];
 
 $configJson = json_encode([
-    'editFeedId' => isset($wizardData['edit_feed']) ? (int)$wizardData['edit_feed'] : null,
+    'editFeedId' => $wizardData['edit_feed'] ?? null,
     'feedTitle' => $wizardData['feed']['feed_title'] ?? '',
     'rssUrl' => $wizardData['rss_url'] ?? '',
     'articleSection' => preg_replace('/[ ]+/', ' ', trim(($wizardData['redirect'] ?? '') . ($wizardData['article_section'] ?? ''))),

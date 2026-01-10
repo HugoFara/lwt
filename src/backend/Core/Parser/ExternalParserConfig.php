@@ -124,11 +124,19 @@ class ExternalParserConfig
             );
         }
 
+        $args = isset($config['args'])
+            ? array_map(
+                /** @param mixed $v */
+                fn($v): string => (string) $v,
+                array_values((array) $config['args'])
+            )
+            : [];
+
         return new self(
             $type,
             (string) $config['name'],
             (string) $config['binary'],
-            isset($config['args']) ? array_values((array) $config['args']) : [],
+            $args,
             (string) ($config['input_mode'] ?? self::INPUT_MODE_STDIN),
             (string) ($config['output_format'] ?? self::OUTPUT_FORMAT_LINE)
         );

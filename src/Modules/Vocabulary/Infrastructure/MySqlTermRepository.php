@@ -97,8 +97,8 @@ class MySqlTermRepository implements TermRepositoryInterface
             (string) ($row['WoNotes'] ?? ''),
             (string) ($row['WoRomanization'] ?? ''),
             (int) ($row['WoWordCount'] ?? 1),
-            $this->parseDateTime($row['WoCreated'] ?? null),
-            $this->parseDateTime($row['WoStatusChanged'] ?? null),
+            $this->parseDateTime(isset($row['WoCreated']) ? (string)$row['WoCreated'] : null),
+            $this->parseDateTime(isset($row['WoStatusChanged']) ? (string)$row['WoStatusChanged'] : null),
             (float) ($row['WoTodayScore'] ?? 0.0),
             (float) ($row['WoTomorrowScore'] ?? 0.0),
             (float) ($row['WoRandom'] ?? 0.0)
@@ -110,7 +110,7 @@ class MySqlTermRepository implements TermRepositoryInterface
      *
      * @param Term $term The term entity
      *
-     * @return array<string, mixed> Database column => value pairs
+     * @return array<string, null|scalar> Database column => value pairs
      */
     protected function mapToRow(Term $term): array
     {
@@ -237,13 +237,17 @@ class MySqlTermRepository implements TermRepositoryInterface
     {
         $query = $this->query();
 
+        /**
+         * @var string $field
+         * @var mixed $value
+         */
         foreach ($criteria as $field => $value) {
             $column = $this->columnMap[$field] ?? $field;
             if (is_array($value)) {
                 $query->whereIn($column, $value);
             } elseif ($value === null) {
                 $query->whereNull($column);
-            } else {
+            } elseif (is_scalar($value)) {
                 $query->where($column, '=', $value);
             }
         }

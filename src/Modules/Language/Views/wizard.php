@@ -21,6 +21,16 @@ namespace Lwt\Modules\Language\Views;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 
+// Type assertions for view variables
+assert(is_string($languageDefsJson));
+assert(is_string($languageOptions));
+assert(is_string($languageOptionsEmpty));
+
+/**
+ * @var string $languageDefsJson
+ * @var string $languageOptions
+ * @var string $languageOptionsEmpty
+ */
 ?>
 <script type="application/json" id="language-wizard-config">
 <?php echo json_encode(['languageDefs' => json_decode($languageDefsJson, true)]); ?>

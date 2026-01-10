@@ -404,7 +404,7 @@ class WordListApiHandler
             }
         }
 
-        // Get term tags (from tags table - tags2 is for text tags)
+        // Get term tags (from tags table - text_tags is for text tags)
         $tags = [];
         $tagResult = QueryBuilder::table('tags')
             ->select(['TgID', 'TgText'])
@@ -486,7 +486,7 @@ class WordListApiHandler
      * @param int    $offset     Offset for pagination
      * @param int    $maxTerms   Maximum terms to return
      *
-     * @return array<array<float|int|null|string>>
+     * @return array<int, array<string, mixed>>
      */
     public function selectImportedTerms(string $lastUpdate, int $offset, int $maxTerms): array
     {
@@ -501,8 +501,8 @@ class WordListApiHandler
                 'words.WoStatus',
                 "IFNULL(group_concat(DISTINCT tags.TgText ORDER BY tags.TgText separator ','), '') AS taglist"
             ])
-            ->leftJoin('wordtags', 'words.WoID', '=', 'wordtags.WtWoID')
-            ->leftJoin('tags', 'tags.TgID', '=', 'wordtags.WtTgID')
+            ->leftJoin('word_tag_map', 'words.WoID', '=', 'word_tag_map.WtWoID')
+            ->leftJoin('tags', 'tags.TgID', '=', 'word_tag_map.WtTgID')
             ->where('words.WoStatusChanged', '>', $lastUpdate)
             ->groupBy('words.WoID')
             ->limit($maxTerms)
@@ -517,7 +517,7 @@ class WordListApiHandler
      * @param int    $currentpage Current page number
      * @param int    $recno       Number of imported terms
      *
-     * @return array{navigation: array{current_page: int, total_pages: int}, terms: array<array<float|int|null|string>>}
+     * @return array{navigation: array{current_page: int, total_pages: int}, terms: array<int, array<string, mixed>>}
      */
     public function importedTermsList(string $lastUpdate, int $currentpage, int $recno): array
     {

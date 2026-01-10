@@ -31,9 +31,9 @@ class TagTypeTest extends TestCase
         $this->assertEquals('tags', TagType::TERM->tableName());
     }
 
-    public function testTableNameReturnsTags2ForText(): void
+    public function testTableNameReturnsTextTagsForText(): void
     {
-        $this->assertEquals('tags2', TagType::TEXT->tableName());
+        $this->assertEquals('text_tags', TagType::TEXT->tableName());
     }
 
     // ===== columnPrefix Tests =====
@@ -100,12 +100,12 @@ class TagTypeTest extends TestCase
 
     public function testAssociationTableReturnsWordtagsForTerm(): void
     {
-        $this->assertEquals('wordtags', TagType::TERM->associationTable());
+        $this->assertEquals('word_tag_map', TagType::TERM->associationTable());
     }
 
     public function testAssociationTableReturnsTexttagsForText(): void
     {
-        $this->assertEquals('texttags', TagType::TEXT->associationTable());
+        $this->assertEquals('text_tag_map', TagType::TEXT->associationTable());
     }
 
     // ===== label Tests =====
