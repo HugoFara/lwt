@@ -294,7 +294,7 @@ class DictionaryAdapter
         $wb2 = $dicts['dict2'];
         $wb3 = $dicts['translator'];
         $escapedWord = htmlspecialchars($word, ENT_QUOTES, 'UTF-8');
-        $r = '<span class="smaller">';
+        $r = '<span class="is-size-7">';
         $r .= '<span class="click" data-action="translate-word-direct" ' .
         'data-url="' . htmlspecialchars($wb1, ENT_QUOTES, 'UTF-8') . '" ' .
         'data-word="' . $escapedWord . '">[1]</span> ';

@@ -496,12 +496,6 @@ img {
 .scoregreen {
     color: #006400;
 }
-.bigger {
-    font-size: 130%;
-}
-.smaller {
-    font-size: 80%;
-}
 .backgray {
     /*background-color: #DDDDDD;*/
     background-color: #222222;
