@@ -525,7 +525,7 @@ $words = $query
 | Legacy PHP files remaining | 60+ | 0 |
 | Route definitions | 0 | 80+ |
 | Test files for routing | 0 | 2 (1000+ lines) |
-| Feature modules | 0 | 10 |
+| Feature modules | 0 | 11 |
 | Use case classes | 0 | 76 |
 | API handlers | 0 | 20+ |
 
@@ -1212,13 +1212,14 @@ $title = $validator->getString('title', '');
 
 ### 15. Modular Architecture (src/Modules)
 
-Version 3 introduces a modular architecture with 10 feature modules, each following Clean Architecture principles.
+Version 3 introduces a modular architecture with 11 feature modules, each following Clean Architecture principles.
 
 #### Module List
 
 | Module | Purpose |
 |--------|---------|
 | `Admin` | Administration, settings, backup, statistics |
+| `Book` | EPUB import, book management, chapter navigation |
 | `Dictionary` | Dictionary integrations and local dictionaries |
 | `Feed` | RSS feed management |
 | `Home` | Dashboard and landing page |
@@ -1258,6 +1259,7 @@ src/Modules/[Module]/
 |--------|-----------|----------|-------|
 | Text | 9 | 7 | 18 |
 | Vocabulary | 7 | 7 | 22 |
+| Book | 2 | 2 | 4 |
 | Language | 5 | 1 | 5 |
 | Tags | 6 | 2 | 5 |
 | Review | 5 | 3 | 6 |
@@ -1510,6 +1512,284 @@ All legacy PHP endpoint files have been removed:
 | `inline_edit.php` | `/word/inline-edit` route |
 | `set_test_status.php` | `PUT /api/v1/review/status` |
 | `trans.php` | Direct dictionary URLs |
+
+### 19. Lemma Support
+
+Version 3 adds lemma (base form) support for vocabulary items, enabling word family grouping.
+
+#### Purpose
+
+Lemmatization groups related word forms (e.g., "runs", "running", "ran") under a common base form. This enables:
+
+- Word family queries for vocabulary review
+- Better organization of inflected forms
+- Foundation for automatic lemmatization in future versions
+
+#### Database Changes
+
+**Migration:** `db/migrations/20260109_200000_add_lemma_support.sql`
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `WoLemma` | `VARCHAR(250)` | Lemma in original case |
+| `WoLemmaLC` | `VARCHAR(250)` | Lowercase lemma for lookups |
+
+**Index:** `idx_words_lemma` on `(WoLemmaLC, WoLgID)` for efficient word family queries.
+
+#### Key Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `Term` entity | `src/Modules/Vocabulary/Domain/Term.php` | Domain model with lemma properties |
+| `MySqlTermRepository` | `src/Modules/Vocabulary/Infrastructure/` | `findByLemma()` method for word family queries |
+| `WordService` | `src/Modules/Vocabulary/Application/Services/` | Lemma handling in CRUD operations |
+
+#### Usage
+
+```php
+// Domain entity
+$term->updateLemma('run');  // Sets both WoLemma and WoLemmaLC
+
+// Repository query
+$wordFamily = $repository->findByLemma($languageId, 'run');
+```
+
+#### User Interaction
+
+- Lemma input field added to word edit forms
+- Users manually enter lemmas when creating or editing terms
+- Future: Automatic lemmatization via NLP service
+
+### 20. EPUB Import with Auto-Split
+
+Version 3 adds unified text import with EPUB file support and automatic splitting for large texts.
+
+#### Purpose
+
+- Import EPUB e-books directly into LWT
+- Automatic chapter extraction from EPUB structure
+- Auto-split large texts (>60KB) at paragraph boundaries
+- Track reading progress across book chapters
+
+#### Database Changes
+
+**Migration:** `db/migrations/20260109_195419_add_books_table.sql`
+
+**New `books` table:**
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `BkID` | `SMALLINT` | Primary key |
+| `BkUsID` | `SMALLINT` | User ID (multi-user mode) |
+| `BkLgID` | `SMALLINT` | Language (FK to languages) |
+| `BkTitle` | `VARCHAR(200)` | Book title |
+| `BkAuthor` | `VARCHAR(200)` | Author name |
+| `BkSourceType` | `ENUM` | 'text', 'epub', or 'pdf' |
+| `BkSourceHash` | `CHAR(64)` | SHA-256 for duplicate detection |
+| `BkTotalChapters` | `SMALLINT` | Total chapter count |
+| `BkCurrentChapter` | `SMALLINT` | Current reading position |
+
+**Columns added to `texts` table:**
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `TxBkID` | `SMALLINT` | Reference to book (FK, cascade delete) |
+| `TxChapterNum` | `SMALLINT` | Chapter number (1-based) |
+| `TxChapterTitle` | `VARCHAR(200)` | Chapter title |
+
+#### Key Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `EpubParserService` | `src/Modules/Book/Application/Services/` | EPUB extraction using `kiwilan/php-ebook` |
+| `TextSplitterService` | `src/Modules/Book/Application/Services/` | Split large texts at paragraph boundaries |
+| `Book` entity | `src/Modules/Book/Domain/Book.php` | Book domain model with progress tracking |
+| `ImportEpub` use case | `src/Modules/Book/Application/UseCases/` | Orchestrates EPUB import workflow |
+| `BookController` | `src/Modules/Book/Http/` | Handles `/books` and `/book/import` routes |
+
+#### Text Splitting Algorithm
+
+```php
+// TextSplitterService constants
+const DEFAULT_MAX_BYTES = 60000;   // Target chunk size
+const ABSOLUTE_MAX_BYTES = 65000;  // MySQL TEXT limit
+
+// Splits at paragraph boundaries (\n\n) to keep chunks under 60KB
+$chapters = $splitter->split($longText, 60000);
+```
+
+#### User Interaction
+
+1. Navigate to `/book/import`
+2. Upload EPUB file and select language
+3. System extracts metadata and chapters automatically
+4. Large chapters are auto-split at paragraph boundaries
+5. Each chapter becomes a linked text record
+6. Reading interface shows chapter navigation (prev/next/dropdown)
+7. Progress tracked per book
+
+### 21. Piper Text-to-Speech Service
+
+Version 3 adds a Python microservice for high-quality text-to-speech using Piper TTS.
+
+#### Purpose
+
+- High-quality neural TTS for language learning
+- Multiple voice options per language
+- Voice management (download, install, delete)
+- Integration with MeCab/Jieba parsers for CJK languages
+
+#### Architecture
+
+```text
+┌─────────────────┐     HTTP      ┌─────────────────┐
+│   PHP Backend   │ ───────────►  │  Python NLP     │
+│   (LWT App)     │               │  (FastAPI)      │
+└─────────────────┘               └─────────────────┘
+                                         │
+                                         ▼
+                                  ┌─────────────────┐
+                                  │   Piper TTS     │
+                                  │   + MeCab/Jieba │
+                                  └─────────────────┘
+```
+
+#### Database Changes
+
+**Migration:** `db/migrations/20260109_180418_add_piper_voice.sql`
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `LgPiperVoiceId` | `VARCHAR(100)` | Piper voice ID (e.g., 'en_US-lessac-medium') |
+
+#### Python Microservice
+
+**Location:** `services/nlp/`
+
+| File | Purpose |
+|------|---------|
+| `app/main.py` | FastAPI entry point |
+| `app/services/piper_tts.py` | Piper TTS synthesis |
+| `app/services/voice_manager.py` | Voice catalog and downloads |
+| `app/services/parsers/mecab.py` | Japanese text parsing |
+| `app/services/parsers/jieba.py` | Chinese text parsing |
+| `app/routers/tts.py` | TTS REST endpoints |
+| `app/routers/parse.py` | Text parsing endpoints |
+
+#### PHP Integration
+
+**Handler:** `src/backend/Api/V1/Handlers/NlpServiceHandler.php`
+
+```php
+// Synthesize speech
+$audioDataUrl = $handler->speak($text, $voiceId);
+
+// Voice management
+$voices = $handler->getVoices();
+$handler->downloadVoice('en_US-lessac-medium');
+$handler->deleteVoice('en_US-lessac-medium');
+
+// Text parsing
+$tokens = $handler->parse($text, 'mecab');
+```
+
+#### REST Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/tts/speak` | POST | Synthesize text to audio |
+| `/tts/voices` | GET | List all available voices |
+| `/tts/voices/installed` | GET | List installed voices |
+| `/tts/voices/download` | POST | Download voice from catalog |
+| `/tts/voices/{id}` | DELETE | Remove installed voice |
+| `/parse/` | POST | Parse text with MeCab/Jieba |
+| `/parse/available` | GET | List available parsers |
+
+#### Docker Configuration
+
+```yaml
+# docker-compose.yml
+services:
+  nlp:
+    build: ./services/nlp
+    volumes:
+      - ./services/nlp/voices:/app/voices
+    environment:
+      - PIPER_VOICES_DIR=/app/voices
+```
+
+#### User Interaction
+
+1. Admin selects Piper voice for a language in TTS settings
+2. User clicks speak button when reading text
+3. Text sent to NLP service for synthesis
+4. Audio returned as base64 data URL and played inline
+5. Additional voices can be downloaded from the admin panel
+
+### 22. Multi-Word Expression Visual Display
+
+Version 3 enhances multi-word expression (MWE) display with connected underlines and status colors.
+
+#### Purpose
+
+- Visually connect words that form a multi-word expression
+- Show MWE status through color-coded underlines
+- Display MWE translation on hover over any word in the group
+
+#### Implementation
+
+**API Changes:** `src/Modules/Text/Http/TextApiHandler.php`
+
+Multi-word data now includes:
+
+| Field | Purpose |
+|-------|---------|
+| `translation` | MWE translation |
+| `status` | Learning status (0-5, 98, 99) |
+| `wordId` | MWE word ID |
+| `position` | Starting position in text |
+
+**Frontend Renderer:** `src/frontend/js/modules/text/pages/reading/text_renderer.ts`
+
+```typescript
+// Wraps MWE words in connected group
+<span class="mw-group mw-status{status}"
+      data-mw-text="multi word"
+      data-mw-trans="translation">
+  <span class="word">multi</span>
+  <span class="word">word</span>
+</span>
+```
+
+#### CSS Styling
+
+**File:** `src/frontend/css/base/styles.css`
+
+| Class | Style |
+|-------|-------|
+| `.mw-group` | Connected bottom border (2px solid) |
+| `.mw-status0` | Blue (`#5ABAFF`) - new |
+| `.mw-status1-5` | Orange → yellow → green gradient |
+| `.mw-status99` | Light green (`#CCFFCC`) - well-known |
+| `.mw-status98` | Gray dashed (`#888888`) - ignored |
+
+Individual word underlines are hidden within groups:
+
+```css
+.mw-group .wsty,
+.mw-group .word,
+.mw-group .mword {
+  border-bottom: none;
+}
+```
+
+#### User Interaction
+
+1. When reading text with saved multi-word expressions
+2. All words in the MWE display a connected bottom border
+3. Border color indicates learning status
+4. Hovering over any word in the group shows MWE translation
+5. Clear visual indication that words form a semantic unit
 
 ## Future Improvements
 
