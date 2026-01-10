@@ -35,6 +35,11 @@ use Lwt\Modules\Vocabulary\Application\UseCases\UpdateTermStatus;
 
 // Services
 use Lwt\Modules\Vocabulary\Application\Services\SimilarityCalculator;
+use Lwt\Modules\Vocabulary\Application\Services\LemmaService;
+
+// Lemmatizers
+use Lwt\Modules\Vocabulary\Domain\LemmatizerInterface;
+use Lwt\Modules\Vocabulary\Infrastructure\Lemmatizers\DictionaryLemmatizer;
 
 // Infrastructure
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
@@ -129,6 +134,23 @@ class VocabularyServiceProvider implements ServiceProviderInterface
 
         $container->singleton(ExportService::class, function (Container $_c) {
             return new ExportService();
+        });
+
+        // Register Lemmatizer
+        $container->singleton(LemmatizerInterface::class, function (Container $_c) {
+            return new DictionaryLemmatizer();
+        });
+
+        $container->singleton(DictionaryLemmatizer::class, function (Container $c): DictionaryLemmatizer {
+            /** @var DictionaryLemmatizer */
+            return $c->getTyped(LemmatizerInterface::class);
+        });
+
+        $container->singleton(LemmaService::class, function (Container $c) {
+            return new LemmaService(
+                $c->getTyped(LemmatizerInterface::class),
+                $c->getTyped(MySqlTermRepository::class)
+            );
         });
 
         // Register Facade
