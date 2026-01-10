@@ -171,4 +171,37 @@ class LemmaServiceTest extends TestCase
         $result = $this->service->getAvailableLanguages();
         $this->assertSame([], $result);
     }
+
+    // =========================================================================
+    // Phase 4: Smart Matching Tests
+    // =========================================================================
+
+    public function testLinkTextItemsByLemmaReturnsEmptyWhenLanguageNotSupported(): void
+    {
+        $this->mockLemmatizer
+            ->expects($this->once())
+            ->method('supportsLanguage')
+            ->with('unsupported')
+            ->willReturn(false);
+
+        $result = $this->service->linkTextItemsByLemma(1, 'unsupported');
+
+        $this->assertSame(['linked' => 0, 'unmatched' => 0, 'errors' => 0], $result);
+    }
+
+    public function testLinkTextItemsByLemmaCallsSupportsLanguage(): void
+    {
+        $this->mockLemmatizer
+            ->expects($this->once())
+            ->method('supportsLanguage')
+            ->with('en')
+            ->willReturn(false);
+
+        // When language is not supported, method should return early
+        $result = $this->service->linkTextItemsByLemma(1, 'en');
+
+        $this->assertArrayHasKey('linked', $result);
+        $this->assertArrayHasKey('unmatched', $result);
+        $this->assertArrayHasKey('errors', $result);
+    }
 }
