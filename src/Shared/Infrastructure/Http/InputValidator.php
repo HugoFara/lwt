@@ -795,6 +795,20 @@ class InputValidator
     // ===== Session persistence methods =====
 
     /**
+     * Clear a session key.
+     *
+     * @param string $sessKey Session key to clear
+     *
+     * @return void
+     */
+    public static function clearSessionKey(string $sessKey): void
+    {
+        if (isset($_SESSION[$sessKey])) {
+            unset($_SESSION[$sessKey]);
+        }
+    }
+
+    /**
      * Get a string from request, persisting to session.
      *
      * If the request parameter exists, updates the session with its value.

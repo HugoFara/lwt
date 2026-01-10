@@ -16,11 +16,13 @@ namespace Lwt\Modules\Feed\Http;
 
 use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Modules\Feed\Domain\Feed;
+use Lwt\Modules\Feed\Infrastructure\FeedWizardSessionManager;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\Validation;
+use Lwt\Shared\Infrastructure\Http\FlashMessageService;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
@@ -55,32 +57,34 @@ class FeedController
     private LanguageFacade $languageFacade;
 
     /**
+     * Wizard session manager.
+     */
+    private FeedWizardSessionManager $wizardSession;
+
+    /**
+     * Flash message service.
+     */
+    private FlashMessageService $flashService;
+
+    /**
      * Constructor.
      *
-     * @param FeedFacade     $feedFacade     Feed facade
-     * @param LanguageFacade $languageFacade Language facade
+     * @param FeedFacade               $feedFacade     Feed facade
+     * @param LanguageFacade           $languageFacade Language facade
+     * @param FeedWizardSessionManager $wizardSession  Wizard session manager
+     * @param FlashMessageService      $flashService   Flash message service
      */
     public function __construct(
         FeedFacade $feedFacade,
-        LanguageFacade $languageFacade
+        LanguageFacade $languageFacade,
+        ?FeedWizardSessionManager $wizardSession = null,
+        ?FlashMessageService $flashService = null
     ) {
         $this->viewPath = __DIR__ . '/../Views/';
         $this->feedFacade = $feedFacade;
         $this->languageFacade = $languageFacade;
-    }
-
-    /**
-     * Get the wizard session data as typed array.
-     *
-     * @return array<string, mixed>
-     */
-    private function getWizardSession(): array
-    {
-        if (!isset($_SESSION['wizard']) || !is_array($_SESSION['wizard'])) {
-            $_SESSION['wizard'] = [];
-        }
-        /** @var array<string, mixed> */
-        return $_SESSION['wizard'];
+        $this->wizardSession = $wizardSession ?? new FeedWizardSessionManager();
+        $this->flashService = $flashService ?? new FlashMessageService();
     }
 
     /**
@@ -90,28 +94,7 @@ class FeedController
      */
     private function getWizardFeed(): array
     {
-        $wizard = $this->getWizardSession();
-        if (!isset($wizard['feed']) || !is_array($wizard['feed'])) {
-            return [];
-        }
-        return $wizard['feed'];
-    }
-
-    /**
-     * Get a string value from wizard session.
-     *
-     * @param string $key     Key to retrieve
-     * @param string $default Default value
-     *
-     * @return string
-     */
-    private function getWizardString(string $key, string $default = ''): string
-    {
-        $wizard = $this->getWizardSession();
-        if (!isset($wizard[$key])) {
-            return $default;
-        }
-        return is_string($wizard[$key]) ? $wizard[$key] : $default;
+        return $this->wizardSession->getFeed();
     }
 
     /**
@@ -582,8 +565,6 @@ class FeedController
      */
     public function index(array $params): void
     {
-        session_start();
-
         $currentLang = Validation::language(
             InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
@@ -773,18 +754,13 @@ class FeedController
             $message = $this->feedFacade->saveTextsFromFeed($feedData);
         }
 
-        if (isset($_SESSION['feed_loaded'])) {
-            /** @var array<string> $feedLoaded */
-            $feedLoaded = $_SESSION['feed_loaded'];
-            foreach ($feedLoaded as $lf) {
-                if (substr($lf, 0, 5) == "Error") {
-                    echo "\n<div class=\"red\"><p>";
-                } else {
-                    echo "\n<div class=\"msgblue\"><p class=\"hide_message\">";
-                }
-                echo "+++ ", $lf, " +++</p></div>";
-            }
-            unset($_SESSION['feed_loaded']);
+        // Display flash messages from previous requests
+        $flashMessages = $this->flashService->getAndClear();
+        foreach ($flashMessages as $flashMsg) {
+            $cssClass = FlashMessageService::getCssClass($flashMsg['type']);
+            $hideClass = FlashMessageService::isError($flashMsg['type']) ? '' : ' class="hide_message"';
+            echo "\n<div class=\"{$cssClass}\"><p{$hideClass}>";
+            echo "+++ ", htmlspecialchars($flashMsg['message']), " +++</p></div>";
         }
 
         $this->displayMessage($message);
@@ -825,7 +801,7 @@ class FeedController
             if (!$this->feedFacade->validateRegexPattern($currentQuery)) {
                 $currentQuery = '';
                 $searchTerm = '';
-                unset($_SESSION['currentwordquery']);
+                InputValidator::clearSessionKey('currentwordquery');
                 if (InputValidator::has('query')) {
                     echo '<p id="hide3" class="warning-message">+++ Warning: Invalid Search +++</p>';
                 }
@@ -930,8 +906,8 @@ class FeedController
         PageLayoutHelper::renderPageStart('Manage ' . $this->languageFacade->getLanguageName($currentLang) . ' Feeds', true);
 
         // Clear wizard session if exists
-        if (isset($_SESSION['wizard'])) {
-            unset($_SESSION['wizard']);
+        if ($this->wizardSession->exists()) {
+            $this->wizardSession->clear();
         }
 
         // Handle mark actions (delete, delete articles, reset articles)
@@ -1064,16 +1040,13 @@ class FeedController
      */
     private function displaySessionMessages(): void
     {
-        if (!isset($_SESSION['feed_loaded'])) {
-            return;
+        $flashMessages = $this->flashService->getAndClear();
+        foreach ($flashMessages as $flashMsg) {
+            $cssClass = FlashMessageService::getCssClass($flashMsg['type']);
+            $hideClass = FlashMessageService::isError($flashMsg['type']) ? '' : ' class="hide_message"';
+            echo "\n<div class=\"{$cssClass}\"><p{$hideClass}>";
+            echo "+++ ", htmlspecialchars($flashMsg['message']), " +++</p></div>";
         }
-
-        /** @var array<string> $feedLoaded */
-        $feedLoaded = $_SESSION['feed_loaded'];
-        foreach ($feedLoaded as $lf) {
-            echo "\n<div class=\"msgblue\"><p class=\"hide_message\">+++ ", $lf, " +++</p></div>";
-        }
-        unset($_SESSION['feed_loaded']);
     }
 
     /**
@@ -1235,8 +1208,6 @@ class FeedController
      */
     public function wizard(array $params): void
     {
-        session_start();
-
         $step = InputValidator::getInt('step', 1) ?? 1;
 
         switch ($step) {
@@ -1270,9 +1241,7 @@ class FeedController
         PageLayoutHelper::renderPageStart('Feed Wizard', false);
 
         $errorMessage = InputValidator::has('err') ? true : null;
-        /** @var array{rss_url?: string, feed?: array<string|int, mixed>} $wizard */
-        $wizard = $_SESSION['wizard'] ?? [];
-        $rssUrl = $wizard['rss_url'] ?? null;
+        $rssUrl = $this->wizardSession->getRssUrl() ?: null;
 
         include $this->viewPath . 'wizard_step1.php';
 
@@ -1289,7 +1258,7 @@ class FeedController
         // Handle edit mode - load existing feed
         $editFeedId = InputValidator::getInt('edit_feed');
         $rssUrl = InputValidator::getString('rss_url');
-        if ($editFeedId !== null && !isset($_SESSION['wizard'])) {
+        if ($editFeedId !== null && !$this->wizardSession->exists()) {
             $this->loadExistingFeedForEdit($editFeedId);
         } elseif ($rssUrl !== '') {
             $this->loadNewFeedFromUrl($rssUrl);
@@ -1298,10 +1267,7 @@ class FeedController
         // Process session parameters
         $this->processStep2SessionParams();
 
-        /** @var array{feed?: array<string|int, mixed>} $wizardSession */
-        $wizardSession = $_SESSION['wizard'] ?? [];
-        /** @var array<string|int, mixed> $feedData */
-        $feedData = $wizardSession['feed'] ?? [];
+        $feedData = $this->wizardSession->getFeed();
         $feedLen = count(array_filter(array_keys($feedData), 'is_numeric'));
 
         // Handle article section change
@@ -1315,7 +1281,7 @@ class FeedController
 
         PageLayoutHelper::renderPageStartNobody('Feed Wizard');
 
-        $wizardData = &$_SESSION['wizard'];
+        $wizardData = $this->wizardSession->getAll();
         $feedHtml = $this->getStep2FeedHtml();
 
         /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
@@ -1338,7 +1304,7 @@ class FeedController
 
         PageLayoutHelper::renderPageStartNobody("Feed Wizard");
 
-        $wizardData = &$_SESSION['wizard'];
+        $wizardData = $this->wizardSession->getAll();
         $feedHtml = $this->getStep3FeedHtml();
 
         /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
@@ -1358,10 +1324,10 @@ class FeedController
 
         $filterTags = InputValidator::getString('filter_tags');
         if ($filterTags !== '') {
-            $_SESSION['wizard']['filter_tags'] = $filterTags;
+            $this->wizardSession->setFilterTags($filterTags);
         }
 
-        $options = $this->getWizardString('options');
+        $options = $this->wizardSession->getOptions();
         $autoUpdI = $this->feedFacade->getNfOption($options, 'autoupdate');
         if ($autoUpdI === null || !is_string($autoUpdI)) {
             $autoUpdV = null;
@@ -1371,7 +1337,7 @@ class FeedController
             $autoUpdI = substr($autoUpdI, 0, -1);
         }
 
-        $wizardData = &$_SESSION['wizard'];
+        $wizardData = $this->wizardSession->getAll();
         $languages = $this->feedFacade->getLanguages();
         $service = $this->feedFacade;
 
@@ -1379,7 +1345,7 @@ class FeedController
         include $this->viewPath . 'wizard_step4.php';
 
         // Clear wizard session after step 4
-        unset($_SESSION['wizard']);
+        $this->wizardSession->clear();
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -1393,11 +1359,11 @@ class FeedController
     {
         $selectMode = InputValidator::getString('select_mode');
         if ($selectMode !== '') {
-            $_SESSION['wizard']['select_mode'] = $selectMode;
+            $this->wizardSession->setSelectMode($selectMode);
         }
         $hideImages = InputValidator::getString('hide_images');
         if ($hideImages !== '') {
-            $_SESSION['wizard']['hide_images'] = $hideImages;
+            $this->wizardSession->setHideImages($hideImages);
         }
     }
 
@@ -1417,15 +1383,15 @@ class FeedController
             exit();
         }
 
-        $_SESSION['wizard']['edit_feed'] = $feedId;
-        $_SESSION['wizard']['rss_url'] = $row['NfSourceURI'];
+        $this->wizardSession->setEditFeedId($feedId);
+        $this->wizardSession->setRssUrl($row['NfSourceURI']);
 
         // Parse article tags
         $articleTags = explode('|', str_replace('!?!', '|', $row['NfArticleSectionTags']));
         $articleTagsHtml = '';
         foreach ($articleTags as $tag) {
             if (substr_compare(trim($tag), "redirect", 0, 8) == 0) {
-                $_SESSION['wizard']['redirect'] = trim($tag) . ' | ';
+                $this->wizardSession->setRedirect(trim($tag) . ' | ');
             } else {
                 $articleTagsHtml .= '<li class="left">'
                 . IconHelper::render('x', ['class' => 'delete_selection', 'title' => 'Delete Selection', 'alt' => '-'])
@@ -1433,7 +1399,7 @@ class FeedController
                 '</li>';
             }
         }
-        $_SESSION['wizard']['article_tags'] = $articleTagsHtml;
+        $this->wizardSession->setArticleTags($articleTagsHtml);
 
         // Parse filter tags
         $filterTags = explode('|', str_replace('!?!', '|', $row['NfFilterTags']));
@@ -1446,35 +1412,31 @@ class FeedController
                 '</li>';
             }
         }
-        $_SESSION['wizard']['filter_tags'] = $filterTagsHtml;
+        $this->wizardSession->setFilterTags($filterTagsHtml);
 
         $feedData = $this->feedFacade->detectAndParseFeed($row['NfSourceURI']);
         if (!is_array($feedData) || empty($feedData)) {
-            $wizardSession = isset($_SESSION['wizard']) && is_array($_SESSION['wizard'])
-                ? $_SESSION['wizard']
-                : [];
-            unset($wizardSession['feed']);
-            $_SESSION['wizard'] = $wizardSession;
+            $this->wizardSession->remove('feed');
             header("Location: /feeds/wizard?step=1&err=1");
             exit();
         }
         // Update feed data with title
         $feedData['feed_title'] = $row['NfName'];
-        $_SESSION['wizard']['feed'] = $feedData;
-        $_SESSION['wizard']['options'] = $row['NfOptions'];
+        $this->wizardSession->setFeed($feedData);
+        $this->wizardSession->setOptions($row['NfOptions']);
 
         $feedText = isset($feedData['feed_text']) && is_string($feedData['feed_text'])
             ? $feedData['feed_text']
             : '';
         if ($feedText === '') {
             $feedData['feed_text'] = '';
-            $_SESSION['wizard']['feed'] = $feedData;
-            $_SESSION['wizard']['detected_feed'] = 'Detected: «Webpage Link»';
+            $this->wizardSession->setFeed($feedData);
+            $this->wizardSession->setDetectedFeed('Detected: «Webpage Link»');
         } else {
-            $_SESSION['wizard']['detected_feed'] = 'Detected: «' . $feedText . '»';
+            $this->wizardSession->setDetectedFeed('Detected: «' . $feedText . '»');
         }
 
-        $_SESSION['wizard']['lang'] = $row['NfLgID'];
+        $this->wizardSession->setLang((string)$row['NfLgID']);
 
         // Handle custom article source
         $articleSource = $this->feedFacade->getNfOption($row['NfOptions'], 'article_source');
@@ -1490,7 +1452,7 @@ class FeedController
                     $feedData[$i] = $item;
                 }
             }
-            $_SESSION['wizard']['feed'] = $feedData;
+            $this->wizardSession->setFeed($feedData);
         }
     }
 
@@ -1500,14 +1462,14 @@ class FeedController
      * @param string $rssUrl Feed URL
      *
      * @return void
-     *
-     * @psalm-suppress MixedArrayAccess,MixedAssignment,MixedOperand - Session wizard data
      */
     private function loadNewFeedFromUrl(string $rssUrl): void
     {
+        $existingFeed = $this->wizardSession->getFeed();
+        $existingUrl = $this->wizardSession->getRssUrl();
         if (
-            isset($_SESSION['wizard']) && !empty($_SESSION['wizard']['feed']) &&
-            $rssUrl === $_SESSION['wizard']['rss_url']
+            $this->wizardSession->exists() && !empty($existingFeed) &&
+            $rssUrl === $existingUrl
         ) {
             session_destroy();
             throw new \RuntimeException(
@@ -1515,33 +1477,37 @@ class FeedController
             );
         }
 
-        $_SESSION['wizard']['feed'] = $this->feedFacade->detectAndParseFeed($rssUrl);
-        $_SESSION['wizard']['rss_url'] = $rssUrl;
+        $feedData = $this->feedFacade->detectAndParseFeed($rssUrl);
+        if ($feedData !== false) {
+            $this->wizardSession->setFeed($feedData);
+        }
+        $this->wizardSession->setRssUrl($rssUrl);
 
-        if ($_SESSION['wizard']['feed'] === false || (is_array($_SESSION['wizard']['feed']) && count($_SESSION['wizard']['feed']) === 0)) {
-            unset($_SESSION['wizard']['feed']);
+        $currentFeed = $this->wizardSession->getFeed();
+        if (empty($currentFeed)) {
+            $this->wizardSession->remove('feed');
             header("Location: /feeds/wizard?step=1&err=1");
             exit();
         }
 
-        if (!isset($_SESSION['wizard']['article_tags'])) {
-            $_SESSION['wizard']['article_tags'] = '';
+        if (!$this->wizardSession->has('article_tags')) {
+            $this->wizardSession->setArticleTags('');
         }
-        if (!isset($_SESSION['wizard']['filter_tags'])) {
-            $_SESSION['wizard']['filter_tags'] = '';
+        if (!$this->wizardSession->has('filter_tags')) {
+            $this->wizardSession->setFilterTags('');
         }
-        if (!isset($_SESSION['wizard']['options'])) {
-            $_SESSION['wizard']['options'] = 'edit_text=1';
+        if (!$this->wizardSession->has('options')) {
+            $this->wizardSession->setOptions('edit_text=1');
         }
-        if (!isset($_SESSION['wizard']['lang'])) {
-            $_SESSION['wizard']['lang'] = '';
+        if (!$this->wizardSession->has('lang')) {
+            $this->wizardSession->setLang('');
         }
 
-        if ($_SESSION['wizard']['feed']['feed_text'] != '') {
-            $_SESSION['wizard']['detected_feed'] = 'Detected: «' .
-            $_SESSION['wizard']['feed']['feed_text'] . '»';
+        $feedText = $this->wizardSession->getFeedText();
+        if ($feedText !== '') {
+            $this->wizardSession->setDetectedFeed('Detected: «' . $feedText . '»');
         } else {
-            $_SESSION['wizard']['detected_feed'] = 'Detected: «Webpage Link»';
+            $this->wizardSession->setDetectedFeed('Detected: «Webpage Link»');
         }
     }
 
@@ -1549,57 +1515,55 @@ class FeedController
      * Process step 2 session parameters.
      *
      * @return void
-     *
-     * @psalm-suppress MixedArrayAccess,MixedAssignment - Session wizard data
      */
     private function processStep2SessionParams(): void
     {
         $filterTags = InputValidator::getString('filter_tags');
         if ($filterTags !== '') {
-            $_SESSION['wizard']['filter_tags'] = $filterTags;
+            $this->wizardSession->setFilterTags($filterTags);
         }
         $selectedFeed = InputValidator::getString('selected_feed');
         if ($selectedFeed !== '') {
-            $_SESSION['wizard']['selected_feed'] = $selectedFeed;
+            $this->wizardSession->setSelectedFeed((int)$selectedFeed);
         }
         $maxim = InputValidator::getString('maxim');
         if ($maxim !== '') {
-            $_SESSION['wizard']['maxim'] = $maxim;
+            $this->wizardSession->setMaxim((int)$maxim);
         }
-        if (!isset($_SESSION['wizard']['maxim'])) {
-            $_SESSION['wizard']['maxim'] = 1;
+        if (!$this->wizardSession->has('maxim')) {
+            $this->wizardSession->setMaxim(1);
         }
         $selectMode = InputValidator::getString('select_mode');
         if ($selectMode !== '') {
-            $_SESSION['wizard']['select_mode'] = $selectMode;
+            $this->wizardSession->setSelectMode($selectMode);
         }
-        if (!isset($_SESSION['wizard']['select_mode'])) {
-            $_SESSION['wizard']['select_mode'] = '0';
+        if (!$this->wizardSession->has('select_mode')) {
+            $this->wizardSession->setSelectMode('0');
         }
         $hideImages = InputValidator::getString('hide_images');
         if ($hideImages !== '') {
-            $_SESSION['wizard']['hide_images'] = $hideImages;
+            $this->wizardSession->setHideImages($hideImages);
         }
-        if (!isset($_SESSION['wizard']['hide_images'])) {
-            $_SESSION['wizard']['hide_images'] = 'yes';
+        if (!$this->wizardSession->has('hide_images')) {
+            $this->wizardSession->setHideImages('yes');
         }
-        if (!isset($_SESSION['wizard']['redirect'])) {
-            $_SESSION['wizard']['redirect'] = '';
+        if (!$this->wizardSession->has('redirect')) {
+            $this->wizardSession->setRedirect('');
         }
-        if (!isset($_SESSION['wizard']['selected_feed'])) {
-            $_SESSION['wizard']['selected_feed'] = 0;
+        if (!$this->wizardSession->has('selected_feed')) {
+            $this->wizardSession->setSelectedFeed(0);
         }
-        if (!isset($_SESSION['wizard']['host'])) {
-            $_SESSION['wizard']['host'] = array();
+        if (!$this->wizardSession->has('host')) {
+            $this->wizardSession->set('host', []);
         }
         $hostName = InputValidator::getString('host_name');
         $hostStatus = InputValidator::getString('host_status');
         if ($hostStatus !== '' && $hostName !== '') {
-            $_SESSION['wizard']['host'][$hostName] = $hostStatus;
+            $this->wizardSession->setHostStatus($hostName, $hostStatus);
         }
         $nfName = InputValidator::getString('NfName');
         if ($nfName !== '') {
-            $_SESSION['wizard']['feed']['feed_title'] = $nfName;
+            $this->wizardSession->setFeedTitle($nfName);
         }
     }
 
@@ -1607,78 +1571,76 @@ class FeedController
      * Process step 3 session parameters.
      *
      * @return void
-     *
-     * @psalm-suppress MixedArrayAccess,MixedAssignment - Session wizard data
      */
     private function processStep3SessionParams(): void
     {
         $nfName = InputValidator::getString('NfName');
         if ($nfName !== '') {
-            $_SESSION['wizard']['feed']['feed_title'] = $nfName;
+            $this->wizardSession->setFeedTitle($nfName);
         }
         $nfArticleSection = InputValidator::getString('NfArticleSection');
         if ($nfArticleSection !== '') {
-            $_SESSION['wizard']['article_section'] = $nfArticleSection;
+            $this->wizardSession->setArticleSection($nfArticleSection);
         }
         $articleSelector = InputValidator::getString('article_selector');
         if ($articleSelector !== '') {
-            $_SESSION['wizard']['article_selector'] = $articleSelector;
+            $this->wizardSession->setArticleSelector($articleSelector);
         }
         $selectedFeed = InputValidator::getString('selected_feed');
         if ($selectedFeed !== '') {
-            $_SESSION['wizard']['selected_feed'] = $selectedFeed;
+            $this->wizardSession->setSelectedFeed((int)$selectedFeed);
         }
         $articleTags = InputValidator::getString('article_tags');
         if ($articleTags !== '') {
-            $_SESSION['wizard']['article_tags'] = $articleTags;
+            $this->wizardSession->setArticleTags($articleTags);
         }
         $html = InputValidator::getString('html');
         if ($html !== '') {
-            $_SESSION['wizard']['filter_tags'] = $html;
+            $this->wizardSession->setFilterTags($html);
         }
         $nfOptions = InputValidator::getString('NfOptions');
         if ($nfOptions !== '') {
-            $_SESSION['wizard']['options'] = $nfOptions;
+            $this->wizardSession->setOptions($nfOptions);
         }
         $nfLgId = InputValidator::getString('NfLgID');
         if ($nfLgId !== '') {
-            $_SESSION['wizard']['lang'] = $nfLgId;
+            $this->wizardSession->setLang($nfLgId);
         }
-        if (!isset($_SESSION['wizard']['article_tags'])) {
-            $_SESSION['wizard']['article_tags'] = '';
+        if (!$this->wizardSession->has('article_tags')) {
+            $this->wizardSession->setArticleTags('');
         }
         $maxim = InputValidator::getString('maxim');
         if ($maxim !== '') {
-            $_SESSION['wizard']['maxim'] = $maxim;
+            $this->wizardSession->setMaxim((int)$maxim);
         }
         $selectMode = InputValidator::getString('select_mode');
         if ($selectMode !== '') {
-            $_SESSION['wizard']['select_mode'] = $selectMode;
+            $this->wizardSession->setSelectMode($selectMode);
         }
         $hideImages = InputValidator::getString('hide_images');
         if ($hideImages !== '') {
-            $_SESSION['wizard']['hide_images'] = $hideImages;
+            $this->wizardSession->setHideImages($hideImages);
         }
-        if (!isset($_SESSION['wizard']['select_mode'])) {
-            $_SESSION['wizard']['select_mode'] = '';
+        if (!$this->wizardSession->has('select_mode')) {
+            $this->wizardSession->setSelectMode('');
         }
-        if (!isset($_SESSION['wizard']['maxim'])) {
-            $_SESSION['wizard']['maxim'] = 1;
+        if (!$this->wizardSession->has('maxim')) {
+            $this->wizardSession->setMaxim(1);
         }
-        if (!isset($_SESSION['wizard']['selected_feed'])) {
-            $_SESSION['wizard']['selected_feed'] = 0;
+        if (!$this->wizardSession->has('selected_feed')) {
+            $this->wizardSession->setSelectedFeed(0);
         }
-        if (!isset($_SESSION['wizard']['host2'])) {
-            $_SESSION['wizard']['host2'] = array();
+        if (!$this->wizardSession->has('host2')) {
+            $this->wizardSession->set('host2', []);
         }
         $hostName = InputValidator::getString('host_name');
         $hostStatus = InputValidator::getString('host_status');
         $hostStatus2 = InputValidator::getString('host_status2');
         if ($hostStatus !== '' && $hostName !== '') {
-            $_SESSION['wizard']['host'][$hostName] = $hostStatus;
+            $this->wizardSession->setHostStatus($hostName, $hostStatus);
         }
         if ($hostStatus2 !== '' && $hostName !== '') {
-            $_SESSION['wizard']['host2'][$hostName] = $hostStatus2;
+            $this->wizardSession->setHost2Status($hostName, $hostStatus2);
         }
     }
 
@@ -1689,79 +1651,114 @@ class FeedController
      * @param int    $feedLen        Number of feed items
      *
      * @return void
-     *
-     * @psalm-suppress MixedArrayAccess,MixedAssignment,MixedArrayOffset - Session wizard data
      */
     private function updateFeedArticleSource(string $articleSection, int $feedLen): void
     {
-        $_SESSION['wizard']['feed']['feed_text'] = $articleSection;
-        $source = $_SESSION['wizard']['feed']['feed_text'];
+        $this->wizardSession->setFeedText($articleSection);
+        $source = $articleSection;
 
         for ($i = 0; $i < $feedLen; $i++) {
-            if ($_SESSION['wizard']['feed']['feed_text'] != '') {
-                $_SESSION['wizard']['feed'][$i]['text'] = $_SESSION['wizard']['feed'][$i][$source];
-            } else {
-                unset($_SESSION['wizard']['feed'][$i]['text']);
+            $item = $this->wizardSession->getFeedItem($i);
+            if ($item === null) {
+                continue;
             }
-            unset($_SESSION['wizard']['feed'][$i]['html']);
+            if ($source !== '') {
+                /** @var mixed $sourceValue */
+                $sourceValue = $item[$source] ?? '';
+                $item['text'] = is_string($sourceValue) ? $sourceValue : '';
+            } else {
+                unset($item['text']);
+            }
+            unset($item['html']);
+            $this->wizardSession->setFeedItem($i, $item);
         }
-        $_SESSION['wizard']['host'] = array();
+        $this->wizardSession->clearHost();
     }
 
     /**
      * Get HTML content for step 2 feed preview.
      *
-     * @return string HTML content
-     *
-     * @psalm-suppress MixedArrayAccess,MixedArgument,MixedAssignment,MixedOperand,MixedArrayOffset - Session wizard data
+     * @return string|array HTML content
      */
-    private function getStep2FeedHtml(): string
+    private function getStep2FeedHtml(): string|array
     {
-        $i = $_SESSION['wizard']['selected_feed'];
-        /** @var list<mixed> */
-        $aFeed = [];
+        $i = $this->wizardSession->getSelectedFeed();
+        $existingHtml = $this->wizardSession->getFeedItemHtml($i);
 
-        if (!isset($_SESSION['wizard']['feed'][$i]['html'])) {
-            $aFeed = [$_SESSION['wizard']['feed'][$i]];
-            $charsetRaw = $this->feedFacade->getNfOption($_SESSION['wizard']['options'], 'charset');
+        if ($existingHtml === null) {
+            $feedItem = $this->wizardSession->getFeedItem($i);
+            if ($feedItem === null) {
+                return '';
+            }
+            // Build feed item array with required fields
+            /** @var array{link: string, title: string, audio?: string, text?: string} $typedItem */
+            $typedItem = [
+                'link' => isset($feedItem['link']) && is_string($feedItem['link']) ? $feedItem['link'] : '',
+                'title' => isset($feedItem['title']) && is_string($feedItem['title']) ? $feedItem['title'] : '',
+            ];
+            if (isset($feedItem['audio']) && is_string($feedItem['audio'])) {
+                $typedItem['audio'] = $feedItem['audio'];
+            }
+            if (isset($feedItem['text']) && is_string($feedItem['text'])) {
+                $typedItem['text'] = $feedItem['text'];
+            }
+            $aFeed = [$typedItem];
+            $charsetRaw = $this->feedFacade->getNfOption($this->wizardSession->getOptions(), 'charset');
             $charset = is_string($charsetRaw) ? $charsetRaw : null;
-            $_SESSION['wizard']['feed'][$i]['html'] = $this->feedFacade->extractTextFromArticle(
+            $html = $this->feedFacade->extractTextFromArticle(
                 $aFeed,
-                $_SESSION['wizard']['redirect'] . 'new',
+                $this->wizardSession->getRedirect() . 'new',
                 'iframe!?!script!?!noscript!?!head!?!meta!?!link!?!style',
                 $charset
             );
+            $this->wizardSession->setFeedItemHtml($i, $html);
+            return is_string($html) ? $html : (is_array($html) ? $html : '');
         }
 
-        return $_SESSION['wizard']['feed'][$i]['html'];
+        return $existingHtml;
     }
 
     /**
      * Get HTML content for step 3 feed preview.
      *
-     * @return string HTML content
-     *
-     * @psalm-suppress MixedArrayAccess,MixedArgument,MixedAssignment,MixedOperand,MixedArrayOffset - Session wizard data
+     * @return string|array HTML content
      */
-    private function getStep3FeedHtml(): string
+    private function getStep3FeedHtml(): string|array
     {
-        $i = $_SESSION['wizard']['selected_feed'];
-        /** @var list<mixed> */
-        $aFeed = [];
+        $i = $this->wizardSession->getSelectedFeed();
+        $existingHtml = $this->wizardSession->getFeedItemHtml($i);
 
-        if (!isset($_SESSION['wizard']['feed'][$i]['html'])) {
-            $aFeed = [$_SESSION['wizard']['feed'][$i]];
-            $charsetRaw = $this->feedFacade->getNfOption($_SESSION['wizard']['options'], 'charset');
+        if ($existingHtml === null) {
+            $feedItem = $this->wizardSession->getFeedItem($i);
+            if ($feedItem === null) {
+                return '';
+            }
+            // Build feed item array with required fields
+            /** @var array{link: string, title: string, audio?: string, text?: string} $typedItem */
+            $typedItem = [
+                'link' => isset($feedItem['link']) && is_string($feedItem['link']) ? $feedItem['link'] : '',
+                'title' => isset($feedItem['title']) && is_string($feedItem['title']) ? $feedItem['title'] : '',
+            ];
+            if (isset($feedItem['audio']) && is_string($feedItem['audio'])) {
+                $typedItem['audio'] = $feedItem['audio'];
+            }
+            if (isset($feedItem['text']) && is_string($feedItem['text'])) {
+                $typedItem['text'] = $feedItem['text'];
+            }
+            $aFeed = [$typedItem];
+            $charsetRaw = $this->feedFacade->getNfOption($this->wizardSession->getOptions(), 'charset');
             $charset = is_string($charsetRaw) ? $charsetRaw : null;
-            $_SESSION['wizard']['feed'][$i]['html'] = $this->feedFacade->extractTextFromArticle(
+            $html = $this->feedFacade->extractTextFromArticle(
                 $aFeed,
-                $_SESSION['wizard']['redirect'] . 'new',
+                $this->wizardSession->getRedirect() . 'new',
                 'iframe!?!script!?!noscript!?!head!?!meta!?!link!?!style',
                 $charset
             );
+            $this->wizardSession->setFeedItemHtml($i, $html);
+            return is_string($html) ? $html : (is_array($html) ? $html : '');
         }
 
-        return $_SESSION['wizard']['feed'][$i]['html'];
+        return $existingHtml;
     }
 
     /**
