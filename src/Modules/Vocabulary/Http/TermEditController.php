@@ -129,9 +129,10 @@ class TermEditController extends VocabularyBaseController
             $titletext = "New/Edit Term: " . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
-            $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
-                '", please go back and correct this!';
-            echo '<p class="msg">' . $message . '</p>';
+            echo '<div class="notification is-danger">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Error: Term in lowercase must be exactly = "' . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8') .
+                '", please go back and correct this!</div>';
             PageLayoutHelper::renderPageEnd();
             exit();
         }
@@ -348,9 +349,10 @@ class TermEditController extends VocabularyBaseController
             $titletext = "New/Edit Term: " . htmlspecialchars(Escaping::prepareTextdata($woTextLC), ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
-            $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
-                '", please go back and correct this!';
-            echo '<p class="msg">' . $message . '</p>';
+            echo '<div class="notification is-danger">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Error: Term in lowercase must be exactly = "' . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8') .
+                '", please go back and correct this!</div>';
             PageLayoutHelper::renderPageEnd();
             exit();
         }

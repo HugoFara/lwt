@@ -221,13 +221,17 @@ class TermImportController extends VocabularyBaseController
         $langId = InputValidator::getInt("LgID", 0) ?? 0;
 
         if ($langId === 0) {
-            echo '<p class="msgred">Error: No language selected</p>';
+            echo '<div class="notification is-danger">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Error: No language selected</div>';
             return;
         }
 
         $langData = $uploadService->getLanguageData($langId);
         if ($langData === null) {
-            echo '<p class="msgred">Error: Invalid language</p>';
+            echo '<div class="notification is-danger">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Error: Invalid language</div>';
             return;
         }
 
@@ -259,7 +263,9 @@ class TermImportController extends VocabularyBaseController
             $fileName = $uploadedFile["tmp_name"];
         } else {
             if ($uploadText === '') {
-                echo '<p class="msgred">Error: No data to import</p>';
+                echo '<div class="notification is-danger">' .
+                    '<button class="delete" aria-label="close"></button>' .
+                    'Error: No data to import</div>';
                 return;
             }
             $fileName = $uploadService->createTempFile($uploadText);
@@ -300,7 +306,9 @@ class TermImportController extends VocabularyBaseController
                 $uploadService->importTagsOnly(['tl' => $fields['tl']], $tabType, $fileName, $ignoreFirst);
                 echo '<p>Tags imported successfully.</p>';
             } else {
-                echo '<p class="msgred">Error: No term column specified</p>';
+                echo '<div class="notification is-danger">' .
+                    '<button class="delete" aria-label="close"></button>' .
+                    'Error: No term column specified</div>';
             }
         } finally {
             // Clean up temp file if we created it
