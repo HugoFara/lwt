@@ -65,7 +65,7 @@ if ($isNew) {
 
 <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
-<form class="validate" method="post"
+<form class="validate" method="post" enctype="multipart/form-data"
       action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>"
       x-data="{ showAnnotation: <?php echo $isNew ? 'false' : 'true'; ?> }">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
@@ -139,6 +139,31 @@ if ($isNew) {
                 For EPUB files, use the <a href="/book/import">Import EPUB</a> feature.
             </p>
         </div>
+
+        <?php if ($isNew): ?>
+        <!-- Subtitle File Import -->
+        <div class="field">
+            <label class="label">Import from Subtitle File</label>
+            <div class="file has-name is-fullwidth">
+                <label class="file-label">
+                    <input class="file-input" type="file" name="subtitleFile"
+                           accept=".srt,.vtt"
+                           onchange="this.closest('.file').querySelector('.file-name').textContent = this.files[0]?.name || 'No file selected'" />
+                    <span class="file-cta">
+                        <span class="file-icon">
+                            <?php echo IconHelper::render('file-text', ['alt' => 'Upload']); ?>
+                        </span>
+                        <span class="file-label">Choose .srt or .vtt file...</span>
+                    </span>
+                    <span class="file-name">No file selected</span>
+                </label>
+            </div>
+            <p class="help">
+                Optional. Select a subtitle file to extract text into the textarea above.
+            </p>
+            <p id="subtitleStatus" class="help"></p>
+        </div>
+        <?php endif; ?>
 
         <!-- Annotated Text (only for existing texts) -->
         <?php if (!$isNew): ?>

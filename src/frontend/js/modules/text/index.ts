@@ -34,5 +34,6 @@ import './pages/texts_grouped_app';
 import './pages/archived_texts_grouped_app';
 import './pages/text_status_chart';
 import './pages/youtube_import';
+import './pages/subtitle_import';
 import './pages/text_check_display';
 import './pages/text_print_app';

@@ -352,6 +352,26 @@ class TextController extends BaseController
         $txAudioUri = $this->param('TxAudioURI');
         $txSourceUri = $this->param('TxSourceURI');
 
+        // Check for uploaded subtitle file (.srt, .vtt)
+        $subtitleFile = InputValidator::getUploadedFile('subtitleFile');
+        if ($subtitleFile !== null) {
+            $subtitleService = new \Lwt\Modules\Text\Application\Services\SubtitleParserService();
+            $fileContent = file_get_contents($subtitleFile['tmp_name']);
+            if ($fileContent !== false) {
+                $format = $subtitleService->detectFormat($subtitleFile['name'], $fileContent);
+                if ($format !== null) {
+                    $parseResult = $subtitleService->parse($fileContent, $format);
+                    if ($parseResult['success']) {
+                        $txText = $parseResult['text'];
+                        // Auto-set title from filename if empty
+                        if ($txTitle === '') {
+                            $txTitle = pathinfo($subtitleFile['name'], PATHINFO_FILENAME);
+                        }
+                    }
+                }
+            }
+        }
+
         // Check if text needs auto-splitting (> 60KB)
         $needsAutoSplit = false;
         try {
