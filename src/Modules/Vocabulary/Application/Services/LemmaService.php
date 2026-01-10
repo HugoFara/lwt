@@ -282,21 +282,17 @@ class LemmaService
      *
      * @param int    $termId Term ID
      * @param string $lemma  The lemma to set
-     *
-     * @return bool True if updated
      */
-    private function updateTermLemma(int $termId, string $lemma): bool
+    private function updateTermLemma(int $termId, string $lemma): void
     {
         $lemmaLc = mb_strtolower($lemma, 'UTF-8');
         $bindings = [$lemma, $lemmaLc, $termId];
 
-        $affected = Connection::preparedExecute(
+        Connection::preparedExecute(
             "UPDATE words SET WoLemma = ?, WoLemmaLC = ? WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
             $bindings
         );
-
-        return $affected > 0;
     }
 
     /**

@@ -129,22 +129,4 @@ class ImportText
     {
         return str_replace("\xC2\xAD", "", $text);
     }
-
-    /**
-     * Apply tags to a text.
-     *
-     * @param int        $textId Text ID
-     * @param list<int>  $tagIds Array of tag IDs
-     */
-    private function applyTags(int $textId, array $tagIds): void
-    {
-        foreach ($tagIds as $tagId) {
-            $bindings = [$textId, $tagId];
-            Connection::preparedExecute(
-                "INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID) VALUES (?, ?)"
-                . UserScopedQuery::forTablePrepared('text_tag_map', $bindings, '', 'texts'),
-                $bindings
-            );
-        }
-    }
 }
