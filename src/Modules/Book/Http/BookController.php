@@ -56,7 +56,7 @@ class BookController
     /**
      * List all books.
      *
-     * @param array $params Route parameters
+     * @param array<string, mixed> $params Route parameters
      *
      * @return void
      */
@@ -64,7 +64,8 @@ class BookController
     {
         $userId = Globals::getCurrentUserId();
         $languageId = InputValidator::getInt('lg_id');
-        $page = max(1, InputValidator::getInt('page') ?: 1);
+        $pageParam = InputValidator::getInt('page');
+        $page = max(1, $pageParam ?? 1);
 
         $result = $this->bookFacade->getBooks($userId, $languageId, $page);
         $books = $result['books'];
@@ -88,7 +89,7 @@ class BookController
     /**
      * Show a single book with chapters.
      *
-     * @param array $params Route parameters (id)
+     * @param array<string, mixed> $params Route parameters (id)
      *
      * @return void
      */
@@ -110,8 +111,9 @@ class BookController
 
         $book = $result['book'];
         $chapters = $result['chapters'];
+        $bookTitle = $book['title'];
 
-        PageLayoutHelper::renderPageStart($book['title'], true, 'books');
+        PageLayoutHelper::renderPageStart($bookTitle, true, 'books');
         include $this->viewPath . 'show.php';
         PageLayoutHelper::renderPageEnd();
     }
@@ -119,7 +121,7 @@ class BookController
     /**
      * Show EPUB import form or handle import submission.
      *
-     * @param array $params Route parameters
+     * @param array<string, mixed> $params Route parameters
      *
      * @return void
      */
@@ -168,7 +170,7 @@ class BookController
             return;
         }
 
-        if ($uploadedFile === null || empty($uploadedFile['tmp_name'])) {
+        if ($uploadedFile === null || !isset($uploadedFile['tmp_name']) || $uploadedFile['tmp_name'] === '') {
             $message = 'Please select an EPUB file to upload';
             $messageType = 'is-danger';
             $this->showImportResult($message, $messageType, null);
@@ -215,19 +217,18 @@ class BookController
     /**
      * Delete a book.
      *
-     * @param array $params Route parameters (id)
+     * @param array<string, mixed> $params Route parameters (id)
      *
      * @return void
      */
     public function delete(array $params): void
     {
         $bookId = (int) ($params['id'] ?? 0);
+        $message = 'Invalid book ID';
 
         if ($bookId > 0) {
             $result = $this->bookFacade->deleteBook($bookId);
             $message = $result['message'];
-        } else {
-            $message = 'Invalid book ID';
         }
 
         // Redirect back to books list with message

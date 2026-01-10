@@ -203,15 +203,15 @@ class Book
             isset($record['BkUsID']) ? (int) $record['BkUsID'] : null,
             (int) $record['BkLgID'],
             (string) $record['BkTitle'],
-            $record['BkAuthor'] ?? null,
-            $record['BkDescription'] ?? null,
-            $record['BkCoverPath'] ?? null,
+            isset($record['BkAuthor']) ? (string) $record['BkAuthor'] : null,
+            isset($record['BkDescription']) ? (string) $record['BkDescription'] : null,
+            isset($record['BkCoverPath']) ? (string) $record['BkCoverPath'] : null,
             (string) ($record['BkSourceType'] ?? 'text'),
-            $record['BkSourceHash'] ?? null,
+            isset($record['BkSourceHash']) ? (string) $record['BkSourceHash'] : null,
             (int) ($record['BkTotalChapters'] ?? 0),
             (int) ($record['BkCurrentChapter'] ?? 1),
-            $record['BkCreated'] ?? null,
-            $record['BkUpdated'] ?? null
+            isset($record['BkCreated']) ? (string) $record['BkCreated'] : null,
+            isset($record['BkUpdated']) ? (string) $record['BkUpdated'] : null
         );
     }
 

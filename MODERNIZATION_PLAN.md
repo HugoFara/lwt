@@ -131,7 +131,7 @@ All 10 modules complete with ServiceProviders:
 ### v3.0.0 Release Checklist
 
 **Must Complete:**
-- [ ] Update API version from 0.1.1
+- [x] Update API version from 0.1.1 to 3.0.0
 
 **Nice to Have:**
 - [ ] Achieve Psalm level 1 compliance

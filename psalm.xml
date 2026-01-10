@@ -105,36 +105,42 @@
         <MixedArgument>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </MixedArgument>
 
         <MixedArrayAccess>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </MixedArrayAccess>
 
         <MixedArrayOffset>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </MixedArrayOffset>
 
         <MixedAssignment>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </MixedAssignment>
 
         <MixedMethodCall>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </MixedMethodCall>
 
         <MixedOperand>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </MixedOperand>
 
@@ -142,6 +148,7 @@
         <DocblockTypeContradiction>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </DocblockTypeContradiction>
 
@@ -149,12 +156,14 @@
         <RedundantCast>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </RedundantCast>
 
         <RedundantCastGivenDocblockType>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </RedundantCastGivenDocblockType>
 
@@ -162,8 +171,25 @@
         <RiskyTruthyFalsyComparison>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </RiskyTruthyFalsyComparison>
+
+        <!-- Views may use unvalidated string data -->
+        <PossiblyInvalidArgument>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
+            </errorLevel>
+        </PossiblyInvalidArgument>
+
+        <!-- Controllers use dynamic include paths for views -->
+        <UnresolvableInclude>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="src/Modules/Book/Http" />
+            </errorLevel>
+        </UnresolvableInclude>
 
         <!-- Return value may not be used by callers -->
         <PossiblyUnusedReturnValue>

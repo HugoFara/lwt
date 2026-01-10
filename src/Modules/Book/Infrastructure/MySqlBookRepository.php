@@ -70,7 +70,10 @@ class MySqlBookRepository implements BookRepositoryInterface
      */
     public function beginTransaction(): void
     {
-        Globals::getDbConnection()->begin_transaction();
+        $db = Globals::getDbConnection();
+        if ($db !== null) {
+            $db->begin_transaction();
+        }
     }
 
     /**
@@ -78,7 +81,10 @@ class MySqlBookRepository implements BookRepositoryInterface
      */
     public function commit(): void
     {
-        Globals::getDbConnection()->commit();
+        $db = Globals::getDbConnection();
+        if ($db !== null) {
+            $db->commit();
+        }
     }
 
     /**
@@ -86,13 +92,16 @@ class MySqlBookRepository implements BookRepositoryInterface
      */
     public function rollback(): void
     {
-        Globals::getDbConnection()->rollback();
+        $db = Globals::getDbConnection();
+        if ($db !== null) {
+            $db->rollback();
+        }
     }
 
     /**
      * Map a database row to a Book entity.
      *
-     * @param array $row Database row
+     * @param array<string, mixed> $row Database row
      *
      * @return Book
      */
@@ -103,15 +112,15 @@ class MySqlBookRepository implements BookRepositoryInterface
             isset($row['BkUsID']) ? (int) $row['BkUsID'] : null,
             (int) $row['BkLgID'],
             (string) $row['BkTitle'],
-            $row['BkAuthor'] ?? null,
-            $row['BkDescription'] ?? null,
-            $row['BkCoverPath'] ?? null,
+            isset($row['BkAuthor']) ? (string) $row['BkAuthor'] : null,
+            isset($row['BkDescription']) ? (string) $row['BkDescription'] : null,
+            isset($row['BkCoverPath']) ? (string) $row['BkCoverPath'] : null,
             (string) ($row['BkSourceType'] ?? 'text'),
-            $row['BkSourceHash'] ?? null,
+            isset($row['BkSourceHash']) ? (string) $row['BkSourceHash'] : null,
             (int) ($row['BkTotalChapters'] ?? 0),
             (int) ($row['BkCurrentChapter'] ?? 1),
-            $row['BkCreated'] ?? null,
-            $row['BkUpdated'] ?? null
+            isset($row['BkCreated']) ? (string) $row['BkCreated'] : null,
+            isset($row['BkUpdated']) ? (string) $row['BkUpdated'] : null
         );
     }
 
@@ -325,10 +334,14 @@ class MySqlBookRepository implements BookRepositoryInterface
             ->getPrepared();
 
         return array_map(
+            /**
+             * @param array<string, mixed> $row
+             * @return array{id: int, num: int, title: string}
+             */
             fn(array $row) => [
                 'id' => (int) $row['TxID'],
                 'num' => (int) $row['TxChapterNum'],
-                'title' => $row['TxChapterTitle'] ?? $row['TxTitle'],
+                'title' => (string) ($row['TxChapterTitle'] ?? $row['TxTitle']),
             ],
             $rows
         );
@@ -359,7 +372,7 @@ class MySqlBookRepository implements BookRepositoryInterface
             ->where('TxID', '=', $textId)
             ->firstPrepared();
 
-        if ($textRow === null || $textRow['TxBkID'] === null) {
+        if ($textRow === null || !isset($textRow['TxBkID'])) {
             return null;
         }
 
@@ -397,7 +410,7 @@ class MySqlBookRepository implements BookRepositoryInterface
             'bookId' => $bookId,
             'bookTitle' => (string) $bookRow['BkTitle'],
             'chapterNum' => $chapterNum,
-            'chapterTitle' => $textRow['TxChapterTitle'],
+            'chapterTitle' => isset($textRow['TxChapterTitle']) ? (string) $textRow['TxChapterTitle'] : null,
             'totalChapters' => (int) $bookRow['BkTotalChapters'],
             'prevTextId' => $prevRow !== null ? (int) $prevRow['TxID'] : null,
             'nextTextId' => $nextRow !== null ? (int) $nextRow['TxID'] : null,

@@ -66,11 +66,11 @@ class ImportEpub
     /**
      * Import an EPUB file as a book.
      *
-     * @param int         $languageId    Language ID for the book
-     * @param array       $uploadedFile  Uploaded file data from $_FILES
-     * @param string|null $overrideTitle Optional title override
-     * @param array       $tagIds        Tag IDs to apply to all chapters
-     * @param int|null    $userId        User ID (for multi-user mode)
+     * @param int                   $languageId    Language ID for the book
+     * @param array<string, mixed>  $uploadedFile  Uploaded file data from $_FILES
+     * @param string|null           $overrideTitle Optional title override
+     * @param int[]                 $tagIds        Tag IDs to apply to all chapters
+     * @param int|null              $userId        User ID (for multi-user mode)
      *
      * @return array{
      *     success: bool,
@@ -101,6 +101,7 @@ class ImportEpub
             ];
         }
 
+        /** @var string $filePath */
         $filePath = $uploadedFile['tmp_name'];
 
         // Validate EPUB file
@@ -217,7 +218,7 @@ class ImportEpub
      * @param int      $chapterNum    Chapter number
      * @param string   $chapterTitle  Chapter title
      * @param string   $content       Chapter content
-     * @param array    $tagIds        Tag IDs to apply
+     * @param int[]    $tagIds        Tag IDs to apply
      * @param int|null $userId        User ID
      *
      * @return int[] Array of created text IDs
@@ -287,7 +288,7 @@ class ImportEpub
      * @param int      $chapterNum   Chapter number
      * @param string   $chapterTitle Chapter title
      * @param string   $content      Chapter content
-     * @param array    $tagIds       Tag IDs to apply
+     * @param int[]    $tagIds       Tag IDs to apply
      * @param int|null $userId       User ID
      *
      * @return int|null Text ID or null on failure
@@ -357,12 +358,12 @@ class ImportEpub
      * Apply tags to a text.
      *
      * @param int   $textId Text ID
-     * @param array $tagIds Array of tag IDs
+     * @param int[] $tagIds Array of tag IDs
      */
     private function applyTags(int $textId, array $tagIds): void
     {
         foreach ($tagIds as $tagId) {
-            $bindings = [$textId, (int) $tagId];
+            $bindings = [$textId, $tagId];
             Connection::preparedExecute(
                 "INSERT IGNORE INTO " . Globals::table('texttags') .
                 " (TtTxID, TtT2ID) VALUES (?, ?)",

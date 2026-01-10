@@ -157,8 +157,7 @@ HTML;
      *
      * Creates a Bulma card with action buttons for page-level actions.
      *
-     * @param array $actions Array of actions with 'url', 'label', 'icon',
-     *                       and optional 'class', 'target', 'attrs'
+     * @param array<array{url: string, label: string, icon?: string, class?: string, target?: string, attrs?: string}> $actions Array of actions
      *
      * @return string HTML for the action card
      */
@@ -466,16 +465,17 @@ HTML;
      *
      * Calls renderPageStartNobody then adds navbar and page title.
      *
-     * @param string $title Page title
-     * @param bool   $close Whether to show full navigation (true) or minimal header (false)
+     * @param string $title       Page title
+     * @param bool   $close       Whether to show full navigation (true) or minimal header (false)
+     * @param string $currentPage Optional identifier for the current page to highlight in navbar
      *
      * @return void
      */
-    public static function renderPageStart(string $title, bool $close): void
+    public static function renderPageStart(string $title, bool $close, string $currentPage = ''): void
     {
         self::renderPageStartNobody($title);
         if ($close) {
-            echo self::buildNavbar();
+            echo self::buildNavbar($currentPage);
         } else {
             echo '<div>';
             echo self::buildLogo();

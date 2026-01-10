@@ -60,8 +60,8 @@ use Lwt\Shared\Infrastructure\Container\Container;
  */
 class ApiV1
 {
-    private const VERSION = "0.1.1";
-    private const RELEASE_DATE = "2023-12-29";
+    private const VERSION = "3.0.0";
+    private const RELEASE_DATE = "2026-01-10";
 
     private UserApiHandler $authHandler;
     private FeedApiHandler $feedHandler;

@@ -68,7 +68,7 @@ class CreateBookFromTexts
      * @param string|null $author      Author name (optional)
      * @param string      $audioUri    Audio URI (applied to first chapter)
      * @param string      $sourceUri   Source URI (applied to first chapter)
-     * @param array       $tagIds      Tag IDs to apply to all chapters
+     * @param int[]       $tagIds      Tag IDs to apply to all chapters
      * @param int|null    $userId      User ID (for multi-user mode)
      *
      * @return array{

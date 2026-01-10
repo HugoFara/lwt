@@ -56,13 +56,19 @@ class BookFacade
     /**
      * Import an EPUB file as a book.
      *
-     * @param int         $languageId    Language ID
-     * @param array       $uploadedFile  Uploaded file data from $_FILES
-     * @param string|null $overrideTitle Optional title override
-     * @param array       $tagIds        Tag IDs to apply
-     * @param int|null    $userId        User ID
+     * @param int                     $languageId    Language ID
+     * @param array<string, mixed>    $uploadedFile  Uploaded file data from $_FILES
+     * @param string|null             $overrideTitle Optional title override
+     * @param int[]                   $tagIds        Tag IDs to apply
+     * @param int|null                $userId        User ID
      *
-     * @return array Import result
+     * @return array{
+     *     success: bool,
+     *     message: string,
+     *     bookId: int|null,
+     *     chapterCount: int,
+     *     textIds: int[]
+     * }
      */
     public function importEpub(
         int $languageId,
@@ -89,10 +95,16 @@ class BookFacade
      * @param string|null $author     Author name
      * @param string      $audioUri   Audio URI
      * @param string      $sourceUri  Source URI
-     * @param array       $tagIds     Tag IDs to apply
+     * @param int[]       $tagIds     Tag IDs to apply
      * @param int|null    $userId     User ID
      *
-     * @return array Creation result
+     * @return array{
+     *     success: bool,
+     *     message: string,
+     *     bookId: int|null,
+     *     chapterCount: int,
+     *     textIds: int[]
+     * }
      */
     public function createBookFromText(
         int $languageId,
@@ -124,7 +136,24 @@ class BookFacade
      * @param int      $page       Page number
      * @param int      $perPage    Items per page
      *
-     * @return array Book list with pagination info
+     * @return array{
+     *     books: array<array{
+     *         id: int,
+     *         title: string,
+     *         author: string|null,
+     *         languageId: int,
+     *         sourceType: string,
+     *         totalChapters: int,
+     *         currentChapter: int,
+     *         progress: float,
+     *         createdAt: string|null,
+     *         updatedAt: string|null
+     *     }>,
+     *     total: int,
+     *     page: int,
+     *     perPage: int,
+     *     totalPages: int
+     * }
      */
     public function getBooks(
         ?int $userId = null,
@@ -140,7 +169,22 @@ class BookFacade
      *
      * @param int $bookId Book ID
      *
-     * @return array|null Book data or null if not found
+     * @return array{
+     *     book: array{
+     *         id: int,
+     *         title: string,
+     *         author: string|null,
+     *         description: string|null,
+     *         languageId: int,
+     *         sourceType: string,
+     *         totalChapters: int,
+     *         currentChapter: int,
+     *         progress: float,
+     *         createdAt: string|null,
+     *         updatedAt: string|null
+     *     },
+     *     chapters: array<array{id: int, num: int, title: string}>
+     * }|null
      */
     public function getBook(int $bookId): ?array
     {
@@ -164,7 +208,7 @@ class BookFacade
      *
      * @param int $bookId Book ID
      *
-     * @return array Deletion result
+     * @return array{success: bool, message: string}
      */
     public function deleteBook(int $bookId): array
     {
