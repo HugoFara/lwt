@@ -281,7 +281,7 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware('/feeds/edit', 'Lwt\\Modules\\Feed\\Http\\FeedController@edit', AUTH_MIDDLEWARE);
 
     // Feed wizard
-    $router->registerWithMiddleware('/feeds/wizard', 'Lwt\\Modules\\Feed\\Http\\FeedController@wizard', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware('/feeds/wizard', 'Lwt\\Modules\\Feed\\Http\\FeedWizardController@wizard', AUTH_MIDDLEWARE);
 
     // ==================== BOOK ROUTES (PROTECTED) ====================
     // Book module routes for EPUB import and book management
