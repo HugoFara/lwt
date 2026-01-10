@@ -27,6 +27,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
+use Lwt\Shared\Infrastructure\Http\RedirectResponse;
 use Lwt\Core\StringUtils;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Core\Globals;
@@ -95,11 +96,11 @@ class TextController extends BaseController
      *
      * @param int|null $text Text ID (injected from route parameter)
      *
-     * @return void
+     * @return RedirectResponse|null Redirect response or null if rendered
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function read(?int $text = null): void
+    public function read(?int $text = null): ?RedirectResponse
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         require_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
@@ -108,12 +109,11 @@ class TextController extends BaseController
         $textId = $this->getTextIdFromRequest($text);
 
         if ($textId === null) {
-            header("Location: /text/edit");
-            exit();
+            return $this->redirect('/text/edit');
         }
 
         // Render the reading page
-        $this->renderReadPage($textId);
+        return $this->renderReadPage($textId);
     }
 
     /**
@@ -148,17 +148,16 @@ class TextController extends BaseController
      *
      * @param int $textId Text ID
      *
-     * @return void
+     * @return RedirectResponse|null Redirect response or null if rendered
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    private function renderReadPage(int $textId): void
+    private function renderReadPage(int $textId): ?RedirectResponse
     {
         // Prepare minimal header data
         $headerData = $this->textService->getTextForReading($textId);
         if ($headerData === null) {
-            header("Location: /text/edit");
-            exit();
+            return $this->redirect('/text/edit');
         }
 
         $title = (string) $headerData['TxTitle'];
@@ -189,6 +188,8 @@ class TextController extends BaseController
         include LWT_TEXT_MODULE_VIEWS . '/read_desktop.php';
 
         PageLayoutHelper::renderPageEnd();
+
+        return null;
     }
 
     /**
@@ -196,11 +197,11 @@ class TextController extends BaseController
      *
      * @param array $params Route parameters
      *
-     * @return void
+     * @return RedirectResponse|null Redirect response or null if rendered
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function edit(array $params): void
+    public function edit(array $params): ?RedirectResponse
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
@@ -233,11 +234,15 @@ class TextController extends BaseController
         // Handle mark actions
         $markAction = $this->param('markaction');
         if ($markAction !== '') {
-            $message = $this->handleMarkAction(
+            $result = $this->handleMarkAction(
                 $markAction,
                 $this->paramArray('marked'),
                 $this->param('data')
             );
+            if ($result instanceof RedirectResponse) {
+                return $result;
+            }
+            $message = $result;
         }
 
         // Handle single item actions
@@ -254,9 +259,12 @@ class TextController extends BaseController
                 $noPagestart,
                 $currentLang
             );
+            if ($result instanceof RedirectResponse) {
+                return $result;
+            }
             $message .= ($message ? " / " : "") . $result['message'];
             if ($result['redirect']) {
-                return;
+                return null;
             }
         }
 
@@ -270,6 +278,8 @@ class TextController extends BaseController
         }
 
         PageLayoutHelper::renderPageEnd();
+
+        return null;
     }
 
     /**
@@ -279,13 +289,13 @@ class TextController extends BaseController
      * @param array  $marked     Array of marked text IDs
      * @param string $actionData Additional data for the action
      *
-     * @return string Result message
+     * @return string|RedirectResponse Result message or redirect
      */
     private function handleMarkAction(
         string $markAction,
         array $marked,
         string $actionData
-    ): string {
+    ): string|RedirectResponse {
         $message = "Multiple Actions: 0";
 
         if (count($marked) === 0) {
@@ -312,8 +322,7 @@ class TextController extends BaseController
 
             case 'deltag':
                 TagsFacade::removeTagFromTexts($actionData, $list);
-                header("Location: /texts");
-                exit();
+                return $this->redirect('/texts');
 
             case 'setsent':
                 $message = $this->textService->setTermSentences($marked, false);
@@ -330,8 +339,7 @@ class TextController extends BaseController
             case 'review':
                 $sessionManager = new SessionStateManager();
                 $sessionManager->saveCriteria('texts', array_map('intval', $marked));
-                header("Location: /review?selection=3");
-                exit();
+                return $this->redirect('/review?selection=3');
         }
 
         return $message;
@@ -344,13 +352,13 @@ class TextController extends BaseController
      * @param bool       $noPagestart Whether to skip page start
      * @param string|int $currentLang Current language ID
      *
-     * @return array{message: string, redirect: bool}
+     * @return array{message: string, redirect: bool}|RedirectResponse
      */
     private function handleTextOperation(
         string $op,
         bool $noPagestart,
         string|int $currentLang
-    ): array {
+    ): array|RedirectResponse {
         $txText = $this->param('TxText');
         $txLgId = $this->paramInt('TxLgID', 0) ?? 0;
         $txTitle = $this->param('TxTitle');
@@ -403,7 +411,7 @@ class TextController extends BaseController
         }
 
         if ($op == 'Check') {
-            // Check text only
+            // Check text only - render and indicate page was handled
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
             $this->textService->checkText(
                 StringUtils::removeSoftHyphens($txText),
@@ -411,7 +419,7 @@ class TextController extends BaseController
             );
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
             PageLayoutHelper::renderPageEnd();
-            exit();
+            return ['message' => '', 'redirect' => true];
         }
 
         $textId = $this->paramInt('TxID', 0) ?? 0;
@@ -440,8 +448,7 @@ class TextController extends BaseController
 
         // Redirect if "and Open" was requested
         if (str_ends_with($op, "and Open")) {
-            header('Location: /text/read?start=' . $result['textId']);
-            exit();
+            return $this->redirect('/text/read?start=' . $result['textId']);
         }
 
         return ['message' => $result['message'], 'redirect' => false];
@@ -459,7 +466,7 @@ class TextController extends BaseController
      * @param string $sourceUri  Source URI
      * @param bool   $openAfter  Whether to open the first chapter after import
      *
-     * @return array{message: string, redirect: bool}
+     * @return array{message: string, redirect: bool}|RedirectResponse
      */
     private function handleAutoSplitImport(
         int $languageId,
@@ -468,7 +475,7 @@ class TextController extends BaseController
         string $audioUri,
         string $sourceUri,
         bool $openAfter
-    ): array {
+    ): array|RedirectResponse {
         try {
             $bookFacade = Container::getInstance()->getTyped(
                 \Lwt\Modules\Book\Application\BookFacade::class
@@ -503,14 +510,12 @@ class TextController extends BaseController
 
             // Redirect to book or first chapter
             if ($openAfter && isset($result['textIds']) && count($result['textIds']) > 0) {
-                header('Location: /text/read?start=' . $result['textIds'][0]);
-                exit();
+                return $this->redirect('/text/read?start=' . $result['textIds'][0]);
             }
 
             // Redirect to book page
             if ($result['bookId'] !== null) {
-                header('Location: /book/' . $result['bookId']);
-                exit();
+                return $this->redirect('/book/' . $result['bookId']);
             }
 
             return ['message' => $result['message'], 'redirect' => true];
@@ -614,11 +619,11 @@ class TextController extends BaseController
      *
      * @param int|null $text Text ID (injected from route parameter)
      *
-     * @return void
+     * @return RedirectResponse|null Redirect response or null if rendered
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function display(?int $text = null): void
+    public function display(?int $text = null): ?RedirectResponse
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
@@ -634,29 +639,25 @@ class TextController extends BaseController
         $textId = $text ?? $this->paramInt('text', 0) ?? 0;
 
         if ($textId === 0) {
-            header("Location: /text/edit");
-            exit();
+            return $this->redirect('/text/edit');
         }
 
         // Get annotated text
         $annotatedText = $this->displayService->getAnnotatedText($textId);
         if (strlen($annotatedText) <= 0) {
-            header("Location: /text/edit");
-            exit();
+            return $this->redirect('/text/edit');
         }
 
         // Get display settings
         $settings = $this->displayService->getTextDisplaySettings($textId);
         if ($settings === null) {
-            header("Location: /text/edit");
-            exit();
+            return $this->redirect('/text/edit');
         }
 
         // Get header data
         $headerData = $this->displayService->getHeaderData($textId);
         if ($headerData === null) {
-            header("Location: /text/edit");
-            exit();
+            return $this->redirect('/text/edit');
         }
 
         // Prepare view variables
@@ -684,6 +685,8 @@ class TextController extends BaseController
         PageLayoutHelper::renderPageStartNobody('Display');
         include LWT_TEXT_MODULE_VIEWS . '/display_main.php';
         PageLayoutHelper::renderPageEnd();
+
+        return null;
     }
 
     /**
@@ -772,11 +775,11 @@ class TextController extends BaseController
      *
      * @param array $params Route parameters
      *
-     * @return void
+     * @return RedirectResponse|null Redirect response or null if rendered
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function archived(array $params): void
+    public function archived(array $params): ?RedirectResponse
     {
         require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
@@ -798,11 +801,15 @@ class TextController extends BaseController
 
         // Handle mark actions
         if ($markAction !== '') {
-            $message = $this->handleArchivedMarkAction(
+            $result = $this->handleArchivedMarkAction(
                 $markAction,
                 $this->paramArray('marked'),
                 $this->param('data')
             );
+            if ($result instanceof RedirectResponse) {
+                return $result;
+            }
+            $message = $result;
         }
 
         // Handle single item actions
@@ -842,6 +849,8 @@ class TextController extends BaseController
         }
 
         PageLayoutHelper::renderPageEnd();
+
+        return null;
     }
 
     /**
@@ -851,13 +860,13 @@ class TextController extends BaseController
      * @param array  $marked     Array of marked text IDs
      * @param string $actionData Additional data for the action
      *
-     * @return string Result message
+     * @return string|RedirectResponse Result message or redirect
      */
     private function handleArchivedMarkAction(
         string $markAction,
         array $marked,
         string $actionData
-    ): string {
+    ): string|RedirectResponse {
         $message = "Multiple Actions: 0";
 
         if (count($marked) === 0) {
@@ -879,8 +888,7 @@ class TextController extends BaseController
             case 'deltag':
                 $list = "(" . implode(",", array_map('intval', $marked)) . ")";
                 TagsFacade::removeTagFromArchivedTexts($actionData, $list);
-                header("Location: /text/archived");
-                exit();
+                return $this->redirect('/text/archived');
 
             case 'unarch':
                 $result = $this->textService->unarchiveTexts($marked);

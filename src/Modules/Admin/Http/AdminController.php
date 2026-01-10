@@ -343,9 +343,9 @@ class AdminController extends BaseController
      *
      * @param array<string, string> $params Route parameters
      *
-     * @return void
+     * @return \Lwt\Shared\Infrastructure\Http\RedirectResponse|null
      */
-    public function saveSetting(array $params): void
+    public function saveSetting(array $params): ?\Lwt\Shared\Infrastructure\Http\RedirectResponse
     {
         $key = $this->param('k');
         $value = $this->param('v');
@@ -358,8 +358,9 @@ class AdminController extends BaseController
 
         // Redirect if URL is provided
         if ($url !== '') {
-            header("Location: " . $url);
-            exit();
+            return $this->redirect($url);
         }
+
+        return null;
     }
 }

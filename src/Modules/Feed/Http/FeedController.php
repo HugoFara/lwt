@@ -24,6 +24,7 @@ use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\Validation;
 use Lwt\Shared\Infrastructure\Http\FlashMessageService;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\RedirectResponse;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
@@ -507,7 +508,8 @@ class FeedController
             throw new \RuntimeException("View not found: $view");
         }
 
-        extract($data);
+        // EXTR_SKIP prevents overwriting existing variables
+        extract($data, EXTR_SKIP);
         require $viewFile;
     }
 
@@ -1211,16 +1213,15 @@ class FeedController
      *
      * @param array<string, string> $params Route parameters
      *
-     * @return void
+     * @return RedirectResponse|null Redirect response or null if rendered
      */
-    public function wizard(array $params): void
+    public function wizard(array $params): ?RedirectResponse
     {
         $step = InputValidator::getInt('step', 1) ?? 1;
 
         switch ($step) {
             case 2:
-                $this->wizardStep2();
-                break;
+                return $this->wizardStep2();
             case 3:
                 $this->wizardStep3();
                 break;
@@ -1232,6 +1233,8 @@ class FeedController
                 $this->wizardStep1();
                 break;
         }
+
+        return null;
     }
 
     /**
@@ -1258,17 +1261,23 @@ class FeedController
     /**
      * Wizard Step 2: Select Article Text.
      *
-     * @return void
+     * @return RedirectResponse|null Redirect response or null if rendered
      */
-    private function wizardStep2(): void
+    private function wizardStep2(): ?RedirectResponse
     {
         // Handle edit mode - load existing feed
         $editFeedId = InputValidator::getInt('edit_feed');
         $rssUrl = InputValidator::getString('rss_url');
         if ($editFeedId !== null && !$this->wizardSession->exists()) {
-            $this->loadExistingFeedForEdit($editFeedId);
+            $redirect = $this->loadExistingFeedForEdit($editFeedId);
+            if ($redirect !== null) {
+                return $redirect;
+            }
         } elseif ($rssUrl !== '') {
-            $this->loadNewFeedFromUrl($rssUrl);
+            $redirect = $this->loadNewFeedFromUrl($rssUrl);
+            if ($redirect !== null) {
+                return $redirect;
+            }
         }
 
         // Process session parameters
@@ -1295,6 +1304,8 @@ class FeedController
         include $this->viewPath . 'wizard_step2.php';
 
         PageLayoutHelper::renderPageEnd();
+
+        return null;
     }
 
     /**
@@ -1379,15 +1390,14 @@ class FeedController
      *
      * @param int $feedId Feed ID
      *
-     * @return void
+     * @return RedirectResponse|null Redirect on error, null on success
      */
-    private function loadExistingFeedForEdit(int $feedId): void
+    private function loadExistingFeedForEdit(int $feedId): ?RedirectResponse
     {
         $row = $this->feedFacade->getFeedById($feedId);
 
         if ($row === null) {
-            header("Location: /feeds/wizard?step=1&err=1");
-            exit();
+            return new RedirectResponse('/feeds/wizard?step=1&err=1');
         }
 
         $this->wizardSession->setEditFeedId($feedId);
@@ -1424,8 +1434,7 @@ class FeedController
         $feedData = $this->feedFacade->detectAndParseFeed($row['NfSourceURI']);
         if (!is_array($feedData) || empty($feedData)) {
             $this->wizardSession->remove('feed');
-            header("Location: /feeds/wizard?step=1&err=1");
-            exit();
+            return new RedirectResponse('/feeds/wizard?step=1&err=1');
         }
         // Update feed data with title
         $feedData['feed_title'] = $row['NfName'];
@@ -1461,6 +1470,8 @@ class FeedController
             }
             $this->wizardSession->setFeed($feedData);
         }
+
+        return null;
     }
 
     /**
@@ -1468,9 +1479,9 @@ class FeedController
      *
      * @param string $rssUrl Feed URL
      *
-     * @return void
+     * @return RedirectResponse|null Redirect on error, null on success
      */
-    private function loadNewFeedFromUrl(string $rssUrl): void
+    private function loadNewFeedFromUrl(string $rssUrl): ?RedirectResponse
     {
         $existingFeed = $this->wizardSession->getFeed();
         $existingUrl = $this->wizardSession->getRssUrl();
@@ -1493,8 +1504,7 @@ class FeedController
         $currentFeed = $this->wizardSession->getFeed();
         if (empty($currentFeed)) {
             $this->wizardSession->remove('feed');
-            header("Location: /feeds/wizard?step=1&err=1");
-            exit();
+            return new RedirectResponse('/feeds/wizard?step=1&err=1');
         }
 
         if (!$this->wizardSession->has('article_tags')) {
@@ -1516,6 +1526,8 @@ class FeedController
         } else {
             $this->wizardSession->setDetectedFeed('Detected: «Webpage Link»');
         }
+
+        return null;
     }
 
     /**

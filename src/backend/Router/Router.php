@@ -17,6 +17,7 @@ namespace Lwt\Router;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Http\SecurityHeaders;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
+use Lwt\Shared\Infrastructure\Http\ResponseInterface;
 use Lwt\Router\Middleware\MiddlewareInterface;
 
 /**
@@ -890,7 +891,13 @@ class Router
         );
 
         // Call the controller method with resolved arguments
-        call_user_func_array([$controller, $method], $arguments);
+        /** @var mixed $result */
+        $result = call_user_func_array([$controller, $method], $arguments);
+
+        // Handle response objects
+        if ($result instanceof ResponseInterface) {
+            $result->send();
+        }
     }
 
     /**
@@ -1007,10 +1014,8 @@ class Router
             return;
         }
 
-        // Make params available to the included file
+        // EXTR_SKIP prevents overwriting existing variables
         extract($params, EXTR_SKIP);
-
-        // Include the file
         include $filePath;
     }
 

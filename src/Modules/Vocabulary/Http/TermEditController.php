@@ -15,6 +15,7 @@
 namespace Lwt\Modules\Vocabulary\Http;
 
 use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\RedirectResponse;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Escaping;
@@ -103,7 +104,9 @@ class TermEditController extends VocabularyBaseController
         $fromAnn = InputValidator::getString('fromAnn');
 
         if ($op !== '') {
-            $this->handleEditWordOperation();
+            if ($this->handleEditWordOperation()) {
+                return; // Error was rendered with full page
+            }
         } else {
             $widInt = ($wid !== '' && is_numeric($wid)) ? (int) $wid : -1;
             $textId = InputValidator::getInt('tid', 0) ?? 0;
@@ -117,9 +120,9 @@ class TermEditController extends VocabularyBaseController
     /**
      * Handle save/update operation for word edit.
      *
-     * @return void
+     * @return bool True if error response was rendered, false otherwise
      */
-    private function handleEditWordOperation(): void
+    private function handleEditWordOperation(): bool
     {
         $textlc = trim(Escaping::prepareTextdata(InputValidator::getString('WoTextLC')));
         $text = trim(Escaping::prepareTextdata(InputValidator::getString('WoText')));
@@ -134,7 +137,7 @@ class TermEditController extends VocabularyBaseController
                 'Error: Term in lowercase must be exactly = "' . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8') .
                 '", please go back and correct this!</div>';
             PageLayoutHelper::renderPageEnd();
-            exit();
+            return true;
         }
 
         $translation = ExportService::replaceTabNewline(InputValidator::getString('WoTranslation'));
@@ -183,6 +186,8 @@ class TermEditController extends VocabularyBaseController
             'oldStatus' => $oldStatus,
             'isNew' => ($op == 'Save'),
         ]);
+
+        return false;
     }
 
     /**
@@ -323,7 +328,9 @@ class TermEditController extends VocabularyBaseController
 
         $op = InputValidator::getString('op');
         if ($op !== '') {
-            $this->handleEditTermOperation($translation);
+            if ($this->handleEditTermOperation($translation)) {
+                return; // Error was rendered with full page
+            }
         } else {
             $this->displayEditTermForm();
         }
@@ -336,9 +343,9 @@ class TermEditController extends VocabularyBaseController
      *
      * @param string $translation Translation value
      *
-     * @return void
+     * @return bool True if error response was rendered, false otherwise
      */
-    private function handleEditTermOperation(string $translation): void
+    private function handleEditTermOperation(string $translation): bool
     {
         $woTextLC = InputValidator::getString('WoTextLC');
         $woText = InputValidator::getString('WoText');
@@ -354,7 +361,7 @@ class TermEditController extends VocabularyBaseController
                 'Error: Term in lowercase must be exactly = "' . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8') .
                 '", please go back and correct this!</div>';
             PageLayoutHelper::renderPageEnd();
-            exit();
+            return true;
         }
 
         $op = InputValidator::getString('op');
@@ -441,6 +448,8 @@ class TermEditController extends VocabularyBaseController
                 'sent1' => $sent1,
             ]);
         }
+
+        return false;
     }
 
     /**

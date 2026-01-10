@@ -16,6 +16,8 @@
 namespace Lwt\Controllers;
 
 use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\RedirectResponse;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\DB;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
@@ -217,15 +219,16 @@ abstract class BaseController
     /**
      * Redirect to another URL.
      *
+     * Return this from a controller method; the router will send it.
+     *
      * @param string $url        URL to redirect to
      * @param int    $statusCode HTTP status code (default: 302)
      *
-     * @return never
+     * @return RedirectResponse
      */
-    protected function redirect(string $url, int $statusCode = 302)
+    protected function redirect(string $url, int $statusCode = 302): RedirectResponse
     {
-        header("Location: $url", true, $statusCode);
-        exit;
+        return new RedirectResponse($url, $statusCode);
     }
 
     /**
@@ -267,19 +270,18 @@ abstract class BaseController
     }
 
     /**
-     * Return JSON response and exit.
+     * Return JSON response.
+     *
+     * Return this from a controller method; the router will send it.
      *
      * @param mixed $data   Data to encode as JSON
      * @param int   $status HTTP status code (default: 200)
      *
-     * @return never
+     * @return JsonResponse
      */
-    protected function json(mixed $data, int $status = 200)
+    protected function json(mixed $data, int $status = 200): JsonResponse
     {
-        http_response_code($status);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data);
-        exit;
+        return new JsonResponse($data, $status);
     }
 
     /**
