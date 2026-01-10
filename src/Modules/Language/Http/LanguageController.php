@@ -196,7 +196,9 @@ class LanguageController extends BaseController
         $languageEntity = $this->languageFacade->getById($lid);
 
         if ($languageEntity === null) {
-            echo '<p class="red">Language not found.</p>';
+            echo '<div class="notification is-danger">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Language not found.</div>';
             return;
         }
 

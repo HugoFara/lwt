@@ -216,13 +216,6 @@ a:link,a:visited,a:active,a:focus,a:hover {
 img {
 	border: 0pt none;
 }
-.red {
-	color: #FF0000;
-	font-weight: bold;
-	background-color: #FFFFD0;
-	text-align: center;
-	font-size: 120%;
-}
 .red2 {
 	color: #FF0000;
 	font-weight: bold;

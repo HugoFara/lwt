@@ -485,14 +485,6 @@ a:link,a:visited,a:active,a:focus,a:hover {
 img {
     border: 0pt none;
 }
-.red {
-    color: #FF0000;
-    font-weight: bold;
-    background-color: #222222;
-    text-align: center;
-    font-size: 120%;
-	border-radius: 2px;box-shadow:inset 0 0 8px 2px #000;
-}
 .red2 {
     color: #FF0000;
     font-weight: bold;
