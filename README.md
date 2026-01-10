@@ -11,7 +11,10 @@
 <p align="center">
   <a href="https://packagist.org/packages/hugofara/lwt"><img src="https://poser.pugx.org/hugofara/lwt/v" alt="Latest Stable Version"></a>
   <a href="https://packagist.org/packages/hugofara/lwt"><img src="https://poser.pugx.org/hugofara/lwt/require/php" alt="PHP Version"></a>
-  <a href="https://github.com/HugoFara/lwt/actions/workflows/php.yml"><img src="https://github.com/hugofara/lwt/actions/workflows/php.yml/badge.svg" alt="CI Status"></a>
+  <a href="https://github.com/HugoFara/lwt/actions/workflows/php.yml"><img src="https://github.com/HugoFara/lwt/actions/workflows/php.yml/badge.svg" alt="PHP CI"></a>
+  <a href="https://github.com/HugoFara/lwt/actions/workflows/frontend.yml"><img src="https://github.com/HugoFara/lwt/actions/workflows/frontend.yml/badge.svg" alt="Frontend CI"></a>
+  <a href="https://github.com/HugoFara/lwt/actions/workflows/security_check.yml"><img src="https://github.com/HugoFara/lwt/actions/workflows/security_check.yml/badge.svg" alt="Psalm"></a>
+  <a href="https://github.com/HugoFara/lwt/actions/workflows/phpcs.yml"><img src="https://github.com/HugoFara/lwt/actions/workflows/phpcs.yml/badge.svg" alt="PHPCS"></a>
   <a href="https://github.com/HugoFara/lwt/actions/workflows/docker-image.yml"><img src="https://github.com/HugoFara/lwt/actions/workflows/docker-image.yml/badge.svg" alt="Docker"></a>
   <a href="http://unlicense.org/"><img src="https://poser.pugx.org/hugofara/lwt/license" alt="License"></a>
 </p>

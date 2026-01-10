@@ -1,0 +1,25 @@
+name: PHP CodeSniffer
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  phpcs:
+    name: PHP CodeSniffer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: cs2pr, phpcs
+
+      - name: Run PHP CodeSniffer
+        run: phpcs --standard=PSR12 --extensions=php --ignore=vendor/,node_modules/,docs/ src/ --report=checkstyle | cs2pr

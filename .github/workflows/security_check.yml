@@ -1,17 +1,36 @@
-name: Psalm Static analysis
+name: Psalm Static Analysis
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
 
 jobs:
   psalm:
     name: Psalm
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Psalm
-        uses: docker://vimeo/psalm-github-actions
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          composer_require_dev: true
-          composer_ignore_platform_reqs: true
+          php-version: '8.2'
+          extensions: mbstring, mysqli, dom
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-psalm-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-psalm-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run Psalm
+        run: vendor/bin/psalm --output-format=github
