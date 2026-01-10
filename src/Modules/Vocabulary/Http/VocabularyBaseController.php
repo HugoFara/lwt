@@ -15,6 +15,11 @@
 namespace Lwt\Modules\Vocabulary\Http;
 
 use Lwt\Modules\Vocabulary\Application\Services\WordService;
+use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
+use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
+use Lwt\Modules\Vocabulary\Application\Services\WordBulkService;
+use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
+use Lwt\Modules\Vocabulary\Application\Services\MultiWordService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Modules\Text\Application\Services\SentenceService;
@@ -40,6 +45,11 @@ abstract class VocabularyBaseController
      * Lazy-loaded services.
      */
     protected ?WordService $wordService = null;
+    protected ?WordCrudService $crudService = null;
+    protected ?WordContextService $contextService = null;
+    protected ?WordBulkService $bulkService = null;
+    protected ?WordDiscoveryService $discoveryService = null;
+    protected ?MultiWordService $multiWordService = null;
     protected ?SentenceService $sentenceService = null;
     protected ?ExpressionService $expressionService = null;
     protected ?WordUploadService $uploadService = null;
@@ -56,6 +66,7 @@ abstract class VocabularyBaseController
      * Get WordService (lazy loaded).
      *
      * @return WordService
+     * @deprecated Use specific services (WordCrudService, etc.) instead
      */
     protected function getWordService(): WordService
     {
@@ -63,6 +74,71 @@ abstract class VocabularyBaseController
             $this->wordService = new WordService();
         }
         return $this->wordService;
+    }
+
+    /**
+     * Get WordCrudService (lazy loaded).
+     *
+     * @return WordCrudService
+     */
+    protected function getCrudService(): WordCrudService
+    {
+        if ($this->crudService === null) {
+            $this->crudService = new WordCrudService();
+        }
+        return $this->crudService;
+    }
+
+    /**
+     * Get WordContextService (lazy loaded).
+     *
+     * @return WordContextService
+     */
+    protected function getContextService(): WordContextService
+    {
+        if ($this->contextService === null) {
+            $this->contextService = new WordContextService();
+        }
+        return $this->contextService;
+    }
+
+    /**
+     * Get WordBulkService (lazy loaded).
+     *
+     * @return WordBulkService
+     */
+    protected function getBulkService(): WordBulkService
+    {
+        if ($this->bulkService === null) {
+            $this->bulkService = new WordBulkService();
+        }
+        return $this->bulkService;
+    }
+
+    /**
+     * Get WordDiscoveryService (lazy loaded).
+     *
+     * @return WordDiscoveryService
+     */
+    protected function getDiscoveryService(): WordDiscoveryService
+    {
+        if ($this->discoveryService === null) {
+            $this->discoveryService = new WordDiscoveryService();
+        }
+        return $this->discoveryService;
+    }
+
+    /**
+     * Get MultiWordService (lazy loaded).
+     *
+     * @return MultiWordService
+     */
+    protected function getMultiWordService(): MultiWordService
+    {
+        if ($this->multiWordService === null) {
+            $this->multiWordService = new MultiWordService();
+        }
+        return $this->multiWordService;
     }
 
     /**

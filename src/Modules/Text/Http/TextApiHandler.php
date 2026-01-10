@@ -21,7 +21,7 @@ use Lwt\Core\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
-use Lwt\Modules\Vocabulary\Application\Services\WordService;
+use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 use Lwt\Modules\Tags\Application\TagsFacade;
@@ -30,7 +30,7 @@ use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Modules\Text\Application\Services\TextPrintService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/WordService.php';
+require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/WordDiscoveryService.php';
 require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExportService.php';
 require_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
 require_once dirname(__DIR__) . '/Application/TextFacade.php';
@@ -43,12 +43,12 @@ require_once dirname(__DIR__) . '/Application/Services/TextPrintService.php';
  */
 class TextApiHandler
 {
-    private WordService $wordService;
+    private WordDiscoveryService $discoveryService;
     private TextFacade $textService;
 
-    public function __construct()
+    public function __construct(?WordDiscoveryService $discoveryService = null)
     {
-        $this->wordService = new WordService();
+        $this->discoveryService = $discoveryService ?? new WordDiscoveryService();
         $this->textService = new TextFacade();
     }
     /**
@@ -242,7 +242,7 @@ class TextApiHandler
      */
     public function markAllWellKnown(int $textId): array
     {
-        list($count, $wordsData) = $this->wordService->markAllWordsWithStatus($textId, 99);
+        list($count, $wordsData) = $this->discoveryService->markAllWordsWithStatus($textId, 99);
         return [
             'count' => $count,
             'words' => $wordsData
@@ -258,7 +258,7 @@ class TextApiHandler
      */
     public function markAllIgnored(int $textId): array
     {
-        list($count, $wordsData) = $this->wordService->markAllWordsWithStatus($textId, 98);
+        list($count, $wordsData) = $this->discoveryService->markAllWordsWithStatus($textId, 98);
         return [
             'count' => $count,
             'words' => $wordsData

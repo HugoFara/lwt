@@ -241,7 +241,10 @@ class VocabularyServiceProvider implements ServiceProviderInterface
             return new TermCrudApiHandler(
                 $c->getTyped(VocabularyFacade::class),
                 $c->getTyped(FindSimilarTerms::class),
-                $c->getTyped(DictionaryAdapter::class)
+                $c->getTyped(DictionaryAdapter::class),
+                $c->getTyped(WordContextService::class),
+                $c->getTyped(WordDiscoveryService::class),
+                $c->getTyped(WordLinkingService::class)
             );
         });
 
@@ -253,8 +256,11 @@ class VocabularyServiceProvider implements ServiceProviderInterface
         });
 
         // Register Multi-word API Handler
-        $container->singleton(MultiWordApiHandler::class, function (Container $_c) {
-            return new MultiWordApiHandler();
+        $container->singleton(MultiWordApiHandler::class, function (Container $c) {
+            return new MultiWordApiHandler(
+                $c->getTyped(MultiWordService::class),
+                $c->getTyped(WordContextService::class)
+            );
         });
 
         // Register Word List API Handler

@@ -146,13 +146,13 @@ class TermEditController extends VocabularyBaseController
 
         if ($op == 'Save') {
             // Insert new term
-            $result = $this->getWordService()->create($requestData);
-            $hex = $this->getWordService()->textToClassName(InputValidator::getString('WoTextLC'));
+            $result = $this->getCrudService()->create($requestData);
+            $hex = $this->getContextService()->textToClassName(InputValidator::getString('WoTextLC'));
             $oldStatus = 0;
             $titletext = "New Term: " . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8');
         } else {
             // Update existing term
-            $result = $this->getWordService()->update(InputValidator::getInt('WoID', 0) ?? 0, $requestData);
+            $result = $this->getCrudService()->update(InputValidator::getInt('WoID', 0) ?? 0, $requestData);
             $hex = null;
             $oldStatus = InputValidator::getString('WoOldStatus');
             $titletext = "Edit Term: " . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8');

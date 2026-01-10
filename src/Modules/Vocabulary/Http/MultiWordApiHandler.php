@@ -18,7 +18,8 @@ namespace Lwt\Modules\Vocabulary\Http;
 
 use Lwt\Core\StringUtils;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
-use Lwt\Modules\Vocabulary\Application\Services\WordService;
+use Lwt\Modules\Vocabulary\Application\Services\MultiWordService;
+use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
 
 /**
  * Handler for multi-word expression API operations.
@@ -32,16 +33,21 @@ use Lwt\Modules\Vocabulary\Application\Services\WordService;
  */
 class MultiWordApiHandler
 {
-    private WordService $wordService;
+    private MultiWordService $multiWordService;
+    private WordContextService $contextService;
 
     /**
      * Constructor.
      *
-     * @param WordService|null $wordService Word service instance
+     * @param MultiWordService|null   $multiWordService Multi-word service
+     * @param WordContextService|null $contextService   Context service
      */
-    public function __construct(?WordService $wordService = null)
-    {
-        $this->wordService = $wordService ?? new WordService();
+    public function __construct(
+        ?MultiWordService $multiWordService = null,
+        ?WordContextService $contextService = null
+    ) {
+        $this->multiWordService = $multiWordService ?? new MultiWordService();
+        $this->contextService = $contextService ?? new WordContextService();
     }
 
     /**
@@ -57,14 +63,14 @@ class MultiWordApiHandler
     public function getMultiWordForEdit(int $textId, int $position, ?string $text = null, ?int $wordId = null): array
     {
         // Get language ID from text
-        $lgid = $this->wordService->getLanguageIdFromText($textId);
+        $lgid = $this->contextService->getLanguageIdFromText($textId);
         if ($lgid === null) {
             return ['error' => 'Text not found'];
         }
 
         // If word ID provided, get existing multi-word
         if ($wordId !== null && $wordId > 0) {
-            $data = $this->wordService->getMultiWordData($wordId);
+            $data = $this->multiWordService->getMultiWordData($wordId);
             if ($data === null) {
                 return ['error' => 'Multi-word expression not found'];
             }
@@ -124,7 +130,7 @@ class MultiWordApiHandler
 
         // New multi-word expression
         // Get sentence at position
-        $sentence = $this->wordService->getSentenceTextAtPosition($textId, $position);
+        $sentence = $this->contextService->getSentenceTextAtPosition($textId, $position);
 
         // Count words in the text
         $wordCount = count(preg_split('/\s+/', trim($text)) ?: []);
@@ -169,7 +175,7 @@ class MultiWordApiHandler
             return ['error' => 'Text ID and multi-word text are required'];
         }
 
-        $lgid = $this->wordService->getLanguageIdFromText($textId);
+        $lgid = $this->contextService->getLanguageIdFromText($textId);
         if ($lgid === null) {
             return ['error' => 'Text not found'];
         }
@@ -179,7 +185,7 @@ class MultiWordApiHandler
         $wordCount = (int) ($data['wordCount'] ?? count($splitWords ?: []));
 
         try {
-            $result = $this->wordService->createMultiWord([
+            $result = $this->multiWordService->createMultiWord([
                 'lgid' => $lgid,
                 'text' => $text,
                 'textlc' => $textLc,
@@ -211,7 +217,7 @@ class MultiWordApiHandler
      */
     public function updateMultiWordTerm(int $termId, array $data): array
     {
-        $existing = $this->wordService->getMultiWordData($termId);
+        $existing = $this->multiWordService->getMultiWordData($termId);
         if ($existing === null) {
             return ['error' => 'Multi-word expression not found'];
         }
@@ -220,7 +226,7 @@ class MultiWordApiHandler
         $newStatus = (int) ($data['status'] ?? $oldStatus);
 
         try {
-            $this->wordService->updateMultiWord($termId, [
+            $this->multiWordService->updateMultiWord($termId, [
                 'text' => (string) $existing['text'], // Don't change text
                 'translation' => (string) ($data['translation'] ?? $existing['translation'] ?? ''),
                 'sentence' => (string) ($data['sentence'] ?? $existing['sentence'] ?? ''),

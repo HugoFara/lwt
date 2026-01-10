@@ -330,8 +330,8 @@ class TermStatusController extends VocabularyBaseController
             PageLayoutHelper::renderPageStart("Setting all blue words to Well-known", false);
         }
 
-        $wordService = $this->getWordService();
-        list($count, $wordsData) = $wordService->markAllWordsWithStatus($textId, $status);
+        $discoveryService = $this->getDiscoveryService();
+        list($count, $wordsData) = $discoveryService->markAllWordsWithStatus($textId, $status);
         $useTooltips = Settings::getWithDefault('set-tooltip-mode') == 1;
 
         include $this->viewPath . 'all_wellknown_result.php';

@@ -104,13 +104,15 @@ class TermImportController extends VocabularyBaseController
      */
     private function handleBulkSave(array $terms, int $tid, bool $cleanUp): void
     {
-        $wordService = $this->getWordService();
-        $maxWoId = $wordService->bulkSaveTerms($terms);
+        $bulkService = $this->getBulkService();
+        $maxWoId = $bulkService->bulkSaveTerms($terms);
 
         $tooltipMode = Settings::getWithDefault('set-tooltip-mode');
-        $res = $wordService->getNewWordsAfter($maxWoId);
+        $res = $bulkService->getNewWordsAfter($maxWoId);
 
-        $wordService->linkNewWordsToTextItems($maxWoId);
+        // Link new words to text items
+        $linkingService = new \Lwt\Modules\Vocabulary\Application\Services\WordLinkingService();
+        $linkingService->linkNewWordsToTextItems($maxWoId);
 
         // Prepare data for view
         $newWords = [];
@@ -139,11 +141,12 @@ class TermImportController extends VocabularyBaseController
      */
     private function displayBulkTranslateForm(int $tid, ?string $sl, ?string $tl, int $pos): void
     {
-        $wordService = $this->getWordService();
+        $contextService = $this->getContextService();
+        $discoveryService = $this->getDiscoveryService();
         $limit = (int) Settings::getWithDefault('set-ggl-translation-per-page') + 1;
-        $dictionaries = $wordService->getLanguageDictionaries($tid);
+        $dictionaries = $contextService->getLanguageDictionaries($tid);
 
-        $res = $wordService->getUnknownWordsForBulkTranslate($tid, $pos, $limit);
+        $res = $discoveryService->getUnknownWordsForBulkTranslate($tid, $pos, $limit);
 
         // Collect terms and check if there are more
         $terms = [];

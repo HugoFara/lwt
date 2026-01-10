@@ -25,7 +25,9 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Modules\Tags\Application\TagsFacade;
-use Lwt\Modules\Vocabulary\Application\Services\WordService;
+use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
+use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
+use Lwt\Modules\Vocabulary\Application\Services\WordLinkingService;
 use Lwt\View\Helper\StatusHelper;
 
 /**
@@ -44,26 +46,34 @@ class TermCrudApiHandler
     private VocabularyFacade $facade;
     private FindSimilarTerms $findSimilarTerms;
     private DictionaryAdapter $dictionaryAdapter;
-    private WordService $wordService;
+    private WordContextService $contextService;
+    private WordDiscoveryService $discoveryService;
+    private WordLinkingService $linkingService;
 
     /**
      * Constructor.
      *
-     * @param VocabularyFacade|null   $facade            Vocabulary facade
-     * @param FindSimilarTerms|null   $findSimilarTerms  Find similar terms use case
-     * @param DictionaryAdapter|null  $dictionaryAdapter Dictionary adapter
-     * @param WordService|null        $wordService       Word service
+     * @param VocabularyFacade|null       $facade            Vocabulary facade
+     * @param FindSimilarTerms|null       $findSimilarTerms  Find similar terms use case
+     * @param DictionaryAdapter|null      $dictionaryAdapter Dictionary adapter
+     * @param WordContextService|null     $contextService    Context service
+     * @param WordDiscoveryService|null   $discoveryService  Discovery service
+     * @param WordLinkingService|null     $linkingService    Linking service
      */
     public function __construct(
         ?VocabularyFacade $facade = null,
         ?FindSimilarTerms $findSimilarTerms = null,
         ?DictionaryAdapter $dictionaryAdapter = null,
-        ?WordService $wordService = null
+        ?WordContextService $contextService = null,
+        ?WordDiscoveryService $discoveryService = null,
+        ?WordLinkingService $linkingService = null
     ) {
         $this->facade = $facade ?? new VocabularyFacade();
         $this->findSimilarTerms = $findSimilarTerms ?? new FindSimilarTerms();
         $this->dictionaryAdapter = $dictionaryAdapter ?? new DictionaryAdapter();
-        $this->wordService = $wordService ?? new WordService();
+        $this->contextService = $contextService ?? new WordContextService();
+        $this->discoveryService = $discoveryService ?? new WordDiscoveryService();
+        $this->linkingService = $linkingService ?? new WordLinkingService();
     }
 
     // =========================================================================
@@ -377,13 +387,13 @@ class TermCrudApiHandler
         }
 
         // Get the word at the position
-        $term = $this->wordService->getWordAtPosition($textId, $ord);
+        $term = $this->linkingService->getWordAtPosition($textId, $ord);
         if ($term === null) {
             return ['error' => 'Word not found at position'];
         }
 
         try {
-            $result = $this->wordService->insertWordWithStatus($textId, $term, $status);
+            $result = $this->discoveryService->insertWordWithStatus($textId, $term, $status);
             return [
                 'term_id' => $result['id'],
                 'term' => $result['term'],
@@ -505,7 +515,7 @@ class TermCrudApiHandler
         }
 
         // New term - get word at position
-        $wordData = $this->wordService->getWordAtPosition($textId, $position);
+        $wordData = $this->linkingService->getWordAtPosition($textId, $position);
         if ($wordData === null) {
             return ['error' => 'Word not found at position'];
         }
@@ -514,7 +524,7 @@ class TermCrudApiHandler
         $textLc = mb_strtolower($text, 'UTF-8');
 
         // Get sentence at position
-        $sentence = $this->wordService->getSentenceTextAtPosition($textId, $position);
+        $sentence = $this->contextService->getSentenceTextAtPosition($textId, $position);
 
         // Mark the term in the sentence with curly braces if not already marked
         if ($sentence !== null && strpos($sentence, '{') === false) {
@@ -616,13 +626,13 @@ class TermCrudApiHandler
         }
 
         // Get language ID from text
-        $langId = $this->wordService->getLanguageIdFromText($textId);
+        $langId = $this->contextService->getLanguageIdFromText($textId);
         if ($langId === null) {
             return ['error' => 'Text not found'];
         }
 
         // Get the word at the position
-        $wordText = $this->wordService->getWordAtPosition($textId, $position);
+        $wordText = $this->linkingService->getWordAtPosition($textId, $position);
         if ($wordText === null) {
             return ['error' => 'Word not found at position'];
         }

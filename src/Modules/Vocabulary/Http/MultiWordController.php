@@ -129,7 +129,8 @@ class MultiWordController extends VocabularyBaseController
         ];
 
         $op = InputValidator::getString('op');
-        $wordService = $this->getWordService();
+        $multiWordService = $this->getMultiWordService();
+        $contextService = $this->getContextService();
 
         if ($op == 'Save') {
             // Insert new multi-word
@@ -141,7 +142,7 @@ class MultiWordController extends VocabularyBaseController
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
-            $result = $wordService->createMultiWord($data);
+            $result = $multiWordService->createMultiWord($data);
             $wid = $result['id'];
         } else {
             // Update existing multi-word
@@ -153,12 +154,12 @@ class MultiWordController extends VocabularyBaseController
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
-            $result = $wordService->updateMultiWord($wid, $data, $oldStatus, $newStatus);
+            $result = $multiWordService->updateMultiWord($wid, $data, $oldStatus, $newStatus);
 
             // Prepare data for view
             $tagList = TagsFacade::getWordTagList($wid, false);
             $formattedTags = $tagList !== '' ? ' [' . $tagList . ']' : '';
-            $termJson = $wordService->exportTermAsJson(
+            $termJson = $contextService->exportTermAsJson(
                 $wid,
                 $data['text'],
                 $data['roman'],
@@ -186,19 +187,20 @@ class MultiWordController extends VocabularyBaseController
         $tid = InputValidator::getInt('tid', 0) ?? 0;
         $ord = InputValidator::getInt('ord', 0) ?? 0;
         $strWid = InputValidator::getString('wid');
-        $wordService = $this->getWordService();
+        $contextService = $this->getContextService();
+        $multiWordService = $this->getMultiWordService();
 
         // Determine if we're editing an existing word or creating new
         if ($strWid == "" || !is_numeric($strWid)) {
             // No ID provided: check if text exists in database
-            $lgid = $wordService->getLanguageIdFromText($tid);
+            $lgid = $contextService->getLanguageIdFromText($tid);
             $txtParam = InputValidator::getString('txt');
             $textlc = mb_strtolower(
                 Escaping::prepareTextdata($txtParam),
                 'UTF-8'
             );
 
-            $strWid = $wordService->findMultiWordByText($textlc, (int) $lgid);
+            $strWid = $multiWordService->findMultiWordByText($textlc, (int) $lgid);
         }
 
         if ($strWid === null) {
@@ -210,7 +212,7 @@ class MultiWordController extends VocabularyBaseController
         } else {
             // Edit existing multi-word
             $wid = (int) $strWid;
-            $wordData = $wordService->getMultiWordData($wid);
+            $wordData = $multiWordService->getMultiWordData($wid);
             if ($wordData === null) {
                 throw new \RuntimeException("Cannot access term and language: multi-word not found");
             }
@@ -231,16 +233,17 @@ class MultiWordController extends VocabularyBaseController
      */
     private function displayNewMultiWordForm(string $text, int $tid, int $ord, int $len): void
     {
-        $wordService = $this->getWordService();
-        $lgid = $wordService->getLanguageIdFromText($tid);
+        $contextService = $this->getContextService();
+        $multiWordService = $this->getMultiWordService();
+        $lgid = $contextService->getLanguageIdFromText($tid);
         $termText = Escaping::prepareTextdata($text);
         $textlc = mb_strtolower($termText, 'UTF-8');
 
         // Check if word already exists
-        $existingWid = $wordService->findMultiWordByText($textlc, (int) $lgid);
+        $existingWid = $multiWordService->findMultiWordByText($textlc, (int) $lgid);
         if ($existingWid !== null) {
             // Get text from existing word
-            $wordData = $wordService->getMultiWordData($existingWid);
+            $wordData = $multiWordService->getMultiWordData($existingWid);
             if ($wordData !== null) {
                 $termText = $wordData['text'];
             }
@@ -293,7 +296,7 @@ class MultiWordController extends VocabularyBaseController
         $textlc = mb_strtolower($termText, 'UTF-8');
 
         $scrdir = $this->languageFacade->getScriptDirectionTag($lgid);
-        $showRoman = $this->getWordService()->shouldShowRomanization($tid);
+        $showRoman = $this->getContextService()->shouldShowRomanization($tid);
 
         $this->render('form_edit_multi_existing', [
             'wid' => $wid,
@@ -335,7 +338,7 @@ class MultiWordController extends VocabularyBaseController
         $showAll = (bool) Settings::getWithDefault('set-show-all-words');
 
         // Delete the multi-word
-        $result = $this->getWordService()->deleteMultiWord($wid);
+        $result = $this->getMultiWordService()->deleteMultiWord($wid);
 
         PageLayoutHelper::renderPageStartNobody('Term Deleted');
 
