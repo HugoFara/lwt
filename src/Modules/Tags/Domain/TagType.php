@@ -97,7 +97,7 @@ enum TagType: string
     /**
      * Get the primary association table for this tag type.
      *
-     * For term tags, this is 'wordtags'.
+     * For term tags, this is 'word_tag_map'.
      * For text tags, this is 'text_tag_map'.
      *
      * @return string Table name
@@ -105,7 +105,7 @@ enum TagType: string
     public function associationTable(): string
     {
         return match ($this) {
-            self::TERM => 'wordtags',
+            self::TERM => 'word_tag_map',
             self::TEXT => 'text_tag_map',
         };
     }

@@ -35,9 +35,9 @@ class MySqlBackupRepository implements BackupRepositoryInterface
      * @var string[]
      */
     private const BACKUP_TABLES = [
-        'archivedtexts', 'archived_text_tag_map', 'feedlinks', 'languages', 'word_occurrences',
-        'newsfeeds', 'sentences', 'settings', 'tags', 'text_tags', 'texts', 'text_tag_map',
-        'words', 'wordtags'
+        'archived_texts', 'archived_text_tag_map', 'feed_links', 'languages', 'word_occurrences',
+        'news_feeds', 'sentences', 'settings', 'tags', 'text_tags', 'texts', 'text_tag_map',
+        'words', 'word_tag_map'
     ];
 
     /**
@@ -46,8 +46,8 @@ class MySqlBackupRepository implements BackupRepositoryInterface
      * @var string[]
      */
     private const OFFICIAL_BACKUP_TABLES = [
-        'archivedtexts', 'archived_text_tag_map', 'languages', 'sentences', 'settings',
-        'tags', 'text_tags', 'textitems', 'texts', 'text_tag_map', 'words', 'wordtags'
+        'archived_texts', 'archived_text_tag_map', 'languages', 'sentences', 'settings',
+        'tags', 'text_tags', 'textitems', 'texts', 'text_tag_map', 'words', 'word_tag_map'
     ];
 
     /**
@@ -202,7 +202,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
     private function getOfficialTableSchema(string $table): string
     {
         $schemas = [
-            'archivedtexts' => "CREATE TABLE `archivedtexts` (
+            'archived_texts' => "CREATE TABLE `archived_texts` (
                 `AtID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `AtLgID` int(11) unsigned NOT NULL,
                 `AtTitle` varchar(200) NOT NULL,
@@ -330,7 +330,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 KEY `WoTomorrowScore` (`WoTomorrowScore`),
                 KEY `WoRandom` (`WoRandom`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n",
-            'wordtags' => "CREATE TABLE `wordtags` (
+            'word_tag_map' => "CREATE TABLE `word_tag_map` (
                 `WtWoID` int(11) unsigned NOT NULL,
                 `WtTgID` int(11) unsigned NOT NULL,
                 PRIMARY KEY (`WtWoID`,`WtTgID`),

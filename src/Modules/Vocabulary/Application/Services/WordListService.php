@@ -230,12 +230,12 @@ class WordListService
     ): int {
         if ($textId == '') {
             $sql = 'select count(*) as value from (select WoID from (' .
-                'words left JOIN wordtags' .
+                'words left JOIN word_tag_map' .
                 ' ON WoID = WtWoID) where (1=1) ' .
                 $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag . ') as dummy';
         } else {
             $sql = 'select count(*) as value from (select WoID from (' .
-                'words left JOIN wordtags' .
+                'words left JOIN word_tag_map' .
                 ' ON WoID = WtWoID), word_occurrences' .
                 ' where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' .
                 $textId . ')' . $whLang . $whStat . $whQuery .
@@ -304,7 +304,7 @@ class WordListService
                         where WoLgID = LgID ' . $whLang . $whStat . $whQuery . '
                         group by WoID
                         order by ' . $sorts[$sort - 1] . ' ' . $limit . ') AS AA
-                        left JOIN wordtags ON WoID = WtWoID
+                        left JOIN word_tag_map ON WoID = WtWoID
                         left join tags on TgID = WtTgID
                         group by WoID
                         order by ' . $sorts[$sort - 1];
@@ -315,7 +315,7 @@ class WordListService
                         DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
                         WoTomorrowScore AS Score2,
                         ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist
-                        from ((words left JOIN wordtags
+                        from ((words left JOIN word_tag_map
                         ON WoID = WtWoID) left join tags
                         on TgID = WtTgID), languages
                         where WoLgID = LgID ' . $whLang . $whStat . $whQuery .
@@ -329,7 +329,7 @@ class WordListService
                     WoTomorrowScore AS Score2,
                     ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist
                     from ((words
-                    left JOIN wordtags ON WoID = WtWoID)
+                    left JOIN word_tag_map ON WoID = WtWoID)
                     left join tags on TgID = WtTgID),
                     languages, word_occurrences
                     where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' .
@@ -367,7 +367,7 @@ class WordListService
                     WoTomorrowScore AS Score2,
                     ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
                     WoTextLC, WoTodayScore
-                    from ((words left JOIN wordtags
+                    from ((words left JOIN word_tag_map
                     ON WoID = WtWoID)
                     left join tags on TgID = WtTgID),
                     languages, word_occurrences
@@ -384,7 +384,7 @@ class WordListService
                     WoTomorrowScore AS Score2,
                     ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
                     WoTextLC, WoTodayScore
-                    from ((words left JOIN wordtags
+                    from ((words left JOIN word_tag_map
                     ON WoID = WtWoID)
                     left join tags on TgID = WtTgID),
                     languages
@@ -401,7 +401,7 @@ class WordListService
                     WoTomorrowScore AS Score2,
                     ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
                     WoTextLC, WoTodayScore
-                    from ((words left JOIN wordtags
+                    from ((words left JOIN word_tag_map
                     ON WoID = WtWoID)
                     left join tags on TgID = WtTgID),
                     languages, word_occurrences
@@ -430,7 +430,7 @@ class WordListService
 
         // Delete words - FK constraints handle:
         // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
-        // - wordtags deleted (ON DELETE CASCADE)
+        // - word_tag_map deleted (ON DELETE CASCADE)
         $message = Connection::execute(
             'DELETE FROM words WHERE WoID in ' . $idList,
             "Deleted"
@@ -573,7 +573,7 @@ class WordListService
         if ($textId == '') {
             $sql = 'select distinct WoID from (
                 words
-                left JOIN wordtags
+                left JOIN word_tag_map
                 ON WoID = WtWoID
             ) where (1=1) ' . $whLang . $whStat . $whQuery . '
             group by WoID ' . $whTag;
@@ -581,7 +581,7 @@ class WordListService
             $sql = 'select distinct WoID
             from (
                 words
-                left JOIN wordtags ON WoID = WtWoID
+                left JOIN word_tag_map ON WoID = WtWoID
             ), word_occurrences
             where Ti2LgID = WoLgID and Ti2WoID = WoID and
             Ti2TxID in (' . $textId . ')' . $whLang . $whStat . $whQuery .
@@ -617,7 +617,7 @@ class WordListService
 
         // Delete word - FK constraints handle:
         // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
-        // - wordtags deleted (ON DELETE CASCADE)
+        // - word_tag_map deleted (ON DELETE CASCADE)
         $bindings = [$wordId];
         Connection::preparedExecute(
             'DELETE FROM words WHERE WoID = ?'
@@ -664,7 +664,7 @@ class WordListService
                 from (
                     (
                         words
-                        left JOIN wordtags
+                        left JOIN word_tag_map
                         ON WoID = WtWoID
                     )
                     left join tags
@@ -688,7 +688,7 @@ class WordListService
                 from (
                     (
                         words
-                        left JOIN wordtags
+                        left JOIN word_tag_map
                         ON WoID = WtWoID
                     )
                     left join tags
@@ -703,7 +703,7 @@ class WordListService
         return 'select distinct WoID, LgRightToLeft, LgRegexpWordCharacters,
             LgName, WoText, WoTranslation, WoRomanization, WoSentence,
             ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist
-            from ((words left JOIN wordtags
+            from ((words left JOIN word_tag_map
             ON WoID = WtWoID) left join tags
             on TgID = WtTgID), languages,
             word_occurrences where Ti2LgID = WoLgID and Ti2WoID = WoID
@@ -743,7 +743,7 @@ class WordListService
                 from (
                     (
                         words
-                        left JOIN wordtags
+                        left JOIN word_tag_map
                         ON WoID = WtWoID
                     )
                     left join tags on TgID = WtTgID
@@ -756,7 +756,7 @@ class WordListService
             return 'select distinct WoID, LgName, WoText, WoTranslation,
                 WoRomanization, WoSentence, WoStatus,
                 ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist
-                from ((words left JOIN wordtags
+                from ((words left JOIN word_tag_map
                 ON WoID = WtWoID) left join tags
                 on TgID = WtTgID), languages
                 where WoLgID = LgID ' . $whLang . $whStat . $whQuery .
@@ -766,7 +766,7 @@ class WordListService
         return 'select distinct WoID, LgName, WoText, WoTranslation,
             WoRomanization, WoSentence, WoStatus,
             ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist
-            from ((words left JOIN wordtags
+            from ((words left JOIN word_tag_map
             ON WoID = WtWoID) left join tags
             on TgID = WtTgID), languages,
             word_occurrences where Ti2LgID = WoLgID and Ti2WoID = WoID
@@ -805,7 +805,7 @@ class WordListService
                 from (
                     (
                         words
-                        left JOIN wordtags
+                        left JOIN word_tag_map
                         ON WoID = WtWoID
                     )
                     left join tags on TgID = WtTgID
@@ -819,7 +819,7 @@ class WordListService
                 WoText, WoTextLC, WoTranslation, WoRomanization, WoSentence,
                 WoStatus,
                 ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist
-                from ((words left JOIN wordtags
+                from ((words left JOIN word_tag_map
                 ON WoID = WtWoID) left join tags
                 on TgID = WtTgID), languages
                 where WoLgID = LgID ' . $whLang . $whStat . $whQuery .
@@ -830,7 +830,7 @@ class WordListService
             WoText, WoTextLC, WoTranslation, WoRomanization, WoSentence,
             WoStatus,
             ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist
-            from ((words left JOIN wordtags
+            from ((words left JOIN word_tag_map
             ON WoID = WtWoID) left join tags
             on TgID = WtTgID), languages,
             word_occurrences where Ti2LgID = WoLgID and Ti2WoID = WoID
@@ -860,14 +860,14 @@ class WordListService
     ): string {
         if ($textId == '') {
             return 'select distinct WoID
-            from (words left JOIN wordtags
+            from (words left JOIN word_tag_map
             ON WoID = WtWoID)
             where (1=1) ' . $whLang . $whStat . $whQuery .
             ' group by WoID ' . $whTag;
         }
 
         return 'select distinct WoID
-        from (words left JOIN wordtags
+        from (words left JOIN word_tag_map
         ON WoID = WtWoID), word_occurrences
         where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' .
         $textId . ')' . $whLang . $whStat . $whQuery . '

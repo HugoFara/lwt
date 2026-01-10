@@ -325,11 +325,11 @@ class SqlValidatorTest extends TestCase
     public static function provideAllowedTables(): array
     {
         return [
-            ['archivedtexts'],
+            ['archived_texts'],
             ['archived_text_tag_map'],
-            ['feedlinks'],
+            ['feed_links'],
             ['languages'],
-            ['newsfeeds'],
+            ['news_feeds'],
             ['sentences'],
             ['settings'],
             ['tags'],
@@ -339,7 +339,7 @@ class SqlValidatorTest extends TestCase
             ['texts'],
             ['text_tag_map'],
             ['words'],
-            ['wordtags'],
+            ['word_tag_map'],
         ];
     }
 

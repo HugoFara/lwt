@@ -430,7 +430,7 @@ class WordService
 
         // Delete the word - FK constraints handle:
         // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
-        // - wordtags deleted (ON DELETE CASCADE)
+        // - word_tag_map deleted (ON DELETE CASCADE)
         QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
             ->deletePrepared();
@@ -461,7 +461,7 @@ class WordService
 
         // Delete words - FK constraints handle:
         // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
-        // - wordtags deleted (ON DELETE CASCADE)
+        // - word_tag_map deleted (ON DELETE CASCADE)
         $count = QueryBuilder::table('words')
             ->whereIn('WoID', $ids)
             ->deletePrepared();
@@ -768,15 +768,15 @@ class WordService
         // Build SQL
         if (empty($filters['textId'])) {
             // words has WoUsID - user scope auto-applied
-            // wordtags inherits user context via WtWoID -> words FK
-            $sql = "SELECT DISTINCT WoID FROM (words LEFT JOIN wordtags ON WoID = WtWoID)
+            // word_tag_map inherits user context via WtWoID -> words FK
+            $sql = "SELECT DISTINCT WoID FROM (words LEFT JOIN word_tag_map ON WoID = WtWoID)
             WHERE {$whereClause}
             GROUP BY WoID {$whTag}"
             . UserScopedQuery::forTablePrepared('words', $params, 'words');
         } else {
             $params[] = (int)$filters['textId'];
             // word_occurrences inherits user context via Ti2TxID -> texts FK
-            $sql = "SELECT DISTINCT WoID FROM (words LEFT JOIN wordtags ON WoID = WtWoID), word_occurrences
+            $sql = "SELECT DISTINCT WoID FROM (words LEFT JOIN word_tag_map ON WoID = WtWoID), word_occurrences
             WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ?
             AND {$whereClause}
             GROUP BY WoID {$whTag}"

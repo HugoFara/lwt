@@ -111,7 +111,7 @@ class TextServiceCrudTest extends TestCase
 
         // Clean up created archived texts
         foreach ($this->createdArchivedTextIds as $id) {
-            Connection::query("DELETE FROM archivedtexts WHERE AtID = " . $id);
+            Connection::query("DELETE FROM archived_texts WHERE AtID = " . $id);
         }
     }
 
@@ -148,7 +148,7 @@ class TextServiceCrudTest extends TestCase
     private function createTestArchivedText(string $title, string $text): int
     {
         Connection::query(
-            "INSERT INTO archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
+            "INSERT INTO archived_texts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
             "VALUES (" . self::$testLangId . ", " .
             "'" . mysqli_real_escape_string(Globals::getDbConnection(), $title) . "', " .
             "'" . mysqli_real_escape_string(Globals::getDbConnection(), $text) . "', " .
@@ -313,7 +313,7 @@ class TextServiceCrudTest extends TestCase
 
         // Find in archived texts
         $archivedId = Connection::fetchValue(
-            "SELECT AtID AS value FROM archivedtexts WHERE AtTitle = 'Archive Test' LIMIT 1"
+            "SELECT AtID AS value FROM archived_texts WHERE AtTitle = 'Archive Test' LIMIT 1"
         );
 
         $this->assertNotNull($archivedId);
@@ -348,7 +348,7 @@ class TextServiceCrudTest extends TestCase
         // Find and cleanup archived texts
         $archivedIds = [];
         $res = Connection::query(
-            "SELECT AtID FROM archivedtexts WHERE AtTitle LIKE 'Archive Multi%'"
+            "SELECT AtID FROM archived_texts WHERE AtTitle LIKE 'Archive Multi%'"
         );
         while ($row = mysqli_fetch_assoc($res)) {
             $archivedIds[] = (int)$row['AtID'];

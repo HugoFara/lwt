@@ -250,53 +250,53 @@ class QueryBuilderTest extends TestCase
     {
         $prefix = '';
         $sql = QueryBuilder::table('tags')
-            ->join('wordtags', 'tags.TgID', '=', 'wordtags.WtTgID')
+            ->join('word_tag_map', 'tags.TgID', '=', 'word_tag_map.WtTgID')
             ->toSql();
 
-        $this->assertStringContainsString("INNER JOIN {$prefix}wordtags", $sql);
-        $this->assertStringContainsString("ON tags.TgID = wordtags.WtTgID", $sql);
+        $this->assertStringContainsString("INNER JOIN {$prefix}word_tag_map", $sql);
+        $this->assertStringContainsString("ON tags.TgID = word_tag_map.WtTgID", $sql);
     }
 
     public function testJoinWithImplicitEquality(): void
     {
         $prefix = '';
         $sql = QueryBuilder::table('tags')
-            ->join('wordtags', 'tags.TgID', 'wordtags.WtTgID')
+            ->join('word_tag_map', 'tags.TgID', 'word_tag_map.WtTgID')
             ->toSql();
 
-        $this->assertStringContainsString("INNER JOIN {$prefix}wordtags", $sql);
-        $this->assertStringContainsString("ON tags.TgID = wordtags.WtTgID", $sql);
+        $this->assertStringContainsString("INNER JOIN {$prefix}word_tag_map", $sql);
+        $this->assertStringContainsString("ON tags.TgID = word_tag_map.WtTgID", $sql);
     }
 
     public function testLeftJoin(): void
     {
         $prefix = '';
         $sql = QueryBuilder::table('tags')
-            ->leftJoin('wordtags', 'tags.TgID', 'wordtags.WtTgID')
+            ->leftJoin('word_tag_map', 'tags.TgID', 'word_tag_map.WtTgID')
             ->toSql();
 
-        $this->assertStringContainsString("LEFT JOIN {$prefix}wordtags", $sql);
+        $this->assertStringContainsString("LEFT JOIN {$prefix}word_tag_map", $sql);
     }
 
     public function testRightJoin(): void
     {
         $prefix = '';
         $sql = QueryBuilder::table('tags')
-            ->rightJoin('wordtags', 'tags.TgID', 'wordtags.WtTgID')
+            ->rightJoin('word_tag_map', 'tags.TgID', 'word_tag_map.WtTgID')
             ->toSql();
 
-        $this->assertStringContainsString("RIGHT JOIN {$prefix}wordtags", $sql);
+        $this->assertStringContainsString("RIGHT JOIN {$prefix}word_tag_map", $sql);
     }
 
     public function testJoinWithNonEqualityOperator(): void
     {
         $prefix = '';
         $sql = QueryBuilder::table('tags')
-            ->join('wordtags', 'tags.TgID', '!=', 'wordtags.WtTgID')
+            ->join('word_tag_map', 'tags.TgID', '!=', 'word_tag_map.WtTgID')
             ->toSql();
 
-        $this->assertStringContainsString("INNER JOIN {$prefix}wordtags", $sql);
-        $this->assertStringContainsString("ON tags.TgID != wordtags.WtTgID", $sql);
+        $this->assertStringContainsString("INNER JOIN {$prefix}word_tag_map", $sql);
+        $this->assertStringContainsString("ON tags.TgID != word_tag_map.WtTgID", $sql);
     }
 
     // ===== orderBy() tests =====

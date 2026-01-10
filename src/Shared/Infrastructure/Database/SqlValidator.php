@@ -35,25 +35,25 @@ class SqlValidator
      * @var string[]
      */
     private const ALLOWED_TABLES = [
-        'archivedtexts',
+        'archived_texts',
         'archived_text_tag_map',
-        'feedlinks',
+        'feed_links',
         'languages',
         'local_dictionaries',
         'local_dictionary_entries',
-        'newsfeeds',
+        'news_feeds',
         'sentences',
         'settings',
         'tags',
-        'temptextitems',
-        'tempwords',
+        'temp_word_occurrences',
+        'temp_words',
         'text_tags',
         'textitems',
         'word_occurrences',
         'texts',
         'text_tag_map',
         'words',
-        'wordtags',
+        'word_tag_map',
     ];
 
     /**

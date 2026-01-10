@@ -1140,7 +1140,7 @@ class FeedController
             }
 
             // Build query with QueryBuilder
-            $query = QueryBuilder::table('newsfeeds')->select(['*']);
+            $query = QueryBuilder::table('news_feeds')->select(['*']);
 
             if (!empty($currentLang)) {
                 $query->where('NfLgID', '=', $currentLang);

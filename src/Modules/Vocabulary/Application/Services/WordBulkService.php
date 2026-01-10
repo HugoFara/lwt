@@ -54,7 +54,7 @@ class WordBulkService
 
         // Delete words - FK constraints handle:
         // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
-        // - wordtags deleted (ON DELETE CASCADE)
+        // - word_tag_map deleted (ON DELETE CASCADE)
         $count = QueryBuilder::table('words')
             ->whereIn('WoID', $ids)
             ->deletePrepared();

@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- NOTE: Admin user should be created through the setup wizard or registration page.
 -- For security, no default admin is inserted. Multi-user mode requires explicit setup.
 
-CREATE TABLE IF NOT EXISTS archivedtexts (
+CREATE TABLE IF NOT EXISTS archived_texts (
     AtID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
     AtUsID int(10) unsigned DEFAULT NULL,
     AtLgID tinyint(3) unsigned NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS archivedtexts (
     KEY AtUsID (AtUsID),
     KEY AtLgID (AtLgID),
     KEY AtLgIDSourceURI (AtSourceURI(20),AtLgID),
-    CONSTRAINT fk_archivedtexts_user FOREIGN KEY (AtUsID) REFERENCES users(UsID) ON DELETE CASCADE
+    CONSTRAINT fk_archived_texts_user FOREIGN KEY (AtUsID) REFERENCES users(UsID) ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS word_occurrences (
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS temptextitems (
+CREATE TABLE IF NOT EXISTS temp_word_occurrences (
     TiCount smallint(5) unsigned NOT NULL,
     TiSeID mediumint(8) unsigned NOT NULL,
     TiOrder smallint(5) unsigned NOT NULL,
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS temptextitems (
     TiText varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
 ) ENGINE=MEMORY DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS tempwords (
+CREATE TABLE IF NOT EXISTS temp_words (
     WoText varchar(250) DEFAULT NULL,
     WoTextLC varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
     WoTranslation varchar(500) NOT NULL DEFAULT '*',
@@ -212,7 +212,7 @@ CREATE TABLE IF NOT EXISTS tags (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-CREATE TABLE IF NOT EXISTS wordtags (
+CREATE TABLE IF NOT EXISTS word_tag_map (
     WtWoID mediumint(8) unsigned NOT NULL,
     WtTgID smallint(5) unsigned NOT NULL,
     PRIMARY KEY (WtWoID,WtTgID),
@@ -236,7 +236,7 @@ CREATE TABLE IF NOT EXISTS text_tag_map (
     PRIMARY KEY (TtTxID,TtT2ID), KEY TtT2ID (TtT2ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS newsfeeds (
+CREATE TABLE IF NOT EXISTS news_feeds (
     NfID tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
     NfUsID int(10) unsigned DEFAULT NULL,
     NfLgID tinyint(3) unsigned NOT NULL,
@@ -250,10 +250,10 @@ CREATE TABLE IF NOT EXISTS newsfeeds (
     KEY NfUsID (NfUsID),
     KEY NfLgID (NfLgID),
     KEY NfUpdate (NfUpdate),
-    CONSTRAINT fk_newsfeeds_user FOREIGN KEY (NfUsID) REFERENCES users(UsID) ON DELETE CASCADE
+    CONSTRAINT fk_news_feeds_user FOREIGN KEY (NfUsID) REFERENCES users(UsID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS feedlinks (
+CREATE TABLE IF NOT EXISTS feed_links (
     FlID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
     FlTitle varchar(200) NOT NULL,
     FlLink varchar(400) NOT NULL,
@@ -289,9 +289,9 @@ CREATE TABLE IF NOT EXISTS _prefix_migration_log (
 -- NOTE: FK constraints are added via migration 20251221_120000_add_inter_table_foreign_keys.sql
 -- This ensures they are only applied once and allows for proper data cleanup.
 -- The migration adds 16 FK constraints:
--- - Language references: texts, words, sentences, archivedtexts, newsfeeds -> languages
+-- - Language references: texts, words, sentences, archived_texts, news_feeds -> languages
 -- - Text references: sentences, word_occurrences, text_tag_map -> texts
 -- - Other: word_occurrences -> sentences, word_occurrences -> words (SET NULL),
---   wordtags -> words/tags, text_tag_map -> text_tags, archived_text_tag_map -> archivedtexts/text_tags,
---   feedlinks -> newsfeeds
+--   word_tag_map -> words/tags, text_tag_map -> text_tags, archived_text_tag_map -> archived_texts/text_tags,
+--   feed_links -> news_feeds
 -- ============================================================================

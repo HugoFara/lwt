@@ -77,9 +77,9 @@ class FeedServiceTest extends TestCase
             return;
         }
 
-        // Clean up test feeds and feedlinks
-        Connection::query("DELETE FROM " . Globals::table('feedlinks') . " WHERE FlNfID IN (SELECT NfID FROM " . Globals::table('newsfeeds') . " WHERE NfName LIKE 'Test Feed%')");
-        Connection::query("DELETE FROM " . Globals::table('newsfeeds') . " WHERE NfName LIKE 'Test Feed%'");
+        // Clean up test feeds and feed_links
+        Connection::query("DELETE FROM " . Globals::table('feed_links') . " WHERE FlNfID IN (SELECT NfID FROM " . Globals::table('news_feeds') . " WHERE NfName LIKE 'Test Feed%')");
+        Connection::query("DELETE FROM " . Globals::table('news_feeds') . " WHERE NfName LIKE 'Test Feed%'");
         Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgName = 'FeedServiceTestLang'");
     }
 
@@ -101,8 +101,8 @@ class FeedServiceTest extends TestCase
         }
 
         // Clean up test feeds after each test
-        Connection::query("DELETE FROM " . Globals::table('feedlinks') . " WHERE FlNfID IN (SELECT NfID FROM " . Globals::table('newsfeeds') . " WHERE NfName LIKE 'Test Feed%')");
-        Connection::query("DELETE FROM " . Globals::table('newsfeeds') . " WHERE NfName LIKE 'Test Feed%'");
+        Connection::query("DELETE FROM " . Globals::table('feed_links') . " WHERE FlNfID IN (SELECT NfID FROM " . Globals::table('news_feeds') . " WHERE NfName LIKE 'Test Feed%')");
+        Connection::query("DELETE FROM " . Globals::table('news_feeds') . " WHERE NfName LIKE 'Test Feed%'");
     }
 
     // ===== getFeeds() tests =====
@@ -302,13 +302,13 @@ class FeedServiceTest extends TestCase
 
         // Add a feedlink (article) to the feed
         Connection::execute(
-            "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+            "INSERT INTO " . Globals::table('feed_links') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
              VALUES ($feedId, 'Test Article', 'https://example.com/article', 'Description', FROM_UNIXTIME(" . time() . "))"
         );
 
         // Verify article exists
         $count = (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM " . Globals::table('feedlinks') . " WHERE FlNfID = $feedId"
+            "SELECT COUNT(*) AS value FROM " . Globals::table('feed_links') . " WHERE FlNfID = $feedId"
         );
         $this->assertEquals(1, $count);
 
@@ -612,14 +612,14 @@ class FeedServiceTest extends TestCase
         // Add articles
         for ($i = 1; $i <= 3; $i++) {
             Connection::execute(
-                "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+                "INSERT INTO " . Globals::table('feed_links') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
                  VALUES ($feedId, 'Article $i', 'https://example.com/art$i', 'Desc', FROM_UNIXTIME(" . time() . "))"
             );
         }
 
         // Verify articles exist
         $count = (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM " . Globals::table('feedlinks') . " WHERE FlNfID = $feedId"
+            "SELECT COUNT(*) AS value FROM " . Globals::table('feed_links') . " WHERE FlNfID = $feedId"
         );
         $this->assertEquals(3, $count);
 
@@ -629,7 +629,7 @@ class FeedServiceTest extends TestCase
 
         // Verify articles are gone
         $count = (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM " . Globals::table('feedlinks') . " WHERE FlNfID = $feedId"
+            "SELECT COUNT(*) AS value FROM " . Globals::table('feed_links') . " WHERE FlNfID = $feedId"
         );
         $this->assertEquals(0, $count);
 
@@ -656,7 +656,7 @@ class FeedServiceTest extends TestCase
 
         // Add article with space prefix (unloadable)
         Connection::execute(
-            "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+            "INSERT INTO " . Globals::table('feed_links') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
              VALUES ($feedId, 'Unloadable Article', ' https://example.com/unloadable', 'Desc', FROM_UNIXTIME(" . time() . "))"
         );
 
@@ -666,7 +666,7 @@ class FeedServiceTest extends TestCase
 
         // Verify link is trimmed
         $link = Connection::fetchValue(
-            "SELECT FlLink AS value FROM " . Globals::table('feedlinks') . " WHERE FlNfID = $feedId"
+            "SELECT FlLink AS value FROM " . Globals::table('feed_links') . " WHERE FlNfID = $feedId"
         );
         $this->assertEquals('https://example.com/unloadable', $link);
     }

@@ -232,7 +232,7 @@ class WordCrudService
 
         // Delete the word - FK constraints handle:
         // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
-        // - wordtags deleted (ON DELETE CASCADE)
+        // - word_tag_map deleted (ON DELETE CASCADE)
         QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
             ->deletePrepared();

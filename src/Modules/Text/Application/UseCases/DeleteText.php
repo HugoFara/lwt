@@ -101,11 +101,11 @@ class DeleteText
      */
     public function deleteArchivedText(int $textId): string
     {
-        $deleted = QueryBuilder::table('archivedtexts')
+        $deleted = QueryBuilder::table('archived_texts')
             ->where('AtID', '=', $textId)
             ->delete();
         $message = "Archived Texts deleted: $deleted";
-        Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
+        Maintenance::adjustAutoIncrement('archived_texts', 'AtID');
         $this->cleanupArchivedTextTags();
         return $message;
     }
@@ -123,10 +123,10 @@ class DeleteText
             return "Multiple Actions: 0";
         }
 
-        $affectedRows = QueryBuilder::table('archivedtexts')
+        $affectedRows = QueryBuilder::table('archived_texts')
             ->whereIn('AtID', array_map('intval', $textIds))
             ->delete();
-        Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
+        Maintenance::adjustAutoIncrement('archived_texts', 'AtID');
         $this->cleanupArchivedTextTags();
         return "Archived Texts deleted: $affectedRows";
     }
@@ -161,10 +161,10 @@ class DeleteText
             "DELETE archived_text_tag_map
             FROM (
                 archived_text_tag_map
-                LEFT JOIN archivedtexts ON AgAtID = AtID
+                LEFT JOIN archived_texts ON AgAtID = AtID
             )
             WHERE AtID IS NULL"
-            . UserScopedQuery::forTable('archived_text_tag_map', '', 'archivedtexts'),
+            . UserScopedQuery::forTable('archived_text_tag_map', '', 'archived_texts'),
             ''
         );
     }

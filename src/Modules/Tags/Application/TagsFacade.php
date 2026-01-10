@@ -631,7 +631,7 @@ class TagsFacade
     public static function saveWordTagsFromArray(int $wordId, array $tagNames): void
     {
         // Delete existing tags for this word
-        QueryBuilder::table('wordtags')
+        QueryBuilder::table('word_tag_map')
             ->where('WtWoID', '=', $wordId)
             ->delete();
 
@@ -659,7 +659,7 @@ class TagsFacade
 
             // Link tag to word using raw SQL for INSERT...SELECT
             Connection::preparedExecute(
-                "INSERT INTO wordtags (WtWoID, WtTgID)
+                "INSERT INTO word_tag_map (WtWoID, WtTgID)
                 SELECT ?, TgID
                 FROM tags
                 WHERE TgText = ?",
@@ -790,7 +790,7 @@ class TagsFacade
         // Use raw SQL for LEFT JOIN with dynamic IN clause
         $sql = 'SELECT WoID
             FROM words
-            LEFT JOIN wordtags ON WoID = WtWoID AND WtTgID = ' . $tagId . '
+            LEFT JOIN word_tag_map ON WoID = WtWoID AND WtTgID = ' . $tagId . '
             WHERE WtTgID IS NULL AND WoID IN ' . $idList
             . UserScopedQuery::forTable('words');
         $res = Connection::query($sql);
@@ -799,7 +799,7 @@ class TagsFacade
         if ($res instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($res)) {
                 $count += (int) Connection::execute(
-                    'INSERT IGNORE INTO wordtags (WtWoID, WtTgID)
+                    'INSERT IGNORE INTO word_tag_map (WtWoID, WtTgID)
                     VALUES(' . (int)$record['WoID'] . ', ' . $tagId . ')'
                 );
             }
@@ -843,7 +843,7 @@ class TagsFacade
         if ($res instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($res)) {
                 $count++;
-                QueryBuilder::table('wordtags')
+                QueryBuilder::table('word_tag_map')
                     ->where('WtWoID', '=', (int)$record['WoID'])
                     ->where('WtTgID', '=', (int)$tagId)
                     ->delete();
@@ -957,10 +957,10 @@ class TagsFacade
             return "Failed to create tag";
         }
 
-        $sql = 'SELECT AtID FROM archivedtexts
+        $sql = 'SELECT AtID FROM archived_texts
             LEFT JOIN archived_text_tag_map ON AtID = AgAtID AND AgT2ID = ' . $tagId . '
             WHERE AgT2ID IS NULL AND AtID IN ' . $idList
-            . UserScopedQuery::forTable('archivedtexts');
+            . UserScopedQuery::forTable('archived_texts');
         $res = Connection::query($sql);
 
         $count = 0;
@@ -1005,8 +1005,8 @@ class TagsFacade
             return "Tag " . $tagText . " not found";
         }
 
-        $sql = 'SELECT AtID FROM archivedtexts WHERE AtID IN ' . $idList
-            . UserScopedQuery::forTable('archivedtexts');
+        $sql = 'SELECT AtID FROM archived_texts WHERE AtID IN ' . $idList
+            . UserScopedQuery::forTable('archived_texts');
         $res = Connection::query($sql);
 
         $count = 0;
@@ -1048,7 +1048,7 @@ class TagsFacade
         if ($langId === '') {
             $rows = Connection::preparedFetchAll(
                 "SELECT TgID, TgText
-                FROM words, tags, wordtags
+                FROM words, tags, word_tag_map
                 WHERE TgID = WtTgID AND WtWoID = WoID
                 GROUP BY TgID
                 ORDER BY UPPER(TgText)",
@@ -1057,7 +1057,7 @@ class TagsFacade
         } else {
             $rows = Connection::preparedFetchAll(
                 "SELECT TgID, TgText
-                FROM words, tags, wordtags
+                FROM words, tags, word_tag_map
                 WHERE TgID = WtTgID AND WtWoID = WoID AND WoLgID = ?
                 GROUP BY TgID
                 ORDER BY UPPER(TgText)",
@@ -1210,7 +1210,7 @@ class TagsFacade
         if ($langId === '') {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM archivedtexts, text_tags, archived_text_tag_map
+                FROM archived_texts, text_tags, archived_text_tag_map
                 WHERE T2ID = AgT2ID AND AgAtID = AtID
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1219,7 +1219,7 @@ class TagsFacade
         } else {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM archivedtexts, text_tags, archived_text_tag_map
+                FROM archived_texts, text_tags, archived_text_tag_map
                 WHERE T2ID = AgT2ID AND AgAtID = AtID AND AtLgID = ?
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",

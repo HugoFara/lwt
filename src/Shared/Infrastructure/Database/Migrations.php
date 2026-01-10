@@ -341,9 +341,9 @@ class Migrations
              FROM INFORMATION_SCHEMA.TABLES
              WHERE TABLE_SCHEMA = ?
              AND TABLE_NAME IN (
-                'languages', 'texts', 'archivedtexts', 'words', 'sentences',
-                'word_occurrences', 'word_occurrences', 'textitems', 'tags', 'text_tags', 'text_tags', 'wordtags',
-                'text_tag_map', 'archived_text_tag_map', 'newsfeeds', 'feedlinks',
+                'languages', 'texts', 'archived_texts', 'words', 'sentences',
+                'word_occurrences', 'word_occurrences', 'textitems', 'tags', 'text_tags', 'text_tags', 'word_tag_map',
+                'text_tag_map', 'archived_text_tag_map', 'news_feeds', 'feed_links',
                 'settings', '_migrations', 'tts'
              )",
             [$dbname]
@@ -409,16 +409,16 @@ class Migrations
                 SET " . TermStatusService::makeScoreRandomInsertUpdate('u') . "
                 WHERE WoTodayScore>=-100 AND WoStatus<98"
             );
-            // Clean up orphaned wordtags (tags deleted)
+            // Clean up orphaned word_tag_map (tags deleted)
             Connection::execute(
-                "DELETE wordtags
-                FROM (wordtags LEFT JOIN tags on WtTgID = TgID)
+                "DELETE word_tag_map
+                FROM (word_tag_map LEFT JOIN tags on WtTgID = TgID)
                 WHERE TgID IS NULL"
             );
-            // Clean up orphaned wordtags (words deleted)
+            // Clean up orphaned word_tag_map (words deleted)
             Connection::execute(
-                "DELETE wordtags
-                FROM (wordtags LEFT JOIN words ON WtWoID = WoID)
+                "DELETE word_tag_map
+                FROM (word_tag_map LEFT JOIN words ON WtWoID = WoID)
                 WHERE WoID IS NULL"
             );
             // Clean up orphaned text_tag_map (text_tags deleted)
@@ -442,12 +442,12 @@ class Migrations
                 )
                 WHERE T2ID IS NULL"
             );
-            // Clean up orphaned archived_text_tag_map (archivedtexts deleted)
+            // Clean up orphaned archived_text_tag_map (archived_texts deleted)
             Connection::execute(
                 "DELETE archived_text_tag_map
                 FROM (
                     archived_text_tag_map
-                    LEFT JOIN archivedtexts ON AgAtID = AtID
+                    LEFT JOIN archived_texts ON AgAtID = AtID
                 )
                 WHERE AtID IS NULL"
             );

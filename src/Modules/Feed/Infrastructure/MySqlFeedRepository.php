@@ -33,7 +33,7 @@ class MySqlFeedRepository extends AbstractRepository implements FeedRepositoryIn
     /**
      * @var string Table name without prefix
      */
-    protected string $tableName = 'newsfeeds';
+    protected string $tableName = 'news_feeds';
 
     /**
      * @var string Primary key column

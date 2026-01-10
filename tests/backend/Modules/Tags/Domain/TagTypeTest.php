@@ -100,7 +100,7 @@ class TagTypeTest extends TestCase
 
     public function testAssociationTableReturnsWordtagsForTerm(): void
     {
-        $this->assertEquals('wordtags', TagType::TERM->associationTable());
+        $this->assertEquals('word_tag_map', TagType::TERM->associationTable());
     }
 
     public function testAssociationTableReturnsTexttagsForText(): void

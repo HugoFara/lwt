@@ -17,7 +17,7 @@
 namespace Lwt\Modules\Feed\Domain;
 
 /**
- * Repository interface for Article entities (feedlinks).
+ * Repository interface for Article entities (feed_links).
  *
  * This is a domain port defining the contract for article persistence.
  * Infrastructure implementations (e.g., MySqlArticleRepository) provide
@@ -67,7 +67,7 @@ interface ArticleRepositoryInterface
     /**
      * Find articles by feed IDs with status information.
      *
-     * Returns articles with additional status info from texts/archivedtexts tables.
+     * Returns articles with additional status info from texts/archived_texts tables.
      *
      * @param int[]  $feedIds   Feed IDs
      * @param int    $offset    Pagination offset

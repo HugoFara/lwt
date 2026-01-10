@@ -341,7 +341,7 @@ class TextParsingTest extends TestCase
         Connection::query($sql);
         $textId = mysqli_insert_id(Globals::getDbConnection());
 
-        // Parse and save the text (populates temptextitems and registers sentences/text items)
+        // Parse and save the text (populates temp_word_occurrences and registers sentences/text items)
         TextParsing::parseAndSave("Hello world.", self::$testLanguageId, $textId);
 
         // Check that sentences were created

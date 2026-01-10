@@ -63,7 +63,7 @@ class ListTexts
      */
     public function getArchivedTextsPerPage(): int
     {
-        return (int) Settings::getWithDefault('set-archivedtexts-per-page');
+        return (int) Settings::getWithDefault('set-archived_texts-per-page');
     }
 
     /**
@@ -189,11 +189,11 @@ class ListTexts
     ): int {
         $sql = "SELECT COUNT(*) AS cnt FROM (
             SELECT AtID FROM (
-                archivedtexts
+                archived_texts
                 LEFT JOIN archived_text_tag_map ON AtID = AgAtID
             ) WHERE (1=1) {$whLang}{$whQuery}
             GROUP BY AtID {$whTag}
-        ) AS dummy" . UserScopedQuery::forTable('archivedtexts');
+        ) AS dummy" . UserScopedQuery::forTable('archived_texts');
         return (int) Connection::fetchValue($sql, 'cnt');
     }
 
@@ -226,7 +226,7 @@ class ListTexts
             LENGTH(AtAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                (archivedtexts
+                (archived_texts
                 LEFT JOIN archived_text_tag_map ON AtID = AgAtID)
                 LEFT JOIN text_tags ON T2ID = AgT2ID
             ), languages
@@ -234,7 +234,7 @@ class ListTexts
             GROUP BY AtID {$whTag}
             ORDER BY {$sortColumn}
             {$limit}"
-            . UserScopedQuery::forTable('archivedtexts')
+            . UserScopedQuery::forTable('archived_texts')
             . UserScopedQuery::forTable('text_tags')
             . UserScopedQuery::forTable('languages');
 

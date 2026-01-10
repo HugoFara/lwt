@@ -105,7 +105,7 @@ class Validation
             $sql = "SELECT (
                 " . $currenttag_int . " IN (
                     SELECT TgID
-                    FROM words, tags, wordtags
+                    FROM words, tags, word_tag_map
                     WHERE TgID = WtTgID AND WtWoID = WoID" .
                     $lang_condition .
                     " group by TgID order by TgText
@@ -142,14 +142,14 @@ class Validation
                 $sql = "select (
                     " . $currenttag_int . " in (
                         select T2ID
-                        from archivedtexts,
+                        from archived_texts,
                         text_tags,
                         archived_text_tag_map
                         where T2ID = AgT2ID and AgAtID = AtID
                         group by T2ID order by T2Text
                     )
                 ) as value"
-                    . UserScopedQuery::forTablePrepared('archivedtexts', $bindings);
+                    . UserScopedQuery::forTablePrepared('archived_texts', $bindings);
             } else {
                 if (!is_numeric($currentlang)) {
                     return '';
@@ -158,14 +158,14 @@ class Validation
                 $sql = "select (
                     " . $currenttag_int . " in (
                         select T2ID
-                        from archivedtexts,
+                        from archived_texts,
                         text_tags,
                         archived_text_tag_map
                         where T2ID = AgT2ID and AgAtID = AtID and AtLgID = " . $currentlang_int . "
                         group by T2ID order by T2Text
                     )
                 ) as value"
-                    . UserScopedQuery::forTablePrepared('archivedtexts', $bindings);
+                    . UserScopedQuery::forTablePrepared('archived_texts', $bindings);
             }
             $r = Connection::fetchValue($sql);
             if ($r == 0) {

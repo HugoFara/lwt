@@ -103,7 +103,7 @@ class FeedFacade
     // =========================================================================
 
     /**
-     * Get all newsfeeds for a language (or all languages).
+     * Get all news_feeds for a language (or all languages).
      *
      * @param int|null $langId Language ID filter (null for all)
      *
@@ -133,7 +133,7 @@ class FeedFacade
     }
 
     /**
-     * Count newsfeeds with optional language and query filter.
+     * Count news_feeds with optional language and query filter.
      *
      * @param int|null    $langId       Language ID filter (null for all)
      * @param string|null $queryPattern LIKE pattern for name filter
@@ -925,13 +925,13 @@ class FeedFacade
 
                     $bindings = [$textID];
                     $message4 += (int)\Lwt\Shared\Infrastructure\Database\Connection::execute(
-                        'INSERT INTO archivedtexts (
+                        'INSERT INTO archived_texts (
                             AtLgID, AtTitle, AtText, AtAnnotatedText,
                             AtAudioURI, AtSourceURI'
-                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('archivedtexts')
+                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('archived_texts')
                         . ') SELECT TxLgID, TxTitle, TxText, TxAnnotatedText,
                         TxAudioURI, TxSourceURI'
-                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValue('archivedtexts')
+                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValue('archived_texts')
                         . ' FROM texts
                         WHERE TxID = ' . (int)$textID
                         . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTable('texts')

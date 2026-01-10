@@ -146,8 +146,8 @@ class UpdateText
         // Check if text content changed
         $bindings1 = [$textId];
         $oldText = Connection::preparedFetchValue(
-            "SELECT AtText FROM archivedtexts WHERE AtID = ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
+            "SELECT AtText FROM archived_texts WHERE AtID = ?"
+            . UserScopedQuery::forTablePrepared('archived_texts', $bindings1),
             $bindings1,
             'AtText'
         );
@@ -155,10 +155,10 @@ class UpdateText
 
         $bindings2 = [$languageId, $title, $text, $audioUri, $sourceUri, $textId];
         $affected = Connection::preparedExecute(
-            "UPDATE archivedtexts SET
+            "UPDATE archived_texts SET
                 AtLgID = ?, AtTitle = ?, AtText = ?, AtAudioURI = ?, AtSourceURI = ?
              WHERE AtID = ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings2),
+            . UserScopedQuery::forTablePrepared('archived_texts', $bindings2),
             $bindings2
         );
 
@@ -168,8 +168,8 @@ class UpdateText
         if ($affected > 0 && $textsdiffer) {
             $bindings3 = [$textId];
             Connection::preparedExecute(
-                "UPDATE archivedtexts SET AtAnnotatedText = '' WHERE AtID = ?"
-                . UserScopedQuery::forTablePrepared('archivedtexts', $bindings3),
+                "UPDATE archived_texts SET AtAnnotatedText = '' WHERE AtID = ?"
+                . UserScopedQuery::forTablePrepared('archived_texts', $bindings3),
                 $bindings3
             );
         }

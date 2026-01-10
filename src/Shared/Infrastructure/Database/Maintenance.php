@@ -58,15 +58,15 @@ class Maintenance
      */
     public static function optimizeDatabase(): void
     {
-        self::adjustAutoIncrement('archivedtexts', 'AtID');
+        self::adjustAutoIncrement('archived_texts', 'AtID');
         self::adjustAutoIncrement('languages', 'LgID');
         self::adjustAutoIncrement('sentences', 'SeID');
         self::adjustAutoIncrement('texts', 'TxID');
         self::adjustAutoIncrement('words', 'WoID');
         self::adjustAutoIncrement('tags', 'TgID');
         self::adjustAutoIncrement('text_tags', 'T2ID');
-        self::adjustAutoIncrement('newsfeeds', 'NfID');
-        self::adjustAutoIncrement('feedlinks', 'FlID');
+        self::adjustAutoIncrement('news_feeds', 'NfID');
+        self::adjustAutoIncrement('feed_links', 'FlID');
         // SHOW TABLE STATUS queries physical table names, not logical table names
         // In the new system, tables don't have prefixes - they're just "words", "texts", etc.
         $sql =

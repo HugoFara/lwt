@@ -67,7 +67,7 @@ final class SettingDefinitions
         'set-term-sentence-count' => [
             "dft" => '1', "num" => 0
         ],
-        'set-archivedtexts-per-page' => [
+        'set-archived_texts-per-page' => [
             "dft" => '100', "num" => 1, "min" => 1, "max" => 9999
         ],
         'set-texts-per-page' => [

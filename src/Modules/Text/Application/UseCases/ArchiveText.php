@@ -24,7 +24,7 @@ use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
  * Use case for archiving and unarchiving texts.
  *
  * Handles moving texts between active (texts table) and archived
- * (archivedtexts table) states, including tag migration and cleanup.
+ * (archived_texts table) states, including tag migration and cleanup.
  *
  * @since 3.0.0
  */
@@ -50,11 +50,11 @@ class ArchiveText
         // Copy to archived texts
         $bindings1 = [$textId];
         $inserted = Connection::preparedExecute(
-            "INSERT INTO archivedtexts (
+            "INSERT INTO archived_texts (
                 AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
-                . UserScopedQuery::insertColumn('archivedtexts')
+                . UserScopedQuery::insertColumn('archived_texts')
             . ") SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
-                . UserScopedQuery::insertValue('archivedtexts')
+                . UserScopedQuery::insertValue('archived_texts')
             . " FROM texts
             WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings1),
@@ -113,11 +113,11 @@ class ArchiveText
             // Copy to archived
             $bindings1 = [$textId];
             $mess = Connection::preparedExecute(
-                "INSERT INTO archivedtexts (
+                "INSERT INTO archived_texts (
                     AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
-                    . UserScopedQuery::insertColumn('archivedtexts')
+                    . UserScopedQuery::insertColumn('archived_texts')
                 . ") SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
-                    . UserScopedQuery::insertValue('archivedtexts')
+                    . UserScopedQuery::insertValue('archived_texts')
                 . " FROM texts
                 WHERE TxID = ?"
                 . UserScopedQuery::forTablePrepared('texts', $bindings1),
@@ -163,9 +163,9 @@ class ArchiveText
         // Get language ID first
         $bindings = [$archivedId];
         $lgId = Connection::preparedFetchValue(
-            "SELECT AtLgID FROM archivedtexts
+            "SELECT AtLgID FROM archived_texts
             WHERE AtID = ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings),
+            . UserScopedQuery::forTablePrepared('archived_texts', $bindings),
             $bindings,
             'AtLgID'
         );
@@ -182,9 +182,9 @@ class ArchiveText
                 . UserScopedQuery::insertColumn('texts')
             . ") SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
                 . UserScopedQuery::insertValue('texts')
-            . " FROM archivedtexts
+            . " FROM archived_texts
             WHERE AtID = ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
+            . UserScopedQuery::forTablePrepared('archived_texts', $bindings1),
             $bindings1
         );
         $insertedMsg = "Texts added: $inserted";
@@ -198,7 +198,7 @@ class ArchiveText
             SELECT ?, AgT2ID
             FROM archived_text_tag_map
             WHERE AgAtID = ?"
-            . UserScopedQuery::forTablePrepared('archived_text_tag_map', $bindings2, '', 'archivedtexts'),
+            . UserScopedQuery::forTablePrepared('archived_text_tag_map', $bindings2, '', 'archived_texts'),
             $bindings2
         );
 
@@ -213,12 +213,12 @@ class ArchiveText
         TextParsing::parseAndSave((string)($textContent ?? ''), (int) $lgId, (int)$textId);
 
         // Delete from archived
-        $deleted = QueryBuilder::table('archivedtexts')
+        $deleted = QueryBuilder::table('archived_texts')
             ->where('AtID', '=', $archivedId)
             ->delete();
         $deleted = "Archived Texts deleted: $deleted";
 
-        Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
+        Maintenance::adjustAutoIncrement('archived_texts', 'AtID');
         $this->cleanupArchivedTextTags();
 
         // Get statistics
@@ -260,8 +260,8 @@ class ArchiveText
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         $records = Connection::preparedFetchAll(
-            "SELECT AtID, AtLgID FROM archivedtexts WHERE AtID IN ({$placeholders})"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $ids),
+            "SELECT AtID, AtLgID FROM archived_texts WHERE AtID IN ({$placeholders})"
+            . UserScopedQuery::forTablePrepared('archived_texts', $ids),
             $ids
         );
 
@@ -274,9 +274,9 @@ class ArchiveText
                     . UserScopedQuery::insertColumn('texts')
                 . ") SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
                     . UserScopedQuery::insertValue('texts')
-                . " FROM archivedtexts
+                . " FROM archived_texts
                 WHERE AtID = ?"
-                . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
+                . UserScopedQuery::forTablePrepared('archived_texts', $bindings1),
                 $bindings1
             );
             $count += $mess;
@@ -289,7 +289,7 @@ class ArchiveText
                 SELECT ?, AgT2ID
                 FROM archived_text_tag_map
                 WHERE AgAtID = ?"
-                . UserScopedQuery::forTablePrepared('archived_text_tag_map', $bindings2, '', 'archivedtexts'),
+                . UserScopedQuery::forTablePrepared('archived_text_tag_map', $bindings2, '', 'archived_texts'),
                 $bindings2
             );
 
@@ -302,12 +302,12 @@ class ArchiveText
             );
             TextParsing::parseAndSave((string)($textContent ?? ''), (int) $record['AtLgID'], (int)$id);
 
-            QueryBuilder::table('archivedtexts')
+            QueryBuilder::table('archived_texts')
                 ->where('AtID', '=', $ida)
                 ->delete();
         }
 
-        Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
+        Maintenance::adjustAutoIncrement('archived_texts', 'AtID');
         $this->cleanupArchivedTextTags();
 
         return "Unarchived Text(s): {$count}";
@@ -339,10 +339,10 @@ class ArchiveText
             "DELETE archived_text_tag_map
             FROM (
                 archived_text_tag_map
-                LEFT JOIN archivedtexts ON AgAtID = AtID
+                LEFT JOIN archived_texts ON AgAtID = AtID
             )
             WHERE AtID IS NULL"
-            . UserScopedQuery::forTable('archived_text_tag_map', '', 'archivedtexts'),
+            . UserScopedQuery::forTable('archived_text_tag_map', '', 'archived_texts'),
             ''
         );
     }

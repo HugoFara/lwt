@@ -22,7 +22,7 @@ use Lwt\Modules\Feed\Domain\Article;
 use Lwt\Modules\Feed\Domain\ArticleRepositoryInterface;
 
 /**
- * MySQL repository for Article entities (feedlinks).
+ * MySQL repository for Article entities (feed_links).
  *
  * Provides database access for article management operations.
  *
@@ -35,7 +35,7 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
     /**
      * @var string Table name without prefix
      */
-    protected string $tableName = 'feedlinks';
+    protected string $tableName = 'feed_links';
 
     /**
      * @var string Primary key column
@@ -197,14 +197,14 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
             $bindings[] = '%' . $search . '%';
         }
 
-        // Complex query with LEFT JOINs to texts and archivedtexts
+        // Complex query with LEFT JOINs to texts and archived_texts
         $sql = "SELECT FlID, FlNfID, FlTitle, FlLink, FlDescription, FlDate, FlAudio, FlText,
                        TxID, AtID
-                FROM feedlinks
+                FROM feed_links
                 LEFT JOIN texts ON TxSourceURI = TRIM(FlLink)"
                 . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts')
-                . " LEFT JOIN archivedtexts ON AtSourceURI = TRIM(FlLink)"
-                . UserScopedQuery::forTablePrepared('archivedtexts', $bindings, 'archivedtexts')
+                . " LEFT JOIN archived_texts ON AtSourceURI = TRIM(FlLink)"
+                . UserScopedQuery::forTablePrepared('archived_texts', $bindings, 'archived_texts')
                 . " WHERE FlNfID IN ($feedIdList) $searchClause"
                 . " ORDER BY $orderBy $direction"
                 . " LIMIT $offset, $limit";
@@ -242,7 +242,7 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
             // Use raw SQL for OR condition
             $searchPattern = '%' . $search . '%';
             $bindings = [$feedId, $searchPattern, $searchPattern];
-            $sql = "SELECT COUNT(*) as cnt FROM feedlinks
+            $sql = "SELECT COUNT(*) as cnt FROM feed_links
                     WHERE FlNfID = ?
                     AND (FlTitle LIKE ? OR FlDescription LIKE ?)";
             $row = Connection::preparedFetchOne($sql, $bindings);
@@ -268,7 +268,7 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
             $feedIdList = implode(',', array_map('intval', $feedIds));
             $searchPattern = '%' . $search . '%';
             $bindings = [$searchPattern, $searchPattern];
-            $sql = "SELECT COUNT(*) as cnt FROM feedlinks
+            $sql = "SELECT COUNT(*) as cnt FROM feed_links
                     WHERE FlNfID IN ($feedIdList)
                     AND (FlTitle LIKE ? OR FlDescription LIKE ?)";
             $row = Connection::preparedFetchOne($sql, $bindings);
@@ -400,7 +400,7 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
 
         // Use raw SQL for TRIM() expression
         return (int) Connection::execute(
-            "UPDATE feedlinks SET FlLink = TRIM(FlLink)
+            "UPDATE feed_links SET FlLink = TRIM(FlLink)
              WHERE FlNfID IN ($feedIdList)"
         );
     }
@@ -432,7 +432,7 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
      */
     public function getCountPerFeed(array $feedIds = []): array
     {
-        $sql = "SELECT FlNfID, COUNT(*) as cnt FROM feedlinks";
+        $sql = "SELECT FlNfID, COUNT(*) as cnt FROM feed_links";
 
         if (!empty($feedIds)) {
             $feedIdList = implode(',', array_map('intval', $feedIds));

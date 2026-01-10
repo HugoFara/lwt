@@ -197,8 +197,8 @@ class QueryBuilderUserScopeTest extends TestCase
 
     public function testUserScopeAppliedToArchivedTextsTable(): void
     {
-        $this->assertTrue(UserScopedQuery::isUserScopedTable('archivedtexts'));
-        $this->assertEquals('AtUsID', UserScopedQuery::getUserIdColumn('archivedtexts'));
+        $this->assertTrue(UserScopedQuery::isUserScopedTable('archived_texts'));
+        $this->assertEquals('AtUsID', UserScopedQuery::getUserIdColumn('archived_texts'));
     }
 
     public function testUserScopeAppliedToTagsTable(): void
@@ -215,8 +215,8 @@ class QueryBuilderUserScopeTest extends TestCase
 
     public function testUserScopeAppliedToNewsfeedsTable(): void
     {
-        $this->assertTrue(UserScopedQuery::isUserScopedTable('newsfeeds'));
-        $this->assertEquals('NfUsID', UserScopedQuery::getUserIdColumn('newsfeeds'));
+        $this->assertTrue(UserScopedQuery::isUserScopedTable('news_feeds'));
+        $this->assertEquals('NfUsID', UserScopedQuery::getUserIdColumn('news_feeds'));
     }
 
     public function testUserScopeAppliedToSettingsTable(): void
@@ -361,20 +361,20 @@ class QueryBuilderUserScopeTest extends TestCase
 
         $this->assertArrayHasKey('languages', $tables);
         $this->assertArrayHasKey('texts', $tables);
-        $this->assertArrayHasKey('archivedtexts', $tables);
+        $this->assertArrayHasKey('archived_texts', $tables);
         $this->assertArrayHasKey('words', $tables);
         $this->assertArrayHasKey('tags', $tables);
         $this->assertArrayHasKey('text_tags', $tables);
-        $this->assertArrayHasKey('newsfeeds', $tables);
+        $this->assertArrayHasKey('news_feeds', $tables);
         $this->assertArrayHasKey('settings', $tables);
 
         $this->assertEquals('LgUsID', $tables['languages']);
         $this->assertEquals('TxUsID', $tables['texts']);
-        $this->assertEquals('AtUsID', $tables['archivedtexts']);
+        $this->assertEquals('AtUsID', $tables['archived_texts']);
         $this->assertEquals('WoUsID', $tables['words']);
         $this->assertEquals('TgUsID', $tables['tags']);
         $this->assertEquals('T2UsID', $tables['text_tags']);
-        $this->assertEquals('NfUsID', $tables['newsfeeds']);
+        $this->assertEquals('NfUsID', $tables['news_feeds']);
         $this->assertEquals('StUsID', $tables['settings']);
     }
 

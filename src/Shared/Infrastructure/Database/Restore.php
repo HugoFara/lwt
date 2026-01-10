@@ -186,15 +186,15 @@ class Restore
         // Level 1: Tables with FKs to multiple parents
         Connection::execute('DELETE FROM ' . Globals::table('archived_text_tag_map'));
         Connection::execute('DELETE FROM ' . Globals::table('text_tag_map'));
-        Connection::execute('DELETE FROM ' . Globals::table('wordtags'));
+        Connection::execute('DELETE FROM ' . Globals::table('word_tag_map'));
         Connection::execute('DELETE FROM ' . Globals::table('word_occurrences'));
-        Connection::execute('DELETE FROM ' . Globals::table('feedlinks'));
+        Connection::execute('DELETE FROM ' . Globals::table('feed_links'));
 
         // Level 2: Tables with FKs to languages only
         Connection::execute('DELETE FROM ' . Globals::table('sentences'));
-        Connection::execute('DELETE FROM ' . Globals::table('newsfeeds'));
+        Connection::execute('DELETE FROM ' . Globals::table('news_feeds'));
         Connection::execute('DELETE FROM ' . Globals::table('texts'));
-        Connection::execute('DELETE FROM ' . Globals::table('archivedtexts'));
+        Connection::execute('DELETE FROM ' . Globals::table('archived_texts'));
         Connection::execute('DELETE FROM ' . Globals::table('words'));
 
         // Level 3: Parent tables with no FKs to other content tables

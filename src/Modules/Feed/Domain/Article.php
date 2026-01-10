@@ -15,7 +15,7 @@
 namespace Lwt\Modules\Feed\Domain;
 
 /**
- * Article entity representing an RSS feed item (feedlinks table).
+ * Article entity representing an RSS feed item (feed_links table).
  *
  * Articles are individual items fetched from RSS feeds. They can be
  * imported as texts for reading practice.

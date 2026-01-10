@@ -70,7 +70,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                         <p class="has-text-weight-semibold mb-1">Keep your backup safe</p>
                         <ul class="is-size-7 mt-0">
                             <li>You can restore this backup using the Restore function below</li>
-                            <li>The <strong>Official LWT Backup</strong> doesn't include newsfeeds, saved text positions, or settings</li>
+                            <li>The <strong>Official LWT Backup</strong> doesn't include news_feeds, saved text positions, or settings</li>
                             <li>Large backup files may not be restorable (see upload limits below)</li>
                         </ul>
                     </div>

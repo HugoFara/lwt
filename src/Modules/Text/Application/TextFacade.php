@@ -592,8 +592,8 @@ class TextFacade
 
         $bindings1 = [$langId];
         $total = (int) Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM archivedtexts WHERE AtLgID = ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
+            "SELECT COUNT(*) AS cnt FROM archived_texts WHERE AtLgID = ?"
+            . UserScopedQuery::forTablePrepared('archived_texts', $bindings1),
             $bindings1,
             'cnt'
         );
@@ -605,14 +605,14 @@ class TextFacade
             LENGTH(AtAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                (archivedtexts LEFT JOIN archived_text_tag_map ON AtID = AgAtID)
+                (archived_texts LEFT JOIN archived_text_tag_map ON AtID = AgAtID)
                 LEFT JOIN text_tags ON T2ID = AgT2ID
             )
             WHERE AtLgID = ?
             GROUP BY AtID
             ORDER BY {$sortColumn}
             LIMIT ?, ?"
-            . UserScopedQuery::forTablePrepared('archivedtexts', $bindings2)
+            . UserScopedQuery::forTablePrepared('archived_texts', $bindings2)
             . UserScopedQuery::forTablePrepared('text_tags', $bindings2),
             $bindings2
         );

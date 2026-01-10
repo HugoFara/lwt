@@ -57,7 +57,7 @@ class FeedApiHandler
         $placeholderRow = '(?, ?, ?, ?, ?, ?, ?)';
         $placeholders = array_fill(0, count($feed), $placeholderRow);
 
-        $sql = 'INSERT IGNORE INTO feedlinks
+        $sql = 'INSERT IGNORE INTO feed_links
                 (FlTitle, FlLink, FlText, FlDescription, FlDate, FlAudio, FlNfID)
                 VALUES ' . implode(', ', $placeholders);
 
@@ -97,7 +97,7 @@ class FeedApiHandler
     public function getFeedResult(int $importedFeed, int $nif, string $nfname, int $nfid, string $nfoptions): string
     {
         // Update feed timestamp using QueryBuilder
-        QueryBuilder::table('newsfeeds')
+        QueryBuilder::table('news_feeds')
             ->where('NfID', '=', $nfid)
             ->updatePrepared(['NfUpdate' => time()]);
 
@@ -129,15 +129,15 @@ class FeedApiHandler
             $msg .= ", $nif dublicated article";
         }
 
-        // Count total feedlinks using QueryBuilder
-        $row = QueryBuilder::table('feedlinks')
+        // Count total feed_links using QueryBuilder
+        $row = QueryBuilder::table('feed_links')
             ->select(['COUNT(*) AS total'])
             ->where('FlNfID', '=', $nfid)
             ->firstPrepared();
 
         $to = ($row !== null ? (int)$row['total'] : 0) - $nfMaxLinks;
         if ($to > 0) {
-            QueryBuilder::table('feedlinks')
+            QueryBuilder::table('feed_links')
                 ->whereIn('FlNfID', [$nfid])
                 ->orderBy('FlDate', 'ASC')
                 ->limit($to)
@@ -237,7 +237,7 @@ class FeedApiHandler
 
         // Count total using raw SQL with fixed table name
         $total = (int)Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM newsfeeds WHERE $where",
+            "SELECT COUNT(*) AS cnt FROM news_feeds WHERE $where",
             $queryParams,
             'cnt'
         );
@@ -255,8 +255,8 @@ class FeedApiHandler
 
         // Get feeds with language names and article counts
         $sql = "SELECT nf.*, lg.LgName,
-                       (SELECT COUNT(*) FROM feedlinks WHERE FlNfID = NfID) AS articleCount
-                FROM newsfeeds nf
+                       (SELECT COUNT(*) FROM feed_links WHERE FlNfID = NfID) AS articleCount
+                FROM news_feeds nf
                 LEFT JOIN languages lg ON lg.LgID = nf.NfLgID
                 WHERE $where
                 ORDER BY $orderBy
@@ -369,7 +369,7 @@ class FeedApiHandler
         }
 
         // Get article count
-        $countResult = QueryBuilder::table('feedlinks')
+        $countResult = QueryBuilder::table('feed_links')
             ->select(['COUNT(*) AS cnt'])
             ->where('FlNfID', '=', $feedId)
             ->firstPrepared();
@@ -515,7 +515,7 @@ class FeedApiHandler
 
         // Count total using raw SQL with fixed table name
         $total = (int)Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS cnt FROM feedlinks WHERE $where",
+            "SELECT COUNT(*) AS cnt FROM feed_links WHERE $where",
             $queryParams,
             'cnt'
         );
@@ -533,9 +533,9 @@ class FeedApiHandler
 
         // Get articles with import status
         $sql = "SELECT fl.*, tx.TxID, at.AtID
-                FROM feedlinks fl
+                FROM feed_links fl
                 LEFT JOIN texts tx ON tx.TxSourceURI = TRIM(fl.FlLink)
-                LEFT JOIN archivedtexts at ON at.AtSourceURI = TRIM(fl.FlLink)
+                LEFT JOIN archived_texts at ON at.AtSourceURI = TRIM(fl.FlLink)
                 WHERE $where
                 ORDER BY $orderBy
                 LIMIT ?, ?";
@@ -619,7 +619,7 @@ class FeedApiHandler
         } else {
             // Delete specific articles
             $ids = array_map('intval', $articleIds);
-            $deleted = QueryBuilder::table('feedlinks')
+            $deleted = QueryBuilder::table('feed_links')
                 ->whereIn('FlID', $ids)
                 ->whereIn('FlNfID', [$feedId])
                 ->delete();

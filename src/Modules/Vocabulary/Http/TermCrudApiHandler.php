@@ -322,10 +322,10 @@ class TermCrudApiHandler
         }
 
         // Get tags for the word - using JOIN with user-scoped tables
-        $tagsResult = QueryBuilder::table('wordtags')
+        $tagsResult = QueryBuilder::table('word_tag_map')
             ->select(['tags.TgText'])
-            ->join('tags', 'tags.TgID', '=', 'wordtags.WtTgID')
-            ->where('wordtags.WtWoID', '=', $termId)
+            ->join('tags', 'tags.TgID', '=', 'word_tag_map.WtTgID')
+            ->where('word_tag_map.WtWoID', '=', $termId)
             ->orderBy('tags.TgText')
             ->getPrepared();
         $tags = array_map(fn($row) => (string)$row['TgText'], $tagsResult);
@@ -479,10 +479,10 @@ class TermCrudApiHandler
             }
 
             // Get tags for the word
-            $tagsResult = QueryBuilder::table('wordtags')
+            $tagsResult = QueryBuilder::table('word_tag_map')
                 ->select(['tags.TgText'])
-                ->join('tags', 'tags.TgID', '=', 'wordtags.WtTgID')
-                ->where('wordtags.WtWoID', '=', $wordId)
+                ->join('tags', 'tags.TgID', '=', 'word_tag_map.WtTgID')
+                ->where('word_tag_map.WtWoID', '=', $wordId)
                 ->orderBy('tags.TgText')
                 ->getPrepared();
             $tags = array_map(fn($row) => (string)$row['TgText'], $tagsResult);

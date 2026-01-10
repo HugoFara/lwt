@@ -142,10 +142,10 @@ class TermTranslationApiHandler
      */
     public function getTermTags(int $termId): array
     {
-        $tagsResult = QueryBuilder::table('wordtags')
+        $tagsResult = QueryBuilder::table('word_tag_map')
             ->select(['tags.TgText'])
-            ->join('tags', 'tags.TgID', '=', 'wordtags.WtTgID')
-            ->where('wordtags.WtWoID', '=', $termId)
+            ->join('tags', 'tags.TgID', '=', 'word_tag_map.WtTgID')
+            ->where('word_tag_map.WtWoID', '=', $termId)
             ->orderBy('tags.TgText')
             ->getPrepared();
 

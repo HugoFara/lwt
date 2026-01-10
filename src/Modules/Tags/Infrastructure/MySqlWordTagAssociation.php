@@ -24,13 +24,13 @@ use Lwt\Modules\Tags\Domain\TagRepositoryInterface;
 /**
  * MySQL implementation of TagAssociationInterface for word-tag links.
  *
- * Operates on the 'wordtags' junction table.
+ * Operates on the 'word_tag_map' junction table.
  *
  * @since 3.0.0
  */
 class MySqlWordTagAssociation implements TagAssociationInterface
 {
-    private const TABLE_NAME = 'wordtags';
+    private const TABLE_NAME = 'word_tag_map';
     private const ITEM_COLUMN = 'WtWoID';
     private const TAG_COLUMN = 'WtTgID';
 
@@ -75,7 +75,7 @@ class MySqlWordTagAssociation implements TagAssociationInterface
     public function getTagTextsForItem(int $itemId): array
     {
         $rows = Connection::preparedFetchAll(
-            'SELECT TgText FROM wordtags, tags WHERE TgID = WtTgID AND WtWoID = ? ORDER BY TgText',
+            'SELECT TgText FROM word_tag_map, tags WHERE TgID = WtTgID AND WtWoID = ? ORDER BY TgText',
             [$itemId]
         );
 
@@ -116,7 +116,7 @@ class MySqlWordTagAssociation implements TagAssociationInterface
 
             // Associate using INSERT...SELECT to handle concurrent inserts
             Connection::preparedExecute(
-                'INSERT IGNORE INTO wordtags (WtWoID, WtTgID)
+                'INSERT IGNORE INTO word_tag_map (WtWoID, WtTgID)
                 SELECT ?, TgID FROM tags WHERE TgText = ?',
                 [$itemId, $tagName]
             );
@@ -213,9 +213,9 @@ class MySqlWordTagAssociation implements TagAssociationInterface
      */
     public function cleanupOrphanedLinks(): int
     {
-        // Delete wordtags where the tag no longer exists
+        // Delete word_tag_map where the tag no longer exists
         return Connection::preparedExecute(
-            'DELETE FROM wordtags WHERE WtTgID NOT IN (SELECT TgID FROM tags)',
+            'DELETE FROM word_tag_map WHERE WtTgID NOT IN (SELECT TgID FROM tags)',
             []
         );
     }

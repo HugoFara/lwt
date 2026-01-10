@@ -501,8 +501,8 @@ class WordListApiHandler
                 'words.WoStatus',
                 "IFNULL(group_concat(DISTINCT tags.TgText ORDER BY tags.TgText separator ','), '') AS taglist"
             ])
-            ->leftJoin('wordtags', 'words.WoID', '=', 'wordtags.WtWoID')
-            ->leftJoin('tags', 'tags.TgID', '=', 'wordtags.WtTgID')
+            ->leftJoin('word_tag_map', 'words.WoID', '=', 'word_tag_map.WtWoID')
+            ->leftJoin('tags', 'tags.TgID', '=', 'word_tag_map.WtTgID')
             ->where('words.WoStatusChanged', '>', $lastUpdate)
             ->groupBy('words.WoID')
             ->limit($maxTerms)

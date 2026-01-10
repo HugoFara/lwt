@@ -307,7 +307,7 @@ class MySqlTermTagRepository implements TagRepositoryInterface
      */
     public function getUsageCount(int $tagId): int
     {
-        return QueryBuilder::table('wordtags')
+        return QueryBuilder::table('word_tag_map')
             ->where('WtTgID', '=', $tagId)
             ->count();
     }

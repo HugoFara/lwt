@@ -147,7 +147,7 @@ class ParsingCoordinator
         $lid = $language->id()->toInt();
 
         // Clear temporary table
-        QueryBuilder::table('temptextitems')->truncate();
+        QueryBuilder::table('temp_word_occurrences')->truncate();
 
         // Get next sentence ID
         $dbname = Globals::getDatabaseName();
@@ -163,7 +163,7 @@ class ParsingCoordinator
             );
         }
 
-        // Insert tokens into temptextitems
+        // Insert tokens into temp_word_occurrences
         $this->insertTokensToTemp($result, $nextSeID);
 
         // Check for multi-word expressions
@@ -174,7 +174,7 @@ class ParsingCoordinator
     }
 
     /**
-     * Insert tokens into temptextitems table.
+     * Insert tokens into temp_word_occurrences table.
      *
      * @param ParserResult $result   Parsing result
      * @param int          $startSeID Starting sentence ID
@@ -220,7 +220,7 @@ class ParsingCoordinator
         }
 
         Connection::preparedExecute(
-            "INSERT INTO temptextitems (
+            "INSERT INTO temp_word_occurrences (
                 TiSeID, TiCount, TiOrder, TiText, TiWordCount
             ) VALUES " . implode(',', $placeholders),
             $flatParams
@@ -273,7 +273,7 @@ class ParsingCoordinator
             @i:=@i+1,
             MIN(IF(TiWordCount=0, TiOrder+1, TiOrder)),
             GROUP_CONCAT(TiText ORDER BY TiOrder SEPARATOR \"\")
-            FROM temptextitems
+            FROM temp_word_occurrences
             GROUP BY TiSeID
             ORDER BY TiSeID",
             [$lid, $tid]
@@ -294,7 +294,7 @@ class ParsingCoordinator
                 . " WHERE lword IS NOT NULL AND WoLgID = ?
                 UNION ALL
                 SELECT WoID, ?, ?, TiSeID, TiOrder, TiWordCount, TiText
-                FROM temptextitems
+                FROM temp_word_occurrences
                 LEFT JOIN words
                 ON LOWER(TiText) = WoTextLC AND TiWordCount=1 AND WoLgID = ?"
                 . UserScopedQuery::forTablePrepared('words', $bindings, '')
@@ -308,7 +308,7 @@ class ParsingCoordinator
                 "INSERT INTO word_occurrences (
                     Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
                 ) SELECT WoID, ?, ?, TiSeID, TiOrder, TiWordCount, TiText
-                FROM temptextitems
+                FROM temp_word_occurrences
                 LEFT JOIN words
                 ON LOWER(TiText) = WoTextLC AND TiWordCount=1 AND WoLgID = ?"
                 . UserScopedQuery::forTablePrepared('words', $bindings, '')

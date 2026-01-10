@@ -545,7 +545,7 @@ class WordUploadService
         bool $ignoreFirst
     ): void {
         $sql = "LOAD DATA LOCAL INFILE ?
-            INTO TABLE tempwords
+            INTO TABLE temp_words
             FIELDS TERMINATED BY '$delimiter' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' " .
             ($ignoreFirst ? "IGNORE 1 LINES " : "") .
             "$columnsClause SET " .
@@ -688,7 +688,7 @@ class WordUploadService
             }
         }
 
-        $sql = "INSERT INTO tempwords(
+        $sql = "INSERT INTO temp_words(
                 WoText, WoTextLC" .
                 ($fields["tr"] != 0 ? ', WoTranslation' : '') .
                 ($fields["ro"] != 0 ? ', WoRomanization' : '') .
@@ -757,9 +757,9 @@ class WordUploadService
             FROM numbers
             INNER JOIN (
                 SELECT words.WoTextLC as WoTextLC, $woTrRepl as WoTranslation
-                FROM tempwords
+                FROM temp_words
                 LEFT JOIN words
-                ON words.WoTextLC = tempwords.WoTextLC
+                ON words.WoTextLC = temp_words.WoTextLC
                     AND words.WoTranslation != '*'
                     AND words.WoLgID = ?
             ) b
@@ -782,7 +782,7 @@ class WordUploadService
         }
 
         $seplen = mb_strlen($tesep, 'UTF-8');
-        $woTrRepl = 'tempwords.WoTranslation';
+        $woTrRepl = 'temp_words.WoTranslation';
         $replaceParams2 = [];
         for ($i = 1; $i < $seplen; $i++) {
             $woTrRepl = 'REPLACE(' . $woTrRepl . ', ?, ?)';
@@ -798,7 +798,7 @@ class WordUploadService
 
         $stmt = Connection::prepare(
             "INSERT IGNORE INTO merge_words(MText,MTranslation)
-            SELECT tempwords.WoTextLC,
+            SELECT temp_words.WoTextLC,
             trim(
                 SUBSTRING_INDEX(
                     SUBSTRING_INDEX($woTrRepl, ?,
@@ -807,9 +807,9 @@ class WordUploadService
                 )
             ) name
             FROM numbers
-            INNER JOIN tempwords
-            ON CHAR_LENGTH(tempwords.WoTranslation)-CHAR_LENGTH(REPLACE($woTrRepl, ?, ''))>= numbers.n-1
-            ORDER BY tempwords.WoTextLC, n"
+            INNER JOIN temp_words
+            ON CHAR_LENGTH(temp_words.WoTranslation)-CHAR_LENGTH(REPLACE($woTrRepl, ?, ''))>= numbers.n-1
+            ORDER BY temp_words.WoTextLC, n"
         );
         $stmt->bindValues($params2);
         $stmt->execute();
@@ -821,9 +821,9 @@ class WordUploadService
             $wosep = ' ' . $wosep[0] . ' ';
         }
 
-        // Update tempwords with merged translations
+        // Update temp_words with merged translations
         Connection::preparedExecute(
-            "UPDATE tempwords
+            "UPDATE temp_words
             LEFT JOIN (
                 SELECT MText, GROUP_CONCAT(trim(MTranslation)
                     ORDER BY MID
@@ -864,7 +864,7 @@ class WordUploadService
                     SELECT WoTextLC, WoText, WoTranslation, WoRomanization,
                     WoSentence, $status AS WoStatus,
                     NOW() AS WoStatusChanged
-                    FROM tempwords
+                    FROM temp_words
                 ) AS tw";
 
             if ($overwrite == 1 || $overwrite == 4) {
@@ -900,7 +900,7 @@ class WordUploadService
             // Overwrite modes 3 and 5: only update existing, don't insert new
             $bindings = [];
             $sql = "UPDATE words AS a
-                JOIN tempwords AS b
+                JOIN temp_words AS b
                 ON a.WoTextLC = b.WoTextLC SET
                 a.WoTranslation = CASE
                     WHEN b.WoTranslation = '' OR b.WoTranslation = '*' THEN a.WoTranslation
@@ -938,30 +938,30 @@ class WordUploadService
         Connection::execute(
             "INSERT IGNORE INTO tags (TgText)
             SELECT name FROM (
-                SELECT tempwords.WoTextLC,
+                SELECT temp_words.WoTextLC,
                 SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
-                        tempwords.WoTaglist, ',',
+                        temp_words.WoTaglist, ',',
                         numbers.n
                     ), ',', -1) name
                 FROM numbers
-                INNER JOIN tempwords
-                ON CHAR_LENGTH(tempwords.WoTaglist)-CHAR_LENGTH(REPLACE(tempwords.WoTaglist, ',', ''))>= numbers.n-1
+                INNER JOIN temp_words
+                ON CHAR_LENGTH(temp_words.WoTaglist)-CHAR_LENGTH(REPLACE(temp_words.WoTaglist, ',', ''))>= numbers.n-1
                 ORDER BY WoTextLC, n) A"
         );
 
         // Link words to tags
         $bindings = [$langId];
-        $sql = "INSERT IGNORE INTO wordtags
+        $sql = "INSERT IGNORE INTO word_tag_map
             SELECT WoID, TgID
             FROM (
-                SELECT tempwords.WoTextLC, SUBSTRING_INDEX(
+                SELECT temp_words.WoTextLC, SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
-                        tempwords.WoTaglist, ',', numbers.n
+                        temp_words.WoTaglist, ',', numbers.n
                     ), ',', -1) name
                 FROM numbers
-                INNER JOIN tempwords
-                ON CHAR_LENGTH(tempwords.WoTaglist)-CHAR_LENGTH(REPLACE(tempwords.WoTaglist, ',', ''))>= numbers.n-1
+                INNER JOIN temp_words
+                ON CHAR_LENGTH(temp_words.WoTaglist)-CHAR_LENGTH(REPLACE(temp_words.WoTaglist, ',', ''))>= numbers.n-1
                 ORDER BY WoTextLC, n
             ) A, tags, words
             WHERE name=TgText AND A.WoTextLC=words.WoTextLC AND WoLgID=?"
@@ -980,7 +980,7 @@ class WordUploadService
     private function cleanupTempTables(): void
     {
         Connection::execute("DROP TABLE IF EXISTS numbers");
-        QueryBuilder::table('tempwords')->truncate();
+        QueryBuilder::table('temp_words')->truncate();
     }
 
     /**
@@ -1005,7 +1005,7 @@ class WordUploadService
 
         if ($this->isLocalInfileEnabled()) {
             $sql = "LOAD DATA LOCAL INFILE ?
-                IGNORE INTO TABLE tempwords
+                IGNORE INTO TABLE temp_words
                 FIELDS TERMINATED BY '$delimiter' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' " .
                 ($ignoreFirst ? "IGNORE 1 LINES " : "") .
                 "$columns
@@ -1047,7 +1047,7 @@ class WordUploadService
             }
 
             if (!empty($placeholders)) {
-                $sql = "INSERT INTO tempwords(WoTextLC)
+                $sql = "INSERT INTO temp_words(WoTextLC)
                     VALUES " . implode(',', $placeholders);
                 Connection::preparedExecute($sql, $params);
             }
@@ -1065,11 +1065,11 @@ class WordUploadService
             SELECT NAME FROM (
                 SELECT SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
-                        tempwords.WoTextLC, ',', numbers.n
+                        temp_words.WoTextLC, ',', numbers.n
                     ), ',', -1) name
                 FROM numbers
-                INNER JOIN tempwords
-                ON CHAR_LENGTH(tempwords.WoTextLC)-CHAR_LENGTH(REPLACE(tempwords.WoTextLC, ',', ''))>= numbers.n-1
+                INNER JOIN temp_words
+                ON CHAR_LENGTH(temp_words.WoTextLC)-CHAR_LENGTH(REPLACE(temp_words.WoTextLC, ',', ''))>= numbers.n-1
                 ORDER BY WoTextLC, n) A");
 
         $this->cleanupTempTables();
@@ -1202,7 +1202,7 @@ class WordUploadService
                 CASE WHEN w.WoSentence != '' AND w.WoSentence LIKE CONCAT('%{', w.WoText, '}%')
                     THEN 1 ELSE 0 END as SentOK
             FROM words w
-            LEFT JOIN wordtags wt ON w.WoID = wt.WtWoID
+            LEFT JOIN word_tag_map wt ON w.WoID = wt.WtWoID
             LEFT JOIN tags t ON wt.WtTgID = t.TgID
             WHERE w.WoStatusChanged > ?
             GROUP BY w.WoID

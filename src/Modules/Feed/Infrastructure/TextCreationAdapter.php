@@ -117,12 +117,12 @@ class TextCreationAdapter implements TextCreationInterface
 
             // Archive the text
             $bindings = [$textId];
-            $sql = "INSERT INTO archivedtexts (
+            $sql = "INSERT INTO archived_texts (
                     AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
-                    . UserScopedQuery::insertColumn('archivedtexts')
+                    . UserScopedQuery::insertColumn('archived_texts')
                 . ")
                 SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
-                    . UserScopedQuery::insertValue('archivedtexts')
+                    . UserScopedQuery::insertValue('archived_texts')
                 . " FROM texts WHERE TxID = ?"
                 . UserScopedQuery::forTablePrepared('texts', $bindings);
             Connection::preparedExecute($sql, $bindings);
@@ -187,8 +187,8 @@ class TextCreationAdapter implements TextCreationInterface
             return true;
         }
 
-        // Check archivedtexts table
-        return QueryBuilder::table('archivedtexts')
+        // Check archived_texts table
+        return QueryBuilder::table('archived_texts')
             ->where('AtSourceURI', '=', $trimmedUri)
             ->existsPrepared();
     }

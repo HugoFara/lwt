@@ -58,11 +58,11 @@ class UserScopedQuery
     private const USER_SCOPED_TABLES = [
         'languages' => 'LgUsID',
         'texts' => 'TxUsID',
-        'archivedtexts' => 'AtUsID',
+        'archived_texts' => 'AtUsID',
         'words' => 'WoUsID',
         'tags' => 'TgUsID',
         'text_tags' => 'T2UsID',
-        'newsfeeds' => 'NfUsID',
+        'news_feeds' => 'NfUsID',
         'settings' => 'StUsID',
         'local_dictionaries' => 'LdUsID',
     ];

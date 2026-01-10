@@ -169,9 +169,9 @@ class MaintenanceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        // Test with archivedtexts table
-        Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
-        $this->assertTrue(true, 'adjustAutoIncrement should complete without error for archivedtexts');
+        // Test with archived_texts table
+        Maintenance::adjustAutoIncrement('archived_texts', 'AtID');
+        $this->assertTrue(true, 'adjustAutoIncrement should complete without error for archived_texts');
     }
 
     public function testAdjustAutoIncrementEmptyTable(): void

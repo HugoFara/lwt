@@ -96,7 +96,7 @@ class TextParsing
         self::displayStatistics($lid, $rtlScript, !empty($wl));
 
         // Clean up
-        QueryBuilder::table('temptextitems')->truncate();
+        QueryBuilder::table('temp_word_occurrences')->truncate();
     }
 
     /**
@@ -130,7 +130,7 @@ class TextParsing
             throw DatabaseException::recordNotFound('languages', 'LgID', $lid);
         }
 
-        // Parse text into temptextitems (id>0 uses MAX(SeID)+1 for sentence IDs)
+        // Parse text into temp_word_occurrences (id>0 uses MAX(SeID)+1 for sentence IDs)
         self::prepare($text, $textId, $lid);
 
         // Get multi-word expressions
@@ -145,7 +145,7 @@ class TextParsing
         self::registerSentencesTextItems($textId, $lid, !empty($wl));
 
         // Clean up
-        QueryBuilder::table('temptextitems')->truncate();
+        QueryBuilder::table('temp_word_occurrences')->truncate();
     }
 
     /**
@@ -172,13 +172,13 @@ class TextParsing
             ];
         }
 
-        // Prepare text into temptextitems
+        // Prepare text into temp_word_occurrences
         self::prepare($text, -1, $lid);
 
         // Get sentence count
         $sentences = Connection::fetchAll(
             'SELECT GROUP_CONCAT(TiText ORDER BY TiOrder SEPARATOR "")
-            AS Sent FROM temptextitems GROUP BY TiSeID'
+            AS Sent FROM temp_word_occurrences GROUP BY TiSeID'
         );
         $sentenceCount = count($sentences);
 
@@ -200,7 +200,7 @@ class TextParsing
         $rows = Connection::preparedFetchAll(
             "SELECT COUNT(`TiOrder`) AS cnt, IF(0=TiWordCount,0,1) AS len,
             LOWER(TiText) AS word, WoTranslation
-            FROM temptextitems
+            FROM temp_word_occurrences
             LEFT JOIN words ON LOWER(TiText)=WoTextLC AND WoLgID=?"
             . UserScopedQuery::forTablePrepared('words', $bindings, '')
             . " GROUP BY LOWER(TiText)",
@@ -224,8 +224,8 @@ class TextParsing
             ? round(($unknownWords / $totalWords) * 100, 1)
             : 100.0;
 
-        // Clean up temptextitems
-        QueryBuilder::table('temptextitems')->truncate();
+        // Clean up temp_word_occurrences
+        QueryBuilder::table('temp_word_occurrences')->truncate();
 
         return [
             'sentences' => $sentenceCount,
@@ -273,7 +273,7 @@ class TextParsing
     }
 
     /**
-     * Parse Japanese text with MeCab and insert into temptextitems.
+     * Parse Japanese text with MeCab and insert into temp_word_occurrences.
      *
      * @param string $text         Preprocessed text
      * @param bool   $useMaxSeID   Whether to query for max sentence ID (true for existing texts)
@@ -402,7 +402,7 @@ class TextParsing
                 [$order]
             );
             Connection::query(
-                "INSERT INTO temptextitems (
+                "INSERT INTO temp_word_occurrences (
                     TiCount, TiSeID, TiOrder, TiWordCount, TiText
                 )
                 SELECT MIN(TiCount) s, TiSeID, TiOrder, TiWordCount,
@@ -489,7 +489,7 @@ class TextParsing
         }
         $escaped_file_name = mysqli_real_escape_string($connection, $file_name);
         $sql = "LOAD DATA LOCAL INFILE '$escaped_file_name'
-        INTO TABLE temptextitems
+        INTO TABLE temp_word_occurrences
         FIELDS TERMINATED BY '\\t' LINES TERMINATED BY '\\n' (@word_count, @term)
         SET
             TiSeID = @sid,
@@ -582,7 +582,7 @@ class TextParsing
             $count += strlen($term) + 1;
 
             Connection::preparedExecute(
-                "INSERT INTO temptextitems
+                "INSERT INTO temp_word_occurrences
                 (TiSeID, TiCount, TiOrder, TiText, TiWordCount)
                 VALUES (?, ?, ?, ?, ?)",
                 [$sid, $current_count, $order, $term, $word_count]
@@ -729,7 +729,7 @@ class TextParsing
     }
 
     /**
-     * Parse standard text and insert into temptextitems.
+     * Parse standard text and insert into temp_word_occurrences.
      *
      * @param string $text         Preprocessed text
      * @param string $termchar     Word character regex
@@ -829,7 +829,7 @@ class TextParsing
                 }
 
                 Connection::preparedExecute(
-                    "INSERT INTO temptextitems (
+                    "INSERT INTO temp_word_occurrences (
                         TiSeID, TiCount, TiOrder, TiText, TiWordCount
                     ) VALUES " . implode(',', $placeholders),
                     $flatParams
@@ -924,7 +924,7 @@ class TextParsing
         $replace = explode("|", (string) $record['LgCharacterSubstitutions']);
         $text = Escaping::prepareTextdata($text);
         //if(is_callable('normalizer_normalize')) $s = normalizer_normalize($s);
-        QueryBuilder::table('temptextitems')->truncate();
+        QueryBuilder::table('temp_word_occurrences')->truncate();
 
         // because of sentence special characters
         $text = str_replace(array('}', '{'), array(']', '['), $text);
@@ -953,7 +953,7 @@ class TextParsing
         $wo = $nw = array();
         $sentences = Connection::fetchAll(
             'SELECT GROUP_CONCAT(TiText order by TiOrder SEPARATOR "")
-            Sent FROM temptextitems group by TiSeID'
+            Sent FROM temp_word_occurrences group by TiSeID'
         );
         echo '<h4>Sentences</h4><ol>';
         foreach ($sentences as $record) {
@@ -964,7 +964,7 @@ class TextParsing
         $rows = Connection::preparedFetchAll(
             "SELECT count(`TiOrder`) cnt, if(0=TiWordCount,0,1) as len,
             LOWER(TiText) as word, WoTranslation
-            FROM temptextitems
+            FROM temp_word_occurrences
             LEFT JOIN words ON lower(TiText)=WoTextLC AND WoLgID=?"
             . UserScopedQuery::forTablePrepared('words', $bindings, '')
             . " GROUP BY lower(TiText)",
@@ -994,7 +994,7 @@ class TextParsing
     /**
      * Append sentences and text items in the database.
      *
-     * TiSeID in temptextitems is pre-computed to match future SeID values.
+     * TiSeID in temp_word_occurrences is pre-computed to match future SeID values.
      * When parseStandardToDatabase runs with useMaxSeID=true, it sets TiSeID
      * to MAX(SeID)+1, MAX(SeID)+2, etc. When we insert sentences here, they
      * get those exact SeID values via auto-increment, so TiSeID = SeID.
@@ -1018,7 +1018,7 @@ class TextParsing
             @i:=@i+1,
             MIN(IF(TiWordCount=0, TiOrder+1, TiOrder)),
             GROUP_CONCAT(TiText ORDER BY TiOrder SEPARATOR \"\")
-            FROM temptextitems
+            FROM temp_word_occurrences
             GROUP BY TiSeID
             ORDER BY TiSeID",
             [$lid, $tid]
@@ -1026,14 +1026,14 @@ class TextParsing
 
         // STEP 1.5: Align TiSeID with actual SeID values.
         // The pre-computed TiSeID may not match actual AUTO_INCREMENT values,
-        // so we update temptextitems to use the actual SeID from inserted sentences.
+        // so we update temp_word_occurrences to use the actual SeID from inserted sentences.
         // ROW_NUMBER() maps TiSeID rank to SeOrder, which we JOIN to get SeID.
         Connection::preparedExecute(
-            "UPDATE temptextitems t
+            "UPDATE temp_word_occurrences t
             JOIN (
                 SELECT TiSeID AS old_seid,
                        ROW_NUMBER() OVER (ORDER BY TiSeID) AS rn
-                FROM temptextitems
+                FROM temp_word_occurrences
                 GROUP BY TiSeID
             ) mapping ON t.TiSeID = mapping.old_seid
             JOIN sentences s ON s.SeOrder = mapping.rn AND s.SeTxID = ?
@@ -1075,7 +1075,7 @@ class TextParsing
                 . " WHERE lword IS NOT NULL AND WoLgID = ?
                 UNION ALL
                 SELECT WoID, ?, ?, TiSeID, TiOrder, TiWordCount, TiText
-                FROM temptextitems
+                FROM temp_word_occurrences
                 LEFT JOIN words
                 ON LOWER(TiText) = WoTextLC AND TiWordCount=1 AND WoLgID = ?"
                 . UserScopedQuery::forTablePrepared('words', $bindings, '')
@@ -1090,7 +1090,7 @@ class TextParsing
                     Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
                 )
                 SELECT WoID, ?, ?, TiSeID, TiOrder, TiWordCount, TiText
-                FROM temptextitems
+                FROM temp_word_occurrences
                 LEFT JOIN words
                 ON LOWER(TiText) = WoTextLC AND TiWordCount=1 AND WoLgID = ?"
                 . UserScopedQuery::forTablePrepared('words', $bindings, '')
@@ -1271,7 +1271,7 @@ class TextParsing
             if(@d=0 or ''=@z, NULL, lower(@z)) lword,
             TiOrder,
             n
-            FROM numbers , temptextitems"
+            FROM numbers , temp_word_occurrences"
         );
     }
 }
