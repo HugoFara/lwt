@@ -81,9 +81,6 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware('/text/print', 'Lwt\\Modules\\Text\\Http\\TextPrintController@printAnnotated', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware('/text/print-plain', 'Lwt\\Modules\\Text\\Http\\TextPrintController@printPlain', AUTH_MIDDLEWARE);
 
-    // Import long text
-    $router->registerWithMiddleware('/text/import-long', 'Lwt\\Modules\\Text\\Http\\TextController@importLong', AUTH_MIDDLEWARE);
-
     // Set text mode
     $router->registerWithMiddleware('/text/set-mode', 'Lwt\\Modules\\Text\\Http\\TextController@setMode', AUTH_MIDDLEWARE);
 

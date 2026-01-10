@@ -49,7 +49,6 @@ const quickMenuRoutes: Record<string, string> = {
   edit_archivedtexts: '/text/archived',
   edit_texttags: '/tags/text',
   check_text: '/text/check',
-  long_text_import: '/text/import-long',
   edit_languages: '/languages',
   edit_words: '/words',
   edit_tags: '/tags',
