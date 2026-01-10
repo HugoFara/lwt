@@ -43,6 +43,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:themes": "node scripts/build-themes.js",
+    "build:pwa-icons": "node scripts/generate-pwa-icons.js",
     "build:all": "npm run build && npm run build:themes",
     "preview": "vite preview",
     "test": "vitest run",

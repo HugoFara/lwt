@@ -34,6 +34,9 @@ import '@shared/utils/inline_markdown';
 import '@shared/stores/lwt_state';
 import '@shared/stores/app_data';
 
+// PWA support
+import '@shared/pwa/register';
+
 // Shared API client
 import '@shared/api/client';
 
