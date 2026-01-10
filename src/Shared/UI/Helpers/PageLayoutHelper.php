@@ -545,9 +545,9 @@ HTML;
     /**
      * Display a message (success/error) to the user.
      *
-     * Renders a message with appropriate styling. Error messages
-     * (starting with "Error") are shown in red with a back button.
-     * Success messages are shown in blue and auto-hide.
+     * Renders a Bulma notification with appropriate styling. Error messages
+     * (starting with "Error") are shown as danger notifications with a back button.
+     * Success messages are shown as success notifications and auto-hide.
      *
      * @param string $message  The message to display
      * @param bool   $autoHide Whether to auto-hide the message (default: true)
@@ -556,17 +556,31 @@ HTML;
      */
     public static function renderMessage(string $message, bool $autoHide = true): void
     {
-        if (trim($message) == '') {
+        if (trim($message) === '') {
             return;
         }
-        if (substr($message, 0, 5) == "Error") {
-            echo '<p class="red">*** ' . \htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . ' ***' .
-                ($autoHide ?
-                '' :
-                '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" data-action="go-back" />' ) .
-                '</p>';
+
+        $escapedMessage = \htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+        $isError = str_starts_with($message, 'Error');
+
+        if ($isError) {
+            $backButton = $autoHide
+                ? ''
+                : '<button class="button is-small mt-2" data-action="go-back">' .
+                  IconHelper::render('arrow-left', ['alt' => 'Go back']) .
+                  '<span class="ml-1">Go back and correct</span></button>';
+
+            echo '<div class="notification is-danger">' .
+                '<button class="delete" aria-label="close"></button>' .
+                '<strong>Error:</strong> ' . $escapedMessage .
+                $backButton .
+                '</div>';
         } else {
-            echo '<p id="hide3" class="msgblue">+++ ' . \htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . ' +++</p>';
+            $autoHideAttr = $autoHide ? ' data-auto-hide="true"' : '';
+            echo '<div class="notification is-success"' . $autoHideAttr . '>' .
+                '<button class="delete" aria-label="close"></button>' .
+                $escapedMessage .
+                '</div>';
         }
     }
 }

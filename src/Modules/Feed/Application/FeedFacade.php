@@ -980,7 +980,8 @@ class FeedFacade
 
         // Show progress UI
         if ($config['count'] != 1) {
-            echo '<div class="msgblue"><p>UPDATING <span x-text="loadedCount">0</span>/' .
+            echo '<div class="notification is-info">' .
+                '<p>UPDATING <span x-text="loadedCount">0</span>/' .
                 $config['count'] . ' FEEDS</p></div>';
         }
 

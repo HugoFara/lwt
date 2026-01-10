@@ -540,7 +540,8 @@ class FeedController
         echo '<div x-data="feedLoader()">';
 
         if ($config['count'] !== 1) {
-            echo '<div class="msgblue"><p>UPDATING <span x-text="loadedCount">0</span>/' .
+            echo '<div class="notification is-info">' .
+                '<p>UPDATING <span x-text="loadedCount">0</span>/' .
                 $config['count'] . ' FEEDS</p></div>';
         }
 
@@ -718,9 +719,10 @@ class FeedController
     private function createTextsFromFeed(array $texts, array $row, string $tagName, int $maxTexts): array
     {
         foreach ($texts as $text) {
-            echo '<div class="msgblue">
-            <p class="hide_message">+++ "' . htmlspecialchars((string)($text['TxTitle'] ?? ''), ENT_QUOTES, 'UTF-8') . '" added! +++</p>
-            </div>';
+            echo '<div class="notification is-success" data-auto-hide="true">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Text "' . htmlspecialchars((string)($text['TxTitle'] ?? ''), ENT_QUOTES, 'UTF-8') . '" added!' .
+                '</div>';
 
             $this->feedFacade->createTextFromFeed([
                 'TxLgID' => $row['NfLgID'],
@@ -754,10 +756,13 @@ class FeedController
         // Display flash messages from previous requests
         $flashMessages = $this->flashService->getAndClear();
         foreach ($flashMessages as $flashMsg) {
-            $cssClass = FlashMessageService::getCssClass($flashMsg['type']);
-            $hideClass = FlashMessageService::isError($flashMsg['type']) ? '' : ' class="hide_message"';
-            echo "\n<div class=\"{$cssClass}\"><p{$hideClass}>";
-            echo "+++ ", htmlspecialchars($flashMsg['message']), " +++</p></div>";
+            $isError = FlashMessageService::isError($flashMsg['type']);
+            $notifClass = $isError ? 'is-danger' : 'is-success';
+            $autoHide = $isError ? '' : ' data-auto-hide="true"';
+            echo '<div class="notification ' . $notifClass . '"' . $autoHide . '>' .
+                '<button class="delete" aria-label="close"></button>' .
+                htmlspecialchars($flashMsg['message']) .
+                '</div>';
         }
 
         $this->displayMessage($message);
@@ -773,7 +778,7 @@ class FeedController
     private function displayMessage(string $message): void
     {
         if ($message !== '') {
-            echo '<p id="hide3" class="msgblue">+++ ' . htmlspecialchars($message) . ' +++</p>';
+            PageLayoutHelper::renderMessage($message);
         }
     }
 
@@ -799,7 +804,10 @@ class FeedController
                 $currentQuery = '';
                 $searchTerm = '';
                 if (InputValidator::has('query')) {
-                    echo '<p id="hide3" class="warning-message">+++ Warning: Invalid Search +++</p>';
+                    echo '<div class="notification is-warning" data-auto-hide="true">' .
+                        '<button class="delete" aria-label="close"></button>' .
+                        'Warning: Invalid Search' .
+                        '</div>';
                 }
             }
         }
@@ -1035,10 +1043,13 @@ class FeedController
     {
         $flashMessages = $this->flashService->getAndClear();
         foreach ($flashMessages as $flashMsg) {
-            $cssClass = FlashMessageService::getCssClass($flashMsg['type']);
-            $hideClass = FlashMessageService::isError($flashMsg['type']) ? '' : ' class="hide_message"';
-            echo "\n<div class=\"{$cssClass}\"><p{$hideClass}>";
-            echo "+++ ", htmlspecialchars($flashMsg['message']), " +++</p></div>";
+            $isError = FlashMessageService::isError($flashMsg['type']);
+            $notifClass = $isError ? 'is-danger' : 'is-success';
+            $autoHide = $isError ? '' : ' data-auto-hide="true"';
+            echo '<div class="notification ' . $notifClass . '"' . $autoHide . '>' .
+                '<button class="delete" aria-label="close"></button>' .
+                htmlspecialchars($flashMsg['message']) .
+                '</div>';
         }
     }
 
@@ -1069,7 +1080,10 @@ class FeedController
         $feed = $this->feedFacade->getFeedById($feedId);
 
         if ($feed === null) {
-            echo '<p class="red">Feed not found.</p>';
+            echo '<div class="notification is-danger">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Feed not found.' .
+                '</div>';
             return;
         }
 
