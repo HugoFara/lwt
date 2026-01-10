@@ -77,7 +77,7 @@ class BookController
 
         // Get languages for filter dropdown
         $languageFacade = Container::getInstance()->getTyped(LanguageFacade::class);
-        $languages = $languageFacade->getAllLanguages();
+        $languages = $languageFacade->getLanguagesForSelect();
         $languagesOption = SelectOptionsBuilder::forLanguages($languages, $languageId, "[All Languages]");
 
         PageLayoutHelper::renderPageStart('My Books', true, 'books');
@@ -134,7 +134,7 @@ class BookController
 
         // Show import form
         $languageFacade = Container::getInstance()->getTyped(LanguageFacade::class);
-        $languages = $languageFacade->getAllLanguages();
+        $languages = $languageFacade->getLanguagesForSelect();
         $languagesOption = SelectOptionsBuilder::forLanguages($languages, null, "[Choose...]");
 
         PageLayoutHelper::renderPageStart('Import EPUB', true, 'books');
