@@ -60,10 +60,11 @@
     "docs:preview": "vitepress preview docs-src"
   },
   "dependencies": {
-    "@yaireo/tagify": "^4.35.6",
     "@alpinejs/csp": "^3.15.2",
+    "@yaireo/tagify": "^4.35.6",
     "bulma": "^1.0.4",
     "chart.js": "^4.5.1",
+    "dexie": "^4.2.1",
     "lucide": "^0.555.0"
   },
   "devDependencies": {

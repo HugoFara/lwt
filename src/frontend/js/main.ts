@@ -37,6 +37,10 @@ import '@shared/stores/app_data';
 // PWA support
 import '@shared/pwa/register';
 
+// Offline support
+import '@shared/offline/offline-button';
+import '@shared/offline/offline-indicator';
+
 // Shared API client
 import '@shared/api/client';
 

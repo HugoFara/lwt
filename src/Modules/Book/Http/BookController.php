@@ -22,6 +22,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Core\Globals;
 
+require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
 
 /**
@@ -76,7 +77,7 @@ class BookController
 
         // Get languages for filter dropdown
         $languageFacade = Container::getInstance()->getTyped(LanguageFacade::class);
-        $languages = $languageFacade->getLanguages();
+        $languages = $languageFacade->getAllLanguages();
         $languagesOption = SelectOptionsBuilder::forLanguages($languages, $languageId, "[All Languages]");
 
         PageLayoutHelper::renderPageStart('My Books', true, 'books');
@@ -133,7 +134,7 @@ class BookController
 
         // Show import form
         $languageFacade = Container::getInstance()->getTyped(LanguageFacade::class);
-        $languages = $languageFacade->getLanguages();
+        $languages = $languageFacade->getAllLanguages();
         $languagesOption = SelectOptionsBuilder::forLanguages($languages, null, "[Choose...]");
 
         PageLayoutHelper::renderPageStart('Import EPUB', true, 'books');
