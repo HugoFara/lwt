@@ -49,7 +49,12 @@ use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 
 // HTTP
 use Lwt\Modules\Vocabulary\Http\VocabularyController;
-use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler;
+use Lwt\Modules\Vocabulary\Http\TermCrudApiHandler;
+use Lwt\Modules\Vocabulary\Http\WordFamilyApiHandler;
+use Lwt\Modules\Vocabulary\Http\MultiWordApiHandler;
+use Lwt\Modules\Vocabulary\Http\WordListApiHandler;
+use Lwt\Modules\Vocabulary\Http\TermTranslationApiHandler;
+use Lwt\Modules\Vocabulary\Http\TermStatusApiHandler;
 use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
@@ -180,12 +185,46 @@ class VocabularyServiceProvider implements ServiceProviderInterface
             );
         });
 
-        // Register API Handler
-        $container->singleton(VocabularyApiHandler::class, function (Container $c) {
-            return new VocabularyApiHandler(
+        // Register Term CRUD API Handler
+        $container->singleton(TermCrudApiHandler::class, function (Container $c) {
+            return new TermCrudApiHandler(
                 $c->getTyped(VocabularyFacade::class),
                 $c->getTyped(FindSimilarTerms::class),
                 $c->getTyped(DictionaryAdapter::class)
+            );
+        });
+
+        // Register Word Family API Handler
+        $container->singleton(WordFamilyApiHandler::class, function (Container $c) {
+            return new WordFamilyApiHandler(
+                $c->getTyped(LemmaService::class)
+            );
+        });
+
+        // Register Multi-word API Handler
+        $container->singleton(MultiWordApiHandler::class, function (Container $_c) {
+            return new MultiWordApiHandler();
+        });
+
+        // Register Word List API Handler
+        $container->singleton(WordListApiHandler::class, function (Container $c) {
+            return new WordListApiHandler(
+                $c->getTyped(WordListService::class)
+            );
+        });
+
+        // Register Term Translation API Handler
+        $container->singleton(TermTranslationApiHandler::class, function (Container $c) {
+            return new TermTranslationApiHandler(
+                $c->getTyped(FindSimilarTerms::class),
+                $c->getTyped(DictionaryAdapter::class)
+            );
+        });
+
+        // Register Term Status API Handler
+        $container->singleton(TermStatusApiHandler::class, function (Container $c) {
+            return new TermStatusApiHandler(
+                $c->getTyped(VocabularyFacade::class)
             );
         });
     }

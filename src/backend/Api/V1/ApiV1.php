@@ -40,7 +40,12 @@ use Lwt\Modules\Admin\Http\AdminApiHandler;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
 use Lwt\Modules\Tags\Http\TagApiHandler;
 use Lwt\Modules\User\Http\UserApiHandler;
-use Lwt\Modules\Vocabulary\Http\VocabularyApiHandler;
+use Lwt\Modules\Vocabulary\Http\TermCrudApiHandler;
+use Lwt\Modules\Vocabulary\Http\WordFamilyApiHandler;
+use Lwt\Modules\Vocabulary\Http\MultiWordApiHandler;
+use Lwt\Modules\Vocabulary\Http\WordListApiHandler;
+use Lwt\Modules\Vocabulary\Http\TermTranslationApiHandler;
+use Lwt\Modules\Vocabulary\Http\TermStatusApiHandler;
 use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Modules\Book\Http\BookApiHandler;
 use Lwt\Modules\Book\Application\BookFacade;
@@ -65,7 +70,12 @@ class ApiV1
     private AdminApiHandler $adminHandler;
     private ReviewApiHandler $reviewHandler;
     private TagApiHandler $tagHandler;
-    private VocabularyApiHandler $termHandler;
+    private TermCrudApiHandler $termHandler;
+    private WordFamilyApiHandler $wordFamilyHandler;
+    private MultiWordApiHandler $multiWordHandler;
+    private WordListApiHandler $wordListHandler;
+    private TermTranslationApiHandler $termTranslationHandler;
+    private TermStatusApiHandler $termStatusHandler;
     private TextApiHandler $textHandler;
     private ?BookApiHandler $bookHandler = null;
     private YouTubeApiHandler $youtubeHandler;
@@ -96,7 +106,12 @@ class ApiV1
         );
         $this->reviewHandler = new ReviewApiHandler();
         $this->tagHandler = new TagApiHandler();
-        $this->termHandler = new VocabularyApiHandler();
+        $this->termHandler = new TermCrudApiHandler();
+        $this->wordFamilyHandler = new WordFamilyApiHandler();
+        $this->multiWordHandler = new MultiWordApiHandler();
+        $this->wordListHandler = new WordListApiHandler();
+        $this->termTranslationHandler = new TermTranslationApiHandler();
+        $this->termStatusHandler = new TermStatusApiHandler();
         $this->textHandler = new TextApiHandler();
         try {
             $this->bookHandler = new BookApiHandler(
@@ -547,14 +562,14 @@ class ApiV1
     {
         if (($fragments[1] ?? '') === 'list') {
             // GET /terms/list - get paginated, filtered word list
-            Response::success($this->termHandler->formatGetWordList($params));
+            Response::success($this->wordListHandler->getWordList($params));
         } elseif (($fragments[1] ?? '') === 'filter-options') {
             // GET /terms/filter-options - get filter dropdown options
             $langId = isset($params['language_id']) && $params['language_id'] !== '' ? (int)$params['language_id'] : null;
-            Response::success($this->termHandler->formatGetFilterOptions($langId));
+            Response::success($this->wordListHandler->getFilterOptions($langId));
         } elseif (($fragments[1] ?? '') === 'imported') {
-            Response::success($this->termHandler->formatImportedTerms(
-                $params["last_update"],
+            Response::success($this->wordListHandler->importedTermsList(
+                (string) $params["last_update"],
                 (int)$params["page"],
                 (int)$params["count"]
             ));
@@ -567,10 +582,10 @@ class ApiV1
             ));
         } elseif (($fragments[1] ?? '') === 'multi') {
             // GET /terms/multi - get multi-word expression data for editing
-            Response::success($this->termHandler->formatGetMultiWord(
+            Response::success($this->multiWordHandler->getMultiWordForEdit(
                 (int)($params['term_id'] ?? 0),
                 (int)($params['ord'] ?? 0),
-                $params['txt'] ?? null,
+                isset($params['txt']) ? (string) $params['txt'] : null,
                 isset($params['wid']) ? (int)$params['wid'] : null
             ));
         } elseif (($fragments[1] ?? '') === 'family') {
@@ -579,13 +594,13 @@ class ApiV1
             if (($fragments[2] ?? '') === 'suggestion') {
                 $termId = (int)($params['term_id'] ?? 0);
                 $newStatus = (int)($params['status'] ?? 0);
-                Response::success($this->termHandler->formatGetFamilyUpdateSuggestion($termId, $newStatus));
+                Response::success($this->wordFamilyHandler->getFamilyUpdateSuggestion($termId, $newStatus));
             } else {
                 $termId = (int)($params['term_id'] ?? 0);
                 if ($termId <= 0) {
                     Response::error('term_id is required', 400);
                 }
-                Response::success($this->termHandler->formatGetTermFamily($termId));
+                Response::success($this->wordFamilyHandler->getTermFamily($termId));
             }
         } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
             $termId = (int)$fragments[1];
@@ -602,7 +617,7 @@ class ApiV1
                 ));
             } elseif (($fragments[2] ?? '') === 'family') {
                 // GET /terms/{id}/family - get word family for this term
-                Response::success($this->termHandler->formatGetTermFamily($termId));
+                Response::success($this->wordFamilyHandler->getTermFamily($termId));
             } elseif (!isset($fragments[2])) {
                 // GET /terms/{id} - get term by ID
                 Response::success($this->termHandler->formatGetTerm($termId));
@@ -628,7 +643,7 @@ class ApiV1
             if ($langId <= 0) {
                 Response::error('language_id is required', 400);
             }
-            Response::success($this->termHandler->formatGetLemmaStatistics($langId));
+            Response::success($this->wordFamilyHandler->getLemmaStatistics($langId));
             return;
         }
 
@@ -642,12 +657,12 @@ class ApiV1
         $lemmaLc = $params['lemma_lc'] ?? '';
         if ($lemmaLc !== '') {
             // GET /word-families?language_id=N&lemma_lc=run - get specific family
-            Response::success($this->termHandler->formatGetWordFamilyByLemma($langId, $lemmaLc));
+            Response::success($this->wordFamilyHandler->getWordFamilyByLemma($langId, $lemmaLc));
             return;
         }
 
         // GET /word-families?language_id=N&page=1&per_page=50 - get list of families
-        Response::success($this->termHandler->formatGetWordFamilyList($langId, $params));
+        Response::success($this->wordFamilyHandler->getWordFamilyListFromParams($langId, $params));
     }
 
     private function handleTextsGet(array $fragments, array $params): void
@@ -741,7 +756,7 @@ class ApiV1
             if (($fragments[2] ?? '') === 'status') {
                 $this->handleTermStatusPost($fragments, $termId);
             } elseif (($fragments[2] ?? '') === 'translations') {
-                Response::success($this->termHandler->formatUpdateTranslation(
+                Response::success($this->termTranslationHandler->formatUpdateTranslation(
                     $termId,
                     $params['translation']
                 ));
@@ -749,7 +764,7 @@ class ApiV1
                 Response::error('"status" or "translations" Expected', 404);
             }
         } elseif (($fragments[1] ?? '') === 'new') {
-            Response::success($this->termHandler->formatAddTranslation(
+            Response::success($this->termTranslationHandler->formatAddTranslation(
                 $params['term_text'],
                 (int)($params['language_id'] ?? 0),
                 $params['translation']
@@ -766,7 +781,7 @@ class ApiV1
             Response::success($this->termHandler->formatCreateTermFull($params));
         } elseif (($fragments[1] ?? '') === 'multi') {
             // POST /terms/multi - create multi-word expression
-            Response::success($this->termHandler->formatCreateMultiWord($params));
+            Response::success($this->multiWordHandler->createMultiWordTerm($params));
         } else {
             Response::error('Term ID (Integer), "new", "quick", or "multi" Expected', 404);
         }
@@ -776,14 +791,14 @@ class ApiV1
     {
         switch ($fragments[3] ?? '') {
             case 'down':
-                Response::success($this->termHandler->formatIncrementStatus($termId, false));
+                Response::success($this->termStatusHandler->formatIncrementStatus($termId, false));
                 break;
             case 'up':
-                Response::success($this->termHandler->formatIncrementStatus($termId, true));
+                Response::success($this->termStatusHandler->formatIncrementStatus($termId, true));
                 break;
             default:
                 if (ctype_digit($fragments[3] ?? '')) {
-                    Response::success($this->termHandler->formatSetStatus(
+                    Response::success($this->termStatusHandler->formatSetStatus(
                         $termId,
                         (int)$fragments[3]
                     ));
@@ -939,19 +954,19 @@ class ApiV1
             // PUT /terms/bulk-status - bulk update term statuses
             $termIds = $params['term_ids'] ?? [];
             $status = (int)($params['status'] ?? 0);
-            Response::success($this->termHandler->formatBulkStatus($termIds, $status));
+            Response::success($this->termStatusHandler->formatBulkStatus($termIds, $status));
         } elseif (($fragments[1] ?? '') === 'bulk-action') {
             // PUT /terms/bulk-action - perform bulk action on selected terms
             $ids = $params['ids'] ?? [];
             $action = $params['action'] ?? '';
             $data = $params['data'] ?? null;
-            Response::success($this->termHandler->formatBulkAction($ids, $action, $data));
+            Response::success($this->wordListHandler->bulkAction($ids, $action, $data));
         } elseif (($fragments[1] ?? '') === 'all-action') {
             // PUT /terms/all-action - perform action on all filtered terms
             $filters = $params['filters'] ?? [];
             $action = $params['action'] ?? '';
             $data = $params['data'] ?? null;
-            Response::success($this->termHandler->formatAllAction($filters, $action, $data));
+            Response::success($this->wordListHandler->allAction($filters, $action, $data));
         } elseif (($fragments[1] ?? '') === 'family') {
             // PUT /terms/family/status - update status for entire word family
             // PUT /terms/family/apply - apply suggested family update
@@ -963,7 +978,7 @@ class ApiV1
                 if ($langId <= 0 || $lemmaLc === '') {
                     Response::error('language_id and lemma_lc are required', 400);
                 }
-                Response::success($this->termHandler->formatUpdateWordFamilyStatus($langId, $lemmaLc, $status));
+                Response::success($this->wordFamilyHandler->updateWordFamilyStatus($langId, $lemmaLc, $status));
             } elseif (($fragments[2] ?? '') === 'apply') {
                 $termIds = $params['term_ids'] ?? [];
                 $status = (int)($params['status'] ?? 0);
@@ -971,7 +986,7 @@ class ApiV1
                 if (empty($termIds)) {
                     Response::error('term_ids is required', 400);
                 }
-                Response::success($this->termHandler->formatApplyFamilyUpdate($termIds, $status));
+                Response::success($this->wordFamilyHandler->applyFamilyUpdate($termIds, $status));
             } else {
                 Response::error('Expected "status" or "apply"', 404);
             }
@@ -980,16 +995,16 @@ class ApiV1
             $termId = (int)$fragments[1];
             $field = $params['field'] ?? '';
             $value = $params['value'] ?? '';
-            Response::success($this->termHandler->formatInlineEdit($termId, $field, $value));
+            Response::success($this->wordListHandler->inlineEdit($termId, $field, $value));
         } elseif (($fragments[1] ?? '') === 'multi' && isset($fragments[2]) && ctype_digit($fragments[2])) {
             // PUT /terms/multi/{id} - update multi-word expression
             $termId = (int)$fragments[2];
-            Response::success($this->termHandler->formatUpdateMultiWord($termId, $params));
+            Response::success($this->multiWordHandler->updateMultiWordTerm($termId, $params));
         } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
             $termId = (int)$fragments[1];
             if (($fragments[2] ?? '') === 'translation') {
                 // PUT /terms/{id}/translation - update translation
-                Response::success($this->termHandler->formatUpdateTranslation(
+                Response::success($this->termTranslationHandler->formatUpdateTranslation(
                     $termId,
                     $params['translation'] ?? ''
                 ));
