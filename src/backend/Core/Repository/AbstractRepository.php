@@ -146,11 +146,15 @@ abstract class AbstractRepository implements RepositoryInterface
      * {@inheritdoc}
      *
      * @psalm-suppress InvalidReturnStatement
+     *
+     * @return object|null
+     * @psalm-return T|null
      */
     public function findOneBy(array $criteria): ?object
     {
         $results = $this->findBy($criteria, null, 1);
 
+        /** @psalm-var T|null */
         return $results[0] ?? null;
     }
 
@@ -252,7 +256,7 @@ abstract class AbstractRepository implements RepositoryInterface
      *
      * @param object $entity The entity
      *
-     * @return array<string, mixed> Database row data
+     * @return array<string, scalar|null> Database row data
      *
      * @psalm-param T $entity
      */

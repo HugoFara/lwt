@@ -130,9 +130,9 @@ class ApiV1
     /**
      * Handle the incoming API request.
      *
-     * @param string     $method   HTTP method
-     * @param string     $uri      Request URI
-     * @param array|null $postData POST data (also used for PUT/DELETE with JSON body)
+     * @param string                     $method   HTTP method
+     * @param string                     $uri      Request URI
+     * @param array<string, mixed>|null  $postData POST data (also used for PUT/DELETE with JSON body)
      *
      * @return void
      */
@@ -208,8 +208,8 @@ class ApiV1
     /**
      * Handle GET requests.
      *
-     * @param string[] $fragments Endpoint path segments
-     * @param array    $params    Query parameters
+     * @param list<string>         $fragments Endpoint path segments
+     * @param array<string, mixed> $params    Query parameters
      */
     private function handleGet(array $fragments, array $params): void
     {
@@ -230,6 +230,7 @@ class ApiV1
                 break;
 
             case 'phonetic-reading':
+                /** @var array{text?: string, language_id?: int|string, lang?: string} $params */
                 Response::success($this->languageHandler->formatPhoneticReading($params));
                 break;
 
@@ -308,8 +309,8 @@ class ApiV1
     /**
      * Handle POST requests.
      *
-     * @param string[] $fragments Endpoint path segments
-     * @param array    $params    POST parameters
+     * @param list<string>         $fragments Endpoint path segments
+     * @param array<string, mixed> $params    POST parameters
      */
     private function handlePost(array $fragments, array $params): void
     {
@@ -361,8 +362,8 @@ class ApiV1
     /**
      * Handle POST requests for languages.
      *
-     * @param string[] $fragments Endpoint path segments
-     * @param array    $params    POST parameters
+     * @param list<string>         $fragments Endpoint path segments
+     * @param array<string, mixed> $params    POST parameters
      */
     private function handleLanguagesPost(array $fragments, array $params): void
     {
@@ -399,7 +400,7 @@ class ApiV1
     /**
      * Handle GET requests for auth endpoints.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      */
     private function handleAuthGet(array $fragments): void
     {
@@ -416,8 +417,8 @@ class ApiV1
     /**
      * Handle POST requests for auth endpoints.
      *
-     * @param string[] $fragments Endpoint path segments
-     * @param array    $params    POST parameters
+     * @param list<string>         $fragments Endpoint path segments
+     * @param array<string, mixed> $params    POST parameters
      */
     private function handleAuthPost(array $fragments, array $params): void
     {
@@ -447,6 +448,9 @@ class ApiV1
     // GET Request Handlers
     // =========================================================================
 
+    /**
+     * @param list<string> $fragments
+     */
     private function handleLanguagesGet(array $fragments): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -508,6 +512,10 @@ class ApiV1
         Response::error('Expected "reading-configuration", "stats", or no sub-path', 404);
     }
 
+    /**
+     * @param list<string> $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleReviewGet(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -530,6 +538,10 @@ class ApiV1
         }
     }
 
+    /**
+     * @param list<string> $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleSentencesGet(array $fragments, array $params): void
     {
         $languageId = (int) ($params["language_id"] ?? 0);
@@ -551,6 +563,10 @@ class ApiV1
         }
     }
 
+    /**
+     * @param list<string> $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleSettingsGet(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -562,11 +578,18 @@ class ApiV1
         }
     }
 
+    /**
+     * @param list<string> $fragments
+     */
     private function handleTagsGet(array $fragments): void
     {
         $this->tagHandler->handleGet(array_slice($fragments, 1));
     }
 
+    /**
+     * @param list<string> $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleTermsGet(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -642,8 +665,8 @@ class ApiV1
     /**
      * Handle GET requests for word families.
      *
-     * @param string[] $fragments Endpoint path segments
-     * @param array    $params    Query parameters
+     * @param list<string>         $fragments Endpoint path segments
+     * @param array<string, mixed> $params    Query parameters
      */
     private function handleWordFamiliesGet(array $fragments, array $params): void
     {
@@ -677,6 +700,10 @@ class ApiV1
         Response::success($this->wordFamilyHandler->getWordFamilyListFromParams($langId, $params));
     }
 
+    /**
+     * @param list<string>         $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleTextsGet(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -753,6 +780,10 @@ class ApiV1
     // POST Request Handlers
     // =========================================================================
 
+    /**
+     * @param list<string>         $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleTextsPost(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -789,6 +820,10 @@ class ApiV1
         }
     }
 
+    /**
+     * @param list<string>         $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleTermsPost(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -831,6 +866,10 @@ class ApiV1
         }
     }
 
+    /**
+     * @param list<string> $fragments
+     * @param int          $termId
+     */
     private function handleTermStatusPost(array $fragments, int $termId): void
     {
         $frag3 = $this->frag($fragments, 3);
@@ -851,6 +890,10 @@ class ApiV1
         }
     }
 
+    /**
+     * @param list<string>         $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleFeedsPost(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -882,6 +925,10 @@ class ApiV1
         Response::error('Expected "articles/import", feed data, or "{id}/load"', 404);
     }
 
+    /**
+     * @param list<string>         $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleFeedsGet(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -914,8 +961,8 @@ class ApiV1
     /**
      * Handle PUT requests.
      *
-     * @param string[] $fragments Endpoint path segments
-     * @param array    $params    Request body parameters
+     * @param list<string>         $fragments Endpoint path segments
+     * @param array<string, mixed> $params    Request body parameters
      */
     private function handlePut(array $fragments, array $params): void
     {
@@ -955,6 +1002,10 @@ class ApiV1
         }
     }
 
+    /**
+     * @param list<string>         $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleFeedsPut(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -970,8 +1021,8 @@ class ApiV1
     /**
      * Handle PUT requests for languages.
      *
-     * @param string[] $fragments Endpoint path segments
-     * @param array    $params    Request body parameters
+     * @param list<string>         $fragments Endpoint path segments
+     * @param array<string, mixed> $params    Request body parameters
      */
     private function handleLanguagesPut(array $fragments, array $params): void
     {
@@ -993,6 +1044,10 @@ class ApiV1
         Response::error('Unexpected sub-path for PUT /languages/{id}', 404);
     }
 
+    /**
+     * @param list<string>         $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleReviewPut(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -1005,6 +1060,10 @@ class ApiV1
         }
     }
 
+    /**
+     * @param list<string>         $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleTermsPut(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -1083,6 +1142,10 @@ class ApiV1
         }
     }
 
+    /**
+     * @param list<string>         $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleTextsPut(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -1119,8 +1182,8 @@ class ApiV1
     /**
      * Handle DELETE requests.
      *
-     * @param string[] $fragments Endpoint path segments
-     * @param array    $params    Query parameters (reserved for future use)
+     * @param list<string>         $fragments Endpoint path segments
+     * @param array<string, mixed> $params    Query parameters (reserved for future use)
      *
      * @psalm-suppress UnusedParam
      */
@@ -1162,6 +1225,10 @@ class ApiV1
         }
     }
 
+    /**
+     * @param list<string>         $fragments
+     * @param array<string, mixed> $params
+     */
     private function handleFeedsDelete(array $fragments, array $params): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -1202,7 +1269,7 @@ class ApiV1
     /**
      * Handle DELETE requests for languages.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      */
     private function handleLanguagesDelete(array $fragments): void
     {
@@ -1216,6 +1283,9 @@ class ApiV1
         Response::success($this->languageHandler->formatDelete($langId));
     }
 
+    /**
+     * @param list<string> $fragments
+     */
     private function handleTermsDelete(array $fragments): void
     {
         $frag1 = $this->frag($fragments, 1);
@@ -1235,7 +1305,7 @@ class ApiV1
     /**
      * Handle GET requests for local dictionaries.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      * @param array    $params    Query parameters
      */
     private function handleLocalDictionariesGet(array $fragments, array $params): void
@@ -1283,7 +1353,7 @@ class ApiV1
     /**
      * Handle POST requests for local dictionaries.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      * @param array    $params    POST parameters
      */
     private function handleLocalDictionariesPost(array $fragments, array $params): void
@@ -1327,7 +1397,7 @@ class ApiV1
     /**
      * Handle PUT requests for local dictionaries.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      * @param array    $params    Request body parameters
      */
     private function handleLocalDictionariesPut(array $fragments, array $params): void
@@ -1347,7 +1417,7 @@ class ApiV1
     /**
      * Handle DELETE requests for local dictionaries.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      */
     private function handleLocalDictionariesDelete(array $fragments): void
     {
@@ -1369,7 +1439,7 @@ class ApiV1
     /**
      * Handle GET requests for TTS endpoints.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      * @param array    $_params   Query parameters (unused)
      */
     private function handleTtsGet(array $fragments, array $_params): void
@@ -1394,7 +1464,7 @@ class ApiV1
     /**
      * Handle POST requests for TTS endpoints.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      * @param array    $params    POST parameters
      */
     private function handleTtsPost(array $fragments, array $params): void
@@ -1445,7 +1515,7 @@ class ApiV1
     /**
      * Handle DELETE requests for TTS endpoints.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      */
     private function handleTtsDelete(array $fragments): void
     {
@@ -1474,7 +1544,7 @@ class ApiV1
     /**
      * Handle GET requests for YouTube API proxy.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      * @param array    $params    Query parameters
      */
     private function handleYouTubeGet(array $fragments, array $params): void
@@ -1508,7 +1578,7 @@ class ApiV1
     /**
      * Handle GET requests for Whisper endpoints.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      * @param array    $_params   Query parameters (unused)
      */
     private function handleWhisperGet(array $fragments, array $_params): void
@@ -1560,7 +1630,7 @@ class ApiV1
     /**
      * Handle POST requests for Whisper endpoints.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      * @param array    $params    POST parameters
      */
     private function handleWhisperPost(array $fragments, array $params): void
@@ -1598,7 +1668,7 @@ class ApiV1
     /**
      * Handle DELETE requests for Whisper endpoints.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      */
     private function handleWhisperDelete(array $fragments): void
     {
@@ -1621,7 +1691,7 @@ class ApiV1
     /**
      * Handle GET requests for books.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      * @param array    $params    Query parameters
      */
     private function handleBooksGet(array $fragments, array $params): void
@@ -1652,7 +1722,7 @@ class ApiV1
     /**
      * Handle PUT requests for books.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      * @param array    $params    PUT parameters
      */
     private function handleBooksPut(array $fragments, array $params): void
@@ -1677,7 +1747,7 @@ class ApiV1
     /**
      * Handle DELETE requests for books.
      *
-     * @param string[] $fragments Endpoint path segments
+     * @param list<string> $fragments Endpoint path segments
      */
     private function handleBooksDelete(array $fragments): void
     {
@@ -1703,8 +1773,8 @@ class ApiV1
     /**
      * Extract a fragment from the fragments array.
      *
-     * @param array<int, string> $fragments The URL path fragments
-     * @param int                $index     The index to extract
+     * @param list<string> $fragments The URL path fragments
+     * @param int          $index     The index to extract
      *
      * @return string The fragment at the index, or empty string if not present
      */
@@ -1713,6 +1783,9 @@ class ApiV1
         return $fragments[$index] ?? '';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function parseQueryParams(string $uri): array
     {
         $query = parse_url($uri, PHP_URL_QUERY);
@@ -1720,6 +1793,7 @@ class ApiV1
             return [];
         }
         parse_str($query, $params);
+        /** @var array<string, mixed> */
         return $params;
     }
 

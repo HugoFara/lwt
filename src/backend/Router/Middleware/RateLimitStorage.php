@@ -151,7 +151,17 @@ class RateLimitStorage
             return null;
         }
 
-        return $stored['data'] ?? null;
+        // Validate the data structure
+        $data = $stored['data'] ?? null;
+        if (!is_array($data) || !isset($data['count'], $data['window_start'])) {
+            @unlink($file);
+            return null;
+        }
+
+        return [
+            'count' => (int) $data['count'],
+            'window_start' => (int) $data['window_start']
+        ];
     }
 
     /**

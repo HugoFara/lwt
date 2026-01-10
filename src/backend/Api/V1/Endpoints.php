@@ -147,11 +147,15 @@ class Endpoints
      *
      * @param string $endpoint Endpoint path
      *
-     * @return string[] Endpoint path segments
+     * @return list<string> Endpoint path segments
      */
     public static function parseFragments(string $endpoint): array
     {
         $result = preg_split("/\//", $endpoint);
-        return $result !== false ? $result : [];
+        if ($result === false) {
+            return [];
+        }
+        /** @var list<string> */
+        return $result;
     }
 }

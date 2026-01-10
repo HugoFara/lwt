@@ -110,10 +110,10 @@ class Router
     /**
      * Register a route with middleware.
      *
-     * @param string $path       The URL path
-     * @param string $handler    The handler (file path or controller@method)
-     * @param array  $middleware Array of middleware class names or instances
-     * @param string $method     HTTP method (GET, POST, or *)
+     * @param string                              $path       The URL path
+     * @param string                              $handler    The handler (file path or controller@method)
+     * @param array<MiddlewareInterface|string>   $middleware Array of middleware class names or instances
+     * @param string                              $method     HTTP method (GET, POST, or *)
      *
      * @return void
      */
@@ -147,10 +147,10 @@ class Router
     /**
      * Register a prefix route with middleware.
      *
-     * @param string $prefix     The URL prefix (e.g., '/api/v1')
-     * @param string $handler    The handler (file path or method)
-     * @param array  $middleware Array of middleware class names or instances
-     * @param string $method     HTTP method (GET, POST, or *)
+     * @param string                            $prefix     The URL prefix (e.g., '/api/v1')
+     * @param string                            $handler    The handler (file path or method)
+     * @param array<MiddlewareInterface|string> $middleware Array of middleware class names or instances
+     * @param string                            $method     HTTP method (GET, POST, or *)
      *
      * @return void
      *
@@ -171,9 +171,9 @@ class Router
      *
      * Convenience method for registering GET-only routes.
      *
-     * @param string $path       The URL path (supports {param} placeholders)
-     * @param string $handler    The handler (controller@method)
-     * @param array  $middleware Optional middleware
+     * @param string                            $path       The URL path (supports {param} placeholders)
+     * @param string                            $handler    The handler (controller@method)
+     * @param array<MiddlewareInterface|string> $middleware Optional middleware
      *
      * @return void
      */
@@ -188,9 +188,9 @@ class Router
     /**
      * Register a POST route.
      *
-     * @param string $path       The URL path (supports {param} placeholders)
-     * @param string $handler    The handler (controller@method)
-     * @param array  $middleware Optional middleware
+     * @param string                            $path       The URL path (supports {param} placeholders)
+     * @param string                            $handler    The handler (controller@method)
+     * @param array<MiddlewareInterface|string> $middleware Optional middleware
      *
      * @return void
      *
@@ -207,9 +207,9 @@ class Router
     /**
      * Register a PUT route.
      *
-     * @param string $path       The URL path (supports {param} placeholders)
-     * @param string $handler    The handler (controller@method)
-     * @param array  $middleware Optional middleware
+     * @param string                            $path       The URL path (supports {param} placeholders)
+     * @param string                            $handler    The handler (controller@method)
+     * @param array<MiddlewareInterface|string> $middleware Optional middleware
      *
      * @return void
      */
@@ -224,9 +224,9 @@ class Router
     /**
      * Register a DELETE route.
      *
-     * @param string $path       The URL path (supports {param} placeholders)
-     * @param string $handler    The handler (controller@method)
-     * @param array  $middleware Optional middleware
+     * @param string                            $path       The URL path (supports {param} placeholders)
+     * @param string                            $handler    The handler (controller@method)
+     * @param array<MiddlewareInterface|string> $middleware Optional middleware
      *
      * @return void
      *
@@ -243,9 +243,9 @@ class Router
     /**
      * Register a PATCH route.
      *
-     * @param string $path       The URL path (supports {param} placeholders)
-     * @param string $handler    The handler (controller@method)
-     * @param array  $middleware Optional middleware
+     * @param string                            $path       The URL path (supports {param} placeholders)
+     * @param string                            $handler    The handler (controller@method)
+     * @param array<MiddlewareInterface|string> $middleware Optional middleware
      *
      * @return void
      *
@@ -262,10 +262,10 @@ class Router
     /**
      * Register routes for multiple HTTP methods.
      *
-     * @param array<string> $methods    HTTP methods (GET, POST, etc.)
-     * @param string        $path       The URL path
-     * @param string        $handler    The handler
-     * @param array         $middleware Optional middleware
+     * @param array<string>                     $methods    HTTP methods (GET, POST, etc.)
+     * @param string                            $path       The URL path
+     * @param string                            $handler    The handler
+     * @param array<MiddlewareInterface|string> $middleware Optional middleware
      *
      * @return void
      *
@@ -296,7 +296,7 @@ class Router
      *     url?: string,
      *     code?: 301,
      *     handler?: string,
-     *     params?: array<string, mixed>,
+     *     params?: array<array-key, mixed>,
      *     routeParams?: array<string, mixed>,
      *     file?: string,
      *     mime?: string,
@@ -379,6 +379,7 @@ class Router
             $regex = $this->convertPatternToRegex($pattern);
             if (preg_match($regex, $path, $matches)) {
                 // Extract only named captures (remove numeric keys and full match)
+                /** @var array<string, string> $routeParams */
                 $routeParams = array_filter(
                     $matches,
                     fn($key) => is_string($key),
@@ -453,7 +454,7 @@ class Router
      *
      * @param string $path Request path
      *
-     * @return array|null Resolution array or null if not a static asset
+     * @return array{type: 'static', file: string, mime: string}|null Resolution array or null if not a static asset
      */
     private function resolveStaticAsset(string $path): ?array
     {
