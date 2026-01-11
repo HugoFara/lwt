@@ -101,8 +101,8 @@ composer psalm:level1                                # Strictest static analysis
 npm run lint                                         # ESLint for TypeScript/JS
 npm run lint:fix                                     # Auto-fix lint issues
 npm run typecheck                                    # TypeScript type checking
-php ./vendor/bin/squizlabs/phpcs.phar [file]        # PHP code style check
-php ./vendor/bin/squizlabs/phpcbf.phar [file]       # PHP code style auto-fix
+./vendor/bin/phpcs [file]                            # PHP code style check
+./vendor/bin/phpcbf [file]                           # PHP code style auto-fix
 ```
 
 ### Asset Building

@@ -28,7 +28,6 @@ use Lwt\Shared\Infrastructure\Database\TextParsing;
  */
 class ReparseLanguageTexts
 {
-
     /**
      * Refresh (reparse) all texts for a language.
      *

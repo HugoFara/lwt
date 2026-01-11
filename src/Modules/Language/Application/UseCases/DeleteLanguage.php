@@ -26,7 +26,6 @@ use Lwt\Shared\Infrastructure\Database\QueryBuilder;
  */
 class DeleteLanguage
 {
-
     /**
      * Delete a language.
      *

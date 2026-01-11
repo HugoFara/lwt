@@ -35,7 +35,6 @@ use Lwt\Shared\Infrastructure\Http\JsonResponse;
  */
 class TagApiHandler
 {
-
     /**
      * Handle GET request for tags.
      *

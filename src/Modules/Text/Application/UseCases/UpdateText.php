@@ -33,7 +33,6 @@ use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
  */
 class UpdateText
 {
-
     /**
      * Update an active text.
      *

@@ -27,7 +27,6 @@ use Lwt\Shared\Infrastructure\Database\QueryBuilder;
  */
 class CreateLanguage
 {
-
     /**
      * Create a new language from request data.
      *
