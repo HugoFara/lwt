@@ -179,12 +179,18 @@ echo PageLayoutHelper::buildActionCard([
         <div class="level mt-3 pt-3" style="border-top: 1px solid #dbdbdb;" x-show="pagination.total > 0">
             <div class="level-left">
                 <div class="level-item">
-                    <span class="tag is-info is-medium" x-text="pagination.total + ' Term' + (pagination.total === 1 ? '' : 's')"></span>
+                    <span
+                        class="tag is-info is-medium"
+                        x-text="pagination.total + ' Term' + (pagination.total === 1 ? '' : 's')"
+                    ></span>
                 </div>
             </div>
             <div class="level-right">
                 <div class="level-item">
-                    <span class="has-text-grey is-size-7" x-text="'Page ' + pagination.page + ' of ' + pagination.total_pages"></span>
+                    <span
+                        class="has-text-grey is-size-7"
+                        x-text="'Page ' + pagination.page + ' of ' + pagination.total_pages"
+                    ></span>
                 </div>
             </div>
         </div>
@@ -192,7 +198,8 @@ echo PageLayoutHelper::buildActionCard([
 
     <!-- No results message -->
     <div x-show="!loading && words.length === 0" class="notification is-info is-light">
-        <p>No terms found matching your filters. <a href="/words/edit?new=1">Create a new term</a> or adjust your filters.</p>
+        <p>No terms found matching your filters.
+            <a href="/words/edit?new=1">Create a new term</a> or adjust your filters.</p>
     </div>
 
     <!-- Multi Actions Section -->
@@ -213,7 +220,9 @@ echo PageLayoutHelper::buildActionCard([
                 <div class="field has-addons">
                     <div class="control">
                         <span class="button is-static is-small">
-                            <strong>ALL</strong>&nbsp;<span x-text="pagination.total + ' Term' + (pagination.total === 1 ? '' : 's')"></span>
+                            <strong>ALL</strong>&nbsp;<span
+                                x-text="pagination.total + ' Term' + (pagination.total === 1 ? '' : 's')"
+                            ></span>
                         </span>
                     </div>
                     <div class="control">
@@ -258,7 +267,11 @@ echo PageLayoutHelper::buildActionCard([
                         <?php echo IconHelper::render('x', ['alt' => 'Mark None']); ?>
                         <span class="ml-1">Mark None</span>
                     </button>
-                    <span x-show="getMarkedCount() > 0" class="tag is-warning ml-2" x-text="getMarkedCount() + ' selected'"></span>
+                    <span
+                        x-show="getMarkedCount() > 0"
+                        class="tag is-warning ml-2"
+                        x-text="getMarkedCount() + ' selected'"
+                    ></span>
                 </div>
             </div>
             <div class="control">
@@ -320,7 +333,12 @@ echo PageLayoutHelper::buildActionCard([
                     <th class="has-text-centered" style="width: 3em;" title="Has valid sentence?">Se.?</th>
                     <th class="has-text-centered" style="width: 5em;">Stat./Days</th>
                     <th class="has-text-centered" style="width: 5em;">Score %</th>
-                    <th class="has-text-centered" style="width: 5em;" x-show="filters.sort === 7" title="Word Count in Active Texts">WCnt Txts</th>
+                    <th
+                        class="has-text-centered"
+                        style="width: 5em;"
+                        x-show="filters.sort === 7"
+                        title="Word Count in Active Texts"
+                    >WCnt Txts</th>
                 </tr>
             </thead>
             <tbody>
@@ -337,8 +355,17 @@ echo PageLayoutHelper::buildActionCard([
                         <!-- Actions -->
                         <td class="has-text-centered" style="white-space: nowrap;">
                             <div class="buttons are-small is-centered">
-                                <a :href="'/words/edit?chg=' + word.id" class="button is-small is-ghost" title="Edit">
-                                    <?php echo IconHelper::render('file-pen-line', ['title' => 'Edit', 'alt' => 'Edit']); ?>
+                                <a
+                                    :href="'/words/edit?chg=' + word.id"
+                                    class="button is-small is-ghost"
+                                    title="Edit"
+                                >
+                                    <?php
+                                    echo IconHelper::render(
+                                        'file-pen-line',
+                                        ['title' => 'Edit', 'alt' => 'Edit']
+                                    );
+                                    ?>
                                 </a>
                             </div>
                         </td>
@@ -363,8 +390,15 @@ echo PageLayoutHelper::buildActionCard([
                                               @keydown.ctrl.enter="saveEdit()"
                                               rows="1"></textarea>
                                     <div class="buttons are-small mt-1">
-                                        <button type="button" class="button is-small is-success" @click="saveEdit()" :disabled="editSaving">
-                                            <?php echo IconHelper::render('check', ['alt' => 'Save']); ?>
+                                        <button
+                                            type="button"
+                                            class="button is-small is-success"
+                                            @click="saveEdit()"
+                                            :disabled="editSaving"
+                                        >
+                                            <?php
+                                            echo IconHelper::render('check', ['alt' => 'Save']);
+                                            ?>
                                         </button>
                                         <button type="button" class="button is-small" @click="cancelEdit()">
                                             <?php echo IconHelper::render('x', ['alt' => 'Cancel']); ?>
@@ -392,8 +426,15 @@ echo PageLayoutHelper::buildActionCard([
                                               @keydown.ctrl.enter="saveEdit()"
                                               rows="2"></textarea>
                                     <div class="buttons are-small mt-1">
-                                        <button type="button" class="button is-small is-success" @click="saveEdit()" :disabled="editSaving">
-                                            <?php echo IconHelper::render('check', ['alt' => 'Save']); ?>
+                                        <button
+                                            type="button"
+                                            class="button is-small is-success"
+                                            @click="saveEdit()"
+                                            :disabled="editSaving"
+                                        >
+                                            <?php
+                                            echo IconHelper::render('check', ['alt' => 'Save']);
+                                            ?>
                                         </button>
                                         <button type="button" class="button is-small" @click="cancelEdit()">
                                             <?php echo IconHelper::render('x', ['alt' => 'Cancel']); ?>
@@ -425,16 +466,27 @@ echo PageLayoutHelper::buildActionCard([
 
                         <!-- Status / Days -->
                         <td class="has-text-centered" :title="word.statusLabel">
-                            <span class="tag is-light" x-text="word.statusAbbr + (word.status < 98 ? '/' + word.days : '')"></span>
+                            <span
+                                class="tag is-light"
+                                x-text="word.statusAbbr + (word.status < 98 ? '/' + word.days : '')"
+                            ></span>
                         </td>
 
                         <!-- Score -->
                         <td class="has-text-centered" style="white-space: nowrap;">
-                            <span class="tag is-light" :class="getStatusClass(word.status)" x-text="formatScore(word.score)"></span>
+                            <span
+                                class="tag is-light"
+                                :class="getStatusClass(word.status)"
+                                x-text="formatScore(word.score)"
+                            ></span>
                         </td>
 
                         <!-- Word count (for sort 7) -->
-                        <td class="has-text-centered" x-show="filters.sort === 7" x-text="word.textsWordCount || 0"></td>
+                        <td
+                            class="has-text-centered"
+                            x-show="filters.sort === 7"
+                            x-text="word.textsWordCount || 0"
+                        ></td>
                     </tr>
                 </template>
             </tbody>
@@ -466,15 +518,26 @@ echo PageLayoutHelper::buildActionCard([
                             <div class="level-item">
                                 <div class="tags has-addons mb-0">
                                     <span class="tag is-light" x-text="word.statusAbbr"></span>
-                                    <span class="tag is-light" :class="getStatusClass(word.status)" x-text="formatScore(word.score)"></span>
+                                    <span
+                                        class="tag is-light"
+                                        :class="getStatusClass(word.status)"
+                                        x-text="formatScore(word.score)"
+                                    ></span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Romanization (if exists) -->
-                    <p x-show="word.romanization && word.romanization !== '*'" class="has-text-grey is-size-7 mb-1">
-                        <span class="clickedit" @click="startEdit(word.id, 'romanization')" x-text="word.romanization"></span>
+                    <p
+                        x-show="word.romanization && word.romanization !== '*'"
+                        class="has-text-grey is-size-7 mb-1"
+                    >
+                        <span
+                            class="clickedit"
+                            @click="startEdit(word.id, 'romanization')"
+                            x-text="word.romanization"
+                        ></span>
                     </p>
 
                     <!-- Translation -->
@@ -490,19 +553,36 @@ echo PageLayoutHelper::buildActionCard([
                                           @keydown.ctrl.enter="saveEdit()"
                                           rows="2"></textarea>
                                 <div class="buttons are-small mt-1">
-                                    <button type="button" class="button is-small is-success" @click="saveEdit()" :disabled="editSaving">Save</button>
-                                    <button type="button" class="button is-small" @click="cancelEdit()">Cancel</button>
+                                    <button
+                                        type="button"
+                                        class="button is-small is-success"
+                                        @click="saveEdit()"
+                                        :disabled="editSaving"
+                                    >Save</button>
+                                    <button
+                                        type="button"
+                                        class="button is-small"
+                                        @click="cancelEdit()"
+                                    >Cancel</button>
                                 </div>
                             </span>
                         </template>
                         <template x-if="!isEditing(word.id, 'translation')">
-                            <span class="clickedit" @click="startEdit(word.id, 'translation')" x-text="$markdown(getDisplayValue(word, 'translation'))"></span>
+                            <span
+                                class="clickedit"
+                                @click="startEdit(word.id, 'translation')"
+                                x-text="$markdown(getDisplayValue(word, 'translation'))"
+                            ></span>
                         </template>
                     </p>
 
                     <div class="is-flex is-justify-content-space-between is-align-items-center">
                         <div class="tags">
-                            <span x-show="!filters.lang && word.langName" class="tag is-info is-light" x-text="word.langName"></span>
+                            <span
+                                x-show="!filters.lang && word.langName"
+                                class="tag is-info is-light"
+                                x-text="word.langName"
+                            ></span>
                             <span x-show="word.tags" class="tag is-light" x-text="word.tags"></span>
                             <template x-if="word.sentenceOk">
                                 <span class="tag is-success is-light" :title="word.sentence">
@@ -525,7 +605,10 @@ echo PageLayoutHelper::buildActionCard([
     <nav class="level mt-4" x-show="!loading && pagination.total_pages > 1">
         <div class="level-left">
             <div class="level-item">
-                <span class="tag is-info is-medium" x-text="pagination.total + ' Term' + (pagination.total === 1 ? '' : 's')"></span>
+                <span
+                    class="tag is-info is-medium"
+                    x-text="pagination.total + ' Term' + (pagination.total === 1 ? '' : 's')"
+                ></span>
             </div>
         </div>
         <div class="level-right">
@@ -545,7 +628,10 @@ echo PageLayoutHelper::buildActionCard([
                             title="Previous page">
                         <?php echo IconHelper::render('chevron-left', ['alt' => 'Previous']); ?>
                     </button>
-                    <span class="button is-static is-small" x-text="pagination.page + ' / ' + pagination.total_pages"></span>
+                    <span
+                        class="button is-static is-small"
+                        x-text="pagination.page + ' / ' + pagination.total_pages"
+                    ></span>
                     <button type="button"
                             class="button is-small"
                             :disabled="pagination.page >= pagination.total_pages"

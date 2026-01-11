@@ -91,10 +91,17 @@ class GetPhoneticReading
             unlink($mecab_file);
         }
         $fp = fopen($mecab_file, 'w');
+        if ($fp === false) {
+            return '';
+        }
         fwrite($fp, $text . "\n");
         fclose($fp);
         $mecab = (new TextParsingService())->getMecabPath($mecab_args);
         $handle = popen($mecab . escapeshellarg($mecab_file), "r");
+        if ($handle === false) {
+            unlink($mecab_file);
+            return '';
+        }
         $mecab_str = '';
         while (($line = fgets($handle, 4096)) !== false) {
             $mecab_str .= $line;

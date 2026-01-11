@@ -56,9 +56,18 @@ $error = isset($error) && is_string($error) ? $error : null;
                     <?php endif; ?>
 
                     <!-- Reset password form -->
-                    <form method="POST" action="/password/reset" x-data="resetPasswordForm()" @submit="submitForm($event)">
+                    <form
+                        method="POST"
+                        action="/password/reset"
+                        x-data="resetPasswordForm()"
+                        @submit="submitForm($event)"
+                    >
                         <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-                        <input type="hidden" name="token" value="<?php echo htmlspecialchars($token, ENT_QUOTES, 'UTF-8'); ?>">
+                        <input
+                            type="hidden"
+                            name="token"
+                            value="<?php echo htmlspecialchars($token, ENT_QUOTES, 'UTF-8'); ?>"
+                        >
 
                         <div class="field">
                             <label class="label" for="password">New Password</label>
@@ -107,14 +116,21 @@ $error = isset($error) && is_string($error) ? $error : null;
                                 <span class="icon is-small is-left">
                                     <i data-lucide="lock"></i>
                                 </span>
-                                <span class="icon is-small is-right" x-show="passwordConfirm && !errors.passwordConfirm">
+                                <span
+                                    class="icon is-small is-right"
+                                    x-show="passwordConfirm && !errors.passwordConfirm"
+                                >
                                     <i data-lucide="check" class="has-text-success"></i>
                                 </span>
                                 <span class="icon is-small is-right" x-show="errors.passwordConfirm">
                                     <i data-lucide="alert-circle" class="has-text-danger"></i>
                                 </span>
                             </div>
-                            <p class="help is-danger" x-show="errors.passwordConfirm" x-text="errors.passwordConfirm"></p>
+                            <p
+                                class="help is-danger"
+                                x-show="errors.passwordConfirm"
+                                x-text="errors.passwordConfirm"
+                            ></p>
                         </div>
 
                         <div class="field">

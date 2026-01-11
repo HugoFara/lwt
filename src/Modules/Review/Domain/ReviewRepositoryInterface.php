@@ -154,7 +154,16 @@ interface ReviewRepositoryInterface
     /**
      * Get table test visibility settings.
      *
-     * @return array{edit: int, status: int, term: int, trans: int, rom: int, sentence: int, contextRom: int, contextTrans: int}
+     * @return array{
+     *     edit: int,
+     *     status: int,
+     *     term: int,
+     *     trans: int,
+     *     rom: int,
+     *     sentence: int,
+     *     contextRom: int,
+     *     contextTrans: int
+     * }
      */
     public function getTableReviewSettings(): array;
 
@@ -171,7 +180,13 @@ interface ReviewRepositoryInterface
      *     sentence: string|null,
      *     sentenceId: int|null,
      *     found: bool,
-     *     annotations: array<int, array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>
+     *     annotations: array<int, array{
+     *         text: string,
+     *         romanization: string|null,
+     *         translation: string|null,
+     *         isTarget: bool,
+     *         order: int
+     *     }>
      * }
      */
     public function getSentenceWithAnnotations(int $wordId, string $wordLc): array;

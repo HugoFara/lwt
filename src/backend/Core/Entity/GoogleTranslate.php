@@ -282,7 +282,8 @@ class GoogleTranslate
      *                               https://translate.google.com. If empty, array(408254,585515986) is used
      * @param string|null $domain    (optional) Connect to Google Domain (i.e. 'com' for
      *                               https://translate.google.com). If empty,
-     *                               a random domain will be used (the default value can be altered by changing DEFAULT_DOMAIN)
+     *                               a random domain will be used (the default value can
+     *                               be altered by changing DEFAULT_DOMAIN)
      *                               Possible values:
      *                               ('com.ar', 'at', 'com.au', 'be', 'com.br', 'ca', 'cat', 'ch', 'cl', 'cn', 'cz',
      *                               'de', 'dk', 'es', 'fi', 'fr', 'gr', 'com.hk', 'hr', 'hu', 'co.id', 'ie',

@@ -28,7 +28,9 @@ use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
- * @var array{rss_url: string, feed: array<int|string, mixed>, lang?: int, options?: string, redirect?: string, article_section?: string, edit_feed?: int} $wizardData Wizard session data
+ * @var array{rss_url: string, feed: array<int|string, mixed>, lang?: int,
+ *     options?: string, redirect?: string, article_section?: string,
+ *     edit_feed?: int} $wizardData Wizard session data
  * @var array<int, array{LgID: int, LgName: string}> $languages Language records
  * @var string|null $autoUpdI Auto update interval value
  * @var string|null $autoUpdV Auto update interval unit
@@ -80,7 +82,11 @@ $configJson = json_encode([
     'editFeedId' => $wizardData['edit_feed'] ?? null,
     'feedTitle' => $wizardData['feed']['feed_title'] ?? '',
     'rssUrl' => $wizardData['rss_url'] ?? '',
-    'articleSection' => preg_replace('/[ ]+/', ' ', trim(($wizardData['redirect'] ?? '') . ($wizardData['article_section'] ?? ''))),
+    'articleSection' => preg_replace(
+        '/[ ]+/',
+        ' ',
+        trim(($wizardData['redirect'] ?? '') . ($wizardData['article_section'] ?? ''))
+    ),
     'filterTags' => preg_replace('/[ ]+/', ' ', InputValidator::getString('html')),
     'feedText' => $wizardData['feed']['feed_text'] ?? '',
     'langId' => $wizardData['lang'] ?? null,

@@ -177,7 +177,9 @@ final readonly class ReviewConfiguration
      */
     public function toSqlProjection(): string
     {
-        $selectionInt = is_int($this->selection) ? $this->selection : (int) (is_array($this->selection) ? ($this->selection[0] ?? 0) : $this->selection);
+        $selectionInt = is_int($this->selection)
+            ? $this->selection
+            : (int) (is_array($this->selection) ? ($this->selection[0] ?? 0) : $this->selection);
         return match ($this->reviewKey) {
             self::KEY_LANG => " words WHERE WoLgID = {$selectionInt} ",
             self::KEY_TEXT => " words, word_occurrences

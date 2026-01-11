@@ -55,13 +55,22 @@ class MaintenanceTest extends TestCase
     private static function createTestData(): void
     {
         // Clean up any existing test language first
-        Connection::query("DELETE FROM words WHERE WoLgID IN (SELECT LgID FROM languages WHERE LgName = 'Test Maintenance Language')");
+        Connection::query(
+            "DELETE FROM words WHERE WoLgID IN " .
+            "(SELECT LgID FROM languages WHERE LgName = 'Test Maintenance Language')"
+        );
         Connection::query("DELETE FROM languages WHERE LgName = 'Test Maintenance Language'");
         // Also clean up Japanese test languages to avoid MeCab issues
-        Connection::query("DELETE FROM words WHERE WoLgID IN (SELECT LgID FROM languages WHERE LgName = 'Test Japanese')");
+        Connection::query(
+            "DELETE FROM words WHERE WoLgID IN " .
+            "(SELECT LgID FROM languages WHERE LgName = 'Test Japanese')"
+        );
         Connection::query("DELETE FROM languages WHERE LgName = 'Test Japanese'");
         // Clean up any MECAB languages that could trigger the MeCab requirement
-        Connection::query("DELETE FROM words WHERE WoLgID IN (SELECT LgID FROM languages WHERE UPPER(LgRegexpWordCharacters) = 'MECAB')");
+        Connection::query(
+            "DELETE FROM words WHERE WoLgID IN " .
+            "(SELECT LgID FROM languages WHERE UPPER(LgRegexpWordCharacters) = 'MECAB')"
+        );
         Connection::query("DELETE FROM languages WHERE UPPER(LgRegexpWordCharacters) = 'MECAB'");
         // Clean up split-each-char languages (Chinese) to avoid bug with initWordCount
         Connection::query("DELETE FROM words WHERE WoLgID IN (SELECT LgID FROM languages WHERE LgSplitEachChar = 1)");

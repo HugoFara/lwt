@@ -132,6 +132,7 @@ class GoogleController extends BaseController
 
         if ($pendingLink === null) {
             $this->redirect('/login');
+            return;
         }
 
         $email = $pendingLink['email'];
@@ -161,6 +162,7 @@ class GoogleController extends BaseController
 
         if ($pendingLink === null) {
             $this->redirect('/login');
+            return;
         }
 
         $password = $this->post('password');

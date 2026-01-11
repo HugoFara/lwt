@@ -23,7 +23,8 @@ declare(strict_types=1);
  *
  * @var int $textId
  * @var string $mode
- * @var array{title: string, sourceUri: string, audioUri: string, textSize: int, rtlScript: bool, hasAnnotation: bool} $viewData
+ * @var array{title: string, sourceUri: string, audioUri: string,
+ *           textSize: int, rtlScript: bool, hasAnnotation: bool} $viewData
  * @var int $savedAnn
  * @var int $savedStatus
  * @var int $savedPlacement
@@ -50,7 +51,8 @@ assert(is_string($mode));
 */
 assert(is_array($viewData));
 /**
- * @var array{title: string, sourceUri: string, audioUri: string, textSize: int, rtlScript: bool, hasAnnotation: bool} $viewData
+ * @var array{title: string, sourceUri: string, audioUri: string,
+ *           textSize: int, rtlScript: bool, hasAnnotation: bool} $viewData
 */
 assert(is_int($savedAnn));
 /**
@@ -149,19 +151,34 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                     will be <strong>annotated</strong> with
                     <span class="select is-small">
                         <select x-model="annotationFlags" @change="handleAnnotationChange($event)">
-                            <option value="0"<?php echo FormHelper::getSelected(0, $savedAnn); ?>>Nothing</option>
-                            <option value="1"<?php echo FormHelper::getSelected(1, $savedAnn); ?>>Translation</option>
-                            <option value="5"<?php echo FormHelper::getSelected(5, $savedAnn); ?>>Translation &amp; Tags</option>
-                            <option value="2"<?php echo FormHelper::getSelected(2, $savedAnn); ?>>Romanization</option>
-                            <option value="3"<?php echo FormHelper::getSelected(3, $savedAnn); ?>>Romanization &amp; Translation</option>
-                            <option value="7"<?php echo FormHelper::getSelected(7, $savedAnn); ?>>Romanization, Translation &amp; Tags</option>
+                            <option value="0"
+                                <?php echo FormHelper::getSelected(0, $savedAnn); ?>>Nothing</option>
+                            <option value="1"
+                                <?php echo FormHelper::getSelected(1, $savedAnn); ?>>Translation</option>
+                            <option value="5"
+                                <?php echo FormHelper::getSelected(5, $savedAnn); ?>
+                                >Translation &amp; Tags</option>
+                            <option value="2"
+                                <?php echo FormHelper::getSelected(2, $savedAnn); ?>>Romanization</option>
+                            <option value="3"
+                                <?php echo FormHelper::getSelected(3, $savedAnn); ?>
+                                >Romanization &amp; Translation</option>
+                            <option value="7"
+                                <?php echo FormHelper::getSelected(7, $savedAnn); ?>
+                                >Romanization, Translation &amp; Tags</option>
                         </select>
                     </span>
                     <span class="select is-small">
                         <select x-model="placementMode" @change="handlePlacementChange($event)">
-                            <option value="0"<?php echo FormHelper::getSelected(0, $savedPlacement); ?>>behind</option>
-                            <option value="1"<?php echo FormHelper::getSelected(1, $savedPlacement); ?>>in front of</option>
-                            <option value="2"<?php echo FormHelper::getSelected(2, $savedPlacement); ?>>above (ruby)</option>
+                            <option value="0"
+                                <?php echo FormHelper::getSelected(0, $savedPlacement); ?>
+                                >behind</option>
+                            <option value="1"
+                                <?php echo FormHelper::getSelected(1, $savedPlacement); ?>
+                                >in front of</option>
+                            <option value="2"
+                                <?php echo FormHelper::getSelected(2, $savedPlacement); ?>
+                                >above (ruby)</option>
                         </select>
                     </span>
                     the term.
@@ -176,17 +193,24 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                 <div class="mt-3">
                     <?php if ($hasAnnotation) : ?>
                         Or
-                        <button type="button" class="button is-small" @click="navigateTo('/text/print?text=<?php echo $textId; ?>')">
+                        <button type="button" class="button is-small"
+                            @click="navigateTo('/text/print?text=<?php echo $textId; ?>')">
                             Print/Edit/Delete
                         </button>
                         your <strong>Improved Annotated Text</strong>
                         <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>.
                     <?php else : ?>
-                        <button type="button" class="button is-small" @click="navigateTo('/text/print?edit=1&text=<?php echo $textId; ?>')">
+                        <button type="button" class="button is-small"
+                            @click="navigateTo('/text/print?edit=1&text=<?php echo $textId; ?>')">
                             Create
                         </button>
                         an <strong>Improved Annotated Text</strong>
-                        [<?php echo IconHelper::render('check', ['title' => 'Annotated Text', 'alt' => 'Annotated Text']); ?>].
+                        [<?php
+                            echo IconHelper::render(
+                                'check',
+                                ['title' => 'Annotated Text', 'alt' => 'Annotated Text']
+                            );
+                            ?>].
                     <?php endif; ?>
                 </div>
             </div>
@@ -199,11 +223,16 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
             </header>
             <div class="card-content">
                 <div class="buttons">
-                    <button type="button" class="button" @click="navigateTo('/text/print?edit=1&text=<?php echo $textId; ?>')">
+                    <button type="button" class="button"
+                        @click="navigateTo('/text/print?edit=1&text=<?php echo $textId; ?>')">
                         <?php echo IconHelper::render('pencil', ['size' => 16]); ?>
                         <span class="ml-1">Edit</span>
                     </button>
-                    <button type="button" class="button is-danger is-outlined" @click="confirmNavigateTo('/text/print?del=1&text=<?php echo $textId; ?>', 'Are you sure?')">
+                    <button type="button" class="button is-danger is-outlined"
+                        @click="confirmNavigateTo(
+                            '/text/print?del=1&text=<?php echo $textId; ?>',
+                            'Are you sure?'
+                        )">
                         <?php echo IconHelper::render('trash-2', ['size' => 16]); ?>
                         <span class="ml-1">Delete</span>
                     </button>
@@ -211,9 +240,12 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                         <?php echo IconHelper::render('printer', ['size' => 16]); ?>
                         <span class="ml-1">Print</span>
                     </button>
-                    <button type="button" class="button" @click="openWindow('/text/display?text=<?php echo $textId; ?>')">
+                    <button type="button" class="button"
+                        @click="openWindow('/text/display?text=<?php echo $textId; ?>')">
                         <?php echo IconHelper::render('external-link', ['size' => 16]); ?>
-                        <span class="ml-1">Display<?php echo ($audioUri !== '' ? ' with Audio Player' : ''); ?> in new Window</span>
+                        <span class="ml-1">Display<?php
+                            echo ($audioUri !== '' ? ' with Audio Player' : '');
+                        ?> in new Window</span>
                     </button>
                 </div>
             </div>
@@ -242,8 +274,11 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
     <!-- Print content -->
     <?php if ($mode === 'plain') : ?>
     <div x-show="!loading" id="print" <?php echo ($rtlScript ? 'dir="rtl"' : ''); ?>>
-        <h2 x-text="getConfigTitle('<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>')"></h2>
-        <p :style="'font-size:' + getConfigTextSize(<?php echo $textSize; ?>) + '%; line-height: 1.35; margin-bottom: 10px;'">
+        <h2 x-text="getConfigTitle('<?php
+            echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+        ?>')"></h2>
+        <p :style="'font-size:' + getConfigTextSize(<?php echo $textSize; ?>)
+            + '%; line-height: 1.35; margin-bottom: 10px;'">
             <template x-for="item in items" :key="item.position">
                 <span x-effect="setItemHtml($el, item)"></span>
             </template>
@@ -251,7 +286,8 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
     </div>
     <?php elseif ($mode === 'annotated') : ?>
     <div x-show="!loading" id="print" <?php echo ($rtlScript ? 'dir="rtl"' : ''); ?>>
-        <p :style="'font-size:' + getAnnConfigTextSize(<?php echo $textSize; ?>) + '%; line-height: 1.35; margin-bottom: 10px;'">
+        <p :style="'font-size:' + getAnnConfigTextSize(<?php echo $textSize; ?>)
+            + '%; line-height: 1.35; margin-bottom: 10px;'">
             <span x-text="getAnnConfigTitle('<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>')"></span>
             <br /><br />
             <template x-if="annItems">

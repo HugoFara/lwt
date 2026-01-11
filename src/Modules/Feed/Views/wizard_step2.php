@@ -26,7 +26,10 @@ use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
- * @var array{rss_url: string, feed: array<int|string, mixed>, feed_title?: string, detected_feed?: string, article_tags?: string, host: array<string, string>, selected_feed: int, select_mode: string, hide_images: string, maxim: int, edit_feed?: int} $wizardData Wizard session data
+ * @var array{rss_url: string, feed: array<int|string, mixed>, feed_title?: string,
+ *     detected_feed?: string, article_tags?: string, host: array<string, string>,
+ *     selected_feed: int, select_mode: string, hide_images: string, maxim: int,
+ *     edit_feed?: int} $wizardData Wizard session data
  * @var int $feedLen Number of feed items
  * @var string $feedHtml HTML content of the selected feed item
  */
@@ -322,7 +325,9 @@ $configJson = json_encode([
                                 <template x-for="item in config.feedItems" :key="item.index">
                                     <option :value="item.index"
                                             :title="item.title"
-                                            x-text="(item.hasHtml ? '► ' : '- ') + (item.index + 1) + ' ' + item.hostStatus + ' host: ' + item.host">
+                                            x-text="(item.hasHtml ? '► ' : '- ') +
+                                                    (item.index + 1) + ' ' +
+                                                    item.hostStatus + ' host: ' + item.host">
                                     </option>
                                 </template>
                             </select>

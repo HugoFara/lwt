@@ -345,6 +345,9 @@ class Text
     public function wordCount(): int
     {
         $words = preg_split('/\s+/', $this->text, -1, PREG_SPLIT_NO_EMPTY);
+        if ($words === false) {
+            return 0;
+        }
         return count($words);
     }
 

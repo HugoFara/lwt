@@ -268,18 +268,27 @@ class StarDictImporter implements ImporterInterface
                 $pos += 8;
                 // PHP doesn't have native 64-bit unpack, use 32-bit parts
                 $offsetParts = unpack('N2', $offsetData);
+                if ($offsetParts === false) {
+                    break;
+                }
                 $offset = ((int)$offsetParts[1] << 32) | (int)$offsetParts[2];
             } else {
                 // 32-bit offset
                 $offsetData = substr($content, $pos, 4);
                 $pos += 4;
                 $offsetUnpacked = unpack('N', $offsetData);
+                if ($offsetUnpacked === false) {
+                    break;
+                }
                 $offset = (int)$offsetUnpacked[1];
             }
 
             $sizeData = substr($content, $pos, 4);
             $pos += 4;
             $sizeUnpacked = unpack('N', $sizeData);
+            if ($sizeUnpacked === false) {
+                break;
+            }
             $size = (int)$sizeUnpacked[1];
 
             if ($term !== '' && $size > 0) {

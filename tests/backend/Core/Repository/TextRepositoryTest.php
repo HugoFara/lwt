@@ -132,7 +132,8 @@ class TextRepositoryTest extends TestCase
             "INSERT INTO {$prefix}texts (
                 TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxPosition, TxAudioPosition
             ) VALUES (
-                " . self::$testLanguageId . ", '$escapedTitle', '$escapedContent', '', '$escapedAudioUri', '$escapedSourceUri', 0, 0
+                " . self::$testLanguageId . ", '$escapedTitle', '$escapedContent', '',
+                '$escapedAudioUri', '$escapedSourceUri', 0, 0
             )"
         );
         $id = (int) mysqli_insert_id(Globals::getDbConnection());

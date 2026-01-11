@@ -200,6 +200,9 @@ class TextDisplayService
     public function parseAnnotations(string $annotatedText): array
     {
         $items = preg_split('/[\n]/u', $annotatedText);
+        if ($items === false) {
+            return [];
+        }
         $parsed = [];
 
         foreach ($items as $item) {

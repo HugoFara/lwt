@@ -216,6 +216,23 @@ class InputValidator
     }
 
     /**
+     * Get an integer parameter with a guaranteed non-null return.
+     *
+     * Similar to getInt but always returns an integer, never null.
+     *
+     * @param string $key     Parameter name
+     * @param int    $default Default value if not set or invalid
+     * @param int    $min     Minimum allowed value
+     *
+     * @return int The validated integer value
+     */
+    public static function getIntParam(string $key, int $default, int $min = PHP_INT_MIN): int
+    {
+        $value = self::getInt($key, $default, $min);
+        return $value ?? $default;
+    }
+
+    /**
      * Get a non-negative integer (>= 0) parameter from the request.
      *
      * @param string   $key     Parameter name

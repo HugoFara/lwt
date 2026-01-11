@@ -257,7 +257,8 @@ class UserApiHandler
      *
      * @param User $user The user entity
      *
-     * @return array{id: int, username: string, email: string, role: string, created: string, last_login: ?string, has_wordpress: bool}
+     * @return array{id: int, username: string, email: string, role: string,
+     *               created: string, last_login: ?string, has_wordpress: bool}
      */
     private function formatUserData(User $user): array
     {

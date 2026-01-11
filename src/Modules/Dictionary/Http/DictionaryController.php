@@ -150,6 +150,7 @@ class DictionaryController extends BaseController
         $uploadedFile = InputValidator::getUploadedFile('file');
         if ($uploadedFile === null) {
             $this->redirect("/dictionaries/import?lang=$langId&dict_id=$dictId&error=upload_failed");
+            return;
         }
 
         $filePath = $uploadedFile['tmp_name'];

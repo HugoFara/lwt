@@ -75,11 +75,20 @@ class ExpressionService
 
             $parsed_text = '';
             $fp = fopen($db_to_mecab, 'w');
+            if ($fp === false) {
+                return [];
+            }
             fwrite($fp, $text);
             fclose($fp);
             $handle = popen($mecab . escapeshellarg($db_to_mecab), "r");
+            if ($handle === false) {
+                return [];
+            }
             while (!feof($handle)) {
                 $row = fgets($handle, 16132);
+                if ($row === false) {
+                    break;
+                }
                 $arr = explode("\t", $row, 4);
                 // Not a word (punctuation)
                 if (
@@ -96,14 +105,23 @@ class ExpressionService
             foreach ($rows as $record) {
                 $sent = trim((string) $record['SeText']);
                 $fp = fopen($db_to_mecab, 'w');
+                if ($fp === false) {
+                    continue;
+                }
                 fwrite($fp, $sent . "\n");
                 fclose($fp);
 
                 $handle = popen($mecab . escapeshellarg($db_to_mecab), "r");
+                if ($handle === false) {
+                    continue;
+                }
                 $parsed_sentence = '';
                 // For each word in sentence
                 while (!feof($handle)) {
                     $row = fgets($handle, 16132);
+                    if ($row === false) {
+                        break;
+                    }
                     $arr = explode("\t", $row, 4);
                     // Not a word (punctuation)
                     if (
@@ -119,7 +137,8 @@ class ExpressionService
                 // For each occurrence of multi-word in sentence
                 while ($seek !== false) {
                     // pos = Number of words * 2 + initial position
-                    $pos = preg_match_all('/ /', mb_substr($parsed_sentence, 0, $seek)) * 2 +
+                    $matchCount = preg_match_all('/ /', mb_substr($parsed_sentence, 0, $seek));
+                    $pos = ($matchCount !== false ? $matchCount : 0) * 2 +
                     (int) $record['SeFirstPos'];
                     $occurrences[] = [
                         "SeID" => (int) $record['SeID'],
@@ -195,18 +214,21 @@ class ExpressionService
         foreach ($rows as $record) {
             $string = ' ' . (string)$record['SeText'] . ' ';
             if ($splitEachChar) {
-                $string = preg_replace('/([^\s])/u', "$1 ", $string);
+                $replaced = preg_replace('/([^\s])/u', "$1 ", $string);
+                $string = $replaced ?? $string;
             } elseif ($removeSpaces && !$rSflag) {
-                preg_match(
-                    '/(?<=[ ])(' . preg_replace('/(.)/ui', "$1[ ]*", $textlc) .
-                    ')(?=[ ])/ui',
-                    $string,
-                    $ma
-                );
-                if (isset($ma[1]) && $ma[1] !== '') {
-                    $textlc = trim($ma[1]);
-                    $notermchar = "/[^$termchar]($textlc)[^$termchar]/ui";
-                    $rSflag = true; // Pattern found, stop further processing
+                $patternPart = preg_replace('/(.)/ui', "$1[ ]*", $textlc);
+                if ($patternPart !== null) {
+                    preg_match(
+                        '/(?<=[ ])(' . $patternPart . ')(?=[ ])/ui',
+                        $string,
+                        $ma
+                    );
+                    if (isset($ma[1]) && $ma[1] !== '') {
+                        $textlc = trim($ma[1]);
+                        $notermchar = "/[^$termchar]($textlc)[^$termchar]/ui";
+                        $rSflag = true; // Pattern found, stop further processing
+                    }
                 }
             }
             $last_pos = mb_strripos($string, $textlc, 0, 'UTF-8');
@@ -222,7 +244,7 @@ class ExpressionService
                         mb_substr($string, 0, $last_pos, 'UTF-8'),
                         $_
                     );
-                    $pos = 2 * $cnt + (int) $record['SeFirstPos'];
+                    $pos = 2 * ($cnt !== false ? $cnt : 0) + (int) $record['SeFirstPos'];
                     $txt = '';
                     $matchedTerm = $matches[1] ?? $textlc;
                     if ($matchedTerm != $textlc) {

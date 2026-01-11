@@ -205,7 +205,8 @@ class GetReviewConfiguration
         return match ($config->reviewKey) {
             ReviewConfiguration::KEY_LANG => "All Terms in {$langName}",
             ReviewConfiguration::KEY_TEXT => $this->getTextTitle($config),
-            ReviewConfiguration::KEY_WORDS, ReviewConfiguration::KEY_TEXTS => $this->getSelectionTitle($config, $langName),
+            ReviewConfiguration::KEY_WORDS,
+            ReviewConfiguration::KEY_TEXTS => $this->getSelectionTitle($config, $langName),
             default => 'Review'
         };
     }

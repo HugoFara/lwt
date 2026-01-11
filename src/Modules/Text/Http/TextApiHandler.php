@@ -95,12 +95,18 @@ class TextApiHandler
             ->valuePrepared('TxAnnotatedText');
 
         $items = preg_split('/[\n]/u', $ann);
+        if ($items === false) {
+            return "Failed to parse annotation text";
+        }
         if (count($items) <= $line) {
             return "Unreachable translation: line request is $line, but only " .
             count($items) . " translations were found";
         }
 
         $vals = preg_split('/[\t]/u', $items[$line]);
+        if ($vals === false) {
+            return "Failed to parse annotation line";
+        }
         if ((int)$vals[0] <= -1) {
             return "Term is punctation! Term position is {$vals[0]}";
         }
@@ -282,8 +288,12 @@ class TextApiHandler
     public function formatSetDisplayMode(int $textId, array $params): array
     {
         $annotations = isset($params['annotations']) ? (int)$params['annotations'] : null;
-        $romanization = isset($params['romanization']) ? filter_var($params['romanization'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : null;
-        $translation = isset($params['translation']) ? filter_var($params['translation'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : null;
+        $romanization = isset($params['romanization'])
+            ? filter_var($params['romanization'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)
+            : null;
+        $translation = isset($params['translation'])
+            ? filter_var($params['translation'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)
+            : null;
 
         return $this->setDisplayMode($textId, $annotations, $romanization, $translation);
     }
@@ -362,7 +372,8 @@ class TextApiHandler
                 'Ti2Order',
                 'Ti2SeID',
                 'CASE WHEN `Ti2WordCount`>0 THEN 0 ELSE 1 END AS TiIsNotWord',
-                'CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN CHAR_LENGTH(Ti2Text) ELSE CHAR_LENGTH(`WoTextLC`) END AS TiTextLength',
+                'CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN CHAR_LENGTH(Ti2Text) ' .
+                    'ELSE CHAR_LENGTH(`WoTextLC`) END AS TiTextLength',
                 'WoID',
                 'WoText',
                 'WoStatus',
@@ -425,7 +436,9 @@ class TextApiHandler
                     // Known word
                     $wordData['wordId'] = (int)$record['WoID'];
                     $wordData['status'] = (int)$record['WoStatus'];
-                    $wordData['translation'] = ExportService::replaceTabNewline((string)($record['WoTranslation'] ?? ''));
+                    $wordData['translation'] = ExportService::replaceTabNewline(
+                        (string)($record['WoTranslation'] ?? '')
+                    );
                     $wordData['romanization'] = (string)($record['WoRomanization'] ?? '');
                     $wordData['notes'] = (string)($record['WoNotes'] ?? '');
 
@@ -701,6 +714,9 @@ class TextApiHandler
                 ->valuePrepared('WoTranslation');
             $transarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $alltrans);
             $set = false;
+            if ($transarr === false) {
+                $transarr = [];
+            }
             foreach ($transarr as $t) {
                 $tt = trim($t);
                 if ($tt == '*' || $tt == '') {
@@ -721,19 +737,57 @@ class TextApiHandler
         ($set ? 'checked="checked" ' : '') . 'value="" />
         &nbsp;
         <input class="impr-ann-text" type="text" name="tx' . $i .
-        '" id="tx' . $i . '" value="' . ($set ? htmlspecialchars($trans, ENT_QUOTES, 'UTF-8') : '') .
+        '" id="tx' . $i . '" value="' .
+        ($set ? htmlspecialchars($trans, ENT_QUOTES, 'UTF-8') : '') .
         '" maxlength="50" size="40" />
          &nbsp;
-' . IconHelper::render('eraser', ['title' => 'Erase Text Field', 'alt' => 'Erase Text Field', 'class' => 'click', 'data-action' => 'erase-field', 'data-target' => '#tx' . $i]) . '
+' . IconHelper::render(
+            'eraser',
+            [
+            'title' => 'Erase Text Field',
+            'alt' => 'Erase Text Field',
+            'class' => 'click',
+            'data-action' => 'erase-field',
+            'data-target' => '#tx' . $i
+            ]
+        ) . '
          &nbsp;
-        ' . IconHelper::render('star', ['title' => '* (Set to Term)', 'alt' => '* (Set to Term)', 'class' => 'click', 'data-action' => 'set-star', 'data-target' => '#tx' . $i]) . '
+        ' . IconHelper::render(
+            'star',
+            [
+                'title' => '* (Set to Term)',
+                'alt' => '* (Set to Term)',
+                'class' => 'click',
+                'data-action' => 'set-star',
+                'data-target' => '#tx' . $i
+            ]
+        ) . '
         &nbsp;';
         if ($widset) {
-            $r .=
-            IconHelper::render('circle-plus', ['title' => 'Save another translation to existent term', 'alt' => 'Save another translation to existent term', 'class' => 'click', 'data-action' => 'update-term-translation', 'data-wid' => (string)$wid, 'data-target' => '#tx' . $i]);
+            $r .= IconHelper::render(
+                'circle-plus',
+                [
+                    'title' => 'Save another translation to existent term',
+                    'alt' => 'Save another translation to existent term',
+                    'class' => 'click',
+                    'data-action' => 'update-term-translation',
+                    'data-wid' => (string)$wid,
+                    'data-target' => '#tx' . $i
+                ]
+            );
         } else {
-            $r .=
-            IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'alt' => 'Save translation to new term', 'class' => 'click', 'data-action' => 'add-term-translation', 'data-target' => '#tx' . $i, 'data-word' => htmlspecialchars($word, ENT_QUOTES, 'UTF-8'), 'data-lang' => (string)$lang]);
+            $r .= IconHelper::render(
+                'circle-plus',
+                [
+                    'title' => 'Save translation to new term',
+                    'alt' => 'Save translation to new term',
+                    'class' => 'click',
+                    'data-action' => 'add-term-translation',
+                    'data-target' => '#tx' . $i,
+                    'data-word' => htmlspecialchars($word, ENT_QUOTES, 'UTF-8'),
+                    'data-lang' => (string)$lang
+                ]
+            );
         }
         $r .= '&nbsp;&nbsp;
         <span id="wait' . $i . '">
@@ -757,6 +811,9 @@ class TextApiHandler
             ->where('WoID', '=', $wordId)
             ->valuePrepared('WoTranslation');
         $transarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $alltrans);
+        if ($transarr === false) {
+            return $translations;
+        }
         foreach ($transarr as $t) {
             $tt = trim($t);
             if ($tt == '*' || $tt == '') {
@@ -773,7 +830,9 @@ class TextApiHandler
      * @param string $wordlc Term in lower case
      * @param int    $textid Text ID
      *
-     * @return array{term_lc?: string, wid?: int|null, trans?: string, ann_index?: int, term_ord?: int, translations?: string[], language_id?: int, error?: string}
+     * @return array{term_lc?: string, wid?: int|null, trans?: string,
+     *               ann_index?: int, term_ord?: int, translations?: string[],
+     *               language_id?: int, error?: string}
      */
     public function getTermTranslations(string $wordlc, int $textid): array
     {
@@ -792,8 +851,11 @@ class TextApiHandler
         }
 
         $annotations = preg_split('/[\n]/u', $ann);
+        if ($annotations === false) {
+            return ['error' => 'Failed to parse annotations'];
+        }
         $i = -1;
-        foreach (array_values($annotations) as $index => $annotationLine) {
+        foreach ($annotations as $index => $annotationLine) {
             $vals = preg_split('/[\t]/u', $annotationLine);
             if ($vals === false) {
                 continue;
@@ -891,15 +953,25 @@ class TextApiHandler
                     <th class="has-text-centered">Edit<br />Term</th>
                     <th class="has-text-centered">
                         Term Translations (Delim.: ' .
-                        htmlspecialchars(Settings::getWithDefault('set-term-translation-delimiters'), ENT_QUOTES, 'UTF-8') . ')
+                        htmlspecialchars(
+                            Settings::getWithDefault('set-term-translation-delimiters'),
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) . ')
                         <br />
                         <input type="button" value="Reload" data-action="reload-impr-text" />
                     </th>
                 </tr>';
         $items = preg_split('/[\n]/u', $ann);
+        if ($items === false) {
+            return $r . '</table>';
+        }
         $nontermbuffer = '';
-        foreach (array_values($items) as $i => $item) {
+        foreach ($items as $i => $item) {
             $vals = preg_split('/[\t]/u', $item);
+            if ($vals === false) {
+                continue;
+            }
             if ((int)$vals[0] > -1) {
                 if ($nontermbuffer != '') {
                     $r .= '<tr>
@@ -907,7 +979,16 @@ class TextApiHandler
                             $nontermbuffer .
                         '</td>
                         <td class="has-text-right" colspan="3">
-                        ' . IconHelper::render('check', ['title' => "Back to 'Display/Print Mode'", 'alt' => "Back to 'Display/Print Mode'", 'class' => 'click', 'data-action' => 'back-to-print-mode', 'data-textid' => (string)$textid]) . '
+                        ' . IconHelper::render(
+                            'check',
+                            [
+                                'title' => "Back to 'Display/Print Mode'",
+                                'alt' => "Back to 'Display/Print Mode'",
+                                'class' => 'click',
+                                'data-action' => 'back-to-print-mode',
+                                'data-textid' => (string)$textid
+                            ]
+                        ) . '
                         </td>
                     </tr>';
                     $nontermbuffer = '';
@@ -936,8 +1017,13 @@ class TextApiHandler
                 if ($wid !== null) {
                     $wordLink = '<a name="rec' . $i . '"></a>
                     <span class="click"
-                    data-action="edit-term-popup" data-wid="' . $wid . '" data-textid="' . $textid . '" data-ord="' . (int)$vals[0] . '">
-                        ' . IconHelper::render('file-pen-line', ['title' => 'Edit Term', 'alt' => 'Edit Term']) . '
+                    data-action="edit-term-popup" data-wid="' . $wid .
+                    '" data-textid="' . $textid . '" data-ord="' . (int)$vals[0] . '">
+                        ' .
+                        IconHelper::render(
+                            'file-pen-line',
+                            ['title' => 'Edit Term', 'alt' => 'Edit Term']
+                        ) . '
                     </span>';
                 }
                 $termText = $vals[1] ?? '';
@@ -973,7 +1059,16 @@ class TextApiHandler
                 $nontermbuffer .
                 '</td>
                 <td class="has-text-right" colspan="3">
-                    ' . IconHelper::render('check', ['title' => "Back to 'Display/Print Mode'", 'alt' => "Back to 'Display/Print Mode'", 'class' => 'click', 'data-action' => 'back-to-print-mode', 'data-textid' => (string)$textid]) . '
+                    ' . IconHelper::render(
+                    'check',
+                    [
+                            'title' => "Back to 'Display/Print Mode'",
+                            'alt' => "Back to 'Display/Print Mode'",
+                            'class' => 'click',
+                            'data-action' => 'back-to-print-mode',
+                            'data-textid' => (string)$textid
+                        ]
+                ) . '
                 </td>
             </tr>';
         }
@@ -983,7 +1078,11 @@ class TextApiHandler
                     <th class="has-text-centered">Edit<br />Term</th>
                     <th class="has-text-centered">
                         Term Translations (Delim.: ' .
-                        htmlspecialchars(Settings::getWithDefault('set-term-translation-delimiters'), ENT_QUOTES, 'UTF-8') . ')
+                        htmlspecialchars(
+                            Settings::getWithDefault('set-term-translation-delimiters'),
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) . ')
                         <br />
                         <input type="button" value="Reload" data-action="reload-impr-text" />
                         <a name="bottom"></a>
@@ -1000,7 +1099,9 @@ class TextApiHandler
      * @param string $termLc Term in lowercase
      * @param int    $textId Text ID
      *
-     * @return array{term_lc?: string, wid?: int|null, trans?: string, ann_index?: int, term_ord?: int, translations?: string[], language_id?: int, error?: string}
+     * @return array{term_lc?: string, wid?: int|null, trans?: string,
+     *               ann_index?: int, term_ord?: int, translations?: string[],
+     *               language_id?: int, error?: string}
      */
     public function formatTermTranslations(string $termLc, int $textId): array
     {

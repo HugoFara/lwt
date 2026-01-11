@@ -163,8 +163,11 @@ class SettingsTest extends TestCase
         }
 
         // Directly insert value with whitespace to test trimming
-        Connection::query("DELETE FROM " . Globals::table('settings') . " WHERE StKey = 'test_whitespace'");
-        Connection::query("INSERT INTO " . Globals::table('settings') . " (StKey, StValue) VALUES ('test_whitespace', '  value  ')");
+        $table = Globals::table('settings');
+        Connection::query("DELETE FROM " . $table . " WHERE StKey = 'test_whitespace'");
+        Connection::query(
+            "INSERT INTO " . $table . " (StKey, StValue) VALUES ('test_whitespace', '  value  ')"
+        );
 
         $result = Settings::get('test_whitespace');
         $this->assertEquals('value', $result, 'Value should be trimmed');
@@ -178,7 +181,10 @@ class SettingsTest extends TestCase
 
         // Clean up any previously saved SQL injection key
         $injectionKey = "key'; DROP TABLE settings; --";
-        Connection::query("DELETE FROM " . Globals::table('settings') . " WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+        $table = Globals::table('settings');
+        Connection::query(
+            "DELETE FROM " . $table . " WHERE StKey = " . Escaping::toSqlSyntax($injectionKey)
+        );
 
         // The SQL injection key should return empty (not found)
         $result = Settings::get($injectionKey);
@@ -245,7 +251,10 @@ class SettingsTest extends TestCase
 
         // Use a different injection key that wasn't previously saved
         $injectionKey = "newkey'; DROP TABLE settings; --";
-        Connection::query("DELETE FROM " . Globals::table('settings') . " WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+        $table = Globals::table('settings');
+        Connection::query(
+            "DELETE FROM " . $table . " WHERE StKey = " . Escaping::toSqlSyntax($injectionKey)
+        );
 
         $result = Settings::getWithDefault($injectionKey);
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');

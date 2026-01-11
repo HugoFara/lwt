@@ -836,7 +836,10 @@ class TagsTest extends TestCase
             $this->assertTrue(true, 'saveWordTagsFromArray should handle duplicate tags gracefully');
         } catch (\RuntimeException $e) {
             if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
-                $this->fail('Issue #120: saveWordTagsFromArray throws duplicate key error when cache is stale: ' . $e->getMessage());
+                $this->fail(
+                    'Issue #120: saveWordTagsFromArray throws duplicate key error when cache is stale: ' .
+                    $e->getMessage()
+                );
             }
             throw $e;
         } finally {

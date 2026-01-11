@@ -58,9 +58,18 @@ class ValidationTest extends TestCase
     private static function createTestData(): void
     {
         // Clean up any existing test data first
-        Connection::query("DELETE FROM text_tag_map WHERE TtTxID IN (SELECT TxID FROM texts WHERE TxTitle = 'Test Validation Text')");
-        Connection::query("DELETE FROM word_occurrences WHERE Ti2TxID IN (SELECT TxID FROM texts WHERE TxTitle = 'Test Validation Text')");
-        Connection::query("DELETE FROM sentences WHERE SeTxID IN (SELECT TxID FROM texts WHERE TxTitle = 'Test Validation Text')");
+        Connection::query(
+            "DELETE FROM text_tag_map WHERE TtTxID IN " .
+            "(SELECT TxID FROM texts WHERE TxTitle = 'Test Validation Text')"
+        );
+        Connection::query(
+            "DELETE FROM word_occurrences WHERE Ti2TxID IN " .
+            "(SELECT TxID FROM texts WHERE TxTitle = 'Test Validation Text')"
+        );
+        Connection::query(
+            "DELETE FROM sentences WHERE SeTxID IN " .
+            "(SELECT TxID FROM texts WHERE TxTitle = 'Test Validation Text')"
+        );
         Connection::query("DELETE FROM texts WHERE TxTitle = 'Test Validation Text'");
         Connection::query("DELETE FROM languages WHERE LgName = 'Test Validation Language'");
         Connection::query("DELETE FROM tags WHERE TgText = 'test_validation_tag'");

@@ -44,7 +44,8 @@ class ArticleExtractor
      * - Charset detection and conversion
      * - XPath-based content extraction
      *
-     * @param array<int|string, array{link: string, title: string, audio?: string, text?: string}> $feedData Array of feed items with link, title, etc.
+     * @param array<int|string, array{link: string, title: string, audio?: string, text?: string}> $feedData
+     *     Array of feed items with link, title, etc.
      * @param string      $articleSection XPath selector(s) for article content
      * @param string      $filterTags     XPath selector(s) for elements to remove
      * @param string|null $charset        Override charset (null for auto-detect)
@@ -91,7 +92,8 @@ class ArticleExtractor
      * @param string      $filterTags     Filter selectors
      * @param string|null $charset        Override charset
      *
-     * @return array{TxTitle: string, TxAudioURI: string, TxText: string, TxSourceURI: string}|null Extracted data or null on failure
+     * @return array{TxTitle: string, TxAudioURI: string, TxText: string, TxSourceURI: string}|null
+     *     Extracted data or null on failure
      */
     private function extractSingle(
         array $item,
@@ -261,7 +263,8 @@ class ArticleExtractor
             return $converted !== false ? $converted : $htmlString;
         }
 
-        return mb_convert_encoding($htmlString, 'HTML-ENTITIES', $encoding);
+        $result = mb_convert_encoding($htmlString, 'HTML-ENTITIES', $encoding);
+        return $result !== false ? $result : $htmlString;
     }
 
     /**
@@ -357,10 +360,11 @@ class ArticleExtractor
         foreach ($nodes as $node) {
             $len = $node->attributes->length;
             for ($i = 0; $i < $len; $i++) {
-                if ($node->attributes->item($i)->name === 'content') {
-                    $pos = strpos($node->attributes->item($i)->value, 'charset=');
+                $attr = $node->attributes->item($i);
+                if ($attr !== null && $attr->name === 'content') {
+                    $pos = strpos($attr->value, 'charset=');
                     if ($pos !== false) {
-                        return substr($node->attributes->item($i)->value, $pos + 8);
+                        return substr($attr->value, $pos + 8);
                     }
                 }
             }
@@ -369,8 +373,9 @@ class ArticleExtractor
         // Check charset meta
         foreach ($nodes as $node) {
             $len = $node->attributes->length;
-            if ($len === 1 && $node->attributes->item(0)->name === 'charset') {
-                return $node->attributes->item(0)->value;
+            $firstAttr = $node->attributes->item(0);
+            if ($len === 1 && $firstAttr !== null && $firstAttr->name === 'charset') {
+                return $firstAttr->value;
             }
         }
 
@@ -564,7 +569,8 @@ class ArticleExtractor
      * @param \DOMDocument  $dom        DOM document
      * @param array<string> $filterTags Tags to filter out
      *
-     * @return array{TxTitle: string, TxText: string, TxSourceURI: string, TxAudioURI: string} Result with TxText containing cleaned HTML
+     * @return array{TxTitle: string, TxText: string, TxSourceURI: string, TxAudioURI: string}
+     *     Result with TxText containing cleaned HTML
      */
     private function extractNewArticleHtml(\DOMDocument $dom, array $filterTags): array
     {
@@ -621,11 +627,12 @@ class ArticleExtractor
      */
     private function cleanExtractedText(string $text): string
     {
-        return trim(preg_replace(
+        $result = preg_replace(
             ['/[\r\t]+/', '/(\n)[\s^\n]*\n[\s]*/', '/\ \ +/'],
             [' ', '$1$1', ' '],
             $text
-        ));
+        );
+        return trim($result ?? $text);
     }
 
     /**

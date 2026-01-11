@@ -51,7 +51,16 @@ if (!isset($bookContext) || !is_array($bookContext)) {
     $bookContext = null;
 }
 /**
- * @var array{bookId: int, bookTitle: string, chapterNum: int, totalChapters: int, chapterTitle: string, prevTextId: int|null, nextTextId: int|null, chapters: array<int, array{textId: int, chapterNum: int, title: string}>}|null $bookContext
+ * @var array{
+ *     bookId: int,
+ *     bookTitle: string,
+ *     chapterNum: int,
+ *     totalChapters: int,
+ *     chapterTitle: string,
+ *     prevTextId: int|null,
+ *     nextTextId: int|null,
+ *     chapters: array<int, array{textId: int, chapterNum: int, title: string}>
+ * }|null $bookContext
  */
 
 ?>
@@ -70,8 +79,19 @@ if (!isset($bookContext) || !is_array($bookContext)) {
              * @var string|null $sourceUri
              */
             $sourceUriTyped = $sourceUri;
-            if ($sourceUriTyped !== null && $sourceUriTyped !== '' && !str_starts_with(trim($sourceUriTyped), '#')) : ?>
-                <?php echo \Lwt\Shared\UI\Helpers\IconHelper::link('external-link', $sourceUriTyped, ['alt' => 'Source'], ['target' => '_blank', 'rel' => 'noopener', 'class' => 'ml-2', 'title' => 'Source']); ?>
+            if (
+                $sourceUriTyped !== null
+                && $sourceUriTyped !== ''
+                && !str_starts_with(trim($sourceUriTyped), '#')
+            ) : ?>
+                <?php
+                echo \Lwt\Shared\UI\Helpers\IconHelper::link(
+                    'external-link',
+                    $sourceUriTyped,
+                    ['alt' => 'Source'],
+                    ['target' => '_blank', 'rel' => 'noopener', 'class' => 'ml-2', 'title' => 'Source']
+                );
+                ?>
             <?php endif; ?>
         </div>
       </div>
@@ -96,7 +116,11 @@ if (!isset($bookContext) || !is_array($bookContext)) {
               </button>
             </div>
             <div class="control">
-              <button class="button is-small" :class="showTranslations ? 'is-info' : 'is-light'" @click="toggleTranslations">
+              <button
+                class="button is-small"
+                :class="showTranslations ? 'is-info' : 'is-light'"
+                @click="toggleTranslations"
+              >
                 <span class="icon is-small">
                   <i class="fas" :class="showTranslations ? 'fa-check-square' : 'fa-square'"></i>
                 </span>

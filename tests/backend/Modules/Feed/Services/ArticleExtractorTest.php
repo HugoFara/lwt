@@ -50,7 +50,9 @@ class ArticleExtractorTest extends TestCase
 
     public function testDetectCharsetDetectsFromContentTypeMeta(): void
     {
-        $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"></head><body>Content</body></html>';
+        $html = '<html><head>'
+            . '<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">'
+            . '</head><body>Content</body></html>';
 
         // When override is provided, it's used directly
         $charset = $this->extractor->detectCharset('http://example.com', $html, 'ISO-8859-1');

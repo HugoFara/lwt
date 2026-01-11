@@ -159,7 +159,8 @@ class EmailService
      */
     private function buildResetUrl(string $token): string
     {
-        $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $isHttps = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
+        $protocol = $isHttps ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
         return "{$protocol}://{$host}/password/reset?token=" . urlencode($token);
@@ -194,7 +195,8 @@ class EmailService
         <p>Click the button below to reset your password:</p>
         <p style="text-align: center; margin: 30px 0;">
             <a href="{$escapedUrl}"
-               style="background-color: #3273dc; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+               style="background-color: #3273dc; color: white; padding: 12px 24px;
+                      text-decoration: none; border-radius: 4px; display: inline-block;">
                 Reset Password
             </a>
         </p>

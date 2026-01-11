@@ -222,6 +222,9 @@ class CreateTerm
     private function calculateWordCount(string $text): int
     {
         $words = preg_split('/\s+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        if ($words === false) {
+            return 1;
+        }
         return max(1, count($words));
     }
 }

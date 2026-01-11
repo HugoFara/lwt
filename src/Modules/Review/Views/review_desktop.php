@@ -42,4 +42,6 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 </audio>
 
 <!-- Review configuration -->
-<script type="application/json" id="review-config"><?php echo json_encode($config, JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
+<script type="application/json" id="review-config"><?php
+    echo json_encode($config, JSON_HEX_TAG | JSON_HEX_AMP);
+?></script>

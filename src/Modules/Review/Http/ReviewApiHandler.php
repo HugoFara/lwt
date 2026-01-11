@@ -138,7 +138,13 @@ class ReviewApiHandler
      * @param array<string, mixed>  $wordRecord      Word database record
      * @param string $sentence        Sentence containing the word (word marked with {})
      * @param int    $testType        Test type (1-5)
-     * @param array<int, array{text: string, romanization: string|null, translation: string|null, isTarget?: bool, order?: int}>  $annotations     Word annotations (keyed by order)
+     * @param array<int, array{
+     *     text: string,
+     *     romanization: string|null,
+     *     translation: string|null,
+     *     isTarget?: bool,
+     *     order?: int
+     * }> $annotations Word annotations (keyed by order)
      * @param bool   $showContextRom  Show romanization on context words
      * @param bool   $showContextTrans Show translation on context words
      *
@@ -211,7 +217,13 @@ class ReviewApiHandler
     /**
      * Build HTML for a sentence with ruby annotations.
      *
-     * @param array<int, array{text: string, romanization: string|null, translation: string|null, isTarget?: bool, order?: int}> $annotations Word annotations keyed by order
+     * @param array<int, array{
+     *     text: string,
+     *     romanization: string|null,
+     *     translation: string|null,
+     *     isTarget?: bool,
+     *     order?: int
+     * }> $annotations Word annotations keyed by order
      * @param string $targetWord      The target word being tested
      * @param int    $baseType        Test type (1=show term, 2=hide term, 3=hide term)
      * @param bool   $showRom         Show romanization

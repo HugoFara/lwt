@@ -214,6 +214,9 @@ class CreateBookFromTexts
 
         // Normalize multiple blank lines
         $text = preg_replace('/\n{3,}/', "\n\n", $text);
+        if ($text === null) {
+            return '';
+        }
 
         return trim($text);
     }

@@ -68,16 +68,19 @@ class TranslationControllerTest extends TestCase
 
         // Create a test language
         $existingLang = Connection::fetchValue(
-            "SELECT LgID AS value FROM " . Globals::table('languages') . " WHERE LgName = 'TranslationControllerTestLang' LIMIT 1"
+            "SELECT LgID AS value FROM " . Globals::table('languages') .
+            " WHERE LgName = 'TranslationControllerTestLang' LIMIT 1"
         );
 
         if ($existingLang) {
             self::$testLangId = (int)$existingLang;
         } else {
+            $table = Globals::table('languages');
             Connection::query(
-                "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
-                "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
-                "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
+                "INSERT INTO " . $table . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, " .
+                "LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, " .
+                "LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                 "VALUES ('TranslationControllerTestLang', 'http://dict1.test/lwt_term', " .
                 "'http://dict2.test/###', 'ggl.php?text=lwt_term&sl=es&tl=en', " .
                 "100, '', '.!?', '', 'a-zA-Z', 0, 0, 0, 1)"
@@ -95,8 +98,12 @@ class TranslationControllerTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM " . Globals::table('words') . " WHERE WoLgID = " . self::$testLangId);
-        Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgName = 'TranslationControllerTestLang'");
+        $wordsTable = Globals::table('words');
+        Connection::query("DELETE FROM " . $wordsTable . " WHERE WoLgID = " . self::$testLangId);
+        $langTable = Globals::table('languages');
+        Connection::query(
+            "DELETE FROM " . $langTable . " WHERE LgName = 'TranslationControllerTestLang'"
+        );
 
         // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
         $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM " . Globals::table('languages'));

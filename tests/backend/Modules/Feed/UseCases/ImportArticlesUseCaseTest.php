@@ -157,9 +157,24 @@ class ImportArticlesUseCaseTest extends TestCase
         $this->articleExtractor
             ->method('extract')
             ->willReturn([
-                0 => ['TxTitle' => 'Article 1', 'TxText' => 'Content 1', 'TxSourceURI' => 'http://example.com/1', 'TxAudioURI' => ''],
-                1 => ['TxTitle' => 'Article 2', 'TxText' => 'Content 2', 'TxSourceURI' => 'http://example.com/2', 'TxAudioURI' => ''],
-                2 => ['TxTitle' => 'Article 3', 'TxText' => 'Content 3', 'TxSourceURI' => 'http://example.com/3', 'TxAudioURI' => ''],
+                0 => [
+                    'TxTitle' => 'Article 1',
+                    'TxText' => 'Content 1',
+                    'TxSourceURI' => 'http://example.com/1',
+                    'TxAudioURI' => ''
+                ],
+                1 => [
+                    'TxTitle' => 'Article 2',
+                    'TxText' => 'Content 2',
+                    'TxSourceURI' => 'http://example.com/2',
+                    'TxAudioURI' => ''
+                ],
+                2 => [
+                    'TxTitle' => 'Article 3',
+                    'TxText' => 'Content 3',
+                    'TxSourceURI' => 'http://example.com/3',
+                    'TxAudioURI' => ''
+                ],
             ]);
 
         $this->textCreation
@@ -203,7 +218,12 @@ class ImportArticlesUseCaseTest extends TestCase
         $this->articleExtractor
             ->method('extract')
             ->willReturn([
-                0 => ['TxTitle' => 'Duplicate', 'TxText' => 'Content', 'TxSourceURI' => 'http://example.com/duplicate', 'TxAudioURI' => ''],
+                0 => [
+                    'TxTitle' => 'Duplicate',
+                    'TxText' => 'Content',
+                    'TxSourceURI' => 'http://example.com/duplicate',
+                    'TxAudioURI' => ''
+                ],
             ]);
 
         // Source URI already exists
@@ -284,7 +304,12 @@ class ImportArticlesUseCaseTest extends TestCase
         $this->articleExtractor
             ->method('extract')
             ->willReturn([
-                0 => ['TxTitle' => 'Article', 'TxText' => 'Content', 'TxSourceURI' => 'http://example.com/article', 'TxAudioURI' => ''],
+                0 => [
+                    'TxTitle' => 'Article',
+                    'TxText' => 'Content',
+                    'TxSourceURI' => 'http://example.com/article',
+                    'TxAudioURI' => ''
+                ],
             ]);
 
         $this->textCreation
@@ -353,7 +378,12 @@ class ImportArticlesUseCaseTest extends TestCase
         $this->articleExtractor
             ->method('extract')
             ->willReturn([
-                0 => ['TxTitle' => 'Article', 'TxText' => 'Content', 'TxSourceURI' => 'http://example.com/article', 'TxAudioURI' => ''],
+                0 => [
+                    'TxTitle' => 'Article',
+                    'TxText' => 'Content',
+                    'TxSourceURI' => 'http://example.com/article',
+                    'TxAudioURI' => ''
+                ],
             ]);
 
         $this->textCreation

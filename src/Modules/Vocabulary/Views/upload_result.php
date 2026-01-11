@@ -126,7 +126,11 @@ echo PageLayoutHelper::buildActionCard($actions);
                                     <span>1</span>
                                 </template>
                                 <template x-if="totalPages > 1">
-                                    <select class="select is-small" x-model="currentPage" @change="goToPage(parseInt($event.target.value))">
+                                    <select
+                                        class="select is-small"
+                                        x-model="currentPage"
+                                        @change="goToPage(parseInt($event.target.value))"
+                                    >
                                         <template x-for="p in totalPages" :key="p">
                                             <option :value="p" x-text="p" :selected="p === currentPage"></option>
                                         </template>

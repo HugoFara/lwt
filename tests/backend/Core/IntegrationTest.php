@@ -168,7 +168,10 @@ class IntegrationTest extends TestCase
         // Test legacy path mappings
         $this->assertEquals('/assets/css/styles.css', StringUtils::getFilePath('css/styles.css'));
         $this->assertEquals('/assets/icons/example.svg', StringUtils::getFilePath('icn/example.svg'));
-        $this->assertEquals('/assets/images/apple-touch-icon.png', StringUtils::getFilePath('img/apple-touch-icon.png'));
+        $this->assertEquals(
+            '/assets/images/apple-touch-icon.png',
+            StringUtils::getFilePath('img/apple-touch-icon.png')
+        );
         $this->assertEquals('/assets/js/pgm.js', StringUtils::getFilePath('js/pgm.js'));
 
         // Test paths that already have assets/ prefix - should not double-prefix

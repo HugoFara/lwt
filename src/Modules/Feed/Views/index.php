@@ -197,18 +197,22 @@ echo PageLayoutHelper::buildActionCard([
     <?php if ($pages > 1) : ?>
 <form name="form3" method="get" action="">
 <table class="table is-bordered is-fullwidth">
-<tr><th class="feeds-filter-cell"><?php echo $totalFeeds; ?></th>
-<th class=""><?php
-$pagerParams = ['query' => $currentQuery, 'sort' => $currentSort, 'manage_feeds' => 1];
-echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager(
-    $currentPage,
-    $pages,
-    '/feeds/edit',
-    'form3',
-    $pagerParams
-);
-?></th>
-</tr></table>
+<tr>
+<th class="feeds-filter-cell"><?php echo $totalFeeds; ?></th>
+<th class="">
+        <?php
+        $pagerParams = ['query' => $currentQuery, 'sort' => $currentSort, 'manage_feeds' => 1];
+        echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager(
+            $currentPage,
+            $pages,
+            '/feeds/edit',
+            'form3',
+            $pagerParams
+        );
+        ?>
+</th>
+</tr>
+</table>
 </form>
     <?php endif; ?>
 <?php endif; ?>

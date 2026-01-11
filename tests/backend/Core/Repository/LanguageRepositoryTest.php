@@ -235,8 +235,9 @@ class LanguageRepositoryTest extends TestCase
         // Try to insert language with empty name (may already exist)
         try {
             Connection::query(
-                "INSERT INTO {$prefix}languages (LgName, LgDict1URI, LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters)
-                 VALUES ('', 'https://test.com', 100, '.!?', 'a-z')"
+                "INSERT INTO {$prefix}languages " .
+                "(LgName, LgDict1URI, LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters) " .
+                "VALUES ('', 'https://test.com', 100, '.!?', 'a-z')"
             );
         } catch (\RuntimeException $e) {
             // Empty language may already exist, that's fine

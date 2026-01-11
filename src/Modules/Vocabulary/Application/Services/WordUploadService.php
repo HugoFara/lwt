@@ -194,6 +194,9 @@ class WordUploadService
             throw new \RuntimeException('Failed to create temporary file for import');
         }
         $temp = fopen($fileName, "w");
+        if ($temp === false) {
+            throw new \RuntimeException('Failed to open temporary file for writing');
+        }
         fwrite($temp, Escaping::prepareTextdata($content));
         fclose($temp);
         return $fileName;
@@ -1041,8 +1044,19 @@ class WordUploadService
             $stmt->execute();
         } else {
             $handle = fopen($fileName, 'r');
-            $dataText = fread($handle, filesize($fileName));
+            if ($handle === false) {
+                return;
+            }
+            $fileSize = filesize($fileName);
+            if ($fileSize === false || $fileSize === 0) {
+                fclose($handle);
+                return;
+            }
+            $dataText = fread($handle, $fileSize);
             fclose($handle);
+            if ($dataText === false) {
+                return;
+            }
 
             $params = [];
             $placeholders = [];

@@ -60,14 +60,19 @@ class AnnotationService
         // Get the translations from $oldAnn:
         $oldtrans = array();
         $olditems = preg_split('/[\n]/u', $oldAnn);
-        foreach ($olditems as $olditem) {
-            $oldvals = preg_split('/[\t]/u', $olditem);
-            if (count($oldvals) >= 2 && (int)$oldvals[0] > -1) {
-                $trans = '';
-                if (count($oldvals) > 3) {
-                    $trans = $oldvals[3];
+        if ($olditems !== false) {
+            foreach ($olditems as $olditem) {
+                $oldvals = preg_split('/[\t]/u', $olditem);
+                if ($oldvals === false) {
+                    continue;
                 }
-                $oldtrans[$oldvals[0] . "\t" . $oldvals[1]] = $trans;
+                if (count($oldvals) >= 2 && (int)$oldvals[0] > -1) {
+                    $trans = '';
+                    if (count($oldvals) > 3) {
+                        $trans = $oldvals[3];
+                    }
+                    $oldtrans[$oldvals[0] . "\t" . $oldvals[1]] = $trans;
+                }
             }
         }
 
@@ -75,8 +80,15 @@ class AnnotationService
         $newann = $this->createAnnotation($textId);
         $newitems = preg_split('/[\n]/u', $newann);
         $ann = '';
+        if ($newitems === false) {
+            return $ann;
+        }
         foreach ($newitems as $newitem) {
             $newvals = preg_split('/[\t]/u', $newitem);
+            if ($newvals === false) {
+                $ann .= $newitem . "\n";
+                continue;
+            }
             if ((int)$newvals[0] > -1) {
                 $key = $newvals[0] . "\t";
                 if (isset($newvals[1])) {
@@ -218,7 +230,7 @@ class AnnotationService
     public function getFirstTranslation(string $trans): string
     {
         $arr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $trans);
-        if (count($arr) < 1) {
+        if ($arr === false) {
             return '';
         }
         $r = trim($arr[0]);
@@ -265,8 +277,14 @@ class AnnotationService
         }
         $arr = array();
         $items = preg_split('/[\n]/u', $ann);
+        if ($items === false) {
+            return "{}";
+        }
         foreach ($items as $item) {
             $vals = preg_split('/[\t]/u', $item);
+            if ($vals === false) {
+                continue;
+            }
             if (count($vals) > 3 && $vals[0] >= 0 && $vals[2] > 0) {
                 $arr[intval($vals[0])] = array($vals[1], $vals[2], $vals[3]);
             }

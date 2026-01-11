@@ -207,7 +207,12 @@ if ($currentTextInfo !== null && $currenttext !== null) {
             <label class="label" for="filterlang">Language</label>
             <div class="control">
                 <div class="select is-medium">
-                    <select id="filterlang" data-action="set-lang" data-ajax="true" data-redirect="<?php echo $base; ?>/">
+                    <select
+                        id="filterlang"
+                        data-action="set-lang"
+                        data-ajax="true"
+                        data-redirect="<?php echo $base; ?>/"
+                    >
                         <?php
                         /** @var list<array{id: int, name: string}> $languages */
                         echo SelectOptionsBuilder::forLanguages($languages, $currentlang, '[Select...]');
@@ -225,16 +230,45 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                     <div class="box has-background-link-light" style="width: 280px; min-height: 180px;">
                         <p class="title is-5 mb-3" x-text="lastText.title"></p>
                         <!-- Statistics bar - colors match word status highlights -->
-                        <div class="mb-3" x-show="lastText.stats && lastText.stats.total > 0" :title="getStatsTitle()">
-                            <div style="display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #ddd;">
-                                <div style="background: #5ABAFF;" :style="{ width: getStatPercent('unknown') + '%' }"></div>
-                                <div style="background: #E85A3C;" :style="{ width: getStatPercent('s1') + '%' }"></div>
-                                <div style="background: #E8893C;" :style="{ width: getStatPercent('s2') + '%' }"></div>
-                                <div style="background: #E8B83C;" :style="{ width: getStatPercent('s3') + '%' }"></div>
-                                <div style="background: #E8E23C;" :style="{ width: getStatPercent('s4') + '%' }"></div>
-                                <div style="background: #66CC66;" :style="{ width: getStatPercent('s5') + '%' }"></div>
-                                <div style="background: #CCFFCC;" :style="{ width: getStatPercent('s99') + '%' }"></div>
-                                <div style="background: #888888;" :style="{ width: getStatPercent('s98') + '%' }"></div>
+                        <div
+                            class="mb-3"
+                            x-show="lastText.stats && lastText.stats.total > 0"
+                            :title="getStatsTitle()"
+                        >
+                            <div style="display: flex; height: 12px; border-radius: 6px;
+                                overflow: hidden; background: #ddd;">
+                                <div
+                                    style="background: #5ABAFF;"
+                                    :style="{ width: getStatPercent('unknown') + '%' }"
+                                ></div>
+                                <div
+                                    style="background: #E85A3C;"
+                                    :style="{ width: getStatPercent('s1') + '%' }"
+                                ></div>
+                                <div
+                                    style="background: #E8893C;"
+                                    :style="{ width: getStatPercent('s2') + '%' }"
+                                ></div>
+                                <div
+                                    style="background: #E8B83C;"
+                                    :style="{ width: getStatPercent('s3') + '%' }"
+                                ></div>
+                                <div
+                                    style="background: #E8E23C;"
+                                    :style="{ width: getStatPercent('s4') + '%' }"
+                                ></div>
+                                <div
+                                    style="background: #66CC66;"
+                                    :style="{ width: getStatPercent('s5') + '%' }"
+                                ></div>
+                                <div
+                                    style="background: #CCFFCC;"
+                                    :style="{ width: getStatPercent('s99') + '%' }"
+                                ></div>
+                                <div
+                                    style="background: #888888;"
+                                    :style="{ width: getStatPercent('s98') + '%' }"
+                                ></div>
                             </div>
                         </div>
                         <div class="buttons">
@@ -242,13 +276,19 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                                 <span class="icon"><i data-lucide="book-open"></i></span>
                                 <span>Read</span>
                             </a>
-                            <a :href="basePath + '/review?text=' + lastText.id" class="button is-info is-light is-medium">
+                            <a
+                                :href="basePath + '/review?text=' + lastText.id"
+                                class="button is-info is-light is-medium"
+                            >
                                 <span class="icon"><i data-lucide="circle-help"></i></span>
                                 <span>Review</span>
                             </a>
                         </div>
                         <template x-if="lastText.annotated">
-                            <a :href="basePath + '/text/print?text=' + lastText.id" class="button is-success is-light is-small">
+                            <a
+                                :href="basePath + '/text/print?text=' + lastText.id"
+                                class="button is-success is-light is-small"
+                            >
                                 <span class="icon"><i data-lucide="check"></i></span>
                                 <span>Ann. Text</span>
                             </a>
@@ -264,7 +304,12 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
             <!-- New text card -->
             <div class="column is-narrow">
-                <a href="<?php echo $base; ?>/texts?new=1" class="box has-background-primary-light has-text-centered" style="width: 180px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <a
+                    href="<?php echo $base; ?>/texts?new=1"
+                    class="box has-background-primary-light has-text-centered"
+                    style="width: 180px; min-height: 180px; display: flex;
+                        flex-direction: column; justify-content: center; align-items: center;"
+                >
                     <span class="icon is-large has-text-primary">
                         <i data-lucide="plus" style="width: 48px; height: 48px;"></i>
                     </span>
@@ -295,11 +340,19 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                 </button>
             </header>
             <div class="card-content menu-content">
-                <a href="<?php echo $base; ?>/languages" class="button is-fullwidth is-link is-light mb-2" title="Manage Languages">
+                <a
+                    href="<?php echo $base; ?>/languages"
+                    class="button is-fullwidth is-link is-light mb-2"
+                    title="Manage Languages"
+                >
                     <span class="icon"><i data-lucide="list"></i></span>
                     <span>Manage Languages</span>
                 </a>
-                <a href="<?php echo $base; ?>/languages?new=1" class="button is-fullwidth is-link is-light" title="Add New Language">
+                <a
+                    href="<?php echo $base; ?>/languages?new=1"
+                    class="button is-fullwidth is-link is-light"
+                    title="Add New Language"
+                >
                     <span class="icon"><i data-lucide="plus"></i></span>
                     <span>New Language</span>
                 </a>
@@ -355,7 +408,11 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                 </button>
             </header>
             <div class="card-content menu-content">
-                <a href="<?php echo $base; ?>/words/edit" class="button is-fullwidth is-link is-light mb-2" title="View and edit saved words and expressions">
+                <a
+                    href="<?php echo $base; ?>/words/edit"
+                    class="button is-fullwidth is-link is-light mb-2"
+                    title="View and edit saved words and expressions"
+                >
                     <span class="icon"><i data-lucide="list"></i></span>
                     <span>Terms</span>
                 </a>
@@ -387,7 +444,11 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                 </button>
             </header>
             <div class="card-content menu-content">
-                <a href="<?php echo $base; ?>/admin/statistics" class="button is-fullwidth is-info is-light mb-2" title="Text statistics">
+                <a
+                    href="<?php echo $base; ?>/admin/statistics"
+                    class="button is-fullwidth is-info is-light mb-2"
+                    title="Text statistics"
+                >
                     <span class="icon"><i data-lucide="bar-chart-2"></i></span>
                     <span>Statistics</span>
                 </a>
@@ -395,7 +456,11 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                     <span class="icon"><i data-lucide="help-circle"></i></span>
                     <span>Help</span>
                 </a>
-                <a href="<?php echo $base; ?>/admin/server-data" class="button is-fullwidth is-info is-light" title="Various data useful for debug">
+                <a
+                    href="<?php echo $base; ?>/admin/server-data"
+                    class="button is-fullwidth is-info is-light"
+                    title="Various data useful for debug"
+                >
                     <span class="icon"><i data-lucide="server"></i></span>
                     <span>Server Data</span>
                 </a>
@@ -423,7 +488,11 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                     <span class="icon"><i data-lucide="sliders"></i></span>
                     <span>Settings</span>
                 </a>
-                <a href="<?php echo $base; ?>/admin/backup" class="button is-fullwidth is-light" title="Backup, restore or empty database">
+                <a
+                    href="<?php echo $base; ?>/admin/backup"
+                    class="button is-fullwidth is-light"
+                    title="Backup, restore or empty database"
+                >
                     <span class="icon"><i data-lucide="database"></i></span>
                     <span>Database</span>
                 </a>

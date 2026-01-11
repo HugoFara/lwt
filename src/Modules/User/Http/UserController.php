@@ -399,7 +399,9 @@ class UserController extends BaseController
             $success = $this->userFacade->completePasswordReset($token, $password);
 
             if ($success) {
-                $this->flash->success('Your password has been reset successfully. Please log in with your new password.');
+                $this->flash->success(
+                    'Your password has been reset successfully. Please log in with your new password.'
+                );
                 $this->redirect('/login');
             } else {
                 $this->flash->error('This password reset link has expired or is invalid. Please request a new one.');

@@ -280,7 +280,9 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             'name' => is_string($nameVal) ? $nameVal : '',
             'dict1Uri' => is_string($record['LgDict1URI'] ?? '') ? (string) ($record['LgDict1URI'] ?? '') : '',
             'dict2Uri' => is_string($record['LgDict2URI'] ?? '') ? (string) ($record['LgDict2URI'] ?? '') : '',
-            'translateUri' => is_string($record['LgGoogleTranslateURI'] ?? '') ? (string) ($record['LgGoogleTranslateURI'] ?? '') : '',
+            'translateUri' => is_string($record['LgGoogleTranslateURI'] ?? '')
+                ? (string) ($record['LgGoogleTranslateURI'] ?? '')
+                : '',
             'textSize' => (int) $record['LgTextSize'],
             'removeSpaces' => (bool) $record['LgRemoveSpaces'],
             'regexWord' => is_string($regexVal) ? $regexVal : '',
@@ -415,7 +417,13 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      *     sentence: string|null,
      *     sentenceId: int|null,
      *     found: bool,
-     *     annotations: array<int, array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>
+     *     annotations: array<int, array{
+     *         text: string,
+     *         romanization: string|null,
+     *         translation: string|null,
+     *         isTarget: bool,
+     *         order: int
+     *     }>
      * }
      */
     public function getSentenceWithAnnotations(int $wordId, string $wordLc): array
@@ -477,7 +485,13 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      * @param int    $sentenceCount Number of sentences (1=current, 2=prev+current, 3=prev+current+next)
      * @param string $targetWordLc  Lowercase target word text
      *
-     * @return array<int, array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>
+     * @return array<int, array{
+     *     text: string,
+     *     romanization: string|null,
+     *     translation: string|null,
+     *     isTarget: bool,
+     *     order: int
+     * }>
      */
     private function fetchSentenceAnnotations(int $seid, int $txid, int $sentenceCount, string $targetWordLc): array
     {

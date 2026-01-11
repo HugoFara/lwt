@@ -65,7 +65,12 @@ $itemLabel = $isTextTag ? 'Texts' : 'Terms';
 PageLayoutHelper::renderMessage($message, false);
 
 echo PageLayoutHelper::buildActionCard([
-    ['url' => $baseUrl . '?new=1', 'label' => 'New ' . $tagTypeLabel . ' Tag', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+    [
+        'url' => $baseUrl . '?new=1',
+        'label' => 'New ' . $tagTypeLabel . ' Tag',
+        'icon' => 'circle-plus',
+        'class' => 'is-primary'
+    ],
 ]);
 ?>
 
@@ -110,7 +115,15 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
             </div>
             <div class="level-item">
-                <?php echo PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form1', ['query' => $currentQuery, 'sort' => $currentSort]); ?>
+                <?php
+                echo PageLayoutHelper::buildPager(
+                    $pagination['currentPage'],
+                    $pagination['pages'],
+                    $baseUrl,
+                    'form1',
+                    ['query' => $currentQuery, 'sort' => $currentSort]
+                );
+                ?>
             </div>
             <div class="level-right">
                 <div class="level-item">
@@ -122,7 +135,10 @@ echo PageLayoutHelper::buildActionCard([
                             <div class="select is-small">
                                 <select name="sort" data-action="sort">
                                     <?php foreach ($sortOptions as $option) : ?>
-                                    <option value="<?php echo $option['value']; ?>"<?php echo $currentSort == $option['value'] ? ' selected="selected"' : ''; ?>><?php echo $option['text']; ?></option>
+                                    <option
+                                        value="<?php echo $option['value']; ?>"
+                                        <?php echo $currentSort == $option['value'] ? ' selected="selected"' : ''; ?>
+                                    ><?php echo $option['text']; ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -223,21 +239,37 @@ echo PageLayoutHelper::buildActionCard([
 <tr>
     <td class="has-text-centered">
         <a name="rec<?php echo $tag['id']; ?>">
-            <input name="marked[]" type="checkbox" class="markcheck" value="<?php echo $tag['id']; ?>" <?php echo FormHelper::checkInRequest($tag['id'], 'marked'); ?> />
+            <input
+                name="marked[]"
+                type="checkbox"
+                class="markcheck"
+                value="<?php echo $tag['id']; ?>"
+                <?php echo FormHelper::checkInRequest($tag['id'], 'marked'); ?>
+            />
         </a>
     </td>
     <td class="has-text-centered" style="white-space: nowrap;">
         <div class="buttons are-small is-centered">
-            <a href="<?php echo $baseUrl; ?>?chg=<?php echo $tag['id']; ?>" class="button is-small is-ghost" title="Edit">
+            <a
+                href="<?php echo $baseUrl; ?>?chg=<?php echo $tag['id']; ?>"
+                class="button is-small is-ghost"
+                title="Edit"
+            >
                 <?php echo IconHelper::render('file-pen', ['title' => 'Edit', 'alt' => 'Edit']); ?>
             </a>
-            <a class="button is-small is-ghost confirmdelete" href="<?php echo $baseUrl; ?>?del=<?php echo $tag['id']; ?>" title="Delete">
+            <a
+                class="button is-small is-ghost confirmdelete"
+                href="<?php echo $baseUrl; ?>?del=<?php echo $tag['id']; ?>"
+                title="Delete"
+            >
                 <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
             </a>
         </div>
     </td>
     <td>
-        <span class="tag is-medium is-light"><?php echo htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="tag is-medium is-light">
+            <?php echo htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+        </span>
     </td>
     <td class="has-text-grey"><?php echo htmlspecialchars($tag['comment'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
     <td class="has-text-centered">
@@ -276,20 +308,34 @@ echo PageLayoutHelper::buildActionCard([
             <div class="level-left">
                 <div class="level-item">
                     <label class="checkbox">
-                        <input name="marked[]" type="checkbox" class="markcheck" value="<?php echo $tag['id']; ?>" <?php echo FormHelper::checkInRequest($tag['id'], 'marked'); ?> />
+                        <input
+                            name="marked[]"
+                            type="checkbox"
+                            class="markcheck"
+                            value="<?php echo $tag['id']; ?>"
+                            <?php echo FormHelper::checkInRequest($tag['id'], 'marked'); ?>
+                        />
                     </label>
                 </div>
                 <div class="level-item">
-                    <span class="tag is-medium is-info is-light"><?php echo htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
+                    <span class="tag is-medium is-info is-light">
+                        <?php echo htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                    </span>
                 </div>
             </div>
             <div class="level-right">
                 <div class="level-item">
                     <div class="buttons are-small">
-                        <a href="<?php echo $baseUrl; ?>?chg=<?php echo $tag['id']; ?>" class="button is-small is-info is-light">
+                        <a
+                            href="<?php echo $baseUrl; ?>?chg=<?php echo $tag['id']; ?>"
+                            class="button is-small is-info is-light"
+                        >
                             <?php echo IconHelper::render('file-pen', ['alt' => 'Edit']); ?>
                         </a>
-                        <a class="button is-small is-danger is-light confirmdelete" href="<?php echo $baseUrl; ?>?del=<?php echo $tag['id']; ?>">
+                        <a
+                            class="button is-small is-danger is-light confirmdelete"
+                            href="<?php echo $baseUrl; ?>?del=<?php echo $tag['id']; ?>"
+                        >
                             <?php echo IconHelper::render('circle-minus', ['alt' => 'Delete']); ?>
                         </a>
                     </div>
@@ -305,7 +351,9 @@ echo PageLayoutHelper::buildActionCard([
             <div class="tags has-addons mb-0">
                 <span class="tag is-dark"><?php echo $itemLabel; ?></span>
                 <?php if ($tag['usageCount'] > 0) : ?>
-                <a href="<?php echo $service->getItemsUrl($tag['id']); ?>" class="tag is-link"><?php echo $tag['usageCount']; ?></a>
+                <a href="<?php echo $service->getItemsUrl($tag['id']); ?>" class="tag is-link">
+                    <?php echo $tag['usageCount']; ?>
+                </a>
                 <?php else : ?>
                 <span class="tag is-light">0</span>
                 <?php endif; ?>
@@ -315,7 +363,9 @@ echo PageLayoutHelper::buildActionCard([
                 <span class="tag is-dark">Archived</span>
                 <?php $archivedCountMobile = $tag['archivedUsageCount'] ?? 0; ?>
                 <?php if ($archivedCountMobile > 0) : ?>
-                <a href="<?php echo $service->getArchivedItemsUrl($tag['id']); ?>" class="tag is-link"><?php echo $archivedCountMobile; ?></a>
+                <a href="<?php echo $service->getArchivedItemsUrl($tag['id']); ?>" class="tag is-link">
+                    <?php echo $archivedCountMobile; ?>
+                </a>
                 <?php else : ?>
                 <span class="tag is-light">0</span>
                 <?php endif; ?>
@@ -339,7 +389,15 @@ echo PageLayoutHelper::buildActionCard([
     </div>
     <div class="level-right">
         <div class="level-item">
-            <?php echo PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form2', ['query' => $currentQuery, 'sort' => $currentSort]); ?>
+            <?php
+            echo PageLayoutHelper::buildPager(
+                $pagination['currentPage'],
+                $pagination['pages'],
+                $baseUrl,
+                'form2',
+                ['query' => $currentQuery, 'sort' => $currentSort]
+            );
+            ?>
         </div>
     </div>
 </nav>

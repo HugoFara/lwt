@@ -61,11 +61,24 @@ class TextParsingTest extends TestCase
         $words = Globals::table('words');
 
         // Clean up any existing test language first
-        Connection::query("DELETE FROM $word_occurrences WHERE Ti2LgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
-        Connection::query("DELETE FROM $sentences WHERE SeLgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
-        Connection::query("DELETE FROM $texts WHERE TxLgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
-        Connection::query("DELETE FROM $words WHERE WoLgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
-        Connection::query("DELETE FROM $languages WHERE LgName = 'Test TextParsing Language'");
+        $langName = 'Test TextParsing Language';
+        Connection::query(
+            "DELETE FROM $word_occurrences WHERE Ti2LgID IN " .
+            "(SELECT LgID FROM $languages WHERE LgName = '$langName')"
+        );
+        Connection::query(
+            "DELETE FROM $sentences WHERE SeLgID IN " .
+            "(SELECT LgID FROM $languages WHERE LgName = '$langName')"
+        );
+        Connection::query(
+            "DELETE FROM $texts WHERE TxLgID IN " .
+            "(SELECT LgID FROM $languages WHERE LgName = '$langName')"
+        );
+        Connection::query(
+            "DELETE FROM $words WHERE WoLgID IN " .
+            "(SELECT LgID FROM $languages WHERE LgName = '$langName')"
+        );
+        Connection::query("DELETE FROM $languages WHERE LgName = '$langName'");
 
         // Create test language
         $sql = "INSERT INTO $languages (
@@ -467,7 +480,11 @@ class TextParsingTest extends TestCase
         $this->assertEquals('Hello', $wordsNoPunct[0]['Ti2Text']);
         $this->assertEquals(1, (int)$wordsNoPunct[0]['Ti2WordCount'], 'First word should have WordCount=1');
         $this->assertEquals('world', $wordsNoPunct[1]['Ti2Text']);
-        $this->assertEquals(1, (int)$wordsNoPunct[1]['Ti2WordCount'], 'Last word should have WordCount=1 even without trailing punctuation');
+        $this->assertEquals(
+            1,
+            (int)$wordsNoPunct[1]['Ti2WordCount'],
+            'Last word should have WordCount=1 even without trailing punctuation'
+        );
 
         // Test text WITH punctuation for comparison
         $sql = "INSERT INTO $texts (TxLgID, TxTitle, TxText, TxAudioURI)

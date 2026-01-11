@@ -214,7 +214,7 @@ echo PageLayoutHelper::buildActionCard([
 
                             <!-- Import more entries -->
                             <a href="/dictionaries/import?lang=<?php echo $langId;
-                                ?>&dict_id=<?php echo $dict->id(); ?>"
+                            ?>&dict_id=<?php echo $dict->id(); ?>"
                                class="button is-info" title="Import entries">
                                 <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
                             </a>

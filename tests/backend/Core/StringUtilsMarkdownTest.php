@@ -64,7 +64,8 @@ class StringUtilsMarkdownTest extends TestCase
     public function testFormattingWithinLinks(): void
     {
         $result = StringUtils::parseInlineMarkdown('[**bold link**](https://example.com)');
-        $expected = '<a href="https://example.com" target="_blank" rel="noopener noreferrer"><strong>bold link</strong></a>';
+        $expected = '<a href="https://example.com" target="_blank" rel="noopener noreferrer">' .
+            '<strong>bold link</strong></a>';
         $this->assertEquals($expected, $result);
     }
 

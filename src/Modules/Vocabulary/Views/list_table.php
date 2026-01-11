@@ -227,16 +227,26 @@ assert(is_array($words));
     </td>
     <td>
         <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php
-            echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $trans = ExportService::replaceTabNewline($record['WoTranslation'] ?? '');
+            echo htmlspecialchars($trans, ENT_QUOTES, 'UTF-8');
         ?></span>
         <?php echo TagHelper::renderInline($record['taglist'] ?? ''); ?>
     </td>
     <td class="has-text-centered">
         <?php
         $sentTitle = htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8');
-        echo (isset($record['SentOK']) && $record['SentOK'] != 0
-            ? IconHelper::render('circle-check', ['title' => $sentTitle, 'alt' => 'Yes', 'class' => 'has-text-success'])
-            : IconHelper::render('circle-x', ['title' => '(No valid sentence)', 'alt' => 'No', 'class' => 'has-text-danger']));
+        if (isset($record['SentOK']) && $record['SentOK'] != 0) {
+            $sentIcon = IconHelper::render(
+                'circle-check',
+                ['title' => $sentTitle, 'alt' => 'Yes', 'class' => 'has-text-success']
+            );
+        } else {
+            $sentIcon = IconHelper::render(
+                'circle-x',
+                ['title' => '(No valid sentence)', 'alt' => 'No', 'class' => 'has-text-danger']
+            );
+        }
+        echo $sentIcon;
         ?>
     </td>
     <td class="has-text-centered" title="<?php echo htmlspecialchars($statusName, ENT_QUOTES, 'UTF-8'); ?>">
@@ -297,18 +307,28 @@ assert(is_array($words));
                         isset($record['LgGoogleTranslateURI']) && $record['LgGoogleTranslateURI'] !== ''
                         && strpos($record['LgGoogleTranslateURI'], '&sl=') !== false
                     ) {
-                        $langCode = preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']);
+                        $langCode = preg_replace(
+                            '/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/',
+                            '$1',
+                            $record['LgGoogleTranslateURI']
+                        );
                         echo ' class="tts_' . (is_string($langCode) ? $langCode : '') . '"';
                     }
-                    echo (isset($record['LgRightToLeft']) && $record['LgRightToLeft'] ? ' dir="rtl"' : '');
-                    ?>><strong class="is-size-5"><?php echo htmlspecialchars($record['WoText'], ENT_QUOTES, 'UTF-8'); ?></strong></span>
+                    $rtlAttr = isset($record['LgRightToLeft']) && $record['LgRightToLeft'];
+                    echo ($rtlAttr ? ' dir="rtl"' : '');
+                    $woText = htmlspecialchars($record['WoText'], ENT_QUOTES, 'UTF-8');
+                    ?>><strong class="is-size-5"><?php echo $woText; ?></strong></span>
                 </div>
             </div>
             <div class="level-right">
                 <div class="level-item">
                     <div class="tags has-addons mb-0">
-                        <span class="tag is-light"><?php echo htmlspecialchars($statusAbbr, ENT_QUOTES, 'UTF-8'); ?></span>
-                        <span class="tag <?php echo $scoreClass; ?> is-light"><?php echo $scoreValue; ?>%</span>
+                        <span class="tag is-light"><?php
+                            echo htmlspecialchars($statusAbbr, ENT_QUOTES, 'UTF-8');
+                        ?></span>
+                        <span class="tag <?php echo $scoreClass; ?> is-light"><?php
+                            echo $scoreValue;
+                        ?>%</span>
                     </div>
                 </div>
             </div>
@@ -316,33 +336,47 @@ assert(is_array($words));
 
             <?php if (isset($record['WoRomanization']) && $record['WoRomanization'] !== '') : ?>
         <p class="has-text-grey is-size-7 mb-1">
-            <span id="roman<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoRomanization']), ENT_QUOTES, 'UTF-8'); ?></span>
+            <span id="roman<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php
+                $roman = ExportService::replaceTabNewline($record['WoRomanization']);
+                echo htmlspecialchars($roman, ENT_QUOTES, 'UTF-8');
+            ?></span>
         </p>
             <?php endif; ?>
 
         <p class="mb-2">
             <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php
-            echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation'] ?? ''), ENT_QUOTES, 'UTF-8');
+                $trans = ExportService::replaceTabNewline($record['WoTranslation'] ?? '');
+                echo htmlspecialchars($trans, ENT_QUOTES, 'UTF-8');
             ?></span>
         </p>
 
         <div class="is-flex is-justify-content-space-between is-align-items-center">
             <div class="tags">
                     <?php if ($currentlang == '' && isset($record['LgName']) && $record['LgName'] !== '') : ?>
-                <span class="tag is-info is-light"><?php echo htmlspecialchars($record['LgName'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="tag is-info is-light"><?php
+                    echo htmlspecialchars($record['LgName'], ENT_QUOTES, 'UTF-8');
+                ?></span>
                     <?php endif; ?>
                     <?php echo TagHelper::renderInline($record['taglist'] ?? ''); ?>
-                    <?php if (isset($record['SentOK']) && $record['SentOK'] != 0) : ?>
-                <span class="tag is-success is-light" title="<?php echo htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php if (isset($record['SentOK']) && $record['SentOK'] != 0) :
+                        $sentTitle = htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8');
+                        ?>
+                <span class="tag is-success is-light" title="<?php echo $sentTitle; ?>">
                         <?php echo IconHelper::render('message-square', ['alt' => 'Has sentence']); ?>
                 </span>
                     <?php endif; ?>
             </div>
             <div class="buttons are-small">
-                <a href="/words/edit?chg=<?php echo $record['WoID']; ?>" class="button is-small is-info is-light">
+                <a
+                    href="/words/edit?chg=<?php echo $record['WoID']; ?>"
+                    class="button is-small is-info is-light"
+                >
                     <?php echo IconHelper::render('file-pen-line', ['alt' => 'Edit']); ?>
                 </a>
-                <a class="button is-small is-danger is-light confirmdelete" href="/words/edit?del=<?php echo $record['WoID']; ?>">
+                <a
+                    class="button is-small is-danger is-light confirmdelete"
+                    href="/words/edit?del=<?php echo $record['WoID']; ?>"
+                >
                     <?php echo IconHelper::render('circle-minus', ['alt' => 'Delete']); ?>
                 </a>
             </div>

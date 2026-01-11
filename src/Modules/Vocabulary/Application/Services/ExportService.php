@@ -331,8 +331,8 @@ class ExportService
     public static function replaceTabNewline(string $s): string
     {
         $s = str_replace(["\r\n", "\r", "\n", "\t"], ' ', $s);
-        $s = preg_replace('/\s/u', ' ', $s);
-        $s = preg_replace('/\s{2,}/u', ' ', $s);
+        $s = preg_replace('/\s/u', ' ', $s) ?? $s;
+        $s = preg_replace('/\s{2,}/u', ' ', $s) ?? $s;
         return trim($s);
     }
 

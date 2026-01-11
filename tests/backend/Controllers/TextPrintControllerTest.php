@@ -59,18 +59,23 @@ class TextPrintControllerTest extends TestCase
 
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist
+            $langTable = Globals::table('languages');
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM " . Globals::table('languages') . " WHERE LgName = 'PrintControllerTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM " . $langTable .
+                " WHERE LgName = 'PrintControllerTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
-                    "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
-                    "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
-                    "VALUES ('PrintControllerTestLang', 'http://test.com/###', '', 'http://translate.google.com/?sl=en&tl=fr&###', " .
+                    "INSERT INTO " . $langTable .
+                    " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, " .
+                    "LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, " .
+                    "LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
+                    "VALUES ('PrintControllerTestLang', 'http://test.com/###', '', " .
+                    "'http://translate.google.com/?sl=en&tl=fr&###', " .
                     "100, '', '.!?', '', 'a-zA-Z', 0, 0, 0, 1)"
                 );
                 self::$testLangId = (int)Connection::fetchValue(
@@ -79,16 +84,20 @@ class TextPrintControllerTest extends TestCase
             }
 
             // Create a test text
+            $textTable = Globals::table('texts');
             $existingText = Connection::fetchValue(
-                "SELECT TxID AS value FROM " . Globals::table('texts') . " WHERE TxTitle = 'PrintControllerTestText' LIMIT 1"
+                "SELECT TxID AS value FROM " . $textTable .
+                " WHERE TxTitle = 'PrintControllerTestText' LIMIT 1"
             );
 
             if ($existingText) {
                 self::$testTextId = (int)$existingText;
             } else {
                 Connection::query(
-                    "INSERT INTO " . Globals::table('texts') . " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI) " .
-                    "VALUES (" . self::$testLangId . ", 'PrintControllerTestText', 'This is test text.', " .
+                    "INSERT INTO " . $textTable .
+                    " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI) " .
+                    "VALUES (" . self::$testLangId .
+                    ", 'PrintControllerTestText', 'This is test text.', " .
                     "'0\tThis\t\t\n1\tis\t\t\n2\ttest\t\t\n3\ttext\t\ttranslation', " .
                     "'http://audio.test/audio.mp3', 'http://source.test')"
                 );
@@ -106,10 +115,23 @@ class TextPrintControllerTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM " . Globals::table('word_occurrences') . " WHERE Ti2TxID = " . self::$testTextId);
-        Connection::query("DELETE FROM " . Globals::table('sentences') . " WHERE SeTxID = " . self::$testTextId);
-        Connection::query("DELETE FROM " . Globals::table('texts') . " WHERE TxTitle = 'PrintControllerTestText'");
-        Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgName = 'PrintControllerTestLang'");
+        $occurrencesTable = Globals::table('word_occurrences');
+        $sentencesTable = Globals::table('sentences');
+        $textsTable = Globals::table('texts');
+        $languagesTable = Globals::table('languages');
+
+        Connection::query(
+            "DELETE FROM " . $occurrencesTable . " WHERE Ti2TxID = " . self::$testTextId
+        );
+        Connection::query(
+            "DELETE FROM " . $sentencesTable . " WHERE SeTxID = " . self::$testTextId
+        );
+        Connection::query(
+            "DELETE FROM " . $textsTable . " WHERE TxTitle = 'PrintControllerTestText'"
+        );
+        Connection::query(
+            "DELETE FROM " . $languagesTable . " WHERE LgName = 'PrintControllerTestLang'"
+        );
     }
 
     protected function setUp(): void

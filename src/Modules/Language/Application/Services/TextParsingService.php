@@ -98,14 +98,18 @@ class TextParsingService
         $match7 = $matches[7] ?? '';
 
         if (!strlen($match6) && strlen($match7) && preg_match('/[a-zA-Z0-9]/', substr($matches[1], -1))) {
-            return preg_replace("/[.]/", ".\t", $matches[0]);
+            $result = preg_replace("/[.]/", ".\t", $matches[0]);
+            return $result ?? $matches[0];
         }
         if (is_numeric($matches[1])) {
             if (strlen($matches[1]) < 3) {
                 return $matches[0];
             }
         } elseif (
-            $matches[3] && (preg_match('/^[B-DF-HJ-NP-TV-XZb-df-hj-np-tv-xz][b-df-hj-np-tv-xzñ]*$/u', $matches[1]) || preg_match('/^[AEIOUY]$/', $matches[1]))
+            $matches[3] && (
+                preg_match('/^[B-DF-HJ-NP-TV-XZb-df-hj-np-tv-xz][b-df-hj-np-tv-xzñ]*$/u', $matches[1])
+                || preg_match('/^[AEIOUY]$/', $matches[1])
+            )
         ) {
             return $matches[0];
         }

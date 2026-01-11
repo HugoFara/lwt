@@ -36,7 +36,9 @@ assert(is_string($ann));
 <table class="table is-bordered is-fullwidth">
 <tr>
     <td class="has-text-right word-show-label">Term:</td>
-    <td class="word-show-term" <?php echo $scrdir; ?>><b><?php echo htmlspecialchars($word['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></b></td>
+    <td class="word-show-term" <?php echo $scrdir; ?>>
+        <b><?php echo htmlspecialchars($word['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></b>
+    </td>
 </tr>
 <tr>
     <td class="has-text-right">Translation:</td>
@@ -69,12 +71,16 @@ assert(is_string($ann));
 <?php if ($word['romanization'] !== '') : ?>
 <tr>
     <td class="has-text-right">Romaniz.:</td>
-    <td class="word-show-value"><b><?php echo htmlspecialchars($word['romanization'] ?? '', ENT_QUOTES, 'UTF-8'); ?></b></td>
+    <td class="word-show-value">
+        <b><?php echo htmlspecialchars($word['romanization'] ?? '', ENT_QUOTES, 'UTF-8'); ?></b>
+    </td>
 </tr>
 <?php endif; ?>
 <tr>
     <td class="has-text-right">Sentence<br />Term in {...}:</td>
-    <td class="" <?php echo $scrdir; ?>><?php echo htmlspecialchars($word['sentence'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+    <td class="" <?php echo $scrdir; ?>>
+        <?php echo htmlspecialchars($word['sentence'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+    </td>
 </tr>
 <tr>
     <td class="has-text-right">Status:</td>

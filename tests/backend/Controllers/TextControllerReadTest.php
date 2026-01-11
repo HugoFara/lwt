@@ -64,21 +64,22 @@ class TextControllerReadTest extends TestCase
         if (self::$dbConnected) {
             // Create a test language
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM " . Globals::table('languages') . " WHERE LgName = 'ReadControllerTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::table('languages') .
+                " WHERE LgName = 'ReadControllerTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
-                Connection::query(
-                    "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
-                    "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
-                    "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization, " .
-                    "LgTTSVoiceAPI) " .
-                    "VALUES ('ReadControllerTestLang', 'http://dict1.test/###', 'http://dict2.test/###', " .
-                    "'http://translate.test/?sl=en&tl=fr&text=###', " .
-                    "120, '', '.!?', '', 'a-zA-Z', 0, 0, 0, 1, 'Google')"
-                );
+                $sql = "INSERT INTO " . Globals::table('languages') .
+                    " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, " .
+                    "LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, " .
+                    "LgSplitEachChar, LgRightToLeft, LgShowRomanization, LgTTSVoiceAPI) " .
+                    "VALUES ('ReadControllerTestLang', 'http://dict1.test/###', " .
+                    "'http://dict2.test/###', 'http://translate.test/?sl=en&tl=fr&text=###', " .
+                    "120, '', '.!?', '', 'a-zA-Z', 0, 0, 0, 1, 'Google')";
+                Connection::query($sql);
                 self::$testLangId = (int)Connection::fetchValue(
                     "SELECT LAST_INSERT_ID() AS value"
                 );
@@ -115,10 +116,23 @@ class TextControllerReadTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM " . Globals::table('word_occurrences') . " WHERE Ti2TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
-        Connection::query("DELETE FROM " . Globals::table('sentences') . " WHERE SeTxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
-        Connection::query("DELETE FROM " . Globals::table('texts') . " WHERE TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
-        Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgName = 'ReadControllerTestLang'");
+        $textIds = self::$testTextId . ", " . self::$testText2Id;
+        Connection::query(
+            "DELETE FROM " . Globals::table('word_occurrences') .
+            " WHERE Ti2TxID IN (" . $textIds . ")"
+        );
+        Connection::query(
+            "DELETE FROM " . Globals::table('sentences') .
+            " WHERE SeTxID IN (" . $textIds . ")"
+        );
+        Connection::query(
+            "DELETE FROM " . Globals::table('texts') .
+            " WHERE TxID IN (" . $textIds . ")"
+        );
+        Connection::query(
+            "DELETE FROM " . Globals::table('languages') .
+            " WHERE LgName = 'ReadControllerTestLang'"
+        );
     }
 
     protected function setUp(): void
@@ -153,7 +167,10 @@ class TextControllerReadTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $this->assertInstanceOf(TextController::class, $controller);
     }
@@ -166,7 +183,10 @@ class TextControllerReadTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $this->assertTrue(method_exists($controller, 'read'));
     }
@@ -216,7 +236,10 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = (string)self::$testTextId;
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -235,7 +258,10 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['start'] = (string)self::$testTextId;
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -255,7 +281,10 @@ class TextControllerReadTest extends TestCase
         $_REQUEST['text'] = (string)self::$testTextId;
         $_REQUEST['start'] = (string)self::$testText2Id;
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -275,7 +304,10 @@ class TextControllerReadTest extends TestCase
 
         // No text or start parameter set
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -294,7 +326,10 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = 'not-a-number';
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -313,7 +348,10 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '0';
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -489,7 +527,10 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '2147483647'; // Max 32-bit int
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
         $method->setAccessible(true);
@@ -507,7 +548,10 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '-1';
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
         $method->setAccessible(true);
@@ -526,7 +570,10 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '123.45';
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
         $method->setAccessible(true);
@@ -545,7 +592,10 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '  123  ';
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
         $method->setAccessible(true);
@@ -570,8 +620,14 @@ class TextControllerReadTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller1 = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
-        $controller2 = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller1 = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
+        $controller2 = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         // Both controllers should be functional
         $this->assertInstanceOf(TextController::class, $controller1);

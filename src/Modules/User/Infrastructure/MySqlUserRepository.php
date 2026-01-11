@@ -799,7 +799,8 @@ class MySqlUserRepository implements UserRepositoryInterface
      */
     public function findRecentlyActive(int $days = 30, int $limit = 50): array
     {
-        $sinceDate = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+        $timestamp = strtotime("-{$days} days");
+        $sinceDate = date('Y-m-d H:i:s', $timestamp !== false ? $timestamp : time());
 
         $rows = $this->query()
             ->where('UsLastLogin', '>=', $sinceDate)
@@ -823,7 +824,8 @@ class MySqlUserRepository implements UserRepositoryInterface
      */
     public function findRecentlyCreated(int $days = 30, int $limit = 50): array
     {
-        $sinceDate = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+        $timestamp = strtotime("-{$days} days");
+        $sinceDate = date('Y-m-d H:i:s', $timestamp !== false ? $timestamp : time());
 
         $rows = $this->query()
             ->where('UsCreated', '>=', $sinceDate)
@@ -840,7 +842,8 @@ class MySqlUserRepository implements UserRepositoryInterface
     /**
      * Get user statistics.
      *
-     * @return array{total: int, active: int, inactive: int, admins: int, wordpress_linked: int, google_linked: int, microsoft_linked: int}
+     * @return array{total: int, active: int, inactive: int, admins: int,
+     *               wordpress_linked: int, google_linked: int, microsoft_linked: int}
      */
     public function getStatistics(): array
     {

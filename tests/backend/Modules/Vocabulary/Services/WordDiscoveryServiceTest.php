@@ -60,7 +60,8 @@ class WordDiscoveryServiceTest extends TestCase
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO " . Globals::table('languages') .
+                    " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('TestLanguage', 'http://test.com/###', '', 'http://translate.test/###', " .

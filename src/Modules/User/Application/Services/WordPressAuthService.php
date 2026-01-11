@@ -296,8 +296,9 @@ class WordPressAuthService
         session_write_close();
 
         // Delete session cookie
-        if (session_name() !== false) {
-            setcookie(session_name(), '', 0, '/');
+        $sessionName = session_name();
+        if ($sessionName !== false) {
+            setcookie($sessionName, '', 0, '/');
         }
 
         // Regenerate session ID only if a session can be started

@@ -49,15 +49,19 @@ $rtlScriptTyped = $rtlScript;
 foreach ($annotationsTyped as $item) {
     if ($item['type'] > -1) {
         // Regular word with annotation
+        $romTitle = ($item['rom'] ?? '') === ''
+            ? ''
+            : ' title="' . \htmlspecialchars($item['rom'] ?? '', ENT_QUOTES, 'UTF-8') . '"';
+        $textEscaped = \htmlspecialchars($item['text'] ?? '', ENT_QUOTES, 'UTF-8');
+        $transEscaped = \htmlspecialchars($item['trans'] ?? '', ENT_QUOTES, 'UTF-8');
         echo ' <ruby>
             <rb>
-                <span class="click anntermruby" style="color:black;"' .
-                (($item['rom'] ?? '') === '' ? '' : (' title="' . \htmlspecialchars($item['rom'] ?? '', ENT_QUOTES, 'UTF-8') . '"')) . '>' .
-                    \htmlspecialchars($item['text'] ?? '', ENT_QUOTES, 'UTF-8') .
+                <span class="click anntermruby" style="color:black;"' . $romTitle . '>' .
+                    $textEscaped .
                 '</span>
             </rb>
             <rt>
-                <span class="click anntransruby2">' . \htmlspecialchars($item['trans'] ?? '', ENT_QUOTES, 'UTF-8') . '</span>
+                <span class="click anntransruby2">' . $transEscaped . '</span>
             </rt>
         </ruby> ';
     } else {

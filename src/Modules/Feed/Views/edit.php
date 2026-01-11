@@ -28,7 +28,9 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 /**
- * @var array{NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string} $feed Feed data
+ * @var array{NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string,
+ *            NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int,
+ *            NfOptions: string} $feed Feed data
  * @var array<int, array{LgID: int, LgName: string}> $languages Language records
  * @var array<string, string> $options Parsed feed options
  * @var string|null $autoUpdateInterval Auto-update interval value
@@ -37,7 +39,12 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 $actions = [
     ['url' => '/feeds?page=1', 'label' => 'Feeds', 'icon' => 'list'],
-    ['url' => '/feeds/wizard?step=2&edit_feed=' . (int)$feed['NfID'], 'label' => 'Feed Wizard', 'icon' => 'wand-2', 'class' => 'is-info']
+    [
+        'url' => '/feeds/wizard?step=2&edit_feed=' . (int)$feed['NfID'],
+        'label' => 'Feed Wizard',
+        'icon' => 'wand-2',
+        'class' => 'is-info'
+    ]
 ];
 
 ?>
@@ -88,9 +95,8 @@ $actions = [
                         <div class="select is-fullwidth">
                             <select name="NfLgID" id="NfLgID">
                                 <?php foreach ($languages as $lang) : ?>
-                                <option value="<?php echo $lang['LgID']; ?>"<?php if ($feed['NfLgID'] === $lang['LgID']) {
-                                    echo ' selected';
-                                               } ?>>
+                                    <?php $selected = ($feed['NfLgID'] === $lang['LgID']) ? ' selected' : ''; ?>
+                                    <option value="<?php echo $lang['LgID']; ?>"<?php echo $selected; ?>>
                                     <?php echo htmlspecialchars($lang['LgName'], ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                                 <?php endforeach; ?>
@@ -157,11 +163,15 @@ $actions = [
             <div class="field-body">
                 <div class="field has-addons">
                     <div class="control is-expanded">
+                        <?php
+                        $articleSection = $feed['NfArticleSectionTags'] ?? '';
+                        $articleSectionVal = htmlspecialchars($articleSection, ENT_QUOTES, 'UTF-8');
+                        ?>
                         <input class="input notempty"
                                type="text"
                                name="NfArticleSectionTags"
                                id="NfArticleSectionTags"
-                               value="<?php echo htmlspecialchars($feed['NfArticleSectionTags'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php echo $articleSectionVal; ?>"
                                required />
                     </div>
                     <div class="control">
@@ -181,11 +191,15 @@ $actions = [
             <div class="field-body">
                 <div class="field">
                     <div class="control">
+                        <?php
+                        $filterTags = $feed['NfFilterTags'] ?? '';
+                        $filterTagsVal = htmlspecialchars($filterTags, ENT_QUOTES, 'UTF-8');
+                        ?>
                         <input class="input"
                                type="text"
                                name="NfFilterTags"
                                id="NfFilterTags"
-                               value="<?php echo htmlspecialchars($feed['NfFilterTags'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+                               value="<?php echo $filterTagsVal; ?>" />
                     </div>
                 </div>
             </div>
@@ -228,7 +242,9 @@ $actions = [
                                     </div>
                                     <div class="control">
                                         <div class="select is-small">
-                                            <select name="autoupdate_unit" x-model="autoUpdateUnit" :disabled="!autoUpdate">
+                                            <select name="autoupdate_unit"
+                                                    x-model="autoUpdateUnit"
+                                                    :disabled="!autoUpdate">
                                                 <option value="h">Hour(s)</option>
                                                 <option value="d">Day(s)</option>
                                                 <option value="w">Week(s)</option>

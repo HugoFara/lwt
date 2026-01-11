@@ -63,7 +63,8 @@ class LanguageApiHandler
      *
      * @param int $langId Language ID
      *
-     * @return array{name: string, voiceapi: string, word_parsing: string, abbreviation: mixed, reading_mode: string, piper_voice_id?: string}
+     * @return array{name: string, voiceapi: string, word_parsing: string,
+     *               abbreviation: mixed, reading_mode: string, piper_voice_id?: string}
      */
     public function getReadingConfiguration(int $langId): array
     {
@@ -173,7 +174,8 @@ class LanguageApiHandler
      *
      * @return (mixed|string)[]
      *
-     * @psalm-return array{name: string, voiceapi: string, word_parsing: string, abbreviation: mixed, reading_mode: string, piper_voice_id?: string}
+     * @psalm-return array{name: string, voiceapi: string, word_parsing: string,
+     *               abbreviation: mixed, reading_mode: string, piper_voice_id?: string}
      */
     public function formatReadingConfiguration(int $langId): array
     {
@@ -391,7 +393,8 @@ class LanguageApiHandler
      *
      * @param int $id Language ID
      *
-     * @return array{success: bool, error?: string, relatedData?: array{texts: int, archivedTexts: int, words: int, feeds: int}}
+     * @return array{success: bool, error?: string,
+     *               relatedData?: array{texts: int, archivedTexts: int, words: int, feeds: int}}
      */
     public function formatDelete(int $id): array
     {
@@ -426,7 +429,8 @@ class LanguageApiHandler
      *
      * @param int $id Language ID
      *
-     * @return array{success: bool, sentencesDeleted?: int, textItemsDeleted?: int, sentencesAdded?: int, textItemsAdded?: int}
+     * @return array{success: bool, sentencesDeleted?: int, textItemsDeleted?: int,
+     *               sentencesAdded?: int, textItemsAdded?: int}
      */
     public function formatRefresh(int $id): array
     {

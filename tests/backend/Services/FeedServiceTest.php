@@ -53,19 +53,20 @@ class FeedServiceTest extends TestCase
 
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist
+            $langTable = Globals::table('languages');
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM " . Globals::table('languages') . " WHERE LgName = 'FeedServiceTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM $langTable WHERE LgName = 'FeedServiceTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
-                    "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
-                    "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
-                    "VALUES ('FeedServiceTestLang', 'http://test.com/###', '', 'http://translate.test/###', " .
-                    "100, '', '.!?', '', 'a-zA-Z', 0, 0, 0, 1)"
+                    "INSERT INTO $langTable (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, " .
+                    "LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, " .
+                    "LgRightToLeft, LgShowRomanization) VALUES ('FeedServiceTestLang', 'http://test.com/###', " .
+                    "'', 'http://translate.test/###', 100, '', '.!?', '', 'a-zA-Z', 0, 0, 0, 1)"
                 );
                 self::$testLangId = (int)Connection::fetchValue(
                     "SELECT LAST_INSERT_ID() AS value"
@@ -81,9 +82,15 @@ class FeedServiceTest extends TestCase
         }
 
         // Clean up test feeds and feed_links
-        Connection::query("DELETE FROM " . Globals::table('feed_links') . " WHERE FlNfID IN (SELECT NfID FROM " . Globals::table('news_feeds') . " WHERE NfName LIKE 'Test Feed%')");
-        Connection::query("DELETE FROM " . Globals::table('news_feeds') . " WHERE NfName LIKE 'Test Feed%'");
-        Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgName = 'FeedServiceTestLang'");
+        $feedLinksTable = Globals::table('feed_links');
+        $newsFeedsTable = Globals::table('news_feeds');
+        $langTable = Globals::table('languages');
+        Connection::query(
+            "DELETE FROM $feedLinksTable WHERE FlNfID IN " .
+            "(SELECT NfID FROM $newsFeedsTable WHERE NfName LIKE 'Test Feed%')"
+        );
+        Connection::query("DELETE FROM $newsFeedsTable WHERE NfName LIKE 'Test Feed%'");
+        Connection::query("DELETE FROM $langTable WHERE LgName = 'FeedServiceTestLang'");
     }
 
     protected function setUp(): void
@@ -104,8 +111,13 @@ class FeedServiceTest extends TestCase
         }
 
         // Clean up test feeds after each test
-        Connection::query("DELETE FROM " . Globals::table('feed_links') . " WHERE FlNfID IN (SELECT NfID FROM " . Globals::table('news_feeds') . " WHERE NfName LIKE 'Test Feed%')");
-        Connection::query("DELETE FROM " . Globals::table('news_feeds') . " WHERE NfName LIKE 'Test Feed%'");
+        $feedLinksTable = Globals::table('feed_links');
+        $newsFeedsTable = Globals::table('news_feeds');
+        Connection::query(
+            "DELETE FROM $feedLinksTable WHERE FlNfID IN " .
+            "(SELECT NfID FROM $newsFeedsTable WHERE NfName LIKE 'Test Feed%')"
+        );
+        Connection::query("DELETE FROM $newsFeedsTable WHERE NfName LIKE 'Test Feed%'");
     }
 
     // ===== getFeeds() tests =====
@@ -304,9 +316,12 @@ class FeedServiceTest extends TestCase
         ]);
 
         // Add a feedlink (article) to the feed
+        $feedLinksTable = Globals::table('feed_links');
+        $timestamp = time();
         Connection::execute(
-            "INSERT INTO " . Globals::table('feed_links') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
-             VALUES ($feedId, 'Test Article', 'https://example.com/article', 'Description', FROM_UNIXTIME(" . time() . "))"
+            "INSERT INTO $feedLinksTable (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+             VALUES ($feedId, 'Test Article', 'https://example.com/article', 'Description', " .
+            "FROM_UNIXTIME($timestamp))"
         );
 
         // Verify article exists
@@ -658,9 +673,12 @@ class FeedServiceTest extends TestCase
         ]);
 
         // Add article with space prefix (unloadable)
+        $feedLinksTable = Globals::table('feed_links');
+        $timestamp = time();
         Connection::execute(
-            "INSERT INTO " . Globals::table('feed_links') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
-             VALUES ($feedId, 'Unloadable Article', ' https://example.com/unloadable', 'Desc', FROM_UNIXTIME(" . time() . "))"
+            "INSERT INTO $feedLinksTable (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+             VALUES ($feedId, 'Unloadable Article', ' https://example.com/unloadable', 'Desc', " .
+            "FROM_UNIXTIME($timestamp))"
         );
 
         // Reset unloadable

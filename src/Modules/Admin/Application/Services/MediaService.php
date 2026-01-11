@@ -168,6 +168,7 @@ class MediaService
     public function getMediaPathSelector(string $fieldName): string
     {
         $media = $this->getMediaPaths();
+        $mediaJson = json_encode($media);
         $r = '<p>
             YouTube, Dailymotion, Vimeo or choose a file in "../' . $media["base_path"] . '/media"
             <br />
@@ -186,7 +187,8 @@ class MediaService
             . '
             Refresh
         </span>
-        <script type="application/json" data-lwt-media-select-config>' . (json_encode($media) ?: '{}') . '</script>';
+        <script type="application/json" data-lwt-media-select-config>' .
+            ($mediaJson !== false ? $mediaJson : '{}') . '</script>';
         return $r;
     }
 

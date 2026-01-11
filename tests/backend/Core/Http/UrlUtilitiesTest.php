@@ -127,11 +127,15 @@ final class UrlUtilitiesTest extends TestCase
     public function testTargetLangFromDict(): void
     {
         // Google Translate URLs
-        $this->assertEquals('en', UrlUtilities::targetLangFromDict('http://translate.google.com/?sl=ar&tl=en&text=test'));
-        $this->assertEquals('fr', UrlUtilities::targetLangFromDict('http://localhost/ggl.php?sl=ar&tl=fr&text='));
+        $googleUrl = 'http://translate.google.com/?sl=ar&tl=en&text=test';
+        $this->assertEquals('en', UrlUtilities::targetLangFromDict($googleUrl));
+
+        $localGglUrl = 'http://localhost/ggl.php?sl=ar&tl=fr&text=';
+        $this->assertEquals('fr', UrlUtilities::targetLangFromDict($localGglUrl));
 
         // LibreTranslate URLs
-        $this->assertEquals('en', UrlUtilities::targetLangFromDict('http://localhost:5000/?lwt_translator=libretranslate&source=ar&target=en&q=test'));
+        $libreTranslateUrl = 'http://localhost:5000/?lwt_translator=libretranslate&source=ar&target=en&q=test';
+        $this->assertEquals('en', UrlUtilities::targetLangFromDict($libreTranslateUrl));
 
         // Empty URL
         $this->assertEquals('', UrlUtilities::targetLangFromDict(''));

@@ -63,7 +63,11 @@ echo PageLayoutHelper::buildActionCard(
         <div class="level">
             <div class="level-left">
                 <div class="level-item">
-                    <span class="has-text-weight-semibold" x-text="languages.reduce((sum, lang) => sum + lang.text_count, 0) + ' archived texts in ' + languages.length + ' language' + (languages.length === 1 ? '' : 's')"></span>
+                    <span
+                        class="has-text-weight-semibold"
+                        x-text="languages.reduce((sum, lang) => sum + lang.text_count, 0)
+                            + ' archived texts in ' + languages.length + ' language'
+                            + (languages.length === 1 ? '' : 's')"></span>
                 </div>
             </div>
             <div class="level-right">
@@ -92,11 +96,18 @@ echo PageLayoutHelper::buildActionCard(
             <header class="card-header is-clickable" @click="toggleLanguage(lang.id)" style="user-select: none;">
                 <p class="card-header-title">
                     <span x-text="lang.name"></span>
-                    <span class="tag is-warning ml-2" x-text="lang.text_count + ' archived text' + (lang.text_count === 1 ? '' : 's')"></span>
+                    <span
+                        class="tag is-warning ml-2"
+                        x-text="lang.text_count + ' archived text'
+                            + (lang.text_count === 1 ? '' : 's')"></span>
                 </p>
-                <button class="card-header-icon" type="button"
-                        :aria-label="isCollapsed(lang.id) ? 'Expand ' + lang.name + ' texts' : 'Collapse ' + lang.name + ' texts'"
-                        :aria-expanded="!isCollapsed(lang.id)">
+                <button
+                    class="card-header-icon"
+                    type="button"
+                    :aria-label="isCollapsed(lang.id)
+                        ? 'Expand ' + lang.name + ' texts'
+                        : 'Collapse ' + lang.name + ' texts'"
+                    :aria-expanded="!isCollapsed(lang.id)">
                     <span class="icon">
                         <i :data-lucide="isCollapsed(lang.id) ? 'chevron-right' : 'chevron-down'"></i>
                     </span>
@@ -106,7 +117,9 @@ echo PageLayoutHelper::buildActionCard(
             <!-- Content (texts for this language) -->
             <div class="card-content" x-show="!isCollapsed(lang.id)" x-collapse.duration.200ms>
                 <!-- Loading state for this language -->
-                <div x-show="isLoadingMore(lang.id) && getTextsForLanguage(lang.id).length === 0" class="has-text-centered py-4">
+                <div
+                    x-show="isLoadingMore(lang.id) && getTextsForLanguage(lang.id).length === 0"
+                    class="has-text-centered py-4">
                     <span class="icon">
                         <i data-lucide="loader-2" class="icon-spin"></i>
                     </span>
@@ -126,7 +139,10 @@ echo PageLayoutHelper::buildActionCard(
                                     <?php echo IconHelper::render('square', ['size' => 14]); ?>
                                     <span class="ml-1">Mark None</span>
                                 </button>
-                                <span x-show="hasMarkedInLanguage(lang.id)" class="tag is-warning ml-2" x-text="getMarkedCount(lang.id) + ' selected'"></span>
+                                <span
+                                    x-show="hasMarkedInLanguage(lang.id)"
+                                    class="tag is-warning ml-2"
+                                    x-text="getMarkedCount(lang.id) + ' selected'"></span>
                             </div>
                         </div>
                     </div>
@@ -141,7 +157,10 @@ echo PageLayoutHelper::buildActionCard(
                                 </div>
                                 <div class="control">
                                     <div class="select is-small">
-                                        <select :disabled="!hasMarkedInLanguage(lang.id)" @change="handleMultiAction(lang.id, $event)" aria-label="Bulk actions for selected texts">
+                                        <select
+                                            :disabled="!hasMarkedInLanguage(lang.id)"
+                                            @change="handleMultiAction(lang.id, $event)"
+                                            aria-label="Bulk actions for selected texts">
                                             <?php echo SelectOptionsBuilder::forMultipleArchivedTextsActions(); ?>
                                         </select>
                                     </div>
@@ -152,7 +171,9 @@ echo PageLayoutHelper::buildActionCard(
                 </div>
 
                 <!-- Text cards grid -->
-                <div class="columns is-multiline text-cards archived-text-cards" x-show="getTextsForLanguage(lang.id).length > 0">
+                <div
+                    class="columns is-multiline text-cards archived-text-cards"
+                    x-show="getTextsForLanguage(lang.id).length > 0">
                     <template x-for="text in getTextsForLanguage(lang.id)" :key="text.id">
                         <div class="column is-4-desktop is-6-tablet is-12-mobile">
                             <div class="card text-card is-archived">
@@ -169,7 +190,12 @@ echo PageLayoutHelper::buildActionCard(
                                         <span x-show="text.has_audio" title="With Audio">
                                             <?php echo IconHelper::render('volume-2', ['size' => 16]); ?>
                                         </span>
-                                        <a x-show="text.has_source" :href="text.source_uri" target="_blank" title="Source Link" @click.stop>
+                                        <a
+                                            x-show="text.has_source"
+                                            :href="text.source_uri"
+                                            target="_blank"
+                                            title="Source Link"
+                                            @click.stop>
                                             <?php echo IconHelper::render('external-link', ['size' => 16]); ?>
                                         </a>
                                         <span x-show="text.annotated" title="Annotated Text">
@@ -198,7 +224,9 @@ echo PageLayoutHelper::buildActionCard(
                                 </div>
 
                                 <footer class="card-footer">
-                                    <a :href="'/text/archived?unarch=' + text.id" class="card-footer-item is-primary-action">
+                                    <a
+                                        :href="'/text/archived?unarch=' + text.id"
+                                        class="card-footer-item is-primary-action">
                                         <?php echo IconHelper::render('archive-restore', ['size' => 16]); ?>
                                         <span>Unarchive</span>
                                     </a>
@@ -206,7 +234,11 @@ echo PageLayoutHelper::buildActionCard(
                                         <?php echo IconHelper::render('file-pen', ['size' => 16]); ?>
                                         <span>Edit</span>
                                     </a>
-                                    <a class="card-footer-item has-text-danger" @click.prevent="handleDelete($event, '/text/archived?del=' + text.id)">
+                                    <a
+                                        class="card-footer-item has-text-danger"
+                                        @click.prevent="handleDelete(
+                                            $event, '/text/archived?del=' + text.id
+                                        )">
                                         <?php echo IconHelper::render('trash-2', ['size' => 16]); ?>
                                         <span>Delete</span>
                                     </a>

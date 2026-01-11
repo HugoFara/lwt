@@ -300,7 +300,7 @@ class TextPrintService
             '$1',
             $googleTranslateUri
         );
-        if ($googleTranslateUri !== $ttsLg) {
+        if ($ttsLg !== null && $googleTranslateUri !== $ttsLg) {
             return 'tts_' . $ttsLg . ' ';
         }
         return null;
@@ -320,9 +320,15 @@ class TextPrintService
     public function parseAnnotation(string $annotation): array
     {
         $items = preg_split('/[\n]/u', $annotation);
+        if ($items === false) {
+            return [];
+        }
         $parsed = [];
         foreach ($items as $item) {
             $vals = preg_split('/[\t]/u', $item);
+            if ($vals === false) {
+                continue;
+            }
             $parsed[] = [
                 'order' => isset($vals[0]) ? (int) $vals[0] : -1,
                 'text' => $vals[1] ?? '',
@@ -478,10 +484,16 @@ class TextPrintService
         }
 
         $items = preg_split('/[\n]/u', $ann);
+        if ($items === false) {
+            return null;
+        }
         $parsed = [];
 
         foreach ($items as $item) {
             $vals = preg_split('/[\t]/u', $item);
+            if ($vals === false) {
+                continue;
+            }
             $order = isset($vals[0]) ? (int) $vals[0] : -1;
             $text = $vals[1] ?? '';
             $wordId = (isset($vals[2]) && ctype_digit($vals[2])) ? (int) $vals[2] : null;

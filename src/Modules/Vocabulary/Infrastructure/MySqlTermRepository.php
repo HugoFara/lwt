@@ -906,7 +906,8 @@ class MySqlTermRepository implements TermRepositoryInterface
         int $days = 7,
         int $limit = 50
     ): array {
-        $sinceDate = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+        $timestamp = strtotime("-{$days} days");
+        $sinceDate = date('Y-m-d H:i:s', $timestamp !== false ? $timestamp : time());
 
         $query = $this->query()
             ->where('WoStatusChanged', '>=', $sinceDate)

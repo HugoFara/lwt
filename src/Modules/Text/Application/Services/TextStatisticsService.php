@@ -185,7 +185,12 @@ class TextStatisticsService
                 // We just need to form a valid URL
                 $dict = "http://" . $dict;
             }
-            parse_str(parse_url($dict, PHP_URL_QUERY), $url_query);
+            $queryString = parse_url($dict, PHP_URL_QUERY);
+            /** @var array<string, string> $url_query */
+            $url_query = [];
+            if (is_string($queryString)) {
+                parse_str($queryString, $url_query);
+            }
             if (
                 array_key_exists('lwt_translator', $url_query)
                 && $url_query['lwt_translator'] == "libretranslate"

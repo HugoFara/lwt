@@ -311,12 +311,18 @@ class TermCrudApiHandler
      * @param int         $termId Term ID
      * @param string|null $ann    Annotation to highlight in translation
      *
-     * @return array{id: int, text: string, textLc: string, lemma: string, lemmaLc: string, translation: string, romanization: string, status: int, langId: int, sentence: string, notes: string, tags: array<string>, statusLabel: string}|array{error: string}
+     * @return array{id: int, text: string, textLc: string, lemma: string, lemmaLc: string,
+     *               translation: string, romanization: string, status: int, langId: int,
+     *               sentence: string, notes: string, tags: array<string>,
+     *               statusLabel: string}|array{error: string}
      */
     public function getTermDetails(int $termId, ?string $ann = null): array
     {
         $record = QueryBuilder::table('words')
-            ->select(['WoID', 'WoText', 'WoTextLC', 'WoLemma', 'WoLemmaLC', 'WoTranslation', 'WoRomanization', 'WoStatus', 'WoLgID', 'WoSentence', 'WoNotes'])
+            ->select([
+                'WoID', 'WoText', 'WoTextLC', 'WoLemma', 'WoLemmaLC', 'WoTranslation',
+                'WoRomanization', 'WoStatus', 'WoLgID', 'WoSentence', 'WoNotes'
+            ])
             ->where('WoID', '=', $termId)
             ->firstPrepared();
 
@@ -473,7 +479,10 @@ class TermCrudApiHandler
         // If word ID provided, get existing term data
         if ($wordId !== null && $wordId > 0) {
             $termData = QueryBuilder::table('words')
-                ->select(['WoID', 'WoText', 'WoTextLC', 'WoLemma', 'WoLemmaLC', 'WoTranslation', 'WoRomanization', 'WoSentence', 'WoNotes', 'WoStatus', 'WoLgID'])
+                ->select([
+                    'WoID', 'WoText', 'WoTextLC', 'WoLemma', 'WoLemmaLC', 'WoTranslation',
+                    'WoRomanization', 'WoSentence', 'WoNotes', 'WoStatus', 'WoLgID'
+                ])
                 ->where('WoID', '=', $wordId)
                 ->firstPrepared();
 
@@ -664,7 +673,10 @@ class TermCrudApiHandler
         $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
         // Use raw SQL for complex INSERT with dynamic columns
-        $bindings = [$langId, $textLc, $wordText, $lemma, $lemmaLc, $status, $translation, $sentence, $notes, $romanization];
+        $bindings = [
+            $langId, $textLc, $wordText, $lemma, $lemmaLc,
+            $status, $translation, $sentence, $notes, $romanization
+        ];
         $sql = "INSERT INTO words (
                 WoLgID, WoTextLC, WoText, WoLemma, WoLemmaLC, WoStatus, WoTranslation,
                 WoSentence, WoNotes, WoRomanization, WoStatusChanged,
@@ -673,7 +685,19 @@ class TermCrudApiHandler
             . UserScopedQuery::forTablePrepared('words', $bindings);
 
         $stmt = Connection::prepare($sql);
-        $stmt->bind('issssissss', $langId, $textLc, $wordText, $lemma, $lemmaLc, $status, $translation, $sentence, $notes, $romanization);
+        $stmt->bind(
+            'issssissss',
+            $langId,
+            $textLc,
+            $wordText,
+            $lemma,
+            $lemmaLc,
+            $status,
+            $translation,
+            $sentence,
+            $notes,
+            $romanization
+        );
         $affected = $stmt->execute();
 
         if ($affected != 1) {

@@ -523,6 +523,9 @@ class Term
         // Simple word count based on spaces
         // This matches the legacy behavior
         $words = preg_split('/\s+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        if ($words === false) {
+            return 1;
+        }
         return count($words);
     }
 

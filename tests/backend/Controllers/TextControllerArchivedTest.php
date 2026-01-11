@@ -72,14 +72,16 @@ class TextControllerArchivedTest extends TestCase
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM " . Globals::table('languages') . " WHERE LgName = 'ArchivedTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::table('languages') .
+                " WHERE LgName = 'ArchivedTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO " . Globals::table('languages') .
+                    " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('ArchivedTestLang', 'http://dict1.test/###', 'http://dict2.test/###', " .
@@ -93,7 +95,8 @@ class TextControllerArchivedTest extends TestCase
 
             // Create first archived test text (in texts table with TxArchivedAt set)
             Connection::query(
-                "INSERT INTO " . Globals::table('texts') . " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
+                "INSERT INTO " . Globals::table('texts') .
+                " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
                 "VALUES (" . self::$testLangId . ", 'ArchivedTestText', 'Test archived content.', " .
                 "'0\tTest\t\t*\n0\tarchived\t\ttranslation', " .
                 "'http://audio.test/audio.mp3', 'http://source.test/article', NOW())"
@@ -104,7 +107,8 @@ class TextControllerArchivedTest extends TestCase
 
             // Create second archived test text
             Connection::query(
-                "INSERT INTO " . Globals::table('texts') . " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
+                "INSERT INTO " . Globals::table('texts') .
+                " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
                 "VALUES (" . self::$testLangId . ", 'ArchivedTestText2', 'Second archived content.', " .
                 "'0\tSecond\t\t*', " .
                 "'', '', NOW())"
@@ -392,7 +396,8 @@ class TextControllerArchivedTest extends TestCase
 
         // Create a temporary archived text to update
         Connection::query(
-            "INSERT INTO " . Globals::table('texts') . " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
+            "INSERT INTO " . Globals::table('texts') .
+            " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
             "VALUES (" . self::$testLangId . ", 'TempUpdateTest', 'Temp content.', '', '', '', NOW())"
         );
         $tempId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -427,7 +432,8 @@ class TextControllerArchivedTest extends TestCase
 
         // Create a temporary archived text to delete
         Connection::query(
-            "INSERT INTO " . Globals::table('texts') . " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
+            "INSERT INTO " . Globals::table('texts') .
+            " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
             "VALUES (" . self::$testLangId . ", 'TempDeleteTest', 'Temp content.', '', '', '', NOW())"
         );
         $tempId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -451,13 +457,15 @@ class TextControllerArchivedTest extends TestCase
 
         // Create temporary archived texts to delete
         Connection::query(
-            "INSERT INTO " . Globals::table('texts') . " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
+            "INSERT INTO " . Globals::table('texts') .
+            " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
             "VALUES (" . self::$testLangId . ", 'TempMultiDel1', 'Temp1.', '', '', '', NOW())"
         );
         $tempId1 = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
 
         Connection::query(
-            "INSERT INTO " . Globals::table('texts') . " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
+            "INSERT INTO " . Globals::table('texts') .
+            " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
             "VALUES (" . self::$testLangId . ", 'TempMultiDel2', 'Temp2.', '', '', '', NOW())"
         );
         $tempId2 = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -485,7 +493,8 @@ class TextControllerArchivedTest extends TestCase
 
         // Create a temporary archived text to unarchive
         Connection::query(
-            "INSERT INTO " . Globals::table('texts') . " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
+            "INSERT INTO " . Globals::table('texts') .
+            " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
             "VALUES (" . self::$testLangId . ", 'TempUnarchiveTest', 'Temp content.', " .
             "'0\tTemp\t\t*', 'http://audio.test/temp.mp3', 'http://source.test/temp', NOW())"
         );
@@ -521,13 +530,15 @@ class TextControllerArchivedTest extends TestCase
 
         // Create temporary archived texts to unarchive
         Connection::query(
-            "INSERT INTO " . Globals::table('texts') . " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
+            "INSERT INTO " . Globals::table('texts') .
+            " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
             "VALUES (" . self::$testLangId . ", 'TempMultiUnarch1', 'Temp1.', '0\tTemp1\t\t*', '', '', NOW())"
         );
         $tempId1 = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
 
         Connection::query(
-            "INSERT INTO " . Globals::table('texts') . " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
+            "INSERT INTO " . Globals::table('texts') .
+            " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI, TxArchivedAt) " .
             "VALUES (" . self::$testLangId . ", 'TempMultiUnarch2', 'Temp2.', '0\tTemp2\t\t*', '', '', NOW())"
         );
         $tempId2 = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");

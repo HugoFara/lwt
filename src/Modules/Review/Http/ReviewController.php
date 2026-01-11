@@ -302,6 +302,7 @@ class ReviewController extends BaseController
 
         if ($testData === null) {
             $this->redirect('/text/edit');
+            return;
         }
 
         // Get review identifier
@@ -314,12 +315,14 @@ class ReviewController extends BaseController
 
         if ($identifier[0] === '') {
             $this->redirect('/text/edit');
+            return;
         }
 
         /** @psalm-suppress InvalidScalarArgument */
         $reviewsql = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
         if ($reviewsql === null) {
             $this->redirect('/text/edit');
+            return;
         }
 
         $testType = $isTableMode ? 1 : $this->reviewFacade->clampReviewType((int) $testTypeParam);

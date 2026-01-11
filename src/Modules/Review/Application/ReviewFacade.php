@@ -233,7 +233,13 @@ class ReviewFacade
      *     sentence: string|null,
      *     sentenceId: int|null,
      *     found: bool,
-     *     annotations: array<int, array{text: string, romanization: string|null, translation: string|null, isTarget: bool, order: int}>
+     *     annotations: array<int, array{
+     *         text: string,
+     *         romanization: string|null,
+     *         translation: string|null,
+     *         isTarget: bool,
+     *         order: int
+     *     }>
      * }
      */
     public function getSentenceWithAnnotations(int $wordId, string $wordlc): array
@@ -449,7 +455,8 @@ class ReviewFacade
         return match ($config->reviewKey) {
             ReviewConfiguration::KEY_LANG => "All Terms in {$langName}",
             ReviewConfiguration::KEY_TEXT => "Text Review",
-            ReviewConfiguration::KEY_WORDS, ReviewConfiguration::KEY_TEXTS => $this->getSelectionTitle($config, $langName),
+            ReviewConfiguration::KEY_WORDS,
+            ReviewConfiguration::KEY_TEXTS => $this->getSelectionTitle($config, $langName),
             default => 'Review'
         };
     }
@@ -645,7 +652,7 @@ class ReviewFacade
             $translation = isset($wordData['WoTranslation']) && is_string($wordData['WoTranslation'])
                 ? $wordData['WoTranslation']
                 : '';
-            $trans = \Lwt\Modules\Vocabulary\Application\Services\ExportService::replaceTabNewline($translation) . $tagFormatted;
+            $trans = ExportService::replaceTabNewline($translation) . $tagFormatted;
             return $wordMode ? $trans : "[$trans]";
         }
 

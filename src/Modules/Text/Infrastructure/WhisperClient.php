@@ -126,7 +126,11 @@ class WhisperClient
         string $model = 'small'
     ): string {
         $ch = curl_init($this->baseUrl . '/whisper/transcribe');
+        if ($ch === false) {
+            throw new \RuntimeException('Failed to initialize cURL');
+        }
 
+        /** @psalm-suppress UndefinedClass - CURLFile is a core PHP class */
         $postFields = [
             'file' => new \CURLFile($filePath, '', $fileName),
             'model' => $model,
@@ -147,6 +151,7 @@ class WhisperClient
         );
 
         $response = curl_exec($ch);
+        /** @psalm-suppress MixedArgument - CURLINFO_HTTP_CODE is a core PHP constant */
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
         curl_close($ch);

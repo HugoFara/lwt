@@ -67,7 +67,11 @@ echo PageLayoutHelper::buildActionCard(
         <div class="level">
             <div class="level-left">
                 <div class="level-item">
-                    <span class="has-text-weight-semibold" x-text="languages.reduce((sum, lang) => sum + lang.text_count, 0) + ' texts in ' + languages.length + ' language' + (languages.length === 1 ? '' : 's')"></span>
+                    <span
+                        class="has-text-weight-semibold"
+                        x-text="languages.reduce((sum, lang) => sum + lang.text_count, 0) +
+                            ' texts in ' + languages.length + ' language' +
+                            (languages.length === 1 ? '' : 's')"></span>
                 </div>
             </div>
             <div class="level-right">
@@ -96,11 +100,17 @@ echo PageLayoutHelper::buildActionCard(
             <header class="card-header is-clickable" @click="toggleLanguage(lang.id)" style="user-select: none;">
                 <p class="card-header-title">
                     <span x-text="lang.name"></span>
-                    <span class="tag is-info ml-2" x-text="lang.text_count + ' text' + (lang.text_count === 1 ? '' : 's')"></span>
+                    <span
+                        class="tag is-info ml-2"
+                        x-text="lang.text_count + ' text' + (lang.text_count === 1 ? '' : 's')"></span>
                 </p>
-                <button class="card-header-icon" type="button"
-                        :aria-label="isCollapsed(lang.id) ? 'Expand ' + lang.name + ' texts' : 'Collapse ' + lang.name + ' texts'"
-                        :aria-expanded="!isCollapsed(lang.id)">
+                <button
+                    class="card-header-icon"
+                    type="button"
+                    :aria-label="isCollapsed(lang.id) ?
+                        'Expand ' + lang.name + ' texts' :
+                        'Collapse ' + lang.name + ' texts'"
+                    :aria-expanded="!isCollapsed(lang.id)">
                     <span class="icon">
                         <i :data-lucide="isCollapsed(lang.id) ? 'chevron-right' : 'chevron-down'"></i>
                     </span>
@@ -110,7 +120,9 @@ echo PageLayoutHelper::buildActionCard(
             <!-- Content (texts for this language) -->
             <div class="card-content" x-show="!isCollapsed(lang.id)" x-collapse.duration.200ms>
                 <!-- Loading state for this language -->
-                <div x-show="isLoadingMore(lang.id) && getTextsForLanguage(lang.id).length === 0" class="has-text-centered py-4">
+                <div
+                    x-show="isLoadingMore(lang.id) && getTextsForLanguage(lang.id).length === 0"
+                    class="has-text-centered py-4">
                     <span class="icon">
                         <i data-lucide="loader-2" class="icon-spin"></i>
                     </span>
@@ -130,7 +142,10 @@ echo PageLayoutHelper::buildActionCard(
                                     <?php echo IconHelper::render('square', ['size' => 14]); ?>
                                     <span class="ml-1">Mark None</span>
                                 </button>
-                                <span x-show="hasMarkedInLanguage(lang.id)" class="tag is-warning ml-2" x-text="getMarkedCount(lang.id) + ' selected'"></span>
+                                <span
+                                    x-show="hasMarkedInLanguage(lang.id)"
+                                    class="tag is-warning ml-2"
+                                    x-text="getMarkedCount(lang.id) + ' selected'"></span>
                             </div>
                         </div>
                     </div>
@@ -145,7 +160,10 @@ echo PageLayoutHelper::buildActionCard(
                                 </div>
                                 <div class="control">
                                     <div class="select is-small">
-                                        <select :disabled="!hasMarkedInLanguage(lang.id)" @change="handleMultiAction(lang.id, $event)" aria-label="Bulk actions for selected texts">
+                                        <select
+                                            :disabled="!hasMarkedInLanguage(lang.id)"
+                                            @change="handleMultiAction(lang.id, $event)"
+                                            aria-label="Bulk actions for selected texts">
                                             <?php echo SelectOptionsBuilder::forMultipleTextsActions(); ?>
                                         </select>
                                     </div>
@@ -173,10 +191,19 @@ echo PageLayoutHelper::buildActionCard(
                                         <span x-show="text.has_audio" title="With Audio">
                                             <?php echo IconHelper::render('volume-2', ['size' => 16]); ?>
                                         </span>
-                                        <a x-show="text.has_source" :href="text.source_uri" target="_blank" title="Source Link" @click.stop>
+                                        <a
+                                            x-show="text.has_source"
+                                            :href="text.source_uri"
+                                            target="_blank"
+                                            title="Source Link"
+                                            @click.stop>
                                             <?php echo IconHelper::render('external-link', ['size' => 16]); ?>
                                         </a>
-                                        <a x-show="text.annotated" :href="'/text/print?text=' + text.id" title="Annotated Text" @click.stop>
+                                        <a
+                                            x-show="text.annotated"
+                                            :href="'/text/print?text=' + text.id"
+                                            title="Annotated Text"
+                                            @click.stop>
                                             <?php echo IconHelper::render('file-text', ['size' => 16]); ?>
                                         </a>
                                     </div>
@@ -197,31 +224,51 @@ echo PageLayoutHelper::buildActionCard(
                                         <template x-if="getStatsForText(lang.id, text.id)">
                                             <div>
                                                 <div class="stat-row">
-                                                    <div class="stat-item" title="Total number of unique words in this text">
+                                                    <div
+                                                        class="stat-item"
+                                                        title="Total number of unique words in this text">
                                                         <span class="stat-label">Total</span>
-                                                        <span class="stat-value" x-text="getStatTotal(lang.id, text.id)"></span>
+                                                        <span
+                                                            class="stat-value"
+                                                            x-text="getStatTotal(lang.id, text.id)"></span>
                                                     </div>
-                                                    <div class="stat-item" title="Words you have saved to your vocabulary">
+                                                    <div
+                                                        class="stat-item"
+                                                        title="Words you have saved to your vocabulary">
                                                         <span class="stat-label">Saved</span>
                                                         <span class="stat-value">
-                                                            <a class="status4"
-                                                               :href="'/words/edit?page=1&query=&status=&tag12=0&tag2=&tag1=&text_mode=0&text=' + text.id"
-                                                               @click.stop
-                                                               x-text="getStatSaved(lang.id, text.id)"></a>
+                                                            <a
+                                                                class="status4"
+                                                                :href="'/words/edit?page=1&query=&status=' +
+                                                                    '&tag12=0&tag2=&tag1=&text_mode=0&text=' +
+                                                                    text.id"
+                                                                @click.stop
+                                                                x-text="getStatSaved(lang.id, text.id)"></a>
                                                         </span>
                                                     </div>
-                                                    <div class="stat-item" title="Words you haven't saved yet">
+                                                    <div
+                                                        class="stat-item"
+                                                        title="Words you haven't saved yet">
                                                         <span class="stat-label">Unknown</span>
-                                                        <span class="stat-value status0" x-text="getStatUnknown(lang.id, text.id)"></span>
+                                                        <span
+                                                            class="stat-value status0"
+                                                            x-text="getStatUnknown(lang.id, text.id)"></span>
                                                     </div>
-                                                    <div class="stat-item" title="Percentage of unknown words">
+                                                    <div
+                                                        class="stat-item"
+                                                        title="Percentage of unknown words">
                                                         <span class="stat-label">Unkn.%</span>
-                                                        <span class="stat-value" x-text="getStatUnknownPercent(lang.id, text.id)"></span>
+                                                        <span
+                                                            class="stat-value"
+                                                            x-text="getStatUnknownPercent(lang.id, text.id)">
+                                                        </span>
                                                     </div>
                                                 </div>
                                                 <!-- Status distribution bar chart -->
                                                 <div class="status-bar-chart">
-                                                    <template x-for="seg in getStatusSegments(lang.id, text.id)" :key="seg.status">
+                                                    <template
+                                                        x-for="seg in getStatusSegments(lang.id, text.id)"
+                                                        :key="seg.status">
                                                         <div :class="'status-segment bc' + seg.status"
                                                              :style="'width: ' + seg.percent"
                                                              :title="seg.label"></div>
@@ -251,7 +298,11 @@ echo PageLayoutHelper::buildActionCard(
                                             <?php echo IconHelper::render('more-horizontal', ['size' => 16]); ?>
                                             <span>More</span>
                                         </a>
-                                        <div class="dropdown-menu card-dropdown" x-show="open" @click.outside="open = false" x-cloak>
+                                        <div
+                                            class="dropdown-menu card-dropdown"
+                                            x-show="open"
+                                            @click.outside="open = false"
+                                            x-cloak>
                                             <div class="dropdown-content">
                                                 <a :href="'/text/print-plain?text=' + text.id" class="dropdown-item">
                                                     <?php echo IconHelper::render('printer', ['size' => 14]); ?>
@@ -266,7 +317,11 @@ echo PageLayoutHelper::buildActionCard(
                                                     <span>Edit</span>
                                                 </a>
                                                 <hr class="dropdown-divider">
-                                                <a class="dropdown-item has-text-danger" @click.prevent="handleDelete($event, '/texts?del=' + text.id)">
+                                                <a
+                                                    class="dropdown-item has-text-danger"
+                                                    @click.prevent="handleDelete(
+                                                        $event, '/texts?del=' + text.id
+                                                    )">
                                                     <?php echo IconHelper::render('trash-2', ['size' => 14]); ?>
                                                     <span>Delete</span>
                                                 </a>
@@ -297,7 +352,10 @@ echo PageLayoutHelper::buildActionCard(
 
     <!-- Empty state -->
     <div x-show="!loading && languages.length === 0" class="notification is-info is-light">
-        <p>No texts found. <a href="<?php echo \Lwt\Shared\Infrastructure\Http\UrlUtilities::url('/texts?new=1'); ?>">Create your first text</a> to get started!</p>
+        <p>No texts found.
+            <a href="<?php
+                echo \Lwt\Shared\Infrastructure\Http\UrlUtilities::url('/texts?new=1');
+            ?>">Create your first text</a> to get started!</p>
     </div>
 </div>
 

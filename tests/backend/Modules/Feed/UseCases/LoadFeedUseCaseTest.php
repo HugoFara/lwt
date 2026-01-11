@@ -137,9 +137,18 @@ class LoadFeedUseCaseTest extends TestCase
         $this->rssParser
             ->method('parse')
             ->willReturn([
-                ['title' => 'Article 1', 'link' => 'http://example.com/1', 'desc' => 'Desc 1', 'date' => '2024-01-01', 'audio' => '', 'text' => ''],
-                ['title' => 'Article 2', 'link' => 'http://example.com/2', 'desc' => 'Desc 2', 'date' => '2024-01-02', 'audio' => '', 'text' => ''],
-                ['title' => 'Article 3', 'link' => 'http://example.com/3', 'desc' => 'Desc 3', 'date' => '2024-01-03', 'audio' => '', 'text' => ''],
+                [
+                    'title' => 'Article 1', 'link' => 'http://example.com/1',
+                    'desc' => 'Desc 1', 'date' => '2024-01-01', 'audio' => '', 'text' => ''
+                ],
+                [
+                    'title' => 'Article 2', 'link' => 'http://example.com/2',
+                    'desc' => 'Desc 2', 'date' => '2024-01-02', 'audio' => '', 'text' => ''
+                ],
+                [
+                    'title' => 'Article 3', 'link' => 'http://example.com/3',
+                    'desc' => 'Desc 3', 'date' => '2024-01-03', 'audio' => '', 'text' => ''
+                ],
             ]);
 
         $this->articleRepository
@@ -169,8 +178,14 @@ class LoadFeedUseCaseTest extends TestCase
         $this->rssParser
             ->method('parse')
             ->willReturn([
-                ['title' => 'Article 1', 'link' => 'http://example.com/1', 'desc' => '', 'date' => '', 'audio' => '', 'text' => ''],
-                ['title' => 'Article 2', 'link' => 'http://example.com/2', 'desc' => '', 'date' => '', 'audio' => '', 'text' => ''],
+                [
+                    'title' => 'Article 1', 'link' => 'http://example.com/1',
+                    'desc' => '', 'date' => '', 'audio' => '', 'text' => ''
+                ],
+                [
+                    'title' => 'Article 2', 'link' => 'http://example.com/2',
+                    'desc' => '', 'date' => '', 'audio' => '', 'text' => ''
+                ],
             ]);
 
         // One new, one duplicate
@@ -227,7 +242,10 @@ class LoadFeedUseCaseTest extends TestCase
         $this->rssParser
             ->method('parse')
             ->willReturn([
-                ['title' => 'Article', 'link' => 'http://example.com/a', 'desc' => '', 'date' => '', 'audio' => '', 'text' => ''],
+                [
+                    'title' => 'Article', 'link' => 'http://example.com/a',
+                    'desc' => '', 'date' => '', 'audio' => '', 'text' => ''
+                ],
             ]);
 
         $this->articleRepository
@@ -343,7 +361,10 @@ class LoadFeedUseCaseTest extends TestCase
         $this->rssParser
             ->method('parse')
             ->willReturn([
-                ['title' => 'Test', 'link' => 'http://example.com/test', 'desc' => '', 'date' => '', 'audio' => '', 'text' => ''],
+                [
+                    'title' => 'Test', 'link' => 'http://example.com/test',
+                    'desc' => '', 'date' => '', 'audio' => '', 'text' => ''
+                ],
             ]);
 
         $this->articleRepository

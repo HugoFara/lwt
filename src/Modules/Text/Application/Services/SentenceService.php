@@ -303,7 +303,8 @@ class SentenceService
             || 'MECAB' == strtoupper(trim($termchar))
         ) {
             $text = $seText;
-            $wordlc = '[​]*' . preg_replace('/(.)/u', "$1[​]*", $wordlc);
+            $wordlcReplaced = preg_replace('/(.)/u', "$1[​]*", $wordlc);
+            $wordlc = '[​]*' . ($wordlcReplaced ?? $wordlc);
             $pattern = "/(?<=[​])($wordlc)(?=[​])/ui";
         } else {
             // Convert ZWS markers to proper spacing for non-remove-spaces languages
@@ -790,6 +791,7 @@ class SentenceService
     </div>
 </div>
         <?php
-        return ob_get_clean() ?: '';
+        $output = ob_get_clean();
+        return $output !== false ? $output : '';
     }
 }

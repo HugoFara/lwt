@@ -252,7 +252,8 @@ class TextController extends BaseController
         if ($delId !== null) {
             $message = $this->textService->deleteText($delId);
         } elseif ($archId !== null) {
-            $message = $this->textService->archiveText($archId);
+            $archResult = $this->textService->archiveText($archId);
+            $message = "Text archived: {$archResult['sentences']} sentences, {$archResult['textItems']} text items";
         } elseif ($op !== '') {
             $result = $this->handleTextOperation(
                 $op,
@@ -405,7 +406,8 @@ class TextController extends BaseController
         if (!$needsAutoSplit && !$this->textService->validateTextLength($txText)) {
             $message = "Error: Text too long, must be below 65000 Bytes";
             if ($noPagestart) {
-                PageLayoutHelper::renderPageStart($this->languageService->getLanguageName($currentLang) . ' Texts', true);
+                $pageName = $this->languageService->getLanguageName($currentLang) . ' Texts';
+                PageLayoutHelper::renderPageStart($pageName, true);
             }
             return ['message' => $message, 'redirect' => false];
         }
@@ -820,7 +822,11 @@ class TextController extends BaseController
             $message = $this->textService->deleteArchivedText($delId);
         } elseif ($unarchId !== null) {
             $result = $this->textService->unarchiveText($unarchId);
-            $message = (string)$result['message'];
+            if ($result['success'] ?? false) {
+                $message = "Text unarchived: {$result['sentences']} sentences, {$result['textItems']} text items";
+            } else {
+                $message = $result['error'] ?? 'Failed to unarchive text';
+            }
         } elseif ($op == 'Change') {
             $txId = $this->paramInt('TxID', 0) ?? 0;
             $message = $this->textService->updateArchivedText(

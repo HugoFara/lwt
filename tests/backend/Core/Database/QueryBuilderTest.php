@@ -674,7 +674,10 @@ class QueryBuilderTest extends TestCase
 
         // Create a temporary test table
         $prefix = '';
-        Connection::query("CREATE TEMPORARY TABLE {$prefix}test_truncate (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50))");
+        Connection::query(
+            "CREATE TEMPORARY TABLE {$prefix}test_truncate " .
+            "(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50))"
+        );
 
         // Insert data
         QueryBuilder::table('test_truncate')->insert(['name' => 'test1']);

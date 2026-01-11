@@ -63,7 +63,8 @@ class TextPrintServiceTest extends TestCase
                     "INSERT INTO languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
-                    "VALUES ('TextPrintTestLang', 'http://test.com/###', '', 'http://translate.google.com/?sl=en&tl=fr&###', " .
+                    "VALUES ('TextPrintTestLang', 'http://test.com/###', '', " .
+                    "'http://translate.google.com/?sl=en&tl=fr&###', " .
                     "100, '', '.!?', '', 'a-zA-Z', 0, 0, 0, 1)"
                 );
                 self::$testLangId = (int)Connection::fetchValue(

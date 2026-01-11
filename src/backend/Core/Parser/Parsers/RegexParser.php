@@ -166,7 +166,9 @@ class RegexParser implements ParserInterface
     {
         // Clean up the text similar to parseStandardToDatabase
         // Unicode quotation marks as hex escapes for Psalm compatibility
-        $quoteChars = "\xe2\x80\x9c\xe2\x80\x9d\xe2\x80\x98\xe2\x80\x99\xe2\x80\xb9\xe2\x80\xba\xe2\x80\x9e\xc2\xab\xc2\xbb\xe3\x80\x8f\xe3\x80\x8d";
+        $quoteChars = "\xe2\x80\x9c\xe2\x80\x9d\xe2\x80\x98\xe2\x80\x99" .
+            "\xe2\x80\xb9\xe2\x80\xba\xe2\x80\x9e\xc2\xab\xc2\xbb" .
+            "\xe3\x80\x8f\xe3\x80\x8d";
         $preprocessed = preg_replace(
             array(
                 "/\r(?=[]'`\"" . $quoteChars . " ]*\r)/u",

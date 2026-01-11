@@ -353,7 +353,9 @@ class LanguageFacade
      * Try to get language code from its ID.
      *
      * @param int   $id             Language ID
-     * @param array<string, array{0: string, 1: string, 2: bool, 3: string, 4: string, 5: bool, 6: bool, 7: bool}> $languagesTable Table of languages, usually from LanguagePresets::getAll()
+     * @param array<string, array{0: string, 1: string, 2: bool, 3: string,
+     *               4: string, 5: bool, 6: bool, 7: bool}> $languagesTable
+     *               Table of languages, usually from LanguagePresets::getAll()
      *
      * @return string Two-letter code (e.g., BCP 47) or empty string
      */

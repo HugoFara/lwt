@@ -179,7 +179,10 @@ class WordListApiHandler
         // Extract TTS class from Google Translate URI
         $gtUri = (string) ($record['LgGoogleTranslateURI'] ?? '');
         if ($gtUri !== '' && strpos($gtUri, '&sl=') !== false) {
-            $word['ttsClass'] = 'tts_' . preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $gtUri);
+            $ttsLang = preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $gtUri);
+            if ($ttsLang !== null && $ttsLang !== $gtUri) {
+                $word['ttsClass'] = 'tts_' . $ttsLang;
+            }
         }
 
         // Add text word count for sort option 7

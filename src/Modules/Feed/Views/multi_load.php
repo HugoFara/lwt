@@ -23,7 +23,9 @@ declare(strict_types=1);
 namespace Lwt\Views\Feed;
 
 /**
- * @var array<int, array{NfID: int, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string}> $feeds Feed data
+ * @var array<int, array{NfID: int, NfLgID: int, NfName: string, NfSourceURI: string,
+ *     NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int,
+ *     NfOptions: string}> $feeds Feed data
  * @var int $currentLang Current language filter
  * @var array<int, array{id: int, name: string}> $languages Language records (transformed for SelectOptionsBuilder)
  * @var \Lwt\Modules\Feed\Application\FeedFacade $feedService Feed service
@@ -44,7 +46,10 @@ namespace Lwt\Views\Feed;
 <input type="button" value="Mark None" @click="markNone()" /></th>
 </tr>
 <tr>
-<td colspan="4" style="padding-left: 0px;padding-right: 0px;border-bottom: none;width: 100%;border-left: none;background-color: transparent;"><table class="table is-bordered is-fullwidth sortable">
+<td colspan="4"
+    style="padding-left: 0px;padding-right: 0px;border-bottom: none;width: 100%;
+           border-left: none;background-color: transparent;">
+<table class="table is-bordered is-fullwidth sortable">
 <tr>
 <th class="sorttable_nosort">Mark</th>
 <th class="clickable" colspan="2">Newsfeeds</th>
@@ -57,9 +62,12 @@ namespace Lwt\Views\Feed;
         ?>
     <tr>
         <td class="has-text-centered">
-            <input class="markcheck" type="checkbox" name="selected_feed[]" value="<?php echo $row['NfID']; ?>" checked="checked" />
+            <input class="markcheck" type="checkbox" name="selected_feed[]"
+                   value="<?php echo $row['NfID']; ?>" checked="checked" />
         </td>
-        <td class="has-text-centered" colspan="2"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+        <td class="has-text-centered" colspan="2"><?php
+            echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8');
+        ?></td>
         <td class="has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
             <?php if ($row['NfUpdate']) {
                 echo $feedService->formatLastUpdate($diff);

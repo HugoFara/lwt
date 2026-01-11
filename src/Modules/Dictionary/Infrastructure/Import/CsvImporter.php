@@ -69,15 +69,24 @@ class CsvImporter implements ImporterInterface
                 $lineNumber++;
             }
 
-            while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+            while (true) {
+                $csvRow = fgetcsv($handle, 0, $delimiter);
+                if ($csvRow === false) {
+                    break;
+                }
+                /** @var list<string|null> $row */
+                $row = $csvRow;
                 $lineNumber++;
 
-                // Skip empty rows
-                if (count($row) === 0 || (count($row) === 1 && trim($row[0]) === '')) {
+                // Skip empty rows (fgetcsv returns [null] for blank lines)
+                if (count($row) === 0 || (count($row) === 1 && ($row[0] === null || trim($row[0]) === ''))) {
                     continue;
                 }
 
-                $entry = $this->mapRowToEntry($row, $columnMap, $encoding);
+                // Filter out null values from row
+                /** @var list<string> $cleanRow */
+                $cleanRow = array_map(fn (?string $val): string => $val ?? '', $row);
+                $entry = $this->mapRowToEntry($cleanRow, $columnMap, $encoding);
                 if ($entry !== null) {
                     yield $entry;
                 }

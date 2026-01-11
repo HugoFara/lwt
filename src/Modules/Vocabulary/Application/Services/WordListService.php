@@ -82,8 +82,12 @@ class WordListService
      *
      * @return string SQL condition (with ? placeholders if $params provided, or embedded values if not)
      */
-    public function buildQueryCondition(string $query, string $queryMode, string $regexMode, ?array &$params = null): string
-    {
+    public function buildQueryCondition(
+        string $query,
+        string $queryMode,
+        string $regexMode,
+        ?array &$params = null
+    ): string {
         if ($query === '') {
             return '';
         }
@@ -251,7 +255,8 @@ class WordListService
     /**
      * Get words list for display.
      *
-     * @param array{whLang?: string, whStat?: string, whQuery?: string, whTag?: string, textId?: string} $filters Filter parameters
+     * @param array{whLang?: string, whStat?: string, whQuery?: string,
+     *               whTag?: string, textId?: string} $filters Filter parameters
      * @param int   $sort    Sort column index
      * @param int   $page    Page number
      * @param int   $perPage Items per page
@@ -348,7 +353,8 @@ class WordListService
     /**
      * Get words list with word count (for sort option 7).
      *
-     * @param array{whLang?: string, whStat?: string, whQuery?: string, whTag?: string, textId?: string} $filters Filter parameters
+     * @param array{whLang?: string, whStat?: string, whQuery?: string,
+     *               whTag?: string, textId?: string} $filters Filter parameters
      * @param string $sortExpr Sort expression
      * @param string $limit    LIMIT clause
      *
@@ -966,7 +972,10 @@ class WordListService
         $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
-        $bindings = [(int)$data["WoLgID"], $textLc, (string)$data["WoText"], (int)$data["WoStatus"], $translation, $sentence, $romanization];
+        $bindings = [
+            (int)$data["WoLgID"], $textLc, (string)$data["WoText"],
+            (int)$data["WoStatus"], $translation, $sentence, $romanization
+        ];
         $sql = "INSERT INTO words (WoLgID, WoTextLC, WoText, "
             . "WoStatus, WoTranslation, WoSentence, WoRomanization, WoStatusChanged, {$scoreColumns}"
             . UserScopedQuery::insertColumn('words')
@@ -1023,7 +1032,10 @@ class WordListService
         $newstatus = (int)$data["WoStatus"];
 
         if ($oldstatus != $newstatus) {
-            $bindings = [(string)$data["WoText"], $textLc, $translation, $sentence, $romanization, $newstatus, (int)$data["WoID"]];
+            $bindings = [
+                (string)$data["WoText"], $textLc, $translation, $sentence,
+                $romanization, $newstatus, (int)$data["WoID"]
+            ];
             $affected = Connection::preparedExecute(
                 'UPDATE words
                 SET WoText = ?, WoTextLC = ?, WoTranslation = ?, WoSentence = ?,

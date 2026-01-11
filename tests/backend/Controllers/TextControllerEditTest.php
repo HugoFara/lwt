@@ -113,9 +113,10 @@ class TextControllerEditTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM word_occurrences WHERE Ti2TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
-        Connection::query("DELETE FROM sentences WHERE SeTxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
-        Connection::query("DELETE FROM texts WHERE TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
+        $textIds = self::$testTextId . ", " . self::$testText2Id;
+        Connection::query("DELETE FROM word_occurrences WHERE Ti2TxID IN (" . $textIds . ")");
+        Connection::query("DELETE FROM sentences WHERE SeTxID IN (" . $textIds . ")");
+        Connection::query("DELETE FROM texts WHERE TxID IN (" . $textIds . ")");
         Connection::query("DELETE FROM languages WHERE LgName = 'EditControllerTestLang'");
     }
 
@@ -154,7 +155,10 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $this->assertInstanceOf(TextController::class, $controller);
     }
@@ -167,7 +171,10 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $this->assertTrue(method_exists($controller, 'edit'));
     }
@@ -178,7 +185,10 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $this->assertTrue(method_exists($controller, 'display'));
     }
@@ -189,7 +199,10 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $this->assertTrue(method_exists($controller, 'setMode'));
     }
@@ -200,7 +213,10 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $this->assertTrue(method_exists($controller, 'check'));
     }
@@ -211,7 +227,10 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $this->assertTrue(method_exists($controller, 'archived'));
     }
@@ -337,7 +356,10 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
@@ -656,8 +678,14 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller1 = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
-        $controller2 = new TextController(new \Lwt\Modules\Text\Application\TextFacade(), new \Lwt\Modules\Language\Application\LanguageFacade());
+        $controller1 = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
+        $controller2 = new TextController(
+            new \Lwt\Modules\Text\Application\TextFacade(),
+            new \Lwt\Modules\Language\Application\LanguageFacade()
+        );
 
         $this->assertInstanceOf(TextController::class, $controller1);
         $this->assertInstanceOf(TextController::class, $controller2);
