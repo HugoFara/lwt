@@ -16,16 +16,6 @@ describe('Authentication', () => {
     password: 'TestPass123!',
   };
 
-  // Helper to check if multi-user mode is enabled
-  const checkMultiUserMode = (): Cypress.Chainable<boolean> => {
-    return cy.visit('/login', { failOnStatusCode: false }).then(() => {
-      return cy.get('body').then(($body) => {
-        // Multi-user mode is enabled if login form exists
-        return $body.find('form[action="/login"]').length > 0;
-      });
-    });
-  };
-
   describe('Login Page', () => {
     beforeEach(() => {
       cy.visit('/login', { failOnStatusCode: false });
