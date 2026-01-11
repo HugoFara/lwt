@@ -896,7 +896,8 @@ class FeedController
         // Build query pattern for prepared statement (no SQL escaping needed)
         $queryPattern = ($currentQuery != '') ? ('%' . str_replace("*", "%", $currentQuery) . '%') : null;
 
-        PageLayoutHelper::renderPageStart('Manage ' . $this->languageFacade->getLanguageName($currentLang) . ' Feeds', true);
+        $langName = $this->languageFacade->getLanguageName($currentLang);
+        PageLayoutHelper::renderPageStart('Manage ' . $langName . ' Feeds', true);
 
         // Clear wizard session if exists
         if ($this->wizardSession->exists()) {

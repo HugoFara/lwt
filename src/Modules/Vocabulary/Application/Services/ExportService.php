@@ -209,7 +209,8 @@ class ExportService
             str_replace("}", '</span>', $sent)
         );
 
-        return $span1 . htmlspecialchars(self::replaceTabNewline((string)$record["WoText"]), ENT_QUOTES, 'UTF-8') . $span2 . "\t" .
+        $woText = htmlspecialchars(self::replaceTabNewline((string)$record["WoText"]), ENT_QUOTES, 'UTF-8');
+        return $span1 . $woText . $span2 . "\t" .
             htmlspecialchars(self::replaceTabNewline((string)$record["WoTranslation"]), ENT_QUOTES, 'UTF-8') . "\t" .
             htmlspecialchars(self::replaceTabNewline((string)$record["WoRomanization"]), ENT_QUOTES, 'UTF-8') . "\t" .
             $span1 . $sent1 . $span2 . "\t" .

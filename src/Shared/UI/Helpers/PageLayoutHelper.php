@@ -117,7 +117,8 @@ class PageLayoutHelper
                 </div>
             </div>
 
-            <div class="navbar-item has-dropdown{$languagesActive}" :class="{ 'is-active': activeDropdown === 'languages' }">
+            <div class="navbar-item has-dropdown{$languagesActive}"
+                :class="{ 'is-active': activeDropdown === 'languages' }">
                 <a class="navbar-link" @click.prevent="toggleDropdown('languages')">
                     {$languagesIcon}
                     <span class="ml-1">Languages</span>
@@ -160,7 +161,9 @@ HTML;
      *
      * Creates a Bulma card with action buttons for page-level actions.
      *
-     * @param array<array{url: string, label: string, icon?: string, class?: string, target?: string, attrs?: string}> $actions Array of actions
+     * @param array<array{
+     *     url: string, label: string, icon?: string, class?: string, target?: string, attrs?: string
+     * }> $actions Array of actions
      *
      * @return string HTML for the action card
      */
@@ -172,7 +175,9 @@ HTML;
             $label = htmlspecialchars($action['label'], ENT_QUOTES, 'UTF-8');
             $icon = isset($action['icon']) ? IconHelper::render($action['icon'], ['alt' => $label]) : '';
             $class = isset($action['class']) ? ' ' . htmlspecialchars($action['class'], ENT_QUOTES, 'UTF-8') : '';
-            $target = isset($action['target']) ? ' target="' . htmlspecialchars($action['target'], ENT_QUOTES, 'UTF-8') . '"' : '';
+            $target = isset($action['target'])
+                ? ' target="' . htmlspecialchars($action['target'], ENT_QUOTES, 'UTF-8') . '"'
+                : '';
             // Allow custom attributes (e.g., Alpine.js directives) - not escaped to allow dynamic bindings
             $attrs = isset($action['attrs']) ? ' ' . $action['attrs'] : '';
 
@@ -267,7 +272,8 @@ HTML;
             $dataParams = !empty($preserveParams) && $jsonParams !== false
                 ? ' data-preserve-params="' . htmlspecialchars($jsonParams, ENT_QUOTES, 'UTF-8') . '"'
                 : '';
-            $result .= '<select name="page" data-action="pager-navigate" data-base-url="' . $escapedUrl . '"' . $dataParams . '>';
+            $result .= '<select name="page" data-action="pager-navigate" ' .
+                'data-base-url="' . $escapedUrl . '"' . $dataParams . '>';
             $result .= SelectOptionsBuilder::forPagination($currentPage, $totalPages);
             $result .= '</select>';
         }
@@ -456,7 +462,8 @@ HTML;
         echo file_get_contents("UNLICENSE.md");
         echo '-->';
         echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
-        echo '<meta name="lwt-base-path" content="' . htmlspecialchars(UrlUtilities::getBasePath(), ENT_QUOTES, 'UTF-8') . '" />';
+        $basePath = htmlspecialchars(UrlUtilities::getBasePath(), ENT_QUOTES, 'UTF-8');
+        echo '<meta name="lwt-base-path" content="' . $basePath . '" />';
         echo '<link rel="shortcut icon" href="' . $favicon . '" type="image/x-icon"/>';
         echo '<link rel="apple-touch-icon" href="' . $icon57 . '" />';
         echo '<link rel="apple-touch-icon" sizes="72x72" href="' . $icon72 . '" />';
@@ -474,13 +481,17 @@ HTML;
         } else {
             echo '<!-- Legacy assets -->';
             echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';
-            echo '<script type="text/javascript" src="' . UrlUtilities::url('/assets/js/pgm.js') . '" charset="utf-8"></script>';
+            $jsUrl = UrlUtilities::url('/assets/js/pgm.js');
+            echo '<script type="text/javascript" src="' . $jsUrl . '" charset="utf-8"></script>';
         }
 
         echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
         echo '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
         echo '</head>';
-        echo '<body' . ($bodyClass !== '' ? ' class="' . htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8') . '"' : '') . '>';
+        $bodyAttr = $bodyClass !== ''
+            ? ' class="' . htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8') . '"'
+            : '';
+        echo '<body' . $bodyAttr . '>';
 
         flush();
     }

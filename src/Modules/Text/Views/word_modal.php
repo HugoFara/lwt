@@ -308,7 +308,8 @@ namespace Lwt\Views\Text;
                   <div class="dropdown-menu" role="menu" style="width: 100%;">
                     <div class="dropdown-content">
                       <template x-for="tag in filteredTags" :key="tag">
-                        <a href="#" class="dropdown-item" @mousedown.prevent="selectTagSuggestion(tag)" x-text="tag"></a>
+                        <a href="#" class="dropdown-item"
+                           @mousedown.prevent="selectTagSuggestion(tag)" x-text="tag"></a>
                       </template>
                     </div>
                   </div>
@@ -322,7 +323,8 @@ namespace Lwt\Views\Text;
                 <label class="label is-small">Similar Terms</label>
                 <div class="is-size-7">
                   <template x-for="term in formStore.similarTerms" :key="term.id">
-                    <div class="is-flex is-justify-content-space-between is-align-items-center py-1" style="border-bottom: 1px solid #f0f0f0;">
+                    <div class="is-flex is-justify-content-space-between is-align-items-center py-1"
+                         style="border-bottom: 1px solid #f0f0f0;">
                       <div>
                         <span class="has-text-weight-semibold" x-text="term.text"></span>
                         <span class="has-text-grey" x-text="term.translation ? ': ' + term.translation : ''"></span>

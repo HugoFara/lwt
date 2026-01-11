@@ -221,9 +221,19 @@ class TranslationController extends BaseController
         ?>
         <h2 title="Translate with Google Translate">
             Word translation: <?php echo htmlspecialchars($text, ENT_QUOTES, 'UTF-8') ?>
-            <?php echo IconHelper::render('volume-2', ['id' => 'textToSpeech', 'class' => 'click', 'title' => 'Click to read!', 'alt' => 'Click to read!']); ?>
+            <?php
+            echo IconHelper::render(
+                'volume-2',
+                ['id' => 'textToSpeech', 'class' => 'click', 'title' => 'Click to read!', 'alt' => 'Click to read!']
+            );
+            ?>
 
-            <?php echo IconHelper::render('brush', ['id' => 'del_translation', 'class' => 'click', 'title' => 'Empty Translation Field', 'alt' => 'Empty Translation Field', 'data-action' => 'delete-translation']); ?>
+            <?php
+            echo IconHelper::render('brush', [
+                'id' => 'del_translation', 'class' => 'click', 'title' => 'Empty Translation Field',
+                'alt' => 'Empty Translation Field', 'data-action' => 'delete-translation'
+            ]);
+            ?>
         </h2>
 
         <script type="application/json" data-lwt-google-translate-config>
@@ -281,9 +291,12 @@ class TranslationController extends BaseController
         PageLayoutHelper::renderPageStartNobody('');
 
         $glosbeUrl = $this->translationService->buildGlosbeUrl($phrase, $from, $dest);
+        $escapedFrom = htmlspecialchars($from, ENT_QUOTES, 'UTF-8');
+        $escapedDest = htmlspecialchars($dest, ENT_QUOTES, 'UTF-8');
+        $escapedPhrase = htmlspecialchars($phrase, ENT_QUOTES, 'UTF-8');
         $titleText = '<a href="' . $glosbeUrl . '">Glosbe Dictionary (' .
-            htmlspecialchars($from, ENT_QUOTES, 'UTF-8') . "-" . htmlspecialchars($dest, ENT_QUOTES, 'UTF-8') . "):  &nbsp; " .
-            '<span class="has-text-danger has-text-weight-bold">' . htmlspecialchars($phrase, ENT_QUOTES, 'UTF-8') . "</span></a>";
+            $escapedFrom . "-" . $escapedDest . "):  &nbsp; " .
+            '<span class="has-text-danger has-text-weight-bold">' . $escapedPhrase . "</span></a>";
 
         echo '<h3>' . $titleText .
             ' <span id="del_translation" class="click" data-action="delete-translation">' .
@@ -296,7 +309,8 @@ class TranslationController extends BaseController
         echo '<p id="translations"></p>';
 
         echo '&nbsp;<form action="glosbe_api.php" method="get">Unhappy?<br/>Change term:
-            <input type="text" name="phrase" maxlength="250" size="15" value="' . htmlspecialchars($phrase, ENT_QUOTES, 'UTF-8') . '">
+            <input type="text" name="phrase" maxlength="250" size="15"
+                value="' . htmlspecialchars($phrase, ENT_QUOTES, 'UTF-8') . '">
             <input type="hidden" name="from" value="' . htmlspecialchars($from, ENT_QUOTES, 'UTF-8') . '">
             <input type="hidden" name="dest" value="' . htmlspecialchars($destOrig, ENT_QUOTES, 'UTF-8') . '">
             <input type="submit" value="Translate via Glosbe">

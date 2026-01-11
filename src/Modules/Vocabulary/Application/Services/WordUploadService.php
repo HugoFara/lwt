@@ -938,7 +938,9 @@ class WordUploadService
                     ELSE b.WoSentence
                 END,
                 a.WoStatusChanged = CASE
-                    WHEN (b.WoTranslation = '' OR b.WoTranslation = '*') AND (b.WoRomanization IS NULL OR b.WoRomanization = '') AND (b.WoSentence IS NULL OR b.WoSentence = '')
+                    WHEN (b.WoTranslation = '' OR b.WoTranslation = '*')
+                        AND (b.WoRomanization IS NULL OR b.WoRomanization = '')
+                        AND (b.WoSentence IS NULL OR b.WoSentence = '')
                     THEN a.WoStatusChanged
                     ELSE NOW()
                 END"

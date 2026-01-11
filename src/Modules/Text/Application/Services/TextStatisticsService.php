@@ -45,7 +45,10 @@ class TextStatisticsService
      *
      * @param string $textsId Texts ID separated by comma
      *
-     * @return array{total: array<int, int>, expr: array<int, int>, stat: array<int, array<int, int>>, totalu: array<int, int>, expru: array<int, int>, statu: array<int, array<int, int>>}
+     * @return array{
+     *     total: array<int, int>, expr: array<int, int>, stat: array<int, array<int, int>>,
+     *     totalu: array<int, int>, expru: array<int, int>, statu: array<int, array<int, int>>
+     * }
      *               Total number of words, number of expressions, statistics, total unique,
      *               number of unique expressions, unique statistics
      */

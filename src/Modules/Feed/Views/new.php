@@ -216,7 +216,8 @@ $actions = [
                                     </div>
                                     <div class="control">
                                         <div class="select is-small">
-                                            <select name="autoupdate_unit" x-model="autoUpdateUnit" :disabled="!autoUpdate">
+                                            <select name="autoupdate_unit" x-model="autoUpdateUnit"
+                                                :disabled="!autoUpdate">
                                                 <option value="h">Hour(s)</option>
                                                 <option value="d">Day(s)</option>
                                                 <option value="w">Week(s)</option>

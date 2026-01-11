@@ -773,7 +773,12 @@ class SentenceService
         </span>
     </div>
     <!-- Loading icon -->
-        <?php echo IconHelper::render('loader-2', ['id' => 'exsent-waiting', 'alt' => 'Loading...', 'class' => 'icon-spin']); ?>
+        <?php
+        echo IconHelper::render(
+            'loader-2',
+            ['id' => 'exsent-waiting', 'alt' => 'Loading...', 'class' => 'icon-spin']
+        );
+        ?>
     <!-- Displayed output -->
     <div id="exsent-sentences">
         <p><b>Sentences in active texts with <i><?php echo htmlspecialchars($termlc, ENT_QUOTES, 'UTF-8') ?></i></b></p>

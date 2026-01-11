@@ -86,14 +86,21 @@ assert(is_string($media));
     </div>
     <div>
         <a href="/review?text=<?php echo $textId; ?>" target="_top">
-            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('circle-help', ['title' => 'Review', 'alt' => 'Review']); ?>
+            <?php
+            echo \Lwt\Shared\UI\Helpers\IconHelper::render('circle-help', ['title' => 'Review', 'alt' => 'Review']);
+            ?>
         </a>
         <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
             <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
         <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
         <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
-            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
+            <?php
+            echo \Lwt\Shared\UI\Helpers\IconHelper::render(
+                'file-pen',
+                ['title' => 'Edit Text', 'alt' => 'Edit Text']
+            );
+            ?>
         </a>
     </div>
     <div>
@@ -101,7 +108,12 @@ assert(is_string($media));
             href="/word/new?text=<?php echo $textId; ?>&amp;lang=<?php echo $langId; ?>"
             target="ro" data-action="show-right-frames"
         >
-            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('notepad-text-dashed', ['title' => 'New Term', 'alt' => 'New Term']); ?>
+            <?php
+            echo \Lwt\Shared\UI\Helpers\IconHelper::render(
+                'notepad-text-dashed',
+                ['title' => 'New Term', 'alt' => 'New Term']
+            );
+            ?>
         </a>
     </div>
     <div>
@@ -115,7 +127,9 @@ assert(is_string($media));
     if ($sourceUri !== null && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')) {
         ?>
     <a href="<?php echo $sourceUri ?>" target="_blank">
-        <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']); ?>
+        <?php
+        echo \Lwt\Shared\UI\Helpers\IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']);
+        ?>
     </a>
         <?php
     }
@@ -127,9 +141,10 @@ assert(is_string($media));
         Unknown words:
         <span id="learnstatus"><?php echo (new TextStatisticsService())->getTodoWordsContent($textId); ?></span>
     </div>
-    <div
-    title="[Show All] = ON: ALL terms are shown, and all multi-word terms are shown as superscripts before the first word. The superscript indicates the number of words in the multi-word term.
-[Show All] = OFF: Multi-word terms now hide single words and shorter or overlapping multi-word terms.">
+    <div title="[Show All] = ON: ALL terms are shown, and all multi-word terms are shown as
+superscripts before the first word. The superscript indicates the number of words in
+the multi-word term. [Show All] = OFF: Multi-word terms now hide single words and
+shorter or overlapping multi-word terms.">
         <label for="showallwords">Show All</label>&nbsp;
         <input type="checkbox" id="showallwords" <?php echo \Lwt\Shared\UI\Helpers\FormHelper::getChecked($showAll); ?>
         data-action="toggle-show-all" />

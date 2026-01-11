@@ -122,7 +122,8 @@ class UserScopedQuery
      *
      * Usage:
      * ```php
-     * $sql = "INSERT INTO words (WoLgID, WoText" . UserScopedQuery::insertColumn('words') . ") VALUES (?, ?" . UserScopedQuery::insertValuePrepared('words', $bindings) . ")";
+     * $sql = "INSERT INTO words (WoLgID, WoText" . UserScopedQuery::insertColumn('words') .
+     *         ") VALUES (?, ?" . UserScopedQuery::insertValuePrepared('words', $bindings) . ")";
      * ```
      *
      * @param string $tableName The table name (without prefix)

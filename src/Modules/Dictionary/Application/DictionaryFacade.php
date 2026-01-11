@@ -168,8 +168,9 @@ class DictionaryFacade
     /**
      * Add entries to a dictionary in batch.
      *
-     * @param int                                                                                 $dictId  Dictionary ID
-     * @param iterable<array{term: string, definition: string, reading?: ?string, pos?: ?string}> $entries Entries to add
+     * @param int $dictId Dictionary ID
+     * @param iterable<array{term: string, definition: string, reading?: ?string, pos?: ?string}> $entries
+     *        Entries to add
      *
      * @return int Number of entries added
      */

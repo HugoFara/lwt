@@ -215,7 +215,8 @@ class TextReadingService
      * @param array<string, mixed>                         $record        Text item information
      * @param int                                          $showAll       Show all words or not (0 or 1)
      * @param int                                          $currcharcount Current number of characters
-     * @param bool                                         $hide          Should some item be hidden, depends on $showAll
+     * @param bool                                         $hide          Should some item be hidden,
+     *                                                                     depends on $showAll
      * @param array<int, array{0: int, 1: string, 2: int}> $exprs         Current expressions
      *
      * @return void
@@ -272,7 +273,10 @@ class TextReadingService
             ->selectRaw('CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN LOWER(Ti2Text) ELSE `WoTextLC` END AS TiTextLC')
             ->select(['Ti2Order', 'Ti2SeID'])
             ->selectRaw('CASE WHEN `Ti2WordCount`>0 THEN 0 ELSE 1 END AS TiIsNotWord')
-            ->selectRaw('CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN CHAR_LENGTH(Ti2Text) ELSE CHAR_LENGTH(`WoTextLC`) END AS TiTextLength')
+            ->selectRaw(
+                'CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN CHAR_LENGTH(Ti2Text) ' .
+                'ELSE CHAR_LENGTH(`WoTextLC`) END AS TiTextLength'
+            )
             ->select(['WoID', 'WoText', 'WoStatus', 'WoTranslation', 'WoRomanization'])
             ->leftJoin('words', 'Ti2WoID', '=', 'WoID')
             ->where('Ti2TxID', '=', $textId)

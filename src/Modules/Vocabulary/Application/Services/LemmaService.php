@@ -856,7 +856,8 @@ class LemmaService
 
         // Calculate aggregate statistics
         $averageStatus = count($terms) > 0
-            ? array_sum(array_map(fn($t) => $t['status'] <= 5 ? $t['status'] : 0, $terms)) / count(array_filter($terms, fn($t) => $t['status'] <= 5))
+            ? array_sum(array_map(fn($t) => $t['status'] <= 5 ? $t['status'] : 0, $terms))
+                / count(array_filter($terms, fn($t) => $t['status'] <= 5))
             : 0;
 
         return [
@@ -1092,7 +1093,10 @@ class LemmaService
      *
      * @param int $languageId Language ID
      *
-     * @return array{total_lemmas: int, single_form: int, multi_form: int, avg_forms_per_lemma: float, status_distribution: array}
+     * @return array{
+     *     total_lemmas: int, single_form: int, multi_form: int,
+     *     avg_forms_per_lemma: float, status_distribution: array
+     * }
      */
     public function getLemmaAggregateStats(int $languageId): array
     {

@@ -121,7 +121,8 @@ class TextNavigationService
             } elseif ($currenttag2 != '' && $currenttag1 == '') {
                 $wh_tag = " having (" . (string)$wh_tag2 . ') ';
             } else {
-                $wh_tag = " having ((" . (string)$wh_tag1 . ($currenttag12 ? ') AND (' : ') OR (') . (string)$wh_tag2 . ')) ';
+                $operator = $currenttag12 ? ') AND (' : ') OR (';
+                $wh_tag = " having ((" . (string)$wh_tag1 . $operator . (string)$wh_tag2 . ')) ';
             }
         }
 
@@ -173,22 +174,42 @@ class TextNavigationService
             if ($list[$i] == $textId) {
                 if ($list[$i - 1] !== 0) {
                     $title = htmlspecialchars(self::getTextTitle($list[$i - 1]), ENT_QUOTES, 'UTF-8');
-                    $prev = '<a href="' . $url . $list[$i - 1] . '" target="_top">' . IconHelper::render('circle-chevron-left', ['title' => 'Previous Text: ' . $title, 'alt' => 'Previous Text: ' . $title]) . '</a>';
+                    $icon = IconHelper::render(
+                        'circle-chevron-left',
+                        ['title' => 'Previous Text: ' . $title, 'alt' => 'Previous Text: ' . $title]
+                    );
+                    $prev = '<a href="' . $url . $list[$i - 1] . '" target="_top">' . $icon . '</a>';
                 } else {
-                    $prev = IconHelper::render('circle-chevron-left', ['title' => 'No Previous Text', 'alt' => 'No Previous Text', 'class' => 'icon-muted']);
+                    $prev = IconHelper::render(
+                        'circle-chevron-left',
+                        ['title' => 'No Previous Text', 'alt' => 'No Previous Text', 'class' => 'icon-muted']
+                    );
                 }
                 if ($list[$i + 1] !== 0) {
                     $title = htmlspecialchars(self::getTextTitle($list[$i + 1]), ENT_QUOTES, 'UTF-8');
-                    $next = '<a href="' . $url . $list[$i + 1] .
-                    '" target="_top">' . IconHelper::render('circle-chevron-right', ['title' => 'Next Text: ' . $title, 'alt' => 'Next Text: ' . $title]) . '</a>';
+                    $icon = IconHelper::render(
+                        'circle-chevron-right',
+                        ['title' => 'Next Text: ' . $title, 'alt' => 'Next Text: ' . $title]
+                    );
+                    $next = '<a href="' . $url . $list[$i + 1] . '" target="_top">' . $icon . '</a>';
                 } else {
-                    $next = IconHelper::render('circle-chevron-right', ['title' => 'No Next Text', 'alt' => 'No Next Text', 'class' => 'icon-muted']);
+                    $next = IconHelper::render(
+                        'circle-chevron-right',
+                        ['title' => 'No Next Text', 'alt' => 'No Next Text', 'class' => 'icon-muted']
+                    );
                 }
                 return $add . $prev . ' ' . $next;
             }
         }
-        return $add . IconHelper::render('circle-chevron-left', ['title' => 'No Previous Text', 'alt' => 'No Previous Text', 'class' => 'icon-muted']) . '
-        ' . IconHelper::render('circle-chevron-right', ['title' => 'No Next Text', 'alt' => 'No Next Text', 'class' => 'icon-muted']);
+        $prevIcon = IconHelper::render(
+            'circle-chevron-left',
+            ['title' => 'No Previous Text', 'alt' => 'No Previous Text', 'class' => 'icon-muted']
+        );
+        $nextIcon = IconHelper::render(
+            'circle-chevron-right',
+            ['title' => 'No Next Text', 'alt' => 'No Next Text', 'class' => 'icon-muted']
+        );
+        return $add . $prevIcon . ' ' . $nextIcon;
     }
 
     /**

@@ -110,7 +110,10 @@ class FeedFacade
      *
      * @param int|null $langId Language ID filter (null for all)
      *
-     * @return array<int, array{NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string}> Array of feed records
+     * @return array<int, array{
+     *     NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string,
+     *     NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string
+     * }> Array of feed records
      */
     public function getFeeds(?int $langId = null): array
     {
@@ -127,7 +130,10 @@ class FeedFacade
      *
      * @param int $feedId Feed ID
      *
-     * @return array{NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string}|null Feed record or null if not found
+     * @return array{
+     *     NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string,
+     *     NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string
+     * }|null Feed record or null if not found
      */
     public function getFeedById(int $feedId): ?array
     {
@@ -305,7 +311,12 @@ class FeedFacade
      *
      * @param array|string $markedItems Array or comma-separated string of IDs
      *
-     * @return array<int, array{FlID: int|null, FlNfID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, FlText: string, NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string}> Array of feed link data with feed options
+     * @return array<int, array{
+     *     FlID: int|null, FlNfID: int, FlTitle: string, FlLink: string, FlDescription: string,
+     *     FlDate: string, FlAudio: string, FlText: string, NfID: int|null, NfLgID: int,
+     *     NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string,
+     *     NfUpdate: int, NfOptions: string
+     * }> Array of feed link data with feed options
      */
     public function getMarkedFeedLinks($markedItems): array
     {
@@ -368,7 +379,8 @@ class FeedFacade
     /**
      * Extract text content from RSS feed article links.
      *
-     * @param array<int|string, array{link: string, title: string, audio?: string, text?: string}> $feedData Array of feed items
+     * @param array<int|string, array{link: string, title: string, audio?: string, text?: string}> $feedData
+     *        Array of feed items
      * @param string      $articleSection XPath selector(s) for article content
      * @param string      $filterTags     XPath selector(s) for elements to remove
      * @param string|null $charset        Override charset
@@ -717,7 +729,10 @@ class FeedFacade
      *
      * @param Feed $feed Feed entity
      *
-     * @return array{NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string} Legacy array format
+     * @return array{
+     *     NfID: int|null, NfLgID: int, NfName: string, NfSourceURI: string,
+     *     NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string
+     * } Legacy array format
      */
     private function feedToArray(Feed $feed): array
     {
@@ -738,7 +753,10 @@ class FeedFacade
      *
      * @param \Lwt\Modules\Feed\Domain\Article $article Article entity
      *
-     * @return array{FlID: int|null, FlNfID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, FlText: string} Legacy array format
+     * @return array{
+     *     FlID: int|null, FlNfID: int, FlTitle: string, FlLink: string, FlDescription: string,
+     *     FlDate: string, FlAudio: string, FlText: string
+     * } Legacy array format
      */
     private function articleEntityToArray($article): array
     {
@@ -757,9 +775,14 @@ class FeedFacade
     /**
      * Convert article result to legacy array format.
      *
-     * @param array{article: \Lwt\Modules\Feed\Domain\Article, text_id: int|null, archived_id: int|null, status?: string} $item Article result with status
+     * @param array{
+     *     article: \Lwt\Modules\Feed\Domain\Article, text_id: int|null, archived_id: int|null, status?: string
+     * } $item Article result with status
      *
-     * @return array{FlID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string, FlAudio: string, TxID: int|null, ArchivedTxID: int|null} Legacy array format
+     * @return array{
+     *     FlID: int, FlTitle: string, FlLink: string, FlDescription: string, FlDate: string,
+     *     FlAudio: string, TxID: int|null, ArchivedTxID: int|null
+     * } Legacy array format
      */
     private function articleToLegacyArray(array $item): array
     {
@@ -837,7 +860,8 @@ class FeedFacade
                                 $sql = 'INSERT INTO text_tags (T2Text'
                                     . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertColumn('text_tags')
                                     . ') VALUES (?'
-                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::insertValuePrepared('text_tags', $bindings)
+                                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery
+                                        ::insertValuePrepared('text_tags', $bindings)
                                     . ')';
                                 \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute($sql, $bindings);
                             }
@@ -884,7 +908,8 @@ class FeedFacade
                             'INSERT INTO text_tag_map (TtTxID, TtT2ID)
                             SELECT ?, T2ID FROM text_tags
                             WHERE T2Text IN (' . $tagPlaceholders . ')'
-                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('text_tags', $tagBindings),
+                            . \Lwt\Shared\Infrastructure\Database\UserScopedQuery
+                                ::forTablePrepared('text_tags', $tagBindings),
                             $tagBindings
                         );
                     }
@@ -904,7 +929,8 @@ class FeedFacade
                     "SELECT TtTxID FROM text_tag_map
                     JOIN text_tags ON TtT2ID=T2ID
                     WHERE T2Text IN (" . $tagPlaceholders . ")"
-                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('text_tags', $tagQueryBindings),
+                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery
+                        ::forTablePrepared('text_tags', $tagQueryBindings),
                     $tagQueryBindings
                 );
                 foreach ($rows as $row) {

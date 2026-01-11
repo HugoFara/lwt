@@ -367,7 +367,8 @@ class SelectOptionsBuilder
      *
      * @param array<int, array{id: int, title: string, language: string}> $texts        Text data from TextService
      * @param int|string|null                                              $selected     Selected text ID
-     * @param bool                                                         $showLanguage Whether to prefix with language name
+     * @param bool                                                         $showLanguage
+     *        Whether to prefix with language name
      *
      * @return string HTML options string
      */
@@ -418,7 +419,8 @@ class SelectOptionsBuilder
                     . ' data-description="' . htmlspecialchars($theme['description'] ?? '', ENT_QUOTES, 'UTF-8') . '"'
                     . ' data-mode="' . htmlspecialchars($theme['mode'] ?? 'light', ENT_QUOTES, 'UTF-8') . '"'
                     . ' data-highlighting="' . htmlspecialchars($theme['highlighting'] ?? '', ENT_QUOTES, 'UTF-8') . '"'
-                    . ' data-word-breaking="' . htmlspecialchars($theme['wordBreaking'] ?? '', ENT_QUOTES, 'UTF-8') . '"'
+                    . ' data-word-breaking="'
+                    . htmlspecialchars($theme['wordBreaking'] ?? '', ENT_QUOTES, 'UTF-8') . '"'
                     . '>' . htmlspecialchars($theme['name'], ENT_QUOTES, 'UTF-8')
                     . htmlspecialchars($modeIndicator, ENT_QUOTES, 'UTF-8') . '</option>';
         }

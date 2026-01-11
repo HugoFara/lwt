@@ -119,7 +119,8 @@ $message = $_GET['message'] ?? '';
                     // Get first chapter text ID
                         $firstChapterId = $book['id']; // Will need to query for actual text ID
                         ?>
-                    <a href="/book/<?php echo $book['id']; ?>" class="button is-small is-primary" title="Continue Reading">
+                    <a href="/book/<?php echo $book['id']; ?>" class="button is-small is-primary"
+                       title="Continue Reading">
                         <?php echo IconHelper::render('book-open', ['alt' => 'Read']); ?>
                     </a>
                     <?php endif; ?>
@@ -142,12 +143,14 @@ $message = $_GET['message'] ?? '';
     <?php if ($pagination['totalPages'] > 1) : ?>
 <nav class="pagination is-centered" role="navigation">
     <a class="pagination-previous"
-       href="/books?page=<?php echo max(1, $pagination['page'] - 1); ?><?php echo $languageId ? '&lg_id=' . $languageId : ''; ?>"
+       href="/books?page=<?php echo max(1, $pagination['page'] - 1); ?><?php
+           echo $languageId ? '&lg_id=' . $languageId : ''; ?>"
            <?php echo $pagination['page'] <= 1 ? 'disabled' : ''; ?>>
         Previous
     </a>
     <a class="pagination-next"
-       href="/books?page=<?php echo min($pagination['totalPages'], $pagination['page'] + 1); ?><?php echo $languageId ? '&lg_id=' . $languageId : ''; ?>"
+       href="/books?page=<?php echo min($pagination['totalPages'], $pagination['page'] + 1); ?><?php
+           echo $languageId ? '&lg_id=' . $languageId : ''; ?>"
            <?php echo $pagination['page'] >= $pagination['totalPages'] ? 'disabled' : ''; ?>>
         Next
     </a>

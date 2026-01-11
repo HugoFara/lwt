@@ -42,7 +42,8 @@ class RestoreFromUpload
     /**
      * Execute the use case.
      *
-     * @param array{name: string, type: string, tmp_name: string, error: int, size: int}|null $fileData Validated file data from InputValidator::getUploadedFile()
+     * @param array{name: string, type: string, tmp_name: string, error: int, size: int}|null $fileData
+     *        Validated file data from InputValidator::getUploadedFile()
      *
      * @return array{success: bool, error: ?string}
      */

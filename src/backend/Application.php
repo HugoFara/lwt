@@ -402,13 +402,15 @@ class Application
             <title>LWT - Configuration Error</title>
             <style>
                 body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
-                .container { max-width: 800px; margin: 50px auto; background: white; padding: 30px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+                .container { max-width: 800px; margin: 50px auto; background: white; padding: 30px;
+                    border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
                 .error { color: #d32f2f; }
                 h1 { color: #d32f2f; border-bottom: 2px solid #d32f2f; padding-bottom: 10px; }
                 ul { line-height: 1.8; }
                 a { color: #1976d2; text-decoration: none; }
                 a:hover { text-decoration: underline; }
-                .btn { display: inline-block; padding: 10px 20px; background: #1976d2; color: white; border-radius: 3px; margin: 10px 5px; }
+                .btn { display: inline-block; padding: 10px 20px; background: #1976d2; color: white;
+                    border-radius: 3px; margin: 10px 5px; }
                 .btn:hover { background: #1565c0; text-decoration: none; }
                 code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; }
             </style>

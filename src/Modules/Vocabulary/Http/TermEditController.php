@@ -356,7 +356,8 @@ class TermEditController extends VocabularyBaseController
         $text = trim(Escaping::prepareTextdata($woText));
 
         if (mb_strtolower($text, 'UTF-8') != $textlc) {
-            $titletext = "New/Edit Term: " . htmlspecialchars(Escaping::prepareTextdata($woTextLC), ENT_QUOTES, 'UTF-8');
+            $escapedText = htmlspecialchars(Escaping::prepareTextdata($woTextLC), ENT_QUOTES, 'UTF-8');
+            $titletext = "New/Edit Term: " . $escapedText;
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
             echo '<div class="notification is-danger">' .

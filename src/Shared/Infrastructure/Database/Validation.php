@@ -165,7 +165,8 @@ class Validation
                         from texts,
                         text_tags,
                         text_tag_map
-                        where T2ID = TtT2ID and TtTxID = TxID and TxArchivedAt IS NOT NULL and TxLgID = " . $currentlang_int . "
+                        where T2ID = TtT2ID and TtTxID = TxID and TxArchivedAt IS NOT NULL
+                            and TxLgID = " . $currentlang_int . "
                         group by T2ID order by T2Text
                     )
                 ) as value"

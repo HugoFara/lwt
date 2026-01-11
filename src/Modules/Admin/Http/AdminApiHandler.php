@@ -231,7 +231,9 @@ class AdminApiHandler
      *
      * @param string $textsId Comma-separated text IDs
      *
-     * @return array<string, array{total: int, saved: int, unknown: int, unknownPercent: int, statusCounts: array<string, int>}>
+     * @return array<string, array{
+     *     total: int, saved: int, unknown: int, unknownPercent: int, statusCounts: array<string, int>
+     * }>
      */
     public function formatTextsStatistics(string $textsId): array
     {

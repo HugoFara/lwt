@@ -272,8 +272,9 @@ class LocalDictionaryService
     /**
      * Add multiple entries to a dictionary in batches.
      *
-     * @param int                                                           $dictId  Dictionary ID
-     * @param iterable<array{term: string, definition: string, reading?: ?string, pos?: ?string}> $entries Entries to add
+     * @param int $dictId Dictionary ID
+     * @param iterable<array{term: string, definition: string, reading?: ?string, pos?: ?string}> $entries
+     *        Entries to add
      *
      * @return int Number of entries added
      */

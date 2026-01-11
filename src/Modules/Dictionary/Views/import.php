@@ -66,7 +66,8 @@ echo PageLayoutHelper::buildActionCard([
             <div class="control">
                 <?php if ($dictionary) : ?>
                 <input type="hidden" name="dict_id" value="<?php echo $dictionary->id(); ?>">
-                <input type="text" class="input" value="<?php echo htmlspecialchars($dictionary->name(), ENT_QUOTES); ?>" readonly>
+                <input type="text" class="input"
+                       value="<?php echo htmlspecialchars($dictionary->name(), ENT_QUOTES); ?>" readonly>
                 <p class="help">Adding entries to existing dictionary.</p>
                 <?php elseif (!empty($dictionaries)) : ?>
                 <div class="select is-fullwidth">
@@ -131,7 +132,8 @@ echo PageLayoutHelper::buildActionCard([
             </div>
             <p class="help" x-show="format === 'csv'">CSV files with term and definition columns.</p>
             <p class="help" x-show="format === 'json'">JSON array of objects with term/definition fields.</p>
-            <p class="help" x-show="format === 'stardict'">Select the .ifo file. The .idx and .dict files must be in the same directory.</p>
+            <p class="help" x-show="format === 'stardict'">Select the .ifo file.
+                The .idx and .dict files must be in the same directory.</p>
         </div>
 
         <!-- CSV Options -->
@@ -200,7 +202,8 @@ echo PageLayoutHelper::buildActionCard([
         <!-- JSON Options -->
         <div x-show="format === 'json'" class="box">
             <h5 class="title is-6">JSON Field Mapping</h5>
-            <p class="mb-3">Leave empty for auto-detection (looks for common field names like term, word, definition, meaning, etc.)</p>
+            <p class="mb-3">Leave empty for auto-detection
+                (looks for common field names like term, word, definition, meaning, etc.)</p>
 
             <div class="columns">
                 <div class="column is-3">

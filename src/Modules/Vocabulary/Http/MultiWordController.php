@@ -288,7 +288,10 @@ class MultiWordController extends VocabularyBaseController
      * Display form for editing existing multi-word.
      *
      * @param int                        $wid      Word ID
-     * @param array{text: string, lgid: int, translation: string, sentence: string, notes: string, romanization: string, status: int} $wordData Word data from service
+     * @param array{
+     *     text: string, lgid: int, translation: string, sentence: string,
+     *     notes: string, romanization: string, status: int
+     * } $wordData Word data from service
      * @param int                        $tid      Text ID
      * @param int                        $ord      Text order
      *

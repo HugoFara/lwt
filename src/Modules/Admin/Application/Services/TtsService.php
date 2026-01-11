@@ -58,7 +58,9 @@ class TtsService
      * Get two-letter language code from language ID.
      *
      * @param int   $lgId       Language ID
-     * @param array<string, array{0: string, 1: string, 2: bool, 3: string, 4: string, 5: bool, 6: bool, 7: bool}> $langArray Languages array from langdefs
+     * @param array<string, array{
+     *     0: string, 1: string, 2: bool, 3: string, 4: string, 5: bool, 6: bool, 7: bool
+     * }> $langArray Languages array from langdefs
      *
      * @return string Two-letter language code
      */
@@ -93,7 +95,9 @@ class TtsService
     /**
      * Get language options for TTS form.
      *
-     * @param array<string, array{0: string, 1: string, 2: bool, 3: string, 4: string, 5: bool, 6: bool, 7: bool}> $langArray Languages array from langdefs
+     * @param array<string, array{
+     *     0: string, 1: string, 2: bool, 3: string, 4: string, 5: bool, 6: bool, 7: bool
+     * }> $langArray Languages array from langdefs
      *
      * @return string HTML-formatted options string
      */
@@ -114,7 +118,9 @@ class TtsService
     /**
      * Get current language code for TTS settings.
      *
-     * @param array<string, array{0: string, 1: string, 2: bool, 3: string, 4: string, 5: bool, 6: bool, 7: bool}> $langArray Languages array from langdefs
+     * @param array<string, array{
+     *     0: string, 1: string, 2: bool, 3: string, 4: string, 5: bool, 6: bool, 7: bool
+     * }> $langArray Languages array from langdefs
      *
      * @return string Current language code
      */

@@ -243,8 +243,9 @@ class AnnotationService
             ->firstPrepared();
         $length = (int)($row['text_length'] ?? 0);
         if ($length > 0) {
+            $icon = IconHelper::render('check', ['title' => 'Annotated Text', 'alt' => 'Annotated Text']);
             return ' &nbsp;<a href="print_impr_text.php?text=' . $textId .
-            '" target="_top">' . IconHelper::render('check', ['title' => 'Annotated Text', 'alt' => 'Annotated Text']) . '</a>';
+            '" target="_top">' . $icon . '</a>';
         } else {
             return '';
         }

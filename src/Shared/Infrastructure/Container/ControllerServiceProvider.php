@@ -91,7 +91,8 @@ class ControllerServiceProvider implements ServiceProviderInterface
             );
         });
 
-        // Note: WordController moved to Modules/Vocabulary as VocabularyController - registered by VocabularyServiceProvider
+        // Note: WordController moved to Modules/Vocabulary as VocabularyController
+        // Registered by VocabularyServiceProvider
 
         // NOTE: AdminController is now in Modules/Admin and registered via AdminServiceProvider
     }

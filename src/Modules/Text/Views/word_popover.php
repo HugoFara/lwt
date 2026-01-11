@@ -130,13 +130,16 @@ namespace Lwt\Views\Text;
 
             <!-- Dictionary links -->
             <div class="buttons are-small mb-0">
-              <a :href="getDictUrl('dict1')" target="_blank" class="button is-link is-outlined is-small" rel="noopener" title="Dictionary 1">
+              <a :href="getDictUrl('dict1')" target="_blank"
+                 class="button is-link is-outlined is-small" rel="noopener" title="Dictionary 1">
                 D1
               </a>
-              <a :href="getDictUrl('dict2')" target="_blank" class="button is-link is-outlined is-small" rel="noopener" title="Dictionary 2">
+              <a :href="getDictUrl('dict2')" target="_blank"
+                 class="button is-link is-outlined is-small" rel="noopener" title="Dictionary 2">
                 D2
               </a>
-              <a :href="getDictUrl('translator')" target="_blank" class="button is-link is-outlined is-small" rel="noopener" title="Translate">
+              <a :href="getDictUrl('translator')" target="_blank"
+                 class="button is-link is-outlined is-small" rel="noopener" title="Translate">
                 <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('languages', ['size' => 12]); ?>
               </a>
             </div>

@@ -31,7 +31,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 /**
- * @var array<int, array{NfID: int, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string, NfUpdate: int, NfOptions: string}> $feeds Feed data
+ * @var array<int, array{
+ *     NfID: int, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string,
+ *     NfFilterTags: string, NfUpdate: int, NfOptions: string
+ * }> $feeds Feed data
  * @var int $currentLang Current language filter
  * @var string $currentQuery Search query
  * @var int $currentPage Current page number
@@ -90,7 +93,16 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
             </div>
             <div class="level-item">
-                <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form1', ['query' => $currentQuery, 'sort' => $currentSort, 'manage_feeds' => 1]); ?>
+                <?php
+                $pagerParams = ['query' => $currentQuery, 'sort' => $currentSort, 'manage_feeds' => 1];
+                echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager(
+                    $currentPage,
+                    $pages,
+                    '/feeds/edit',
+                    'form1',
+                    $pagerParams
+                );
+                ?>
             </div>
             <div class="level-right">
                 <div class="level-item">
@@ -101,7 +113,9 @@ echo PageLayoutHelper::buildActionCard([
                         <div class="control">
                             <div class="select is-small">
                                 <select name="sort" @change="handleSort($event)">
-                                    <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forTextSort($currentSort); ?>
+                                    <?php
+                                    echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forTextSort($currentSort);
+                                    ?>
                                 </select>
                             </div>
                         </div>
@@ -184,7 +198,16 @@ echo PageLayoutHelper::buildActionCard([
 <form name="form3" method="get" action="">
 <table class="table is-bordered is-fullwidth">
 <tr><th class="feeds-filter-cell"><?php echo $totalFeeds; ?></th>
-<th class=""><?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form3', ['query' => $currentQuery, 'sort' => $currentSort, 'manage_feeds' => 1]); ?></th>
+<th class=""><?php
+$pagerParams = ['query' => $currentQuery, 'sort' => $currentSort, 'manage_feeds' => 1];
+echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager(
+    $currentPage,
+    $pages,
+    '/feeds/edit',
+    'form3',
+    $pagerParams
+);
+?></th>
 </tr></table>
 </form>
     <?php endif; ?>

@@ -122,7 +122,8 @@ class TermStatusService
         return match ($type) {
             'iv' => ' WoTodayScore, WoTomorrowScore, WoRandom ',
             'id' => ' ' . self::SCORE_FORMULA_TODAY . ', ' . self::SCORE_FORMULA_TOMORROW . ', RAND() ',
-            'u' => ' WoTodayScore = ' . self::SCORE_FORMULA_TODAY . ', WoTomorrowScore = ' . self::SCORE_FORMULA_TOMORROW . ', WoRandom = RAND() ',
+            'u' => ' WoTodayScore = ' . self::SCORE_FORMULA_TODAY .
+                ', WoTomorrowScore = ' . self::SCORE_FORMULA_TOMORROW . ', WoRandom = RAND() ',
             default => '',
         };
     }

@@ -346,7 +346,9 @@ class QueryBuilder
         // - If $value is null and $operator is a known SQL operator, it's 3-arg form with null value
         // - If $value is null and $operator is NOT a known SQL operator, it's 2-arg form
         $operatorStr = is_array($operator) ? '' : (string)$operator;
-        $validOperators = ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL'];
+        $validOperators = [
+            '=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL'
+        ];
         $isKnownOperator = in_array(strtoupper($operatorStr), $validOperators);
 
         if ($value !== null || $isKnownOperator) {

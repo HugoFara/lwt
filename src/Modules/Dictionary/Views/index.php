@@ -66,7 +66,10 @@ if (!empty($message)) :
 <?php
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/languages', 'label' => 'Languages', 'icon' => 'globe'],
-    ['url' => '/dictionaries/import?lang=' . $langId, 'label' => 'Import Dictionary', 'icon' => 'upload', 'class' => 'is-primary'],
+    [
+        'url' => '/dictionaries/import?lang=' . $langId, 'label' => 'Import Dictionary',
+        'icon' => 'upload', 'class' => 'is-primary'
+    ],
 ]);
 ?>
 
@@ -171,7 +174,9 @@ echo PageLayoutHelper::buildActionCard([
                     <td>
                         <strong><?php echo htmlspecialchars($dict->name(), ENT_QUOTES); ?></strong>
                         <?php if ($description !== null && $description !== '') : ?>
-                        <br><span class="is-size-7 has-text-grey"><?php echo htmlspecialchars($description, ENT_QUOTES); ?></span>
+                        <br><span class="is-size-7 has-text-grey"><?php
+                            echo htmlspecialchars($description, ENT_QUOTES);
+                        ?></span>
                         <?php endif; ?>
                     </td>
                     <td>
@@ -193,18 +198,23 @@ echo PageLayoutHelper::buildActionCard([
                     <td>
                         <div class="buttons are-small">
                             <!-- Toggle enable/disable -->
-                            <form method="POST" action="/dictionaries?lang=<?php echo $langId; ?>" style="display:inline;">
+                            <form method="POST" action="/dictionaries?lang=<?php echo $langId; ?>"
+                                  style="display:inline;">
                                 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                                 <input type="hidden" name="dict_id" value="<?php echo $dict->id(); ?>">
                                 <button type="submit" name="toggle_enabled" value="1"
                                         class="button <?php echo $dict->isEnabled() ? 'is-warning' : 'is-success'; ?>"
                                         title="<?php echo $dict->isEnabled() ? 'Disable' : 'Enable'; ?>">
-                                    <?php echo IconHelper::render($dict->isEnabled() ? 'eye-off' : 'eye', ['alt' => 'Toggle']); ?>
+                                    <?php
+                                    $eyeIcon = $dict->isEnabled() ? 'eye-off' : 'eye';
+                                    echo IconHelper::render($eyeIcon, ['alt' => 'Toggle']);
+                                    ?>
                                 </button>
                             </form>
 
                             <!-- Import more entries -->
-                            <a href="/dictionaries/import?lang=<?php echo $langId; ?>&dict_id=<?php echo $dict->id(); ?>"
+                            <a href="/dictionaries/import?lang=<?php echo $langId;
+                                ?>&dict_id=<?php echo $dict->id(); ?>"
                                class="button is-info" title="Import entries">
                                 <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
                             </a>

@@ -91,15 +91,19 @@ class WordService
         /** @var string $woText */
         $woText = isset($data['WoText']) && is_string($data['WoText']) ? $data['WoText'] : '';
         /** @var string $woTranslation */
-        $woTranslation = isset($data['WoTranslation']) && is_string($data['WoTranslation']) ? $data['WoTranslation'] : '';
+        $woTranslation = isset($data['WoTranslation']) && is_string($data['WoTranslation'])
+            ? $data['WoTranslation'] : '';
         /** @var string $woSentence */
-        $woSentence = isset($data['WoSentence']) && is_string($data['WoSentence']) ? $data['WoSentence'] : '';
+        $woSentence = isset($data['WoSentence']) && is_string($data['WoSentence'])
+            ? $data['WoSentence'] : '';
         /** @var string $woNotes */
         $woNotes = isset($data['WoNotes']) && is_string($data['WoNotes']) ? $data['WoNotes'] : '';
         /** @var string $woRomanization */
-        $woRomanization = isset($data['WoRomanization']) && is_string($data['WoRomanization']) ? $data['WoRomanization'] : '';
+        $woRomanization = isset($data['WoRomanization']) && is_string($data['WoRomanization'])
+            ? $data['WoRomanization'] : '';
         /** @var string|null $woLemma */
-        $woLemma = isset($data['WoLemma']) && is_string($data['WoLemma']) && $data['WoLemma'] !== '' ? $data['WoLemma'] : null;
+        $woLemma = isset($data['WoLemma']) && is_string($data['WoLemma']) && $data['WoLemma'] !== ''
+            ? $data['WoLemma'] : null;
 
         $text = trim(Escaping::prepareTextdata($woText));
         $textlc = mb_strtolower($text, 'UTF-8');
@@ -174,15 +178,19 @@ class WordService
         /** @var string $woText */
         $woText = isset($data['WoText']) && is_string($data['WoText']) ? $data['WoText'] : '';
         /** @var string $woTranslation */
-        $woTranslation = isset($data['WoTranslation']) && is_string($data['WoTranslation']) ? $data['WoTranslation'] : '';
+        $woTranslation = isset($data['WoTranslation']) && is_string($data['WoTranslation'])
+            ? $data['WoTranslation'] : '';
         /** @var string $woSentence */
-        $woSentence = isset($data['WoSentence']) && is_string($data['WoSentence']) ? $data['WoSentence'] : '';
+        $woSentence = isset($data['WoSentence']) && is_string($data['WoSentence'])
+            ? $data['WoSentence'] : '';
         /** @var string $woNotes */
         $woNotes = isset($data['WoNotes']) && is_string($data['WoNotes']) ? $data['WoNotes'] : '';
         /** @var string $woRomanization */
-        $woRomanization = isset($data['WoRomanization']) && is_string($data['WoRomanization']) ? $data['WoRomanization'] : '';
+        $woRomanization = isset($data['WoRomanization']) && is_string($data['WoRomanization'])
+            ? $data['WoRomanization'] : '';
         /** @var string|null $woLemma */
-        $woLemma = isset($data['WoLemma']) && is_string($data['WoLemma']) && $data['WoLemma'] !== '' ? $data['WoLemma'] : null;
+        $woLemma = isset($data['WoLemma']) && is_string($data['WoLemma']) && $data['WoLemma'] !== ''
+            ? $data['WoLemma'] : null;
 
         $text = trim(Escaping::prepareTextdata($woText));
         $textlc = mb_strtolower($text, 'UTF-8');
@@ -1563,7 +1571,13 @@ class WordService
 
         \Lwt\Shared\Infrastructure\Database\Maintenance::initWordCount();
         TagsFacade::saveWordTagsFromForm($wid);
-        $this->expressionService->insertExpressions((string) $data['textlc'], (int) $data['lgid'], $wid, (int) $data['wordcount'], 0);
+        $this->expressionService->insertExpressions(
+            (string) $data['textlc'],
+            (int) $data['lgid'],
+            $wid,
+            (int) $data['wordcount'],
+            0
+        );
 
         return [
             'id' => $wid,

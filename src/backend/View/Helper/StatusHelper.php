@@ -206,7 +206,8 @@ class StatusHelper
     ): string {
         // Format the score text
         if ($score < 0) {
-            $scoreText = '<span class="has-text-danger has-text-weight-bold">' . htmlspecialchars($statusAbbr, ENT_QUOTES, 'UTF-8') . '</span>';
+            $escaped = htmlspecialchars($statusAbbr, ENT_QUOTES, 'UTF-8');
+            $scoreText = '<span class="has-text-danger has-text-weight-bold">' . $escaped . '</span>';
         } else {
             $scoreText = htmlspecialchars($statusAbbr, ENT_QUOTES, 'UTF-8');
         }

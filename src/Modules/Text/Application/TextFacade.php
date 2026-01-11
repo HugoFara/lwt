@@ -574,7 +574,8 @@ class TextFacade
                 'title' => (string) $record['TxTitle'],
                 'has_audio' => !empty($record['TxAudioURI']),
                 'source_uri' => (string) ($record['TxSourceURI'] ?? ''),
-                'has_source' => !empty($record['TxSourceURI']) && substr((string)($record['TxSourceURI'] ?? ''), 0, 1) !== '#',
+                'has_source' => !empty($record['TxSourceURI'])
+                    && substr((string)($record['TxSourceURI'] ?? ''), 0, 1) !== '#',
                 'annotated' => !empty($record['annotlen']),
                 'taglist' => (string) $record['taglist']
             ];
@@ -837,7 +838,8 @@ class TextFacade
             'cnt'
         );
 
-        $message = "Sentences deleted: {$sentencesDeleted} / Textitems deleted: {$textitemsDeleted} / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
+        $message = "Sentences deleted: {$sentencesDeleted} / Textitems deleted: {$textitemsDeleted} " .
+            "/ Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
 
         return [
             'message' => $message,
