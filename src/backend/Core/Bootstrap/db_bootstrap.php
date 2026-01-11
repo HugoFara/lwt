@@ -53,5 +53,6 @@ require_once __DIR__ . '/../../../Shared/Infrastructure/Database/SqlFileParser.p
 require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Migrations.php';
 require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
 
-// Run bootstrap
-DatabaseBootstrap::bootstrap();
+// Note: bootstrap() is NOT called automatically.
+// The caller should call DatabaseBootstrap::bootstrap() explicitly when ready.
+// This allows test files to set up the test database name before connecting.

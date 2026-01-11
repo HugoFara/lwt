@@ -22,4 +22,5 @@ jobs:
           tools: cs2pr, phpcs
 
       - name: Run PHP CodeSniffer
-        run: phpcs --standard=PSR12 --extensions=php --ignore=vendor/,node_modules/,docs/ src/ --report=checkstyle | cs2pr
+        # --warning-severity=0 ignores warnings (PSR-12 side-effects in view files)
+        run: phpcs --standard=PSR12 --extensions=php --ignore=vendor/,node_modules/,docs/ --warning-severity=0 src/ --report=checkstyle | cs2pr

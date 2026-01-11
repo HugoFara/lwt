@@ -4,23 +4,10 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Controllers;
 
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
-
 use Lwt\Controllers\ApiController;
-use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/ApiController.php';
 
 /**
  * Unit tests for the ApiController class.
@@ -41,20 +28,8 @@ class ApiControllerTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        $config = EnvLoader::getDatabaseConfig();
-        $testDbname = "test_" . $config['dbname'];
-
-        if (!Globals::getDbConnection()) {
-            $connection = Configuration::connect(
-                $config['server'],
-                $config['userid'],
-                $config['passwd'],
-                $testDbname,
-                $config['socket'] ?? ''
-            );
-            Globals::setDbConnection($connection);
-        }
-        self::$dbConnected = (Globals::getDbConnection() !== null);
+        // Database connection is handled by tests/bootstrap.php
+        self::$dbConnected = defined('LWT_TEST_DB_AVAILABLE') && LWT_TEST_DB_AVAILABLE;
     }
 
     protected function setUp(): void

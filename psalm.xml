@@ -362,14 +362,17 @@
             EXTERNAL EXTENSION SUPPRESSIONS
             ============================================
             Constants defined by optional PHP extensions (curl).
+            Suppressed at directory level to avoid "unused suppression" errors
+            when the extension is available.
         -->
         <UndefinedConstant>
             <errorLevel type="suppress">
-                <file name="src/Modules/Text/Infrastructure/WhisperClient.php" />
-                <file name="src/Shared/UI/Assets/ViteHelper.php" />
-                <file name="src/backend/Core/Entity/GoogleTranslate.php" />
-                <file name="src/backend/Core/Integration/GoogleTimeToken.php" />
+                <directory name="src/Modules/Text/Infrastructure" />
+                <directory name="src/Shared/UI/Assets" />
+                <directory name="src/backend/Core/Entity" />
+                <directory name="src/backend/Core/Integration" />
             </errorLevel>
         </UndefinedConstant>
+
     </issueHandlers>
 </psalm>

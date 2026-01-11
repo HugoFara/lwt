@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Container;
 
+use Lwt\Core\Bootstrap\DatabaseBootstrap;
 use Lwt\Core\Parser\ParserRegistry;
 use Lwt\Core\Parser\ParsingCoordinator;
 use Lwt\Core\Parser\ExternalParserLoader;
@@ -74,6 +75,8 @@ class CoreServiceProvider implements ServiceProviderInterface
      */
     public function boot(Container $container): void
     {
-        // No bootstrap logic needed for core services
+        // Bootstrap database connection
+        // This loads .env configuration, establishes connection, and runs migrations
+        DatabaseBootstrap::bootstrap();
     }
 }
