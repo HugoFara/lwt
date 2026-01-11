@@ -165,28 +165,29 @@ class RegexParser implements ParserInterface
     protected function parseToResult(string $text, bool $removeSpaces): ParserResult
     {
         // Clean up the text similar to parseStandardToDatabase
-        $text = trim(
-            preg_replace(
-                array(
-                    "/\r(?=[]'`\"”)‘’‹›“„«»』」 ]*\r)/u",
-                    '/[\n]+\r/u',
-                    '/\r([^\n])/u',
-                    "/\n[.](?![]'`\"”)‘’‹›“„«»』」]*\r)/u",
-                    "/(\n|^)(?=.?[" . preg_quote('a-zA-Z0-9', '/') . "][^\n]*(\n|$))/u"
-                ),
-                array(
-                    "",
-                    "\r",
-                    "\r\n$1",
-                    ".\n",
-                    "\n1\t"
-                ),
-                str_replace(array("\t", "\n\n"), array("\n", ""), $text)
-            )
+        // Unicode quotation marks as hex escapes for Psalm compatibility
+        $quoteChars = "\xe2\x80\x9c\xe2\x80\x9d\xe2\x80\x98\xe2\x80\x99\xe2\x80\xb9\xe2\x80\xba\xe2\x80\x9e\xc2\xab\xc2\xbb\xe3\x80\x8f\xe3\x80\x8d";
+        $preprocessed = preg_replace(
+            array(
+                "/\r(?=[]'`\"" . $quoteChars . " ]*\r)/u",
+                '/[\n]+\r/u',
+                '/\r([^\n])/u',
+                "/\n[.](?![]'`\"" . $quoteChars . "]*\r)/u",
+                "/(\n|^)(?=.?[a-zA-Z0-9][^\n]*(\n|$))/u"
+            ),
+            array(
+                "",
+                "\r",
+                "\r\n$1",
+                ".\n",
+                "\n1\t"
+            ),
+            str_replace(array("\t", "\n\n"), array("\n", ""), $text)
         );
+        $text = trim($preprocessed ?? '');
 
         // Mark word vs non-word lines
-        $text = preg_replace("/(\n|^)(?!1\t)/u", "\n0\t", $text);
+        $text = preg_replace("/(\n|^)(?!1\t)/u", "\n0\t", $text) ?? $text;
 
         if ($removeSpaces) {
             $text = StringUtils::removeSpaces($text, '1');

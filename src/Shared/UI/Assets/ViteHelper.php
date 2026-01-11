@@ -53,13 +53,16 @@ class ViteHelper
         }
 
         $ch = curl_init('http://localhost:5173/@vite/client');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 1);
-        curl_setopt($ch, CURLOPT_NOBODY, true);
+        if ($ch === false) {
+            return false;
+        }
+        curl_setopt($ch, (int) CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, (int) CURLOPT_CONNECTTIMEOUT, 1);
+        curl_setopt($ch, (int) CURLOPT_TIMEOUT, 1);
+        curl_setopt($ch, (int) CURLOPT_NOBODY, true);
         curl_exec($ch);
         /** @var int $httpCode */
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $httpCode = curl_getinfo($ch, (int) CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         return $httpCode === 200;
@@ -127,7 +130,8 @@ HTML;
                 if ($asyncCss) {
                     // Async CSS loading using preload + onload pattern
                     // This eliminates render-blocking while ensuring CSS loads
-                    $html .= '<link rel="preload" href="' . $cssPath . '" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">' . "\n";
+                    $html .= '<link rel="preload" href="' . $cssPath .
+                        '" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">' . "\n";
                     $html .= '<noscript><link rel="stylesheet" href="' . $cssPath . '"></noscript>' . "\n";
                 } else {
                     $html .= '<link rel="stylesheet" href="' . $cssPath . '">' . "\n";
@@ -191,9 +195,11 @@ HTML;
         }
 
         // Minify: remove comments, extra whitespace
-        $css = preg_replace('/\/\*[\s\S]*?\*\//', '', $css);
-        $css = preg_replace('/\s+/', ' ', $css);
-        $css = str_replace([' {', '{ ', ' }', '} ', ': ', ' :', '; ', ' ;'], ['{', '{', '}', '}', ':', ':', ';', ';'], $css);
+        $css = preg_replace('/\/\*[\s\S]*?\*\//', '', $css) ?? $css;
+        $css = preg_replace('/\s+/', ' ', $css) ?? $css;
+        $patterns = [' {', '{ ', ' }', '} ', ': ', ' :', '; ', ' ;'];
+        $replacements = ['{', '{', '}', '}', ':', ':', ';', ';'];
+        $css = str_replace($patterns, $replacements, $css);
         $css = trim($css);
 
         return '<style>' . $css . '</style>';

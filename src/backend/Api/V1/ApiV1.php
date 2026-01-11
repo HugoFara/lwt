@@ -243,7 +243,6 @@ class ApiV1
                     "version" => self::VERSION,
                     "release_date" => self::RELEASE_DATE
                 ]);
-                break;
 
             case 'media-files':
                 return Response::success($this->adminHandler->formatMediaFiles());
@@ -266,7 +265,6 @@ class ApiV1
                     (int)($params["language_id"] ?? 0),
                     (string)$params["term"]
                 ));
-                break;
 
             case 'statuses':
                 return Response::success(\Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses());
@@ -326,7 +324,6 @@ class ApiV1
                     (string) ($params['key'] ?? ''),
                     (string) ($params['value'] ?? '')
                 ));
-                break;
 
             case 'languages':
                 return $this->handleLanguagesPost($fragments, $params);
@@ -559,7 +556,7 @@ class ApiV1
      */
     private function handleTagsGet(array $fragments): \Lwt\Shared\Infrastructure\Http\JsonResponse
     {
-        $this->tagHandler->handleGet(array_slice($fragments, 1));
+        return $this->tagHandler->handleGet(array_slice($fragments, 1));
     }
 
     /**
@@ -777,19 +774,16 @@ class ApiV1
                     (string) ($params['elem'] ?? ''),
                     (string) ($params['data'] ?? '')
                 ));
-                break;
             case 'audio-position':
                 return Response::success($this->textHandler->formatSetAudioPosition(
                     $textId,
                     (int) ($params['position'] ?? 0)
                 ));
-                break;
             case 'reading-position':
                 return Response::success($this->textHandler->formatSetTextPosition(
                     $textId,
                     (int) ($params['position'] ?? 0)
                 ));
-                break;
             default:
                 return Response::error('Endpoint Not Found: ' . $frag2, 404);
         }
@@ -1547,7 +1541,6 @@ class ApiV1
                 } catch (\RuntimeException $e) {
                     return Response::error($e->getMessage(), 500);
                 }
-                break;
 
             default:
                 return Response::error(
@@ -1713,7 +1706,7 @@ class ApiV1
     private function parseQueryParams(string $uri): array
     {
         $query = parse_url($uri, PHP_URL_QUERY);
-        if ($query === null) {
+        if ($query === null || $query === false) {
             return [];
         }
         parse_str($query, $params);

@@ -152,7 +152,7 @@ class ExternalParser implements ParserInterface
         /** @psalm-suppress ForbiddenCode Required to check binary availability */
         $result = @shell_exec(sprintf('command -v %s 2>/dev/null', escapeshellarg($binary)));
 
-        if ($result !== null && trim($result) !== '') {
+        if ($result !== null && $result !== false && trim($result) !== '') {
             $this->available = true;
             $this->availabilityMessage = '';
             return;
@@ -175,7 +175,7 @@ class ExternalParser implements ParserInterface
         /** @psalm-suppress ForbiddenCode Required to check binary availability */
         $result = @shell_exec(sprintf('where %s 2>nul', escapeshellarg($binary)));
 
-        if ($result !== null && trim($result) !== '') {
+        if ($result !== null && $result !== false && trim($result) !== '') {
             $this->available = true;
             $this->availabilityMessage = '';
             return;

@@ -186,8 +186,10 @@ class RateLimitStorage
         ];
 
         // Atomic write using rename
-        $tempFile = $file . '.tmp.' . getmypid();
-        $success = @file_put_contents($tempFile, json_encode($stored), LOCK_EX);
+        $pid = getmypid();
+        $tempFile = $file . '.tmp.' . ($pid !== false ? $pid : random_int(1000, 9999));
+        $json = json_encode($stored);
+        $success = $json !== false ? @file_put_contents($tempFile, $json, LOCK_EX) : false;
 
         if ($success !== false) {
             @rename($tempFile, $file);

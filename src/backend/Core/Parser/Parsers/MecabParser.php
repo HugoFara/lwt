@@ -96,7 +96,7 @@ class MecabParser implements ParserInterface
             // Linux or macOS
             /** @psalm-suppress ForbiddenCode shell_exec is required to check MeCab availability */
             $result = @shell_exec("command -v mecab 2>/dev/null");
-            if ($result !== null && trim($result) !== '') {
+            if ($result !== null && $result !== false && trim($result) !== '') {
                 $this->mecabAvailable = true;
                 $this->availabilityMessage = '';
                 return;
@@ -111,7 +111,7 @@ class MecabParser implements ParserInterface
             foreach ($checks as $check) {
                 /** @psalm-suppress ForbiddenCode shell_exec is required to check MeCab availability */
                 $result = @shell_exec($check);
-                if ($result !== null && trim($result) !== '') {
+                if ($result !== null && $result !== false && trim($result) !== '') {
                     $this->mecabAvailable = true;
                     $this->availabilityMessage = '';
                     return;
@@ -149,7 +149,7 @@ class MecabParser implements ParserInterface
      */
     protected function preprocessText(string $text): string
     {
-        $text = preg_replace('/[ \t]+/u', ' ', $text);
+        $text = preg_replace('/[ \t]+/u', ' ', $text) ?? $text;
         return trim($text);
     }
 

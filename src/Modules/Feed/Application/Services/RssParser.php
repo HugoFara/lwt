@@ -365,11 +365,12 @@ class RssParser
      */
     private function cleanTitle(string $title): string
     {
+        $trimmed = trim($title);
         return preg_replace(
             ['/\s\s+/', '/\ \&\ /'],
             [' ', ' &amp; '],
-            trim($title)
-        );
+            $trimmed
+        ) ?? $trimmed;
     }
 
     /**
@@ -381,11 +382,12 @@ class RssParser
      */
     private function cleanTitleForDetection(string $title): string
     {
+        $trimmed = trim($title);
         return preg_replace(
             ['/\s\s+/', '/\ \&\ /', '/\"/'],
             [' ', ' &amp; ', '\"'],
-            trim($title)
-        );
+            $trimmed
+        ) ?? $trimmed;
     }
 
     /**
@@ -397,11 +399,12 @@ class RssParser
      */
     private function cleanDescription(string $desc): string
     {
+        $trimmed = trim($desc);
         return preg_replace(
             ['/\ \&\ /', '/<br(\s+)?\/?>/i', '/<br [^>]*?>/i', '/\<[^\>]*\>/', '/(\n)[\s^\n]*\n[\s]*/'],
             [' &amp; ', "\n", "\n", '', '$1$1'],
-            trim($desc)
-        );
+            $trimmed
+        ) ?? $trimmed;
     }
 
     /**
@@ -413,11 +416,12 @@ class RssParser
      */
     private function cleanDescriptionForDetection(string $desc): string
     {
+        $trimmed = trim($desc);
         return preg_replace(
             ['/\s\s+/', '/\ \&\ /', '/\<[^\>]*\>/', '/\"/'],
             [' ', ' &amp; ', '', '\"'],
-            trim($desc)
-        );
+            $trimmed
+        ) ?? $trimmed;
     }
 
     /**

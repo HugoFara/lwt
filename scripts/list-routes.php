@@ -26,6 +26,10 @@ if (!file_exists($routesFile)) {
 }
 
 $content = file_get_contents($routesFile);
+if ($content === false) {
+    fwrite(STDERR, "Error: Could not read routes.php\n");
+    exit(1);
+}
 
 // Extract routes using regex
 $routes = [];
@@ -73,7 +77,8 @@ if (in_array('--json', $argv)) {
 // Output based on format
 switch ($format) {
     case 'json':
-        echo json_encode($routes, JSON_PRETTY_PRINT) . "\n";
+        $json = json_encode($routes, JSON_PRETTY_PRINT);
+        echo ($json !== false ? $json : '[]') . "\n";
         break;
 
     case 'cypress':

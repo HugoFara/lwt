@@ -44,7 +44,8 @@ class ApplicationInfo
      */
     public static function getVersion(): string
     {
-        $formattedDate = \date("F d Y", \strtotime(self::RELEASE_DATE));
+        $timestamp = \strtotime(self::RELEASE_DATE);
+        $formattedDate = $timestamp !== false ? \date("F d Y", $timestamp) : self::RELEASE_DATE;
         return self::VERSION . " ($formattedDate)";
     }
 
@@ -58,7 +59,7 @@ class ApplicationInfo
         $r = 'v';
         $v = self::getVersion();
         // Escape any detail like "-fork"
-        $v = \preg_replace('/-\w+\d*/', '', $v);
+        $v = \preg_replace('/-\w+\d*/', '', $v) ?? $v;
         $pos = \strpos($v, ' ', 0);
         if ($pos === false) {
             throw new \InvalidArgumentException(
@@ -66,7 +67,7 @@ class ApplicationInfo
             );
         }
         $vn = \preg_split("/[.]/", \substr($v, 0, $pos));
-        if (\count($vn) < 3) {
+        if ($vn === false || \count($vn) < 3) {
             throw new \InvalidArgumentException(
                 "Invalid version format '$v': expected at least 3 version components (X.Y.Z)"
             );

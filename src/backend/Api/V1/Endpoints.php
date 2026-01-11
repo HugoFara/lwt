@@ -111,6 +111,9 @@ class Endpoints
     public static function resolve(string $method, string $requestUri): string|JsonResponse
     {
         $uriQuery = parse_url($requestUri, PHP_URL_PATH);
+        if ($uriQuery === null || $uriQuery === false) {
+            return Response::error('Invalid URL format', 400);
+        }
 
         // Support both legacy /api.php/v1/ and new /api/v1/ URL formats
         $matching = preg_match('/(.*?\/api(?:\.php)?\/v\d\/).+/', $uriQuery, $matches);

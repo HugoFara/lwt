@@ -320,7 +320,8 @@ class TextParsing
             if ($handle !== false) {
                 $size = filesize($file_name);
                 if ($size !== false && $size > 0) {
-                    $mecabed = fread($handle, $size) ?: '';
+                    $result = fread($handle, $size);
+                    $mecabed = $result !== false ? $result : '';
                 }
                 fclose($handle);
             }
@@ -337,11 +338,18 @@ class TextParsing
             $last_node_type = 0;
             $count = 0;
             $row = array(0, 0, 0, "", 0);
+            $separator = mb_chr(9);
+            if ($separator === false) {
+                $separator = "\t";
+            }
             foreach (explode(PHP_EOL, $mecabed) as $line) {
                 if (trim($line) == "") {
                     continue;
                 }
-                list($term, $node_type, $third) = explode(mb_chr(9), $line);
+                $parts = explode($separator, $line);
+                $term = $parts[0] ?? '';
+                $node_type = $parts[1] ?? '';
+                $third = $parts[2] ?? '';
                 if ($term_type == 2 || $term == 'EOP' && $third == '7') {
                     $sid += 1;
                 }

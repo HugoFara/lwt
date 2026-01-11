@@ -33,7 +33,11 @@ class InstallDemo
      */
     public function execute(): string
     {
-        $file = getcwd() . '/db/seeds/demo.sql';
+        $cwd = getcwd();
+        if ($cwd === false) {
+            return "Error: Could not determine current working directory";
+        }
+        $file = $cwd . '/db/seeds/demo.sql';
 
         if (!file_exists($file)) {
             return "Error: File '" . $file . "' does not exist";

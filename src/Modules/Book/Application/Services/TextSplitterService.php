@@ -104,7 +104,7 @@ class TextSplitterService
         $text = str_replace("\u{00AD}", '', $text);
 
         // Normalize multiple blank lines to double newline
-        $text = preg_replace('/\n{3,}/', "\n\n", $text);
+        $text = preg_replace('/\n{3,}/', "\n\n", $text) ?? $text;
 
         return trim($text);
     }
@@ -121,6 +121,9 @@ class TextSplitterService
     {
         // Split by double newlines (paragraphs)
         $paragraphs = preg_split('/\n\n+/', $text);
+        if ($paragraphs === false) {
+            return [];
+        }
         $chunks = [];
         $currentChunk = '';
         $chapterNum = 1;
@@ -220,6 +223,9 @@ class TextSplitterService
             PREG_SPLIT_NO_EMPTY
         );
 
+        if ($sentences === false) {
+            return [];
+        }
         return array_map('trim', $sentences);
     }
 

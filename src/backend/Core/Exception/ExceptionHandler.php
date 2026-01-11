@@ -265,7 +265,8 @@ class ExceptionHandler
         if ($exception instanceof LwtException) {
             $context = $exception->getContext();
             if (!empty($context)) {
-                $logMessage .= "\nContext: " . json_encode($context, JSON_UNESCAPED_SLASHES);
+                $encoded = json_encode($context, JSON_UNESCAPED_SLASHES);
+                $logMessage .= "\nContext: " . ($encoded !== false ? $encoded : '{}');
             }
         }
 
@@ -431,8 +432,10 @@ class ExceptionHandler
         if ($this->debug) {
             echo '<div class="debug">';
             echo '<h3>Debug Information</h3>';
-            echo '<p><strong>Exception:</strong> ' . htmlspecialchars(get_class($exception), ENT_QUOTES, 'UTF-8') . '</p>';
-            echo '<p><strong>Message:</strong> ' . htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>';
+            $exceptionClass = htmlspecialchars(get_class($exception), ENT_QUOTES, 'UTF-8');
+            $exceptionMsg = htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8');
+            echo '<p><strong>Exception:</strong> ' . $exceptionClass . '</p>';
+            echo '<p><strong>Message:</strong> ' . $exceptionMsg . '</p>';
             echo '<p><strong>File:</strong> ' . htmlspecialchars($exception->getFile(), ENT_QUOTES, 'UTF-8');
             echo ':' . $exception->getLine() . '</p>';
 

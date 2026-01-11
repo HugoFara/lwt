@@ -379,7 +379,7 @@ class UrlUtilities
             return '';
         }
         $query = parse_url($url, PHP_URL_QUERY);
-        if ($query === null) {
+        if ($query === null || $query === false) {
             return '';
         }
         parse_str($query, $parsed_query);
@@ -409,7 +409,7 @@ class UrlUtilities
             return '';
         }
         $query = parse_url($url, PHP_URL_QUERY);
-        if ($query === null) {
+        if ($query === null || $query === false) {
             return '';
         }
         parse_str($query, $parsed_query);

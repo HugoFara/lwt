@@ -136,6 +136,11 @@ class Escaping
      */
     public static function regexpToSqlSyntax(string $input): string
     {
+        $cleaned = preg_replace(
+            array('/\\\\(?![-xtfrnvup])/u', '/(?<=[[^])[\\\]-/u'),
+            array('', '-'),
+            $input
+        );
         $output = preg_replace_callback(
             "/\\\\x\\{([\\da-z]+)\\}/ui",
             function ($a) {
@@ -143,14 +148,10 @@ class Escaping
                 $dec = hexdec($num);
                 return "&#$dec;";
             },
-            preg_replace(
-                array('/\\\\(?![-xtfrnvup])/u', '/(?<=[[^])[\\\]-/u'),
-                array('', '-'),
-                $input
-            )
+            $cleaned ?? $input
         );
         return self::toSqlSyntaxNoNull(
-            html_entity_decode($output, ENT_NOQUOTES, 'UTF-8')
+            html_entity_decode($output ?? '', ENT_NOQUOTES, 'UTF-8')
         );
     }
 }

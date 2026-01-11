@@ -111,6 +111,9 @@ class Maintenance
             $mecab = (new TextParsingService())->getMecabPath($mecab_args);
 
             $fp = fopen($db_to_mecab, 'w');
+            if ($fp === false) {
+                return;
+            }
             foreach ($rows as $record) {
                 fwrite($fp, (string) $record['WoID'] . "\t" . (string) $record['WoTextLC'] . "\n");
             }
@@ -118,20 +121,23 @@ class Maintenance
 
             // STEP 2: process the data with MeCab and refine the output
             $handle = popen($mecab . escapeshellarg($db_to_mecab), "r");
-            if (feof($handle)) {
-                pclose($handle);
+            if ($handle === false || feof($handle)) {
+                if ($handle !== false) {
+                    pclose($handle);
+                }
                 return;
             }
             $data = array();
             while (!feof($handle)) {
                 $row = fgets($handle, 1024);
+                if ($row === false) {
+                    continue;
+                }
                 $arr = explode("4\t", $row, 2);
                 if (isset($arr[1]) && $arr[1] !== '') {
                     // NOTE: Test coverage requires MeCab installation - see tests/backend for integration tests
-                    $cnt = substr_count(
-                        preg_replace('$[^2678]\\t$u', '', $arr[1]),
-                        "\t"
-                    );
+                    $replaced = preg_replace('$[^2678]\\t$u', '', $arr[1]);
+                    $cnt = substr_count($replaced ?? '', "\t");
                     if (empty($cnt)) {
                         $cnt = 1;
                     }

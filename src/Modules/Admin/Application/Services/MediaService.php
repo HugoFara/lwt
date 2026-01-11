@@ -73,6 +73,10 @@ class MediaService
             "folders" => [$dir]
         ];
 
+        if ($mediadir === false) {
+            return $paths;
+        }
+
         // For each item in directory - add files to paths
         foreach ($mediadir as $path) {
             if (str_starts_with($path, ".") || is_dir($dir . '/' . $path)) {
@@ -80,7 +84,8 @@ class MediaService
             }
             // Encode path for Windows
             if ($isWindows) {
-                $encoded = mb_convert_encoding($path, 'UTF-8', 'Windows-1252');
+                $result = mb_convert_encoding($path, 'UTF-8', 'Windows-1252');
+                $encoded = is_string($result) ? $result : $path;
             } else {
                 $encoded = $path;
             }
@@ -111,8 +116,9 @@ class MediaService
      */
     public function getMediaPaths(): array
     {
+        $cwd = getcwd();
         $answer = [
-            "base_path" => basename(getcwd())
+            "base_path" => $cwd !== false ? basename($cwd) : ''
         ];
 
         if (!file_exists('media')) {
@@ -141,9 +147,11 @@ class MediaService
         $options = $this->searchMediaPaths($dir);
         foreach ($options["paths"] as $op) {
             if (in_array($op, $options["folders"])) {
-                $r .= '<option disabled="disabled">-- Directory: ' . htmlspecialchars($op, ENT_QUOTES, 'UTF-8') . '--</option>';
+                $escapedOp = htmlspecialchars($op, ENT_QUOTES, 'UTF-8');
+                $r .= '<option disabled="disabled">-- Directory: ' . $escapedOp . '--</option>';
             } else {
-                $r .= '<option value="' . htmlspecialchars($op, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($op, ENT_QUOTES, 'UTF-8') . '</option>';
+                $escapedOp = htmlspecialchars($op, ENT_QUOTES, 'UTF-8');
+                $r .= '<option value="' . $escapedOp . '">' . $escapedOp . '</option>';
             }
         }
         return $r;
@@ -166,15 +174,19 @@ class MediaService
             (only mp3, mp4, ogg, wav, webm files shown):
         </p>
         <p id="mediaSelectErrorMessage"></p>
-        ' . IconHelper::render('loader-2', ['id' => 'mediaSelectLoadingImg', 'alt' => 'Loading...', 'class' => 'icon-spin']) . '
+        ' .
+        IconHelper::render('loader-2', ['id' => 'mediaSelectLoadingImg', 'alt' => 'Loading...', 'class' => 'icon-spin'])
+        . '
         <select name="Dir" data-action="media-dir-select"
         data-target-field="' . htmlspecialchars($fieldName, ENT_QUOTES, 'UTF-8') . '">
         </select>
         <span class="click" data-action="refresh-media-select">
-            ' . IconHelper::render('refresh-cw', ['title' => 'Refresh Media Selection', 'alt' => 'Refresh Media Selection']) . '
+            ' .
+            IconHelper::render('refresh-cw', ['title' => 'Refresh Media Selection', 'alt' => 'Refresh Media Selection'])
+            . '
             Refresh
         </span>
-        <script type="application/json" data-lwt-media-select-config>' . json_encode($media) . '</script>';
+        <script type="application/json" data-lwt-media-select-config>' . (json_encode($media) ?: '{}') . '</script>';
         return $r;
     }
 
@@ -425,7 +437,12 @@ allowfullscreen type="text/html">
                 :title="isMuted ? 'Unmute' : 'Mute'"
             >
                 <?php echo IconHelper::render('volume-2', ['x-show' => '!isMuted && volume > 0.5', 'size' => 16]); ?>
-                <?php echo IconHelper::render('volume-1', ['x-show' => '!isMuted && volume > 0 && volume <= 0.5', 'size' => 16]); ?>
+                <?php
+                echo IconHelper::render(
+                    'volume-1',
+                    ['x-show' => '!isMuted && volume > 0 && volume <= 0.5', 'size' => 16]
+                );
+                ?>
                 <?php echo IconHelper::render('volume-x', ['x-show' => 'isMuted || volume === 0', 'size' => 16]); ?>
             </button>
             <div

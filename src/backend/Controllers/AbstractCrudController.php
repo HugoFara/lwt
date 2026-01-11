@@ -354,7 +354,7 @@ abstract class AbstractCrudController extends BaseController
         string $sessionKey = 'currentpage',
         int $default = 1
     ): int {
-        return InputValidator::getIntParam($requestKey, $default, 1);
+        return InputValidator::getInt($requestKey, $default, 1) ?? $default;
     }
 
     /**

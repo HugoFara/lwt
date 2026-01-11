@@ -241,21 +241,21 @@ class EpubParserService
     public function cleanHtmlContent(string $html): string
     {
         // Remove scripts and styles
-        $text = preg_replace('/<script\b[^>]*>.*?<\/script>/is', '', $html);
-        $text = preg_replace('/<style\b[^>]*>.*?<\/style>/is', '', $text);
+        $text = preg_replace('/<script\b[^>]*>.*?<\/script>/is', '', $html) ?? $html;
+        $text = preg_replace('/<style\b[^>]*>.*?<\/style>/is', '', $text) ?? $text;
 
         // Convert paragraph and div tags to double newlines
-        $text = preg_replace('/<\/?(p|div)[^>]*>/i', "\n\n", $text);
+        $text = preg_replace('/<\/?(p|div)[^>]*>/i', "\n\n", $text) ?? $text;
 
         // Convert line breaks to single newlines
-        $text = preg_replace('/<br\s*\/?>/i', "\n", $text);
+        $text = preg_replace('/<br\s*\/?>/i', "\n", $text) ?? $text;
 
         // Convert headings to preserve structure
-        $text = preg_replace('/<h[1-6][^>]*>/i', "\n\n", $text);
-        $text = preg_replace('/<\/h[1-6]>/i', "\n\n", $text);
+        $text = preg_replace('/<h[1-6][^>]*>/i', "\n\n", $text) ?? $text;
+        $text = preg_replace('/<\/h[1-6]>/i', "\n\n", $text) ?? $text;
 
         // Convert list items
-        $text = preg_replace('/<li[^>]*>/i', "\n- ", $text);
+        $text = preg_replace('/<li[^>]*>/i', "\n- ", $text) ?? $text;
 
         // Strip remaining HTML tags
         $text = strip_tags($text);
@@ -265,10 +265,10 @@ class EpubParserService
 
         // Normalize whitespace
         // Replace multiple spaces/tabs with single space
-        $text = preg_replace('/[ \t]+/', ' ', $text);
+        $text = preg_replace('/[ \t]+/', ' ', $text) ?? $text;
 
         // Normalize multiple newlines to double newline (paragraph break)
-        $text = preg_replace('/\n\s*\n/', "\n\n", $text);
+        $text = preg_replace('/\n\s*\n/', "\n\n", $text) ?? $text;
 
         // Remove leading/trailing whitespace from lines
         $lines = explode("\n", $text);
@@ -276,7 +276,7 @@ class EpubParserService
         $text = implode("\n", $lines);
 
         // Remove excessive newlines (more than 2)
-        $text = preg_replace('/\n{3,}/', "\n\n", $text);
+        $text = preg_replace('/\n{3,}/', "\n\n", $text) ?? $text;
 
         return trim($text);
     }

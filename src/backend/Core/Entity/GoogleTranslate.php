@@ -211,10 +211,13 @@ class GoogleTranslate
                 }
                 try {
                     $curl = curl_init($url);
-                    curl_setopt($curl, CURLOPT_COOKIEJAR, $cookie);
-                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($curl, CURLOPT_HTTPHEADER, self::$headers);
-                    curl_setopt($curl, CURLOPT_ENCODING, "gzip");
+                    if ($curl === false) {
+                        return false;
+                    }
+                    curl_setopt($curl, (int) CURLOPT_COOKIEJAR, $cookie);
+                    curl_setopt($curl, (int) CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($curl, (int) CURLOPT_HTTPHEADER, self::$headers ?? []);
+                    curl_setopt($curl, (int) CURLOPT_ENCODING, "gzip");
                     $output = curl_exec($curl);
                     unset($curl);
                     return $output;
@@ -225,10 +228,13 @@ class GoogleTranslate
                 }
             }
             $curl = curl_init($url);
+            if ($curl === false) {
+                return false;
+            }
             // curl_setopt($curl, CURLOPT_COOKIEFILE, $cookie); Commented in 2.7.0-fork, do not work
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, self::$headers);
-            curl_setopt($curl, CURLOPT_ENCODING, "gzip");
+            curl_setopt($curl, (int) CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, (int) CURLOPT_HTTPHEADER, self::$headers ?? []);
+            curl_setopt($curl, (int) CURLOPT_ENCODING, "gzip");
             $output = curl_exec($curl);
             unset($curl);
         } else {
@@ -274,8 +280,8 @@ class GoogleTranslate
      *
      * @param int[]|null $time_token (optional) array() from
      *                               https://translate.google.com. If empty, array(408254,585515986) is used
-     * @param string|null $domain    (optional) Connect to Google Domain
-     *                               (i.e. 'com' for  https://translate.google.com). If empty,
+     * @param string|null $domain    (optional) Connect to Google Domain (i.e. 'com' for
+     *                               https://translate.google.com). If empty,
      *                               a random domain will be used (the default value can be altered by changing DEFAULT_DOMAIN)
      *                               Possible values:
      *                               ('com.ar', 'at', 'com.au', 'be', 'com.br', 'ca', 'cat', 'ch', 'cl', 'cn', 'cz',
@@ -308,6 +314,9 @@ class GoogleTranslate
             return false;
         }
         $result = preg_replace('!([[,])(?=,)!', '$1[]', $curlResult);
+        if ($result === null) {
+            return false;
+        }
         /** @var array<int, mixed>|null $resultArray */
         $resultArray = json_decode($result, true);
         if (!is_array($resultArray)) {
