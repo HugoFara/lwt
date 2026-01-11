@@ -26,17 +26,20 @@
         <UndefinedGlobalVariable>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
-                <directory name="src/Modules" />
+                <directory name="src/Modules/Admin/Views" />
+                <directory name="src/Modules/Book/Views" />
+                <directory name="src/Modules/Dictionary/Views" />
+                <directory name="src/Modules/Feed/Views" />
+                <directory name="src/Modules/Home/Views" />
+                <directory name="src/Modules/Language/Views" />
+                <directory name="src/Modules/Review/Views" />
+                <directory name="src/Modules/Tags/Views" />
+                <directory name="src/Modules/Text/Views" />
+                <directory name="src/Modules/User/Views" />
+                <directory name="src/Modules/Vocabulary/Views" />
             </errorLevel>
         </UndefinedGlobalVariable>
 
-        <!-- Views receive variables via extract(), psalm cannot verify they are defined -->
-        <PossiblyUndefinedVariable>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-                <directory name="src/Modules" />
-            </errorLevel>
-        </PossiblyUndefinedVariable>
 
         <!-- Controllers pass variables to views, services have template vars -->
         <UnusedVariable>

@@ -244,6 +244,7 @@ endif; ?>
             <th class="feeds-filter-cell"><?php echo $recno; ?></th>
             <th class="">
                 <?php
+                /** @var array<string, mixed> $pagerParams */
                 echo PageLayoutHelper::buildPager(
                     $currentPage,
                     $pages,

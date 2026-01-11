@@ -250,7 +250,8 @@ class TextController extends BaseController
         $archId = $this->paramInt('arch');
         $op = $this->param('op');
         if ($delId !== null) {
-            $message = $this->textService->deleteText($delId);
+            $delResult = $this->textService->deleteText($delId);
+            $message = "Text deleted: {$delResult['sentences']} sentences, {$delResult['textItems']} text items";
         } elseif ($archId !== null) {
             $archResult = $this->textService->archiveText($archId);
             $message = "Text archived: {$archResult['sentences']} sentences, {$archResult['textItems']} text items";
