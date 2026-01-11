@@ -214,10 +214,10 @@ class GoogleTranslate
                     if ($curl === false) {
                         return false;
                     }
-                    curl_setopt($curl, (int) CURLOPT_COOKIEJAR, $cookie);
-                    curl_setopt($curl, (int) CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($curl, (int) CURLOPT_HTTPHEADER, self::$headers ?? []);
-                    curl_setopt($curl, (int) CURLOPT_ENCODING, "gzip");
+                    curl_setopt($curl, CURLOPT_COOKIEJAR, $cookie);
+                    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($curl, CURLOPT_HTTPHEADER, self::$headers ?? []);
+                    curl_setopt($curl, CURLOPT_ENCODING, "gzip");
                     $output = curl_exec($curl);
                     unset($curl);
                     return $output;
@@ -232,9 +232,9 @@ class GoogleTranslate
                 return false;
             }
             // curl_setopt($curl, CURLOPT_COOKIEFILE, $cookie); Commented in 2.7.0-fork, do not work
-            curl_setopt($curl, (int) CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, (int) CURLOPT_HTTPHEADER, self::$headers ?? []);
-            curl_setopt($curl, (int) CURLOPT_ENCODING, "gzip");
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, self::$headers ?? []);
+            curl_setopt($curl, CURLOPT_ENCODING, "gzip");
             $output = curl_exec($curl);
             unset($curl);
         } else {

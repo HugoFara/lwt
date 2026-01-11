@@ -45,10 +45,10 @@ class GoogleTimeToken
             }
             curl_setopt(
                 $curl,
-                (int) CURLOPT_HTTPHEADER,
+                CURLOPT_HTTPHEADER,
                 ["User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1"]
             );
-            curl_setopt($curl, (int) CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             $g = (string) curl_exec($curl);
             curl_close($curl);
             if ($g == '') {

@@ -35,17 +35,22 @@ $config = EnvLoader::getDatabaseConfig();
 
 $testDbName = 'test_' . $config['dbname'];
 
-// Suppress warnings for connection attempts
-$conn = @\mysqli_connect(
-    $config['server'],
-    $config['userid'],
-    $config['passwd'],
-    $testDbName,
-    socket: $config['socket'] ?? ''
-);
+// Try to connect - may fail in CI without MySQL
+try {
+    $conn = @\mysqli_connect(
+        $config['server'],
+        $config['userid'],
+        $config['passwd'],
+        $testDbName,
+        socket: $config['socket'] ?? ''
+    );
 
-if (!$conn) {
-    // Test database may not exist yet, which is fine
+    if (!$conn) {
+        // Test database may not exist yet, which is fine
+        exit(0);
+    }
+} catch (\mysqli_sql_exception $e) {
+    // MySQL not available (common in CI environments)
     exit(0);
 }
 

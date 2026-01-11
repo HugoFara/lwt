@@ -22,7 +22,13 @@
     </projectFiles>
 
     <issueHandlers>
-        <!-- Views use variables passed from controllers via extract() -->
+        <!--
+            ============================================
+            VIEW TEMPLATE PATTERN SUPPRESSIONS
+            ============================================
+            Views use PHP's include pattern where variables set in controllers
+            become available in the included view file. Psalm cannot trace this.
+        -->
         <UndefinedGlobalVariable>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
@@ -40,81 +46,7 @@
             </errorLevel>
         </UndefinedGlobalVariable>
 
-
-        <!-- Controllers pass variables to views, services have template vars -->
-        <UnusedVariable>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Controllers" />
-                <directory name="src/backend/Views" />
-                <directory name="src/Modules" />
-            </errorLevel>
-        </UnusedVariable>
-
-        <!-- Methods may have unused params for interface conformance or future use -->
-        <PossiblyUnusedParam>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Controllers" />
-                <directory name="src/backend/View" />
-                <directory name="src/Modules" />
-                <directory name="src/Shared" />
-            </errorLevel>
-        </PossiblyUnusedParam>
-
-        <!-- Public methods called via routing or kept for API completeness -->
-        <PossiblyUnusedMethod>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Controllers" />
-                <directory name="src/backend/Api" />
-                <directory name="src/backend/Core" />
-                <directory name="src/backend/View" />
-                <directory name="src/Modules" />
-                <directory name="src/Shared" />
-            </errorLevel>
-        </PossiblyUnusedMethod>
-
-        <!-- Curl constants are defined when curl extension is loaded -->
-        <UndefinedConstant>
-            <errorLevel type="suppress">
-                <file name="src/Modules/Text/Infrastructure/WhisperClient.php" />
-                <file name="src/Shared/UI/Assets/ViteHelper.php" />
-                <file name="src/backend/Core/Entity/GoogleTranslate.php" />
-                <file name="src/backend/Core/Integration/GoogleTimeToken.php" />
-            </errorLevel>
-        </UndefinedConstant>
-
-        <!-- Views call global functions that may be dynamically loaded -->
-        <UndefinedFunction>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-                <directory name="src/Modules" />
-            </errorLevel>
-        </UndefinedFunction>
-
-        <!-- Defensive null/type checks for safety with dynamic data -->
-        <RedundantCondition>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-                <directory name="src/Modules" />
-            </errorLevel>
-        </RedundantCondition>
-
-        <!-- Views receive variables from controllers via extract(), psalm cannot infer types -->
-        <TypeDoesNotContainType>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-                <directory name="src/Modules" />
-            </errorLevel>
-        </TypeDoesNotContainType>
-
-        <!-- View files document expected template variables with @var annotations -->
-        <UnnecessaryVarAnnotation>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-                <directory name="src/Modules" />
-            </errorLevel>
-        </UnnecessaryVarAnnotation>
-
-        <!-- Views receive untyped data via extract() from controllers -->
+        <!-- Mixed* issues in views due to extract() pattern passing untyped data -->
         <MixedArgument>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
@@ -129,26 +61,12 @@
             </errorLevel>
         </MixedArrayAccess>
 
-        <MixedArrayOffset>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-                <directory name="src/Modules/Book/Views" />
-            </errorLevel>
-        </MixedArrayOffset>
-
         <MixedAssignment>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
                 <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </MixedAssignment>
-
-        <MixedMethodCall>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-                <directory name="src/Modules/Book/Views" />
-            </errorLevel>
-        </MixedMethodCall>
 
         <MixedOperand>
             <errorLevel type="suppress">
@@ -157,38 +75,76 @@
             </errorLevel>
         </MixedOperand>
 
-        <!-- Docblock contradictions in views due to extract() pattern -->
+        <MixedMethodCall>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </MixedMethodCall>
+
+        <MixedArrayOffset>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </MixedArrayOffset>
+
+        <!-- Type checks in views for safety with dynamic data from extract() -->
+        <RedundantCondition>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+                <directory name="src/Modules/Admin/Views" />
+            </errorLevel>
+        </RedundantCondition>
+
+        <RedundantConditionGivenDocblockType>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+                <directory name="src/Modules/Admin/Views" />
+                <directory name="src/Modules/Feed/Views" />
+            </errorLevel>
+        </RedundantConditionGivenDocblockType>
+
+        <TypeDoesNotContainType>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+                <directory name="src/Modules/Admin/Views" />
+            </errorLevel>
+        </TypeDoesNotContainType>
+
         <DocblockTypeContradiction>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
-                <directory name="src/Modules/Book/Views" />
+                <directory name="src/Modules/Admin/Views" />
+                <directory name="src/Modules/Feed/Views" />
             </errorLevel>
         </DocblockTypeContradiction>
 
-        <!-- Redundant casts in views for safety with dynamic data -->
+        <!-- Views document expected variables with @var for clarity -->
+        <UnnecessaryVarAnnotation>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+                <directory name="src/Modules/Feed/Views" />
+            </errorLevel>
+        </UnnecessaryVarAnnotation>
+
+        <!-- Defensive casts in views for safety with dynamic data -->
         <RedundantCast>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
-                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </RedundantCast>
 
         <RedundantCastGivenDocblockType>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
-                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </RedundantCastGivenDocblockType>
 
-        <!-- Truthy/falsy comparisons in views for safety with dynamic data -->
         <RiskyTruthyFalsyComparison>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
-                <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </RiskyTruthyFalsyComparison>
 
-        <!-- Views may use unvalidated string data -->
         <PossiblyInvalidArgument>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
@@ -196,7 +152,39 @@
             </errorLevel>
         </PossiblyInvalidArgument>
 
-        <!-- Controllers use dynamic include paths for views -->
+        <!--
+            ============================================
+            CONTROLLER/ROUTING PATTERN SUPPRESSIONS
+            ============================================
+            Controllers use include to render views, making local variables
+            available to the view. Also, controller methods are called via
+            routing, not direct PHP calls.
+        -->
+
+        <!-- Variables set before include are passed to view files -->
+        <UnusedVariable>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="src/Modules/Book/Http" />
+                <directory name="src/Modules/Dictionary/Http" />
+                <directory name="src/Modules/Feed/Http" />
+                <directory name="src/Modules/Text/Http" />
+                <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Views" />
+            </errorLevel>
+        </UnusedVariable>
+
+        <!-- Parameters used by included view files -->
+        <UnusedParam>
+            <errorLevel type="suppress">
+                <directory name="src/Modules/Book/Http" />
+                <directory name="src/Modules/Text/Http" />
+                <directory name="src/Modules/Review/Application" />
+                <directory name="src/Modules/User/Application" />
+            </errorLevel>
+        </UnusedParam>
+
+        <!-- Controllers use dynamic include paths for view templates -->
         <UnresolvableInclude>
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
@@ -205,28 +193,39 @@
             </errorLevel>
         </UnresolvableInclude>
 
-        <!-- Return value may not be used by callers, especially on interfaces -->
+        <!--
+            ============================================
+            ROUTING/DI/API PATTERN SUPPRESSIONS
+            ============================================
+            Methods called via routing, DI container, or API endpoints
+            appear unused to static analysis.
+        -->
+
+        <!-- Public methods called via routing or DI container -->
+        <PossiblyUnusedMethod>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Api" />
+                <directory name="src/Modules" />
+            </errorLevel>
+        </PossiblyUnusedMethod>
+
+        <!-- Route params required by interface but not always used -->
+        <PossiblyUnusedParam>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="src/Modules" />
+            </errorLevel>
+        </PossiblyUnusedParam>
+
+        <!-- Return values may not be used by all callers -->
         <PossiblyUnusedReturnValue>
             <errorLevel type="suppress">
                 <directory name="src/Modules" />
             </errorLevel>
         </PossiblyUnusedReturnValue>
 
-        <!-- Properties may be kept for future use, DI, or ORM mapping -->
-        <PossiblyUnusedProperty>
-            <errorLevel type="suppress">
-                <directory name="src/Modules" />
-            </errorLevel>
-        </PossiblyUnusedProperty>
-
-        <!-- ORM-style column map properties kept for future use -->
-        <UnusedProperty>
-            <errorLevel type="suppress">
-                <directory name="src/Modules" />
-            </errorLevel>
-        </UnusedProperty>
-
-        <!-- Classes may be used via DI container or routing -->
+        <!-- Classes used via DI container or routing -->
         <UnusedClass>
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
@@ -235,17 +234,37 @@
             </errorLevel>
         </UnusedClass>
 
-        <!-- Private methods may have unused params for consistency or future use -->
-        <UnusedParam>
+        <!--
+            ============================================
+            DOMAIN/INFRASTRUCTURE PATTERN SUPPRESSIONS
+            ============================================
+            Properties and methods for ORM mapping, interface compliance,
+            and future API use.
+        -->
+
+        <!-- Properties for ORM mapping or future use -->
+        <PossiblyUnusedProperty>
             <errorLevel type="suppress">
                 <directory name="src/Modules" />
             </errorLevel>
-        </UnusedParam>
+        </PossiblyUnusedProperty>
+
+        <UnusedProperty>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+            </errorLevel>
+        </UnusedProperty>
+
+        <!-- Interface implementations may have different parameter names -->
+        <ParamNameMismatch>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+            </errorLevel>
+        </ParamNameMismatch>
 
         <!-- Repository implementations may have more specific param types -->
         <MoreSpecificImplementedParamType>
             <errorLevel type="suppress">
-                <directory name="src/backend/Core" />
                 <directory name="src/Modules" />
             </errorLevel>
         </MoreSpecificImplementedParamType>
@@ -253,17 +272,9 @@
         <!-- Repository implementations may have less specific return types -->
         <LessSpecificImplementedReturnType>
             <errorLevel type="suppress">
-                <directory name="src/backend/Core" />
                 <directory name="src/Modules" />
             </errorLevel>
         </LessSpecificImplementedReturnType>
 
-        <!-- Interface implementations may have different parameter names -->
-        <ParamNameMismatch>
-            <errorLevel type="suppress">
-                <directory name="src/Modules" />
-                <directory name="src/backend/Core" />
-            </errorLevel>
-        </ParamNameMismatch>
     </issueHandlers>
 </psalm>

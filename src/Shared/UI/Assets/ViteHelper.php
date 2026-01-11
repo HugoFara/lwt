@@ -56,13 +56,13 @@ class ViteHelper
         if ($ch === false) {
             return false;
         }
-        curl_setopt($ch, (int) CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, (int) CURLOPT_CONNECTTIMEOUT, 1);
-        curl_setopt($ch, (int) CURLOPT_TIMEOUT, 1);
-        curl_setopt($ch, (int) CURLOPT_NOBODY, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 1);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
         curl_exec($ch);
         /** @var int $httpCode */
-        $httpCode = curl_getinfo($ch, (int) CURLINFO_HTTP_CODE);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         return $httpCode === 200;
