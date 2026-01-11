@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Unit tests for the DictionaryFacade class.
  *
@@ -13,6 +11,8 @@ declare(strict_types=1);
  * @license  Unlicense <http://unlicense.org/>
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Tests\Modules\Dictionary;
 

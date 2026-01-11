@@ -8,6 +8,11 @@
     <!-- Only check PHP files -->
     <arg name="extensions" value="php"/>
 
+    <!-- Allow multiple classes per file in tests (for test helpers/stubs) -->
+    <rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses">
+        <exclude-pattern>*/tests/*</exclude-pattern>
+    </rule>
+
     <!-- Exclude directories -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/node_modules/*</exclude-pattern>
