@@ -24,10 +24,6 @@ use Lwt\Router\Middleware\AuthMiddleware;
 use Lwt\Router\Middleware\AdminMiddleware;
 use Lwt\Router\Middleware\CsrfMiddleware;
 
-require_once __DIR__ . '/Middleware/AuthMiddleware.php';
-require_once __DIR__ . '/Middleware/AdminMiddleware.php';
-require_once __DIR__ . '/Middleware/CsrfMiddleware.php';
-
 /**
  * Auth middleware for protected routes.
  * Includes CSRF protection for state-changing requests (POST, PUT, DELETE).
@@ -81,17 +77,33 @@ function registerRoutes(Router $router): void
     $router->get('/text/display', 'Lwt\\Modules\\Text\\Http\\TextController@display', AUTH_MIDDLEWARE);
 
     // Print text (TextPrintController from Text module)
-    $router->registerWithMiddleware('/text/print', 'Lwt\\Modules\\Text\\Http\\TextPrintController@printAnnotated', AUTH_MIDDLEWARE);
-    $router->registerWithMiddleware('/text/print-plain', 'Lwt\\Modules\\Text\\Http\\TextPrintController@printPlain', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/text/print',
+        'Lwt\\Modules\\Text\\Http\\TextPrintController@printAnnotated',
+        AUTH_MIDDLEWARE
+    );
+    $router->registerWithMiddleware(
+        '/text/print-plain',
+        'Lwt\\Modules\\Text\\Http\\TextPrintController@printPlain',
+        AUTH_MIDDLEWARE
+    );
 
     // Set text mode
-    $router->registerWithMiddleware('/text/set-mode', 'Lwt\\Modules\\Text\\Http\\TextController@setMode', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/text/set-mode',
+        'Lwt\\Modules\\Text\\Http\\TextController@setMode',
+        AUTH_MIDDLEWARE
+    );
 
     // Check text
     $router->registerWithMiddleware('/text/check', 'Lwt\\Modules\\Text\\Http\\TextController@check', AUTH_MIDDLEWARE);
 
     // Archived texts
-    $router->registerWithMiddleware('/text/archived', 'Lwt\\Modules\\Text\\Http\\TextController@archived', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/text/archived',
+        'Lwt\\Modules\\Text\\Http\\TextController@archived',
+        AUTH_MIDDLEWARE
+    );
 
     // ==================== WORD/TERM ROUTES (PROTECTED) ====================
     // Split into focused controllers: TermEditController, TermDisplayController,
@@ -193,9 +205,17 @@ function registerRoutes(Router $router): void
     );
     // Update term status (TermStatusController)
     // New RESTful route: PUT /vocabulary/term/123/status
-    $router->put('/vocabulary/term/{wid:int}/status', 'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@updateStatus', AUTH_MIDDLEWARE);
+    $router->put(
+        '/vocabulary/term/{wid:int}/status',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@updateStatus',
+        AUTH_MIDDLEWARE
+    );
     // Legacy route: PUT /vocabulary/term/status?wid=123
-    $router->put('/vocabulary/term/status', 'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@updateStatus', AUTH_MIDDLEWARE);
+    $router->put(
+        '/vocabulary/term/status',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@updateStatus',
+        AUTH_MIDDLEWARE
+    );
     // Delete term (TermApiController)
     $router->registerWithMiddleware(
         '/vocabulary/term/delete',
@@ -262,7 +282,11 @@ function registerRoutes(Router $router): void
     // ==================== LANGUAGE ROUTES (PROTECTED) ====================
 
     // Edit languages (Language module)
-    $router->registerWithMiddleware('/languages', 'Lwt\\Modules\\Language\\Http\\LanguageController@index', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/languages',
+        'Lwt\\Modules\\Language\\Http\\LanguageController@index',
+        AUTH_MIDDLEWARE
+    );
 
     // ==================== TAG ROUTES (PROTECTED) ====================
 
@@ -284,7 +308,11 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware('/feeds/edit', 'Lwt\\Modules\\Feed\\Http\\FeedController@edit', AUTH_MIDDLEWARE);
 
     // Feed wizard
-    $router->registerWithMiddleware('/feeds/wizard', 'Lwt\\Modules\\Feed\\Http\\FeedWizardController@wizard', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/feeds/wizard',
+        'Lwt\\Modules\\Feed\\Http\\FeedWizardController@wizard',
+        AUTH_MIDDLEWARE
+    );
 
     // ==================== BOOK ROUTES (PROTECTED) ====================
     // Book module routes for EPUB import and book management
@@ -305,41 +333,93 @@ function registerRoutes(Router $router): void
     // All dictionary routes use DictionaryController from the Dictionary module
 
     // Dictionaries list
-    $router->registerWithMiddleware('/dictionaries', 'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@index', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/dictionaries',
+        'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@index',
+        AUTH_MIDDLEWARE
+    );
 
     // Import wizard
-    $router->registerWithMiddleware('/dictionaries/import', 'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@import', AUTH_MIDDLEWARE, 'GET');
-    $router->registerWithMiddleware('/dictionaries/import', 'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@processImport', AUTH_MIDDLEWARE, 'POST');
+    $router->registerWithMiddleware(
+        '/dictionaries/import',
+        'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@import',
+        AUTH_MIDDLEWARE,
+        'GET'
+    );
+    $router->registerWithMiddleware(
+        '/dictionaries/import',
+        'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@processImport',
+        AUTH_MIDDLEWARE,
+        'POST'
+    );
 
     // Delete dictionary
-    $router->registerWithMiddleware('/dictionaries/delete', 'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@delete', AUTH_MIDDLEWARE, 'POST');
+    $router->registerWithMiddleware(
+        '/dictionaries/delete',
+        'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@delete',
+        AUTH_MIDDLEWARE,
+        'POST'
+    );
 
     // Preview (AJAX)
-    $router->registerWithMiddleware('/dictionaries/preview', 'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@preview', AUTH_MIDDLEWARE, 'POST');
+    $router->registerWithMiddleware(
+        '/dictionaries/preview',
+        'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@preview',
+        AUTH_MIDDLEWARE,
+        'POST'
+    );
 
     // ==================== ADMIN ROUTES (ADMIN ONLY) ====================
     // These routes require admin role, not just authentication
 
     // Backup & Restore (Admin module)
-    $router->registerWithMiddleware('/admin/backup', 'Lwt\\Modules\\Admin\\Http\\AdminController@backup', ADMIN_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/admin/backup',
+        'Lwt\\Modules\\Admin\\Http\\AdminController@backup',
+        ADMIN_MIDDLEWARE
+    );
 
     // Database Wizard (Admin module)
-    $router->registerWithMiddleware('/admin/wizard', 'Lwt\\Modules\\Admin\\Http\\AdminController@wizard', ADMIN_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/admin/wizard',
+        'Lwt\\Modules\\Admin\\Http\\AdminController@wizard',
+        ADMIN_MIDDLEWARE
+    );
 
     // Statistics (Admin module) - allow regular users to see statistics
-    $router->registerWithMiddleware('/admin/statistics', 'Lwt\\Modules\\Admin\\Http\\AdminController@statistics', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/admin/statistics',
+        'Lwt\\Modules\\Admin\\Http\\AdminController@statistics',
+        AUTH_MIDDLEWARE
+    );
 
     // Install Demo (Admin module)
-    $router->registerWithMiddleware('/admin/install-demo', 'Lwt\\Modules\\Admin\\Http\\AdminController@installDemo', ADMIN_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/admin/install-demo',
+        'Lwt\\Modules\\Admin\\Http\\AdminController@installDemo',
+        ADMIN_MIDDLEWARE
+    );
 
     // Settings (Admin module)
-    $router->registerWithMiddleware('/admin/settings', 'Lwt\\Modules\\Admin\\Http\\AdminController@settings', ADMIN_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/admin/settings',
+        'Lwt\\Modules\\Admin\\Http\\AdminController@settings',
+        ADMIN_MIDDLEWARE
+    );
 
     // Server data (Admin module)
-    $router->registerWithMiddleware('/admin/server-data', 'Lwt\\Modules\\Admin\\Http\\AdminController@serverData', ADMIN_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/admin/server-data',
+        'Lwt\\Modules\\Admin\\Http\\AdminController@serverData',
+        ADMIN_MIDDLEWARE
+    );
 
     // Save setting and redirect (Admin module)
-    $router->registerWithMiddleware('/admin/save-setting', 'Lwt\\Modules\\Admin\\Http\\AdminController@saveSetting', ADMIN_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/admin/save-setting',
+        'Lwt\\Modules\\Admin\\Http\\AdminController@saveSetting',
+        ADMIN_MIDDLEWARE
+    );
 
     // ==================== AUTHENTICATION ROUTES (PUBLIC) ====================
     // All auth routes use UserController from the User module
@@ -381,7 +461,11 @@ function registerRoutes(Router $router): void
     $router->register('/microsoft/start', 'Lwt\\Modules\\User\\Http\\MicrosoftController@start');
     $router->register('/microsoft/callback', 'Lwt\\Modules\\User\\Http\\MicrosoftController@callback');
     $router->register('/microsoft/link-confirm', 'Lwt\\Modules\\User\\Http\\MicrosoftController@linkConfirm', 'GET');
-    $router->register('/microsoft/link-confirm', 'Lwt\\Modules\\User\\Http\\MicrosoftController@processLinkConfirm', 'POST');
+    $router->register(
+        '/microsoft/link-confirm',
+        'Lwt\\Modules\\User\\Http\\MicrosoftController@processLinkConfirm',
+        'POST'
+    );
 
     // ==================== API ROUTES ====================
 
@@ -393,7 +477,19 @@ function registerRoutes(Router $router): void
     $router->registerPrefix('/api.php/v1', 'ApiController@v1');
 
     // Translation APIs (PROTECTED) - used by authenticated users
-    $router->registerWithMiddleware('/api/translate', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@translate', AUTH_MIDDLEWARE);
-    $router->registerWithMiddleware('/api/google', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@google', AUTH_MIDDLEWARE);
-    $router->registerWithMiddleware('/api/glosbe', 'Lwt\\Modules\\Dictionary\\Http\\TranslationController@glosbe', AUTH_MIDDLEWARE);
+    $router->registerWithMiddleware(
+        '/api/translate',
+        'Lwt\\Modules\\Dictionary\\Http\\TranslationController@translate',
+        AUTH_MIDDLEWARE
+    );
+    $router->registerWithMiddleware(
+        '/api/google',
+        'Lwt\\Modules\\Dictionary\\Http\\TranslationController@google',
+        AUTH_MIDDLEWARE
+    );
+    $router->registerWithMiddleware(
+        '/api/glosbe',
+        'Lwt\\Modules\\Dictionary\\Http\\TranslationController@glosbe',
+        AUTH_MIDDLEWARE
+    );
 }
