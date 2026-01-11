@@ -164,10 +164,11 @@ class Configuration
         @mysqli_query($dbconnection, "SET SESSION sql_mode = 'STRICT_ALL_TABLES'");
 
         // Set shorter timeouts for test database connections to prevent zombie locks
+        // Use 300s (5 min) to allow for slow external HTTP requests in translation tests
         if (str_starts_with($dbname, 'test_')) {
-            @mysqli_query($dbconnection, "SET SESSION wait_timeout = 60");
-            @mysqli_query($dbconnection, "SET SESSION interactive_timeout = 60");
-            @mysqli_query($dbconnection, "SET SESSION lock_wait_timeout = 30");
+            @mysqli_query($dbconnection, "SET SESSION wait_timeout = 300");
+            @mysqli_query($dbconnection, "SET SESSION interactive_timeout = 300");
+            @mysqli_query($dbconnection, "SET SESSION lock_wait_timeout = 60");
         }
 
         return $dbconnection;

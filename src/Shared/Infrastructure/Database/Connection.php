@@ -60,6 +60,20 @@ class Connection
     }
 
     /**
+     * Check if the current connection is still alive.
+     *
+     * @return bool True if connection is alive, false otherwise
+     */
+    public static function isAlive(): bool
+    {
+        if (self::$instance === null) {
+            return false;
+        }
+
+        return @self::$instance->ping();
+    }
+
+    /**
      * Set the database connection instance.
      *
      * @param \mysqli $connection The mysqli connection
