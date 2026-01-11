@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Hover Save Result View - Shows result after saving a word via hover
  *
@@ -23,6 +21,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Views;
 

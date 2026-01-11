@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Table Test Header Row View - Column headers for test table
  *
@@ -14,6 +12,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Review;
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief Helper for rendering Lucide icons.
@@ -18,6 +16,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/files/src-backend-View-Helper-IconHelper.html
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Shared\UI\Helpers;
 

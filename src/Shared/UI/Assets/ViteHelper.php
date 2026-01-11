@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief Vite asset helper for development and production modes.
@@ -19,6 +17,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/files/src-backend-View-Helper-ViteHelper.html
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Shared\UI\Assets;
 

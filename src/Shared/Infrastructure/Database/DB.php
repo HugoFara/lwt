@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief Database facade for simplified database operations.
@@ -15,6 +13,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-database-db.html
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Database;
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Word Edit Result View - Shows result after saving/updating a word
  *
@@ -27,6 +25,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 

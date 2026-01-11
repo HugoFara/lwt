@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Word List View - Alpine.js SPA version
  *
@@ -26,6 +24,8 @@ declare(strict_types=1);
  *
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 

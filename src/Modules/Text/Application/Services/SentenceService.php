@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Sentence Service - Sentence operations and retrieval functions.
  *
@@ -17,6 +15,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0 Migrated from Core/Text/sentence_operations.php
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Application\Services;
 

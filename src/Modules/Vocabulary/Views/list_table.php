@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Word list table view
  *
@@ -24,6 +22,8 @@ declare(strict_types=1);
  *
  * @psalm-suppress TypeDoesNotContainType View included from different contexts
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 

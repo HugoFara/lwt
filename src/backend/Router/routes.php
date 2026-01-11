@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * LWT Route Configuration
  *
@@ -17,6 +15,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0 All routes now use controller methods
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Router;
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Language Form View
  *
@@ -23,6 +21,8 @@ declare(strict_types=1);
  *
  * @psalm-suppress TypeDoesNotContainType View included from different contexts
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Modules\Language\Views;
 

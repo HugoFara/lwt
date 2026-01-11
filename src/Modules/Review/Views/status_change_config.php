@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Status Change Config View - JavaScript config for status change page
  *
@@ -22,6 +20,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Review;
 

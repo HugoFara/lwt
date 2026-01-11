@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Tag Form View - New/Edit tag form
  *
@@ -22,6 +20,8 @@ declare(strict_types=1);
  *
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Modules\Tags\Views;
 

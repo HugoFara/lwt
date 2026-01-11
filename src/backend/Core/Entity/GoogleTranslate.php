@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief Defines GoogleTranslate class for word translation
@@ -24,6 +22,8 @@ declare(strict_types=1);
  * @category Lwt
  * @package  Lwt
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Core\Entity;
 

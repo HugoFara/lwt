@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * WordPress Controller
  *
@@ -16,6 +14,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Modules\User\Http;
 

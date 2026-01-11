@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Archived Text Edit Form View
  *
@@ -20,6 +18,8 @@ declare(strict_types=1);
  *
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Text;
 

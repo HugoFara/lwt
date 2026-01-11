@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief Centralized input validation utilities.
@@ -17,6 +15,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-input-validator.html
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Http;
 

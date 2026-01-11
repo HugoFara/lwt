@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Hover Save Result View - Shows result after saving a word via hover
  *
@@ -25,6 +23,8 @@ declare(strict_types=1);
  *
  * @psalm-suppress PossiblyUndefinedVariable - Variables are set by the including controller
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 

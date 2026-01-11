@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief Start a PHP session.
@@ -15,6 +13,8 @@ declare(strict_types=1);
  * @link    https://hugofara.github.io/lwt/docs/php/files/inc-start-session.html
  * @since   2.0.3-fork
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Core\Bootstrap;
 

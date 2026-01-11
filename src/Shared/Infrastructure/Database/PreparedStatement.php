@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief Prepared statement wrapper class for safe parameterized queries.
@@ -15,6 +13,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-database-preparedstatement.html
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Database;
 

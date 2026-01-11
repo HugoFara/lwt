@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Text Navigation Service - Navigation utilities for previous/next texts.
  *
@@ -14,6 +12,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0 Migrated from Core/Text/text_navigation.php
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Application\Services;
 

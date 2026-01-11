@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * New word form for the words list page
  *
@@ -22,6 +20,8 @@ declare(strict_types=1);
  *
  * @psalm-suppress PossiblyUndefinedVariable Variables passed from controller
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 

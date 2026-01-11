@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief WordPress Login Check
@@ -17,6 +15,8 @@ declare(strict_types=1);
  * @link    https://hugofara.github.io/lwt/docs/php/files/inc-wp-logincheck.html
  * @since   2.0.3-fork
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Integration;
 

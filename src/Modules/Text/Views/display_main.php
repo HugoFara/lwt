@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Text Display Main View (Desktop)
  *
@@ -26,6 +24,8 @@ declare(strict_types=1);
  *
  * @psalm-suppress UndefinedGlobalVariable Variables are injected by including file
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Text;
 

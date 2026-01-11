@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Bulk Save Result View - Shows result after saving bulk translated words
  *
@@ -26,6 +24,8 @@ declare(strict_types=1);
  * @since    3.0.0
  *
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 

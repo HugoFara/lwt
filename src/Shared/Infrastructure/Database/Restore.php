@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief Database restore operations.
@@ -18,6 +16,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0 Split from database_operations.php
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Database;
 

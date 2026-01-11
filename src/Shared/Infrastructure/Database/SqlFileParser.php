@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief SQL file parsing utilities.
@@ -17,6 +15,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-sql-file-parser.html
  * @since    3.0.0 Split from kernel_utility.php
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Database;
 

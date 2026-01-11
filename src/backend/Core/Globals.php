@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief Centralized global state management for LWT.
@@ -19,6 +17,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-LWT-Globals.html
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Core;
 

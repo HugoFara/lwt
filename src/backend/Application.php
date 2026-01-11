@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * LWT Application Bootstrap
  *
@@ -17,6 +15,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/files/src-backend-Application.html
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt;
 

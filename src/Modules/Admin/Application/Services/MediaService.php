@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Media Service - Business logic for media file handling and player generation
  *
@@ -19,6 +17,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Modules\Admin\Application\Services;
 
@@ -227,9 +227,8 @@ class MediaService
         ) {
             $url = "https://www.youtube.com/embed/" . $matches[1] . "?t=" . $offset;
             $online = true;
-        }
-        // Check for YouTube short URL (youtu.be/)
-        elseif (
+        } elseif (
+            // Check for YouTube short URL (youtu.be/)
             preg_match(
                 "/(?:https:\/\/)?youtu\.be\/([\d\w]+)/iu",
                 $path,
@@ -238,9 +237,8 @@ class MediaService
         ) {
             $url = "https://www.youtube.com/embed/" . $matches[1] . "?t=" . $offset;
             $online = true;
-        }
-        // Check for Dailymotion
-        elseif (
+        } elseif (
+            // Check for Dailymotion
             preg_match(
                 "/(?:https:\/\/)?dai\.ly\/([^\?]+)/iu",
                 $path,
@@ -249,9 +247,8 @@ class MediaService
         ) {
             $url = "https://www.dailymotion.com/embed/video/" . $matches[1];
             $online = true;
-        }
-        // Check for Vimeo
-        elseif (
+        } elseif (
+            // Check for Vimeo
             preg_match(
                 "/(?:https:\/\/)?vimeo\.com\/(\d+)/iu",
                 $path,

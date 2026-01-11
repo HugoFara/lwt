@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * \file
  * \brief Helper for word status display and filtering.
@@ -15,6 +13,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/files/src-backend-View-Helper-StatusHelper.html
  * @since    3.0.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\View\Helper;
 

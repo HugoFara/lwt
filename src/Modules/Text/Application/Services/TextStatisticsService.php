@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /**
  * Text Statistics Service - Word count and statistics functions.
  *
@@ -13,6 +14,8 @@
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0 Migrated from Core/Text/text_statistics.php
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Application\Services;
 
@@ -35,7 +38,6 @@ use Lwt\Shared\UI\Helpers\IconHelper;
  */
 class TextStatisticsService
 {
-
     /**
      * Return statistics about a list of text IDs.
      *

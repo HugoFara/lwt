@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Feed Edit Text Form View
  *
@@ -18,6 +16,8 @@ declare(strict_types=1);
  *
  * @psalm-suppress PossiblyUndefinedVariable - Variables are set by the including controller
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Feed;
 

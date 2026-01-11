@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Multi-Word New Form View - Form for creating a new multi-word expression
  *
@@ -25,6 +23,8 @@ declare(strict_types=1);
  *
  * @psalm-suppress TypeDoesNotContainType Defensive null checks
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Language Entity
  *
@@ -14,6 +12,8 @@ declare(strict_types=1);
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-classes-language.html
  * @since    2.7.0
  */
+
+declare(strict_types=1);
 
 namespace Lwt\Modules\Language\Domain;
 
