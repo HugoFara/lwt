@@ -46,13 +46,12 @@ jobs:
         if: runner.os != 'Windows'
         run: composer install --prefer-dist --no-progress
 
-      - name: Install GPG (Windows)
-        if: runner.os == 'Windows'
-        run: choco install gnupg -y
-
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
-        run: composer install --prefer-dist --no-progress
+        # Remove phpdocumentor (not needed for tests) to avoid GPG verification issues
+        run: |
+          composer remove --dev --no-update phpdocumentor/shim
+          composer install --prefer-dist --no-progress
 
       - name: Run PHPUnit tests
         run: composer run-script test:no-coverage
