@@ -22,6 +22,11 @@ namespace Lwt\Tests;
 
 use Lwt\Core\Bootstrap\EnvLoader;
 
+// Skip if mysqli extension is not available
+if (!extension_loaded('mysqli')) {
+    exit(0);
+}
+
 // Load environment configuration
 require_once __DIR__ . '/../src/backend/Core/Bootstrap/EnvLoader.php';
 
@@ -31,7 +36,7 @@ $config = EnvLoader::getDatabaseConfig();
 $testDbName = 'test_' . $config['dbname'];
 
 // Suppress warnings for connection attempts
-$conn = @mysqli_connect(
+$conn = @\mysqli_connect(
     $config['server'],
     $config['userid'],
     $config['passwd'],
@@ -45,7 +50,7 @@ if (!$conn) {
 }
 
 // Find connections idle for more than 30 seconds
-$result = mysqli_query(
+$result = \mysqli_query(
     $conn,
     "SELECT id FROM information_schema.processlist
      WHERE db = '$testDbName'
@@ -55,15 +60,15 @@ $result = mysqli_query(
 
 if ($result) {
     $killed = 0;
-    while ($row = mysqli_fetch_row($result)) {
-        @mysqli_query($conn, "KILL " . $row[0]);
+    while ($row = \mysqli_fetch_row($result)) {
+        @\mysqli_query($conn, "KILL " . $row[0]);
         $killed++;
     }
-    mysqli_free_result($result);
+    \mysqli_free_result($result);
 
     if ($killed > 0) {
         echo "Cleaned up $killed stale database connection(s)\n";
     }
 }
 
-mysqli_close($conn);
+\mysqli_close($conn);
