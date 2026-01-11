@@ -26,6 +26,7 @@ namespace Lwt\Modules\Vocabulary\Views;
 
 use Lwt\Core\StringUtils;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
+use Lwt\View\Helper\StatusHelper;
 
 // Type assertions for variables passed from controller
 assert(is_int($wid));
@@ -36,7 +37,7 @@ assert($term instanceof \Lwt\Modules\Vocabulary\Domain\Term);
 
 $hex = StringUtils::toClassName($term->textLowercase());
 ?>
-<p>Status: <?php echo (string)get_colored_status_msg($status); ?></p>
+<p>Status: <?php echo StatusHelper::getColoredMessage($status); ?></p>
 
 <script type="application/json" data-lwt-set-status-result-config>
 <?php echo json_encode([

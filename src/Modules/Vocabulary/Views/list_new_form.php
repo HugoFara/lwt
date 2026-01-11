@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace Lwt\Views\Word;
 
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
+use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
@@ -107,7 +108,7 @@ assert(is_string($languageName));
 <td class="has-text-right" colspan="2">  &nbsp;
 <?php
 /** @psalm-suppress PossiblyUndefinedVariable */
-echo (string)createDictLinksInEditWin2(
+echo (new DictionaryAdapter())->createDictLinksInEditWin2(
     $lgid,
     'WoSentence',
     'WoText'

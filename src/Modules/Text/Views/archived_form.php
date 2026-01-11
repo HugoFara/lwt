@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace Lwt\Views\Text;
 
 use Lwt\Modules\Admin\Application\Services\MediaService;
+use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
@@ -193,7 +194,7 @@ $languagesTyped = $languages;
             <div class="field-body">
                 <div class="field">
                     <div class="control">
-                        <?php echo (string)getArchivedTextTags($textIdTyped); ?>
+                        <?php echo TagsFacade::getArchivedTextTagsHtml($textIdTyped); ?>
                     </div>
                 </div>
             </div>

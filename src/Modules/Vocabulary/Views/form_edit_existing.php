@@ -35,6 +35,7 @@ namespace Lwt\Views\Word;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
+use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
@@ -141,14 +142,15 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        <td class="has-text-right" colspan="2">
            <?php
            /** @psalm-suppress PossiblyUndefinedVariable */
+            $dictAdapter = new DictionaryAdapter();
             if ($fromAnn !== '') {
-                echo (string)createDictLinksInEditWin2(
+                echo $dictAdapter->createDictLinksInEditWin2(
                     $lang,
                     'WoSentence',
                     'WoText'
                 );
             } else {
-                echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin(
+                echo $dictAdapter->createDictLinksInEditWin(
                     $lang,
                     $term,
                     'WoSentence',

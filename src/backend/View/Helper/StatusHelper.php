@@ -272,4 +272,20 @@ class StatusHelper
         $statuses = \Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses();
         return $statuses[$status]['abbr'] ?? '';
     }
+
+    /**
+     * Get a colored status message HTML for a given status code.
+     *
+     * This is a convenience method that looks up name and abbreviation automatically.
+     *
+     * @param int $status Status value (1-5, 98, or 99)
+     *
+     * @return string HTML span with status styling
+     */
+    public static function getColoredMessage(int $status): string
+    {
+        $name = self::getName($status);
+        $abbr = self::getAbbr($status);
+        return self::buildColoredMessage($status, $name, $abbr);
+    }
 }

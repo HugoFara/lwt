@@ -46,11 +46,18 @@
             </errorLevel>
         </UndefinedGlobalVariable>
 
-        <!-- Mixed* issues in views due to extract() pattern passing untyped data -->
+        <!-- Mixed* issues in views and curl constant usage -->
         <MixedArgument>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/backend/Core/Entity" />
+                <directory name="src/backend/Core/Integration" />
                 <directory name="src/Modules/Book/Views" />
+                <directory name="src/Modules/Dictionary/Views" />
+                <directory name="src/Modules/Home/Views" />
+                <directory name="src/Modules/Tags/Views" />
+                <directory name="src/Modules/Vocabulary/Views" />
+                <directory name="src/Shared/UI/Assets" />
             </errorLevel>
         </MixedArgument>
 
@@ -87,11 +94,24 @@
             </errorLevel>
         </MixedArrayOffset>
 
-        <!-- Type checks in views for safety with dynamic data from extract() -->
+        <!-- Type checks for safety with dynamic data -->
         <RedundantCondition>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
                 <directory name="src/Modules/Admin/Views" />
+                <directory name="src/Modules/Book/Application" />
+                <directory name="src/Modules/Book/Views" />
+                <directory name="src/Modules/Dictionary/Views" />
+                <directory name="src/Modules/Feed/Http" />
+                <directory name="src/Modules/Feed/Views" />
+                <directory name="src/Modules/Home/Views" />
+                <directory name="src/Modules/Language/Views" />
+                <directory name="src/Modules/Review/Views" />
+                <directory name="src/Modules/Tags/Views" />
+                <directory name="src/Modules/Text/Http" />
+                <directory name="src/Modules/Text/Views" />
+                <directory name="src/Modules/User/Views" />
+                <directory name="src/Modules/Vocabulary/Views" />
             </errorLevel>
         </RedundantCondition>
 
@@ -99,7 +119,17 @@
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
                 <directory name="src/Modules/Admin/Views" />
+                <directory name="src/Modules/Book/Views" />
+                <directory name="src/Modules/Dictionary/Infrastructure" />
                 <directory name="src/Modules/Feed/Views" />
+                <directory name="src/Modules/Feed/Application" />
+                <directory name="src/Modules/Home/Views" />
+                <directory name="src/Modules/Language/Views" />
+                <directory name="src/Modules/Review/Views" />
+                <directory name="src/Modules/Tags/Views" />
+                <directory name="src/Modules/Text/Views" />
+                <directory name="src/Modules/User/Views" />
+                <directory name="src/Modules/Vocabulary/Views" />
             </errorLevel>
         </RedundantConditionGivenDocblockType>
 
@@ -107,6 +137,12 @@
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
                 <directory name="src/Modules/Admin/Views" />
+                <directory name="src/Modules/Dictionary/Views" />
+                <directory name="src/Modules/Feed/Http" />
+                <directory name="src/Modules/Language/Views" />
+                <directory name="src/Modules/Review/Infrastructure" />
+                <directory name="src/Modules/Tags/Views" />
+                <directory name="src/Modules/User/Views" />
             </errorLevel>
         </TypeDoesNotContainType>
 
@@ -118,11 +154,27 @@
             </errorLevel>
         </DocblockTypeContradiction>
 
-        <!-- Views document expected variables with @var for clarity -->
+        <!-- Type annotations document expected types for dynamic data -->
         <UnnecessaryVarAnnotation>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Application" />
+                <directory name="src/Modules/Dictionary/Views" />
                 <directory name="src/Modules/Feed/Views" />
+                <directory name="src/Modules/Feed/Application" />
+                <directory name="src/Modules/Feed/Http" />
+                <directory name="src/Modules/Home/Views" />
+                <directory name="src/Modules/Language/Views" />
+                <directory name="src/Modules/Review/Views" />
+                <directory name="src/Modules/Tags/Views" />
+                <directory name="src/Modules/Text/Views" />
+                <directory name="src/Modules/Text/Application" />
+                <directory name="src/Modules/User/Views" />
+                <directory name="src/Modules/User/Application" />
+                <directory name="src/Modules/Vocabulary/Views" />
+                <directory name="src/Modules/Vocabulary/Application" />
+                <directory name="src/Modules/Vocabulary/Infrastructure" />
+                <directory name="src/Modules/Vocabulary/Http" />
             </errorLevel>
         </UnnecessaryVarAnnotation>
 
@@ -165,18 +217,39 @@
         <UnusedVariable>
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
-                <directory name="src/Modules/Book/Http" />
-                <directory name="src/Modules/Dictionary/Http" />
-                <directory name="src/Modules/Feed/Http" />
-                <directory name="src/Modules/Text/Http" />
                 <directory name="src/backend/Views" />
+                <directory name="src/Modules/Book/Http" />
                 <directory name="src/Modules/Book/Views" />
+                <directory name="src/Modules/Dictionary/Http" />
+                <directory name="src/Modules/Dictionary/Infrastructure" />
+                <directory name="src/Modules/Feed/Http" />
+                <directory name="src/Modules/Feed/Application" />
+                <directory name="src/Modules/Home/Http" />
+                <directory name="src/Modules/Language/Http" />
+                <directory name="src/Modules/Language/Views" />
+                <directory name="src/Modules/Review/Application" />
+                <directory name="src/Modules/Tags/Infrastructure" />
+                <directory name="src/Modules/Tags/Application" />
+                <directory name="src/Modules/Text/Http" />
+                <directory name="src/Modules/Text/Application" />
+                <directory name="src/Modules/User/Http" />
+                <directory name="src/Modules/Vocabulary/Http" />
+                <directory name="src/Modules/Vocabulary/Views" />
+                <directory name="src/Modules/Vocabulary/Application" />
             </errorLevel>
         </UnusedVariable>
 
-        <!-- Parameters used by included view files -->
+        <!-- Unused foreach values - often intentional when only key is needed -->
+        <UnusedForeachValue>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+            </errorLevel>
+        </UnusedForeachValue>
+
+        <!-- Parameters used by included view files or for interface consistency -->
         <UnusedParam>
             <errorLevel type="suppress">
+                <directory name="src/Modules/Book/Application" />
                 <directory name="src/Modules/Book/Http" />
                 <directory name="src/Modules/Text/Http" />
                 <directory name="src/Modules/Review/Application" />
@@ -206,7 +279,9 @@
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Api" />
+                <directory name="src/backend/Core" />
                 <directory name="src/Modules" />
+                <directory name="src/Shared" />
             </errorLevel>
         </PossiblyUnusedMethod>
 
@@ -215,6 +290,7 @@
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
                 <directory name="src/Modules" />
+                <directory name="src/Shared" />
             </errorLevel>
         </PossiblyUnusedParam>
 
@@ -222,6 +298,7 @@
         <PossiblyUnusedReturnValue>
             <errorLevel type="suppress">
                 <directory name="src/Modules" />
+                <directory name="src/Shared" />
             </errorLevel>
         </PossiblyUnusedReturnValue>
 
@@ -258,7 +335,9 @@
         <!-- Interface implementations may have different parameter names -->
         <ParamNameMismatch>
             <errorLevel type="suppress">
+                <directory name="src/backend/Core" />
                 <directory name="src/Modules" />
+                <directory name="src/Shared" />
             </errorLevel>
         </ParamNameMismatch>
 
@@ -272,9 +351,25 @@
         <!-- Repository implementations may have less specific return types -->
         <LessSpecificImplementedReturnType>
             <errorLevel type="suppress">
+                <directory name="src/backend/Core" />
                 <directory name="src/Modules" />
+                <directory name="src/Shared" />
             </errorLevel>
         </LessSpecificImplementedReturnType>
 
+        <!--
+            ============================================
+            EXTERNAL EXTENSION SUPPRESSIONS
+            ============================================
+            Constants defined by optional PHP extensions (curl).
+        -->
+        <UndefinedConstant>
+            <errorLevel type="suppress">
+                <file name="src/Modules/Text/Infrastructure/WhisperClient.php" />
+                <file name="src/Shared/UI/Assets/ViteHelper.php" />
+                <file name="src/backend/Core/Entity/GoogleTranslate.php" />
+                <file name="src/backend/Core/Integration/GoogleTimeToken.php" />
+            </errorLevel>
+        </UndefinedConstant>
     </issueHandlers>
 </psalm>

@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Views;
 
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
+use Lwt\View\Helper\StatusHelper;
 
 // Type assertions for variables passed from controller
 assert(is_string($word));
@@ -38,7 +39,7 @@ assert(is_string($hex));
 assert(is_int($textId));
 
 ?>
-<p>Status: <?php echo (string)get_colored_status_msg($status); ?></p><br />
+<p>Status: <?php echo StatusHelper::getColoredMessage($status); ?></p><br />
 <?php if ($translation != '*') : ?>
 <p>Translation: <b><?php echo htmlspecialchars($translation, ENT_QUOTES, 'UTF-8'); ?></b></p>
 <?php endif; ?>

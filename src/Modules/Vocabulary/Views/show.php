@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace Lwt\Views\Word;
 
 use Lwt\Core\StringUtils;
+use Lwt\View\Helper\StatusHelper;
 
 // Type assertions for variables passed from controller
 /** @var array{text: string, translation: string, notes?: string, romanization: string, sentence: string, status: int, langId: int} $word */
@@ -84,7 +85,7 @@ assert(is_string($ann));
 </tr>
 <tr>
     <td class="has-text-right">Status:</td>
-    <td class=""><?php echo (string)get_colored_status_msg($word['status']); ?></td>
+    <td class=""><?php echo StatusHelper::getColoredMessage($word['status']); ?></td>
 </tr>
 </table>
 
