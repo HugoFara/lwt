@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Tag Form View - New/Edit tag form
  *
@@ -55,7 +58,7 @@ $tagComment = $isEdit && $tag !== null ? htmlspecialchars($tag['comment'] ?? '',
           tagComment: '<?php echo $tagComment; ?>',
           charCount: <?php echo strlen($tagComment); ?>
       }">
-    <?php if ($isEdit && $tag !== null): ?>
+    <?php if ($isEdit && $tag !== null) : ?>
     <input type="hidden" name="<?php echo $formFieldPrefix; ?>ID" value="<?php echo $tag['id']; ?>" />
     <?php endif; ?>
 

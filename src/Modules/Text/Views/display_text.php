@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Display Content View
  *
@@ -27,11 +30,17 @@ namespace Lwt\Views\Text;
 
 // Type-safe variable extraction from controller context
 assert(is_array($annotations));
-/** @var array<int, array{type: int, text: string, trans?: string, rom?: string}> */
+/**
+ * @var array<int, array{type: int, text: string, trans?: string, rom?: string}>
+*/
 $annotationsTyped = $annotations;
-/** @var int */
+/**
+ * @var int
+*/
 $textSizeTyped = $textSize;
-/** @var bool */
+/**
+ * @var bool
+*/
 $rtlScriptTyped = $rtlScript;
 ?>
 <div id="print"<?php echo ($rtlScriptTyped ? ' dir="rtl"' : ''); ?>>

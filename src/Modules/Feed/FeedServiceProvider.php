@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Feed Module Service Provider
  *
@@ -18,25 +21,20 @@ namespace Lwt\Modules\Feed;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
-
 // Domain
 use Lwt\Modules\Feed\Domain\FeedRepositoryInterface;
 use Lwt\Modules\Feed\Domain\ArticleRepositoryInterface;
 use Lwt\Modules\Feed\Domain\TextCreationInterface;
-
 // Infrastructure
 use Lwt\Modules\Feed\Infrastructure\MySqlFeedRepository;
 use Lwt\Modules\Feed\Infrastructure\MySqlArticleRepository;
 use Lwt\Modules\Feed\Infrastructure\TextCreationAdapter;
 use Lwt\Modules\Feed\Infrastructure\FeedWizardSessionManager;
-
 // Shared Infrastructure
 use Lwt\Shared\Infrastructure\Http\FlashMessageService;
-
 // Services
 use Lwt\Modules\Feed\Application\Services\RssParser;
 use Lwt\Modules\Feed\Application\Services\ArticleExtractor;
-
 // Use Cases
 use Lwt\Modules\Feed\Application\UseCases\CreateFeed;
 use Lwt\Modules\Feed\Application\UseCases\UpdateFeed;
@@ -48,13 +46,10 @@ use Lwt\Modules\Feed\Application\UseCases\GetArticles;
 use Lwt\Modules\Feed\Application\UseCases\ImportArticles;
 use Lwt\Modules\Feed\Application\UseCases\DeleteArticles;
 use Lwt\Modules\Feed\Application\UseCases\ResetErrorArticles;
-
 // Application
 use Lwt\Modules\Feed\Application\FeedFacade;
-
 // Language Module
 use Lwt\Modules\Language\Application\LanguageFacade;
-
 // Http
 use Lwt\Modules\Feed\Http\FeedController;
 use Lwt\Modules\Feed\Http\FeedApiHandler;

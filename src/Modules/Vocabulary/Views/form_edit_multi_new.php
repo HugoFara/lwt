@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Multi-Word New Form View - Form for creating a new multi-word expression
  *

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * TTS Service - Business logic for Text-to-Speech settings
  *
@@ -148,5 +151,4 @@ class TtsService
         setcookie($prefix . 'Rate]', InputValidator::getString('LgTTSRate'), $cookie_options);
         setcookie($prefix . 'Pitch]', InputValidator::getString('LgPitch'), $cookie_options);
     }
-
 }

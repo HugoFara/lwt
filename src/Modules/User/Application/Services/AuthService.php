@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Authentication Service - Business logic for user authentication
  *
@@ -522,5 +525,4 @@ class AuthService
             return null;
         }
     }
-
 }

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Security Headers
  *
@@ -271,7 +274,8 @@ class SecurityHeaders
             return true;
         }
         // Behind a proxy/load balancer
-        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+        if (
+            isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
             && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'
         ) {
             return true;

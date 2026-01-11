@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Reading Content View
  *
@@ -54,7 +57,9 @@ assert(is_string($annotatedText));
 
 // Compute annotations JSON safely
 $annotationJson = (new AnnotationService())->annotationToJson($annotatedText);
-/** @var array<int, mixed>|null */
+/**
+ * @var array<int, mixed>|null
+*/
 $annotations = json_decode($annotationJson !== false ? $annotationJson : '[]', true);
 
 // Build variable array for JavaScript - will be merged into LWT_DATA by TypeScript

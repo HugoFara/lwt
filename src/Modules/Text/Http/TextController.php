@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Controller - Text management and reading
  *
@@ -102,8 +105,8 @@ class TextController extends BaseController
      */
     public function read(?int $text = null): ?RedirectResponse
     {
-        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        require_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
+        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
 
         // Get text ID from route param or query params
         $textId = $this->getTextIdFromRequest($text);
@@ -203,17 +206,17 @@ class TextController extends BaseController
      */
     public function edit(array $params): ?RedirectResponse
     {
-        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        require_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        require_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        require_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-        require_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
-        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/start_session.php';
-        require_once LWT_BACKEND_PATH . '/Core/Integration/YouTubeImport.php';
+        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
+        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
+        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
+        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
+        include_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
+        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/start_session.php';
+        include_once LWT_BACKEND_PATH . '/Core/Integration/YouTubeImport.php';
 
         // Get filter parameters
         $currentLang = Validation::language(
@@ -625,15 +628,15 @@ class TextController extends BaseController
      */
     public function display(?int $text = null): ?RedirectResponse
     {
-        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        require_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        require_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        require_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-        require_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
+        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
+        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
+        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
+        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
+        include_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
 
         // Support both new route param injection and legacy query param
         $textId = $text ?? $this->paramInt('text', 0) ?? 0;
@@ -700,7 +703,7 @@ class TextController extends BaseController
      */
     public function setMode(array $params): void
     {
-        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
 
         $textId = $this->param('text');
         if ($textId === '') {
@@ -737,7 +740,7 @@ class TextController extends BaseController
      */
     public function check(array $params): void
     {
-        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
 
         PageLayoutHelper::renderPageStart('Check a Text', true);
 
@@ -781,14 +784,14 @@ class TextController extends BaseController
      */
     public function archived(array $params): ?RedirectResponse
     {
-        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        require_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        require_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        require_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
+        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
+        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
+        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
+        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
 
         // Handle mark actions that skip pagestart
         $markAction = $this->param('markaction');

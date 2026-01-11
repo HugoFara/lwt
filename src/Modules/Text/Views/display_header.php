@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Display Header View
  *
@@ -36,13 +39,21 @@ use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Type-safe variable extraction from controller context
-/** @var string $titleTyped */
+/**
+ * @var string $titleTyped
+*/
 $titleTyped = $title;
-/** @var string|null $sourceUriTyped */
+/**
+ * @var string|null $sourceUriTyped
+*/
 $sourceUriTyped = $sourceUri;
-/** @var string $textLinksTyped */
+/**
+ * @var string $textLinksTyped
+*/
 $textLinksTyped = $textLinks;
-/** @var string $audioTyped */
+/**
+ * @var string $audioTyped
+*/
 $audioTyped = $audio;
 ?>
 <h1><?php echo \htmlspecialchars($titleTyped, ENT_QUOTES, 'UTF-8'); ?></h1>

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Local Dictionary Import View
  *
@@ -34,8 +37,8 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 // Error handling
 $errorRaw = $_GET['error'] ?? '';
 $error = is_string($errorRaw) ? $errorRaw : '';
-if (!empty($error)):
-?>
+if (!empty($error)) :
+    ?>
 <div class="notification is-danger is-light mb-4">
     <button class="delete" onclick="this.parentElement.remove()"></button>
     <?php echo htmlspecialchars(urldecode($error), ENT_QUOTES); ?>
@@ -61,15 +64,15 @@ echo PageLayoutHelper::buildActionCard([
         <div class="field">
             <label class="label">Dictionary</label>
             <div class="control">
-                <?php if ($dictionary): ?>
+                <?php if ($dictionary) : ?>
                 <input type="hidden" name="dict_id" value="<?php echo $dictionary->id(); ?>">
                 <input type="text" class="input" value="<?php echo htmlspecialchars($dictionary->name(), ENT_QUOTES); ?>" readonly>
                 <p class="help">Adding entries to existing dictionary.</p>
-                <?php elseif (!empty($dictionaries)): ?>
+                <?php elseif (!empty($dictionaries)) : ?>
                 <div class="select is-fullwidth">
                     <select name="dict_id">
                         <option value="">-- Create new dictionary --</option>
-                        <?php foreach ($dictionaries as $dict): ?>
+                        <?php foreach ($dictionaries as $dict) : ?>
                         <option value="<?php echo $dict->id(); ?>">
                             <?php echo htmlspecialchars($dict->name(), ENT_QUOTES); ?>
                             (<?php echo number_format($dict->entryCount()); ?> entries)
@@ -77,14 +80,14 @@ echo PageLayoutHelper::buildActionCard([
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <?php else: ?>
+                <?php else : ?>
                 <p class="help">A new dictionary will be created.</p>
                 <?php endif; ?>
             </div>
         </div>
 
         <!-- Dictionary Name (for new dictionaries) -->
-        <?php if (!$dictionary): ?>
+        <?php if (!$dictionary) : ?>
         <div class="field">
             <label class="label">Dictionary Name</label>
             <div class="control">

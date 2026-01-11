@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Delete Result View - Shows result after deleting a word
  *
@@ -33,9 +36,9 @@ assert(is_string($termLc));
 
 $hex = StringUtils::toClassName($termLc);
 ?>
-<?php if ($deleted): ?>
+<?php if ($deleted) : ?>
 <p>OK, term deleted.</p>
-<?php else: ?>
+<?php else : ?>
 <p>Term not found or already deleted.</p>
 <?php endif; ?>
 

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * \file
  * \brief Database configuration and connection setup.
@@ -169,5 +172,4 @@ class Configuration
 
         return $dbconnection;
     }
-
 }

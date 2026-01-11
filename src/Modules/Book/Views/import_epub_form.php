@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * EPUB Import Form View
  *
@@ -36,7 +39,7 @@ $actions = [
 
 <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
-<?php if (isset($_GET['from']) && $_GET['from'] === 'text'): ?>
+<?php if (isset($_GET['from']) && $_GET['from'] === 'text') : ?>
 <div class="notification is-info is-light">
     <p>
         <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'mr-2']); ?>

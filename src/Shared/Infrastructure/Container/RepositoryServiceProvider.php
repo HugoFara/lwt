@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Repository Service Provider
  *
@@ -18,6 +21,7 @@ use Lwt\Core\Repository\RepositoryInterface;
 use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
+
 // Note: TermRepository is now registered by VocabularyServiceProvider
 
 /**

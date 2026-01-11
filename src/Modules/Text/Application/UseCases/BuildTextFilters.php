@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Build Text Filters Use Case
  *
@@ -29,9 +32,9 @@ class BuildTextFilters
     /**
      * Build WHERE clause for text query filtering.
      *
-     * @param string $query     Search query string
-     * @param string $queryMode Query mode ('title,text', 'title', 'text')
-     * @param string $regexMode Regex mode ('' for LIKE, 'r' for RLIKE)
+     * @param string $query       Search query string
+     * @param string $queryMode   Query mode ('title,text', 'title', 'text')
+     * @param string $regexMode   Regex mode ('' for LIKE, 'r' for RLIKE)
      * @param string $tablePrefix Column prefix ('Tx' for texts, 'At' for archived)
      *
      * @return array{clause: string, params: array} SQL WHERE clause and parameters
@@ -101,10 +104,10 @@ class BuildTextFilters
     /**
      * Build HAVING clause for tag filtering.
      *
-     * @param string|int $tag1       First tag filter (must be numeric or empty)
-     * @param string|int $tag2       Second tag filter (must be numeric or empty)
-     * @param string     $tag12      AND/OR operator
-     * @param string     $tagIdCol   Tag ID column (AgT2ID for archived, TtT2ID for active)
+     * @param string|int $tag1     First tag filter (must be numeric or empty)
+     * @param string|int $tag2     Second tag filter (must be numeric or empty)
+     * @param string     $tag12    AND/OR operator
+     * @param string     $tagIdCol Tag ID column (AgT2ID for archived, TtT2ID for active)
      *
      * @return string SQL HAVING clause
      */

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Sentence Service - Sentence operations and retrieval functions.
  *
@@ -307,7 +310,9 @@ class SentenceService
 
         if ($mode > 1) {
             // Always use word_occurrences to get proper sentence content with word boundaries
-            /** @var string|null $prevseSentRaw */
+            /**
+ * @var string|null $prevseSentRaw
+*/
             $prevseSentRaw = Connection::preparedFetchValue(
                 "SELECT concat(
                     '​',
@@ -335,7 +340,9 @@ class SentenceService
 
         if ($mode > 2) {
             // Always use word_occurrences to get proper sentence content with word boundaries
-            /** @var string|null $nextSentRaw */
+            /**
+ * @var string|null $nextSentRaw
+*/
             $nextSentRaw = Connection::preparedFetchValue(
                 "SELECT concat(
                     '​',
@@ -464,7 +471,9 @@ class SentenceService
     public function getSentenceAtPosition(int $textId, int $position): ?string
     {
         // Get the sentence ID for this position
-        /** @var int|null $seidRaw */
+        /**
+ * @var int|null $seidRaw
+*/
         $seidRaw = Connection::preparedFetchValue(
             "SELECT Ti2SeID FROM word_occurrences WHERE Ti2TxID = ? AND Ti2Order = ?",
             [$textId, $position],
@@ -697,13 +706,14 @@ class SentenceService
     /**
      * Show 20 sentences containing $wordlc.
      *
-     * @param int      $lang       Language ID
-     * @param string   $wordlc     Term in lower case.
-     * @param int|null $wid        Word ID
+     * @param int      $lang        Language ID
+     * @param string   $wordlc      Term in lower case.
+     * @param int|null $wid         Word ID
      * @param string   $targetCtlId ID of the target textarea element
-     * @param int      $mode       * Up to 1: return only the current sentence
-     *                             * Above 1: return previous and current sentence
-     *                             * Above 2: return previous, current and next sentence
+     * @param int      $mode        * Up to 1: return only the current sentence
+     *                              * Above 1: return previous and current
+     *                              sentence * Above 2: return previous,
+     *                              current and next sentence
      *
      * @return string HTML-formatted string of which elements are candidate sentences to use.
      */
@@ -751,7 +761,7 @@ class SentenceService
         </span>
     </div>
     <!-- Loading icon -->
-    <?php echo IconHelper::render('loader-2', ['id' => 'exsent-waiting', 'alt' => 'Loading...', 'class' => 'icon-spin']); ?>
+        <?php echo IconHelper::render('loader-2', ['id' => 'exsent-waiting', 'alt' => 'Loading...', 'class' => 'icon-spin']); ?>
     <!-- Displayed output -->
     <div id="exsent-sentences">
         <p><b>Sentences in active texts with <i><?php echo htmlspecialchars($termlc, ENT_QUOTES, 'UTF-8') ?></i></b></p>

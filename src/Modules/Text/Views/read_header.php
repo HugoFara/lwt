@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Reading Header View
  *
@@ -54,12 +57,14 @@ $sourceUri = isset($sourceUri) && is_string($sourceUri) ? $sourceUri : null;
 assert(is_string($media));
 
 ?>
-<script type="application/json" id="text-header-config"><?php echo json_encode([
+<script type="application/json" id="text-header-config"><?php echo json_encode(
+    [
     'textId' => $textId,
     'phoneticText' => $phoneticText,
     'languageCode' => $languageCode,
     'voiceApi' => $voiceApi
-]); ?></script>
+    ]
+); ?></script>
 
 <div class="flex-header">
     <div>

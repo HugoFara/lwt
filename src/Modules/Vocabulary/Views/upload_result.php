@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Word Upload Result View
  *
@@ -39,7 +42,7 @@ echo PageLayoutHelper::buildActionCard($actions);
 ?>
 
 <!-- Import Result Feedback -->
-<?php if ($recno > 0): ?>
+<?php if ($recno > 0) : ?>
 <article class="message is-success mb-4">
     <div class="message-body">
         <span class="icon-text">
@@ -54,7 +57,7 @@ echo PageLayoutHelper::buildActionCard($actions);
         </span>
     </div>
 </article>
-<?php else: ?>
+<?php else : ?>
 <article class="message is-warning mb-4">
     <div class="message-body">
         <span class="icon-text">

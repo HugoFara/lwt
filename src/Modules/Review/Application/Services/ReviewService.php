@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Review Service - Business logic for word review operations
  *
@@ -19,7 +22,6 @@ use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
-
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;

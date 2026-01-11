@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Feed Wizard Step 2 - Select Article Text
  *
@@ -272,7 +275,7 @@ $configJson = json_encode([
                             <div class="select">
                                 <select name="NfArticleSection" x-model="articleSource" @change="changeArticleSection">
                                     <option value="">Webpage Link</option>
-                                    <?php foreach ($articleSources as $source): ?>
+                                    <?php foreach ($articleSources as $source) : ?>
                                     <option value="<?php echo $source; ?>"><?php echo $source; ?></option>
                                     <?php endforeach; ?>
                                 </select>

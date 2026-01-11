@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Admin Module Service Provider
  *
@@ -18,25 +21,20 @@ namespace Lwt\Modules\Admin;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
-
 // Domain
 use Lwt\Modules\Admin\Domain\SettingsRepositoryInterface;
 use Lwt\Modules\Admin\Domain\BackupRepositoryInterface;
-
 // Infrastructure
 use Lwt\Modules\Admin\Infrastructure\MySqlSettingsRepository;
 use Lwt\Modules\Admin\Infrastructure\MySqlBackupRepository;
 use Lwt\Modules\Admin\Infrastructure\MySqlStatisticsRepository;
 use Lwt\Modules\Admin\Infrastructure\FileSystemEnvRepository;
-
 // Application
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Admin\Application\Services\SessionCleaner;
-
 // Http
 use Lwt\Modules\Admin\Http\AdminController;
 use Lwt\Modules\Admin\Http\AdminApiHandler;
-
 // Application Services
 use Lwt\Modules\Admin\Application\Services\TtsService;
 

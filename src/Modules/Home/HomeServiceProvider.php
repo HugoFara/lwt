@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Home Module Service Provider
  *
@@ -18,15 +21,12 @@ namespace Lwt\Modules\Home;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
-
 // Application
 use Lwt\Modules\Home\Application\HomeFacade;
 use Lwt\Modules\Home\Application\UseCases\GetDashboardData;
 use Lwt\Modules\Home\Application\UseCases\GetTextStatistics;
-
 // Http
 use Lwt\Modules\Home\Http\HomeController;
-
 // Dependencies
 use Lwt\Modules\Language\Application\LanguageFacade;
 

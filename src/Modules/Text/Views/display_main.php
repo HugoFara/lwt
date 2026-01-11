@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Display Main View (Desktop)
  *
@@ -29,10 +32,10 @@ namespace Lwt\Views\Text;
 ?>
 <div style="width: 95%; height: 100%;">
     <div id="frame-h">
-        <?php include __DIR__ . '/display_header.php'; ?>
+        <?php require __DIR__ . '/display_header.php'; ?>
     </div>
     <hr />
     <div id="frame-l">
-        <?php include __DIR__ . '/display_text.php'; ?>
+        <?php require __DIR__ . '/display_text.php'; ?>
     </div>
 </div>

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Controller Service Provider
  *
@@ -32,6 +35,7 @@ use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Text\Application\Services\TextDisplayService;
 // Note: TextPrintService now primarily used via TextPrintController in Text module
 use Lwt\Modules\Text\Application\TextFacade;
+
 // Note: TranslationService moved to Modules/Dictionary - registered by DictionaryServiceProvider
 // Note: WordPressService moved to Modules/User - registered by UserServiceProvider
 

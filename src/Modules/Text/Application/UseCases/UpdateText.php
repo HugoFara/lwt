@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Update Text Use Case
  *
@@ -46,12 +49,12 @@ class UpdateText
     /**
      * Update an active text.
      *
-     * @param int    $textId    Text ID
+     * @param int    $textId     Text ID
      * @param int    $languageId Language ID
-     * @param string $title     Title
-     * @param string $text      Text content
-     * @param string $audioUri  Audio URI
-     * @param string $sourceUri Source URI
+     * @param string $title      Title
+     * @param string $text       Text content
+     * @param string $audioUri   Audio URI
+     * @param string $sourceUri  Source URI
      *
      * @return array{message: string, reparsed: bool}
      */
@@ -68,7 +71,9 @@ class UpdateText
 
         // Check if text content changed
         $bindings1 = [$textId];
-        /** @var string|null $oldText */
+        /**
+ * @var string|null $oldText
+*/
         $oldText = Connection::preparedFetchValue(
             "SELECT TxText FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings1),
@@ -103,12 +108,12 @@ class UpdateText
     /**
      * Save text and reparse (alias for execute with reparse).
      *
-     * @param int    $textId    Text ID
+     * @param int    $textId     Text ID
      * @param int    $languageId Language ID
-     * @param string $title     Title
-     * @param string $text      Text content
-     * @param string $audioUri  Audio URI
-     * @param string $sourceUri Source URI
+     * @param string $title      Title
+     * @param string $text       Text content
+     * @param string $audioUri   Audio URI
+     * @param string $sourceUri  Source URI
      *
      * @return string Result message
      */
@@ -127,12 +132,12 @@ class UpdateText
     /**
      * Update an archived text.
      *
-     * @param int    $textId    Archived text ID
+     * @param int    $textId     Archived text ID
      * @param int    $languageId Language ID
-     * @param string $title     Title
-     * @param string $text      Text content
-     * @param string $audioUri  Audio URI
-     * @param string $sourceUri Source URI
+     * @param string $title      Title
+     * @param string $text       Text content
+     * @param string $audioUri   Audio URI
+     * @param string $sourceUri  Source URI
      *
      * @return string Result message
      */
@@ -146,7 +151,9 @@ class UpdateText
     ): string {
         // Check if text content changed
         $bindings1 = [$textId];
-        /** @var string|null $oldText */
+        /**
+ * @var string|null $oldText
+*/
         $oldText = Connection::preparedFetchValue(
             "SELECT TxText FROM texts WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
             . UserScopedQuery::forTablePrepared('texts', $bindings1),
@@ -193,7 +200,9 @@ class UpdateText
         }
 
         $count = 0;
-        /** @var array<int, int> $ids */
+        /**
+ * @var array<int, int> $ids
+*/
         $ids = array_values(array_map('intval', $textIds));
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 

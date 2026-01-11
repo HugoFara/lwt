@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Tags Module Service Provider
  *
@@ -18,19 +21,16 @@ namespace Lwt\Modules\Tags;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
-
 // Domain
 use Lwt\Modules\Tags\Domain\TagRepositoryInterface;
 use Lwt\Modules\Tags\Domain\TagAssociationInterface;
 use Lwt\Modules\Tags\Domain\TagType;
-
 // Infrastructure
 use Lwt\Modules\Tags\Infrastructure\MySqlTermTagRepository;
 use Lwt\Modules\Tags\Infrastructure\MySqlTextTagRepository;
 use Lwt\Modules\Tags\Infrastructure\MySqlWordTagAssociation;
 use Lwt\Modules\Tags\Infrastructure\MySqlTextTagAssociation;
 use Lwt\Modules\Tags\Infrastructure\MySqlArchivedTextTagAssociation;
-
 // Use Cases
 use Lwt\Modules\Tags\Application\UseCases\CreateTag;
 use Lwt\Modules\Tags\Application\UseCases\DeleteTag;
@@ -38,10 +38,8 @@ use Lwt\Modules\Tags\Application\UseCases\GetAllTagNames;
 use Lwt\Modules\Tags\Application\UseCases\GetTagById;
 use Lwt\Modules\Tags\Application\UseCases\ListTags;
 use Lwt\Modules\Tags\Application\UseCases\UpdateTag;
-
 // Application
 use Lwt\Modules\Tags\Application\TagsFacade;
-
 // Http
 use Lwt\Modules\Tags\Http\TermTagController;
 use Lwt\Modules\Tags\Http\TextTagController;

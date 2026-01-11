@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Get Text For Reading Use Case
  *
@@ -92,7 +95,9 @@ class GetTextForReading
     public function getTtsVoiceApi(int $languageId): string
     {
         $bindings = [$languageId];
-        /** @var string|null $result */
+        /**
+ * @var string|null $result
+*/
         $result = Connection::preparedFetchValue(
             "SELECT LgTTSVoiceAPI FROM languages WHERE LgID = ?"
             . UserScopedQuery::forTablePrepared('languages', $bindings),
@@ -112,7 +117,9 @@ class GetTextForReading
     public function getLanguageIdByName(string $languageName): ?int
     {
         $bindings = [$languageName];
-        /** @var int|string|null $result */
+        /**
+ * @var int|string|null $result
+*/
         $result = Connection::preparedFetchValue(
             "SELECT LgID FROM languages WHERE LgName = ?"
             . UserScopedQuery::forTablePrepared('languages', $bindings),

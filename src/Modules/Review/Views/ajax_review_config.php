@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * AJAX Test Config View - JavaScript config for AJAX-based tests
  *

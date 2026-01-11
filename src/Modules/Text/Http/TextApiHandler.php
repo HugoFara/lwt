@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text API Handler
  *
@@ -204,10 +207,10 @@ class TextApiHandler
     /**
      * Set display mode settings for a text.
      *
-     * @param int        $textId      Text ID
-     * @param int|null   $annotations Annotation mode (0=none, 1=translations, 2=romanization, 3=both)
-     * @param bool|null  $romanization Whether to show romanization
-     * @param bool|null  $translation  Whether to show translation
+     * @param int       $textId       Text ID
+     * @param int|null  $annotations  Annotation mode (0=none, 1=translations, 2=romanization, 3=both)
+     * @param bool|null $romanization Whether to show romanization
+     * @param bool|null $translation  Whether to show translation
      *
      * @return array{updated: bool, error?: string}
      */
@@ -344,8 +347,10 @@ class TextApiHandler
 
         // Get language info including dictionary URLs
         $langInfo = QueryBuilder::table('languages')
-            ->select(['LgID', 'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
-                    'LgTextSize', 'LgRightToLeft', 'LgRegexpWordCharacters', 'LgRemoveSpaces'])
+            ->select(
+                ['LgID', 'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
+                'LgTextSize', 'LgRightToLeft', 'LgRegexpWordCharacters', 'LgRemoveSpaces']
+            )
             ->where('LgID', '=', $langId)
             ->firstPrepared();
 
@@ -355,7 +360,8 @@ class TextApiHandler
 
         // Get all text items with word info
         $records = QueryBuilder::table('word_occurrences')
-            ->select([
+            ->select(
+                [
                 'CASE WHEN `Ti2WordCount`>0 THEN Ti2WordCount ELSE 1 END AS Code',
                 'CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE `WoText` END AS TiText',
                 'CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN LOWER(Ti2Text) ELSE `WoTextLC` END AS TiTextLC',
@@ -369,7 +375,8 @@ class TextApiHandler
                 'WoTranslation',
                 'WoRomanization',
                 'WoNotes'
-            ])
+                ]
+            )
             ->leftJoin('words', 'word_occurrences.Ti2WoID', '=', 'words.WoID')
             ->where('word_occurrences.Ti2TxID', '=', $textId)
             ->orderBy('Ti2Order', 'ASC')
@@ -729,10 +736,10 @@ class TextApiHandler
         &nbsp;';
         if ($widset) {
             $r .=
-IconHelper::render('circle-plus', ['title' => 'Save another translation to existent term', 'alt' => 'Save another translation to existent term', 'class' => 'click', 'data-action' => 'update-term-translation', 'data-wid' => (string)$wid, 'data-target' => '#tx' . $i]);
+            IconHelper::render('circle-plus', ['title' => 'Save another translation to existent term', 'alt' => 'Save another translation to existent term', 'class' => 'click', 'data-action' => 'update-term-translation', 'data-wid' => (string)$wid, 'data-target' => '#tx' . $i]);
         } else {
             $r .=
-IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'alt' => 'Save translation to new term', 'class' => 'click', 'data-action' => 'add-term-translation', 'data-target' => '#tx' . $i, 'data-word' => htmlspecialchars($word, ENT_QUOTES, 'UTF-8'), 'data-lang' => (string)$lang]);
+            IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'alt' => 'Save translation to new term', 'class' => 'click', 'data-action' => 'add-term-translation', 'data-target' => '#tx' . $i, 'data-word' => htmlspecialchars($word, ENT_QUOTES, 'UTF-8'), 'data-lang' => (string)$lang]);
         }
         $r .= '&nbsp;&nbsp;
         <span id="wait' . $i . '">

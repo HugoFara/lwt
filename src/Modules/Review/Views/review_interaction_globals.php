@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Test Interaction Globals View - JavaScript config for dictionaries
  *

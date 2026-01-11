@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Language Form View
  *
@@ -97,7 +100,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="LgID" value="<?php echo $langId ?? ''; ?>" />
 
-    <?php if (!$isNew): ?>
+    <?php if (!$isNew) : ?>
     <!-- Edit Warning -->
     <article class="message is-warning mb-4">
         <div class="message-body">
@@ -314,7 +317,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 </div>
                 <p class="help">
                     Configure how local (offline) dictionaries are used.
-                    <?php if ($langId !== null && $langId > 0): ?>
+                    <?php if ($langId !== null && $langId > 0) : ?>
                     <a href="/dictionaries?lang=<?php echo $langId; ?>">
                         Manage local dictionaries
                     </a>
@@ -390,10 +393,10 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 <div class="control">
                     <div class="select is-fullwidth">
                         <select name="LgParserType" id="LgParserType" x-model="parserType">
-                            <?php foreach ($parserInfo as $type => $info):
+                            <?php foreach ($parserInfo as $type => $info) :
                                 $infoAvailable = isset($info['available']) && $info['available'];
                                 $infoName = isset($info['name']) && is_string($info['name']) ? $info['name'] : '';
-                            ?>
+                                ?>
                             <option value="<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>"
                                     <?php echo ($langParserType === $type) ? 'selected' : ''; ?>
                                     <?php echo !$infoAvailable ? 'disabled' : ''; ?>>
@@ -405,11 +408,11 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                     </div>
                 </div>
                 <p class="help">Select the parsing algorithm for this language</p>
-                <?php foreach ($parserInfo as $type => $info):
+                <?php foreach ($parserInfo as $type => $info) :
                     $infoAvailable = isset($info['available']) && $info['available'];
                     $infoMessage = isset($info['message']) && is_string($info['message']) ? $info['message'] : '';
-                ?>
-                    <?php if (!$infoAvailable && $infoMessage !== ''): ?>
+                    ?>
+                    <?php if (!$infoAvailable && $infoMessage !== '') : ?>
                     <p class="help is-warning" x-show="parserType === '<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>'" x-cloak>
                         <?php echo htmlspecialchars($infoMessage, ENT_QUOTES, 'UTF-8'); ?>
                     </p>
@@ -672,14 +675,14 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
             </button>
         </div>
         <div class="control">
-            <?php if ($isNew): ?>
+            <?php if ($isNew) : ?>
             <button type="submit" name="op" value="Save" class="button is-primary">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                 </span>
                 <span>Save</span>
             </button>
-            <?php else: ?>
+            <?php else : ?>
             <button type="submit" name="op" value="Change" class="button is-primary">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>

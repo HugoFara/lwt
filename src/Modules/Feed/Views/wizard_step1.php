@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Feed Wizard Step 1 - Insert Feed URI
  *
@@ -63,7 +66,7 @@ $configJson = json_encode([
         </div>
     </div>
 
-    <?php if (!empty($errorMessage)): ?>
+    <?php if (!empty($errorMessage)) : ?>
     <div class="notification is-danger is-light">
         <span class="icon-text">
             <span class="icon">

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Archived Text Edit Form View
  *
@@ -26,7 +29,9 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 
 // Type-safe variable extraction from controller context
-/** @var int */
+/**
+ * @var int
+*/
 $textIdTyped = $textId;
 assert(is_array($record));
 $recordLgId = (int)$record['TxLgID'];
@@ -36,7 +41,9 @@ $recordAnnotLen = (int)$record['annotlen'];
 $recordSourceUri = (string)$record['TxSourceURI'];
 $recordAudioUri = (string)$record['TxAudioURI'];
 assert(is_array($languages));
-/** @var array<int, array{id: int, name: string}> */
+/**
+ * @var array<int, array{id: int, name: string}>
+*/
 $languagesTyped = $languages;
 ?>
 <h2 class="title is-4">Edit Archived Text</h2>
@@ -127,7 +134,7 @@ $languagesTyped = $languages;
             <div class="field-body">
                 <div class="field">
                     <div class="control">
-                        <?php if ($recordAnnotLen > 0): ?>
+                        <?php if ($recordAnnotLen > 0) : ?>
                         <div class="notification is-info is-light">
                             <span class="icon-text">
                                 <span class="icon has-text-success">
@@ -136,7 +143,7 @@ $languagesTyped = $languages;
                                 <span>Exists - May be partially or fully lost if you change the text!</span>
                             </span>
                         </div>
-                        <?php else: ?>
+                        <?php else : ?>
                         <div class="notification is-light">
                             <span class="icon-text">
                                 <span class="icon has-text-grey">

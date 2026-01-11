@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Database Operations View
  *
@@ -114,7 +117,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
         </header>
 
         <div class="collapsible-content" x-show="open" x-collapse>
-            <?php if (!$restoreEnabled): ?>
+            <?php if (!$restoreEnabled) : ?>
             <div class="notification is-danger is-light mt-4">
                 <div class="columns is-vcentered">
                     <div class="column is-narrow">
@@ -131,7 +134,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                     </div>
                 </div>
             </div>
-            <?php else: ?>
+            <?php else : ?>
             <div class="content mt-4">
                 <p>
                     The database <strong><?php echo $escapedDbName; ?></strong>

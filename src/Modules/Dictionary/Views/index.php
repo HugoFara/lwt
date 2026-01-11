@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Local Dictionaries Index View
  *
@@ -39,21 +42,21 @@ $message = is_string($messageRaw) ? $messageRaw : '';
 $errorRaw = $_GET['error'] ?? '';
 $error = is_string($errorRaw) ? $errorRaw : '';
 
-if (!empty($message)):
+if (!empty($message)) :
     $messageText = match ($message) {
         'deleted' => 'Dictionary deleted successfully.',
         default => str_starts_with($message, 'imported_')
             ? 'Imported ' . substr($message, 9) . ' entries.'
             : $message,
     };
-?>
+    ?>
 <div class="notification is-success is-light mb-4">
     <button class="delete" onclick="this.parentElement.remove()"></button>
     <?php echo htmlspecialchars($messageText, ENT_QUOTES); ?>
 </div>
 <?php endif; ?>
 
-<?php if (!empty($error)): ?>
+<?php if (!empty($error)) : ?>
 <div class="notification is-danger is-light mb-4">
     <button class="delete" onclick="this.parentElement.remove()"></button>
     <?php echo htmlspecialchars($error, ENT_QUOTES); ?>
@@ -73,7 +76,7 @@ echo PageLayoutHelper::buildActionCard([
             <div class="control is-expanded">
                 <div class="select is-fullwidth">
                     <select name="lang" onchange="this.form.submit()">
-                        <?php foreach ($languages as $lang): ?>
+                        <?php foreach ($languages as $lang) : ?>
                         <option value="<?php echo $lang['id']; ?>"
                             <?php echo $lang['id'] == $langId ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($lang['name'], ENT_QUOTES); ?>
@@ -137,7 +140,7 @@ echo PageLayoutHelper::buildActionCard([
 <div class="box">
     <h4 class="title is-5 mb-4">Dictionaries for <?php echo htmlspecialchars($langName, ENT_QUOTES); ?></h4>
 
-    <?php if (empty($dictionaries)): ?>
+    <?php if (empty($dictionaries)) : ?>
     <div class="notification is-light">
         <p>No local dictionaries found for this language.</p>
         <p class="mt-2">
@@ -147,7 +150,7 @@ echo PageLayoutHelper::buildActionCard([
             </a>
         </p>
     </div>
-    <?php else: ?>
+    <?php else : ?>
     <div class="table-container">
         <table class="table is-fullwidth is-striped is-hoverable">
             <thead>
@@ -161,13 +164,13 @@ echo PageLayoutHelper::buildActionCard([
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($dictionaries as $dict):
+                <?php foreach ($dictionaries as $dict) :
                     $description = $dict->description();
-                ?>
+                    ?>
                 <tr>
                     <td>
                         <strong><?php echo htmlspecialchars($dict->name(), ENT_QUOTES); ?></strong>
-                        <?php if ($description !== null && $description !== ''): ?>
+                        <?php if ($description !== null && $description !== '') : ?>
                         <br><span class="is-size-7 has-text-grey"><?php echo htmlspecialchars($description, ENT_QUOTES); ?></span>
                         <?php endif; ?>
                     </td>
@@ -181,9 +184,9 @@ echo PageLayoutHelper::buildActionCard([
                         <?php echo $dict->priority(); ?>
                     </td>
                     <td>
-                        <?php if ($dict->isEnabled()): ?>
+                        <?php if ($dict->isEnabled()) : ?>
                         <span class="tag is-success">Enabled</span>
-                        <?php else: ?>
+                        <?php else : ?>
                         <span class="tag is-warning">Disabled</span>
                         <?php endif; ?>
                     </td>

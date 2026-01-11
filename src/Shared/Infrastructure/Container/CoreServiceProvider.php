@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Core Service Provider
  *
@@ -91,4 +94,3 @@ class CoreServiceProvider implements ServiceProviderInterface
         // No bootstrap logic needed for core services
     }
 }
-

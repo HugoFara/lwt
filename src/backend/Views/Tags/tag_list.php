@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Tag List View - Display list of tags with filtering and pagination
  *
@@ -91,7 +94,7 @@ echo PageLayoutHelper::buildActionCard([
             Search functionality is being redesigned. Full filtering will be available soon.
         </p>
 
-        <?php if ($totalCount > 0): ?>
+        <?php if ($totalCount > 0) : ?>
         <!-- Results Summary & Pagination -->
         <div class="level mt-4 pt-4" style="border-top: 1px solid #dbdbdb;">
             <div class="level-left">
@@ -113,7 +116,7 @@ echo PageLayoutHelper::buildActionCard([
                         <div class="control">
                             <div class="select is-small">
                                 <select name="sort" data-action="sort">
-                                    <?php foreach ($sortOptions as $option): ?>
+                                    <?php foreach ($sortOptions as $option) : ?>
                                     <option value="<?php echo $option['value']; ?>"<?php echo $currentSort == $option['value'] ? ' selected="selected"' : ''; ?>><?php echo $option['text']; ?></option>
                                     <?php endforeach; ?>
                                 </select>
@@ -127,9 +130,9 @@ echo PageLayoutHelper::buildActionCard([
     </div>
 </form>
 
-<?php if ($totalCount == 0): ?>
+<?php if ($totalCount == 0) : ?>
 <p class="has-text-grey">No tags found.</p>
-<?php else: ?>
+<?php else : ?>
 <form name="form2" action="<?php echo $baseUrl; ?>" method="post">
 <input type="hidden" name="data" value="" />
 
@@ -205,13 +208,13 @@ echo PageLayoutHelper::buildActionCard([
     <th class="clickable">Tag Text</th>
     <th class="clickable">Tag Comment</th>
     <th class="has-text-centered clickable"><?php echo $itemLabel; ?> With Tag</th>
-    <?php if ($isTextTag): ?>
+    <?php if ($isTextTag) : ?>
     <th class="has-text-centered clickable">Arch. Texts With Tag</th>
     <?php endif; ?>
 </tr>
 </thead>
 <tbody>
-<?php foreach ($tags as $tag): ?>
+    <?php foreach ($tags as $tag) : ?>
 <tr>
     <td class="has-text-centered">
         <a name="rec<?php echo $tag['id']; ?>">
@@ -233,35 +236,35 @@ echo PageLayoutHelper::buildActionCard([
     </td>
     <td class="has-text-grey"><?php echo htmlspecialchars($tag['comment'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
     <td class="has-text-centered">
-        <?php if ($tag['usageCount'] > 0): ?>
+        <?php if ($tag['usageCount'] > 0) : ?>
         <a href="<?php echo $service->getItemsUrl($tag['id']); ?>" class="tag is-link is-light">
             <?php echo $tag['usageCount']; ?>
         </a>
-        <?php else: ?>
+        <?php else : ?>
         <span class="tag is-light">0</span>
         <?php endif; ?>
     </td>
-    <?php if ($isTextTag): ?>
+        <?php if ($isTextTag) : ?>
     <td class="has-text-centered">
-        <?php $archivedCount = $tag['archivedUsageCount'] ?? 0; ?>
-        <?php if ($archivedCount > 0): ?>
+            <?php $archivedCount = $tag['archivedUsageCount'] ?? 0; ?>
+            <?php if ($archivedCount > 0) : ?>
         <a href="<?php echo $service->getArchivedItemsUrl($tag['id']); ?>" class="tag is-link is-light">
-            <?php echo $archivedCount; ?>
+                <?php echo $archivedCount; ?>
         </a>
-        <?php else: ?>
+            <?php else : ?>
         <span class="tag is-light">0</span>
-        <?php endif; ?>
+            <?php endif; ?>
     </td>
-    <?php endif; ?>
+        <?php endif; ?>
 </tr>
-<?php endforeach; ?>
+    <?php endforeach; ?>
 </tbody>
 </table>
 </div>
 
 <!-- Mobile Card View -->
 <div class="is-hidden-tablet">
-<?php foreach ($tags as $tag): ?>
+    <?php foreach ($tags as $tag) : ?>
 <div class="card mb-3">
     <div class="card-content">
         <div class="level is-mobile mb-2">
@@ -289,26 +292,26 @@ echo PageLayoutHelper::buildActionCard([
             </div>
         </div>
 
-        <?php if ($tag['comment'] !== null && $tag['comment'] !== ''): ?>
+        <?php if ($tag['comment'] !== null && $tag['comment'] !== '') : ?>
         <p class="has-text-grey mb-2"><?php echo htmlspecialchars($tag['comment'], ENT_QUOTES, 'UTF-8'); ?></p>
         <?php endif; ?>
 
         <div class="is-flex is-flex-wrap-wrap" style="gap: 0.5rem;">
             <div class="tags has-addons mb-0">
                 <span class="tag is-dark"><?php echo $itemLabel; ?></span>
-                <?php if ($tag['usageCount'] > 0): ?>
+                <?php if ($tag['usageCount'] > 0) : ?>
                 <a href="<?php echo $service->getItemsUrl($tag['id']); ?>" class="tag is-link"><?php echo $tag['usageCount']; ?></a>
-                <?php else: ?>
+                <?php else : ?>
                 <span class="tag is-light">0</span>
                 <?php endif; ?>
             </div>
-            <?php if ($isTextTag): ?>
+            <?php if ($isTextTag) : ?>
             <div class="tags has-addons mb-0">
                 <span class="tag is-dark">Archived</span>
                 <?php $archivedCountMobile = $tag['archivedUsageCount'] ?? 0; ?>
-                <?php if ($archivedCountMobile > 0): ?>
+                <?php if ($archivedCountMobile > 0) : ?>
                 <a href="<?php echo $service->getArchivedItemsUrl($tag['id']); ?>" class="tag is-link"><?php echo $archivedCountMobile; ?></a>
-                <?php else: ?>
+                <?php else : ?>
                 <span class="tag is-light">0</span>
                 <?php endif; ?>
             </div>
@@ -316,10 +319,10 @@ echo PageLayoutHelper::buildActionCard([
         </div>
     </div>
 </div>
-<?php endforeach; ?>
+    <?php endforeach; ?>
 </div>
 
-<?php if ($pagination['pages'] > 1): ?>
+    <?php if ($pagination['pages'] > 1) : ?>
 <!-- Pagination -->
 <nav class="level mt-4">
     <div class="level-left">
@@ -335,6 +338,6 @@ echo PageLayoutHelper::buildActionCard([
         </div>
     </div>
 </nav>
-<?php endif; ?>
+    <?php endif; ?>
 </form>
 <?php endif; ?>

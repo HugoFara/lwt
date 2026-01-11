@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Insert Status Result View - Shows result after inserting word with status (wellknown/ignore)
  *

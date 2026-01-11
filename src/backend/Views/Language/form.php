@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Language Form View
  *
@@ -95,7 +98,7 @@ $parserInfo = $parserInfo ?? [];
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="LgID" value="<?php echo $language->id; ?>" />
 
-    <?php if (!$isNew): ?>
+    <?php if (!$isNew) : ?>
     <!-- Edit Warning -->
     <article class="message is-warning mb-4">
         <div class="message-body">
@@ -312,7 +315,7 @@ $parserInfo = $parserInfo ?? [];
                 </div>
                 <p class="help">
                     Configure how local (offline) dictionaries are used.
-                    <?php if (($language->id ?? 0) > 0): ?>
+                    <?php if (($language->id ?? 0) > 0) : ?>
                     <a href="/dictionaries?lang=<?php echo $language->id; ?>">
                         Manage local dictionaries
                     </a>
@@ -388,7 +391,7 @@ $parserInfo = $parserInfo ?? [];
                 <div class="control">
                     <div class="select is-fullwidth">
                         <select name="LgParserType" id="LgParserType" x-model="parserType">
-                            <?php foreach ($parserInfo as $type => $info): ?>
+                            <?php foreach ($parserInfo as $type => $info) : ?>
                             <option value="<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>"
                                     <?php echo ($language->parsertype === $type) ? 'selected' : ''; ?>
                                     <?php echo !$info['available'] ? 'disabled' : ''; ?>>
@@ -400,8 +403,8 @@ $parserInfo = $parserInfo ?? [];
                     </div>
                 </div>
                 <p class="help">Select the parsing algorithm for this language</p>
-                <?php foreach ($parserInfo as $type => $info): ?>
-                    <?php if (!$info['available'] && $info['message']): ?>
+                <?php foreach ($parserInfo as $type => $info) : ?>
+                    <?php if (!$info['available'] && $info['message']) : ?>
                     <p class="help is-warning" x-show="parserType === '<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>'" x-cloak>
                         <?php echo htmlspecialchars($info['message'], ENT_QUOTES, 'UTF-8'); ?>
                     </p>
@@ -664,14 +667,14 @@ $parserInfo = $parserInfo ?? [];
             </button>
         </div>
         <div class="control">
-            <?php if ($isNew): ?>
+            <?php if ($isNew) : ?>
             <button type="submit" name="op" value="Save" class="button is-primary">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                 </span>
                 <span>Save</span>
             </button>
-            <?php else: ?>
+            <?php else : ?>
             <button type="submit" name="op" value="Change" class="button is-primary">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>

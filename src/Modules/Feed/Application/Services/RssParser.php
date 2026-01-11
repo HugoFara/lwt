@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * RSS Feed Parser Service
  *
@@ -329,8 +332,14 @@ class RssParser
     private function formatParsedDate(array $pubDate, int $fallback): string
     {
         if (
-            !isset($pubDate['hour'], $pubDate['minute'], $pubDate['second'],
-                   $pubDate['month'], $pubDate['day'], $pubDate['year'])
+            !isset(
+                $pubDate['hour'],
+                $pubDate['minute'],
+                $pubDate['second'],
+                $pubDate['month'],
+                $pubDate['day'],
+                $pubDate['year']
+            )
         ) {
             return date('Y-m-d H:i:s', time() - $fallback);
         }

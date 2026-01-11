@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Feeds Management Index View
  *
@@ -76,7 +79,7 @@ echo PageLayoutHelper::buildActionCard([
             Search functionality is being redesigned. Full filtering will be available soon.
         </p>
 
-        <?php if ($totalFeeds > 0): ?>
+        <?php if ($totalFeeds > 0) : ?>
         <!-- Results Summary & Pagination -->
         <div class="level mt-4 pt-4" style="border-top: 1px solid #dbdbdb;">
             <div class="level-left">
@@ -111,7 +114,7 @@ echo PageLayoutHelper::buildActionCard([
 </form>
 
 <input id="map" type="hidden" name="selected_feed" value="" />
-<?php if ($totalFeeds > 0): ?>
+<?php if ($totalFeeds > 0) : ?>
 <form name="form2" action="" method="get">
 <table class="table is-bordered is-fullwidth">
 <tr>
@@ -143,11 +146,11 @@ echo PageLayoutHelper::buildActionCard([
     <th class="sorttable_nosort">Options</th>
     <th class="sorttable_numeric clickable">Last Update</th>
 </tr>
-<?php
-$time = time();
-foreach ($feeds as $row):
-    $diff = $time - $row['NfUpdate'];
-?>
+    <?php
+    $time = time();
+    foreach ($feeds as $row) :
+        $diff = $time - $row['NfUpdate'];
+        ?>
 <tr>
     <td class="has-text-centered">
         <input type="checkbox" name="marked[]" class="markcheck" value="<?php echo $row['NfID']; ?>" />
@@ -169,20 +172,22 @@ foreach ($feeds as $row):
     <td class="has-text-centered"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
     <td class="has-text-centered"><?php echo str_replace(',', ', ', $row['NfOptions']); ?></td>
     <td class="has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
-        <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
+        <?php if ($row['NfUpdate']) {
+            echo $feedService->formatLastUpdate($diff);
+        } ?>
     </td>
 </tr>
-<?php endforeach; ?>
+    <?php endforeach; ?>
 </table>
 </form>
-<?php if ($pages > 1): ?>
+    <?php if ($pages > 1) : ?>
 <form name="form3" method="get" action="">
 <table class="table is-bordered is-fullwidth">
 <tr><th class="feeds-filter-cell"><?php echo $totalFeeds; ?></th>
 <th class=""><?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form3', ['query' => $currentQuery, 'sort' => $currentSort, 'manage_feeds' => 1]); ?></th>
 </tr></table>
 </form>
-<?php endif; ?>
+    <?php endif; ?>
 <?php endif; ?>
 </div>
 <!-- Feed index component: feeds/components/feed_index_component.ts -->

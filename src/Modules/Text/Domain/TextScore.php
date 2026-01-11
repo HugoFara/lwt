@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Score Value Object
  *
@@ -28,12 +31,12 @@ namespace Lwt\Modules\Text\Domain;
 final readonly class TextScore
 {
     /**
-     * @param int      $textId              The text ID
-     * @param int      $totalUniqueWords    Total unique single words in text
-     * @param int      $knownWords          Words with status 5 or 99
-     * @param int      $learningWords       Words with status 1-4
-     * @param int      $unknownWords        Words not in user's vocabulary
-     * @param string[] $unknownWordsList    List of unknown word texts (for preview)
+     * @param int      $textId           The text ID
+     * @param int      $totalUniqueWords Total unique single words in text
+     * @param int      $knownWords       Words with status 5 or 99
+     * @param int      $learningWords    Words with status 1-4
+     * @param int      $unknownWords     Words not in user's vocabulary
+     * @param string[] $unknownWordsList List of unknown word texts (for preview)
      */
     public function __construct(
         public int $textId,

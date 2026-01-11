@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Book Detail View
  *
@@ -38,11 +41,11 @@ $actions = [
         <div class="column is-8">
             <!-- Book Info -->
             <div class="content">
-                <?php if ($book['author']): ?>
+                <?php if ($book['author']) : ?>
                 <p><strong>Author:</strong> <?php echo htmlspecialchars($book['author']); ?></p>
                 <?php endif; ?>
 
-                <?php if ($book['description']): ?>
+                <?php if ($book['description']) : ?>
                 <p><strong>Description:</strong> <?php echo htmlspecialchars($book['description']); ?></p>
                 <?php endif; ?>
 
@@ -63,7 +66,7 @@ $actions = [
             </div>
 
             <!-- Continue Reading Button -->
-            <?php if (!empty($chapters)): ?>
+            <?php if (!empty($chapters)) : ?>
             <a href="/text/<?php echo $chapters[0]['id']; ?>/read" class="button is-primary is-medium">
                 <?php echo IconHelper::render('book-open', ['alt' => 'Continue']); ?>
                 <span class="ml-2">Continue Reading</span>
@@ -91,9 +94,9 @@ $actions = [
 <div class="box">
     <h3 class="title is-5">Chapters</h3>
 
-    <?php if (empty($chapters)): ?>
+    <?php if (empty($chapters)) : ?>
     <p class="has-text-grey">No chapters found.</p>
-    <?php else: ?>
+    <?php else : ?>
     <table class="table is-fullwidth is-hoverable">
         <thead>
             <tr>
@@ -103,14 +106,14 @@ $actions = [
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($chapters as $chapter): ?>
+            <?php foreach ($chapters as $chapter) : ?>
             <tr class="<?php echo $chapter['num'] === $book['currentChapter'] ? 'is-selected' : ''; ?>">
                 <td><?php echo $chapter['num']; ?></td>
                 <td>
                     <a href="/text/<?php echo $chapter['id']; ?>/read">
                         <?php echo htmlspecialchars($chapter['title']); ?>
                     </a>
-                    <?php if ($chapter['num'] === $book['currentChapter']): ?>
+                    <?php if ($chapter['num'] === $book['currentChapter']) : ?>
                     <span class="tag is-small is-info ml-2">Current</span>
                     <?php endif; ?>
                 </td>

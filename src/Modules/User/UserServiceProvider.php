@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * User Module Service Provider
  *
@@ -18,39 +21,29 @@ namespace Lwt\Modules\User;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
-
 // Domain
 use Lwt\Modules\User\Domain\UserRepositoryInterface;
-
 // Infrastructure
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
-
 // Application
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Modules\User\Application\Services\PasswordHasher;
-
 // Http
 use Lwt\Modules\User\Http\UserController;
 use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\User\Http\WordPressController;
 use Lwt\Modules\User\Http\GoogleController;
-
 // Infrastructure
 use Lwt\Modules\User\Infrastructure\AuthFormDataManager;
-
 // Shared Services
 use Lwt\Shared\Infrastructure\Http\FlashMessageService;
-
 // WordPress integration
 use Lwt\Modules\User\Application\Services\WordPressAuthService;
-
 // Google OAuth integration
 use Lwt\Modules\User\Application\Services\GoogleAuthService;
-
 // Microsoft OAuth integration
 use Lwt\Modules\User\Application\Services\MicrosoftAuthService;
 use Lwt\Modules\User\Http\MicrosoftController;
-
 // Application Services
 use Lwt\Modules\User\Application\Services\EmailService;
 use Lwt\Modules\User\Application\Services\PasswordService;

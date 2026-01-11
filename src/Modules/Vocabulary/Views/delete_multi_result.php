@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Word Delete Multi Result View - Shows result after deleting a multi-word expression
  *
@@ -33,8 +36,11 @@ assert(is_bool($showAll));
 <p>OK, term deleted (<?php echo $rowsAffected; ?>).</p>
 
 <script type="application/json" data-lwt-delete-multi-result-config>
-<?php echo json_encode([
+<?php echo json_encode(
+    [
     'wid' => $wid,
     'showAll' => $showAll,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
-], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
+    ],
+    JSON_HEX_TAG | JSON_HEX_AMP
+); ?></script>

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * EPUB Import Result View
  *
@@ -29,7 +32,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 </div>
 
 <div class="buttons">
-    <?php if ($bookId !== null): ?>
+    <?php if ($bookId !== null) : ?>
     <a href="/book/<?php echo $bookId; ?>" class="button is-primary">
         <?php echo IconHelper::render('book', ['alt' => 'View Book']); ?>
         <span class="ml-2">View Book</span>

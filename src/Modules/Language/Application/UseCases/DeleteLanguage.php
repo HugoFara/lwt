@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Delete Language Use Case
  *
@@ -47,8 +50,10 @@ class DeleteLanguage
         // Check for related data
         $stats = $this->getRelatedDataCounts($id);
 
-        if ($stats['texts'] > 0 || $stats['archivedTexts'] > 0 ||
-            $stats['words'] > 0 || $stats['feeds'] > 0) {
+        if (
+            $stats['texts'] > 0 || $stats['archivedTexts'] > 0 ||
+            $stats['words'] > 0 || $stats['feeds'] > 0
+        ) {
             return [
                 'success' => false,
                 'count' => 0,

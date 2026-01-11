@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Dictionary Module Service Provider
  *
@@ -18,24 +21,19 @@ namespace Lwt\Modules\Dictionary;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
-
 // Application
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
 use Lwt\Modules\Dictionary\Application\TranslationService;
-
 // Http
 use Lwt\Modules\Dictionary\Http\DictionaryController;
 use Lwt\Modules\Dictionary\Http\TranslationController;
-
 // Application Services
 use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
-
 // Infrastructure - Dictionary Importers
 use Lwt\Modules\Dictionary\Infrastructure\Import\ImporterInterface;
 use Lwt\Modules\Dictionary\Infrastructure\Import\CsvImporter;
 use Lwt\Modules\Dictionary\Infrastructure\Import\JsonImporter;
 use Lwt\Modules\Dictionary\Infrastructure\Import\StarDictImporter;
-
 // Language Module
 use Lwt\Modules\Language\Application\LanguageFacade;
 

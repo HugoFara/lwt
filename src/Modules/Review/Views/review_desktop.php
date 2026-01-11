@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Desktop Review Layout View
  *
@@ -19,7 +22,6 @@
 namespace Lwt\Views\Review;
 
 use Lwt\Core\StringUtils;
-
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 ?>

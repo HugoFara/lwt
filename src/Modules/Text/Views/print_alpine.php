@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Unified print view using Alpine.js.
  *
@@ -35,18 +38,32 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Type-safe variable extraction from controller context
 assert(is_int($textId));
-/** @var int $textId */
+/**
+ * @var int $textId
+*/
 assert(is_string($mode));
-/** @var string $mode */
+/**
+ * @var string $mode
+*/
 assert(is_array($viewData));
-/** @var array{title: string, sourceUri: string, audioUri: string, textSize: int, rtlScript: bool, hasAnnotation: bool} $viewData */
+/**
+ * @var array{title: string, sourceUri: string, audioUri: string, textSize: int, rtlScript: bool, hasAnnotation: bool} $viewData
+*/
 assert(is_int($savedAnn));
-/** @var int $savedAnn */
+/**
+ * @var int $savedAnn
+*/
 assert(is_int($savedStatus));
-/** @var int $savedStatus */
+/**
+ * @var int $savedStatus
+*/
 assert(is_int($savedPlacement));
-/** @var int $savedPlacement */
-/** @var string|null $editFormHtml */
+/**
+ * @var int $savedPlacement
+*/
+/**
+ * @var string|null $editFormHtml
+*/
 
 $title = $viewData['title'];
 $sourceUri = $viewData['sourceUri'];
@@ -77,7 +94,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                 <a href="/review?text=<?php echo $textId; ?>" target="_top">
                     <?php echo IconHelper::render('circle-help', ['title' => 'Review', 'alt' => 'Review']); ?>
                 </a>
-                <?php if ($mode !== 'edit'): ?>
+                <?php if ($mode !== 'edit') : ?>
                     <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
                 <?php endif; ?>
                 <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
@@ -91,13 +108,13 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
 
         <!-- Page title -->
         <h1>
-            <?php if ($mode === 'plain'): ?>
+            <?php if ($mode === 'plain') : ?>
                 PRINT &#9654;
-            <?php else: ?>
+            <?php else : ?>
                 ANN.TEXT &#9654;
             <?php endif; ?>
             <?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>
-            <?php if ($sourceUri !== '' && substr(trim($sourceUri), 0, 1) !== '#'): ?>
+            <?php if ($sourceUri !== '' && substr(trim($sourceUri), 0, 1) !== '#') : ?>
                 <a href="<?php echo htmlspecialchars($sourceUri, ENT_QUOTES, 'UTF-8'); ?>" target="_blank">
                     <?php echo IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']); ?>
                 </a>
@@ -112,7 +129,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
             <p class="mt-2">Loading...</p>
         </div>
 
-        <?php if ($mode === 'plain'): ?>
+        <?php if ($mode === 'plain') : ?>
         <!-- Plain print options -->
         <div x-show="!loading" class="card mb-4" id="printoptions" data-text-id="<?php echo $textId; ?>">
             <div class="card-content">
@@ -154,14 +171,14 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                     <span class="is-size-7 ml-2">(only the text below the line)</span>
                 </div>
                 <div class="mt-3">
-                    <?php if ($hasAnnotation): ?>
+                    <?php if ($hasAnnotation) : ?>
                         Or
                         <button type="button" class="button is-small" @click="navigateTo('/text/print?text=<?php echo $textId; ?>')">
                             Print/Edit/Delete
                         </button>
                         your <strong>Improved Annotated Text</strong>
                         <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>.
-                    <?php else: ?>
+                    <?php else : ?>
                         <button type="button" class="button is-small" @click="navigateTo('/text/print?edit=1&text=<?php echo $textId; ?>')">
                             Create
                         </button>
@@ -171,7 +188,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                 </div>
             </div>
         </div>
-        <?php elseif ($mode === 'annotated'): ?>
+        <?php elseif ($mode === 'annotated') : ?>
         <!-- Annotated display options -->
         <div x-show="!loading" class="card mb-4" id="printoptions" data-text-id="<?php echo $textId; ?>">
             <header class="card-header">
@@ -198,7 +215,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                 </div>
             </div>
         </div>
-        <?php else: ?>
+        <?php else : ?>
         <!-- Edit mode options -->
         <div x-show="!loading" class="card mb-4" id="printoptions">
             <header class="card-header">
@@ -220,7 +237,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
     <!-- End noprint -->
 
     <!-- Print content -->
-    <?php if ($mode === 'plain'): ?>
+    <?php if ($mode === 'plain') : ?>
     <div x-show="!loading" id="print" <?php echo ($rtlScript ? 'dir="rtl"' : ''); ?>>
         <h2 x-text="getConfigTitle('<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>')"></h2>
         <p :style="'font-size:' + getConfigTextSize(<?php echo $textSize; ?>) + '%; line-height: 1.35; margin-bottom: 10px;'">
@@ -229,7 +246,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
             </template>
         </p>
     </div>
-    <?php elseif ($mode === 'annotated'): ?>
+    <?php elseif ($mode === 'annotated') : ?>
     <div x-show="!loading" id="print" <?php echo ($rtlScript ? 'dir="rtl"' : ''); ?>>
         <p :style="'font-size:' + getAnnConfigTextSize(<?php echo $textSize; ?>) + '%; line-height: 1.35; margin-bottom: 10px;'">
             <span x-text="getAnnConfigTitle('<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>')"></span>
@@ -244,14 +261,14 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
             </template>
         </p>
     </div>
-    <?php else: ?>
+    <?php else : ?>
     <!-- Edit mode content -->
     <div x-show="!loading" id="print">
-        <?php if (isset($editFormHtml) && $editFormHtml !== null): ?>
+        <?php if (isset($editFormHtml) && $editFormHtml !== null) : ?>
             <div data_id="<?php echo $textId; ?>" id="editimprtextdata">
                 <?php echo $editFormHtml; ?>
             </div>
-        <?php else: ?>
+        <?php else : ?>
             <p>No annotated text found, and creation seems not possible.</p>
         <?php endif; ?>
     </div>
@@ -264,10 +281,13 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
 </div>
 
 <!-- Config for Alpine -->
-<script type="application/json" id="print-config"><?php echo json_encode([
+<script type="application/json" id="print-config"><?php echo json_encode(
+    [
     'textId' => $textId,
     'mode' => $mode,
     'savedAnn' => $savedAnn,
     'savedStatus' => $savedStatus,
     'savedPlacement' => $savedPlacement
-], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
+    ],
+    JSON_HEX_TAG | JSON_HEX_AMP
+); ?></script>

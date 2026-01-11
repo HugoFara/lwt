@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Microsoft Account Link Confirmation View
  *
@@ -40,7 +41,7 @@ $error = isset($error) && is_string($error) ? $error : null;
                     </p>
                 </div>
 
-                <?php if ($error !== null): ?>
+                <?php if ($error !== null) : ?>
                 <div class="notification is-danger is-light">
                     <?= htmlspecialchars($error) ?>
                 </div>

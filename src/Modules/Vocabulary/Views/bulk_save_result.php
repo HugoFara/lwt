@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Bulk Save Result View - Shows result after saving bulk translated words
  *

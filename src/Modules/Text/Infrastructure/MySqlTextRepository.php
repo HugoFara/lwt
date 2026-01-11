@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * MySQL Text Repository
  *
@@ -358,10 +361,12 @@ class MySqlTextRepository extends AbstractRepository implements TextRepositoryIn
     {
         $affected = $this->query()
             ->where('TxID', '=', $textId)
-            ->updatePrepared([
+            ->updatePrepared(
+                [
                 'TxPosition' => 0,
                 'TxAudioPosition' => 0.0,
-            ]);
+                ]
+            );
 
         return $affected > 0;
     }
@@ -420,13 +425,15 @@ class MySqlTextRepository extends AbstractRepository implements TextRepositoryIn
     public function getBasicInfo(int $textId): ?array
     {
         $row = $this->query()
-            ->select([
+            ->select(
+                [
                 'TxID',
                 'TxTitle',
                 'TxLgID',
                 'TxAudioURI',
                 'LENGTH(TxAnnotatedText) AS annotlen'
-            ])
+                ]
+            )
             ->where('TxID', '=', $textId)
             ->firstPrepared();
 
@@ -446,11 +453,11 @@ class MySqlTextRepository extends AbstractRepository implements TextRepositoryIn
     /**
      * Get texts with pagination and language info.
      *
-     * @param int      $languageId Language ID (0 for all)
-     * @param int      $page       Page number (1-based)
-     * @param int      $perPage    Items per page
-     * @param string   $orderBy    Column to order by
-     * @param string   $direction  Sort direction
+     * @param int    $languageId Language ID (0 for all)
+     * @param int    $page       Page number (1-based)
+     * @param int    $perPage    Items per page
+     * @param string $orderBy    Column to order by
+     * @param string $direction  Sort direction
      *
      * @return array{items: Text[], total: int, page: int, per_page: int, total_pages: int}
      */

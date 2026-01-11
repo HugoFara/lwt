@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Active Text List View - Display grouped texts by language
  *
@@ -29,7 +32,9 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Core\StringUtils;
 
 // Type-safe variable extraction from controller context
-/** @var string $message */
+/**
+ * @var string $message
+*/
 
 ?>
 <link rel="stylesheet" type="text/css" href="<?php StringUtils::printFilePath('css/css_charts.css');?>" />
@@ -37,11 +42,13 @@ use Lwt\Core\StringUtils;
 <?php \Lwt\Shared\UI\Helpers\PageLayoutHelper::renderMessage($message, false); ?>
 
 <?php
-echo PageLayoutHelper::buildActionCard([
+echo PageLayoutHelper::buildActionCard(
+    [
     ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
     ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'],
     ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'],
-]);
+    ]
+);
 ?>
 
 <!-- Alpine.js container for grouped texts -->
@@ -295,7 +302,10 @@ echo PageLayoutHelper::buildActionCard([
 </div>
 
 <!-- Config for Alpine - pass statuses and active language for default expansion -->
-<script type="application/json" id="texts-grouped-config"><?php echo json_encode([
+<script type="application/json" id="texts-grouped-config"><?php echo json_encode(
+    [
     'statuses' => $statuses,
     'activeLanguageId' => $activeLanguageId
-], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
+    ],
+    JSON_HEX_TAG | JSON_HEX_AMP
+); ?></script>

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Review Module Service Provider
  *
@@ -18,14 +21,11 @@ namespace Lwt\Modules\Review;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
-
 // Domain
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
-
 // Infrastructure
 use Lwt\Modules\Review\Infrastructure\MySqlReviewRepository;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
-
 // Use Cases
 use Lwt\Modules\Review\Application\UseCases\GetNextTerm;
 use Lwt\Modules\Review\Application\UseCases\GetTableWords;
@@ -33,14 +33,11 @@ use Lwt\Modules\Review\Application\UseCases\GetReviewConfiguration;
 use Lwt\Modules\Review\Application\UseCases\GetTomorrowCount;
 use Lwt\Modules\Review\Application\UseCases\StartReviewSession;
 use Lwt\Modules\Review\Application\UseCases\SubmitAnswer;
-
 // Application
 use Lwt\Modules\Review\Application\ReviewFacade;
-
 // Http
 use Lwt\Modules\Review\Http\ReviewController;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
-
 // Application Services
 use Lwt\Modules\Review\Application\Services\ReviewService;
 

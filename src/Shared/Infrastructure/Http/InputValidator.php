@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * \file
  * \brief Centralized input validation utilities.
@@ -514,8 +517,10 @@ class InputValidator
             return null;
         }
 
-        if (!isset($file['error']) || !isset($file['tmp_name']) ||
-            !isset($file['name']) || !isset($file['type']) || !isset($file['size'])) {
+        if (
+            !isset($file['error']) || !isset($file['tmp_name']) ||
+            !isset($file['name']) || !isset($file['type']) || !isset($file['size'])
+        ) {
             return null;
         }
 

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Archived Text List View - Display grouped archived texts by language
  *
@@ -28,16 +31,20 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Type-safe variable extraction from controller context
-/** @var string $messageTyped */
+/**
+ * @var string $messageTyped
+*/
 $messageTyped = $message;
 
 PageLayoutHelper::renderMessage($messageTyped, false);
 
-echo PageLayoutHelper::buildActionCard([
+echo PageLayoutHelper::buildActionCard(
+    [
     ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
     ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'],
     ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'],
-]);
+    ]
+);
 ?>
 
 <!-- Alpine.js container for grouped archived texts -->
@@ -232,6 +239,9 @@ echo PageLayoutHelper::buildActionCard([
 </div>
 
 <!-- Config for Alpine - pass active language for default expansion -->
-<script type="application/json" id="archived-texts-grouped-config"><?php echo json_encode([
+<script type="application/json" id="archived-texts-grouped-config"><?php echo json_encode(
+    [
     'activeLanguageId' => $activeLanguageId
-], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
+    ],
+    JSON_HEX_TAG | JSON_HEX_AMP
+); ?></script>

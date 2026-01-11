@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Vocabulary Module Service Provider
  *
@@ -18,13 +21,10 @@ namespace Lwt\Modules\Vocabulary;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
-
 // Domain
 use Lwt\Modules\Vocabulary\Domain\TermRepositoryInterface;
-
 // Infrastructure
 use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
-
 // Use Cases
 use Lwt\Modules\Vocabulary\Application\UseCases\CreateTerm;
 use Lwt\Modules\Vocabulary\Application\UseCases\DeleteTerm;
@@ -32,21 +32,16 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\UseCases\GetTermById;
 use Lwt\Modules\Vocabulary\Application\UseCases\UpdateTerm;
 use Lwt\Modules\Vocabulary\Application\UseCases\UpdateTermStatus;
-
 // Services
 use Lwt\Modules\Vocabulary\Application\Services\SimilarityCalculator;
 use Lwt\Modules\Vocabulary\Application\Services\LemmaService;
-
 // Lemmatizers
 use Lwt\Modules\Vocabulary\Domain\LemmatizerInterface;
 use Lwt\Modules\Vocabulary\Infrastructure\Lemmatizers\DictionaryLemmatizer;
-
 // Infrastructure
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
-
 // Application
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
-
 // HTTP
 use Lwt\Modules\Vocabulary\Http\VocabularyController;
 use Lwt\Modules\Vocabulary\Http\TermCrudApiHandler;

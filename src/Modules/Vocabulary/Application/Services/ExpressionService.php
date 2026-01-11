@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Expression Service - Multi-word expression handling
  *
@@ -353,12 +356,12 @@ class ExpressionService
 
         ?>
 <script type="application/json" data-lwt-multiword-config>
-<?php echo json_encode([
-    'attrs' => $attrs,
-    'multiWords' => $multiwords,
-    'hex' => $hex,
-    'showAll' => $showAll
-]); ?>
+        <?php echo json_encode([
+        'attrs' => $attrs,
+        'multiWords' => $multiwords,
+        'hex' => $hex,
+        'showAll' => $showAll
+        ]); ?>
 </script>
         <?php
         flush();
@@ -397,14 +400,14 @@ class ExpressionService
 
         ?>
 <script type="application/json" data-lwt-expression-config>
-<?php echo json_encode([
-    'attrs' => $attrs,
-    'appendText' => $appendtext,
-    'term' => $term,
-    'len' => $len,
-    'hex' => $hex,
-    'showAll' => $showAll
-]); ?>
+        <?php echo json_encode([
+        'attrs' => $attrs,
+        'appendText' => $appendtext,
+        'term' => $term,
+        'len' => $len,
+        'hex' => $hex,
+        'showAll' => $showAll
+        ]); ?>
 </script>
         <?php
         flush();

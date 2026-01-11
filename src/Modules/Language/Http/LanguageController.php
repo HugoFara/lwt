@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * \file
  * \brief Language Controller - Language configuration
@@ -278,5 +281,4 @@ class LanguageController extends BaseController
         }
         return $r;
     }
-
 }

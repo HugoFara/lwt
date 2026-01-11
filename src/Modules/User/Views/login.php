@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Login Form View
  *
@@ -54,7 +57,7 @@ if (isset($_SESSION['auth_success'])) {
                     </div>
 
                     <!-- Success message -->
-                    <?php if ($success !== null): ?>
+                    <?php if ($success !== null) : ?>
                     <div class="notification is-success is-light">
                         <button class="delete" onclick="this.parentElement.remove()"></button>
                         <?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?>
@@ -62,7 +65,7 @@ if (isset($_SESSION['auth_success'])) {
                     <?php endif; ?>
 
                     <!-- Error message -->
-                    <?php if ($error !== null): ?>
+                    <?php if ($error !== null) : ?>
                     <div class="notification is-danger is-light">
                         <button class="delete" onclick="this.parentElement.remove()"></button>
                         <?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?>
@@ -159,7 +162,7 @@ if (isset($_SESSION['auth_success'])) {
                     </p>
 
                     <!-- Google login link (if configured) -->
-                    <?php if (($_ENV['GOOGLE_CLIENT_ID'] ?? '') !== ''): ?>
+                    <?php if (($_ENV['GOOGLE_CLIENT_ID'] ?? '') !== '') : ?>
                     <p class="has-text-centered mt-3">
                         <a href="/google/start" class="button is-light is-fullwidth">
                             <span class="icon-text">
@@ -178,7 +181,7 @@ if (isset($_SESSION['auth_success'])) {
                     <?php endif; ?>
 
                     <!-- Microsoft login link (if configured) -->
-                    <?php if (($_ENV['MICROSOFT_CLIENT_ID'] ?? '') !== ''): ?>
+                    <?php if (($_ENV['MICROSOFT_CLIENT_ID'] ?? '') !== '') : ?>
                     <p class="has-text-centered mt-3">
                         <a href="/microsoft/start" class="button is-light is-fullwidth">
                             <span class="icon-text">

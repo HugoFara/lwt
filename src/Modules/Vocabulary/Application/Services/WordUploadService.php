@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Word Upload Service - Business logic for importing terms from files or text
  *
@@ -1080,7 +1083,8 @@ class WordUploadService
         Connection::execute(
             "CREATE TEMPORARY TABLE IF NOT EXISTS numbers(
                 n tinyint(3) unsigned NOT NULL
-            )");
+            )"
+        );
         Connection::execute("INSERT IGNORE INTO numbers(n) VALUES ('1'),('2'),('3'),
             ('4'),('5'),('6'),('7'),('8'),('9')");
 

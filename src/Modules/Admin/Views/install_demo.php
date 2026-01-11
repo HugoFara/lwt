@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Install Demo View
  *
@@ -60,7 +63,7 @@ $base = UrlUtilities::getBasePath();
                     <p class="is-size-7">
                         The database <strong><?php echo htmlspecialchars(Globals::getDatabaseName(), ENT_QUOTES, 'UTF-8'); ?></strong>
                         <?php echo $prefinfo; ?> will be <strong>replaced</strong> by the LWT demo database.
-                        <?php if ($langcnt > 0): ?>
+                        <?php if ($langcnt > 0) : ?>
                         <br>Your existing <?php echo $langcnt; ?> language(s) and all associated data will be <strong>overwritten</strong>.
                         <?php endif; ?>
                     </p>

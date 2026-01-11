@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Multi-Load Feeds View
  *
@@ -49,16 +52,18 @@ namespace Lwt\Views\Feed;
 </tr>
     <?php
     $time = time();
-    foreach ($feeds as $row):
+    foreach ($feeds as $row) :
         $diff = $time - $row['NfUpdate'];
-    ?>
+        ?>
     <tr>
         <td class="has-text-centered">
             <input class="markcheck" type="checkbox" name="selected_feed[]" value="<?php echo $row['NfID']; ?>" checked="checked" />
         </td>
         <td class="has-text-centered" colspan="2"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
         <td class="has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
-            <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
+            <?php if ($row['NfUpdate']) {
+                echo $feedService->formatLastUpdate($diff);
+            } ?>
         </td>
     </tr>
     <?php endforeach; ?>

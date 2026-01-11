@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Book Module Service Provider
  *
@@ -18,30 +21,23 @@ namespace Lwt\Modules\Book;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
-
 // Domain
 use Lwt\Modules\Book\Domain\BookRepositoryInterface;
-
 // Infrastructure
 use Lwt\Modules\Book\Infrastructure\MySqlBookRepository;
-
 // Services
 use Lwt\Modules\Book\Application\Services\EpubParserService;
 use Lwt\Modules\Book\Application\Services\TextSplitterService;
-
 // Use Cases
 use Lwt\Modules\Book\Application\UseCases\ImportEpub;
 use Lwt\Modules\Book\Application\UseCases\CreateBookFromTexts;
 use Lwt\Modules\Book\Application\UseCases\GetBookList;
 use Lwt\Modules\Book\Application\UseCases\GetBookById;
 use Lwt\Modules\Book\Application\UseCases\DeleteBook;
-
 // Application
 use Lwt\Modules\Book\Application\BookFacade;
-
 // Text module dependencies
 use Lwt\Modules\Text\Domain\TextRepositoryInterface;
-
 // Http
 use Lwt\Modules\Book\Http\BookController;
 use Lwt\Modules\Book\Http\BookApiHandler;

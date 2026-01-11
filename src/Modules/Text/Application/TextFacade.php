@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Facade
  *
@@ -67,16 +70,16 @@ class TextFacade
      * Constructor.
      *
      * @param TextRepositoryInterface|null $textRepository    Text repository
-     * @param ArchiveText|null            $archiveText       Archive use case
-     * @param BuildTextFilters|null       $buildTextFilters  Filter builder use case
-     * @param DeleteText|null             $deleteText        Delete use case
-     * @param GetTextForEdit|null         $getTextForEdit    Get for edit use case
-     * @param GetTextForReading|null      $getTextForReading Get for reading use case
-     * @param ImportText|null             $importText        Import use case
-     * @param ListTexts|null              $listTexts         List use case
-     * @param ParseText|null              $parseText         Parse use case
-     * @param UpdateText|null             $updateText        Update use case
-     * @param SentenceService|null        $sentenceService   Sentence service
+     * @param ArchiveText|null             $archiveText       Archive use case
+     * @param BuildTextFilters|null        $buildTextFilters  Filter builder use case
+     * @param DeleteText|null              $deleteText        Delete use case
+     * @param GetTextForEdit|null          $getTextForEdit    Get for edit use case
+     * @param GetTextForReading|null       $getTextForReading Get for reading use case
+     * @param ImportText|null              $importText        Import use case
+     * @param ListTexts|null               $listTexts         List use case
+     * @param ParseText|null               $parseText         Parse use case
+     * @param UpdateText|null              $updateText        Update use case
+     * @param SentenceService|null         $sentenceService   Sentence service
      */
     public function __construct(
         ?TextRepositoryInterface $textRepository = null,
@@ -711,7 +714,9 @@ class TextFacade
             return "Multiple Actions: 0";
         }
 
-        /** @var array<int, int> $ids */
+        /**
+ * @var array<int, int> $ids
+*/
         $ids = array_values(array_map('intval', $textIds));
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
         $count = 0;

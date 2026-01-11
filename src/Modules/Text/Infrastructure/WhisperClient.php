@@ -26,16 +26,20 @@ class WhisperClient
      */
     public function isAvailable(): bool
     {
-        $context = stream_context_create([
+        $context = stream_context_create(
+            [
             'http' => ['method' => 'GET', 'timeout' => 5]
-        ]);
+            ]
+        );
 
         $response = @file_get_contents($this->baseUrl . '/whisper/available', false, $context);
         if ($response === false) {
             return false;
         }
 
-        /** @var array{available?: bool}|null $data */
+        /**
+ * @var array{available?: bool}|null $data
+*/
         $data = json_decode($response, true);
         return $data['available'] ?? false;
     }
@@ -47,16 +51,20 @@ class WhisperClient
      */
     public function getLanguages(): array
     {
-        $context = stream_context_create([
+        $context = stream_context_create(
+            [
             'http' => ['method' => 'GET', 'timeout' => 10]
-        ]);
+            ]
+        );
 
         $response = @file_get_contents($this->baseUrl . '/whisper/languages', false, $context);
         if ($response === false) {
             return [];
         }
 
-        /** @var array{languages?: array<array{code: string, name: string}>}|null $data */
+        /**
+ * @var array{languages?: array<array{code: string, name: string}>}|null $data
+*/
         $data = json_decode($response, true);
         return $data['languages'] ?? [];
     }
@@ -68,16 +76,20 @@ class WhisperClient
      */
     public function getModels(): array
     {
-        $context = stream_context_create([
+        $context = stream_context_create(
+            [
             'http' => ['method' => 'GET', 'timeout' => 10]
-        ]);
+            ]
+        );
 
         $response = @file_get_contents($this->baseUrl . '/whisper/models', false, $context);
         if ($response === false) {
             return [];
         }
 
-        /** @var array{models?: array<array{name: string, description: string}>}|null $data */
+        /**
+ * @var array{models?: array<array{name: string, description: string}>}|null $data
+*/
         $data = json_decode($response, true);
         return $data['models'] ?? [];
     }
@@ -111,12 +123,15 @@ class WhisperClient
             $postFields['language'] = $language;
         }
 
-        curl_setopt_array($ch, [
+        curl_setopt_array(
+            $ch,
+            [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $postFields,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 120, // Upload timeout
-        ]);
+            ]
+        );
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -127,7 +142,9 @@ class WhisperClient
             throw new \RuntimeException('Failed to connect to NLP service: ' . $error);
         }
 
-        /** @var array{job_id?: string, detail?: string}|null $data */
+        /**
+ * @var array{job_id?: string, detail?: string}|null $data
+*/
         $data = json_decode($response, true);
 
         if ($httpCode !== 200 && $httpCode !== 202) {
@@ -151,9 +168,11 @@ class WhisperClient
      */
     public function getStatus(string $jobId): array
     {
-        $context = stream_context_create([
+        $context = stream_context_create(
+            [
             'http' => ['method' => 'GET', 'timeout' => $this->timeout]
-        ]);
+            ]
+        );
 
         $url = $this->baseUrl . '/whisper/status/' . urlencode($jobId);
         $response = @file_get_contents($url, false, $context);
@@ -167,7 +186,9 @@ class WhisperClient
             ];
         }
 
-        /** @var array{job_id: string, status: string, progress: int, message: string} $data */
+        /**
+ * @var array{job_id: string, status: string, progress: int, message: string} $data
+*/
         $data = json_decode($response, true);
         return $data;
     }
@@ -183,13 +204,15 @@ class WhisperClient
      */
     public function getResult(string $jobId): array
     {
-        $context = stream_context_create([
+        $context = stream_context_create(
+            [
             'http' => [
                 'method' => 'GET',
                 'timeout' => $this->timeout,
                 'ignore_errors' => true,
             ]
-        ]);
+            ]
+        );
 
         $url = $this->baseUrl . '/whisper/result/' . urlencode($jobId);
         $response = @file_get_contents($url, false, $context);
@@ -209,7 +232,9 @@ class WhisperClient
             }
         }
 
-        /** @var array{job_id?: string, text?: string, language?: string, duration_seconds?: float, detail?: string}|null $data */
+        /**
+ * @var array{job_id?: string, text?: string, language?: string, duration_seconds?: float, detail?: string}|null $data
+*/
         $data = json_decode($response, true);
 
         if ($httpCode === 202) {
@@ -225,7 +250,9 @@ class WhisperClient
             throw new \RuntimeException('Failed to get result: ' . $detail);
         }
 
-        /** @var array{job_id: string, text: string, language: string, duration_seconds: float} */
+        /**
+ * @var array{job_id: string, text: string, language: string, duration_seconds: float}
+*/
         return $data ?? [];
     }
 
@@ -238,12 +265,14 @@ class WhisperClient
      */
     public function cancelJob(string $jobId): bool
     {
-        $context = stream_context_create([
+        $context = stream_context_create(
+            [
             'http' => [
                 'method' => 'DELETE',
                 'timeout' => $this->timeout,
             ]
-        ]);
+            ]
+        );
 
         $url = $this->baseUrl . '/whisper/job/' . urlencode($jobId);
         $response = @file_get_contents($url, false, $context);

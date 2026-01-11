@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Navigation Service - Navigation utilities for previous/next texts.
  *
@@ -35,7 +38,6 @@ use Lwt\Shared\UI\Helpers\IconHelper;
  */
 class TextNavigationService
 {
-
     /**
      * Return navigation arrows to previous and next texts.
      *
@@ -198,7 +200,9 @@ class TextNavigationService
      */
     public static function getTextTitle(int $textId): string
     {
-        /** @var string|null $result */
+        /**
+ * @var string|null $result
+*/
         $result = QueryBuilder::table('texts')
             ->where('TxID', '=', $textId)
             ->valuePrepared('TxTitle');

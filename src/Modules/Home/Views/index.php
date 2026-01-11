@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Home Page View
  *
@@ -68,7 +71,7 @@ function renderHomeConfig(?array $lastTextInfo, string $base): void
     ];
     ?>
 <script type="application/json" id="home-warnings-config">
-<?php echo json_encode($config, JSON_UNESCAPED_SLASHES); ?>
+    <?php echo json_encode($config, JSON_UNESCAPED_SLASHES); ?>
 </script>
     <?php
 }
@@ -164,7 +167,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
     </div>
 </section>
 
-<?php if ($langcnt == 0): ?>
+<?php if ($langcnt == 0) : ?>
 <!-- Empty database: Getting Started section -->
 <section class="section py-4 mb-5">
     <div class="container">
@@ -195,7 +198,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
         </div>
     </div>
 </section>
-<?php elseif ($langcnt > 0): ?>
+<?php elseif ($langcnt > 0) : ?>
 <!-- Current text section -->
 <section class="section py-4 mb-4">
     <div class="container">

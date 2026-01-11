@@ -41,7 +41,8 @@
         "vimeo/psalm": "^5.6",
         "phpunit/phpunit": "^10.5",
         "league/commonmark": "^2.7",
-        "phpdocumentor/shim": "*"
+        "phpdocumentor/shim": "*",
+        "squizlabs/php_codesniffer": "^4.0"
     },
     "suggest": {
         "squizlabs/php_codesniffer": "Following code style standards is a good thing"

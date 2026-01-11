@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Test Header Navigation Row View
  *
@@ -32,7 +35,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
             <?php echo PageLayoutHelper::buildLogo(); ?>
         </a>
     </div>
-    <?php if ($textId !== null): ?>
+    <?php if ($textId !== null) : ?>
     <div>
         <?php
         echo (new TextNavigationService())->getPreviousAndNextTextLinks(

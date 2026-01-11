@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Edit Feed Form View
  *
@@ -84,8 +87,10 @@ $actions = [
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="NfLgID" id="NfLgID">
-                                <?php foreach ($languages as $lang): ?>
-                                <option value="<?php echo $lang['LgID']; ?>"<?php if ($feed['NfLgID'] === $lang['LgID']) echo ' selected'; ?>>
+                                <?php foreach ($languages as $lang) : ?>
+                                <option value="<?php echo $lang['LgID']; ?>"<?php if ($feed['NfLgID'] === $lang['LgID']) {
+                                    echo ' selected';
+                                               } ?>>
                                     <?php echo htmlspecialchars($lang['LgName'], ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                                 <?php endforeach; ?>

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * \file
  * \brief Database bootstrap class - establishes connection and initializes globals.

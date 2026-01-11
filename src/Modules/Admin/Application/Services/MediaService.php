@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Media Service - Business logic for media file handling and player generation
  *
@@ -455,7 +458,7 @@ allowfullscreen type="text/html">
                 </div>
                 <div class="dropdown-menu" role="menu">
                     <div class="dropdown-content">
-                        <?php foreach ($skipOptions as $sec): ?>
+                        <?php foreach ($skipOptions as $sec) : ?>
                         <a
                             class="dropdown-item is-size-7"
                             :class="{ 'is-active': skipSeconds === <?php echo $sec; ?> }"
@@ -522,5 +525,4 @@ allowfullscreen type="text/html">
 </div>
         <?php
     }
-
 }

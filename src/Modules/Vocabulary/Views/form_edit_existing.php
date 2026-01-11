@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Edit Word Form View - For editing an existing word
  *
@@ -134,21 +137,21 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        <td class="has-text-right" colspan="2">
            <?php
            /** @psalm-suppress PossiblyUndefinedVariable */
-           if ($fromAnn !== '') {
-               echo (string)createDictLinksInEditWin2(
-                   $lang,
-                   'WoSentence',
-                   'WoText'
-               );
-           } else {
-               echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin(
-                   $lang,
-                   $term,
-                   'WoSentence',
-                   !InputValidator::hasFromGet('nodict')
-               );
-           }
-           ?>
+            if ($fromAnn !== '') {
+                echo (string)createDictLinksInEditWin2(
+                    $lang,
+                    'WoSentence',
+                    'WoText'
+                );
+            } else {
+                echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin(
+                    $lang,
+                    $term,
+                    'WoSentence',
+                    !InputValidator::hasFromGet('nodict')
+                );
+            }
+            ?>
            &nbsp; &nbsp; &nbsp;
            <input type="submit" name="op" value="Change" />
        </td>

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Edit Form View - Display form for creating/editing texts
  *
@@ -39,29 +42,53 @@ use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Core\Integration\YouTubeImport;
 
 // Type-safe variable extraction from controller context
-/** @var int $textId */
-/** @var bool $annotated */
+/**
+ * @var int $textId
+*/
+/**
+ * @var bool $annotated
+*/
 assert(is_array($languageData));
-/** @var array<int, string> $languageData */
+/**
+ * @var array<int, string> $languageData
+*/
 assert(is_array($languages));
-/** @var array<int, array{id: int, name: string}> $languagesTyped */
+/**
+ * @var array<int, array{id: int, name: string}> $languagesTyped
+*/
 $languagesTyped = $languages;
-/** @var bool $isNew */
-/** @var string $scrdir */
+/**
+ * @var bool $isNew
+*/
+/**
+ * @var string $scrdir
+*/
 
 // Extract typed properties from $text for use in template
 assert(is_object($text) && property_exists($text, 'lgid'));
-/** @var int $textIdTyped */
+/**
+ * @var int $textIdTyped
+*/
 $textIdTyped = $textId;
-/** @var int $textLgId */
+/**
+ * @var int $textLgId
+*/
 $textLgId = $text->lgid;
-/** @var string $textTitle */
+/**
+ * @var string $textTitle
+*/
 $textTitle = $text->title;
-/** @var string $textContent */
+/**
+ * @var string $textContent
+*/
 $textContent = $text->text;
-/** @var string $textSource */
+/**
+ * @var string $textSource
+*/
 $textSource = $text->source;
-/** @var string $textMediaUri */
+/**
+ * @var string $textMediaUri
+*/
 $textMediaUri = $text->media_uri;
 $scrdirTyped = $scrdir;
 
@@ -99,7 +126,7 @@ if ($isNew) {
     <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
 
     <div class="box">
-        <?php if ($isNew): ?>
+        <?php if ($isNew) : ?>
         <!-- Import from File (FIRST for new texts) -->
         <div class="field">
             <label class="label">Import from File</label>
@@ -263,11 +290,11 @@ if ($isNew) {
         </div>
 
         <!-- Annotated Text (only for existing texts) -->
-        <?php if (!$isNew): ?>
+        <?php if (!$isNew) : ?>
         <div class="field">
             <label class="label">Annotated Text</label>
             <div class="control">
-                <?php if ($annotated): ?>
+                <?php if ($annotated) : ?>
                 <div class="notification is-info is-light">
                     <span class="icon-text">
                         <span class="icon has-text-success">
@@ -287,7 +314,7 @@ if ($isNew) {
                         </button>
                     </div>
                 </div>
-                <?php else: ?>
+                <?php else : ?>
                 <div class="notification is-light">
                     <span class="icon-text">
                         <span class="icon has-text-grey">
@@ -358,7 +385,7 @@ if ($isNew) {
             </div>
         </div>
 
-        <?php if ($isNew && YouTubeImport::isConfigured()): ?>
+        <?php if ($isNew && YouTubeImport::isConfigured()) : ?>
         <!-- YouTube Import -->
         <div class="field">
             <label class="label" for="ytVideoId">YouTube Video</label>

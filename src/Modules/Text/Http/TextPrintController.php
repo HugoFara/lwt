@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Print Controller
  *
@@ -97,14 +100,14 @@ class TextPrintController extends BaseController
      */
     public function printPlain(array $params): void
     {
-        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        require_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        require_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        require_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
+        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
+        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
+        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
+        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
 
         $textId = (int) $this->param('text', '0');
 
@@ -150,15 +153,15 @@ class TextPrintController extends BaseController
      */
     public function printAnnotated(array $params): void
     {
-        require_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        require_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        require_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        require_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        require_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-        require_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
+        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
+        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
+        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
+        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
 
         $textId = (int) $this->param('text', '0');
         $editMode = (int) $this->param('edit', '0');

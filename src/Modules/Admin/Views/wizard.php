@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Database Wizard View (Standalone)
  *
@@ -64,7 +67,7 @@ $connSocket = $connObj->socket ?? '';
         <div class="box">
             <h1 class="title is-3 has-text-centered">Database Connection Wizard</h1>
 
-            <?php if ($errorMessage !== null): ?>
+            <?php if ($errorMessage !== null) : ?>
             <div class="notification <?php echo str_contains($errorMessage, 'Success') ? 'is-success' : 'is-danger'; ?> is-light"
                  x-data="{ show: true }"
                  x-show="show"

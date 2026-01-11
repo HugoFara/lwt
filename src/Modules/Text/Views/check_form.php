@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Check Form View - Form to check text parsing
  *
@@ -26,7 +29,9 @@ namespace Lwt\Views\Text;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Type-safe variable extraction from controller context
-/** @var string $languagesOptionTyped */
+/**
+ * @var string $languagesOptionTyped
+*/
 $languagesOptionTyped = $languagesOption;
 ?>
 <script type="application/json" id="language-data-config"><?php echo json_encode($languageData, JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

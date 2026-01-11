@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Word Upload Form View
  *
@@ -222,7 +225,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                     <div class="control">
                         <div class="select is-fullwidth is-small">
                             <select name="Col<?php echo $i; ?>">
-                                <?php foreach ($columnOptions as $val => $label): ?>
+                                <?php foreach ($columnOptions as $val => $label) : ?>
                                 <option value="<?php echo $val; ?>"<?php echo ($val === $default) ? ' selected' : ''; ?>>
                                     <?php echo $label; ?>
                                 </option>

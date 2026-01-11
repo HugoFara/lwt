@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Delete Text Use Case
  *
@@ -125,7 +128,9 @@ class DeleteText
             return ['count' => 0];
         }
 
-        /** @var array<int, int> $ids */
+        /**
+ * @var array<int, int> $ids
+*/
         $ids = array_values(array_map('intval', $textIds));
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
         $deleted = Connection::preparedExecute(

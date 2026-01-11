@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Desktop Text Reading Layout View
  *
@@ -61,11 +64,13 @@ if (!isset($bookContext) || !is_array($bookContext)) {
         <div class="level-item">
           <strong x-text="title || 'Loading...'"></strong>
           <?php
-          /** @var string|null $sourceUri */
-          $sourceUriTyped = $sourceUri;
-          if ($sourceUriTyped !== null && $sourceUriTyped !== '' && !str_starts_with(trim($sourceUriTyped), '#')): ?>
-          <?php echo \Lwt\Shared\UI\Helpers\IconHelper::link('external-link', $sourceUriTyped, ['alt' => 'Source'], ['target' => '_blank', 'rel' => 'noopener', 'class' => 'ml-2', 'title' => 'Source']); ?>
-          <?php endif; ?>
+            /**
+             * @var string|null $sourceUri
+             */
+            $sourceUriTyped = $sourceUri;
+            if ($sourceUriTyped !== null && $sourceUriTyped !== '' && !str_starts_with(trim($sourceUriTyped), '#')) : ?>
+                <?php echo \Lwt\Shared\UI\Helpers\IconHelper::link('external-link', $sourceUriTyped, ['alt' => 'Source'], ['target' => '_blank', 'rel' => 'noopener', 'class' => 'ml-2', 'title' => 'Source']); ?>
+            <?php endif; ?>
         </div>
       </div>
       <div class="level-right">
@@ -116,26 +121,28 @@ if (!isset($bookContext) || !is_array($bookContext)) {
   </div>
 
   <!-- Audio player (if media available) -->
-  <?php if ($media !== ''): ?>
+  <?php if ($media !== '') : ?>
   <div class="box py-2 px-4 mb-0" style="border-radius: 0;">
-    <?php (new MediaService())->renderMediaPlayer($media, $audioPosition); ?>
+        <?php (new MediaService())->renderMediaPlayer($media, $audioPosition); ?>
   </div>
   <?php endif; ?>
 
   <!-- Chapter navigation (if part of a book) -->
-  <?php if ($bookContext !== null): ?>
-  <?php
-  // Extract typed values for template use (types from docblock)
-  $bookId = $bookContext['bookId'];
-  $bookTitle = $bookContext['bookTitle'];
-  $chapterNum = $bookContext['chapterNum'];
-  $totalChapters = $bookContext['totalChapters'];
-  $chapterTitle = $bookContext['chapterTitle'];
-  $prevTextId = $bookContext['prevTextId'];
-  $nextTextId = $bookContext['nextTextId'];
-  /** @var array<int, array{textId: int, chapterNum: int, title: string}> */
-  $chapters = $bookContext['chapters'];
-  ?>
+  <?php if ($bookContext !== null) : ?>
+        <?php
+        // Extract typed values for template use (types from docblock)
+        $bookId = $bookContext['bookId'];
+        $bookTitle = $bookContext['bookTitle'];
+        $chapterNum = $bookContext['chapterNum'];
+        $totalChapters = $bookContext['totalChapters'];
+        $chapterTitle = $bookContext['chapterTitle'];
+        $prevTextId = $bookContext['prevTextId'];
+        $nextTextId = $bookContext['nextTextId'];
+        /**
+ * @var array<int, array{textId: int, chapterNum: int, title: string}>
+*/
+        $chapters = $bookContext['chapters'];
+        ?>
   <div class="box py-2 px-4 mb-0" style="border-radius: 0; background: #f5f5f5;">
     <div class="level is-mobile">
       <div class="level-left">
@@ -148,7 +155,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
           </a>
           <span class="has-text-grey ml-2">
             — Ch. <?php echo $chapterNum; ?>/<?php echo $totalChapters; ?>
-            <?php if ($chapterTitle !== ''): ?>
+            <?php if ($chapterTitle !== '') : ?>
               <em class="ml-1"><?php echo htmlspecialchars($chapterTitle); ?></em>
             <?php endif; ?>
           </span>
@@ -158,7 +165,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
         <div class="level-item">
           <div class="buttons has-addons mb-0">
             <!-- Previous chapter -->
-            <?php if ($prevTextId !== null): ?>
+            <?php if ($prevTextId !== null) : ?>
             <a href="/text/read?text=<?php echo $prevTextId; ?>"
                class="button is-small" title="Previous chapter">
               <span class="icon is-small">
@@ -166,7 +173,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
               </span>
               <span>Prev</span>
             </a>
-            <?php else: ?>
+            <?php else : ?>
             <button class="button is-small" disabled title="No previous chapter">
               <span class="icon is-small">
                 <i class="fas fa-chevron-left"></i>
@@ -187,11 +194,11 @@ if (!isset($bookContext) || !is_array($bookContext)) {
               </div>
               <div class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                 <div class="dropdown-content">
-                  <?php foreach ($chapters as $chapter): ?>
+                  <?php foreach ($chapters as $chapter) : ?>
                   <a href="/text/read?text=<?php echo $chapter['textId']; ?>"
                      class="dropdown-item <?php echo ($chapter['chapterNum'] === $chapterNum) ? 'is-active' : ''; ?>">
-                    <?php echo $chapter['chapterNum']; ?>.
-                    <?php echo htmlspecialchars($chapter['title'] ?: 'Chapter ' . $chapter['chapterNum']); ?>
+                        <?php echo $chapter['chapterNum']; ?>.
+                        <?php echo htmlspecialchars($chapter['title'] ?: 'Chapter ' . $chapter['chapterNum']); ?>
                   </a>
                   <?php endforeach; ?>
                 </div>
@@ -199,7 +206,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
             </div>
 
             <!-- Next chapter -->
-            <?php if ($nextTextId !== null): ?>
+            <?php if ($nextTextId !== null) : ?>
             <a href="/text/read?text=<?php echo $nextTextId; ?>"
                class="button is-small" title="Next chapter">
               <span>Next</span>
@@ -207,7 +214,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
                 <i class="fas fa-chevron-right"></i>
               </span>
             </a>
-            <?php else: ?>
+            <?php else : ?>
             <button class="button is-small" disabled title="No next chapter">
               <span>Next</span>
               <span class="icon is-small">
@@ -249,13 +256,13 @@ if (!isset($bookContext) || !is_array($bookContext)) {
   </div>
 
   <!-- Word popover (info view - non-blocking) -->
-  <?php include __DIR__ . '/word_popover.php'; ?>
+  <?php require __DIR__ . '/word_popover.php'; ?>
 
   <!-- Word modal (edit view only) -->
-  <?php include __DIR__ . '/word_modal.php'; ?>
+  <?php require __DIR__ . '/word_modal.php'; ?>
 
   <!-- Multi-word modal -->
-  <?php include __DIR__ . '/multi_word_modal.php'; ?>
+  <?php require __DIR__ . '/multi_word_modal.php'; ?>
 </div>
 
 <style>
@@ -331,7 +338,10 @@ if (!isset($bookContext) || !is_array($bookContext)) {
 }
 </style>
 
-<script type="application/json" id="text-reader-config"><?php echo json_encode([
+<script type="application/json" id="text-reader-config"><?php echo json_encode(
+    [
     'textId' => $textId,
     'langId' => $langId,
-], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
+    ],
+    JSON_HEX_TAG | JSON_HEX_AMP
+); ?></script>

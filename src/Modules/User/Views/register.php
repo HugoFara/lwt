@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Registration Form View
  *
@@ -47,7 +50,7 @@ assert(isset($error) && (is_string($error) || $error === null));
                     </div>
 
                     <!-- Error message -->
-                    <?php if ($error !== null): ?>
+                    <?php if ($error !== null) : ?>
                     <div class="notification is-danger is-light">
                         <button class="delete" onclick="this.parentElement.remove()"></button>
                         <?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?>

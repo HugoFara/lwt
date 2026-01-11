@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Reading Service - Functions for displaying text in reading view.
  *
@@ -40,13 +43,13 @@ class TextReadingService
     /**
      * Print the output when the word is a term.
      *
-     * @param int                  $actcode       Action code, > 1 for multiword
-     * @param bool                 $showAll       Show all words or not
-     * @param string               $spanid        ID for this span element
-     * @param string               $hidetag       Hide tag string
-     * @param int                  $currcharcount Current number of characters
-     * @param array<string, mixed> $record        Various data from database
-     * @param array<int, array{0: int, 1: string, 2: int}> $exprs Current expressions (passed by reference)
+     * @param int                                          $actcode       Action code, > 1 for multiword
+     * @param bool                                         $showAll       Show all words or not
+     * @param string                                       $spanid        ID for this span element
+     * @param string                                       $hidetag       Hide tag string
+     * @param int                                          $currcharcount Current number of characters
+     * @param array<string, mixed>                         $record        Various data from database
+     * @param array<int, array{0: int, 1: string, 2: int}> $exprs         Current expressions (passed by reference)
      *
      * @return void
      */
@@ -171,7 +174,9 @@ class TextReadingService
             $span .= '>' . htmlspecialchars($tiText, ENT_QUOTES, 'UTF-8') . '</span>';
             echo $span;
             for ($i = sizeof($exprs) - 1; $i >= 0; $i--) {
-                /** @var array{0: int, 1: string, 2: int} $currentExpr */
+                /**
+ * @var array{0: int, 1: string, 2: int} $currentExpr
+*/
                 $currentExpr = $exprs[$i];
                 $currentExpr[2]--;
                 $exprs[$i] = $currentExpr;
@@ -207,11 +212,11 @@ class TextReadingService
     /**
      * Process each text item (can be punctuation, term, etc...)
      *
-     * @param array<string, mixed> $record Text item information
-     * @param int   $showAll       Show all words or not (0 or 1)
-     * @param int   $currcharcount Current number of characters
-     * @param bool  $hide          Should some item be hidden, depends on $showAll
-     * @param array<int, array{0: int, 1: string, 2: int}> $exprs Current expressions
+     * @param array<string, mixed>                         $record        Text item information
+     * @param int                                          $showAll       Show all words or not (0 or 1)
+     * @param int                                          $currcharcount Current number of characters
+     * @param bool                                         $hide          Should some item be hidden, depends on $showAll
+     * @param array<int, array{0: int, 1: string, 2: int}> $exprs         Current expressions
      *
      * @return void
      */

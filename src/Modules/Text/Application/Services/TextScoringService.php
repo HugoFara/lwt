@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Text Scoring Service - Comprehensibility and difficulty scoring.
  *
@@ -34,7 +37,7 @@ class TextScoringService
     /**
      * Calculate the difficulty score for a single text.
      *
-     * @param int $textId          The text ID to score
+     * @param int $textId            The text ID to score
      * @param int $unknownWordsLimit Maximum unknown words to return in preview
      *
      * @return TextScore The calculated score
@@ -100,9 +103,9 @@ class TextScoringService
      *
      * Returns texts ordered by proximity to optimal comprehensibility (95%).
      *
-     * @param int   $languageId The language to filter by
+     * @param int   $languageId              The language to filter by
      * @param float $targetComprehensibility Target comprehensibility (default 0.95)
-     * @param int   $limit Maximum number of texts to return
+     * @param int   $limit                   Maximum number of texts to return
      *
      * @return TextScore[] Array of TextScore objects, best matches first
      */
@@ -130,11 +133,14 @@ class TextScoringService
         $scores = $this->scoreTexts($textIds);
 
         // Sort by proximity to target comprehensibility
-        usort($scores, function (TextScore $a, TextScore $b) use ($targetComprehensibility): int {
-            $diffA = abs($a->comprehensibility() - $targetComprehensibility);
-            $diffB = abs($b->comprehensibility() - $targetComprehensibility);
-            return $diffA <=> $diffB;
-        });
+        usort(
+            $scores,
+            function (TextScore $a, TextScore $b) use ($targetComprehensibility): int {
+                $diffA = abs($a->comprehensibility() - $targetComprehensibility);
+                $diffB = abs($b->comprehensibility() - $targetComprehensibility);
+                return $diffA <=> $diffB;
+            }
+        );
 
         // Return top N
         return array_slice($scores, 0, $limit);
@@ -162,7 +168,9 @@ class TextScoringService
             FROM word_occurrences
             WHERE Ti2WordCount = 1 AND Ti2TxID = ?";
 
-        /** @var int|string|null $total */
+        /**
+ * @var int|string|null $total
+*/
         $total = Connection::preparedFetchValue($totalQuery, [$textId], 'cnt');
         $stats['total'] = $total !== null ? (int) $total : 0;
 
@@ -171,7 +179,9 @@ class TextScoringService
             FROM word_occurrences
             WHERE Ti2WordCount = 1 AND Ti2WoID IS NULL AND Ti2TxID = ?";
 
-        /** @var int|string|null $unknown */
+        /**
+ * @var int|string|null $unknown
+*/
         $unknown = Connection::preparedFetchValue($unknownQuery, [$textId], 'cnt');
         $stats['unknown'] = $unknown !== null ? (int) $unknown : 0;
 
@@ -209,7 +219,9 @@ class TextScoringService
      */
     private function calculateVocabularyStatsForTexts(array $textIds): array
     {
-        /** @var array<int, array{total: int, known: int, learning: int, unknown: int}> $results */
+        /**
+ * @var array<int, array{total: int, known: int, learning: int, unknown: int}> $results
+*/
         $results = [];
         foreach ($textIds as $textId) {
             $results[$textId] = [

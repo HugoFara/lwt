@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Parsing Coordinator - Orchestrates text parsing operations.
  *

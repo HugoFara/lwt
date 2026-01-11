@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Forgot Password Form View
  *
@@ -48,7 +51,7 @@ assert(isset($success) && (is_string($success) || $success === null));
                     </div>
 
                     <!-- Error message -->
-                    <?php if ($error !== null): ?>
+                    <?php if ($error !== null) : ?>
                     <div class="notification is-danger is-light">
                         <button class="delete" onclick="this.parentElement.remove()"></button>
                         <?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?>
@@ -56,7 +59,7 @@ assert(isset($success) && (is_string($success) || $success === null));
                     <?php endif; ?>
 
                     <!-- Success message -->
-                    <?php if ($success !== null): ?>
+                    <?php if ($success !== null) : ?>
                     <div class="notification is-success is-light">
                         <button class="delete" onclick="this.parentElement.remove()"></button>
                         <?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?>

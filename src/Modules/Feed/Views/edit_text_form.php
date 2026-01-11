@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Feed Edit Text Form View
  *
@@ -49,9 +52,9 @@ assert(is_string($scrdir));
  * @var string $scrdir
  */
 
-foreach ($texts as $text):
+foreach ($texts as $text) :
     /** @var array{TxTitle: string, TxText: string, TxSourceURI: string, TxAudioURI: string} $text */
-?>
+    ?>
 <div class="box mb-4" x-data="{ isSelected: true }">
     <!-- Header with checkbox and title -->
     <div class="field is-horizontal">
@@ -98,13 +101,13 @@ foreach ($texts as $text):
                         <div class="select is-fullwidth">
                             <select name="feed[<?php echo $count; ?>][TxLgID]" class="notempty setfocus">
                                 <?php
-                                foreach ($languages as $rowLang):
+                                foreach ($languages as $rowLang) :
                                     /** @var array{LgID: int, LgName: string} $rowLang */
-                                ?>
+                                    ?>
                                 <option value="<?php echo $rowLang['LgID']; ?>"<?php
-                                    if ($row['NfLgID'] === $rowLang['LgID']) {
-                                        echo ' selected';
-                                    }
+                                if ($row['NfLgID'] === $rowLang['LgID']) {
+                                    echo ' selected';
+                                }
                                 ?>><?php echo htmlspecialchars($rowLang['LgName'], ENT_QUOTES, 'UTF-8'); ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -202,6 +205,6 @@ foreach ($texts as $text):
         Text deselected - check the box to include
     </div>
 </div>
-<?php
+    <?php
     $count++;
 endforeach;

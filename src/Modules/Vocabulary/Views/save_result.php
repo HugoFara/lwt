@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Word Save Result View - Shows result after saving a word
  *
@@ -43,11 +46,11 @@ assert(is_int($len));
 ?>
 <p><?php echo $message; ?></p>
 
-<?php if ($success && $len == 1):
+<?php if ($success && $len == 1) :
     $tagList = \Lwt\Modules\Tags\Application\TagsFacade::getWordTagList($wid, false);
-?>
+    ?>
 <script type="application/json" data-lwt-save-result-config>
-<?php echo json_encode([
+    <?php echo json_encode([
     'wid' => $wid,
     'status' => $status,
     'translation' => $translation . ($tagList !== '' ? ' [' . $tagList . ']' : ''),
@@ -56,6 +59,6 @@ assert(is_int($len));
     'hex' => $hex,
     'textId' => $textId,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
-], JSON_HEX_TAG | JSON_HEX_AMP); ?>
+    ], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>
 <?php endif; ?>

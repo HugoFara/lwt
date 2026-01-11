@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Language Module Service Provider
  *
@@ -18,13 +21,10 @@ namespace Lwt\Modules\Language;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
-
 // Domain
 use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
-
 // Infrastructure
 use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
-
 // Use Cases
 use Lwt\Modules\Language\Application\UseCases\CreateLanguage;
 use Lwt\Modules\Language\Application\UseCases\UpdateLanguage;
@@ -34,11 +34,9 @@ use Lwt\Modules\Language\Application\UseCases\GetLanguageCode;
 use Lwt\Modules\Language\Application\UseCases\GetPhoneticReading;
 use Lwt\Modules\Language\Application\UseCases\ListLanguages;
 use Lwt\Modules\Language\Application\UseCases\ReparseLanguageTexts;
-
 // Application
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Application\Services\TextParsingService;
-
 // Http
 use Lwt\Modules\Language\Http\LanguageController;
 use Lwt\Modules\Language\Http\LanguageApiHandler;

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * Edit word form for the words list page
  *
@@ -19,7 +22,9 @@ use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Type assertions for variables passed from controller
-/** @var array{WoID: int, WoLgID: int, WoText: string, WoTextLC: string, WoStatus: int, LgName?: string, WoLemma?: string, WoRomanization?: string, WoSentence?: string} $word */
+/**
+ * @var array{WoID: int, WoLgID: int, WoText: string, WoTextLC: string, WoStatus: int, LgName?: string, WoLemma?: string, WoRomanization?: string, WoSentence?: string} $word
+*/
 assert(is_array($word));
 assert(is_string($scrdir));
 assert(is_bool($showRoman));
