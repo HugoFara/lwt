@@ -25,6 +25,13 @@ declare(strict_types=1);
  * - $pages: Total pages
  *
  * PHP version 8.1
+ *
+ * @category Views
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
  */
 
 namespace Lwt\Views\Word;

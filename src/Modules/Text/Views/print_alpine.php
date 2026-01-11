@@ -16,6 +16,9 @@ declare(strict_types=1);
  *
  * @category User_Interface
  * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  *
  * @var int $textId

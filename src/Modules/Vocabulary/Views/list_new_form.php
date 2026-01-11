@@ -13,6 +13,13 @@ declare(strict_types=1);
  *
  * PHP version 8.1
  *
+ * @category Views
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ *
  * @psalm-suppress PossiblyUndefinedVariable Variables passed from controller
  */
 

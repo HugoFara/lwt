@@ -2,6 +2,19 @@
 
 declare(strict_types=1);
 
+/**
+ * HybridLemmatizer for combining dictionary and NLP approaches.
+ *
+ * PHP version 8.1
+ *
+ * @category Infrastructure
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
 namespace Lwt\Modules\Vocabulary\Infrastructure\Lemmatizers;
 
 use Lwt\Modules\Vocabulary\Domain\LemmatizerInterface;

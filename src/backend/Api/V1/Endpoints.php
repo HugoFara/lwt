@@ -2,6 +2,19 @@
 
 declare(strict_types=1);
 
+/**
+ * API V1 Endpoints registry.
+ *
+ * PHP version 8.1
+ *
+ * @category Api
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
 namespace Lwt\Api\V1;
 
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
