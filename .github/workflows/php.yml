@@ -48,8 +48,10 @@ jobs:
 
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
-        # Skip scripts to avoid phpdocumentor GPG verification issues on Windows
-        run: composer install --prefer-dist --no-progress --no-scripts
+        # Skip phpdocumentor PHAR download to avoid GPG verification issues on Windows
+        env:
+          PHPDOCUMENTOR_SKIP_DOWNLOAD: 1
+        run: composer install --prefer-dist --no-progress
 
       - name: Run PHPUnit tests
         run: composer run-script test:no-coverage
