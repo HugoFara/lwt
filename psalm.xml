@@ -356,22 +356,5 @@
             </errorLevel>
         </LessSpecificImplementedReturnType>
 
-        <!--
-            ============================================
-            EXTERNAL EXTENSION SUPPRESSIONS
-            ============================================
-            Constants defined by optional PHP extensions (curl).
-            Suppressed at directory level to avoid "unused suppression" errors
-            when the extension is available.
-        -->
-        <UndefinedConstant>
-            <errorLevel type="suppress">
-                <directory name="src/Modules/Text/Infrastructure" />
-                <directory name="src/Shared/UI/Assets" />
-                <directory name="src/backend/Core/Entity" />
-                <directory name="src/backend/Core/Integration" />
-            </errorLevel>
-        </UndefinedConstant>
-
     </issueHandlers>
 </psalm>
