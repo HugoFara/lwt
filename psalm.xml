@@ -7,6 +7,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    autoloader="vendor/autoload.php"
 >
     <projectFiles>
         <directory name="." />
@@ -67,6 +68,16 @@
                 <directory name="src/Shared" />
             </errorLevel>
         </PossiblyUnusedMethod>
+
+        <!-- Curl constants are defined when curl extension is loaded -->
+        <UndefinedConstant>
+            <errorLevel type="suppress">
+                <file name="src/Modules/Text/Infrastructure/WhisperClient.php" />
+                <file name="src/Shared/UI/Assets/ViteHelper.php" />
+                <file name="src/backend/Core/Entity/GoogleTranslate.php" />
+                <file name="src/backend/Core/Integration/GoogleTimeToken.php" />
+            </errorLevel>
+        </UndefinedConstant>
 
         <!-- Views call global functions that may be dynamically loaded -->
         <UndefinedFunction>
@@ -187,6 +198,7 @@
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
                 <directory name="src/Modules/Book/Http" />
+                <directory name="src/Modules/Text/Http" />
             </errorLevel>
         </UnresolvableInclude>
 

@@ -353,16 +353,16 @@ class StringUtils
                 return $linkText;
             },
             $result
-        );
+        ) ?? $result;
 
         // Step 3: Bold **text**
-        $result = preg_replace('/\*\*([^*]+)\*\*/', '<strong>$1</strong>', $result);
+        $result = preg_replace('/\*\*([^*]+)\*\*/', '<strong>$1</strong>', $result) ?? $result;
 
         // Step 4: Italic *text* (not preceded/followed by asterisk)
-        $result = preg_replace('/(?<!\*)\*([^*]+)\*(?!\*)/', '<em>$1</em>', $result);
+        $result = preg_replace('/(?<!\*)\*([^*]+)\*(?!\*)/', '<em>$1</em>', $result) ?? $result;
 
         // Step 5: Strikethrough ~~text~~
-        $result = preg_replace('/~~([^~]+)~~/', '<del>$1</del>', $result);
+        $result = preg_replace('/~~([^~]+)~~/', '<del>$1</del>', $result) ?? $result;
 
         return $result;
     }

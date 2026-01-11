@@ -108,7 +108,7 @@ class RegexParser implements ParserInterface
         $text = str_replace("\n", " ¶", $text);
         $text = trim($text);
         // Collapse multiple spaces
-        $text = preg_replace('/\s+/u', ' ', $text);
+        $text = preg_replace('/\s+/u', ' ', $text) ?? $text;
         return $text;
     }
 
@@ -135,7 +135,7 @@ class RegexParser implements ParserInterface
             "/(\S+)\s*((\.+)|([$splitSentence]))([]'`\"”)‘’‹›“„«»』」]*)(?=(\s*)(\S+|$))/u",
             fn ($matches) => $this->parsingService->findLatinSentenceEnd($matches, $noSentenceEnd),
             $text
-        );
+        ) ?? $text;
 
         // Paragraph delimiters become a combination of ¶ and carriage return \r
         $text = str_replace(array("¶", " ¶"), array("¶\r", "\r¶"), $text);
@@ -149,7 +149,7 @@ class RegexParser implements ParserInterface
             ),
             array("\n$1\n", "$1", "$1$2$3"),
             $text
-        );
+        ) ?? $text;
 
         return $text;
     }

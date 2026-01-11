@@ -253,9 +253,9 @@ class TextParsing
      */
     private static function splitJapaneseSentences(string $text): array
     {
-        $text = preg_replace('/[ \t]+/u', ' ', $text);
+        $text = preg_replace('/[ \t]+/u', ' ', $text) ?? $text;
         $text = trim($text);
-        $text = preg_replace("/[\n]+/u", "\n¶", $text);
+        $text = preg_replace("/[\n]+/u", "\n¶", $text) ?? $text;
         return explode("\n", $text);
     }
 
@@ -268,7 +268,7 @@ class TextParsing
      */
     private static function displayJapanesePreview(string $text): void
     {
-        $text = preg_replace('/[ \t]+/u', ' ', $text);
+        $text = preg_replace('/[ \t]+/u', ' ', $text) ?? $text;
         $text = trim($text);
         echo '<div id="check_text" style="margin-right:50px;">
         <h2>Text</h2>
@@ -285,7 +285,7 @@ class TextParsing
      */
     private static function parseJapaneseToDatabase(string $text, bool $useMaxSeID): void
     {
-        $text = preg_replace('/[ \t]+/u', ' ', $text);
+        $text = preg_replace('/[ \t]+/u', ' ', $text) ?? $text;
         $text = trim($text);
 
         $file_name = tempnam(sys_get_temp_dir(), "tmpti");
@@ -301,8 +301,10 @@ class TextParsing
 
             // WARNING: \n is converted to PHP_EOL here!
             $handle = popen($mecab, 'w');
-            fwrite($handle, $text);
-            pclose($handle);
+            if ($handle !== false) {
+                fwrite($handle, $text);
+                pclose($handle);
+            }
 
             Connection::execute(
                 "CREATE TEMPORARY TABLE IF NOT EXISTS tempword_occurrences (
@@ -314,9 +316,14 @@ class TextParsing
                 ) DEFAULT CHARSET=utf8"
             );
             $handle = fopen($file_name, 'r');
-            $mecabed = fread($handle, filesize($file_name));
-
-            fclose($handle);
+            $mecabed = '';
+            if ($handle !== false) {
+                $size = filesize($file_name);
+                if ($size !== false && $size > 0) {
+                    $mecabed = fread($handle, $size) ?: '';
+                }
+                fclose($handle);
+            }
             $values = array();
             $order = 0;
             $sid = 1;
@@ -464,8 +471,10 @@ class TextParsing
     {
         $file_name = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "tmpti.txt";
         $fp = fopen($file_name, 'w');
-        fwrite($fp, $text);
-        fclose($fp);
+        if ($fp !== false) {
+            fwrite($fp, $text);
+            fclose($fp);
+        }
         Connection::query("SET @order=0, @sid=1, @count = 0;");
         if ($id > 0) {
             // Get next auto-increment value for accurate TiSeID calculation
@@ -647,9 +656,9 @@ class TextParsing
         $text = str_replace("\n", " ¶", $text);
         $text = trim($text);
         if ($splitEachChar) {
-            $text = preg_replace('/([^\s])/u', "$1\t", $text);
+            $text = preg_replace('/([^\s])/u', "$1\t", $text) ?? $text;
         }
-        $text = preg_replace('/\s+/u', ' ', $text);
+        $text = preg_replace('/\s+/u', ' ', $text) ?? $text;
         return $text;
     }
 
@@ -671,11 +680,12 @@ class TextParsing
     ): string {
         // "\r" => Sentence delimiter, "\t" and "\n" => Word delimiter
         $service = new TextParsingService();
+        /** @psalm-suppress TooFewArguments, MissingClosureReturnType, MissingClosureParamType, MixedArgument */
         $text = preg_replace_callback(
             "/(\S+)\s*((\.+)|([$splitSentence]))([]'`\"”)‘’‹›“„«»』」]*)(?=(\s*)(\S+|$))/u",
             fn ($matches) => $service->findLatinSentenceEnd($matches, $noSentenceEnd),
             $text
-        );
+        ) ?? $text;
         // Paragraph delimiters become a combination of ¶ and carriage return \r
         $text = str_replace(array("¶", " ¶"), array("¶\r", "\r¶"), $text);
         $text = preg_replace(
@@ -686,7 +696,7 @@ class TextParsing
             ),
             array("\n$1\n", "$1", "$1$2$3"),
             $text
-        );
+        ) ?? $text;
 
         return $text;
     }
@@ -747,27 +757,28 @@ class TextParsing
         string $removeSpaces,
         bool $useMaxSeID
     ): void {
-        $text = trim(
-            preg_replace(
-                array(
-                    "/\r(?=[]'`\"”)‘’‹›“„«»』」 ]*\r)/u",
-                    '/[\n]+\r/u',
-                    '/\r([^\n])/u',
-                    "/\n[.](?![]'`\"”)‘’‹›“„«»』」]*\r)/u",
-                    "/(\n|^)(?=.?[$termchar][^\n]*(\n|$))/u"
-                ),
-                array(
-                    "",
-                    "\r",
-                    "\r\n$1",
-                    ".\n",
-                    "\n1\t"
-                ),
-                str_replace(array("\t", "\n\n"), array("\n", ""), $text)
-            )
+        /** @psalm-suppress UndefinedConstant */
+        $replaced = preg_replace(
+            array(
+                "/\r(?=[]'`\"”)‘’‹›“„«»』」 ]*\r)/u",
+                '/[\n]+\r/u',
+                '/\r([^\n])/u',
+                "/\n[.](?![]'`\"”)‘’‹›“„«»』」]*\r)/u",
+                "/(\n|^)(?=.?[$termchar][^\n]*(\n|$))/u"
+            ),
+            array(
+                "",
+                "\r",
+                "\r\n$1",
+                ".\n",
+                "\n1\t"
+            ),
+            str_replace(array("\t", "\n\n"), array("\n", ""), $text)
         );
+        /** @psalm-suppress MixedArgument */
+        $text = trim($replaced ?? $text);
         $text = StringUtils::removeSpaces(
-            preg_replace("/(\n|^)(?!1\t)/u", "\n0\t", $text),
+            preg_replace("/(\n|^)(?!1\t)/u", "\n0\t", $text) ?? $text,
             $removeSpaces
         );
 

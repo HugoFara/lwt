@@ -85,21 +85,27 @@ class SentenceService
                 unlink($mecab_file);
             }
             $fp = fopen($mecab_file, 'w');
-            fwrite($fp, $wordlc . "\n");
-            fclose($fp);
+            if ($fp !== false) {
+                fwrite($fp, $wordlc . "\n");
+                fclose($fp);
+            }
             $mecab = $this->textParsingService->getMecabPath($mecab_args);
             $handle = popen($mecab . escapeshellarg($mecab_file), "r");
-            if (!feof($handle)) {
+            if ($handle !== false && !feof($handle)) {
                 $row = fgets($handle, 256);
-                $mecab_str = "\t" . preg_replace_callback(
-                    '([2678]?)\t[0-9]+$',
-                    function ($matches) {
-                        return isset($matches[1]) ? "\t" : "";
-                    },
-                    $row
-                );
+                if ($row !== false) {
+                    $mecab_str = "\t" . (preg_replace_callback(
+                        '([2678]?)\t[0-9]+$',
+                        function ($matches) {
+                            return isset($matches[1]) ? "\t" : "";
+                        },
+                        $row
+                    ) ?? $row);
+                }
             }
-            pclose($handle);
+            if ($handle !== false) {
+                pclose($handle);
+            }
             unlink($mecab_file);
             $sql = "SELECT SeID, SeText,
                 concat(
@@ -159,21 +165,27 @@ class SentenceService
                 unlink($mecab_file);
             }
             $fp = fopen($mecab_file, 'w');
-            fwrite($fp, $wordlc . "\n");
-            fclose($fp);
+            if ($fp !== false) {
+                fwrite($fp, $wordlc . "\n");
+                fclose($fp);
+            }
             $mecab = $this->textParsingService->getMecabPath($mecab_args);
             $handle = popen($mecab . escapeshellarg($mecab_file), "r");
-            if (!feof($handle)) {
+            if ($handle !== false && !feof($handle)) {
                 $row = fgets($handle, 256);
-                $mecab_str = "\t" . preg_replace_callback(
-                    '([2678]?)\t[0-9]+$',
-                    function ($matches) {
-                        return isset($matches[1]) ? "\t" : "";
-                    },
-                    $row
-                );
+                if ($row !== false) {
+                    $mecab_str = "\t" . (preg_replace_callback(
+                        '([2678]?)\t[0-9]+$',
+                        function ($matches) {
+                            return isset($matches[1]) ? "\t" : "";
+                        },
+                        $row
+                    ) ?? $row);
+                }
             }
-            pclose($handle);
+            if ($handle !== false) {
+                pclose($handle);
+            }
             unlink($mecab_file);
             $sql = "SELECT SeID, SeText,
                 concat(
@@ -391,15 +403,15 @@ class SentenceService
     {
         // Step 1: Add space between consecutive word characters
         $pattern1 = "/([$termchar])​(?=[$termchar])/u";
-        $result = preg_replace($pattern1, "$1 ", $text);
+        $result = preg_replace($pattern1, "$1 ", $text) ?? $text;
 
         // Step 2: Add space after sentence punctuation when followed by word char
         $pattern2 = "/([.!?,;:…])​(?=[$termchar])/u";
-        $result = preg_replace($pattern2, "$1 ", $result);
+        $result = preg_replace($pattern2, "$1 ", $result) ?? $result;
 
         // Step 3: Add space after closing quotes/brackets when followed by word char
         $pattern3 = '/([\]})»›"\'」』])​(?=[' . $termchar . '])/u';
-        $result = preg_replace($pattern3, '$1 ', $result);
+        $result = preg_replace($pattern3, '$1 ', $result) ?? $result;
 
         // Step 4: Remove remaining ZWS markers (preserving any actual space tokens)
         $result = str_replace("​", "", $result);
@@ -625,8 +637,8 @@ class SentenceService
         $result = mb_substr($text, $start, $maxLength);
 
         // Try to start/end at word boundaries
-        $result = preg_replace('/^\S*\s/', '', $result);
-        $result = preg_replace('/\s\S*$/', '', $result);
+        $result = preg_replace('/^\S*\s/', '', $result) ?? $result;
+        $result = preg_replace('/\s\S*$/', '', $result) ?? $result;
 
         return '...' . trim($result) . '...';
     }
@@ -654,11 +666,11 @@ class SentenceService
 
         // Try to start/end at word boundaries
         if ($start > 0) {
-            $result = preg_replace('/^\S*\s/', '', $result);
+            $result = preg_replace('/^\S*\s/', '', $result) ?? $result;
             $result = '...' . trim($result);
         }
         if ($end < mb_strlen($text)) {
-            $result = preg_replace('/\s\S*$/', '', $result);
+            $result = preg_replace('/\s\S*$/', '', $result) ?? $result;
             $result = trim($result) . '...';
         }
 
@@ -773,6 +785,6 @@ class SentenceService
     </div>
 </div>
         <?php
-        return ob_get_clean();
+        return ob_get_clean() ?: '';
     }
 }

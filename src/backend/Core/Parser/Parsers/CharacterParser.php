@@ -107,10 +107,10 @@ class CharacterParser implements ParserInterface
         $text = trim($text);
 
         // Split each character with tabs (key difference from RegexParser)
-        $text = preg_replace('/([^\s])/u', "$1\t", $text);
+        $text = preg_replace('/([^\s])/u', "$1\t", $text) ?? $text;
 
         // Collapse multiple spaces
-        $text = preg_replace('/\s+/u', ' ', $text);
+        $text = preg_replace('/\s+/u', ' ', $text) ?? $text;
 
         return $text;
     }
@@ -136,7 +136,7 @@ class CharacterParser implements ParserInterface
             "/(\S+)\s*((\.+)|([$splitSentence]))([]'`\"”)‘’‹›“„«»』」]*)(?=(\s*)(\S+|$))/u",
             fn ($matches) => $this->parsingService->findLatinSentenceEnd($matches, $noSentenceEnd),
             $text
-        );
+        ) ?? $text;
 
         // Paragraph delimiters
         $text = str_replace(array("¶", " ¶"), array("¶\r", "\r¶"), $text);
@@ -150,7 +150,7 @@ class CharacterParser implements ParserInterface
             ),
             array("\n$1\n", "$1", "$1$2$3"),
             $text
-        );
+        ) ?? $text;
 
         return $text;
     }

@@ -620,7 +620,7 @@ class Router
                 return '(?:(?P<' . $paramName . '>' . $typePattern . '))?';
             },
             $pattern
-        );
+        ) ?? $pattern;
 
         // Convert typed params: {param:type}
         $pattern = preg_replace_callback(
@@ -636,7 +636,7 @@ class Router
                 return '(?P<' . $paramName . '>' . $typePattern . ')';
             },
             $pattern
-        );
+        ) ?? $pattern;
 
         // Convert optional params: {param?}
         // Must start with a letter (not a digit) to avoid matching regex quantifiers like {8}
@@ -644,11 +644,11 @@ class Router
             '/\{([a-zA-Z]\w*)\?\}/',
             '(?:(?P<$1>[^\/]+))?',
             $pattern
-        );
+        ) ?? $pattern;
 
         // Convert basic params: {param}
         // Must start with a letter (not a digit) to avoid matching regex quantifiers like {8}
-        $pattern = preg_replace('/\{([a-zA-Z]\w*)\}/', '(?P<$1>[^\/]+)', $pattern);
+        $pattern = preg_replace('/\{([a-zA-Z]\w*)\}/', '(?P<$1>[^\/]+)', $pattern) ?? $pattern;
 
         return '/^' . $pattern . '$/';
     }
@@ -810,7 +810,10 @@ class Router
         header('Cache-Control: public, max-age=' . $maxAge);
         header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $maxAge) . ' GMT');
         header('Content-Type: ' . $mimeType);
-        header('Content-Length: ' . filesize($filePath));
+        $size = filesize($filePath);
+        if ($size !== false) {
+            header('Content-Length: ' . $size);
+        }
 
         // Send file contents
         readfile($filePath);

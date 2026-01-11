@@ -19,6 +19,9 @@
 
 $uri = $_SERVER['REQUEST_URI'] ?? '/';
 $path = parse_url($uri, PHP_URL_PATH);
+if ($path === false || $path === null) {
+    $path = '/';
+}
 
 // Serve documentation files directly (VitePress output in /docs)
 if (preg_match('#^/docs(/|$)#', $path)) {
