@@ -36,18 +36,6 @@ use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Core\Globals;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 
-// Base path for legacy includes
-define('LWT_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
-
-// Module views path
-define('LWT_TEXT_MODULE_VIEWS', dirname(__DIR__) . '/Views');
-
-require_once dirname(__DIR__) . '/Application/TextFacade.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/SelectOptionsBuilder.php';
-require_once dirname(__DIR__) . '/Application/Services/TextDisplayService.php';
-// LanguageFacade and LanguagePresets loaded via autoloader
-
 /**
  * Controller for text management and reading interface.
  *
@@ -66,6 +54,15 @@ require_once dirname(__DIR__) . '/Application/Services/TextDisplayService.php';
  */
 class TextController extends BaseController
 {
+    /**
+     * Base path for legacy includes.
+     */
+    private const BACKEND_PATH = __DIR__ . '/../../../backend';
+
+    /**
+     * Module views path.
+     */
+    private const MODULE_VIEWS = __DIR__ . '/../Views';
     private TextFacade $textService;
     private LanguageFacade $languageService;
     private TextDisplayService $displayService;
@@ -105,7 +102,7 @@ class TextController extends BaseController
      */
     public function read(?int $text = null): ?RedirectResponse
     {
-        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         include_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
 
         // Get text ID from route param or query params
@@ -188,7 +185,7 @@ class TextController extends BaseController
         PageLayoutHelper::renderPageStartNobody('Read', 'full-width');
 
         // Render desktop layout
-        include LWT_TEXT_MODULE_VIEWS . '/read_desktop.php';
+        include self::MODULE_VIEWS . '/read_desktop.php';
 
         PageLayoutHelper::renderPageEnd();
 
@@ -206,7 +203,7 @@ class TextController extends BaseController
      */
     public function edit(array $params): ?RedirectResponse
     {
-        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
         include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
         include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
@@ -215,8 +212,8 @@ class TextController extends BaseController
         include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
         include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
         include_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
-        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/start_session.php';
-        include_once LWT_BACKEND_PATH . '/Core/Integration/YouTubeImport.php';
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/start_session.php';
+        include_once self::BACKEND_PATH . '/Core/Integration/YouTubeImport.php';
 
         // Get filter parameters
         $currentLang = Validation::language(
@@ -553,7 +550,7 @@ class TextController extends BaseController
         $languages = $this->languageService->getLanguagesForSelect();
         $scrdir = $this->languageService->getScriptDirectionTag($text->lgid);
 
-        include LWT_TEXT_MODULE_VIEWS . '/edit_form.php';
+        include self::MODULE_VIEWS . '/edit_form.php';
     }
 
     /**
@@ -589,7 +586,7 @@ class TextController extends BaseController
         $languages = $this->languageService->getLanguagesForSelect();
         $scrdir = $this->languageService->getScriptDirectionTag((int)$text->lgid);
 
-        include LWT_TEXT_MODULE_VIEWS . '/edit_form.php';
+        include self::MODULE_VIEWS . '/edit_form.php';
     }
 
     /**
@@ -610,7 +607,7 @@ class TextController extends BaseController
 
         $activeLanguageId = (int) Settings::get('currentlanguage');
 
-        include LWT_TEXT_MODULE_VIEWS . '/edit_list.php';
+        include self::MODULE_VIEWS . '/edit_list.php';
     }
 
     /**
@@ -628,7 +625,7 @@ class TextController extends BaseController
      */
     public function display(?int $text = null): ?RedirectResponse
     {
-        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
         include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
         include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
@@ -686,7 +683,7 @@ class TextController extends BaseController
 
         // Render page
         PageLayoutHelper::renderPageStartNobody('Display');
-        include LWT_TEXT_MODULE_VIEWS . '/display_main.php';
+        include self::MODULE_VIEWS . '/display_main.php';
         PageLayoutHelper::renderPageEnd();
 
         return null;
@@ -703,7 +700,7 @@ class TextController extends BaseController
      */
     public function setMode(array $params): void
     {
-        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
 
         $textId = $this->param('text');
         if ($textId === '') {
@@ -724,7 +721,7 @@ class TextController extends BaseController
         $waitingIconPath = null; // Using Lucide icon instead
         flush();
 
-        include LWT_TEXT_MODULE_VIEWS . '/set_mode_result.php';
+        include self::MODULE_VIEWS . '/set_mode_result.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -740,7 +737,7 @@ class TextController extends BaseController
      */
     public function check(array $params): void
     {
-        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
 
         PageLayoutHelper::renderPageStart('Check a Text', true);
 
@@ -767,7 +764,7 @@ class TextController extends BaseController
                 '[Choose...]'
             );
 
-            include LWT_TEXT_MODULE_VIEWS . '/check_form.php';
+            include self::MODULE_VIEWS . '/check_form.php';
         }
 
         PageLayoutHelper::renderPageEnd();
@@ -784,7 +781,7 @@ class TextController extends BaseController
      */
     public function archived(array $params): ?RedirectResponse
     {
-        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
         include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
         include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
@@ -844,11 +841,11 @@ class TextController extends BaseController
             $record = $this->textService->getArchivedTextById($textId);
             if ($record !== null) {
                 $languages = $this->languageService->getLanguagesForSelect();
-                include LWT_TEXT_MODULE_VIEWS . '/archived_form.php';
+                include self::MODULE_VIEWS . '/archived_form.php';
             }
         } else {
             $activeLanguageId = (int) Settings::get('currentlanguage');
-            include LWT_TEXT_MODULE_VIEWS . '/archived_list.php';
+            include self::MODULE_VIEWS . '/archived_list.php';
         }
 
         PageLayoutHelper::renderPageEnd();

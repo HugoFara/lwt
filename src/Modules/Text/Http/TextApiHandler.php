@@ -34,12 +34,6 @@ use Lwt\Modules\Text\Application\Services\TextPrintService;
 use Lwt\Modules\Text\Application\Services\TextScoringService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/WordDiscoveryService.php';
-require_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExportService.php';
-require_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
-require_once dirname(__DIR__) . '/Application/TextFacade.php';
-require_once dirname(__DIR__) . '/Application/Services/TextPrintService.php';
-
 /**
  * Handler for text-related API operations.
  *

@@ -19,8 +19,6 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Application\Services;
 
-require_once __DIR__ . '/../../../../backend/View/Helper/StatusHelper.php';
-
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;

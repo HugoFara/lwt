@@ -25,23 +25,6 @@ use Lwt\Modules\Text\Application\Services\AnnotationService;
 use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
-// Base path for legacy includes
-if (!defined('LWT_BACKEND_PATH')) {
-    define('LWT_BACKEND_PATH', dirname(__DIR__, 3) . '/backend');
-}
-
-// Module views path
-if (!defined('LWT_TEXT_MODULE_VIEWS')) {
-    define('LWT_TEXT_MODULE_VIEWS', dirname(__DIR__) . '/Views');
-}
-
-require_once dirname(__DIR__) . '/Application/Services/TextPrintService.php';
-require_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-require_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/SelectOptionsBuilder.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/FormHelper.php';
-
 /**
  * Controller for text printing functionality.
  *
@@ -59,6 +42,15 @@ require_once __DIR__ . '/../../../Shared/UI/Helpers/FormHelper.php';
  */
 class TextPrintController extends BaseController
 {
+    /**
+     * Base path for legacy includes.
+     */
+    private const BACKEND_PATH = __DIR__ . '/../../../backend';
+
+    /**
+     * Module views path.
+     */
+    private const MODULE_VIEWS = __DIR__ . '/../Views';
     /**
      * Text print service for business logic.
      *
@@ -100,7 +92,7 @@ class TextPrintController extends BaseController
      */
     public function printPlain(array $params): void
     {
-        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
         include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
         include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
@@ -135,7 +127,7 @@ class TextPrintController extends BaseController
         // Render the view
         PageLayoutHelper::renderPageStartNobody('Print');
 
-        include LWT_TEXT_MODULE_VIEWS . '/print_alpine.php';
+        include self::MODULE_VIEWS . '/print_alpine.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -153,7 +145,7 @@ class TextPrintController extends BaseController
      */
     public function printAnnotated(array $params): void
     {
-        include_once LWT_BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
         include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
         include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
@@ -220,7 +212,7 @@ class TextPrintController extends BaseController
         // Render the view
         PageLayoutHelper::renderPageStartNobody('Annotated Text');
 
-        include LWT_TEXT_MODULE_VIEWS . '/print_alpine.php';
+        include self::MODULE_VIEWS . '/print_alpine.php';
 
         PageLayoutHelper::renderPageEnd();
     }
