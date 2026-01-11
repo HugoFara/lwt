@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Entity;
 
@@ -301,10 +303,27 @@ class ClassesTest extends TestCase
     public function testLanguageExportJsDict(): void
     {
         $lang = Language::reconstitute(
-            42, 'Test', 'http://dict1', 'http://dict2', 'http://trans',
-            false, false, false, null, null,  // popup and lang fields
-            'Template', 100, 'a=b', '.!?', 'Dr.', 'a-z',
-            true, false, true, 'http://tts', true
+            42,
+            'Test',
+            'http://dict1',
+            'http://dict2',
+            'http://trans',
+            false,
+            false,
+            false,
+            null,
+            null,  // popup and lang fields
+            'Template',
+            100,
+            'a=b',
+            '.!?',
+            'Dr.',
+            'a-z',
+            true,
+            false,
+            true,
+            'http://tts',
+            true
         );
 
         $json = $lang->exportJsDict();
@@ -375,9 +394,23 @@ class ClassesTest extends TestCase
     public function testTermReconstitute(): void
     {
         $term = Term::reconstitute(
-            123, 1, 'Hello', 'hello', null, null, 3, 'Hola', 'Hello world.', 'My notes', 'heh-lo',
-            1, new DateTimeImmutable('2024-01-01'), new DateTimeImmutable('2024-01-02'),
-            0.5, 0.7, 0.3
+            123,
+            1,
+            'Hello',
+            'hello',
+            null,
+            null,
+            3,
+            'Hola',
+            'Hello world.',
+            'My notes',
+            'heh-lo',
+            1,
+            new DateTimeImmutable('2024-01-01'),
+            new DateTimeImmutable('2024-01-02'),
+            0.5,
+            0.7,
+            0.3
         );
 
         $this->assertEquals(123, $term->id()->toInt());
@@ -408,8 +441,23 @@ class ClassesTest extends TestCase
     public function testTermDecreaseStatus(): void
     {
         $term = Term::reconstitute(
-            1, 1, 'test', 'test', null, null, 3, '', '', '', '', 1,
-            new DateTimeImmutable(), new DateTimeImmutable(), 0, 0, 0
+            1,
+            1,
+            'test',
+            'test',
+            null,
+            null,
+            3,
+            '',
+            '',
+            '',
+            '',
+            1,
+            new DateTimeImmutable(),
+            new DateTimeImmutable(),
+            0,
+            0,
+            0
         );
 
         $term->decreaseStatus();
@@ -563,8 +611,15 @@ class ClassesTest extends TestCase
     public function testTextReconstitute(): void
     {
         $text = Text::reconstitute(
-            456, 1, 'Test Title', 'Test content.', '<annotated>content</annotated>',
-            'http://audio.mp3', 'http://source.com', 50, 12.5
+            456,
+            1,
+            'Test Title',
+            'Test content.',
+            '<annotated>content</annotated>',
+            'http://audio.mp3',
+            'http://source.com',
+            50,
+            12.5
         );
 
         $this->assertEquals(456, $text->id()->toInt());
@@ -599,7 +654,15 @@ class ClassesTest extends TestCase
     public function testTextUpdateContent(): void
     {
         $text = Text::reconstitute(
-            1, 1, 'Title', 'Original', '<annotated/>', '', '', 0, 0
+            1,
+            1,
+            'Title',
+            'Original',
+            '<annotated/>',
+            '',
+            '',
+            0,
+            0
         );
 
         $this->assertTrue($text->isAnnotated());
@@ -648,7 +711,15 @@ class ClassesTest extends TestCase
     public function testTextResetProgress(): void
     {
         $text = Text::reconstitute(
-            1, 1, 'Title', 'Content', '', '', '', 50, 30.5
+            1,
+            1,
+            'Title',
+            'Content',
+            '',
+            '',
+            '',
+            50,
+            30.5
         );
 
         $text->resetProgress();
@@ -815,10 +886,27 @@ class ClassesTest extends TestCase
     public function testLanguageSetIdOnPersistedEntityFails(): void
     {
         $lang = Language::reconstitute(
-            1, 'English', '', '', '',
-            false, false, false, null, null,  // popup and lang fields
-            '', 100, '', '.!?', '', 'a-z',
-            false, false, false, '', true
+            1,
+            'English',
+            '',
+            '',
+            '',
+            false,
+            false,
+            false,
+            null,
+            null,  // popup and lang fields
+            '',
+            100,
+            '',
+            '.!?',
+            '',
+            'a-z',
+            false,
+            false,
+            false,
+            '',
+            true
         );
 
         $this->expectException(\LogicException::class);
@@ -837,8 +925,23 @@ class ClassesTest extends TestCase
     public function testTermSetIdOnPersistedEntityFails(): void
     {
         $term = Term::reconstitute(
-            1, 1, 'test', 'test', null, null, 1, '', '', '', '', 1,
-            new DateTimeImmutable(), new DateTimeImmutable(), 0, 0, 0
+            1,
+            1,
+            'test',
+            'test',
+            null,
+            null,
+            1,
+            '',
+            '',
+            '',
+            '',
+            1,
+            new DateTimeImmutable(),
+            new DateTimeImmutable(),
+            0,
+            0,
+            0
         );
 
         $this->expectException(\LogicException::class);
@@ -857,7 +960,15 @@ class ClassesTest extends TestCase
     public function testTextSetIdOnPersistedEntityFails(): void
     {
         $text = Text::reconstitute(
-            1, 1, 'Title', 'Content', '', '', '', 0, 0
+            1,
+            1,
+            'Title',
+            'Content',
+            '',
+            '',
+            '',
+            0,
+            0
         );
 
         $this->expectException(\LogicException::class);

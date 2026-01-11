@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Text;
 
@@ -48,7 +50,11 @@ class TextParsingTest extends TestCase
 
         if (!Globals::getDbConnection()) {
             $connection = Configuration::connect(
-                $config['server'], $config['userid'], $config['passwd'], $testDbname, $config['socket']
+                $config['server'],
+                $config['userid'],
+                $config['passwd'],
+                $testDbname,
+                $config['socket']
             );
             Globals::setDbConnection($connection);
         }

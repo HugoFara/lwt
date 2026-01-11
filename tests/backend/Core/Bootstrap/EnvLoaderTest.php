@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Lwt\Tests\Core\Bootstrap;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
@@ -18,10 +21,10 @@ class EnvLoaderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create a temporary .env file for testing
         $this->testEnvFile = sys_get_temp_dir() . '/test_' . uniqid() . '.env';
-        
+
         // Reset EnvLoader state before each test
         EnvLoader::reset();
     }
@@ -46,16 +49,16 @@ class EnvLoaderTest extends TestCase
     public function testLoadReturnsTrue(): void
     {
         file_put_contents($this->testEnvFile, "TEST_KEY=test_value\n");
-        
+
         $result = EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertTrue($result);
     }
 
     public function testLoadReturnsFalseForNonexistentFile(): void
     {
         $result = EnvLoader::load('/path/that/does/not/exist.env');
-        
+
         $this->assertFalse($result);
     }
 
@@ -65,15 +68,15 @@ class EnvLoaderTest extends TestCase
         if (PHP_OS_FAMILY === 'Windows') {
             $this->markTestSkipped('chmod test not applicable on Windows');
         }
-        
+
         // Create file and make it unreadable
         file_put_contents($this->testEnvFile, "TEST=value\n");
         chmod($this->testEnvFile, 0000);
-        
+
         $result = EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertFalse($result);
-        
+
         // Restore permissions for cleanup
         chmod($this->testEnvFile, 0644);
     }
@@ -81,45 +84,45 @@ class EnvLoaderTest extends TestCase
     public function testLoadParsesSimpleKeyValue(): void
     {
         file_put_contents($this->testEnvFile, "SIMPLE_KEY=simple_value\n");
-        
+
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertEquals('simple_value', EnvLoader::get('SIMPLE_KEY'));
     }
 
     public function testLoadParsesDoubleQuotedValue(): void
     {
         file_put_contents($this->testEnvFile, 'QUOTED_KEY="value with spaces"' . "\n");
-        
+
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertEquals('value with spaces', EnvLoader::get('QUOTED_KEY'));
     }
 
     public function testLoadParsesSingleQuotedValue(): void
     {
         file_put_contents($this->testEnvFile, "SINGLE_QUOTED='value with spaces'\n");
-        
+
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertEquals('value with spaces', EnvLoader::get('SINGLE_QUOTED'));
     }
 
     public function testLoadSkipsComments(): void
     {
         file_put_contents($this->testEnvFile, "# This is a comment\nVALID_KEY=valid_value\n");
-        
+
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertEquals('valid_value', EnvLoader::get('VALID_KEY'));
     }
 
     public function testLoadSkipsEmptyLines(): void
     {
         file_put_contents($this->testEnvFile, "KEY1=value1\n\nKEY2=value2\n");
-        
+
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertEquals('value1', EnvLoader::get('KEY1'));
         $this->assertEquals('value2', EnvLoader::get('KEY2'));
     }
@@ -127,9 +130,9 @@ class EnvLoaderTest extends TestCase
     public function testLoadSkipsLinesWithoutEquals(): void
     {
         file_put_contents($this->testEnvFile, "INVALID_LINE\nVALID_KEY=value\n");
-        
+
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertEquals('value', EnvLoader::get('VALID_KEY'));
         $this->assertNull(EnvLoader::get('INVALID_LINE'));
     }
@@ -137,18 +140,18 @@ class EnvLoaderTest extends TestCase
     public function testLoadTrimsWhitespace(): void
     {
         file_put_contents($this->testEnvFile, "  TRIMMED_KEY  =  trimmed_value  \n");
-        
+
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertEquals('trimmed_value', EnvLoader::get('TRIMMED_KEY'));
     }
 
     public function testLoadHandlesEmptyValue(): void
     {
         file_put_contents($this->testEnvFile, "EMPTY_KEY=\n");
-        
+
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertEquals('', EnvLoader::get('EMPTY_KEY'));
     }
 
@@ -158,45 +161,45 @@ class EnvLoaderTest extends TestCase
     {
         file_put_contents($this->testEnvFile, "GET_KEY=get_value\n");
         EnvLoader::load($this->testEnvFile);
-        
+
         $value = EnvLoader::get('GET_KEY');
-        
+
         $this->assertEquals('get_value', $value);
     }
 
     public function testGetReturnsDefaultWhenNotFound(): void
     {
         $value = EnvLoader::get('NONEXISTENT_KEY', 'default_value');
-        
+
         $this->assertEquals('default_value', $value);
     }
 
     public function testGetReturnsNullWhenNotFoundAndNoDefault(): void
     {
         $value = EnvLoader::get('NONEXISTENT_KEY');
-        
+
         $this->assertNull($value);
     }
 
     public function testGetChecksEnvSuperglobal(): void
     {
         $_ENV['ENV_SUPER_KEY'] = 'env_super_value';
-        
+
         $value = EnvLoader::get('ENV_SUPER_KEY');
-        
+
         $this->assertEquals('env_super_value', $value);
-        
+
         unset($_ENV['ENV_SUPER_KEY']);
     }
 
     public function testGetChecksGetenv(): void
     {
         putenv('GETENV_KEY=getenv_value');
-        
+
         $value = EnvLoader::get('GETENV_KEY');
-        
+
         $this->assertEquals('getenv_value', $value);
-        
+
         putenv('GETENV_KEY');
     }
 
@@ -206,18 +209,18 @@ class EnvLoaderTest extends TestCase
     {
         file_put_contents($this->testEnvFile, "BOOL_TRUE=true\n");
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertTrue(EnvLoader::getBool('BOOL_TRUE'));
     }
 
     public function testGetBoolRecognizesTrueValues(): void
     {
         file_put_contents(
-            $this->testEnvFile, 
+            $this->testEnvFile,
             "BOOL_TRUE=true\nBOOL_ONE=1\nBOOL_YES=yes\nBOOL_ON=on\n"
         );
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertTrue(EnvLoader::getBool('BOOL_TRUE'));
         $this->assertTrue(EnvLoader::getBool('BOOL_ONE'));
         $this->assertTrue(EnvLoader::getBool('BOOL_YES'));
@@ -227,11 +230,11 @@ class EnvLoaderTest extends TestCase
     public function testGetBoolRecognizesFalseValues(): void
     {
         file_put_contents(
-            $this->testEnvFile, 
+            $this->testEnvFile,
             "BOOL_FALSE=false\nBOOL_ZERO=0\nBOOL_NO=no\nBOOL_OFF=off\nBOOL_EMPTY=\n"
         );
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertFalse(EnvLoader::getBool('BOOL_FALSE'));
         $this->assertFalse(EnvLoader::getBool('BOOL_ZERO'));
         $this->assertFalse(EnvLoader::getBool('BOOL_NO'));
@@ -249,7 +252,7 @@ class EnvLoaderTest extends TestCase
     {
         file_put_contents($this->testEnvFile, "BOOL_INVALID=maybe\n");
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertTrue(EnvLoader::getBool('BOOL_INVALID', true));
         $this->assertFalse(EnvLoader::getBool('BOOL_INVALID', false));
     }
@@ -260,7 +263,7 @@ class EnvLoaderTest extends TestCase
     {
         file_put_contents($this->testEnvFile, "INT_KEY=42\n");
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertEquals(42, EnvLoader::getInt('INT_KEY'));
     }
 
@@ -273,7 +276,7 @@ class EnvLoaderTest extends TestCase
     {
         file_put_contents($this->testEnvFile, "INT_INVALID=not_a_number\n");
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertEquals(0, EnvLoader::getInt('INT_INVALID'));
         $this->assertEquals(50, EnvLoader::getInt('INT_INVALID', 50));
     }
@@ -282,7 +285,7 @@ class EnvLoaderTest extends TestCase
     {
         file_put_contents($this->testEnvFile, "INT_NEGATIVE=-123\n");
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertEquals(-123, EnvLoader::getInt('INT_NEGATIVE'));
     }
 
@@ -291,7 +294,7 @@ class EnvLoaderTest extends TestCase
     public function testIsLoadedReturnsFalseInitially(): void
     {
         EnvLoader::reset();
-        
+
         $this->assertFalse(EnvLoader::isLoaded());
     }
 
@@ -299,7 +302,7 @@ class EnvLoaderTest extends TestCase
     {
         file_put_contents($this->testEnvFile, "KEY=value\n");
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertTrue(EnvLoader::isLoaded());
     }
 
@@ -309,7 +312,7 @@ class EnvLoaderTest extends TestCase
     {
         file_put_contents($this->testEnvFile, "HAS_KEY=value\n");
         EnvLoader::load($this->testEnvFile);
-        
+
         $this->assertTrue(EnvLoader::has('HAS_KEY'));
     }
 
@@ -321,9 +324,9 @@ class EnvLoaderTest extends TestCase
     public function testHasReturnsTrueForEnvSuperglobal(): void
     {
         $_ENV['ENV_HAS_KEY'] = 'value';
-        
+
         $this->assertTrue(EnvLoader::has('ENV_HAS_KEY'));
-        
+
         unset($_ENV['ENV_HAS_KEY']);
     }
 
@@ -332,7 +335,7 @@ class EnvLoaderTest extends TestCase
     public function testAllReturnsEmptyArrayInitially(): void
     {
         EnvLoader::reset();
-        
+
         $this->assertEquals([], EnvLoader::all());
     }
 
@@ -340,9 +343,9 @@ class EnvLoaderTest extends TestCase
     {
         file_put_contents($this->testEnvFile, "KEY1=value1\nKEY2=value2\n");
         EnvLoader::load($this->testEnvFile);
-        
+
         $all = EnvLoader::all();
-        
+
         $this->assertArrayHasKey('KEY1', $all);
         $this->assertArrayHasKey('KEY2', $all);
         $this->assertEquals('value1', $all['KEY1']);
@@ -355,9 +358,9 @@ class EnvLoaderTest extends TestCase
     {
         file_put_contents($this->testEnvFile, "RESET_KEY=value\n");
         EnvLoader::load($this->testEnvFile);
-        
+
         EnvLoader::reset();
-        
+
         $this->assertFalse(EnvLoader::isLoaded());
         $this->assertEquals([], EnvLoader::all());
     }
@@ -367,9 +370,9 @@ class EnvLoaderTest extends TestCase
     public function testGetDatabaseConfigReturnsDefaults(): void
     {
         EnvLoader::reset();
-        
+
         $config = EnvLoader::getDatabaseConfig();
-        
+
         $this->assertEquals('localhost', $config['server']);
         $this->assertEquals('root', $config['userid']);
         $this->assertEquals('', $config['passwd']);
@@ -380,7 +383,7 @@ class EnvLoaderTest extends TestCase
     public function testGetDatabaseConfigReturnsLoadedValues(): void
     {
         file_put_contents(
-            $this->testEnvFile, 
+            $this->testEnvFile,
             "DB_HOST=testhost\nDB_USER=testuser\nDB_PASSWORD=testpass\n" .
             "DB_NAME=testdb\nDB_SOCKET=/tmp/mysql.sock\n"
         );

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<ruleset name="LWT Coding Standard">
+    <description>PHP CodeSniffer configuration for Learning with Texts</description>
+
+    <!-- Use PSR-12 as the base standard -->
+    <rule ref="PSR12"/>
+
+    <!-- Only check PHP files -->
+    <arg name="extensions" value="php"/>
+
+    <!-- Exclude directories -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/dist/*</exclude-pattern>
+    <exclude-pattern>*/docs/*</exclude-pattern>
+
+    <!-- Show progress and use colors -->
+    <arg value="ps"/>
+    <arg name="colors"/>
+
+    <!-- Default paths to check -->
+    <file>src</file>
+    <file>tests</file>
+</ruleset>

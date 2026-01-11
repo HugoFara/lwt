@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Lwt\Tests\Core\Export;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
@@ -253,9 +256,9 @@ class ExportAndAnnotationTest extends TestCase
         // Test that old annotation parsing works correctly
         $oldAnn = "1\tword\t0\ttranslation\n2\tother\t0\tmeaning\n";
         $lines = explode("\n", $oldAnn);
-        
+
         $this->assertGreaterThan(0, count($lines));
-        
+
         foreach ($lines as $line) {
             if (strlen(trim($line)) > 0) {
                 $parts = explode("\t", $line);

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Lwt\Tests\Core\Container;
 
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Container/ContainerInterface.php';

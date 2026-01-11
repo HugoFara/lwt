@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Lwt\Tests\Tools;
 
@@ -10,7 +12,6 @@ use function Lwt\Tools\markdownConverter;
 
 final class MarkdownConverterTest extends TestCase
 {
-    
     /**
      * Test the conversion from Markdown to HTML
      */
@@ -26,5 +27,4 @@ final class MarkdownConverterTest extends TestCase
         fclose($temp);
         $this->assertSame($expectedHTML, $outputText);
     }
-
 }

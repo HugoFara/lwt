@@ -66,7 +66,6 @@
             "vendor/bin/phpunit --no-coverage --testsuite integration"
         ],
         "psalm": "vendor/bin/psalm",
-        "psalm:level1": "vendor/bin/psalm --error-level=1",
         "phpcs": "vendor/bin/phpcs",
         "phpcbf": "vendor/bin/phpcbf",
         "doc": [
@@ -90,8 +89,7 @@
         "test:integration": "Run integration tests (requires database)",
         "test": "Run all tests with coverage (cleans up stale DB connections first)",
         "test:no-coverage": "Run all tests without coverage (cleans up stale DB connections first)",
-        "psalm": "Run Psalm static analysis (level 2 by default)",
-        "psalm:level1": "Run Psalm at level 1 (strictest)",
+        "psalm": "Run Psalm static analysis",
         "phpcs": "Check PHP code style (PSR-12)",
         "phpcbf": "Auto-fix PHP code style issues",
         "doc": "Regenerate all documentation (VitePress + JSDoc + phpDoc)",

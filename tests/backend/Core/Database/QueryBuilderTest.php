@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Lwt\Tests\Core\Database;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
@@ -151,7 +154,7 @@ class QueryBuilderTest extends TestCase
             ->where('TgID', '>', 1)
             ->where('TgText', 'LIKE', 'test%')
             ->toSql();
-        
+
         $this->assertStringContainsString("WHERE TgID > 1 AND TgText LIKE 'test%'", $sql);
     }
 
@@ -204,7 +207,7 @@ class QueryBuilderTest extends TestCase
             ->where('TgID', 1)
             ->orWhere('TgID', 2)
             ->toSql();
-        
+
         $this->assertStringContainsString("WHERE TgID = 1 OR TgID = 2", $sql);
     }
 
@@ -325,7 +328,7 @@ class QueryBuilderTest extends TestCase
             ->orderBy('TgText')
             ->orderBy('TgID', 'DESC')
             ->toSql();
-        
+
         $this->assertStringContainsString("ORDER BY TgText ASC, TgID DESC", $sql);
     }
 
@@ -384,9 +387,9 @@ class QueryBuilderTest extends TestCase
 
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_get']);
-        
+
         $results = QueryBuilder::table('tags')->where('TgText', 'test_qb_get')->get();
-        
+
         $this->assertCount(1, $results);
         $this->assertEquals('test_qb_get', $results[0]['TgText']);
     }
@@ -401,9 +404,9 @@ class QueryBuilderTest extends TestCase
 
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_first']);
-        
+
         $row = QueryBuilder::table('tags')->where('TgText', 'test_qb_first')->first();
-        
+
         $this->assertIsArray($row);
         $this->assertEquals('test_qb_first', $row['TgText']);
     }
@@ -428,9 +431,9 @@ class QueryBuilderTest extends TestCase
 
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_value']);
-        
+
         $value = QueryBuilder::table('tags')->where('TgText', 'test_qb_value')->value('TgText');
-        
+
         $this->assertEquals('test_qb_value', $value);
     }
 
@@ -441,7 +444,7 @@ class QueryBuilderTest extends TestCase
         }
 
         $value = QueryBuilder::table('tags')->where('TgText', 'nonexistent_xyz_123')->value('TgText');
-        
+
         $this->assertNull($value);
     }
 
@@ -467,9 +470,9 @@ class QueryBuilderTest extends TestCase
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_count1']);
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_count2']);
-        
+
         $count = QueryBuilder::table('tags')->where('TgText', 'LIKE', 'test_qb_count%')->count();
-        
+
         $this->assertEquals(2, $count);
     }
 
@@ -483,9 +486,9 @@ class QueryBuilderTest extends TestCase
 
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_exists']);
-        
+
         $exists = QueryBuilder::table('tags')->where('TgText', 'test_qb_exists')->exists();
-        
+
         $this->assertTrue($exists);
     }
 
@@ -508,9 +511,9 @@ class QueryBuilderTest extends TestCase
         }
 
         $id = QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_insert']);
-        
+
         $this->assertGreaterThan(0, $id);
-        
+
         // Verify inserted
         $row = QueryBuilder::table('tags')->where('TgID', $id)->first();
         $this->assertEquals('test_qb_insert', $row['TgText']);
@@ -526,7 +529,7 @@ class QueryBuilderTest extends TestCase
             'TgText' => 'test_qb_multi',
             'TgComment' => 'test comment'
         ]);
-        
+
         $row = QueryBuilder::table('tags')->where('TgID', $id)->first();
         $this->assertEquals('test_qb_multi', $row['TgText']);
         $this->assertEquals('test comment', $row['TgComment']);
@@ -545,9 +548,9 @@ class QueryBuilderTest extends TestCase
             ['TgText' => 'test_qb_many2'],
             ['TgText' => 'test_qb_many3']
         ]);
-        
+
         $this->assertEquals(3, $affected);
-        
+
         // Verify all inserted
         $count = QueryBuilder::table('tags')->where('TgText', 'LIKE', 'test_qb_many%')->count();
         $this->assertEquals(3, $count);
@@ -573,14 +576,14 @@ class QueryBuilderTest extends TestCase
 
         // Insert test data
         $id = QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_update_old']);
-        
+
         // Update
         $affected = QueryBuilder::table('tags')
             ->where('TgID', $id)
             ->update(['TgText' => 'test_qb_update_new']);
-        
+
         $this->assertEquals(1, $affected);
-        
+
         // Verify updated
         $row = QueryBuilder::table('tags')->where('TgID', $id)->first();
         $this->assertEquals('test_qb_update_new', $row['TgText']);
@@ -595,13 +598,13 @@ class QueryBuilderTest extends TestCase
         // Insert test data with unique suffix
         $suffix = substr(uniqid(), -6);
         $id = QueryBuilder::table('tags')->insert(['TgText' => "test_qb_upd_m_{$suffix}"]);
-        
+
         // Update
         QueryBuilder::table('tags')->where('TgID', $id)->update([
             'TgText' => "upd_txt_{$suffix}",
             'TgComment' => 'updated_comment'
         ]);
-        
+
         // Verify
         $row = QueryBuilder::table('tags')->where('TgID', $id)->first();
         $this->assertEquals("upd_txt_{$suffix}", $row['TgText']);
@@ -618,12 +621,12 @@ class QueryBuilderTest extends TestCase
 
         // Insert test data
         $id = QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_delete']);
-        
+
         // Delete
         $affected = QueryBuilder::table('tags')->where('TgID', $id)->delete();
-        
+
         $this->assertEquals(1, $affected);
-        
+
         // Verify deleted
         $row = QueryBuilder::table('tags')->where('TgID', $id)->first();
         $this->assertNull($row);
@@ -640,24 +643,24 @@ class QueryBuilderTest extends TestCase
         $tag1 = "qb_{$rand}_1";
         $tag2 = "qb_{$rand}_2";
         $tag3 = "qb_{$rand}_3";
-        
+
         // Clean up any potential leftovers
         try {
             QueryBuilder::table('tags')->where('TgText', 'LIKE', "qb_{$rand}%")->delete();
         } catch (\Exception $e) {
             // Ignore if nothing to delete
         }
-        
+
         // Insert test data
         QueryBuilder::table('tags')->insertMany([
             ['TgText' => $tag1],
             ['TgText' => $tag2],
             ['TgText' => $tag3]
         ]);
-        
+
         // Delete
         $affected = QueryBuilder::table('tags')->where('TgText', 'LIKE', "qb_{$rand}%")->delete();
-        
+
         $this->assertEquals(3, $affected);
     }
 
@@ -704,7 +707,7 @@ class QueryBuilderTest extends TestCase
             ['TgText' => 'test_qb_complex_c'],
             ['TgText' => 'test_qb_other']
         ]);
-        
+
         // Complex query
         $results = QueryBuilder::table('tags')
             ->select(['TgID', 'TgText'])
@@ -712,7 +715,7 @@ class QueryBuilderTest extends TestCase
             ->orderBy('TgText')
             ->limit(2)
             ->get();
-        
+
         $this->assertCount(2, $results);
         $this->assertEquals('test_qb_complex_a', $results[0]['TgText']);
         $this->assertEquals('test_qb_complex_b', $results[1]['TgText']);
@@ -726,7 +729,7 @@ class QueryBuilderTest extends TestCase
 
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_fluent']);
-        
+
         // Test fluent chaining
         $result = QueryBuilder::table('tags')
             ->select('TgText')
@@ -734,7 +737,7 @@ class QueryBuilderTest extends TestCase
             ->orderBy('TgID')
             ->limit(1)
             ->first();
-        
+
         $this->assertIsArray($result);
         $this->assertEquals('test_qb_fluent', $result['TgText']);
     }

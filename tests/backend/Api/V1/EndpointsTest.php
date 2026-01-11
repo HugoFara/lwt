@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Lwt\Tests\Api\V1;
 
 require_once __DIR__ . '/../../../../src/backend/Api/V1/Response.php';

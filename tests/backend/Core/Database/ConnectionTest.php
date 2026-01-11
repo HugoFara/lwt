@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Lwt\Tests\Core\Database;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
@@ -88,10 +91,10 @@ class ConnectionTest extends TestCase
         }
 
         $oldConnection = Connection::getInstance();
-        
+
         // Set it back (this is just to test the setter works)
         Connection::setInstance($oldConnection);
-        
+
         $newConnection = Connection::getInstance();
         $this->assertInstanceOf(\mysqli::class, $newConnection);
     }
@@ -554,13 +557,13 @@ class ConnectionTest extends TestCase
 
         // Get instance first
         $instance1 = Connection::getInstance();
-        
+
         // Reset
         Connection::reset();
-        
+
         // Get instance again - should be fetched from Globals
         $instance2 = Connection::getInstance();
-        
+
         // They should still be connected (Globals maintains the connection)
         $this->assertInstanceOf(\mysqli::class, $instance2);
     }
@@ -574,13 +577,12 @@ class ConnectionTest extends TestCase
         }
 
         $originalInstance = Connection::getInstance();
-        
+
         // Set a new instance (same connection for testing purposes)
         Connection::setInstance($originalInstance);
-        
+
         $newInstance = Connection::getInstance();
-        
+
         $this->assertSame($originalInstance, $newInstance);
     }
 }
-

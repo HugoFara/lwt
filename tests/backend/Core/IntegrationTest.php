@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Lwt\Tests\Core;
 
@@ -845,4 +847,3 @@ class IntegrationTest extends TestCase
         $this->assertIsString($result);
     }
 }
-?>

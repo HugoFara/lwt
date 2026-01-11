@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Lwt\Tests\Controllers;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
@@ -55,19 +58,19 @@ class BaseControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Save original superglobals
         $this->originalServer = $_SERVER;
         $this->originalGet = $_GET;
         $this->originalPost = $_POST;
         $this->originalRequest = $_REQUEST;
-        
+
         // Reset superglobals
         $_SERVER = [];
         $_GET = [];
         $_POST = [];
         $_REQUEST = [];
-        
+
         $this->controller = new TestableController();
     }
 
@@ -78,12 +81,12 @@ class BaseControllerTest extends TestCase
         $_GET = $this->originalGet;
         $_POST = $this->originalPost;
         $_REQUEST = $this->originalRequest;
-        
+
         // Clean up test data
         if (self::$dbConnected) {
             Connection::query("DELETE FROM tags WHERE TgText LIKE 'test_ctrl_%'");
         }
-        
+
         parent::tearDown();
     }
 
@@ -257,12 +260,11 @@ class BaseControllerTest extends TestCase
         $this->assertIsInt($ids[2]);
         $this->assertEquals(0, $ids[3]); // intval('invalid') = 0
     }
-
 }
 
 /**
  * Concrete implementation of BaseController for testing.
- * 
+ *
  * Exposes protected methods for testing purposes.
  */
 class TestableController extends BaseController
@@ -311,5 +313,4 @@ class TestableController extends BaseController
     {
         return $this->getMarkedIds($marked);
     }
-
 }

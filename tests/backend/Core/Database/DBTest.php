@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Lwt\Tests\Core\Database;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
@@ -338,7 +341,7 @@ class DBTest extends TestCase
 
         $result = DB::beginTransaction();
         $this->assertTrue($result);
-        
+
         // Rollback to clean up
         DB::rollback();
     }
@@ -419,17 +422,17 @@ class DBTest extends TestCase
         // Insert test data
         DB::table('tags')->insert(['TgText' => 'test_db_builder1']);
         DB::table('tags')->insert(['TgText' => 'test_db_builder2']);
-        
+
         // Query
         $results = DB::table('tags')
             ->where('TgText', 'LIKE', 'test_db_builder%')
             ->orderBy('TgText')
             ->get();
-        
+
         $this->assertCount(2, $results);
         $this->assertEquals('test_db_builder1', $results[0]['TgText']);
         $this->assertEquals('test_db_builder2', $results[1]['TgText']);
-        
+
         // Clean up
         DB::table('tags')->where('TgText', 'LIKE', 'test_db_builder%')->delete();
     }

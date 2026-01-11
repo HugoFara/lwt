@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Feed;
 
@@ -36,7 +38,11 @@ class FeedsTest extends TestCase
             $config = EnvLoader::getDatabaseConfig();
             $test_dbname = "test_" . $config['dbname'];
             $connection = Configuration::connect(
-                $config['server'], $config['userid'], $config['passwd'], $test_dbname, $config['socket']
+                $config['server'],
+                $config['userid'],
+                $config['passwd'],
+                $test_dbname,
+                $config['socket']
             );
             Globals::setDbConnection($connection);
         }
@@ -481,4 +487,3 @@ class FeedsTest extends TestCase
         $this->assertTrue(method_exists($this->feedService, 'validateRegexPattern'));
     }
 }
-?>

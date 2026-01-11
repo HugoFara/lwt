@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Lwt\Tests\Core;
 
@@ -55,20 +57,22 @@ function userLogging(): array
         }
     }
     return array($userid, $passwd, $server, $dbname);
-
 }
 
 
 class DatabaseConnectTest extends TestCase
 {
-
     public function testDatabaseInstallation(): void
     {
         list($userid, $passwd, $server, $dbname) = userLogging();
 
         // Connect to the database
         $connection = Configuration::connect(
-            $server, $userid, $passwd, $dbname, $socket ?? ""
+            $server,
+            $userid,
+            $passwd,
+            $dbname,
+            $socket ?? ""
         );
         Globals::setDbConnection($connection);
         $this->assertTrue(
@@ -90,12 +94,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testConvertStringToSqlsyntax(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -145,12 +153,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testConvertStringToSqlsyntaxNonull(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -182,12 +194,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testConvertStringToSqlsyntaxNotrimNonull(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -210,12 +226,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testConvertRegexpToSqlsyntax(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -239,12 +259,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testValidateLang(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -281,12 +305,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testValidateText(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -344,12 +372,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testValidateTag(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -403,12 +435,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testValidateArchTextTag(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -447,12 +483,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testValidateTextTag(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -484,12 +524,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testConvertRegexpToSqlsyntaxAdvanced(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -532,12 +576,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testGetSetting(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -581,12 +629,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testGetSettingWithDefault(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -621,12 +673,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testSaveSetting(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -679,12 +735,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testGetSettingZeroOrOne(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -717,12 +777,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testLWTTableOperations(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -776,7 +840,11 @@ class DatabaseConnectTest extends TestCase
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -812,12 +880,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testRunsql(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -848,12 +920,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testAdjustAutoincr(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -874,12 +950,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testOptimizedb(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -900,7 +980,11 @@ class DatabaseConnectTest extends TestCase
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -940,7 +1024,11 @@ class DatabaseConnectTest extends TestCase
 
         // Valid connection
         $connection = Configuration::connect(
-            $server, $userid, $passwd, $dbname, $socket ?? ""
+            $server,
+            $userid,
+            $passwd,
+            $dbname,
+            $socket ?? ""
         );
         $this->assertInstanceOf(\mysqli::class, $connection);
         $this->assertEquals(0, \mysqli_connect_errno(), 'Should connect successfully');
@@ -958,12 +1046,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testDoMysqliQuerySuccess(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -1019,12 +1111,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testGetFirstValue(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -1109,12 +1205,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testLWTTableFunctions(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -1155,12 +1255,16 @@ class DatabaseConnectTest extends TestCase
      */
     public function testEdgeCasesForSQLFunctions(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -1201,7 +1305,8 @@ class DatabaseConnectTest extends TestCase
         // Create a temporary SQL file
         $temp_file = tempnam(sys_get_temp_dir(), 'lwt_test_sql_');
         file_put_contents(
-            $temp_file, "-- Comment\nSELECT 1;\n\nSELECT 2;\n-- Another comment\nSELECT 3;"
+            $temp_file,
+            "-- Comment\nSELECT 1;\n\nSELECT 2;\n-- Another comment\nSELECT 3;"
         );
 
         $queries = \Lwt\Shared\Infrastructure\Database\SqlFileParser::parseFile($temp_file);
@@ -1361,11 +1466,15 @@ class DatabaseConnectTest extends TestCase
      */
     public function testDatabaseCharsetCollation(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -1399,7 +1508,11 @@ class DatabaseConnectTest extends TestCase
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = userLogging();
             $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
+                $server,
+                $userid,
+                $passwd,
+                $dbname,
+                $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
@@ -1449,6 +1562,4 @@ class DatabaseConnectTest extends TestCase
         // Clean up
         Connection::query("DELETE FROM settings WHERE StKey='test_transaction'");
     }
-
 }
-?>

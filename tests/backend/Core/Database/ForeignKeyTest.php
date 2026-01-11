@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Lwt\Tests\Core\Database;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
@@ -413,13 +416,16 @@ class ForeignKeyTest extends TestCase
 
         // Verify all exist
         $this->assertEquals(1, (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM texts WHERE TxID = $textId", 'cnt'
+            "SELECT COUNT(*) AS cnt FROM texts WHERE TxID = $textId",
+            'cnt'
         ));
         $this->assertEquals(1, (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM sentences WHERE SeID = $sentenceId", 'cnt'
+            "SELECT COUNT(*) AS cnt FROM sentences WHERE SeID = $sentenceId",
+            'cnt'
         ));
         $this->assertEquals(1, (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = $textId", 'cnt'
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = $textId",
+            'cnt'
         ));
 
         // Delete language - should cascade through entire chain
@@ -427,13 +433,16 @@ class ForeignKeyTest extends TestCase
 
         // Verify all were deleted
         $this->assertEquals(0, (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM texts WHERE TxID = $textId", 'cnt'
+            "SELECT COUNT(*) AS cnt FROM texts WHERE TxID = $textId",
+            'cnt'
         ), 'Text should be deleted via CASCADE');
         $this->assertEquals(0, (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM sentences WHERE SeID = $sentenceId", 'cnt'
+            "SELECT COUNT(*) AS cnt FROM sentences WHERE SeID = $sentenceId",
+            'cnt'
         ), 'Sentence should be deleted via CASCADE');
         $this->assertEquals(0, (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = $textId", 'cnt'
+            "SELECT COUNT(*) AS cnt FROM word_occurrences WHERE Ti2TxID = $textId",
+            'cnt'
         ), 'TextItem should be deleted via CASCADE');
     }
 

@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Lwt\Tests\Core;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
@@ -29,7 +32,7 @@ class GlobalsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Reset Globals state before each test
         Globals::reset();
     }
@@ -38,7 +41,7 @@ class GlobalsTest extends TestCase
     {
         // Reset Globals state after each test
         Globals::reset();
-        
+
         parent::tearDown();
     }
 
@@ -68,9 +71,9 @@ class GlobalsTest extends TestCase
     public function testSetAndGetDbConnection(): void
     {
         $mockConnection = $this->createMock(\mysqli::class);
-        
+
         Globals::setDbConnection($mockConnection);
-        
+
         $this->assertSame($mockConnection, Globals::getDbConnection());
     }
 
@@ -84,7 +87,7 @@ class GlobalsTest extends TestCase
     public function testSetAndGetDatabaseName(): void
     {
         Globals::setDatabaseName('test_database');
-        
+
         $this->assertEquals('test_database', Globals::getDatabaseName());
     }
 
@@ -131,7 +134,7 @@ class GlobalsTest extends TestCase
     public function testQueryReturnsQueryBuilder(): void
     {
         $qb = Globals::query('words');
-        
+
         $this->assertInstanceOf(QueryBuilder::class, $qb);
     }
 
