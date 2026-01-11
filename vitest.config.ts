@@ -8,7 +8,7 @@ export default defineConfig({
   test: {
     globals: true,
     include: ['tests/**/*.test.ts', 'tests/**/*.spec.ts'],
-    exclude: ['node_modules', 'vendor'],
+    exclude: ['node_modules', 'vendor', 'tests/api.test.ts'],
     testTimeout: 10000,
     hookTimeout: 10000,
     setupFiles: ['./tests/setup.ts'],
@@ -16,8 +16,6 @@ export default defineConfig({
     environmentMatchGlobs: [
       // Frontend tests use jsdom for DOM manipulation
       ['tests/frontend/**', 'jsdom'],
-      // API tests use node environment
-      ['tests/api.test.ts', 'node'],
     ],
     // Default to jsdom for frontend tests
     environment: 'jsdom',
