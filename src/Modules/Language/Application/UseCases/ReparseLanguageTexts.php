@@ -20,8 +20,6 @@ namespace Lwt\Modules\Language\Application\UseCases;
 use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\TextParsing;
-use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
-use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 
 /**
  * Use case for reparsing all texts for a language.
@@ -30,15 +28,6 @@ use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
  */
 class ReparseLanguageTexts
 {
-    private LanguageRepositoryInterface $repository;
-
-    /**
-     * @param LanguageRepositoryInterface|null $repository Repository instance
-     */
-    public function __construct(?LanguageRepositoryInterface $repository = null)
-    {
-        $this->repository = $repository ?? new MySqlLanguageRepository();
-    }
 
     /**
      * Refresh (reparse) all texts for a language.

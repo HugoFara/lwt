@@ -19,8 +19,6 @@ namespace Lwt\Modules\Language\Application\UseCases;
 
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
-use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
-use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 
 /**
  * Use case for updating an existing language.
@@ -29,19 +27,14 @@ use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
  */
 class UpdateLanguage
 {
-    private LanguageRepositoryInterface $repository;
     private ReparseLanguageTexts $reparseUseCase;
 
     /**
-     * @param LanguageRepositoryInterface|null $repository    Repository instance
-     * @param ReparseLanguageTexts|null        $reparseUseCase Reparse use case
+     * @param ReparseLanguageTexts|null $reparseUseCase Reparse use case
      */
-    public function __construct(
-        ?LanguageRepositoryInterface $repository = null,
-        ?ReparseLanguageTexts $reparseUseCase = null
-    ) {
-        $this->repository = $repository ?? new MySqlLanguageRepository();
-        $this->reparseUseCase = $reparseUseCase ?? new ReparseLanguageTexts($this->repository);
+    public function __construct(?ReparseLanguageTexts $reparseUseCase = null)
+    {
+        $this->reparseUseCase = $reparseUseCase ?? new ReparseLanguageTexts();
     }
 
     /**

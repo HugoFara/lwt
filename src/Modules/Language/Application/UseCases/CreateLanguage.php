@@ -19,8 +19,6 @@ namespace Lwt\Modules\Language\Application\UseCases;
 
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
-use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
-use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 
 /**
  * Use case for creating a new language.
@@ -29,15 +27,6 @@ use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
  */
 class CreateLanguage
 {
-    private LanguageRepositoryInterface $repository;
-
-    /**
-     * @param LanguageRepositoryInterface|null $repository Repository instance
-     */
-    public function __construct(?LanguageRepositoryInterface $repository = null)
-    {
-        $this->repository = $repository ?? new MySqlLanguageRepository();
-    }
 
     /**
      * Create a new language from request data.

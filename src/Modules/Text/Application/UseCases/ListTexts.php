@@ -33,20 +33,15 @@ use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 class ListTexts
 {
     private TextRepositoryInterface $textRepository;
-    private BuildTextFilters $filterBuilder;
 
     /**
      * Constructor.
      *
      * @param TextRepositoryInterface $textRepository Text repository
-     * @param BuildTextFilters|null   $filterBuilder  Filter builder (optional)
      */
-    public function __construct(
-        TextRepositoryInterface $textRepository,
-        ?BuildTextFilters $filterBuilder = null
-    ) {
+    public function __construct(TextRepositoryInterface $textRepository)
+    {
         $this->textRepository = $textRepository;
-        $this->filterBuilder = $filterBuilder ?? new BuildTextFilters();
     }
 
     /**

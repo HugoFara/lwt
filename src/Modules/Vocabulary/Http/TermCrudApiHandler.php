@@ -26,7 +26,6 @@ use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
-use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
@@ -48,7 +47,6 @@ class TermCrudApiHandler
 {
     private VocabularyFacade $facade;
     private FindSimilarTerms $findSimilarTerms;
-    private DictionaryAdapter $dictionaryAdapter;
     private WordContextService $contextService;
     private WordDiscoveryService $discoveryService;
     private WordLinkingService $linkingService;
@@ -56,24 +54,21 @@ class TermCrudApiHandler
     /**
      * Constructor.
      *
-     * @param VocabularyFacade|null       $facade            Vocabulary facade
-     * @param FindSimilarTerms|null       $findSimilarTerms  Find similar terms use case
-     * @param DictionaryAdapter|null      $dictionaryAdapter Dictionary adapter
-     * @param WordContextService|null     $contextService    Context service
-     * @param WordDiscoveryService|null   $discoveryService  Discovery service
-     * @param WordLinkingService|null     $linkingService    Linking service
+     * @param VocabularyFacade|null     $facade           Vocabulary facade
+     * @param FindSimilarTerms|null     $findSimilarTerms Find similar terms use case
+     * @param WordContextService|null   $contextService   Context service
+     * @param WordDiscoveryService|null $discoveryService Discovery service
+     * @param WordLinkingService|null   $linkingService   Linking service
      */
     public function __construct(
         ?VocabularyFacade $facade = null,
         ?FindSimilarTerms $findSimilarTerms = null,
-        ?DictionaryAdapter $dictionaryAdapter = null,
         ?WordContextService $contextService = null,
         ?WordDiscoveryService $discoveryService = null,
         ?WordLinkingService $linkingService = null
     ) {
         $this->facade = $facade ?? new VocabularyFacade();
         $this->findSimilarTerms = $findSimilarTerms ?? new FindSimilarTerms();
-        $this->dictionaryAdapter = $dictionaryAdapter ?? new DictionaryAdapter();
         $this->contextService = $contextService ?? new WordContextService();
         $this->discoveryService = $discoveryService ?? new WordDiscoveryService();
         $this->linkingService = $linkingService ?? new WordLinkingService();

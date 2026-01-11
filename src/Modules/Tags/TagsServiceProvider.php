@@ -285,12 +285,8 @@ class TagsServiceProvider implements ServiceProviderInterface
      */
     private function registerApiHandler(Container $container): void
     {
-        $container->singleton(TagApiHandler::class, function (Container $c) {
-            /** @var TagsFacade $termFacade */
-            $termFacade = $c->get('tags.facade.term');
-            /** @var TagsFacade $textFacade */
-            $textFacade = $c->get('tags.facade.text');
-            return new TagApiHandler($termFacade, $textFacade);
+        $container->singleton(TagApiHandler::class, function (Container $_c) {
+            return new TagApiHandler();
         });
     }
 

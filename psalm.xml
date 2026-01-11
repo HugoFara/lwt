@@ -202,19 +202,24 @@
             </errorLevel>
         </UnresolvableInclude>
 
-        <!-- Return value may not be used by callers -->
+        <!-- Return value may not be used by callers, especially on interfaces -->
         <PossiblyUnusedReturnValue>
             <errorLevel type="suppress">
                 <directory name="src/Modules" />
-                <directory name="src/Shared" />
             </errorLevel>
         </PossiblyUnusedReturnValue>
 
-        <!-- Unused properties may be kept for future use or DI -->
+        <!-- Properties may be kept for future use, DI, or ORM mapping -->
+        <PossiblyUnusedProperty>
+            <errorLevel type="suppress">
+                <directory name="src/Modules" />
+            </errorLevel>
+        </PossiblyUnusedProperty>
+
+        <!-- ORM-style column map properties kept for future use -->
         <UnusedProperty>
             <errorLevel type="suppress">
                 <directory name="src/Modules" />
-                <directory name="src/Shared" />
             </errorLevel>
         </UnusedProperty>
 
@@ -224,16 +229,8 @@
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Api" />
                 <directory name="src/Modules" />
-                <directory name="src/Shared" />
             </errorLevel>
         </UnusedClass>
-
-        <!-- Closure params for DI may not be used -->
-        <UnusedClosureParam>
-            <errorLevel type="suppress">
-                <directory name="src/Modules" />
-            </errorLevel>
-        </UnusedClosureParam>
 
         <!-- Private methods may have unused params for consistency or future use -->
         <UnusedParam>
@@ -245,16 +242,16 @@
         <!-- Repository implementations may have more specific param types -->
         <MoreSpecificImplementedParamType>
             <errorLevel type="suppress">
-                <directory name="src/Modules" />
                 <directory name="src/backend/Core" />
+                <directory name="src/Modules" />
             </errorLevel>
         </MoreSpecificImplementedParamType>
 
         <!-- Repository implementations may have less specific return types -->
         <LessSpecificImplementedReturnType>
             <errorLevel type="suppress">
-                <directory name="src/Modules" />
                 <directory name="src/backend/Core" />
+                <directory name="src/Modules" />
             </errorLevel>
         </LessSpecificImplementedReturnType>
 

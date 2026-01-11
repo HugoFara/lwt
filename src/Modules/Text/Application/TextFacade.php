@@ -101,9 +101,9 @@ class TextFacade
         $this->getTextForEdit = $getTextForEdit ?? new GetTextForEdit($this->textRepository);
         $this->getTextForReading = $getTextForReading ?? new GetTextForReading($this->textRepository);
         $this->importText = $importText ?? new ImportText($this->textRepository);
-        $this->listTexts = $listTexts ?? new ListTexts($this->textRepository, $this->buildTextFilters);
+        $this->listTexts = $listTexts ?? new ListTexts($this->textRepository);
         $this->parseText = $parseText ?? new ParseText();
-        $this->updateText = $updateText ?? new UpdateText($this->textRepository);
+        $this->updateText = $updateText ?? new UpdateText();
         $this->sentenceService = $sentenceService ?? new SentenceService();
     }
 

@@ -18,8 +18,6 @@ declare(strict_types=1);
 namespace Lwt\Modules\Language\Application\UseCases;
 
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
-use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
-use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 
 /**
  * Use case for deleting a language with dependency checking.
@@ -28,15 +26,6 @@ use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
  */
 class DeleteLanguage
 {
-    private LanguageRepositoryInterface $repository;
-
-    /**
-     * @param LanguageRepositoryInterface|null $repository Repository instance
-     */
-    public function __construct(?LanguageRepositoryInterface $repository = null)
-    {
-        $this->repository = $repository ?? new MySqlLanguageRepository();
-    }
 
     /**
      * Delete a language.

@@ -125,32 +125,25 @@ class LanguageServiceProvider implements ServiceProviderInterface
         });
 
         // CreateLanguage use case
-        $container->singleton(CreateLanguage::class, function (Container $c) {
-            return new CreateLanguage(
-                $c->getTyped(LanguageRepositoryInterface::class)
-            );
+        $container->singleton(CreateLanguage::class, function (Container $_c) {
+            return new CreateLanguage();
         });
 
         // ReparseLanguageTexts use case
-        $container->singleton(ReparseLanguageTexts::class, function (Container $c) {
-            return new ReparseLanguageTexts(
-                $c->getTyped(LanguageRepositoryInterface::class)
-            );
+        $container->singleton(ReparseLanguageTexts::class, function (Container $_c) {
+            return new ReparseLanguageTexts();
         });
 
         // UpdateLanguage use case (depends on ReparseLanguageTexts)
         $container->singleton(UpdateLanguage::class, function (Container $c) {
             return new UpdateLanguage(
-                $c->getTyped(LanguageRepositoryInterface::class),
                 $c->getTyped(ReparseLanguageTexts::class)
             );
         });
 
         // DeleteLanguage use case
-        $container->singleton(DeleteLanguage::class, function (Container $c) {
-            return new DeleteLanguage(
-                $c->getTyped(LanguageRepositoryInterface::class)
-            );
+        $container->singleton(DeleteLanguage::class, function (Container $_c) {
+            return new DeleteLanguage();
         });
 
         // GetLanguageCode use case

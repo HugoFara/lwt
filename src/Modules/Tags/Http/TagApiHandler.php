@@ -35,22 +35,6 @@ use Lwt\Shared\Infrastructure\Http\JsonResponse;
  */
 class TagApiHandler
 {
-    private TagsFacade $termFacade;
-    private TagsFacade $textFacade;
-
-    /**
-     * Constructor.
-     *
-     * @param TagsFacade|null $termFacade Term tags facade
-     * @param TagsFacade|null $textFacade Text tags facade
-     */
-    public function __construct(
-        ?TagsFacade $termFacade = null,
-        ?TagsFacade $textFacade = null
-    ) {
-        $this->termFacade = $termFacade ?? TagsFacade::forTermTags();
-        $this->textFacade = $textFacade ?? TagsFacade::forTextTags();
-    }
 
     /**
      * Handle GET request for tags.

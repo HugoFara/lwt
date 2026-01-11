@@ -172,10 +172,8 @@ class TextServiceProvider implements ServiceProviderInterface
         // UpdateText use case
         $container->singleton(
             UpdateText::class,
-            function (Container $c) {
-                return new UpdateText(
-                    $c->getTyped(TextRepositoryInterface::class)
-                );
+            function (Container $_c) {
+                return new UpdateText();
             }
         );
 

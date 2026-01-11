@@ -20,7 +20,6 @@ namespace Lwt\Modules\Vocabulary\Application\UseCases;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Vocabulary\Application\Services\SimilarityCalculator;
-use Lwt\Modules\Vocabulary\Domain\TermRepositoryInterface;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
@@ -30,20 +29,16 @@ use Lwt\Shared\UI\Helpers\IconHelper;
  */
 class FindSimilarTerms
 {
-    private TermRepositoryInterface $repository;
     private SimilarityCalculator $calculator;
 
     /**
      * Constructor.
      *
-     * @param TermRepositoryInterface|null $repository  Term repository
-     * @param SimilarityCalculator|null    $calculator  Similarity calculator
+     * @param SimilarityCalculator|null $calculator Similarity calculator
      */
     public function __construct(
-        ?TermRepositoryInterface $repository = null,
         ?SimilarityCalculator $calculator = null
     ) {
-        $this->repository = $repository ?? new \Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository();
         $this->calculator = $calculator ?? new SimilarityCalculator();
     }
 

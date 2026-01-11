@@ -22,7 +22,6 @@ use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\TextParsing;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
-use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 
 /**
  * Use case for updating texts.
@@ -34,17 +33,6 @@ use Lwt\Modules\Text\Domain\TextRepositoryInterface;
  */
 class UpdateText
 {
-    private TextRepositoryInterface $textRepository;
-
-    /**
-     * Constructor.
-     *
-     * @param TextRepositoryInterface $textRepository Text repository
-     */
-    public function __construct(TextRepositoryInterface $textRepository)
-    {
-        $this->textRepository = $textRepository;
-    }
 
     /**
      * Update an active text.

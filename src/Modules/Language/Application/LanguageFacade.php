@@ -77,14 +77,14 @@ class LanguageFacade
         ?UpdateLanguage $updateLanguage = null
     ) {
         $this->repository = $repository ?? new MySqlLanguageRepository();
-        $this->createLanguage = $createLanguage ?? new CreateLanguage($this->repository);
-        $this->deleteLanguage = $deleteLanguage ?? new DeleteLanguage($this->repository);
+        $this->createLanguage = $createLanguage ?? new CreateLanguage();
+        $this->deleteLanguage = $deleteLanguage ?? new DeleteLanguage();
         $this->getLanguageById = $getLanguageById ?? new GetLanguageById($this->repository);
         $this->getLanguageCode = $getLanguageCode ?? new GetLanguageCode($this->repository);
         $this->getPhoneticReading = $getPhoneticReading ?? new GetPhoneticReading($this->repository);
         $this->listLanguages = $listLanguages ?? new ListLanguages($this->repository);
-        $this->reparseLanguageTexts = $reparseLanguageTexts ?? new ReparseLanguageTexts($this->repository);
-        $this->updateLanguage = $updateLanguage ?? new UpdateLanguage($this->repository, $this->reparseLanguageTexts);
+        $this->reparseLanguageTexts = $reparseLanguageTexts ?? new ReparseLanguageTexts();
+        $this->updateLanguage = $updateLanguage ?? new UpdateLanguage($this->reparseLanguageTexts);
     }
 
     // =====================

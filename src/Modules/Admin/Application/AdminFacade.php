@@ -85,8 +85,6 @@ class AdminFacade
     private TestConnection $testConnection;
     private AutocompleteConnection $autocompleteConnection;
 
-    // Services
-    private SessionCleaner $sessionCleaner;
 
     /**
      * Constructor.
@@ -98,15 +96,12 @@ class AdminFacade
         SettingsRepositoryInterface $settingsRepository,
         BackupRepositoryInterface $backupRepository
     ) {
-        // Initialize services
-        $this->sessionCleaner = new SessionCleaner();
-
         // Initialize Settings use cases
         $this->getSetting = new GetSetting($settingsRepository);
         $this->getAllSettings = new GetAllSettings();
         $this->saveAllSettings = new SaveAllSettings();
         $this->resetAllSettings = new ResetAllSettings($settingsRepository);
-        $this->saveSetting = new SaveSetting($this->sessionCleaner);
+        $this->saveSetting = new SaveSetting(new SessionCleaner());
 
         // Initialize Backup use cases
         $this->restoreFromUpload = new RestoreFromUpload($backupRepository);

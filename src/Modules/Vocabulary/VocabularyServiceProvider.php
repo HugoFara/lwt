@@ -117,7 +117,6 @@ class VocabularyServiceProvider implements ServiceProviderInterface
 
         $container->singleton(FindSimilarTerms::class, function (Container $c) {
             return new FindSimilarTerms(
-                $c->getTyped(TermRepositoryInterface::class),
                 $c->getTyped(SimilarityCalculator::class)
             );
         });
@@ -226,7 +225,6 @@ class VocabularyServiceProvider implements ServiceProviderInterface
             return new TermCrudApiHandler(
                 $c->getTyped(VocabularyFacade::class),
                 $c->getTyped(FindSimilarTerms::class),
-                $c->getTyped(DictionaryAdapter::class),
                 $c->getTyped(WordContextService::class),
                 $c->getTyped(WordDiscoveryService::class),
                 $c->getTyped(WordLinkingService::class)
