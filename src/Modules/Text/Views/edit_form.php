@@ -137,8 +137,8 @@ if ($isNew) {
                            name="importFile"
                            id="importFile"
                            accept=".srt,.vtt,.epub,.mp3,.mp4,.wav,.webm,.ogg,.m4a,.mkv,.flac"
-                           onchange="this.closest('.file').querySelector('.file-name').textContent =
-                               this.files[0]?.name || 'No file selected'" />
+                           @change="$el.closest('.file').querySelector('.file-name').textContent =
+                               $el.files[0]?.name || 'No file selected'" />
                     <span class="file-cta">
                         <span class="file-icon">
                             <?php echo IconHelper::render('file-up', ['alt' => 'Upload']); ?>

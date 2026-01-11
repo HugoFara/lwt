@@ -51,14 +51,14 @@ if (!empty($message)) :
     };
     ?>
 <div class="notification is-success is-light mb-4">
-    <button class="delete" onclick="this.parentElement.remove()"></button>
+    <button class="delete" @click="$el.parentElement.remove()"></button>
     <?php echo htmlspecialchars($messageText, ENT_QUOTES); ?>
 </div>
 <?php endif; ?>
 
 <?php if (!empty($error)) : ?>
 <div class="notification is-danger is-light mb-4">
-    <button class="delete" onclick="this.parentElement.remove()"></button>
+    <button class="delete" @click="$el.parentElement.remove()"></button>
     <?php echo htmlspecialchars($error, ENT_QUOTES); ?>
 </div>
 <?php endif; ?>
@@ -78,7 +78,7 @@ echo PageLayoutHelper::buildActionCard([
         <div class="field has-addons">
             <div class="control is-expanded">
                 <div class="select is-fullwidth">
-                    <select name="lang" onchange="this.form.submit()">
+                    <select name="lang" @change="$el.form.submit()">
                         <?php foreach ($languages as $lang) : ?>
                         <option value="<?php echo $lang['id']; ?>"
                             <?php echo $lang['id'] == $langId ? 'selected' : ''; ?>>
@@ -221,7 +221,7 @@ echo PageLayoutHelper::buildActionCard([
 
                             <!-- Delete -->
                             <form method="POST" action="/dictionaries/delete" style="display:inline;"
-                                  onsubmit="return confirm('Delete this dictionary and all its entries?');">
+                                  @submit="if(!confirm('Delete this dictionary and all its entries?')) $event.preventDefault()">
                                 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                                 <input type="hidden" name="dict_id" value="<?php echo $dict->id(); ?>">
                                 <input type="hidden" name="lang_id" value="<?php echo $langId; ?>">

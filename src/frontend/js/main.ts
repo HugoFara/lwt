@@ -227,6 +227,13 @@ import '@modules/tags/pages/tag_list';
 // -----------------------------------------------------------------------------
 
 import '@modules/auth/pages/register_form';
+import '@modules/auth/pages/reset_password_form';
+
+// -----------------------------------------------------------------------------
+// DICTIONARY MODULE
+// -----------------------------------------------------------------------------
+
+import '@modules/dictionary/pages/dictionary_import';
 
 // =============================================================================
 // CROSS-CUTTING FEATURES (kept at root level)
@@ -239,6 +246,16 @@ import './media/audio_player_alpine';
 
 // Home
 import './home/home_app';
+
+// =============================================================================
+// ASYNC CSS LOADING (CSP-compliant)
+// =============================================================================
+
+// Convert async CSS links from print to all media
+// This enables non-render-blocking CSS loading without inline JS
+document.querySelectorAll<HTMLLinkElement>('link[data-async-css]').forEach((link) => {
+  link.media = 'all';
+});
 
 // =============================================================================
 // ALPINE.JS INITIALIZATION

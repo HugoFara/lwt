@@ -123,15 +123,19 @@ HTML;
         $html = '';
 
         // Load CSS files
+        // Note: Async CSS loading via onload requires inline JS which violates strict CSP.
+        // We use standard stylesheet loading with media="print" switching handled by
+        // external JS in main.ts for CSP compliance. For browsers without JS,
+        // the noscript fallback ensures styles load.
         if (isset($entryData['css']) && is_array($entryData['css'])) {
             /** @var mixed $cssFile */
             foreach ($entryData['css'] as $cssFile) {
                 $cssPath = UrlUtilities::url('/assets/' . htmlspecialchars((string) $cssFile));
                 if ($asyncCss) {
-                    // Async CSS loading using preload + onload pattern
-                    // This eliminates render-blocking while ensuring CSS loads
-                    $html .= '<link rel="preload" href="' . $cssPath .
-                        '" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">' . "\n";
+                    // CSP-compliant async CSS: use media="print" initially,
+                    // JS in main.ts will switch to media="all" on load
+                    $html .= '<link rel="stylesheet" href="' . $cssPath .
+                        '" media="print" data-async-css>' . "\n";
                     $html .= '<noscript><link rel="stylesheet" href="' . $cssPath . '"></noscript>' . "\n";
                 } else {
                     $html .= '<link rel="stylesheet" href="' . $cssPath . '">' . "\n";

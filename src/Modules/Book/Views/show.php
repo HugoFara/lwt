@@ -80,7 +80,7 @@ $actions = [
             <!-- Actions -->
             <div class="buttons">
                 <form method="post" action="/book/<?php echo $book['id']; ?>/delete"
-                      onsubmit="return confirm('Delete this book and all its chapters?');">
+                      @submit="if(!confirm('Delete this book and all its chapters?')) $event.preventDefault()">
                     <?php echo FormHelper::csrfField(); ?>
                     <button type="submit" class="button is-danger is-outlined">
                         <?php echo IconHelper::render('trash-2', ['alt' => 'Delete']); ?>

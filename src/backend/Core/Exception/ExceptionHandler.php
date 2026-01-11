@@ -461,8 +461,7 @@ class ExceptionHandler
         }
 
         echo '<div class="actions">';
-        echo '<a href="javascript:history.back()" class="btn">&larr; Go Back</a>';
-        echo '<a href="/" class="btn">Home</a>';
+        echo '<a href="/" class="btn">&larr; Home</a>';
         echo '</div>';
 
         echo '<div class="support">';

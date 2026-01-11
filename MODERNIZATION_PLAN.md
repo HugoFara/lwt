@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2026-01-07
+**Last Updated:** 2026-01-11
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -97,7 +97,7 @@ Modules/[Module]/
 
 | Metric | Status | Details |
 |--------|--------|---------|
-| Psalm Level 3 | PASS | 0 errors |
+| Psalm Level 1 | PASS | 0 errors |
 | PHPUnit Tests | PASS | 3259 tests, 6865 assertions |
 | TypeScript | PASS | No errors |
 | ESLint | PASS | No errors |
@@ -134,11 +134,11 @@ All 10 modules complete with ServiceProviders:
 - [x] Update API version from 0.1.1 to 3.0.0
 
 **Nice to Have:**
-- [ ] Achieve Psalm level 1 compliance
+- [x] Achieve Psalm level 1 compliance
 - [x] 100% test coverage for module domain layer (value objects, entities, enums)
 
 ### Future Improvements
-- [ ] Migrate away from `unsafe-inline` in CSP
+- [x] Migrate away from `unsafe-inline` in CSP script-src (style-src still needs it)
 - [x] Inter-table foreign keys (texts→languages, words→languages, etc.)
 - [ ] Transaction usage in multi-query operations
 
@@ -167,5 +167,5 @@ Key test files added (2026-01-06):
 
 **Document Owner:** LWT Maintainers
 **Review Cycle:** Quarterly
-**Last Review:** 2026-01-06
-**Next Review:** 2026-04-06
+**Last Review:** 2026-01-11
+**Next Review:** 2026-04-11

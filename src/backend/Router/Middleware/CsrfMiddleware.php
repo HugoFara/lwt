@@ -255,7 +255,7 @@ class CsrfMiddleware implements MiddlewareInterface
         <li>You submitted a form from a bookmarked page</li>
         <li>You have cookies disabled</li>
     </ul>
-    <p><a href="javascript:history.back()">Go back</a> and try again, or <a href="/">return to the home page</a>.</p>
+    <p>Use your browser's back button to try again, or <a href="/">return to the home page</a>.</p>
 </body>
 </html>
 HTML;

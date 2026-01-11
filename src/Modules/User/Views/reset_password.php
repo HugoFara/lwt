@@ -50,7 +50,7 @@ $error = isset($error) && is_string($error) ? $error : null;
                     <!-- Error message -->
                     <?php if ($error !== null) : ?>
                     <div class="notification is-danger is-light">
-                        <button class="delete" onclick="this.parentElement.remove()"></button>
+                        <button class="delete" @click="$el.parentElement.remove()"></button>
                         <?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?>
                     </div>
                     <?php endif; ?>
@@ -168,70 +168,3 @@ $error = isset($error) && is_string($error) ? $error : null;
         </div>
     </div>
 </section>
-
-<script>
-function resetPasswordForm() {
-    return {
-        password: '',
-        passwordConfirm: '',
-        loading: false,
-        errors: {
-            password: '',
-            passwordConfirm: ''
-        },
-
-        get hasErrors() {
-            return this.errors.password || this.errors.passwordConfirm || !this.password || !this.passwordConfirm;
-        },
-
-        validatePassword() {
-            this.errors.password = '';
-
-            if (this.password.length < 8) {
-                this.errors.password = 'Password must be at least 8 characters';
-                return;
-            }
-
-            if (this.password.length > 128) {
-                this.errors.password = 'Password must not exceed 128 characters';
-                return;
-            }
-
-            if (!/[a-zA-Z]/.test(this.password)) {
-                this.errors.password = 'Password must contain at least one letter';
-                return;
-            }
-
-            if (!/[0-9]/.test(this.password)) {
-                this.errors.password = 'Password must contain at least one number';
-                return;
-            }
-
-            // Revalidate confirm if already entered
-            if (this.passwordConfirm) {
-                this.validatePasswordConfirm();
-            }
-        },
-
-        validatePasswordConfirm() {
-            this.errors.passwordConfirm = '';
-
-            if (this.passwordConfirm && this.password !== this.passwordConfirm) {
-                this.errors.passwordConfirm = 'Passwords do not match';
-            }
-        },
-
-        submitForm(event) {
-            this.validatePassword();
-            this.validatePasswordConfirm();
-
-            if (this.hasErrors) {
-                event.preventDefault();
-                return;
-            }
-
-            this.loading = true;
-        }
-    };
-}
-</script>

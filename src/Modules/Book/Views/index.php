@@ -48,7 +48,7 @@ $message = $_GET['message'] ?? '';
 <?php if ($message !== '') : ?>
 <div class="notification is-info is-light">
     <?php echo htmlspecialchars($message); ?>
-    <button class="delete" onclick="this.parentElement.remove()"></button>
+    <button class="delete" @click="$el.parentElement.remove()"></button>
 </div>
 <?php endif; ?>
 
@@ -60,7 +60,7 @@ $message = $_GET['message'] ?? '';
                 <label class="label is-small">Language</label>
                 <div class="control">
                     <div class="select is-small is-fullwidth">
-                        <select name="lg_id" onchange="this.form.submit()">
+                        <select name="lg_id" @change="$el.form.submit()">
                             <?php echo $languagesOption; ?>
                         </select>
                     </div>
@@ -126,7 +126,7 @@ $message = $_GET['message'] ?? '';
                     <?php endif; ?>
                     <form method="post" action="/book/<?php echo $book['id']; ?>/delete"
                           style="display: inline;"
-                          onsubmit="return confirm('Delete this book and all its chapters?');">
+                          @submit="if(!confirm('Delete this book and all its chapters?')) $event.preventDefault()">
                         <?php echo FormHelper::csrfField(); ?>
                         <button type="submit" class="button is-small is-danger is-outlined" title="Delete">
                             <?php echo IconHelper::render('trash-2', ['alt' => 'Delete']); ?>

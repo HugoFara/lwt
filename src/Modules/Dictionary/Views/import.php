@@ -40,7 +40,7 @@ $error = is_string($errorRaw) ? $errorRaw : '';
 if (!empty($error)) :
     ?>
 <div class="notification is-danger is-light mb-4">
-    <button class="delete" onclick="this.parentElement.remove()"></button>
+    <button class="delete" @click="$el.parentElement.remove()"></button>
     <?php echo htmlspecialchars(urldecode($error), ENT_QUOTES); ?>
 </div>
 <?php endif; ?>
@@ -266,27 +266,3 @@ echo PageLayoutHelper::buildActionCard([
         </div>
     </form>
 </div>
-
-<script>
-function dictionaryImport() {
-    return {
-        format: 'csv',
-        fileName: '',
-        submitting: false,
-        acceptTypes: {
-            'csv': '.csv,.tsv,.txt',
-            'json': '.json',
-            'stardict': '.ifo'
-        },
-
-        fileSelected(event) {
-            const file = event.target.files[0];
-            this.fileName = file ? file.name : '';
-        },
-
-        resetOptions() {
-            // Reset options when format changes
-        }
-    };
-}
-</script>
