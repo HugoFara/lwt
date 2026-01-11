@@ -23,8 +23,6 @@ use Lwt\Modules\Review\Domain\ReviewWord;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 
-require_once __DIR__ . '/../../../Vocabulary/Application/Services/ExportService.php';
-
 /**
  * Use case for fetching the next term to test.
  *

@@ -21,8 +21,6 @@ namespace Lwt\Router\Middleware;
 
 use Lwt\Core\Globals;
 
-require_once __DIR__ . '/MiddlewareInterface.php';
-
 /**
  * Middleware that validates CSRF tokens.
  *

@@ -27,9 +27,6 @@ use Lwt\Shared\Infrastructure\Http\RedirectResponse;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
-require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
-
 /**
  * Controller for feed wizard operations.
  *

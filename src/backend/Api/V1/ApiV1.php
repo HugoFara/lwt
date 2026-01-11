@@ -21,19 +21,6 @@ declare(strict_types=1);
 
 namespace Lwt\Api\V1;
 
-// Load required dependencies for API handlers
-require_once __DIR__ . '/../../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../Modules/Text/Application/Services/TextStatisticsService.php';
-require_once __DIR__ . '/../../../Modules/Text/Application/Services/SentenceService.php';
-require_once __DIR__ . '/../../../Modules/Text/Application/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../Modules/Text/Application/Services/TextNavigationService.php';
-require_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-require_once __DIR__ . '/../../../Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-require_once __DIR__ . '/../../../Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
-require_once __DIR__ . '/../../../Modules/Admin/Application/Services/MediaService.php';
-// Language module now loaded via autoloader
-
 use Lwt\Modules\Dictionary\Http\DictionaryApiHandler;
 use Lwt\Modules\Language\Http\LanguageApiHandler;
 use Lwt\Modules\Feed\Application\FeedFacade;

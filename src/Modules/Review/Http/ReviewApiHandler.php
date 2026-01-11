@@ -27,10 +27,6 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
 
-// LanguageFacade loaded via autoloader
-require_once __DIR__ . '/../../Vocabulary/Application/Services/ExportService.php';
-require_once __DIR__ . '/../../../backend/View/Helper/StatusHelper.php';
-
 /**
  * Handler for review/test-related API operations.
  *

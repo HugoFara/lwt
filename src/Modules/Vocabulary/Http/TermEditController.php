@@ -31,9 +31,6 @@ use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
-require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
-
 /**
  * Controller for creating and editing single-word terms.
  *

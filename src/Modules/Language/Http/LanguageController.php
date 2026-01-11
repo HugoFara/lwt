@@ -22,12 +22,6 @@ use Lwt\Controllers\BaseController;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
-
-require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/FormHelper.php';
-require_once __DIR__ . '/../../../Shared/Infrastructure/Http/UrlUtilities.php';
-
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Domain\Language;

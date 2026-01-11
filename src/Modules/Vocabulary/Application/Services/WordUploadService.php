@@ -24,10 +24,6 @@ use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\TextParsing;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
-
-require_once __DIR__ . '/../../../../backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/ExpressionService.php';
-
 use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**

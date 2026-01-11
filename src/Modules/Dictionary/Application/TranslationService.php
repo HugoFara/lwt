@@ -19,9 +19,6 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Dictionary\Application;
 
-require_once __DIR__ . '/../../../backend/Core/Entity/GoogleTranslate.php';
-require_once __DIR__ . '/../../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
-
 use Lwt\Core\Entity\GoogleTranslate;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;

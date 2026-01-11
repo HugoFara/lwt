@@ -17,9 +17,6 @@ declare(strict_types=1);
 
 namespace Lwt\Router\Middleware;
 
-require_once __DIR__ . '/MiddlewareInterface.php';
-require_once __DIR__ . '/RateLimitStorage.php';
-
 /**
  * Middleware that enforces rate limiting for API requests.
  *

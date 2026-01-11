@@ -17,8 +17,6 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
-require_once __DIR__ . '/ExportService.php';
-
 use Lwt\Modules\Vocabulary\Domain\Term;
 use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 use Lwt\Shared\Infrastructure\Database\Connection;

@@ -28,9 +28,6 @@ use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Modules\Text\Application\Services\SentenceService;
 
-require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
-
 /**
  * Base controller for vocabulary-related controllers.
  *

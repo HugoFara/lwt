@@ -17,9 +17,6 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
-require_once __DIR__ . '/../../../Text/Application/Services/SentenceService.php';
-require_once __DIR__ . '/ExportService.php';
-
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Core\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;

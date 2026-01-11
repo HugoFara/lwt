@@ -22,9 +22,6 @@ use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Language\Application\LanguageFacade;
 
-require_once __DIR__ . '/../../../../Shared/Infrastructure/Http/InputValidator.php';
-// LanguageFacade loaded via autoloader
-
 /**
  * Service class for Text-to-Speech settings.
  *

@@ -23,9 +23,6 @@ use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
-require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
-
 /**
  * Controller for term status operations.
  *

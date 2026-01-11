@@ -22,9 +22,6 @@ use Lwt\Core\Globals;
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Shared\Infrastructure\Container\Container;
 
-require_once __DIR__ . '/MiddlewareInterface.php';
-require_once __DIR__ . '/../../Core/Globals.php';
-
 /**
  * Middleware that requires admin role authorization.
  *

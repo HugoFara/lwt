@@ -17,13 +17,8 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
-require_once __DIR__ . '/../../../Text/Application/Services/SentenceService.php';
-require_once __DIR__ . '/ExportService.php';
-require_once __DIR__ . '/ExpressionService.php';
-
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Tags\Application\TagsFacade;
-
 use Lwt\Modules\Vocabulary\Domain\Term;
 use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 use Lwt\Core\StringUtils;

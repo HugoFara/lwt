@@ -20,8 +20,6 @@ namespace Lwt\Shared\UI\Helpers;
 
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 
-require_once __DIR__ . '/../../Infrastructure/Http/InputValidator.php';
-
 /**
  * Helper class for generating HTML form attributes.
  *

@@ -28,15 +28,6 @@ use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
-require_once __DIR__ . '/../../../backend/Controllers/BaseController.php';
-// LanguageFacade loaded via autoloader
-require_once __DIR__ . '/../../Text/Application/Services/TextNavigationService.php';
-require_once __DIR__ . '/../../Text/Application/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
-require_once __DIR__ . '/../../../backend/View/Helper/StatusHelper.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/FormHelper.php';
-require_once __DIR__ . '/../../../backend/Core/Bootstrap/start_session.php';
-
 /**
  * Controller for word review interface.
  *

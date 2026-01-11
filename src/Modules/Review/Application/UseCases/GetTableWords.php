@@ -23,9 +23,6 @@ use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 
-// LanguageFacade loaded via autoloader
-require_once __DIR__ . '/../../../Vocabulary/Application/Services/ExportService.php';
-
 /**
  * Use case for getting all words for table test mode.
  *

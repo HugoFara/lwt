@@ -17,9 +17,6 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
-require_once __DIR__ . '/ExportService.php';
-require_once __DIR__ . '/ExpressionService.php';
-
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;

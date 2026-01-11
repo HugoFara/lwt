@@ -26,11 +26,6 @@ use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../Shared/UI/Helpers/PageLayoutHelper.php';
-require_once __DIR__ . '/../../../Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
-require_once __DIR__ . '/../../../backend/Core/Entity/GoogleTranslate.php';
-
 /**
  * Controller for translation API endpoints.
  *

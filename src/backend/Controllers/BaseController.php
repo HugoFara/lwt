@@ -25,10 +25,6 @@ use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\DB;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
-require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../Shared/Infrastructure/Http/InputValidator.php';
-require_once __DIR__ . '/../../Shared/UI/Helpers/PageLayoutHelper.php';
-
 /**
  * Abstract base controller providing common functionality for all controllers.
  *

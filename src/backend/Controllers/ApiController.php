@@ -18,12 +18,6 @@ declare(strict_types=1);
 
 namespace Lwt\Controllers;
 
-require_once __DIR__ . '/../Api/V1/Response.php';
-require_once __DIR__ . '/../Api/V1/Endpoints.php';
-require_once __DIR__ . '/../Api/V1/ApiV1.php';
-require_once __DIR__ . '/../Router/Middleware/RateLimitMiddleware.php';
-// API handlers now in Modules (loaded via autoloader)
-
 use Lwt\Api\V1\ApiV1;
 use Lwt\Router\Middleware\RateLimitMiddleware;
 

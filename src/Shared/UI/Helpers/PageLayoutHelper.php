@@ -18,9 +18,6 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\UI\Helpers;
 
-require_once __DIR__ . '/../../Infrastructure/Http/UrlUtilities.php';
-require_once __DIR__ . '/../Assets/ViteHelper.php';
-
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Assets\ViteHelper;
 use Lwt\Core\StringUtils;

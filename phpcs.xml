@@ -13,6 +13,18 @@
         <exclude-pattern>*/tests/*</exclude-pattern>
     </rule>
 
+    <!-- Allow side effects in specific file types -->
+    <rule ref="PSR1.Files.SideEffects">
+        <!-- Tests often need bootstrap/setup code -->
+        <exclude-pattern>*/tests/*</exclude-pattern>
+        <!-- View files intentionally mix declarations and output -->
+        <exclude-pattern>*/Views/*</exclude-pattern>
+        <!-- Tools are standalone scripts -->
+        <exclude-pattern>*/tools/*</exclude-pattern>
+        <!-- Bootstrap files intentionally have side effects -->
+        <exclude-pattern>*/Bootstrap/*</exclude-pattern>
+    </rule>
+
     <!-- Exclude directories -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/node_modules/*</exclude-pattern>
