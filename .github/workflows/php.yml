@@ -50,7 +50,7 @@ jobs:
         if: runner.os == 'Windows'
         # Remove phpdocumentor (not needed for tests) to avoid GPG verification issues
         run: |
-          composer remove --dev --no-update phpdocumentor/shim
+          composer remove --dev phpdocumentor/shim
           composer install --prefer-dist --no-progress
 
       - name: Run PHPUnit tests
