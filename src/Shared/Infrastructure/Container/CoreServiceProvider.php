@@ -23,17 +23,12 @@ namespace Lwt\Shared\Infrastructure\Container;
 use Lwt\Core\Parser\ParserRegistry;
 use Lwt\Core\Parser\ParsingCoordinator;
 use Lwt\Core\Parser\ExternalParserLoader;
-use Lwt\Modules\Vocabulary\Application\Services\WordService;
-use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
-use Lwt\Modules\Text\Application\Services\SentenceService;
-use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 
 /**
  * Core service provider that registers essential cross-cutting services.
  *
  * This provider only registers:
  * - Parser infrastructure (ParserRegistry, ParsingCoordinator)
- * - Legacy deprecated services (WordService) for backward compatibility
  *
  * Module-specific services are registered by their respective ServiceProviders:
  * - TextParsingService → LanguageServiceProvider
@@ -70,18 +65,6 @@ class CoreServiceProvider implements ServiceProviderInterface
         $container->singleton(ParsingCoordinator::class, function (Container $c) {
             return new ParsingCoordinator(
                 $c->getTyped(ParserRegistry::class)
-            );
-        });
-
-        // =====================
-        // Vocabulary Services
-        // =====================
-
-        $container->singleton(WordService::class, function (Container $c) {
-            return new WordService(
-                $c->getTyped(ExpressionService::class),
-                $c->getTyped(SentenceService::class),
-                $c->getTyped(MySqlTermRepository::class)
             );
         });
     }

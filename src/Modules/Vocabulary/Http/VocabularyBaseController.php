@@ -17,7 +17,6 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Http;
 
-use Lwt\Modules\Vocabulary\Application\Services\WordService;
 use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
 use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
 use Lwt\Modules\Vocabulary\Application\Services\WordBulkService;
@@ -45,7 +44,6 @@ abstract class VocabularyBaseController
     /**
      * Lazy-loaded services.
      */
-    protected ?WordService $wordService = null;
     protected ?WordCrudService $crudService = null;
     protected ?WordContextService $contextService = null;
     protected ?WordBulkService $bulkService = null;
@@ -62,20 +60,6 @@ abstract class VocabularyBaseController
     public function __construct()
     {
         $this->viewPath = __DIR__ . '/../Views/';
-    }
-
-    /**
-     * Get WordService (lazy loaded).
-     *
-     * @return WordService
-     * @deprecated Use specific services (WordCrudService, etc.) instead
-     */
-    protected function getWordService(): WordService
-    {
-        if ($this->wordService === null) {
-            $this->wordService = new WordService();
-        }
-        return $this->wordService;
     }
 
     /**
