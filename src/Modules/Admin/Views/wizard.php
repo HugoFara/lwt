@@ -37,7 +37,9 @@ $errorMessage = is_string($errorMessageRaw) ? $errorMessageRaw : null;
  * @psalm-suppress MixedPropertyFetch
  */
 $connRaw = $conn ?? null;
-$connObj = is_object($connRaw) ? $connRaw : (object)['server' => '', 'userid' => '', 'passwd' => '', 'dbname' => '', 'socket' => ''];
+$connObj = is_object($connRaw)
+    ? $connRaw
+    : (object)['server' => '', 'userid' => '', 'passwd' => '', 'dbname' => '', 'socket' => ''];
 $connServer = $connObj->server ?? '';
 $connUserid = $connObj->userid ?? '';
 $connPasswd = $connObj->passwd ?? '';
@@ -68,7 +70,9 @@ $connSocket = $connObj->socket ?? '';
             <h1 class="title is-3 has-text-centered">Database Connection Wizard</h1>
 
             <?php if ($errorMessage !== null) : ?>
-            <div class="notification <?php echo str_contains($errorMessage, 'Success') ? 'is-success' : 'is-danger'; ?> is-light"
+            <div class="notification <?php
+                echo str_contains($errorMessage, 'Success') ? 'is-success' : 'is-danger';
+            ?> is-light"
                  x-data="{ show: true }"
                  x-show="show"
                  x-transition>

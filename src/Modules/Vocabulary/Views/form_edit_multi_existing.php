@@ -75,15 +75,22 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
             <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp"
             data_info="Term" type="text" name="WoText" id="wordfield"
             value="<?php echo htmlspecialchars($termText, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
+            <?php echo IconHelper::render('circle-x', [
+                'title' => 'Field must not be empty',
+                'alt' => 'Field must not be empty'
+            ]); ?>
         </td>
     </tr>
     <?php echo (new FindSimilarTerms())->getTableRow(); ?>
     <tr>
         <td class="has-text-right">Translation:</td>
         <td class="">
-            <textarea name="WoTranslation" class="setfocus textarea-noreturn checklength checkoutsidebmp"
-            data_maxlength="500" data_info="Translation" cols="35" rows="3"><?php echo htmlspecialchars($transl, ENT_QUOTES, 'UTF-8'); ?></textarea>
+            <textarea name="WoTranslation"
+                      class="setfocus textarea-noreturn checklength checkoutsidebmp"
+                      data_maxlength="500"
+                      data_info="Translation"
+                      cols="35"
+                      rows="3"><?php echo htmlspecialchars($transl, ENT_QUOTES, 'UTF-8'); ?></textarea>
         </td>
     </tr>
     <tr>
@@ -103,9 +110,13 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr>
         <td class="has-text-right">Sentence<br />Term in {...}:</td>
         <td class="">
-            <textarea <?php echo $scrdir; ?> name="WoSentence"
-            class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000"
-            data_info="Sentence" cols="35" rows="3"><?php echo htmlspecialchars($sentence, ENT_QUOTES, 'UTF-8'); ?></textarea>
+            <textarea <?php echo $scrdir; ?>
+                      name="WoSentence"
+                      class="textarea-noreturn checklength checkoutsidebmp"
+                      data_maxlength="1000"
+                      data_info="Sentence"
+                      cols="35"
+                      rows="3"><?php echo htmlspecialchars($sentence, ENT_QUOTES, 'UTF-8'); ?></textarea>
         </td>
     </tr>
     <tr>
@@ -138,5 +149,10 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 </form>
 <?php
 // Display example sentences button
-echo (new SentenceService())->renderExampleSentencesArea($termLgid, $termTextlc, 'document.forms.editword.WoSentence', $termId);
+echo (new SentenceService())->renderExampleSentencesArea(
+    $termLgid,
+    $termTextlc,
+    'document.forms.editword.WoSentence',
+    $termId
+);
 ?>

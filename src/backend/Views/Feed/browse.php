@@ -32,7 +32,8 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  * @var int $currentSort Current sort index
  * @var int $maxPerPage Articles per page
  * @var int $pages Total pages
- * @var array<int, array{FlID: int, FlTitle: string, FlDescription: string, FlAudio: string, FlDate: string, FlLink: string, TxID: int|null, AtID: int|null}> $articles Array of feed article records
+ * @var array<int, array{FlID: int, FlTitle: string, FlDescription: string, FlAudio: string,
+ *             FlDate: string, FlLink: string, TxID: int|null, AtID: int|null}> $articles
  * @var int|null $feedTime Last update timestamp
  */
 $currentLang = $currentLang ?? 0;
@@ -56,7 +57,10 @@ echo PageLayoutHelper::buildActionCard([
     ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'],
 ]);
 ?>
-<div x-data="feedBrowse({currentQuery: '<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>', currentQueryMode: '<?php echo htmlspecialchars($currentQueryMode, ENT_QUOTES, 'UTF-8'); ?>'})">
+<div x-data="feedBrowse({
+    currentQuery: '<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>',
+    currentQueryMode: '<?php echo htmlspecialchars($currentQueryMode, ENT_QUOTES, 'UTF-8'); ?>'
+})">
 
 <!-- NOTE: Search bar planned for future UI refactoring.
      Planned features:
@@ -108,7 +112,14 @@ endif; ?>
                 </div>
             </div>
             <div class="level-item">
-                <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form1', ['selected_feed' => $currentFeed, 'query' => $currentQuery, 'query_mode' => $currentQueryMode, 'sort' => $currentSort]); ?>
+                <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager(
+                    $currentPage,
+                    $pages,
+                    '/feeds',
+                    'form1',
+                    ['selected_feed' => $currentFeed, 'query' => $currentQuery,
+                     'query_mode' => $currentQueryMode, 'sort' => $currentSort]
+                ); ?>
             </div>
             <div class="level-right">
                 <div class="level-item">
@@ -119,7 +130,9 @@ endif; ?>
                         <div class="control">
                             <div class="select is-small">
                                 <select name="sort" @change="handleSort($event)">
-                                    <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forTextSort($currentSort); ?>
+                                    <?php
+                                        echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forTextSort($currentSort);
+                                    ?>
                                 </select>
                             </div>
                         </div>
@@ -132,9 +145,15 @@ endif; ?>
 </form>
 
 <?php if ($recno > 0) : ?>
-  <form name="form2" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" method="post">
+  <form
+      name="form2"
+      action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+      method="post"
+  >
   <table class="table is-bordered is-fullwidth">
-  <tr><th class="" colspan="2">Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?></th></tr>
+  <tr><th class="" colspan="2">Multi Actions <?php
+    echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']);
+    ?></th></tr>
   <tr><td class="has-text-centered feeds-filter-cell">
   <input type="button" value="Mark All" @click="markAll()" />
   <input type="button" value="Mark None" @click="markNone()" />
@@ -150,31 +169,63 @@ endif; ?>
   <th class="clickable feeds-date-col">Date</th>
   </tr>
     <?php
-    /** @var array{FlID: int, FlTitle: string, FlDescription: string, FlAudio: string, FlDate: string, FlLink: string, TxID: int|null, AtID: int|null} $row */
+    /**
+     * @var array{FlID: int, FlTitle: string, FlDescription: string,
+     *            FlAudio: string, FlDate: string, FlLink: string, TxID: int|null, AtID: int|null} $row
+     */
     foreach ($articles as $row) : ?>
         <tr>
         <?php if ($row['TxID']) : ?>
-            <td class="has-text-centered"><a href="/text/read?start=<?php echo $row['TxID']; ?>" >
-            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['title' => 'Read', 'alt' => '-']); ?></a>
+            <td class="has-text-centered">
+                <a href="/text/read?start=<?php echo $row['TxID']; ?>">
+                    <?php
+                        echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['title' => 'Read', 'alt' => '-']);
+                    ?>
+                </a>
         <?php elseif ($row['AtID']) : ?>
-            <td class="has-text-centered"><span title="archived"><?php echo IconHelper::render('circle-x', ['alt' => '-']); ?></span>
+            <td class="has-text-centered">
+                <span title="archived"><?php echo IconHelper::render('circle-x', ['alt' => '-']); ?></span>
         <?php elseif (!empty($row['FlLink']) && str_starts_with((string)$row['FlLink'], ' ')) : ?>
             <td class="has-text-centered">
-            <span class="not_found" name="<?php echo $row['FlID']; ?>" title="download error" @click="handleNotFoundClick($event)"><?php echo IconHelper::render('alert-circle', ['alt' => '-']); ?></span>
+            <span
+                class="not_found"
+                name="<?php echo $row['FlID']; ?>"
+                title="download error"
+                @click="handleNotFoundClick($event)"
+            ><?php echo IconHelper::render('alert-circle', ['alt' => '-']); ?></span>
         <?php else : ?>
-            <td class="has-text-centered"><input type="checkbox" class="markcheck" name="marked_items[]" value="<?php echo $row['FlID']; ?>" />
+            <td class="has-text-centered">
+                <input
+                    type="checkbox"
+                    class="markcheck"
+                    name="marked_items[]"
+                    value="<?php echo $row['FlID']; ?>"
+                />
         <?php endif; ?>
         </td>
             <td class="has-text-centered">
-            <span title="<?php echo htmlentities((string)$row['FlDescription'], ENT_QUOTES, 'UTF-8', false); ?>"><b><?php echo $row['FlTitle']; ?></b></span>
+            <span title="<?php
+                echo htmlentities((string)$row['FlDescription'], ENT_QUOTES, 'UTF-8', false);
+            ?>"><b><?php echo $row['FlTitle']; ?></b></span>
         <?php if ($row['FlAudio']) : ?>
-            <a href="<?php echo $row['FlAudio']; ?>" @click.prevent="openPopup('<?php echo $row['FlAudio']; ?>', 'audio')" target="_blank" rel="noopener">
+            <a
+                href="<?php echo $row['FlAudio']; ?>"
+                @click.prevent="openPopup('<?php echo $row['FlAudio']; ?>', 'audio')"
+                target="_blank"
+                rel="noopener"
+            >
             <?php echo IconHelper::render('volume-2', ['alt' => 'Audio']); ?></a>
         <?php endif; ?>
         </td>
             <td class="has-text-centered valign-middle">
         <?php if (!empty($row['FlLink']) && !str_starts_with(trim((string)$row['FlLink']), '#')) : ?>
-            <a href="<?php echo trim((string)$row['FlLink']); ?>" title="<?php echo trim((string)$row['FlLink']); ?>" @click.prevent="openPopup('<?php echo trim((string)$row['FlLink']); ?>', 'external')" target="_blank" rel="noopener">
+            <a
+                href="<?php echo trim((string)$row['FlLink']); ?>"
+                title="<?php echo trim((string)$row['FlLink']); ?>"
+                @click.prevent="openPopup('<?php echo trim((string)$row['FlLink']); ?>', 'external')"
+                target="_blank"
+                rel="noopener"
+            >
             <?php echo IconHelper::render('external-link', ['alt' => '-']); ?></a>
         <?php endif; ?>
         </td><td class="has-text-centered"><?php echo $row['FlDate']; ?></td></tr>
@@ -187,7 +238,14 @@ endif; ?>
     <form name="form3" method="get" action ="">
         <table class="table is-bordered is-fullwidth">
         <tr><th class="feeds-filter-cell"><?php echo $recno; ?></th><th class="">
-        <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form3', ['selected_feed' => $currentFeed, 'query' => $currentQuery, 'query_mode' => $currentQueryMode, 'sort' => $currentSort]); ?>
+        <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildPager(
+            $currentPage,
+            $pages,
+            '/feeds',
+            'form3',
+            ['selected_feed' => $currentFeed, 'query' => $currentQuery,
+             'query_mode' => $currentQueryMode, 'sort' => $currentSort]
+        ); ?>
         </th></tr></table></form>
     <?php endif; ?>
 <?php else : ?>

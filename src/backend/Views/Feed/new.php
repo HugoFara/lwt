@@ -71,9 +71,12 @@ $actions = [
                         <div class="select is-fullwidth">
                             <select name="NfLgID" id="NfLgID">
                                 <?php foreach ($languages as $lang) : ?>
-                                <option value="<?php echo $lang['LgID']; ?>"<?php if ($currentLang === (int)$lang['LgID']) {
-                                    echo ' selected';
-                                               } ?>>
+                                <option
+                                    value="<?php echo $lang['LgID']; ?>"
+                                    <?php if ($currentLang === (int)$lang['LgID']) {
+                                        echo 'selected';
+                                    } ?>
+                                >
                                     <?php echo htmlspecialchars($lang['LgName'], ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                                 <?php endforeach; ?>
@@ -211,7 +214,11 @@ $actions = [
                                     </div>
                                     <div class="control">
                                         <div class="select is-small">
-                                            <select name="autoupdate_unit" x-model="autoUpdateUnit" :disabled="!autoUpdate">
+                                            <select
+                                                name="autoupdate_unit"
+                                                x-model="autoUpdateUnit"
+                                                :disabled="!autoUpdate"
+                                            >
                                                 <option value="h">Hour(s)</option>
                                                 <option value="d">Day(s)</option>
                                                 <option value="w">Week(s)</option>

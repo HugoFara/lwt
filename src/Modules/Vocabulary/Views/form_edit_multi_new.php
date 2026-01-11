@@ -61,15 +61,31 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr title="Only change uppercase/lowercase!">
         <td class="has-text-right"><b>New Term:</b></td>
         <td class="">
-            <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="New Term" type="text" name="WoText" id="wordfield" value="<?php echo htmlspecialchars($termText, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
+            <input <?php echo $scrdir; ?>
+                   class="notempty checkoutsidebmp"
+                   data_info="New Term"
+                   type="text"
+                   name="WoText"
+                   id="wordfield"
+                   value="<?php echo htmlspecialchars($termText, ENT_QUOTES, 'UTF-8'); ?>"
+                   maxlength="250"
+                   size="35" />
+            <?php echo IconHelper::render('circle-x', [
+                'title' => 'Field must not be empty',
+                'alt' => 'Field must not be empty'
+            ]); ?>
         </td>
     </tr>
     <?php echo (new FindSimilarTerms())->getTableRow(); ?>
     <tr>
         <td class="has-text-right">Translation:</td>
         <td class="">
-            <textarea name="WoTranslation" class="setfocus textarea-noreturn checklength checkoutsidebmp" data_maxlength="500" data_info="Translation" cols="35" rows="3"></textarea>
+            <textarea name="WoTranslation"
+                      class="setfocus textarea-noreturn checklength checkoutsidebmp"
+                      data_maxlength="500"
+                      data_info="Translation"
+                      cols="35"
+                      rows="3"></textarea>
         </td>
     </tr>
     <tr>
@@ -81,19 +97,36 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr class="<?php echo ($showRoman ? '' : 'is-hidden'); ?>">
         <td class="has-text-right">Romaniz.:</td>
         <td class="">
-            <input type="text" class="checkoutsidebmp" data_info="Romanization" name="WoRomanization" value="" maxlength="100" size="35" />
+            <input type="text"
+                   class="checkoutsidebmp"
+                   data_info="Romanization"
+                   name="WoRomanization"
+                   value=""
+                   maxlength="100"
+                   size="35" />
         </td>
     </tr>
     <tr>
         <td class="has-text-right">Sentence<br />Term in {...}:</td>
         <td class="">
-            <textarea <?php echo $scrdir; ?> name="WoSentence" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence" cols="35" rows="3"><?php echo htmlspecialchars($sentence, ENT_QUOTES, 'UTF-8'); ?></textarea>
+            <textarea <?php echo $scrdir; ?>
+                      name="WoSentence"
+                      class="textarea-noreturn checklength checkoutsidebmp"
+                      data_maxlength="1000"
+                      data_info="Sentence"
+                      cols="35"
+                      rows="3"><?php echo htmlspecialchars($sentence, ENT_QUOTES, 'UTF-8'); ?></textarea>
         </td>
     </tr>
     <tr>
         <td class="has-text-right">Notes:</td>
         <td class="">
-            <textarea name="WoNotes" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Notes" cols="35" rows="3"></textarea>
+            <textarea name="WoNotes"
+                      class="textarea-noreturn checklength checkoutsidebmp"
+                      data_maxlength="1000"
+                      data_info="Notes"
+                      cols="35"
+                      rows="3"></textarea>
         </td>
     </tr>
     <tr>
@@ -118,5 +151,10 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 </form>
 <?php
 // Display example sentences button
-echo (new SentenceService())->renderExampleSentencesArea($termLgid, $termTextlc, 'document.forms.newword.WoSentence', -1);
+echo (new SentenceService())->renderExampleSentencesArea(
+    $termLgid,
+    $termTextlc,
+    'document.forms.newword.WoSentence',
+    -1
+);
 ?>

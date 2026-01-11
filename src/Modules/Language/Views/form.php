@@ -53,24 +53,32 @@ $langTextSize = isset($language->textsize) && is_numeric($language->textsize) ? 
 $langParserType = isset($language->parsertype) && is_string($language->parsertype) ? $language->parsertype : 'regex';
 $langDict1Uri = isset($language->dict1uri) && is_string($language->dict1uri) ? $language->dict1uri : '';
 $langDict2Uri = isset($language->dict2uri) && is_string($language->dict2uri) ? $language->dict2uri : '';
-$langTranslatorUri = isset($language->translatoruri) && is_string($language->translatoruri) ? $language->translatoruri : '';
+$langTranslatorUri = isset($language->translatoruri) && is_string($language->translatoruri)
+    ? $language->translatoruri : '';
 $langDict1Popup = !empty($language->dict1popup);
 $langDict2Popup = !empty($language->dict2popup);
 $langTranslatorPopup = !empty($language->translatorpopup);
 $langSourceLang = isset($language->sourcelang) && is_string($language->sourcelang) ? $language->sourcelang : '';
 $langTargetLang = isset($language->targetlang) && is_string($language->targetlang) ? $language->targetlang : '';
-$langExportTemplate = isset($language->exporttemplate) && is_string($language->exporttemplate) ? $language->exporttemplate : '';
-$langRegexpSplitSentences = isset($language->regexpsplitsent) && is_string($language->regexpsplitsent) ? $language->regexpsplitsent : '';
-$langExceptionsSplitSentences = isset($language->exceptionsplitsent) && is_string($language->exceptionsplitsent) ? $language->exceptionsplitsent : '';
-$langRegexpWordCharacters = isset($language->regexpwordchar) && is_string($language->regexpwordchar) ? $language->regexpwordchar : '';
-$langCharSubstitutions = isset($language->charactersubst) && is_string($language->charactersubst) ? $language->charactersubst : '';
+$langExportTemplate = isset($language->exporttemplate) && is_string($language->exporttemplate)
+    ? $language->exporttemplate : '';
+$langRegexpSplitSentences = isset($language->regexpsplitsent) && is_string($language->regexpsplitsent)
+    ? $language->regexpsplitsent : '';
+$langExceptionsSplitSentences = isset($language->exceptionsplitsent) && is_string($language->exceptionsplitsent)
+    ? $language->exceptionsplitsent : '';
+$langRegexpWordCharacters = isset($language->regexpwordchar) && is_string($language->regexpwordchar)
+    ? $language->regexpwordchar : '';
+$langCharSubstitutions = isset($language->charactersubst) && is_string($language->charactersubst)
+    ? $language->charactersubst : '';
 $langRemoveSpaces = !empty($language->removespaces);
 $langSplitEachChar = !empty($language->spliteachchar);
 $langRightToLeft = !empty($language->rightoleft);
 $langShowRomanization = !empty($language->showromanization);
 $langTtsVoiceApi = isset($language->ttsvoiceapi) && is_string($language->ttsvoiceapi) ? $language->ttsvoiceapi : '';
-$langLocalDictMode = isset($language->localdictmode) && is_numeric($language->localdictmode) ? (int)$language->localdictmode : 0;
-$langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->pipervoiceid) ? $language->pipervoiceid : null;
+$langLocalDictMode = isset($language->localdictmode) && is_numeric($language->localdictmode)
+    ? (int)$language->localdictmode : 0;
+$langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->pipervoiceid)
+    ? $language->pipervoiceid : null;
 
 ?>
 <script type="application/json" id="language-form-config">
@@ -174,7 +182,8 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgDict1PopUp" id="LgDict1PopUp" value="1"
                            <?php echo $langDict1Popup ? 'checked' : ''; ?> />
-                    <span class="has-text-grey-dark" title="Open in a new window. Some dictionaries cannot be displayed in iframes">
+                    <span class="has-text-grey-dark"
+                          title="Open in a new window. Some dictionaries cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
                 </label>
@@ -194,7 +203,8 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgDict2PopUp" id="LgDict2PopUp" value="1"
                            <?php echo $langDict2Popup ? 'checked' : ''; ?> />
-                    <span class="has-text-grey-dark" title="Open in a new window. Some dictionaries cannot be displayed in iframes">
+                    <span class="has-text-grey-dark"
+                          title="Open in a new window. Some dictionaries cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
                 </label>
@@ -241,7 +251,8 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 <label class="checkbox mt-2">
                     <input type="checkbox" name="LgGoogleTranslatePopUp" id="LgGoogleTranslatePopUp" value="1"
                            <?php echo $langTranslatorPopup ? 'checked' : ''; ?> />
-                    <span class="has-text-grey-dark" title="Open in a new window. Some translators cannot be displayed in iframes">
+                    <span class="has-text-grey-dark"
+                          title="Open in a new window. Some translators cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
                 </label>
@@ -413,7 +424,9 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                     $infoMessage = isset($info['message']) && is_string($info['message']) ? $info['message'] : '';
                     ?>
                     <?php if (!$infoAvailable && $infoMessage !== '') : ?>
-                    <p class="help is-warning" x-show="parserType === '<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>'" x-cloak>
+                    <p class="help is-warning"
+                       x-show="parserType === '<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>'"
+                       x-cloak>
                         <?php echo htmlspecialchars($infoMessage, ENT_QUOTES, 'UTF-8'); ?>
                     </p>
                     <?php endif; ?>
@@ -618,7 +631,9 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                               name="LgTTSVoiceAPI"
                               maxlength="2048"
                               rows="4"
-                              placeholder="JSON configuration for TTS API"><?php echo htmlspecialchars($langTtsVoiceApi, ENT_QUOTES, 'UTF-8'); ?></textarea>
+                              placeholder="JSON configuration for TTS API"><?php
+                                  echo htmlspecialchars($langTtsVoiceApi, ENT_QUOTES, 'UTF-8');
+                                ?></textarea>
                 </div>
                 <div class="buttons mt-3">
                     <button type="button"

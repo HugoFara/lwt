@@ -76,7 +76,9 @@ $data = is_array($data ?? null) ? $data : [];
                 </tr>
                 <tr>
                     <th>Server Location</th>
-                    <td><code><?php echo htmlspecialchars($data["server_location"] ?? '', ENT_QUOTES, 'UTF-8'); ?></code></td>
+                    <td><code><?php
+                        echo htmlspecialchars($data["server_location"] ?? '', ENT_QUOTES, 'UTF-8');
+                    ?></code></td>
                 </tr>
                 <tr>
                     <th>

@@ -61,10 +61,14 @@ $base = UrlUtilities::getBasePath();
                 <div class="column">
                     <p class="has-text-weight-semibold">Warning: This action will replace your current data</p>
                     <p class="is-size-7">
-                        The database <strong><?php echo htmlspecialchars(Globals::getDatabaseName(), ENT_QUOTES, 'UTF-8'); ?></strong>
+                        The database
+                        <strong><?php
+                            echo htmlspecialchars(Globals::getDatabaseName(), ENT_QUOTES, 'UTF-8');
+                        ?></strong>
                         <?php echo $prefinfo; ?> will be <strong>replaced</strong> by the LWT demo database.
                         <?php if ($langcnt > 0) : ?>
-                        <br>Your existing <?php echo $langcnt; ?> language(s) and all associated data will be <strong>overwritten</strong>.
+                        <br>Your existing <?php echo $langcnt; ?> language(s) and all associated data
+                        will be <strong>overwritten</strong>.
                         <?php endif; ?>
                     </p>
                 </div>

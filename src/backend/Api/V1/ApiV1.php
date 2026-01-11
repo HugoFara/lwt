@@ -57,6 +57,7 @@ use Lwt\Api\V1\Handlers\NlpServiceHandler;
 use Lwt\Api\V1\Handlers\WhisperApiHandler;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
 
 /**
  * Main API V1 handler class.
@@ -575,7 +576,9 @@ class ApiV1
             return Response::success($this->wordListHandler->getWordList($params));
         } elseif ($frag1 === 'filter-options') {
             // GET /terms/filter-options - get filter dropdown options
-            $langId = isset($params['language_id']) && $params['language_id'] !== '' ? (int) $params['language_id'] : null;
+            $langId = isset($params['language_id']) && $params['language_id'] !== ''
+                ? (int) $params['language_id']
+                : null;
             return Response::success($this->wordListHandler->getFilterOptions($langId));
         } elseif ($frag1 === 'imported') {
             return Response::success($this->wordListHandler->importedTermsList(
@@ -643,7 +646,7 @@ class ApiV1
      * @param list<string>         $fragments Endpoint path segments
      * @param array<string, mixed> $params    Query parameters
      */
-    private function handleWordFamiliesGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
+    private function handleWordFamiliesGet(array $fragments, array $params): JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
 
@@ -1250,7 +1253,7 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $params    Query parameters
      */
-    private function handleLocalDictionariesGet(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
+    private function handleLocalDictionariesGet(array $fragments, array $params): JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -1295,7 +1298,7 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $params    POST parameters
      */
-    private function handleLocalDictionariesPost(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
+    private function handleLocalDictionariesPost(array $fragments, array $params): JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -1334,7 +1337,7 @@ class ApiV1
      * @param list<string> $fragments Endpoint path segments
      * @param array    $params    Request body parameters
      */
-    private function handleLocalDictionariesPut(array $fragments, array $params): \Lwt\Shared\Infrastructure\Http\JsonResponse
+    private function handleLocalDictionariesPut(array $fragments, array $params): JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
@@ -1547,7 +1550,10 @@ class ApiV1
                 break;
 
             default:
-                return Response::error('Expected "available", "languages", "models", "status/{id}", or "result/{id}"', 404);
+                return Response::error(
+                    'Expected "available", "languages", "models", "status/{id}", or "result/{id}"',
+                    404
+                );
         }
     }
 

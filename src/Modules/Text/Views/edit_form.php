@@ -132,9 +132,13 @@ if ($isNew) {
             <label class="label">Import from File</label>
             <div class="file has-name is-fullwidth">
                 <label class="file-label">
-                    <input class="file-input" type="file" name="importFile" id="importFile"
+                    <input class="file-input"
+                           type="file"
+                           name="importFile"
+                           id="importFile"
                            accept=".srt,.vtt,.epub,.mp3,.mp4,.wav,.webm,.ogg,.m4a,.mkv,.flac"
-                           onchange="this.closest('.file').querySelector('.file-name').textContent = this.files[0]?.name || 'No file selected'" />
+                           onchange="this.closest('.file').querySelector('.file-name').textContent =
+                               this.files[0]?.name || 'No file selected'" />
                     <span class="file-cta">
                         <span class="file-icon">
                             <?php echo IconHelper::render('file-up', ['alt' => 'Upload']); ?>
@@ -145,7 +149,8 @@ if ($isNew) {
                 </label>
             </div>
             <p class="help">
-                Supported: EPUB books, SRT/VTT subtitles, audio/video (MP3, MP4, WAV, WebM, OGG, M4A, FLAC, MKV - requires Whisper).
+                Supported: EPUB books, SRT/VTT subtitles, audio/video
+                (MP3, MP4, WAV, WebM, OGG, M4A, FLAC, MKV - requires Whisper).
             </p>
             <p id="importFileStatus" class="help"></p>
 
@@ -379,7 +384,10 @@ if ($isNew) {
                        placeholder="media/audio.mp3 or https://example.com/video.mp4"
                        title="Audio or video file to play while reading" />
             </div>
-            <p class="help">Optional. Audio or video file to accompany the text (YouTube, Dailymotion, Vimeo URLs also supported).</p>
+            <p class="help">
+                Optional. Audio or video file to accompany the text
+                (YouTube, Dailymotion, Vimeo URLs also supported).
+            </p>
             <div class="mt-2" id="mediaselect">
                 <?php echo (new MediaService())->getMediaPathSelector('TxAudioURI'); ?>
             </div>
@@ -404,7 +412,11 @@ if ($isNew) {
                         </button>
                     </div>
                 </div>
-                <input type="hidden" id="ytApiKey" value="<?php echo htmlspecialchars(YouTubeImport::getApiKey() ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+                <input type="hidden"
+                       id="ytApiKey"
+                       value="<?php
+                           echo htmlspecialchars(YouTubeImport::getApiKey() ?? '', ENT_QUOTES, 'UTF-8');
+                        ?>" />
             </div>
             <p class="help">Optional. Enter a YouTube video ID to import its captions as text.</p>
             <p id="ytDataStatus" class="help"></p>
@@ -439,7 +451,10 @@ if ($isNew) {
             </button>
         </div>
         <div class="control">
-            <button type="submit" name="op" value="<?php echo $isNew ? 'Save' : 'Change'; ?> and Open" class="button is-success">
+            <button type="submit"
+                    name="op"
+                    value="<?php echo $isNew ? 'Save' : 'Change'; ?> and Open"
+                    class="button is-success">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('book-open', ['alt' => 'Save and Open']); ?>
                 </span>

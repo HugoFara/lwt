@@ -129,7 +129,9 @@ foreach ($texts as $text) :
                                   name="feed[<?php echo $count; ?>][TxText]"
                                   class="textarea notempty checkbytes"
                                   rows="12"
-                                  required><?php echo htmlspecialchars($text['TxText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                  required><?php
+                                      echo htmlspecialchars($text['TxText'] ?? '', ENT_QUOTES, 'UTF-8');
+                                    ?></textarea>
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
@@ -168,10 +170,16 @@ foreach ($texts as $text) :
                 <div class="field">
                     <div class="control">
                         <div class="tags">
-                            <span class="tag is-info is-light"><?php echo htmlspecialchars($tagName, ENT_QUOTES, 'UTF-8'); ?></span>
+                            <span class="tag is-info is-light"><?php
+                                echo htmlspecialchars($tagName, ENT_QUOTES, 'UTF-8');
+                            ?></span>
                         </div>
-                        <input type="hidden" name="feed[<?php echo $count; ?>][Nf_ID]" value="<?php echo $nfId; ?>" />
-                        <input type="hidden" name="feed[<?php echo $count; ?>][Nf_Max_Texts]" value="<?php echo $maxTexts; ?>" />
+                        <input type="hidden"
+                               name="feed[<?php echo $count; ?>][Nf_ID]"
+                               value="<?php echo $nfId; ?>" />
+                        <input type="hidden"
+                               name="feed[<?php echo $count; ?>][Nf_Max_Texts]"
+                               value="<?php echo $maxTexts; ?>" />
                     </div>
                 </div>
             </div>

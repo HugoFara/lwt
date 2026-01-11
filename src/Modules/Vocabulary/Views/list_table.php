@@ -128,30 +128,48 @@ assert(is_array($words));
     <th class="clickable">
         Translation [Tags]
         <span id="waitinfo" class="has-text-grey is-size-7">
-            Please <?php echo IconHelper::render('loader-2', ['class' => 'icon-spin', 'alt' => 'Loading...']); ?> wait...
+            Please <?php
+            echo IconHelper::render('loader-2', ['class' => 'icon-spin', 'alt' => 'Loading...']);
+            ?> wait...
         </span>
     </th>
     <th class="has-text-centered sorttable_nosort" style="width: 3em;" title="Has valid sentence?">Se.?</th>
     <th class="has-text-centered sorttable_numeric clickable" style="width: 5em;">Stat./Days</th>
     <th class="has-text-centered sorttable_numeric clickable" style="width: 5em;">Score %</th>
     <?php if ($currentsort == 7) : ?>
-    <th class="has-text-centered sorttable_numeric clickable" style="width: 5em;" title="Word Count in Active Texts">WCnt Txts</th>
+    <th
+        class="has-text-centered sorttable_numeric clickable"
+        style="width: 5em;"
+        title="Word Count in Active Texts"
+    >WCnt Txts</th>
     <?php endif; ?>
 </tr>
 </thead>
 <tbody>
     <?php
     foreach ($words as $record) :
-        /** @var array{WoID: int, WoText: string, WoTextLC: string, WoStatus: int, Days: int|string, Score: int|float, Score2: int|float, WoTranslation?: string, WoRomanization?: string, WoSentence?: string, LgName?: string, LgGoogleTranslateURI?: string, LgRightToLeft?: bool, SentOK?: int, taglist?: string, textswordcount?: int} $record */
+        /**
+         * @var array{WoID: int, WoText: string, WoTextLC: string, WoStatus: int,
+         *            Days: int|string, Score: int|float, Score2: int|float, WoTranslation?: string,
+         *            WoRomanization?: string, WoSentence?: string, LgName?: string,
+         *            LgGoogleTranslateURI?: string, LgRightToLeft?: bool, SentOK?: int,
+         *            taglist?: string, textswordcount?: int} $record
+         */
         $days = $record['Days'];
         if ($record['WoStatus'] > 5) {
             $days = "-";
         }
         $score = $record['Score'];
         if ($score < 0) {
-            $scoreHtml = '<span class="tag is-danger is-light">0 ' . IconHelper::render('circle-x', ['title' => 'Review today!', 'alt' => 'Review today!']) . '</span>';
+            $scoreHtml = '<span class="tag is-danger is-light">0 '
+                . IconHelper::render('circle-x', ['title' => 'Review today!', 'alt' => 'Review today!'])
+                . '</span>';
         } else {
-            $scoreHtml = '<span class="tag is-success is-light">' . floor((int)$score) . ($record['Score2'] < 0 ? ' ' . IconHelper::render('circle-dot', ['title' => 'Review tomorrow!', 'alt' => 'Review tomorrow!']) : ' ' . IconHelper::render('circle-check', ['title' => '-', 'alt' => '-'])) . '</span>';
+            $reviewIcon = $record['Score2'] < 0
+                ? IconHelper::render('circle-dot', ['title' => 'Review tomorrow!', 'alt' => 'Review tomorrow!'])
+                : IconHelper::render('circle-check', ['title' => '-', 'alt' => '-']);
+            $scoreHtml = '<span class="tag is-success is-light">'
+                . floor((int)$score) . ' ' . $reviewIcon . '</span>';
         }
         $statusName = StatusHelper::getName($record['WoStatus']);
         $statusAbbr = StatusHelper::getAbbr($record['WoStatus']);
@@ -159,7 +177,13 @@ assert(is_array($words));
 <tr>
     <td class="has-text-centered">
         <a name="rec<?php echo $record['WoID']; ?>">
-            <input name="marked[]" type="checkbox" class="markcheck" value="<?php echo $record['WoID']; ?>" <?php echo FormHelper::checkInRequest($record['WoID'], 'marked'); ?> />
+            <input
+                name="marked[]"
+                type="checkbox"
+                class="markcheck"
+                value="<?php echo $record['WoID']; ?>"
+                <?php echo FormHelper::checkInRequest($record['WoID'], 'marked'); ?>
+            />
         </a>
     </td>
     <td class="has-text-centered" style="white-space: nowrap;">
@@ -167,7 +191,11 @@ assert(is_array($words));
             <a href="/words/edit?chg=<?php echo $record['WoID']; ?>" class="button is-small is-ghost" title="Edit">
                 <?php echo IconHelper::render('file-pen-line', ['title' => 'Edit', 'alt' => 'Edit']); ?>
             </a>
-            <a class="button is-small is-ghost confirmdelete" href="/words/edit?del=<?php echo $record['WoID']; ?>" title="Delete">
+            <a
+                class="button is-small is-ghost confirmdelete"
+                href="/words/edit?del=<?php echo $record['WoID']; ?>"
+                title="Delete"
+            >
                 <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
             </a>
         </div>
@@ -177,7 +205,10 @@ assert(is_array($words));
         <?php endif; ?>
     <td>
         <span<?php
-        if (isset($record['LgGoogleTranslateURI']) && $record['LgGoogleTranslateURI'] !== '' && strpos($record['LgGoogleTranslateURI'], '&sl=') !== false) {
+        if (
+            isset($record['LgGoogleTranslateURI']) && $record['LgGoogleTranslateURI'] !== ''
+            && strpos($record['LgGoogleTranslateURI'], '&sl=') !== false
+        ) {
             $langCode = preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']);
             echo ' class="tts_' . (is_string($langCode) ? $langCode : '') . '"';
         }
@@ -189,19 +220,30 @@ assert(is_array($words));
             : '*';
         ?>
         <span class="has-text-grey"> / </span>
-        <span id="roman<?php echo $record['WoID']; ?>" class="edit_area clickedit has-text-grey-dark"><?php echo $romanization; ?></span>
+        <span
+            id="roman<?php echo $record['WoID']; ?>"
+            class="edit_area clickedit has-text-grey-dark"
+        ><?php echo $romanization; ?></span>
     </td>
     <td>
-        <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
+        <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php
+            echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation'] ?? ''), ENT_QUOTES, 'UTF-8');
+        ?></span>
         <?php echo TagHelper::renderInline($record['taglist'] ?? ''); ?>
     </td>
     <td class="has-text-centered">
-        <?php echo (isset($record['SentOK']) && $record['SentOK'] != 0
-            ? IconHelper::render('circle-check', ['title' => htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8'), 'alt' => 'Yes', 'class' => 'has-text-success'])
-            : IconHelper::render('circle-x', ['title' => '(No valid sentence)', 'alt' => 'No', 'class' => 'has-text-danger'])); ?>
+        <?php
+        $sentTitle = htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8');
+        echo (isset($record['SentOK']) && $record['SentOK'] != 0
+            ? IconHelper::render('circle-check', ['title' => $sentTitle, 'alt' => 'Yes', 'class' => 'has-text-success'])
+            : IconHelper::render('circle-x', ['title' => '(No valid sentence)', 'alt' => 'No', 'class' => 'has-text-danger']));
+        ?>
     </td>
     <td class="has-text-centered" title="<?php echo htmlspecialchars($statusName, ENT_QUOTES, 'UTF-8'); ?>">
-        <span class="tag is-light"><?php echo htmlspecialchars($statusAbbr, ENT_QUOTES, 'UTF-8'); ?><?php echo ($record['WoStatus'] < 98 ? '/' . $days : ''); ?></span>
+        <span class="tag is-light"><?php
+            echo htmlspecialchars($statusAbbr, ENT_QUOTES, 'UTF-8');
+            echo ($record['WoStatus'] < 98 ? '/' . $days : '');
+        ?></span>
     </td>
     <td class="has-text-centered" style="white-space: nowrap;"><?php echo $scoreHtml; ?></td>
         <?php if ($currentsort == 7) : ?>
@@ -217,7 +259,13 @@ assert(is_array($words));
 <div class="is-hidden-tablet">
     <?php
     foreach ($words as $record) :
-        /** @var array{WoID: int, WoText: string, WoTextLC: string, WoStatus: int, Days: int|string, Score: int|float, Score2: int|float, WoTranslation?: string, WoRomanization?: string, WoSentence?: string, LgName?: string, LgGoogleTranslateURI?: string, LgRightToLeft?: bool, SentOK?: int, taglist?: string, textswordcount?: int} $record */
+        /**
+         * @var array{WoID: int, WoText: string, WoTextLC: string, WoStatus: int,
+         *            Days: int|string, Score: int|float, Score2: int|float, WoTranslation?: string,
+         *            WoRomanization?: string, WoSentence?: string, LgName?: string,
+         *            LgGoogleTranslateURI?: string, LgRightToLeft?: bool, SentOK?: int,
+         *            taglist?: string, textswordcount?: int} $record
+         */
         $days = $record['Days'];
         if ($record['WoStatus'] > 5) {
             $days = "-";
@@ -234,12 +282,21 @@ assert(is_array($words));
             <div class="level-left">
                 <div class="level-item">
                     <label class="checkbox">
-                        <input name="marked[]" type="checkbox" class="markcheck" value="<?php echo $record['WoID']; ?>" <?php echo FormHelper::checkInRequest($record['WoID'], 'marked'); ?> />
+                        <input
+                name="marked[]"
+                type="checkbox"
+                class="markcheck"
+                value="<?php echo $record['WoID']; ?>"
+                <?php echo FormHelper::checkInRequest($record['WoID'], 'marked'); ?>
+            />
                     </label>
                 </div>
                 <div class="level-item">
                     <span<?php
-                    if (isset($record['LgGoogleTranslateURI']) && $record['LgGoogleTranslateURI'] !== '' && strpos($record['LgGoogleTranslateURI'], '&sl=') !== false) {
+                    if (
+                        isset($record['LgGoogleTranslateURI']) && $record['LgGoogleTranslateURI'] !== ''
+                        && strpos($record['LgGoogleTranslateURI'], '&sl=') !== false
+                    ) {
                         $langCode = preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']);
                         echo ' class="tts_' . (is_string($langCode) ? $langCode : '') . '"';
                     }
@@ -264,7 +321,9 @@ assert(is_array($words));
             <?php endif; ?>
 
         <p class="mb-2">
-            <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
+            <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php
+            echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation'] ?? ''), ENT_QUOTES, 'UTF-8');
+            ?></span>
         </p>
 
         <div class="is-flex is-justify-content-space-between is-align-items-center">

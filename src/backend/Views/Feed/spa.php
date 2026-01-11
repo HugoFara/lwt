@@ -29,7 +29,11 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 ?>
 
 <!-- Notifications -->
-<div x-data="feedNotifications()" class="notification-container" style="position: fixed; top: 1rem; right: 1rem; z-index: 100; max-width: 400px;">
+<div
+    x-data="feedNotifications()"
+    class="notification-container"
+    style="position: fixed; top: 1rem; right: 1rem; z-index: 100; max-width: 400px;"
+>
     <template x-for="notification in notifications" :key="notification.id">
         <div class="notification" :class="getClass(notification.type)" x-transition>
             <button class="delete" @click="dismiss(notification.id)"></button>
@@ -57,7 +61,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
             <!-- Action buttons -->
             <?php
             echo PageLayoutHelper::buildActionCard([
-                ['url' => '#', 'label' => 'New Feed', 'icon' => 'circle-plus', 'class' => 'is-primary', 'attrs' => '@click.prevent="store.showCreateForm()"'],
+                [
+                    'url' => '#', 'label' => 'New Feed', 'icon' => 'circle-plus',
+                    'class' => 'is-primary', 'attrs' => '@click.prevent="store.showCreateForm()"'
+                ],
                 ['url' => '/feeds/wizard', 'label' => 'Feed Wizard', 'icon' => 'wand-2'],
             ]);
             ?>
@@ -357,7 +364,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                                 <td>
                                     <a :href="article.link" target="_blank" x-text="article.title"
                                        class="has-text-weight-semibold"></a>
-                                    <p class="is-size-7 has-text-grey" x-text="article.description.substring(0, 100) + '...'"></p>
+                                    <p
+                                        class="is-size-7 has-text-grey"
+                                        x-text="article.description.substring(0, 100) + '...'"
+                                    ></p>
                                 </td>
                                 <td>
                                     <span class="is-size-7" x-text="article.date"></span>
@@ -495,7 +505,9 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                             <input class="input" type="text" x-model="feed.options"
                                    placeholder="edit_text=1,autoupdate=2h,max_links=50">
                         </div>
-                        <p class="help">Comma-separated options (edit_text, autoupdate, max_links, max_texts, charset, tag)</p>
+                        <p class="help">
+                            Comma-separated options (edit_text, autoupdate, max_links, max_texts, charset, tag)
+                        </p>
                     </div>
 
                     <!-- Submit -->
@@ -504,7 +516,9 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                             <div class="buttons">
                                 <button type="submit" class="button is-primary" :disabled="isSubmitting">
                                     <span class="icon" x-show="isSubmitting">
-                                        <?php echo IconHelper::render('loader-2', ['class' => 'animate-spin icon-sm']); ?>
+                                        <?php
+                                            echo IconHelper::render('loader-2', ['class' => 'animate-spin icon-sm']);
+                                        ?>
                                     </span>
                                     <span x-text="isCreate ? 'Create Feed' : 'Update Feed'"></span>
                                 </button>

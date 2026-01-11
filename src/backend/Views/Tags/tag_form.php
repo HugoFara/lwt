@@ -72,7 +72,9 @@ $tagComment = $isEdit && $tag !== null ? htmlspecialchars($tag['comment'] ?? '',
                 <div class="field has-addons">
                     <div class="control is-expanded">
                         <input type="text"
-                               class="input notempty noblanksnocomma checkoutsidebmp <?php echo $isEdit ? '' : 'setfocus'; ?>"
+                               class="input notempty noblanksnocomma checkoutsidebmp <?php
+                                   echo $isEdit ? '' : 'setfocus';
+                                ?>"
                                id="<?php echo $formFieldPrefix; ?>Text"
                                name="<?php echo $formFieldPrefix; ?>Text"
                                data_info="Tag"

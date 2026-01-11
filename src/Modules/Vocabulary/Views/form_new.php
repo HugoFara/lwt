@@ -52,7 +52,10 @@ data-lwt-clear-frame="true">
             <td class=""><input <?php echo $scrdir; ?>
             class="notempty setfocus checkoutsidebmp" data_info="New Term"
             type="text" name="WoText" id="WoText" value="" maxlength="250" size="35" />
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?></td>
+            <?php echo IconHelper::render('circle-x', [
+                'title' => 'Field must not be empty',
+                'alt' => 'Field must not be empty'
+            ]); ?></td>
         </tr>
         <tr>
             <td class="has-text-right">Lemma:</td>
@@ -78,19 +81,38 @@ data-lwt-clear-frame="true">
         <tr class="<?php echo ($showRoman ? '' : 'is-hidden'); ?>">
             <td class="has-text-right">Romaniz.:</td>
             <td class="">
-                <input type="text" class="checkoutsidebmp" data_info="Romanization" name="WoRomanization" value="" maxlength="100" size="35" />
+                <input type="text"
+                       class="checkoutsidebmp"
+                       data_info="Romanization"
+                       name="WoRomanization"
+                       value=""
+                       maxlength="100"
+                       size="35" />
             </td>
         </tr>
         <tr>
             <td class="has-text-right">Sentence<br />Term in {...}:</td>
             <td class="">
-                <textarea <?php echo $scrdir; ?> name="WoSentence" id="WoSentence" cols="35" rows="3" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence"></textarea>
+                <textarea <?php echo $scrdir; ?>
+                          name="WoSentence"
+                          id="WoSentence"
+                          cols="35"
+                          rows="3"
+                          class="textarea-noreturn checklength checkoutsidebmp"
+                          data_maxlength="1000"
+                          data_info="Sentence"></textarea>
             </td>
         </tr>
         <tr>
             <td class="has-text-right">Notes:</td>
             <td class="">
-                <textarea name="WoNotes" id="WoNotes" cols="35" rows="3" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Notes"></textarea>
+                <textarea name="WoNotes"
+                          id="WoNotes"
+                          cols="35"
+                          rows="3"
+                          class="textarea-noreturn checklength checkoutsidebmp"
+                          data_maxlength="1000"
+                          data_info="Notes"></textarea>
             </td>
         </tr>
         <tr>
@@ -101,7 +123,10 @@ data-lwt-clear-frame="true">
         </tr>
         <tr>
             <td class="has-text-right" colspan="2">  &nbsp;
-                <?php /** @psalm-suppress PossiblyUndefinedVariable */ echo $dictService->createDictLinksInEditWin3($lang, 'WoSentence', 'WoText'); ?>
+                <?php
+                /** @psalm-suppress PossiblyUndefinedVariable */
+                echo $dictService->createDictLinksInEditWin3($lang, 'WoSentence', 'WoText');
+                ?>
                 &nbsp; &nbsp;
                 <input type="submit" name="op" value="Save" />
             </td>

@@ -30,7 +30,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Type assertions for variables passed from controller
 /**
- * @var array{WoID: int, WoLgID: int, WoText: string, WoTextLC: string, WoStatus: int, LgName?: string, WoLemma?: string, WoRomanization?: string, WoSentence?: string} $word
+ * @var array{
+ *     WoID: int, WoLgID: int, WoText: string, WoTextLC: string, WoStatus: int,
+ *     LgName?: string, WoLemma?: string, WoRomanization?: string, WoSentence?: string
+ * } $word
 */
 assert(is_array($word));
 assert(is_string($scrdir));
@@ -50,7 +53,20 @@ assert(is_string($transl));
 </tr>
 <tr title="Normally only change uppercase/lowercase here!">
    <td class="has-text-right">Term:</td>
-   <td class=""><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="WoText" value="<?php echo htmlspecialchars($word['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="40" /> <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
+   <td class="">
+       <input <?php echo $scrdir; ?>
+              class="notempty setfocus checkoutsidebmp"
+              data_info="Term"
+              type="text"
+              name="WoText"
+              id="WoText"
+              value="<?php echo htmlspecialchars($word['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+              maxlength="250"
+              size="40" />
+       <?php echo IconHelper::render('circle-x', [
+           'title' => 'Field must not be empty',
+           'alt' => 'Field must not be empty'
+       ]); ?>
    </td>
 </tr>
 <tr>
@@ -67,7 +83,12 @@ assert(is_string($transl));
 <tr>
    <td class="has-text-right">Translation:</td>
    <td class="">
-       <textarea class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="500" data_info="Translation" name="WoTranslation" cols="40" rows="3"><?php echo htmlspecialchars($transl, ENT_QUOTES, 'UTF-8'); ?></textarea>
+       <textarea class="textarea-noreturn checklength checkoutsidebmp"
+                 data_maxlength="500"
+                 data_info="Translation"
+                 name="WoTranslation"
+                 cols="40"
+                 rows="3"><?php echo htmlspecialchars($transl, ENT_QUOTES, 'UTF-8'); ?></textarea>
    </td>
 </tr>
 <tr>
@@ -79,13 +100,27 @@ assert(is_string($transl));
 <tr class="<?php echo ($showRoman ? '' : 'is-hidden'); ?>">
    <td class="has-text-right">Romaniz.:</td>
    <td class="">
-       <input type="text" class="checkoutsidebmp" data_info="Romanization" name="WoRomanization" maxlength="100" size="40"
-       value="<?php echo htmlspecialchars($word['WoRomanization'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+       <input type="text"
+              class="checkoutsidebmp"
+              data_info="Romanization"
+              name="WoRomanization"
+              maxlength="100"
+              size="40"
+              value="<?php echo htmlspecialchars($word['WoRomanization'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
    </td>
 </tr>
 <tr>
    <td class="has-text-right">Sentence<br />Term in {...}:</td>
-   <td class=""><textarea <?php echo $scrdir; ?> class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence" name="WoSentence" id="WoSentence" cols="40" rows="3"><?php echo htmlspecialchars($word['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea></td>
+   <td class="">
+       <textarea <?php echo $scrdir; ?>
+                 class="textarea-noreturn checklength checkoutsidebmp"
+                 data_maxlength="1000"
+                 data_info="Sentence"
+                 name="WoSentence"
+                 id="WoSentence"
+                 cols="40"
+                 rows="3"><?php echo htmlspecialchars($word['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+   </td>
 </tr>
 <tr>
    <td class="has-text-right">Status:</td>
@@ -95,9 +130,15 @@ assert(is_string($transl));
 </tr>
 <tr>
    <td class="has-text-right" colspan="2">  &nbsp;
-       <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin2($word['WoLgID'], 'WoSentence', 'WoText'); ?>
+       <?php
+        echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())
+           ->createDictLinksInEditWin2($word['WoLgID'], 'WoSentence', 'WoText');
+        ?>
        &nbsp; &nbsp;
-       <input type="button" value="Cancel" data-action="cancel-navigate" data-url="/words/edit#rec<?php echo $word['WoID']; ?>" />
+       <input type="button"
+              value="Cancel"
+              data-action="cancel-navigate"
+              data-url="/words/edit#rec<?php echo $word['WoID']; ?>" />
        <input type="submit" name="op" value="Change" />
    </td>
 </tr>
@@ -105,5 +146,10 @@ assert(is_string($transl));
 </form>
 <?php
 // Display example sentence button
-echo (new SentenceService())->renderExampleSentencesArea($word['WoLgID'], $word['WoTextLC'], 'WoSentence', $word['WoID']);
+echo (new SentenceService())->renderExampleSentencesArea(
+    $word['WoLgID'],
+    $word['WoTextLC'],
+    'WoSentence',
+    $word['WoID']
+);
 ?>

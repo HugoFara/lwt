@@ -44,7 +44,8 @@ assert($nextOffset === null || is_int($nextOffset));
     'sourceLanguage' => $sl,
     'targetLanguage' => $tl
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script type="text/javascript"
+        src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <form name="form1" action="/word/bulk-translate" method="post"
       x-data="bulkTranslateApp()">
@@ -86,7 +87,8 @@ assert($nextOffset === null || is_int($nextOffset));
                         </div>
                         <div class="control">
                             <div class="select is-small">
-                                <select @change="handleTermToggles($event.target.value); $event.target.selectedIndex = 0;">
+                                <select @change="handleTermToggles($event.target.value);
+                                               $event.target.selectedIndex = 0;">
                                     <option value="0" selected>[Choose...]</option>
                                     <optgroup label="Change Status">
                                         <option value="1">Set Status To [1]</option>
@@ -168,7 +170,9 @@ assert($nextOffset === null || is_int($nextOffset));
                                value="<?php echo $value ?>" />
                         <input type="hidden"
                                name="term[<?php echo $cnt ?>][lg]"
-                               value="<?php echo \htmlspecialchars((string)($record['Ti2LgID'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" />
+                               value="<?php
+                                   echo \htmlspecialchars((string)($record['Ti2LgID'] ?? ''), ENT_QUOTES, 'UTF-8');
+                                ?>" />
                     </td>
                 </tr>
                 <?php

@@ -62,7 +62,13 @@ $languagesTyped = $languages;
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
                             <select name="TxLgID" id="TxLgID" class="notempty setfocus" required>
-                                <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languagesTyped, $recordLgId, '[Choose...]'); ?>
+                                <?php
+                                echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages(
+                                    $languagesTyped,
+                                    $recordLgId,
+                                    '[Choose...]'
+                                );
+                                ?>
                             </select>
                         </div>
                     </div>

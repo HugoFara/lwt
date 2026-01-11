@@ -75,7 +75,11 @@ $configJson = json_encode([
     'editFeedId' => isset($wizardData['edit_feed']) ? (int)$wizardData['edit_feed'] : null,
     'feedTitle' => $wizardData['feed']['feed_title'] ?? '',
     'rssUrl' => $wizardData['rss_url'] ?? '',
-    'articleSection' => preg_replace('/[ ]+/', ' ', trim(($wizardData['redirect'] ?? '') . ($wizardData['article_section'] ?? ''))),
+    'articleSection' => preg_replace(
+        '/[ ]+/',
+        ' ',
+        trim(($wizardData['redirect'] ?? '') . ($wizardData['article_section'] ?? ''))
+    ),
     'filterTags' => preg_replace('/[ ]+/', ' ', InputValidator::getString('html')),
     'feedText' => $wizardData['feed']['feed_text'] ?? '',
     'langId' => $wizardData['lang'] ?? null,

@@ -73,7 +73,8 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                         <p class="has-text-weight-semibold mb-1">Keep your backup safe</p>
                         <ul class="is-size-7 mt-0">
                             <li>You can restore this backup using the Restore function below</li>
-                            <li>The <strong>Official LWT Backup</strong> doesn't include news_feeds, saved text positions, or settings</li>
+                            <li>The <strong>Official LWT Backup</strong> doesn't include
+                                news_feeds, saved text positions, or settings</li>
                             <li>Large backup files may not be restorable (see upload limits below)</li>
                         </ul>
                     </div>
@@ -156,7 +157,8 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                             Large backup files may fail to restore due to PHP limits:<br>
                             <code>post_max_size = <?php echo $postMaxSize; ?></code> /
                             <code>upload_max_filesize = <?php echo $uploadMaxFilesize; ?></code><br>
-                            If needed, increase these values in <code><?php echo $escapedIniFile; ?></code> and restart your server.
+                            If needed, increase these values in
+                            <code><?php echo $escapedIniFile; ?></code> and restart your server.
                         </p>
                     </div>
                 </div>
@@ -253,7 +255,8 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                     <?php echo $prefinfo; ?> will be <strong>replaced</strong> by the LWT demo database.
                 </p>
                 <p class="is-size-7 has-text-grey">
-                    The demo includes sample texts and vocabulary in multiple languages to help you explore LWT's features.
+                    The demo includes sample texts and vocabulary in multiple languages
+                    to help you explore LWT's features.
                 </p>
             </div>
 
@@ -301,7 +304,9 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                     </div>
                     <div class="column">
                         <p class="has-text-weight-semibold">Warning: This action cannot be undone!</p>
-                        <p class="is-size-7">All your texts, vocabulary, and learning progress will be permanently deleted.</p>
+                        <p class="is-size-7">
+                            All your texts, vocabulary, and learning progress will be permanently deleted.
+                        </p>
                     </div>
                 </div>
             </div>

@@ -311,7 +311,9 @@ $configJson = json_encode([
                                 <template x-for="item in config.feedItems" :key="item.index">
                                     <option :value="item.index"
                                             :title="item.title"
-                                            x-text="(item.hasHtml ? '► ' : '- ') + (item.index + 1) + ' ' + item.hostStatus + ' host: ' + item.host">
+                                            x-text="(item.hasHtml ? '► ' : '- ') + (item.index + 1)
+                                                + ' ' + item.hostStatus + ' host: ' + item.host"
+                                    >
                                     </option>
                                 </template>
                             </select>

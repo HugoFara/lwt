@@ -82,9 +82,13 @@ $actions = [
             </label>
             <div class="file has-name is-fullwidth">
                 <label class="file-label">
-                    <input class="file-input" type="file" name="thefile" accept=".epub"
+                    <input class="file-input"
+                           type="file"
+                           name="thefile"
+                           accept=".epub"
                            required
-                           onchange="document.getElementById('filename').textContent = this.files[0]?.name || 'No file selected'" />
+                           onchange="document.getElementById('filename').textContent =
+                               this.files[0]?.name || 'No file selected'" />
                     <span class="file-cta">
                         <span class="file-icon">
                             <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>

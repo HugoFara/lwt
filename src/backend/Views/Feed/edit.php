@@ -21,13 +21,18 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 /**
- * @var array{NfID: string, NfLgID: int, NfName: string, NfSourceURI: string, NfArticleSectionTags: string, NfFilterTags: string} $feed
+ * @var array{NfID: string, NfLgID: int, NfName: string, NfSourceURI: string,
+ *             NfArticleSectionTags: string, NfFilterTags: string} $feed
  * @var array<int, array{LgID: int, LgName: string}> $languages
- * @var array{edit_text?: string, max_links?: string, charset?: string, max_texts?: string, tag?: string, article_source?: string} $options
+ * @var array{edit_text?: string, max_links?: string, charset?: string,
+ *             max_texts?: string, tag?: string, article_source?: string} $options
  * @var string|null $autoUpdateInterval
  * @var string|null $autoUpdateUnit
  */
-$feed = $feed ?? ['NfID' => '', 'NfLgID' => 0, 'NfName' => '', 'NfSourceURI' => '', 'NfArticleSectionTags' => '', 'NfFilterTags' => ''];
+$feed = $feed ?? [
+    'NfID' => '', 'NfLgID' => 0, 'NfName' => '', 'NfSourceURI' => '',
+    'NfArticleSectionTags' => '', 'NfFilterTags' => ''
+];
 $languages = $languages ?? [];
 $options = $options ?? [];
 $autoUpdateInterval = $autoUpdateInterval ?? null;
@@ -35,7 +40,10 @@ $autoUpdateUnit = $autoUpdateUnit ?? null;
 
 $actions = [
     ['url' => '/feeds?page=1', 'label' => 'Feeds', 'icon' => 'list'],
-    ['url' => '/feeds/wizard?step=2&edit_feed=' . $feed['NfID'], 'label' => 'Feed Wizard', 'icon' => 'wand-2', 'class' => 'is-info']
+    [
+        'url' => '/feeds/wizard?step=2&edit_feed=' . $feed['NfID'],
+        'label' => 'Feed Wizard', 'icon' => 'wand-2', 'class' => 'is-info'
+    ]
 ];
 
 ?>
@@ -70,7 +78,11 @@ $actions = [
       x-data="feedForm()"
       @submit="handleSubmit($event)">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-    <input type="hidden" name="NfID" value="<?php echo htmlspecialchars($feed['NfID'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+    <input
+        type="hidden"
+        name="NfID"
+        value="<?php echo htmlspecialchars($feed['NfID'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+    />
     <input type="hidden" name="NfOptions" value="" />
     <input type="hidden" name="update_feed" value="1" />
 
@@ -88,9 +100,12 @@ $actions = [
                                 <?php
                                 /** @var array{LgID: int, LgName: string} $lang */
                                 foreach ($languages as $lang) : ?>
-                                <option value="<?php echo $lang['LgID']; ?>"<?php if ($feed['NfLgID'] === $lang['LgID']) {
-                                    echo ' selected';
-                                               } ?>>
+                                <option
+                                    value="<?php echo $lang['LgID']; ?>"
+                                    <?php if ($feed['NfLgID'] === $lang['LgID']) {
+                                        echo 'selected';
+                                    } ?>
+                                >
                                     <?php echo htmlspecialchars($lang['LgName'], ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                                 <?php endforeach; ?>
@@ -161,7 +176,9 @@ $actions = [
                                type="text"
                                name="NfArticleSectionTags"
                                id="NfArticleSectionTags"
-                               value="<?php echo htmlspecialchars($feed['NfArticleSectionTags'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php
+                                   echo htmlspecialchars($feed['NfArticleSectionTags'] ?? '', ENT_QUOTES, 'UTF-8');
+                                ?>"
                                required />
                     </div>
                     <div class="control">
@@ -185,7 +202,9 @@ $actions = [
                                type="text"
                                name="NfFilterTags"
                                id="NfFilterTags"
-                               value="<?php echo htmlspecialchars($feed['NfFilterTags'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+                               value="<?php
+                                   echo htmlspecialchars($feed['NfFilterTags'] ?? '', ENT_QUOTES, 'UTF-8');
+                                ?>" />
                     </div>
                 </div>
             </div>
@@ -228,7 +247,11 @@ $actions = [
                                     </div>
                                     <div class="control">
                                         <div class="select is-small">
-                                            <select name="autoupdate_unit" x-model="autoUpdateUnit" :disabled="!autoUpdate">
+                                            <select
+                                                name="autoupdate_unit"
+                                                x-model="autoUpdateUnit"
+                                                :disabled="!autoUpdate"
+                                            >
                                                 <option value="h">Hour(s)</option>
                                                 <option value="d">Day(s)</option>
                                                 <option value="w">Week(s)</option>

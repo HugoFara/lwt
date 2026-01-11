@@ -27,21 +27,31 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
  * @var array{
- *     languages: array<int, array{name?: string, s1: int|string, s2: int|string, s3: int|string, s4: int|string, s5: int|string, s99: int|string}>,
+ *     languages: array<int, array{name?: string, s1: int|string, s2: int|string,
+ *                                 s3: int|string, s4: int|string, s5: int|string, s99: int|string}>,
  *     totals?: array<string, int|string>
  * } $intensityStats Learning intensity statistics
  */
-$intensityStats = is_array($intensityStats ?? null) && isset($intensityStats['languages']) ? $intensityStats : ['languages' => []];
+$intensityStats = is_array($intensityStats ?? null) && isset($intensityStats['languages'])
+    ? $intensityStats
+    : ['languages' => []];
 
 /**
  * @var array{
  *     languages?: array<int, array<string, int|string>>,
- *     totals: array{ct: int|string, at: int|string, kt: int|string, cy: int|string, ay: int|string, ky: int|string, cw: int|string, aw: int|string, kw: int|string, cm: int|string, am: int|string, km: int|string, ca: int|string, aa: int|string, ka: int|string}
+ *     totals: array{ct: int|string, at: int|string, kt: int|string, cy: int|string,
+ *                   ay: int|string, ky: int|string, cw: int|string, aw: int|string,
+ *                   kw: int|string, cm: int|string, am: int|string, km: int|string,
+ *                   ca: int|string, aa: int|string, ka: int|string}
  * } $frequencyStats Learning frequency statistics
  */
 $frequencyStats = is_array($frequencyStats ?? null) && isset($frequencyStats['totals'])
     ? $frequencyStats
-    : ['totals' => ['ct' => 0, 'at' => 0, 'kt' => 0, 'cy' => 0, 'ay' => 0, 'ky' => 0, 'cw' => 0, 'aw' => 0, 'kw' => 0, 'cm' => 0, 'am' => 0, 'km' => 0, 'ca' => 0, 'aa' => 0, 'ka' => 0]];
+    : ['totals' => [
+        'ct' => 0, 'at' => 0, 'kt' => 0, 'cy' => 0, 'ay' => 0, 'ky' => 0,
+        'cw' => 0, 'aw' => 0, 'kw' => 0, 'cm' => 0, 'am' => 0, 'km' => 0,
+        'ca' => 0, 'aa' => 0, 'ka' => 0
+    ]];
 
 // Prepare chart data as JSON for the Alpine/Chart.js module
 /** @var array{name?: string, s1: int|string, s2: int|string, s3: int|string, s4: int|string, s5: int|string, s99: int|string} $lang */

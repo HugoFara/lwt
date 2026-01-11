@@ -226,7 +226,9 @@ echo PageLayoutHelper::buildActionCard($actions);
                         <div class="select is-fullwidth is-small">
                             <select name="Col<?php echo $i; ?>">
                                 <?php foreach ($columnOptions as $val => $label) : ?>
-                                <option value="<?php echo $val; ?>"<?php echo ($val === $default) ? ' selected' : ''; ?>>
+                                <option value="<?php echo $val; ?>"<?php
+                                    echo ($val === $default) ? ' selected' : '';
+                                ?>>
                                     <?php echo $label; ?>
                                 </option>
                                 <?php endforeach; ?>

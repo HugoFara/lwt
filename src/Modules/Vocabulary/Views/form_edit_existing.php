@@ -71,7 +71,10 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
            data_info="Term" type="text"
            name="WoText" id="WoText"
            value="<?php echo htmlspecialchars($term, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
-           <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
+           <?php echo IconHelper::render('circle-x', [
+               'title' => 'Field must not be empty',
+               'alt' => 'Field must not be empty'
+           ]); ?>
        </td>
    </tr>
    <tr>
@@ -80,7 +83,8 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
            <input <?php echo $scrdir; ?> type="text"
            class="checkoutsidebmp checklength" data_maxlength="250"
            data_info="Lemma" name="WoLemma" id="WoLemma"
-           value="<?php echo htmlspecialchars($wordData['WoLemma'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35"
+           value="<?php echo htmlspecialchars($wordData['WoLemma'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+           maxlength="250" size="35"
            placeholder="Base form (e.g., 'run' for 'running')" />
        </td>
    </tr>

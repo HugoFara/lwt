@@ -33,11 +33,15 @@ use Lwt\Shared\UI\Helpers\IconHelper;
         <div class="card-content">
             <div class="buttons is-centered">
                 <a href="/languages?new=1" class="button is-light is-primary">
-                    <span class="icon"><?php echo IconHelper::render('circle-plus', ['alt' => 'New Language']); ?></span>
+                    <span class="icon"><?php
+                        echo IconHelper::render('circle-plus', ['alt' => 'New Language']);
+                    ?></span>
                     <span>New Language</span>
                 </a>
                 <a href="#" class="button is-light is-info" @click.prevent="store.openWizardModal()">
-                    <span class="icon"><?php echo IconHelper::render('wand-2', ['alt' => 'Quick Setup Wizard']); ?></span>
+                    <span class="icon"><?php
+                        echo IconHelper::render('wand-2', ['alt' => 'Quick Setup Wizard']);
+                    ?></span>
                     <span>Quick Setup Wizard</span>
                 </a>
             </div>
@@ -119,7 +123,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                                 <span class="stat-label">Texts</span>
                                 <span class="stat-value">
                                     <template x-if="lang.textCount > 0">
-                                        <a :href="'/texts?page=1&query=&filterlang=' + lang.id" x-text="lang.textCount"></a>
+                                        <a
+                                            :href="'/texts?page=1&query=&filterlang=' + lang.id"
+                                            x-text="lang.textCount"
+                                        ></a>
                                     </template>
                                     <template x-if="lang.textCount === 0">
                                         <span>0</span>
@@ -130,7 +137,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                                 <span class="stat-label">Archived</span>
                                 <span class="stat-value">
                                     <template x-if="lang.archivedTextCount > 0">
-                                        <a :href="'/text/archived?page=1&query=&filterlang=' + lang.id" x-text="lang.archivedTextCount"></a>
+                                        <a
+                                            :href="'/text/archived?page=1&query=&filterlang=' + lang.id"
+                                            x-text="lang.archivedTextCount"
+                                        ></a>
                                     </template>
                                     <template x-if="lang.archivedTextCount === 0">
                                         <span>0</span>
@@ -141,7 +151,11 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                                 <span class="stat-label">Terms</span>
                                 <span class="stat-value">
                                     <template x-if="lang.wordCount > 0">
-                                        <a :href="'/words?page=1&query=&text=&status=&filterlang=' + lang.id + '&status=&tag12=0&tag2=&tag1='" x-text="lang.wordCount"></a>
+                                        <a
+                                            :href="'/words?page=1&query=&text=&status=&filterlang='
+                                                + lang.id + '&status=&tag12=0&tag2=&tag1='"
+                                            x-text="lang.wordCount"
+                                        ></a>
                                     </template>
                                     <template x-if="lang.wordCount === 0">
                                         <span>0</span>
@@ -152,7 +166,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                                 <span class="stat-label">Feeds</span>
                                 <span class="stat-value">
                                     <template x-if="lang.feedCount > 0">
-                                        <a :href="'/feeds?query=&selected_feed=&check_autoupdate=1&filterlang=' + lang.id">
+                                        <a
+                                            :href="'/feeds?query=&selected_feed=&check_autoupdate=1&filterlang='
+                                                + lang.id"
+                                        >
                                             <span x-text="lang.feedCount"></span>
                                             (<span x-text="lang.articleCount"></span>)
                                         </a>
@@ -166,7 +183,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 
                         <template x-if="lang.hasExportTemplate">
                             <div class="tags mt-3">
-                                <span class="tag is-info is-light export-template-tag" title="This language has a custom export template for flexible term exports">
+                                <span
+                                    class="tag is-info is-light export-template-tag"
+                                    title="This language has a custom export template for flexible term exports"
+                                >
                                     <span class="icon">
                                         <i data-lucide="file-down" style="width: 12px; height: 12px;"></i>
                                     </span>

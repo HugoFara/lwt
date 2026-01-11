@@ -73,9 +73,10 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
             </button>
         </header>
         <div class="card-content" x-show="open" x-transition>
+            <?php $currentTheme = htmlspecialchars($settings['set-theme-dir'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
             <div class="field is-horizontal"
                  x-data="{
-                     currentTheme: '<?php echo htmlspecialchars($settings['set-theme-dir'] ?? '', ENT_QUOTES, 'UTF-8'); ?>',
+                     currentTheme: '<?php echo $currentTheme; ?>',
                      description: '',
                      mode: '',
                      highlighting: '',
@@ -113,7 +114,12 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                     <select name="set-theme-dir" id="set-theme-dir" class="notempty" required
                                             x-model="currentTheme"
                                             @change="updateInfo(); previewTheme()">
-                                        <?php echo SelectOptionsBuilder::forThemes($themes, $settings['set-theme-dir']); ?>
+                                        <?php
+                                        echo SelectOptionsBuilder::forThemes(
+                                            $themes,
+                                            $settings['set-theme-dir']
+                                        );
+                                        ?>
                                     </select>
                                 </div>
                             </div>
@@ -170,8 +176,14 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                     <div class="field has-addons">
                         <div class="control is-expanded">
                             <div class="select is-fullwidth">
-                                <select name="set-words-to-do-buttons" id="set-words-to-do-buttons" class="notempty" required>
-                                    <?php echo SelectOptionsBuilder::forWordsToDoButtons($settings['set-words-to-do-buttons']); ?>
+                                <select name="set-words-to-do-buttons"
+                                        id="set-words-to-do-buttons"
+                                        class="notempty"
+                                        required>
+                                    <?php
+                                    $wordsToDoButtons = $settings['set-words-to-do-buttons'];
+                                    echo SelectOptionsBuilder::forWordsToDoButtons($wordsToDoButtons);
+                                    ?>
                                 </select>
                             </div>
                         </div>
@@ -219,7 +231,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                    id="set-ggl-translation-per-page"
                                    name="set-ggl-translation-per-page"
                                    data_info="New Term Translations per Page"
-                                   value="<?php echo htmlspecialchars($settings['set-ggl-translation-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php
+                                       echo htmlspecialchars(
+                                           $settings['set-ggl-translation-per-page'] ?? '',
+                                           ENT_QUOTES,
+                                           'UTF-8'
+                                       );
+                                        ?>"
                                    maxlength="4"
                                    style="width: 100px;"
                                    required />
@@ -262,7 +280,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                    id="set-test-main-frame-waiting-time"
                                    name="set-test-main-frame-waiting-time"
                                    data_info="Waiting time after assessment to display next review"
-                                   value="<?php echo htmlspecialchars($settings['set-test-main-frame-waiting-time'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php
+                                       echo htmlspecialchars(
+                                           $settings['set-test-main-frame-waiting-time'] ?? '',
+                                           ENT_QUOTES,
+                                           'UTF-8'
+                                       );
+                                        ?>"
                                    maxlength="4"
                                    style="width: 120px;"
                                    required />
@@ -292,7 +316,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                    id="set-test-edit-frame-waiting-time"
                                    name="set-test-edit-frame-waiting-time"
                                    data_info="Waiting Time to clear the message/edit frame"
-                                   value="<?php echo htmlspecialchars($settings['set-test-edit-frame-waiting-time'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php
+                                       echo htmlspecialchars(
+                                           $settings['set-test-edit-frame-waiting-time'] ?? '',
+                                           ENT_QUOTES,
+                                           'UTF-8'
+                                       );
+                                        ?>"
                                    maxlength="8"
                                    style="width: 120px;"
                                    required />
@@ -345,7 +375,9 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                 </select>
                             </div>
                         </div>
-                        <p class="help">Visit saved terms with these statuses via keystrokes (RIGHT, SPACE, LEFT, etc.)</p>
+                        <p class="help">
+                            Visit saved terms with these statuses via keystrokes (RIGHT, SPACE, LEFT, etc.)
+                        </p>
                     </div>
                 </div>
             </div>
@@ -358,7 +390,8 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                     <div class="field">
                         <div class="control">
                             <div class="select is-fullwidth">
-                                <select name="set-display-text-frame-term-translation" id="set-display-text-frame-term-translation">
+                                <select name="set-display-text-frame-term-translation"
+                                        id="set-display-text-frame-term-translation">
                                     <?php
                                     echo SelectOptionsBuilder::forWordStatus(
                                         $settings['set-display-text-frame-term-translation'],
@@ -383,8 +416,15 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                     <div class="field has-addons">
                         <div class="control is-expanded">
                             <div class="select is-fullwidth">
-                                <select name="set-text-frame-annotation-position" id="set-text-frame-annotation-position" class="notempty" required>
-                                    <?php echo SelectOptionsBuilder::forAnnotationPosition($settings['set-text-frame-annotation-position']); ?>
+                                <select name="set-text-frame-annotation-position"
+                                        id="set-text-frame-annotation-position"
+                                        class="notempty"
+                                        required>
+                                    <?php
+                                    echo SelectOptionsBuilder::forAnnotationPosition(
+                                        $settings['set-text-frame-annotation-position']
+                                    );
+                                    ?>
                                 </select>
                             </div>
                         </div>
@@ -421,8 +461,15 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                     <div class="field has-addons">
                         <div class="control is-expanded">
                             <div class="select is-fullwidth">
-                                <select name="set-test-sentence-count" id="set-test-sentence-count" class="notempty" required>
-                                    <?php echo SelectOptionsBuilder::forSentenceCount($settings['set-test-sentence-count']); ?>
+                                <select name="set-test-sentence-count"
+                                        id="set-test-sentence-count"
+                                        class="notempty"
+                                        required>
+                                    <?php
+                                    echo SelectOptionsBuilder::forSentenceCount(
+                                        $settings['set-test-sentence-count']
+                                    );
+                                    ?>
                                 </select>
                             </div>
                         </div>
@@ -444,8 +491,15 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                     <div class="field has-addons">
                         <div class="control is-expanded">
                             <div class="select is-fullwidth">
-                                <select name="set-term-sentence-count" id="set-term-sentence-count" class="notempty" required>
-                                    <?php echo SelectOptionsBuilder::forSentenceCount($settings['set-term-sentence-count']); ?>
+                                <select name="set-term-sentence-count"
+                                        id="set-term-sentence-count"
+                                        class="notempty"
+                                        required>
+                                    <?php
+                                    echo SelectOptionsBuilder::forSentenceCount(
+                                        $settings['set-term-sentence-count']
+                                    );
+                                    ?>
                                 </select>
                             </div>
                         </div>
@@ -473,7 +527,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                    id="set-similar-terms-count"
                                    name="set-similar-terms-count"
                                    data_info="Similar terms to be displayed while adding/editing a term"
-                                   value="<?php echo htmlspecialchars($settings['set-similar-terms-count'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php
+                                       echo htmlspecialchars(
+                                           $settings['set-similar-terms-count'] ?? '',
+                                           ENT_QUOTES,
+                                           'UTF-8'
+                                       );
+                                        ?>"
                                    maxlength="1"
                                    style="width: 80px;"
                                    required />
@@ -499,7 +559,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                    type="text"
                                    id="set-term-translation-delimiters"
                                    name="set-term-translation-delimiters"
-                                   value="<?php echo htmlspecialchars($settings['set-term-translation-delimiters'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php
+                                       echo htmlspecialchars(
+                                           $settings['set-term-translation-delimiters'] ?? '',
+                                           ENT_QUOTES,
+                                           'UTF-8'
+                                       );
+                                        ?>"
                                    maxlength="8"
                                    style="width: 120px;"
                                    required />
@@ -510,7 +576,9 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                             </span>
                         </div>
                     </div>
-                    <p class="help">Characters that delimit different translations (used in annotation selection)</p>
+                    <p class="help">
+                        Characters that delimit different translations (used in annotation selection)
+                    </p>
                 </div>
             </div>
         </div>
@@ -762,7 +830,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                        id="set-texts-per-page"
                                        name="set-texts-per-page"
                                        data_info="Texts per Page"
-                                       value="<?php echo htmlspecialchars($settings['set-texts-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                       value="<?php
+                                           echo htmlspecialchars(
+                                               $settings['set-texts-per-page'] ?? '',
+                                               ENT_QUOTES,
+                                               'UTF-8'
+                                           );
+                                            ?>"
                                        maxlength="4"
                                        required />
                             </div>
@@ -786,7 +860,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                        id="set-archived_texts-per-page"
                                        name="set-archived_texts-per-page"
                                        data_info="Archived Texts per Page"
-                                       value="<?php echo htmlspecialchars($settings['set-archived_texts-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                       value="<?php
+                                           echo htmlspecialchars(
+                                               $settings['set-archived_texts-per-page'] ?? '',
+                                               ENT_QUOTES,
+                                               'UTF-8'
+                                           );
+                                            ?>"
                                        maxlength="4"
                                        required />
                             </div>
@@ -812,7 +892,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                        id="set-terms-per-page"
                                        name="set-terms-per-page"
                                        data_info="Terms per Page"
-                                       value="<?php echo htmlspecialchars($settings['set-terms-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                       value="<?php
+                                           echo htmlspecialchars(
+                                               $settings['set-terms-per-page'] ?? '',
+                                               ENT_QUOTES,
+                                               'UTF-8'
+                                           );
+                                            ?>"
                                        maxlength="4"
                                        required />
                             </div>
@@ -836,7 +922,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                        id="set-tags-per-page"
                                        name="set-tags-per-page"
                                        data_info="Tags per Page"
-                                       value="<?php echo htmlspecialchars($settings['set-tags-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                       value="<?php
+                                           echo htmlspecialchars(
+                                               $settings['set-tags-per-page'] ?? '',
+                                               ENT_QUOTES,
+                                               'UTF-8'
+                                           );
+                                            ?>"
                                        maxlength="4"
                                        required />
                             </div>
@@ -862,7 +954,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                        id="set-articles-per-page"
                                        name="set-articles-per-page"
                                        data_info="Feed Articles per Page"
-                                       value="<?php echo htmlspecialchars($settings['set-articles-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                       value="<?php
+                                           echo htmlspecialchars(
+                                               $settings['set-articles-per-page'] ?? '',
+                                               ENT_QUOTES,
+                                               'UTF-8'
+                                           );
+                                            ?>"
                                        maxlength="4"
                                        required />
                             </div>
@@ -886,7 +984,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                        id="set-feeds-per-page"
                                        name="set-feeds-per-page"
                                        data_info="Feeds per Page"
-                                       value="<?php echo htmlspecialchars($settings['set-feeds-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                       value="<?php
+                                           echo htmlspecialchars(
+                                               $settings['set-feeds-per-page'] ?? '',
+                                               ENT_QUOTES,
+                                               'UTF-8'
+                                           );
+                                            ?>"
                                        maxlength="4"
                                        required />
                             </div>
@@ -935,7 +1039,9 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
         <div class="card-content" x-show="open" x-transition>
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label" for="set-max-articles-with-text">Max Articles <span class="has-text-weight-normal">(with cache)</span></label>
+                    <label class="label" for="set-max-articles-with-text">
+                        Max Articles <span class="has-text-weight-normal">(with cache)</span>
+                    </label>
                 </div>
                 <div class="field-body">
                     <div class="field has-addons">
@@ -946,7 +1052,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                    id="set-max-articles-with-text"
                                    name="set-max-articles-with-text"
                                    data_info="Max Articles per Feed with cached text"
-                                   value="<?php echo htmlspecialchars($settings['set-max-articles-with-text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php
+                                       echo htmlspecialchars(
+                                           $settings['set-max-articles-with-text'] ?? '',
+                                           ENT_QUOTES,
+                                           'UTF-8'
+                                       );
+                                        ?>"
                                    maxlength="4"
                                    style="width: 100px;"
                                    required />
@@ -963,7 +1075,9 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
 
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label" for="set-max-articles-without-text">Max Articles <span class="has-text-weight-normal">(no cache)</span></label>
+                    <label class="label" for="set-max-articles-without-text">
+                        Max Articles <span class="has-text-weight-normal">(no cache)</span>
+                    </label>
                 </div>
                 <div class="field-body">
                     <div class="field has-addons">
@@ -974,7 +1088,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                    id="set-max-articles-without-text"
                                    name="set-max-articles-without-text"
                                    data_info="Max Articles per Feed without cached text"
-                                   value="<?php echo htmlspecialchars($settings['set-max-articles-without-text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php
+                                       echo htmlspecialchars(
+                                           $settings['set-max-articles-without-text'] ?? '',
+                                           ENT_QUOTES,
+                                           'UTF-8'
+                                       );
+                                        ?>"
                                    maxlength="4"
                                    style="width: 100px;"
                                    required />
@@ -1002,7 +1122,13 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                    id="set-max-texts-per-feed"
                                    name="set-max-texts-per-feed"
                                    data_info="Max Texts per Feed"
-                                   value="<?php echo htmlspecialchars($settings['set-max-texts-per-feed'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?php
+                                       echo htmlspecialchars(
+                                           $settings['set-max-texts-per-feed'] ?? '',
+                                           ENT_QUOTES,
+                                           'UTF-8'
+                                       );
+                                        ?>"
                                    maxlength="4"
                                    style="width: 100px;"
                                    required />
