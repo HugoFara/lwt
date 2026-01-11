@@ -338,8 +338,13 @@ class PreparedStatement
     public function __destruct()
     {
         // Only close if the connection is still valid
-        if ($this->connection->ping()) {
-            $this->stmt->close();
+        // thread_id will be 0/falsy if the connection has been closed
+        try {
+            if ($this->connection->thread_id) {
+                $this->stmt->close();
+            }
+        } catch (\Throwable $e) {
+            // Connection may have been closed already - ignore
         }
     }
 }

@@ -121,8 +121,12 @@ class GetLanguageById
      */
     public function isDuplicateName(string $name, int $excludeLgId = 0): bool
     {
+        $trimmedName = trim($name);
+        if ($trimmedName === '') {
+            return false;
+        }
         return $this->repository->nameExists(
-            trim($name),
+            $trimmedName,
             $excludeLgId > 0 ? $excludeLgId : null
         );
     }
