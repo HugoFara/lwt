@@ -67,6 +67,10 @@
     "dexie": "^4.2.1",
     "lucide": "^0.555.0"
   },
+  "overrides": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
   "devDependencies": {
     "@eslint/css": "^0.14.1",
     "@eslint/js": "^9.39.1",

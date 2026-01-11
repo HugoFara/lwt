@@ -32,5 +32,8 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
+      - name: Create node_modules directory
+        run: mkdir -p node_modules
+
       - name: Run Psalm
         run: vendor/bin/psalm --output-format=github
