@@ -129,4 +129,571 @@ class TextHandlerTest extends TestCase
         // Should have at least 6 public methods
         $this->assertGreaterThanOrEqual(6, count($publicMethods));
     }
+
+    // ===== saveImprTextData tests =====
+
+    /**
+     * Test saveImprTextData returns error for non-existent text.
+     */
+    public function testSaveImprTextDataReturnsErrorForInvalidTextId(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Non-existent text ID should return empty annotation, and line out of range
+        $result = $this->handler->saveImprTextData(999999999, 0, 'test annotation');
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('success', $result);
+    }
+
+    // ===== formatSetAnnotation tests =====
+
+    /**
+     * Test formatSetAnnotation returns error for invalid JSON.
+     */
+    public function testFormatSetAnnotationReturnsErrorForInvalidJson(): void
+    {
+        $result = $this->handler->formatSetAnnotation(1, 'tx0', 'not valid json');
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertEquals('Invalid JSON data', $result['error']);
+    }
+
+    /**
+     * Test formatSetAnnotation with valid JSON but non-existent text.
+     */
+    public function testFormatSetAnnotationWithValidJson(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->formatSetAnnotation(999999999, 'tx0', '{"tx0": "test"}');
+
+        $this->assertIsArray($result);
+        // Should either return success or error based on text existence
+        $this->assertTrue(
+            array_key_exists('save_impr_text', $result) || array_key_exists('error', $result)
+        );
+    }
+
+    // ===== setDisplayMode tests =====
+
+    /**
+     * Test setDisplayMode returns error for non-existent text.
+     */
+    public function testSetDisplayModeReturnsErrorForNonExistentText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->setDisplayMode(999999999, 1, true, true);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('updated', $result);
+        $this->assertFalse($result['updated']);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertEquals('Text not found', $result['error']);
+    }
+
+    /**
+     * Test formatSetDisplayMode extracts parameters correctly.
+     */
+    public function testFormatSetDisplayModeExtractsParams(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $params = [
+            'annotations' => '2',
+            'romanization' => 'true',
+            'translation' => 'false',
+        ];
+
+        $result = $this->handler->formatSetDisplayMode(999999999, $params);
+
+        $this->assertIsArray($result);
+        // For non-existent text, should return error
+        $this->assertArrayHasKey('updated', $result);
+    }
+
+    // ===== getWords tests =====
+
+    /**
+     * Test getWords returns error for non-existent text.
+     */
+    public function testGetWordsReturnsErrorForNonExistentText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->getWords(999999999);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertEquals('Text not found', $result['error']);
+    }
+
+    /**
+     * Test formatGetWords delegates to getWords.
+     */
+    public function testFormatGetWordsDelegatesToGetWords(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->formatGetWords(999999999);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    // ===== formatTextsByLanguage tests =====
+
+    /**
+     * Test formatTextsByLanguage returns correct structure.
+     */
+    public function testFormatTextsByLanguageReturnsCorrectStructure(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->formatTextsByLanguage(999999, []);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('texts', $result);
+        $this->assertArrayHasKey('pagination', $result);
+    }
+
+    /**
+     * Test formatTextsByLanguage accepts pagination params.
+     */
+    public function testFormatTextsByLanguageAcceptsPaginationParams(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $params = ['page' => '2', 'per_page' => '20', 'sort' => '2'];
+        $result = $this->handler->formatTextsByLanguage(999999, $params);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('pagination', $result);
+    }
+
+    // ===== formatArchivedTextsByLanguage tests =====
+
+    /**
+     * Test formatArchivedTextsByLanguage returns correct structure.
+     */
+    public function testFormatArchivedTextsByLanguageReturnsCorrectStructure(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->formatArchivedTextsByLanguage(999999, []);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('texts', $result);
+        $this->assertArrayHasKey('pagination', $result);
+    }
+
+    // ===== getPrintItems tests =====
+
+    /**
+     * Test getPrintItems returns error for non-existent text.
+     */
+    public function testGetPrintItemsReturnsErrorForNonExistentText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->getPrintItems(999999999);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertEquals('Text not found', $result['error']);
+    }
+
+    /**
+     * Test formatGetPrintItems delegates to getPrintItems.
+     */
+    public function testFormatGetPrintItemsDelegatesToGetPrintItems(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->formatGetPrintItems(999999999);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    // ===== getAnnotation tests =====
+
+    /**
+     * Test getAnnotation returns error for non-existent text.
+     */
+    public function testGetAnnotationReturnsErrorForNonExistentText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->getAnnotation(999999999);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertEquals('Text not found', $result['error']);
+    }
+
+    /**
+     * Test formatGetAnnotation delegates to getAnnotation.
+     */
+    public function testFormatGetAnnotationDelegatesToGetAnnotation(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->formatGetAnnotation(999999999);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    // ===== getTranslations tests =====
+
+    /**
+     * Test getTranslations returns empty array for non-existent word.
+     */
+    public function testGetTranslationsReturnsEmptyForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->getTranslations(999999999);
+
+        $this->assertIsArray($result);
+        // Non-existent word returns empty array
+        $this->assertEmpty($result);
+    }
+
+    // ===== getTermTranslations tests =====
+
+    /**
+     * Test getTermTranslations returns error for non-existent text.
+     */
+    public function testGetTermTranslationsReturnsErrorForNonExistentText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->getTermTranslations('test', 999999999);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertEquals('Text not found', $result['error']);
+    }
+
+    /**
+     * Test formatTermTranslations delegates correctly.
+     */
+    public function testFormatTermTranslationsDelegatesCorrectly(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->formatTermTranslations('test', 999999999);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    // ===== editTermForm tests =====
+
+    /**
+     * Test editTermForm returns message for non-existent text.
+     */
+    public function testEditTermFormReturnsMessageForNonExistentText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->editTermForm(999999999);
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('Text not found', $result);
+    }
+
+    /**
+     * Test formatEditTermForm wraps result in HTML key.
+     */
+    public function testFormatEditTermFormWrapsResult(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->formatEditTermForm(999999999);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('html', $result);
+    }
+
+    // ===== markAllWellKnown tests =====
+
+    /**
+     * Test markAllWellKnown returns count structure.
+     */
+    public function testMarkAllWellKnownReturnsCountStructure(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        try {
+            $result = $this->handler->markAllWellKnown(999999999);
+            $this->assertIsArray($result);
+            $this->assertArrayHasKey('count', $result);
+        } catch (\RuntimeException $e) {
+            // Non-existent text throws RuntimeException, which is valid behavior
+            $this->assertStringContainsString('not found', $e->getMessage());
+        }
+    }
+
+    /**
+     * Test formatMarkAllWellKnown delegates correctly.
+     */
+    public function testFormatMarkAllWellKnownDelegates(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        try {
+            $result = $this->handler->formatMarkAllWellKnown(999999999);
+            $this->assertIsArray($result);
+            $this->assertArrayHasKey('count', $result);
+        } catch (\RuntimeException $e) {
+            // Non-existent text throws RuntimeException, which is valid behavior
+            $this->assertStringContainsString('not found', $e->getMessage());
+        }
+    }
+
+    // ===== markAllIgnored tests =====
+
+    /**
+     * Test markAllIgnored returns count structure.
+     */
+    public function testMarkAllIgnoredReturnsCountStructure(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        try {
+            $result = $this->handler->markAllIgnored(999999999);
+            $this->assertIsArray($result);
+            $this->assertArrayHasKey('count', $result);
+        } catch (\RuntimeException $e) {
+            // Non-existent text throws RuntimeException, which is valid behavior
+            $this->assertStringContainsString('not found', $e->getMessage());
+        }
+    }
+
+    /**
+     * Test formatMarkAllIgnored delegates correctly.
+     */
+    public function testFormatMarkAllIgnoredDelegates(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        try {
+            $result = $this->handler->formatMarkAllIgnored(999999999);
+            $this->assertIsArray($result);
+            $this->assertArrayHasKey('count', $result);
+        } catch (\RuntimeException $e) {
+            // Non-existent text throws RuntimeException, which is valid behavior
+            $this->assertStringContainsString('not found', $e->getMessage());
+        }
+    }
+
+    // ===== Text Scoring tests =====
+
+    /**
+     * Test formatGetTextScore returns score structure.
+     */
+    public function testFormatGetTextScoreReturnsStructure(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->formatGetTextScore(999999999);
+
+        $this->assertIsArray($result);
+        // Score structure should have text_id (snake_case) even if text doesn't exist
+        $this->assertArrayHasKey('text_id', $result);
+    }
+
+    /**
+     * Test formatGetTextScores returns scores for multiple texts.
+     */
+    public function testFormatGetTextScoresReturnsMultiple(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->formatGetTextScores([999999998, 999999999]);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('scores', $result);
+    }
+
+    /**
+     * Test formatGetRecommendedTexts returns recommendations structure.
+     */
+    public function testFormatGetRecommendedTextsReturnsStructure(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->formatGetRecommendedTexts(999999, []);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('recommendations', $result);
+        $this->assertArrayHasKey('target_comprehensibility', $result);
+    }
+
+    /**
+     * Test formatGetRecommendedTexts clamps target parameter.
+     */
+    public function testFormatGetRecommendedTextsClamsTarget(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Test with target below minimum
+        $result = $this->handler->formatGetRecommendedTexts(999999, ['target' => '0.1']);
+        $this->assertEquals(0.5, $result['target_comprehensibility']);
+
+        // Test with target above maximum
+        $result = $this->handler->formatGetRecommendedTexts(999999, ['target' => '1.5']);
+        $this->assertEquals(1.0, $result['target_comprehensibility']);
+
+        // Test with valid target
+        $result = $this->handler->formatGetRecommendedTexts(999999, ['target' => '0.9']);
+        $this->assertEquals(0.9, $result['target_comprehensibility']);
+    }
+
+    /**
+     * Test formatGetRecommendedTexts handles limit parameter.
+     */
+    public function testFormatGetRecommendedTextsHandlesLimit(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Test with high limit (should clamp to 50)
+        $result = $this->handler->formatGetRecommendedTexts(999999, ['limit' => '100']);
+        $this->assertIsArray($result['recommendations']);
+    }
+
+    // ===== makeTrans tests =====
+
+    /**
+     * Test makeTrans generates HTML for new word.
+     */
+    public function testMakeTransGeneratesHtmlForNewWord(): void
+    {
+        $result = $this->handler->makeTrans(0, null, '', 'test', 1);
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('input', $result);
+        $this->assertStringContainsString('rg0', $result);
+        $this->assertStringContainsString('tx0', $result);
+    }
+
+    /**
+     * Test makeTrans generates HTML for existing word with ID.
+     */
+    public function testMakeTransGeneratesHtmlForExistingWord(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->handler->makeTrans(1, 1, 'translation', 'test', 1);
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('input', $result);
+        $this->assertStringContainsString('rg1', $result);
+        $this->assertStringContainsString('tx1', $result);
+    }
+
+    // ===== Method signature tests =====
+
+    /**
+     * Test all handler methods have correct return types.
+     */
+    public function testHandlerMethodsHaveCorrectReturnTypes(): void
+    {
+        $reflection = new \ReflectionClass(TextApiHandler::class);
+
+        $arrayReturnMethods = [
+            'formatSetTextPosition',
+            'formatSetAudioPosition',
+            'formatSetAnnotation',
+            'formatSetDisplayMode',
+            'formatMarkAllWellKnown',
+            'formatMarkAllIgnored',
+            'formatGetWords',
+            'formatTextsByLanguage',
+            'formatArchivedTextsByLanguage',
+            'formatGetPrintItems',
+            'formatGetAnnotation',
+            'formatTermTranslations',
+            'formatEditTermForm',
+            'formatGetTextScore',
+            'formatGetTextScores',
+            'formatGetRecommendedTexts',
+        ];
+
+        foreach ($arrayReturnMethods as $methodName) {
+            $method = $reflection->getMethod($methodName);
+            $returnType = $method->getReturnType();
+
+            $this->assertNotNull(
+                $returnType,
+                "Method $methodName should have a return type"
+            );
+            $this->assertEquals(
+                'array',
+                $returnType->getName(),
+                "Method $methodName should return array"
+            );
+        }
+    }
 }

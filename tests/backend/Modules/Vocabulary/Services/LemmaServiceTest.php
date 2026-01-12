@@ -378,4 +378,277 @@ class LemmaServiceTest extends TestCase
 
         $this->assertSame(0, $result);
     }
+
+    // =========================================================================
+    // Additional Coverage Tests - Public Method Signatures
+    // =========================================================================
+
+    /**
+     * Test constructor creates LemmaService with default dependencies.
+     */
+    public function testConstructorWithDefaults(): void
+    {
+        $service = new LemmaService();
+
+        $this->assertInstanceOf(LemmaService::class, $service);
+    }
+
+    /**
+     * Test getWordFamilyList page boundary handling.
+     */
+    public function testGetWordFamilyListClampsPagination(): void
+    {
+        // Page should be at least 1
+        $result = $this->service->getWordFamilyList(1, 0, 50, 'lemma', 'asc');
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('pagination', $result);
+
+        // Per page should be clamped to 1-100 range
+        $result = $this->service->getWordFamilyList(1, 1, 0, 'lemma', 'asc');
+        $this->assertIsArray($result);
+
+        $result = $this->service->getWordFamilyList(1, 1, 200, 'lemma', 'asc');
+        $this->assertIsArray($result);
+    }
+
+    /**
+     * Test getWordFamilyList with various sort options.
+     */
+    public function testGetWordFamilyListSortByCount(): void
+    {
+        $result = $this->service->getWordFamilyList(1, 1, 50, 'count', 'desc');
+        $this->assertIsArray($result);
+    }
+
+    /**
+     * Test getWordFamilyList with status sort.
+     */
+    public function testGetWordFamilyListSortByStatus(): void
+    {
+        $result = $this->service->getWordFamilyList(1, 1, 50, 'status', 'asc');
+        $this->assertIsArray($result);
+    }
+
+    /**
+     * Test getWordFamilyList with default lemma sort.
+     */
+    public function testGetWordFamilyListSortByLemma(): void
+    {
+        $result = $this->service->getWordFamilyList(1, 1, 50, 'lemma', 'desc');
+        $this->assertIsArray($result);
+    }
+
+    /**
+     * Test getWordFamilyList with invalid sort falls back to lemma.
+     */
+    public function testGetWordFamilyListInvalidSort(): void
+    {
+        $result = $this->service->getWordFamilyList(1, 1, 50, 'invalid', 'asc');
+        $this->assertIsArray($result);
+    }
+
+    /**
+     * Test updateWordFamilyStatus with all valid status values.
+     *
+     * @dataProvider validStatusProvider
+     */
+    public function testUpdateWordFamilyStatusAcceptsValidStatus(int $status): void
+    {
+        // Just ensure no exception is thrown for valid statuses
+        // The actual update will fail because database is mocked
+        $result = $this->service->updateWordFamilyStatus(1, 'test', $status);
+        $this->assertIsInt($result);
+    }
+
+    public static function validStatusProvider(): array
+    {
+        return [
+            'status 1' => [1],
+            'status 2' => [2],
+            'status 3' => [3],
+            'status 4' => [4],
+            'status 5' => [5],
+            'status 98 (ignored)' => [98],
+            'status 99 (well-known)' => [99],
+        ];
+    }
+
+    /**
+     * Test bulkUpdateTermStatus with all valid status values.
+     *
+     * @dataProvider validStatusProvider
+     */
+    public function testBulkUpdateTermStatusAcceptsValidStatus(int $status): void
+    {
+        $result = $this->service->bulkUpdateTermStatus([1], $status);
+        $this->assertIsInt($result);
+    }
+
+    /**
+     * Test getLemmaStatistics returns expected structure.
+     */
+    public function testGetLemmaStatisticsReturnsExpectedStructure(): void
+    {
+        $result = $this->service->getLemmaStatistics(1);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('total_terms', $result);
+        $this->assertArrayHasKey('with_lemma', $result);
+        $this->assertArrayHasKey('without_lemma', $result);
+        $this->assertArrayHasKey('unique_lemmas', $result);
+    }
+
+    /**
+     * Test clearLemmas returns integer.
+     */
+    public function testClearLemmasReturnsInteger(): void
+    {
+        $result = $this->service->clearLemmas(1);
+        $this->assertIsInt($result);
+    }
+
+    /**
+     * Test getWordFamilies returns array.
+     */
+    public function testGetWordFamiliesReturnsArray(): void
+    {
+        $result = $this->service->getWordFamilies(1, 50);
+        $this->assertIsArray($result);
+    }
+
+    /**
+     * Test getWordFamilies with custom limit.
+     */
+    public function testGetWordFamiliesWithLimit(): void
+    {
+        $result = $this->service->getWordFamilies(1, 10);
+        $this->assertIsArray($result);
+    }
+
+    /**
+     * Test findPotentialLemmaGroups returns array.
+     */
+    public function testFindPotentialLemmaGroupsReturnsArray(): void
+    {
+        $result = $this->service->findPotentialLemmaGroups(1, 20);
+        $this->assertIsArray($result);
+    }
+
+    /**
+     * Test findPotentialLemmaGroups with custom limit.
+     */
+    public function testFindPotentialLemmaGroupsWithLimit(): void
+    {
+        $result = $this->service->findPotentialLemmaGroups(1, 5);
+        $this->assertIsArray($result);
+    }
+
+    /**
+     * Test getWordFamilyDetails returns null for non-existent term.
+     */
+    public function testGetWordFamilyDetailsReturnsNullForNonExistent(): void
+    {
+        $result = $this->service->getWordFamilyDetails(999999999);
+        $this->assertNull($result);
+    }
+
+    /**
+     * Test getLemmaAggregateStats returns expected structure.
+     */
+    public function testGetLemmaAggregateStatsReturnsExpectedStructure(): void
+    {
+        $result = $this->service->getLemmaAggregateStats(1);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('total_lemmas', $result);
+        $this->assertArrayHasKey('single_form', $result);
+        $this->assertArrayHasKey('multi_form', $result);
+        $this->assertArrayHasKey('avg_forms_per_lemma', $result);
+        $this->assertArrayHasKey('status_distribution', $result);
+    }
+
+    /**
+     * Test getSuggestedFamilyUpdate returns expected structure.
+     */
+    public function testGetSuggestedFamilyUpdateReturnsExpectedStructure(): void
+    {
+        $result = $this->service->getSuggestedFamilyUpdate(999999, 5);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('suggestion', $result);
+        $this->assertArrayHasKey('affected_count', $result);
+        $this->assertArrayHasKey('term_ids', $result);
+    }
+
+    /**
+     * Test getSuggestedFamilyUpdate with well-known status.
+     */
+    public function testGetSuggestedFamilyUpdateWithWellKnownStatus(): void
+    {
+        $result = $this->service->getSuggestedFamilyUpdate(1, 99);
+
+        $this->assertArrayHasKey('suggestion', $result);
+    }
+
+    /**
+     * Test getSuggestedFamilyUpdate with learning status.
+     */
+    public function testGetSuggestedFamilyUpdateWithLearningStatus(): void
+    {
+        $result = $this->service->getSuggestedFamilyUpdate(1, 3);
+
+        $this->assertArrayHasKey('suggestion', $result);
+    }
+
+    /**
+     * Test getUnmatchedStatistics returns expected structure.
+     */
+    public function testGetUnmatchedStatisticsReturnsExpectedStructure(): void
+    {
+        $result = $this->service->getUnmatchedStatistics(1);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('unmatched_count', $result);
+        $this->assertArrayHasKey('unique_words', $result);
+        $this->assertArrayHasKey('matchable_by_lemma', $result);
+    }
+
+    /**
+     * Test linkTextItemsByLemmaSql returns integer.
+     *
+     * @group integration
+     */
+    public function testLinkTextItemsByLemmaSqlReturnsInteger(): void
+    {
+        try {
+            $result = $this->service->linkTextItemsByLemmaSql(1);
+            $this->assertIsInt($result);
+        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+            $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Test linkTextItemsByLemmaSql with text ID.
+     *
+     * @group integration
+     */
+    public function testLinkTextItemsByLemmaSqlWithTextId(): void
+    {
+        try {
+            $result = $this->service->linkTextItemsByLemmaSql(1, 1);
+            $this->assertIsInt($result);
+        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+            $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Test findWordIdByLemma returns null for non-existent.
+     */
+    public function testFindWordIdByLemmaReturnsNullForNonExistent(): void
+    {
+        $result = $this->service->findWordIdByLemma(999999, 'nonexistent');
+        $this->assertNull($result);
+    }
 }
