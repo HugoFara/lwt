@@ -191,7 +191,7 @@ class Term
         float $random
     ): self {
         return new self(
-            TermId::fromInt($id),
+            $id === 0 ? TermId::new() : TermId::fromInt($id),
             LanguageId::fromInt($languageId),
             $text,
             $textLowercase,
