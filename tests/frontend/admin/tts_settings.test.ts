@@ -298,5 +298,133 @@ describe('tts_settings.ts', () => {
         expect(component.getVoiceDisplayName(voice)).toBe('Test Voice');
       });
     });
+
+    describe('init', () => {
+      it('calls autoSetCurrentLanguage, loadSavedSettings, and initVoices', () => {
+        const config: TTSSettingsConfig = { currentLanguageCode: 'en' };
+        const component = ttsSettingsApp(config);
+
+        const autoSetSpy = vi.spyOn(component, 'autoSetCurrentLanguage');
+        const loadSpy = vi.spyOn(component, 'loadSavedSettings');
+        const initVoicesSpy = vi.spyOn(component, 'initVoices');
+
+        component.init();
+
+        expect(autoSetSpy).toHaveBeenCalled();
+        expect(loadSpy).toHaveBeenCalled();
+        expect(initVoicesSpy).toHaveBeenCalled();
+      });
+
+      it('initializes component state in correct order', () => {
+        mockGetTTSSettingsWithMigration.mockReturnValue({
+          voice: 'Saved Voice',
+          rate: 1.2,
+          pitch: 0.9
+        });
+
+        Object.defineProperty(window, 'location', {
+          value: { search: '?lang=de' },
+          writable: true
+        });
+
+        const config: TTSSettingsConfig = { currentLanguageCode: 'en' };
+        const component = ttsSettingsApp(config);
+
+        component.init();
+
+        // After init, language should be set from URL
+        expect(component.currentLanguage).toBe('de');
+        // Settings should be loaded for the correct language
+        expect(mockGetTTSSettingsWithMigration).toHaveBeenCalledWith('de');
+      });
+    });
+
+    describe('initVoices', () => {
+      it('sets voicesLoading to false when speechSynthesis is undefined', () => {
+        delete (window as any).speechSynthesis;
+
+        const component = ttsSettingsApp();
+        component.initVoices();
+
+        expect(component.voicesLoading).toBe(false);
+      });
+
+      it('loads voices immediately when available', () => {
+        (window as any).speechSynthesis = {
+          getVoices: vi.fn().mockReturnValue([
+            { name: 'Voice 1', lang: 'en', default: false }
+          ]),
+          onvoiceschanged: null
+        };
+
+        const component = ttsSettingsApp({ currentLanguageCode: '' });
+        const populateSpy = vi.spyOn(component, 'populateVoiceList');
+
+        component.initVoices();
+
+        expect(populateSpy).toHaveBeenCalled();
+        expect(component.voicesLoading).toBe(false);
+      });
+
+      it('waits for onvoiceschanged when voices not immediately available', () => {
+        let onvoiceschangedCallback: (() => void) | null = null;
+        (window as any).speechSynthesis = {
+          getVoices: vi.fn().mockReturnValue([]),
+          set onvoiceschanged(cb: (() => void) | null) {
+            onvoiceschangedCallback = cb;
+          },
+          get onvoiceschanged() {
+            return onvoiceschangedCallback;
+          }
+        };
+
+        const component = ttsSettingsApp({ currentLanguageCode: '' });
+        const populateSpy = vi.spyOn(component, 'populateVoiceList');
+
+        component.initVoices();
+
+        // Should not call populate yet, still loading
+        expect(populateSpy).not.toHaveBeenCalled();
+        expect(component.voicesLoading).toBe(true);
+
+        // Simulate voices becoming available
+        if (onvoiceschangedCallback) {
+          onvoiceschangedCallback();
+        }
+
+        expect(populateSpy).toHaveBeenCalled();
+        expect(component.voicesLoading).toBe(false);
+      });
+    });
+
+    describe('saveSettings with empty voice', () => {
+      it('saves undefined voice when selectedVoice is empty', () => {
+        const config: TTSSettingsConfig = { currentLanguageCode: 'en' };
+        const component = ttsSettingsApp(config);
+        component.selectedVoice = '';
+        component.rate = 1.0;
+        component.pitch = 1.0;
+
+        component.saveSettings();
+
+        expect(mockSaveTTSSettings).toHaveBeenCalledWith('en', {
+          voice: undefined,
+          rate: 1.0,
+          pitch: 1.0
+        });
+      });
+    });
+
+    describe('saveSettings error case', () => {
+      it('logs error when no language is set', () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const component = ttsSettingsApp();
+
+        component.saveSettings();
+
+        expect(consoleSpy).toHaveBeenCalledWith('Cannot save TTS settings: no language selected');
+        expect(mockSaveTTSSettings).not.toHaveBeenCalled();
+      });
+    });
   });
 });
