@@ -33,7 +33,6 @@ vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
 import {
   wordPopoverData,
   initWordPopoverAlpine,
-  type WordPopoverData
 } from '../../../src/frontend/js/modules/vocabulary/components/word_popover';
 
 describe('word_popover.ts', () => {

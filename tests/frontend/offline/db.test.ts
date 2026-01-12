@@ -1,8 +1,7 @@
 /**
  * Tests for shared/offline/db.ts - IndexedDB offline database
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import Dexie from 'dexie';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 
 // Mock Dexie before importing the module
 vi.mock('dexie', () => {

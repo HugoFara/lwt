@@ -22,7 +22,7 @@ vi.mock('../../../src/frontend/js/shared/icons/lucide_icons', () => ({
 }));
 
 // Import after mocks are set up
-import { multiWordModalData, registerMultiWordModal, type MultiWordModalData } from '../../../src/frontend/js/modules/vocabulary/components/multi_word_modal';
+import { multiWordModalData, registerMultiWordModal } from '../../../src/frontend/js/modules/vocabulary/components/multi_word_modal';
 
 describe('multi_word_modal.ts', () => {
   let mockStore: ReturnType<typeof createMockStore>;

@@ -28,7 +28,6 @@ import Alpine from 'alpinejs';
 import {
   offlineIndicator,
   registerOfflineIndicator,
-  type OfflineIndicatorData,
 } from '../../../src/frontend/js/shared/offline/offline-indicator';
 import {
   isOfflineStorageAvailable,
@@ -43,7 +42,6 @@ describe('shared/offline/offline-indicator.ts', () => {
   let removeEventListenerSpy: ReturnType<typeof vi.spyOn>;
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
   let confirmSpy: ReturnType<typeof vi.spyOn>;
-  const originalNavigator = globalThis.navigator;
 
   beforeEach(() => {
     vi.clearAllMocks();

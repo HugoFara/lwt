@@ -308,10 +308,6 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
 
       await openTermEditModal(1, 5);
 
-      // Simulate form submission
-      const form = document.getElementById('term-edit-form');
-      const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-
       // Get the form submission handler that was attached
       // Since we can't easily access the handler, we test that the API method exists
       expect(typeof TermsApi.createFull).toBe('function');

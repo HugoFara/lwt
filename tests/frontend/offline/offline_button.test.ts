@@ -22,7 +22,6 @@ import Alpine from 'alpinejs';
 import {
   offlineButton,
   registerOfflineButton,
-  type OfflineButtonData,
 } from '../../../src/frontend/js/shared/offline/offline-button';
 import {
   isOfflineStorageAvailable,

@@ -33,7 +33,6 @@ vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
 import {
   wordModalData,
   initWordModalAlpine,
-  type WordModalData
 } from '../../../src/frontend/js/modules/vocabulary/components/word_modal';
 
 describe('word_modal.ts', () => {

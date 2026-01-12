@@ -29,7 +29,7 @@ describe('js/sw.ts - Service Worker', () => {
     skipWaiting: ReturnType<typeof vi.fn>;
     clients: { claim: ReturnType<typeof vi.fn> };
   };
-  let eventHandlers: Map<string, Function>;
+  let eventHandlers: Map<string, (...args: unknown[]) => unknown>;
   let consoleLogSpy: ReturnType<typeof vi.spyOn>;
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
@@ -52,7 +52,7 @@ describe('js/sw.ts - Service Worker', () => {
     };
 
     mockSelf = {
-      addEventListener: vi.fn((event: string, handler: Function) => {
+      addEventListener: vi.fn((event: string, handler: (...args: unknown[]) => unknown) => {
         eventHandlers.set(event, handler);
       }),
       skipWaiting: vi.fn().mockResolvedValue(undefined),
