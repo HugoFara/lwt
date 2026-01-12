@@ -556,7 +556,9 @@ describe('word_popup_interface.ts', () => {
   // ===========================================================================
 
   // Note: These tests are skipped because they require the word popup dialog
-  // which is not properly set up in the test environment
+  // which has complex DOM and Alpine.js dependencies that are difficult to mock.
+  // The individual helper functions (createDictionaryLinks, createStatusChangeLinks, etc.)
+  // are already thoroughly tested above.
   describe.skip('popup functions (require popup dialog)', () => {
     it('showIgnoredWordPopup returns boolean', () => {
       const result = showIgnoredWordPopup(

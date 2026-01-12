@@ -485,6 +485,497 @@ describe('api/terms.ts', () => {
   });
 
   // ===========================================================================
+  // getDetails Tests
+  // ===========================================================================
+
+  describe('TermsApi.getDetails', () => {
+    it('calls apiGet with correct endpoint', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ data: { id: 1 } });
+
+      await TermsApi.getDetails(100);
+
+      expect(apiGet).toHaveBeenCalledWith('/terms/100/details', {});
+    });
+
+    it('includes annotation parameter when provided', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ data: { id: 1 } });
+
+      await TermsApi.getDetails(100, 'test-annotation');
+
+      expect(apiGet).toHaveBeenCalledWith('/terms/100/details', {
+        ann: 'test-annotation'
+      });
+    });
+
+    it('returns term details on success', async () => {
+      const mockDetails = {
+        id: 1,
+        text: 'hello',
+        textLc: 'hello',
+        translation: 'bonjour',
+        status: 3,
+        langId: 1,
+        sentence: 'Hello world',
+        tags: ['greeting'],
+        statusLabel: 'Learning (3)'
+      };
+      vi.mocked(apiGet).mockResolvedValue({ data: mockDetails });
+
+      const result = await TermsApi.getDetails(1);
+
+      expect(result.data).toEqual(mockDetails);
+    });
+
+    it('returns error on failure', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ error: 'Term not found' });
+
+      const result = await TermsApi.getDetails(999);
+
+      expect(result.error).toBe('Term not found');
+    });
+  });
+
+  // ===========================================================================
+  // getMultiWord Tests
+  // ===========================================================================
+
+  describe('TermsApi.getMultiWord', () => {
+    it('calls apiGet with text ID and position', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ data: {} });
+
+      await TermsApi.getMultiWord(1, 5);
+
+      expect(apiGet).toHaveBeenCalledWith('/terms/multi', {
+        term_id: '1',
+        ord: '5'
+      });
+    });
+
+    it('includes text parameter when provided', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ data: {} });
+
+      await TermsApi.getMultiWord(1, 5, 'hello world');
+
+      expect(apiGet).toHaveBeenCalledWith('/terms/multi', {
+        term_id: '1',
+        ord: '5',
+        txt: 'hello world'
+      });
+    });
+
+    it('includes word ID when provided', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ data: {} });
+
+      await TermsApi.getMultiWord(1, 5, undefined, 100);
+
+      expect(apiGet).toHaveBeenCalledWith('/terms/multi', {
+        term_id: '1',
+        ord: '5',
+        wid: '100'
+      });
+    });
+
+    it('includes both text and word ID when provided', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ data: {} });
+
+      await TermsApi.getMultiWord(1, 5, 'hello world', 100);
+
+      expect(apiGet).toHaveBeenCalledWith('/terms/multi', {
+        term_id: '1',
+        ord: '5',
+        txt: 'hello world',
+        wid: '100'
+      });
+    });
+
+    it('returns multi-word data on success', async () => {
+      const mockData = {
+        id: 100,
+        text: 'hello world',
+        textLc: 'hello world',
+        translation: 'bonjour le monde',
+        romanization: '',
+        sentence: 'Hello world, how are you?',
+        status: 1,
+        langId: 1,
+        wordCount: 2,
+        isNew: false
+      };
+      vi.mocked(apiGet).mockResolvedValue({ data: mockData });
+
+      const result = await TermsApi.getMultiWord(1, 5);
+
+      expect(result.data).toEqual(mockData);
+    });
+
+    it('returns error on failure', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ error: 'Invalid position' });
+
+      const result = await TermsApi.getMultiWord(1, 9999);
+
+      expect(result.error).toBe('Invalid position');
+    });
+  });
+
+  // ===========================================================================
+  // createMultiWord Tests
+  // ===========================================================================
+
+  describe('TermsApi.createMultiWord', () => {
+    it('calls apiPost with correct data', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ data: { term_id: 200 } });
+
+      const data = {
+        textId: 1,
+        position: 5,
+        text: 'hello world',
+        translation: 'bonjour le monde',
+        status: 1
+      };
+
+      await TermsApi.createMultiWord(data);
+
+      expect(apiPost).toHaveBeenCalledWith('/terms/multi', data);
+    });
+
+    it('returns new term ID on success', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ data: { term_id: 200, term_lc: 'hello world' } });
+
+      const result = await TermsApi.createMultiWord({
+        textId: 1,
+        text: 'hello world'
+      });
+
+      expect(result.data?.term_id).toBe(200);
+    });
+
+    it('returns error on failure', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ error: 'Invalid multi-word' });
+
+      const result = await TermsApi.createMultiWord({
+        textId: 1,
+        text: ''
+      });
+
+      expect(result.error).toBe('Invalid multi-word');
+    });
+
+    it('handles optional parameters', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ data: { term_id: 1 } });
+
+      const data = {
+        textId: 1,
+        text: 'hello world',
+        wordCount: 2,
+        romanization: 'haro warudo',
+        sentence: 'Hello world, how are you?'
+      };
+
+      await TermsApi.createMultiWord(data);
+
+      expect(apiPost).toHaveBeenCalledWith('/terms/multi', data);
+    });
+  });
+
+  // ===========================================================================
+  // updateMultiWord Tests
+  // ===========================================================================
+
+  describe('TermsApi.updateMultiWord', () => {
+    it('calls apiPut with correct endpoint and data', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ data: { success: true } });
+
+      const data = {
+        translation: 'updated translation',
+        status: 2
+      };
+
+      await TermsApi.updateMultiWord(100, data);
+
+      expect(apiPut).toHaveBeenCalledWith('/terms/multi/100', data);
+    });
+
+    it('returns success on update', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ data: { success: true, status: 2 } });
+
+      const result = await TermsApi.updateMultiWord(100, { translation: 'test' });
+
+      expect(result.data?.success).toBe(true);
+    });
+
+    it('returns error on failure', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ error: 'Term not found' });
+
+      const result = await TermsApi.updateMultiWord(999, { translation: 'test' });
+
+      expect(result.error).toBe('Term not found');
+    });
+
+    it('handles partial update data', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ data: { success: true } });
+
+      await TermsApi.updateMultiWord(100, { romanization: 'haro' });
+
+      expect(apiPut).toHaveBeenCalledWith('/terms/multi/100', { romanization: 'haro' });
+    });
+  });
+
+  // ===========================================================================
+  // getForEdit Tests
+  // ===========================================================================
+
+  describe('TermsApi.getForEdit', () => {
+    it('calls apiGet with text ID and position', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ data: {} });
+
+      await TermsApi.getForEdit(1, 5);
+
+      expect(apiGet).toHaveBeenCalledWith('/terms/for-edit', {
+        term_id: '1',
+        ord: '5'
+      });
+    });
+
+    it('includes word ID when provided', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ data: {} });
+
+      await TermsApi.getForEdit(1, 5, 100);
+
+      expect(apiGet).toHaveBeenCalledWith('/terms/for-edit', {
+        term_id: '1',
+        ord: '5',
+        wid: '100'
+      });
+    });
+
+    it('handles null wordId', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ data: {} });
+
+      await TermsApi.getForEdit(1, 5, undefined);
+
+      expect(apiGet).toHaveBeenCalledWith('/terms/for-edit', {
+        term_id: '1',
+        ord: '5'
+      });
+    });
+
+    it('returns term edit data on success', async () => {
+      const mockResponse = {
+        isNew: false,
+        term: {
+          id: 100,
+          text: 'hello',
+          textLc: 'hello',
+          lemma: '',
+          lemmaLc: '',
+          hex: '#68656c6c6f',
+          translation: 'bonjour',
+          romanization: '',
+          sentence: 'Hello world',
+          notes: '',
+          status: 2,
+          tags: ['greeting']
+        },
+        language: {
+          id: 1,
+          name: 'French',
+          showRomanization: false,
+          translateUri: 'https://translate.google.com/?sl=fr&tl=en&text=###'
+        },
+        allTags: ['greeting', 'common', 'verb'],
+        similarTerms: [
+          { id: 101, text: 'helo', translation: 'salut', status: 1 }
+        ]
+      };
+      vi.mocked(apiGet).mockResolvedValue({ data: mockResponse });
+
+      const result = await TermsApi.getForEdit(1, 5);
+
+      expect(result.data).toEqual(mockResponse);
+    });
+
+    it('returns error on failure', async () => {
+      vi.mocked(apiGet).mockResolvedValue({ error: 'Invalid position' });
+
+      const result = await TermsApi.getForEdit(1, 9999);
+
+      expect(result.error).toBe('Invalid position');
+    });
+  });
+
+  // ===========================================================================
+  // createFull Tests
+  // ===========================================================================
+
+  describe('TermsApi.createFull', () => {
+    it('calls apiPost with correct data', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ data: { success: true } });
+
+      const data = {
+        textId: 1,
+        position: 5,
+        translation: 'bonjour',
+        status: 1
+      };
+
+      await TermsApi.createFull(data);
+
+      expect(apiPost).toHaveBeenCalledWith('/terms/full', data);
+    });
+
+    it('returns term data on success', async () => {
+      const mockTerm = {
+        success: true,
+        term: {
+          id: 200,
+          text: 'hello',
+          textLc: 'hello',
+          lemma: '',
+          lemmaLc: '',
+          hex: '#68656c6c6f',
+          translation: 'bonjour',
+          romanization: '',
+          sentence: 'Hello world',
+          status: 1,
+          tags: []
+        }
+      };
+      vi.mocked(apiPost).mockResolvedValue({ data: mockTerm });
+
+      const result = await TermsApi.createFull({
+        textId: 1,
+        position: 5,
+        translation: 'bonjour',
+        status: 1
+      });
+
+      expect(result.data).toEqual(mockTerm);
+    });
+
+    it('returns error on failure', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ error: 'Term already exists' });
+
+      const result = await TermsApi.createFull({
+        textId: 1,
+        position: 5,
+        translation: 'test',
+        status: 1
+      });
+
+      expect(result.error).toBe('Term already exists');
+    });
+
+    it('handles all optional parameters', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ data: { success: true } });
+
+      const data = {
+        textId: 1,
+        position: 5,
+        translation: 'bonjour',
+        romanization: 'haro',
+        sentence: 'Hello world',
+        notes: 'Common greeting',
+        lemma: 'hello',
+        status: 2,
+        tags: ['greeting', 'common']
+      };
+
+      await TermsApi.createFull(data);
+
+      expect(apiPost).toHaveBeenCalledWith('/terms/full', data);
+    });
+  });
+
+  // ===========================================================================
+  // updateFull Tests
+  // ===========================================================================
+
+  describe('TermsApi.updateFull', () => {
+    it('calls apiPut with correct endpoint and data', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ data: { success: true } });
+
+      const data = {
+        translation: 'updated translation',
+        status: 3
+      };
+
+      await TermsApi.updateFull(100, data);
+
+      expect(apiPut).toHaveBeenCalledWith('/terms/100', data);
+    });
+
+    it('returns updated term data on success', async () => {
+      const mockResponse = {
+        success: true,
+        term: {
+          id: 100,
+          text: 'hello',
+          textLc: 'hello',
+          lemma: '',
+          lemmaLc: '',
+          hex: '#68656c6c6f',
+          translation: 'updated translation',
+          romanization: '',
+          sentence: 'Hello world',
+          status: 3,
+          tags: []
+        }
+      };
+      vi.mocked(apiPut).mockResolvedValue({ data: mockResponse });
+
+      const result = await TermsApi.updateFull(100, {
+        translation: 'updated translation',
+        status: 3
+      });
+
+      expect(result.data).toEqual(mockResponse);
+    });
+
+    it('returns error on failure', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ error: 'Term not found' });
+
+      const result = await TermsApi.updateFull(999, {
+        translation: 'test',
+        status: 1
+      });
+
+      expect(result.error).toBe('Term not found');
+    });
+
+    it('handles all optional parameters', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ data: { success: true } });
+
+      const data = {
+        translation: 'bonjour',
+        romanization: 'haro',
+        sentence: 'Hello world',
+        notes: 'Common greeting',
+        lemma: 'hello',
+        status: 4,
+        tags: ['greeting', 'common']
+      };
+
+      await TermsApi.updateFull(100, data);
+
+      expect(apiPut).toHaveBeenCalledWith('/terms/100', data);
+    });
+
+    it('handles partial update', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ data: { success: true } });
+
+      await TermsApi.updateFull(100, {
+        translation: 'just translation',
+        status: 1
+      });
+
+      expect(apiPut).toHaveBeenCalledWith('/terms/100', {
+        translation: 'just translation',
+        status: 1
+      });
+    });
+  });
+
+  // ===========================================================================
   // Edge Cases
   // ===========================================================================
 
