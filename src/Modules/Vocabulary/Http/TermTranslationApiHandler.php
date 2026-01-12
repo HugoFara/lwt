@@ -299,7 +299,7 @@ class TermTranslationApiHandler
         $result = $this->checkUpdateTranslation($termId, trim($translation));
         if (!$result['success']) {
             $errorMsg = match ($result['error'] ?? '') {
-                'word_not_found' => "Error: {$result['count']} word ID found!",
+                'word_not_found' => "Error: " . ($result['count'] ?? '?') . " word ID found!",
                 default => 'Unknown error'
             };
             return ["error" => $errorMsg];
@@ -329,7 +329,7 @@ class TermTranslationApiHandler
         }
 
         $errorMsg = match ($result['error'] ?? '') {
-            'unexpected_affected_rows' => "Error: {$result['affected']} rows affected, expected 1!",
+            'unexpected_affected_rows' => "Error: " . ($result['affected'] ?? '?') . " rows affected, expected 1!",
             default => 'Unknown error'
         };
         return ["error" => $errorMsg];

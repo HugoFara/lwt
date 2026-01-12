@@ -16,7 +16,6 @@ vi.mock('alpinejs', () => {
   };
 });
 
-import Alpine from 'alpinejs';
 import { resetPasswordFormData } from '../../../src/frontend/js/modules/auth/pages/reset_password_form';
 
 describe('auth/pages/reset_password_form.ts', () => {

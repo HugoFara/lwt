@@ -16,7 +16,6 @@ vi.mock('alpinejs', () => {
   };
 });
 
-import Alpine from 'alpinejs';
 import { registerFormData } from '../../../src/frontend/js/modules/auth/pages/register_form';
 
 describe('auth/pages/register_form.ts', () => {

@@ -23,8 +23,7 @@ import {
   type Feed,
   type Article,
   type FeedListResponse,
-  type ArticlesResponse,
-  type FeedOptions
+  type ArticlesResponse
 } from '../../../../src/frontend/js/modules/feed/api/feeds_api';
 
 // Mock the api_client module

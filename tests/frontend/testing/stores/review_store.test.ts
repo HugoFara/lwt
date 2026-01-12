@@ -710,7 +710,6 @@ describe('review/stores/review_store.ts', () => {
     it('clears interval', () => {
       const store = getReviewStore();
       store.startTimer();
-      const intervalId = store.timer.intervalId;
 
       store.stopTimer();
 

@@ -143,11 +143,12 @@ class TextApiHandler
 
         return match ($result['error'] ?? '') {
             'parse_annotation_failed' => 'Failed to parse annotation text',
-            'line_out_of_range' => "Unreachable translation: line request is {$result['requested']}, " .
-                "but only {$result['available']} translations were found",
+            'line_out_of_range' => "Unreachable translation: line request is " .
+                ($result['requested'] ?? '?') . ", but only " .
+                ($result['available'] ?? '?') . " translations were found",
             'parse_line_failed' => 'Failed to parse annotation line',
-            'punctuation_term' => "Term is punctuation! Term position is {$result['position']}",
-            'insufficient_columns' => "Not enough columns: {$result['found']}",
+            'punctuation_term' => "Term is punctuation! Term position is " . ($result['position'] ?? '?'),
+            'insufficient_columns' => "Not enough columns: " . ($result['found'] ?? '?'),
             default => 'Unknown error'
         };
     }
