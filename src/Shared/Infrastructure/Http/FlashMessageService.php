@@ -45,13 +45,23 @@ class FlashMessageService
     /**
      * Ensure session is started.
      *
-     * @return void
+     * @return bool True if session is available, false otherwise
      */
-    private function ensureSession(): void
+    private function ensureSession(): bool
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            return true;
         }
+        if (session_status() === PHP_SESSION_NONE) {
+            // Check if headers have already been sent
+            if (headers_sent()) {
+                // Cannot start session after headers are sent
+                return false;
+            }
+            session_start();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -64,7 +74,9 @@ class FlashMessageService
      */
     public function add(string $message, string $type = self::TYPE_INFO): void
     {
-        $this->ensureSession();
+        if (!$this->ensureSession()) {
+            return;
+        }
         if (!isset($_SESSION[self::KEY_FLASH]) || !is_array($_SESSION[self::KEY_FLASH])) {
             $_SESSION[self::KEY_FLASH] = [];
         }
@@ -148,7 +160,9 @@ class FlashMessageService
      */
     public function has(?string $type = null): bool
     {
-        $this->ensureSession();
+        if (!$this->ensureSession()) {
+            return false;
+        }
         if (!isset($_SESSION[self::KEY_FLASH]) || !is_array($_SESSION[self::KEY_FLASH])) {
             return false;
         }
@@ -170,7 +184,9 @@ class FlashMessageService
      */
     public function getAndClear(): array
     {
-        $this->ensureSession();
+        if (!$this->ensureSession()) {
+            return [];
+        }
         if (!isset($_SESSION[self::KEY_FLASH]) || !is_array($_SESSION[self::KEY_FLASH])) {
             return [];
         }
@@ -191,7 +207,9 @@ class FlashMessageService
      */
     public function getByTypeAndClear(string $type): array
     {
-        $this->ensureSession();
+        if (!$this->ensureSession()) {
+            return [];
+        }
         if (!isset($_SESSION[self::KEY_FLASH]) || !is_array($_SESSION[self::KEY_FLASH])) {
             return [];
         }
@@ -232,7 +250,9 @@ class FlashMessageService
      */
     public function clear(): void
     {
-        $this->ensureSession();
+        if (!$this->ensureSession()) {
+            return;
+        }
         unset($_SESSION[self::KEY_FLASH]);
     }
 
