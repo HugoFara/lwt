@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Variation 4: Deeper navy blue, subtle shadow -->
+
+  <!-- Shadow -->
+  <path d="M266 395
+           L266 125
+           C266 125 330 105 420 120
+           L420 375
+           C330 360 266 395 266 395 Z"
+        fill="#0D47A1" opacity="0.3"/>
+
+  <!-- Left page -->
+  <path d="M256 380
+           L256 115
+           C256 115 192 95 102 110
+           C90 112 82 122 82 134
+           L82 355
+           C82 367 90 377 102 375
+           C192 360 256 380 256 380 Z"
+        fill="#1565C0"/>
+
+  <!-- Right page -->
+  <path d="M256 380
+           L256 115
+           C256 115 320 95 410 110
+           C422 112 430 122 430 134
+           L430 355
+           C430 367 422 377 410 375
+           C320 360 256 380 256 380 Z"
+        fill="#0D47A1"/>
+
+  <!-- Hiragana あ on left page -->
+  <text x="170" y="275"
+        font-family="'Hiragino Kaku Gothic Pro', 'Yu Gothic', 'Noto Sans JP', sans-serif"
+        font-size="130"
+        font-weight="400"
+        fill="#FFFFFF"
+        text-anchor="middle">あ</text>
+
+  <!-- Latin A on right page -->
+  <text x="342" y="288"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="140"
+        font-weight="600"
+        fill="#FFFFFF"
+        text-anchor="middle">A</text>
+</svg>
