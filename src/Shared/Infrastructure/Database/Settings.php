@@ -106,18 +106,18 @@ class Settings
      * @param string $k Setting key
      * @param mixed  $v Setting value, will get converted to string
      *
-     * @return string Success message (starts by "OK: "), or error message
+     * @return void
      *
-     * @since 2.9.0 Success message starts by "OK: "
+     * @throws \InvalidArgumentException If value is not set or is empty
      */
-    public static function save(string $k, mixed $v): string
+    public static function save(string $k, mixed $v): void
     {
         $dft = SettingDefinitions::getAll();
         if (!isset($v)) {
-            return 'Value is not set!';
+            throw new \InvalidArgumentException('Value is not set');
         }
         if ($v === '') {
-            return 'Value is an empty string!';
+            throw new \InvalidArgumentException('Value is an empty string');
         }
         if (isset($dft[$k]) && $dft[$k]['num']) {
             $v = (int)$v;
@@ -136,7 +136,6 @@ class Settings
              ON DUPLICATE KEY UPDATE StValue = ?",
             [$k, (string)$v, (string)$v]
         );
-        return "OK: Setting saved";
     }
 
     /**

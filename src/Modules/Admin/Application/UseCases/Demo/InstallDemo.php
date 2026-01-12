@@ -29,23 +29,25 @@ class InstallDemo
     /**
      * Execute the use case.
      *
-     * @return string Status message
+     * @return string Status message from restore process
+     *
+     * @throws \RuntimeException If working directory cannot be determined or file cannot be accessed
      */
     public function execute(): string
     {
         $cwd = getcwd();
         if ($cwd === false) {
-            return "Error: Could not determine current working directory";
+            throw new \RuntimeException('Could not determine current working directory');
         }
         $file = $cwd . '/db/seeds/demo.sql';
 
         if (!file_exists($file)) {
-            return "Error: File '" . $file . "' does not exist";
+            throw new \RuntimeException("File '{$file}' does not exist");
         }
 
         $handle = fopen($file, "r");
         if ($handle === false) {
-            return "Error: File '" . $file . "' could not be opened";
+            throw new \RuntimeException("File '{$file}' could not be opened");
         }
 
         return Restore::restoreFile($handle, "Demo Database");

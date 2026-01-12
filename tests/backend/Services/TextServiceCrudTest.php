@@ -518,7 +518,7 @@ class TextServiceCrudTest extends TestCase
         $archivedId = $this->createTestArchivedText('Update Archived Test', 'Original content.');
 
         // Update the archived text
-        $message = $this->service->updateArchivedText(
+        $affected = $this->service->updateArchivedText(
             $archivedId,
             self::$testLangId,
             'Updated Archived Title',
@@ -527,7 +527,8 @@ class TextServiceCrudTest extends TestCase
             'http://new-source.test/article'
         );
 
-        $this->assertIsString($message);
+        $this->assertIsInt($affected);
+        $this->assertGreaterThanOrEqual(0, $affected);
 
         // Verify update
         $result = $this->service->getArchivedTextById($archivedId);
@@ -691,11 +692,10 @@ class TextServiceCrudTest extends TestCase
 
         $textId = $this->createTestText('Rebuild Test', 'Content for rebuilding.');
 
-        $message = $this->service->rebuildTexts([$textId]);
+        $count = $this->service->rebuildTexts([$textId]);
 
-        $this->assertIsString($message);
-        // Message format is "Rebuilt Text(s): N" or similar
-        $this->assertStringContainsStringIgnoringCase('rebuilt', $message);
+        $this->assertIsInt($count);
+        $this->assertGreaterThanOrEqual(1, $count);
     }
 
     public function testRebuildTextsWithEmptyArray(): void
@@ -704,9 +704,9 @@ class TextServiceCrudTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $message = $this->service->rebuildTexts([]);
+        $count = $this->service->rebuildTexts([]);
 
-        $this->assertEquals('Multiple Actions: 0', $message);
+        $this->assertEquals(0, $count);
     }
 
     // ===== Set term sentences tests =====
@@ -719,9 +719,9 @@ class TextServiceCrudTest extends TestCase
 
         $textId = $this->createTestText('Term Sentence Test', 'Test for term sentences.');
 
-        $message = $this->service->setTermSentences([$textId], false);
+        $count = $this->service->setTermSentences([$textId], false);
 
-        $this->assertIsString($message);
+        $this->assertIsInt($count);
     }
 
     public function testSetTermSentencesWithActiveOnly(): void
@@ -732,8 +732,8 @@ class TextServiceCrudTest extends TestCase
 
         $textId = $this->createTestText('Active Term Test', 'Active terms test.');
 
-        $message = $this->service->setTermSentences([$textId], true);
+        $count = $this->service->setTermSentences([$textId], true);
 
-        $this->assertIsString($message);
+        $this->assertIsInt($count);
     }
 }

@@ -402,7 +402,7 @@ class TextControllerArchivedTest extends TestCase
         );
         $tempId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
 
-        $message = $service->updateArchivedText(
+        $affected = $service->updateArchivedText(
             $tempId,
             self::$testLangId,
             'Updated Title',
@@ -411,7 +411,8 @@ class TextControllerArchivedTest extends TestCase
             'http://source.test/updated'
         );
 
-        $this->assertIsString($message);
+        $this->assertIsInt($affected);
+        $this->assertGreaterThanOrEqual(0, $affected);
 
         // Verify update
         $updated = $service->getArchivedTextById($tempId);

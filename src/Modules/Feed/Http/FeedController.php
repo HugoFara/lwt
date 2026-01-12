@@ -739,7 +739,10 @@ class FeedController
         if (InputValidator::has('checked_feeds_save')) {
             /** @var array<int, array{Nf_ID: int|string, TagList: array<string>, Nf_Max_Texts: int|null, TxLgID: int, TxTitle: string, TxText: string, TxAudioURI: string, TxSourceURI: string}> $feedData */
             $feedData = InputValidator::getArray('feed');
-            $message = $this->feedFacade->saveTextsFromFeed($feedData);
+            $result = $this->feedFacade->saveTextsFromFeed($feedData);
+            $message = "Texts archived: {$result['textsArchived']}, " .
+                "Sentences deleted: {$result['sentencesDeleted']}, " .
+                "Text items deleted: {$result['textItemsDeleted']}";
         }
 
         // Display flash messages from previous requests
@@ -902,7 +905,8 @@ class FeedController
         }
 
         // Handle mark actions (delete, delete articles, reset articles)
-        $message = $this->handleMarkAction($currentFeed);
+        $result = $this->handleMarkAction($currentFeed);
+        $message = $this->formatMarkActionMessage($result);
         if (!empty($message)) {
             $this->displayMessage($message);
         }
@@ -949,31 +953,52 @@ class FeedController
      *
      * @param string $currentFeed Current selected feed(s)
      *
-     * @return string Status message
+     * @return array{action: string, success: bool}|null Result data or null if no action
      */
-    private function handleMarkAction(string $currentFeed): string
+    private function handleMarkAction(string $currentFeed): ?array
     {
         $action = InputValidator::getString('markaction');
         if ($action === '' || empty($currentFeed)) {
-            return '';
+            return null;
         }
 
         switch ($action) {
             case 'del':
                 $this->feedFacade->deleteFeeds($currentFeed);
-                return "Article item(s) deleted / Newsfeed(s) deleted";
+                return ['action' => 'del', 'success' => true];
 
             case 'del_art':
                 $this->feedFacade->deleteArticles($currentFeed);
-                return "Article item(s) deleted";
+                return ['action' => 'del_art', 'success' => true];
 
             case 'res_art':
                 $this->feedFacade->resetUnloadableArticles($currentFeed);
-                return "Article(s) reset";
+                return ['action' => 'res_art', 'success' => true];
 
             default:
-                return '';
+                return null;
         }
+    }
+
+    /**
+     * Format mark action result into a display message.
+     *
+     * @param array{action: string, success: bool}|null $result Action result
+     *
+     * @return string Formatted message for display
+     */
+    private function formatMarkActionMessage(?array $result): string
+    {
+        if ($result === null) {
+            return '';
+        }
+
+        return match ($result['action']) {
+            'del' => 'Article item(s) deleted / Newsfeed(s) deleted',
+            'del_art' => 'Article item(s) deleted',
+            'res_art' => 'Article(s) reset',
+            default => ''
+        };
     }
 
     /**

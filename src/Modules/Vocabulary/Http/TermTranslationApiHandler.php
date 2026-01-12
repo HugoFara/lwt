@@ -181,9 +181,10 @@ class TermTranslationApiHandler
      * @param int    $lang Language ID
      * @param string $data Translation
      *
-     * @return array{0: int|string, 1: string}|string [new word ID, lowercase $text] if success, error message otherwise
+     * @return array{success: bool, wordId?: int, textLc?: string, error?: string, affected?: int}
+     *         Result with wordId and textLc on success, or error details on failure
      */
-    public function addNewTermTranslation(string $text, int $lang, string $data): array|string
+    public function addNewTermTranslation(string $text, int $lang, string $data): array
     {
         $textlc = mb_strtolower($text, 'UTF-8');
 
@@ -205,7 +206,7 @@ class TermTranslationApiHandler
         $affected = $stmt->execute();
 
         if ($affected != 1) {
-            return "Error: $affected rows affected, expected 1!";
+            return ['success' => false, 'error' => 'unexpected_affected_rows', 'affected' => $affected];
         }
 
         $wid = $stmt->insertId();
@@ -219,7 +220,7 @@ class TermTranslationApiHandler
             [$wid, $lang, $textlc]
         );
 
-        return array($wid, $textlc);
+        return ['success' => true, 'wordId' => (int) $wid, 'textLc' => $textlc];
     }
 
     /**
@@ -269,18 +270,20 @@ class TermTranslationApiHandler
      * @param int    $wid      Word ID
      * @param string $newTrans New translation
      *
-     * @return string Term in lower case, or error message if term does not exist
+     * @return array{success: bool, textLc?: string, error?: string, count?: int}
+     *         Result with textLc on success, or error details on failure
      */
-    public function checkUpdateTranslation(int $wid, string $newTrans): string
+    public function checkUpdateTranslation(int $wid, string $newTrans): array
     {
         $cntWords = QueryBuilder::table('words')
             ->where('WoID', '=', $wid)
             ->countPrepared();
 
         if ($cntWords == 1) {
-            return $this->editTermTranslation($wid, $newTrans);
+            $textLc = $this->editTermTranslation($wid, $newTrans);
+            return ['success' => true, 'textLc' => $textLc];
         }
-        return "Error: " . $cntWords . " word ID found!";
+        return ['success' => false, 'error' => 'word_not_found', 'count' => $cntWords];
     }
 
     /**
@@ -294,10 +297,14 @@ class TermTranslationApiHandler
     public function formatUpdateTranslation(int $termId, string $translation): array
     {
         $result = $this->checkUpdateTranslation($termId, trim($translation));
-        if (str_starts_with($result, "Error")) {
-            return ["error" => $result];
+        if (!$result['success']) {
+            $errorMsg = match ($result['error'] ?? '') {
+                'word_not_found' => "Error: {$result['count']} word ID found!",
+                default => 'Unknown error'
+            };
+            return ["error" => $errorMsg];
         }
-        return ["update" => $result];
+        return ["update" => $result['textLc'] ?? ''];
     }
 
     /**
@@ -314,14 +321,17 @@ class TermTranslationApiHandler
         $text = trim($termText);
         $result = $this->addNewTermTranslation($text, $lgId, trim($translation));
 
-        if (is_array($result)) {
+        if ($result['success']) {
             return [
-                "term_id" => $result[0],
-                "term_lc" => $result[1]
+                "term_id" => $result['wordId'] ?? 0,
+                "term_lc" => $result['textLc'] ?? ''
             ];
-        } elseif ($result == mb_strtolower($text, 'UTF-8')) {
-            return ["add" => $result];
         }
-        return ["error" => $result];
+
+        $errorMsg = match ($result['error'] ?? '') {
+            'unexpected_affected_rows' => "Error: {$result['affected']} rows affected, expected 1!",
+            default => 'Unknown error'
+        };
+        return ["error" => $errorMsg];
     }
 }

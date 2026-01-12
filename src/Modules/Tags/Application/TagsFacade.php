@@ -1374,13 +1374,14 @@ class TagsFacade
     }
 
     /**
-     * Format duplicate entry error message for display.
+     * Parse duplicate entry error and extract tag details.
      *
      * @param string $message Original error message
      *
-     * @return string Formatted error message
+     * @return array{isDuplicate: bool, tagName: string, tagType: string}|null
+     *         Returns tag details if duplicate error, null otherwise
      */
-    public function formatDuplicateError(string $message): string
+    public function parseDuplicateError(string $message): ?array
     {
         $keyName = $this->tagType === TagType::TEXT ? 'T2Text' : 'TgText';
 
@@ -1391,10 +1392,30 @@ class TagsFacade
             $tagName = substr($message, 24);
             $tagName = substr($tagName, 0, strlen($tagName) - strlen("' for key '$keyName'"));
             $tagTypeLabel = $this->tagType === TagType::TEXT ? 'Text Tag' : 'Term Tag';
-            return "Error: $tagTypeLabel '" . $tagName .
-                   "' already exists. Please go back and correct this!";
+            return [
+                'isDuplicate' => true,
+                'tagName' => $tagName,
+                'tagType' => $tagTypeLabel
+            ];
         }
 
+        return null;
+    }
+
+    /**
+     * Format duplicate entry error message for display.
+     *
+     * @param string $message Original error message
+     *
+     * @return string Formatted error message
+     */
+    public function formatDuplicateError(string $message): string
+    {
+        $result = $this->parseDuplicateError($message);
+        if ($result !== null) {
+            return "Error: {$result['tagType']} '{$result['tagName']}' already exists. " .
+                   "Please go back and correct this!";
+        }
         return $message;
     }
 }

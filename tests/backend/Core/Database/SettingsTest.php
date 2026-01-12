@@ -294,8 +294,9 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = Settings::save('test_save_key', 'test_value');
-        $this->assertStringContainsString('OK:', $result, 'Valid save should return OK message');
+        // Settings::save() returns void on success, throws on error
+        Settings::save('test_save_key', 'test_value');
+        $this->assertTrue(true, 'Valid save should not throw');
     }
 
     public function testSaveAndRetrieve(): void
@@ -315,8 +316,9 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = Settings::save('test_null_key', null);
-        $this->assertStringContainsString('Value is not set!', $result, 'NULL value should be rejected');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Value is not set');
+        Settings::save('test_null_key', null);
     }
 
     public function testSaveEmptyStringValue(): void
@@ -325,8 +327,9 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = Settings::save('test_empty_key', '');
-        $this->assertStringContainsString('Value is an empty string!', $result, 'Empty string should be rejected');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Value is an empty string');
+        Settings::save('test_empty_key', '');
     }
 
     public function testSaveUpdateExisting(): void
@@ -336,8 +339,7 @@ class SettingsTest extends TestCase
         }
 
         Settings::save('test_update_key', 'value1');
-        $result = Settings::save('test_update_key', 'value2');
-        $this->assertStringContainsString('OK:', $result, 'Update should succeed');
+        Settings::save('test_update_key', 'value2');
 
         $value = Settings::get('test_update_key');
         $this->assertEquals('value2', $value, 'Updated value should be saved');
@@ -349,9 +351,9 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = Settings::save("key'; DROP TABLE settings; --", 'value');
-        // Should either safely escape or reject
-        $this->assertIsString($result);
+        // Should safely escape - doesn't throw
+        Settings::save("key'; DROP TABLE settings; --", 'value');
+        $this->assertTrue(true, 'SQL injection in key should be safely escaped');
     }
 
     public function testSaveSqlInjectionInValue(): void
@@ -360,8 +362,8 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = Settings::save('test_safe_key', "value'; DROP TABLE settings; --");
-        $this->assertStringContainsString('OK:', $result, 'Should save with escaped value');
+        Settings::save('test_safe_key', "value'; DROP TABLE settings; --");
+        $this->assertTrue(true, 'Should save with escaped value');
     }
 
     public function testSaveNumericSettingWithinBounds(): void
@@ -371,8 +373,7 @@ class SettingsTest extends TestCase
         }
 
         // 'set-texts-per-page' has min=10, max=9999
-        $result = Settings::save('set-texts-per-page', '50');
-        $this->assertStringContainsString('OK:', $result, 'Valid numeric value should save');
+        Settings::save('set-texts-per-page', '50');
 
         $value = Settings::get('set-texts-per-page');
         $this->assertEquals('50', $value);
@@ -411,8 +412,7 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = Settings::save('test_int_key', 42);
-        $this->assertStringContainsString('OK:', $result);
+        Settings::save('test_int_key', 42);
 
         $value = Settings::get('test_int_key');
         $this->assertEquals('42', $value);

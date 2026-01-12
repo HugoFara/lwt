@@ -293,7 +293,11 @@ class AdminController extends BaseController
 
         // Handle install request
         if ($this->hasParam('install')) {
-            $message = $this->adminFacade->installDemo();
+            try {
+                $message = $this->adminFacade->installDemo();
+            } catch (\RuntimeException $e) {
+                $message = 'Error: ' . $e->getMessage();
+            }
         }
 
         // Get view data (used by included view)

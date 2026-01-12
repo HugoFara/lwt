@@ -556,17 +556,17 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->rebuildTexts([]);
-        $this->assertEquals('Multiple Actions: 0', $result);
+        $this->assertEquals(0, $result);
     }
 
-    public function testSetTermSentencesWithEmptyArrayReturnsMessage(): void
+    public function testSetTermSentencesWithEmptyArrayReturnsZero(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $result = $this->service->setTermSentences([]);
-        $this->assertEquals('Multiple Actions: 0', $result);
+        $this->assertEquals(0, $result);
     }
 
     // ===== Text validation tests =====

@@ -376,9 +376,8 @@ class WordCrudServiceTest extends TestCase
         $word = $this->service->findById($wordId);
         $this->assertNotNull($word);
 
-        // Delete it
-        $result = $this->service->delete($wordId);
-        $this->assertEquals('Deleted', $result);
+        // Delete it (returns void)
+        $this->service->delete($wordId);
 
         // Verify it's gone
         $deletedWord = $this->service->findById($wordId);

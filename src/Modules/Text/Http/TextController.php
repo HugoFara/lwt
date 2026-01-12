@@ -327,15 +327,18 @@ class TextController extends BaseController
                 return $this->redirect('/texts');
 
             case 'setsent':
-                $message = $this->textService->setTermSentences($marked, false);
+                $count = $this->textService->setTermSentences($marked, false);
+                $message = "Term sentences set: {$count}";
                 break;
 
             case 'setactsent':
-                $message = $this->textService->setTermSentences($marked, true);
+                $count = $this->textService->setTermSentences($marked, true);
+                $message = "Active term sentences set: {$count}";
                 break;
 
             case 'rebuild':
-                $message = $this->textService->rebuildTexts($marked);
+                $count = $this->textService->rebuildTexts($marked);
+                $message = "Rebuilt Text(s): {$count}";
                 break;
 
             case 'review':
@@ -830,7 +833,7 @@ class TextController extends BaseController
             }
         } elseif ($op == 'Change') {
             $txId = $this->paramInt('TxID', 0) ?? 0;
-            $message = $this->textService->updateArchivedText(
+            $affected = $this->textService->updateArchivedText(
                 $txId,
                 $this->paramInt('TxLgID', 0) ?? 0,
                 $this->param('TxTitle'),
@@ -838,6 +841,7 @@ class TextController extends BaseController
                 $this->param('TxAudioURI'),
                 $this->param('TxSourceURI')
             );
+            $message = "Updated: {$affected}";
             TagsFacade::saveArchivedTextTagsFromForm($txId);
         }
 

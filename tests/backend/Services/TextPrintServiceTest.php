@@ -263,20 +263,17 @@ class TextPrintServiceTest extends TestCase
         $this->assertEquals(5, $result);
     }
 
-    public function testGetAnnotationSettingReturnsSavedValueWhenEmpty(): void
+    public function testGetAnnotationSettingReturnsDefaultWhenNotSet(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        // Save a known value first, clear, then test
-        Settings::save('currentprintannotation', '');
-
+        // Test with no request value - returns saved setting or default (3)
         $service = new TextPrintService();
         $result = $service->getAnnotationSetting(null);
 
-        // When saved setting is empty, returns default (3)
-        // Verify it uses saved value when one exists
+        // Verify it uses saved value when one exists, or default
         $savedValue = Settings::get('currentprintannotation');
         $expected = $savedValue === '' ? 3 : (int)$savedValue;
         $this->assertEquals($expected, $result);
@@ -294,18 +291,17 @@ class TextPrintServiceTest extends TestCase
         $this->assertEquals(10, $result);
     }
 
-    public function testGetStatusRangeSettingReturnsSavedValueWhenEmpty(): void
+    public function testGetStatusRangeSettingReturnsDefaultWhenSettingNotSet(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        Settings::save('currentprintstatus', '');
-
+        // Get current value and later verify defaults are returned when no request value
         $service = new TextPrintService();
         $result = $service->getStatusRangeSetting(null);
 
-        // When saved setting is empty, returns default (14)
+        // When no request value, returns saved setting or default (14)
         $savedValue = Settings::get('currentprintstatus');
         $expected = $savedValue === '' ? 14 : (int)$savedValue;
         $this->assertEquals($expected, $result);
@@ -323,18 +319,17 @@ class TextPrintServiceTest extends TestCase
         $this->assertEquals(2, $result);
     }
 
-    public function testGetAnnotationPlacementSettingReturnsSavedValueWhenEmpty(): void
+    public function testGetAnnotationPlacementSettingReturnsDefaultWhenSettingNotSet(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        Settings::save('currentprintannotationplacement', '');
-
+        // Get current value and later verify defaults are returned when no request value
         $service = new TextPrintService();
         $result = $service->getAnnotationPlacementSetting(null);
 
-        // When saved setting is empty, returns default (0)
+        // When no request value, returns saved setting or default (0)
         $savedValue = Settings::get('currentprintannotationplacement');
         $expected = $savedValue === '' ? 0 : (int)$savedValue;
         $this->assertEquals($expected, $result);

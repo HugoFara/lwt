@@ -168,14 +168,14 @@ class ParseTextUseCaseTest extends TestCase
     }
 
     // =====================
-    // SET TERM SENTENCES TESTS (Returns message without database access)
+    // SET TERM SENTENCES TESTS (Returns count without database access)
     // =====================
 
-    public function testSetTermSentencesWithEmptyArrayReturnsZeroMessage(): void
+    public function testSetTermSentencesWithEmptyArrayReturnsZero(): void
     {
         $result = $this->parseText->setTermSentences([]);
 
-        $this->assertEquals('Multiple Actions: 0', $result);
+        $this->assertEquals(0, $result);
     }
 
     // =====================

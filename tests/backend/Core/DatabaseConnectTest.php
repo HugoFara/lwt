@@ -687,42 +687,52 @@ class DatabaseConnectTest extends TestCase
             Globals::setDbConnection($connection);
         }
 
-        // Test saving valid setting
-        $result = Settings::save('test_key_123', 'test_value_123');
-        $this->assertStringContainsString('OK:', $result, 'Valid save should return OK message');
+        // Test saving valid setting (returns void on success)
+        Settings::save('test_key_123', 'test_value_123');
 
         // Verify it was saved
         $value = Settings::get('test_key_123');
         $this->assertEquals('test_value_123', $value, 'Saved value should be retrievable');
 
-        // Test NULL value (should error)
-        $result = Settings::save('test_key', null);
-        $this->assertStringContainsString('Value is not set!', $result, 'NULL value should be rejected');
+        // Test NULL value (should throw)
+        $nullThrown = false;
+        try {
+            Settings::save('test_key', null);
+        } catch (\InvalidArgumentException $e) {
+            $nullThrown = true;
+            $this->assertStringContainsString('Value is not set', $e->getMessage());
+        }
+        $this->assertTrue($nullThrown, 'NULL value should throw InvalidArgumentException');
 
-        // Test empty string value (should error)
-        $result = Settings::save('test_key', '');
-        $this->assertStringContainsString('Value is an empty string!', $result, 'Empty string should be rejected');
+        // Test empty string value (should throw)
+        $emptyThrown = false;
+        try {
+            Settings::save('test_key', '');
+        } catch (\InvalidArgumentException $e) {
+            $emptyThrown = true;
+            $this->assertStringContainsString('Value is an empty string', $e->getMessage());
+        }
+        $this->assertTrue($emptyThrown, 'Empty string should throw InvalidArgumentException');
 
-        // Test updating existing setting
+        // Test updating existing setting (returns void on success)
         Settings::save('test_key_update', 'value1');
-        $result = Settings::save('test_key_update', 'value2');
-        $this->assertStringContainsString('OK:', $result, 'Update should succeed');
+        Settings::save('test_key_update', 'value2');
         $value = Settings::get('test_key_update');
         $this->assertEquals('value2', $value, 'Updated value should be saved');
 
-        // Test SQL injection in key
-        $result = Settings::save("key'; DROP TABLE settings; --", 'value');
-        // Should either safely escape or reject
-        $this->assertTrue(is_string($result), 'Should handle SQL injection safely');
+        // Test SQL injection in key (should safely escape)
+        Settings::save("key'; DROP TABLE settings; --", 'value');
+        // Should safely escape - doesn't throw
+        $this->assertTrue(true, 'Should handle SQL injection safely');
 
-        // Test SQL injection in value
-        $result = Settings::save('safe_key', "value'; DROP TABLE settings; --");
-        $this->assertStringContainsString('OK:', $result, 'Should save with escaped value');
+        // Test SQL injection in value (should safely escape)
+        Settings::save('safe_key', "value'; DROP TABLE settings; --");
+        $this->assertTrue(true, 'Should save with escaped value');
 
         // Test numeric setting within bounds (if applicable)
         // 'set-texts-per-page' has min=10, max=9999
-        $result = Settings::save('set-texts-per-page', '50');
-        $this->assertStringContainsString('OK:', $result, 'Valid numeric value should save');
+        Settings::save('set-texts-per-page', '50');
+        $this->assertTrue(true, 'Valid numeric value should save');
 
         // Clean up test keys (including SQL injection test keys)
         Connection::query("DELETE FROM settings WHERE StKey LIKE 'test_%'");

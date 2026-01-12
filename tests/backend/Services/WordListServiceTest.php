@@ -332,11 +332,8 @@ class WordListServiceTest extends TestCase
         ]);
         $wordId = $result['id'];
 
-        // Delete it
-        $result = $listService->deleteSingleWord($wordId);
-
-        // Result is affected row count (should be 1) or may be a success indicator
-        $this->assertNotEmpty($result);
+        // Delete it (returns void)
+        $listService->deleteSingleWord($wordId);
 
         // Verify it's gone
         $word = $wordService->findById($wordId);
@@ -777,9 +774,11 @@ class WordListServiceTest extends TestCase
             'WoRomanization' => ''
         ];
 
-        $message = $listService->saveNewWord($data);
+        $wordId = $listService->saveNewWord($data);
 
-        $this->assertEquals('Saved', $message);
+        // Returns the word ID
+        $this->assertIsInt($wordId);
+        $this->assertGreaterThan(0, $wordId);
 
         // Verify word exists
         $word = $wordService->findByText('list_test_save', self::$testLangId);

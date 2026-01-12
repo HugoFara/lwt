@@ -130,15 +130,15 @@ abstract class AbstractCrudController extends BaseController
         // Bulk actions on marked items
         $markAction = $this->param('markaction');
         if ($markAction !== '') {
-            $message = $this->processBulkAction($markAction);
-            return $message;
+            $result = $this->processBulkAction($markAction);
+            return $this->formatBulkActionMessage($result);
         }
 
         // Actions on all filtered items
         $allAction = $this->param('allaction');
         if ($allAction !== '') {
-            $message = $this->processAllAction($allAction);
-            return $message;
+            $result = $this->processAllAction($allAction);
+            return $this->formatBulkActionMessage($result);
         }
 
         // Single delete
@@ -158,6 +158,31 @@ abstract class AbstractCrudController extends BaseController
         }
 
         return $message;
+    }
+
+    /**
+     * Format bulk action result into a display message.
+     *
+     * @param array{success: bool, count: int, action: string, error?: string} $result Bulk action result
+     *
+     * @return string Formatted message for display
+     */
+    protected function formatBulkActionMessage(array $result): string
+    {
+        if (!$result['success'] && isset($result['error'])) {
+            return match ($result['error']) {
+                'no_items_selected' => 'No items selected',
+                'no_valid_items' => 'No valid items selected',
+                'unknown_action' => "Unknown action: {$result['action']}",
+                'not_implemented' => "Action '{$result['action']}' not implemented",
+                default => "Error: {$result['error']}"
+            };
+        }
+
+        return match ($result['action']) {
+            'del' => "Deleted: {$result['count']}",
+            default => "Action '{$result['action']}' completed: {$result['count']} items"
+        };
     }
 
     /**
@@ -187,18 +212,18 @@ abstract class AbstractCrudController extends BaseController
      *
      * @param string $action The action code (e.g., 'del', 'export')
      *
-     * @return string Result message
+     * @return array{success: bool, count: int, action: string, error?: string} Result data
      */
-    protected function processBulkAction(string $action): string
+    protected function processBulkAction(string $action): array
     {
         $marked = InputValidator::getArray('marked');
         if (empty($marked)) {
-            return "No items selected";
+            return ['success' => false, 'count' => 0, 'action' => $action, 'error' => 'no_items_selected'];
         }
 
         $ids = $this->getMarkedIds($marked);
         if (empty($ids)) {
-            return "No valid items selected";
+            return ['success' => false, 'count' => 0, 'action' => $action, 'error' => 'no_valid_items'];
         }
 
         return $this->handleBulkAction($action, $ids);
@@ -212,15 +237,15 @@ abstract class AbstractCrudController extends BaseController
      * @param string $action The action code
      * @param int[]  $ids    Array of record IDs
      *
-     * @return string Result message
+     * @return array{success: bool, count: int, action: string, error?: string} Result data
      */
-    protected function handleBulkAction(string $action, array $ids): string
+    protected function handleBulkAction(string $action, array $ids): array
     {
         if ($action === 'del') {
             return $this->handleBulkDelete($ids);
         }
 
-        return "Unknown action: $action";
+        return ['success' => false, 'count' => 0, 'action' => $action, 'error' => 'unknown_action'];
     }
 
     /**
@@ -230,9 +255,9 @@ abstract class AbstractCrudController extends BaseController
      *
      * @param int[] $ids Array of record IDs to delete
      *
-     * @return string Result message
+     * @return array{success: bool, count: int, action: string} Result data
      */
-    protected function handleBulkDelete(array $ids): string
+    protected function handleBulkDelete(array $ids): array
     {
         $count = 0;
         foreach ($ids as $id) {
@@ -241,7 +266,7 @@ abstract class AbstractCrudController extends BaseController
                 $count++;
             }
         }
-        return "Deleted: $count";
+        return ['success' => true, 'count' => $count, 'action' => 'del'];
     }
 
     /**
@@ -251,11 +276,11 @@ abstract class AbstractCrudController extends BaseController
      *
      * @param string $action The action code (e.g., 'delall')
      *
-     * @return string Result message
+     * @return array{success: bool, count: int, action: string, error?: string} Result data
      */
-    protected function processAllAction(string $action): string
+    protected function processAllAction(string $action): array
     {
-        return "Action '$action' not implemented";
+        return ['success' => false, 'count' => 0, 'action' => $action, 'error' => 'not_implemented'];
     }
 
     /**

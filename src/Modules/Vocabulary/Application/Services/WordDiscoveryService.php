@@ -338,16 +338,15 @@ class WordDiscoveryService
      * @param int $wordId Word ID
      * @param int $status New status (1-5, 98, 99)
      *
-     * @return string Result message
+     * @return void
      */
-    public function setStatus(int $wordId, int $status): string
+    public function setStatus(int $wordId, int $status): void
     {
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
         $bindings = [$status, $wordId];
         $sql = "UPDATE words SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate} WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings);
         Connection::preparedExecute($sql, $bindings);
-        return 'Status changed';
     }
 
     /**

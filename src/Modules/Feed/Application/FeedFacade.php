@@ -535,13 +535,13 @@ class FeedFacade
     }
 
     /**
-     * Format last update time as human-readable string.
+     * Calculate last update time components.
      *
      * @param int $diff Time difference in seconds
      *
-     * @return string Formatted string
+     * @return array{value: int, unit: string}|null Returns time data or null if up to date
      */
-    public function formatLastUpdate(int $diff): string
+    public function getLastUpdateData(int $diff): ?array
     {
         $periods = [
             [60 * 60 * 24 * 365, 'year'],
@@ -554,18 +554,34 @@ class FeedFacade
         ];
 
         if ($diff < 1) {
-            return 'up to date';
+            return null;
         }
 
         foreach ($periods as $period) {
             $x = intval($diff / $period[0]);
             if ($x >= 1) {
                 $unit = $period[1] . ($x > 1 ? 's' : '');
-                return "last update: $x $unit ago";
+                return ['value' => $x, 'unit' => $unit];
             }
         }
 
-        return 'up to date';
+        return null;
+    }
+
+    /**
+     * Format last update time as human-readable string.
+     *
+     * @param int $diff Time difference in seconds
+     *
+     * @return string Formatted string
+     */
+    public function formatLastUpdate(int $diff): string
+    {
+        $data = $this->getLastUpdateData($diff);
+        if ($data === null) {
+            return 'up to date';
+        }
+        return "last update: {$data['value']} {$data['unit']} ago";
     }
 
     /**
@@ -824,12 +840,12 @@ class FeedFacade
      *     TxSourceURI: string
      * }> $texts Array of text data from extractTextFromArticle()
      *
-     * @return string Status message
+     * @return array{textsArchived: int, sentencesDeleted: int, textItemsDeleted: int} Archive statistics
      */
-    public function saveTextsFromFeed(array $texts): string
+    public function saveTextsFromFeed(array $texts): array
     {
         $texts = array_reverse($texts);
-        $message1 = $message2 = $message3 = $message4 = 0;
+        $textsArchived = $sentencesDeleted = $textItemsDeleted = $archiveCount = 0;
         /** @var list<int|string> $NfID */
         $NfID = [];
 
@@ -945,36 +961,34 @@ class FeedFacade
                 $textItem = array_slice($textItem, 0, $textCount - (int)$nfMaxTexts);
 
                 foreach ($textItem as $txId) {
-                    $message3 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('word_occurrences')
+                    $textItemsDeleted += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('word_occurrences')
                         ->where('Ti2TxID', '=', $txId)
                         ->delete();
-                    $message2 += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('sentences')
+                    $sentencesDeleted += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('sentences')
                         ->where('SeTxID', '=', $txId)
                         ->delete();
 
                     // Archive the text (soft delete - set TxArchivedAt)
                     $bindings = [$txId];
-                    $message4 += \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute(
+                    $archiveCount += \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute(
                         'UPDATE texts SET TxArchivedAt = NOW(), TxPosition = 0, TxAudioPosition = 0
                          WHERE TxID = ? AND TxArchivedAt IS NULL'
                         . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('texts', $bindings),
                         $bindings
                     );
 
-                    $message1 = $message4; // Same count for archiving
+                    $textsArchived = $archiveCount;
 
                     \Lwt\Shared\Infrastructure\Database\Maintenance::adjustAutoIncrement('sentences', 'SeID');
                 }
             }
         }
 
-        if ($message4 > 0 || $message1 > 0) {
-            return "Texts archived: " . $message1 .
-                " / Sentences deleted: " . $message2 .
-                " / Text items deleted: " . $message3;
-        }
-
-        return '';
+        return [
+            'textsArchived' => $textsArchived,
+            'sentencesDeleted' => $sentencesDeleted,
+            'textItemsDeleted' => $textItemsDeleted
+        ];
     }
 
     /**

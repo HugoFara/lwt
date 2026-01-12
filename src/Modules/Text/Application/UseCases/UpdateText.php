@@ -43,7 +43,7 @@ class UpdateText
      * @param string $audioUri   Audio URI
      * @param string $sourceUri  Source URI
      *
-     * @return array{message: string, reparsed: bool}
+     * @return array{updated: bool, reparsed: bool}
      */
     public function execute(
         int $textId,
@@ -79,17 +79,16 @@ class UpdateText
             $bindings2
         );
 
-        $message = $affected > 0 ? "Updated" : "No changes";
+        $updated = $affected > 0;
         $reparsed = false;
 
         // Reparse if text changed
-        if ($affected > 0 && $textChanged) {
+        if ($updated && $textChanged) {
             $this->reparseText($textId, $languageId, $text);
             $reparsed = true;
-            $message = "Updated and reparsed";
         }
 
-        return ['message' => $message, 'reparsed' => $reparsed];
+        return ['updated' => $updated, 'reparsed' => $reparsed];
     }
 
     /**
@@ -113,7 +112,23 @@ class UpdateText
         string $sourceUri
     ): string {
         $result = $this->execute($textId, $languageId, $title, $text, $audioUri, $sourceUri);
-        return $result['message'];
+        return self::formatUpdateMessage($result['updated'], $result['reparsed']);
+    }
+
+    /**
+     * Format update result as a user-facing message.
+     *
+     * @param bool $updated  Whether the text was updated
+     * @param bool $reparsed Whether the text was reparsed
+     *
+     * @return string Formatted message
+     */
+    public static function formatUpdateMessage(bool $updated, bool $reparsed): string
+    {
+        if (!$updated) {
+            return 'No changes';
+        }
+        return $reparsed ? 'Updated and reparsed' : 'Updated';
     }
 
     /**
@@ -126,7 +141,7 @@ class UpdateText
      * @param string $audioUri   Audio URI
      * @param string $sourceUri  Source URI
      *
-     * @return string Result message
+     * @return int Number of rows affected
      */
     public function updateArchivedText(
         int $textId,
@@ -135,7 +150,7 @@ class UpdateText
         string $text,
         string $audioUri,
         string $sourceUri
-    ): string {
+    ): int {
         // Check if text content changed
         $bindings1 = [$textId];
         /**
@@ -158,8 +173,6 @@ class UpdateText
             $bindings2
         );
 
-        $message = $affected > 0 ? "Updated: {$affected}" : "Updated: 0";
-
         // Clear annotation if text changed
         if ($affected > 0 && $textsdiffer) {
             $bindings3 = [$textId];
@@ -170,7 +183,19 @@ class UpdateText
             );
         }
 
-        return $message;
+        return $affected;
+    }
+
+    /**
+     * Format archived text update result as a user-facing message.
+     *
+     * @param int $affectedCount Number of rows affected
+     *
+     * @return string Formatted message
+     */
+    public static function formatArchivedUpdateMessage(int $affectedCount): string
+    {
+        return "Updated: {$affectedCount}";
     }
 
     /**
@@ -178,12 +203,12 @@ class UpdateText
      *
      * @param array $textIds Array of text IDs
      *
-     * @return string Result message
+     * @return int Number of texts rebuilt
      */
-    public function rebuildTexts(array $textIds): string
+    public function rebuildTexts(array $textIds): int
     {
         if (empty($textIds)) {
-            return "Multiple Actions: 0";
+            return 0;
         }
 
         $count = 0;
@@ -208,6 +233,18 @@ class UpdateText
             $count++;
         }
 
+        return $count;
+    }
+
+    /**
+     * Format rebuild result as a user-facing message.
+     *
+     * @param int $count Number of texts rebuilt
+     *
+     * @return string Formatted message
+     */
+    public static function formatRebuildMessage(int $count): string
+    {
         return "Rebuilt Text(s): {$count}";
     }
 

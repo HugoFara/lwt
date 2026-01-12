@@ -221,9 +221,9 @@ class WordCrudService
      *
      * @param int $wordId Word ID to delete
      *
-     * @return string Result message
+     * @return void
      */
-    public function delete(int $wordId): string
+    public function delete(int $wordId): void
     {
         // Delete multi-word text items first (before word deletion triggers FK SET NULL)
         QueryBuilder::table('word_occurrences')
@@ -237,8 +237,6 @@ class WordCrudService
         QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
             ->deletePrepared();
-
-        return 'Deleted';
     }
 
     /**

@@ -118,9 +118,8 @@ class WordDiscoveryServiceTest extends TestCase
         $createResult = $this->crudService->create($data);
         $wordId = $createResult['id'];
 
-        // Set status to 5
-        $result = $this->service->setStatus($wordId, 5);
-        $this->assertNotEmpty($result);
+        // Set status to 5 (returns void)
+        $this->service->setStatus($wordId, 5);
 
         // Verify status changed
         $word = $this->crudService->findById($wordId);

@@ -113,12 +113,12 @@ class ParseText
      * @param array $textIds    Array of text IDs
      * @param bool  $activeOnly Only update active (non-well-known) words
      *
-     * @return string Result message
+     * @return int Number of terms updated
      */
-    public function setTermSentences(array $textIds, bool $activeOnly = false): string
+    public function setTermSentences(array $textIds, bool $activeOnly = false): int
     {
         if (empty($textIds)) {
-            return "Multiple Actions: 0";
+            return 0;
         }
 
         /**
@@ -162,6 +162,6 @@ class ParseText
             $count++;
         }
 
-        return "Set sentences for {$count} term(s)";
+        return $count;
     }
 }

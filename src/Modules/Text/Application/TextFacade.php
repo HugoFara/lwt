@@ -183,6 +183,8 @@ class TextFacade
 
     /**
      * Update an archived text.
+     *
+     * @return int Number of rows affected
      */
     public function updateArchivedText(
         int $textId,
@@ -191,7 +193,7 @@ class TextFacade
         string $text,
         string $audioUri,
         string $sourceUri
-    ): string {
+    ): int {
         return $this->updateText->updateArchivedText($textId, $lgId, $title, $text, $audioUri, $sourceUri);
     }
 
@@ -387,8 +389,10 @@ class TextFacade
 
     /**
      * Rebuild/reparse multiple texts.
+     *
+     * @return int Number of texts rebuilt
      */
-    public function rebuildTexts(array $textIds): string
+    public function rebuildTexts(array $textIds): int
     {
         return $this->updateText->rebuildTexts($textIds);
     }
@@ -469,8 +473,13 @@ class TextFacade
 
     /**
      * Set term sentences for words from texts.
+     *
+     * @param array $textIds    Text IDs
+     * @param bool  $activeOnly Only update active words
+     *
+     * @return int Number of terms updated
      */
-    public function setTermSentences(array $textIds, bool $activeOnly = false): string
+    public function setTermSentences(array $textIds, bool $activeOnly = false): int
     {
         return $this->parseText->setTermSentences($textIds, $activeOnly);
     }
@@ -707,12 +716,12 @@ class TextFacade
      * @param array $textIds    Text IDs to process
      * @param bool  $activeOnly Only process active terms (status != 98, 99)
      *
-     * @return string Result message
+     * @return int Number of terms updated
      */
-    public function setTermSentencesWithService(array $textIds, bool $activeOnly = false): string
+    public function setTermSentencesWithService(array $textIds, bool $activeOnly = false): int
     {
         if (empty($textIds)) {
-            return "Multiple Actions: 0";
+            return 0;
         }
 
         /**
@@ -753,7 +762,7 @@ class TextFacade
             );
         }
 
-        return "Term Sentences set from Text(s): {$count}";
+        return $count;
     }
 
     /**

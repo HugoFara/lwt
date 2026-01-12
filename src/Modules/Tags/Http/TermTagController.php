@@ -134,14 +134,18 @@ class TermTagController extends AbstractCrudController
      * @param string $action Action code
      * @param int[]  $ids    Tag IDs
      *
-     * @return string Result message
+     * @return array{action: string, count: int, error?: string, success: bool}
      */
-    protected function handleBulkAction(string $action, array $ids): string
+    protected function handleBulkAction(string $action, array $ids): array
     {
         if ($action === 'del') {
             $result = $this->facade->deleteMultiple($ids);
             $this->facade->cleanupOrphanedLinks();
-            return $result['count'] > 0 ? "Deleted" : "Deleted (0 rows affected)";
+            return [
+                'success' => true,
+                'count' => $result['count'],
+                'action' => 'del'
+            ];
         }
 
         return parent::handleBulkAction($action, $ids);
@@ -152,13 +156,17 @@ class TermTagController extends AbstractCrudController
      *
      * @param string $action Action code
      *
-     * @return string Result message
+     * @return array{action: string, count: int, error?: string, success: bool}
      */
-    protected function processAllAction(string $action): string
+    protected function processAllAction(string $action): array
     {
         if ($action === 'delall') {
             $result = $this->facade->deleteAll($this->currentQuery);
-            return $result['count'] > 0 ? "Deleted" : "Deleted (0 rows affected)";
+            return [
+                'success' => true,
+                'count' => $result['count'],
+                'action' => 'delall'
+            ];
         }
 
         return parent::processAllAction($action);

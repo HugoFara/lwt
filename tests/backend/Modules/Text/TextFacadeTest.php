@@ -290,7 +290,7 @@ class TextFacadeTest extends TestCase
             ->expects($this->once())
             ->method('updateArchivedText')
             ->with(5, 1, 'New Title', 'New text', '', 'https://source.com')
-            ->willReturn('Archived text updated');
+            ->willReturn(1);
 
         $result = $this->facade->updateArchivedText(
             5,
@@ -301,7 +301,8 @@ class TextFacadeTest extends TestCase
             'https://source.com'
         );
 
-        $this->assertEquals('Archived text updated', $result);
+        $this->assertIsInt($result);
+        $this->assertEquals(1, $result);
     }
 
     // =============================
@@ -696,11 +697,12 @@ class TextFacadeTest extends TestCase
             ->expects($this->once())
             ->method('rebuildTexts')
             ->with([1, 2])
-            ->willReturn('2 texts rebuilt');
+            ->willReturn(2);
 
         $result = $this->facade->rebuildTexts([1, 2]);
 
-        $this->assertEquals('2 texts rebuilt', $result);
+        $this->assertIsInt($result);
+        $this->assertEquals(2, $result);
     }
 
     // ====================
@@ -761,11 +763,11 @@ class TextFacadeTest extends TestCase
             ->expects($this->once())
             ->method('setTermSentences')
             ->with([1, 2], false)
-            ->willReturn('Term sentences set: 10');
+            ->willReturn(10);
 
         $result = $this->facade->setTermSentences([1, 2]);
 
-        $this->assertEquals('Term sentences set: 10', $result);
+        $this->assertEquals(10, $result);
     }
 
     public function testSetTermSentencesWithActiveOnly(): void
@@ -774,11 +776,11 @@ class TextFacadeTest extends TestCase
             ->expects($this->once())
             ->method('setTermSentences')
             ->with([1, 2], true)
-            ->willReturn('Term sentences set: 5');
+            ->willReturn(5);
 
         $result = $this->facade->setTermSentences([1, 2], true);
 
-        $this->assertEquals('Term sentences set: 5', $result);
+        $this->assertEquals(5, $result);
     }
 
     // ======================
@@ -1094,8 +1096,8 @@ class TextFacadeTest extends TestCase
         }
         $facade = new TextFacade();
         $result = $facade->setTermSentencesWithService([]);
-        $this->assertIsString($result);
-        $this->assertStringContainsString('0', $result);
+        $this->assertIsInt($result);
+        $this->assertEquals(0, $result);
     }
 
     public function testSaveTextAndReparseReturnsArray(): void

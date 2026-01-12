@@ -615,9 +615,9 @@ class WordListService
      *
      * @param int $wordId Word ID
      *
-     * @return string Result message
+     * @return void
      */
-    public function deleteSingleWord(int $wordId): string
+    public function deleteSingleWord(int $wordId): void
     {
         // Delete multi-word text items first (before word deletion triggers FK SET NULL)
         Connection::preparedExecute(
@@ -636,8 +636,6 @@ class WordListService
         );
 
         Maintenance::adjustAutoIncrement('words', 'WoID');
-
-        return "Deleted";
     }
 
     /**
@@ -956,9 +954,11 @@ class WordListService
      *
      * @param array<string, mixed> $data Form data
      *
-     * @return string Result message
+     * @return int Word ID of the created word
+     *
+     * @throws \RuntimeException If word could not be saved
      */
-    public function saveNewWord(array $data): string
+    public function saveNewWord(array $data): int
     {
         $translation = ExportService::replaceTabNewline((string)($data['WoTranslation'] ?? ''));
         if ($translation == '') {
@@ -985,29 +985,30 @@ class WordListService
 
         $wid = Connection::preparedInsert($sql, $bindings);
 
-        if ($wid > 0) {
-            Maintenance::initWordCount();
-            $bindings = [$wid];
-            $len = (int)Connection::preparedFetchValue(
-                'SELECT WoWordCount FROM words WHERE WoID = ?'
-                . UserScopedQuery::forTablePrepared('words', $bindings),
-                $bindings,
-                'WoWordCount'
-            );
-            if ($len > 1) {
-                (new ExpressionService())->insertExpressions($textLc, (int)$data["WoLgID"], (int)$wid, $len, 1);
-            } else {
-                Connection::preparedExecute(
-                    'UPDATE word_occurrences
-                    SET Ti2WoID = ?
-                    WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?',
-                    [$wid, (int)$data["WoLgID"], $textLc]
-                );
-            }
-            return "Saved";
+        if ($wid <= 0) {
+            throw new \RuntimeException('Failed to save word');
         }
 
-        return "Error saving word";
+        Maintenance::initWordCount();
+        $bindings = [$wid];
+        $len = (int)Connection::preparedFetchValue(
+            'SELECT WoWordCount FROM words WHERE WoID = ?'
+            . UserScopedQuery::forTablePrepared('words', $bindings),
+            $bindings,
+            'WoWordCount'
+        );
+        if ($len > 1) {
+            (new ExpressionService())->insertExpressions($textLc, (int)$data["WoLgID"], (int)$wid, $len, 1);
+        } else {
+            Connection::preparedExecute(
+                'UPDATE word_occurrences
+                SET Ti2WoID = ?
+                WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?',
+                [$wid, (int)$data["WoLgID"], $textLc]
+            );
+        }
+
+        return (int) $wid;
     }
 
     /**

@@ -86,9 +86,10 @@ class TextApiHandler
      * @param int    $line   Line number to save
      * @param string $val    Proposed new annotation for the term
      *
-     * @return string Error message, or "OK" if success.
+     * @return array{success: bool, error?: string, requested?: int, available?: int, position?: int, found?: int}
+     *         Result data with success flag and optional error details
      */
-    public function saveImprTextData(int $textid, int $line, string $val): string
+    public function saveImprTextData(int $textid, int $line, string $val): array
     {
         $ann = (string) QueryBuilder::table('texts')
             ->where('TxID', '=', $textid)
@@ -96,22 +97,26 @@ class TextApiHandler
 
         $items = preg_split('/[\n]/u', $ann);
         if ($items === false) {
-            return "Failed to parse annotation text";
+            return ['success' => false, 'error' => 'parse_annotation_failed'];
         }
         if (count($items) <= $line) {
-            return "Unreachable translation: line request is $line, but only " .
-            count($items) . " translations were found";
+            return [
+                'success' => false,
+                'error' => 'line_out_of_range',
+                'requested' => $line,
+                'available' => count($items)
+            ];
         }
 
         $vals = preg_split('/[\t]/u', $items[$line]);
         if ($vals === false) {
-            return "Failed to parse annotation line";
+            return ['success' => false, 'error' => 'parse_line_failed'];
         }
         if ((int)$vals[0] <= -1) {
-            return "Term is punctation! Term position is {$vals[0]}";
+            return ['success' => false, 'error' => 'punctuation_term', 'position' => (int)$vals[0]];
         }
         if (count($vals) < 4) {
-            return "Not enough columns: " . count($vals);
+            return ['success' => false, 'error' => 'insufficient_columns', 'found' => count($vals)];
         }
 
         $items[$line] = implode("\t", array($vals[0], $vals[1], $vals[2], $val));
@@ -120,7 +125,31 @@ class TextApiHandler
             ->where('TxID', '=', $textid)
             ->updatePrepared(['TxAnnotatedText' => implode("\n", $items)]);
 
-        return "OK";
+        return ['success' => true];
+    }
+
+    /**
+     * Format annotation save error into human-readable message.
+     *
+     * @param array{success: bool, error?: string, requested?: int, available?: int, position?: int, found?: int} $result
+     *
+     * @return string Formatted error message
+     */
+    private function formatAnnotationError(array $result): string
+    {
+        if ($result['success']) {
+            return 'OK';
+        }
+
+        return match ($result['error'] ?? '') {
+            'parse_annotation_failed' => 'Failed to parse annotation text',
+            'line_out_of_range' => "Unreachable translation: line request is {$result['requested']}, " .
+                "but only {$result['available']} translations were found",
+            'parse_line_failed' => 'Failed to parse annotation line',
+            'punctuation_term' => "Term is punctuation! Term position is {$result['position']}",
+            'insufficient_columns' => "Not enough columns: {$result['found']}",
+            default => 'Unknown error'
+        };
     }
 
     /**
@@ -139,11 +168,11 @@ class TextApiHandler
         if (str_starts_with($elem, "rg") && $newAnnotation == "") {
             $newAnnotation = (string)($data->{'tx' . $line} ?? '');
         }
-        $status = $this->saveImprTextData($textid, $line, $newAnnotation);
-        if ($status != "OK") {
-            return ["error" => $status];
+        $result = $this->saveImprTextData($textid, $line, $newAnnotation);
+        if (!$result['success']) {
+            return ["error" => $this->formatAnnotationError($result)];
         }
-        return ["success" => $status];
+        return ["success" => "OK"];
     }
 
     // =========================================================================

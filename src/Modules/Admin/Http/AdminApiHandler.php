@@ -62,9 +62,9 @@ class AdminApiHandler
             $this->clearSessionSettings();
         }
 
-        $status = Settings::save($key, $value);
-        if (str_starts_with($status, "OK: ")) {
-            $result = ["message" => substr($status, 4)];
+        try {
+            Settings::save($key, $value);
+            $result = ["message" => "Setting saved"];
 
             // For language changes, include the last text info for that language
             if ($key === 'currentlanguage' && $value !== '') {
@@ -72,8 +72,9 @@ class AdminApiHandler
             }
 
             return $result;
+        } catch (\InvalidArgumentException $e) {
+            return ["error" => $e->getMessage()];
         }
-        return ["error" => $status];
     }
 
     /**
