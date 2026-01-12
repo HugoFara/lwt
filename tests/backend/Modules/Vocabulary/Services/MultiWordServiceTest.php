@@ -82,6 +82,8 @@ class MultiWordServiceTest extends TestCase
 
         // Clean up test words
         Connection::query("DELETE FROM " . Globals::table('words') . " WHERE WoLgID = " . self::$testLangId);
+        // Clean up test language
+        Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgID = " . self::$testLangId);
     }
 
     protected function setUp(): void

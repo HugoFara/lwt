@@ -141,8 +141,11 @@ class ReviewServiceTest extends TestCase
 
         // Clean up test data
         Connection::query("DELETE FROM word_occurrences WHERE Ti2TxID = " . self::$testTextId);
+        Connection::query("DELETE FROM sentences WHERE SeTxID = " . self::$testTextId);
         Connection::query("DELETE FROM words WHERE WoLgID = " . self::$testLangId);
         Connection::query("DELETE FROM texts WHERE TxID = " . self::$testTextId);
+        // Clean up test language
+        Connection::query("DELETE FROM languages WHERE LgID = " . self::$testLangId);
     }
 
     protected function setUp(): void

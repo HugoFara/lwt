@@ -72,6 +72,16 @@ class WordContextServiceTest extends TestCase
         }
     }
 
+    public static function tearDownAfterClass(): void
+    {
+        if (!self::$dbConnected) {
+            return;
+        }
+
+        // Clean up test language
+        Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgID = " . self::$testLangId);
+    }
+
     protected function setUp(): void
     {
         $this->service = new WordContextService();
