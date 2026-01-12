@@ -146,7 +146,7 @@ class FeedWizardController
     {
         $this->initWizardSession();
 
-        PageLayoutHelper::renderPageStart('Feed Wizard', false);
+        PageLayoutHelper::renderPageStart('Feed Wizard - Step 1', true);
 
         $errorMessage = InputValidator::has('err') ? true : null;
         $rssUrl = $this->wizardSession->getRssUrl() ?: null;
@@ -193,7 +193,7 @@ class FeedWizardController
             $this->updateFeedArticleSource($nfArticleSection, $feedLen);
         }
 
-        PageLayoutHelper::renderPageStartNobody('Feed Wizard');
+        PageLayoutHelper::renderPageStart('Feed Wizard - Step 2', true);
 
         $wizardData = $this->wizardSession->getAll();
         $feedHtml = $this->getStep2FeedHtml();
@@ -218,7 +218,7 @@ class FeedWizardController
         $feedData = $this->getWizardFeed();
         $feedLen = count(array_filter(array_keys($feedData), 'is_numeric'));
 
-        PageLayoutHelper::renderPageStartNobody("Feed Wizard");
+        PageLayoutHelper::renderPageStart('Feed Wizard - Step 3', true);
 
         $wizardData = $this->wizardSession->getAll();
         $feedHtml = $this->getStep3FeedHtml();
@@ -236,7 +236,7 @@ class FeedWizardController
      */
     private function wizardStep4(): void
     {
-        PageLayoutHelper::renderPageStart('Feed Wizard', false);
+        PageLayoutHelper::renderPageStart('Feed Wizard - Step 4', true);
 
         $filterTags = InputValidator::getString('filter_tags');
         if ($filterTags !== '') {
@@ -273,6 +273,9 @@ class FeedWizardController
      */
     private function initWizardSession(): void
     {
+        // Ensure session is started before any output
+        $this->wizardSession->init();
+
         $selectMode = InputValidator::getString('select_mode');
         if ($selectMode !== '') {
             $this->wizardSession->setSelectMode($selectMode);

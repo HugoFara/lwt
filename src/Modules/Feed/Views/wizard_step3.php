@@ -169,18 +169,6 @@ $configJson = json_encode([
     </div>
 
     <div id="lwt_container" x-show="!isMinimized">
-        <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildLogo(); ?>
-
-        <h1 class="title is-4 is-flex is-align-items-center">
-            <span class="icon mr-2">
-                <?php echo IconHelper::render('wand-2', ['alt' => 'Wizard']); ?>
-            </span>
-            Feed Wizard - Step 3: Filter Text
-            <a href="docs/info.html#feed_wizard" target="_blank" class="ml-2">
-                <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
-            </a>
-        </h1>
-
         <!-- Steps indicator -->
         <div class="steps is-small mb-4">
             <div class="step-item is-completed is-success">

@@ -896,13 +896,13 @@ class FeedController
         // Build query pattern for prepared statement (no SQL escaping needed)
         $queryPattern = ($currentQuery != '') ? ('%' . str_replace("*", "%", $currentQuery) . '%') : null;
 
-        $langName = $this->languageFacade->getLanguageName($currentLang);
-        PageLayoutHelper::renderPageStart('Manage ' . $langName . ' Feeds', true);
-
-        // Clear wizard session if exists
+        // Clear wizard session if exists (must be before any output)
         if ($this->wizardSession->exists()) {
             $this->wizardSession->clear();
         }
+
+        $langName = $this->languageFacade->getLanguageName($currentLang);
+        PageLayoutHelper::renderPageStart('Manage ' . $langName . ' Feeds', true);
 
         // Handle mark actions (delete, delete articles, reset articles)
         $result = $this->handleMarkAction($currentFeed);
@@ -930,7 +930,7 @@ class FeedController
                 $_SERVER['PHP_SELF'] ?? '/'
             );
         } elseif (InputValidator::has('new_feed')) {
-            $this->showNewForm();
+            $this->showNewForm((int)$currentLang);
         } elseif (InputValidator::has('edit_feed')) {
             $this->showEditForm((int)$currentFeed);
         } elseif (InputValidator::has('multi_load_feed')) {
@@ -1071,15 +1071,20 @@ class FeedController
     /**
      * Show the new feed form.
      *
+     * @param int $currentLang Current language ID to pre-select
+     *
      * @return void
      *
      * @psalm-suppress UnresolvableInclude View path is constructed at runtime
      */
-    private function showNewForm(): void
+    private function showNewForm(int $currentLang): void
     {
-        $languages = $this->feedFacade->getLanguages();
+        $viewData = [
+            'languages' => $this->feedFacade->getLanguages(),
+            'currentLang' => $currentLang,
+        ];
+        extract($viewData);
 
-        /** @psalm-suppress UnresolvableInclude */
         include $this->viewPath . 'new.php';
     }
 

@@ -47,6 +47,18 @@ class FeedWizardSessionManager
     }
 
     /**
+     * Initialize the session.
+     *
+     * Call this before any output is sent to ensure the session is started.
+     *
+     * @return void
+     */
+    public function init(): void
+    {
+        $this->ensureSession();
+    }
+
+    /**
      * Get the wizard session data as typed array.
      *
      * @return array<string, mixed>

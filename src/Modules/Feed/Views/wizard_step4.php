@@ -97,18 +97,6 @@ $configJson = json_encode([
 <script type="application/json" id="wizard-step4-config"><?php echo $configJson; ?></script>
 
 <div x-data="feedWizardStep4" x-cloak>
-    <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::buildLogo(); ?>
-
-    <h1 class="title is-4 is-flex is-align-items-center">
-        <span class="icon mr-2">
-            <?php echo IconHelper::render('wand-2', ['alt' => 'Wizard']); ?>
-        </span>
-        Feed Wizard - Step 4: Edit Options
-        <a href="docs/info.html#feed_wizard" target="_blank" class="ml-2">
-            <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
-        </a>
-    </h1>
-
     <!-- Steps indicator -->
     <div class="steps is-small mb-5">
         <div class="step-item is-completed is-success">
