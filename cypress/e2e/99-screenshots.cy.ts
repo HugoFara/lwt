@@ -6,7 +6,8 @@
  * Run with: npx cypress run --spec cypress/e2e/99-screenshots.cy.ts
  *
  * Screenshots are saved to cypress/screenshots/99-screenshots.cy.ts/
- * After running, copy the relevant screenshots to docs/assets/images/
+ * After running, copy the screenshots to docs-src/public/assets/images/
+ * (the docs/ folder is auto-generated and will be overwritten)
  */
 
 describe('README Screenshots', () => {
