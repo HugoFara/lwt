@@ -262,4 +262,120 @@ class LemmaServiceTest extends TestCase
 
         $this->assertSame(0, $result);
     }
+
+    // =========================================================================
+    // Lemmatizer Configuration Tests
+    // =========================================================================
+
+    public function testGetLemmatizerForLanguageReturnsLemmatizer(): void
+    {
+        $result = $this->service->getLemmatizerForLanguage('en');
+
+        $this->assertInstanceOf(LemmatizerInterface::class, $result);
+    }
+
+    public function testGetLemmatizerByTypeReturnsLemmatizer(): void
+    {
+        $result = $this->service->getLemmatizerByType('dictionary');
+
+        $this->assertInstanceOf(LemmatizerInterface::class, $result);
+    }
+
+    public function testIsNlpServiceAvailableReturnsBool(): void
+    {
+        $result = $this->service->isNlpServiceAvailable();
+
+        $this->assertIsBool($result);
+    }
+
+    public function testGetNlpSupportedLanguagesReturnsArray(): void
+    {
+        $result = $this->service->getNlpSupportedLanguages();
+
+        $this->assertIsArray($result);
+    }
+
+    public function testGetAllNlpLanguagesReturnsArray(): void
+    {
+        $result = $this->service->getAllNlpLanguages();
+
+        $this->assertIsArray($result);
+    }
+
+    // =========================================================================
+    // Word Family Tests
+    // =========================================================================
+
+    public function testGetWordFamilyCallsRepository(): void
+    {
+        $this->mockRepository
+            ->expects($this->once())
+            ->method('findByLemma')
+            ->with(1, 'run')
+            ->willReturn([]);
+
+        $result = $this->service->getWordFamily(1, 'run');
+
+        $this->assertSame([], $result);
+    }
+
+    public function testSetLemmaCallsRepository(): void
+    {
+        $this->mockRepository
+            ->expects($this->once())
+            ->method('updateLemma')
+            ->with(1, 'run')
+            ->willReturn(true);
+
+        $result = $this->service->setLemma(1, 'run');
+
+        $this->assertTrue($result);
+    }
+
+    public function testSetLemmaReturnsFalseWhenRepositoryFails(): void
+    {
+        $this->mockRepository
+            ->expects($this->once())
+            ->method('updateLemma')
+            ->with(1, 'run')
+            ->willReturn(false);
+
+        $result = $this->service->setLemma(1, 'run');
+
+        $this->assertFalse($result);
+    }
+
+    // =========================================================================
+    // applyLemmasToVocabulary Tests
+    // =========================================================================
+
+    public function testApplyLemmasToVocabularyReturnsZerosWhenLanguageNotSupported(): void
+    {
+        $this->mockLemmatizer
+            ->expects($this->once())
+            ->method('supportsLanguage')
+            ->with('xyz')
+            ->willReturn(false);
+
+        $result = $this->service->applyLemmasToVocabulary(1, 'xyz');
+
+        $this->assertSame(['processed' => 0, 'updated' => 0, 'skipped' => 0], $result);
+    }
+
+    // =========================================================================
+    // propagateLemma Tests
+    // =========================================================================
+
+    public function testPropagateLemmaReturnsZeroWhenTermNotFound(): void
+    {
+        $this->mockRepository
+            ->expects($this->once())
+            ->method('find')
+            ->with(999)
+            ->willReturn(null);
+
+        $result = $this->service->propagateLemma(999, 1, 'en');
+
+        $this->assertSame(0, $result);
+    }
 }

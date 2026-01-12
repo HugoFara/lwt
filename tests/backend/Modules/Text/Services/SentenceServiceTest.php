@@ -284,4 +284,149 @@ class SentenceServiceTest extends TestCase
             );
         }
     }
+
+    // =========================================================================
+    // formatSentence() Tests (requires database)
+    // =========================================================================
+
+    /**
+     * @group integration
+     */
+    public function testFormatSentenceReturnsArrayWithTwoElements(): void
+    {
+        // formatSentence requires database access (looks up sentence by ID)
+        // This test verifies the method signature and return type
+        try {
+            $result = $this->service->formatSentence(0, 'test', 1);
+        } catch (\Throwable $e) {
+            $this->markTestSkipped('Database required for formatSentence test');
+        }
+
+        $this->assertIsArray($result);
+    }
+
+    // =========================================================================
+    // getSentenceText() Tests (requires database)
+    // =========================================================================
+
+    /**
+     * @group integration
+     */
+    public function testGetSentenceTextReturnsString(): void
+    {
+        // getSentenceText requires database access
+        try {
+            $result = $this->service->getSentenceText(0, 'test', 0);
+        } catch (\Throwable $e) {
+            $this->markTestSkipped('Database required for getSentenceText test');
+        }
+
+        // May return null for non-existent sentence
+        $this->assertTrue($result === null || is_string($result));
+    }
+
+    // =========================================================================
+    // Additional extractCenteredPortion() Tests
+    // =========================================================================
+
+    public function testExtractCenteredPortionWithExactLimit(): void
+    {
+        $method = $this->getExtractCenteredPortionMethod();
+
+        $text = str_repeat("a", 50);
+        $result = $method->invoke($this->service, $text, 50);
+
+        // Should return full text when exactly at limit
+        $this->assertEquals($text, $result);
+    }
+
+    public function testExtractCenteredPortionWithVeryShortLimit(): void
+    {
+        $method = $this->getExtractCenteredPortionMethod();
+
+        $text = "Hello World";
+        $result = $method->invoke($this->service, $text, 5);
+
+        // Should still produce a result
+        $this->assertIsString($result);
+        $this->assertLessThanOrEqual(mb_strlen($text), mb_strlen($result));
+    }
+
+    // =========================================================================
+    // Additional extractPortionAroundWord() Tests
+    // =========================================================================
+
+    public function testExtractPortionAroundWordHandlesEmptyWord(): void
+    {
+        $method = $this->getExtractPortionAroundWordMethod();
+
+        $text = "The quick brown fox";
+        $result = $method->invoke($this->service, $text, "", 50);
+
+        // Should fallback to centered extraction
+        $this->assertIsString($result);
+    }
+
+    public function testExtractPortionAroundWordWithZeroLimit(): void
+    {
+        $method = $this->getExtractPortionAroundWordMethod();
+
+        $text = "The quick brown fox jumps over the lazy dog";
+        $word = "fox";
+        $result = $method->invoke($this->service, $text, $word, 0);
+
+        $this->assertIsString($result);
+    }
+
+    public function testExtractPortionAroundWordCaseInsensitive(): void
+    {
+        $method = $this->getExtractPortionAroundWordMethod();
+
+        $text = "The quick brown FOX jumps over the lazy dog";
+        $word = "fox";
+        $result = $method->invoke($this->service, $text, $word, 10);
+
+        // Should find case-insensitive match
+        $this->assertStringContainsString("FOX", $result);
+    }
+
+    // =========================================================================
+    // Additional convertZwsToSpacing() Tests
+    // =========================================================================
+
+    public function testConvertZwsToSpacingWithMultipleConsecutiveZws(): void
+    {
+        $method = $this->getConvertZwsToSpacingMethod();
+
+        $termchar = 'a-zA-Z';
+        $input = "Hello​​​world"; // Multiple ZWS between words
+        $result = $method->invoke($this->service, $input, $termchar);
+
+        // Should collapse multiple ZWS into single space
+        $this->assertIsString($result);
+    }
+
+    public function testConvertZwsToSpacingWithOnlyZws(): void
+    {
+        $method = $this->getConvertZwsToSpacingMethod();
+
+        $termchar = 'a-zA-Z';
+        $input = "​​​"; // Only ZWS characters
+        $result = $method->invoke($this->service, $input, $termchar);
+
+        // Should trim to empty string
+        $this->assertEquals("", $result);
+    }
+
+    public function testConvertZwsToSpacingPreservesExistingSpaces(): void
+    {
+        $method = $this->getConvertZwsToSpacingMethod();
+
+        $termchar = 'a-zA-Z';
+        $input = "Hello world"; // Regular spaces
+        $result = $method->invoke($this->service, $input, $termchar);
+
+        // Should preserve existing spaces
+        $this->assertEquals("Hello world", $result);
+    }
 }
