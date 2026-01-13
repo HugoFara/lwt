@@ -798,4 +798,592 @@ describe('review_view.ts', () => {
       expect(container.innerHTML).toContain('store.error');
     });
   });
+
+  // ===========================================================================
+  // Keyboard Handler detailed tests
+  // ===========================================================================
+
+  describe('keyboard handling detail', () => {
+    function getReviewAppComponent(): () => Record<string, unknown> {
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 1, "isTableMode": false}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const reviewAppCall = calls.find((c: unknown[]) => c[0] === 'reviewApp');
+      return reviewAppCall ? reviewAppCall[1] : () => ({});
+    }
+
+    it('handleKeydown does nothing when modal is open', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+        revealAnswer: () => void;
+      };
+      mockReviewStore.isModalOpen = true;
+
+      const revealSpy = vi.spyOn(component, 'revealAnswer');
+      const event = new KeyboardEvent('keydown', { key: ' ' });
+      component.handleKeydown(event);
+
+      expect(revealSpy).not.toHaveBeenCalled();
+      mockReviewStore.isModalOpen = false;
+    });
+
+    it('handleKeydown does nothing when in table mode', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+        revealAnswer: () => void;
+      };
+      mockReviewStore.isTableMode = true;
+
+      const revealSpy = vi.spyOn(component, 'revealAnswer');
+      const event = new KeyboardEvent('keydown', { key: ' ' });
+      component.handleKeydown(event);
+
+      expect(revealSpy).not.toHaveBeenCalled();
+      mockReviewStore.isTableMode = false;
+    });
+
+    it('handleKeydown does nothing when finished', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+        revealAnswer: () => void;
+      };
+      mockReviewStore.isFinished = true;
+
+      const revealSpy = vi.spyOn(component, 'revealAnswer');
+      const event = new KeyboardEvent('keydown', { key: ' ' });
+      component.handleKeydown(event);
+
+      expect(revealSpy).not.toHaveBeenCalled();
+      mockReviewStore.isFinished = false;
+    });
+
+    it('handleKeydown does nothing when target is input', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+        revealAnswer: () => void;
+      };
+
+      const input = document.createElement('input');
+      const event = new KeyboardEvent('keydown', { key: ' ' });
+      Object.defineProperty(event, 'target', { value: input });
+
+      const revealSpy = vi.spyOn(component, 'revealAnswer');
+      component.handleKeydown(event);
+
+      expect(revealSpy).not.toHaveBeenCalled();
+    });
+
+    it('Space key reveals answer when not revealed', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+        revealAnswer: () => void;
+      };
+      mockReviewStore.answerRevealed = false;
+
+      const event = new KeyboardEvent('keydown', { key: ' ', cancelable: true });
+      const preventSpy = vi.spyOn(event, 'preventDefault');
+
+      component.handleKeydown(event);
+
+      expect(preventSpy).toHaveBeenCalled();
+      expect(mockReviewStore.revealAnswer).toHaveBeenCalled();
+    });
+
+    it('Escape key skips word', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+        skipWord: () => Promise<void>;
+      };
+      mockReviewStore.currentWord = { text: 'test', status: 1, solution: '', group: '' };
+
+      const event = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+
+      component.handleKeydown(event);
+
+      expect(mockReviewStore.skipWord).toHaveBeenCalled();
+      mockReviewStore.currentWord = null;
+    });
+
+    it('ArrowUp increments status when answer revealed', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+        incrementStatus: () => Promise<void>;
+      };
+      mockReviewStore.answerRevealed = true;
+
+      const event = new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true });
+
+      component.handleKeydown(event);
+
+      expect(mockReviewStore.incrementStatus).toHaveBeenCalled();
+      mockReviewStore.answerRevealed = false;
+    });
+
+    it('ArrowDown decrements status when answer revealed', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+        decrementStatus: () => Promise<void>;
+      };
+      mockReviewStore.answerRevealed = true;
+
+      const event = new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true });
+
+      component.handleKeydown(event);
+
+      expect(mockReviewStore.decrementStatus).toHaveBeenCalled();
+      mockReviewStore.answerRevealed = false;
+    });
+
+    it('I key sets status to ignored', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+        setStatus: (s: number) => Promise<void>;
+      };
+      mockReviewStore.currentWord = { text: 'test', status: 1, solution: '', group: '' };
+
+      const event = new KeyboardEvent('keydown', { key: 'i', cancelable: true });
+
+      component.handleKeydown(event);
+
+      expect(mockReviewStore.updateStatus).toHaveBeenCalledWith(98);
+      mockReviewStore.currentWord = null;
+    });
+
+    it('W key sets status to well-known', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+        setStatus: (s: number) => Promise<void>;
+      };
+      mockReviewStore.currentWord = { text: 'test', status: 1, solution: '', group: '' };
+
+      const event = new KeyboardEvent('keydown', { key: 'W', cancelable: true });
+
+      component.handleKeydown(event);
+
+      expect(mockReviewStore.updateStatus).toHaveBeenCalledWith(99);
+      mockReviewStore.currentWord = null;
+    });
+
+    it('E key opens modal', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+      };
+      mockReviewStore.currentWord = { text: 'test', status: 1, solution: '', group: '' };
+
+      const event = new KeyboardEvent('keydown', { key: 'e', cancelable: true });
+
+      component.handleKeydown(event);
+
+      expect(mockReviewStore.openModal).toHaveBeenCalled();
+      mockReviewStore.currentWord = null;
+    });
+
+    it('Number keys set status when answer revealed', () => {
+      const componentFactory = getReviewAppComponent();
+      const component = componentFactory() as {
+        store: ReturnType<typeof getReviewStore>;
+        handleKeydown: (e: KeyboardEvent) => void;
+        setStatus: (s: number) => Promise<void>;
+      };
+      mockReviewStore.answerRevealed = true;
+
+      const event = new KeyboardEvent('keydown', { key: '3', cancelable: true });
+
+      component.handleKeydown(event);
+
+      expect(mockReviewStore.updateStatus).toHaveBeenCalledWith(3);
+      mockReviewStore.answerRevealed = false;
+    });
+  });
+
+  // ===========================================================================
+  // reviewApp init Tests
+  // ===========================================================================
+
+  describe('reviewApp init', () => {
+    it('configures store and fetches first word', async () => {
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 2, "isTableMode": false}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const reviewAppCall = calls.find((c: unknown[]) => c[0] === 'reviewApp');
+      const componentFactory = reviewAppCall![1];
+      const component = componentFactory() as {
+        init: () => Promise<void>;
+      };
+
+      await component.init();
+
+      expect(mockReviewStore.configure).toHaveBeenCalled();
+      expect(mockReviewStore.nextWord).toHaveBeenCalled();
+    });
+
+    it('does not fetch word in table mode', async () => {
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 1, "isTableMode": true}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const reviewAppCall = calls.find((c: unknown[]) => c[0] === 'reviewApp');
+      const componentFactory = reviewAppCall![1];
+      const component = componentFactory() as {
+        init: () => Promise<void>;
+      };
+
+      mockReviewStore.nextWord.mockClear();
+      await component.init();
+
+      expect(mockReviewStore.nextWord).not.toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // speakWord Tests
+  // ===========================================================================
+
+  describe('speakWord', () => {
+    it('calls speechDispatcher with word text and langId', async () => {
+      const { speechDispatcher } = await import('../../../src/frontend/js/shared/utils/user_interactions');
+
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 1, "isTableMode": false}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const reviewAppCall = calls.find((c: unknown[]) => c[0] === 'reviewApp');
+      const componentFactory = reviewAppCall![1];
+      const component = componentFactory() as {
+        speakWord: () => void;
+        store: ReturnType<typeof getReviewStore>;
+      };
+
+      mockReviewStore.currentWord = { text: 'hello', status: 1, solution: '', group: '' };
+      mockReviewStore.langSettings.langCode = 'en';
+      mockReviewStore.langId = 5;
+
+      component.speakWord();
+
+      expect(speechDispatcher).toHaveBeenCalledWith('hello', 5);
+
+      mockReviewStore.currentWord = null;
+    });
+  });
+
+  // ===========================================================================
+  // tableReview loadWords Tests
+  // ===========================================================================
+
+  describe('tableReview loadWords', () => {
+    it('loads words from API', async () => {
+      (ReviewApi.getTableWords as Mock).mockResolvedValue({
+        data: {
+          words: [{ id: 1, text: 'test', status: 1, translation: 'prueba' }],
+          langSettings: { textSize: 100, rtl: false }
+        }
+      });
+
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 1, "isTableMode": true}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const tableCall = calls.find((c: unknown[]) => c[0] === 'tableReview');
+      const componentFactory = tableCall![1];
+      const component = componentFactory() as {
+        loadWords: () => Promise<void>;
+        words: Array<{ id: number }>;
+        isLoading: boolean;
+      };
+
+      await component.loadWords();
+
+      expect(ReviewApi.getTableWords).toHaveBeenCalled();
+      expect(component.words).toHaveLength(1);
+      expect(component.isLoading).toBe(false);
+    });
+
+    it('handles API errors gracefully', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      (ReviewApi.getTableWords as Mock).mockRejectedValue(new Error('Network error'));
+
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 1, "isTableMode": true}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const tableCall = calls.find((c: unknown[]) => c[0] === 'tableReview');
+      const componentFactory = tableCall![1];
+      const component = componentFactory() as {
+        loadWords: () => Promise<void>;
+        isLoading: boolean;
+      };
+
+      await component.loadWords();
+
+      expect(consoleSpy).toHaveBeenCalled();
+      expect(component.isLoading).toBe(false);
+    });
+  });
+
+  // ===========================================================================
+  // tableReview setWordStatus error handling Tests
+  // ===========================================================================
+
+  describe('tableReview setWordStatus error handling', () => {
+    it('logs error when API fails', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      (ReviewApi.updateStatus as Mock).mockRejectedValue(new Error('Update failed'));
+
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 1, "isTableMode": true}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const tableCall = calls.find((c: unknown[]) => c[0] === 'tableReview');
+      const componentFactory = tableCall![1];
+      const component = componentFactory() as {
+        words: Array<{ id: number; status: number }>;
+        setWordStatus: (id: number, status: number) => Promise<void>;
+      };
+      component.words = [{ id: 1, status: 1 }];
+
+      await component.setWordStatus(1, 3);
+
+      expect(consoleSpy).toHaveBeenCalledWith('Error updating status:', expect.any(Error));
+    });
+
+    it('does not update word when API returns undefined status', async () => {
+      (ReviewApi.updateStatus as Mock).mockResolvedValue({
+        data: { status: undefined }
+      });
+
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 1, "isTableMode": true}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const tableCall = calls.find((c: unknown[]) => c[0] === 'tableReview');
+      const componentFactory = tableCall![1];
+      const component = componentFactory() as {
+        words: Array<{ id: number; status: number }>;
+        setWordStatus: (id: number, status: number) => Promise<void>;
+      };
+      component.words = [{ id: 1, status: 1 }];
+
+      await component.setWordStatus(1, 3);
+
+      expect(component.words[0].status).toBe(1); // unchanged
+    });
+  });
+
+  // ===========================================================================
+  // tableReview init Tests
+  // ===========================================================================
+
+  describe('tableReview init', () => {
+    it('loads column settings and words on init', async () => {
+      localStorage.setItem('lwt-table-review-columns', JSON.stringify({
+        columns: { edit: false },
+        hideTermContent: true
+      }));
+
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 1, "isTableMode": true}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const tableCall = calls.find((c: unknown[]) => c[0] === 'tableReview');
+      const componentFactory = tableCall![1];
+      const component = componentFactory() as {
+        init: () => Promise<void>;
+        columns: Record<string, boolean>;
+        hideTermContent: boolean;
+      };
+
+      await component.init();
+
+      expect(ReviewApi.getTableWords).toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // revealAnswer with readAloud Tests
+  // ===========================================================================
+
+  describe('revealAnswer with readAloud', () => {
+    it('speaks word when readAloud enabled', async () => {
+      const { speechDispatcher } = await import('../../../src/frontend/js/shared/utils/user_interactions');
+
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 1, "isTableMode": false}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const reviewAppCall = calls.find((c: unknown[]) => c[0] === 'reviewApp');
+      const componentFactory = reviewAppCall![1];
+      const component = componentFactory() as {
+        revealAnswer: () => void;
+        store: ReturnType<typeof getReviewStore>;
+      };
+
+      mockReviewStore.readAloudEnabled = true;
+      mockReviewStore.currentWord = { text: 'hello', status: 1, solution: '', group: '' };
+
+      component.revealAnswer();
+
+      expect(mockReviewStore.revealAnswer).toHaveBeenCalled();
+      expect(speechDispatcher).toHaveBeenCalled();
+
+      mockReviewStore.readAloudEnabled = false;
+      mockReviewStore.currentWord = null;
+    });
+  });
+
+  // ===========================================================================
+  // setTermDisplayHtml Tests
+  // ===========================================================================
+
+  describe('setTermDisplayHtml', () => {
+    it('sets innerHTML on element', () => {
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 1, "isTableMode": false}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const reviewAppCall = calls.find((c: unknown[]) => c[0] === 'reviewApp');
+      const componentFactory = reviewAppCall![1];
+      const component = componentFactory() as {
+        setTermDisplayHtml: (el: HTMLElement) => void;
+        getCurrentWordGroup: () => string;
+      };
+
+      mockReviewStore.currentWord = { text: 'test', status: 1, solution: 'prueba', group: '<b>test</b>' };
+
+      const el = document.createElement('div');
+      component.setTermDisplayHtml(el);
+
+      expect(el.innerHTML).toBe('<b>test</b>');
+
+      mockReviewStore.currentWord = null;
+    });
+  });
+
+  // ===========================================================================
+  // getCurrentWord* with current word Tests
+  // ===========================================================================
+
+  describe('getCurrentWord accessors with word', () => {
+    it('returns word properties when word exists', () => {
+      document.body.innerHTML = `
+        <div id="review-app"></div>
+        <script type="application/json" id="review-config">
+          {"reviewType": 1, "isTableMode": false}
+        </script>
+      `;
+
+      initReviewApp();
+
+      const calls = (Alpine.data as Mock).mock.calls;
+      const reviewAppCall = calls.find((c: unknown[]) => c[0] === 'reviewApp');
+      const componentFactory = reviewAppCall![1];
+      const component = componentFactory() as {
+        getCurrentWordGroup: () => string;
+        getCurrentWordSolution: () => string;
+        getCurrentWordStatus: () => number;
+      };
+
+      mockReviewStore.currentWord = {
+        text: 'test',
+        status: 3,
+        solution: 'prueba',
+        group: '<span>group</span>'
+      };
+
+      expect(component.getCurrentWordGroup()).toBe('<span>group</span>');
+      expect(component.getCurrentWordSolution()).toBe('prueba');
+      expect(component.getCurrentWordStatus()).toBe(3);
+
+      mockReviewStore.currentWord = null;
+    });
+  });
 });

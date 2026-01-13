@@ -513,4 +513,336 @@ describe('text_reader.ts', () => {
       expect(typeof window.textReaderData).toBe('function');
     });
   });
+
+  // ===========================================================================
+  // init method Tests
+  // ===========================================================================
+
+  describe('init method', () => {
+    it('returns early when no text ID in URL', async () => {
+      Object.defineProperty(window, 'location', {
+        value: { pathname: '/', search: '' },
+        writable: true
+      });
+
+      const component = textReaderData();
+      await component.init();
+
+      expect(component.isLoading).toBe(false);
+      expect(mockWordStore.loadText).not.toHaveBeenCalled();
+    });
+
+    it('returns early when text ID is 0', async () => {
+      Object.defineProperty(window, 'location', {
+        value: { pathname: '/', search: '?text=0' },
+        writable: true
+      });
+
+      const component = textReaderData();
+      await component.init();
+
+      expect(component.isLoading).toBe(false);
+      expect(mockWordStore.loadText).not.toHaveBeenCalled();
+    });
+
+    it('loads text and renders content on success', async () => {
+      document.body.innerHTML = '<div id="thetext"></div>';
+      Object.defineProperty(window, 'location', {
+        value: { pathname: '/text/read/123', search: '' },
+        writable: true
+      });
+
+      const component = textReaderData();
+      await component.init();
+
+      expect(mockWordStore.loadText).toHaveBeenCalledWith(123);
+      expect(renderText).toHaveBeenCalled();
+      expect(component.isLoading).toBe(false);
+    });
+
+    it('sets error when store fails to initialize', async () => {
+      Object.defineProperty(window, 'location', {
+        value: { pathname: '/text/read/123', search: '' },
+        writable: true
+      });
+      mockWordStore.isInitialized = false;
+
+      const component = textReaderData();
+      await component.init();
+
+      expect(component.error).toBe('Failed to load text');
+      expect(component.isLoading).toBe(false);
+
+      mockWordStore.isInitialized = true;
+    });
+
+    it('handles exceptions gracefully', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      Object.defineProperty(window, 'location', {
+        value: { pathname: '/text/read/123', search: '' },
+        writable: true
+      });
+      mockWordStore.loadText.mockRejectedValue(new Error('Network error'));
+
+      const component = textReaderData();
+      await component.init();
+
+      expect(consoleSpy).toHaveBeenCalled();
+      expect(component.error).toBe('An error occurred while loading the text');
+      expect(component.isLoading).toBe(false);
+
+      mockWordStore.loadText.mockResolvedValue(undefined);
+    });
+  });
+
+  // ===========================================================================
+  // handleWordClick Tests
+  // ===========================================================================
+
+  describe('handleWordClick', () => {
+    it('does nothing when clicking non-word element', () => {
+      document.body.innerHTML = '<div id="thetext"><p>Regular text</p></div>';
+
+      const component = textReaderData();
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: document.querySelector('p') });
+
+      component.handleWordClick(event);
+
+      expect(mockWordStore.selectWord).not.toHaveBeenCalled();
+    });
+
+    it('selects word when clicking .word element', () => {
+      document.body.innerHTML = `
+        <div id="thetext">
+          <span class="word TERMABC123" data_hex="ABC123" data_order="5">hello</span>
+        </div>
+      `;
+
+      const component = textReaderData();
+      const wordEl = document.querySelector('.word')!;
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: wordEl });
+
+      component.handleWordClick(event);
+
+      expect(mockWordStore.selectWord).toHaveBeenCalledWith('ABC123', 5, wordEl);
+    });
+
+    it('selects word when clicking .mword element', () => {
+      document.body.innerHTML = `
+        <div id="thetext">
+          <span class="mword TERMDEF456" data_hex="DEF456" data_pos="10">multi word</span>
+        </div>
+      `;
+
+      const component = textReaderData();
+      const wordEl = document.querySelector('.mword')!;
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: wordEl });
+
+      component.handleWordClick(event);
+
+      expect(mockWordStore.selectWord).toHaveBeenCalledWith('DEF456', 10, wordEl);
+    });
+
+    it('extracts hex from class name when data_hex missing', () => {
+      document.body.innerHTML = `
+        <div id="thetext">
+          <span class="word TERM999AAA" data_order="1">test</span>
+        </div>
+      `;
+
+      const component = textReaderData();
+      const wordEl = document.querySelector('.word')!;
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: wordEl });
+
+      component.handleWordClick(event);
+
+      expect(mockWordStore.selectWord).toHaveBeenCalledWith('999AAA', 1, wordEl);
+    });
+
+    it('does nothing when hex cannot be determined', () => {
+      document.body.innerHTML = `
+        <div id="thetext">
+          <span class="word" data_order="1">test</span>
+        </div>
+      `;
+
+      const component = textReaderData();
+      const wordEl = document.querySelector('.word')!;
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: wordEl });
+
+      component.handleWordClick(event);
+
+      expect(mockWordStore.selectWord).not.toHaveBeenCalled();
+    });
+
+    it('prevents default and stops propagation', () => {
+      document.body.innerHTML = `
+        <div id="thetext">
+          <span class="word TERMABC" data_hex="ABC" data_order="1">hello</span>
+        </div>
+      `;
+
+      const component = textReaderData();
+      const wordEl = document.querySelector('.word')!;
+      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+      Object.defineProperty(event, 'target', { value: wordEl });
+      const preventSpy = vi.spyOn(event, 'preventDefault');
+      const stopSpy = vi.spyOn(event, 'stopPropagation');
+
+      component.handleWordClick(event);
+
+      expect(preventSpy).toHaveBeenCalled();
+      expect(stopSpy).toHaveBeenCalled();
+    });
+
+    it('handles click on child element of word', () => {
+      document.body.innerHTML = `
+        <div id="thetext">
+          <span class="word TERMABC" data_hex="ABC" data_order="1">
+            <ruby>hello<rt>annotation</rt></ruby>
+          </span>
+        </div>
+      `;
+
+      const component = textReaderData();
+      const rubyEl = document.querySelector('ruby')!;
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: rubyEl });
+
+      component.handleWordClick(event);
+
+      // closest() should find the parent .word element
+      expect(mockWordStore.selectWord).toHaveBeenCalledWith('ABC', 1, expect.any(Element));
+    });
+  });
+
+  // ===========================================================================
+  // markAllWellKnown edge cases Tests
+  // ===========================================================================
+
+  describe('markAllWellKnown edge cases', () => {
+    it('handles API error response', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      vi.mocked(TextsApi.markAllWellKnown).mockResolvedValue({
+        error: 'API Error',
+        data: undefined
+      });
+
+      const component = textReaderData();
+      await component.markAllWellKnown();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to mark all well-known:', 'API Error');
+      expect(component.isLoading).toBe(false);
+    });
+
+    it('updates words in DOM and store on success', async () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      vi.mocked(TextsApi.markAllWellKnown).mockResolvedValue({
+        data: {
+          words: [
+            { hex: 'ABC123', wid: 1 },
+            { hex: 'DEF456', wid: 2 }
+          ]
+        },
+        error: undefined
+      });
+
+      const component = textReaderData();
+      await component.markAllWellKnown();
+
+      expect(updateWordStatusInDOM).toHaveBeenCalledWith('ABC123', 99, 1);
+      expect(updateWordStatusInDOM).toHaveBeenCalledWith('DEF456', 99, 2);
+      expect(mockWordStore.updateWordInStore).toHaveBeenCalledTimes(2);
+    });
+
+    it('handles exception during API call', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      vi.mocked(TextsApi.markAllWellKnown).mockRejectedValue(new Error('Network error'));
+
+      const component = textReaderData();
+      await component.markAllWellKnown();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Error marking all well-known:', expect.any(Error));
+      expect(component.isLoading).toBe(false);
+    });
+  });
+
+  // ===========================================================================
+  // markAllIgnored edge cases Tests
+  // ===========================================================================
+
+  describe('markAllIgnored edge cases', () => {
+    it('handles API error response', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      vi.mocked(TextsApi.markAllIgnored).mockResolvedValue({
+        error: 'API Error',
+        data: undefined
+      });
+
+      const component = textReaderData();
+      await component.markAllIgnored();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to mark all ignored:', 'API Error');
+      expect(component.isLoading).toBe(false);
+    });
+
+    it('updates words in DOM and store on success', async () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      vi.mocked(TextsApi.markAllIgnored).mockResolvedValue({
+        data: {
+          words: [
+            { hex: 'ABC123', wid: 1 },
+            { hex: 'DEF456', wid: 2 }
+          ]
+        },
+        error: undefined
+      });
+
+      const component = textReaderData();
+      await component.markAllIgnored();
+
+      expect(updateWordStatusInDOM).toHaveBeenCalledWith('ABC123', 98, 1);
+      expect(updateWordStatusInDOM).toHaveBeenCalledWith('DEF456', 98, 2);
+      expect(mockWordStore.updateWordInStore).toHaveBeenCalledTimes(2);
+    });
+
+    it('handles exception during API call', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      vi.mocked(TextsApi.markAllIgnored).mockRejectedValue(new Error('Network error'));
+
+      const component = textReaderData();
+      await component.markAllIgnored();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Error marking all ignored:', expect.any(Error));
+      expect(component.isLoading).toBe(false);
+    });
+  });
+
+  // ===========================================================================
+  // goNext Tests
+  // ===========================================================================
+
+  describe('goNext', () => {
+    it('does not throw when called', () => {
+      const component = textReaderData();
+
+      // goNext is a placeholder that doesn't do anything yet
+      expect(() => component.goNext()).not.toThrow();
+    });
+  });
 });

@@ -702,5 +702,251 @@ describe('words/word_list_app.ts', () => {
 
       expect(data.getMarkedIds()).toEqual([]);
     });
+
+    it('handleMultiAction cancels when delete not confirmed', async () => {
+      const data = wordListData();
+      data.marked.add(1);
+
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+      const select = document.createElement('select');
+      select.value = 'del';
+      const event = { target: select } as unknown as Event;
+
+      await data.handleMultiAction(event);
+
+      // When confirm returns false, it should reset the select
+      expect(select.value).toBe('');
+    });
+  });
+
+  // ===========================================================================
+  // All Action Tests
+  // ===========================================================================
+
+  describe('All actions (handleAllAction)', () => {
+    it('returns early when action is empty', async () => {
+      const data = wordListData();
+
+      const select = document.createElement('select');
+      select.value = '';
+      const event = { target: select } as unknown as Event;
+
+      await data.handleAllAction(event);
+
+      expect(window.confirm).not.toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // Init Method Tests
+  // ===========================================================================
+
+  describe('init method', () => {
+    it('loads filter state, options, and words on init', async () => {
+      const data = wordListData();
+
+      await data.init();
+
+      expect(WordsApi.getFilterOptions).toHaveBeenCalled();
+      expect(WordsApi.getList).toHaveBeenCalled();
+      expect(data.loading).toBe(false);
+    });
+  });
+
+  // ===========================================================================
+  // loadWords Tests
+  // ===========================================================================
+
+  describe('loadWords', () => {
+    it('updates words and pagination from API response', async () => {
+      const data = wordListData();
+
+      vi.mocked(WordsApi.getList).mockResolvedValue({
+        data: {
+          words: [{ id: 1, text: 'hello' } as never],
+          pagination: { page: 2, per_page: 50, total: 100, total_pages: 2 }
+        },
+        error: undefined,
+      });
+
+      await data.loadWords();
+
+      expect(data.words).toHaveLength(1);
+      expect(data.pagination.page).toBe(2);
+      expect(data.pagination.total).toBe(100);
+    });
+  });
+
+  // ===========================================================================
+  // loadFilterOptions Tests
+  // ===========================================================================
+
+  describe('loadFilterOptions', () => {
+    it('passes language ID to API', async () => {
+      const data = wordListData();
+      data.filters.lang = 5;
+
+      await data.loadFilterOptions();
+
+      expect(WordsApi.getFilterOptions).toHaveBeenCalledWith(5);
+    });
+
+    it('passes null when no language selected', async () => {
+      const data = wordListData();
+      data.filters.lang = null;
+
+      await data.loadFilterOptions();
+
+      expect(WordsApi.getFilterOptions).toHaveBeenCalledWith(null);
+    });
+
+    it('handles empty string language as null', async () => {
+      const data = wordListData();
+      data.filters.lang = '' as unknown as number;
+
+      await data.loadFilterOptions();
+
+      expect(WordsApi.getFilterOptions).toHaveBeenCalledWith(null);
+    });
+  });
+
+  // ===========================================================================
+  // setFilter lang change Tests
+  // ===========================================================================
+
+  describe('setFilter language change', () => {
+    it('resets text_id and reloads filter options when lang changes', () => {
+      const data = wordListData();
+      data.filters.text_id = 5;
+
+      vi.mocked(WordsApi.getList).mockResolvedValue({
+        data: { words: [], pagination: { page: 1, per_page: 50, total: 0, total_pages: 0 } },
+        error: undefined,
+      });
+
+      data.setFilter('lang', 3);
+
+      expect(data.filters.text_id).toBeNull();
+      expect(WordsApi.getFilterOptions).toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // startEdit with missing word Tests
+  // ===========================================================================
+
+  describe('startEdit edge cases', () => {
+    it('does nothing when word not found', () => {
+      const data = wordListData();
+      data.words = [];
+
+      data.startEdit(999, 'translation');
+
+      expect(data.editingWord).toBeNull();
+    });
+  });
+
+  // ===========================================================================
+  // saveEdit error handling Tests
+  // ===========================================================================
+
+  describe('saveEdit error handling', () => {
+    it('shows alert on API error', async () => {
+      const data = wordListData();
+      const alertSpy = vi.spyOn(window, 'alert');
+      data.words = [{ id: 1, translation: 'old', romanization: '' } as never];
+      data.editingWord = { id: 1, field: 'translation' };
+      data.editValue = 'new';
+
+      vi.mocked(WordsApi.inlineEdit).mockResolvedValue({
+        data: { success: false, error: 'Update failed' },
+        error: undefined,
+      });
+
+      await data.saveEdit();
+
+      expect(alertSpy).toHaveBeenCalledWith('Update failed');
+    });
+
+    it('clears editing state even on error', async () => {
+      const data = wordListData();
+      data.words = [{ id: 1, translation: 'old', romanization: '' } as never];
+      data.editingWord = { id: 1, field: 'translation' };
+      data.editValue = 'new';
+
+      vi.mocked(WordsApi.inlineEdit).mockResolvedValue({
+        data: { success: false, error: 'Error' },
+        error: undefined,
+      });
+
+      await data.saveEdit();
+
+      expect(data.editingWord).toBeNull();
+      expect(data.editValue).toBe('');
+      expect(data.editSaving).toBe(false);
+    });
+
+    it('updates romanization field on success', async () => {
+      const data = wordListData();
+      data.words = [{ id: 1, translation: '', romanization: 'old' } as never];
+      data.editingWord = { id: 1, field: 'romanization' };
+      data.editValue = 'new';
+
+      vi.mocked(WordsApi.inlineEdit).mockResolvedValue({
+        data: { success: true, value: 'new' },
+        error: undefined,
+      });
+
+      await data.saveEdit();
+
+      expect(data.words[0].romanization).toBe('new');
+    });
+
+    it('does nothing when editingWord is null', async () => {
+      const data = wordListData();
+      data.editingWord = null;
+
+      await data.saveEdit();
+
+      expect(WordsApi.inlineEdit).not.toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // loadFilterState Tests
+  // ===========================================================================
+
+  describe('loadFilterState', () => {
+    it('reads lang from URL params', () => {
+      window.location.search = '?lang=7';
+
+      const data = wordListData();
+      data.loadFilterState();
+
+      expect(data.filters.lang).toBe(7);
+    });
+
+    it('URL lang takes precedence over localStorage', () => {
+      window.location.search = '?lang=7';
+      vi.mocked(window.localStorage.getItem).mockReturnValue(
+        JSON.stringify({ lang: 3, status: '1' })
+      );
+
+      const data = wordListData();
+      data.loadFilterState();
+
+      expect(data.filters.lang).toBe(7);
+    });
+
+    it('handles localStorage errors gracefully', () => {
+      vi.mocked(window.localStorage.getItem).mockImplementation(() => {
+        throw new Error('Storage error');
+      });
+
+      const data = wordListData();
+
+      expect(() => data.loadFilterState()).not.toThrow();
+    });
   });
 });
