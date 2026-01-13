@@ -503,4 +503,432 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
       expect(formHtml).toContain('disabled');
     });
   });
+
+  // ===========================================================================
+  // Form Submission Handler Tests
+  // ===========================================================================
+
+  describe('Form Submission Handler', () => {
+    beforeEach(async () => {
+      // Set up DOM with form before each test
+      document.body.innerHTML = `
+        <form id="term-edit-form">
+          <textarea id="term-edit-translation">test translation</textarea>
+          <input id="term-edit-romanization" value="romaji" />
+          <textarea id="term-edit-sentence">test {sentence}</textarea>
+          <select id="term-edit-status">
+            <option value="1">Learning (1)</option>
+            <option value="2" selected>Learning (2)</option>
+          </select>
+          <button id="term-edit-save" type="submit">Save</button>
+          <button id="term-edit-cancel" type="button">Cancel</button>
+          <div id="term-edit-error" style="display: none;"></div>
+        </form>
+      `;
+    });
+
+    it('prevents default form submission', async () => {
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      const submitEvent = new Event('submit', { cancelable: true });
+      const preventDefaultSpy = vi.spyOn(submitEvent, 'preventDefault');
+
+      form?.dispatchEvent(submitEvent);
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+    });
+
+    it('disables save button during submission', async () => {
+      // Make API call slow
+      vi.mocked(TermsApi.updateFull).mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve({
+          data: { term: mockTermResponse.data!.term }
+        }), 100))
+      );
+
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      const saveBtn = document.getElementById('term-edit-save') as HTMLButtonElement;
+
+      // Submit form
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      // Button should be disabled during submission
+      expect(saveBtn.disabled).toBe(true);
+      expect(saveBtn.classList.contains('is-loading')).toBe(true);
+    });
+
+    it('hides error notification on new submission', async () => {
+      await openTermEditModal(1, 5, 123);
+
+      const errorEl = document.getElementById('term-edit-error')!;
+      errorEl.style.display = 'block';
+      errorEl.textContent = 'Previous error';
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      expect(errorEl.style.display).toBe('none');
+    });
+
+    it('calls updateFull with form data for existing term', async () => {
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        return vi.mocked(TermsApi.updateFull).mock.calls.length > 0;
+      });
+
+      expect(TermsApi.updateFull).toHaveBeenCalledWith(123, {
+        translation: 'test translation',
+        romanization: 'romaji',
+        sentence: 'test {sentence}',
+        status: 2,
+        tags: []
+      });
+    });
+
+    it('calls createFull with form data for new term', async () => {
+      vi.mocked(TermsApi.getForEdit).mockResolvedValue({
+        data: {
+          ...mockTermResponse.data!,
+          isNew: true,
+          term: { ...mockTermResponse.data!.term, id: null as any },
+        },
+      });
+
+      await openTermEditModal(1, 5);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        return vi.mocked(TermsApi.createFull).mock.calls.length > 0;
+      });
+
+      expect(TermsApi.createFull).toHaveBeenCalledWith({
+        textId: 1,
+        position: 5,
+        translation: 'test translation',
+        romanization: 'romaji',
+        sentence: 'test {sentence}',
+        status: 2,
+        tags: []
+      });
+    });
+
+    it('closes modal on successful save', async () => {
+      vi.mocked(TermsApi.updateFull).mockResolvedValue({
+        data: { term: mockTermResponse.data!.term }
+      });
+
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        return vi.mocked(closeModal).mock.calls.length > 0;
+      });
+
+      expect(closeModal).toHaveBeenCalled();
+    });
+
+    it('dispatches lwt-term-saved event on successful save', async () => {
+      vi.mocked(TermsApi.updateFull).mockResolvedValue({
+        data: { term: mockTermResponse.data!.term }
+      });
+
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        return dispatchEventSpy.mock.calls.some(
+          call => (call[0] as CustomEvent).type === 'lwt-term-saved'
+        );
+      });
+
+      expect(dispatchEventSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'lwt-term-saved',
+          detail: expect.objectContaining({
+            wordId: 123,
+            hex: 'abc123'
+          })
+        })
+      );
+    });
+
+    it('shows error notification on API error response', async () => {
+      vi.mocked(TermsApi.updateFull).mockResolvedValue({
+        error: 'Validation failed'
+      });
+
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        const errorEl = document.getElementById('term-edit-error');
+        return errorEl?.style.display === 'block';
+      });
+
+      const errorEl = document.getElementById('term-edit-error');
+      expect(errorEl?.textContent).toContain('Validation failed');
+      expect(errorEl?.style.display).toBe('block');
+    });
+
+    it('shows error notification on data.error', async () => {
+      vi.mocked(TermsApi.updateFull).mockResolvedValue({
+        data: { error: 'Term already exists' } as any
+      });
+
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        const errorEl = document.getElementById('term-edit-error');
+        return errorEl?.style.display === 'block';
+      });
+
+      const errorEl = document.getElementById('term-edit-error');
+      expect(errorEl?.textContent).toContain('Term already exists');
+    });
+
+    it('shows generic error on exception', async () => {
+      vi.mocked(TermsApi.updateFull).mockRejectedValue(new Error('Network error'));
+
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        const errorEl = document.getElementById('term-edit-error');
+        return errorEl?.style.display === 'block';
+      });
+
+      const errorEl = document.getElementById('term-edit-error');
+      expect(errorEl?.textContent).toContain('Network error');
+    });
+
+    it('re-enables save button after error', async () => {
+      vi.mocked(TermsApi.updateFull).mockRejectedValue(new Error('Failed'));
+
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      const saveBtn = document.getElementById('term-edit-save') as HTMLButtonElement;
+
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        return !saveBtn.disabled;
+      });
+
+      expect(saveBtn.disabled).toBe(false);
+      expect(saveBtn.classList.contains('is-loading')).toBe(false);
+    });
+
+    it('handles missing wordId for existing term', async () => {
+      // This tests the edge case where wordId is null but isNew is false
+      vi.mocked(TermsApi.getForEdit).mockResolvedValue({
+        data: {
+          ...mockTermResponse.data!,
+          isNew: false,
+          term: { ...mockTermResponse.data!.term, id: null as any },
+        },
+      });
+
+      await openTermEditModal(1, 5);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        const errorEl = document.getElementById('term-edit-error');
+        return errorEl?.style.display === 'block';
+      });
+
+      const errorEl = document.getElementById('term-edit-error');
+      expect(errorEl?.textContent).toContain('Word ID is missing');
+    });
+
+    it('handles empty form fields gracefully', async () => {
+      // Clear form fields
+      (document.getElementById('term-edit-translation') as HTMLTextAreaElement).value = '';
+      (document.getElementById('term-edit-romanization') as HTMLInputElement).value = '';
+      (document.getElementById('term-edit-sentence') as HTMLTextAreaElement).value = '';
+
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        return vi.mocked(TermsApi.updateFull).mock.calls.length > 0;
+      });
+
+      expect(TermsApi.updateFull).toHaveBeenCalledWith(123, {
+        translation: '',
+        romanization: '',
+        sentence: '',
+        status: 2,
+        tags: []
+      });
+    });
+  });
+
+  // ===========================================================================
+  // Cancel Button Handler Tests
+  // ===========================================================================
+
+  describe('Cancel Button Handler', () => {
+    beforeEach(async () => {
+      document.body.innerHTML = `
+        <form id="term-edit-form">
+          <textarea id="term-edit-translation">test</textarea>
+          <input id="term-edit-romanization" value="" />
+          <textarea id="term-edit-sentence">test</textarea>
+          <select id="term-edit-status"><option value="1" selected>1</option></select>
+          <button id="term-edit-save">Save</button>
+          <button id="term-edit-cancel">Cancel</button>
+          <div id="term-edit-error" style="display: none;"></div>
+        </form>
+      `;
+    });
+
+    it('attaches click handler to cancel button', async () => {
+      await openTermEditModal(1, 5, 123);
+
+      const cancelBtn = document.getElementById('term-edit-cancel');
+      expect(cancelBtn).not.toBeNull();
+    });
+
+    it('clicking cancel closes the modal', async () => {
+      await openTermEditModal(1, 5, 123);
+
+      const cancelBtn = document.getElementById('term-edit-cancel')!;
+      cancelBtn.click();
+
+      expect(closeModal).toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // Edge Cases Tests
+  // ===========================================================================
+
+  describe('Edge Cases', () => {
+    it('handles null response data', async () => {
+      vi.mocked(TermsApi.getForEdit).mockResolvedValue({
+        data: null as any,
+        error: undefined
+      });
+
+      await openTermEditModal(1, 5);
+
+      expect(openModal).toHaveBeenLastCalledWith(
+        expect.stringContaining('Failed to load'),
+        expect.objectContaining({ title: 'Error' })
+      );
+    });
+
+    it('does not dispatch event when response has no term', async () => {
+      vi.mocked(TermsApi.updateFull).mockResolvedValue({
+        data: {} // No term in response
+      });
+
+      document.body.innerHTML = `
+        <form id="term-edit-form">
+          <textarea id="term-edit-translation">test</textarea>
+          <input id="term-edit-romanization" value="" />
+          <textarea id="term-edit-sentence">test</textarea>
+          <select id="term-edit-status"><option value="1" selected>1</option></select>
+          <button id="term-edit-save">Save</button>
+          <div id="term-edit-error" style="display: none;"></div>
+        </form>
+      `;
+
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        return vi.mocked(closeModal).mock.calls.length > 0;
+      });
+
+      // Event should not be dispatched if no term in response
+      const termSavedCalls = dispatchEventSpy.mock.calls.filter(
+        call => (call[0] as CustomEvent).type === 'lwt-term-saved'
+      );
+      expect(termSavedCalls.length).toBe(0);
+    });
+
+    it('handles missing form elements gracefully', async () => {
+      // Remove some form elements
+      document.body.innerHTML = `
+        <form id="term-edit-form">
+          <button id="term-edit-save">Save</button>
+          <div id="term-edit-error" style="display: none;"></div>
+        </form>
+      `;
+
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        return vi.mocked(TermsApi.updateFull).mock.calls.length > 0;
+      });
+
+      // Should use empty/default values for missing fields
+      expect(TermsApi.updateFull).toHaveBeenCalledWith(123, {
+        translation: '',
+        romanization: '',
+        sentence: '',
+        status: 1, // Default when parsing empty string
+        tags: []
+      });
+    });
+
+    it('handles status selection without romanization field', async () => {
+      document.body.innerHTML = `
+        <form id="term-edit-form">
+          <textarea id="term-edit-translation">translation</textarea>
+          <textarea id="term-edit-sentence">sentence</textarea>
+          <select id="term-edit-status">
+            <option value="99" selected>Well Known</option>
+          </select>
+          <button id="term-edit-save">Save</button>
+          <div id="term-edit-error" style="display: none;"></div>
+        </form>
+      `;
+
+      await openTermEditModal(1, 5, 123);
+
+      const form = document.getElementById('term-edit-form');
+      form?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        return vi.mocked(TermsApi.updateFull).mock.calls.length > 0;
+      });
+
+      expect(TermsApi.updateFull).toHaveBeenCalledWith(123, expect.objectContaining({
+        status: 99,
+        romanization: ''
+      }));
+    });
+  });
 });

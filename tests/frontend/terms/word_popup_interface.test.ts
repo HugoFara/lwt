@@ -36,6 +36,12 @@ import {
   createWellKnownButton,
   createIgnoreButton,
   createReviewStatusButtons,
+  createLocalDictSection,
+  addLocalDictToPopup,
+  buildKnownWordPopupContent,
+  buildUnknownWordPopupContent,
+  buildWordDetailsPanel,
+  openMultiWordModal,
 } from '../../../src/frontend/js/modules/vocabulary/services/word_popup_interface';
 import type { WordActionContext } from '../../../src/frontend/js/modules/vocabulary/services/word_actions';
 
@@ -48,6 +54,38 @@ vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_actions', () 
   incrementWordStatus: vi.fn().mockResolvedValue({ success: true }),
 }));
 
+// Mock local dictionaries API
+const mockHasLocalDictionaries = vi.fn();
+const mockLookupLocal = vi.fn();
+const mockFormatResults = vi.fn();
+
+vi.mock('../../../src/frontend/js/dictionaries', () => ({
+  hasLocalDictionaries: (...args: unknown[]) => mockHasLocalDictionaries(...args),
+  lookupLocal: (...args: unknown[]) => mockLookupLocal(...args),
+  formatResults: (...args: unknown[]) => mockFormatResults(...args),
+}));
+
+// Mock TermsApi
+const mockGetDetails = vi.fn();
+vi.mock('../../../src/frontend/js/modules/vocabulary/api/terms_api', () => ({
+  TermsApi: {
+    getDetails: (...args: unknown[]) => mockGetDetails(...args),
+  },
+}));
+
+// Mock Alpine store
+const mockMultiWordFormStore = {
+  loadForEdit: vi.fn(),
+};
+vi.mock('alpinejs', () => ({
+  default: {
+    store: vi.fn((name: string) => {
+      if (name === 'multiWordForm') return mockMultiWordFormStore;
+      return {};
+    }),
+  },
+}));
+
 import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/modules/language/stores/language_config';
 import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/modules/text/stores/text_config';
 import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/shared/utils/settings_config';
@@ -55,6 +93,7 @@ import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/j
 describe('word_popup_interface.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
+    vi.clearAllMocks();
     // Initialize state modules
     resetLanguageConfig();
     resetTextConfig();
@@ -969,6 +1008,359 @@ describe('word_popup_interface.ts', () => {
 
       expect(oopsBtn.disabled).toBe(true);
       expect(incrementWordStatus).toHaveBeenCalledWith(mockContext, 'down');
+    });
+  });
+
+  // ===========================================================================
+  // createLocalDictSection Tests
+  // ===========================================================================
+
+  describe('createLocalDictSection', () => {
+    it('returns null when no local dictionaries available', async () => {
+      mockHasLocalDictionaries.mockResolvedValue(false);
+
+      const result = await createLocalDictSection(1, 'test');
+
+      expect(result).toBeNull();
+      expect(mockHasLocalDictionaries).toHaveBeenCalledWith(1);
+    });
+
+    it('creates section with results when lookup succeeds', async () => {
+      mockHasLocalDictionaries.mockResolvedValue(true);
+      mockLookupLocal.mockResolvedValue({
+        data: {
+          results: [{ term: 'test', definition: 'a test' }],
+        },
+      });
+      mockFormatResults.mockReturnValue('<div>test - a test</div>');
+
+      const result = await createLocalDictSection(1, 'hello');
+
+      expect(result).not.toBeNull();
+      expect(result!.className).toBe('lwt-local-dict-section');
+      expect(result!.innerHTML).toContain('Local Dictionary');
+      expect(result!.innerHTML).toContain('test - a test');
+    });
+
+    it('shows empty message when no results found', async () => {
+      mockHasLocalDictionaries.mockResolvedValue(true);
+      mockLookupLocal.mockResolvedValue({
+        data: {
+          results: [],
+        },
+      });
+
+      const result = await createLocalDictSection(1, 'unknown');
+
+      expect(result).not.toBeNull();
+      expect(result!.innerHTML).toContain('No local results found');
+    });
+
+    it('shows error message when lookup returns error', async () => {
+      mockHasLocalDictionaries.mockResolvedValue(true);
+      mockLookupLocal.mockResolvedValue({
+        error: 'Dictionary not found',
+      });
+
+      const result = await createLocalDictSection(1, 'test');
+
+      expect(result).not.toBeNull();
+      expect(result!.innerHTML).toContain('Dictionary not found');
+    });
+
+    it('shows error message when lookup throws exception', async () => {
+      mockHasLocalDictionaries.mockResolvedValue(true);
+      mockLookupLocal.mockRejectedValue(new Error('Network error'));
+
+      const result = await createLocalDictSection(1, 'test');
+
+      expect(result).not.toBeNull();
+      expect(result!.innerHTML).toContain('Failed to look up term');
+    });
+  });
+
+  // ===========================================================================
+  // addLocalDictToPopup Tests
+  // ===========================================================================
+
+  describe('addLocalDictToPopup', () => {
+    it('adds section with separator when local dict available', async () => {
+      mockHasLocalDictionaries.mockResolvedValue(true);
+      mockLookupLocal.mockResolvedValue({
+        data: {
+          results: [{ term: 'test', definition: 'a test' }],
+        },
+      });
+      mockFormatResults.mockReturnValue('<div>test - a test</div>');
+
+      const container = document.createElement('div');
+      const result = await addLocalDictToPopup(container, 1, 'test');
+
+      expect(result).toBe(true);
+      expect(container.querySelector('hr.lwt-popup-separator')).not.toBeNull();
+      expect(container.querySelector('.lwt-local-dict-section')).not.toBeNull();
+    });
+
+    it('returns false and adds nothing when no local dict', async () => {
+      mockHasLocalDictionaries.mockResolvedValue(false);
+
+      const container = document.createElement('div');
+      const result = await addLocalDictToPopup(container, 1, 'test');
+
+      expect(result).toBe(false);
+      expect(container.children.length).toBe(0);
+    });
+  });
+
+  // ===========================================================================
+  // buildKnownWordPopupContent Tests
+  // ===========================================================================
+
+  describe('buildKnownWordPopupContent', () => {
+    const mockContext: WordActionContext = {
+      textId: 1,
+      wordId: 100,
+      position: 5,
+      text: 'test',
+      status: 3,
+    };
+
+    const dictLinks = {
+      dict1: 'http://dict1.com/lwt_term',
+      dict2: 'http://dict2.com/lwt_term',
+      translator: 'http://trans.com/lwt_term',
+    };
+
+    it('creates popup content with audio button', () => {
+      const content = buildKnownWordPopupContent(mockContext, dictLinks, [], false);
+
+      expect(content.className).toBe('lwt-word-popup-content');
+      expect(content.querySelector('.lwt-popup-audio')).not.toBeNull();
+    });
+
+    it('creates popup content with status buttons', () => {
+      const content = buildKnownWordPopupContent(mockContext, dictLinks, [], false);
+
+      const buttons = content.querySelectorAll('button.lwt-status-btn');
+      expect(buttons.length).toBeGreaterThan(0);
+    });
+
+    it('creates popup content with edit link', () => {
+      const content = buildKnownWordPopupContent(mockContext, dictLinks, [], false);
+
+      const editLink = content.querySelector('a[href*="/word/edit"]');
+      expect(editLink).not.toBeNull();
+      expect(editLink!.innerHTML).toContain('Edit term');
+    });
+
+    it('creates popup content with delete button', () => {
+      const content = buildKnownWordPopupContent(mockContext, dictLinks, [], false);
+
+      const deleteBtn = content.querySelector('.lwt-action-btn--delete');
+      expect(deleteBtn).not.toBeNull();
+    });
+
+    it('creates popup content with dictionary links', () => {
+      const content = buildKnownWordPopupContent(mockContext, dictLinks, [], false);
+
+      expect(content.innerHTML).toContain('Dict1');
+      expect(content.innerHTML).toContain('Dict2');
+      expect(content.innerHTML).toContain('Trans');
+    });
+
+    it('includes multiword expressions when provided', () => {
+      const multiWords = ['2 word1 word2', undefined, '', '', '', '', '', ''];
+      const content = buildKnownWordPopupContent(mockContext, dictLinks, multiWords, false);
+
+      expect(content.innerHTML).toContain('Expr:');
+    });
+
+    it('excludes multiword section when no expressions', () => {
+      const content = buildKnownWordPopupContent(mockContext, dictLinks, [], false);
+
+      expect(content.innerHTML).not.toContain('Expr:');
+    });
+  });
+
+  // ===========================================================================
+  // buildUnknownWordPopupContent Tests
+  // ===========================================================================
+
+  describe('buildUnknownWordPopupContent', () => {
+    const mockContext: WordActionContext = {
+      textId: 1,
+      position: 5,
+      text: 'newword',
+    };
+
+    const dictLinks = {
+      dict1: 'http://dict1.com/lwt_term',
+      dict2: 'http://dict2.com/lwt_term',
+      translator: 'http://trans.com/lwt_term',
+    };
+
+    it('creates popup content with audio button', () => {
+      const content = buildUnknownWordPopupContent(mockContext, dictLinks, [], false);
+
+      expect(content.className).toBe('lwt-word-popup-content');
+      expect(content.querySelector('.lwt-popup-audio')).not.toBeNull();
+    });
+
+    it('creates popup content with well-known button', () => {
+      const content = buildUnknownWordPopupContent(mockContext, dictLinks, [], false);
+
+      const wkBtn = content.querySelector('.lwt-action-btn--wellknown');
+      expect(wkBtn).not.toBeNull();
+      expect(wkBtn!.textContent).toBe('I know this term well');
+    });
+
+    it('creates popup content with ignore button', () => {
+      const content = buildUnknownWordPopupContent(mockContext, dictLinks, [], false);
+
+      const ignoreBtn = content.querySelector('.lwt-action-btn--ignore');
+      expect(ignoreBtn).not.toBeNull();
+      expect(ignoreBtn!.textContent).toBe('Ignore this term');
+    });
+
+    it('creates popup content with dictionary links', () => {
+      const content = buildUnknownWordPopupContent(mockContext, dictLinks, [], false);
+
+      expect(content.innerHTML).toContain('Dict1');
+    });
+
+    it('includes multiword expressions when provided', () => {
+      const multiWords = ['2 test expr', '', '', '', '', '', '', ''];
+      const content = buildUnknownWordPopupContent(mockContext, dictLinks, multiWords, false);
+
+      expect(content.innerHTML).toContain('Expr:');
+    });
+  });
+
+  // ===========================================================================
+  // buildWordDetailsPanel Tests
+  // ===========================================================================
+
+  describe('buildWordDetailsPanel', () => {
+    it('shows error when termId is 0', async () => {
+      const panel = await buildWordDetailsPanel(0);
+
+      expect(panel.className).toBe('lwt-word-details');
+      expect(panel.innerHTML).toContain('No term ID provided');
+    });
+
+    it('shows error when API returns error', async () => {
+      mockGetDetails.mockResolvedValue({ error: 'Term not found' });
+
+      const panel = await buildWordDetailsPanel(100);
+
+      expect(panel.innerHTML).toContain('Term not found');
+    });
+
+    it('renders term details when API succeeds', async () => {
+      mockGetDetails.mockResolvedValue({
+        data: {
+          text: 'hello',
+          translation: 'hola',
+          notes: 'A greeting',
+          tags: ['common', 'greeting'],
+          romanization: 'heh-loh',
+          sentence: 'Say {hello} to everyone.',
+          status: 3,
+          statusLabel: 'Learning (3)',
+        },
+      });
+
+      const panel = await buildWordDetailsPanel(100);
+
+      expect(panel.innerHTML).toContain('Term:');
+      expect(panel.innerHTML).toContain('hello');
+      expect(panel.innerHTML).toContain('Translation:');
+      expect(panel.innerHTML).toContain('hola');
+      expect(panel.innerHTML).toContain('Notes:');
+      expect(panel.innerHTML).toContain('A greeting');
+      expect(panel.innerHTML).toContain('Tags:');
+      expect(panel.innerHTML).toContain('common');
+      expect(panel.innerHTML).toContain('greeting');
+      expect(panel.innerHTML).toContain('Romaniz.:');
+      expect(panel.innerHTML).toContain('heh-loh');
+      expect(panel.innerHTML).toContain('Sentence:');
+      expect(panel.innerHTML).toContain('<b>hello</b>');
+      expect(panel.innerHTML).toContain('Status:');
+      expect(panel.innerHTML).toContain('Learning (3)');
+    });
+
+    it('excludes translation when it equals asterisk', async () => {
+      mockGetDetails.mockResolvedValue({
+        data: {
+          text: 'hello',
+          translation: '*',
+          status: 3,
+          statusLabel: 'Learning (3)',
+        },
+      });
+
+      const panel = await buildWordDetailsPanel(100);
+
+      expect(panel.innerHTML).not.toContain('Translation:');
+    });
+
+    it('excludes empty optional fields', async () => {
+      mockGetDetails.mockResolvedValue({
+        data: {
+          text: 'hello',
+          status: 3,
+          statusLabel: 'Learning (3)',
+        },
+      });
+
+      const panel = await buildWordDetailsPanel(100);
+
+      expect(panel.innerHTML).not.toContain('Translation:');
+      expect(panel.innerHTML).not.toContain('Notes:');
+      expect(panel.innerHTML).not.toContain('Tags:');
+      expect(panel.innerHTML).not.toContain('Romaniz.:');
+      expect(panel.innerHTML).not.toContain('Sentence:');
+    });
+
+    it('passes annotation to API when provided', async () => {
+      mockGetDetails.mockResolvedValue({
+        data: {
+          text: 'hello',
+          translation: 'hi [informal]',
+          status: 3,
+          statusLabel: 'Learning (3)',
+        },
+      });
+
+      await buildWordDetailsPanel(100, 'informal');
+
+      expect(mockGetDetails).toHaveBeenCalledWith(100, 'informal');
+    });
+  });
+
+  // ===========================================================================
+  // openMultiWordModal Tests
+  // ===========================================================================
+
+  describe('openMultiWordModal', () => {
+    it('calls store loadForEdit with new expression parameters', () => {
+      openMultiWordModal(1, 5, 'hello world', 2);
+
+      expect(mockMultiWordFormStore.loadForEdit).toHaveBeenCalledWith(
+        1, 5, 'hello world', 2, undefined
+      );
+    });
+
+    it('calls store loadForEdit with existing word parameters', () => {
+      openMultiWordModal(1, 5, '', 0, 100);
+
+      expect(mockMultiWordFormStore.loadForEdit).toHaveBeenCalledWith(
+        1, 5, '', 0, 100
+      );
+    });
+
+    it('is exposed on window object', () => {
+      expect(window.openMultiWordModal).toBe(openMultiWordModal);
     });
   });
 });

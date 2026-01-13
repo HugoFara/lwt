@@ -548,4 +548,606 @@ describe('texts_grouped_app.ts', () => {
       expect(typeof window.textsGroupedData).toBe('function');
     });
   });
+
+  // ===========================================================================
+  // loadLanguages Tests
+  // ===========================================================================
+
+  describe('loadLanguages', () => {
+    it('loads languages from API', async () => {
+      (apiGet as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: {
+          languages: [
+            { id: 1, name: 'English', text_count: 5 },
+            { id: 2, name: 'French', text_count: 3 }
+          ]
+        }
+      });
+
+      const component = textsGroupedData();
+      await component.loadLanguages();
+
+      expect(component.languages).toHaveLength(2);
+      expect(component.languages[0].name).toBe('English');
+      expect(component.languages[1].name).toBe('French');
+    });
+
+    it('initializes language states for each language', async () => {
+      (apiGet as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: {
+          languages: [
+            { id: 1, name: 'English', text_count: 10 },
+            { id: 2, name: 'French', text_count: 5 }
+          ]
+        }
+      });
+
+      const component = textsGroupedData();
+      await component.loadLanguages();
+
+      expect(component.languageStates.has(1)).toBe(true);
+      expect(component.languageStates.has(2)).toBe(true);
+      expect(component.languageStates.get(1)?.pagination.total).toBe(10);
+      expect(component.languageStates.get(2)?.pagination.total).toBe(5);
+    });
+
+    it('handles empty languages response', async () => {
+      (apiGet as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: { languages: [] }
+      });
+
+      const component = textsGroupedData();
+      await component.loadLanguages();
+
+      expect(component.languages).toHaveLength(0);
+    });
+
+    it('handles API error gracefully', async () => {
+      (apiGet as ReturnType<typeof vi.fn>).mockResolvedValue({
+        error: 'Network error'
+      });
+
+      const component = textsGroupedData();
+      await component.loadLanguages();
+
+      expect(component.languages).toHaveLength(0);
+    });
+  });
+
+  // ===========================================================================
+  // loadTextsForLanguage Tests
+  // ===========================================================================
+
+  describe('loadTextsForLanguage', () => {
+    it('loads texts for a specific language', async () => {
+      (apiGet as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: {
+          texts: [
+            { id: 1, title: 'Text 1', has_audio: false, source_uri: '', has_source: false, annotated: false, taglist: '' },
+            { id: 2, title: 'Text 2', has_audio: true, source_uri: '', has_source: false, annotated: true, taglist: 'tag1' }
+          ],
+          pagination: { current_page: 1, per_page: 10, total: 2, total_pages: 1 }
+        }
+      });
+
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map(),
+        pagination: { current_page: 0, per_page: 10, total: 2, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      await component.loadTextsForLanguage(1);
+
+      await vi.runAllTimersAsync();
+
+      expect(component.languageStates.get(1)?.texts).toHaveLength(2);
+      expect(component.languageStates.get(1)?.texts[0].title).toBe('Text 1');
+    });
+
+    it('appends texts when loading additional pages', async () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [{ id: 1, title: 'Text 1' }] as never[],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 15, total_pages: 2 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      (apiGet as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: {
+          texts: [{ id: 2, title: 'Text 2' }],
+          pagination: { current_page: 2, per_page: 10, total: 15, total_pages: 2 }
+        }
+      });
+
+      await component.loadTextsForLanguage(1, 2);
+
+      await vi.runAllTimersAsync();
+
+      expect(component.languageStates.get(1)?.texts).toHaveLength(2);
+    });
+
+    it('sets loading state during load', async () => {
+      let resolvePromise: (value: unknown) => void;
+      (apiGet as ReturnType<typeof vi.fn>).mockImplementation(() =>
+        new Promise(resolve => { resolvePromise = resolve; })
+      );
+
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map(),
+        pagination: { current_page: 0, per_page: 10, total: 5, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      const loadPromise = component.loadTextsForLanguage(1);
+
+      expect(component.languageStates.get(1)?.loading).toBe(true);
+
+      resolvePromise!({
+        data: {
+          texts: [],
+          pagination: { current_page: 1, per_page: 10, total: 0, total_pages: 0 }
+        }
+      });
+
+      await loadPromise;
+      await vi.runAllTimersAsync();
+
+      expect(component.languageStates.get(1)?.loading).toBe(false);
+    });
+
+    it('does nothing for unknown language', async () => {
+      const component = textsGroupedData();
+
+      await component.loadTextsForLanguage(999);
+
+      expect(apiGet).not.toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // loadMoreTexts Tests
+  // ===========================================================================
+
+  describe('loadMoreTexts', () => {
+    it('loads next page of texts', async () => {
+      (apiGet as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: {
+          texts: [{ id: 2, title: 'Text 2' }],
+          pagination: { current_page: 2, per_page: 10, total: 15, total_pages: 2 }
+        }
+      });
+
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [{ id: 1, title: 'Text 1' }] as never[],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 15, total_pages: 2 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      await component.loadMoreTexts(1);
+
+      expect(apiGet).toHaveBeenCalledWith('/texts/by-language/1', expect.objectContaining({ page: 2 }));
+    });
+
+    it('does nothing when already loading', async () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 20, total_pages: 2 },
+        loading: true,
+        marked: new Set()
+      }]]);
+
+      await component.loadMoreTexts(1);
+
+      expect(apiGet).not.toHaveBeenCalled();
+    });
+
+    it('does nothing for unknown language', async () => {
+      const component = textsGroupedData();
+
+      await component.loadMoreTexts(999);
+
+      expect(apiGet).not.toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // isLoadingMore Tests
+  // ===========================================================================
+
+  describe('isLoadingMore', () => {
+    it('returns true when language is loading', () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 10, total_pages: 1 },
+        loading: true,
+        marked: new Set()
+      }]]);
+
+      expect(component.isLoadingMore(1)).toBe(true);
+    });
+
+    it('returns false when language is not loading', () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 10, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      expect(component.isLoadingMore(1)).toBe(false);
+    });
+
+    it('returns false for unknown language', () => {
+      const component = textsGroupedData();
+
+      expect(component.isLoadingMore(999)).toBe(false);
+    });
+  });
+
+  // ===========================================================================
+  // initializeDefaultCollapseState Tests
+  // ===========================================================================
+
+  describe('initializeDefaultCollapseState', () => {
+    it('collapses all languages except active', () => {
+      const component = textsGroupedData();
+      component.activeLanguageId = 2;
+      component.languages = [
+        { id: 1, name: 'English', text_count: 5 },
+        { id: 2, name: 'French', text_count: 3 },
+        { id: 3, name: 'German', text_count: 4 }
+      ];
+
+      component.initializeDefaultCollapseState();
+
+      expect(component.collapsedLanguages).toContain(1);
+      expect(component.collapsedLanguages).not.toContain(2);
+      expect(component.collapsedLanguages).toContain(3);
+    });
+
+    it('saves collapse state after initialization', () => {
+      const component = textsGroupedData();
+      component.activeLanguageId = 1;
+      component.languages = [
+        { id: 1, name: 'English', text_count: 5 },
+        { id: 2, name: 'French', text_count: 3 }
+      ];
+
+      component.initializeDefaultCollapseState();
+
+      const stored = localStorage.getItem('lwt_collapsed_languages');
+      expect(stored).not.toBeNull();
+      expect(JSON.parse(stored!)).toContain(2);
+    });
+  });
+
+  // ===========================================================================
+  // getStatsForText Tests
+  // ===========================================================================
+
+  describe('getStatsForText', () => {
+    it('returns stats for text', () => {
+      const component = textsGroupedData();
+      const stats = { total: 100, saved: 50, unknown: 25, unknownPercent: 25, statusCounts: {} };
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map([[10, stats]]),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      expect(component.getStatsForText(1, 10)).toEqual(stats);
+    });
+
+    it('returns undefined for unknown text', () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      expect(component.getStatsForText(1, 999)).toBeUndefined();
+    });
+
+    it('returns undefined for unknown language', () => {
+      const component = textsGroupedData();
+
+      expect(component.getStatsForText(999, 10)).toBeUndefined();
+    });
+  });
+
+  // ===========================================================================
+  // getStatusSegments Tests
+  // ===========================================================================
+
+  describe('getStatusSegments', () => {
+    it('returns segments for text with stats', () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map([[10, {
+          total: 100,
+          saved: 70,
+          unknown: 30,
+          unknownPercent: 30,
+          statusCounts: { '1': 20, '2': 15, '5': 35 }
+        }]]),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      const segments = component.getStatusSegments(1, 10);
+
+      expect(segments.length).toBeGreaterThan(0);
+      expect(segments.find(s => s.status === 0)?.count).toBe(30); // unknown
+      expect(segments.find(s => s.status === 1)?.count).toBe(20);
+    });
+
+    it('returns empty array when no stats', () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      const segments = component.getStatusSegments(1, 10);
+
+      expect(segments).toEqual([]);
+    });
+
+    it('returns empty array when total is zero', () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map([[10, {
+          total: 0,
+          saved: 0,
+          unknown: 0,
+          unknownPercent: 0,
+          statusCounts: {}
+        }]]),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      const segments = component.getStatusSegments(1, 10);
+
+      expect(segments).toEqual([]);
+    });
+
+    it('includes correct status labels', () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map([[10, {
+          total: 100,
+          saved: 0,
+          unknown: 50,
+          unknownPercent: 50,
+          statusCounts: { '99': 30, '98': 20 }
+        }]]),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      const segments = component.getStatusSegments(1, 10);
+
+      const wellKnown = segments.find(s => s.status === 99);
+      const ignored = segments.find(s => s.status === 98);
+
+      expect(wellKnown?.label).toContain('Well Known');
+      expect(ignored?.label).toContain('Ignored');
+    });
+  });
+
+  // ===========================================================================
+  // handleMultiAction Tests
+  // ===========================================================================
+
+  describe('handleMultiAction', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('does nothing when no action selected', () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [{ id: 10 }] as never[],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set([10])
+      }]]);
+
+      const event = { target: { value: '' } } as unknown as Event;
+
+      component.handleMultiAction(1, event);
+
+      // Should not create form or submit
+    });
+
+    it('resets select when no items marked', () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [{ id: 10 }] as never[],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      const selectEl = { value: 'del' };
+      const event = { target: selectEl } as unknown as Event;
+
+      component.handleMultiAction(1, event);
+
+      expect(selectEl.value).toBe('');
+    });
+
+    it('shows confirmation for delete action', () => {
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [{ id: 10 }] as never[],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set([10])
+      }]]);
+
+      const selectEl = { value: 'del' };
+      const event = { target: selectEl } as unknown as Event;
+
+      component.handleMultiAction(1, event);
+
+      expect(confirmDelete).toHaveBeenCalled();
+    });
+
+    it('resets select when delete cancelled', () => {
+      (confirmDelete as ReturnType<typeof vi.fn>).mockReturnValue(false);
+
+      const component = textsGroupedData();
+      component.languageStates = new Map([[1, {
+        texts: [{ id: 10 }] as never[],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set([10])
+      }]]);
+
+      const selectEl = { value: 'del' };
+      const event = { target: selectEl } as unknown as Event;
+
+      component.handleMultiAction(1, event);
+
+      expect(selectEl.value).toBe('');
+    });
+  });
+
+  // ===========================================================================
+  // toggleLanguage with Text Loading Tests
+  // ===========================================================================
+
+  describe('toggleLanguage with text loading', () => {
+    it('loads texts when expanding language with no loaded texts', async () => {
+      (apiGet as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: {
+          texts: [{ id: 1, title: 'Test' }],
+          pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 }
+        }
+      });
+
+      const component = textsGroupedData();
+      component.collapsedLanguages = [1];
+      component.languageStates = new Map([[1, {
+        texts: [],
+        stats: new Map(),
+        pagination: { current_page: 0, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      await component.toggleLanguage(1);
+
+      await vi.runAllTimersAsync();
+
+      expect(apiGet).toHaveBeenCalledWith('/texts/by-language/1', expect.any(Object));
+    });
+
+    it('does not reload texts when expanding language with loaded texts', async () => {
+      const component = textsGroupedData();
+      component.collapsedLanguages = [1];
+      component.languageStates = new Map([[1, {
+        texts: [{ id: 1, title: 'Already loaded' }] as never[],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      await component.toggleLanguage(1);
+
+      expect(apiGet).not.toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // handleSortChange with Reload Tests
+  // ===========================================================================
+
+  describe('handleSortChange with reload', () => {
+    it('clears and reloads expanded languages when sort changes', async () => {
+      (apiGet as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: {
+          texts: [{ id: 2, title: 'Resorted' }],
+          pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 }
+        }
+      });
+
+      const component = textsGroupedData();
+      component.languages = [{ id: 1, name: 'English', text_count: 5 }];
+      component.collapsedLanguages = [];
+      component.languageStates = new Map([[1, {
+        texts: [{ id: 1, title: 'Original' }] as never[],
+        stats: new Map([[1, { total: 10, saved: 5, unknown: 5, unknownPercent: 50, statusCounts: {} }]]),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      const event = { target: { value: '2' } } as unknown as Event;
+      component.handleSortChange(event);
+
+      await vi.runAllTimersAsync();
+
+      // Texts should be cleared and reloaded
+      expect(apiGet).toHaveBeenCalledWith('/texts/by-language/1', expect.objectContaining({ sort: 2 }));
+    });
+
+    it('does not reload collapsed languages', async () => {
+      const component = textsGroupedData();
+      component.languages = [{ id: 1, name: 'English', text_count: 5 }];
+      component.collapsedLanguages = [1];
+      component.languageStates = new Map([[1, {
+        texts: [{ id: 1, title: 'Original' }] as never[],
+        stats: new Map(),
+        pagination: { current_page: 1, per_page: 10, total: 1, total_pages: 1 },
+        loading: false,
+        marked: new Set()
+      }]]);
+
+      const event = { target: { value: '2' } } as unknown as Event;
+      component.handleSortChange(event);
+
+      await vi.runAllTimersAsync();
+
+      expect(apiGet).not.toHaveBeenCalled();
+    });
+  });
 });
