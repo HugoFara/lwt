@@ -219,4 +219,105 @@ class TextApiHandlerTest extends TestCase
 
         $this->assertStringContainsString('?', $result);
     }
+
+    // =========================================================================
+    // saveImprText additional tests
+    // =========================================================================
+
+    public function testSaveImprTextHandlesMissingProperty(): void
+    {
+        $data = new \stdClass();
+
+        $result = $this->handler->saveImprText(0, 'tx5', $data);
+
+        $this->assertIsArray($result);
+    }
+
+    public function testSaveImprTextExtractsNumberFromElementId(): void
+    {
+        $data = new \stdClass();
+        $data->tx10 = 'test value';
+
+        $result = $this->handler->saveImprText(0, 'tx10', $data);
+
+        $this->assertIsArray($result);
+    }
+
+    public function testSaveImprTextHandlesRgWithNonEmptyTranslation(): void
+    {
+        $data = new \stdClass();
+        $data->rg5 = 'romanization value';
+        $data->tx5 = 'translation value';
+
+        $result = $this->handler->saveImprText(0, 'rg5', $data);
+
+        $this->assertIsArray($result);
+    }
+
+    // =========================================================================
+    // formatGetRecommendedTexts tests
+    // =========================================================================
+
+    public function testFormatGetRecommendedTextsReturnsArray(): void
+    {
+        // Without DB this will return empty/error, but tests structure
+        $result = $this->handler->formatGetRecommendedTexts(1, []);
+
+        $this->assertIsArray($result);
+    }
+
+    // =========================================================================
+    // formatGetTextScore tests
+    // =========================================================================
+
+    public function testFormatGetTextScoreReturnsArray(): void
+    {
+        // Without DB this will return empty/error, but tests structure
+        $result = $this->handler->formatGetTextScore(1);
+
+        $this->assertIsArray($result);
+    }
+
+    // =========================================================================
+    // formatTermTranslations tests
+    // =========================================================================
+
+    public function testFormatTermTranslationsReturnsArray(): void
+    {
+        $result = $this->handler->formatTermTranslations('test', 1);
+
+        $this->assertIsArray($result);
+    }
+
+    // =========================================================================
+    // Constructor with null creates default service
+    // =========================================================================
+
+    public function testConstructorCreatesDefaultService(): void
+    {
+        $handler = new TextApiHandler(null);
+
+        $this->assertInstanceOf(TextApiHandler::class, $handler);
+    }
+
+    // =========================================================================
+    // setTextPosition tests
+    // =========================================================================
+
+    public function testSetTextPositionReturnsMessage(): void
+    {
+        $result = $this->handler->formatSetTextPosition(1, 0);
+
+        $this->assertArrayHasKey('text', $result);
+        $this->assertSame('Reading position set', $result['text']);
+    }
+
+    public function testSetTextPositionWithDifferentPositions(): void
+    {
+        $result1 = $this->handler->formatSetTextPosition(1, 100);
+        $result2 = $this->handler->formatSetTextPosition(1, -1);
+
+        $this->assertSame('Reading position set', $result1['text']);
+        $this->assertSame('Reading position set', $result2['text']);
+    }
 }

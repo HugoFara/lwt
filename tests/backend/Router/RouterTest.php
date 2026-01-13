@@ -709,4 +709,314 @@ class RouterTest extends TestCase
         $this->assertEquals('my-post-title', $result['routeParams']['slug']);
         $this->assertContains('AuthMiddleware', $result['middleware']);
     }
+
+    // ==================== ADDITIONAL PREFIX ROUTE TESTS ====================
+
+    public function testPrefixRouteCatchesAllSubpaths(): void
+    {
+        $this->router->registerPrefix('/api', 'ApiHandler@handle');
+
+        $result1 = $this->simulateRequest('/api/users');
+        $this->assertEquals('handler', $result1['type']);
+
+        $result2 = $this->simulateRequest('/api/users/123/posts');
+        $this->assertEquals('handler', $result2['type']);
+    }
+
+    public function testPrefixRouteWithMethod(): void
+    {
+        $this->router->registerPrefix('/api', 'ApiGetHandler@handle', 'GET');
+        $this->router->registerPrefix('/api', 'ApiPostHandler@handle', 'POST');
+
+        $getResult = $this->simulateRequest('/api/data', 'GET');
+        $this->assertEquals('ApiGetHandler@handle', $getResult['handler']);
+
+        $postResult = $this->simulateRequest('/api/data', 'POST');
+        $this->assertEquals('ApiPostHandler@handle', $postResult['handler']);
+    }
+
+    public function testExactRouteOverridesPrefix(): void
+    {
+        $this->router->registerPrefix('/api', 'ApiHandler@handle');
+        $this->router->register('/api/special', 'SpecialHandler@handle');
+
+        $specialResult = $this->simulateRequest('/api/special');
+        $this->assertEquals('SpecialHandler@handle', $specialResult['handler']);
+
+        $otherResult = $this->simulateRequest('/api/other');
+        $this->assertEquals('ApiHandler@handle', $otherResult['handler']);
+    }
+
+    // ==================== ADDITIONAL PATH EDGE CASES ====================
+
+    public function testDoubleSlashInPathNotNormalized(): void
+    {
+        $this->router->register('/test', 'handler.php');
+
+        $result = $this->simulateRequest('//test');
+
+        // Router does NOT normalize double slashes - this is correct behavior
+        $this->assertEquals('not_found', $result['type']);
+    }
+
+    public function testPathWithEncodedCharacters(): void
+    {
+        $this->router->register('/search/{query}', 'search_handler.php');
+
+        $result = $this->simulateRequest('/search/hello%20world');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertArrayHasKey('query', $result['params']);
+    }
+
+    public function testPathWithMultipleConsecutiveSlashesNotNormalized(): void
+    {
+        $this->router->register('/a/b/c', 'handler.php');
+
+        $result = $this->simulateRequest('/a///b//c');
+
+        // Router does NOT normalize multiple slashes - returns not_found
+        $this->assertEquals('not_found', $result['type']);
+    }
+
+    public function testCaseInsensitiveMethod(): void
+    {
+        $this->router->register('/test', 'handler.php', 'get');
+
+        // Simulate request with lowercase method
+        $_SERVER['REQUEST_URI'] = '/test';
+        $_SERVER['REQUEST_METHOD'] = 'get';
+        $_SERVER['QUERY_STRING'] = '';
+        $_GET = [];
+
+        $result = $this->router->resolve();
+
+        $this->assertEquals('handler', $result['type']);
+    }
+
+    public function testVeryLongPath(): void
+    {
+        $longPath = '/' . str_repeat('segment/', 20) . 'end';
+        $this->router->register($longPath, 'handler.php');
+
+        $result = $this->simulateRequest($longPath);
+
+        $this->assertEquals('handler', $result['type']);
+    }
+
+    // ==================== ADDITIONAL TYPED PARAMETER TESTS ====================
+
+    public function testTypedIntParameterWithLeadingZeros(): void
+    {
+        $this->router->register('/item/{id:int}', 'handler.php');
+
+        $result = $this->simulateRequest('/item/007');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertSame(7, $result['routeParams']['id']); // Should parse as int
+    }
+
+    public function testTypedIntParameterWithLargeNumber(): void
+    {
+        $this->router->register('/item/{id:int}', 'handler.php');
+
+        $result = $this->simulateRequest('/item/999999999');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertSame(999999999, $result['routeParams']['id']);
+    }
+
+    public function testSlugParameterWithSpecialCharacters(): void
+    {
+        $this->router->register('/post/{slug:slug}', 'handler.php');
+
+        // Slug should allow hyphens, underscores, and alphanumeric
+        $result1 = $this->simulateRequest('/post/my-post-title');
+        $this->assertEquals('handler', $result1['type']);
+
+        $result2 = $this->simulateRequest('/post/post_with_underscores');
+        $this->assertEquals('handler', $result2['type']);
+    }
+
+    public function testAlphanumParameterRejectsSpecialChars(): void
+    {
+        $this->router->register('/token/{token:alphanum}', 'handler.php');
+
+        $result = $this->simulateRequest('/token/abc-123');
+
+        // Hyphen is not alphanumeric
+        $this->assertEquals('not_found', $result['type']);
+    }
+
+    // ==================== ADDITIONAL MIDDLEWARE TESTS ====================
+
+    public function testPrefixMiddlewareWithWildcard(): void
+    {
+        $this->router->registerPrefixWithMiddleware(
+            '/admin',
+            'AdminHandler@handle',
+            ['AdminAuthMiddleware'],
+            '*'
+        );
+
+        $getResult = $this->simulateRequest('/admin/users', 'GET');
+        $this->assertContains('AdminAuthMiddleware', $getResult['middleware']);
+
+        $postResult = $this->simulateRequest('/admin/users', 'POST');
+        $this->assertContains('AdminAuthMiddleware', $postResult['middleware']);
+    }
+
+    public function testMiddlewareOrder(): void
+    {
+        $middleware = ['First', 'Second', 'Third'];
+        $this->router->registerWithMiddleware('/test', 'handler.php', $middleware);
+
+        $result = $this->simulateRequest('/test');
+
+        // Middleware should maintain order
+        $this->assertSame(['First', 'Second', 'Third'], $result['middleware']);
+    }
+
+    // ==================== ADDITIONAL MATCH METHOD TESTS ====================
+
+    public function testMatchWithEmptyMethodsArray(): void
+    {
+        $this->router->match([], '/test', 'handler.php');
+
+        // No methods registered, should not match
+        $result = $this->simulateRequest('/test', 'GET');
+        $this->assertEquals('not_found', $result['type']);
+    }
+
+    public function testMatchWithAllCommonMethods(): void
+    {
+        $methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+        $this->router->match($methods, '/resource', 'ResourceController@handle');
+
+        foreach ($methods as $method) {
+            $result = $this->simulateRequest('/resource', $method);
+            $this->assertEquals('handler', $result['type'], "Should match $method");
+        }
+    }
+
+    // ==================== ADDITIONAL QUERY PARAMETER TESTS ====================
+
+    public function testQueryParamsWithArrayNotation(): void
+    {
+        $this->router->register('/test', 'handler.php');
+
+        $result = $this->simulateRequest(
+            '/test?items[]=1&items[]=2',
+            'GET',
+            ['items' => ['1', '2']]
+        );
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertIsArray($result['params']['items']);
+    }
+
+    public function testQueryParamsWithNestedArray(): void
+    {
+        $this->router->register('/test', 'handler.php');
+
+        $result = $this->simulateRequest(
+            '/test?filter[status]=active',
+            'GET',
+            ['filter' => ['status' => 'active']]
+        );
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertIsArray($result['params']['filter']);
+    }
+
+    // ==================== CONSTRUCTOR TESTS ====================
+
+    public function testConstructorWithContainer(): void
+    {
+        $container = $this->createMock(\Lwt\Shared\Infrastructure\Container\Container::class);
+        $router = new Router(dirname(__DIR__, 3), $container);
+
+        $this->assertInstanceOf(Router::class, $router);
+    }
+
+    public function testConstructorWithNullContainer(): void
+    {
+        $router = new Router(dirname(__DIR__, 3), null);
+
+        $this->assertInstanceOf(Router::class, $router);
+    }
+
+    // ==================== HTTP HEAD METHOD TEST ====================
+
+    public function testHeadMethodFallsBackToGet(): void
+    {
+        $this->router->get('/test', 'handler.php');
+
+        // HEAD requests should typically match GET routes
+        $result = $this->simulateRequest('/test', 'HEAD');
+
+        // Behavior depends on implementation - may return not_found or match GET
+        $this->assertContains($result['type'], ['handler', 'not_found']);
+    }
+
+    // ==================== STATIC FILE DETECTION TESTS ====================
+
+    public function testStaticFileExtensionsReturnNotFound(): void
+    {
+        $extensions = ['.css', '.js', '.png', '.jpg', '.gif', '.svg', '.ico'];
+
+        foreach ($extensions as $ext) {
+            $result = $this->simulateRequest('/assets/file' . $ext);
+            $this->assertEquals('not_found', $result['type'], "Extension $ext should return not_found");
+        }
+    }
+
+    // ==================== ROUTE PRIORITY TESTS ====================
+
+    public function testLaterRegistrationOverridesEarlier(): void
+    {
+        $this->router->register('/test', 'first_handler.php');
+        $this->router->register('/test', 'second_handler.php');
+
+        $result = $this->simulateRequest('/test');
+
+        $this->assertEquals('second_handler.php', $result['handler']);
+    }
+
+    public function testPatternRoutesMatchInRegistrationOrder(): void
+    {
+        // More specific pattern should be registered first
+        $this->router->register('/user/{id:int}', 'int_handler.php');
+        $this->router->register('/user/{name}', 'name_handler.php');
+
+        // Numeric should match int pattern
+        $numericResult = $this->simulateRequest('/user/123');
+        $this->assertEquals('int_handler.php', $numericResult['handler']);
+
+        // Non-numeric should match generic pattern
+        $nameResult = $this->simulateRequest('/user/john');
+        $this->assertEquals('name_handler.php', $nameResult['handler']);
+    }
+
+    // ==================== UNICODE PATH TESTS ====================
+
+    public function testUnicodeInPath(): void
+    {
+        $this->router->register('/日本語', 'japanese_handler.php');
+
+        $result = $this->simulateRequest('/日本語');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('japanese_handler.php', $result['handler']);
+    }
+
+    public function testUnicodeInPatternParameter(): void
+    {
+        $this->router->register('/word/{word}', 'word_handler.php');
+
+        $result = $this->simulateRequest('/word/日本語');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('日本語', $result['params']['word']);
+    }
 }

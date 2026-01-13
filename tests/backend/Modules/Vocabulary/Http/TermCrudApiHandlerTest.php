@@ -327,6 +327,326 @@ class TermCrudApiHandlerTest extends TestCase
     }
 
     // =========================================================================
+    // updateTerm additional tests
+    // =========================================================================
+
+    public function testUpdateTermTrimsWhitespace(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', 'old', 1);
+        $this->facade->method('getTerm')
+            ->willReturn($term);
+        $this->facade->expects($this->once())
+            ->method('updateTerm')
+            ->with(
+                1,
+                null,
+                'new translation',
+                $this->anything(),
+                $this->anything()
+            );
+
+        $this->handler->updateTerm(1, ['translation' => '  new translation  ']);
+    }
+
+    public function testUpdateTermHandlesException(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', 'old', 1);
+        $this->facade->method('getTerm')
+            ->willReturn($term);
+        $this->facade->method('updateTerm')
+            ->willThrowException(new \Exception('Update failed'));
+
+        $result = $this->handler->updateTerm(1, ['translation' => 'new']);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('Update failed', $result['error']);
+    }
+
+    public function testUpdateTermIgnoresInvalidStatus(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', 'old', 1);
+        $this->facade->method('getTerm')
+            ->willReturn($term);
+        $this->facade->expects($this->once())
+            ->method('updateTerm')
+            ->with(
+                1,
+                null, // Invalid status should be converted to null
+                $this->anything(),
+                $this->anything(),
+                $this->anything()
+            );
+
+        $this->handler->updateTerm(1, ['status' => 999]);
+    }
+
+    public function testUpdateTermPassesAllFields(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', 'old', 1);
+        $this->facade->method('getTerm')
+            ->willReturn($term);
+        $this->facade->expects($this->once())
+            ->method('updateTerm');
+
+        $result = $this->handler->updateTerm(1, [
+            'translation' => 'nueva',
+            'romanization' => 'elo',
+            'sentence' => 'Hello world',
+            'status' => 3
+        ]);
+
+        $this->assertTrue($result['success']);
+    }
+
+    // =========================================================================
+    // deleteTerm tests
+    // =========================================================================
+
+    public function testDeleteTermReturnsErrorWhenNotFound(): void
+    {
+        $this->facade->method('getTerm')
+            ->willReturn(null);
+
+        $result = $this->handler->deleteTerm(999);
+
+        $this->assertFalse($result['deleted']);
+        $this->assertSame('Term not found', $result['error']);
+    }
+
+    public function testDeleteTermCallsFacade(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', 'hola', 1);
+        $this->facade->method('getTerm')
+            ->willReturn($term);
+        $this->facade->expects($this->once())
+            ->method('deleteTerm')
+            ->with(1)
+            ->willReturn(true);
+
+        $result = $this->handler->deleteTerm(1);
+
+        $this->assertTrue($result['deleted']);
+    }
+
+    public function testDeleteTermReturnsFalseOnFailure(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', 'hola', 1);
+        $this->facade->method('getTerm')
+            ->willReturn($term);
+        $this->facade->method('deleteTerm')
+            ->willReturn(false);
+
+        $result = $this->handler->deleteTerm(1);
+
+        $this->assertFalse($result['deleted']);
+    }
+
+    // =========================================================================
+    // deleteTerms tests
+    // =========================================================================
+
+    public function testDeleteTermsReturnsErrorWhenEmpty(): void
+    {
+        $result = $this->handler->deleteTerms([]);
+
+        $this->assertSame(0, $result['deleted']);
+        $this->assertSame('No term IDs provided', $result['error']);
+    }
+
+    public function testDeleteTermsCallsFacadeWithIds(): void
+    {
+        $this->facade->expects($this->once())
+            ->method('deleteTerms')
+            ->with([1, 2, 3])
+            ->willReturn(3);
+
+        $result = $this->handler->deleteTerms([1, 2, 3]);
+
+        $this->assertSame(3, $result['deleted']);
+    }
+
+    public function testDeleteTermsReturnsPartialCount(): void
+    {
+        $this->facade->method('deleteTerms')
+            ->willReturn(2);
+
+        $result = $this->handler->deleteTerms([1, 2, 3]);
+
+        $this->assertSame(2, $result['deleted']);
+    }
+
+    // =========================================================================
+    // formatGetTerm tests
+    // =========================================================================
+
+    public function testFormatGetTermDelegatesToGetTerm(): void
+    {
+        $this->facade->method('getTerm')
+            ->willReturn(null);
+
+        $result = $this->handler->formatGetTerm(999);
+
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    // =========================================================================
+    // formatCreateTerm tests
+    // =========================================================================
+
+    public function testFormatCreateTermDelegatesToCreateTerm(): void
+    {
+        $result = $this->handler->formatCreateTerm([
+            'langId' => 0,
+            'text' => 'hello'
+        ]);
+
+        $this->assertFalse($result['success']);
+    }
+
+    // =========================================================================
+    // formatUpdateTerm tests
+    // =========================================================================
+
+    public function testFormatUpdateTermDelegatesToUpdateTerm(): void
+    {
+        $this->facade->method('getTerm')
+            ->willReturn(null);
+
+        $result = $this->handler->formatUpdateTerm(999, []);
+
+        $this->assertFalse($result['success']);
+    }
+
+    // =========================================================================
+    // formatDeleteTerm tests
+    // =========================================================================
+
+    public function testFormatDeleteTermDelegatesToDeleteTerm(): void
+    {
+        $this->facade->method('getTerm')
+            ->willReturn(null);
+
+        $result = $this->handler->formatDeleteTerm(999);
+
+        $this->assertFalse($result['deleted']);
+    }
+
+    // =========================================================================
+    // createQuickTerm tests
+    // =========================================================================
+
+    public function testCreateQuickTermReturnsErrorForInvalidStatus(): void
+    {
+        $result = $this->handler->createQuickTerm(1, 5, 1);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Status must be 98 (ignored) or 99 (well-known)', $result['error']);
+    }
+
+    public function testCreateQuickTermReturnsErrorWhenWordNotFound(): void
+    {
+        $this->linkingService->method('getWordAtPosition')
+            ->willReturn(null);
+
+        $result = $this->handler->createQuickTerm(1, 5, 98);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Word not found at position', $result['error']);
+    }
+
+    public function testCreateQuickTermReturnsSuccessData(): void
+    {
+        $this->linkingService->method('getWordAtPosition')
+            ->willReturn('hello');
+        $this->discoveryService->method('insertWordWithStatus')
+            ->willReturn([
+                'id' => 123,
+                'term' => 'hello',
+                'termlc' => 'hello',
+                'hex' => 'hex123'
+            ]);
+
+        $result = $this->handler->createQuickTerm(1, 5, 99);
+
+        $this->assertSame(123, $result['term_id']);
+        $this->assertSame('hello', $result['term']);
+        $this->assertSame('hello', $result['term_lc']);
+        $this->assertSame('hex123', $result['hex']);
+    }
+
+    public function testCreateQuickTermHandlesException(): void
+    {
+        $this->linkingService->method('getWordAtPosition')
+            ->willReturn('hello');
+        $this->discoveryService->method('insertWordWithStatus')
+            ->willThrowException(new \RuntimeException('Insert failed'));
+
+        $result = $this->handler->createQuickTerm(1, 5, 98);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Insert failed', $result['error']);
+    }
+
+    // =========================================================================
+    // formatQuickCreate tests
+    // =========================================================================
+
+    public function testFormatQuickCreateDelegatesToCreateQuickTerm(): void
+    {
+        $result = $this->handler->formatQuickCreate(1, 5, 1);
+
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    // =========================================================================
+    // createTerm valid status tests
+    // =========================================================================
+
+    public function testCreateTermAcceptsStatus98(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', '*', 98);
+        $this->facade->method('createTerm')
+            ->willReturn($term);
+
+        $result = $this->handler->createTerm([
+            'langId' => 1,
+            'text' => 'hello',
+            'status' => 98
+        ]);
+
+        $this->assertTrue($result['success']);
+    }
+
+    public function testCreateTermAcceptsStatus99(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', '*', 99);
+        $this->facade->method('createTerm')
+            ->willReturn($term);
+
+        $result = $this->handler->createTerm([
+            'langId' => 1,
+            'text' => 'hello',
+            'status' => 99
+        ]);
+
+        $this->assertTrue($result['success']);
+    }
+
+    public function testCreateTermDefaultsStatus(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', '*', 1);
+        $this->facade->expects($this->once())
+            ->method('createTerm')
+            ->with(1, 'hello', 1, '*', '', '')
+            ->willReturn($term);
+
+        $this->handler->createTerm([
+            'langId' => 1,
+            'text' => 'hello'
+        ]);
+    }
+
+    // =========================================================================
     // Helper methods
     // =========================================================================
 

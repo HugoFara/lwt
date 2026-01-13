@@ -624,4 +624,344 @@ class TextParsingTest extends TestCase
         // Clean up
         Connection::query("DELETE FROM $languages WHERE LgID = $rtlLangId");
     }
+
+    // ===== checkText() tests =====
+
+    public function testCheckTextReturnsArrayWithStats(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $text = "Hello world. This is a test sentence.";
+        $result = TextParsing::checkText($text, self::$testLanguageId);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('sentences', $result);
+        $this->assertArrayHasKey('words', $result);
+        $this->assertArrayHasKey('unknownPercent', $result);
+        $this->assertArrayHasKey('preview', $result);
+    }
+
+    public function testCheckTextReturnsSentenceCount(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $text = "First sentence. Second sentence. Third sentence.";
+        $result = TextParsing::checkText($text, self::$testLanguageId);
+
+        // At least 1 sentence should be parsed
+        $this->assertGreaterThanOrEqual(1, $result['sentences']);
+    }
+
+    public function testCheckTextReturnsWordCount(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $text = "One two three four five.";
+        $result = TextParsing::checkText($text, self::$testLanguageId);
+
+        $this->assertGreaterThanOrEqual(5, $result['words']);
+    }
+
+    public function testCheckTextReturnsUnknownPercent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $text = "Hello world.";
+        $result = TextParsing::checkText($text, self::$testLanguageId);
+
+        // Without any words in the database, all words should be unknown
+        $this->assertIsFloat($result['unknownPercent']);
+        $this->assertGreaterThanOrEqual(0, $result['unknownPercent']);
+        $this->assertLessThanOrEqual(100, $result['unknownPercent']);
+    }
+
+    public function testCheckTextReturnsPreview(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $text = "First sentence. Second sentence. Third sentence.";
+        $result = TextParsing::checkText($text, self::$testLanguageId);
+
+        $this->assertIsString($result['preview']);
+        $this->assertNotEmpty($result['preview']);
+    }
+
+    public function testCheckTextPreviewWithMultipleSentences(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $text = "Sentence one. Sentence two. Sentence three. Sentence four. Sentence five.";
+        $result = TextParsing::checkText($text, self::$testLanguageId);
+
+        // Preview should contain some of the text
+        $this->assertIsString($result['preview']);
+        $this->assertNotEmpty($result['preview']);
+    }
+
+    public function testCheckTextWithEmptyText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = TextParsing::checkText('', self::$testLanguageId);
+
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['words']);
+    }
+
+    public function testCheckTextWithInvalidLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = TextParsing::checkText('Test text.', 99999);
+
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['sentences']);
+        $this->assertEquals(0, $result['words']);
+        $this->assertEquals(100.0, $result['unknownPercent']);
+        $this->assertEquals('', $result['preview']);
+    }
+
+    // ===== parseAndSave() error handling tests =====
+
+    public function testParseAndSaveThrowsForZeroTextId(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Text ID must be positive');
+
+        TextParsing::parseAndSave("Test text.", self::$testLanguageId, 0);
+    }
+
+    public function testParseAndSaveThrowsForNegativeTextId(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Text ID must be positive');
+
+        TextParsing::parseAndSave("Test text.", self::$testLanguageId, -1);
+    }
+
+    public function testParseAndSaveThrowsForInvalidLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $this->expectException(\Lwt\Core\Exception\DatabaseException::class);
+
+        TextParsing::parseAndSave("Test text.", 99999, 1);
+    }
+
+    // ===== parseAndDisplayPreview() error handling tests =====
+
+    public function testParseAndDisplayPreviewThrowsForInvalidLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $this->expectException(\Lwt\Core\Exception\DatabaseException::class);
+
+        ob_start();
+        try {
+            TextParsing::parseAndDisplayPreview("Test text.", 99999);
+        } finally {
+            ob_end_clean();
+        }
+    }
+
+    // ===== Multi-word expression tests =====
+
+    public function testParseAndSaveWithMultiWordExpression(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $texts = Globals::table('texts');
+        $sentences = Globals::table('sentences');
+        $word_occurrences = Globals::table('word_occurrences');
+        $words = Globals::table('words');
+
+        // Create a multi-word expression (lowercase to match parsed text)
+        $sql = "INSERT INTO $words (WoLgID, WoText, WoTextLC, WoTranslation, WoStatus, WoWordCount)
+                VALUES (" . self::$testLanguageId . ", 'test word', 'test word', 'translation', 1, 2)";
+        Connection::query($sql);
+        $wordId = mysqli_insert_id(Globals::getDbConnection());
+
+        // Create a test text
+        $sql = "INSERT INTO $texts (TxLgID, TxTitle, TxText, TxAudioURI)
+                VALUES (" . self::$testLanguageId . ", 'MW Test', 'This is a test word example.', '')";
+        Connection::query($sql);
+        $textId = mysqli_insert_id(Globals::getDbConnection());
+
+        // Parse and save
+        TextParsing::parseAndSave("This is a test word example.", self::$testLanguageId, $textId);
+
+        // Check that word occurrences were created
+        $itemCount = Connection::fetchValue(
+            "SELECT COUNT(*) as value FROM $word_occurrences WHERE Ti2TxID = $textId"
+        );
+        $this->assertGreaterThan(0, (int)$itemCount, 'Should have word occurrences');
+
+        // Clean up
+        Connection::query("DELETE FROM $word_occurrences WHERE Ti2TxID = $textId");
+        Connection::query("DELETE FROM $sentences WHERE SeTxID = $textId");
+        Connection::query("DELETE FROM $texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM $words WHERE WoID = $wordId");
+    }
+
+    // ===== Additional edge case tests =====
+
+    public function testSplitIntoSentencesWithAbbreviations(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Test that abbreviations don't split sentences incorrectly
+        $text = "Dr. Smith works at Mr. Jones Corp. He is great.";
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
+
+        $this->assertIsArray($result);
+        // Should not split at "Dr." or "Mr."
+        $this->assertGreaterThanOrEqual(1, count($result));
+    }
+
+    public function testSplitIntoSentencesWithMixedPunctuation(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $text = "What? How! Sure... Go on. Yes!";
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
+
+        $this->assertIsArray($result);
+        $this->assertGreaterThanOrEqual(4, count($result));
+    }
+
+    public function testSplitIntoSentencesPreservesParagraphMarkers(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $text = "Para one.\n\nPara two.\n\nPara three.";
+        $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
+
+        $this->assertIsArray($result);
+        // Should have paragraph markers (¶)
+        $joined = implode('', $result);
+        $this->assertStringContainsString('¶', $joined);
+    }
+
+    public function testCheckTextWithKnownWord(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $words = Globals::table('words');
+
+        // Create a known word
+        $sql = "INSERT INTO $words (WoLgID, WoText, WoTextLC, WoTranslation, WoStatus, WoWordCount)
+                VALUES (" . self::$testLanguageId . ", 'known', 'known', 'bekannt', 99, 1)";
+        Connection::query($sql);
+        $wordId = mysqli_insert_id(Globals::getDbConnection());
+
+        $result = TextParsing::checkText('known word test.', self::$testLanguageId);
+
+        // At least one word should be known now (lower unknown %)
+        $this->assertIsFloat($result['unknownPercent']);
+        // Can't assert exact percentage since "word" and "test" are still unknown
+
+        // Clean up
+        Connection::query("DELETE FROM $words WHERE WoID = $wordId");
+    }
+
+    public function testParseAndSaveMultipleSentences(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $texts = Globals::table('texts');
+        $sentences = Globals::table('sentences');
+        $word_occurrences = Globals::table('word_occurrences');
+
+        // Create a test text with multiple sentences
+        $sql = "INSERT INTO $texts (TxLgID, TxTitle, TxText, TxAudioURI)
+                VALUES (" . self::$testLanguageId . ", 'Multi Sentence Test', 'Sentence one. Sentence two. Sentence three.', '')";
+        Connection::query($sql);
+        $textId = mysqli_insert_id(Globals::getDbConnection());
+
+        TextParsing::parseAndSave("Sentence one. Sentence two. Sentence three.", self::$testLanguageId, $textId);
+
+        // Check that at least 1 sentence was created
+        $sentenceCount = Connection::fetchValue(
+            "SELECT COUNT(*) as value FROM $sentences WHERE SeTxID = $textId"
+        );
+        $this->assertGreaterThanOrEqual(1, (int)$sentenceCount, 'Should create at least 1 sentence');
+
+        // Clean up
+        Connection::query("DELETE FROM $word_occurrences WHERE Ti2TxID = $textId");
+        Connection::query("DELETE FROM $sentences WHERE SeTxID = $textId");
+        Connection::query("DELETE FROM $texts WHERE TxID = $textId");
+    }
+
+    public function testParseAndDisplayPreviewOutputsHtml(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        ob_start();
+        TextParsing::parseAndDisplayPreview("Test sentence one. Test sentence two.", self::$testLanguageId);
+        $output = ob_get_clean();
+
+        // Should output HTML structure
+        $this->assertStringContainsString('<h4>', $output);
+        $this->assertStringContainsString('Sentences', $output);
+        $this->assertStringContainsString('<ol>', $output);
+        $this->assertStringContainsString('<li>', $output);
+    }
+
+    public function testParseAndDisplayPreviewOutputsJson(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        ob_start();
+        TextParsing::parseAndDisplayPreview("Hello world.", self::$testLanguageId);
+        $output = ob_get_clean();
+
+        // Should output JSON config scripts
+        $this->assertStringContainsString('text-check-words-config', $output);
+        $this->assertStringContainsString('text-check-config', $output);
+        $this->assertStringContainsString('application/json', $output);
+    }
 }

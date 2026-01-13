@@ -465,4 +465,151 @@ class FeedApiHandlerTest extends TestCase
 
         $this->assertTrue($result['success']);
     }
+
+    // =========================================================================
+    // deleteArticles tests
+    // =========================================================================
+
+    public function testDeleteArticlesCallsFacadeWhenArticleIdsEmpty(): void
+    {
+        $this->feedFacade->expects($this->once())
+            ->method('deleteArticles')
+            ->with('5')
+            ->willReturn(10);
+
+        $result = $this->handler->deleteArticles(5, []);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(10, $result['deleted']);
+    }
+
+    // =========================================================================
+    // Additional format method tests
+    // =========================================================================
+
+    public function testFormatGetFeedListDelegatesToGetFeedList(): void
+    {
+        // This will fail without DB, but tests structure
+        $result = $this->handler->formatGetFeedList([]);
+
+        $this->assertIsArray($result);
+    }
+
+    public function testFormatGetFeedDelegatesToGetFeed(): void
+    {
+        $this->feedFacade->method('getFeedById')->willReturn(null);
+
+        $result = $this->handler->formatGetFeed(999);
+
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function testFormatCreateFeedDelegatesToCreateFeed(): void
+    {
+        $result = $this->handler->formatCreateFeed([]);
+
+        $this->assertFalse($result['success']);
+    }
+
+    public function testFormatUpdateFeedDelegatesToUpdateFeed(): void
+    {
+        $this->feedFacade->method('getFeedById')->willReturn(null);
+
+        $result = $this->handler->formatUpdateFeed(999, []);
+
+        $this->assertFalse($result['success']);
+    }
+
+    public function testFormatGetArticlesDelegatesToGetArticles(): void
+    {
+        $result = $this->handler->formatGetArticles([]);
+
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function testFormatDeleteArticlesDelegatesToDeleteArticles(): void
+    {
+        $this->feedFacade->method('deleteArticles')->willReturn(0);
+
+        $result = $this->handler->formatDeleteArticles(1, []);
+
+        $this->assertTrue($result['success']);
+    }
+
+    // =========================================================================
+    // createFeed additional validation tests
+    // =========================================================================
+
+    public function testCreateFeedCallsFacadeWithValidData(): void
+    {
+        $this->feedFacade->expects($this->once())
+            ->method('createFeed')
+            ->willReturn(123);
+        $this->feedFacade->method('getFeedById')
+            ->willReturn([
+                'NfID' => 123,
+                'NfName' => 'Test Feed',
+                'NfSourceURI' => 'http://example.com/feed',
+                'NfLgID' => 1,
+                'NfArticleSectionTags' => '',
+                'NfFilterTags' => '',
+                'NfOptions' => '',
+                'NfUpdate' => 0,
+            ]);
+        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('formatLastUpdate')->willReturn('never');
+
+        $result = $this->handler->createFeed([
+            'langId' => 1,
+            'name' => 'Test Feed',
+            'sourceUri' => 'http://example.com/feed'
+        ]);
+
+        $this->assertTrue($result['success']);
+    }
+
+    // =========================================================================
+    // updateFeed additional tests
+    // =========================================================================
+
+    public function testUpdateFeedCallsFacadeWithPartialData(): void
+    {
+        $this->feedFacade->method('getFeedById')
+            ->willReturn([
+                'NfID' => 1,
+                'NfName' => 'Old Name',
+                'NfSourceURI' => 'http://old.com',
+                'NfLgID' => 1,
+                'NfArticleSectionTags' => '',
+                'NfFilterTags' => '',
+                'NfOptions' => '',
+                'NfUpdate' => 0,
+            ]);
+        $this->feedFacade->expects($this->once())
+            ->method('updateFeed');
+        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('formatLastUpdate')->willReturn('never');
+
+        $result = $this->handler->updateFeed(1, ['name' => 'New Name']);
+
+        $this->assertTrue($result['success']);
+    }
+
+    // =========================================================================
+    // importArticles additional tests
+    // =========================================================================
+
+    public function testImportArticlesCallsFacadeWithArticleIds(): void
+    {
+        $this->feedFacade->expects($this->once())
+            ->method('getMarkedFeedLinks')
+            ->with('1,2,3')
+            ->willReturn([]);
+
+        $result = $this->handler->importArticles(['article_ids' => [1, 2, 3]]);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(0, $result['imported']);
+    }
+
 }

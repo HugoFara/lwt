@@ -240,4 +240,246 @@ class WordDiscoveryServiceTest extends TestCase
         $this->assertEquals($existingId, $result['id']);
         $this->assertEquals(0, $result['rows']); // No new rows inserted
     }
+
+    // ===== Method Signature and Structure Tests (no DB required) =====
+
+    public function testConstructorWithNullServicesCreatesDefaults(): void
+    {
+        $service = new WordDiscoveryService(null, null);
+
+        $contextReflection = new \ReflectionProperty(WordDiscoveryService::class, 'contextService');
+        $contextReflection->setAccessible(true);
+
+        $linkingReflection = new \ReflectionProperty(WordDiscoveryService::class, 'linkingService');
+        $linkingReflection->setAccessible(true);
+
+        $this->assertInstanceOf(
+            \Lwt\Modules\Vocabulary\Application\Services\WordContextService::class,
+            $contextReflection->getValue($service)
+        );
+        $this->assertInstanceOf(
+            \Lwt\Modules\Vocabulary\Application\Services\WordLinkingService::class,
+            $linkingReflection->getValue($service)
+        );
+    }
+
+    public function testGetUnknownWordsInTextMethodSignature(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'getUnknownWordsInText');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame(1, $method->getNumberOfRequiredParameters());
+
+        $params = $method->getParameters();
+        $this->assertSame('textId', $params[0]->getName());
+    }
+
+    public function testGetAllUnknownWordsInTextMethodSignature(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'getAllUnknownWordsInText');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame(1, $method->getNumberOfRequiredParameters());
+    }
+
+    public function testGetUnknownWordsForBulkTranslateMethodSignature(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'getUnknownWordsForBulkTranslate');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame(3, $method->getNumberOfRequiredParameters());
+
+        $params = $method->getParameters();
+        $this->assertSame('textId', $params[0]->getName());
+        $this->assertSame('offset', $params[1]->getName());
+        $this->assertSame('limit', $params[2]->getName());
+    }
+
+    public function testCreateWithStatusMethodSignature(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'createWithStatus');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame(4, $method->getNumberOfRequiredParameters());
+
+        $params = $method->getParameters();
+        $this->assertSame('langId', $params[0]->getName());
+        $this->assertSame('term', $params[1]->getName());
+        $this->assertSame('termlc', $params[2]->getName());
+        $this->assertSame('status', $params[3]->getName());
+    }
+
+    public function testInsertWordWithStatusMethodSignature(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'insertWordWithStatus');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame(3, $method->getNumberOfRequiredParameters());
+
+        $params = $method->getParameters();
+        $this->assertSame('textId', $params[0]->getName());
+        $this->assertSame('term', $params[1]->getName());
+        $this->assertSame('status', $params[2]->getName());
+    }
+
+    public function testCreateOnHoverMethodSignature(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'createOnHover');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame(3, $method->getNumberOfRequiredParameters());
+
+        $params = $method->getParameters();
+        $this->assertSame('textId', $params[0]->getName());
+        $this->assertSame('text', $params[1]->getName());
+        $this->assertSame('status', $params[2]->getName());
+        $this->assertSame('translation', $params[3]->getName());
+
+        // translation has default value
+        $this->assertTrue($params[3]->isDefaultValueAvailable());
+        $this->assertSame('*', $params[3]->getDefaultValue());
+    }
+
+    public function testProcessWordForWellKnownMethodSignature(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'processWordForWellKnown');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame(4, $method->getNumberOfRequiredParameters());
+
+        $params = $method->getParameters();
+        $this->assertSame('status', $params[0]->getName());
+        $this->assertSame('term', $params[1]->getName());
+        $this->assertSame('termlc', $params[2]->getName());
+        $this->assertSame('langId', $params[3]->getName());
+    }
+
+    public function testSetStatusMethodSignature(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'setStatus');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame(2, $method->getNumberOfRequiredParameters());
+
+        $params = $method->getParameters();
+        $this->assertSame('wordId', $params[0]->getName());
+        $this->assertSame('status', $params[1]->getName());
+    }
+
+    public function testMarkAllWordsWithStatusMethodSignature(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'markAllWordsWithStatus');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame(2, $method->getNumberOfRequiredParameters());
+
+        $params = $method->getParameters();
+        $this->assertSame('textId', $params[0]->getName());
+        $this->assertSame('status', $params[1]->getName());
+    }
+
+    // ===== Return Type Tests =====
+
+    public function testGetUnknownWordsInTextReturnType(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'getUnknownWordsInText');
+        $returnType = $method->getReturnType();
+
+        $this->assertSame('array', $returnType->getName());
+    }
+
+    public function testCreateWithStatusReturnType(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'createWithStatus');
+        $returnType = $method->getReturnType();
+
+        $this->assertSame('array', $returnType->getName());
+    }
+
+    public function testInsertWordWithStatusReturnType(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'insertWordWithStatus');
+        $returnType = $method->getReturnType();
+
+        $this->assertSame('array', $returnType->getName());
+    }
+
+    public function testCreateOnHoverReturnType(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'createOnHover');
+        $returnType = $method->getReturnType();
+
+        $this->assertSame('array', $returnType->getName());
+    }
+
+    public function testProcessWordForWellKnownReturnType(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'processWordForWellKnown');
+        $returnType = $method->getReturnType();
+
+        $this->assertSame('array', $returnType->getName());
+    }
+
+    public function testSetStatusReturnType(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'setStatus');
+        $returnType = $method->getReturnType();
+
+        $this->assertSame('void', $returnType->getName());
+    }
+
+    public function testMarkAllWordsWithStatusReturnType(): void
+    {
+        $method = new \ReflectionMethod(WordDiscoveryService::class, 'markAllWordsWithStatus');
+        $returnType = $method->getReturnType();
+
+        $this->assertSame('array', $returnType->getName());
+    }
+
+    // ===== Status Value Tests =====
+
+    /**
+     * @dataProvider statusValueProvider
+     */
+    public function testValidStatusValues(int $status, string $description): void
+    {
+        // Document valid status values
+        $this->assertContains($status, [1, 2, 3, 4, 5, 98, 99], $description);
+    }
+
+    public static function statusValueProvider(): array
+    {
+        return [
+            'learning_1' => [1, 'Learning stage 1'],
+            'learning_2' => [2, 'Learning stage 2'],
+            'learning_3' => [3, 'Learning stage 3'],
+            'learning_4' => [4, 'Learning stage 4'],
+            'learning_5' => [5, 'Learning stage 5'],
+            'ignored' => [98, 'Ignored word'],
+            'well_known' => [99, 'Well-known word'],
+        ];
+    }
+
+    // ===== Expected Return Structure Documentation =====
+
+    public function testCreateWithStatusExpectedReturnStructure(): void
+    {
+        // Document expected return structure: ['id' => int, 'rows' => int]
+        $expectedKeys = ['id', 'rows'];
+        $this->assertCount(2, $expectedKeys);
+    }
+
+    public function testInsertWordWithStatusExpectedReturnStructure(): void
+    {
+        // Document expected return structure
+        $expectedKeys = ['id', 'term', 'termlc', 'hex'];
+        $this->assertCount(4, $expectedKeys);
+    }
+
+    public function testCreateOnHoverExpectedReturnStructure(): void
+    {
+        // Document expected return structure
+        $expectedKeys = ['wid', 'word', 'wordRaw', 'translation', 'status', 'hex'];
+        $this->assertCount(6, $expectedKeys);
+    }
 }

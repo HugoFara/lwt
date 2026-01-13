@@ -651,4 +651,367 @@ class LemmaServiceTest extends TestCase
         $result = $this->service->findWordIdByLemma(999999, 'nonexistent');
         $this->assertNull($result);
     }
+
+    // =========================================================================
+    // Additional suggestLemma Tests
+    // =========================================================================
+
+    public function testSuggestLemmaWithUnicodeWord(): void
+    {
+        $this->mockLemmatizer
+            ->expects($this->once())
+            ->method('lemmatize')
+            ->with('テスト', 'ja')
+            ->willReturn('テスト');
+
+        $result = $this->service->suggestLemma('テスト', 'ja');
+        $this->assertSame('テスト', $result);
+    }
+
+    public function testSuggestLemmaWithWhitespaceOnlyWord(): void
+    {
+        // Whitespace-only is NOT empty string, so lemmatizer will be called
+        $this->mockLemmatizer
+            ->expects($this->once())
+            ->method('lemmatize')
+            ->with('   ', '  ')
+            ->willReturn(null);
+
+        $result = $this->service->suggestLemma('   ', '  ');
+        $this->assertNull($result);
+    }
+
+    // =========================================================================
+    // Additional suggestLemmasBatch Tests
+    // =========================================================================
+
+    public function testSuggestLemmasBatchWithUnicodeWords(): void
+    {
+        $words = ['日本語', '英語', 'フランス語'];
+        $expected = [
+            '日本語' => '日本語',
+            '英語' => '英語',
+            'フランス語' => 'フランス語',
+        ];
+
+        $this->mockLemmatizer
+            ->expects($this->once())
+            ->method('lemmatizeBatch')
+            ->with($words, 'ja')
+            ->willReturn($expected);
+
+        $result = $this->service->suggestLemmasBatch($words, 'ja');
+        $this->assertSame($expected, $result);
+    }
+
+    public function testSuggestLemmasBatchWithMixedResults(): void
+    {
+        $words = ['running', 'xyz123', 'walking'];
+        $expected = [
+            'running' => 'run',
+            'xyz123' => null, // No lemma found
+            'walking' => 'walk',
+        ];
+
+        $this->mockLemmatizer
+            ->expects($this->once())
+            ->method('lemmatizeBatch')
+            ->with($words, 'en')
+            ->willReturn($expected);
+
+        $result = $this->service->suggestLemmasBatch($words, 'en');
+        $this->assertArrayHasKey('running', $result);
+        $this->assertArrayHasKey('xyz123', $result);
+        $this->assertNull($result['xyz123']);
+    }
+
+    // =========================================================================
+    // Additional isAvailableForLanguage Tests
+    // =========================================================================
+
+    public function testIsAvailableForLanguageWithEmptyCode(): void
+    {
+        $this->mockLemmatizer
+            ->expects($this->once())
+            ->method('supportsLanguage')
+            ->with('')
+            ->willReturn(false);
+
+        $result = $this->service->isAvailableForLanguage('');
+        $this->assertFalse($result);
+    }
+
+    public function testIsAvailableForLanguageWithPartialCode(): void
+    {
+        $this->mockLemmatizer
+            ->expects($this->once())
+            ->method('supportsLanguage')
+            ->with('en-US')
+            ->willReturn(true);
+
+        $result = $this->service->isAvailableForLanguage('en-US');
+        $this->assertTrue($result);
+    }
+
+    // =========================================================================
+    // Additional getAvailableLanguages Tests
+    // =========================================================================
+
+    public function testGetAvailableLanguagesReturnsLargeList(): void
+    {
+        $expected = ['en', 'de', 'fr', 'es', 'it', 'pt', 'ru', 'ja', 'zh', 'ko'];
+
+        $this->mockLemmatizer
+            ->expects($this->once())
+            ->method('getSupportedLanguages')
+            ->willReturn($expected);
+
+        $result = $this->service->getAvailableLanguages();
+        $this->assertCount(10, $result);
+        $this->assertSame($expected, $result);
+    }
+
+    // =========================================================================
+    // Additional updateWordFamilyStatus Tests
+    // =========================================================================
+
+    public function testUpdateWordFamilyStatusAcceptsIgnoredStatus(): void
+    {
+        $result = $this->service->updateWordFamilyStatus(1, 'run', 98);
+        $this->assertIsInt($result);
+    }
+
+    public function testUpdateWordFamilyStatusAcceptsWellKnownStatus(): void
+    {
+        $result = $this->service->updateWordFamilyStatus(1, 'run', 99);
+        $this->assertIsInt($result);
+    }
+
+    public function testUpdateWordFamilyStatusWithEmptyLemma(): void
+    {
+        $result = $this->service->updateWordFamilyStatus(1, '', 5);
+        $this->assertSame(0, $result);
+    }
+
+    // =========================================================================
+    // Additional getWordFamily Tests
+    // =========================================================================
+
+    public function testGetWordFamilyWithEmptyLemma(): void
+    {
+        $this->mockRepository
+            ->expects($this->once())
+            ->method('findByLemma')
+            ->with(1, '')
+            ->willReturn([]);
+
+        $result = $this->service->getWordFamily(1, '');
+        $this->assertSame([], $result);
+    }
+
+    public function testGetWordFamilyWithNonExistentLanguage(): void
+    {
+        $this->mockRepository
+            ->expects($this->once())
+            ->method('findByLemma')
+            ->with(999999, 'test')
+            ->willReturn([]);
+
+        $result = $this->service->getWordFamily(999999, 'test');
+        $this->assertSame([], $result);
+    }
+
+    // =========================================================================
+    // Additional setLemma Tests
+    // =========================================================================
+
+    public function testSetLemmaWithEmptyString(): void
+    {
+        $this->mockRepository
+            ->expects($this->once())
+            ->method('updateLemma')
+            ->with(1, '')
+            ->willReturn(true);
+
+        $result = $this->service->setLemma(1, '');
+        $this->assertTrue($result);
+    }
+
+    public function testSetLemmaWithUnicodeString(): void
+    {
+        $this->mockRepository
+            ->expects($this->once())
+            ->method('updateLemma')
+            ->with(1, '走る')
+            ->willReturn(true);
+
+        $result = $this->service->setLemma(1, '走る');
+        $this->assertTrue($result);
+    }
+
+    // =========================================================================
+    // Additional applyLemmasToVocabulary Tests
+    // =========================================================================
+
+    public function testApplyLemmasToVocabularyWithUnsupportedLanguage(): void
+    {
+        $this->mockLemmatizer
+            ->expects($this->once())
+            ->method('supportsLanguage')
+            ->with('unsupported_lang')
+            ->willReturn(false);
+
+        $result = $this->service->applyLemmasToVocabulary(1, 'unsupported_lang');
+
+        $this->assertSame(['processed' => 0, 'updated' => 0, 'skipped' => 0], $result);
+    }
+
+    // =========================================================================
+    // Additional propagateLemma Tests
+    // =========================================================================
+
+    public function testPropagateLemmaWithNullTerm(): void
+    {
+        $this->mockRepository
+            ->expects($this->once())
+            ->method('find')
+            ->with(999)
+            ->willReturn(null);
+
+        $result = $this->service->propagateLemma(999, 1, 'en');
+
+        $this->assertSame(0, $result);
+    }
+
+    // =========================================================================
+    // Additional getLemmaStatistics Tests
+    // =========================================================================
+
+    public function testGetLemmaStatisticsWithZeroLanguageId(): void
+    {
+        $result = $this->service->getLemmaStatistics(0);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('total_terms', $result);
+        $this->assertArrayHasKey('with_lemma', $result);
+        $this->assertArrayHasKey('without_lemma', $result);
+        $this->assertArrayHasKey('unique_lemmas', $result);
+    }
+
+    // =========================================================================
+    // Additional clearLemmas Tests
+    // =========================================================================
+
+    public function testClearLemmasWithZeroLanguageId(): void
+    {
+        $result = $this->service->clearLemmas(0);
+        $this->assertIsInt($result);
+    }
+
+    // =========================================================================
+    // Additional getWordFamilies Tests
+    // =========================================================================
+
+    public function testGetWordFamiliesWithZeroLimit(): void
+    {
+        $result = $this->service->getWordFamilies(1, 0);
+        $this->assertIsArray($result);
+    }
+
+    public function testGetWordFamiliesWithLargeLimit(): void
+    {
+        $result = $this->service->getWordFamilies(1, 1000);
+        $this->assertIsArray($result);
+    }
+
+    // =========================================================================
+    // Additional findPotentialLemmaGroups Tests
+    // =========================================================================
+
+    public function testFindPotentialLemmaGroupsWithZeroLimit(): void
+    {
+        $result = $this->service->findPotentialLemmaGroups(1, 0);
+        $this->assertIsArray($result);
+    }
+
+    // =========================================================================
+    // Additional getWordFamilyList Tests
+    // =========================================================================
+
+    public function testGetWordFamilyListWithNegativePage(): void
+    {
+        $result = $this->service->getWordFamilyList(1, -5, 50, 'lemma', 'asc');
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('pagination', $result);
+    }
+
+    public function testGetWordFamilyListWithInvalidDirection(): void
+    {
+        $result = $this->service->getWordFamilyList(1, 1, 50, 'lemma', 'invalid');
+        $this->assertIsArray($result);
+    }
+
+    // =========================================================================
+    // Additional bulkUpdateTermStatus Tests
+    // =========================================================================
+
+    public function testBulkUpdateTermStatusAcceptsLargeArray(): void
+    {
+        $termIds = range(1, 100);
+        $result = $this->service->bulkUpdateTermStatus($termIds, 5);
+        $this->assertIsInt($result);
+    }
+
+    // =========================================================================
+    // Additional getLemmaAggregateStats Tests
+    // =========================================================================
+
+    public function testGetLemmaAggregateStatsWithZeroLanguageId(): void
+    {
+        $result = $this->service->getLemmaAggregateStats(0);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('total_lemmas', $result);
+        $this->assertArrayHasKey('single_form', $result);
+        $this->assertArrayHasKey('multi_form', $result);
+        $this->assertArrayHasKey('avg_forms_per_lemma', $result);
+    }
+
+    // =========================================================================
+    // Additional getUnmatchedStatistics Tests
+    // =========================================================================
+
+    public function testGetUnmatchedStatisticsWithZeroLanguageId(): void
+    {
+        $result = $this->service->getUnmatchedStatistics(0);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('unmatched_count', $result);
+        $this->assertArrayHasKey('unique_words', $result);
+        $this->assertArrayHasKey('matchable_by_lemma', $result);
+    }
+
+    // =========================================================================
+    // Constructor Edge Cases
+    // =========================================================================
+
+    public function testConstructorWithBothNull(): void
+    {
+        $service = new LemmaService(null, null);
+        $this->assertInstanceOf(LemmaService::class, $service);
+    }
+
+    public function testConstructorWithCustomLemmatizerAndNullRepository(): void
+    {
+        $lemmatizer = $this->createMock(LemmatizerInterface::class);
+        $service = new LemmaService($lemmatizer, null);
+        $this->assertInstanceOf(LemmaService::class, $service);
+    }
+
+    public function testConstructorWithNullLemmatizerAndCustomRepository(): void
+    {
+        $repository = $this->createMock(MySqlTermRepository::class);
+        $service = new LemmaService(null, $repository);
+        $this->assertInstanceOf(LemmaService::class, $service);
+    }
 }

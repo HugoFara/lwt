@@ -438,4 +438,617 @@ class ExportServiceTest extends TestCase
         $this->assertStringNotContainsString("\t", $result);
         $this->assertIsString($result);
     }
+
+    // ====================================
+    // Additional Edge Cases for replaceTabNewline()
+    // ====================================
+
+    public function testReplaceTabNewlineWithVerticalTab(): void
+    {
+        $input = "word1\x0Bword2"; // Vertical tab
+        $result = ExportService::replaceTabNewline($input);
+
+        // Vertical tab is whitespace and should be converted
+        $this->assertEquals('word1 word2', $result);
+    }
+
+    public function testReplaceTabNewlineWithFormFeed(): void
+    {
+        $input = "word1\x0Cword2"; // Form feed
+        $result = ExportService::replaceTabNewline($input);
+
+        $this->assertEquals('word1 word2', $result);
+    }
+
+    public function testReplaceTabNewlineWithMixedLineEndings(): void
+    {
+        $input = "line1\nline2\r\nline3\rline4";
+        $result = ExportService::replaceTabNewline($input);
+
+        $this->assertEquals('line1 line2 line3 line4', $result);
+    }
+
+    public function testReplaceTabNewlineWithOnlySpaces(): void
+    {
+        $input = '     ';
+        $result = ExportService::replaceTabNewline($input);
+
+        $this->assertEquals('', $result);
+    }
+
+    public function testReplaceTabNewlinePreservesWords(): void
+    {
+        $input = "  first   second  \t third \n fourth  ";
+        $result = ExportService::replaceTabNewline($input);
+
+        $this->assertEquals('first second third fourth', $result);
+    }
+
+    public function testReplaceTabNewlineWithZeroWidthSpaces(): void
+    {
+        // Zero-width space U+200B is NOT regular whitespace
+        // The \s pattern in preg_replace matches: space, tab, newline, carriage return, form feed
+        // Zero-width space is a different Unicode category and is preserved
+        $input = "word1\xE2\x80\x8Bword2";
+        $result = ExportService::replaceTabNewline($input);
+
+        // Zero-width space is NOT converted - it's preserved as-is
+        $this->assertEquals("word1\xE2\x80\x8Bword2", $result);
+    }
+
+    // ====================================
+    // Additional maskTermInSentence() Tests
+    // ====================================
+
+    public function testMaskTermWithMultipleTermsInSentence(): void
+    {
+        $sentence = "First {term1} and second {term2}.";
+        $regexword = 'a-zA-Z0-9';
+
+        $result = ExportService::maskTermInSentence($sentence, $regexword);
+
+        $this->assertEquals("First {•••••} and second {•••••}.", $result);
+    }
+
+    public function testMaskTermWithAdjacentBraces(): void
+    {
+        $sentence = "Words {first}{second} together.";
+        $regexword = 'a-zA-Z';
+
+        $result = ExportService::maskTermInSentence($sentence, $regexword);
+
+        $this->assertEquals("Words {•••••}{••••••} together.", $result);
+    }
+
+    public function testMaskTermWithUnmatchedOpenBrace(): void
+    {
+        $sentence = "Open {brace without close";
+        $regexword = 'a-zA-Z';
+
+        $result = ExportService::maskTermInSentence($sentence, $regexword);
+
+        // Everything after { should be masked
+        $this->assertStringContainsString('•', $result);
+    }
+
+    public function testMaskTermWithUnmatchedCloseBrace(): void
+    {
+        $sentence = "Close brace} without open";
+        $regexword = 'a-zA-Z';
+
+        $result = ExportService::maskTermInSentence($sentence, $regexword);
+
+        // No masking should occur before the close brace
+        $this->assertEquals("Close brace} without open", $result);
+    }
+
+    public function testMaskTermWithSpacesInTerm(): void
+    {
+        $sentence = "A {multi word expression} here.";
+        $regexword = 'a-zA-Z';
+
+        $result = ExportService::maskTermInSentence($sentence, $regexword);
+
+        // Spaces preserved, letters masked
+        $this->assertEquals("A {••••• •••• ••••••••••} here.", $result);
+    }
+
+    public function testMaskTermWithAccentedCharacters(): void
+    {
+        $sentence = "French: {café} word.";
+        $regexword = 'a-zA-ZÀ-ÿ';
+
+        $result = ExportService::maskTermInSentence($sentence, $regexword);
+
+        $this->assertEquals("French: {••••} word.", $result);
+    }
+
+    public function testMaskTermWithGreekCharacters(): void
+    {
+        $sentence = "Greek: {λόγος} word.";
+        $regexword = 'α-ωΑ-Ωά-ώ';
+
+        $result = ExportService::maskTermInSentence($sentence, $regexword);
+
+        $this->assertStringContainsString('•', $result);
+    }
+
+    public function testMaskTermWithDigitsOnly(): void
+    {
+        $sentence = "Number {123} here.";
+        $regexword = '0-9';
+
+        $result = ExportService::maskTermInSentence($sentence, $regexword);
+
+        $this->assertEquals("Number {•••} here.", $result);
+    }
+
+    public function testMaskTermWithSpecialRegexChars(): void
+    {
+        $sentence = "Test {word} here.";
+        $regexword = 'a-z\\-';
+
+        $result = ExportService::maskTermInSentence($sentence, $regexword);
+
+        $this->assertIsString($result);
+    }
+
+    // ====================================
+    // Additional maskTermInSentenceV2() Tests
+    // ====================================
+
+    public function testMaskTermV2WithTermAtStart(): void
+    {
+        $sentence = "{Word} at start.";
+
+        $result = ExportService::maskTermInSentenceV2($sentence);
+
+        $this->assertEquals("[...] at start.", $result);
+    }
+
+    public function testMaskTermV2WithTermAtEnd(): void
+    {
+        $sentence = "End with {term}";
+
+        $result = ExportService::maskTermInSentenceV2($sentence);
+
+        $this->assertEquals("End with [...]", $result);
+    }
+
+    public function testMaskTermV2OnlyTerm(): void
+    {
+        $sentence = "{alone}";
+
+        $result = ExportService::maskTermInSentenceV2($sentence);
+
+        $this->assertEquals("[...]", $result);
+    }
+
+    public function testMaskTermV2WithNestedPunctuation(): void
+    {
+        $sentence = "Text {a-b-c!} more.";
+
+        $result = ExportService::maskTermInSentenceV2($sentence);
+
+        $this->assertEquals("Text [...] more.", $result);
+    }
+
+    public function testMaskTermV2WithVeryLongTerm(): void
+    {
+        $longTerm = str_repeat('a', 100);
+        $sentence = "Test {{$longTerm}} end.";
+
+        $result = ExportService::maskTermInSentenceV2($sentence);
+
+        $this->assertEquals("Test [...] end.", $result);
+    }
+
+    public function testMaskTermV2PreservesRtlMarkers(): void
+    {
+        // RTL markers should be preserved outside braces
+        $sentence = "Hebrew: \u{200F}{שלום}\u{200F} word.";
+
+        $result = ExportService::maskTermInSentenceV2($sentence);
+
+        $this->assertStringContainsString('[...]', $result);
+        $this->assertStringContainsString("\u{200F}", $result);
+    }
+
+    // ====================================
+    // Private Method Tests via Reflection
+    // ====================================
+
+    public function testFormatAnkiRowViaReflection(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatAnkiRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'LgRegexpWordCharacters' => 'a-zA-Z',
+            'LgRightToLeft' => 0,
+            'WoSentence' => 'This is a {test} sentence.',
+            'WoText' => 'test',
+            'WoTranslation' => 'prueba',
+            'WoRomanization' => '',
+            'LgName' => 'English',
+            'WoID' => '123',
+            'taglist' => 'tag1, tag2',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        $this->assertStringContainsString('test', $result);
+        $this->assertStringContainsString('prueba', $result);
+        $this->assertStringContainsString('English', $result);
+        $this->assertStringContainsString('123', $result);
+        $this->assertStringContainsString("\t", $result);
+        $this->assertStringEndsWith("\r\n", $result);
+    }
+
+    public function testFormatAnkiRowWithRtlLanguage(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatAnkiRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'LgRegexpWordCharacters' => '\x{0600}-\x{06FF}',
+            'LgRightToLeft' => 1,
+            'WoSentence' => 'This is a {مرحبا} sentence.',
+            'WoText' => 'مرحبا',
+            'WoTranslation' => 'hello',
+            'WoRomanization' => 'marhaba',
+            'LgName' => 'Arabic',
+            'WoID' => '456',
+            'taglist' => '',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        $this->assertStringContainsString('<span dir="rtl">', $result);
+        $this->assertStringContainsString('</span>', $result);
+        $this->assertStringContainsString(']', $result); // RTL brackets reversed
+    }
+
+    public function testFormatAnkiRowWithMecabRegex(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatAnkiRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'LgRegexpWordCharacters' => 'MECAB',
+            'LgRightToLeft' => 0,
+            'WoSentence' => '日本語の{単語}です。',
+            'WoText' => '単語',
+            'WoTranslation' => 'word',
+            'WoRomanization' => 'tango',
+            'LgName' => 'Japanese',
+            'WoID' => '789',
+            'taglist' => 'japanese',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        $this->assertStringContainsString('単語', $result);
+        $this->assertStringContainsString('word', $result);
+        $this->assertStringContainsString('•', $result); // Masked characters
+    }
+
+    public function testFormatTsvRowViaReflection(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatTsvRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'WoText' => "test\tword",
+            'WoTranslation' => "prueba\nnewline",
+            'WoSentence' => 'This is a {test} sentence.',
+            'WoRomanization' => '',
+            'WoStatus' => '2',
+            'LgName' => 'English',
+            'WoID' => '123',
+            'taglist' => 'tag1',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        // Tab and newline in WoText/WoTranslation should be converted to spaces
+        $this->assertStringNotContainsString("\n", str_replace("\r\n", '', $result));
+        $this->assertStringContainsString('test word', $result);
+        $this->assertStringContainsString('prueba newline', $result);
+        $this->assertStringContainsString('123', $result);
+        $this->assertStringEndsWith("\r\n", $result);
+    }
+
+    public function testFormatTsvRowWithMissingFields(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatTsvRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'WoText' => 'test',
+            'WoTranslation' => 'prueba',
+            'WoSentence' => '',
+            'WoRomanization' => '',
+            'LgName' => 'English',
+            // Missing WoStatus, WoID, taglist
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('test', $result);
+    }
+
+    public function testFormatFlexibleRowViaReflection(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'LgExportTemplate' => '%w\t%t\t%s\n',
+            'WoID' => '123',
+            'LgName' => 'English',
+            'LgRightToLeft' => 0,
+            'WoText' => 'test',
+            'WoTextLC' => 'test',
+            'WoTranslation' => 'prueba',
+            'WoRomanization' => '',
+            'WoSentence' => 'A {test} here.',
+            'WoStatus' => '2',
+            'taglist' => 'tag1',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        $this->assertStringContainsString('test', $result);
+        $this->assertStringContainsString('prueba', $result);
+        $this->assertStringContainsString("\t", $result);
+        $this->assertStringContainsString("\n", $result);
+    }
+
+    public function testFormatFlexibleRowWithHtmlPlaceholders(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'LgExportTemplate' => '$w\t$t',
+            'WoID' => '123',
+            'LgName' => 'English',
+            'LgRightToLeft' => 0,
+            'WoText' => '<script>alert(1)</script>',
+            'WoTextLC' => '<script>alert(1)</script>',
+            'WoTranslation' => '"quoted"',
+            'WoRomanization' => '',
+            'WoSentence' => 'A {test} here.',
+            'WoStatus' => '2',
+            'taglist' => '',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        // HTML should be escaped
+        $this->assertStringContainsString('&lt;script&gt;', $result);
+        $this->assertStringContainsString('&quot;quoted&quot;', $result);
+    }
+
+    public function testFormatFlexibleRowWithEscapeSequences(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'LgExportTemplate' => '%w\\t%t\\n%r\\r%%',
+            'WoID' => '123',
+            'LgName' => 'English',
+            'LgRightToLeft' => 0,
+            'WoText' => 'test',
+            'WoTextLC' => 'test',
+            'WoTranslation' => 'prueba',
+            'WoRomanization' => 'romanized',
+            'WoSentence' => 'A {test} here.',
+            'WoStatus' => '2',
+            'taglist' => '',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        $this->assertStringContainsString("\t", $result);
+        $this->assertStringContainsString("\n", $result);
+        $this->assertStringContainsString("\r", $result);
+        $this->assertStringContainsString('%', $result);
+    }
+
+    public function testFormatFlexibleRowWithMissingTemplate(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'WoID' => '123',
+            'LgName' => 'English',
+            // Missing LgExportTemplate
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        $this->assertEquals('', $result);
+    }
+
+    public function testFormatFlexibleRowClozeFormats(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'LgExportTemplate' => '$x\t$y',
+            'WoID' => '123',
+            'LgName' => 'English',
+            'LgRightToLeft' => 0,
+            'WoText' => 'test',
+            'WoTextLC' => 'test',
+            'WoTranslation' => 'prueba',
+            'WoRomanization' => '',
+            'WoSentence' => 'A {test} here.',
+            'WoStatus' => '2',
+            'taglist' => '',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        // $x format: {{c1::term}}
+        $this->assertStringContainsString('{{c1::', $result);
+        $this->assertStringContainsString('}}', $result);
+        // $y format includes translation hint
+        $this->assertStringContainsString('prueba', $result);
+    }
+
+    public function testFormatFlexibleRowWithCMask(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'LgExportTemplate' => '%c',
+            'WoID' => '123',
+            'LgName' => 'English',
+            'LgRightToLeft' => 0,
+            'WoText' => 'test',
+            'WoTextLC' => 'test',
+            'WoTranslation' => 'prueba',
+            'WoRomanization' => '',
+            'WoSentence' => 'A {test} here.',
+            'WoStatus' => '2',
+            'taglist' => '',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        // %c uses maskTermInSentenceV2 - replaces with [...]
+        $this->assertStringContainsString('[...]', $result);
+    }
+
+    public function testFormatFlexibleRowWithDMask(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'LgExportTemplate' => '%d',
+            'WoID' => '123',
+            'LgName' => 'English',
+            'LgRightToLeft' => 0,
+            'WoText' => 'test',
+            'WoTextLC' => 'test',
+            'WoTranslation' => 'prueba',
+            'WoRomanization' => '',
+            'WoSentence' => 'A {test} here.',
+            'WoStatus' => '2',
+            'taglist' => '',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        // %d replaces braces with brackets
+        $this->assertStringContainsString('[test]', $result);
+    }
+
+    public function testFormatFlexibleRowWithRtlLanguage(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'LgExportTemplate' => '$w\t$s',
+            'WoID' => '123',
+            'LgName' => 'Arabic',
+            'LgRightToLeft' => 1,
+            'WoText' => 'مرحبا',
+            'WoTextLC' => 'مرحبا',
+            'WoTranslation' => 'hello',
+            'WoRomanization' => '',
+            'WoSentence' => 'A {مرحبا} here.',
+            'WoStatus' => '2',
+            'taglist' => '',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        $this->assertStringContainsString('<span dir="rtl">', $result);
+        $this->assertStringContainsString('</span>', $result);
+    }
+
+    public function testFormatFlexibleRowAllPlaceholders(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
+        $method->setAccessible(true);
+
+        $record = [
+            'LgExportTemplate' => '%w|%t|%s|%r|%a|%k|%z|%l|%n',
+            'WoID' => '999',
+            'LgName' => 'English',
+            'LgRightToLeft' => 0,
+            'WoText' => 'TEST',
+            'WoTextLC' => 'test',
+            'WoTranslation' => 'TRANSLATION',
+            'WoRomanization' => 'ROMAN',
+            'WoSentence' => 'A {test} sentence.',
+            'WoStatus' => '3',
+            'taglist' => 'tag1,tag2',
+        ];
+
+        $result = $method->invoke($this->exportService, $record);
+
+        $this->assertStringContainsString('TEST', $result); // %w
+        $this->assertStringContainsString('TRANSLATION', $result); // %t
+        $this->assertStringContainsString('A test sentence.', $result); // %s (braces removed)
+        $this->assertStringContainsString('ROMAN', $result); // %r
+        $this->assertStringContainsString('3', $result); // %a
+        $this->assertStringContainsString('test', $result); // %k
+        $this->assertStringContainsString('tag1,tag2', $result); // %z
+        $this->assertStringContainsString('English', $result); // %l
+        $this->assertStringContainsString('999', $result); // %n
+    }
+
+    // ====================================
+    // Data Provider for Complex Scenarios
+    // ====================================
+
+    /**
+     * @dataProvider complexMaskingProvider
+     */
+    public function testMaskTermWithComplexPatterns(
+        string $sentence,
+        string $regex,
+        string $expectedSubstring
+    ): void {
+        $result = ExportService::maskTermInSentence($sentence, $regex);
+        $this->assertStringContainsString($expectedSubstring, $result);
+    }
+
+    public static function complexMaskingProvider(): array
+    {
+        return [
+            'mixed_case_term' => [
+                'The {MixedCase} word.',
+                'a-zA-Z',
+                '{•••••••••}',
+            ],
+            'term_with_number_prefix' => [
+                'Code {2nd} place.',
+                'a-zA-Z',
+                '{2••}',
+            ],
+            'term_with_underscore' => [
+                'Variable {var_name} here.',
+                'a-zA-Z_',
+                '{••••••••}',
+            ],
+            'emoji_preserved' => [
+                'Happy {word😀} here.',
+                'a-zA-Z',
+                '😀',
+            ],
+        ];
+    }
 }
