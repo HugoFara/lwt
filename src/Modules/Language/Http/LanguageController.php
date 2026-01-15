@@ -89,42 +89,23 @@ class LanguageController extends BaseController
     }
 
     /**
-     * Languages index page - handles all language operations.
+     * Edit language form.
      *
-     * Routes based on request parameters:
-     * - chg=[id]: Show edit form for language
-     * - del=[id]: Delete language
-     * - refresh=[id]: Reparse texts for language
-     * - op=Save: Create new language
-     * - op=Change: Update existing language
-     * - (default): Show language list
+     * Route: GET/POST /languages/{id}/edit
      *
-     * @param array $params Route parameters
+     * @param int $id Language ID from route parameter
      *
      * @return void
      */
-    public function index(array $params): void
+    public function edit(int $id): void
     {
         PageLayoutHelper::renderPageStart('Languages', true);
 
         $message = '';
 
-        // Handle actions
-        $refreshId = $this->paramInt('refresh');
-        if ($refreshId !== null) {
-            $result = $this->languageFacade->refresh($refreshId);
-            $message = "Sentences deleted: {$result['sentencesDeleted']} / " .
-                "Text items deleted: {$result['textItemsDeleted']} / " .
-                "Sentences added: {$result['sentencesAdded']} / " .
-                "Text items added: {$result['textItemsAdded']}";
-        }
-
-        $delId = $this->paramInt('del');
+        // Handle update operation
         $op = $this->param('op');
-        if ($delId !== null) {
-            $result = $this->languageFacade->delete($delId);
-            $message = $result['error'] ?? "Deleted: {$result['count']}";
-        } elseif ($op === 'Change') {
+        if ($op === 'Change') {
             $lgId = $this->paramInt('LgID', 0) ?? 0;
             $result = $this->languageFacade->update($lgId);
             if ($result['error'] !== null) {
@@ -134,14 +115,83 @@ class LanguageController extends BaseController
             } else {
                 $message = "Updated: 1 / Reparsing not needed";
             }
+            // After successful update, redirect to languages list
+            if ($result['error'] === null) {
+                header('Location: ' . url('/languages'));
+                exit;
+            }
         }
 
-        // Display appropriate view
-        if ($this->hasParam('chg')) {
-            $this->showEditForm($this->paramInt('chg', 0) ?? 0);
+        $this->showEditForm($id);
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Delete a language.
+     *
+     * Route: DELETE /languages/{id}
+     *
+     * @param int $id Language ID from route parameter
+     *
+     * @return void
+     */
+    public function delete(int $id): void
+    {
+        $result = $this->languageFacade->delete($id);
+        $error = $result['error'];
+
+        if ($error !== null) {
+            // Error - redirect back with error message
+            header('Location: ' . url('/languages') . '?error=' . urlencode($error));
         } else {
-            $this->showList($message);
+            // Success - redirect to languages list
+            header('Location: ' . url('/languages'));
         }
+        exit;
+    }
+
+    /**
+     * Refresh (reparse) all texts for a language.
+     *
+     * Route: POST /languages/{id}/refresh
+     *
+     * @param int $id Language ID from route parameter
+     *
+     * @return void
+     */
+    public function refresh(int $id): void
+    {
+        $result = $this->languageFacade->refresh($id);
+
+        $message = "Sentences deleted: {$result['sentencesDeleted']} / " .
+            "Text items deleted: {$result['textItemsDeleted']} / " .
+            "Sentences added: {$result['sentencesAdded']} / " .
+            "Text items added: {$result['textItemsAdded']}";
+
+        // Redirect to languages list with message
+        header('Location: ' . url('/languages') . '?message=' . urlencode($message));
+        exit;
+    }
+
+    /**
+     * Languages index page - shows language list.
+     *
+     * Route: GET /languages
+     *
+     * @param array $params Route parameters
+     *
+     * @return void
+     */
+    public function index(array $params): void
+    {
+        PageLayoutHelper::renderPageStart('Languages', true);
+
+        // Check for message from redirect (e.g., after refresh/delete)
+        $message = $this->hasParam('message') ? $this->param('message') :
+                   ($this->hasParam('error') ? $this->param('error') : '');
+
+        $this->showList($message);
 
         PageLayoutHelper::renderPageEnd();
     }
