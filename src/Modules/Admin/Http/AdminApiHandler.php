@@ -53,7 +53,7 @@ class AdminApiHandler
      * @param string $key   Setting name
      * @param string $value Setting value
      *
-     * @return array{error?: string, message?: string, last_text?: array<array-key, mixed>|null}
+     * @return array{error?: string, message?: string, text_count?: int, last_text?: array<array-key, mixed>|null}
      */
     public function saveSetting(string $key, string $value): array
     {
@@ -66,9 +66,11 @@ class AdminApiHandler
             Settings::save($key, $value);
             $result = ["message" => "Setting saved"];
 
-            // For language changes, include the last text info for that language
+            // For language changes, include the text count and last text info for that language
             if ($key === 'currentlanguage' && $value !== '') {
-                $result['last_text'] = $this->getLastTextForLanguage((int)$value);
+                $languageId = (int)$value;
+                $result['text_count'] = $this->getTextCountForLanguage($languageId);
+                $result['last_text'] = $this->getLastTextForLanguage($languageId);
             }
 
             return $result;
@@ -153,6 +155,21 @@ class AdminApiHandler
     }
 
     /**
+     * Get the count of active (non-archived) texts for a language.
+     *
+     * @param int $languageId Language ID
+     *
+     * @return int Number of texts
+     */
+    private function getTextCountForLanguage(int $languageId): int
+    {
+        return QueryBuilder::table('texts')
+            ->where('TxLgID', '=', $languageId)
+            ->whereNull('TxArchivedAt')
+            ->count();
+    }
+
+    /**
      * Clear session settings when changing language.
      *
      * Note: Pagination/filter state is now stored in URL parameters,
@@ -184,7 +201,7 @@ class AdminApiHandler
      * @param string $key   Setting key
      * @param string $value Setting value
      *
-     * @return array{error?: string, message?: string, last_text?: array<array-key, mixed>|null}
+     * @return array{error?: string, message?: string, text_count?: int, last_text?: array<array-key, mixed>|null}
      */
     public function formatSaveSetting(string $key, string $value): array
     {

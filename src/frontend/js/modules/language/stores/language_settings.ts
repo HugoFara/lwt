@@ -29,6 +29,7 @@ export interface TextStats {
 export interface LanguageChangeResponse {
   message?: string;
   error?: string;
+  text_count?: number;
   last_text?: {
     id: number;
     title: string;

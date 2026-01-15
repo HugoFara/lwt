@@ -58,16 +58,18 @@ function renderWordPressLogout(bool $isWordPress, string $base): void
  *
  * @param array|null $lastTextInfo Current text info for Alpine.js initial state
  * @param string     $base         The application base path
+ * @param int        $textCount    Number of texts for current language
  *
  * @return void
  */
-function renderHomeConfig(?array $lastTextInfo, string $base): void
+function renderHomeConfig(?array $lastTextInfo, string $base, int $textCount): void
 {
     $config = [
         'phpVersion' => phpversion(),
         'lwtVersion' => ApplicationInfo::VERSION,
         'lastText' => $lastTextInfo,
         'basePath' => $base,
+        'textCount' => $textCount,
     ];
     ?>
 <script type="application/json" id="home-warnings-config">
@@ -95,6 +97,8 @@ $langcnt = $dashboardData['language_count'] ?? 0;
 $isWordPress = $dashboardData['is_wordpress'] ?? false;
 /** @var array<string, mixed>|null $currentTextInfo */
 $currentTextInfo = $dashboardData['current_text_info'] ?? null;
+/** @var int $textCount */
+$textCount = $dashboardData['current_language_text_count'] ?? 0;
 
 // Get base path for URL generation
 $base = UrlUtilities::getBasePath();
@@ -168,33 +172,26 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 </section>
 
 <?php if ($langcnt == 0) : ?>
-<!-- Empty database: Getting Started section -->
-<section class="section py-4 mb-5">
+<!-- Empty database: Select a language -->
+<section class="section py-6">
     <div class="container">
-        <div class="box has-background-warning-light">
-            <h3 class="title is-4 has-text-centered mb-4">
-                <span class="icon-text">
-                    <span class="icon"><i data-lucide="rocket"></i></span>
-                    <span>Get Started</span>
-                </span>
-            </h3>
-            <p class="has-text-centered mb-4">Your database is empty. Choose one of the options below to begin:</p>
-            <div class="columns is-centered">
-                <div class="column is-narrow">
-                    <a href="<?php echo $base; ?>/admin/install-demo" class="button is-medium is-info">
-                        <span class="icon"><i data-lucide="database"></i></span>
-                        <span>Install Demo Database</span>
-                    </a>
-                    <p class="help has-text-centered mt-2">Try LWT with sample texts</p>
-                </div>
-                <div class="column is-narrow">
-                    <a href="<?php echo $base; ?>/languages?new=1" class="button is-medium is-primary">
-                        <span class="icon"><i data-lucide="plus"></i></span>
-                        <span>Create Your First Language</span>
-                    </a>
-                    <p class="help has-text-centered mt-2">Start from scratch</p>
-                </div>
-            </div>
+        <div class="has-text-centered">
+            <a href="<?php echo $base; ?>/languages?new=1" class="button is-large is-primary">
+                <span class="icon"><i data-lucide="languages"></i></span>
+                <span>Select a language to learn</span>
+            </a>
+        </div>
+    </div>
+</section>
+<?php elseif ($langcnt > 0 && $textCount == 0) : ?>
+<!-- Has language but no texts: Add a text -->
+<section class="section py-6">
+    <div class="container">
+        <div class="has-text-centered">
+            <a href="<?php echo $base; ?>/texts?new=1" class="button is-large is-primary">
+                <span class="icon"><i data-lucide="plus"></i></span>
+                <span>Add a text to read</span>
+            </a>
         </div>
     </div>
 </section>
@@ -322,7 +319,8 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
 <?php endif; ?>
 
-<!-- Main menu grid -->
+<?php if ($langcnt > 0 && $textCount > 0) : ?>
+<!-- Main menu grid (only shown when user has texts) -->
 <div class="columns is-multiline is-centered home-menu-container">
     <!-- Languages Card -->
     <div class="column is-one-third-desktop is-half-tablet">
@@ -502,6 +500,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
     <?php renderWordPressLogout($isWordPress, $base); ?>
 </div>
+<?php endif; ?>
 
 <!-- Version info -->
 <p class="has-text-centered has-text-grey is-size-7 mt-4">
@@ -525,4 +524,4 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
 </div><!-- End Alpine.js container -->
 
-<?php renderHomeConfig($lastTextInfo, $base); ?>
+<?php renderHomeConfig($lastTextInfo, $base, $textCount); ?>

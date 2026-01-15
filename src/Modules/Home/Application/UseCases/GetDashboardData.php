@@ -34,6 +34,7 @@ class GetDashboardData
      * @return array{
      *   language_count: int,
      *   current_language_id: int|null,
+     *   current_language_text_count: int,
      *   current_text_id: int|null,
      *   current_text_info: array|null,
      *   is_wordpress: bool,
@@ -43,10 +44,12 @@ class GetDashboardData
     public function execute(): array
     {
         $currentTextId = $this->getCurrentTextId();
+        $currentLanguageId = $this->getCurrentLanguageId();
 
         return [
             'language_count' => $this->getLanguageCount(),
-            'current_language_id' => $this->getCurrentLanguageId(),
+            'current_language_id' => $currentLanguageId,
+            'current_language_text_count' => $this->getTextCountForLanguage($currentLanguageId),
             'current_text_id' => $currentTextId,
             'current_text_info' => $currentTextId !== null
                 ? $this->getCurrentTextInfo($currentTextId)
@@ -158,5 +161,24 @@ class GetDashboardData
     private function isWordPressSession(): bool
     {
         return isset($_SESSION['LWT-WP-User']);
+    }
+
+    /**
+     * Get the count of active (non-archived) texts for a language.
+     *
+     * @param int|null $languageId Language ID
+     *
+     * @return int Number of texts, 0 if no language selected
+     */
+    private function getTextCountForLanguage(?int $languageId): int
+    {
+        if ($languageId === null) {
+            return 0;
+        }
+
+        return QueryBuilder::table('texts')
+            ->where('TxLgID', '=', $languageId)
+            ->whereNull('TxArchivedAt')
+            ->count();
     }
 }

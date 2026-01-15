@@ -28,6 +28,7 @@ interface HomeWarningsConfig {
   lwtVersion: string;
   lastText: LastTextInfo | null;
   basePath: string;
+  textCount: number;
 }
 
 interface Warning {
@@ -58,6 +59,9 @@ interface HomeData {
 
   // Last text info (dynamically updated when language changes)
   lastText: LastTextInfo | null;
+
+  // Number of texts for current language (for onboarding state)
+  textCount: number;
 
   // Base path for URLs (e.g., '/lwt' for subdirectory installation)
   basePath: string;
@@ -97,6 +101,8 @@ export function homeData(): HomeData {
     collapsedMenus: [],
 
     lastText: null,
+
+    textCount: 0,
 
     basePath: '',
 
@@ -188,6 +194,9 @@ export function homeData(): HomeData {
         // Load initial last text info
         this.lastText = config.lastText;
 
+        // Load text count for onboarding state
+        this.textCount = config.textCount || 0;
+
         // Load base path for URL generation
         this.basePath = config.basePath || '';
 
@@ -216,6 +225,9 @@ export function homeData(): HomeData {
       } else {
         this.lastText = null;
       }
+
+      // Update text count for onboarding state
+      this.textCount = response.text_count ?? 0;
 
       // Show notification
       this.languageNotification.message = `Language changed to "${languageName}"`;

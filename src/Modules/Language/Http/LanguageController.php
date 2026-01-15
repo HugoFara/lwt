@@ -79,6 +79,17 @@ class LanguageController extends BaseController
      */
     public function index(array $params): void
     {
+        // Handle new language creation with redirect (before any output)
+        if ($this->param('op') === 'Save') {
+            $result = $this->languageFacade->create();
+            if ($result['success']) {
+                // Redirect to text creation page after successful language creation
+                header('Location: ' . url('/texts?new=1'));
+                exit;
+            }
+            // On error, fall through to show the form with error message
+        }
+
         PageLayoutHelper::renderPageStart('Languages', true);
 
         $message = '';
@@ -100,8 +111,9 @@ class LanguageController extends BaseController
             $message = $result['error'] ?? "Deleted: {$result['count']}";
         } elseif ($op !== '') {
             if ($op === 'Save') {
-                $result = $this->languageFacade->create();
-                $message = $result['success'] ? "Saved: 1" : "Error creating language";
+                // Save was already handled above (with redirect on success)
+                // If we get here, it means there was an error
+                $message = "Error creating language";
             } elseif ($op === 'Change') {
                 $lgId = $this->paramInt('LgID', 0) ?? 0;
                 $result = $this->languageFacade->update($lgId);
