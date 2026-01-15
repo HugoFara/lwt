@@ -10,37 +10,25 @@
   "categories": ["education", "productivity"],
   "icons": [
     {
-      "src": "/assets/images/lwt_icon.png",
+      "src": "/assets/images/lwt_icon_48.png",
       "sizes": "48x48",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/images/apple-touch-icon-57x57.png",
-      "sizes": "57x57",
+      "src": "/assets/images/lwt_icon_180.png",
+      "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/images/apple-touch-icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/assets/images/apple-touch-icon-114x114.png",
-      "sizes": "114x114",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/assets/images/lwt_icon_big.png",
+      "src": "/assets/images/lwt_icon_192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/images/lwt_icon_big.png",
+      "src": "/assets/images/lwt_icon_512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
@@ -52,14 +40,14 @@
       "short_name": "Texts",
       "description": "View and manage your texts",
       "url": "/texts",
-      "icons": [{ "src": "/assets/images/lwt_icon.png", "sizes": "48x48" }]
+      "icons": [{ "src": "/assets/images/lwt_icon_48.png", "sizes": "48x48" }]
     },
     {
       "name": "Vocabulary",
       "short_name": "Words",
       "description": "Review your vocabulary",
       "url": "/words/edit",
-      "icons": [{ "src": "/assets/images/lwt_icon.png", "sizes": "48x48" }]
+      "icons": [{ "src": "/assets/images/lwt_icon_48.png", "sizes": "48x48" }]
     }
   ]
 }

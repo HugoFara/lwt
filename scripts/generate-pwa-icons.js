@@ -3,7 +3,7 @@
  * Generate PWA icons from the source LWT icon.
  *
  * This script creates 192x192 and 512x512 PNG icons required for PWA
- * installation from the existing lwt_icon_big.png.
+ * installation from the existing lwt_icon_192.png.
  *
  * Usage: node scripts/generate-pwa-icons.js
  *
@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
 
-const SOURCE_ICON = resolve(rootDir, 'assets/images/lwt_icon_big.png');
+const SOURCE_ICON = resolve(rootDir, 'assets/images/lwt_icon_192.png');
 const OUTPUT_DIR = resolve(rootDir, 'assets/images');
 
 const SIZES = [

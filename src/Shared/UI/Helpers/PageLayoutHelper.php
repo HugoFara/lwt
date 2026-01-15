@@ -59,7 +59,7 @@ class PageLayoutHelper
         $adminActive = $isAdmin ? ' is-active' : '';
 
         $base = UrlUtilities::getBasePath();
-        $logoUrl = UrlUtilities::url('/assets/images/lwt_icon.png');
+        $logoUrl = UrlUtilities::url('/assets/images/lwt_icon_48.png');
 
         return <<<HTML
 <nav class="navbar is-light" role="navigation" aria-label="main navigation" x-data="navbar()">
@@ -204,7 +204,7 @@ HTML;
      *
      * @return string HTML img element for the logo
      */
-    public static function buildLogo(string $imagePath = 'assets/images/lwt_icon.png'): string
+    public static function buildLogo(string $imagePath = 'assets/images/lwt_icon_48.png'): string
     {
         $path = StringUtils::getFilePath($imagePath);
         $url = UrlUtilities::url($path);
@@ -311,9 +311,7 @@ HTML;
     {
         $basePath = UrlUtilities::getBasePath();
         $favicon = UrlUtilities::url('/favicon.ico');
-        $icon57 = UrlUtilities::url('/assets/images/apple-touch-icon-57x57.png');
-        $icon72 = UrlUtilities::url('/assets/images/apple-touch-icon-72x72.png');
-        $icon114 = UrlUtilities::url('/assets/images/apple-touch-icon-114x114.png');
+        $icon180 = UrlUtilities::url('/assets/images/lwt_icon_180.png');
         $startup = UrlUtilities::url('/assets/images/apple-touch-startup.png');
         $manifest = UrlUtilities::url('/assets/manifest.json');
 
@@ -323,9 +321,7 @@ HTML;
 <meta name="lwt-base-path" content="{$basePath}" />
 <meta name="theme-color" content="#3273dc" />
 <link rel="shortcut icon" href="{$favicon}" type="image/x-icon"/>
-<link rel="apple-touch-icon" href="{$icon57}" />
-<link rel="apple-touch-icon" sizes="72x72" href="{$icon72}" />
-<link rel="apple-touch-icon" sizes="114x114" href="{$icon114}" />
+<link rel="apple-touch-icon" href="{$icon180}" />
 <link rel="apple-touch-startup-image" href="{$startup}" />
 <link rel="manifest" href="{$manifest}" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -388,9 +384,7 @@ HTML;
         self::sendNoCacheHeaders();
 
         $favicon = UrlUtilities::url('/favicon.ico');
-        $icon57 = UrlUtilities::url('/assets/images/apple-touch-icon-57x57.png');
-        $icon72 = UrlUtilities::url('/assets/images/apple-touch-icon-72x72.png');
-        $icon114 = UrlUtilities::url('/assets/images/apple-touch-icon-114x114.png');
+        $icon180 = UrlUtilities::url('/assets/images/lwt_icon_180.png');
         $startup = UrlUtilities::url('/assets/images/apple-touch-startup.png');
 
         echo '<!DOCTYPE html>';
@@ -402,9 +396,7 @@ HTML;
         echo '-->';
         echo '<meta name="viewport" content="width=900" />';
         echo '<link rel="shortcut icon" href="' . $favicon . '" type="image/x-icon"/>';
-        echo '<link rel="apple-touch-icon" href="' . $icon57 . '" />';
-        echo '<link rel="apple-touch-icon" sizes="72x72" href="' . $icon72 . '" />';
-        echo '<link rel="apple-touch-icon" sizes="114x114" href="' . $icon114 . '" />';
+        echo '<link rel="apple-touch-icon" href="' . $icon180 . '" />';
         echo '<link rel="apple-touch-startup-image" href="' . $startup . '" />';
         echo '<link rel="manifest" href="' . UrlUtilities::url('/assets/manifest.json') . '" />';
         echo '<meta name="theme-color" content="#3273dc" />';
@@ -446,9 +438,7 @@ HTML;
         self::sendNoCacheHeaders();
 
         $favicon = UrlUtilities::url('/favicon.ico');
-        $icon57 = UrlUtilities::url('/assets/images/apple-touch-icon-57x57.png');
-        $icon72 = UrlUtilities::url('/assets/images/apple-touch-icon-72x72.png');
-        $icon114 = UrlUtilities::url('/assets/images/apple-touch-icon-114x114.png');
+        $icon180 = UrlUtilities::url('/assets/images/lwt_icon_180.png');
         $startup = UrlUtilities::url('/assets/images/apple-touch-startup.png');
 
         echo '<!DOCTYPE html>';
@@ -462,9 +452,7 @@ HTML;
         $basePath = htmlspecialchars(UrlUtilities::getBasePath(), ENT_QUOTES, 'UTF-8');
         echo '<meta name="lwt-base-path" content="' . $basePath . '" />';
         echo '<link rel="shortcut icon" href="' . $favicon . '" type="image/x-icon"/>';
-        echo '<link rel="apple-touch-icon" href="' . $icon57 . '" />';
-        echo '<link rel="apple-touch-icon" sizes="72x72" href="' . $icon72 . '" />';
-        echo '<link rel="apple-touch-icon" sizes="114x114" href="' . $icon114 . '" />';
+        echo '<link rel="apple-touch-icon" href="' . $icon180 . '" />';
         echo '<link rel="apple-touch-startup-image" href="' . $startup . '" />';
         echo '<link rel="manifest" href="' . UrlUtilities::url('/assets/manifest.json') . '" />';
         echo '<meta name="theme-color" content="#3273dc" />';

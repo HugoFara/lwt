@@ -27,8 +27,8 @@ const APP_SHELL: string[] = [
   '/',
   '/offline.html',
   '/assets/manifest.json',
-  '/assets/images/lwt_icon.png',
-  '/assets/images/lwt_icon_big.png',
+  '/assets/images/lwt_icon_48.png',
+  '/assets/images/lwt_icon_192.png',
   '/favicon.ico',
 ];
 

@@ -18,12 +18,12 @@ export default defineConfig({
   ],
 
   head: [
-    ['link', { rel: 'icon', href: '/docs/assets/images/lwt_icon.png' }],
-    ['link', { rel: 'apple-touch-icon', href: '/docs/assets/images/apple-touch-icon-57x57.png' }]
+    ['link', { rel: 'icon', href: '/docs/assets/images/lwt_icon_48.png' }],
+    ['link', { rel: 'apple-touch-icon', href: '/docs/assets/images/lwt_icon_180.png' }]
   ],
 
   themeConfig: {
-    logo: '/assets/images/lwt_icon_big.png',
+    logo: '/assets/images/lwt_icon_192.png',
     siteTitle: 'LWT Docs',
 
     nav: [
