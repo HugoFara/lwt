@@ -82,7 +82,7 @@ $parserInfo = $parserInfo ?? [];
 ]); ?>
 </script>
 
-<form class="validate" action="<?php echo url('/languages'); ?>" method="post" name="lg_form"
+<form class="validate" action="<?php echo url($isNew ? '/languages/new' : '/languages/' . $language->id . '/edit'); ?>" method="post" name="lg_form"
       x-data="{
           textSize: <?php echo $language->textsize ?: 100; ?>,
           parserType: '<?php echo htmlspecialchars($language->parsertype, ENT_QUOTES, 'UTF-8'); ?>',
