@@ -9,7 +9,8 @@ vi.mock('../../../src/frontend/js/modules/text/pages/whisper_import', () => ({
     const ext = filename.split('.').pop()?.toLowerCase() ?? '';
     return ['mp3', 'mp4', 'wav', 'webm', 'ogg', 'm4a'].includes(ext);
   }),
-  handleFileSelection: vi.fn()
+  handleFileSelection: vi.fn(),
+  initWhisperImport: vi.fn()
 }));
 
 import { initFileImport } from '../../../src/frontend/js/modules/text/pages/file_import';

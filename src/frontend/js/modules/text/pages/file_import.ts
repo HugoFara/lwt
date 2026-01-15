@@ -10,7 +10,7 @@
  * @since   3.0.0
  */
 
-import { isAudioVideoFile, handleFileSelection as handleWhisperFileSelection } from './whisper_import';
+import { isAudioVideoFile, handleFileSelection as handleWhisperFileSelection, initWhisperImport } from './whisper_import';
 
 /**
  * Parsed subtitle result.
@@ -298,6 +298,9 @@ export function initFileImport(): void {
       handleFileImport(file);
     }
   });
+
+  // Initialize whisper transcription buttons if present
+  initWhisperImport();
 }
 
 // Auto-initialize on document ready

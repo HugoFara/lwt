@@ -443,18 +443,18 @@ export function handleFileSelection(file: File | null): void {
 
 /**
  * Initialize Whisper import functionality.
+ *
+ * Only initializes if the whisper-specific UI elements are present on the page.
+ * This prevents unnecessary API calls on pages that don't have the import form.
  */
 export function initWhisperImport(): void {
-  const fileInput = document.getElementById('importFile');
   const startBtn = document.getElementById('startTranscription');
   const cancelBtn = document.getElementById('whisperCancel');
 
-  // Handle file selection
-  fileInput?.addEventListener('change', () => {
-    const input = fileInput as HTMLInputElement;
-    const file = input.files?.[0] || null;
-    handleFileSelection(file);
-  });
+  // Only initialize if whisper UI elements exist on the page
+  if (!startBtn && !cancelBtn) {
+    return;
+  }
 
   // Handle start transcription
   startBtn?.addEventListener('click', (e) => {
@@ -467,10 +467,4 @@ export function initWhisperImport(): void {
     e.preventDefault();
     cancelTranscription();
   });
-
-  // Pre-check Whisper availability
-  checkWhisperAvailable();
 }
-
-// Auto-initialize on document ready
-document.addEventListener('DOMContentLoaded', initWhisperImport);
