@@ -16,10 +16,14 @@ import { getTextId as getTextIdFromConfig } from '@modules/text/stores/text_conf
  * Get text ID from URL (fallback when config is not available).
  */
 function getTextIdFromUrl(): number {
-  // Try to get from URL path: /text/read/123
-  const pathMatch = window.location.pathname.match(/\/text\/read\/(\d+)/);
-  if (pathMatch) {
-    return parseInt(pathMatch[1], 10);
+  // Try to get from URL path: /text/123/read (RESTful) or /text/read/123 (legacy)
+  const restfulMatch = window.location.pathname.match(/\/text\/(\d+)\/read/);
+  if (restfulMatch) {
+    return parseInt(restfulMatch[1], 10);
+  }
+  const legacyMatch = window.location.pathname.match(/\/text\/read\/(\d+)/);
+  if (legacyMatch) {
+    return parseInt(legacyMatch[1], 10);
   }
   // Try to get from query string: ?text=123 or ?tid=123 or ?start=123
   const params = new URLSearchParams(window.location.search);
