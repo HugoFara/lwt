@@ -50,7 +50,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
         <a href="/text/read?start=<?php echo $textId; ?>" target="_top">
             <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['title' => 'Read', 'alt' => 'Read']); ?>
         </a>
-        <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
+        <a href="/text/<?php echo $textId; ?>/print-plain" target="_top">
             <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
         <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>

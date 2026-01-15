@@ -102,7 +102,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
               <a href="/review?text=<?php echo $textId; ?>" class="button is-small">Review</a>
             </div>
             <div class="control">
-              <a href="/text/print-plain?text=<?php echo $textId; ?>" class="button is-small">Print</a>
+              <a href="/text/<?php echo $textId; ?>/print-plain" class="button is-small">Print</a>
             </div>
             <div class="control">
               <a href="/texts/<?php echo $textId; ?>/edit" class="button is-small">Edit</a>

@@ -304,7 +304,7 @@ echo PageLayoutHelper::buildActionCard(
                                             @click.outside="open = false"
                                             x-cloak>
                                             <div class="dropdown-content">
-                                                <a :href="'/text/print-plain?text=' + text.id" class="dropdown-item">
+                                                <a :href="'/text/' + text.id + '/print-plain'" class="dropdown-item">
                                                     <?php echo IconHelper::render('printer', ['size' => 14]); ?>
                                                     <span>Print</span>
                                                 </a>

@@ -82,15 +82,19 @@ class TextPrintController extends BaseController
     /**
      * Print plain text with annotations (replaces text_print_plain.php).
      *
-     * Route: /text/print-plain?text=[textid]&ann=[annotationcode]&status=[statuscode]
+     * Routes:
+     * - GET /text/{text:int}/print-plain (new RESTful route)
+     * - GET /text/print-plain?text=[textid] (legacy route)
      *
-     * @param array $params Route parameters
+     * Optional query params: ann=[annotationcode]&status=[statuscode]
+     *
+     * @param int|null $text Text ID (injected from route parameter)
      *
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    public function printPlain(array $params): void
+    public function printPlain(?int $text = null): void
     {
         include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
         include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
@@ -101,7 +105,8 @@ class TextPrintController extends BaseController
         include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
         include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
 
-        $textId = (int) $this->param('text', '0');
+        // Support both new route param injection and legacy query param
+        $textId = $text ?? (int) $this->param('text', '0');
 
         if ($textId === 0) {
             $this->redirect('/text/edit');
@@ -289,7 +294,7 @@ class TextPrintController extends BaseController
 
         $deleted = $this->printService->deleteAnnotation($textId);
         if ($deleted) {
-            $this->redirect('/text/print-plain?text=' . $textId);
+            $this->redirect('/text/' . $textId . '/print-plain');
         }
 
         // If deletion failed, redirect back to print view

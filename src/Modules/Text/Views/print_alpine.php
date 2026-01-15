@@ -78,7 +78,7 @@ $rtlScript = $viewData['rtlScript'];
 $hasAnnotation = $viewData['hasAnnotation'];
 
 // Determine URLs based on mode
-$printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/{id}/print';
+$printUrl = $mode === 'plain' ? '/text/{id}/print-plain' : '/text/{id}/print';
 ?>
 <!-- Alpine.js container -->
 <div x-data="textPrintApp()" x-init="init()" x-cloak>

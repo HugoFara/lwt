@@ -99,6 +99,9 @@ function registerRoutes(Router $router): void
     $router->get('/text/{text:int}/print/edit', 'Lwt\\Modules\\Text\\Http\\TextPrintController@editAnnotation', AUTH_MIDDLEWARE);
     // RESTful route: DELETE /text/123/annotation
     $router->delete('/text/{text:int}/annotation', 'Lwt\\Modules\\Text\\Http\\TextPrintController@deleteAnnotation', AUTH_MIDDLEWARE);
+    // RESTful route: /text/123/print-plain
+    $router->get('/text/{text:int}/print-plain', 'Lwt\\Modules\\Text\\Http\\TextPrintController@printPlain', AUTH_MIDDLEWARE);
+    // Legacy route: /text/print-plain?text=123
     $router->registerWithMiddleware(
         '/text/print-plain',
         'Lwt\\Modules\\Text\\Http\\TextPrintController@printPlain',

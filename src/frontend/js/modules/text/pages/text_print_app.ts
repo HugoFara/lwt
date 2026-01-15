@@ -155,18 +155,19 @@ function getPageConfig(): PageConfig {
   // Fallback: try to get text ID from URL
   const pathname = window.location.pathname;
 
-  // RESTful URL pattern: /text/{id}/print or /text/{id}/print/edit
-  const printMatch = pathname.match(/\/text\/(\d+)\/print(?:\/edit)?$/);
+  // RESTful URL pattern: /text/{id}/print, /text/{id}/print/edit, or /text/{id}/print-plain
+  const printMatch = pathname.match(/\/text\/(\d+)\/print(?:-plain|\/edit)?$/);
   if (printMatch) {
     const textId = parseInt(printMatch[1], 10);
     const isEdit = pathname.endsWith('/print/edit');
+    const isPlain = pathname.endsWith('/print-plain');
     return {
       textId,
-      mode: isEdit ? 'edit' : 'annotated'
+      mode: isEdit ? 'edit' : isPlain ? 'plain' : 'annotated'
     };
   }
 
-  // Legacy/plain print URL pattern: /text/print-plain?text={id}
+  // Legacy plain print URL pattern: /text/print-plain?text={id}
   const params = new URLSearchParams(window.location.search);
   const textId = parseInt(params.get('text') || '0', 10);
 
@@ -529,7 +530,7 @@ export function textPrintAppData(): TextPrintAppData {
             if (response.redirected) {
               window.location.href = response.url;
             } else if (response.ok) {
-              window.location.href = `/text/print-plain?text=${textId}`;
+              window.location.href = `/text/${textId}/print-plain`;
             }
           })
           .catch((error) => {
