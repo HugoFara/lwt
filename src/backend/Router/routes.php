@@ -318,8 +318,9 @@ function registerRoutes(Router $router): void
 
     // ==================== LANGUAGE ROUTES (PROTECTED) ====================
 
-    // New language form (RESTful route)
+    // New language form (RESTful route): GET/POST /languages/new
     $router->get('/languages/new', 'Lwt\\Modules\\Language\\Http\\LanguageController@new', AUTH_MIDDLEWARE);
+    $router->post('/languages/new', 'Lwt\\Modules\\Language\\Http\\LanguageController@new', AUTH_MIDDLEWARE);
 
     // Edit language form (RESTful route): /languages/123/edit
     $router->get('/languages/{id:int}/edit', 'Lwt\\Modules\\Language\\Http\\LanguageController@edit', AUTH_MIDDLEWARE);

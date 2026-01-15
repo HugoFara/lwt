@@ -619,7 +619,7 @@ class TextController extends BaseController
 
         // Redirect if "and Open" was requested
         if (str_ends_with($op, "and Open")) {
-            return $this->redirect('/text/read?start=' . $result['textId']);
+            return $this->redirect('/text/' . $result['textId'] . '/read');
         }
 
         return ['message' => $result['message'], 'redirect' => false];
@@ -681,7 +681,7 @@ class TextController extends BaseController
 
             // Redirect to book or first chapter
             if ($openAfter && isset($result['textIds']) && count($result['textIds']) > 0) {
-                return $this->redirect('/text/read?start=' . $result['textIds'][0]);
+                return $this->redirect('/text/' . $result['textIds'][0] . '/read');
             }
 
             // Redirect to book page

@@ -78,7 +78,7 @@ assert(is_string($media));
         <?php
         echo (new TextNavigationService())->getPreviousAndNextTextLinks(
             $textId,
-            '/text/read?start=',
+            '/text/{id}/read',
             false,
             ''
         );

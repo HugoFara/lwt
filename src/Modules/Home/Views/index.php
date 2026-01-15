@@ -274,7 +274,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                             </div>
                         </div>
                         <div class="buttons">
-                            <a :href="basePath + '/text/read?start=' + lastText.id" class="button is-link is-medium">
+                            <a :href="basePath + '/text/' + lastText.id + '/read'" class="button is-link is-medium">
                                 <span class="icon"><i data-lucide="book-open"></i></span>
                                 <span>Read</span>
                             </a>
@@ -288,7 +288,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                         </div>
                         <template x-if="lastText.annotated">
                             <a
-                                :href="basePath + '/text/print?text=' + lastText.id"
+                                :href="basePath + '/text/' + lastText.id + '/print'"
                                 class="button is-success is-light is-small"
                             >
                                 <span class="icon"><i data-lucide="check"></i></span>

@@ -285,7 +285,7 @@ echo PageLayoutHelper::buildActionCard(
                                 </div>
 
                                 <footer class="card-footer">
-                                    <a :href="'/text/read?start=' + text.id" class="card-footer-item is-primary-action">
+                                    <a :href="'/text/' + text.id + '/read'" class="card-footer-item is-primary-action">
                                         <?php echo IconHelper::render('book-open', ['size' => 16]); ?>
                                         <span>Read</span>
                                     </a>

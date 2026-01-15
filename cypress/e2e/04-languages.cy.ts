@@ -230,8 +230,8 @@ describe('Languages Management', () => {
       // Submit the form
       cy.get('button[type="submit"]').click();
 
-      // Should redirect to languages list or show success
-      cy.url().should('include', '/languages');
+      // After creating a new language, it redirects to texts/new to add first text
+      cy.url().should('include', '/texts/new');
     });
   });
 
