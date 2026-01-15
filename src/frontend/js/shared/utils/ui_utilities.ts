@@ -256,7 +256,7 @@ export function serializeFormToObject(form: HTMLFormElement): Record<string, unk
 export function wrapRadioButtons(): void {
   let tabIndex = 1;
   const tabElements = document.querySelectorAll<HTMLElement>(
-    ':is(input, .wrap_checkbox span, .wrap_radio span, select, ' +
+    ':is(input, textarea, .wrap_checkbox span, .wrap_radio span, select, ' +
     '.searchable-select__trigger, button[type="submit"], ' +
     '#mediaselect span.click, #forwbutt, #backbutt), a:not([name^=rec])'
   );

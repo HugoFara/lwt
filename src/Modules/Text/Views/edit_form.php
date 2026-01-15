@@ -157,7 +157,7 @@ if (!$isNew) {
         </div>
 
         <!-- File Import Section -->
-        <div x-show="importMode === 'file'" x-transition x-cloak class="mt-4">
+        <div x-show="importMode === 'file'" x-transition x-cloak class="mt-4" :inert="importMode !== 'file'">
             <p class="help mb-4">
                 Text files, EPUB, SRT/VTT subtitles, or audio/video for transcription
             </p>
@@ -275,7 +275,7 @@ if (!$isNew) {
         </div>
 
         <!-- Manual Text Entry Section -->
-        <div x-show="importMode === 'manual'" x-transition class="mt-4">
+        <div x-show="importMode === 'manual'" x-transition class="mt-4" :inert="importMode !== 'manual'">
             <!-- Title -->
             <div class="field">
                 <label class="label" for="TxTitle">Title</label>
@@ -309,7 +309,7 @@ if (!$isNew) {
         </div>
 
         <!-- URL Import Section -->
-        <div x-show="importMode === 'url'" x-transition x-cloak class="mt-4">
+        <div x-show="importMode === 'url'" x-transition x-cloak class="mt-4" :inert="importMode !== 'url'">
             <div class="field">
                 <label class="label">Video URL</label>
                 <div class="control">
