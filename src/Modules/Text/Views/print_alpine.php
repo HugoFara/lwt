@@ -93,7 +93,7 @@ $printUrl = $mode === 'plain' ? '/text/{id}/print-plain' : '/text/{id}/print';
                 <?php echo (new TextNavigationService())->getPreviousAndNextTextLinks($textId, $printUrl, false, ''); ?>
             </div>
             <div>
-                <a href="/text/read?start=<?php echo $textId; ?>" target="_top">
+                <a href="/text/<?php echo $textId; ?>/read" target="_top">
                     <?php echo IconHelper::render('book-open', ['title' => 'Read', 'alt' => 'Read']); ?>
                 </a>
                 <a href="/review?text=<?php echo $textId; ?>" target="_top">

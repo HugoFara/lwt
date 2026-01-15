@@ -123,7 +123,7 @@ echo PageLayoutHelper::buildActionCard([
 <!-- Quick Create -->
 <div class="box mb-4">
     <h4 class="title is-5 mb-2">Quick Create Dictionary</h4>
-    <form method="POST" action="/dictionaries?lang=<?php echo $langId; ?>">
+    <form method="POST" action="/languages/<?php echo $langId; ?>/dictionaries">
         <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
         <div class="field has-addons">
             <div class="control is-expanded">
@@ -147,7 +147,7 @@ echo PageLayoutHelper::buildActionCard([
     <div class="notification is-light">
         <p>No local dictionaries found for this language.</p>
         <p class="mt-2">
-            <a href="/dictionaries/import?lang=<?php echo $langId; ?>" class="button is-primary is-small">
+            <a href="/languages/<?php echo $langId; ?>/dictionaries/import" class="button is-primary is-small">
                 <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
                 Import a dictionary
             </a>
@@ -198,7 +198,7 @@ echo PageLayoutHelper::buildActionCard([
                     <td>
                         <div class="buttons are-small">
                             <!-- Toggle enable/disable -->
-                            <form method="POST" action="/dictionaries?lang=<?php echo $langId; ?>"
+                            <form method="POST" action="/languages/<?php echo $langId; ?>/dictionaries"
                                   style="display:inline;">
                                 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                                 <input type="hidden" name="dict_id" value="<?php echo $dict->id(); ?>">
@@ -213,8 +213,8 @@ echo PageLayoutHelper::buildActionCard([
                             </form>
 
                             <!-- Import more entries -->
-                            <a href="/dictionaries/import?lang=<?php echo $langId;
-                            ?>&dict_id=<?php echo $dict->id(); ?>"
+                            <a href="/languages/<?php echo $langId;
+                            ?>/dictionaries/import?dict_id=<?php echo $dict->id(); ?>"
                                class="button is-info" title="Import entries">
                                 <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
                             </a>

@@ -319,7 +319,7 @@ $parserInfo = $parserInfo ?? [];
                 <p class="help">
                     Configure how local (offline) dictionaries are used.
                     <?php if (($language->id ?? 0) > 0) : ?>
-                    <a href="/dictionaries?lang=<?php echo $language->id; ?>">
+                    <a href="/languages/<?php echo $language->id; ?>/dictionaries">
                         Manage local dictionaries
                     </a>
                     <?php endif; ?>

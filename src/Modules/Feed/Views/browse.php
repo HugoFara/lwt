@@ -183,7 +183,7 @@ endif; ?>
         <tr>
         <?php if ($row['TxID'] !== null && $row['TxArchivedAt'] === null) : ?>
             <td class="has-text-centered">
-                <a href="/text/read?start=<?php echo $row['TxID']; ?>">
+                <a href="/text/<?php echo $row['TxID']; ?>/read">
                 <?php echo IconHelper::render('book-open', ['title' => 'Read', 'alt' => '-']); ?>
                 </a>
         <?php elseif ($row['TxID'] !== null && $row['TxArchivedAt'] !== null) : ?>

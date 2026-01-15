@@ -56,15 +56,16 @@ class DictionaryController extends BaseController
     /**
      * Index page - list dictionaries for a language.
      *
-     * @param array $params Route parameters
+     * @param array $params Route parameters (may contain 'id' from RESTful route)
      *
      * @return void
      */
     public function index(array $params): void
     {
-        $langId = (int)Validation::language(
-            InputValidator::getStringWithDb('lang', 'currentlanguage')
-        );
+        // Support both /languages/{id}/dictionaries and /dictionaries?lang=
+        $langId = isset($params['id'])
+            ? (int)$params['id']
+            : (int)Validation::language(InputValidator::getStringWithDb('lang', 'currentlanguage'));
 
         $langName = $this->languageFacade->getLanguageName($langId);
         PageLayoutHelper::renderPageStart($langName . ' - Local Dictionaries', true);
@@ -88,15 +89,16 @@ class DictionaryController extends BaseController
     /**
      * Import wizard - show import form or process upload.
      *
-     * @param array $params Route parameters
+     * @param array $params Route parameters (may contain 'id' from RESTful route)
      *
      * @return void
      */
     public function import(array $params): void
     {
-        $langId = (int)Validation::language(
-            InputValidator::getStringWithDb('lang', 'currentlanguage')
-        );
+        // Support both /languages/{id}/dictionaries/import and /dictionaries/import?lang=
+        $langId = isset($params['id'])
+            ? (int)$params['id']
+            : (int)Validation::language(InputValidator::getStringWithDb('lang', 'currentlanguage'));
         $dictId = $this->paramInt('dict_id');
 
         $langName = $this->languageFacade->getLanguageName($langId);
@@ -126,7 +128,10 @@ class DictionaryController extends BaseController
      */
     public function processImport(array $params): void
     {
-        $langId = $this->paramInt('lang_id') ?? 0;
+        // Support both route parameter and form field
+        $langId = isset($params['id'])
+            ? (int)$params['id']
+            : ($this->paramInt('lang_id') ?? 0);
         $dictId = $this->paramInt('dict_id');
         $format = $this->param('format', 'csv');
         $dictName = $this->param('dict_name');

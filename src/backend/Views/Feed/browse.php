@@ -177,7 +177,7 @@ endif; ?>
         <tr>
         <?php if ($row['TxID']) : ?>
             <td class="has-text-centered">
-                <a href="/text/read?start=<?php echo $row['TxID']; ?>">
+                <a href="/text/<?php echo $row['TxID']; ?>/read">
                     <?php
                         echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['title' => 'Read', 'alt' => '-']);
                     ?>

@@ -192,7 +192,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
           <div class="buttons has-addons mb-0">
             <!-- Previous chapter -->
             <?php if ($prevTextId !== null) : ?>
-            <a href="/text/read?text=<?php echo $prevTextId; ?>"
+            <a href="/text/<?php echo $prevTextId; ?>/read"
                class="button is-small" title="Previous chapter">
               <span class="icon is-small">
                 <i class="fas fa-chevron-left"></i>
@@ -221,7 +221,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
               <div class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                 <div class="dropdown-content">
                   <?php foreach ($chapters as $chapter) : ?>
-                  <a href="/text/read?text=<?php echo $chapter['textId']; ?>"
+                  <a href="/text/<?php echo $chapter['textId']; ?>/read"
                      class="dropdown-item <?php echo ($chapter['chapterNum'] === $chapterNum) ? 'is-active' : ''; ?>">
                         <?php echo $chapter['chapterNum']; ?>.
                         <?php echo htmlspecialchars($chapter['title'] ?: 'Chapter ' . $chapter['chapterNum']); ?>
@@ -233,7 +233,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
 
             <!-- Next chapter -->
             <?php if ($nextTextId !== null) : ?>
-            <a href="/text/read?text=<?php echo $nextTextId; ?>"
+            <a href="/text/<?php echo $nextTextId; ?>/read"
                class="button is-small" title="Next chapter">
               <span>Next</span>
               <span class="icon is-small">

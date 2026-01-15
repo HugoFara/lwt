@@ -425,7 +425,29 @@ function registerRoutes(Router $router): void
     // ==================== LOCAL DICTIONARY ROUTES (PROTECTED) ====================
     // All dictionary routes use DictionaryController from the Dictionary module
 
-    // Dictionaries list
+    // RESTful routes: /languages/{id}/dictionaries
+    $router->get(
+        '/languages/{id:int}/dictionaries',
+        'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@index',
+        AUTH_MIDDLEWARE
+    );
+    $router->post(
+        '/languages/{id:int}/dictionaries',
+        'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@index',
+        AUTH_MIDDLEWARE
+    );
+    $router->get(
+        '/languages/{id:int}/dictionaries/import',
+        'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@import',
+        AUTH_MIDDLEWARE
+    );
+    $router->post(
+        '/languages/{id:int}/dictionaries/import',
+        'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@processImport',
+        AUTH_MIDDLEWARE
+    );
+
+    // Legacy routes (with ?lang= query parameter)
     $router->registerWithMiddleware(
         '/dictionaries',
         'Lwt\\Modules\\Dictionary\\Http\\DictionaryController@index',

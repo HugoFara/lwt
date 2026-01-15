@@ -47,7 +47,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
         ?>
     </div>
     <div>
-        <a href="/text/read?start=<?php echo $textId; ?>" target="_top">
+        <a href="/text/<?php echo $textId; ?>/read" target="_top">
             <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['title' => 'Read', 'alt' => 'Read']); ?>
         </a>
         <a href="/text/<?php echo $textId; ?>/print-plain" target="_top">
