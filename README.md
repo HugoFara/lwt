@@ -1,7 +1,7 @@
 # Learning with Texts
 
 <p align="center">
-  <img src="https://github.com/HugoFara/lwt/raw/main/docs/assets/images/lwt_icon_big.jpg" alt="LWT logo - an open book" width="200"/>
+  <img src="https://github.com/HugoFara/lwt/raw/main/assets/images/lwt_icon_512.png" alt="LWT logo - an open book" width="200"/>
 </p>
 
 <p align="center">
