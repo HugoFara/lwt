@@ -53,7 +53,7 @@ describe('Languages Management', () => {
     it('should have edit links for languages when they exist', () => {
       cy.get('body').then(($body) => {
         if ($body.find('.language-card').length > 0) {
-          cy.get('.language-card a[href*="chg="]').should('exist');
+          cy.get('.language-card a[href*="/edit"]').should('exist');
         } else {
           cy.log('No languages installed - skipping edit links check');
         }
@@ -71,7 +71,7 @@ describe('Languages Management', () => {
     });
 
     it('should have "New Language" button in action card', () => {
-      cy.get('.action-card a[href*="new=1"]').should('exist');
+      cy.get('.action-card a[href*="/languages/new"]').should('exist');
     });
 
     it('should have "Quick Setup Wizard" button', () => {
@@ -100,9 +100,9 @@ describe('Languages Management', () => {
 
     it('should navigate to edit page when Edit is clicked', () => {
       cy.get('body').then(($body) => {
-        if ($body.find('.language-card a[href*="chg="]').length > 0) {
-          cy.get('.language-card a[href*="chg="]').first().click();
-          cy.url().should('include', 'chg=');
+        if ($body.find('.language-card a[href*="/edit"]').length > 0) {
+          cy.get('.language-card a[href*="/edit"]').first().click();
+          cy.url().should('match', /\/languages\/\d+\/edit/);
           cy.get('form').should('exist');
         } else {
           cy.log('No languages installed - skipping edit navigation check');
@@ -233,19 +233,19 @@ describe('Languages Management', () => {
 
   describe('Edit Language', () => {
     it('should load edit form for existing language', () => {
-      cy.visit('/languages?chg=1');
+      cy.visit('/languages/1/edit');
       cy.get('form[name="lg_form"]').should('exist');
       // Language name should be filled
       cy.get('input[name="LgName"]').should('not.have.value', '');
     });
 
     it('should have populated fields', () => {
-      cy.visit('/languages?chg=1');
+      cy.visit('/languages/1/edit');
       cy.get('input[name="LgName"]').invoke('val').should('not.be.empty');
     });
 
     it('should have cancel button that returns to list', () => {
-      cy.visit('/languages?chg=1');
+      cy.visit('/languages/1/edit');
       cy.get('button').contains('Cancel').click();
       cy.url().should('eq', Cypress.config().baseUrl + '/languages');
     });

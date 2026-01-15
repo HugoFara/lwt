@@ -356,7 +356,7 @@ echo PageLayoutHelper::buildActionCard([
                         <td class="has-text-centered" style="white-space: nowrap;">
                             <div class="buttons are-small is-centered">
                                 <a
-                                    :href="'/words/edit?chg=' + word.id"
+                                    :href="'/words/' + word.id + '/edit'"
                                     class="button is-small is-ghost"
                                     title="Edit"
                                 >
@@ -591,7 +591,7 @@ echo PageLayoutHelper::buildActionCard([
                             </template>
                         </div>
                         <div class="buttons are-small">
-                            <a :href="'/words/edit?chg=' + word.id" class="button is-small is-info is-light">
+                            <a :href="'/words/' + word.id + '/edit'" class="button is-small is-info is-light">
                                 <?php echo IconHelper::render('file-pen-line', ['alt' => 'Edit']); ?>
                             </a>
                         </div>

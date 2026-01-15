@@ -79,6 +79,30 @@ class TermEditController extends VocabularyBaseController
     }
 
     /**
+     * Edit word by ID.
+     *
+     * Route: GET/POST /words/{id}/edit
+     *
+     * @param int $id Word ID from route parameter
+     *
+     * @return void
+     */
+    public function editWordById(int $id): void
+    {
+        $op = InputValidator::getString('op');
+
+        if ($op !== '') {
+            if ($this->handleEditWordOperation()) {
+                return; // Error was rendered with full page
+            }
+        } else {
+            $this->displayEditWordForm($id, 0, 0, '');
+        }
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
      * Edit word form.
      *
      * Handles:

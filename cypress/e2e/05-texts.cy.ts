@@ -35,7 +35,7 @@ describe('Texts Management', () => {
     it('should have action links for texts', () => {
       // Look for read/test/edit links in cards or action card for new text
       cy.get(
-        'a[href*="/text/read"], a[href*="/test"], a[href*="chg="], a[href*="new=1"]'
+        'a[href*="/text/read"], a[href*="/test"], a[href*="/edit"], a[href*="/texts/new"]'
       ).should('exist');
     });
   });
@@ -130,7 +130,7 @@ describe('Texts Management', () => {
 
   describe('Edit Text', () => {
     it('should load edit form for existing text or show not found', () => {
-      cy.visit('/text/edit?chg=1');
+      cy.visit('/texts/1/edit');
       // Either show the form or a "not found" message
       cy.get('body').then(($body) => {
         if ($body.text().includes('not found')) {
@@ -144,7 +144,7 @@ describe('Texts Management', () => {
     });
 
     it('should have populated title field when text exists', () => {
-      cy.visit('/text/edit?chg=1');
+      cy.visit('/texts/1/edit');
       cy.get('body').then(($body) => {
         if (!$body.text().includes('not found')) {
           cy.get('input[name="TxTitle"]').invoke('val').should('not.be.empty');

@@ -123,7 +123,7 @@ $actions = [
                     <a href="/text/<?php echo $chapter['id']; ?>/read" class="button is-small is-primary">
                         <?php echo IconHelper::render('book-open', ['alt' => 'Read']); ?>
                     </a>
-                    <a href="/texts?chg=<?php echo $chapter['id']; ?>" class="button is-small is-light">
+                    <a href="/texts/<?php echo $chapter['id']; ?>/edit" class="button is-small is-light">
                         <?php echo IconHelper::render('edit', ['alt' => 'Edit']); ?>
                     </a>
                 </td>

@@ -248,6 +248,61 @@ class TextController extends BaseController
     }
 
     /**
+     * Edit single text form.
+     *
+     * Route: GET/POST /texts/{id}/edit
+     *
+     * @param int $id Text ID from route parameter
+     *
+     * @return RedirectResponse|null Redirect response or null if rendered
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    public function editSingle(int $id): ?RedirectResponse
+    {
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
+        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
+        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
+        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
+        include_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/start_session.php';
+        include_once self::BACKEND_PATH . '/Core/Integration/YouTubeImport.php';
+
+        // Get filter parameters
+        $currentLang = Validation::language(
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
+        );
+
+        // Handle save operation
+        $op = $this->param('op');
+        if ($op !== '') {
+            $noPagestart = (substr($op, -8) == 'and Open');
+            if (!$noPagestart) {
+                PageLayoutHelper::renderPageStart('Texts', true);
+            }
+            $result = $this->handleTextOperation($op, $noPagestart, $currentLang);
+            if ($result instanceof RedirectResponse) {
+                return $result;
+            }
+            if ($result['redirect']) {
+                return null;
+            }
+            PageLayoutHelper::renderPageEnd();
+            return null;
+        }
+
+        PageLayoutHelper::renderPageStart('Texts', true);
+        $this->showEditTextForm($id);
+        PageLayoutHelper::renderPageEnd();
+
+        return null;
+    }
+
+    /**
      * Edit texts list (replaces text_edit.php)
      *
      * @param array $params Route parameters
@@ -325,12 +380,8 @@ class TextController extends BaseController
             }
         }
 
-        // Display appropriate page
-        if ($this->hasParam('chg')) {
-            $this->showEditTextForm($this->paramInt('chg', 0) ?? 0);
-        } else {
-            $this->showTextsList($currentLang, $message);
-        }
+        // Display texts list
+        $this->showTextsList($currentLang, $message);
 
         PageLayoutHelper::renderPageEnd();
 

@@ -105,7 +105,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
               <a href="/text/print-plain?text=<?php echo $textId; ?>" class="button is-small">Print</a>
             </div>
             <div class="control">
-              <a href="/texts?chg=<?php echo $textId; ?>" class="button is-small">Edit</a>
+              <a href="/texts/<?php echo $textId; ?>/edit" class="button is-small">Edit</a>
             </div>
             <div class="control">
               <button class="button is-small" :class="showAll ? 'is-info' : 'is-light'" @click="toggleShowAll">

@@ -102,7 +102,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                 <?php if ($mode !== 'edit') : ?>
                     <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
                 <?php endif; ?>
-                <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
+                <a target="_top" href="/texts/<?php echo $textId; ?>/edit">
                     <?php echo IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
                 </a>
             </div>

@@ -75,23 +75,23 @@ describe('Words Management', () => {
   });
 
   describe('Single Word Edit', () => {
-    // Note: Word editing from the list uses /words/edit?chg=X
+    // Note: Word editing from the list uses /words/X/edit RESTful route
     // The /word/edit endpoint is for editing from within reading context
     // These tests verify editing works when a word exists in the database
 
     it('should load word edit page when word exists', () => {
       cy.visit('/words/edit');
       cy.get('body').then(($body) => {
-        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
-          cy.get('a[href*="chg="]')
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="/edit"]').length > 0) {
+          cy.get('a[href*="/edit"]')
             .first()
             .then(($link) => {
               const href = $link.attr('href');
               if (href) {
-                const match = href.match(/chg=(\d+)/);
+                const match = href.match(/\/words\/(\d+)\/edit/);
                 if (match) {
                   const wordId = match[1];
-                  cy.visit(`/words/edit?chg=${wordId}`);
+                  cy.visit(`/words/${wordId}/edit`);
                   cy.get('form').should('exist');
                 }
               }
@@ -105,15 +105,15 @@ describe('Words Management', () => {
     it('should have word text field when editing', () => {
       cy.visit('/words/edit');
       cy.get('body').then(($body) => {
-        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
-          cy.get('a[href*="chg="]')
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="/edit"]').length > 0) {
+          cy.get('a[href*="/edit"]')
             .first()
             .then(($link) => {
               const href = $link.attr('href');
               if (href) {
-                const match = href.match(/chg=(\d+)/);
+                const match = href.match(/\/words\/(\d+)\/edit/);
                 if (match) {
-                  cy.visit(`/words/edit?chg=${match[1]}`);
+                  cy.visit(`/words/${match[1]}/edit`);
                   cy.get('input[name="WoText"]').should('exist');
                 }
               }
@@ -127,15 +127,15 @@ describe('Words Management', () => {
     it('should have translation field when editing', () => {
       cy.visit('/words/edit');
       cy.get('body').then(($body) => {
-        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
-          cy.get('a[href*="chg="]')
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="/edit"]').length > 0) {
+          cy.get('a[href*="/edit"]')
             .first()
             .then(($link) => {
               const href = $link.attr('href');
               if (href) {
-                const match = href.match(/chg=(\d+)/);
+                const match = href.match(/\/words\/(\d+)\/edit/);
                 if (match) {
-                  cy.visit(`/words/edit?chg=${match[1]}`);
+                  cy.visit(`/words/${match[1]}/edit`);
                   cy.get('textarea[name="WoTranslation"]').should('exist');
                 }
               }
@@ -149,15 +149,15 @@ describe('Words Management', () => {
     it('should have status selector when editing', () => {
       cy.visit('/words/edit');
       cy.get('body').then(($body) => {
-        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
-          cy.get('a[href*="chg="]')
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="/edit"]').length > 0) {
+          cy.get('a[href*="/edit"]')
             .first()
             .then(($link) => {
               const href = $link.attr('href');
               if (href) {
-                const match = href.match(/chg=(\d+)/);
+                const match = href.match(/\/words\/(\d+)\/edit/);
                 if (match) {
-                  cy.visit(`/words/edit?chg=${match[1]}`);
+                  cy.visit(`/words/${match[1]}/edit`);
                   cy.get('input[type="radio"][name="WoStatus"]').should('exist');
                 }
               }
@@ -171,15 +171,15 @@ describe('Words Management', () => {
     it('should have submit button when editing', () => {
       cy.visit('/words/edit');
       cy.get('body').then(($body) => {
-        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
-          cy.get('a[href*="chg="]')
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="/edit"]').length > 0) {
+          cy.get('a[href*="/edit"]')
             .first()
             .then(($link) => {
               const href = $link.attr('href');
               if (href) {
-                const match = href.match(/chg=(\d+)/);
+                const match = href.match(/\/words\/(\d+)\/edit/);
                 if (match) {
-                  cy.visit(`/words/edit?chg=${match[1]}`);
+                  cy.visit(`/words/${match[1]}/edit`);
                   cy.get('input[type="submit"][value="Change"]').should('exist');
                 }
               }
@@ -195,15 +195,15 @@ describe('Words Management', () => {
     it('should be able to change word status when words exist', () => {
       cy.visit('/words/edit');
       cy.get('body').then(($body) => {
-        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
-          cy.get('a[href*="chg="]')
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="/edit"]').length > 0) {
+          cy.get('a[href*="/edit"]')
             .first()
             .then(($link) => {
               const href = $link.attr('href');
               if (href) {
-                const match = href.match(/chg=(\d+)/);
+                const match = href.match(/\/words\/(\d+)\/edit/);
                 if (match) {
-                  cy.visit(`/words/edit?chg=${match[1]}`);
+                  cy.visit(`/words/${match[1]}/edit`);
                   cy.get('input[type="radio"][name="WoStatus"]').should(
                     'have.length.greaterThan',
                     0
@@ -222,15 +222,15 @@ describe('Words Management', () => {
     it('should have lemma field when editing a word', () => {
       cy.visit('/words/edit');
       cy.get('body').then(($body) => {
-        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
-          cy.get('a[href*="chg="]')
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="/edit"]').length > 0) {
+          cy.get('a[href*="/edit"]')
             .first()
             .then(($link) => {
               const href = $link.attr('href');
               if (href) {
-                const match = href.match(/chg=(\d+)/);
+                const match = href.match(/\/words\/(\d+)\/edit/);
                 if (match) {
-                  cy.visit(`/words/edit?chg=${match[1]}`);
+                  cy.visit(`/words/${match[1]}/edit`);
                   cy.get('input[name="WoLemma"]').should('exist');
                 }
               }
@@ -244,15 +244,15 @@ describe('Words Management', () => {
     it('should have placeholder text for lemma field', () => {
       cy.visit('/words/edit');
       cy.get('body').then(($body) => {
-        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
-          cy.get('a[href*="chg="]')
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="/edit"]').length > 0) {
+          cy.get('a[href*="/edit"]')
             .first()
             .then(($link) => {
               const href = $link.attr('href');
               if (href) {
-                const match = href.match(/chg=(\d+)/);
+                const match = href.match(/\/words\/(\d+)\/edit/);
                 if (match) {
-                  cy.visit(`/words/edit?chg=${match[1]}`);
+                  cy.visit(`/words/${match[1]}/edit`);
                   cy.get('input[name="WoLemma"]')
                     .should('have.attr', 'placeholder')
                     .and('include', 'Base form');
@@ -268,15 +268,15 @@ describe('Words Management', () => {
     it('should allow entering a lemma value', () => {
       cy.visit('/words/edit');
       cy.get('body').then(($body) => {
-        if (!$body.text().includes('No terms found') && $body.find('a[href*="chg="]').length > 0) {
-          cy.get('a[href*="chg="]')
+        if (!$body.text().includes('No terms found') && $body.find('a[href*="/edit"]').length > 0) {
+          cy.get('a[href*="/edit"]')
             .first()
             .then(($link) => {
               const href = $link.attr('href');
               if (href) {
-                const match = href.match(/chg=(\d+)/);
+                const match = href.match(/\/words\/(\d+)\/edit/);
                 if (match) {
-                  cy.visit(`/words/edit?chg=${match[1]}`);
+                  cy.visit(`/words/${match[1]}/edit`);
                   cy.get('input[name="WoLemma"]')
                     .clear()
                     .type('testlemma')

@@ -216,7 +216,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                                 <span>Reparse</span>
                             </a>
                         </template>
-                        <a :href="'/languages?chg=' + lang.id" class="card-footer-item">
+                        <a :href="'/languages/' + lang.id + '/edit'" class="card-footer-item">
                             <span class="icon">
                                 <i data-lucide="file-pen" style="width: 16px; height: 16px;"></i>
                             </span>

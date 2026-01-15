@@ -312,7 +312,7 @@ echo PageLayoutHelper::buildActionCard(
                                                     <?php echo IconHelper::render('archive', ['size' => 14]); ?>
                                                     <span>Archive</span>
                                                 </a>
-                                                <a :href="'/texts?chg=' + text.id" class="dropdown-item">
+                                                <a :href="'/texts/' + text.id + '/edit'" class="dropdown-item">
                                                     <?php echo IconHelper::render('file-pen', ['size' => 14]); ?>
                                                     <span>Edit</span>
                                                 </a>

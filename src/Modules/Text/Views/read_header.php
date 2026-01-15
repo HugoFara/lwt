@@ -94,7 +94,7 @@ assert(is_string($media));
             <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
         <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
-        <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
+        <a target="_top" href="/texts/<?php echo $textId; ?>/edit">
             <?php
             echo \Lwt\Shared\UI\Helpers\IconHelper::render(
                 'file-pen',

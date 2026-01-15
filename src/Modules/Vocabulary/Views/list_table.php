@@ -188,7 +188,7 @@ assert(is_array($words));
     </td>
     <td class="has-text-centered" style="white-space: nowrap;">
         <div class="buttons are-small is-centered">
-            <a href="/words/edit?chg=<?php echo $record['WoID']; ?>" class="button is-small is-ghost" title="Edit">
+            <a href="/words/<?php echo $record['WoID']; ?>/edit" class="button is-small is-ghost" title="Edit">
                 <?php echo IconHelper::render('file-pen-line', ['title' => 'Edit', 'alt' => 'Edit']); ?>
             </a>
             <a
@@ -368,7 +368,7 @@ assert(is_array($words));
             </div>
             <div class="buttons are-small">
                 <a
-                    href="/words/edit?chg=<?php echo $record['WoID']; ?>"
+                    href="/words/<?php echo $record['WoID']; ?>/edit"
                     class="button is-small is-info is-light"
                 >
                     <?php echo IconHelper::render('file-pen-line', ['alt' => 'Edit']); ?>

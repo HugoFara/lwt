@@ -162,7 +162,7 @@ export function languageListData(): LanguageListComponentData {
      * Navigate to the edit page for a language.
      */
     navigateToEdit(id: number): void {
-      window.location.href = url(`/languages?chg=${id}`);
+      window.location.href = url(`/languages/${id}/edit`);
     },
 
     /**
