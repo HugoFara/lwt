@@ -68,6 +68,7 @@ function registerRoutes(Router $router): void
 
     // New text form (RESTful route)
     $router->get('/texts/new', 'Lwt\\Modules\\Text\\Http\\TextController@new', AUTH_MIDDLEWARE);
+    $router->post('/texts/new', 'Lwt\\Modules\\Text\\Http\\TextController@new', AUTH_MIDDLEWARE);
 
     // Edit text form (RESTful route): /texts/123/edit
     $router->get('/texts/{id:int}/edit', 'Lwt\\Modules\\Text\\Http\\TextController@editSingle', AUTH_MIDDLEWARE);
