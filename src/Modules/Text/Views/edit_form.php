@@ -407,22 +407,6 @@ if (!$isNew) {
                     </div>
                     <p class="help">Organize texts with tags for easy filtering.</p>
                 </div>
-
-                <!-- Media URI (for manual entry) -->
-                <div class="field">
-                    <label class="label" for="TxAudioURI">Media URI</label>
-                    <div class="control">
-                        <input type="text"
-                               class="input checkoutsidebmp"
-                               data_info="Audio-URI"
-                               name="TxAudioURI"
-                               id="TxAudioURI"
-                               maxlength="2048"
-                               value="<?php echo \htmlspecialchars($textMediaUri, ENT_QUOTES, 'UTF-8'); ?>"
-                               placeholder="media/audio.mp3 or video URL" />
-                    </div>
-                    <p class="help">Audio or video file path or URL to accompany the text.</p>
-                </div>
             </div>
         </div>
     </div>
