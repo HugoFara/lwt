@@ -1088,6 +1088,24 @@ class TextController extends BaseController
     }
 
     /**
+     * Delete an archived text.
+     *
+     * Route: DELETE /text/archived/{id}
+     *
+     * @param int $id Archived text ID from route parameter
+     *
+     * @return RedirectResponse Redirect to archived texts list
+     */
+    public function deleteArchived(int $id): RedirectResponse
+    {
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+
+        $this->textService->deleteArchivedText($id);
+
+        return $this->redirect('/text/archived');
+    }
+
+    /**
      * Handle mark actions for archived texts.
      *
      * @param string $markAction Action to perform

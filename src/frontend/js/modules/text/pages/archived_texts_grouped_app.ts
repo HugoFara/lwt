@@ -125,6 +125,7 @@ export interface ArchivedTextsGroupedData {
   // Actions
   handleMultiAction(langId: number, event: Event): void;
   handleDelete(event: Event, url: string): void;
+  handleRestDelete(event: Event, url: string): void;
   handlePostAction(event: Event, url: string): void;
 
   // Sorting
@@ -409,6 +410,23 @@ export function archivedTextsGroupedData(): ArchivedTextsGroupedData {
       event.preventDefault();
       if (confirmDelete()) {
         window.location.href = url;
+      }
+    },
+
+    handleRestDelete(event: Event, url: string) {
+      event.preventDefault();
+      if (confirmDelete()) {
+        fetch(url, {
+          method: 'DELETE',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        }).then(() => {
+          window.location.reload();
+        }).catch((error) => {
+          console.error('Delete failed:', error);
+          alert('Failed to delete. Please try again.');
+        });
       }
     },
 

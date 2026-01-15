@@ -237,8 +237,8 @@ echo PageLayoutHelper::buildActionCard(
                                     </a>
                                     <a
                                         class="card-footer-item has-text-danger"
-                                        @click.prevent="handleDelete(
-                                            $event, '/text/archived?del=' + text.id
+                                        @click.prevent="handleRestDelete(
+                                            $event, '/text/archived/' + text.id
                                         )">
                                         <?php echo IconHelper::render('trash-2', ['size' => 16]); ?>
                                         <span>Delete</span>

@@ -126,6 +126,9 @@ function registerRoutes(Router $router): void
     $router->get('/text/archived/{id:int}/edit', 'Lwt\\Modules\\Text\\Http\\TextController@archivedEdit', AUTH_MIDDLEWARE);
     $router->post('/text/archived/{id:int}/edit', 'Lwt\\Modules\\Text\\Http\\TextController@archivedEdit', AUTH_MIDDLEWARE);
 
+    // Delete archived text (RESTful route): DELETE /text/archived/123
+    $router->delete('/text/archived/{id:int}', 'Lwt\\Modules\\Text\\Http\\TextController@deleteArchived', AUTH_MIDDLEWARE);
+
     // ==================== WORD/TERM ROUTES (PROTECTED) ====================
     // Split into focused controllers: TermEditController, TermDisplayController,
     // TermStatusController, TermApiController, TermImportController, MultiWordController
