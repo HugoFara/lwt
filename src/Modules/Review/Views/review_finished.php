@@ -26,6 +26,8 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Review;
 
+use Lwt\Shared\UI\Helpers\IconHelper;
+
 // Validate and cast injected variables
 assert(isset($totalTests) && is_int($totalTests));
 assert(isset($tomorrowTests) && is_int($tomorrowTests));
@@ -34,7 +36,7 @@ assert(isset($hidden) && is_bool($hidden));
 $display = $hidden ? 'none' : 'inherit';
 ?>
 <p id="test-finished-area" class="has-text-centered" style="display: <?php echo $display; ?>;">
-    <img src="/assets/images/ok.png" alt="Done!" />
+    <?php echo IconHelper::render('circle-check', ['size' => 64, 'alt' => 'Done!', 'class' => 'has-text-success']); ?>
     <br /><br />
     <span class="has-text-danger has-text-weight-bold">
         <span id="tests-done-today">

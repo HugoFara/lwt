@@ -46,15 +46,6 @@
       "purpose": "any"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/assets/images/lwt_abstract.png",
-      "sizes": "800x600",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "LWT Reading Interface"
-    }
-  ],
   "shortcuts": [
     {
       "name": "My Texts",
