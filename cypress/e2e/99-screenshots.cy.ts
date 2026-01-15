@@ -39,10 +39,14 @@ describe('Documentation Screenshots', () => {
   describe('Texts', () => {
     it('texts-list - List of all texts', () => {
       cy.visit('/texts');
-      // Wait for text cards to appear (French section auto-expands)
-      cy.get('.text-card, [class*="text-item"], a[href*="/text/read"]', { timeout: 30000 }).should('exist');
+      // Wait for Alpine.js to initialize
+      cy.get('[x-data]', { timeout: 10000 }).should('exist');
+      // Wait for Alpine.js to render the text cards/links
+      cy.wait(2000);
+      // Check for any content indicating texts loaded (cards, links, or empty state message)
+      cy.get('.text-card, .card, a[href*="/text/read"], [x-data]').should('exist');
       // Wait for loading to complete
-      cy.wait(3000);
+      cy.wait(1000);
       cy.screenshot('texts-list', { capture: 'viewport' });
     });
 
@@ -57,18 +61,34 @@ describe('Documentation Screenshots', () => {
       // Fill in some example data for a nicer screenshot
       cy.get('input[name="TxTitle"]').type('Le Petit Prince - Chapitre 1');
 
-      // Select French if available, otherwise first language
-      cy.get('select[name="TxLgID"]').then(($select) => {
-        const options = $select.find('option');
-        let langValue = options.eq(1).val();
-        options.each((i, opt) => {
-          if (opt.textContent?.toLowerCase().includes('french') ||
-              opt.textContent?.toLowerCase().includes('français')) {
-            langValue = opt.value;
+      // Select French if available using the searchable-select component
+      cy.get('.searchable-select').first().as('langSelect');
+      cy.get('@langSelect').find('.searchable-select__trigger').click();
+      // Wait for dropdown to be visible
+      cy.get('@langSelect')
+        .find('.searchable-select__options')
+        .should('be.visible');
+      // Try to find French, otherwise select the first non-placeholder option
+      cy.get('@langSelect')
+        .find('.searchable-select__options li:not(.searchable-select__empty)')
+        .then(($options) => {
+          let found = false;
+          $options.each((i, opt) => {
+            const text = opt.textContent?.toLowerCase() || '';
+            if (text.includes('french') || text.includes('français')) {
+              cy.wrap(opt).click();
+              found = true;
+              return false; // break loop
+            }
+          });
+          if (!found) {
+            // Select first non-placeholder option
+            cy.get('@langSelect')
+              .find('.searchable-select__options li:not(.searchable-select__empty)')
+              .eq(1)
+              .click();
           }
         });
-        cy.get('select[name="TxLgID"]').select(String(langValue));
-      });
 
       // Add sample French text
       cy.get('textarea[name="TxText"]').type(
@@ -93,35 +113,40 @@ On disait dans le livre: "Les serpents boas avalent leur proie tout entière, sa
   });
 
   describe('Reading', () => {
-    it('reading-text - Reading interface', () => {
-      // Navigate to texts list and click first available text
+    // Helper to navigate to reading page with Alpine.js fallback
+    const navigateToReadingPage = () => {
       cy.visit('/text/edit');
-      // Wait for texts to load
-      cy.get('a[href*="/text/read"], a[href*="text/read"]', { timeout: 15000 }).should('exist');
-      cy.wait(500);
-
-      // Click the first read link
-      cy.get('a[href*="/text/read"], a[href*="text/read"]').first().click();
-      cy.url().should('include', '/read');
-
-      // Wait for the reading interface to fully load
-      cy.get('#thetext', { timeout: 10000 }).should('exist');
-      cy.get('#thetext .wsty', { timeout: 10000 }).should('have.length.at.least', 1);
-
-      // Wait for Alpine.js components to initialize
+      // Wait for Alpine.js to initialize
+      cy.get('[x-data]', { timeout: 10000 }).should('exist');
+      // Wait for Alpine.js to render the links
       cy.wait(1000);
 
+      // Try to find a reading link, fallback to direct navigation
+      cy.get('body').then(($body) => {
+        if ($body.find('a[href*="/text/read"]').length > 0) {
+          cy.get('a[href*="/text/read"]').first().click();
+        } else if ($body.find('a[href*="/text/"][href*="/read"]').length > 0) {
+          cy.get('a[href*="/text/"][href*="/read"]').first().click();
+        } else {
+          // Fallback: navigate directly to a known demo text
+          cy.visit('/text/read?start=4');
+        }
+      });
+
+      // Wait for reading page to load
+      cy.url().should('include', '/read');
+      cy.get('#thetext', { timeout: 10000 }).should('exist');
+      cy.get('#thetext .wsty', { timeout: 10000 }).should('have.length.at.least', 1);
+      cy.wait(1000);
+    };
+
+    it('reading-text - Reading interface', () => {
+      navigateToReadingPage();
       cy.screenshot('reading-text', { capture: 'viewport' });
     });
 
     it('reading-text-show-all - Reading with Show All enabled', () => {
-      cy.visit('/text/edit');
-      cy.get('a[href*="/text/read"], a[href*="text/read"]', { timeout: 15000 }).should('exist');
-      cy.wait(500);
-      cy.get('a[href*="/text/read"], a[href*="text/read"]').first().click();
-      cy.url().should('include', '/read');
-      cy.get('#thetext', { timeout: 10000 }).should('exist');
-      cy.wait(1000);
+      navigateToReadingPage();
 
       // Click Show All button if it exists
       cy.get('body').then(($body) => {

@@ -56,8 +56,11 @@ class RedirectResponse implements ResponseInterface
      */
     public function send(): void
     {
-        http_response_code($this->statusCode);
-        header('Location: ' . $this->url);
+        // Only set headers if they haven't been sent yet
+        if (!headers_sent()) {
+            http_response_code($this->statusCode);
+            header('Location: ' . $this->url);
+        }
     }
 
     /**

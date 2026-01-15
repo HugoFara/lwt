@@ -71,25 +71,30 @@ describe('Texts Management', () => {
       // Fill in required fields
       cy.get('input[name="TxTitle"]').type(uniqueTitle);
 
-      // Select first available language (must have index > 0, which is the placeholder)
-      cy.get('select[name="TxLgID"] option').should('have.length.greaterThan', 1);
-      cy.get('select[name="TxLgID"]').then(($select) => {
-        const options = $select.find('option');
-        // Select the first non-placeholder option (index 1)
-        const firstLangValue = options.eq(1).val();
-        cy.get('select[name="TxLgID"]').select(String(firstLangValue));
-      });
+      // Select first available language using the searchable-select component
+      // The component uses Alpine.js and stores options in x-data
+      cy.get('.searchable-select').first().as('langSelect');
+
+      // Click to open the dropdown
+      cy.get('@langSelect').find('.searchable-select__trigger').click();
+
+      // Wait for dropdown to be visible and select first non-placeholder option
+      cy.get('@langSelect')
+        .find('.searchable-select__options li:not(.searchable-select__empty)')
+        .should('have.length.at.least', 2)
+        .eq(1) // Skip the [Choose...] placeholder
+        .click();
 
       // Add text content
       cy.get('textarea[name="TxText"]').type(
         'This is a test text. It has multiple sentences.'
       );
 
-      // Submit the form - click the "Save" button (not "Save and Open")
-      cy.get('button[name="op"][value="Save"]').click();
+      // Submit the form - the new text form only has "Save and Open" button
+      cy.get('button[name="op"][value="Save and Open"]').click();
 
-      // Should redirect to texts list
-      cy.url().should('match', /\/text/);
+      // Should redirect to reading page (new RESTful format: /text/{id}/read)
+      cy.url().should('match', /\/text\/\d+\/read/);
     });
 
     it('should create a new text and open it for reading with Save & Open', () => {
@@ -100,13 +105,18 @@ describe('Texts Management', () => {
       // Fill in required fields
       cy.get('input[name="TxTitle"]').type(uniqueTitle);
 
-      // Select first available language
-      cy.get('select[name="TxLgID"] option').should('have.length.greaterThan', 1);
-      cy.get('select[name="TxLgID"]').then(($select) => {
-        const options = $select.find('option');
-        const firstLangValue = options.eq(1).val();
-        cy.get('select[name="TxLgID"]').select(String(firstLangValue));
-      });
+      // Select first available language using the searchable-select component
+      cy.get('.searchable-select').first().as('langSelect');
+
+      // Click to open the dropdown
+      cy.get('@langSelect').find('.searchable-select__trigger').click();
+
+      // Wait for dropdown to be visible and select first non-placeholder option
+      cy.get('@langSelect')
+        .find('.searchable-select__options li:not(.searchable-select__empty)')
+        .should('have.length.at.least', 2)
+        .eq(1) // Skip the [Choose...] placeholder
+        .click();
 
       // Add text content
       cy.get('textarea[name="TxText"]').type(
@@ -116,9 +126,8 @@ describe('Texts Management', () => {
       // Click "Save and Open" button
       cy.get('button[name="op"][value="Save and Open"]').click();
 
-      // Should redirect to reading page
-      cy.url().should('include', '/text/read');
-      cy.url().should('match', /start=\d+/);
+      // Should redirect to reading page (new RESTful format: /text/{id}/read)
+      cy.url().should('match', /\/text\/\d+\/read/);
 
       // Reading interface should load
       cy.get('#thetext', { timeout: 10000 }).should('exist');
@@ -176,11 +185,11 @@ describe('Texts Management', () => {
   });
 
   describe('Long Text Import', () => {
-    it('should redirect to text edit or handle long text via regular form', () => {
-      // Long text import is handled through the regular text edit form
+    it('should handle long text via the new text form', () => {
+      // Long text import is handled through the new text form
       // which supports longer texts via the textarea
       cy.visit('/texts/new');
-      cy.url().should('include', '/text/edit');
+      cy.url().should('include', '/texts/new');
       cy.get('form').should('exist');
       // Text content textarea should exist for entering long texts
       cy.get('textarea[name="TxText"]').should('exist');
@@ -188,8 +197,8 @@ describe('Texts Management', () => {
 
     it('should have required fields for text creation', () => {
       cy.visit('/texts/new');
-      // Language selector
-      cy.get('select[name*="lang" i], select[name="TxLgID"]').should('exist');
+      // Language selector - now uses searchable-select component
+      cy.get('.searchable-select, select[name="TxLgID"]').should('exist');
       // Text input area
       cy.get('textarea[name="TxText"]').should('exist');
     });

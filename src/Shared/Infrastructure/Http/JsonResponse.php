@@ -66,8 +66,11 @@ class JsonResponse implements ResponseInterface
      */
     public function send(): void
     {
-        http_response_code($this->statusCode);
-        header('Content-Type: application/json; charset=utf-8');
+        // Only set headers if they haven't been sent yet
+        if (!headers_sent()) {
+            http_response_code($this->statusCode);
+            header('Content-Type: application/json; charset=utf-8');
+        }
         echo json_encode($this->data, $this->encodingFlags);
     }
 
