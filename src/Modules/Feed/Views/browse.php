@@ -54,8 +54,8 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  */
 
 echo PageLayoutHelper::buildActionCard([
-    ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
-    ['url' => '/feeds/edit?manage_feeds=1', 'label' => 'Manage Feeds', 'icon' => 'settings'],
+    ['url' => '/feeds/new', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
+    ['url' => '/feeds/manage', 'label' => 'Manage Feeds', 'icon' => 'settings'],
     ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'],
     ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'],
 ]);

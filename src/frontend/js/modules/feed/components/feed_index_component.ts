@@ -58,9 +58,9 @@ type AlpineContext = FeedIndexData & { $el: HTMLElement };
  */
 export function feedIndexData(config: FeedIndexConfig = {}): FeedIndexData {
   return {
-    resetUrl: config.resetUrl ?? '/feeds/edit',
-    filterUrl: config.filterUrl ?? '/feeds/edit?manage_feeds=1',
-    pageBaseUrl: config.pageBaseUrl ?? '/feeds/edit',
+    resetUrl: config.resetUrl ?? '/feeds/manage',
+    filterUrl: config.filterUrl ?? '/feeds/manage',
+    pageBaseUrl: config.pageBaseUrl ?? '/feeds/manage',
     query: config.currentQuery ?? '',
 
     /**
@@ -166,7 +166,17 @@ export function feedIndexData(config: FeedIndexConfig = {}): FeedIndexData {
      */
     confirmDelete(feedId: string): void {
       if (confirm('Are you sure?')) {
-        location.href = `/feeds/edit?markaction=del&selected_feed=${feedId}`;
+        // Use fetch with DELETE method for RESTful deletion
+        fetch(`/feeds/${feedId}`, {
+          method: 'DELETE',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        }).then(() => {
+          location.href = '/feeds/manage';
+        }).catch(() => {
+          location.href = '/feeds/manage';
+        });
       }
     }
   };

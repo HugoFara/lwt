@@ -57,7 +57,7 @@ $actions = [
     'articleSourceValue' => '',
 ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?>
 </script>
-<form class="validate" action="/feeds/edit" method="post"
+<form class="validate" action="/feeds/new" method="post"
       x-data="feedForm()"
       @submit="handleSubmit($event)">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
@@ -333,7 +333,7 @@ $actions = [
             <button type="button"
                     class="button is-light"
                     data-action="navigate"
-                    data-url="/feeds/edit">
+                    data-url="/feeds/manage">
                 Cancel
             </button>
         </div>

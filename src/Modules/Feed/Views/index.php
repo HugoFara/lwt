@@ -47,7 +47,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/feeds', 'label' => 'Feeds', 'icon' => 'list'],
-    ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
+    ['url' => '/feeds/new', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
 ]);
 ?>
 <div x-data="feedIndex({currentQuery: '<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>'})">
@@ -170,10 +170,10 @@ echo PageLayoutHelper::buildActionCard([
         <input type="checkbox" name="marked[]" class="markcheck" value="<?php echo $row['NfID']; ?>" />
     </td>
     <td class="has-text-centered nowrap">
-        <a href="/feeds/edit?edit_feed=1&amp;selected_feed=<?php echo $row['NfID']; ?>">
+        <a href="/feeds/<?php echo $row['NfID']; ?>/edit">
             <?php echo IconHelper::render('rss', ['title' => 'Edit', 'alt' => 'Edit']); ?>
         </a>
-        &nbsp; <a href="/feeds/edit?manage_feeds=1&amp;load_feed=1&amp;selected_feed=<?php echo $row['NfID']; ?>">
+        &nbsp; <a href="/feeds/<?php echo $row['NfID']; ?>/load">
             <span title="Update Feed"><?php echo IconHelper::render('refresh-cw', ['alt' => '-']); ?></span>
         </a>&nbsp;
         <a href="<?php echo $row['NfSourceURI']; ?>" data-action="open-window">

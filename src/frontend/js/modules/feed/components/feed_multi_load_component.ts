@@ -50,8 +50,8 @@ type AlpineContext = FeedMultiLoadData & { $el: HTMLElement };
  */
 export function feedMultiLoadData(config: FeedMultiLoadConfig = {}): FeedMultiLoadData {
   return {
-    cancelUrl: config.cancelUrl ?? '/feeds?selected_feed=0',
-    filterUrl: config.filterUrl ?? '/feeds/edit?multi_load_feed=1&page=1',
+    cancelUrl: config.cancelUrl ?? '/feeds',
+    filterUrl: config.filterUrl ?? '/feeds/multi-load',
 
     /**
      * Initialize the component.

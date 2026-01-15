@@ -377,10 +377,27 @@ function registerRoutes(Router $router): void
     // Feeds SPA (new Alpine.js single page application)
     $router->registerWithMiddleware('/feeds/manage', 'Lwt\\Modules\\Feed\\Http\\FeedController@spa', AUTH_MIDDLEWARE);
 
+    // New feed form (RESTful route)
+    $router->get('/feeds/new', 'Lwt\\Modules\\Feed\\Http\\FeedController@newFeed', AUTH_MIDDLEWARE);
+    $router->post('/feeds/new', 'Lwt\\Modules\\Feed\\Http\\FeedController@newFeed', AUTH_MIDDLEWARE);
+
+    // Edit feed form (RESTful route): /feeds/123/edit
+    $router->get('/feeds/{id:int}/edit', 'Lwt\\Modules\\Feed\\Http\\FeedController@editFeed', AUTH_MIDDLEWARE);
+    $router->post('/feeds/{id:int}/edit', 'Lwt\\Modules\\Feed\\Http\\FeedController@editFeed', AUTH_MIDDLEWARE);
+
+    // Delete feed (RESTful route): DELETE /feeds/123
+    $router->delete('/feeds/{id:int}', 'Lwt\\Modules\\Feed\\Http\\FeedController@deleteFeed', AUTH_MIDDLEWARE);
+
+    // Load/refresh feed (RESTful route): POST /feeds/123/load
+    $router->get('/feeds/{id:int}/load', 'Lwt\\Modules\\Feed\\Http\\FeedController@loadFeedRoute', AUTH_MIDDLEWARE);
+
+    // Multi-load feeds interface (RESTful route)
+    $router->get('/feeds/multi-load', 'Lwt\\Modules\\Feed\\Http\\FeedController@multiLoad', AUTH_MIDDLEWARE);
+
     // Feeds list
     $router->registerWithMiddleware('/feeds', 'Lwt\\Modules\\Feed\\Http\\FeedController@index', AUTH_MIDDLEWARE);
 
-    // Edit feeds
+    // Edit feeds (legacy route - handles query params)
     $router->registerWithMiddleware('/feeds/edit', 'Lwt\\Modules\\Feed\\Http\\FeedController@edit', AUTH_MIDDLEWARE);
 
     // Feed wizard

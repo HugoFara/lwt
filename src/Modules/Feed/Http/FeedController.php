@@ -1242,4 +1242,163 @@ class FeedController
         include $this->viewPath . 'spa.php';
         PageLayoutHelper::renderPageEnd();
     }
+
+    // =========================================================================
+    // RESTful Route Handlers
+    // =========================================================================
+
+    /**
+     * New feed form.
+     *
+     * Route: GET/POST /feeds/new
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function newFeed(array $params): void
+    {
+        $currentLang = Validation::language(
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
+        );
+
+        $langName = $this->languageFacade->getLanguageName($currentLang);
+        PageLayoutHelper::renderPageStart('New Feed - ' . $langName, true);
+
+        // Handle form submission
+        if (InputValidator::has('save_feed')) {
+            $data = [
+                'NfLgID' => InputValidator::getString('NfLgID'),
+                'NfName' => InputValidator::getString('NfName'),
+                'NfSourceURI' => InputValidator::getString('NfSourceURI'),
+                'NfArticleSectionTags' => InputValidator::getString('NfArticleSectionTags'),
+                'NfFilterTags' => InputValidator::getString('NfFilterTags'),
+                'NfOptions' => rtrim(InputValidator::getString('NfOptions'), ','),
+            ];
+
+            $feedId = $this->feedFacade->createFeed($data);
+            $this->flashService->success('Feed created successfully');
+            header('Location: ' . url('/feeds/' . $feedId . '/edit'));
+            exit;
+        }
+
+        $this->showNewForm((int)$currentLang);
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Edit feed form.
+     *
+     * Route: GET/POST /feeds/{id}/edit
+     *
+     * @param int $id Feed ID from route parameter
+     *
+     * @return void
+     */
+    public function editFeed(int $id): void
+    {
+        $feed = $this->feedFacade->getFeedById($id);
+
+        if ($feed === null) {
+            $this->flashService->error('Feed not found');
+            header('Location: ' . url('/feeds/manage'));
+            exit;
+        }
+
+        $langName = $this->languageFacade->getLanguageName($feed['NfLgID']);
+        PageLayoutHelper::renderPageStart('Edit Feed - ' . $langName, true);
+
+        // Handle form submission
+        if (InputValidator::has('update_feed')) {
+            $data = [
+                'NfLgID' => InputValidator::getString('NfLgID'),
+                'NfName' => InputValidator::getString('NfName'),
+                'NfSourceURI' => InputValidator::getString('NfSourceURI'),
+                'NfArticleSectionTags' => InputValidator::getString('NfArticleSectionTags'),
+                'NfFilterTags' => InputValidator::getString('NfFilterTags'),
+                'NfOptions' => rtrim(InputValidator::getString('NfOptions'), ','),
+            ];
+
+            $this->feedFacade->updateFeed($id, $data);
+            $this->flashService->success('Feed updated successfully');
+            header('Location: ' . url('/feeds/manage'));
+            exit;
+        }
+
+        $this->showEditForm($id);
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Delete a feed.
+     *
+     * Route: DELETE /feeds/{id}
+     *
+     * @param int $id Feed ID from route parameter
+     *
+     * @return void
+     */
+    public function deleteFeed(int $id): void
+    {
+        $result = $this->feedFacade->deleteFeeds((string)$id);
+
+        if ($result['feeds'] > 0) {
+            $this->flashService->success('Feed deleted successfully');
+        } else {
+            $this->flashService->error('Failed to delete feed');
+        }
+
+        header('Location: ' . url('/feeds/manage'));
+        exit;
+    }
+
+    /**
+     * Load/refresh a single feed.
+     *
+     * Route: GET /feeds/{id}/load
+     *
+     * @param int $id Feed ID from route parameter
+     *
+     * @return void
+     */
+    public function loadFeedRoute(int $id): void
+    {
+        $currentLang = Validation::language(
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
+        );
+
+        $langName = $this->languageFacade->getLanguageName($currentLang);
+        PageLayoutHelper::renderPageStart('Loading Feed - ' . $langName, true);
+
+        $this->feedFacade->renderFeedLoadInterfaceModern(
+            $id,
+            false,
+            '/feeds/manage'
+        );
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Multi-load feeds interface.
+     *
+     * Route: GET /feeds/multi-load
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function multiLoad(array $params): void
+    {
+        $currentLang = Validation::language(
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
+        );
+
+        $langName = $this->languageFacade->getLanguageName($currentLang);
+        PageLayoutHelper::renderPageStart('Multi-Load Feeds - ' . $langName, true);
+
+        $this->showMultiLoadForm((int)$currentLang);
+
+        PageLayoutHelper::renderPageEnd();
+    }
 }
