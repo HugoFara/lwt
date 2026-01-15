@@ -554,7 +554,7 @@ class TagsFacade
      */
     public static function getTextTagsHtml(int $textId): string
     {
-        $html = '<ul id="text_tag_map" class="respinput">';
+        $html = '<ul id="texttags" class="respinput">';
 
         if ($textId > 0) {
             $tagNames = self::getTextAssociation()->getTagTextsForItem($textId);
