@@ -42,67 +42,27 @@ use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Core\Integration\YouTubeImport;
 
 // Type-safe variable extraction from controller context
-/**
- * @var int $textId
-*/
-/**
- * @var bool $annotated
-*/
 assert(is_array($languageData));
-/**
- * @var array<int, string> $languageData
-*/
 assert(is_array($languages));
-/**
- * @var array<int, array{id: int, name: string}> $languagesTyped
-*/
 $languagesTyped = $languages;
-/**
- * @var bool $isNew
-*/
-/**
- * @var string $scrdir
-*/
-
-// Extract typed properties from $text for use in template
 assert(is_object($text) && property_exists($text, 'lgid'));
-/**
- * @var int $textIdTyped
-*/
+
 $textIdTyped = $textId;
-/**
- * @var int $textLgId
-*/
 $textLgId = $text->lgid;
-/**
- * @var string $textTitle
-*/
 $textTitle = $text->title;
-/**
- * @var string $textContent
-*/
 $textContent = $text->text;
-/**
- * @var string $textSource
-*/
 $textSource = $text->source;
-/**
- * @var string $textMediaUri
-*/
 $textMediaUri = $text->media_uri;
 $scrdirTyped = $scrdir;
 
-// Build actions based on whether this is a new or existing text
+// Build actions only for edit mode (not new text)
 $actions = [];
 if (!$isNew) {
     $actions[] = ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'];
-}
-$actions[] = ['url' => '/book/import', 'label' => 'Import EPUB', 'icon' => 'book'];
-$actions[] = ['url' => '/books', 'label' => 'My Books', 'icon' => 'library'];
-$actions[] = ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'];
-$actions[] = ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'];
-if ($isNew) {
-    $actions[] = ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'];
+    $actions[] = ['url' => '/book/import', 'label' => 'Import EPUB', 'icon' => 'book'];
+    $actions[] = ['url' => '/books', 'label' => 'My Books', 'icon' => 'library'];
+    $actions[] = ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'];
+    $actions[] = ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'];
 }
 
 ?>
@@ -110,49 +70,126 @@ if ($isNew) {
 <?php echo json_encode(['languageData' => $languageData]); ?>
 </script>
 
+<?php if (!$isNew) : ?>
 <h2 class="title is-4 is-flex is-align-items-center">
-    <?php echo $isNew ? "New" : "Edit"; ?> Text
+    Edit Text
     <a target="_blank" href="docs/info.html#howtotext" class="ml-2">
         <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
     </a>
 </h2>
-
 <?php echo PageLayoutHelper::buildActionCard($actions); ?>
+<?php endif; ?>
 
 <form class="validate" method="post" enctype="multipart/form-data"
       action="/texts<?php echo $isNew ? '' : '#rec' . $textIdTyped; ?>"
-      x-data="{ showAnnotation: <?php echo $isNew ? 'false' : 'true'; ?> }">
+      x-data="{
+          importMode: 'manual',
+          showAdvanced: <?php echo $isNew ? 'false' : 'true'; ?>
+      }">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
 
-    <div class="box">
-        <?php if ($isNew) : ?>
-        <!-- Import from File (FIRST for new texts) -->
-        <div class="field">
-            <label class="label">Import from File</label>
-            <div class="file has-name is-fullwidth">
-                <label class="file-label">
-                    <input class="file-input"
-                           type="file"
-                           name="importFile"
-                           id="importFile"
-                           accept=".srt,.vtt,.epub,.mp3,.mp4,.wav,.webm,.ogg,.m4a,.mkv,.flac"
-                           @change="$el.closest('.file').querySelector('.file-name').textContent =
-                               $el.files[0]?.name || 'No file selected'" />
-                    <span class="file-cta">
-                        <span class="file-icon">
-                            <?php echo IconHelper::render('file-up', ['alt' => 'Upload']); ?>
-                        </span>
-                        <span class="file-label">Choose file...</span>
-                    </span>
-                    <span class="file-name">No file selected</span>
-                </label>
+    <?php if ($isNew) : ?>
+    <!-- New Text Form -->
+    <div class="container mb-5" style="max-width: 500px;">
+        <!-- Language (at the top) -->
+        <div class="field mb-5">
+            <label class="label is-medium" for="TxLgID">Language</label>
+            <div class="control">
+                <div class="select is-fullwidth is-medium">
+                    <select name="TxLgID" id="TxLgID" class="notempty setfocus"
+                            data-action="change-language"
+                            required>
+                        <?php echo SelectOptionsBuilder::forLanguages($languagesTyped, $textLgId, "[Choose...]"); ?>
+                    </select>
+                </div>
             </div>
-            <p class="help">
-                Supported: EPUB books, SRT/VTT subtitles, audio/video
-                (MP3, MP4, WAV, WebM, OGG, M4A, FLAC, MKV - requires Whisper).
-            </p>
-            <p id="importFileStatus" class="help"></p>
+        </div>
+
+        <!-- Import Method Selection -->
+        <div class="field">
+            <label class="label is-medium">How do you want to add your text?</label>
+            <div class="control">
+                <div class="buttons is-centered" style="flex-wrap: wrap;">
+                    <button type="button"
+                            class="button"
+                            :class="importMode === 'file' ? 'is-primary is-selected' : ''"
+                            @click="importMode = 'file'">
+                        <span class="icon">
+                            <?php echo IconHelper::render('file-up', ['alt' => 'File']); ?>
+                        </span>
+                        <span>Import from file</span>
+                    </button>
+                    <button type="button"
+                            class="button"
+                            :class="importMode === 'manual' ? 'is-primary is-selected' : ''"
+                            @click="importMode = 'manual'">
+                        <span class="icon">
+                            <?php echo IconHelper::render('pencil', ['alt' => 'Manual']); ?>
+                        </span>
+                        <span>Paste text</span>
+                    </button>
+                    <button type="button"
+                            class="button"
+                            :class="importMode === 'url' ? 'is-primary is-selected' : ''"
+                            @click="importMode = 'url'">
+                        <span class="icon">
+                            <?php echo IconHelper::render('link', ['alt' => 'URL']); ?>
+                        </span>
+                        <span>Import from URL</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Import Section -->
+        <div x-show="importMode === 'file'" x-transition x-cloak class="mt-4">
+            <!-- Upload file from computer -->
+            <div class="field">
+                <label class="label">From your computer</label>
+                <div class="file has-name is-fullwidth">
+                    <label class="file-label">
+                        <input class="file-input"
+                               type="file"
+                               name="importFile"
+                               id="importFile"
+                               accept=".srt,.vtt,.epub,.txt,.mp3,.mp4,.wav,.webm,.ogg,.m4a,.mkv,.flac"
+                               @change="$el.closest('.file').querySelector('.file-name').textContent =
+                                   $el.files[0]?.name || 'No file selected'" />
+                        <span class="file-cta">
+                            <span class="file-icon">
+                                <?php echo IconHelper::render('file-up', ['alt' => 'Upload']); ?>
+                            </span>
+                            <span class="file-label">Browse...</span>
+                        </span>
+                        <span class="file-name">No file selected</span>
+                    </label>
+                </div>
+                <p class="help mt-2">
+                    Text files, EPUB, SRT/VTT subtitles, or audio/video for transcription
+                </p>
+                <p id="importFileStatus" class="help"></p>
+            </div>
+
+            <!-- Or select from server media folder -->
+            <div class="field mt-4">
+                <label class="label">Or from the server's media folder</label>
+                <div class="control" id="mediaselect">
+                    <?php
+                    $mediaPaths = (new MediaService())->getMediaPaths();
+                    $mediaJson = json_encode($mediaPaths);
+                    ?>
+                    <p class="help mb-2">Files in "../<?php echo htmlspecialchars($mediaPaths['base_path'] ?? '', ENT_QUOTES, 'UTF-8'); ?>/media" (mp3, mp4, ogg, wav, webm):</p>
+                    <p id="mediaSelectErrorMessage"></p>
+                    <?php echo IconHelper::render('loader-2', ['id' => 'mediaSelectLoadingImg', 'alt' => 'Loading...', 'class' => 'icon-spin']); ?>
+                    <select name="Dir" class="input" data-action="media-dir-select" data-target-field="TxAudioURI"></select>
+                    <span class="click" data-action="refresh-media-select">
+                        <?php echo IconHelper::render('refresh-cw', ['title' => 'Refresh', 'alt' => 'Refresh']); ?>
+                        Refresh
+                    </span>
+                    <script type="application/json" data-lwt-media-select-config><?php echo $mediaJson !== false ? $mediaJson : '{}'; ?></script>
+                </div>
+            </div>
 
             <!-- Whisper Transcription Options (shown when audio/video selected) -->
             <div id="whisperOptions" class="box mt-3" style="display: none;">
@@ -170,7 +207,6 @@ if ($isNew) {
                             </select>
                         </div>
                     </div>
-                    <p class="help">Leave as auto-detect or select to improve accuracy.</p>
                 </div>
 
                 <div class="field">
@@ -178,14 +214,13 @@ if ($isNew) {
                     <div class="control">
                         <div class="select is-small is-fullwidth">
                             <select id="whisperModel" name="whisperModel">
-                                <option value="base">Base (fast, good quality)</option>
+                                <option value="base">Base (fast)</option>
                                 <option value="small" selected>Small (balanced)</option>
-                                <option value="medium">Medium (better quality, slower)</option>
-                                <option value="large">Large (best quality, slowest)</option>
+                                <option value="medium">Medium (better quality)</option>
+                                <option value="large">Large (best quality)</option>
                             </select>
                         </div>
                     </div>
-                    <p class="help">Larger models are more accurate but take longer to process.</p>
                 </div>
 
                 <div class="field">
@@ -199,7 +234,6 @@ if ($isNew) {
                     </div>
                 </div>
 
-                <!-- Transcription Progress -->
                 <div id="whisperProgress" class="notification is-info is-light mt-3" style="display: none;">
                     <div class="level mb-2">
                         <div class="level-left">
@@ -215,7 +249,6 @@ if ($isNew) {
                 </div>
             </div>
 
-            <!-- Whisper Unavailable Message -->
             <div id="whisperUnavailable" class="notification is-warning is-light mt-3" style="display: none;">
                 <span class="icon-text">
                     <span class="icon">
@@ -225,8 +258,163 @@ if ($isNew) {
                 </span>
             </div>
         </div>
-        <?php endif; ?>
 
+        <!-- Manual Text Entry Section -->
+        <div x-show="importMode === 'manual'" x-transition class="mt-4">
+            <!-- Title -->
+            <div class="field">
+                <label class="label" for="TxTitle">Title</label>
+                <div class="control">
+                    <input type="text"
+                           class="input notempty checkoutsidebmp"
+                           data_info="Title"
+                           name="TxTitle"
+                           id="TxTitle"
+                           value="<?php echo \htmlspecialchars($textTitle, ENT_QUOTES, 'UTF-8'); ?>"
+                           maxlength="200"
+                           placeholder="Enter a title"
+                           required />
+                </div>
+            </div>
+
+            <!-- Text Content -->
+            <div class="field">
+                <label class="label" for="TxText">Text</label>
+                <div class="control">
+                    <textarea <?php echo $scrdirTyped; ?>
+                              name="TxText"
+                              id="TxText"
+                              class="textarea notempty checkoutsidebmp"
+                              data_info="Text"
+                              rows="10"
+                              placeholder="Paste your text here..."
+                              required><?php echo \htmlspecialchars($textContent, ENT_QUOTES, 'UTF-8'); ?></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- URL Import Section -->
+        <div x-show="importMode === 'url'" x-transition x-cloak class="mt-4">
+            <div class="field">
+                <label class="label">Video URL</label>
+                <div class="control">
+                    <input type="url"
+                           class="input"
+                           name="TxMediaURL"
+                           id="TxMediaURL"
+                           placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." />
+                </div>
+                <p class="help">YouTube, Vimeo, or Dailymotion URL. Captions will be imported if available.</p>
+            </div>
+
+            <?php if (YouTubeImport::isConfigured()) : ?>
+            <div class="field mt-3">
+                <label class="label is-small">Or enter YouTube Video ID directly</label>
+                <div class="control">
+                    <div class="field has-addons mb-0">
+                        <div class="control is-expanded">
+                            <input type="text"
+                                   class="input is-small"
+                                   id="ytVideoId"
+                                   placeholder="e.g., dQw4w9WgXcQ" />
+                        </div>
+                        <div class="control">
+                            <button type="button" class="button is-info is-small" data-action="fetch-youtube">
+                                Fetch Captions
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden"
+                           id="ytApiKey"
+                           value="<?php echo htmlspecialchars(YouTubeImport::getApiKey() ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+                </div>
+                <p id="ytDataStatus" class="help"></p>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Save Button -->
+        <div class="field mt-5">
+            <div class="control">
+                <button type="submit" name="op" value="Save and Open" class="button is-primary is-medium is-fullwidth">
+                    <span class="icon">
+                        <?php echo IconHelper::render('book-open', ['alt' => 'Save and Open']); ?>
+                    </span>
+                    <span>Save &amp; Start Reading</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Cancel link -->
+        <div class="has-text-centered mt-3">
+            <a href="/" class="has-text-grey">Cancel</a>
+        </div>
+    </div>
+
+    <!-- Additional Options (collapsible, for new texts) -->
+    <div class="container" style="max-width: 600px;">
+        <div class="box" x-data="{ open: showAdvanced }">
+            <header class="is-flex is-align-items-center is-justify-content-space-between is-clickable"
+                    @click="open = !open">
+                <h4 class="title is-6 mb-0 is-flex is-align-items-center">
+                    <span class="icon mr-2">
+                        <?php echo IconHelper::render('settings', ['alt' => 'Settings']); ?>
+                    </span>
+                    Additional Options
+                </h4>
+                <span class="icon">
+                    <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
+                </span>
+            </header>
+
+            <div x-show="open" x-transition x-cloak class="mt-4">
+                <!-- Source URI -->
+                <div class="field">
+                    <label class="label" for="TxSourceURI">Source URI</label>
+                    <div class="control">
+                        <input type="url"
+                               class="input checkurl checkoutsidebmp"
+                               data_info="Source URI"
+                               name="TxSourceURI"
+                               id="TxSourceURI"
+                               value="<?php echo \htmlspecialchars($textSource, ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="1000"
+                               placeholder="https://example.com/article" />
+                    </div>
+                    <p class="help">Link to the original source of this text.</p>
+                </div>
+
+                <!-- Tags -->
+                <div class="field">
+                    <label class="label">Tags</label>
+                    <div class="control">
+                        <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getTextTagsHtml($textIdTyped); ?>
+                    </div>
+                    <p class="help">Organize texts with tags for easy filtering.</p>
+                </div>
+
+                <!-- Media URI (for manual entry) -->
+                <div class="field">
+                    <label class="label" for="TxAudioURI">Media URI</label>
+                    <div class="control">
+                        <input type="text"
+                               class="input checkoutsidebmp"
+                               data_info="Audio-URI"
+                               name="TxAudioURI"
+                               id="TxAudioURI"
+                               maxlength="2048"
+                               value="<?php echo \htmlspecialchars($textMediaUri, ENT_QUOTES, 'UTF-8'); ?>"
+                               placeholder="media/audio.mp3 or video URL" />
+                    </div>
+                    <p class="help">Audio or video file path or URL to accompany the text.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <?php else : ?>
+    <!-- Edit Mode: Show full form -->
+    <div class="box">
         <!-- Language -->
         <div class="field">
             <label class="label" for="TxLgID">
@@ -239,13 +427,11 @@ if ($isNew) {
                 <div class="select is-fullwidth">
                     <select name="TxLgID" id="TxLgID" class="notempty setfocus"
                             data-action="change-language"
-                            title="Select the language of your text"
                             required>
                         <?php echo SelectOptionsBuilder::forLanguages($languagesTyped, $textLgId, "[Choose...]"); ?>
                     </select>
                 </div>
             </div>
-            <p class="help">The language determines how the text will be parsed into words and sentences.</p>
         </div>
 
         <!-- Title -->
@@ -264,8 +450,6 @@ if ($isNew) {
                        id="TxTitle"
                        value="<?php echo \htmlspecialchars($textTitle, ENT_QUOTES, 'UTF-8'); ?>"
                        maxlength="200"
-                       placeholder="Enter a descriptive title for your text"
-                       title="A short, memorable title to identify this text"
                        required />
             </div>
         </div>
@@ -285,17 +469,11 @@ if ($isNew) {
                           class="textarea notempty checkoutsidebmp"
                           data_info="Text"
                           rows="15"
-                          placeholder="Paste or type your text here..."
-                          title="The text you want to study"
                           required><?php echo \htmlspecialchars($textContent, ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
-            <p class="help">
-                Long texts (over 60KB) will be automatically split into chapters and saved as a book.
-            </p>
         </div>
 
         <!-- Annotated Text (only for existing texts) -->
-        <?php if (!$isNew) : ?>
         <div class="field">
             <label class="label">Annotated Text</label>
             <div class="control">
@@ -327,22 +505,10 @@ if ($isNew) {
                         </span>
                         <span>None</span>
                     </span>
-                    <div class="mt-2">
-                        <button type="button"
-                                class="button is-small is-outlined"
-                                data-action="navigate"
-                                data-url="print_impr_text.php?edit=1&amp;text=<?php echo $textIdTyped; ?>">
-                            <span class="icon is-small">
-                                <?php echo IconHelper::render('plus', ['alt' => 'Create']); ?>
-                            </span>
-                            <span>Create/Print...</span>
-                        </button>
-                    </div>
                 </div>
                 <?php endif; ?>
             </div>
         </div>
-        <?php endif; ?>
 
         <!-- Source URI -->
         <div class="field">
@@ -355,19 +521,16 @@ if ($isNew) {
                        id="TxSourceURI"
                        value="<?php echo \htmlspecialchars($textSource, ENT_QUOTES, 'UTF-8'); ?>"
                        maxlength="1000"
-                       placeholder="https://example.com/article"
-                       title="Link to the original source of this text" />
+                       placeholder="https://example.com/article" />
             </div>
-            <p class="help">Optional. The original webpage or document where this text came from.</p>
         </div>
 
         <!-- Tags -->
         <div class="field">
-            <label class="label" title="Organize texts with tags for easy filtering">Tags</label>
+            <label class="label">Tags</label>
             <div class="control">
                 <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getTextTagsHtml($textIdTyped); ?>
             </div>
-            <p class="help">Optional. Add tags to categorize and filter your texts.</p>
         </div>
 
         <!-- Media URI -->
@@ -381,56 +544,21 @@ if ($isNew) {
                        id="TxAudioURI"
                        maxlength="2048"
                        value="<?php echo \htmlspecialchars($textMediaUri, ENT_QUOTES, 'UTF-8'); ?>"
-                       placeholder="media/audio.mp3 or https://example.com/video.mp4"
-                       title="Audio or video file to play while reading" />
+                       placeholder="media/audio.mp3" />
             </div>
-            <p class="help">
-                Optional. Audio or video file to accompany the text
-                (YouTube, Dailymotion, Vimeo URLs also supported).
-            </p>
             <div class="mt-2" id="mediaselect">
                 <?php echo (new MediaService())->getMediaPathSelector('TxAudioURI'); ?>
             </div>
         </div>
-
-        <?php if ($isNew && YouTubeImport::isConfigured()) : ?>
-        <!-- YouTube Import -->
-        <div class="field">
-            <label class="label" for="ytVideoId">YouTube Video</label>
-            <div class="control">
-                <div class="field has-addons mb-0">
-                    <div class="control is-expanded">
-                        <input type="text"
-                               class="input"
-                               id="ytVideoId"
-                               placeholder="e.g., dQw4w9WgXcQ"
-                               title="The video ID from a YouTube URL" />
-                    </div>
-                    <div class="control">
-                        <button type="button" class="button is-info" data-action="fetch-youtube">
-                            Fetch from YouTube
-                        </button>
-                    </div>
-                </div>
-                <input type="hidden"
-                       id="ytApiKey"
-                       value="<?php
-                           echo htmlspecialchars(YouTubeImport::getApiKey() ?? '', ENT_QUOTES, 'UTF-8');
-                        ?>" />
-            </div>
-            <p class="help">Optional. Enter a YouTube video ID to import its captions as text.</p>
-            <p id="ytDataStatus" class="help"></p>
-        </div>
-        <?php endif; ?>
     </div>
 
-    <!-- Form Actions -->
+    <!-- Form Actions (Edit mode) -->
     <div class="field is-grouped is-grouped-right">
         <div class="control">
             <button type="button"
                     class="button is-light"
                     data-action="cancel-form"
-                    data-url="/texts<?php echo $isNew ? '' : '#rec' . $textIdTyped; ?>">
+                    data-url="/texts#rec<?php echo $textIdTyped; ?>">
                 Cancel
             </button>
         </div>
@@ -443,23 +571,21 @@ if ($isNew) {
             </button>
         </div>
         <div class="control">
-            <button type="submit" name="op" value="<?php echo $isNew ? 'Save' : 'Change'; ?>" class="button is-primary">
+            <button type="submit" name="op" value="Change" class="button is-primary">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                 </span>
-                <span><?php echo $isNew ? 'Save' : 'Save Changes'; ?></span>
+                <span>Save Changes</span>
             </button>
         </div>
         <div class="control">
-            <button type="submit"
-                    name="op"
-                    value="<?php echo $isNew ? 'Save' : 'Change'; ?> and Open"
-                    class="button is-success">
+            <button type="submit" name="op" value="Change and Open" class="button is-success">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('book-open', ['alt' => 'Save and Open']); ?>
                 </span>
-                <span><?php echo $isNew ? 'Save' : 'Save'; ?> &amp; Open</span>
+                <span>Save &amp; Open</span>
             </button>
         </div>
     </div>
+    <?php endif; ?>
 </form>

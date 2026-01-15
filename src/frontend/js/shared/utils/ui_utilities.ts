@@ -266,8 +266,12 @@ export function prepareMainAreas(): void {
     form.setAttribute('autocomplete', 'off');
   });
 
-  // Handle file inputs
+  // Handle file inputs (skip Bulma file components which have their own styling)
   document.querySelectorAll<HTMLInputElement>('input[type="file"]').forEach((fileInput) => {
+    // Skip if already inside a Bulma file component
+    if (fileInput.classList.contains('file-input') || fileInput.closest('.file')) {
+      return;
+    }
     if (fileInput.offsetParent === null) { // Not visible
       const button = document.createElement('button');
       button.className = 'button-file';
