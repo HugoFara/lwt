@@ -193,8 +193,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                name="LgDict1URI"
                                value="<?php echo htmlspecialchars($langDict1Uri, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
-                               data_info="Dictionary 1 URI"
-                               required />
+                               data_info="Dictionary 1 URI" />
                     </div>
                     <label class="checkbox mt-2">
                         <input type="checkbox" name="LgDict1PopUp" id="LgDict1PopUp" value="1"
@@ -405,8 +404,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                name="LgRegexpSplitSentences"
                                value="<?php echo htmlspecialchars($langRegexpSplitSentences, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="500"
-                               data_info="RegExp Split Sentences"
-                               :required="parserType === 'regex'" />
+                               data_info="RegExp Split Sentences" />
                     </div>
                 </div>
 
@@ -445,8 +443,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                data_info="RegExp Word Characters"
                                name="LgRegexpWordCharacters"
                                value="<?php echo htmlspecialchars($langRegexpWordCharacters, ENT_QUOTES, 'UTF-8'); ?>"
-                               maxlength="500"
-                               :required="parserType === 'regex'" />
+                               maxlength="500" />
                     </div>
                 </div>
 

@@ -244,11 +244,16 @@ export function initSearchableSelectAlpine(): void {
       },
 
       async triggerChange(this: SearchableSelectComponent): Promise<void> {
-        // Dispatch change event on hidden input for other listeners
-        const hiddenInput = document.getElementById(this.id) as HTMLInputElement;
-        if (hiddenInput) {
-          hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-        }
+        // Wait for Alpine to update the DOM before dispatching the change event
+        // This ensures the hidden input's value is updated before listeners read it
+        this.$nextTick(() => {
+          const hiddenInput = document.getElementById(this.id) as HTMLInputElement;
+          if (hiddenInput) {
+            // Ensure the value is set (in case Alpine binding hasn't applied yet)
+            hiddenInput.value = this.selectedValue;
+            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
 
         // Handle data-action behaviors
         if (this.dataAction === 'set-lang') {
