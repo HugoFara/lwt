@@ -7,6 +7,7 @@
  * - $currentNativeLanguage: string current native language setting
  * - $languageOptions: string HTML options for language select
  * - $languageDefsJson: string JSON-encoded language definitions
+ * - $languagePresetsArray: array language presets for searchable select
  *
  * PHP version 8.1
  *
@@ -23,16 +24,20 @@ declare(strict_types=1);
 namespace Lwt\Modules\Language\Views;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\UI\Helpers\SearchableSelectHelper;
 
 // Type assertions for view variables
 assert(is_string($languageDefsJson));
 assert(is_string($languageOptions));
 assert(is_string($languageOptionsEmpty));
+assert(is_array($languagePresetsArray));
 
 /**
  * @var string $languageDefsJson
  * @var string $languageOptions
  * @var string $languageOptionsEmpty
+ * @var array<int, array{id: int|string, name: string}> $languagePresetsArray
+ * @var string $currentNativeLanguage
  */
 ?>
 <script type="application/json" id="language-wizard-config">
@@ -47,11 +52,17 @@ assert(is_string($languageOptionsEmpty));
                 The language you want to study
             </label>
             <div class="control">
-                <div class="select is-medium is-fullwidth">
-                    <select name="l2" id="l2">
-                        <?php echo $languageOptionsEmpty; ?>
-                    </select>
-                </div>
+                <?php echo SearchableSelectHelper::forLanguages(
+                    $languagePresetsArray,
+                    '',
+                    [
+                        'name' => 'l2',
+                        'id' => 'l2',
+                        'placeholder' => '[Choose...]',
+                        'required' => false,
+                        'size' => 'medium'
+                    ]
+                ); ?>
             </div>
         </div>
 
@@ -61,11 +72,17 @@ assert(is_string($languageOptionsEmpty));
                 Your native language
             </label>
             <div class="control">
-                <div class="select is-medium is-fullwidth">
-                    <select name="l1" id="l1">
-                        <?php echo $languageOptions; ?>
-                    </select>
-                </div>
+                <?php echo SearchableSelectHelper::forLanguages(
+                    $languagePresetsArray,
+                    $currentNativeLanguage,
+                    [
+                        'name' => 'l1',
+                        'id' => 'l1',
+                        'placeholder' => '[Choose...]',
+                        'required' => false,
+                        'size' => 'medium'
+                    ]
+                ); ?>
             </div>
         </div>
     </div>

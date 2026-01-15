@@ -26,6 +26,7 @@ use Lwt\Core\ApplicationInfo;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\SearchableSelectHelper;
 
 /**
  * When on a WordPress server, make a logout button.
@@ -203,19 +204,23 @@ if ($currentTextInfo !== null && $currenttext !== null) {
         <div class="field mb-4">
             <label class="label" for="filterlang">Language</label>
             <div class="control">
-                <div class="select is-medium">
-                    <select
-                        id="filterlang"
-                        data-action="set-lang"
-                        data-ajax="true"
-                        data-redirect="<?php echo $base; ?>/"
-                    >
-                        <?php
-                        /** @var list<array{id: int, name: string}> $languages */
-                        echo SelectOptionsBuilder::forLanguages($languages, $currentlang, '[Select...]');
-                        ?>
-                    </select>
-                </div>
+                <?php
+                /** @var list<array{id: int, name: string}> $languages */
+                echo SearchableSelectHelper::forLanguages(
+                    $languages,
+                    $currentlang,
+                    [
+                        'name' => 'filterlang',
+                        'id' => 'filterlang',
+                        'placeholder' => '[Select...]',
+                        'required' => false,
+                        'dataAction' => 'set-lang',
+                        'dataAjax' => true,
+                        'dataRedirect' => $base . '/',
+                        'size' => 'medium'
+                    ]
+                );
+                ?>
             </div>
         </div>
 

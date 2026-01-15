@@ -2711,3 +2711,167 @@ Settings Page - Collapsible Sections
     display: none;
   }
 }
+
+/**************************************************************
+Searchable Select Component (Alpine.js)
+***************************************************************/
+
+.searchable-select {
+  position: relative;
+  width: 100%;
+}
+
+.searchable-select__trigger {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  background-color: white;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  padding: calc(0.5em - 1px) calc(0.75em - 1px);
+  cursor: pointer;
+  min-height: 2.5em;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font: inherit;
+}
+
+.searchable-select__trigger:hover {
+  border-color: #b5b5b5;
+}
+
+.searchable-select__trigger:focus {
+  outline: none;
+  border-color: #485fc7;
+  box-shadow: 0 0 0 0.125em rgba(72, 95, 199, 0.25);
+}
+
+.searchable-select__trigger:focus-visible {
+  outline: 2px solid #485fc7;
+  outline-offset: 2px;
+}
+
+.searchable-select__trigger .icon {
+  flex-shrink: 0;
+  margin-left: 0.5em;
+}
+
+.searchable-select__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  margin-top: 4px;
+  background-color: white;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 300px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.searchable-select__search {
+  padding: 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.searchable-select__search .input {
+  width: 100%;
+}
+
+.searchable-select__options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  max-height: 240px;
+}
+
+.searchable-select__options li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.searchable-select__options li:hover,
+.searchable-select__options li.is-highlighted {
+  background-color: #f5f5f5;
+}
+
+.searchable-select__options li.is-selected {
+  background-color: #eff5fb;
+  color: #485fc7;
+}
+
+.searchable-select__options li.is-selected.is-highlighted {
+  background-color: #e8f0fc;
+}
+
+.searchable-select__empty {
+  padding: 0.75rem;
+  color: #7a7a7a;
+  text-align: center;
+  font-style: italic;
+  cursor: default;
+}
+
+.searchable-select__empty:hover {
+  background-color: transparent;
+}
+
+/* Size variants (Bulma compatible) */
+.searchable-select.is-medium .searchable-select__trigger {
+  font-size: 1.25rem;
+  min-height: 3em;
+}
+
+.searchable-select.is-small .searchable-select__trigger {
+  font-size: 0.875rem;
+  min-height: 2em;
+}
+
+/* Dropdown transition animations */
+.dropdown-enter {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.dropdown-enter-start {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.dropdown-enter-end {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown-leave {
+  transition: opacity 0.1s ease;
+}
+
+.dropdown-leave-start {
+  opacity: 1;
+}
+
+.dropdown-leave-end {
+  opacity: 0;
+}
+
+/* Mobile responsive */
+@media screen and (max-width: 768px) {
+  .searchable-select__dropdown {
+    max-height: 250px;
+  }
+
+  .searchable-select__options {
+    max-height: 190px;
+  }
+}

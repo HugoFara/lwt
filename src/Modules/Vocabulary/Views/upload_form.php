@@ -25,6 +25,7 @@ namespace Lwt\Views\Word;
 
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\SearchableSelectHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
@@ -84,11 +85,16 @@ echo PageLayoutHelper::buildActionCard($actions);
             <div class="field-body">
                 <div class="field has-addons">
                     <div class="control is-expanded">
-                        <div class="select is-fullwidth">
-                            <select name="LgID" class="notempty setfocus" required>
-                                <?php echo SelectOptionsBuilder::forLanguages($languages, $langToUse, '[Choose...]'); ?>
-                            </select>
-                        </div>
+                        <?php echo SearchableSelectHelper::forLanguages(
+                            $languages,
+                            $langToUse,
+                            [
+                                'name' => 'LgID',
+                                'id' => 'LgID',
+                                'placeholder' => '[Choose...]',
+                                'required' => true
+                            ]
+                        ); ?>
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger mt-2" title="Required">

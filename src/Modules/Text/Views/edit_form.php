@@ -36,6 +36,7 @@ declare(strict_types=1);
 namespace Lwt\Views\Text;
 
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
+use Lwt\Shared\UI\Helpers\SearchableSelectHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Modules\Admin\Application\Services\MediaService;
@@ -96,13 +97,18 @@ if (!$isNew) {
         <div class="field mb-5">
             <label class="label is-medium" for="TxLgID">Language</label>
             <div class="control">
-                <div class="select is-fullwidth is-medium">
-                    <select name="TxLgID" id="TxLgID" class="notempty setfocus"
-                            data-action="change-language"
-                            required>
-                        <?php echo SelectOptionsBuilder::forLanguages($languagesTyped, $textLgId, "[Choose...]"); ?>
-                    </select>
-                </div>
+                <?php echo SearchableSelectHelper::forLanguages(
+                    $languagesTyped,
+                    $textLgId,
+                    [
+                        'name' => 'TxLgID',
+                        'id' => 'TxLgID',
+                        'placeholder' => '[Choose...]',
+                        'required' => true,
+                        'dataAction' => 'change-language',
+                        'size' => 'medium'
+                    ]
+                ); ?>
             </div>
         </div>
 
@@ -424,13 +430,17 @@ if (!$isNew) {
                 </span>
             </label>
             <div class="control">
-                <div class="select is-fullwidth">
-                    <select name="TxLgID" id="TxLgID" class="notempty setfocus"
-                            data-action="change-language"
-                            required>
-                        <?php echo SelectOptionsBuilder::forLanguages($languagesTyped, $textLgId, "[Choose...]"); ?>
-                    </select>
-                </div>
+                <?php echo SearchableSelectHelper::forLanguages(
+                    $languagesTyped,
+                    $textLgId,
+                    [
+                        'name' => 'TxLgID',
+                        'id' => 'TxLgID',
+                        'placeholder' => '[Choose...]',
+                        'required' => true,
+                        'dataAction' => 'change-language'
+                    ]
+                ); ?>
             </div>
         </div>
 

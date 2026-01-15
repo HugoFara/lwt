@@ -167,6 +167,7 @@ class LanguageController extends BaseController
         $languageOptions = $this->getWizardSelectOptions($currentNativeLanguage);
         $languageOptionsEmpty = $this->getWizardSelectOptions('');
         $languageDefsJson = json_encode(LanguagePresets::getAll());
+        $languagePresetsArray = $this->getLanguagePresetsArray();
 
         ?>
         <h2>
@@ -286,5 +287,20 @@ class LanguageController extends BaseController
                 FormHelper::getSelected($selected, $item) . '>' . $item . '</option>';
         }
         return $r;
+    }
+
+    /**
+     * Get language presets as array for searchable select.
+     *
+     * @return array<int, array{id: int|string, name: string}>
+     */
+    private function getLanguagePresetsArray(): array
+    {
+        $presets = [];
+        $keys = array_keys(LanguagePresets::getAll());
+        foreach ($keys as $item) {
+            $presets[] = ['id' => $item, 'name' => $item];
+        }
+        return $presets;
     }
 }
