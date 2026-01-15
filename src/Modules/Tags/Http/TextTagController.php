@@ -57,6 +57,29 @@ class TextTagController extends AbstractCrudController
     }
 
     /**
+     * Show new text tag form.
+     *
+     * Route: GET /tags/text/new
+     *
+     * @param array $params Route parameters
+     *
+     * @return void
+     */
+    public function new(array $params): void
+    {
+        $this->render($this->pageTitle, $this->showMenu);
+
+        // Handle form submission
+        if ($this->param('op') === 'Save') {
+            $message = $this->handleCreate();
+            $this->message($message, false);
+        }
+
+        $this->renderCreateForm();
+        $this->endRender();
+    }
+
+    /**
      * Main index action.
      *
      * @param array $params Route parameters

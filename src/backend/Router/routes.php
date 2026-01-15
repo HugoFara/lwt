@@ -69,7 +69,11 @@ function registerRoutes(Router $router): void
     // New text form (RESTful route)
     $router->get('/texts/new', 'Lwt\\Modules\\Text\\Http\\TextController@new', AUTH_MIDDLEWARE);
 
-    // Edit texts
+    // Edit text form (RESTful route): /texts/123/edit
+    $router->get('/texts/{id:int}/edit', 'Lwt\\Modules\\Text\\Http\\TextController@editSingle', AUTH_MIDDLEWARE);
+    $router->post('/texts/{id:int}/edit', 'Lwt\\Modules\\Text\\Http\\TextController@editSingle', AUTH_MIDDLEWARE);
+
+    // Texts list and legacy edit routes
     $router->registerWithMiddleware('/text/edit', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware('/texts', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
 
@@ -126,7 +130,11 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
-    // Edit words (list) - Alpine.js SPA version (TermDisplayController)
+    // Edit single word form (RESTful route): /words/123/edit
+    $router->get('/words/{id:int}/edit', 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById', AUTH_MIDDLEWARE);
+    $router->post('/words/{id:int}/edit', 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById', AUTH_MIDDLEWARE);
+
+    // Words list - Alpine.js SPA version (TermDisplayController)
     $router->registerWithMiddleware(
         '/words/edit',
         'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController@listEditAlpine',
@@ -290,7 +298,25 @@ function registerRoutes(Router $router): void
     // New language form (RESTful route)
     $router->get('/languages/new', 'Lwt\\Modules\\Language\\Http\\LanguageController@new', AUTH_MIDDLEWARE);
 
-    // Edit languages (Language module)
+    // Edit language form (RESTful route): /languages/123/edit
+    $router->get('/languages/{id:int}/edit', 'Lwt\\Modules\\Language\\Http\\LanguageController@edit', AUTH_MIDDLEWARE);
+    $router->post('/languages/{id:int}/edit', 'Lwt\\Modules\\Language\\Http\\LanguageController@edit', AUTH_MIDDLEWARE);
+
+    // Delete language (RESTful route): DELETE /languages/123
+    $router->delete(
+        '/languages/{id:int}',
+        'Lwt\\Modules\\Language\\Http\\LanguageController@delete',
+        AUTH_MIDDLEWARE
+    );
+
+    // Refresh (reparse) language texts (RESTful route): POST /languages/123/refresh
+    $router->post(
+        '/languages/{id:int}/refresh',
+        'Lwt\\Modules\\Language\\Http\\LanguageController@refresh',
+        AUTH_MIDDLEWARE
+    );
+
+    // Languages list (Language module)
     $router->registerWithMiddleware(
         '/languages',
         'Lwt\\Modules\\Language\\Http\\LanguageController@index',
@@ -300,9 +326,11 @@ function registerRoutes(Router $router): void
     // ==================== TAG ROUTES (PROTECTED) ====================
 
     // Term tags (Tags module)
+    $router->get('/tags/new', 'Lwt\\Modules\\Tags\\Http\\TermTagController@new', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware('/tags', 'Lwt\\Modules\\Tags\\Http\\TermTagController@index', AUTH_MIDDLEWARE);
 
     // Text tags (Tags module)
+    $router->get('/tags/text/new', 'Lwt\\Modules\\Tags\\Http\\TextTagController@new', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware('/tags/text', 'Lwt\\Modules\\Tags\\Http\\TextTagController@index', AUTH_MIDDLEWARE);
 
     // ==================== FEED ROUTES (PROTECTED) ====================

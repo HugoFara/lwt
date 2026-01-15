@@ -66,7 +66,7 @@ PageLayoutHelper::renderMessage($message, false);
 
 echo PageLayoutHelper::buildActionCard([
     [
-        'url' => $baseUrl . '?new=1',
+        'url' => $baseUrl . '/new',
         'label' => 'New ' . $tagTypeLabel . ' Tag',
         'icon' => 'circle-plus',
         'class' => 'is-primary'

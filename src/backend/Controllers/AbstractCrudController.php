@@ -31,7 +31,6 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  * ## Request Parameter Conventions
  *
  * This controller expects these standard request parameters:
- * - `new=1` - Display the create form
  * - `chg=ID` - Display the edit form for record ID
  * - `del=ID` - Delete record ID
  * - `op=Save` - Create a new record (from form submission)
@@ -39,6 +38,8 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  * - `marked[]` - Array of IDs for bulk operations
  * - `markaction` - Bulk action to perform on marked items
  * - `allaction` - Action to perform on all filtered items
+ *
+ * Note: Create forms should use dedicated /new routes (e.g., /tags/new)
  *
  * ## Usage
  *
@@ -194,9 +195,7 @@ abstract class AbstractCrudController extends BaseController
      */
     protected function dispatchView(string $message): void
     {
-        if ($this->hasParam('new')) {
-            $this->renderCreateForm();
-        } elseif ($this->hasParam('chg')) {
+        if ($this->hasParam('chg')) {
             $id = $this->paramInt('chg', 0) ?? 0;
             $this->renderEditForm($id);
         } else {
