@@ -116,7 +116,7 @@ echo PageLayoutHelper::buildActionCard([
     </p>
     <p class="help">
         You can change the mode in the
-        <a href="/languages?edit=<?php echo $langId; ?>#local-dict-mode">language settings</a>.
+        <a href="/languages/<?php echo $langId; ?>/edit#local-dict-mode">language settings</a>.
     </p>
 </div>
 
