@@ -148,20 +148,20 @@ class MediaServiceTest extends TestCase
     {
         $tempDir = sys_get_temp_dir() . '/lwt_test_media_' . uniqid();
         mkdir($tempDir);
-        touch($tempDir . '/document.txt');
         touch($tempDir . '/image.jpg');
+        touch($tempDir . '/document.pdf');
         touch($tempDir . '/audio.mp3');
 
         try {
             $result = $this->service->searchMediaPaths($tempDir);
 
-            // Should include mp3 but not txt or jpg
+            // Should include mp3 but not jpg or pdf
             $this->assertContains($tempDir . '/audio.mp3', $result['paths']);
-            $this->assertNotContains($tempDir . '/document.txt', $result['paths']);
             $this->assertNotContains($tempDir . '/image.jpg', $result['paths']);
+            $this->assertNotContains($tempDir . '/document.pdf', $result['paths']);
         } finally {
-            @unlink($tempDir . '/document.txt');
             @unlink($tempDir . '/image.jpg');
+            @unlink($tempDir . '/document.pdf');
             @unlink($tempDir . '/audio.mp3');
             @rmdir($tempDir);
         }
@@ -421,8 +421,7 @@ class MediaServiceTest extends TestCase
         $this->assertStringContainsString('YouTube', $result);
         $this->assertStringContainsString('Dailymotion', $result);
         $this->assertStringContainsString('Vimeo', $result);
-        $this->assertStringContainsString('mp3', $result);
-        $this->assertStringContainsString('mp4', $result);
+        $this->assertStringContainsString('media', $result);
     }
 
     // =========================================================================

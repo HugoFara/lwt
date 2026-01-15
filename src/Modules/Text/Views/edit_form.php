@@ -158,6 +158,10 @@ if (!$isNew) {
 
         <!-- File Import Section -->
         <div x-show="importMode === 'file'" x-transition x-cloak class="mt-4">
+            <p class="help mb-4">
+                Text files, EPUB, SRT/VTT subtitles, or audio/video for transcription
+            </p>
+
             <!-- Upload file from computer -->
             <div class="field">
                 <label class="label">From your computer</label>
@@ -179,9 +183,6 @@ if (!$isNew) {
                         <span class="file-name">No file selected</span>
                     </label>
                 </div>
-                <p class="help mt-2">
-                    Text files, EPUB, SRT/VTT subtitles, or audio/video for transcription
-                </p>
                 <p id="importFileStatus" class="help"></p>
             </div>
 
@@ -193,7 +194,7 @@ if (!$isNew) {
                     $mediaPaths = (new MediaService())->getMediaPaths();
                     $mediaJson = json_encode($mediaPaths);
                     ?>
-                    <p class="help mb-2">Files in "../<?php echo htmlspecialchars($mediaPaths['base_path'] ?? '', ENT_QUOTES, 'UTF-8'); ?>/media" (mp3, mp4, ogg, wav, webm):</p>
+                    <p class="help mb-2">Files in "../<?php echo htmlspecialchars($mediaPaths['base_path'] ?? '', ENT_QUOTES, 'UTF-8'); ?>/media":</p>
                     <p id="mediaSelectErrorMessage"></p>
                     <?php echo IconHelper::render('loader-2', ['id' => 'mediaSelectLoadingImg', 'alt' => 'Loading...', 'class' => 'icon-spin']); ?>
                     <select name="Dir" class="input" data-action="media-dir-select" data-target-field="TxAudioURI"></select>

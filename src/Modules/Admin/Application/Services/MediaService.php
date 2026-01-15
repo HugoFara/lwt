@@ -40,18 +40,23 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 class MediaService
 {
     /**
-     * Supported media file formats.
+     * Supported file formats for import.
      *
      * @var string[]
      */
-    private const SUPPORTED_FORMATS = ['mp3', 'mp4', 'ogg', 'wav', 'webm'];
+    private const SUPPORTED_FORMATS = [
+        // Audio/video
+        'mp3', 'mp4', 'ogg', 'wav', 'webm', 'm4a', 'mkv', 'flac',
+        // Text/subtitles
+        'txt', 'srt', 'vtt', 'epub'
+    ];
 
     /**
      * Audio-only formats.
      *
      * @var string[]
      */
-    private const AUDIO_FORMATS = ['.mp3', '.wav', '.ogg'];
+    private const AUDIO_FORMATS = ['.mp3', '.wav', '.ogg', '.m4a', '.flac'];
 
     // =========================================================================
     // Media File Discovery
@@ -170,9 +175,7 @@ class MediaService
         $media = $this->getMediaPaths();
         $mediaJson = json_encode($media);
         $r = '<p>
-            YouTube, Dailymotion, Vimeo or choose a file in "../' . $media["base_path"] . '/media"
-            <br />
-            (only mp3, mp4, ogg, wav, webm files shown):
+            YouTube, Dailymotion, Vimeo or choose a file in "../' . $media["base_path"] . '/media":
         </p>
         <p id="mediaSelectErrorMessage"></p>
         ' .
