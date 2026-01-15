@@ -175,6 +175,153 @@ describe('Languages Management', () => {
       // It may be disabled initially via Alpine.js :disabled binding
       cy.get('.modal-card-foot').should('contain', 'Create Language');
     });
+
+    it('should apply wizard preset values when creating a language', () => {
+      // Wait for definitions to load
+      cy.wait(1000);
+
+      cy.get('.action-card a').contains('Quick Setup Wizard').click();
+      cy.get('.modal.is-active').should('exist');
+
+      // Select L1 (native language) - English (first dropdown)
+      cy.get('.modal.is-active select').eq(0).select('English');
+
+      // Select L2 (study language) - Latvian (second dropdown)
+      cy.get('.modal.is-active select').eq(1).select('Latvian');
+
+      // Click Create Language button
+      cy.get('.modal-card-foot button').contains('Create Language').click();
+
+      // Should navigate to the language form with wizard=1 param
+      cy.url().should('include', '/languages/new');
+      cy.url().should('include', 'wizard=1');
+
+      // Wait for preset to be applied
+      cy.wait(500);
+
+      // Verify preset values are applied
+      cy.get('input[name="LgName"]').should('have.value', 'Latvian');
+
+      // Expand Advanced Settings to check parsing settings
+      cy.contains('Advanced Settings').click();
+
+      // For Latvian: rightToLeft should be false (unchecked)
+      cy.get('input[name="LgRightToLeft"]').should('not.be.checked');
+
+      // For Latvian: word characters regex should be set
+      cy.get('input[name="LgRegexpWordCharacters"]').invoke('val').should('not.be.empty');
+
+      // For Latvian: sentence split regex should be set
+      cy.get('input[name="LgRegexpSplitSentences"]').invoke('val').should('not.be.empty');
+
+      // Dictionary should be populated with Glosbe URL
+      cy.get('input[name="LgDict1URI"]').invoke('val').should('include', 'glosbe.com');
+    });
+
+    it('should create language with correct settings from wizard', () => {
+      // Wait for definitions to load
+      cy.wait(1000);
+
+      cy.get('.action-card a').contains('Quick Setup Wizard').click();
+      cy.get('.modal.is-active').should('exist');
+
+      // Select L1 (native language) - English (first dropdown)
+      cy.get('.modal.is-active select').eq(0).select('English');
+
+      // Use Danish - less commonly used in tests
+      const baseLangName = 'Danish';
+
+      // Select L2 (study language) - Danish (second dropdown) to avoid existing languages
+      cy.get('.modal.is-active select').eq(1).select(baseLangName);
+
+      // Click Create Language button
+      cy.get('.modal-card-foot button').contains('Create Language').click();
+
+      // Wait for navigation
+      cy.url().should('include', '/languages/new');
+      cy.url().should('include', 'wizard=1');
+
+      // Wait for preset to be applied
+      cy.wait(500);
+
+      // Make the language name unique by adding a timestamp
+      const uniqueLangName = `${baseLangName} Test ${Date.now()}`;
+      cy.get('input[name="LgName"]').clear().type(uniqueLangName);
+
+      // Submit the form
+      cy.get('button[type="submit"]').click();
+
+      // Should redirect to texts/new after successful creation
+      cy.url().should('include', '/texts/new');
+
+      // Now verify the language was created with correct settings
+      // Navigate to languages list
+      cy.visit('/languages');
+      cy.wait(1000);
+
+      // Find the language card and go to edit
+      cy.get('.language-card').contains(uniqueLangName).closest('.language-card').within(() => {
+        cy.get('a[href*="/edit"]').click();
+      });
+
+      // Verify the settings were saved correctly
+      cy.get('input[name="LgName"]').should('have.value', uniqueLangName);
+
+      // Expand Advanced Settings
+      cy.contains('Advanced Settings').click();
+
+      // Danish should NOT be right-to-left
+      cy.get('input[name="LgRightToLeft"]').should('not.be.checked');
+
+      // Word characters should be set (not empty)
+      cy.get('input[name="LgRegexpWordCharacters"]').invoke('val').should('not.be.empty');
+    });
+  });
+
+  describe('Embedded Wizard', () => {
+    it('should apply settings when selecting language from embedded wizard', () => {
+      cy.visit('/languages/new');
+
+      // Wait for page to fully load
+      cy.wait(500);
+
+      // The embedded wizard uses SearchableSelectHelper which renders as an Alpine.js component
+      // Structure: searchable-select > hidden input#l2 + searchable-select__trigger button + dropdown
+      // We need to:
+      // 1. Click the trigger button to open the dropdown
+      // 2. Type in the search input to filter
+      // 3. Click the option
+
+      // Find the searchable select for L2 (contains input#l2)
+      cy.get('input#l2').closest('.searchable-select').within(() => {
+        // Click the trigger button to open the dropdown
+        cy.get('.searchable-select__trigger').click();
+
+        // Type to filter
+        cy.get('.searchable-select__dropdown input[type="text"]').type('Latvian');
+      });
+
+      // Click on the Latvian option (options are <li> elements inside .searchable-select__options)
+      cy.get('.searchable-select__options li').contains('Latvian').click();
+
+      // Wait for settings to be applied
+      cy.wait(300);
+
+      // Verify the language name is set
+      cy.get('input[name="LgName"]').should('have.value', 'Latvian');
+
+      // Expand Advanced Settings to check parsing settings
+      cy.contains('Advanced Settings').click();
+
+      // Latvian should NOT be right-to-left
+      cy.get('input[name="LgRightToLeft"]').should('not.be.checked');
+
+      // Word characters regex should be set
+      cy.get('input[name="LgRegexpWordCharacters"]').invoke('val').should('not.be.empty');
+
+      // Sentence split regex should be set
+      cy.get('input[name="LgRegexpSplitSentences"]').invoke('val').should('not.be.empty');
+    });
   });
 
   describe('Create Language', () => {
