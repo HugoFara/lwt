@@ -516,6 +516,44 @@ class MediaServiceTest extends TestCase
         $this->assertStringContainsString('?t=60', $output);
     }
 
+    public function testRenderVideoPlayerParsesYouTubeShortsUrl(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://www.youtube.com/shorts/dQw4w9WgXcQ');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('iframe', $output);
+        $this->assertStringContainsString('youtube.com/embed/dQw4w9WgXcQ', $output);
+    }
+
+    public function testRenderVideoPlayerParsesYouTubeEmbedUrl(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://www.youtube.com/embed/dQw4w9WgXcQ');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('iframe', $output);
+        $this->assertStringContainsString('youtube.com/embed/dQw4w9WgXcQ', $output);
+    }
+
+    public function testRenderVideoPlayerParsesYouTubeWithoutWww(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://youtube.com/watch?v=abc123');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('youtube.com/embed/abc123', $output);
+    }
+
+    public function testRenderVideoPlayerParsesYouTubeWithHyphenInId(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://www.youtube.com/watch?v=abc-123_XYZ');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('youtube.com/embed/abc-123_XYZ', $output);
+    }
+
     // =========================================================================
     // renderVideoPlayer Tests (Dailymotion URL parsing)
     // =========================================================================
@@ -537,6 +575,25 @@ class MediaServiceTest extends TestCase
         $output = ob_get_clean();
 
         $this->assertStringContainsString('dailymotion.com/embed/video/abc123', $output);
+    }
+
+    public function testRenderVideoPlayerParsesDailymotionFullUrl(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://www.dailymotion.com/video/x8abc12');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('iframe', $output);
+        $this->assertStringContainsString('dailymotion.com/embed/video/x8abc12', $output);
+    }
+
+    public function testRenderVideoPlayerParsesDailymotionFullUrlWithoutWww(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://dailymotion.com/video/x8xyz99');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('dailymotion.com/embed/video/x8xyz99', $output);
     }
 
     // =========================================================================
@@ -569,6 +626,123 @@ class MediaServiceTest extends TestCase
         $output = ob_get_clean();
 
         $this->assertStringContainsString('#t=30s', $output);
+    }
+
+    // =========================================================================
+    // renderVideoPlayer Tests (Bilibili URL parsing)
+    // =========================================================================
+
+    public function testRenderVideoPlayerParsesBilibiliBvUrl(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://www.bilibili.com/video/BV1xx411c7mD');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('iframe', $output);
+        $this->assertStringContainsString('player.bilibili.com/player.html?bvid=BV1xx411c7mD', $output);
+    }
+
+    public function testRenderVideoPlayerParsesBilibiliAvUrl(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://www.bilibili.com/video/av12345678');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('iframe', $output);
+        $this->assertStringContainsString('player.bilibili.com/player.html?aid=12345678', $output);
+    }
+
+    public function testRenderVideoPlayerParsesBilibiliWithoutWww(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://bilibili.com/video/BV1Ab4y1Z7eF');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('player.bilibili.com/player.html?bvid=BV1Ab4y1Z7eF', $output);
+    }
+
+    public function testRenderVideoPlayerIncludesOffsetForBilibili(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://www.bilibili.com/video/BV1xx411c7mD', 120);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('&t=120', $output);
+    }
+
+    // =========================================================================
+    // renderVideoPlayer Tests (NicoNico URL parsing)
+    // =========================================================================
+
+    public function testRenderVideoPlayerParsesNicoNicoUrl(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://www.nicovideo.jp/watch/sm12345678');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('iframe', $output);
+        $this->assertStringContainsString('embed.nicovideo.jp/watch/sm12345678', $output);
+    }
+
+    public function testRenderVideoPlayerParsesNicoNicoShortUrl(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://nico.ms/sm98765432');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('iframe', $output);
+        $this->assertStringContainsString('embed.nicovideo.jp/watch/sm98765432', $output);
+    }
+
+    public function testRenderVideoPlayerParsesNicoNicoWithoutWww(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://nicovideo.jp/watch/nm11111111');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('embed.nicovideo.jp/watch/nm11111111', $output);
+    }
+
+    public function testRenderVideoPlayerIncludesOffsetForNicoNico(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://www.nicovideo.jp/watch/sm12345678', 45);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('?from=45', $output);
+    }
+
+    // =========================================================================
+    // renderVideoPlayer Tests (PeerTube URL parsing)
+    // =========================================================================
+
+    public function testRenderVideoPlayerParsesPeerTubeWatchUrl(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://peertube.example.com/videos/watch/a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('iframe', $output);
+        $this->assertStringContainsString('peertube.example.com/videos/embed/a1b2c3d4-e5f6-7890-abcd-ef1234567890', $output);
+    }
+
+    public function testRenderVideoPlayerParsesPeerTubeShortUrl(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://video.instance.org/w/xyz123abc');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('iframe', $output);
+        $this->assertStringContainsString('video.instance.org/videos/embed/xyz123abc', $output);
+    }
+
+    public function testRenderVideoPlayerIncludesOffsetForPeerTube(): void
+    {
+        ob_start();
+        $this->service->renderVideoPlayer('https://peertube.social/videos/watch/abc123', 90);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('?start=90s', $output);
     }
 
     // =========================================================================

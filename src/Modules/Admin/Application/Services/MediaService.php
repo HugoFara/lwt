@@ -6,7 +6,7 @@
  * This service handles:
  * - Media file discovery (audio/video in media folder)
  * - HTML media player generation (audio/video)
- * - Support for local files and streaming platforms (YouTube, Vimeo, Dailymotion)
+ * - Support for local files and streaming platforms (YouTube, Vimeo, Dailymotion, Bilibili, NicoNico, PeerTube)
  *
  * PHP version 8.1
  *
@@ -175,7 +175,7 @@ class MediaService
         $media = $this->getMediaPaths();
         $mediaJson = json_encode($media);
         $r = '<p>
-            YouTube, Dailymotion, Vimeo or choose a file in "../' . $media["base_path"] . '/media":
+            YouTube, Dailymotion, Vimeo, Bilibili, NicoNico, PeerTube, or choose a file in "../' . $media["base_path"] . '/media":
         </p>
         <p id="mediaSelectErrorMessage"></p>
         ' .
@@ -237,7 +237,7 @@ class MediaService
         // Check for YouTube (youtube.com/watch?v=)
         if (
             preg_match(
-                "/(?:https:\/\/)?www\.youtube\.com\/watch\?v=([\d\w]+)/iu",
+                "/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([\w-]+)/iu",
                 $path,
                 $matches
             )
@@ -247,7 +247,7 @@ class MediaService
         } elseif (
             // Check for YouTube short URL (youtu.be/)
             preg_match(
-                "/(?:https:\/\/)?youtu\.be\/([\d\w]+)/iu",
+                "/(?:https?:\/\/)?youtu\.be\/([\w-]+)/iu",
                 $path,
                 $matches
             )
@@ -255,9 +255,39 @@ class MediaService
             $url = "https://www.youtube.com/embed/" . $matches[1] . "?t=" . $offset;
             $online = true;
         } elseif (
-            // Check for Dailymotion
+            // Check for YouTube Shorts
             preg_match(
-                "/(?:https:\/\/)?dai\.ly\/([^\?]+)/iu",
+                "/(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([\w-]+)/iu",
+                $path,
+                $matches
+            )
+        ) {
+            $url = "https://www.youtube.com/embed/" . $matches[1] . "?t=" . $offset;
+            $online = true;
+        } elseif (
+            // Check for YouTube embed URL
+            preg_match(
+                "/(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([\w-]+)/iu",
+                $path,
+                $matches
+            )
+        ) {
+            $url = "https://www.youtube.com/embed/" . $matches[1] . "?t=" . $offset;
+            $online = true;
+        } elseif (
+            // Check for Dailymotion short URL (dai.ly/)
+            preg_match(
+                "/(?:https?:\/\/)?dai\.ly\/([^\?\/#]+)/iu",
+                $path,
+                $matches
+            )
+        ) {
+            $url = "https://www.dailymotion.com/embed/video/" . $matches[1];
+            $online = true;
+        } elseif (
+            // Check for Dailymotion full URL (dailymotion.com/video/)
+            preg_match(
+                "/(?:https?:\/\/)?(?:www\.)?dailymotion\.com\/video\/([^\?\/#]+)/iu",
                 $path,
                 $matches
             )
@@ -273,6 +303,56 @@ class MediaService
             )
         ) {
             $url = "https://player.vimeo.com/video/" . $matches[1] . "#t=" . $offset . "s";
+            $online = true;
+        } elseif (
+            // Check for Bilibili (BV format)
+            preg_match(
+                "/(?:https?:\/\/)?(?:www\.)?bilibili\.com\/video\/(BV[\w]+)/iu",
+                $path,
+                $matches
+            )
+        ) {
+            $url = "https://player.bilibili.com/player.html?bvid=" . $matches[1] . "&t=" . $offset;
+            $online = true;
+        } elseif (
+            // Check for Bilibili (av format)
+            preg_match(
+                "/(?:https?:\/\/)?(?:www\.)?bilibili\.com\/video\/av(\d+)/iu",
+                $path,
+                $matches
+            )
+        ) {
+            $url = "https://player.bilibili.com/player.html?aid=" . $matches[1] . "&t=" . $offset;
+            $online = true;
+        } elseif (
+            // Check for NicoNico (nicovideo.jp)
+            preg_match(
+                "/(?:https?:\/\/)?(?:www\.)?nicovideo\.jp\/watch\/([a-z]{2}\d+)/iu",
+                $path,
+                $matches
+            )
+        ) {
+            $url = "https://embed.nicovideo.jp/watch/" . $matches[1] . "?from=" . $offset;
+            $online = true;
+        } elseif (
+            // Check for NicoNico short URL (nico.ms)
+            preg_match(
+                "/(?:https?:\/\/)?nico\.ms\/([a-z]{2}\d+)/iu",
+                $path,
+                $matches
+            )
+        ) {
+            $url = "https://embed.nicovideo.jp/watch/" . $matches[1] . "?from=" . $offset;
+            $online = true;
+        } elseif (
+            // Check for PeerTube (federated - matches /videos/watch/ or /w/ pattern)
+            preg_match(
+                "/https?:\/\/([^\/]+)\/(?:videos\/watch|w)\/([a-zA-Z0-9-]+)/iu",
+                $path,
+                $matches
+            )
+        ) {
+            $url = "https://" . $matches[1] . "/videos/embed/" . $matches[2] . "?start=" . $offset . "s";
             $online = true;
         }
 

@@ -319,7 +319,7 @@ if (!$isNew) {
                            id="TxMediaURL"
                            placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." />
                 </div>
-                <p class="help">YouTube, Vimeo, or Dailymotion URL. Captions will be imported if available.</p>
+                <p class="help">YouTube, Vimeo, Dailymotion, Bilibili, NicoNico, or PeerTube URL. Captions will be imported if available.</p>
             </div>
 
             <?php if (YouTubeImport::isConfigured()) : ?>
