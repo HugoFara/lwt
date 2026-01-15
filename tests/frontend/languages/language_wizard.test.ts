@@ -78,62 +78,31 @@ describe('language_wizard.ts', () => {
   });
 
   // ===========================================================================
-  // languageWizard.go Tests
+  // languageWizard.onL2Change Tests
   // ===========================================================================
 
-  describe('languageWizard.go', () => {
+  describe('languageWizard.onL2Change', () => {
     beforeEach(() => {
       languageWizard.langDefs = {
         'English': ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false],
         'French': ['fr', 'fr', false, '[a-zA-Z]', '.!?', false, false, false],
-        'Japanese': ['ja', 'ja', true, '[\\p{Han}\\p{Hiragana}\\p{Katakana}]', '。！？', true, true, false]
+        'Japanese': ['ja', 'ja', true, '[\\p{Han}\\p{Hiragana}\\p{Katakana}]', '。！？', true, true, false],
+        'Arabic': ['ar', 'ar', false, '[\\p{Arabic}]', '.!?', false, false, true]
       };
-    });
-
-    it('alerts when L1 is not selected', () => {
       document.body.innerHTML = `
-        <select id="l1"><option value="">Select...</option></select>
-        <select id="l2"><option value="French">French</option></select>
-      `;
-
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      languageWizard.go();
-
-      expect(alertSpy).toHaveBeenCalledWith('Please choose your native language (L1)!');
-    });
-
-    it('alerts when L2 is not selected', () => {
-      document.body.innerHTML = `
-        <select id="l1"><option value="English">English</option></select>
-        <select id="l2"><option value="">Select...</option></select>
-      `;
-
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      languageWizard.go();
-
-      expect(alertSpy).toHaveBeenCalledWith('Please choose your language you want to read/study (L2)!');
-    });
-
-    it('alerts when L1 and L2 are the same', () => {
-      document.body.innerHTML = `
-        <select id="l1"><option value="English" selected>English</option></select>
-        <select id="l2"><option value="English" selected>English</option></select>
-      `;
-
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      languageWizard.go();
-
-      expect(alertSpy).toHaveBeenCalledWith('L1 L2 Languages must not be equal!');
-    });
-
-    it('calls apply with correct language definitions', () => {
-      document.body.innerHTML = `
-        <select id="l1"><option value="English" selected>English</option></select>
-        <select id="l2"><option value="French" selected>French</option></select>
+        <select id="l1">
+          <option value="">Select...</option>
+          <option value="English">English</option>
+        </select>
+        <select id="l2">
+          <option value="">Select...</option>
+          <option value="French">French</option>
+          <option value="Japanese">Japanese</option>
+          <option value="Arabic">Arabic</option>
+        </select>
         <input name="LgName" />
+        <input name="LgSourceLang" />
+        <input name="LgTargetLang" />
         <input name="LgDict1URI" />
         <input name="LgDict1PopUp" type="checkbox" />
         <input name="LgGoogleTranslateURI" />
@@ -144,93 +113,252 @@ describe('language_wizard.ts', () => {
         <input name="LgRemoveSpaces" type="checkbox" />
         <input name="LgRightToLeft" type="checkbox" />
       `;
+    });
 
-      const applySpy = vi.spyOn(languageWizard, 'apply');
+    it('does nothing when L2 is empty', () => {
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = '';
 
-      languageWizard.go();
+      languageWizard.onL2Change();
 
-      expect(applySpy).toHaveBeenCalledWith(
-        languageWizard.langDefs['French'],
-        languageWizard.langDefs['English'],
-        'French'
-      );
+      const nameInput = document.querySelector('input[name="LgName"]') as HTMLInputElement;
+      expect(nameInput.value).toBe('');
+    });
+
+    it('sets language name when L2 is selected', () => {
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = 'French';
+
+      languageWizard.onL2Change();
+
+      const nameInput = document.querySelector('input[name="LgName"]') as HTMLInputElement;
+      expect(nameInput.value).toBe('French');
+    });
+
+    it('calls checkLanguageChanged with the language name', () => {
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = 'Japanese';
+
+      languageWizard.onL2Change();
+
+      expect(languageForm.checkLanguageChanged).toHaveBeenCalledWith('Japanese');
+    });
+
+    it('sets source language code', () => {
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = 'French';
+
+      languageWizard.onL2Change();
+
+      const sourceInput = document.querySelector('input[name="LgSourceLang"]') as HTMLInputElement;
+      expect(sourceInput.value).toBe('fr');
+    });
+
+    it('sets text size 200 for languages needing large text', () => {
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = 'Japanese';
+
+      languageWizard.onL2Change();
+
+      const textSizeInput = document.querySelector('input[name="LgTextSize"]') as HTMLInputElement;
+      expect(textSizeInput.value).toBe('200');
+    });
+
+    it('sets text size 150 for languages not needing large text', () => {
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = 'French';
+
+      languageWizard.onL2Change();
+
+      const textSizeInput = document.querySelector('input[name="LgTextSize"]') as HTMLInputElement;
+      expect(textSizeInput.value).toBe('150');
+    });
+
+    it('sets language parsing rules', () => {
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = 'Japanese';
+
+      languageWizard.onL2Change();
+
+      const sentencesInput = document.querySelector('input[name="LgRegexpSplitSentences"]') as HTMLInputElement;
+      expect(sentencesInput.value).toBe('。！？');
+      const wordCharsInput = document.querySelector('input[name="LgRegexpWordCharacters"]') as HTMLInputElement;
+      expect(wordCharsInput.value).toBe('[\\p{Han}\\p{Hiragana}\\p{Katakana}]');
+      const splitCharInput = document.querySelector('input[name="LgSplitEachChar"]') as HTMLInputElement;
+      expect(splitCharInput.checked).toBe(true);
+      const removeSpacesInput = document.querySelector('input[name="LgRemoveSpaces"]') as HTMLInputElement;
+      expect(removeSpacesInput.checked).toBe(true);
+    });
+
+    it('sets RTL flag for RTL languages', () => {
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = 'Arabic';
+
+      languageWizard.onL2Change();
+
+      const rtlInput = document.querySelector('input[name="LgRightToLeft"]') as HTMLInputElement;
+      expect(rtlInput.checked).toBe(true);
+    });
+
+    it('updates dictionary URLs if L1 is already set', () => {
+      const l1Select = document.getElementById('l1') as HTMLSelectElement;
+      l1Select.value = 'English';
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = 'French';
+
+      languageWizard.onL2Change();
+
+      expect(languageForm.reloadDictURLs).toHaveBeenCalledWith('fr', 'en');
     });
   });
 
   // ===========================================================================
-  // languageWizard.apply Tests
+  // languageWizard.onL1Change Tests
   // ===========================================================================
 
-  describe('languageWizard.apply', () => {
+  describe('languageWizard.onL1Change', () => {
     beforeEach(() => {
+      languageWizard.langDefs = {
+        'English': ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false],
+        'French': ['fr', 'fr', false, '[a-zA-Z]', '.!?', false, false, false]
+      };
       document.body.innerHTML = `
-        <input name="LgName" />
+        <select id="l1"><option value="">Select...</option><option value="English">English</option></select>
+        <select id="l2"><option value="">Select...</option><option value="French">French</option></select>
+        <input name="LgTargetLang" />
         <input name="LgDict1URI" />
         <input name="LgDict1PopUp" type="checkbox" />
         <input name="LgGoogleTranslateURI" />
-        <input name="LgTextSize" />
-        <input name="LgRegexpSplitSentences" />
-        <input name="LgRegexpWordCharacters" />
-        <input name="LgSplitEachChar" type="checkbox" />
-        <input name="LgRemoveSpaces" type="checkbox" />
-        <input name="LgRightToLeft" type="checkbox" />
       `;
     });
 
-    it('calls reloadDictURLs with language codes', () => {
-      const learningLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['fr', 'fr', false, '[a-zA-Z]', '.!?', false, false, false];
-      const knownLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false];
+    it('does nothing when L1 is empty', () => {
+      const l1Select = document.getElementById('l1') as HTMLSelectElement;
+      l1Select.value = '';
 
-      languageWizard.apply(learningLg, knownLg, 'French');
+      languageWizard.onL1Change();
+
+      expect(saveSetting).not.toHaveBeenCalled();
+    });
+
+    it('saves native language setting', () => {
+      const l1Select = document.getElementById('l1') as HTMLSelectElement;
+      l1Select.value = 'English';
+
+      languageWizard.onL1Change();
+
+      expect(saveSetting).toHaveBeenCalledWith('currentnativelanguage', 'English');
+    });
+
+    it('sets target language code', () => {
+      const l1Select = document.getElementById('l1') as HTMLSelectElement;
+      l1Select.value = 'English';
+
+      languageWizard.onL1Change();
+
+      const targetInput = document.querySelector('input[name="LgTargetLang"]') as HTMLInputElement;
+      expect(targetInput.value).toBe('en');
+    });
+
+    it('updates dictionary URLs if L2 is already set', () => {
+      const l1Select = document.getElementById('l1') as HTMLSelectElement;
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = 'French';
+      l1Select.value = 'English';
+
+      languageWizard.onL1Change();
+
+      expect(languageForm.reloadDictURLs).toHaveBeenCalledWith('fr', 'en');
+    });
+  });
+
+  // ===========================================================================
+  // languageWizard.updateDictionaryUrls Tests
+  // ===========================================================================
+
+  describe('languageWizard.updateDictionaryUrls', () => {
+    beforeEach(() => {
+      languageWizard.langDefs = {
+        'English': ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false],
+        'French': ['fr', 'fr', false, '[a-zA-Z]', '.!?', false, false, false],
+        'German': ['de', 'de', false, '[a-zA-Z]', '.!?', false, false, false]
+      };
+      document.body.innerHTML = `
+        <select id="l1">
+          <option value="">Select...</option>
+          <option value="English">English</option>
+        </select>
+        <select id="l2">
+          <option value="">Select...</option>
+          <option value="French">French</option>
+          <option value="German">German</option>
+        </select>
+        <input name="LgDict1URI" />
+        <input name="LgDict1PopUp" type="checkbox" />
+        <input name="LgGoogleTranslateURI" />
+      `;
+    });
+
+    it('does nothing when L1 is empty', () => {
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = 'French';
+
+      languageWizard.updateDictionaryUrls();
+
+      expect(languageForm.reloadDictURLs).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when L2 is empty', () => {
+      const l1Select = document.getElementById('l1') as HTMLSelectElement;
+      l1Select.value = 'English';
+
+      languageWizard.updateDictionaryUrls();
+
+      expect(languageForm.reloadDictURLs).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when L1 and L2 are the same', () => {
+      const l1Select = document.getElementById('l1') as HTMLSelectElement;
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l1Select.value = 'English';
+      l2Select.value = 'English';
+
+      languageWizard.updateDictionaryUrls();
+
+      expect(languageForm.reloadDictURLs).not.toHaveBeenCalled();
+    });
+
+    it('calls reloadDictURLs with language codes', () => {
+      const l1Select = document.getElementById('l1') as HTMLSelectElement;
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l1Select.value = 'English';
+      l2Select.value = 'French';
+
+      languageWizard.updateDictionaryUrls();
 
       expect(languageForm.reloadDictURLs).toHaveBeenCalledWith('fr', 'en');
     });
 
     it('sets up LibreTranslate URL', () => {
-      const learningLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['fr', 'fr', false, '[a-zA-Z]', '.!?', false, false, false];
-      const knownLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false];
+      const l1Select = document.getElementById('l1') as HTMLSelectElement;
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l1Select.value = 'English';
+      l2Select.value = 'French';
 
-      languageWizard.apply(learningLg, knownLg, 'French');
+      languageWizard.updateDictionaryUrls();
 
       expect((window as any).LIBRETRANSLATE).toContain('libretranslate');
       expect((window as any).LIBRETRANSLATE).toContain('source=fr');
       expect((window as any).LIBRETRANSLATE).toContain('target=en');
     });
 
-    it('sets language name and triggers change event', () => {
-      const learningLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['fr', 'fr', false, '[a-zA-Z]', '.!?', false, false, false];
-      const knownLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false];
-
-      languageWizard.apply(learningLg, knownLg, 'French');
-
-      const input = document.querySelector('input[name="LgName"]') as HTMLInputElement;
-      expect(input.value).toBe('French');
-    });
-
-    it('calls checkLanguageChanged', () => {
-      const learningLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['ja', 'ja', true, '[\\p{Han}]', '。', true, true, false];
-      const knownLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false];
-
-      languageWizard.apply(learningLg, knownLg, 'Japanese');
-
-      expect(languageForm.checkLanguageChanged).toHaveBeenCalledWith('Japanese');
-    });
-
     it('sets Glosbe dictionary URL', () => {
-      const learningLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['de', 'de', false, '[a-zA-Zäöüß]', '.!?', false, false, false];
-      const knownLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false];
+      const l1Select = document.getElementById('l1') as HTMLSelectElement;
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l1Select.value = 'English';
+      l2Select.value = 'German';
 
-      languageWizard.apply(learningLg, knownLg, 'German');
+      languageWizard.updateDictionaryUrls();
 
       const dictInput = document.querySelector('input[name="LgDict1URI"]') as HTMLInputElement;
       expect(dictInput.value).toContain('glosbe.com/de/en');
@@ -241,83 +369,15 @@ describe('language_wizard.ts', () => {
     it('sets Google Translate URL when available', () => {
       (window as any).GGTRANSLATE = 'https://translate.google.com/?source=fr&target=en';
 
-      const learningLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['fr', 'fr', false, '[a-zA-Z]', '.!?', false, false, false];
-      const knownLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false];
+      const l1Select = document.getElementById('l1') as HTMLSelectElement;
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l1Select.value = 'English';
+      l2Select.value = 'French';
 
-      languageWizard.apply(learningLg, knownLg, 'French');
+      languageWizard.updateDictionaryUrls();
 
       const input = document.querySelector('input[name="LgGoogleTranslateURI"]') as HTMLInputElement;
       expect(input.value).toBe('https://translate.google.com/?source=fr&target=en');
-    });
-
-    it('sets text size 200 for languages needing large text', () => {
-      const learningLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['ja', 'ja', true, '[\\p{Han}]', '。', true, true, false];  // Large text = true
-      const knownLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false];
-
-      languageWizard.apply(learningLg, knownLg, 'Japanese');
-
-      const input = document.querySelector('input[name="LgTextSize"]') as HTMLInputElement;
-      expect(input.value).toBe('200');
-    });
-
-    it('sets text size 150 for languages not needing large text', () => {
-      const learningLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['fr', 'fr', false, '[a-zA-Z]', '.!?', false, false, false];  // Large text = false
-      const knownLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false];
-
-      languageWizard.apply(learningLg, knownLg, 'French');
-
-      const input = document.querySelector('input[name="LgTextSize"]') as HTMLInputElement;
-      expect(input.value).toBe('150');
-    });
-
-    it('sets language parsing rules', () => {
-      const learningLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['ja', 'ja', true, '[\\p{Han}]', '。！？', true, true, false];
-      const knownLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false];
-
-      languageWizard.apply(learningLg, knownLg, 'Japanese');
-
-      const sentencesInput = document.querySelector('input[name="LgRegexpSplitSentences"]') as HTMLInputElement;
-      expect(sentencesInput.value).toBe('。！？');
-      const wordCharsInput = document.querySelector('input[name="LgRegexpWordCharacters"]') as HTMLInputElement;
-      expect(wordCharsInput.value).toBe('[\\p{Han}]');
-      const splitCharInput = document.querySelector('input[name="LgSplitEachChar"]') as HTMLInputElement;
-      expect(splitCharInput.checked).toBe(true);
-      const removeSpacesInput = document.querySelector('input[name="LgRemoveSpaces"]') as HTMLInputElement;
-      expect(removeSpacesInput.checked).toBe(true);
-      const rtlInput = document.querySelector('input[name="LgRightToLeft"]') as HTMLInputElement;
-      expect(rtlInput.checked).toBe(false);
-    });
-
-    it('sets RTL flag for RTL languages', () => {
-      const learningLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['ar', 'ar', false, '[\\p{Arabic}]', '.!?', false, false, true];  // RTL = true
-      const knownLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
-        ['en', 'en', false, '[a-zA-Z]', '.!?', false, false, false];
-
-      languageWizard.apply(learningLg, knownLg, 'Arabic');
-
-      const rtlInput = document.querySelector('input[name="LgRightToLeft"]') as HTMLInputElement;
-      expect(rtlInput.checked).toBe(true);
-    });
-  });
-
-  // ===========================================================================
-  // languageWizard.changeNative Tests
-  // ===========================================================================
-
-  describe('languageWizard.changeNative', () => {
-    it('saves native language setting via AJAX', () => {
-      languageWizard.changeNative('English');
-
-      expect(saveSetting).toHaveBeenCalledWith('currentnativelanguage', 'English');
     });
   });
 
@@ -359,14 +419,45 @@ describe('language_wizard.ts', () => {
       expect(languageWizard.langDefs).toHaveProperty('English');
     });
 
+    it('sets up L2 change handler', () => {
+      document.body.innerHTML = `
+        <script id="language-wizard-config" type="application/json">
+          {"languageDefs": {"French": ["fr", "fr", false, "[a-zA-Z]", ".!?", false, false, false]}}
+        </script>
+        <select id="l2">
+          <option value="">Select...</option>
+          <option value="French">French</option>
+        </select>
+        <input name="LgName" />
+        <input name="LgSourceLang" />
+        <input name="LgTextSize" />
+        <input name="LgRegexpSplitSentences" />
+        <input name="LgRegexpWordCharacters" />
+        <input name="LgSplitEachChar" type="checkbox" />
+        <input name="LgRemoveSpaces" type="checkbox" />
+        <input name="LgRightToLeft" type="checkbox" />
+      `;
+
+      initLanguageWizard();
+
+      const l2Select = document.getElementById('l2') as HTMLSelectElement;
+      l2Select.value = 'French';
+      l2Select.dispatchEvent(new Event('change'));
+
+      const nameInput = document.querySelector('input[name="LgName"]') as HTMLInputElement;
+      expect(nameInput.value).toBe('French');
+    });
+
     it('sets up L1 change handler', () => {
       document.body.innerHTML = `
         <script id="language-wizard-config" type="application/json">
-          {"languageDefs": {}}
+          {"languageDefs": {"English": ["en", "en", false, "[a-zA-Z]", ".!?", false, false, false]}}
         </script>
         <select id="l1">
+          <option value="">Select...</option>
           <option value="English">English</option>
         </select>
+        <input name="LgTargetLang" />
       `;
 
       initLanguageWizard();
@@ -376,26 +467,6 @@ describe('language_wizard.ts', () => {
       l1Select.dispatchEvent(new Event('change'));
 
       expect(saveSetting).toHaveBeenCalledWith('currentnativelanguage', 'English');
-    });
-
-    it('sets up wizard go button handler', () => {
-      document.body.innerHTML = `
-        <script id="language-wizard-config" type="application/json">
-          {"languageDefs": {"English": ["en", "en", false, "[a-zA-Z]", ".!?", false, false, false]}}
-        </script>
-        <select id="l1"><option value="">Select...</option></select>
-        <select id="l2"><option value="">Select...</option></select>
-        <button data-action="wizard-go">Go</button>
-      `;
-
-      initLanguageWizard();
-
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      const goButton = document.querySelector('[data-action="wizard-go"]')!;
-      goButton.dispatchEvent(new Event('click'));
-
-      // Should alert because L1 is not selected
-      expect(alertSpy).toHaveBeenCalled();
     });
 
     it('sets up wizard toggle handler', () => {

@@ -118,11 +118,11 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
     <div class="container mb-5" style="max-width: 400px;">
         <div class="field">
             <label class="label is-medium" for="LgName">
-                Language name
+                Display name
             </label>
             <div class="control">
                 <input type="text"
-                       class="input is-medium notempty setfocus checkoutsidebmp"
+                       class="input is-medium notempty<?php echo $isNew ? '' : ' setfocus'; ?> checkoutsidebmp"
                        data_info="Study Language"
                        name="LgName"
                        id="LgName"
@@ -131,6 +131,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                        @input="showJapaneseOptions = ($event.target.value === 'Japanese')"
                        required />
             </div>
+            <p class="help">A friendly name to identify this language in your lists</p>
         </div>
 
         <!-- Save button (primary action) -->
@@ -138,14 +139,14 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
             <div class="control">
                 <?php if ($isNew) : ?>
                 <button type="submit" name="op" value="Save" class="button is-primary is-medium is-fullwidth">
-                    <span class="icon is-small">
+                    <span class="icon">
                         <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                     </span>
                     <span>Save</span>
                 </button>
                 <?php else : ?>
                 <button type="submit" name="op" value="Change" class="button is-primary is-medium is-fullwidth">
-                    <span class="icon is-small">
+                    <span class="icon">
                         <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                     </span>
                     <span>Save Changes</span>

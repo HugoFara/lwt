@@ -56,7 +56,7 @@ assert(is_string($languageOptionsEmpty));
         </div>
 
         <!-- Native language (L1) -->
-        <div class="field mb-5">
+        <div class="field">
             <label class="label is-medium" for="l1">
                 Your native language
             </label>
@@ -66,20 +66,6 @@ assert(is_string($languageOptionsEmpty));
                         <?php echo $languageOptions; ?>
                     </select>
                 </div>
-            </div>
-        </div>
-
-        <!-- Continue button -->
-        <div class="field">
-            <div class="control">
-                <button type="button"
-                        class="button is-primary is-medium is-fullwidth"
-                        data-action="wizard-go">
-                    <span>Continue</span>
-                    <span class="icon is-small">
-                        <?php echo IconHelper::render('arrow-right', ['alt' => 'Continue']); ?>
-                    </span>
-                </button>
             </div>
         </div>
     </div>

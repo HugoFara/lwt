@@ -116,40 +116,73 @@ export const languageWizard = {
   },
 
   /**
-   * Execute the wizard - validate and apply language settings.
+   * Handle L2 (study language) change.
+   * Applies language-specific settings immediately.
    */
-  go(): void {
-    const l1 = getInputValue('#l1');
+  onL2Change(): void {
     const l2 = getInputValue('#l2');
+    if (l2 === '') return;
 
-    if (l1 === '') {
-      alert('Please choose your native language (L1)!');
-      return;
-    }
-    if (l2 === '') {
-      alert('Please choose your language you want to read/study (L2)!');
-      return;
-    }
-    if (l2 === l1) {
-      alert('L1 L2 Languages must not be equal!');
-      return;
-    }
+    const learningLg = this.langDefs[l2];
+    if (!learningLg) return;
 
-    this.apply(this.langDefs[l2], this.langDefs[l1], l2);
+    // Set language name and trigger change event
+    setInputValue('input[name="LgName"]', l2, true);
+
+    // Check for language-specific UI changes (e.g., Japanese regexp field)
+    languageForm.checkLanguageChanged(l2);
+
+    // Set source language code
+    setInputValue('input[name="LgSourceLang"]', learningLg[1]);
+
+    // Set text size based on language needs
+    setInputValue('input[name="LgTextSize"]', learningLg[2] ? 200 : 150, true);
+
+    // Set language parsing rules
+    setInputValue('input[name="LgRegexpSplitSentences"]', learningLg[4]);
+    setInputValue('input[name="LgRegexpWordCharacters"]', learningLg[3]);
+    setChecked('input[name="LgSplitEachChar"]', learningLg[5]);
+    setChecked('input[name="LgRemoveSpaces"]', learningLg[6]);
+    setChecked('input[name="LgRightToLeft"]', learningLg[7]);
+
+    // Also update dictionary URLs if L1 is already set
+    this.updateDictionaryUrls();
   },
 
   /**
-   * Apply language settings to the form.
-   *
-   * @param learningLg - Language definition for the study language (L2)
-   * @param knownLg - Language definition for the native language (L1)
-   * @param learningLgName - Name of the learning language
+   * Handle L1 (native language) change.
+   * Updates dictionary and translation URLs.
    */
-  apply(
-    learningLg: LanguageDefinition,
-    knownLg: LanguageDefinition,
-    learningLgName: string
-  ): void {
+  onL1Change(): void {
+    const l1 = getInputValue('#l1');
+    if (l1 === '') return;
+
+    saveSetting('currentnativelanguage', l1);
+
+    const knownLg = this.langDefs[l1];
+    if (!knownLg) return;
+
+    // Set target language code
+    setInputValue('input[name="LgTargetLang"]', knownLg[1]);
+
+    // Update dictionary URLs if L2 is already set
+    this.updateDictionaryUrls();
+  },
+
+  /**
+   * Update dictionary and translation URLs based on current L1/L2 selection.
+   * Only applies when both languages are selected.
+   */
+  updateDictionaryUrls(): void {
+    const l1 = getInputValue('#l1');
+    const l2 = getInputValue('#l2');
+
+    if (l1 === '' || l2 === '' || l1 === l2) return;
+
+    const learningLg = this.langDefs[l2];
+    const knownLg = this.langDefs[l1];
+    if (!learningLg || !knownLg) return;
+
     // Reload dictionary URLs with the new language codes
     languageForm.reloadDictURLs(learningLg[1], knownLg[1]);
 
@@ -165,12 +198,6 @@ export const languageWizard = {
       q: 'lwt_term'
     });
 
-    // Set language name and trigger change event
-    setInputValue('input[name="LgName"]', learningLgName, true);
-
-    // Check for language-specific UI changes (e.g., Japanese regexp field)
-    languageForm.checkLanguageChanged(learningLgName);
-
     // Set dictionary URL (Glosbe) and popup checkbox
     setInputValue(
       'input[name="LgDict1URI"]',
@@ -178,33 +205,10 @@ export const languageWizard = {
     );
     setChecked('input[name="LgDict1PopUp"]', true);
 
-    // Set source/target language codes
-    setInputValue('input[name="LgSourceLang"]', learningLg[1]);
-    setInputValue('input[name="LgTargetLang"]', knownLg[1]);
-
     // Set translator URL
     if (window.GGTRANSLATE) {
       setInputValue('input[name="LgGoogleTranslateURI"]', window.GGTRANSLATE);
     }
-
-    // Set text size based on language needs
-    setInputValue('input[name="LgTextSize"]', learningLg[2] ? 200 : 150, true);
-
-    // Set language parsing rules
-    setInputValue('input[name="LgRegexpSplitSentences"]', learningLg[4]);
-    setInputValue('input[name="LgRegexpWordCharacters"]', learningLg[3]);
-    setChecked('input[name="LgSplitEachChar"]', learningLg[5]);
-    setChecked('input[name="LgRemoveSpaces"]', learningLg[6]);
-    setChecked('input[name="LgRightToLeft"]', learningLg[7]);
-  },
-
-  /**
-   * Save the native language preference.
-   *
-   * @param value - The selected native language
-   */
-  changeNative(value: string): void {
-    saveSetting('currentnativelanguage', value);
   },
 
   /**
@@ -237,17 +241,15 @@ export function initLanguageWizard(): void {
 
   languageWizard.init(config);
 
-  // Set up event listeners using data-action attributes
-  const l1Select = document.getElementById('l1');
-  if (l1Select) {
-    l1Select.addEventListener('change', function (this: HTMLSelectElement) {
-      languageWizard.changeNative(this.value);
-    });
+  // Set up event listeners for language selection
+  const l2Select = document.getElementById('l2');
+  if (l2Select) {
+    l2Select.addEventListener('change', () => languageWizard.onL2Change());
   }
 
-  const goButton = document.querySelector('[data-action="wizard-go"]');
-  if (goButton) {
-    goButton.addEventListener('click', () => languageWizard.go());
+  const l1Select = document.getElementById('l1');
+  if (l1Select) {
+    l1Select.addEventListener('change', () => languageWizard.onL1Change());
   }
 
   const toggleHeader = document.querySelector('[data-action="wizard-toggle"]');

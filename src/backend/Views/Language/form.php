@@ -120,12 +120,12 @@ $parserInfo = $parserInfo ?? [];
 
         <div class="field">
             <label class="label" for="LgName">
-                Study Language "L2"
+                Display name
                 <span class="has-text-danger" title="Required">*</span>
             </label>
             <div class="control">
                 <input type="text"
-                       class="input notempty setfocus checkoutsidebmp"
+                       class="input notempty<?php echo $isNew ? '' : ' setfocus'; ?> checkoutsidebmp"
                        data_info="Study Language"
                        name="LgName"
                        id="LgName"
@@ -134,7 +134,7 @@ $parserInfo = $parserInfo ?? [];
                        @input="showJapaneseOptions = ($event.target.value === 'Japanese')"
                        required />
             </div>
-            <p class="help">The name of the language you want to learn</p>
+            <p class="help">A friendly name to identify this language in your lists</p>
         </div>
     </div>
 
@@ -677,14 +677,14 @@ $parserInfo = $parserInfo ?? [];
         <div class="control">
             <?php if ($isNew) : ?>
             <button type="submit" name="op" value="Save" class="button is-primary">
-                <span class="icon is-small">
+                <span class="icon">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                 </span>
                 <span>Save</span>
             </button>
             <?php else : ?>
             <button type="submit" name="op" value="Change" class="button is-primary">
-                <span class="icon is-small">
+                <span class="icon">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                 </span>
                 <span>Save Changes</span>
