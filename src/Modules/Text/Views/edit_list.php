@@ -44,7 +44,7 @@ use Lwt\Core\StringUtils;
 <?php
 echo PageLayoutHelper::buildActionCard(
     [
-    ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+    ['url' => '/texts/new', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
     ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'],
     ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'],
     ]
@@ -354,7 +354,7 @@ echo PageLayoutHelper::buildActionCard(
     <div x-show="!loading && languages.length === 0" class="notification is-info is-light">
         <p>No texts found.
             <a href="<?php
-                echo \Lwt\Shared\Infrastructure\Http\UrlUtilities::url('/texts?new=1');
+                echo \Lwt\Shared\Infrastructure\Http\UrlUtilities::url('/texts/new');
             ?>">Create your first text</a> to get started!</p>
     </div>
 </div>

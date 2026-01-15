@@ -177,7 +177,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 <section class="section py-6">
     <div class="container">
         <div class="has-text-centered">
-            <a href="<?php echo $base; ?>/languages?new=1" class="button is-large is-primary">
+            <a href="<?php echo $base; ?>/languages/new" class="button is-large is-primary">
                 <span class="icon"><i data-lucide="languages"></i></span>
                 <span>Select a language to learn</span>
             </a>
@@ -189,7 +189,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 <section class="section py-6">
     <div class="container">
         <div class="has-text-centered">
-            <a href="<?php echo $base; ?>/texts?new=1" class="button is-large is-primary">
+            <a href="<?php echo $base; ?>/texts/new" class="button is-large is-primary">
                 <span class="icon"><i data-lucide="plus"></i></span>
                 <span>Add a text to read</span>
             </a>
@@ -307,7 +307,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
             <!-- New text card -->
             <div class="column is-narrow">
                 <a
-                    href="<?php echo $base; ?>/texts?new=1"
+                    href="<?php echo $base; ?>/texts/new"
                     class="box has-background-primary-light has-text-centered"
                     style="width: 180px; min-height: 180px; display: flex;
                         flex-direction: column; justify-content: center; align-items: center;"
@@ -352,7 +352,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                     <span>Manage Languages</span>
                 </a>
                 <a
-                    href="<?php echo $base; ?>/languages?new=1"
+                    href="<?php echo $base; ?>/languages/new"
                     class="button is-fullwidth is-link is-light"
                     title="Add New Language"
                 >

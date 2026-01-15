@@ -308,7 +308,7 @@ describe('language_wizard_modal.ts', () => {
 
       component.apply();
 
-      expect(window.location.href).toBe('/languages?new=1&wizard=1');
+      expect(window.location.href).toBe('/languages/new?wizard=1');
 
       sessionStorage.removeItem('lwt_language_wizard');
       window.location = originalLocation;

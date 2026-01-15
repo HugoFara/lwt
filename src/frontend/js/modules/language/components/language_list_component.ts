@@ -169,7 +169,7 @@ export function languageListData(): LanguageListComponentData {
      * Navigate to the new language page.
      */
     navigateToNew(): void {
-      window.location.href = url('/languages?new=1');
+      window.location.href = url('/languages/new');
     },
 
     /**

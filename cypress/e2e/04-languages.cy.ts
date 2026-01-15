@@ -179,12 +179,12 @@ describe('Languages Management', () => {
 
   describe('Create Language', () => {
     it('should show new language form', () => {
-      cy.visit('/languages?new=1');
+      cy.visit('/languages/new');
       cy.get('form[name="lg_form"]').should('exist');
     });
 
     it('should have required form fields', () => {
-      cy.visit('/languages?new=1');
+      cy.visit('/languages/new');
       // Language name field
       cy.get('input[name="LgName"]').should('exist');
       // Dictionary field
@@ -196,12 +196,12 @@ describe('Languages Management', () => {
     });
 
     it('should have submit button', () => {
-      cy.visit('/languages?new=1');
+      cy.visit('/languages/new');
       cy.get('button[type="submit"]').should('exist');
     });
 
     it('should create a new language', () => {
-      cy.visit('/languages?new=1');
+      cy.visit('/languages/new');
 
       const uniqueName = `Test Language ${Date.now()}`;
 
@@ -253,7 +253,7 @@ describe('Languages Management', () => {
 
   describe('Text Size Preview', () => {
     it('should have text size input in form', () => {
-      cy.visit('/languages?new=1');
+      cy.visit('/languages/new');
 
       // The text size input should exist (may be in collapsed section)
       cy.get('input[name="LgTextSize"]').should('exist');
@@ -263,7 +263,7 @@ describe('Languages Management', () => {
     });
 
     it('should update text size when input changes', () => {
-      cy.visit('/languages?new=1');
+      cy.visit('/languages/new');
 
       // Force interaction since the element may be in a collapsed section
       cy.get('input[name="LgTextSize"]').clear({ force: true }).type('150', { force: true });

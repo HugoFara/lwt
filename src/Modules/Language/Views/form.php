@@ -92,7 +92,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
 ]); ?>
 </script>
 
-<form class="validate" action="<?php echo url('/languages'); ?>" method="post" name="lg_form"
+<form class="validate" action="<?php echo url($isNew ? '/languages/new' : '/languages'); ?>" method="post" name="lg_form"
       x-data="{
           textSize: <?php echo $langTextSize; ?>,
           parserType: '<?php echo htmlspecialchars($langParserType, ENT_QUOTES, 'UTF-8'); ?>',

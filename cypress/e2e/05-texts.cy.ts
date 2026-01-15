@@ -42,12 +42,12 @@ describe('Texts Management', () => {
 
   describe('Create Text', () => {
     it('should show new text form', () => {
-      cy.visit('/text/edit?new=1');
+      cy.visit('/texts/new');
       cy.get('form').should('exist');
     });
 
     it('should have required form fields', () => {
-      cy.visit('/text/edit?new=1');
+      cy.visit('/texts/new');
       // Title field
       cy.get('input[name="TxTitle"], input[name*="title" i]').should('exist');
       // Language selector
@@ -59,12 +59,12 @@ describe('Texts Management', () => {
     });
 
     it('should have submit button', () => {
-      cy.visit('/text/edit?new=1');
+      cy.visit('/texts/new');
       cy.get('input[type="submit"], button[type="submit"]').should('exist');
     });
 
     it('should create a new text', () => {
-      cy.visit('/text/edit?new=1');
+      cy.visit('/texts/new');
 
       const uniqueTitle = `Test Text ${Date.now()}`;
 
@@ -93,7 +93,7 @@ describe('Texts Management', () => {
     });
 
     it('should create a new text and open it for reading with Save & Open', () => {
-      cy.visit('/text/edit?new=1');
+      cy.visit('/texts/new');
 
       const uniqueTitle = `Save Open Test ${Date.now()}`;
 
@@ -179,7 +179,7 @@ describe('Texts Management', () => {
     it('should redirect to text edit or handle long text via regular form', () => {
       // Long text import is handled through the regular text edit form
       // which supports longer texts via the textarea
-      cy.visit('/text/edit?new=1');
+      cy.visit('/texts/new');
       cy.url().should('include', '/text/edit');
       cy.get('form').should('exist');
       // Text content textarea should exist for entering long texts
@@ -187,7 +187,7 @@ describe('Texts Management', () => {
     });
 
     it('should have required fields for text creation', () => {
-      cy.visit('/text/edit?new=1');
+      cy.visit('/texts/new');
       // Language selector
       cy.get('select[name*="lang" i], select[name="TxLgID"]').should('exist');
       // Text input area

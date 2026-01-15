@@ -66,6 +66,9 @@ function registerRoutes(Router $router): void
     // Legacy route: /text/read?text=123
     $router->get('/text/read', 'Lwt\\Modules\\Text\\Http\\TextController@read', AUTH_MIDDLEWARE);
 
+    // New text form (RESTful route)
+    $router->get('/texts/new', 'Lwt\\Modules\\Text\\Http\\TextController@new', AUTH_MIDDLEWARE);
+
     // Edit texts
     $router->registerWithMiddleware('/text/edit', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware('/texts', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
@@ -145,6 +148,9 @@ function registerRoutes(Router $router): void
     );
 
     // New word (TermEditController)
+    // RESTful route: /words/new
+    $router->get('/words/new', 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@createWord', AUTH_MIDDLEWARE);
+    // Legacy route: /word/new
     $router->registerWithMiddleware(
         '/word/new',
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@createWord',
@@ -280,6 +286,9 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware('/review', 'Lwt\\Modules\\Review\\Http\\ReviewController@index', AUTH_MIDDLEWARE);
 
     // ==================== LANGUAGE ROUTES (PROTECTED) ====================
+
+    // New language form (RESTful route)
+    $router->get('/languages/new', 'Lwt\\Modules\\Language\\Http\\LanguageController@new', AUTH_MIDDLEWARE);
 
     // Edit languages (Language module)
     $router->registerWithMiddleware(

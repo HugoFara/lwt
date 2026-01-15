@@ -34,7 +34,7 @@ $base = UrlUtilities::getBasePath();
     <div class="card action-card mb-4">
         <div class="card-content">
             <div class="buttons is-centered">
-                <a href="<?php echo $base; ?>/languages?new=1" class="button is-light is-primary">
+                <a href="<?php echo $base; ?>/languages/new" class="button is-light is-primary">
                     <span class="icon"><?php
                         echo IconHelper::render('circle-plus', ['alt' => 'New Language']);
                     ?></span>

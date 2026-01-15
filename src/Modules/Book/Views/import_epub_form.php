@@ -26,7 +26,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
 
 $actions = [
     ['url' => '/books', 'label' => 'My Books', 'icon' => 'library'],
-    ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus'],
+    ['url' => '/texts/new', 'label' => 'New Text', 'icon' => 'circle-plus'],
     ['url' => '/texts', 'label' => 'All Texts', 'icon' => 'book-open'],
 ];
 

@@ -40,7 +40,7 @@ PageLayoutHelper::renderMessage($messageTyped, false);
 
 echo PageLayoutHelper::buildActionCard(
     [
-    ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+    ['url' => '/texts/new', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
     ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'],
     ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'],
     ]

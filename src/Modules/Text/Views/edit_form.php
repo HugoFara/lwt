@@ -67,7 +67,7 @@ $scrdirTyped = $scrdir;
 // Build actions only for edit mode (not new text)
 $actions = [];
 if (!$isNew) {
-    $actions[] = ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'];
+    $actions[] = ['url' => '/texts/new', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'];
     $actions[] = ['url' => '/book/import', 'label' => 'Import EPUB', 'icon' => 'book'];
     $actions[] = ['url' => '/books', 'label' => 'My Books', 'icon' => 'library'];
     $actions[] = ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'];
@@ -90,7 +90,7 @@ if (!$isNew) {
 <?php endif; ?>
 
 <form class="validate" method="post" enctype="multipart/form-data"
-      action="/texts<?php echo $isNew ? '' : '#rec' . $textIdTyped; ?>"
+      action="<?php echo $isNew ? '/texts/new' : '/texts#rec' . $textIdTyped; ?>"
       x-data="{
           importMode: 'manual',
           showAdvanced: <?php echo $isNew ? 'false' : 'true'; ?>

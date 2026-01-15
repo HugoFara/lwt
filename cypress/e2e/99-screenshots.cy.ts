@@ -47,7 +47,7 @@ describe('Documentation Screenshots', () => {
     });
 
     it('adding-text - Text creation form', () => {
-      cy.visit('/text/edit?new=1');
+      cy.visit('/texts/new');
       cy.wait(500);
 
       // Wait for form to load

@@ -155,7 +155,7 @@ export function wizardModalData(): WizardModalComponentData {
       this.close();
 
       // Navigate to the new language form with wizard flag
-      window.location.href = url('/languages?new=1&wizard=1');
+      window.location.href = url('/languages/new?wizard=1');
     }
   };
 }

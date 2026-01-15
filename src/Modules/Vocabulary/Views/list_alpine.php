@@ -39,7 +39,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 
 <?php
 echo PageLayoutHelper::buildActionCard([
-    ['url' => '/words/edit?new=1', 'label' => 'New Term', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+    ['url' => '/words/new', 'label' => 'New Term', 'icon' => 'circle-plus', 'class' => 'is-primary'],
     ['url' => '/word/upload', 'label' => 'Import Terms', 'icon' => 'file-up'],
     ['url' => '/word/tags', 'label' => 'Term Tags', 'icon' => 'tags'],
 ]);
@@ -199,7 +199,7 @@ echo PageLayoutHelper::buildActionCard([
     <!-- No results message -->
     <div x-show="!loading && words.length === 0" class="notification is-info is-light">
         <p>No terms found matching your filters.
-            <a href="/words/edit?new=1">Create a new term</a> or adjust your filters.</p>
+            <a href="/words/new">Create a new term</a> or adjust your filters.</p>
     </div>
 
     <!-- Multi Actions Section -->

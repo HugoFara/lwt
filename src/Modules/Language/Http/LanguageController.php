@@ -62,10 +62,36 @@ class LanguageController extends BaseController
     }
 
     /**
+     * Show new language form.
+     *
+     * Route: GET /languages/new
+     *
+     * @param array $params Route parameters
+     *
+     * @return void
+     */
+    public function new(array $params): void
+    {
+        // Handle new language creation with redirect (before any output)
+        if ($this->param('op') === 'Save') {
+            $result = $this->languageFacade->create();
+            if ($result['success']) {
+                // Redirect to text creation page after successful language creation
+                header('Location: ' . url('/texts/new'));
+                exit;
+            }
+            // On error, fall through to show the form with error message
+        }
+
+        PageLayoutHelper::renderPageStart('Languages', true);
+        $this->showNewForm();
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
      * Languages index page - handles all language operations.
      *
      * Routes based on request parameters:
-     * - new=1: Show new language form
      * - chg=[id]: Show edit form for language
      * - del=[id]: Delete language
      * - refresh=[id]: Reparse texts for language
@@ -79,17 +105,6 @@ class LanguageController extends BaseController
      */
     public function index(array $params): void
     {
-        // Handle new language creation with redirect (before any output)
-        if ($this->param('op') === 'Save') {
-            $result = $this->languageFacade->create();
-            if ($result['success']) {
-                // Redirect to text creation page after successful language creation
-                header('Location: ' . url('/texts?new=1'));
-                exit;
-            }
-            // On error, fall through to show the form with error message
-        }
-
         PageLayoutHelper::renderPageStart('Languages', true);
 
         $message = '';
@@ -109,28 +124,20 @@ class LanguageController extends BaseController
         if ($delId !== null) {
             $result = $this->languageFacade->delete($delId);
             $message = $result['error'] ?? "Deleted: {$result['count']}";
-        } elseif ($op !== '') {
-            if ($op === 'Save') {
-                // Save was already handled above (with redirect on success)
-                // If we get here, it means there was an error
-                $message = "Error creating language";
-            } elseif ($op === 'Change') {
-                $lgId = $this->paramInt('LgID', 0) ?? 0;
-                $result = $this->languageFacade->update($lgId);
-                if ($result['error'] !== null) {
-                    $message = $result['error'];
-                } elseif ($result['reparsed'] !== null) {
-                    $message = "Updated: 1 / Reparsed texts: {$result['reparsed']}";
-                } else {
-                    $message = "Updated: 1 / Reparsing not needed";
-                }
+        } elseif ($op === 'Change') {
+            $lgId = $this->paramInt('LgID', 0) ?? 0;
+            $result = $this->languageFacade->update($lgId);
+            if ($result['error'] !== null) {
+                $message = $result['error'];
+            } elseif ($result['reparsed'] !== null) {
+                $message = "Updated: 1 / Reparsed texts: {$result['reparsed']}";
+            } else {
+                $message = "Updated: 1 / Reparsing not needed";
             }
         }
 
         // Display appropriate view
-        if ($this->hasParam('new')) {
-            $this->showNewForm();
-        } elseif ($this->hasParam('chg')) {
+        if ($this->hasParam('chg')) {
             $this->showEditForm($this->paramInt('chg', 0) ?? 0);
         } else {
             $this->showList($message);

@@ -123,7 +123,7 @@ class PageLayoutHelper
                 <div class="navbar-dropdown">
                     <a class="navbar-item" href="{$base}/languages">Languages</a>
                     <hr class="navbar-divider">
-                    <a class="navbar-item" href="{$base}/languages?new=1">Add New Language</a>
+                    <a class="navbar-item" href="{$base}/languages/new">Add New Language</a>
                 </div>
             </div>
 

@@ -32,7 +32,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
     <div class="card action-card mb-4">
         <div class="card-content">
             <div class="buttons is-centered">
-                <a href="/languages?new=1" class="button is-light is-primary">
+                <a href="/languages/new" class="button is-light is-primary">
                     <span class="icon"><?php
                         echo IconHelper::render('circle-plus', ['alt' => 'New Language']);
                     ?></span>
