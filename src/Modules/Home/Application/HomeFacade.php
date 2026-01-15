@@ -47,6 +47,7 @@ class HomeFacade
      * @return array{
      *   language_count: int,
      *   current_language_id: int|null,
+     *   current_language_text_count: int,
      *   current_text_id: int|null,
      *   current_text_info: array|null,
      *   is_wordpress: bool,

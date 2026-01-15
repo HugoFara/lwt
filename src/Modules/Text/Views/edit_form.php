@@ -45,15 +45,23 @@ use Lwt\Core\Integration\YouTubeImport;
 // Type-safe variable extraction from controller context
 assert(is_array($languageData));
 assert(is_array($languages));
+/** @var array<int, array{id: int|string, name: string}> $languagesTyped */
 $languagesTyped = $languages;
 assert(is_object($text) && property_exists($text, 'lgid'));
 
+/** @var int $textIdTyped */
 $textIdTyped = $textId;
+/** @var int $textLgId */
 $textLgId = $text->lgid;
+/** @var string $textTitle */
 $textTitle = $text->title;
+/** @var string $textContent */
 $textContent = $text->text;
+/** @var string $textSource */
 $textSource = $text->source;
+/** @var string $textMediaUri */
 $textMediaUri = $text->media_uri;
+/** @var string $scrdirTyped */
 $scrdirTyped = $scrdir;
 
 // Build actions only for edit mode (not new text)
@@ -78,7 +86,7 @@ if (!$isNew) {
         <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
     </a>
 </h2>
-<?php echo PageLayoutHelper::buildActionCard($actions); ?>
+    <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 <?php endif; ?>
 
 <form class="validate" method="post" enctype="multipart/form-data"
