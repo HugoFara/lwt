@@ -76,8 +76,11 @@ class LanguageController extends BaseController
         if ($this->param('op') === 'Save') {
             $result = $this->languageFacade->create();
             if ($result['success']) {
+                // Set the newly created language as the current language
+                Settings::save('currentlanguage', (string)$result['id']);
                 // Redirect to text creation page after successful language creation
-                header('Location: ' . url('/texts/new'));
+                // Use filterlang parameter to select the new language and bust browser cache
+                header('Location: ' . url('/texts/new') . '?filterlang=' . $result['id']);
                 exit;
             }
             // On error, fall through to show the form with error message
