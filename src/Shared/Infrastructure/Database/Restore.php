@@ -58,14 +58,14 @@ class Restore
         Connection::execute("SET FOREIGN_KEY_CHECKS = 0");
         try {
             foreach ($tables as $table) {
-                $tableName = $table['TABLE_NAME'] ?? null;
-                if (is_string($tableName)) {
-                    $escapedTable = '`' . str_replace('`', '``', $tableName) . '`';
-                    try {
-                        Connection::execute("DROP TABLE IF EXISTS $escapedTable");
-                    } catch (\RuntimeException $e) {
-                        // Ignore errors, table might already be gone
-                    }
+                if (!isset($table['TABLE_NAME']) || !is_string($table['TABLE_NAME'])) {
+                    continue;
+                }
+                $escapedTable = '`' . str_replace('`', '``', $table['TABLE_NAME']) . '`';
+                try {
+                    Connection::execute("DROP TABLE IF EXISTS $escapedTable");
+                } catch (\RuntimeException $e) {
+                    // Ignore errors, table might already be gone
                 }
             }
         } finally {

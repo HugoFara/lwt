@@ -49,8 +49,8 @@ describe('feed_multi_load_component.ts', () => {
     it('creates component with default values', () => {
       const component = feedMultiLoadData();
 
-      expect(component.cancelUrl).toBe('/feeds?selected_feed=0');
-      expect(component.filterUrl).toBe('/feeds/edit?multi_load_feed=1&page=1');
+      expect(component.cancelUrl).toBe('/feeds');
+      expect(component.filterUrl).toBe('/feeds/multi-load');
     });
 
     it('creates component with provided config values', () => {
@@ -73,7 +73,7 @@ describe('feed_multi_load_component.ts', () => {
       const component = feedMultiLoadData(config);
 
       expect(component.cancelUrl).toBe('/custom/cancel');
-      expect(component.filterUrl).toBe('/feeds/edit?multi_load_feed=1&page=1');
+      expect(component.filterUrl).toBe('/feeds/multi-load');
     });
   });
 
@@ -100,8 +100,8 @@ describe('feed_multi_load_component.ts', () => {
       const component = feedMultiLoadData();
       component.init();
 
-      expect(component.cancelUrl).toBe('/feeds?selected_feed=0');
-      expect(component.filterUrl).toBe('/feeds/edit?multi_load_feed=1&page=1');
+      expect(component.cancelUrl).toBe('/feeds');
+      expect(component.filterUrl).toBe('/feeds/multi-load');
     });
 
     it('handles invalid JSON gracefully', () => {
@@ -114,7 +114,7 @@ describe('feed_multi_load_component.ts', () => {
       const component = feedMultiLoadData();
 
       expect(() => component.init()).not.toThrow();
-      expect(component.cancelUrl).toBe('/feeds?selected_feed=0');
+      expect(component.cancelUrl).toBe('/feeds');
     });
   });
 
@@ -314,7 +314,7 @@ describe('feed_multi_load_component.ts', () => {
 
       component.handleLanguageFilter(event);
 
-      expect(setLang).toHaveBeenCalledWith(select, '/feeds/edit?multi_load_feed=1&page=1');
+      expect(setLang).toHaveBeenCalledWith(select, '/feeds/multi-load');
     });
   });
 
@@ -338,7 +338,7 @@ describe('feed_multi_load_component.ts', () => {
 
       component.cancel();
 
-      expect(window.location.href).toBe('/feeds?selected_feed=0');
+      expect(window.location.href).toBe('/feeds');
     });
   });
 });

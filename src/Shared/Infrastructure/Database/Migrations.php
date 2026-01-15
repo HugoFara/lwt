@@ -56,19 +56,21 @@ class Migrations
         );
 
         foreach ($constraints as $constraint) {
-            $tableName = $constraint['TABLE_NAME'] ?? null;
-            $constraintName = $constraint['CONSTRAINT_NAME'] ?? null;
-            if (is_string($tableName) && is_string($constraintName)) {
-                // Use backtick escaping for identifiers
-                $escapedTable = '`' . str_replace('`', '``', $tableName) . '`';
-                $escapedConstraint = '`' . str_replace('`', '``', $constraintName) . '`';
-                try {
-                    Connection::execute(
-                        "ALTER TABLE $escapedTable DROP FOREIGN KEY $escapedConstraint"
-                    );
-                } catch (\RuntimeException $e) {
-                    // FK might already be dropped, continue
-                }
+            if (
+                !isset($constraint['TABLE_NAME']) || !is_string($constraint['TABLE_NAME'])
+                || !isset($constraint['CONSTRAINT_NAME']) || !is_string($constraint['CONSTRAINT_NAME'])
+            ) {
+                continue;
+            }
+            // Use backtick escaping for identifiers
+            $escapedTable = '`' . str_replace('`', '``', $constraint['TABLE_NAME']) . '`';
+            $escapedConstraint = '`' . str_replace('`', '``', $constraint['CONSTRAINT_NAME']) . '`';
+            try {
+                Connection::execute(
+                    "ALTER TABLE $escapedTable DROP FOREIGN KEY $escapedConstraint"
+                );
+            } catch (\RuntimeException $e) {
+                // FK might already be dropped, continue
             }
         }
     }

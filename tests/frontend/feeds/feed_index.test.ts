@@ -56,9 +56,9 @@ describe('feed_index_component.ts', () => {
     it('creates component with default values', () => {
       const component = feedIndexData();
 
-      expect(component.resetUrl).toBe('/feeds/edit');
-      expect(component.filterUrl).toBe('/feeds/edit?manage_feeds=1');
-      expect(component.pageBaseUrl).toBe('/feeds/edit');
+      expect(component.resetUrl).toBe('/feeds/manage');
+      expect(component.filterUrl).toBe('/feeds/manage');
+      expect(component.pageBaseUrl).toBe('/feeds/manage');
       expect(component.query).toBe('');
     });
 
@@ -85,7 +85,7 @@ describe('feed_index_component.ts', () => {
 
       const component = feedIndexData(config);
 
-      expect(component.resetUrl).toBe('/feeds/edit'); // Default
+      expect(component.resetUrl).toBe('/feeds/manage'); // Default
       expect(component.query).toBe('search term');
     });
   });
@@ -113,7 +113,7 @@ describe('feed_index_component.ts', () => {
       const component = feedIndexData();
       component.init();
 
-      expect(component.resetUrl).toBe('/feeds/edit');
+      expect(component.resetUrl).toBe('/feeds/manage');
       expect(component.query).toBe('');
     });
 
@@ -149,7 +149,7 @@ describe('feed_index_component.ts', () => {
 
       component.handleReset();
 
-      expect(resetAll).toHaveBeenCalledWith('/feeds/edit');
+      expect(resetAll).toHaveBeenCalledWith('/feeds/manage');
     });
   });
 
@@ -175,7 +175,7 @@ describe('feed_index_component.ts', () => {
 
       component.handleLanguageFilter(event);
 
-      expect(setLang).toHaveBeenCalledWith(select, '/feeds/edit?manage_feeds=1');
+      expect(setLang).toHaveBeenCalledWith(select, '/feeds/manage');
     });
   });
 
@@ -199,7 +199,7 @@ describe('feed_index_component.ts', () => {
 
       component.handleQueryFilter();
 
-      expect(window.location.href).toBe('/feeds/edit?page=1&query=');
+      expect(window.location.href).toBe('/feeds/manage?page=1&query=');
     });
 
     it('handles special characters in query', () => {
@@ -208,7 +208,7 @@ describe('feed_index_component.ts', () => {
 
       component.handleQueryFilter();
 
-      expect(window.location.href).toBe('/feeds/edit?page=1&query=test%26query%3Dvalue');
+      expect(window.location.href).toBe('/feeds/manage?page=1&query=test%26query%3Dvalue');
     });
   });
 
@@ -224,7 +224,7 @@ describe('feed_index_component.ts', () => {
       component.handleClearQuery();
 
       expect(component.query).toBe('');
-      expect(window.location.href).toBe('/feeds/edit?page=1&query=');
+      expect(window.location.href).toBe('/feeds/manage?page=1&query=');
     });
   });
 
@@ -353,7 +353,7 @@ describe('feed_index_component.ts', () => {
 
       component.handleSort(event);
 
-      expect(window.location.href).toBe('/feeds/edit?page=1&sort=name%26asc');
+      expect(window.location.href).toBe('/feeds/manage?page=1&sort=name%26asc');
     });
   });
 
@@ -362,15 +362,24 @@ describe('feed_index_component.ts', () => {
   // ===========================================================================
 
   describe('confirmDelete()', () => {
-    it('navigates to delete URL when confirmed', () => {
+    it('navigates to delete URL when confirmed', async () => {
       vi.spyOn(window, 'confirm').mockReturnValue(true);
+      const fetchMock = vi.spyOn(global, 'fetch').mockResolvedValue(new Response());
 
       const component = feedIndexData();
 
       component.confirmDelete('42');
 
       expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-      expect(window.location.href).toBe('/feeds/edit?markaction=del&selected_feed=42');
+      expect(fetchMock).toHaveBeenCalledWith('/feeds/42', {
+        method: 'DELETE',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+
+      // Wait for the promise to resolve
+      await vi.waitFor(() => {
+        expect(window.location.href).toBe('/feeds/manage');
+      });
     });
 
     it('does not navigate when cancelled', () => {
