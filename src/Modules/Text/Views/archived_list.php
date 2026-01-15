@@ -225,12 +225,13 @@ echo PageLayoutHelper::buildActionCard(
 
                                 <footer class="card-footer">
                                     <a
-                                        :href="'/text/archived?unarch=' + text.id"
-                                        class="card-footer-item is-primary-action">
+                                        href="#"
+                                        class="card-footer-item is-primary-action"
+                                        @click.prevent="handlePostAction($event, '/texts/' + text.id + '/unarchive')">
                                         <?php echo IconHelper::render('archive-restore', ['size' => 16]); ?>
                                         <span>Unarchive</span>
                                     </a>
-                                    <a :href="'/text/archived?chg=' + text.id" class="card-footer-item">
+                                    <a :href="'/text/archived/' + text.id + '/edit'" class="card-footer-item">
                                         <?php echo IconHelper::render('file-pen', ['size' => 16]); ?>
                                         <span>Edit</span>
                                     </a>

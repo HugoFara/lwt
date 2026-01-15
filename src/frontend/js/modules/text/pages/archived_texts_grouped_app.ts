@@ -125,6 +125,7 @@ export interface ArchivedTextsGroupedData {
   // Actions
   handleMultiAction(langId: number, event: Event): void;
   handleDelete(event: Event, url: string): void;
+  handlePostAction(event: Event, url: string): void;
 
   // Sorting
   handleSortChange(event: Event): void;
@@ -409,6 +410,16 @@ export function archivedTextsGroupedData(): ArchivedTextsGroupedData {
       if (confirmDelete()) {
         window.location.href = url;
       }
+    },
+
+    handlePostAction(event: Event, url: string) {
+      event.preventDefault();
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;
+      form.style.display = 'none';
+      document.body.appendChild(form);
+      form.submit();
     },
 
     // Sorting

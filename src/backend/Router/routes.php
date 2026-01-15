@@ -73,6 +73,15 @@ function registerRoutes(Router $router): void
     $router->get('/texts/{id:int}/edit', 'Lwt\\Modules\\Text\\Http\\TextController@editSingle', AUTH_MIDDLEWARE);
     $router->post('/texts/{id:int}/edit', 'Lwt\\Modules\\Text\\Http\\TextController@editSingle', AUTH_MIDDLEWARE);
 
+    // Delete text (RESTful route): DELETE /texts/123
+    $router->delete('/texts/{id:int}', 'Lwt\\Modules\\Text\\Http\\TextController@delete', AUTH_MIDDLEWARE);
+
+    // Archive text (RESTful route): POST /texts/123/archive
+    $router->post('/texts/{id:int}/archive', 'Lwt\\Modules\\Text\\Http\\TextController@archive', AUTH_MIDDLEWARE);
+
+    // Unarchive text (RESTful route): POST /texts/123/unarchive
+    $router->post('/texts/{id:int}/unarchive', 'Lwt\\Modules\\Text\\Http\\TextController@unarchive', AUTH_MIDDLEWARE);
+
     // Texts list and legacy edit routes
     $router->registerWithMiddleware('/text/edit', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware('/texts', 'Lwt\\Modules\\Text\\Http\\TextController@edit', AUTH_MIDDLEWARE);
@@ -84,11 +93,12 @@ function registerRoutes(Router $router): void
     $router->get('/text/display', 'Lwt\\Modules\\Text\\Http\\TextController@display', AUTH_MIDDLEWARE);
 
     // Print text (TextPrintController from Text module)
-    $router->registerWithMiddleware(
-        '/text/print',
-        'Lwt\\Modules\\Text\\Http\\TextPrintController@printAnnotated',
-        AUTH_MIDDLEWARE
-    );
+    // RESTful route: /text/123/print
+    $router->get('/text/{text:int}/print', 'Lwt\\Modules\\Text\\Http\\TextPrintController@printAnnotated', AUTH_MIDDLEWARE);
+    // RESTful route: /text/123/print/edit
+    $router->get('/text/{text:int}/print/edit', 'Lwt\\Modules\\Text\\Http\\TextPrintController@editAnnotation', AUTH_MIDDLEWARE);
+    // RESTful route: DELETE /text/123/annotation
+    $router->delete('/text/{text:int}/annotation', 'Lwt\\Modules\\Text\\Http\\TextPrintController@deleteAnnotation', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware(
         '/text/print-plain',
         'Lwt\\Modules\\Text\\Http\\TextPrintController@printPlain',
@@ -112,6 +122,10 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
+    // Edit archived text (RESTful route): /text/archived/123/edit
+    $router->get('/text/archived/{id:int}/edit', 'Lwt\\Modules\\Text\\Http\\TextController@archivedEdit', AUTH_MIDDLEWARE);
+    $router->post('/text/archived/{id:int}/edit', 'Lwt\\Modules\\Text\\Http\\TextController@archivedEdit', AUTH_MIDDLEWARE);
+
     // ==================== WORD/TERM ROUTES (PROTECTED) ====================
     // Split into focused controllers: TermEditController, TermDisplayController,
     // TermStatusController, TermApiController, TermImportController, MultiWordController
@@ -133,6 +147,9 @@ function registerRoutes(Router $router): void
     // Edit single word form (RESTful route): /words/123/edit
     $router->get('/words/{id:int}/edit', 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById', AUTH_MIDDLEWARE);
     $router->post('/words/{id:int}/edit', 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById', AUTH_MIDDLEWARE);
+
+    // Delete word (RESTful route): DELETE /words/123
+    $router->delete('/words/{id:int}', 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@deleteWord', AUTH_MIDDLEWARE);
 
     // Words list - Alpine.js SPA version (TermDisplayController)
     $router->registerWithMiddleware(
@@ -327,10 +344,26 @@ function registerRoutes(Router $router): void
 
     // Term tags (Tags module)
     $router->get('/tags/new', 'Lwt\\Modules\\Tags\\Http\\TermTagController@new', AUTH_MIDDLEWARE);
+
+    // Edit term tag (RESTful route): GET/POST /tags/123/edit
+    $router->get('/tags/{id:int}/edit', 'Lwt\\Modules\\Tags\\Http\\TermTagController@edit', AUTH_MIDDLEWARE);
+    $router->post('/tags/{id:int}/edit', 'Lwt\\Modules\\Tags\\Http\\TermTagController@edit', AUTH_MIDDLEWARE);
+
+    // Delete term tag (RESTful route): DELETE /tags/123
+    $router->delete('/tags/{id:int}', 'Lwt\\Modules\\Tags\\Http\\TermTagController@delete', AUTH_MIDDLEWARE);
+
     $router->registerWithMiddleware('/tags', 'Lwt\\Modules\\Tags\\Http\\TermTagController@index', AUTH_MIDDLEWARE);
 
     // Text tags (Tags module)
     $router->get('/tags/text/new', 'Lwt\\Modules\\Tags\\Http\\TextTagController@new', AUTH_MIDDLEWARE);
+
+    // Edit text tag (RESTful route): GET/POST /tags/text/123/edit
+    $router->get('/tags/text/{id:int}/edit', 'Lwt\\Modules\\Tags\\Http\\TextTagController@edit', AUTH_MIDDLEWARE);
+    $router->post('/tags/text/{id:int}/edit', 'Lwt\\Modules\\Tags\\Http\\TextTagController@edit', AUTH_MIDDLEWARE);
+
+    // Delete text tag (RESTful route): DELETE /tags/text/123
+    $router->delete('/tags/text/{id:int}', 'Lwt\\Modules\\Tags\\Http\\TextTagController@delete', AUTH_MIDDLEWARE);
+
     $router->registerWithMiddleware('/tags/text', 'Lwt\\Modules\\Tags\\Http\\TextTagController@index', AUTH_MIDDLEWARE);
 
     // ==================== FEED ROUTES (PROTECTED) ====================

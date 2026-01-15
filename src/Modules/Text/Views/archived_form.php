@@ -28,7 +28,7 @@ use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\SearchableSelectHelper;
 
-$phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
+// Form action URL - posts back to the same RESTful route
 
 // Type-safe variable extraction from controller context
 /**
@@ -50,7 +50,7 @@ $languagesTyped = $languages;
 ?>
 <h2 class="title is-4">Edit Archived Text</h2>
 
-<form class="validate" action="<?php echo $phpSelf; ?>#rec<?php echo $textIdTyped; ?>" method="post">
+<form class="validate" action="/text/archived/<?php echo $textIdTyped; ?>/edit#rec<?php echo $textIdTyped; ?>" method="post">
     <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
 
     <div class="box">

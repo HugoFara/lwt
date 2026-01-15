@@ -303,6 +303,67 @@ class TextController extends BaseController
     }
 
     /**
+     * Delete a text.
+     *
+     * Route: DELETE /texts/{id}
+     *
+     * @param int $id Text ID from route parameter
+     *
+     * @return RedirectResponse Redirect to texts list
+     */
+    public function delete(int $id): RedirectResponse
+    {
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+
+        $this->textService->deleteText($id);
+
+        return $this->redirect('/texts');
+    }
+
+    /**
+     * Archive a text.
+     *
+     * Route: POST /texts/{id}/archive
+     *
+     * @param int $id Text ID from route parameter
+     *
+     * @return RedirectResponse Redirect to texts list
+     */
+    public function archive(int $id): RedirectResponse
+    {
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+
+        $this->textService->archiveText($id);
+
+        return $this->redirect('/texts');
+    }
+
+    /**
+     * Unarchive a text.
+     *
+     * Route: POST /texts/{id}/unarchive
+     *
+     * @param int $id Text ID from route parameter
+     *
+     * @return RedirectResponse Redirect to archived texts list
+     */
+    public function unarchive(int $id): RedirectResponse
+    {
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
+        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
+        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
+        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
+
+        $this->textService->unarchiveText($id);
+
+        return $this->redirect('/text/archived');
+    }
+
+    /**
      * Edit texts list (replaces text_edit.php)
      *
      * @param array $params Route parameters
@@ -961,6 +1022,64 @@ class TextController extends BaseController
         } else {
             $activeLanguageId = (int) Settings::get('currentlanguage');
             include self::MODULE_VIEWS . '/archived_list.php';
+        }
+
+        PageLayoutHelper::renderPageEnd();
+
+        return null;
+    }
+
+    /**
+     * Edit archived text form.
+     *
+     * Route: GET/POST /text/archived/{id}/edit
+     *
+     * @param int $id Archived text ID from route parameter
+     *
+     * @return RedirectResponse|null Redirect response or null if rendered
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    public function archivedEdit(int $id): ?RedirectResponse
+    {
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
+        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
+        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
+        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
+
+        PageLayoutHelper::renderPageStart('Archived Texts', true);
+
+        $message = '';
+
+        // Handle save operation
+        $op = $this->param('op');
+        if ($op == 'Change') {
+            $txId = $this->paramInt('TxID', 0) ?? 0;
+            $affected = $this->textService->updateArchivedText(
+                $txId,
+                $this->paramInt('TxLgID', 0) ?? 0,
+                $this->param('TxTitle'),
+                $this->param('TxText'),
+                $this->param('TxAudioURI'),
+                $this->param('TxSourceURI')
+            );
+            $message = "Updated: {$affected}";
+            TagsFacade::saveArchivedTextTagsFromForm($txId);
+            PageLayoutHelper::renderMessage($message, false);
+        }
+
+        // Display edit form
+        $textId = $id;
+        $record = $this->textService->getArchivedTextById($textId);
+        if ($record !== null) {
+            $languages = $this->languageService->getLanguagesForSelect();
+            include self::MODULE_VIEWS . '/archived_form.php';
+        } else {
+            echo '<p>Archived text not found.</p>';
         }
 
         PageLayoutHelper::renderPageEnd();

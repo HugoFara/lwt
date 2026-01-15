@@ -308,7 +308,9 @@ echo PageLayoutHelper::buildActionCard(
                                                     <?php echo IconHelper::render('printer', ['size' => 14]); ?>
                                                     <span>Print</span>
                                                 </a>
-                                                <a :href="'/texts?arch=' + text.id" class="dropdown-item">
+                                                <a href="#"
+                                                   class="dropdown-item"
+                                                   @click.prevent="handlePostAction($event, '/texts/' + text.id + '/archive')">
                                                     <?php echo IconHelper::render('archive', ['size' => 14]); ?>
                                                     <span>Archive</span>
                                                 </a>
@@ -319,8 +321,8 @@ echo PageLayoutHelper::buildActionCard(
                                                 <hr class="dropdown-divider">
                                                 <a
                                                     class="dropdown-item has-text-danger"
-                                                    @click.prevent="handleDelete(
-                                                        $event, '/texts?del=' + text.id
+                                                    @click.prevent="handleRestDelete(
+                                                        $event, '/texts/' + text.id
                                                     )">
                                                     <?php echo IconHelper::render('trash-2', ['size' => 14]); ?>
                                                     <span>Delete</span>
