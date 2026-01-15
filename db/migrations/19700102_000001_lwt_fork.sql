@@ -11,9 +11,9 @@ ALTER TABLE archivedtexts
 
 ALTER TABLE languages
     MODIFY COLUMN LgID tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
-    MODIFY COLUMN LgRemoveSpaces tinyint(1) unsigned NOT NULL,
-    MODIFY COLUMN LgSplitEachChar tinyint(1) unsigned NOT NULL,
-    MODIFY COLUMN LgRightToLeft tinyint(1) unsigned NOT NULL;
+    MODIFY COLUMN LgRemoveSpaces tinyint(1) unsigned NOT NULL DEFAULT '0',
+    MODIFY COLUMN LgSplitEachChar tinyint(1) unsigned NOT NULL DEFAULT '0',
+    MODIFY COLUMN LgRightToLeft tinyint(1) unsigned NOT NULL DEFAULT '0';
 
 ALTER TABLE sentences
     MODIFY COLUMN SeID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
