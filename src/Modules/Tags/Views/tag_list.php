@@ -251,7 +251,7 @@ echo PageLayoutHelper::buildActionCard([
     <td class="has-text-centered" style="white-space: nowrap;">
         <div class="buttons are-small is-centered">
             <a
-                href="<?php echo $baseUrl; ?>?chg=<?php echo $tag['id']; ?>"
+                href="<?php echo $baseUrl; ?>/<?php echo $tag['id']; ?>/edit"
                 class="button is-small is-ghost"
                 title="Edit"
             >
@@ -259,7 +259,8 @@ echo PageLayoutHelper::buildActionCard([
             </a>
             <a
                 class="button is-small is-ghost confirmdelete"
-                href="<?php echo $baseUrl; ?>?del=<?php echo $tag['id']; ?>"
+                href="<?php echo $baseUrl; ?>/<?php echo $tag['id']; ?>"
+                data-method="delete"
                 title="Delete"
             >
                 <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
@@ -327,14 +328,15 @@ echo PageLayoutHelper::buildActionCard([
                 <div class="level-item">
                     <div class="buttons are-small">
                         <a
-                            href="<?php echo $baseUrl; ?>?chg=<?php echo $tag['id']; ?>"
+                            href="<?php echo $baseUrl; ?>/<?php echo $tag['id']; ?>/edit"
                             class="button is-small is-info is-light"
                         >
                             <?php echo IconHelper::render('file-pen', ['alt' => 'Edit']); ?>
                         </a>
                         <a
                             class="button is-small is-danger is-light confirmdelete"
-                            href="<?php echo $baseUrl; ?>?del=<?php echo $tag['id']; ?>"
+                            href="<?php echo $baseUrl; ?>/<?php echo $tag['id']; ?>"
+                            data-method="delete"
                         >
                             <?php echo IconHelper::render('circle-minus', ['alt' => 'Delete']); ?>
                         </a>

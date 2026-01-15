@@ -80,6 +80,55 @@ class TextTagController extends AbstractCrudController
     }
 
     /**
+     * Edit text tag form.
+     *
+     * Route: GET/POST /tags/text/{id}/edit
+     *
+     * @param int $id Tag ID from route parameter
+     *
+     * @return void
+     */
+    public function edit(int $id): void
+    {
+        $this->render($this->pageTitle, $this->showMenu);
+
+        // Handle form submission
+        if ($this->param('op') === 'Change') {
+            $message = $this->handleUpdate($id);
+            if (!str_starts_with($message, 'Error')) {
+                // Redirect to list on success
+                header('Location: ' . url('/tags/text'));
+                exit;
+            }
+            $this->message($message, false);
+        }
+
+        $this->renderEditForm($id);
+        $this->endRender();
+    }
+
+    /**
+     * Delete a text tag.
+     *
+     * Route: DELETE /tags/text/{id}
+     *
+     * @param int $id Tag ID from route parameter
+     *
+     * @return void
+     */
+    public function delete(int $id): void
+    {
+        $result = $this->facade->delete($id);
+
+        if ($result['success']) {
+            header('Location: ' . url('/tags/text') . '?message=' . urlencode('Deleted'));
+        } else {
+            header('Location: ' . url('/tags/text') . '?error=' . urlencode('Failed to delete tag'));
+        }
+        exit;
+    }
+
+    /**
      * Main index action.
      *
      * @param array $params Route parameters

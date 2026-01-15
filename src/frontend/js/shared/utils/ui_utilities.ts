@@ -48,6 +48,42 @@ export function confirmDelete(): boolean {
 }
 
 /**
+ * Handle click on confirmdelete elements.
+ * Supports data-method="delete" for RESTful DELETE requests.
+ *
+ * @param event - The click event
+ */
+async function handleConfirmDelete(event: Event): Promise<void> {
+  const el = event.currentTarget as HTMLElement;
+  const href = el.getAttribute('href');
+  const method = el.getAttribute('data-method');
+
+  if (!confirmDelete()) {
+    event.preventDefault();
+    return;
+  }
+
+  // If data-method="delete", send DELETE request instead of following link
+  if (method?.toLowerCase() === 'delete' && href) {
+    event.preventDefault();
+    try {
+      const response = await fetch(href, { method: 'DELETE' });
+      if (response.redirected) {
+        window.location.href = response.url;
+      } else if (response.ok) {
+        // Reload page to show updated list
+        window.location.reload();
+      } else {
+        alert('Delete failed: ' + response.statusText);
+      }
+    } catch (error) {
+      alert('Delete failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  }
+  // Otherwise, let the default link behavior proceed (confirmDelete already returned true)
+}
+
+/**
  * Save a setting via API.
  *
  * @param key - Setting key
@@ -382,9 +418,9 @@ export function prepareMainAreas(): void {
     input.addEventListener('click', markClick);
   });
 
-  // Confirm delete buttons
+  // Confirm delete buttons - supports data-method="delete" for RESTful DELETE requests
   document.querySelectorAll<HTMLElement>('.confirmdelete').forEach((el) => {
-    el.addEventListener('click', confirmDelete);
+    el.addEventListener('click', handleConfirmDelete);
   });
 
   // Textarea no-return handling

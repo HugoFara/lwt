@@ -31,13 +31,15 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  * ## Request Parameter Conventions
  *
  * This controller expects these standard request parameters:
- * - `chg=ID` - Display the edit form for record ID
- * - `del=ID` - Delete record ID
  * - `op=Save` - Create a new record (from form submission)
  * - `op=Change` - Update an existing record (from form submission)
  * - `marked[]` - Array of IDs for bulk operations
  * - `markaction` - Bulk action to perform on marked items
  * - `allaction` - Action to perform on all filtered items
+ *
+ * Note: Edit and delete operations use RESTful routes:
+ * - GET /{resource}/{id}/edit - Edit form
+ * - DELETE /{resource}/{id} - Delete record
  *
  * Note: Create forms should use dedicated /new routes (e.g., /tags/new)
  *
@@ -119,8 +121,9 @@ abstract class AbstractCrudController extends BaseController
      *
      * Handles the standard action flow:
      * 1. Bulk actions (markaction, allaction)
-     * 2. Single delete (del parameter)
-     * 3. Create/Update (op parameter)
+     * 2. Create/Update (op parameter)
+     *
+     * Note: Single delete is handled via RESTful DELETE routes.
      *
      * @return string Result message from the action
      */
@@ -140,13 +143,6 @@ abstract class AbstractCrudController extends BaseController
         if ($allAction !== '') {
             $result = $this->processAllAction($allAction);
             return $this->formatBulkActionMessage($result);
-        }
-
-        // Single delete
-        $deleteId = $this->paramInt('del');
-        if ($deleteId !== null) {
-            $message = $this->handleDelete($deleteId);
-            return $message;
         }
 
         // Create or Update
@@ -189,18 +185,15 @@ abstract class AbstractCrudController extends BaseController
     /**
      * Dispatch to the appropriate view based on request parameters.
      *
+     * Note: Edit forms are now handled via RESTful /{resource}/{id}/edit routes.
+     *
      * @param string $message Message from processed action
      *
      * @return void
      */
     protected function dispatchView(string $message): void
     {
-        if ($this->hasParam('chg')) {
-            $id = $this->paramInt('chg', 0) ?? 0;
-            $this->renderEditForm($id);
-        } else {
-            $this->renderList($message);
-        }
+        $this->renderList($message);
     }
 
     /**
@@ -323,7 +316,7 @@ abstract class AbstractCrudController extends BaseController
     /**
      * Handle delete operation.
      *
-     * Called when `del=ID` is in the request.
+     * Called from RESTful DELETE routes and bulk delete operations.
      *
      * @param int $id Record ID to delete
      *
@@ -345,7 +338,7 @@ abstract class AbstractCrudController extends BaseController
     /**
      * Render the create form.
      *
-     * Called when `new=1` is in the request.
+     * Called from RESTful /{resource}/new routes.
      *
      * @return void
      */
@@ -354,7 +347,7 @@ abstract class AbstractCrudController extends BaseController
     /**
      * Render the edit form.
      *
-     * Called when `chg=ID` is in the request.
+     * Called from RESTful /{resource}/{id}/edit routes.
      *
      * @param int $id Record ID to edit
      *
