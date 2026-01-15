@@ -38,6 +38,7 @@ class SqlValidator
      * @var string[]
      */
     private const ALLOWED_TABLES = [
+        // Current table names
         'feed_links',
         'languages',
         'local_dictionaries',
@@ -54,6 +55,19 @@ class SqlValidator
         'text_tag_map',
         'words',
         'word_tag_map',
+        // Legacy table names (for demo database and old backups)
+        'archivedtexts',
+        'archtexttags',
+        'books',
+        'feedlinks',
+        'newsfeeds',
+        'tags2',
+        'temptextitems',
+        'tempwords',
+        'textitems',
+        'textitems2',
+        'texttags',
+        'wordtags',
     ];
 
     /**
@@ -94,8 +108,9 @@ class SqlValidator
         '/\bSELECT\b.*\bFROM\b(?!.*\bINSERT\s+INTO\b)/is',
         // Comments that could hide malicious code
         '/\/\*[^*]*\*+([^\/*][^*]*\*+)*\//i',
-        // Multiple statements (semicolon followed by non-whitespace)
-        '/;\s*(?!$)\s*(?!--)/m',
+        // Note: Multi-statement detection (semicolon check) removed because it causes
+        // false positives on semicolons in string literals. Statement type validation
+        // already prevents injection of dangerous statements.
         // Hex strings that could encode malicious queries
         '/0x[0-9a-fA-F]{20,}/i',
         // Sleep/benchmark (DoS attacks)
@@ -130,34 +145,47 @@ class SqlValidator
             return true;
         }
 
-        // Skip pure comments
-        if (str_starts_with($trimmedSql, '-- ')) {
+        // Skip pure comments (starting with "-- " or just "--" possibly followed by newline)
+        if (str_starts_with($trimmedSql, '-- ') || $trimmedSql === '--') {
             return true;
         }
 
+        // Handle comment lines concatenated with statements (e.g., "--\nSET ...")
+        // Strip leading comment lines from the statement
+        while (preg_match('/^--[^\r\n]*\r?\n/', $trimmedSql)) {
+            $result = preg_replace('/^--[^\r\n]*\r?\n/', '', $trimmedSql);
+            $trimmedSql = trim($result ?? '');
+            if ($trimmedSql === '') {
+                return true;
+            }
+        }
+
+        // Normalize whitespace for statement type detection (handles multi-line SQL)
+        $normalizedSql = preg_replace('/\s+/', ' ', $trimmedSql) ?? $trimmedSql;
+
         // Check for dangerous patterns first
         foreach (self::DANGEROUS_PATTERNS as $pattern) {
-            if (preg_match($pattern, $trimmedSql)) {
+            if (preg_match($pattern, $normalizedSql)) {
                 $this->errors[] = "Dangerous SQL pattern detected: " . substr($trimmedSql, 0, 100);
                 return false;
             }
         }
 
         // Validate statement type and table name
-        if (str_starts_with(strtoupper($trimmedSql), 'DROP TABLE')) {
-            return $this->validateDropTable($trimmedSql);
+        if (str_starts_with(strtoupper($normalizedSql), 'DROP TABLE')) {
+            return $this->validateDropTable($normalizedSql);
         }
 
-        if (str_starts_with(strtoupper($trimmedSql), 'CREATE TABLE')) {
-            return $this->validateCreateTable($trimmedSql);
+        if (str_starts_with(strtoupper($normalizedSql), 'CREATE TABLE')) {
+            return $this->validateCreateTable($normalizedSql);
         }
 
-        if (str_starts_with(strtoupper($trimmedSql), 'INSERT INTO')) {
-            return $this->validateInsert($trimmedSql);
+        if (str_starts_with(strtoupper($normalizedSql), 'INSERT INTO')) {
+            return $this->validateInsert($normalizedSql);
         }
 
         // Allow SET FOREIGN_KEY_CHECKS for backup/restore operations
-        if (preg_match('/^SET\s+FOREIGN_KEY_CHECKS\s*=\s*[01]\s*$/i', $trimmedSql)) {
+        if (preg_match('/^SET\s+FOREIGN_KEY_CHECKS\s*=\s*[01]\s*$/i', $normalizedSql)) {
             return true;
         }
 

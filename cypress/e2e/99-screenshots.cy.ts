@@ -252,7 +252,7 @@ On disait dans le livre: "Les serpents boas avalent leur proie tout entière, sa
   describe('Print', () => {
     it('print-text - Print text page', () => {
       // Go directly to print page for first text
-      cy.visit('/text/print?text=1');
+      cy.visit('/text/1/print');
       cy.wait(1500);
       cy.get('body').should('be.visible');
       cy.screenshot('print-text', { capture: 'viewport' });

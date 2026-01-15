@@ -41,6 +41,13 @@ class SqlValidatorTest extends TestCase
         $this->assertTrue($this->validator->validate($sql));
     }
 
+    public function testValidDropTableMultiLine(): void
+    {
+        // Multi-line DROP statement (as found in demo.sql)
+        $sql = "DROP\n  TABLE IF EXISTS archivedtexts";
+        $this->assertTrue($this->validator->validate($sql));
+    }
+
     // ===== Valid CREATE TABLE statements =====
 
     public function testValidCreateTable(): void
@@ -279,6 +286,35 @@ class SqlValidatorTest extends TestCase
         $this->assertTrue($this->validator->validate($sql));
     }
 
+    public function testCommentWithoutSpaceAllowed(): void
+    {
+        // Just "--" without trailing space (common in SQL dumps)
+        $sql = "--";
+        $this->assertTrue($this->validator->validate($sql));
+    }
+
+    public function testCommentLineBeforeStatementAllowed(): void
+    {
+        // Comment line followed by newline and valid statement
+        // This can happen when SQL parsing concatenates lines
+        $sql = "--\nSET FOREIGN_KEY_CHECKS = 0";
+        $this->assertTrue($this->validator->validate($sql));
+    }
+
+    public function testMultipleCommentLinesBeforeStatementAllowed(): void
+    {
+        // Multiple comment lines before a valid statement
+        $sql = "--\n--\n-- comment\nINSERT INTO languages VALUES(1, 'English')";
+        $this->assertTrue($this->validator->validate($sql));
+    }
+
+    public function testCommentLineBeforeInvalidStatementBlocked(): void
+    {
+        // Comment line before invalid statement should still be blocked
+        $sql = "--\nSELECT * FROM users";
+        $this->assertFalse($this->validator->validate($sql));
+    }
+
     // ===== validateAll tests =====
 
     public function testValidateAllWithValidStatements(): void
@@ -328,6 +364,7 @@ class SqlValidatorTest extends TestCase
     public static function provideAllowedTables(): array
     {
         return [
+            // Current table names
             ['feed_links'],
             ['languages'],
             ['local_dictionaries'],
@@ -344,6 +381,19 @@ class SqlValidatorTest extends TestCase
             ['text_tag_map'],
             ['words'],
             ['word_tag_map'],
+            // Legacy table names
+            ['archivedtexts'],
+            ['archtexttags'],
+            ['books'],
+            ['feedlinks'],
+            ['newsfeeds'],
+            ['tags2'],
+            ['temptextitems'],
+            ['tempwords'],
+            ['textitems'],
+            ['textitems2'],
+            ['texttags'],
+            ['wordtags'],
         ];
     }
 
@@ -352,10 +402,8 @@ class SqlValidatorTest extends TestCase
     public function testGetAllowedTablesReturnsExpectedCount(): void
     {
         $tables = SqlValidator::getAllowedTables();
-        // 14 tables: feed_links, languages, local_dictionaries, local_dictionary_entries,
-        // news_feeds, sentences, settings, tags, temp_word_occurrences, temp_words,
-        // text_tags, word_occurrences, texts, text_tag_map, words, word_tag_map
-        $this->assertCount(16, $tables);
+        // 16 current tables + 12 legacy tables = 28 total
+        $this->assertCount(28, $tables);
     }
 
     public function testGetAllowedTablesContainsLanguages(): void

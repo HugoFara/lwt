@@ -144,12 +144,24 @@ class RoutesTest extends TestCase
             'text edit' => ['/text/edit', "{$textController}@edit"],
             'texts list' => ['/texts', "{$textController}@edit"],
             'text display' => ['/text/display', "{$textController}@display"],
-            'text print' => ['/text/print', "{$textPrintController}@printAnnotated"],
+            'text print' => ['/text/1/print', "{$textPrintController}@printAnnotated"],
+            'text print edit' => ['/text/1/print/edit', "{$textPrintController}@editAnnotation"],
             'text print-plain' => ['/text/print-plain', "{$textPrintController}@printPlain"],
             'text set-mode' => ['/text/set-mode', "{$textController}@setMode"],
             'text check' => ['/text/check', "{$textController}@check"],
             'text archived' => ['/text/archived', "{$textController}@archived"],
         ];
+    }
+
+    /**
+     * Test DELETE routes for text annotation.
+     */
+    public function testTextAnnotationDeleteRoute(): void
+    {
+        $result = $this->simulateRequest('/text/1/annotation', 'DELETE');
+        $this->assertEquals('handler', $result['type'], "Route DELETE /text/1/annotation should resolve to handler");
+        $this->assertEquals('Lwt\\Modules\\Text\\Http\\TextPrintController@deleteAnnotation', $result['handler']);
+        $this->assertHandlerFileExists($result['handler']);
     }
 
     // ==================== WORD ROUTES TESTS ====================

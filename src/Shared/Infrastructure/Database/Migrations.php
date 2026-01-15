@@ -34,6 +34,46 @@ use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 class Migrations
 {
     /**
+     * Drop all foreign key constraints from all tables in the database.
+     *
+     * This is needed before running migrations from scratch because
+     * SET FOREIGN_KEY_CHECKS = 0 only affects INSERT/UPDATE/DELETE and DROP TABLE,
+     * not ALTER TABLE MODIFY on columns referenced by FKs.
+     *
+     * @return void
+     */
+    public static function dropAllForeignKeys(): void
+    {
+        $dbname = Globals::getDatabaseName();
+
+        // Get all foreign key constraints in the database
+        $constraints = Connection::preparedFetchAll(
+            "SELECT CONSTRAINT_NAME, TABLE_NAME
+             FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+             WHERE CONSTRAINT_TYPE = 'FOREIGN KEY'
+             AND TABLE_SCHEMA = ?",
+            [$dbname]
+        );
+
+        foreach ($constraints as $constraint) {
+            $tableName = $constraint['TABLE_NAME'] ?? null;
+            $constraintName = $constraint['CONSTRAINT_NAME'] ?? null;
+            if (is_string($tableName) && is_string($constraintName)) {
+                // Use backtick escaping for identifiers
+                $escapedTable = '`' . str_replace('`', '``', $tableName) . '`';
+                $escapedConstraint = '`' . str_replace('`', '``', $constraintName) . '`';
+                try {
+                    Connection::execute(
+                        "ALTER TABLE $escapedTable DROP FOREIGN KEY $escapedConstraint"
+                    );
+                } catch (\RuntimeException $e) {
+                    // FK might already be dropped, continue
+                }
+            }
+        }
+    }
+
+    /**
      * Add a prefix to table in a SQL query string.
      *
      * @param string $sql_line SQL string to prefix.
@@ -311,15 +351,34 @@ class Migrations
             $pendingMigrations = array_diff($allMigrations, $appliedMigrations);
             $migrationsDir = __DIR__ . '/../../../../db/migrations/';
 
-            foreach ($pendingMigrations as $filename) {
-                $filepath = $migrationsDir . $filename;
-                $queries = SqlFileParser::parseFile($filepath);
-                foreach ($queries as $sql_query) {
-                    Connection::execute($sql_query);
+            // Drop all FK constraints before running migrations.
+            // SET FOREIGN_KEY_CHECKS = 0 only affects INSERT/UPDATE/DELETE and DROP TABLE,
+            // not ALTER TABLE MODIFY on columns referenced by FKs.
+            // The migrations will recreate FKs as needed.
+            self::dropAllForeignKeys();
+
+            // Disable FK checks during migrations to handle legacy data
+            // that may not satisfy new FK constraints until fully migrated
+            Connection::execute("SET FOREIGN_KEY_CHECKS = 0");
+            try {
+                foreach ($pendingMigrations as $filename) {
+                    $filepath = $migrationsDir . $filename;
+                    $queries = SqlFileParser::parseFile($filepath);
+                    try {
+                        foreach ($queries as $sql_query) {
+                            Connection::execute($sql_query);
+                        }
+                        // Record migration as applied with checksum
+                        $checksum = self::calculateChecksum($filepath);
+                        self::recordMigration($filename, $checksum);
+                    } catch (\RuntimeException $e) {
+                        // Log migration failure but continue with other migrations
+                        // This allows the app to recover from partial migration states
+                        error_log("Migration failed: $filename - " . $e->getMessage());
+                    }
                 }
-                // Record migration as applied with checksum
-                $checksum = self::calculateChecksum($filepath);
-                self::recordMigration($filename, $checksum);
+            } finally {
+                Connection::execute("SET FOREIGN_KEY_CHECKS = 1");
             }
 
             Connection::execute(
@@ -334,7 +393,7 @@ class Migrations
 
             // Set database to current version
             Settings::save('dbversion', $currversion);
-            Settings::save('lastscorecalc', '');  // do next section, too
+            Settings::save('lastscorecalc', '0');  // Reset to trigger recalculation
         }
     }
 

@@ -33,6 +33,47 @@ use Lwt\Shared\Infrastructure\Database\SqlValidator;
 class Restore
 {
     /**
+     * Drop all LWT tables to prepare for a clean restore.
+     *
+     * This is needed to ensure migrations run on a clean slate
+     * and don't fail due to partial state from previous attempts.
+     *
+     * @return void
+     */
+    private static function dropAllLwtTables(): void
+    {
+        $dbname = Globals::getDatabaseName();
+
+        // First drop all foreign keys to avoid dependency issues
+        Migrations::dropAllForeignKeys();
+
+        // Get all tables in the database
+        $tables = Connection::preparedFetchAll(
+            "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+             WHERE TABLE_SCHEMA = ? AND TABLE_TYPE = 'BASE TABLE'",
+            [$dbname]
+        );
+
+        // Disable FK checks while dropping
+        Connection::execute("SET FOREIGN_KEY_CHECKS = 0");
+        try {
+            foreach ($tables as $table) {
+                $tableName = $table['TABLE_NAME'] ?? null;
+                if (is_string($tableName)) {
+                    $escapedTable = '`' . str_replace('`', '``', $tableName) . '`';
+                    try {
+                        Connection::execute("DROP TABLE IF EXISTS $escapedTable");
+                    } catch (\RuntimeException $e) {
+                        // Ignore errors, table might already be gone
+                    }
+                }
+            }
+        } finally {
+            Connection::execute("SET FOREIGN_KEY_CHECKS = 1");
+        }
+    }
+
+    /**
      * Restore the database from a file.
      *
      * @param resource $handle       Backup file handle
@@ -79,8 +120,9 @@ class Restore
                 $start = false;
                 continue;
             }
-            // Skip comments
-            if (str_starts_with($stream, '-- ')) {
+            // Skip comments (lines starting with "-- " or lines that are just "--")
+            $trimmedLine = trim($stream);
+            if (str_starts_with($stream, '-- ') || $trimmedLine === '--') {
                 continue;
             }
             // Add stream to accumulator
@@ -118,6 +160,12 @@ class Restore
             }
         }
 
+        // Drop all existing tables first to ensure a clean slate
+        // This prevents issues with partial state from previous attempts
+        if (!$hasErrors) {
+            self::dropAllLwtTables();
+        }
+
         // Now run all queries
         $connection = Globals::getDbConnection();
         if (!$hasErrors && $connection !== null) {
@@ -153,7 +201,40 @@ class Restore
         if (!$hasErrors) {
             // Drop legacy textitems table if it exists (replaced by word_occurrences)
             Connection::execute("DROP TABLE IF EXISTS textitems");
-            Migrations::checkAndUpdate();
+
+            // Clear migration history so all migrations run fresh on restored data.
+            // This handles old backups that predate the migration system or have
+            // different schema versions. The migrations will bring the schema up to date.
+            try {
+                Connection::execute("DELETE FROM _migrations");
+            } catch (\RuntimeException $e) {
+                // Table might not exist in old backups, that's fine
+            }
+
+            // Reset dbversion to force migration check
+            // The old backup might have a different version or no version at all
+            try {
+                QueryBuilder::table('settings')
+                    ->where('StKey', '=', 'dbversion')
+                    ->delete();
+            } catch (\RuntimeException $e) {
+                // Settings table might not exist yet or have different schema
+            }
+
+            // Drop all FK constraints before running migrations.
+            // SET FOREIGN_KEY_CHECKS = 0 only affects INSERT/UPDATE/DELETE and DROP TABLE,
+            // not ALTER TABLE MODIFY on columns referenced by FKs.
+            // The migrations will recreate FKs as needed.
+            Migrations::dropAllForeignKeys();
+
+            // Disable FK checks during migrations to handle legacy backup data
+            // that may not satisfy new FK constraints until fully migrated
+            Connection::execute("SET FOREIGN_KEY_CHECKS = 0");
+            try {
+                Migrations::checkAndUpdate();
+            } finally {
+                Connection::execute("SET FOREIGN_KEY_CHECKS = 1");
+            }
             Migrations::reparseAllTexts();
             Maintenance::optimizeDatabase();
             TagsFacade::getAllTermTags(true);
