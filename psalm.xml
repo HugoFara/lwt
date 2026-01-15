@@ -45,16 +45,6 @@
             </errorLevel>
         </UndefinedGlobalVariable>
 
-        <!-- cURL constants not recognized without ext-curl stub -->
-        <UndefinedConstant>
-            <errorLevel type="suppress">
-                <file name="src/Modules/Text/Infrastructure/WhisperClient.php" />
-                <file name="src/Shared/UI/Assets/ViteHelper.php" />
-                <file name="src/backend/Core/Entity/GoogleTranslate.php" />
-                <file name="src/backend/Core/Integration/GoogleTimeToken.php" />
-            </errorLevel>
-        </UndefinedConstant>
-
         <!-- Mixed* issues in views and curl constant usage -->
         <MixedArgument>
             <errorLevel type="suppress">
