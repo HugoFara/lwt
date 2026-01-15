@@ -507,7 +507,7 @@ if (!$isNew) {
                         <button type="button"
                                 class="button is-small is-info is-outlined"
                                 data-action="navigate"
-                                data-url="/text/print?text=<?php echo $textIdTyped; ?>">
+                                data-url="/text/<?php echo $textIdTyped; ?>/print">
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('printer', ['alt' => 'Print']); ?>
                             </span>

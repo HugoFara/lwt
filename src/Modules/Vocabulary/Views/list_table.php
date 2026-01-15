@@ -193,7 +193,8 @@ assert(is_array($words));
             </a>
             <a
                 class="button is-small is-ghost confirmdelete"
-                href="/words/edit?del=<?php echo $record['WoID']; ?>"
+                href="/words/<?php echo $record['WoID']; ?>"
+                data-method="delete"
                 title="Delete"
             >
                 <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
@@ -375,7 +376,8 @@ assert(is_array($words));
                 </a>
                 <a
                     class="button is-small is-danger is-light confirmdelete"
-                    href="/words/edit?del=<?php echo $record['WoID']; ?>"
+                    href="/words/<?php echo $record['WoID']; ?>"
+                    data-method="delete"
                 >
                     <?php echo IconHelper::render('circle-minus', ['alt' => 'Delete']); ?>
                 </a>

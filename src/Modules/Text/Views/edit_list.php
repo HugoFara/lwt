@@ -201,7 +201,7 @@ echo PageLayoutHelper::buildActionCard(
                                         </a>
                                         <a
                                             x-show="text.annotated"
-                                            :href="'/text/print?text=' + text.id"
+                                            :href="'/text/' + text.id + '/print'"
                                             title="Annotated Text"
                                             @click.stop>
                                             <?php echo IconHelper::render('file-text', ['size' => 16]); ?>

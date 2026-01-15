@@ -39,10 +39,26 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 class TextNavigationService
 {
     /**
+     * Build the URL for navigation by replacing {id} placeholder or appending ID.
+     *
+     * @param string $url    URL pattern (may contain {id} placeholder or be a query param base)
+     * @param int    $textId Text ID to insert
+     *
+     * @return string Complete URL with text ID
+     */
+    private function buildNavigationUrl(string $url, int $textId): string
+    {
+        if (str_contains($url, '{id}')) {
+            return str_replace('{id}', (string) $textId, $url);
+        }
+        return $url . $textId;
+    }
+
+    /**
      * Return navigation arrows to previous and next texts.
      *
      * @param int    $textId  ID of the current text
-     * @param string $url     Base URL to append before $textId
+     * @param string $url     Base URL to append before $textId, or pattern with {id} placeholder
      * @param bool   $onlyAnn Restrict to annotated texts only
      * @param string $add     Some content to add before the output
      *
@@ -178,7 +194,8 @@ class TextNavigationService
                         'circle-chevron-left',
                         ['title' => 'Previous Text: ' . $title, 'alt' => 'Previous Text: ' . $title]
                     );
-                    $prev = '<a href="' . $url . $list[$i - 1] . '" target="_top">' . $icon . '</a>';
+                    $prevUrl = $this->buildNavigationUrl($url, $list[$i - 1]);
+                    $prev = '<a href="' . $prevUrl . '" target="_top">' . $icon . '</a>';
                 } else {
                     $prev = IconHelper::render(
                         'circle-chevron-left',
@@ -191,7 +208,8 @@ class TextNavigationService
                         'circle-chevron-right',
                         ['title' => 'Next Text: ' . $title, 'alt' => 'Next Text: ' . $title]
                     );
-                    $next = '<a href="' . $url . $list[$i + 1] . '" target="_top">' . $icon . '</a>';
+                    $nextUrl = $this->buildNavigationUrl($url, $list[$i + 1]);
+                    $next = '<a href="' . $nextUrl . '" target="_top">' . $icon . '</a>';
                 } else {
                     $next = IconHelper::render(
                         'circle-chevron-right',

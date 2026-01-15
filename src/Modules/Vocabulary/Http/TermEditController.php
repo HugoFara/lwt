@@ -743,4 +743,20 @@ class TermEditController extends VocabularyBaseController
 
         PageLayoutHelper::renderPageEnd();
     }
+
+    /**
+     * Delete word.
+     *
+     * Route: DELETE /words/{id}
+     *
+     * @param int $id Word ID from route parameter
+     *
+     * @return RedirectResponse Redirect to words list
+     */
+    public function deleteWord(int $id): RedirectResponse
+    {
+        $this->facade->deleteTerm($id);
+
+        return new RedirectResponse('/words');
+    }
 }

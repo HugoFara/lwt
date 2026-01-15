@@ -103,6 +103,7 @@ export interface TextPrintAppData {
   handlePrint(): void;
   navigateTo(url: string): void;
   confirmNavigateTo(url: string, message: string): void;
+  confirmDeleteAnnotation(textId: number, message: string): void;
   openWindow(url: string): void;
 
   // CSP-compatible innerHTML setters (use with x-effect)
@@ -152,14 +153,26 @@ function getPageConfig(): PageConfig {
     }
   }
   // Fallback: try to get text ID from URL
+  const pathname = window.location.pathname;
+
+  // RESTful URL pattern: /text/{id}/print or /text/{id}/print/edit
+  const printMatch = pathname.match(/\/text\/(\d+)\/print(?:\/edit)?$/);
+  if (printMatch) {
+    const textId = parseInt(printMatch[1], 10);
+    const isEdit = pathname.endsWith('/print/edit');
+    return {
+      textId,
+      mode: isEdit ? 'edit' : 'annotated'
+    };
+  }
+
+  // Legacy/plain print URL pattern: /text/print-plain?text={id}
   const params = new URLSearchParams(window.location.search);
   const textId = parseInt(params.get('text') || '0', 10);
-  const edit = params.get('edit') === '1';
-  const isAnnotated = window.location.pathname.endsWith('/text/print');
 
   return {
     textId,
-    mode: edit ? 'edit' : isAnnotated ? 'annotated' : 'plain'
+    mode: 'plain'
   };
 }
 
@@ -501,6 +514,27 @@ export function textPrintAppData(): TextPrintAppData {
     confirmNavigateTo(url: string, message: string) {
       if (confirm(message)) {
         window.location.href = url;
+      }
+    },
+
+    confirmDeleteAnnotation(textId: number, message: string) {
+      if (confirm(message)) {
+        fetch(`/text/${textId}/annotation`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+          .then((response) => {
+            if (response.redirected) {
+              window.location.href = response.url;
+            } else if (response.ok) {
+              window.location.href = `/text/print-plain?text=${textId}`;
+            }
+          })
+          .catch((error) => {
+            console.error('Delete annotation failed:', error);
+          });
       }
     },
 

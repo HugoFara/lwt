@@ -133,11 +133,11 @@ class TextPrintController extends BaseController
     }
 
     /**
-     * Print/edit improved annotated text (replaces text_print.php).
+     * Print improved annotated text (replaces text_print.php).
      *
-     * Route: /text/print?text=[textid]&edit=[0|1]&del=[0|1]
+     * Route: /text/{text}/print
      *
-     * @param array $params Route parameters
+     * @param array $params Route parameters (expects 'text' key with text ID)
      *
      * @return void
      *
@@ -155,9 +155,7 @@ class TextPrintController extends BaseController
         include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
         include_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
 
-        $textId = (int) $this->param('text', '0');
-        $editMode = (int) $this->param('edit', '0');
-        $deleteMode = (int) $this->param('del', '0');
+        $textId = (int) ($params['text'] ?? 0);
 
         if ($textId === 0) {
             $this->redirect('/text/edit');
@@ -172,12 +170,73 @@ class TextPrintController extends BaseController
             $annExists = strlen($ann) > 0;
         }
 
-        // Handle delete mode
-        if ($deleteMode && $annExists) {
-            $deleted = $this->printService->deleteAnnotation($textId);
-            if ($deleted) {
-                $this->redirect('/text/print-plain?text=' . $textId);
-            }
+        // Prepare view data
+        $viewData = $this->printService->prepareAnnotatedPrintData($textId);
+        if ($viewData === null) {
+            $this->redirect('/text/edit');
+        }
+
+        // Save current text setting
+        $this->printService->setCurrentText($textId);
+
+        // Display mode (not edit)
+        $mode = 'annotated';
+        $editFormHtml = null;
+        $savedAnn = 0;
+        $savedStatus = 0;
+        $savedPlacement = 0;
+
+        // Render the view
+        PageLayoutHelper::renderPageStartNobody('Annotated Text');
+
+        include self::MODULE_VIEWS . '/print_alpine.php';
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Edit annotation for a text.
+     *
+     * Route: /text/{text}/print/edit
+     *
+     * @param array $params Route parameters (expects 'text' key with text ID)
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    public function editAnnotation(array $params): void
+    {
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
+        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
+        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
+        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
+        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
+        include_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
+
+        $textId = (int) ($params['text'] ?? 0);
+
+        if ($textId === 0) {
+            $this->redirect('/text/edit');
+        }
+
+        // Handle annotation recreation or creation
+        $ann = $this->printService->getAnnotatedText($textId);
+        $annExists = $ann !== null;
+        if ($annExists) {
+            $annotationService = new AnnotationService();
+            $ann = $annotationService->recreateSaveAnnotation($textId, $ann);
+            $annExists = strlen($ann) > 0;
+        }
+
+        // Create annotation if it doesn't exist
+        if (!$annExists) {
+            $annotationService = new AnnotationService();
+            $ann = $annotationService->createSaveAnnotation($textId);
+            $annExists = strlen($ann) > 0;
         }
 
         // Prepare view data
@@ -189,24 +248,16 @@ class TextPrintController extends BaseController
         // Save current text setting
         $this->printService->setCurrentText($textId);
 
-        // Set mode and prepare edit form if needed
-        $mode = $editMode ? 'edit' : 'annotated';
+        // Edit mode
+        $mode = 'edit';
         $editFormHtml = null;
         $savedAnn = 0;
         $savedStatus = 0;
         $savedPlacement = 0;
 
-        if ($editMode) {
-            // For edit mode, create annotation if needed and render edit form
-            if (!$annExists) {
-                $annotationService = new AnnotationService();
-                $ann = $annotationService->createSaveAnnotation($textId);
-                $annExists = strlen($ann) > 0;
-            }
-            if ($annExists) {
-                $handler = new TextApiHandler();
-                $editFormHtml = $handler->editTermForm($textId);
-            }
+        if ($annExists) {
+            $handler = new TextApiHandler();
+            $editFormHtml = $handler->editTermForm($textId);
         }
 
         // Render the view
@@ -215,5 +266,33 @@ class TextPrintController extends BaseController
         include self::MODULE_VIEWS . '/print_alpine.php';
 
         PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Delete annotation for a text.
+     *
+     * Route: DELETE /text/{text}/annotation
+     *
+     * @param array $params Route parameters (expects 'text' key with text ID)
+     *
+     * @return void
+     */
+    public function deleteAnnotation(array $params): void
+    {
+        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
+
+        $textId = (int) ($params['text'] ?? 0);
+
+        if ($textId === 0) {
+            $this->redirect('/text/edit');
+        }
+
+        $deleted = $this->printService->deleteAnnotation($textId);
+        if ($deleted) {
+            $this->redirect('/text/print-plain?text=' . $textId);
+        }
+
+        // If deletion failed, redirect back to print view
+        $this->redirect('/text/' . $textId . '/print');
     }
 }

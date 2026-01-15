@@ -78,7 +78,7 @@ $rtlScript = $viewData['rtlScript'];
 $hasAnnotation = $viewData['hasAnnotation'];
 
 // Determine URLs based on mode
-$printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
+$printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/{id}/print';
 ?>
 <!-- Alpine.js container -->
 <div x-data="textPrintApp()" x-init="init()" x-cloak>
@@ -194,14 +194,14 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                     <?php if ($hasAnnotation) : ?>
                         Or
                         <button type="button" class="button is-small"
-                            @click="navigateTo('/text/print?text=<?php echo $textId; ?>')">
+                            @click="navigateTo('/text/<?php echo $textId; ?>/print')">
                             Print/Edit/Delete
                         </button>
                         your <strong>Improved Annotated Text</strong>
                         <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>.
                     <?php else : ?>
                         <button type="button" class="button is-small"
-                            @click="navigateTo('/text/print?edit=1&text=<?php echo $textId; ?>')">
+                            @click="navigateTo('/text/<?php echo $textId; ?>/print/edit')">
                             Create
                         </button>
                         an <strong>Improved Annotated Text</strong>
@@ -224,15 +224,12 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
             <div class="card-content">
                 <div class="buttons">
                     <button type="button" class="button"
-                        @click="navigateTo('/text/print?edit=1&text=<?php echo $textId; ?>')">
+                        @click="navigateTo('/text/<?php echo $textId; ?>/print/edit')">
                         <?php echo IconHelper::render('pencil', ['size' => 16]); ?>
                         <span class="ml-1">Edit</span>
                     </button>
                     <button type="button" class="button is-danger is-outlined"
-                        @click="confirmNavigateTo(
-                            '/text/print?del=1&text=<?php echo $textId; ?>',
-                            'Are you sure?'
-                        )">
+                        @click="confirmDeleteAnnotation(<?php echo $textId; ?>, 'Are you sure?')">
                         <?php echo IconHelper::render('trash-2', ['size' => 16]); ?>
                         <span class="ml-1">Delete</span>
                     </button>
@@ -262,7 +259,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                 </p>
             </header>
             <div class="card-content">
-                <button type="button" class="button" @click="navigateTo('/text/print?text=<?php echo $textId; ?>')">
+                <button type="button" class="button" @click="navigateTo('/text/<?php echo $textId; ?>/print')">
                     Display/Print Mode
                 </button>
             </div>
@@ -312,7 +309,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
         <?php endif; ?>
     </div>
     <div class="noprint mt-4">
-        <button type="button" class="button" @click="navigateTo('/text/print?text=<?php echo $textId; ?>')">
+        <button type="button" class="button" @click="navigateTo('/text/<?php echo $textId; ?>/print')">
             Display/Print Mode
         </button>
     </div>
