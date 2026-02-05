@@ -62,6 +62,14 @@ use Lwt\Modules\Vocabulary\Application\Services\WordBulkService;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
 use Lwt\Modules\Text\Application\Services\SentenceService;
+// Controllers
+use Lwt\Modules\Vocabulary\Http\TermEditController;
+use Lwt\Modules\Vocabulary\Http\TermDisplayController;
+use Lwt\Modules\Vocabulary\Http\TermStatusController;
+use Lwt\Modules\Vocabulary\Http\TermApiController;
+use Lwt\Modules\Vocabulary\Http\TermImportController;
+use Lwt\Modules\Vocabulary\Http\MultiWordController;
+use Lwt\Modules\Language\Application\LanguageFacade;
 
 /**
  * Service provider for the Vocabulary module.
@@ -265,6 +273,52 @@ class VocabularyServiceProvider implements ServiceProviderInterface
         $container->singleton(TermStatusApiHandler::class, function (Container $c) {
             return new TermStatusApiHandler(
                 $c->getTyped(VocabularyFacade::class)
+            );
+        });
+
+        // Register Controllers
+        $container->singleton(TermEditController::class, function (Container $c) {
+            return new TermEditController(
+                $c->getTyped(VocabularyFacade::class),
+                $c->getTyped(DictionaryAdapter::class),
+                $c->getTyped(LanguageFacade::class)
+            );
+        });
+
+        $container->singleton(TermDisplayController::class, function (Container $c) {
+            return new TermDisplayController(
+                $c->getTyped(VocabularyFacade::class),
+                $c->getTyped(CreateTermFromHover::class),
+                $c->getTyped(FindSimilarTerms::class),
+                $c->getTyped(DictionaryAdapter::class),
+                $c->getTyped(LanguageFacade::class)
+            );
+        });
+
+        $container->singleton(TermStatusController::class, function (Container $c) {
+            return new TermStatusController(
+                $c->getTyped(VocabularyFacade::class),
+                $c->getTyped(CreateTermFromHover::class)
+            );
+        });
+
+        $container->singleton(TermApiController::class, function (Container $c) {
+            return new TermApiController(
+                $c->getTyped(VocabularyFacade::class)
+            );
+        });
+
+        $container->singleton(TermImportController::class, function (Container $c) {
+            return new TermImportController(
+                $c->getTyped(LanguageFacade::class)
+            );
+        });
+
+        $container->singleton(MultiWordController::class, function (Container $c) {
+            return new MultiWordController(
+                $c->getTyped(VocabularyFacade::class),
+                $c->getTyped(DictionaryAdapter::class),
+                $c->getTyped(LanguageFacade::class)
             );
         });
     }
