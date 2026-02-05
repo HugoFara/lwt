@@ -42,6 +42,7 @@ use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Text\Http\TextController;
 use Lwt\Modules\Text\Http\TextPrintController;
 use Lwt\Modules\Text\Http\TextApiHandler;
+use Lwt\Modules\Language\Application\LanguageFacade;
 // Module services
 use Lwt\Modules\Text\Application\Services\TextPrintService;
 use Lwt\Modules\Text\Application\Services\TextDisplayService;
@@ -105,16 +106,22 @@ class TextServiceProvider implements ServiceProviderInterface
         // Register Controller
         $container->singleton(
             TextController::class,
-            function (Container $_c) {
-                return new TextController();
+            function (Container $c) {
+                return new TextController(
+                    $c->getTyped(TextFacade::class),
+                    $c->getTyped(LanguageFacade::class),
+                    $c->getTyped(TextDisplayService::class)
+                );
             }
         );
 
         // Register Print Controller
         $container->singleton(
             TextPrintController::class,
-            function (Container $_c) {
-                return new TextPrintController();
+            function (Container $c) {
+                return new TextPrintController(
+                    $c->getTyped(TextPrintService::class)
+                );
             }
         );
 

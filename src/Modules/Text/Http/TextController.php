@@ -55,11 +55,6 @@ use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 class TextController extends BaseController
 {
     /**
-     * Base path for legacy includes.
-     */
-    private const BACKEND_PATH = __DIR__ . '/../../../backend';
-
-    /**
      * Module views path.
      */
     private const MODULE_VIEWS = __DIR__ . '/../Views';
@@ -102,9 +97,6 @@ class TextController extends BaseController
      */
     public function read(?int $text = null): ?RedirectResponse
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        include_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
-
         // Get text ID from route param or query params
         $textId = $this->getTextIdFromRequest($text);
 
@@ -205,18 +197,6 @@ class TextController extends BaseController
      */
     public function new(array $params): ?RedirectResponse
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-        include_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/start_session.php';
-        include_once self::BACKEND_PATH . '/Core/Integration/YouTubeImport.php';
-
         // Get filter parameters
         $currentLang = Validation::language(
             InputValidator::getStringWithDb("filterlang", 'currentlanguage')
@@ -260,18 +240,6 @@ class TextController extends BaseController
      */
     public function editSingle(int $id): ?RedirectResponse
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-        include_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/start_session.php';
-        include_once self::BACKEND_PATH . '/Core/Integration/YouTubeImport.php';
-
         // Get filter parameters
         $currentLang = Validation::language(
             InputValidator::getStringWithDb("filterlang", 'currentlanguage')
@@ -313,8 +281,6 @@ class TextController extends BaseController
      */
     public function delete(int $id): RedirectResponse
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-
         $this->textService->deleteText($id);
 
         return $this->redirect('/texts');
@@ -331,8 +297,6 @@ class TextController extends BaseController
      */
     public function archive(int $id): RedirectResponse
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-
         $this->textService->archiveText($id);
 
         return $this->redirect('/texts');
@@ -349,15 +313,6 @@ class TextController extends BaseController
      */
     public function unarchive(int $id): RedirectResponse
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-
         $this->textService->unarchiveText($id);
 
         return $this->redirect('/text/archived');
@@ -374,18 +329,6 @@ class TextController extends BaseController
      */
     public function edit(array $params): ?RedirectResponse
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-        include_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/start_session.php';
-        include_once self::BACKEND_PATH . '/Core/Integration/YouTubeImport.php';
-
         // Get filter parameters
         $currentLang = Validation::language(
             InputValidator::getStringWithDb("filterlang", 'currentlanguage')
@@ -796,16 +739,6 @@ class TextController extends BaseController
      */
     public function display(?int $text = null): ?RedirectResponse
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-        include_once dirname(__DIR__, 2) . '/Admin/Application/Services/MediaService.php';
-
         // Support both new route param injection and legacy query param
         $textId = $text ?? $this->paramInt('text', 0) ?? 0;
 
@@ -871,8 +804,6 @@ class TextController extends BaseController
      */
     public function setMode(array $params): void
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-
         $textId = $this->param('text');
         if ($textId === '') {
             return;
@@ -908,8 +839,6 @@ class TextController extends BaseController
      */
     public function check(array $params): void
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-
         PageLayoutHelper::renderPageStart('Check a Text', true);
 
         $op = $this->param('op');
@@ -952,15 +881,6 @@ class TextController extends BaseController
      */
     public function archived(array $params): ?RedirectResponse
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-
         // Handle mark actions that skip pagestart
         $markAction = $this->param('markaction');
         $noPagestart = ($markAction == 'deltag');
@@ -1042,15 +962,6 @@ class TextController extends BaseController
      */
     public function archivedEdit(int $id): ?RedirectResponse
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-
         PageLayoutHelper::renderPageStart('Archived Texts', true);
 
         $message = '';
@@ -1098,8 +1009,6 @@ class TextController extends BaseController
      */
     public function deleteArchived(int $id): RedirectResponse
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-
         $this->textService->deleteArchivedText($id);
 
         return $this->redirect('/text/archived');

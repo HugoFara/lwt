@@ -43,11 +43,6 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 class TextPrintController extends BaseController
 {
     /**
-     * Base path for legacy includes.
-     */
-    private const BACKEND_PATH = __DIR__ . '/../../../backend';
-
-    /**
      * Module views path.
      */
     private const MODULE_VIEWS = __DIR__ . '/../Views';
@@ -96,15 +91,6 @@ class TextPrintController extends BaseController
      */
     public function printPlain(?int $text = null): void
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-
         // Support both new route param injection and legacy query param
         $textId = $text ?? (int) $this->param('text', '0');
 
@@ -150,16 +136,6 @@ class TextPrintController extends BaseController
      */
     public function printAnnotated(array $params): void
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
-
         $textId = (int) ($params['text'] ?? 0);
 
         if ($textId === 0) {
@@ -212,16 +188,6 @@ class TextPrintController extends BaseController
      */
     public function editAnnotation(array $params): void
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextStatisticsService.php';
-        include_once dirname(__DIR__, 2) . '/Text/Application/Services/SentenceService.php';
-        include_once dirname(__DIR__) . '/Application/Services/AnnotationService.php';
-        include_once dirname(__DIR__) . '/Application/Services/TextNavigationService.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Application/Services/ExpressionService.php';
-        include_once __DIR__ . '/../../../Shared/Infrastructure/Database/Restore.php';
-        include_once dirname(__DIR__, 2) . '/Vocabulary/Infrastructure/DictionaryAdapter.php';
-
         $textId = (int) ($params['text'] ?? 0);
 
         if ($textId === 0) {
@@ -284,8 +250,6 @@ class TextPrintController extends BaseController
      */
     public function deleteAnnotation(array $params): void
     {
-        include_once self::BACKEND_PATH . '/Core/Bootstrap/db_bootstrap.php';
-
         $textId = (int) ($params['text'] ?? 0);
 
         if ($textId === 0) {

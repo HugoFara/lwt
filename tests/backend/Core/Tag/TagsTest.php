@@ -634,7 +634,7 @@ class TagsTest extends TestCase
         $result = TagsFacade::getTextTagsHtml(1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
-        $this->assertStringContainsString('id="text_tag_map"', $result);
+        $this->assertStringContainsString('id="texttags"', $result);
         $this->assertStringContainsString('</ul>', $result);
     }
 
