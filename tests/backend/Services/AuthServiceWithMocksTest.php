@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Services;
 
 use DateTimeImmutable;
-use Lwt\Core\Entity\User;
+use Lwt\Modules\User\Domain\User;
 use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Application\Services\AuthService;

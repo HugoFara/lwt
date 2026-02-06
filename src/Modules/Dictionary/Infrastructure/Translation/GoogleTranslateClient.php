@@ -2,13 +2,12 @@
 
 /**
  * \file
- * \brief Defines GoogleTranslate class for word translation
+ * \brief Defines GoogleTranslateClient class for word translation
  *
  * Usage:
- * use Lwt\Core\Entity\GoogleTranslate;
+ * use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTranslateClient;
  *
- * require_once( 'GoogleTranslate.php' );
- * $translations = GoogleTranslate::staticTranslate('Hello','en','de');
+ * $translations = GoogleTranslateClient::staticTranslate('Hello','en','de');
  *
  * if(!$translations)
  *      echo 'Error: No translation found!';
@@ -25,7 +24,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Entity;
+namespace Lwt\Modules\Dictionary\Infrastructure\Translation;
 
 /**
  * Wrapper class to get translation.
@@ -36,7 +35,7 @@ namespace Lwt\Core\Entity;
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  */
-class GoogleTranslate
+class GoogleTranslateClient
 {
     /**
      * @var ''|list<string>|false

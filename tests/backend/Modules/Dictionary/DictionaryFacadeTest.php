@@ -23,7 +23,7 @@ use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
-use Lwt\Core\Entity\LocalDictionary;
+use Lwt\Modules\Dictionary\Domain\LocalDictionary;
 use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 use Lwt\Modules\Dictionary\Infrastructure\Import\CsvImporter;
 use Lwt\Modules\Dictionary\Infrastructure\Import\JsonImporter;

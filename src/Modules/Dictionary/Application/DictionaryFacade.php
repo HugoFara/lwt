@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Dictionary\Application;
 
-use Lwt\Core\Entity\LocalDictionary;
+use Lwt\Modules\Dictionary\Domain\LocalDictionary;
 use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 use Lwt\Modules\Dictionary\Infrastructure\Import\ImporterInterface;
 use Lwt\Modules\Dictionary\Infrastructure\Import\CsvImporter;

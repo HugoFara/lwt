@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Dictionary\Application;
 
-use Lwt\Core\Entity\GoogleTranslate;
+use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTranslateClient;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
@@ -71,7 +71,7 @@ class TranslationService
             ];
         }
 
-        $result = GoogleTranslate::staticTranslate($text, $srcLang, $tgtLang, $timeToken);
+        $result = GoogleTranslateClient::staticTranslate($text, $srcLang, $tgtLang, $timeToken);
 
         if ($result === false) {
             return [

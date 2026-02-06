@@ -6,11 +6,11 @@ namespace Lwt\Tests\Core\Entity;
 
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Domain/Term.php';
 require_once __DIR__ . '/../../../../src/Modules/Text/Domain/Text.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/GoogleTranslate.php';
+require_once __DIR__ . '/../../../../src/Modules/Dictionary/Infrastructure/Translation/GoogleTranslateClient.php';
 
 use DateTimeImmutable;
 use InvalidArgumentException;
-use Lwt\Core\Entity\GoogleTranslate;
+use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTranslateClient;
 use Lwt\Modules\Language\Domain\Language;
 use Lwt\Modules\Vocabulary\Domain\Term;
 use Lwt\Modules\Text\Domain\Text;
@@ -800,25 +800,25 @@ class ClassesTest extends TestCase
 
     public function testGoogleTranslateGetDomain(): void
     {
-        $domain = GoogleTranslate::getDomain('com');
+        $domain = GoogleTranslateClient::getDomain('com');
         $this->assertEquals('com', $domain);
 
-        $domain = GoogleTranslate::getDomain('de');
+        $domain = GoogleTranslateClient::getDomain('de');
         $this->assertEquals('de', $domain);
 
         // Empty should return random valid domain
-        $domain = GoogleTranslate::getDomain('');
+        $domain = GoogleTranslateClient::getDomain('');
         $this->assertNotEmpty($domain);
 
         // Invalid should return random valid domain
-        $domain = GoogleTranslate::getDomain('invalid');
+        $domain = GoogleTranslateClient::getDomain('invalid');
         $this->assertNotEquals('invalid', $domain);
     }
 
     public function testGoogleTranslateArrayIunique(): void
     {
         $input = ['Hello', 'HELLO', 'hello', 'World', 'WORLD'];
-        $result = GoogleTranslate::arrayIunique($input);
+        $result = GoogleTranslateClient::arrayIunique($input);
 
         $this->assertLessThanOrEqual(2, count($result));
         $this->assertContains('Hello', $result);
@@ -826,31 +826,31 @@ class ClassesTest extends TestCase
 
     public function testGoogleTranslateConstructorAndSetters(): void
     {
-        $translator = new GoogleTranslate('en', 'es');
-        $this->assertInstanceOf(GoogleTranslate::class, $translator);
+        $translator = new GoogleTranslateClient('en', 'es');
+        $this->assertInstanceOf(GoogleTranslateClient::class, $translator);
 
         $result = $translator->setLangFrom('de');
-        $this->assertInstanceOf(GoogleTranslate::class, $result);
+        $this->assertInstanceOf(GoogleTranslateClient::class, $result);
 
         $result = $translator->setLangTo('fr');
-        $this->assertInstanceOf(GoogleTranslate::class, $result);
+        $this->assertInstanceOf(GoogleTranslateClient::class, $result);
     }
 
     public function testGoogleTranslateSetDomain(): void
     {
-        GoogleTranslate::setDomain('com');
+        GoogleTranslateClient::setDomain('com');
         $this->assertTrue(true); // No exception
 
-        GoogleTranslate::setDomain('');
+        GoogleTranslateClient::setDomain('');
         $this->assertTrue(true);
 
-        GoogleTranslate::setDomain(null);
+        GoogleTranslateClient::setDomain(null);
         $this->assertTrue(true);
     }
 
     public function testGoogleTranslateGenerateToken(): void
     {
-        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $reflection = new \ReflectionClass(GoogleTranslateClient::class);
         $method = $reflection->getMethod('generateToken');
         $method->setAccessible(true);
 
@@ -866,7 +866,7 @@ class ClassesTest extends TestCase
 
     public function testGoogleTranslateLastResultProperty(): void
     {
-        $translator = new GoogleTranslate('en', 'es');
+        $translator = new GoogleTranslateClient('en', 'es');
         $this->assertEquals('', $translator->lastResult);
     }
 

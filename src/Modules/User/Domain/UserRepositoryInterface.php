@@ -20,7 +20,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\User\Domain;
 
 use DateTimeImmutable;
-use Lwt\Core\Entity\User;
+use Lwt\Modules\User\Domain\User;
 
 /**
  * Repository interface for User entity.

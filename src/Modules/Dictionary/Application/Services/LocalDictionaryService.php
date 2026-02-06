@@ -18,7 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Dictionary\Application\Services;
 
 use DateTimeImmutable;
-use Lwt\Core\Entity\LocalDictionary;
+use Lwt\Modules\Dictionary\Domain\LocalDictionary;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;

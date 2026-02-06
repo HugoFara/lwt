@@ -24,9 +24,9 @@
         <!-- curl extension constants not available in all analysis environments -->
         <UndefinedConstant>
             <errorLevel type="suppress">
+                <directory name="src/Modules/Dictionary/Infrastructure/Translation" />
                 <directory name="src/Modules/Text/Infrastructure" />
                 <directory name="src/Shared/UI/Assets" />
-                <directory name="src/backend/Core/Entity" />
                 <directory name="src/backend/Core/Integration" />
             </errorLevel>
         </UndefinedConstant>
@@ -57,7 +57,7 @@
         <!-- Mixed* issues in views and curl constant usage -->
         <MixedArgument>
             <errorLevel type="suppress">
-                <directory name="src/backend/Core/Entity" />
+                <directory name="src/Modules/Dictionary/Infrastructure/Translation" />
                 <directory name="src/backend/Core/Integration" />
                 <directory name="src/Modules/Book/Views" />
                 <directory name="src/Modules/Dictionary/Views" />

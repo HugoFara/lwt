@@ -6,7 +6,7 @@ namespace Lwt\Tests\Core\Repository;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\Entity\User;
+use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Domain\ValueObjects\UserId;
 use Lwt\Core\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
@@ -22,7 +22,7 @@ Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/Shared/Domain/ValueObjects/UserId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/User.php';
+require_once __DIR__ . '/../../../../src/Modules/User/Domain/User.php';
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/PreparedStatement.php';
 require_once __DIR__ . '/../../../../src/Modules/User/Infrastructure/MySqlUserRepository.php';
 

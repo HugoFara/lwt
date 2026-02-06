@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Dictionary\Views;
 
-use Lwt\Core\Entity\LocalDictionary;
+use Lwt\Modules\Dictionary\Domain\LocalDictionary;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 

@@ -20,7 +20,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\User\Infrastructure;
 
 use DateTimeImmutable;
-use Lwt\Core\Entity\User;
+use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Domain\ValueObjects\UserId;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;

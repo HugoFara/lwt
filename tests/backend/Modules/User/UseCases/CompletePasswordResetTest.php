@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Modules\User\UseCases;
 
 use DateTimeImmutable;
-use Lwt\Core\Entity\User;
+use Lwt\Modules\User\Domain\User;
 use Lwt\Modules\User\Application\Services\PasswordHasher;
 use Lwt\Modules\User\Application\Services\TokenHasher;
 use Lwt\Modules\User\Application\UseCases\CompletePasswordReset;

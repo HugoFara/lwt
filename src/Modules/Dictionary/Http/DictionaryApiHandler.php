@@ -646,11 +646,11 @@ class DictionaryApiHandler
     /**
      * Format a LocalDictionary entity for API response.
      *
-     * @param \Lwt\Core\Entity\LocalDictionary $dictionary Dictionary entity
+     * @param \Lwt\Modules\Dictionary\Domain\LocalDictionary $dictionary Dictionary entity
      *
      * @return array Formatted dictionary data
      */
-    private function formatDictionary(\Lwt\Core\Entity\LocalDictionary $dictionary): array
+    private function formatDictionary(\Lwt\Modules\Dictionary\Domain\LocalDictionary $dictionary): array
     {
         return [
             'id' => $dictionary->id(),

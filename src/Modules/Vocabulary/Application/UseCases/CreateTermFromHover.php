@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Application\UseCases;
 
-use Lwt\Core\Entity\GoogleTranslate;
+use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTranslateClient;
 use Lwt\Core\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Escaping;
@@ -74,7 +74,7 @@ class CreateTermFromHover
         // Get translation if status is 1 (new word) and translation params provided
         $translation = '*';
         if ($status === 1 && $sourceLang !== '' && $targetLang !== '') {
-            $translationResult = GoogleTranslate::staticTranslate(
+            $translationResult = GoogleTranslateClient::staticTranslate(
                 $wordText,
                 $sourceLang,
                 $targetLang

@@ -20,7 +20,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\User\Application\Services;
 
 use TheNetworg\OAuth2\Client\Provider\Azure;
-use Lwt\Core\Entity\User;
+use Lwt\Modules\User\Domain\User;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Application\UserFacade;
 

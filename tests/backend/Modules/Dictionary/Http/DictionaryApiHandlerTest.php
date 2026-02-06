@@ -6,7 +6,7 @@ namespace Lwt\Tests\Modules\Dictionary\Http;
 
 use Lwt\Modules\Dictionary\Http\DictionaryApiHandler;
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
-use Lwt\Core\Entity\LocalDictionary;
+use Lwt\Modules\Dictionary\Domain\LocalDictionary;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 

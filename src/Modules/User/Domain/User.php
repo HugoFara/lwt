@@ -15,7 +15,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Entity;
+namespace Lwt\Modules\User\Domain;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
