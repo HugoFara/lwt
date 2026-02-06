@@ -34,6 +34,41 @@ use Lwt\Core\StringUtils;
 class PageLayoutHelper
 {
     /**
+     * Build the data-theme attribute for the <html> element.
+     *
+     * When a user has explicitly selected a theme (not auto-detect),
+     * returns a data-theme attribute with the theme's mode ("light" or "dark").
+     * When auto-detect is active (empty theme dir or legacy default),
+     * returns empty string so the CSS prefers-color-scheme media query applies.
+     *
+     * @return string HTML attribute string (e.g., ' data-theme="dark"') or empty
+     */
+    private static function buildDataThemeAttr(): string
+    {
+        $themeDir = Settings::getWithDefault('set-theme-dir');
+        $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/');
+
+        if ($isAutoTheme) {
+            return '';
+        }
+
+        $themeMode = 'light';
+        $jsonPath = $themeDir . 'theme.json';
+        if (file_exists($jsonPath)) {
+            $json = file_get_contents($jsonPath);
+            if ($json !== false) {
+                /** @var array<string, mixed>|null $meta */
+                $meta = json_decode($json, true);
+                if (is_array($meta) && isset($meta['mode']) && is_string($meta['mode'])) {
+                    $themeMode = $meta['mode'];
+                }
+            }
+        }
+
+        return ' data-theme="' . htmlspecialchars($themeMode, ENT_QUOTES, 'UTF-8') . '"';
+    }
+
+    /**
      * Generate the main navigation bar HTML using Alpine.js and Bulma.
      *
      * @param string $currentPage Optional identifier for the current page to highlight
@@ -80,11 +115,13 @@ class PageLayoutHelper
                 }
             }
         }
+        $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/');
         $toggleIcon = $themeMode === 'dark' ? 'sun' : 'moon';
         $toggleTitle = $themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
         $toggleIconHtml = IconHelper::render($toggleIcon, ['alt' => $toggleTitle]);
         $escapedCounterpart = htmlspecialchars($themeCounterpart, ENT_QUOTES, 'UTF-8');
         $escapedThemeDir = htmlspecialchars($themeDir, ENT_QUOTES, 'UTF-8');
+        $autoThemeAttr = $isAutoTheme ? 'true' : 'false';
 
         return <<<HTML
 <nav class="navbar is-light" role="navigation" aria-label="main navigation" x-data="navbar()">
@@ -163,7 +200,8 @@ class PageLayoutHelper
                x-data="themeToggle()" @click.prevent="toggle()"
                data-theme-mode="{$themeMode}"
                data-theme-counterpart="{$escapedCounterpart}"
-               data-current-theme="{$escapedThemeDir}">
+               data-current-theme="{$escapedThemeDir}"
+               data-auto-theme="{$autoThemeAttr}">
                 {$toggleIconHtml}
             </a>
 
@@ -418,7 +456,7 @@ HTML;
         $icon180 = UrlUtilities::url('/assets/images/lwt_icon_180.png');
 
         echo '<!DOCTYPE html>';
-        echo '<html lang="en">';
+        echo '<html lang="en"' . self::buildDataThemeAttr() . '>';
         echo '<head>';
         echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
         echo '<!--' . "\n";
@@ -470,7 +508,7 @@ HTML;
         $icon180 = UrlUtilities::url('/assets/images/lwt_icon_180.png');
 
         echo '<!DOCTYPE html>';
-        echo '<html lang="en">';
+        echo '<html lang="en"' . self::buildDataThemeAttr() . '>';
         echo '<head>';
         echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
         echo '<!--' . "\n";
@@ -556,7 +594,7 @@ HTML;
         self::sendNoCacheHeaders();
 
         echo '<!DOCTYPE html>';
-        echo '<html lang="en">';
+        echo '<html lang="en"' . self::buildDataThemeAttr() . '>';
         echo '<head>';
         echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
         echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';

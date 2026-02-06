@@ -107,6 +107,9 @@ export default defineConfig([
       // The flagged properties (user-select, resize, accent-color) are well-supported
       // in all modern browsers since 2021-2022. Disabling to avoid false positives.
       "css/use-baseline": "off",
+      // Theme and chart CSS files reference custom properties defined in the base
+      // styles.css :root block. The linter can't resolve cross-file variables.
+      "css/no-invalid-properties": ["error", { allowUnknownVariables: true }],
     },
   },
 ]);

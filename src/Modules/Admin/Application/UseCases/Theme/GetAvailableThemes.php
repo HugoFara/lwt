@@ -27,19 +27,11 @@ namespace Lwt\Modules\Admin\Application\UseCases\Theme;
 class GetAvailableThemes
 {
     /**
-     * Default theme metadata for the base theme.
-     */
-    private const DEFAULT_THEME_METADATA = [
-        'name' => 'Default',
-        'description' => 'Standard light theme with background color highlighting.',
-        'mode' => 'light',
-        'counterpart' => 'assets/themes/Dark/',
-        'highlighting' => 'Background color highlighting',
-        'wordBreaking' => 'Standard'
-    ];
-
-    /**
      * Execute the use case.
+     *
+     * Scans the assets/themes/ directory for theme directories.
+     * The Default theme is discovered via glob like all others
+     * (it has a theme.json but no styles.css — the base CSS handles it).
      *
      * @return array<int, array{
      *     path: string,
@@ -57,20 +49,32 @@ class GetAvailableThemes
         $globResult = glob('assets/themes/*', GLOB_ONLYDIR);
         $themeDirs = $globResult === false ? [] : $globResult;
 
-        // Add Default first (uses base CSS)
-        $themes[] = array_merge(
-            ['path' => 'assets/themes/Default/'],
-            self::DEFAULT_THEME_METADATA
-        );
-
+        // Ensure Default appears first by processing it separately
+        $otherThemes = [];
         foreach ($themeDirs as $theme) {
-            if ($theme !== 'assets/themes/Default') {
-                $metadata = $this->loadThemeMetadata($theme);
-                $themes[] = array_merge(['path' => $theme . '/'], $metadata);
+            $metadata = $this->loadThemeMetadata($theme);
+            $entry = array_merge(['path' => $theme . '/'], $metadata);
+            if ($theme === 'assets/themes/Default') {
+                array_unshift($themes, $entry);
+            } else {
+                $otherThemes[] = $entry;
             }
         }
 
-        return $themes;
+        // If Default wasn't found via glob (shouldn't happen), add it manually
+        if (empty($themes)) {
+            $themes[] = [
+                'path' => 'assets/themes/Default/',
+                'name' => 'Default',
+                'description' => 'Standard theme with background color highlighting. Auto-detects dark mode from system preference.',
+                'mode' => 'light',
+                'counterpart' => 'assets/themes/Dark/',
+                'highlighting' => 'Background color highlighting',
+                'wordBreaking' => 'Standard',
+            ];
+        }
+
+        return array_merge($themes, $otherThemes);
     }
 
     /**

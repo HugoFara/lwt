@@ -1,3 +1,30 @@
+/* Chart-specific custom properties */
+:root {
+  --lwt-chart-bg: #eee;
+  --lwt-chart-shadow: #999;
+  --lwt-chart-li-border: #e3e3e3;
+  --lwt-chart-hover-border: #d1d1d1;
+  --lwt-status-bar-bg: #eee;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --lwt-chart-bg: #333;
+    --lwt-chart-shadow: #444;
+    --lwt-chart-li-border: #333;
+    --lwt-chart-hover-border: #444;
+    --lwt-status-bar-bg: #333;
+  }
+}
+
+:root[data-theme="dark"] {
+  --lwt-chart-bg: #333;
+  --lwt-chart-shadow: #444;
+  --lwt-chart-li-border: #333;
+  --lwt-chart-hover-border: #444;
+  --lwt-status-bar-bg: #333;
+}
+
 .barchart
 {
   font-weight: bold;
@@ -6,12 +33,12 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  background: #eee;
+  background: var(--lwt-chart-bg);
   overflow: hidden;
   margin: 0;
   height: 25px;
   border-radius: 3px;
-  box-shadow: 0 0 1px 1px #999;
+  box-shadow: 0 0 1px 1px var(--lwt-chart-shadow);
 }
 
 .barchart li
@@ -22,7 +49,7 @@
   height: 200px;
   margin: 0;
   padding: 0;
-  border: 1px solid #e3e3e3;
+  border: 1px solid var(--lwt-chart-li-border);
   border-right-width: 0;
   border-left: 0;
   border-bottom: 0;
@@ -42,7 +69,7 @@
 .barchart li:hover
 {
   opacity: 0.9;
-  border-color: #d1d1d1;
+  border-color: var(--lwt-chart-hover-border);
 }
 
 .barchart li:hover span
@@ -64,42 +91,42 @@
 /* Status colors - matching word highlight colors from styles.css */
 .bc0
 {
-  background: #5ABAFF;
+  background: var(--lwt-status0);
 }
 
 .bc1
 {
-  background: #E85A3C;
+  background: var(--lwt-status1);
 }
 
 .bc2
 {
-  background: #E8893C;
+  background: var(--lwt-status2);
 }
 
 .bc3
 {
-  background: #E8B83C;
+  background: var(--lwt-status3);
 }
 
 .bc4
 {
-  background: #E8E23C;
+  background: var(--lwt-status4);
 }
 
 .bc5
 {
-  background: #66CC66;
+  background: var(--lwt-status5);
 }
 
 .bc98
 {
-  background: #888888;
+  background: var(--lwt-status98);
 }
 
 .bc99
 {
-  background: #CCFFCC;
+  background: var(--lwt-status99);
 }
 
 .wc_cont
@@ -130,12 +157,12 @@
   height: 8px;
   border-radius: 4px;
   overflow: hidden;
-  background: #eee;
+  background: var(--lwt-status-bar-bg);
   margin-top: 0.5rem;
 }
 
 .status-bar-chart.empty {
-  background: #f5f5f5;
+  background: var(--lwt-stat-item-bg);
 }
 
 .status-bar-chart .status-segment {

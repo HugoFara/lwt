@@ -1,0 +1,8 @@
+{
+    "name": "Default",
+    "description": "Standard theme with background color highlighting. Auto-detects dark mode from system preference.",
+    "mode": "light",
+    "counterpart": "assets/themes/Dark/",
+    "highlighting": "Background color highlighting",
+    "wordBreaking": "Standard"
+}
