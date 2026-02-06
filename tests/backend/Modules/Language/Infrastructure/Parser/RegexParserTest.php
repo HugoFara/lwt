@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Tests\Core\Parser;
+namespace Lwt\Tests\Modules\Language\Infrastructure\Parser;
 
 use PHPUnit\Framework\TestCase;
-use Lwt\Core\Parser\Parsers\RegexParser;
-use Lwt\Core\Parser\ParserConfig;
-use Lwt\Core\Parser\ParserResult;
-use Lwt\Core\Parser\Token;
+use Lwt\Modules\Language\Infrastructure\Parser\RegexParser;
+use Lwt\Modules\Language\Domain\Parser\ParserConfig;
+use Lwt\Modules\Language\Domain\Parser\ParserResult;
+use Lwt\Modules\Language\Domain\Parser\Token;
 
 /**
  * Tests for the RegexParser class.

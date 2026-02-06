@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Parser
- * @package  Lwt\Core\Parser
+ * @package  Lwt\Modules\Language\Infrastructure\Parser
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,13 +15,10 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Parser;
+namespace Lwt\Modules\Language\Infrastructure\Parser;
 
 use Lwt\Modules\Language\Domain\Language;
-use Lwt\Core\Parser\Parsers\RegexParser;
-use Lwt\Core\Parser\Parsers\CharacterParser;
-use Lwt\Core\Parser\Parsers\MecabParser;
-use Lwt\Core\Parser\Parsers\ExternalParser;
+use Lwt\Modules\Language\Domain\Parser\ParserInterface;
 
 /**
  * Registry for parser implementations.

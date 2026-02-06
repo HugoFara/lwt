@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Regex Parser - Standard regex-based text parser.
+ * Character Parser - Character-by-character text parser.
  *
  * PHP version 8.1
  *
  * @category Parser
- * @package  Lwt\Core\Parser\Parsers
+ * @package  Lwt\Modules\Language\Infrastructure\Parser
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,24 +15,24 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Parser\Parsers;
+namespace Lwt\Modules\Language\Infrastructure\Parser;
 
-use Lwt\Core\Parser\ParserInterface;
-use Lwt\Core\Parser\ParserConfig;
-use Lwt\Core\Parser\ParserResult;
-use Lwt\Core\Parser\Token;
+use Lwt\Modules\Language\Domain\Parser\ParserInterface;
+use Lwt\Modules\Language\Domain\Parser\ParserConfig;
+use Lwt\Modules\Language\Domain\Parser\ParserResult;
+use Lwt\Modules\Language\Domain\Parser\Token;
 use Lwt\Core\StringUtils;
 use Lwt\Modules\Language\Application\Services\TextParsingService;
 
 /**
- * Standard regex-based parser for most languages.
+ * Character-by-character parser for CJK languages.
  *
- * Uses regular expressions to identify word boundaries and sentence endings.
- * Suitable for space-separated languages like English, French, German, etc.
+ * Each character is treated as a separate word. This is suitable for
+ * Chinese and similar languages where there are no word boundaries.
  *
  * @since 3.0.0
  */
-class RegexParser implements ParserInterface
+class CharacterParser implements ParserInterface
 {
     private TextParsingService $parsingService;
 
@@ -46,7 +46,7 @@ class RegexParser implements ParserInterface
      */
     public function getType(): string
     {
-        return 'regex';
+        return 'character';
     }
 
     /**
@@ -54,7 +54,7 @@ class RegexParser implements ParserInterface
      */
     public function getName(): string
     {
-        return 'Standard (Regex)';
+        return 'Character-by-Character';
     }
 
     /**
@@ -78,7 +78,7 @@ class RegexParser implements ParserInterface
      */
     public function parse(string $text, ParserConfig $config): ParserResult
     {
-        // Step 1: Apply initial transformations
+        // Step 1: Apply initial transformations with character splitting
         $text = $this->applyInitialTransformations($text);
 
         // Step 2: Apply word-splitting transformations
@@ -89,14 +89,12 @@ class RegexParser implements ParserInterface
             $config->getRegexpWordCharacters()
         );
 
-        // Step 3: Parse into sentences and tokens
-        return $this->parseToResult($text, $config->shouldRemoveSpaces());
+        // Step 3: Parse into sentences and tokens (always remove spaces for CJK)
+        return $this->parseToResult($text, true);
     }
 
     /**
-     * Apply initial text transformations.
-     *
-     * Normalizes text by marking paragraphs and collapsing whitespace.
+     * Apply initial text transformations with character splitting.
      *
      * @param string $text Raw text
      *
@@ -107,22 +105,25 @@ class RegexParser implements ParserInterface
         // Split text paragraphs using " ¶" symbol
         $text = str_replace("\n", " ¶", $text);
         $text = trim($text);
+
+        // Split each character with tabs (key difference from RegexParser)
+        $text = preg_replace('/([^\s])/u', "$1\t", $text) ?? $text;
+
         // Collapse multiple spaces
         $text = preg_replace('/\s+/u', ' ', $text) ?? $text;
+
         return $text;
     }
 
     /**
      * Apply word-splitting transformations.
      *
-     * Uses regex patterns to identify word and sentence boundaries.
-     *
      * @param string $text          Text after initial transformations
      * @param string $splitSentence Sentence split regex
      * @param string $noSentenceEnd Exception patterns
      * @param string $termchar      Word character regex
      *
-     * @return string Preprocessed text with \r for sentence breaks and \n for token breaks
+     * @return string Preprocessed text
      */
     protected function applyWordSplitting(
         string $text,
@@ -137,7 +138,7 @@ class RegexParser implements ParserInterface
             $text
         ) ?? $text;
 
-        // Paragraph delimiters become a combination of ¶ and carriage return \r
+        // Paragraph delimiters
         $text = str_replace(array("¶", " ¶"), array("¶\r", "\r¶"), $text);
 
         // Split on non-word characters
@@ -157,25 +158,21 @@ class RegexParser implements ParserInterface
     /**
      * Parse preprocessed text into a ParserResult.
      *
-     * @param string $text         Preprocessed text with \r and \n markers
+     * @param string $text         Preprocessed text
      * @param bool   $removeSpaces Whether to remove spaces
      *
      * @return ParserResult Result with sentences and tokens
      */
     protected function parseToResult(string $text, bool $removeSpaces): ParserResult
     {
-        // Clean up the text similar to parseStandardToDatabase
-        // Unicode quotation marks as hex escapes for Psalm compatibility
-        $quoteChars = "\xe2\x80\x9c\xe2\x80\x9d\xe2\x80\x98\xe2\x80\x99" .
-            "\xe2\x80\xb9\xe2\x80\xba\xe2\x80\x9e\xc2\xab\xc2\xbb" .
-            "\xe3\x80\x8f\xe3\x80\x8d";
+        // Clean up the text
         $preprocessed = preg_replace(
             array(
-                "/\r(?=[]'`\"" . $quoteChars . " ]*\r)/u",
+                "/\r(?=[]'`\"”)‘’‹›“„«»』」 ]*\r)/u",
                 '/[\n]+\r/u',
                 '/\r([^\n])/u',
-                "/\n[.](?![]'`\"" . $quoteChars . "]*\r)/u",
-                "/(\n|^)(?=.?[a-zA-Z0-9][^\n]*(\n|$))/u"
+                "/\n[.](?![]'`\"”)‘’‹›“„«»』」]*\r)/u",
+                "/(\n|^)(?=.?[^\n]*(\n|$))/u"
             ),
             array(
                 "",
@@ -224,7 +221,7 @@ class RegexParser implements ParserInterface
             // Add to current sentence
             $currentSentenceParts[] = $term;
 
-            // Create token
+            // Create token (each character is a word in this parser)
             $tokens[] = new Token(
                 $term,
                 $sentenceIndex,

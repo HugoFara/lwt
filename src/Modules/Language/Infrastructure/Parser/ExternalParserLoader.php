@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Parser
- * @package  Lwt\Core\Parser
+ * @package  Lwt\Modules\Language\Infrastructure\Parser
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,7 +15,9 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Parser;
+namespace Lwt\Modules\Language\Infrastructure\Parser;
+
+use Lwt\Modules\Language\Domain\Parser\ExternalParserConfig;
 
 use InvalidArgumentException;
 
@@ -68,8 +70,8 @@ class ExternalParserLoader
         }
 
         // Fallback: assume standard LWT directory structure
-        // __DIR__ is src/backend/Core/Parser, project root is 4 levels up
-        return dirname(__DIR__, 4) . '/' . self::CONFIG_FILENAME;
+        // __DIR__ is src/Modules/Language/Infrastructure/Parser, project root is 5 levels up
+        return dirname(__DIR__, 5) . '/' . self::CONFIG_FILENAME;
     }
 
     /**

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Tests\Core\Parser;
+namespace Lwt\Tests\Modules\Language\Domain\Parser;
 
 use InvalidArgumentException;
-use Lwt\Core\Parser\ExternalParserConfig;
+use Lwt\Modules\Language\Domain\Parser\ExternalParserConfig;
 use PHPUnit\Framework\TestCase;
 
 /**

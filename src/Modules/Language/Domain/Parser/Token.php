@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Parser
- * @package  Lwt\Core\Parser
+ * @package  Lwt\Modules\Language\Domain\Parser
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,7 +15,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Parser;
+namespace Lwt\Modules\Language\Domain\Parser;
 
 /**
  * Represents a single token from text parsing.

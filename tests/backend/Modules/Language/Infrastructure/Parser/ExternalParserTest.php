@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Tests\Core\Parser\Parsers;
+namespace Lwt\Tests\Modules\Language\Infrastructure\Parser;
 
-use Lwt\Core\Parser\ExternalParserConfig;
-use Lwt\Core\Parser\ParserConfig;
-use Lwt\Core\Parser\Parsers\ExternalParser;
+use Lwt\Modules\Language\Domain\Parser\ExternalParserConfig;
+use Lwt\Modules\Language\Domain\Parser\ParserConfig;
+use Lwt\Modules\Language\Infrastructure\Parser\ExternalParser;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

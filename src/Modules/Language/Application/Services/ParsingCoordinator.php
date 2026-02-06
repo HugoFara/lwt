@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Parser
- * @package  Lwt\Core\Parser
+ * @package  Lwt\Modules\Language\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,9 +15,12 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Parser;
+namespace Lwt\Modules\Language\Application\Services;
 
 use Lwt\Modules\Language\Domain\Language;
+use Lwt\Modules\Language\Domain\Parser\ParserConfig;
+use Lwt\Modules\Language\Domain\Parser\ParserResult;
+use Lwt\Modules\Language\Infrastructure\Parser\ParserRegistry;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Escaping;

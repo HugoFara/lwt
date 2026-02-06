@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Parser
- * @package  Lwt\Core\Parser\Parsers
+ * @package  Lwt\Modules\Language\Infrastructure\Parser
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,12 +15,12 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Parser\Parsers;
+namespace Lwt\Modules\Language\Infrastructure\Parser;
 
-use Lwt\Core\Parser\ParserInterface;
-use Lwt\Core\Parser\ParserConfig;
-use Lwt\Core\Parser\ParserResult;
-use Lwt\Core\Parser\Token;
+use Lwt\Modules\Language\Domain\Parser\ParserInterface;
+use Lwt\Modules\Language\Domain\Parser\ParserConfig;
+use Lwt\Modules\Language\Domain\Parser\ParserResult;
+use Lwt\Modules\Language\Domain\Parser\Token;
 use Lwt\Modules\Language\Application\Services\TextParsingService;
 
 /**

@@ -40,6 +40,10 @@ use Lwt\Modules\Language\Application\Services\TextParsingService;
 // Http
 use Lwt\Modules\Language\Http\LanguageController;
 use Lwt\Modules\Language\Http\LanguageApiHandler;
+// Parser Infrastructure
+use Lwt\Modules\Language\Infrastructure\Parser\ExternalParserLoader;
+use Lwt\Modules\Language\Infrastructure\Parser\ParserRegistry;
+use Lwt\Modules\Language\Application\Services\ParsingCoordinator;
 
 /**
  * Service provider for the Language module.
@@ -59,6 +63,23 @@ class LanguageServiceProvider implements ServiceProviderInterface
         // Register TextParsingService
         $container->singleton(TextParsingService::class, function (Container $_c) {
             return new TextParsingService();
+        });
+
+        // Register Parser Infrastructure
+        $container->singleton(ExternalParserLoader::class, function (Container $_c) {
+            return new ExternalParserLoader();
+        });
+
+        $container->singleton(ParserRegistry::class, function (Container $c) {
+            return new ParserRegistry(
+                $c->getTyped(ExternalParserLoader::class)
+            );
+        });
+
+        $container->singleton(ParsingCoordinator::class, function (Container $c) {
+            return new ParsingCoordinator(
+                $c->getTyped(ParserRegistry::class)
+            );
         });
 
         // Register Repository Interface binding

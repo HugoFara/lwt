@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Tests\Core\Parser;
+namespace Lwt\Tests\Modules\Language\Infrastructure\Parser;
 
 use PHPUnit\Framework\TestCase;
-use Lwt\Core\Parser\ParserRegistry;
-use Lwt\Core\Parser\ParserInterface;
-use Lwt\Core\Parser\Parsers\RegexParser;
-use Lwt\Core\Parser\Parsers\CharacterParser;
-use Lwt\Core\Parser\Parsers\MecabParser;
+use Lwt\Modules\Language\Infrastructure\Parser\ParserRegistry;
+use Lwt\Modules\Language\Domain\Parser\ParserInterface;
+use Lwt\Modules\Language\Infrastructure\Parser\RegexParser;
+use Lwt\Modules\Language\Infrastructure\Parser\CharacterParser;
+use Lwt\Modules\Language\Infrastructure\Parser\MecabParser;
 
 /**
  * Tests for the ParserRegistry class.

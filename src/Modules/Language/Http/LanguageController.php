@@ -27,7 +27,7 @@ use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Domain\Language;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
-use Lwt\Core\Parser\ParserRegistry;
+use Lwt\Modules\Language\Infrastructure\Parser\ParserRegistry;
 
 /**
  * Controller for language configuration.
