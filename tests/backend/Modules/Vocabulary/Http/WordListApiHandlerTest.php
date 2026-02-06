@@ -401,7 +401,7 @@ class WordListApiHandlerTest extends TestCase
 
             $this->assertFalse($result['success']);
             $this->assertEquals('Term not found', $result['error']);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -447,7 +447,7 @@ class WordListApiHandlerTest extends TestCase
             $this->assertArrayHasKey('tags', $result);
             $this->assertArrayHasKey('statuses', $result);
             $this->assertArrayHasKey('sorts', $result);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -465,7 +465,7 @@ class WordListApiHandlerTest extends TestCase
             $firstStatus = $result['statuses'][0];
             $this->assertArrayHasKey('value', $firstStatus);
             $this->assertArrayHasKey('label', $firstStatus);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -483,7 +483,7 @@ class WordListApiHandlerTest extends TestCase
             $firstSort = $result['sorts'][0];
             $this->assertArrayHasKey('value', $firstSort);
             $this->assertArrayHasKey('label', $firstSort);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -533,7 +533,7 @@ class WordListApiHandlerTest extends TestCase
             $result = $handler->selectImportedTerms('2000-01-01 00:00:00', 0, 10);
 
             $this->assertIsArray($result);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -556,7 +556,7 @@ class WordListApiHandlerTest extends TestCase
             $this->assertArrayHasKey('terms', $result);
             $this->assertArrayHasKey('current_page', $result['navigation']);
             $this->assertArrayHasKey('total_pages', $result['navigation']);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }

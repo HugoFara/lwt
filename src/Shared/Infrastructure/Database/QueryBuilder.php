@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Database;
 
-use Lwt\Core\Exception\AuthException;
+use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Core\Globals;
 
 /**

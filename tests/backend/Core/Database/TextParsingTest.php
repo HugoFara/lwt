@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Database;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\TextParsing;
 use Lwt\Shared\Infrastructure\Database\Configuration;
@@ -18,7 +18,7 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 
 /**
  * Unit tests for the Database\TextParsing class.
@@ -769,7 +769,7 @@ class TextParsingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $this->expectException(\Lwt\Core\Exception\DatabaseException::class);
+        $this->expectException(\Lwt\Shared\Infrastructure\Exception\DatabaseException::class);
 
         TextParsing::parseAndSave("Test text.", 99999, 1);
     }
@@ -782,7 +782,7 @@ class TextParsingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $this->expectException(\Lwt\Core\Exception\DatabaseException::class);
+        $this->expectException(\Lwt\Shared\Infrastructure\Exception\DatabaseException::class);
 
         ob_start();
         try {

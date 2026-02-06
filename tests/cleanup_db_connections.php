@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace Lwt\Tests;
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 
 // Skip if mysqli extension is not available
 if (!extension_loaded('mysqli')) {
@@ -28,7 +28,7 @@ if (!extension_loaded('mysqli')) {
 }
 
 // Load environment configuration
-require_once __DIR__ . '/../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 EnvLoader::load(__DIR__ . '/../.env');
 $config = EnvLoader::getDatabaseConfig();

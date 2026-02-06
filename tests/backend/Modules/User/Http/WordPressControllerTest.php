@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Modules\User\Http;
 
-require_once __DIR__ . '/../../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Application\Services\WordPressAuthService;
 use Lwt\Modules\User\Application\UserFacade;
@@ -20,7 +20,7 @@ EnvLoader::load(__DIR__ . '/../../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
-require_once __DIR__ . '/../../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../../src/backend/Controllers/BaseController.php';
 
 /**

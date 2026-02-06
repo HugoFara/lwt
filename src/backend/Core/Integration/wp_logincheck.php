@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace Lwt\Integration;
 
-require_once __DIR__ . '/../Bootstrap/start_session.php';
+require_once __DIR__ . '/../../../Shared/Infrastructure/Bootstrap/start_session.php';
 
 if (isset($_SESSION['LWT-WP-User'])) {
     // WordPress user is authenticated

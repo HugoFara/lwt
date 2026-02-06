@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Tests\Core\Exception;
+namespace Lwt\Tests\Shared\Infrastructure\Exception;
 
-use Lwt\Core\Exception\DatabaseException;
+use Lwt\Shared\Infrastructure\Exception\DatabaseException;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for the DatabaseException class.
  *
- * @covers \Lwt\Core\Exception\DatabaseException
+ * @covers \Lwt\Shared\Infrastructure\Exception\DatabaseException
  */
 class DatabaseExceptionTest extends TestCase
 {

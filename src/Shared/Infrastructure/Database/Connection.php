@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Database;
 
-use Lwt\Core\Exception\DatabaseException;
+use Lwt\Shared\Infrastructure\Exception\DatabaseException;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\PreparedStatement;
 

@@ -18,7 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\User\Application\UseCases;
 
 use Lwt\Modules\User\Domain\User;
-use Lwt\Core\Exception\AuthException;
+use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Application\Services\PasswordHasher;
 use Lwt\Modules\User\Domain\UserRepositoryInterface;

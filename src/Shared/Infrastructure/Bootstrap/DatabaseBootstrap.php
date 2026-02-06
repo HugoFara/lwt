@@ -7,7 +7,7 @@
  * PHP version 8.1
  *
  * @category Database
- * @package  Lwt\Core\Bootstrap
+ * @package  Lwt\Shared\Infrastructure\Bootstrap
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Bootstrap;
+namespace Lwt\Shared\Infrastructure\Bootstrap;
 
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;

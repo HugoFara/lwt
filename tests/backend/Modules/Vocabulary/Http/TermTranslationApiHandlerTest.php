@@ -200,7 +200,7 @@ class TermTranslationApiHandlerTest extends TestCase
             $this->assertIsArray($result);
             $this->assertArrayHasKey('tags', $result);
             $this->assertIsArray($result['tags']);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -215,7 +215,7 @@ class TermTranslationApiHandlerTest extends TestCase
             $result = $handler->getTermTags(999999999);
 
             $this->assertEmpty($result['tags']);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -236,7 +236,7 @@ class TermTranslationApiHandlerTest extends TestCase
             $this->assertIsArray($result);
             $this->assertArrayHasKey('success', $result);
             $this->assertTrue($result['success']);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -261,7 +261,7 @@ class TermTranslationApiHandlerTest extends TestCase
                 isset($result['success']) || isset($result['error']),
                 'Result should contain success or error key'
             );
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         } catch (\Exception $e) {
             // FK constraint or other DB error is expected
@@ -294,7 +294,7 @@ class TermTranslationApiHandlerTest extends TestCase
             $result = $handler->editTermTranslation(999999999, 'new translation');
 
             $this->assertIsString($result);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -316,7 +316,7 @@ class TermTranslationApiHandlerTest extends TestCase
             $this->assertFalse($result['success']);
             $this->assertEquals('word_not_found', $result['error']);
             $this->assertEquals(0, $result['count']);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -337,7 +337,7 @@ class TermTranslationApiHandlerTest extends TestCase
             $this->assertIsArray($result);
             $this->assertArrayHasKey('error', $result);
             $this->assertStringContainsString('0 word ID found', $result['error']);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -353,7 +353,7 @@ class TermTranslationApiHandlerTest extends TestCase
             $result = $handler->formatUpdateTranslation(999999999, '  translation  ');
 
             $this->assertIsArray($result);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -378,7 +378,7 @@ class TermTranslationApiHandlerTest extends TestCase
                 isset($result['term_id']) || isset($result['error']),
                 'Result should contain term_id or error key'
             );
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         } catch (\Exception $e) {
             // FK constraint or other DB error is expected
@@ -464,7 +464,7 @@ class TermTranslationApiHandlerTest extends TestCase
             // Step 2: Format the error
             $formatted = $handler->formatUpdateTranslation(999999999, 'test');
             $this->assertArrayHasKey('error', $formatted);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }

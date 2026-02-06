@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Tests\Core\Exception;
+namespace Lwt\Tests\Shared\Infrastructure\Exception;
 
-use Lwt\Core\Exception\ValidationException;
+use Lwt\Shared\Infrastructure\Exception\ValidationException;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for the ValidationException class.
  *
- * @covers \Lwt\Core\Exception\ValidationException
+ * @covers \Lwt\Shared\Infrastructure\Exception\ValidationException
  */
 class ValidationExceptionTest extends TestCase
 {

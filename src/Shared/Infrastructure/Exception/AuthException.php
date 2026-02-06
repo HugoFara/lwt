@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Core\Exception
+ * @package  Lwt\Shared\Infrastructure\Exception
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,7 +15,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Exception;
+namespace Lwt\Shared\Infrastructure\Exception;
 
 /**
  * Exception thrown when authentication is required but not present.

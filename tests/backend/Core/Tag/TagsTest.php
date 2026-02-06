@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Tag;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Http/UrlUtilities.php';
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
@@ -19,7 +19,7 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 
 /**
  * Comprehensive tests for TagsFacade

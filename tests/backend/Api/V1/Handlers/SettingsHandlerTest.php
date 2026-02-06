@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Api\V1\Handlers;
 
-require_once __DIR__ . '/../../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Admin\Http\AdminApiHandler;
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Repository;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 use Lwt\Modules\Vocabulary\Domain\Term;
 use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use Lwt\Modules\Vocabulary\Domain\ValueObject\TermId;
 use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
@@ -22,7 +22,7 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Domain/Term.php';
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/PreparedStatement.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Repository/RepositoryInterface.php';

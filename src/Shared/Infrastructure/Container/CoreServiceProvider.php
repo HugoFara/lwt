@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Container;
 
-use Lwt\Core\Bootstrap\DatabaseBootstrap;
+use Lwt\Shared\Infrastructure\Bootstrap\DatabaseBootstrap;
 
 /**
  * Core service provider that registers essential cross-cutting services.

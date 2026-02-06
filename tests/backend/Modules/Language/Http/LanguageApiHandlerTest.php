@@ -179,7 +179,7 @@ class LanguageApiHandlerTest extends TestCase
         // This test requires database access with full schema
         try {
             $result = $this->handler->formatReadingConfiguration(1);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 
@@ -203,7 +203,7 @@ class LanguageApiHandlerTest extends TestCase
         // This test requires database access with full schema
         try {
             $result = $this->handler->getReadingConfiguration(999);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 
@@ -222,7 +222,7 @@ class LanguageApiHandlerTest extends TestCase
         // This test requires database access with full schema
         try {
             $result = $this->handler->getReadingConfiguration(0);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 
@@ -241,7 +241,7 @@ class LanguageApiHandlerTest extends TestCase
     {
         try {
             $result = $this->handler->getSimilarTerms(1, 'test');
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 
@@ -257,7 +257,7 @@ class LanguageApiHandlerTest extends TestCase
     {
         try {
             $result = $this->handler->formatSimilarTerms(1, 'test');
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 
@@ -276,7 +276,7 @@ class LanguageApiHandlerTest extends TestCase
     {
         try {
             $result = $this->handler->getSentencesWithTerm(1, 'test', null);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 
@@ -290,7 +290,7 @@ class LanguageApiHandlerTest extends TestCase
     {
         try {
             $result = $this->handler->getSentencesWithTerm(1, 'test', 1);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 
@@ -304,7 +304,7 @@ class LanguageApiHandlerTest extends TestCase
     {
         try {
             $result = $this->handler->formatSentencesWithRegisteredTerm(1, 'test', 1);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 
@@ -318,7 +318,7 @@ class LanguageApiHandlerTest extends TestCase
     {
         try {
             $result = $this->handler->formatSentencesWithNewTerm(1, 'test');
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 
@@ -332,7 +332,7 @@ class LanguageApiHandlerTest extends TestCase
     {
         try {
             $result = $this->handler->formatSentencesWithNewTerm(1, 'test', true);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 
@@ -386,7 +386,7 @@ class LanguageApiHandlerTest extends TestCase
 
         try {
             $result = $this->handler->formatGetAll();
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 
@@ -594,7 +594,7 @@ class LanguageApiHandlerTest extends TestCase
     {
         try {
             $result = $this->handler->formatSetDefault(1);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
 

@@ -763,7 +763,7 @@ DB_TABLE_PREFIX=lwt_
 
 #### EnvLoader Class
 
-The `Lwt\Core\EnvLoader` class (`src/backend/Core/Bootstrap/EnvLoader.php`) provides the parsing functionality:
+The `Lwt\Shared\Infrastructure\Bootstrap\EnvLoader` class (`src/Shared/Infrastructure/Bootstrap/EnvLoader.php`) provides the parsing functionality:
 
 ```php
 use Lwt\Core\EnvLoader;

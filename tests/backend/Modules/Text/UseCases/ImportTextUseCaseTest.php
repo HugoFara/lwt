@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Modules\Text\UseCases;
 
-require_once __DIR__ . '/../../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use Lwt\Modules\Text\Application\UseCases\ImportText;
 use Lwt\Modules\Text\Domain\Text;

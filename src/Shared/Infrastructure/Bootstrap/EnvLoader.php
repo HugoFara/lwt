@@ -19,7 +19,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Bootstrap;
+namespace Lwt\Shared\Infrastructure\Bootstrap;
 
 /**
  * Simple .env file parser and loader.
@@ -29,7 +29,7 @@ namespace Lwt\Core\Bootstrap;
  *
  * Usage:
  * ```php
- * use Lwt\Core\Bootstrap\EnvLoader;
+ * use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
  *
  * // Load .env file
  * EnvLoader::load('/path/to/.env');

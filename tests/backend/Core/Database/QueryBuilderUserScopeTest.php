@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Database;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
@@ -19,7 +19,7 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 
 /**
  * Unit tests for QueryBuilder user scope filtering.
@@ -98,7 +98,7 @@ class QueryBuilderUserScopeTest extends TestCase
         Globals::setCurrentUserId(42);
         Globals::setCurrentUserIsAdmin(false);
 
-        $this->expectException(\Lwt\Core\Exception\AuthException::class);
+        $this->expectException(\Lwt\Shared\Infrastructure\Exception\AuthException::class);
         $this->expectExceptionMessage('You do not have permission to access cross-user data.');
 
         QueryBuilder::table('words')->withoutUserScope();

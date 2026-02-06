@@ -623,7 +623,7 @@ class LemmaServiceTest extends TestCase
         try {
             $result = $this->service->linkTextItemsByLemmaSql(1);
             $this->assertIsInt($result);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
@@ -638,7 +638,7 @@ class LemmaServiceTest extends TestCase
         try {
             $result = $this->service->linkTextItemsByLemmaSql(1, 1);
             $this->assertIsInt($result);
-        } catch (\Lwt\Core\Exception\DatabaseException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException $e) {
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }

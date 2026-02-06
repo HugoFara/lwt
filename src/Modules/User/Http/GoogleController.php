@@ -20,7 +20,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\User\Http;
 
 use Lwt\Controllers\BaseController;
-use Lwt\Core\Exception\AuthException;
+use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Modules\User\Application\Services\GoogleAuthService;
 use Lwt\Shared\UI\Helpers\FormHelper;
 

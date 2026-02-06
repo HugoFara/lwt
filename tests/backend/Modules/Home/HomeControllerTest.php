@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Modules\Home;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 use Lwt\Modules\Home\Http\HomeController;
 use Lwt\Modules\Home\Application\HomeFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +19,7 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/backend/Controllers/BaseController.php';
 
 /**

@@ -22,7 +22,7 @@ declare(strict_types=1);
 
 namespace Lwt\Core\Integration;
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 
 /**
  * YouTube integration helper class.

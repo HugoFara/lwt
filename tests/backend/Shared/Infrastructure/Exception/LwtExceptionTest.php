@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Tests\Core\Exception;
+namespace Lwt\Tests\Shared\Infrastructure\Exception;
 
-use Lwt\Core\Exception\LwtException;
+use Lwt\Shared\Infrastructure\Exception\LwtException;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for the base LwtException class.
  *
- * @covers \Lwt\Core\Exception\LwtException
+ * @covers \Lwt\Shared\Infrastructure\Exception\LwtException
  */
 class LwtExceptionTest extends TestCase
 {

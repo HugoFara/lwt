@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Repository;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Domain\ValueObjects\UserId;
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 use Lwt\Shared\Infrastructure\Database\Configuration;
@@ -20,7 +20,7 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/Shared/Domain/ValueObjects/UserId.php';
 require_once __DIR__ . '/../../../../src/Modules/User/Domain/User.php';
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/PreparedStatement.php';

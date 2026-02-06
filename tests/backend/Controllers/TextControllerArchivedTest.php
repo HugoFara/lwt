@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Controllers;
 
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 use Lwt\Modules\Text\Http\TextController;
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
@@ -21,7 +21,7 @@ EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 // LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/SentenceService.php';

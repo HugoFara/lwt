@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Modules\User\Http;
 
 use Lwt\Modules\User\Domain\User;
-use Lwt\Core\Exception\AuthException;
+use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Shared\Domain\ValueObjects\UserId;

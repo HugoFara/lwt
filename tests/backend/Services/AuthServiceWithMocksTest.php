@@ -6,7 +6,7 @@ namespace Lwt\Tests\Services;
 
 use DateTimeImmutable;
 use Lwt\Modules\User\Domain\User;
-use Lwt\Core\Exception\AuthException;
+use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Application\Services\AuthService;
 use Lwt\Modules\User\Application\Services\PasswordService;

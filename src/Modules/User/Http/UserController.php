@@ -18,7 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\User\Http;
 
 use Lwt\Controllers\BaseController;
-use Lwt\Core\Exception\AuthException;
+use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Core\Globals;
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Modules\User\Infrastructure\AuthFormDataManager;

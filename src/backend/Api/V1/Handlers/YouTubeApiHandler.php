@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Lwt\Api\V1\Handlers;
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 
 /**
  * Handler for YouTube API proxy endpoints.

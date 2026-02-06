@@ -22,7 +22,7 @@ declare(strict_types=1);
 
 namespace Lwt\Core;
 
-use Lwt\Core\Exception\AuthException;
+use Lwt\Shared\Infrastructure\Exception\AuthException;
 
 /**
  * Centralized management of LWT global variables.

@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Database;
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Utils\ErrorHandler;
 
 /**

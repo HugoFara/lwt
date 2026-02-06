@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Tests\Core\Bootstrap;
+namespace Lwt\Tests\Shared\Infrastructure\Bootstrap;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -39,7 +39,7 @@ class EnvLoaderTest extends TestCase
         // Reset EnvLoader state and reload the project's .env file
         // to ensure subsequent tests have the correct configuration
         EnvLoader::reset();
-        EnvLoader::load(__DIR__ . '/../../../.env');
+        EnvLoader::load(__DIR__ . '/../../../../../.env');
 
         parent::tearDown();
     }

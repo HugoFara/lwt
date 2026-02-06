@@ -20,7 +20,7 @@ namespace Lwt\Shared\Infrastructure\Database;
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
-use Lwt\Core\Exception\DatabaseException;
+use Lwt\Shared\Infrastructure\Exception\DatabaseException;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Language\Application\Services\TextParsingService;

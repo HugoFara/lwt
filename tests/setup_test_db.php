@@ -24,10 +24,10 @@ declare(strict_types=1);
 
 namespace Lwt\Tests;
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 
 // Load environment configuration
-require_once __DIR__ . '/../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 // Parse command line arguments
 $drop = in_array('--drop', $argv ?? []);

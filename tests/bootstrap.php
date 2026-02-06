@@ -18,8 +18,8 @@ declare(strict_types=1);
 
 namespace Lwt\Tests;
 
-use Lwt\Core\Bootstrap\DatabaseBootstrap;
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\DatabaseBootstrap;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 
@@ -27,7 +27,7 @@ use Lwt\Shared\Infrastructure\Database\Configuration;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // Load EnvLoader and Globals
-require_once __DIR__ . '/../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 require_once __DIR__ . '/../src/backend/Core/Globals.php';
 
 // Initialize Globals

@@ -41,7 +41,7 @@ use Lwt\Modules\Admin\Application\UseCases\Wizard\AutocompleteConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\LoadConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\SaveConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\TestConnection;
-use Lwt\Core\Exception\ExceptionHandler;
+use Lwt\Shared\Infrastructure\Exception\ExceptionHandler;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Router\Router;
 

@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Infrastructure;
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 
 /**
  * HTTP client for communicating with the NLP microservice Whisper endpoints.

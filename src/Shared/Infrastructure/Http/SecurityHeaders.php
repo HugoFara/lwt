@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Http;
 
-use Lwt\Core\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 
 /**
  * Handles HTTP security headers for the application.
