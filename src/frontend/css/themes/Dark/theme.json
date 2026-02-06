@@ -1,7 +1,8 @@
 {
-    "name": "Night Mode",
+    "name": "Dark",
     "description": "Dark theme with black background and standard highlighting. Easy on the eyes for nighttime reading.",
     "mode": "dark",
+    "counterpart": "assets/themes/Default/",
     "highlighting": "Background color highlighting",
     "wordBreaking": "Standard"
 }

@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\UI\Helpers;
 
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Assets\ViteHelper;
 use Lwt\Core\StringUtils;
@@ -60,6 +61,30 @@ class PageLayoutHelper
 
         $base = UrlUtilities::getBasePath();
         $logoUrl = UrlUtilities::url('/assets/images/lwt_icon_48.png');
+
+        // Theme toggle: read current theme and determine mode/counterpart
+        $themeDir = Settings::getWithDefault('set-theme-dir');
+        $themeJsonPath = $themeDir . 'theme.json';
+        $themeMode = 'light';
+        $themeCounterpart = 'assets/themes/Dark/';
+        if ($themeDir !== '' && file_exists($themeJsonPath)) {
+            $json = file_get_contents($themeJsonPath);
+            if ($json !== false) {
+                /** @var array<string, mixed>|null $meta */
+                $meta = json_decode($json, true);
+                if (is_array($meta)) {
+                    $themeMode = (isset($meta['mode']) && is_string($meta['mode']))
+                        ? $meta['mode'] : 'light';
+                    $themeCounterpart = (isset($meta['counterpart']) && is_string($meta['counterpart']))
+                        ? $meta['counterpart'] : 'assets/themes/Dark/';
+                }
+            }
+        }
+        $toggleIcon = $themeMode === 'dark' ? 'sun' : 'moon';
+        $toggleTitle = $themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+        $toggleIconHtml = IconHelper::render($toggleIcon, ['alt' => $toggleTitle]);
+        $escapedCounterpart = htmlspecialchars($themeCounterpart, ENT_QUOTES, 'UTF-8');
+        $escapedThemeDir = htmlspecialchars($themeDir, ENT_QUOTES, 'UTF-8');
 
         return <<<HTML
 <nav class="navbar is-light" role="navigation" aria-label="main navigation" x-data="navbar()">
@@ -134,6 +159,14 @@ class PageLayoutHelper
         </div>
 
         <div class="navbar-end">
+            <a class="navbar-item" href="#" title="{$toggleTitle}"
+               x-data="themeToggle()" @click.prevent="toggle()"
+               data-theme-mode="{$themeMode}"
+               data-theme-counterpart="{$escapedCounterpart}"
+               data-current-theme="{$escapedThemeDir}">
+                {$toggleIconHtml}
+            </a>
+
             <div class="navbar-item has-dropdown{$adminActive}" :class="{ 'is-active': activeDropdown === 'admin' }">
                 <a class="navbar-link" @click.prevent="toggleDropdown('admin')">
                     {$settingsIcon}

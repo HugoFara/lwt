@@ -1,7 +1,8 @@
 {
-    "name": "Lingocracy",
+    "name": "Underline",
     "description": "Light theme with subtle underline highlighting. Clean, minimal appearance.",
     "mode": "light",
+    "counterpart": "assets/themes/Underline_Dark/",
     "highlighting": "Discrete underline borders",
     "wordBreaking": "Modified - punctuation can break separately"
 }

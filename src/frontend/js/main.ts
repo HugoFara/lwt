@@ -48,6 +48,7 @@ import '@shared/api/client';
 import '@shared/components/modal';
 import '@shared/components/sorttable';
 import '@shared/components/navbar';
+import '@shared/components/theme_toggle';
 import '@shared/components/footer';
 import '@shared/components/searchable_select';
 

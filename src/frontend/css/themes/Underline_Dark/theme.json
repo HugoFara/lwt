@@ -1,0 +1,8 @@
+{
+    "name": "Underline Dark",
+    "description": "Dark version of Underline theme with subtle underline highlighting on dark background.",
+    "mode": "dark",
+    "counterpart": "assets/themes/Underline/",
+    "highlighting": "Discrete underline borders",
+    "wordBreaking": "Modified - punctuation can break separately"
+}

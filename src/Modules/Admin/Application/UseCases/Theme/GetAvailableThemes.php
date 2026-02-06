@@ -33,6 +33,7 @@ class GetAvailableThemes
         'name' => 'Default',
         'description' => 'Standard light theme with background color highlighting.',
         'mode' => 'light',
+        'counterpart' => 'assets/themes/Dark/',
         'highlighting' => 'Background color highlighting',
         'wordBreaking' => 'Standard'
     ];
@@ -45,6 +46,7 @@ class GetAvailableThemes
      *     name: string,
      *     description: string,
      *     mode: string,
+     *     counterpart: string,
      *     highlighting: string,
      *     wordBreaking: string
      * }> Array of theme data with metadata
@@ -80,6 +82,7 @@ class GetAvailableThemes
      *     name: string,
      *     description: string,
      *     mode: string,
+     *     counterpart: string,
      *     highlighting: string,
      *     wordBreaking: string
      * } Theme metadata
@@ -93,6 +96,7 @@ class GetAvailableThemes
             'name' => $fallbackName,
             'description' => '',
             'mode' => 'light',
+            'counterpart' => 'assets/themes/Dark/',
             'highlighting' => '',
             'wordBreaking' => ''
         ];
@@ -118,6 +122,8 @@ class GetAvailableThemes
                 ? $metadata['description'] : $defaults['description'],
             'mode' => isset($metadata['mode']) && is_string($metadata['mode'])
                 ? $metadata['mode'] : $defaults['mode'],
+            'counterpart' => isset($metadata['counterpart']) && is_string($metadata['counterpart'])
+                ? $metadata['counterpart'] : $defaults['counterpart'],
             'highlighting' => isset($metadata['highlighting']) && is_string($metadata['highlighting'])
                 ? $metadata['highlighting'] : $defaults['highlighting'],
             'wordBreaking' => isset($metadata['wordBreaking']) && is_string($metadata['wordBreaking'])

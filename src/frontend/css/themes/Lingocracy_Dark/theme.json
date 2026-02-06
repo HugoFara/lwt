@@ -1,7 +1,0 @@
-{
-    "name": "Lingocracy Dark",
-    "description": "Dark version of Lingocracy with subtle underline highlighting on dark background.",
-    "mode": "dark",
-    "highlighting": "Discrete underline borders",
-    "wordBreaking": "Modified - punctuation can break separately"
-}
