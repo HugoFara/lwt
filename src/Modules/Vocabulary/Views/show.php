@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace Lwt\Views\Word;
 
 use Lwt\Core\StringUtils;
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 // Type assertions for variables passed from controller
 /** @var array{text: string, translation: string, notes?: string, romanization: string, sentence: string, status: int, langId: int} $word */

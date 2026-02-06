@@ -26,7 +26,7 @@ namespace Lwt\Modules\Vocabulary\Views;
 
 use Lwt\Core\StringUtils;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 // Type assertions for variables passed from controller
 assert(is_int($wid));

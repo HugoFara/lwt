@@ -24,7 +24,7 @@ use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 /**
  * Handler for term status API operations.

@@ -31,7 +31,7 @@ declare(strict_types=1);
 namespace Lwt\Views\Review;
 
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 // Validate and cast injected variables
 assert(isset($wordText) && is_string($wordText));

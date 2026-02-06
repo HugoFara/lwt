@@ -91,7 +91,7 @@ $varArray = [
         ],
         'settings' => [
             'hts'                => $hts,
-            'word_status_filter' => \Lwt\View\Helper\StatusHelper::makeClassFilter((int)$visitStatus),
+            'word_status_filter' => \Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper::makeClassFilter((int)$visitStatus),
             'annotations_mode'   => $modeTrans
         ],
     ]

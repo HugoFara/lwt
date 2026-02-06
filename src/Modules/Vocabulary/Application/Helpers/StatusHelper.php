@@ -6,19 +6,20 @@
  *
  * PHP version 8.1
  *
- * @category View
- * @package  Lwt
+ * @category Application
+ * @package  Lwt\Modules\Vocabulary\Application\Helpers
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/files/src-backend-View-Helper-StatusHelper.html
+ * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
 
 declare(strict_types=1);
 
-namespace Lwt\View\Helper;
+namespace Lwt\Modules\Vocabulary\Application\Helpers;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 
 /**
  * Helper class for word status-related display logic.
@@ -256,7 +257,7 @@ class StatusHelper
      */
     public static function getName(int $status): string
     {
-        $statuses = \Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses();
+        $statuses = TermStatusService::getStatuses();
         return $statuses[$status]['name'] ?? '';
     }
 
@@ -269,7 +270,7 @@ class StatusHelper
      */
     public static function getAbbr(int $status): string
     {
-        $statuses = \Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses();
+        $statuses = TermStatusService::getStatuses();
         return $statuses[$status]['abbr'] ?? '';
     }
 

@@ -30,7 +30,7 @@ namespace Lwt\Views\Word;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\TagHelper;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;

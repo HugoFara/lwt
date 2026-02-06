@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Infrastructure\Lemmatizers;
 
-use Lwt\Api\V1\Handlers\NlpServiceHandler;
+use Lwt\Modules\Language\Infrastructure\NlpServiceHandler;
 use Lwt\Modules\Vocabulary\Domain\LemmatizerInterface;
 
 /**

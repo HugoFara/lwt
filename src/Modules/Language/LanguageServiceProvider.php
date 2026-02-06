@@ -40,6 +40,8 @@ use Lwt\Modules\Language\Application\Services\TextParsingService;
 // Http
 use Lwt\Modules\Language\Http\LanguageController;
 use Lwt\Modules\Language\Http\LanguageApiHandler;
+// NLP Service
+use Lwt\Modules\Language\Infrastructure\NlpServiceHandler;
 // Parser Infrastructure
 use Lwt\Modules\Language\Infrastructure\Parser\ExternalParserLoader;
 use Lwt\Modules\Language\Infrastructure\Parser\ParserRegistry;
@@ -60,6 +62,11 @@ class LanguageServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
+        // Register NLP Service Handler
+        $container->singleton(NlpServiceHandler::class, function (Container $_c) {
+            return new NlpServiceHandler();
+        });
+
         // Register TextParsingService
         $container->singleton(TextParsingService::class, function (Container $_c) {
             return new TextParsingService();

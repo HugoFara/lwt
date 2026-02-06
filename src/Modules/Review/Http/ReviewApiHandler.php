@@ -25,7 +25,7 @@ use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 /**
  * Handler for review/test-related API operations.

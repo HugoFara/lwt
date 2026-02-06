@@ -27,7 +27,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Views;
 
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 // Type assertions for variables passed from controller
 assert(is_string($word));

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Tests\Api\V1\Handlers;
+namespace Tests\Backend\Modules\Language\Infrastructure;
 
 use PHPUnit\Framework\TestCase;
-use Lwt\Api\V1\Handlers\NlpServiceHandler;
+use Lwt\Modules\Language\Infrastructure\NlpServiceHandler;
 
 /**
  * Tests for NlpServiceHandler.
  *
- * @covers \Lwt\Api\V1\Handlers\NlpServiceHandler
+ * @covers \Lwt\Modules\Language\Infrastructure\NlpServiceHandler
  */
 class NlpServiceHandlerTest extends TestCase
 {

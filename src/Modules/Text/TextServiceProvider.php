@@ -42,6 +42,8 @@ use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Text\Http\TextController;
 use Lwt\Modules\Text\Http\TextPrintController;
 use Lwt\Modules\Text\Http\TextApiHandler;
+use Lwt\Modules\Text\Http\WhisperApiHandler;
+use Lwt\Modules\Text\Http\YouTubeApiHandler;
 use Lwt\Modules\Language\Application\LanguageFacade;
 // Module services
 use Lwt\Modules\Text\Application\Services\TextPrintService;
@@ -155,6 +157,16 @@ class TextServiceProvider implements ServiceProviderInterface
                 return new TextScoringService();
             }
         );
+
+        // Register Whisper API Handler
+        $container->singleton(WhisperApiHandler::class, function (Container $_c) {
+            return new WhisperApiHandler();
+        });
+
+        // Register YouTube API Handler
+        $container->singleton(YouTubeApiHandler::class, function (Container $_c) {
+            return new YouTubeApiHandler();
+        });
     }
 
     /**

@@ -22,7 +22,7 @@ namespace Lwt\Modules\Vocabulary\Http;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Modules\Tags\Application\TagsFacade;
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 /**
  * Handler for word list API operations.

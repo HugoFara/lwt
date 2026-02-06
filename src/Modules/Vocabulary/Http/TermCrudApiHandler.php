@@ -30,7 +30,7 @@ use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Modules\Vocabulary\Application\Services\WordLinkingService;
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 /**
  * Handler for term CRUD API operations.

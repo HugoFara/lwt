@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Backend\Modules\Vocabulary\Infrastructure\Lemmatizers;
 
 use PHPUnit\Framework\TestCase;
-use Lwt\Api\V1\Handlers\NlpServiceHandler;
+use Lwt\Modules\Language\Infrastructure\NlpServiceHandler;
 use Lwt\Modules\Vocabulary\Infrastructure\Lemmatizers\NlpServiceLemmatizer;
 
 /**

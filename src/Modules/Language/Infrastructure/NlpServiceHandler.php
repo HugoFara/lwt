@@ -5,8 +5,8 @@
  *
  * PHP version 8.1
  *
- * @category Api
- * @package  Lwt
+ * @category Infrastructure
+ * @package  Lwt\Modules\Language\Infrastructure
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,7 +15,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Api\V1\Handlers;
+namespace Lwt\Modules\Language\Infrastructure;
 
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 

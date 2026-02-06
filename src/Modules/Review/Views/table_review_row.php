@@ -30,7 +30,7 @@ namespace Lwt\Views\Review;
 
 use Lwt\Core\StringUtils;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Validate and cast injected variables

@@ -27,7 +27,7 @@ declare(strict_types=1);
 namespace Lwt\Views\Word;
 
 use Lwt\Modules\Tags\Application\TagsFacade;
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 // Type assertions for variables passed from controller
 assert(is_string($message));

@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\UI\Helpers;
 
-use Lwt\View\Helper\StatusHelper;
+use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 /**
  * Builder class for generating HTML select options.

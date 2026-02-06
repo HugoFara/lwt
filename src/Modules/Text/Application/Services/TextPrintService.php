@@ -353,7 +353,7 @@ class TextPrintService
      */
     public function checkStatusInRange(int $status, int $statusRange): bool
     {
-        return \Lwt\View\Helper\StatusHelper::checkRange($status, $statusRange);
+        return \Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper::checkRange($status, $statusRange);
     }
 
     // ===========================
