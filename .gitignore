@@ -1,5 +1,8 @@
 # LWT specific files
 
+# Claude Code local config
+.claude/
+
 # Environment configuration (contains secrets)
 .env
 deploy.env
