@@ -21,6 +21,16 @@
     </projectFiles>
 
     <issueHandlers>
+        <!-- curl extension constants not available in all analysis environments -->
+        <UndefinedConstant>
+            <errorLevel type="suppress">
+                <directory name="src/Modules/Text/Infrastructure" />
+                <directory name="src/Shared/UI/Assets" />
+                <directory name="src/backend/Core/Entity" />
+                <directory name="src/backend/Core/Integration" />
+            </errorLevel>
+        </UndefinedConstant>
+
         <!--
             ============================================
             VIEW TEMPLATE PATTERN SUPPRESSIONS
@@ -30,7 +40,6 @@
         -->
         <UndefinedGlobalVariable>
             <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
                 <directory name="src/Modules/Admin/Views" />
                 <directory name="src/Modules/Book/Views" />
                 <directory name="src/Modules/Dictionary/Views" />
@@ -48,7 +57,6 @@
         <!-- Mixed* issues in views and curl constant usage -->
         <MixedArgument>
             <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
                 <directory name="src/backend/Core/Entity" />
                 <directory name="src/backend/Core/Integration" />
                 <directory name="src/Modules/Book/Views" />
@@ -62,41 +70,25 @@
 
         <MixedArrayAccess>
             <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
                 <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </MixedArrayAccess>
 
         <MixedAssignment>
             <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
                 <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </MixedAssignment>
 
         <MixedOperand>
             <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
                 <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </MixedOperand>
 
-        <MixedMethodCall>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-            </errorLevel>
-        </MixedMethodCall>
-
-        <MixedArrayOffset>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-            </errorLevel>
-        </MixedArrayOffset>
-
         <!-- Type checks for safety with dynamic data -->
         <RedundantCondition>
             <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
                 <directory name="src/Modules/Admin/Views" />
                 <directory name="src/Modules/Book/Application" />
                 <directory name="src/Modules/Book/Views" />
@@ -116,7 +108,6 @@
 
         <RedundantConditionGivenDocblockType>
             <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
                 <directory name="src/Modules/Admin/Views" />
                 <directory name="src/Modules/Book/Views" />
                 <directory name="src/Modules/Dictionary/Infrastructure" />
@@ -134,7 +125,6 @@
 
         <TypeDoesNotContainType>
             <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
                 <directory name="src/Modules/Admin/Views" />
                 <directory name="src/Modules/Dictionary/Views" />
                 <directory name="src/Modules/Feed/Http" />
@@ -145,18 +135,9 @@
             </errorLevel>
         </TypeDoesNotContainType>
 
-        <DocblockTypeContradiction>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-                <directory name="src/Modules/Admin/Views" />
-                <directory name="src/Modules/Feed/Views" />
-            </errorLevel>
-        </DocblockTypeContradiction>
-
         <!-- Type annotations document expected types for dynamic data -->
         <UnnecessaryVarAnnotation>
             <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
                 <directory name="src/Modules/Book/Application" />
                 <directory name="src/Modules/Dictionary/Views" />
                 <directory name="src/Modules/Feed/Views" />
@@ -177,28 +158,8 @@
             </errorLevel>
         </UnnecessaryVarAnnotation>
 
-        <!-- Defensive casts in views for safety with dynamic data -->
-        <RedundantCast>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-            </errorLevel>
-        </RedundantCast>
-
-        <RedundantCastGivenDocblockType>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-            </errorLevel>
-        </RedundantCastGivenDocblockType>
-
-        <RiskyTruthyFalsyComparison>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-            </errorLevel>
-        </RiskyTruthyFalsyComparison>
-
         <PossiblyInvalidArgument>
             <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
                 <directory name="src/Modules/Book/Views" />
             </errorLevel>
         </PossiblyInvalidArgument>
@@ -216,7 +177,6 @@
         <UnusedVariable>
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
-                <directory name="src/backend/Views" />
                 <directory name="src/Modules/Book/Http" />
                 <directory name="src/Modules/Book/Views" />
                 <directory name="src/Modules/Dictionary/Http" />
