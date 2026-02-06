@@ -65,5 +65,13 @@ RUN a2enmod rewrite \
 WORKDIR /var/www/html${APP_BASE_PATH}
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+# Build frontend assets (Alpine.js, Vite bundles)
+RUN apt-get update && apt-get install -y --no-install-recommends nodejs npm \
+    && npm ci --ignore-scripts \
+    && npm run build:all \
+    && rm -rf node_modules \
+    && apt-get purge -y nodejs npm && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set proper ownership for Apache (www-data user)
 RUN chown -R www-data:www-data /var/www/html${APP_BASE_PATH}

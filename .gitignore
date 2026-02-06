@@ -3,6 +3,8 @@
 # Environment configuration (contains secrets)
 .env
 deploy.env
+deploy.sh
+docker-compose.prod.yml
 # Local audio files (root media directory only)
 /media/
 # Text-to-Speech files
