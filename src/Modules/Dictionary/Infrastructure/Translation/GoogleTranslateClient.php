@@ -47,99 +47,23 @@ class GoogleTranslateClient
     private ?string $langFrom = null;
 
     private ?string $langTo = null;
-    private const DEFAULT_DOMAIN = null; // change the domain here / NULL <> random domain
-    private static ?string $gglDomain = null;
-
     /** @var list<string>|null */
     private static ?array $headers = null;
-    //&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss
-    private static string $urlFormat = "http://translate.google.%s/translate_a/single" .
-    "?client=t&q=%s&hl=en&sl=%s&tl=%s&dt=t&dt=at&dt=bd&ie=UTF-8&oe=UTF-8&oc=1&" .
-    "otf=2&ssel=0&tsel=3&tk=%s";
+
+    private static string $urlFormat =
+        "https://translate.googleapis.com/translate_a/single" .
+        "?client=gtx&q=%s&hl=en&sl=%s&tl=%s&dt=t&dt=at&dt=bd&ie=UTF-8&oe=UTF-8";
 
     private static function setHeaders(): void
     {
-        $domain = self::$gglDomain ?? 'com';
         self::$headers = array(
             'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language: en-US,en',
             'Connection: keep-alive',
-            'Cookie: OGPC=4061130-1:',
-            'DNT: 1',
-            'Host: translate.google.' . $domain,
-            'Referer: https://translate.google.' . $domain . '/',
-            'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1'
+            'Host: translate.googleapis.com',
+            'Referer: https://translate.googleapis.com/',
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0'
         );
-    }
-    /**
-     * @param int[]|null $tok
-     *
-     * @psalm-param array<int>|null $tok
-     */
-    private static function generateToken(string $str, array|null $tok): string
-    {
-        $t = $c = isset($tok) ? $tok[0] : 408254;//todo floor(time()/3600);
-        $x = hexdec('80000000');
-        $z = 0xffffffff;
-        // Use signed int representation to avoid float conversion on 64-bit systems
-        // 0xffffffff00000000 as signed 64-bit int is -4294967296
-        $y = PHP_INT_SIZE == 8 ? -4294967296 : 0x00000000;
-        $d = array();
-        $strlen = mb_strlen($str, "UTF-8");
-        while ($strlen) {
-            $charString = mb_substr($str, 0, 1, "UTF-8");
-            $size = strlen($charString);
-            for ($i = 0; $i < $size; $i++) {
-                $d[] = ord($charString[$i]);
-            }
-            $str = mb_substr($str, 1, $strlen, "UTF-8");
-            $strlen = mb_strlen($str, "UTF-8");
-        }
-        foreach ($d as $b) {
-            $c += $b;
-            $b = $c << 10;
-            if ($b & $x) {
-                $b = (int)($b | $y);
-            } else {
-                $b = ($b & $z);
-            }
-            $c += $b;
-            $b = (($c >> 6) & (0x03ffffff));
-            $c ^= $b;
-            if ($c & $x) {
-                $c = (int)($c | $y);
-            } else {
-                $c = ($c & $z);
-            }
-        }
-        $b = $c << 3;
-        if ($b & $x) {
-            $b = (int)($b | $y);
-        } else {
-            $b = ($b & $z);
-        }
-        $c += $b;
-        $b = (($c >> 11) & (0x001fffff));
-        $c ^= $b;
-        $b = $c << 15;
-        if ($b & $x) {
-            $b = (int)($b | $y);
-        } else {
-            $b = ($b & $z);
-        }
-        $c += $b;
-        $c ^= isset($tok) ? $tok[1] : 585515986;//todo create from time() / TKK ggltrns
-        $c &= $z;
-        if (0 > $c) {
-            $c = (($x ^ $c));
-            if (5000000 > $c) {
-                $c += 483648;
-            } else {
-                $c -= 516352;
-            }
-        }
-        $c %= 1000000;
-        return $c . '.' . ($t ^ $c);
     }
     /**
      * Return the current domain.
@@ -190,10 +114,12 @@ class GoogleTranslateClient
     }
     /**
      * @param null|string $domain
+     *
+     * @deprecated Domain is no longer used for URL construction. The gtx endpoint
+     *             uses a fixed domain (translate.googleapis.com).
      */
     public static function setDomain(string|null $domain): void
     {
-        self::$gglDomain = self::getDomain($domain);
         self::setHeaders();
     }
     public function __construct(string|null $from, string $to)
@@ -277,17 +203,8 @@ class GoogleTranslateClient
      *                               all supported language codes can be found here:
      *                               https://cloud.google.com/translate/docs/basic/discovering-supported-languages#getting_a_list_of_supported_languages
      *
-     * @param int[]|null $time_token (optional) array() from
-     *                               https://translate.google.com. If empty, array(408254,585515986) is used
-     * @param string|null $domain    (optional) Connect to Google Domain (i.e. 'com' for
-     *                               https://translate.google.com). If empty,
-     *                               a random domain will be used (the default value can
-     *                               be altered by changing DEFAULT_DOMAIN)
-     *                               Possible values:
-     *                               ('com.ar', 'at', 'com.au', 'be', 'com.br', 'ca', 'cat', 'ch', 'cl', 'cn', 'cz',
-     *                               'de', 'dk', 'es', 'fi', 'fr', 'gr', 'com.hk', 'hr', 'hu', 'co.id', 'ie',
-     *                               'co.il', 'im', 'co.in', 'it', 'co.jp', 'co.kr', 'com.mx', 'nl', 'no', 'pl',
-     *                               'pt', 'ru', 'se', 'com.sg', 'co.th', 'com.tw', 'co.uk', 'com')
+     * @param int[]|null $time_token @deprecated No longer used. The gtx endpoint requires no token.
+     * @param string|null $domain    @deprecated No longer used. The gtx endpoint uses a fixed domain.
      *
      * @return string[]|false An array of translation, or false if an error occured.
      */
@@ -296,18 +213,14 @@ class GoogleTranslateClient
         $from,
         $to,
         $time_token = null,
-        $domain = self::DEFAULT_DOMAIN
+        $domain = null
     ): array|false {
-        self::setDomain($domain);
-        // setDomain always sets $gglDomain to a non-null value
-        $gglDomain = self::$gglDomain ?? 'com';
+        self::setHeaders();
         $url = sprintf(
             self::$urlFormat,
-            $gglDomain,
             rawurlencode($string),
             $from,
-            $to,
-            self::generateToken($string, $time_token)
+            $to
         );
         $curlResult = self::makeCurl($url);
         if ($curlResult === false || $curlResult === true) {

@@ -848,22 +848,6 @@ class ClassesTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testGoogleTranslateGenerateToken(): void
-    {
-        $reflection = new \ReflectionClass(GoogleTranslateClient::class);
-        $method = $reflection->getMethod('generateToken');
-        $method->setAccessible(true);
-
-        $token = $method->invokeArgs(null, ['hello', [408254, 585515986]]);
-        $this->assertIsString($token);
-        $this->assertStringContainsString('.', $token);
-
-        $parts = explode('.', $token);
-        $this->assertCount(2, $parts);
-        $this->assertIsNumeric($parts[0]);
-        $this->assertIsNumeric($parts[1]);
-    }
-
     public function testGoogleTranslateLastResultProperty(): void
     {
         $translator = new GoogleTranslateClient('en', 'es');
