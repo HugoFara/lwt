@@ -20,7 +20,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Text\Application\Services;
 
 use Lwt\Core\Globals;
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;

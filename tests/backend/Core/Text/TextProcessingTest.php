@@ -31,7 +31,7 @@ require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/Restore.
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExportService.php';
 // LanguageFacade loaded via autoloader
 
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;

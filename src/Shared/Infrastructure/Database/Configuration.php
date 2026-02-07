@@ -19,7 +19,7 @@ declare(strict_types=1);
 namespace Lwt\Shared\Infrastructure\Database;
 
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Utils\ErrorHandler;
+use Lwt\Shared\Infrastructure\Utilities\ErrorHandler;
 
 /**
  * Database configuration and connection utilities.

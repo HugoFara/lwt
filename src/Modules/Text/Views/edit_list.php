@@ -29,7 +29,7 @@ namespace Lwt\Views\Text;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 
 // Type-safe variable extraction from controller context
 /**

@@ -31,7 +31,7 @@ use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\Infrastructure\Http\RedirectResponse;
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Core\Globals;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;

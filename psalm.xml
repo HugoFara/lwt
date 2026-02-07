@@ -236,7 +236,7 @@
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Api" />
-                <directory name="src/backend/Core" />
+                <file name="src/backend/Core/Globals.php" />
                 <directory name="src/Modules" />
                 <directory name="src/Shared" />
             </errorLevel>
@@ -292,7 +292,7 @@
         <!-- Interface implementations may have different parameter names -->
         <ParamNameMismatch>
             <errorLevel type="suppress">
-                <directory name="src/backend/Core" />
+                <file name="src/backend/Core/Globals.php" />
                 <directory name="src/Modules" />
                 <directory name="src/Shared" />
             </errorLevel>
@@ -308,7 +308,7 @@
         <!-- Repository implementations may have less specific return types -->
         <LessSpecificImplementedReturnType>
             <errorLevel type="suppress">
-                <directory name="src/backend/Core" />
+                <file name="src/backend/Core/Globals.php" />
                 <directory name="src/Modules" />
                 <directory name="src/Shared" />
             </errorLevel>

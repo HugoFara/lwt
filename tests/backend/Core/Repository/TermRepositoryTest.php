@@ -25,8 +25,8 @@ Globals::setDatabaseName("test_" . $config['dbname']);
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Domain/Term.php';
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/PreparedStatement.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/RepositoryInterface.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/AbstractRepository.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Repository/RepositoryInterface.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Repository/AbstractRepository.php';
 require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Infrastructure/MySqlTermRepository.php';
 
 /**

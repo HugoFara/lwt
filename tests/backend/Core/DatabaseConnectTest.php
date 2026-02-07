@@ -6,11 +6,11 @@ namespace Lwt\Tests\Core;
 
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
-use Lwt\Core\ApplicationInfo;
+use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Core\StringUtils;
-use Lwt\Core\Utils\ErrorHandler;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\ErrorHandler;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\DB;

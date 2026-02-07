@@ -19,7 +19,7 @@ declare(strict_types=1);
 namespace Lwt\Shared\Infrastructure\Bootstrap;
 
 use Lwt\Core\Globals;
-use Lwt\Core\Utils\ErrorHandler;
+use Lwt\Shared\Infrastructure\Utilities\ErrorHandler;
 
 /**
  * Session bootstrap utility class.

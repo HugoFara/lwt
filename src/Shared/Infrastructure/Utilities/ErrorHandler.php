@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Utils;
+namespace Lwt\Shared\Infrastructure\Utilities;
 
 /**
  * Error handling utilities.

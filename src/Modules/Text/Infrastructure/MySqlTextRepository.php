@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Infrastructure;
 
-use Lwt\Core\Repository\AbstractRepository;
+use Lwt\Shared\Infrastructure\Repository\AbstractRepository;
 use Lwt\Modules\Text\Domain\Text;
 use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 use Lwt\Modules\Text\Domain\ValueObject\TextId;

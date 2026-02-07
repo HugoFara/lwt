@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Http;
 
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Vocabulary\Application\Services\MultiWordService;
 use Lwt\Modules\Vocabulary\Application\Services\WordContextService;

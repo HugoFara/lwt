@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Review;
 
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 ?>

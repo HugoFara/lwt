@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 // Type assertions for variables passed from controller

@@ -25,15 +25,15 @@ Globals::setDatabaseName("test_" . $config['dbname']);
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/Modules/Text/Domain/Text.php';
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/PreparedStatement.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/RepositoryInterface.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Repository/AbstractRepository.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Repository/RepositoryInterface.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Repository/AbstractRepository.php';
 require_once __DIR__ . '/../../../../src/Modules/Text/Infrastructure/MySqlTextRepository.php';
 
 /**
  * Tests for the MySqlTextRepository class.
  *
  * @covers \Lwt\Modules\Text\Infrastructure\MySqlTextRepository
- * @covers \Lwt\Core\Repository\AbstractRepository
+ * @covers \Lwt\Shared\Infrastructure\Repository\AbstractRepository
  */
 class TextRepositoryTest extends TestCase
 {

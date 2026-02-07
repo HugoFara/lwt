@@ -593,7 +593,7 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         if ($trans === '' || $trans === '*') {
             return null;
         }
-        $arr = preg_split('/[' . \Lwt\Core\StringUtils::getSeparators() . ']/u', $trans);
+        $arr = preg_split('/[' . \Lwt\Shared\Infrastructure\Utilities\StringUtils::getSeparators() . ']/u', $trans);
         if ($arr === false) {
             return null;
         }

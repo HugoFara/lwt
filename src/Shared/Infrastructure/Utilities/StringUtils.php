@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core;
+namespace Lwt\Shared\Infrastructure\Utilities;
 
 use Lwt\Shared\Infrastructure\Database\Settings;
 

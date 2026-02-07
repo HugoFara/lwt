@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Container;
 
-use Lwt\Core\Repository\RepositoryInterface;
+use Lwt\Shared\Infrastructure\Repository\RepositoryInterface;
 use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;

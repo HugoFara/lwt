@@ -18,9 +18,9 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Database;
 
-use Lwt\Core\ApplicationInfo;
+use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Core\Globals;
-use Lwt\Core\Utils\ErrorHandler;
+use Lwt\Shared\Infrastructure\Utilities\ErrorHandler;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 
 /**

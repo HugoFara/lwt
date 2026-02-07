@@ -21,7 +21,7 @@ use Lwt\Modules\Language\Domain\Parser\ParserInterface;
 use Lwt\Modules\Language\Domain\Parser\ParserConfig;
 use Lwt\Modules\Language\Domain\Parser\ParserResult;
 use Lwt\Modules\Language\Domain\Parser\Token;
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Modules\Language\Application\Services\TextParsingService;
 
 /**

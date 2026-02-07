@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Lwt\Tests\Core\UI;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
-require_once __DIR__ . '/../../../../src/backend/Core/StringUtils.php';
-require_once __DIR__ . '/../../../../src/backend/Core/ApplicationInfo.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Utilities/StringUtils.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/ApplicationInfo.php';
 require_once __DIR__ . '/../../../../src/Shared/UI/Helpers/PageLayoutHelper.php';
 
 use Lwt\Core\Globals;

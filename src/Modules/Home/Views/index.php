@@ -22,7 +22,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Home\Views;
 
-use Lwt\Core\ApplicationInfo;
+use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;

@@ -18,7 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Application\UseCases;
 
 use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTranslateClient;
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;

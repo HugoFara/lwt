@@ -28,7 +28,7 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Review;
 
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;

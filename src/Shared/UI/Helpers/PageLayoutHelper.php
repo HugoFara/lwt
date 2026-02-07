@@ -21,7 +21,7 @@ namespace Lwt\Shared\UI\Helpers;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Assets\ViteHelper;
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 
 /**
  * Helper class for generating page layout elements.
@@ -452,7 +452,8 @@ HTML;
         $uri = $_SERVER['REQUEST_URI'] ?? '/';
 
         // Strip query string and base path
-        $path = parse_url($uri, PHP_URL_PATH) ?: '/';
+        $parsed = parse_url($uri, PHP_URL_PATH);
+        $path = is_string($parsed) ? $parsed : '/';
         $basePath = UrlUtilities::getBasePath();
         if ($basePath !== '' && str_starts_with($path, $basePath)) {
             $path = substr($path, strlen($basePath));
@@ -499,7 +500,7 @@ HTML;
         }
 
         // Home page — everything is in the main bundle
-        if ($path === '/' || $path === '') {
+        if ($path === '/') {
             return [];
         }
 

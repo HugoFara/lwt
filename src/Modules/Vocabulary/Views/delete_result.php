@@ -24,7 +24,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Views;
 
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
 // Type assertions for variables passed from controller

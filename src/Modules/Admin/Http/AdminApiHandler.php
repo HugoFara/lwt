@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Admin\Http;
 
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Admin\Application\AdminFacade;

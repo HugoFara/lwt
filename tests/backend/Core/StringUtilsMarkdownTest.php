@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Core;
 
 use PHPUnit\Framework\TestCase;
-use Lwt\Core\StringUtils;
+use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 
 /**
  * Tests for StringUtils::parseInlineMarkdown()

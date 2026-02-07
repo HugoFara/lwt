@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Core\Repository
+ * @package  Lwt\Shared\Infrastructure\Repository
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,7 +15,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Repository;
+namespace Lwt\Shared\Infrastructure\Repository;
 
 /**
  * Base interface for all repositories.

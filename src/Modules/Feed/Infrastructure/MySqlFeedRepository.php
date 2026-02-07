@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Feed\Infrastructure;
 
-use Lwt\Core\Repository\AbstractRepository;
+use Lwt\Shared\Infrastructure\Repository\AbstractRepository;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Feed\Domain\Feed;
 use Lwt\Modules\Feed\Domain\FeedRepositoryInterface;
