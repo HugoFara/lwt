@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\User\Http;
 
-use Lwt\Controllers\BaseController;
+use Lwt\Shared\Http\BaseController;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\UserFacade;

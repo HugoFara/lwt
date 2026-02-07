@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Home\Http;
 
-use Lwt\Controllers\BaseController;
+use Lwt\Shared\Http\BaseController;
 use Lwt\Modules\Home\Application\HomeFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;

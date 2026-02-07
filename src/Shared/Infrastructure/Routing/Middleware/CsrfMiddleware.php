@@ -8,7 +8,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Router\Middleware
+ * @package  Lwt\Shared\Infrastructure\Routing\Middleware
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -17,7 +17,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Router\Middleware;
+namespace Lwt\Shared\Infrastructure\Routing\Middleware;
 
 use Lwt\Shared\Infrastructure\Globals;
 
@@ -33,7 +33,7 @@ use Lwt\Shared\Infrastructure\Globals;
  * API requests with Bearer tokens are exempt (API tokens serve as CSRF protection).
  *
  * @category Lwt
- * @package  Lwt\Router\Middleware
+ * @package  Lwt\Shared\Infrastructure\Routing\Middleware
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

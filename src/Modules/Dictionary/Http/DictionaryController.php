@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Dictionary\Http;
 
-use Lwt\Controllers\BaseController;
+use Lwt\Shared\Http\BaseController;
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Shared\Infrastructure\Database\Validation;

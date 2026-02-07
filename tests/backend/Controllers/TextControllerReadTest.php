@@ -23,7 +23,7 @@ Globals::setDatabaseName("test_" . $config['dbname']);
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 // LanguageFacade loaded via autoloader
 require_once __DIR__ . '/../../../src/Modules/Admin/Application/Services/MediaService.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
+require_once __DIR__ . '/../../../src/Shared/Http/BaseController.php';
 require_once __DIR__ . '/../../../src/Modules/Text/Http/TextController.php';
 require_once __DIR__ . '/../../../src/Modules/Text/Application/TextFacade.php';
 

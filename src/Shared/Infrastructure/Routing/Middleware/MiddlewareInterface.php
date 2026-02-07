@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Router\Middleware
+ * @package  Lwt\Shared\Infrastructure\Routing\Middleware
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,7 +15,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Router\Middleware;
+namespace Lwt\Shared\Infrastructure\Routing\Middleware;
 
 /**
  * Interface for route middleware.
@@ -24,7 +24,7 @@ namespace Lwt\Router\Middleware;
  * and can halt request processing (e.g., for authentication failures).
  *
  * @category Lwt
- * @package  Lwt\Router\Middleware
+ * @package  Lwt\Shared\Infrastructure\Routing\Middleware
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

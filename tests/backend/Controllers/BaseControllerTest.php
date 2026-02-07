@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Lwt\Tests\Controllers;
 
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
+require_once __DIR__ . '/../../../src/Shared/Http/BaseController.php';
 
-use Lwt\Controllers\BaseController;
+use Lwt\Shared\Http\BaseController;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;

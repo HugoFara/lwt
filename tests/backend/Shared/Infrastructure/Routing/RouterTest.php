@@ -2,13 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\Router;
+namespace Tests\Shared\Infrastructure\Routing;
 
-require_once __DIR__ . '/../../../src/backend/Router/Router.php';
-require_once __DIR__ . '/../../../src/backend/Router/Middleware/MiddlewareInterface.php';
-
-use Lwt\Router\Router;
-use Lwt\Router\Middleware\MiddlewareInterface;
+use Lwt\Shared\Infrastructure\Routing\Router;
+use Lwt\Shared\Infrastructure\Routing\Middleware\MiddlewareInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -24,7 +21,7 @@ class RouterTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->router = new Router(dirname(__DIR__, 3));
+        $this->router = new Router(dirname(__DIR__, 5));
 
         // Save original superglobals
         $this->originalServer = $_SERVER;
@@ -934,14 +931,14 @@ class RouterTest extends TestCase
     public function testConstructorWithContainer(): void
     {
         $container = $this->createMock(\Lwt\Shared\Infrastructure\Container\Container::class);
-        $router = new Router(dirname(__DIR__, 3), $container);
+        $router = new Router(dirname(__DIR__, 5), $container);
 
         $this->assertInstanceOf(Router::class, $router);
     }
 
     public function testConstructorWithNullContainer(): void
     {
-        $router = new Router(dirname(__DIR__, 3), null);
+        $router = new Router(dirname(__DIR__, 5), null);
 
         $this->assertInstanceOf(Router::class, $router);
     }

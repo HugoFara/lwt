@@ -22,7 +22,7 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
+require_once __DIR__ . '/../../../src/Shared/Http/BaseController.php';
 require_once __DIR__ . '/../../../src/Modules/Review/Http/ReviewController.php';
 require_once __DIR__ . '/../../../src/Modules/Review/Application/Services/ReviewService.php';
 
@@ -175,7 +175,7 @@ class ReviewControllerTest extends TestCase
 
         $controller = $this->createController();
 
-        $this->assertInstanceOf(\Lwt\Controllers\BaseController::class, $controller);
+        $this->assertInstanceOf(\Lwt\Shared\Http\BaseController::class, $controller);
     }
 
     // ===== ReviewService tests =====

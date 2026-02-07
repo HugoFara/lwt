@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Tags\Http;
 
-use Lwt\Controllers\AbstractCrudController;
+use Lwt\Shared\Http\AbstractCrudController;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;

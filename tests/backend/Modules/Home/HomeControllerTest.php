@@ -20,7 +20,7 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/Controllers/BaseController.php';
+require_once __DIR__ . '/../../../../src/Shared/Http/BaseController.php';
 
 /**
  * Unit tests for the Home module HomeController class.

@@ -43,7 +43,7 @@ use Lwt\Modules\Admin\Application\UseCases\Wizard\SaveConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\TestConnection;
 use Lwt\Shared\Infrastructure\Exception\ExceptionHandler;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
-use Lwt\Router\Router;
+use Lwt\Shared\Infrastructure\Routing\Router;
 
 /**
  * Main application class that bootstraps and runs LWT.
@@ -195,7 +195,7 @@ class Application
 
         spl_autoload_register(function ($class) use ($basePath) {
             // Convert namespace to file path
-            // Lwt\Router\Router -> src/backend/Router/Router.php
+            // Lwt\Controllers\ApiController -> src/backend/Controllers/ApiController.php
             $prefix = 'Lwt\\';
             $baseDir = $basePath . '/src/backend/';
 
@@ -282,8 +282,8 @@ class Application
         $router = new Router($this->basePath, $this->container);
 
         // Load route configuration
-        require_once $this->basePath . '/src/backend/Router/routes.php';
-        \Lwt\Router\registerRoutes($router);
+        require_once $this->basePath . '/src/Shared/Infrastructure/Routing/routes.php';
+        \Lwt\Shared\Infrastructure\Routing\registerRoutes($router);
 
         // Resolve and execute the request
         $resolution = $router->resolve();

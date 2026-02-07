@@ -2,16 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Router\Middleware;
+namespace Tests\Shared\Infrastructure\Routing\Middleware;
 
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\UserFacade;
-use Lwt\Router\Middleware\AuthMiddleware;
-use Lwt\Router\Middleware\MiddlewareInterface;
+use Lwt\Shared\Infrastructure\Routing\Middleware\AuthMiddleware;
+use Lwt\Shared\Infrastructure\Routing\Middleware\MiddlewareInterface;
 use PHPUnit\Framework\TestCase;
-
-require_once __DIR__ . '/../../../../src/backend/Router/Middleware/AuthMiddleware.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Globals.php';
 
 /**
  * Unit tests for the AuthMiddleware class.

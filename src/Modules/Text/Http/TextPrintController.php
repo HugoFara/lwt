@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Http;
 
-use Lwt\Controllers\BaseController;
+use Lwt\Shared\Http\BaseController;
 use Lwt\Modules\Text\Application\Services\TextPrintService;
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 use Lwt\Modules\Text\Http\TextApiHandler;

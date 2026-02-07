@@ -2,14 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Tests\Backend\Router\Middleware;
+namespace Tests\Shared\Infrastructure\Routing\Middleware;
 
 use PHPUnit\Framework\TestCase;
-use Lwt\Router\Middleware\RateLimitMiddleware;
-use Lwt\Router\Middleware\RateLimitStorage;
-
-require_once __DIR__ . '/../../../../src/backend/Router/Middleware/RateLimitMiddleware.php';
-require_once __DIR__ . '/../../../../src/backend/Router/Middleware/RateLimitStorage.php';
+use Lwt\Shared\Infrastructure\Routing\Middleware\RateLimitMiddleware;
+use Lwt\Shared\Infrastructure\Routing\Middleware\RateLimitStorage;
 
 /**
  * Test cases for RateLimitMiddleware.

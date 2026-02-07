@@ -7,7 +7,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Controllers
+ * @package  Lwt\Shared\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Controllers;
+namespace Lwt\Shared\Http;
 
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
@@ -61,7 +61,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  * ```
  *
  * @category Lwt
- * @package  Lwt\Controllers
+ * @package  Lwt\Shared\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

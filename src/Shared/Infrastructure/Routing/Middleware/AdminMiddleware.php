@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Router\Middleware
+ * @package  Lwt\Shared\Infrastructure\Routing\Middleware
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,7 +15,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Router\Middleware;
+namespace Lwt\Shared\Infrastructure\Routing\Middleware;
 
 use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Infrastructure\Globals;
@@ -31,7 +31,7 @@ use Lwt\Shared\Infrastructure\Container\Container;
  * Use this for admin-only routes like database wizard, settings, etc.
  *
  * @category Lwt
- * @package  Lwt\Router\Middleware
+ * @package  Lwt\Shared\Infrastructure\Routing\Middleware
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

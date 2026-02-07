@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Admin\Http;
 
-use Lwt\Controllers\BaseController;
+use Lwt\Shared\Http\BaseController;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;

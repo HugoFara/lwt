@@ -140,8 +140,7 @@ class FormHelper
     public static function csrfField(): string
     {
         // Delegate to CsrfMiddleware for token management
-        require_once __DIR__ . '/../../../backend/Router/Middleware/CsrfMiddleware.php';
-        return \Lwt\Router\Middleware\CsrfMiddleware::formField();
+        return \Lwt\Shared\Infrastructure\Routing\Middleware\CsrfMiddleware::formField();
     }
 
     /**
@@ -153,7 +152,6 @@ class FormHelper
      */
     public static function csrfToken(): string
     {
-        require_once __DIR__ . '/../../../backend/Router/Middleware/CsrfMiddleware.php';
-        return \Lwt\Router\Middleware\CsrfMiddleware::getToken();
+        return \Lwt\Shared\Infrastructure\Routing\Middleware\CsrfMiddleware::getToken();
     }
 }

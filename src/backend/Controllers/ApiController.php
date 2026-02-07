@@ -19,7 +19,8 @@ declare(strict_types=1);
 namespace Lwt\Controllers;
 
 use Lwt\Api\V1\ApiV1;
-use Lwt\Router\Middleware\RateLimitMiddleware;
+use Lwt\Shared\Http\BaseController;
+use Lwt\Shared\Infrastructure\Routing\Middleware\RateLimitMiddleware;
 
 /**
  * Controller for REST API endpoints.

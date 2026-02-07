@@ -9,7 +9,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Router
+ * @package  Lwt\Shared\Infrastructure\Routing
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -18,11 +18,11 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Router;
+namespace Lwt\Shared\Infrastructure\Routing;
 
-use Lwt\Router\Middleware\AuthMiddleware;
-use Lwt\Router\Middleware\AdminMiddleware;
-use Lwt\Router\Middleware\CsrfMiddleware;
+use Lwt\Shared\Infrastructure\Routing\Middleware\AuthMiddleware;
+use Lwt\Shared\Infrastructure\Routing\Middleware\AdminMiddleware;
+use Lwt\Shared\Infrastructure\Routing\Middleware\CsrfMiddleware;
 
 /**
  * Auth middleware for protected routes.

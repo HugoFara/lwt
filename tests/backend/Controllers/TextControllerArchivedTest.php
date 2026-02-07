@@ -31,7 +31,7 @@ require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextNavi
 require_once __DIR__ . '/../../../src/Modules/Language/Application/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Database/Restore.php';
-require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
+require_once __DIR__ . '/../../../src/Shared/Http/BaseController.php';
 require_once __DIR__ . '/../../../src/Modules/Text/Http/TextController.php';
 require_once __DIR__ . '/../../../src/Modules/Text/Application/TextFacade.php';
 

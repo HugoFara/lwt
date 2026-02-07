@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Dictionary\Http;
 
-use Lwt\Controllers\BaseController;
+use Lwt\Shared\Http\BaseController;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTimeToken;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;

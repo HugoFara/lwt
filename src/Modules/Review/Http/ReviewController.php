@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Review\Http;
 
-use Lwt\Controllers\BaseController;
+use Lwt\Shared\Http\BaseController;
 use Lwt\Shared\Infrastructure\Exception\ValidationException;
 use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Domain\ReviewConfiguration;

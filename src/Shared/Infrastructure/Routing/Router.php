@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Router
+ * @package  Lwt\Shared\Infrastructure\Routing
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,13 +15,13 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Router;
+namespace Lwt\Shared\Infrastructure\Routing;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Http\SecurityHeaders;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\Infrastructure\Http\ResponseInterface;
-use Lwt\Router\Middleware\MiddlewareInterface;
+use Lwt\Shared\Infrastructure\Routing\Middleware\MiddlewareInterface;
 
 /**
  * Simple Router for LWT Front Controller
@@ -29,7 +29,7 @@ use Lwt\Router\Middleware\MiddlewareInterface;
  * Handles routing URLs to controller-based handlers
  *
  * @category Lwt
- * @package  Lwt\Router
+ * @package  Lwt\Shared\Infrastructure\Routing
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

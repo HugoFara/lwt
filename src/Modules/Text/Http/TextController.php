@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Http;
 
-use Lwt\Controllers\BaseController;
+use Lwt\Shared\Http\BaseController;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Modules\Text\Application\Services\TextDisplayService;
 use Lwt\Modules\Text\Application\Services\TextNavigationService;

@@ -116,7 +116,7 @@ class ApiControllerTest extends TestCase
 
         $controller = new ApiController();
 
-        $this->assertInstanceOf(\Lwt\Controllers\BaseController::class, $controller);
+        $this->assertInstanceOf(\Lwt\Shared\Http\BaseController::class, $controller);
     }
 
     // ===== API request parameter tests =====
