@@ -80,6 +80,10 @@ class DictionaryController extends BaseController
         // Get languages for dropdown
         $languages = $this->languageFacade->getLanguagesForSelect();
 
+        // Extract flash messages from query string
+        $message = $this->param('message');
+        $error = $this->param('error');
+
         // Include view
         include __DIR__ . '/../Views/index.php';
 
@@ -112,6 +116,9 @@ class DictionaryController extends BaseController
 
         // Get or create dictionaries for this language
         $dictionaries = $this->dictionaryFacade->getAllForLanguage($langId);
+
+        // Extract flash error from query string
+        $error = $this->param('error');
 
         // Include view
         include __DIR__ . '/../Views/import.php';

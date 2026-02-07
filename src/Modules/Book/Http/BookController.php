@@ -81,6 +81,9 @@ class BookController
         $languages = $languageFacade->getLanguagesForSelect();
         $languagesOption = SelectOptionsBuilder::forLanguages($languages, $languageId, "[All Languages]");
 
+        // Extract flash message from query string
+        $message = InputValidator::getString('message');
+
         PageLayoutHelper::renderPageStart('My Books', true, 'books');
         include $this->viewPath . 'index.php';
         PageLayoutHelper::renderPageEnd();
@@ -138,6 +141,9 @@ class BookController
         $languageFacade = Container::getInstance()->getTyped(LanguageFacade::class);
         $languages = $languageFacade->getLanguagesForSelect();
         $languagesOption = SelectOptionsBuilder::forLanguages($languages, null, "[Choose...]");
+
+        // Show info notice when redirected from text import page
+        $showFromTextNotice = InputValidator::getString('from') === 'text';
 
         PageLayoutHelper::renderPageStart('Import EPUB', true, 'books');
         include $this->viewPath . 'import_epub_form.php';

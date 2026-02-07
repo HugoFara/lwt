@@ -197,8 +197,7 @@ export function wordListData(): WordListData {
     },
 
     setFilter(key, value) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this.filters as any)[key] = value;
+      (this.filters as Record<string, unknown>)[key] = value;
 
       // Reset to page 1 when filter changes (except for page changes)
       if (key !== 'page') {

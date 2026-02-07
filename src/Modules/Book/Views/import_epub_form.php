@@ -24,6 +24,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\FormHelper;
 
+/**
+ * @var bool $showFromTextNotice
+ */
+
 $actions = [
     ['url' => '/books', 'label' => 'My Books', 'icon' => 'library'],
     ['url' => '/texts/new', 'label' => 'New Text', 'icon' => 'circle-plus'],
@@ -41,7 +45,7 @@ $actions = [
 
 <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
-<?php if (isset($_GET['from']) && $_GET['from'] === 'text') : ?>
+<?php if ($showFromTextNotice) : ?>
 <div class="notification is-info is-light">
     <p>
         <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'mr-2']); ?>

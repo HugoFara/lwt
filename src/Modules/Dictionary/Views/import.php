@@ -32,16 +32,13 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  * @var string $langName
  * @var LocalDictionary|null $dictionary
  * @var array<LocalDictionary> $dictionaries
+ * @var string $error
  */
-
-// Error handling
-$errorRaw = $_GET['error'] ?? '';
-$error = is_string($errorRaw) ? $errorRaw : '';
 if (!empty($error)) :
     ?>
 <div class="notification is-danger is-light mb-4">
     <button class="delete" @click="$el.parentElement.remove()"></button>
-    <?php echo htmlspecialchars(urldecode($error), ENT_QUOTES); ?>
+    <?php echo htmlspecialchars($error, ENT_QUOTES); ?>
 </div>
 <?php endif; ?>
 

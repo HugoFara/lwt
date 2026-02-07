@@ -27,13 +27,15 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\FormHelper;
 
+/**
+ * @var string $message
+ */
+
 $actions = [
     ['url' => '/book/import', 'label' => 'Import EPUB', 'icon' => 'file-up', 'class' => 'is-primary'],
     ['url' => '/texts/new', 'label' => 'New Text', 'icon' => 'circle-plus'],
     ['url' => '/texts', 'label' => 'All Texts', 'icon' => 'book-open'],
 ];
-
-$message = $_GET['message'] ?? '';
 ?>
 
 <h2 class="title is-4">

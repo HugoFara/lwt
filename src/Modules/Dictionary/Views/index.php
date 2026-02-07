@@ -34,13 +34,9 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  * @var array<LocalDictionary> $dictionaries
  * @var int $localDictMode
  * @var array<array{id: int, name: string}> $languages
+ * @var string $message
+ * @var string $error
  */
-
-// Display messages
-$messageRaw = $_GET['message'] ?? '';
-$message = is_string($messageRaw) ? $messageRaw : '';
-$errorRaw = $_GET['error'] ?? '';
-$error = is_string($errorRaw) ? $errorRaw : '';
 
 if (!empty($message)) :
     $messageText = match ($message) {
