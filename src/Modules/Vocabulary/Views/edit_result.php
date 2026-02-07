@@ -30,9 +30,6 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 
-use Lwt\Modules\Tags\Application\TagsFacade;
-use Lwt\Modules\Text\Application\Services\TextStatisticsService;
-
 // Type assertions for variables passed from controller
 assert(is_string($message));
 assert(is_int($wid));
@@ -45,9 +42,10 @@ assert(is_string($romanization));
 assert(is_string($text));
 assert(is_string($fromAnn));
 assert(is_bool($isNew));
+assert(is_string($tagList));
+assert(is_string($todoContent));
 /** @var string $textlc */
 
-$tagList = TagsFacade::getWordTagList($wid, false);
 $tagFormatted = $tagList !== '' ? ' [' . str_replace(',', ', ', $tagList) . ']' : '';
 
 $config = [
@@ -67,7 +65,7 @@ if ($fromAnn === "") {
     } else {
         $config['oldStatus'] = $oldStatus;
     }
-    $config['todoContent'] = (new TextStatisticsService())->getTodoWordsContent($textId);
+    $config['todoContent'] = $todoContent;
 } else {
     // Annotation mode
     $config['fromAnn'] = (int)$fromAnn;

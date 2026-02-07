@@ -30,7 +30,6 @@ declare(strict_types=1);
 namespace Lwt\Views\Word;
 
 use Lwt\Shared\Infrastructure\Database\Escaping;
-use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Type assertions for variables passed from controller
@@ -38,6 +37,7 @@ assert(is_int($tid));
 assert(is_bool($cleanUp));
 assert(is_int($tooltipMode));
 assert(is_array($newWords));
+assert(is_string($todoContent));
 
 ?>
 <p id="displ_message">
@@ -49,5 +49,5 @@ assert(is_array($newWords));
     'words' => $newWords,
     'useTooltip' => ($tooltipMode == 1),
     'cleanUp' => $cleanUp,
-    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($tid)
+    'todoContent' => $todoContent
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

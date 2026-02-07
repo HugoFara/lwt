@@ -26,6 +26,7 @@ use Lwt\Modules\Vocabulary\Application\Services\MultiWordService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Modules\Text\Application\Services\SentenceService;
+use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
 /**
  * Base controller for vocabulary-related controllers.
@@ -53,6 +54,7 @@ abstract class VocabularyBaseController
     protected ?SentenceService $sentenceService = null;
     protected ?ExpressionService $expressionService = null;
     protected ?WordUploadService $uploadService = null;
+    protected ?TextStatisticsService $textStatisticsService = null;
 
     /**
      * Constructor.
@@ -177,6 +179,19 @@ abstract class VocabularyBaseController
             $this->uploadService = new WordUploadService();
         }
         return $this->uploadService;
+    }
+
+    /**
+     * Get TextStatisticsService (lazy loaded).
+     *
+     * @return TextStatisticsService
+     */
+    protected function getTextStatisticsService(): TextStatisticsService
+    {
+        if ($this->textStatisticsService === null) {
+            $this->textStatisticsService = new TextStatisticsService();
+        }
+        return $this->textStatisticsService;
     }
 
     /**

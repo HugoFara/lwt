@@ -23,8 +23,6 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Text;
 
-use Lwt\Modules\Admin\Application\Services\MediaService;
-use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\SearchableSelectHelper;
 
@@ -43,6 +41,8 @@ $recordAnnotLen = (int)$record['annotlen'];
 $recordSourceUri = (string)$record['TxSourceURI'];
 $recordAudioUri = (string)$record['TxAudioURI'];
 assert(is_array($languages));
+assert(is_string($mediaPathSelectorHtml));
+assert(is_string($archivedTextTagsHtml));
 /**
  * @var array<int, array{id: int, name: string}>
 */
@@ -196,7 +196,7 @@ $languagesTyped = $languages;
             <div class="field-body">
                 <div class="field">
                     <div class="control">
-                        <?php echo TagsFacade::getArchivedTextTagsHtml($textIdTyped); ?>
+                        <?php echo $archivedTextTagsHtml; ?>
                     </div>
                 </div>
             </div>
@@ -220,7 +220,7 @@ $languagesTyped = $languages;
                                placeholder="Path to audio file or URL" />
                     </div>
                     <div class="control" id="mediaselect">
-                        <?php echo (new MediaService())->getMediaPathSelector('TxAudioURI'); ?>
+                        <?php echo $mediaPathSelectorHtml; ?>
                     </div>
                 </div>
             </div>

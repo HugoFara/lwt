@@ -198,6 +198,10 @@ class TermEditController extends VocabularyBaseController
         $textId = InputValidator::getInt('tid', 0) ?? 0;
         $status = InputValidator::getString('WoStatus');
         $romanization = InputValidator::getString('WoRomanization');
+        $fromAnn = InputValidator::getString('fromAnn');
+
+        $tagList = TagsFacade::getWordTagList($wid, false);
+        $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($textId);
 
         $this->render('edit_result', [
             'wid' => $wid,
@@ -209,6 +213,11 @@ class TermEditController extends VocabularyBaseController
             'hex' => $hex,
             'oldStatus' => $oldStatus,
             'isNew' => ($op == 'Save'),
+            'fromAnn' => $fromAnn,
+            'text' => $text,
+            'textlc' => $textlc,
+            'tagList' => $tagList,
+            'todoContent' => $todoContent,
         ]);
 
         return false;
@@ -275,6 +284,21 @@ class TermEditController extends VocabularyBaseController
             $langShort = array_key_exists($lgname, LanguagePresets::getAll()) ?
                 LanguagePresets::getAll()[$lgname][1] : '';
 
+            $similarTermsRow = (new \Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms())->getTableRow();
+            $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin(
+                $lang,
+                $term,
+                'document.forms[0].WoSentence',
+                !InputValidator::hasFromGet('nodict')
+            );
+            $sentenceAreaHtml = $this->getSentenceService()->renderExampleSentencesArea(
+                $lang,
+                $termlc,
+                'document.forms.newword.WoSentence',
+                0
+            );
+            $wordTagsHtml = TagsFacade::getWordTagsHtml(0);
+
             $this->render('form_edit_new', [
                 'term' => $term,
                 'termlc' => $termlc,
@@ -287,7 +311,11 @@ class TermEditController extends VocabularyBaseController
                 'showRoman' => $showRoman,
                 'textId' => $textId,
                 'ord' => $ord,
-                'dictionaryAdapter' => $this->dictionaryAdapter,
+                'fromAnn' => $fromAnn,
+                'similarTermsRow' => $similarTermsRow,
+                'dictLinksHtml' => $dictLinksHtml,
+                'sentenceAreaHtml' => $sentenceAreaHtml,
+                'wordTagsHtml' => $wordTagsHtml,
             ]);
         } else {
             // Edit existing word form
@@ -317,6 +345,29 @@ class TermEditController extends VocabularyBaseController
                 ->where('TxID', '=', $textId)
                 ->valuePrepared('LgShowRomanization');
 
+            $similarTermsRow = (new \Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms())->getTableRow();
+            if ($fromAnn !== '') {
+                $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin2(
+                    $lang,
+                    'WoSentence',
+                    'WoText'
+                );
+            } else {
+                $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin(
+                    $lang,
+                    $term,
+                    'WoSentence',
+                    !InputValidator::hasFromGet('nodict')
+                );
+            }
+            $sentenceAreaHtml = $this->getSentenceService()->renderExampleSentencesArea(
+                $lang,
+                $termlc,
+                'WoSentence',
+                $wid
+            );
+            $wordTagsHtml = TagsFacade::getWordTagsHtml($wid);
+
             $this->render('form_edit_existing', [
                 'wid' => $wid,
                 'term' => $term,
@@ -330,7 +381,11 @@ class TermEditController extends VocabularyBaseController
                 'showRoman' => $showRoman,
                 'textId' => $textId,
                 'ord' => $ord,
-                'dictionaryAdapter' => $this->dictionaryAdapter,
+                'fromAnn' => $fromAnn,
+                'similarTermsRow' => $similarTermsRow,
+                'dictLinksHtml' => $dictLinksHtml,
+                'sentenceAreaHtml' => $sentenceAreaHtml,
+                'wordTagsHtml' => $wordTagsHtml,
             ]);
         }
     }
@@ -462,6 +517,7 @@ class TermEditController extends VocabularyBaseController
             $status = $newstatus;
             $romanization = $woRomanization;
             $text = $woText;
+            $tagList = TagsFacade::getWordTagList($wid, false);
 
             $this->render('edit_term_result', [
                 'wid' => $wid,
@@ -471,6 +527,7 @@ class TermEditController extends VocabularyBaseController
                 'translation' => $translation,
                 'text' => $text,
                 'sent1' => $sent1,
+                'tagList' => $tagList,
             ]);
         }
 
@@ -518,6 +575,21 @@ class TermEditController extends VocabularyBaseController
         PageLayoutHelper::renderPageStartNobody($titletext);
         $scrdir = $this->languageFacade->getScriptDirectionTag($lang);
 
+        $similarTermsRow = (new \Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms())->getTableRow();
+        $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin(
+            $lang,
+            $term,
+            'document.forms[0].WoSentence',
+            true
+        );
+        $sentenceAreaHtml = $this->getSentenceService()->renderExampleSentencesArea(
+            $lang,
+            $termlc,
+            'document.forms.editword.WoSentence',
+            $wid
+        );
+        $wordTagsHtml = TagsFacade::getWordTagsHtml($wid);
+
         $this->render('form_edit_term', [
             'wid' => $wid,
             'term' => $term,
@@ -530,7 +602,10 @@ class TermEditController extends VocabularyBaseController
             'status' => $status,
             'showRoman' => $showRoman,
             'scrdir' => $scrdir,
-            'dictionaryAdapter' => $this->dictionaryAdapter,
+            'similarTermsRow' => $similarTermsRow,
+            'dictLinksHtml' => $dictLinksHtml,
+            'sentenceAreaHtml' => $sentenceAreaHtml,
+            'wordTagsHtml' => $wordTagsHtml,
         ]);
     }
 
@@ -640,6 +715,8 @@ class TermEditController extends VocabularyBaseController
                     $textId = InputValidator::getInt('tid', 0) ?? 0;
                     $success = true;
                     $message = $result['message'];
+                    $tagList = TagsFacade::getWordTagList($wid, false);
+                    $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($textId);
 
                     $this->render('save_result', [
                         'wid' => $wid,
@@ -651,6 +728,9 @@ class TermEditController extends VocabularyBaseController
                         'textId' => $textId,
                         'success' => $success,
                         'message' => $message,
+                        'len' => $len,
+                        'tagList' => $tagList,
+                        'todoContent' => $todoContent,
                     ]);
                 }
             }
@@ -662,7 +742,10 @@ class TermEditController extends VocabularyBaseController
 
             $langData = $contextService->getLanguageData($lang);
             $showRoman = $langData['showRoman'];
-            $dictService = $this->dictionaryAdapter;
+
+            $similarTermsRow = (new \Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms())->getTableRow();
+            $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin3($lang, 'WoSentence', 'WoText');
+            $wordTagsHtml = TagsFacade::getWordTagsHtml(0);
 
             PageLayoutHelper::renderPageStartNobody('');
 
@@ -671,8 +754,9 @@ class TermEditController extends VocabularyBaseController
                 'textId' => $textId,
                 'scrdir' => $scrdir,
                 'showRoman' => $showRoman,
-                'dictService' => $dictService,
-                'langData' => $langData,
+                'similarTermsRow' => $similarTermsRow,
+                'dictLinksHtml' => $dictLinksHtml,
+                'wordTagsHtml' => $wordTagsHtml,
             ]);
         }
 
@@ -733,12 +817,17 @@ class TermEditController extends VocabularyBaseController
 
         PageLayoutHelper::renderPageStartNobody('Term Deleted');
 
+        $todoContent = $textId > 0
+            ? $this->getTextStatisticsService()->getTodoWordsContent($textId)
+            : '';
+
         $this->render('delete_result', [
             'wid' => $wid,
             'textId' => $textId,
             'deleted' => $result,
             'term' => $termText,
             'termLc' => $termTextLc,
+            'todoContent' => $todoContent,
         ]);
 
         PageLayoutHelper::renderPageEnd();

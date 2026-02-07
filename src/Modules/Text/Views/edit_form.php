@@ -39,12 +39,15 @@ use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\SearchableSelectHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
-use Lwt\Modules\Admin\Application\Services\MediaService;
-use Lwt\Modules\Text\Http\YouTubeApiHandler;
 
 // Type-safe variable extraction from controller context
 assert(is_array($languageData));
 assert(is_array($languages));
+/** @var array{base_path: string, paths?: string[], folders?: string[], error?: string} $mediaPaths */
+assert(is_array($mediaPaths));
+assert(is_string($mediaPathSelectorHtml));
+assert(is_bool($youtubeConfigured));
+assert(is_string($textTagsHtml));
 /** @var array<int, array{id: int|string, name: string}> $languagesTyped */
 $languagesTyped = $languages;
 assert(is_object($text) && property_exists($text, 'lgid'));
@@ -190,10 +193,7 @@ if (!$isNew) {
             <div class="field mt-4">
                 <label class="label">Or from the server's media folder</label>
                 <div class="control" id="mediaselect">
-                    <?php
-                    $mediaPaths = (new MediaService())->getMediaPaths();
-                    $mediaJson = json_encode($mediaPaths);
-                    ?>
+                    <?php $mediaJson = json_encode($mediaPaths); ?>
                     <p class="help mb-2">Files in "../<?php echo htmlspecialchars($mediaPaths['base_path'] ?? '', ENT_QUOTES, 'UTF-8'); ?>/media":</p>
                     <p id="mediaSelectErrorMessage"></p>
                     <?php echo IconHelper::render('loader-2', ['id' => 'mediaSelectLoadingImg', 'alt' => 'Loading...', 'class' => 'icon-spin']); ?>
@@ -322,7 +322,7 @@ if (!$isNew) {
                 <p class="help">YouTube, Vimeo, Dailymotion, Bilibili, NicoNico, or PeerTube URL. Captions will be imported if available.</p>
             </div>
 
-            <?php if ((new YouTubeApiHandler())->formatIsConfigured()['configured']) : ?>
+            <?php if ($youtubeConfigured) : ?>
             <div class="field mt-3">
                 <label class="label is-small">Or enter YouTube Video ID directly</label>
                 <div class="control">
@@ -400,7 +400,7 @@ if (!$isNew) {
                 <div class="field">
                     <label class="label">Tags</label>
                     <div class="control">
-                        <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getTextTagsHtml($textIdTyped); ?>
+                        <?php echo $textTagsHtml; ?>
                     </div>
                     <p class="help">Organize texts with tags for easy filtering.</p>
                 </div>
@@ -529,7 +529,7 @@ if (!$isNew) {
         <div class="field">
             <label class="label">Tags</label>
             <div class="control">
-                <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getTextTagsHtml($textIdTyped); ?>
+                <?php echo $textTagsHtml; ?>
             </div>
         </div>
 
@@ -547,7 +547,7 @@ if (!$isNew) {
                        placeholder="media/audio.mp3" />
             </div>
             <div class="mt-2" id="mediaselect">
-                <?php echo (new MediaService())->getMediaPathSelector('TxAudioURI'); ?>
+                <?php echo $mediaPathSelectorHtml; ?>
             </div>
         </div>
     </div>

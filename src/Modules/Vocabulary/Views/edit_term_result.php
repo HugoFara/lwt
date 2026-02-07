@@ -26,7 +26,6 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 
-use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 // Type assertions for variables passed from controller
@@ -37,6 +36,7 @@ assert(is_int($status));
 assert(is_string($romanization));
 assert(is_string($text));
 assert(is_string($sent1));
+assert(is_string($tagList));
 
 ?>
 <p>OK: <?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></p>
@@ -44,7 +44,6 @@ assert(is_string($sent1));
 <script type="application/json" data-lwt-edit-term-result-config>
 <?php
 $statusAbbr = StatusHelper::getAbbr($status);
-$tagList = TagsFacade::getWordTagList($wid, false);
 $formattedTags = $tagList !== '' ? ' [' . str_replace(',', ', ', $tagList) . ']' : '';
 echo json_encode([
     'wid' => $wid,

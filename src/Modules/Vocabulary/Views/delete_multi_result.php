@@ -24,23 +24,22 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 
-use Lwt\Modules\Text\Application\Services\TextStatisticsService;
-
 // Type assertions for variables passed from controller
 assert(is_int($wid));
 assert(is_int($textId));
-assert(is_int($rowsAffected));
+assert(is_bool($deleted));
 assert(is_bool($showAll));
+assert(is_string($todoContent));
 
 ?>
-<p>OK, term deleted (<?php echo $rowsAffected; ?>).</p>
+<p>OK, term deleted.</p>
 
 <script type="application/json" data-lwt-delete-multi-result-config>
 <?php echo json_encode(
     [
     'wid' => $wid,
     'showAll' => $showAll,
-    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
+    'todoContent' => $todoContent
     ],
     JSON_HEX_TAG | JSON_HEX_AMP
 ); ?></script>

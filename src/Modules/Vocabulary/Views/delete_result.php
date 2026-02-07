@@ -25,7 +25,6 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Views;
 
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
-use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 
 // Type assertions for variables passed from controller
 assert(is_int($wid));
@@ -33,6 +32,7 @@ assert(is_int($textId));
 assert(is_bool($deleted));
 assert(is_string($term));
 assert(is_string($termLc));
+assert(is_string($todoContent));
 
 $hex = StringUtils::toClassName($termLc);
 ?>
@@ -49,5 +49,5 @@ $hex = StringUtils::toClassName($termLc);
     'hex' => $hex,
     'deleted' => $deleted,
     'textId' => $textId,
-    'todoContent' => $textId > 0 ? (new TextStatisticsService())->getTodoWordsContent($textId) : ''
+    'todoContent' => $todoContent
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

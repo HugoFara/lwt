@@ -173,6 +173,10 @@ class TextController extends BaseController
         // Save current text
         Settings::save('currenttext', $textId);
 
+        // Pre-compute media player HTML for view
+        $mediaPlayerHtml = (new \Lwt\Modules\Admin\Application\Services\MediaService())
+            ->getMediaPlayerHtml($media, $audioPosition);
+
         // Start page layout
         PageLayoutHelper::renderPageStartNobody('Read', 'full-width');
 
@@ -664,6 +668,13 @@ class TextController extends BaseController
         $languages = $this->languageService->getLanguagesForSelect();
         $scrdir = $this->languageService->getScriptDirectionTag($text->lgid);
 
+        // Pre-compute service output for view
+        $mediaService = new \Lwt\Modules\Admin\Application\Services\MediaService();
+        $mediaPaths = $mediaService->getMediaPaths();
+        $mediaPathSelectorHtml = $mediaService->getMediaPathSelector('TxAudioURI');
+        $youtubeConfigured = (new \Lwt\Modules\Text\Http\YouTubeApiHandler())->formatIsConfigured()['configured'];
+        $textTagsHtml = \Lwt\Modules\Tags\Application\TagsFacade::getTextTagsHtml($textId);
+
         include self::MODULE_VIEWS . '/edit_form.php';
     }
 
@@ -699,6 +710,13 @@ class TextController extends BaseController
         $languageData = $this->textService->getLanguageDataForForm();
         $languages = $this->languageService->getLanguagesForSelect();
         $scrdir = $this->languageService->getScriptDirectionTag((int)$text->lgid);
+
+        // Pre-compute service output for view
+        $mediaService = new \Lwt\Modules\Admin\Application\Services\MediaService();
+        $mediaPaths = $mediaService->getMediaPaths();
+        $mediaPathSelectorHtml = $mediaService->getMediaPathSelector('TxAudioURI');
+        $youtubeConfigured = (new \Lwt\Modules\Text\Http\YouTubeApiHandler())->formatIsConfigured()['configured'];
+        $textTagsHtml = \Lwt\Modules\Tags\Application\TagsFacade::getTextTagsHtml($textId);
 
         include self::MODULE_VIEWS . '/edit_form.php';
     }
@@ -778,6 +796,10 @@ class TextController extends BaseController
             true,
             ' &nbsp; &nbsp; '
         );
+
+        // Pre-compute media player HTML for view
+        $mediaPlayerHtml = (new \Lwt\Modules\Admin\Application\Services\MediaService())
+            ->getMediaPlayerHtml($audio);
 
         // Parse annotations
         $annotations = $this->displayService->parseAnnotations($annotatedText);
@@ -937,6 +959,9 @@ class TextController extends BaseController
             $record = $this->textService->getArchivedTextById($textId);
             if ($record !== null) {
                 $languages = $this->languageService->getLanguagesForSelect();
+                $mediaPathSelectorHtml = (new \Lwt\Modules\Admin\Application\Services\MediaService())
+                    ->getMediaPathSelector('TxAudioURI');
+                $archivedTextTagsHtml = \Lwt\Modules\Tags\Application\TagsFacade::getArchivedTextTagsHtml($textId);
                 include self::MODULE_VIEWS . '/archived_form.php';
             }
         } else {
@@ -988,6 +1013,9 @@ class TextController extends BaseController
         $record = $this->textService->getArchivedTextById($textId);
         if ($record !== null) {
             $languages = $this->languageService->getLanguagesForSelect();
+            $mediaPathSelectorHtml = (new \Lwt\Modules\Admin\Application\Services\MediaService())
+                ->getMediaPathSelector('TxAudioURI');
+            $archivedTextTagsHtml = \Lwt\Modules\Tags\Application\TagsFacade::getArchivedTextTagsHtml($textId);
             include self::MODULE_VIEWS . '/archived_form.php';
         } else {
             echo '<p>Archived text not found.</p>';

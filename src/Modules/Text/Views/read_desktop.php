@@ -35,7 +35,6 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Text;
 
-use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 // Type-safe variable extraction from controller context
@@ -44,6 +43,7 @@ assert(is_int($langId));
 assert(is_string($title));
 assert(is_string($media));
 assert(is_int($audioPosition));
+assert(is_string($mediaPlayerHtml));
 // Note: $sourceUri is typed as string|null in file-level docblock
 
 // Book context for chapter navigation (optional)
@@ -149,7 +149,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
   <!-- Audio player (if media available) -->
   <?php if ($media !== '') : ?>
   <div class="box py-2 px-4 mb-0" style="border-radius: 0;">
-        <?php (new MediaService())->renderMediaPlayer($media, $audioPosition); ?>
+        <?php echo $mediaPlayerHtml; ?>
   </div>
   <?php endif; ?>
 

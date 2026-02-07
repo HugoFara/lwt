@@ -25,7 +25,6 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Views;
 
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
-use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 // Type assertions for variables passed from controller
@@ -34,6 +33,7 @@ assert(is_int($textId));
 assert(is_int($ord));
 assert(is_int($status));
 assert($term instanceof \Lwt\Modules\Vocabulary\Domain\Term);
+assert(is_string($todoContent));
 
 $hex = StringUtils::toClassName($term->textLowercase());
 ?>
@@ -48,5 +48,5 @@ $hex = StringUtils::toClassName($term->textLowercase());
     'text' => $term->text(),
     'textId' => $textId,
     'ord' => $ord,
-    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
+    'todoContent' => $todoContent
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

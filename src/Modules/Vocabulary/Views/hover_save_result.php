@@ -26,7 +26,6 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Views;
 
-use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 
 // Type assertions for variables passed from controller
@@ -37,6 +36,7 @@ assert(is_string($translation));
 assert(is_int($wid));
 assert(is_string($hex));
 assert(is_int($textId));
+assert(is_string($todoContent));
 
 ?>
 <p>Status: <?php echo StatusHelper::getColoredMessage($status); ?></p><br />
@@ -51,5 +51,5 @@ assert(is_int($textId));
     'status' => $status,
     'translation' => $translation,
     'wordRaw' => $wordRaw,
-    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
+    'todoContent' => $todoContent
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

@@ -32,9 +32,6 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 
-use Lwt\Shared\Infrastructure\Http\InputValidator;
-use Lwt\Modules\Text\Application\Services\SentenceService;
-use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
@@ -50,6 +47,10 @@ assert(is_string($romanization));
 assert(is_int($status));
 assert(is_int($originalStatus));
 assert(is_bool($showRoman));
+assert(is_string($similarTermsRow));
+assert(is_string($dictLinksHtml));
+assert(is_string($sentenceAreaHtml));
+assert(is_string($wordTagsHtml));
 
 // Extract typed properties from term object
 $termId = (int)$term->id;
@@ -81,7 +82,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
             ]); ?>
         </td>
     </tr>
-    <?php echo (new FindSimilarTerms())->getTableRow(); ?>
+    <?php echo $similarTermsRow; ?>
     <tr>
         <td class="has-text-right">Translation:</td>
         <td class="">
@@ -96,7 +97,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr>
         <td class="has-text-right">Tags:</td>
         <td class="">
-            <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml($termId); ?>
+            <?php echo $wordTagsHtml; ?>
         </td>
     </tr>
     <tr class="<?php echo ($showRoman ? '' : 'is-hidden'); ?>">
@@ -135,24 +136,11 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     </tr>
     <tr>
         <td class="has-text-right" colspan="2">
-            <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin(
-                $termLgid,
-                $termText,
-                'document.forms[0].WoSentence',
-                !InputValidator::hasFromGet('nodict')
-            ); ?>
+            <?php echo $dictLinksHtml; ?>
             &nbsp; &nbsp; &nbsp;
             <input type="submit" name="op" value="Change" />
         </td>
     </tr>
 </table>
 </form>
-<?php
-// Display example sentences button
-echo (new SentenceService())->renderExampleSentencesArea(
-    $termLgid,
-    $termTextlc,
-    'document.forms.editword.WoSentence',
-    $termId
-);
-?>
+<?php echo $sentenceAreaHtml; ?>

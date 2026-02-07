@@ -29,8 +29,6 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 
-use Lwt\Modules\Text\Application\Services\TextStatisticsService;
-
 // Type assertions for variables passed from controller
 assert(is_string($message));
 assert(is_bool($success));
@@ -42,13 +40,13 @@ assert(is_int($status));
 assert(is_string($romanization));
 assert(is_string($text));
 assert(is_int($len));
+assert(is_string($tagList));
+assert(is_string($todoContent));
 
 ?>
 <p><?php echo $message; ?></p>
 
-<?php if ($success && $len == 1) :
-    $tagList = \Lwt\Modules\Tags\Application\TagsFacade::getWordTagList($wid, false);
-    ?>
+<?php if ($success && $len == 1) : ?>
 <script type="application/json" data-lwt-save-result-config>
     <?php echo json_encode([
     'wid' => $wid,
@@ -58,7 +56,7 @@ assert(is_int($len));
     'text' => $text,
     'hex' => $hex,
     'textId' => $textId,
-    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
+    'todoContent' => $todoContent
     ], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>
 <?php endif; ?>

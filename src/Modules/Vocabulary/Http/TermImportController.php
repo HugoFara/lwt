@@ -126,6 +126,8 @@ class TermImportController extends VocabularyBaseController
             $newWords[] = $record;
         }
 
+        $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($tid);
+
         include $this->viewPath . 'bulk_save_result.php';
     }
 

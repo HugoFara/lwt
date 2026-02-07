@@ -8,9 +8,9 @@ declare(strict_types=1);
  * Variables expected:
  * - $title: string - Text title
  * - $textId: int - Text ID
- * - $audio: string - Audio URI
  * - $sourceUri: string|null - Source URI
  * - $textLinks: string - Previous/next text navigation links
+ * - $mediaPlayerHtml: string - Pre-rendered media player HTML
  *
  * PHP version 8.1
  *
@@ -25,9 +25,9 @@ declare(strict_types=1);
  *
  * @var string $title
  * @var int $textId
- * @var string $audio
  * @var string|null $sourceUri
  * @var string $textLinks
+ * @var string $mediaPlayerHtml
  */
 
 namespace Lwt\Views\Text;
@@ -35,7 +35,6 @@ namespace Lwt\Views\Text;
 // Variables injected from text_display_header.php:
 // $title, $audio, $sourceUri, $textLinks
 
-use Lwt\Modules\Admin\Application\Services\MediaService;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 // Type-safe variable extraction from controller context
@@ -52,9 +51,9 @@ $sourceUriTyped = $sourceUri;
 */
 $textLinksTyped = $textLinks;
 /**
- * @var string $audioTyped
+ * @var string $mediaPlayerHtml
 */
-$audioTyped = $audio;
+assert(is_string($mediaPlayerHtml));
 ?>
 <h1><?php echo \htmlspecialchars($titleTyped, ENT_QUOTES, 'UTF-8'); ?></h1>
 <div class="flex-spaced">
@@ -114,6 +113,4 @@ $audioTyped = $audio;
         </span>
     </div>
 </div>
-<?php
-(new MediaService())->renderMediaPlayer($audioTyped);
-?>
+<?php echo $mediaPlayerHtml; ?>

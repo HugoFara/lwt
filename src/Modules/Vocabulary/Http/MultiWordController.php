@@ -269,6 +269,21 @@ class MultiWordController extends VocabularyBaseController
         ];
         $sentence = ExportService::replaceTabNewline($sent[1] ?? '');
 
+        $similarTermsRow = (new \Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms())->getTableRow();
+        $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin(
+            (int) $lgid,
+            $termText,
+            'document.forms[0].WoSentence',
+            !InputValidator::hasFromGet('nodict')
+        );
+        $sentenceAreaHtml = $this->getSentenceService()->renderExampleSentencesArea(
+            (int) $lgid,
+            $textlc,
+            'document.forms.newword.WoSentence',
+            -1
+        );
+        $wordTagsHtml = TagsFacade::getWordTagsHtml(0);
+
         $this->render('form_edit_multi_new', [
             'term' => $term,
             'sentence' => $sentence,
@@ -277,7 +292,10 @@ class MultiWordController extends VocabularyBaseController
             'tid' => $tid,
             'ord' => $ord,
             'len' => $len,
-            'dictionaryAdapter' => $this->dictionaryAdapter,
+            'similarTermsRow' => $similarTermsRow,
+            'dictLinksHtml' => $dictLinksHtml,
+            'sentenceAreaHtml' => $sentenceAreaHtml,
+            'wordTagsHtml' => $wordTagsHtml,
         ]);
     }
 
@@ -303,6 +321,21 @@ class MultiWordController extends VocabularyBaseController
         $scrdir = $this->languageFacade->getScriptDirectionTag($lgid);
         $showRoman = $this->getContextService()->shouldShowRomanization($tid);
 
+        $similarTermsRow = (new \Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms())->getTableRow();
+        $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin(
+            $lgid,
+            $termText,
+            'document.forms[0].WoSentence',
+            !InputValidator::hasFromGet('nodict')
+        );
+        $sentenceAreaHtml = $this->getSentenceService()->renderExampleSentencesArea(
+            $lgid,
+            $textlc,
+            'document.forms.editword.WoSentence',
+            $wid
+        );
+        $wordTagsHtml = TagsFacade::getWordTagsHtml($wid);
+
         $this->render('form_edit_multi_existing', [
             'wid' => $wid,
             'wordData' => $wordData,
@@ -313,7 +346,10 @@ class MultiWordController extends VocabularyBaseController
             'showRoman' => $showRoman,
             'tid' => $tid,
             'ord' => $ord,
-            'dictionaryAdapter' => $this->dictionaryAdapter,
+            'similarTermsRow' => $similarTermsRow,
+            'dictLinksHtml' => $dictLinksHtml,
+            'sentenceAreaHtml' => $sentenceAreaHtml,
+            'wordTagsHtml' => $wordTagsHtml,
         ]);
     }
 
@@ -347,11 +383,14 @@ class MultiWordController extends VocabularyBaseController
 
         PageLayoutHelper::renderPageStartNobody('Term Deleted');
 
+        $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($textId);
+
         $this->render('delete_multi_result', [
             'wid' => $wid,
             'textId' => $textId,
             'deleted' => $result > 0,
             'showAll' => $showAll,
+            'todoContent' => $todoContent,
         ]);
 
         PageLayoutHelper::renderPageEnd();

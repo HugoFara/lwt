@@ -200,6 +200,25 @@ class MediaService
     // =========================================================================
 
     /**
+     * Get HTML for a media player, audio or video.
+     *
+     * @param string $path   URL or local file path
+     * @param int    $offset Offset from the beginning of the video
+     *
+     * @return string HTML string for the media player, or empty string if no path
+     */
+    public function getMediaPlayerHtml(string $path, int $offset = 0): string
+    {
+        if ($path === '') {
+            return '';
+        }
+        ob_start();
+        $this->renderMediaPlayer($path, $offset);
+        $result = ob_get_clean();
+        return $result !== false ? $result : '';
+    }
+
+    /**
      * Create an HTML media player, audio or video.
      *
      * @param string $path   URL or local file path

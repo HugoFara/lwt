@@ -134,6 +134,15 @@ class ReviewController extends BaseController
         $dueCount = (int) ($testData['counts']['due'] ?? 0);
         $this->reviewFacade->initializeReviewSession($dueCount);
 
+        // Pre-compute service output for view
+        $navLinksHtml = ($textId !== null)
+            ? (new \Lwt\Modules\Text\Application\Services\TextNavigationService())
+                ->getPreviousAndNextTextLinks($textId, '/review?text=', false, '')
+            : '';
+        $annotationLinkHtml = ($textId !== null)
+            ? (new \Lwt\Modules\Text\Application\Services\AnnotationService())->getAnnotationLink($textId)
+            : '';
+
         // Render header views
         include __DIR__ . '/../Views/header.php';
 

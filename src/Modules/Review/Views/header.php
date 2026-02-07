@@ -22,11 +22,11 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Review;
 
-use Lwt\Modules\Text\Application\Services\AnnotationService;
-use Lwt\Modules\Text\Application\Services\TextNavigationService;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 /** @var int|null $textId */
+assert(is_string($navLinksHtml));
+assert(is_string($annotationLinkHtml));
 
 ?>
 <div class="flex-header">
@@ -37,14 +37,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
     </div>
     <?php if ($textId !== null) : ?>
     <div>
-        <?php
-        echo (new TextNavigationService())->getPreviousAndNextTextLinks(
-            $textId,
-            '/review?text=',
-            false,
-            ''
-        );
-        ?>
+        <?php echo $navLinksHtml; ?>
     </div>
     <div>
         <a href="/text/<?php echo $textId; ?>/read" target="_top">
@@ -53,7 +46,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
         <a href="/text/<?php echo $textId; ?>/print-plain" target="_top">
             <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
-        <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
+        <?php echo $annotationLinkHtml; ?>
     </div>
     <?php endif; ?>
     <div>

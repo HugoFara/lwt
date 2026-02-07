@@ -26,18 +26,17 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 
-use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
-use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
-use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 
 // Type assertions for variables passed from controller
 assert(is_int($lang));
 assert(is_int($textId));
 assert(is_string($scrdir));
 assert(is_bool($showRoman));
-assert($dictService instanceof DictionaryAdapter);
+assert(is_string($similarTermsRow));
+assert(is_string($dictLinksHtml));
+assert(is_string($wordTagsHtml));
 
 $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
@@ -64,7 +63,7 @@ data-lwt-clear-frame="true">
             data_info="Lemma" name="WoLemma" id="WoLemma" value="" maxlength="250" size="35"
             placeholder="Base form (optional)" /></td>
         </tr>
-        <?php echo (new FindSimilarTerms())->getTableRow(); ?>
+        <?php echo $similarTermsRow; ?>
         <tr>
             <td class="has-text-right">Translation:</td>
             <td class="">
@@ -75,7 +74,7 @@ data-lwt-clear-frame="true">
         <tr>
             <td class="has-text-right">Tags:</td>
             <td class="">
-            <?php echo TagsFacade::getWordTagsHtml(0); ?>
+            <?php echo $wordTagsHtml; ?>
         </td>
         </tr>
         <tr class="<?php echo ($showRoman ? '' : 'is-hidden'); ?>">
@@ -123,10 +122,7 @@ data-lwt-clear-frame="true">
         </tr>
         <tr>
             <td class="has-text-right" colspan="2">  &nbsp;
-                <?php
-                /** @psalm-suppress PossiblyUndefinedVariable */
-                echo $dictService->createDictLinksInEditWin3($lang, 'WoSentence', 'WoText');
-                ?>
+                <?php echo $dictLinksHtml; ?>
                 &nbsp; &nbsp;
                 <input type="submit" name="op" value="Save" />
             </td>

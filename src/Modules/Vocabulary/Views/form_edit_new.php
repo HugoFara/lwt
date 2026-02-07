@@ -30,9 +30,6 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 
-use Lwt\Shared\Infrastructure\Http\InputValidator;
-use Lwt\Modules\Text\Application\Services\SentenceService;
-use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 
@@ -48,6 +45,10 @@ assert(is_bool($showRoman));
 assert(is_string($sentence));
 assert(is_string($transUri));
 assert(is_string($langShort));
+assert(is_string($similarTermsRow));
+assert(is_string($dictLinksHtml));
+assert(is_string($sentenceAreaHtml));
+assert(is_string($wordTagsHtml));
 
 $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
@@ -79,7 +80,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
            ]); ?>
        </td>
    </tr>
-   <?php echo (new FindSimilarTerms())->getTableRow(); ?>
+   <?php echo $similarTermsRow; ?>
    <tr>
        <td class="has-text-right">Translation:</td>
        <td class="">
@@ -92,7 +93,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
    <tr>
        <td class="has-text-right">Tags:</td>
        <td class="">
-           <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getWordTagsHtml(0); ?>
+           <?php echo $wordTagsHtml; ?>
        </td>
    </tr>
    <tr class="<?php echo ($showRoman ? '' : 'is-hidden'); ?>">
@@ -121,7 +122,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
            rows="3"></textarea>
        </td>
    </tr>
-   <?php echo (new FindSimilarTerms())->getTableRow(); ?>
+   <?php echo $similarTermsRow; ?>
    <tr>
        <td class="has-text-right">Status:</td>
        <td class="">
@@ -130,18 +131,10 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
    </tr>
    <tr>
        <td class="has-text-right" colspan="2">
-           <?php echo (new \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter())->createDictLinksInEditWin(
-               $lang,
-               $term,
-               'document.forms[0].WoSentence',
-               !InputValidator::hasFromGet('nodict')
-           ); ?>
+           <?php echo $dictLinksHtml; ?>
        &nbsp; &nbsp; &nbsp;
        <input type="submit" name="op" value="Save" /></td>
    </tr>
 </table>
 </form>
-<?php
-// Display example sentence button
-echo (new SentenceService())->renderExampleSentencesArea($lang, $termlc, 'document.forms.newword.WoSentence', 0);
-?>
+<?php echo $sentenceAreaHtml; ?>

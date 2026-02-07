@@ -137,6 +137,7 @@ class TermStatusController extends VocabularyBaseController
             'ord' => $ord,
             'status' => $status,
             'term' => $term,
+            'todoContent' => $this->getTextStatisticsService()->getTodoWordsContent($textId),
         ]);
 
         PageLayoutHelper::renderPageEnd();
@@ -268,6 +269,7 @@ class TermStatusController extends VocabularyBaseController
             'status' => $status,
             'hex' => $result['hex'],
             'word' => $result['word'],
+            'todoContent' => $this->getTextStatisticsService()->getTodoWordsContent($textId),
         ]);
 
         PageLayoutHelper::renderPageEnd();
@@ -333,6 +335,7 @@ class TermStatusController extends VocabularyBaseController
         $discoveryService = $this->getDiscoveryService();
         list($count, $wordsData) = $discoveryService->markAllWordsWithStatus($textId, $status);
         $useTooltips = Settings::getWithDefault('set-tooltip-mode') == 1;
+        $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($textId);
 
         include $this->viewPath . 'all_wellknown_result.php';
 

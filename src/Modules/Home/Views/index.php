@@ -23,7 +23,6 @@ declare(strict_types=1);
 namespace Lwt\Modules\Home\Views;
 
 use Lwt\Shared\Infrastructure\ApplicationInfo;
-use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\SearchableSelectHelper;
@@ -86,55 +85,20 @@ assert(isset($languages) && is_array($languages));
  * @var array<int, array{id: int, name: string}> $languages
  * @psalm-var list<array{id: int, name: string}> $languages
  */
+/** @var array|null $lastTextInfo - Pre-computed by controller */
 
 // Extract variables from dashboard data with proper types
 /** @var int $currentlang */
 $currentlang = $dashboardData['current_language_id'] ?? 0;
-/** @var int|null $currenttext */
-$currenttext = $dashboardData['current_text_id'] ?? null;
 /** @var int $langcnt */
 $langcnt = $dashboardData['language_count'] ?? 0;
 /** @var bool $isWordPress */
 $isWordPress = $dashboardData['is_wordpress'] ?? false;
-/** @var array<string, mixed>|null $currentTextInfo */
-$currentTextInfo = $dashboardData['current_text_info'] ?? null;
 /** @var int $textCount */
 $textCount = $dashboardData['current_language_text_count'] ?? 0;
 
 // Get base path for URL generation
 $base = UrlUtilities::getBasePath();
-
-// Prepare last text info for Alpine.js
-$lastTextInfo = null;
-if ($currentTextInfo !== null && $currenttext !== null) {
-    // Get text statistics
-    $textStatsService = new TextStatisticsService();
-    $textStats = $textStatsService->getTextWordCount((string)$currenttext);
-    $todoCount = $textStatsService->getTodoWordsCount($currenttext);
-
-    // Build statistics array with status counts
-    $stats = [
-        'unknown' => $todoCount,
-        's1' => $textStats['statu'][$currenttext][1] ?? 0,
-        's2' => $textStats['statu'][$currenttext][2] ?? 0,
-        's3' => $textStats['statu'][$currenttext][3] ?? 0,
-        's4' => $textStats['statu'][$currenttext][4] ?? 0,
-        's5' => $textStats['statu'][$currenttext][5] ?? 0,
-        's98' => $textStats['statu'][$currenttext][98] ?? 0,
-        's99' => $textStats['statu'][$currenttext][99] ?? 0,
-    ];
-    $stats['total'] = $stats['unknown'] + $stats['s1'] + $stats['s2'] + $stats['s3']
-        + $stats['s4'] + $stats['s5'] + $stats['s98'] + $stats['s99'];
-
-    $lastTextInfo = [
-        'id' => $currenttext,
-        'title' => isset($currentTextInfo['title']) ? (string) $currentTextInfo['title'] : '',
-        'language_id' => isset($currentTextInfo['language_id']) ? (int) $currentTextInfo['language_id'] : 0,
-        'language_name' => isset($currentTextInfo['language_name']) ? (string) $currentTextInfo['language_name'] : '',
-        'annotated' => isset($currentTextInfo['annotated']) ? (bool) $currentTextInfo['annotated'] : false,
-        'stats' => $stats,
-    ];
-}
 ?>
 
 <!-- Alpine.js Home App Container -->

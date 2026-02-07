@@ -272,6 +272,7 @@ class TermDisplayController extends VocabularyBaseController
             'translation' => $translation,
             'textId' => $textId,
             'status' => $status,
+            'todoContent' => $this->getTextStatisticsService()->getTodoWordsContent($textId),
         ]);
 
         PageLayoutHelper::renderPageEnd();

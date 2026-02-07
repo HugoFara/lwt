@@ -115,6 +115,11 @@ class TextPrintController extends BaseController
         // Set mode for Alpine view
         $mode = 'plain';
 
+        // Pre-compute service output for view
+        $navLinksHtml = (new \Lwt\Modules\Text\Application\Services\TextNavigationService())
+            ->getPreviousAndNextTextLinks($textId, $printUrl = '/text/{id}/print-plain', false, '');
+        $annotationLinkHtml = (new AnnotationService())->getAnnotationLink($textId);
+
         // Render the view
         PageLayoutHelper::renderPageStartNobody('Print');
 
@@ -166,6 +171,11 @@ class TextPrintController extends BaseController
         $savedAnn = 0;
         $savedStatus = 0;
         $savedPlacement = 0;
+
+        // Pre-compute service output for view
+        $navLinksHtml = (new \Lwt\Modules\Text\Application\Services\TextNavigationService())
+            ->getPreviousAndNextTextLinks($textId, '/text/{id}/print', false, '');
+        $annotationLinkHtml = (new AnnotationService())->getAnnotationLink($textId);
 
         // Render the view
         PageLayoutHelper::renderPageStartNobody('Annotated Text');
@@ -230,6 +240,11 @@ class TextPrintController extends BaseController
             $handler = new TextApiHandler();
             $editFormHtml = $handler->editTermForm($textId);
         }
+
+        // Pre-compute service output for view
+        $navLinksHtml = (new \Lwt\Modules\Text\Application\Services\TextNavigationService())
+            ->getPreviousAndNextTextLinks($textId, '/text/{id}/print', false, '');
+        $annotationLinkHtml = (new AnnotationService())->getAnnotationLink($textId);
 
         // Render the view
         PageLayoutHelper::renderPageStartNobody('Annotated Text');

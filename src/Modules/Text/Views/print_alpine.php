@@ -33,8 +33,6 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Views;
 
-use Lwt\Modules\Text\Application\Services\AnnotationService;
-use Lwt\Modules\Text\Application\Services\TextNavigationService;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
@@ -69,6 +67,14 @@ assert(is_int($savedPlacement));
 /**
  * @var string|null $editFormHtml
 */
+assert(is_string($navLinksHtml));
+/**
+ * @var string $navLinksHtml
+*/
+assert(is_string($annotationLinkHtml));
+/**
+ * @var string $annotationLinkHtml
+*/
 
 $title = $viewData['title'];
 $sourceUri = $viewData['sourceUri'];
@@ -77,8 +83,6 @@ $textSize = $viewData['textSize'];
 $rtlScript = $viewData['rtlScript'];
 $hasAnnotation = $viewData['hasAnnotation'];
 
-// Determine URLs based on mode
-$printUrl = $mode === 'plain' ? '/text/{id}/print-plain' : '/text/{id}/print';
 ?>
 <!-- Alpine.js container -->
 <div x-data="textPrintApp()" x-init="init()" x-cloak>
@@ -90,7 +94,7 @@ $printUrl = $mode === 'plain' ? '/text/{id}/print-plain' : '/text/{id}/print';
                 <?php echo PageLayoutHelper::buildLogo(); ?>
             </div>
             <div>
-                <?php echo (new TextNavigationService())->getPreviousAndNextTextLinks($textId, $printUrl, false, ''); ?>
+                <?php echo $navLinksHtml; ?>
             </div>
             <div>
                 <a href="/text/<?php echo $textId; ?>/read" target="_top">
@@ -100,7 +104,7 @@ $printUrl = $mode === 'plain' ? '/text/{id}/print-plain' : '/text/{id}/print';
                     <?php echo IconHelper::render('circle-help', ['title' => 'Review', 'alt' => 'Review']); ?>
                 </a>
                 <?php if ($mode !== 'edit') : ?>
-                    <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
+                    <?php echo $annotationLinkHtml; ?>
                 <?php endif; ?>
                 <a target="_top" href="/texts/<?php echo $textId; ?>/edit">
                     <?php echo IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
@@ -198,7 +202,7 @@ $printUrl = $mode === 'plain' ? '/text/{id}/print-plain' : '/text/{id}/print';
                             Print/Edit/Delete
                         </button>
                         your <strong>Improved Annotated Text</strong>
-                        <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>.
+                        <?php echo $annotationLinkHtml; ?>.
                     <?php else : ?>
                         <button type="button" class="button is-small"
                             @click="navigateTo('/text/<?php echo $textId; ?>/print/edit')">

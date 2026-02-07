@@ -24,14 +24,13 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Word;
 
-use Lwt\Modules\Text\Application\Services\TextStatisticsService;
-
 // Type assertions for variables passed from controller
 assert(is_int($status));
 assert(is_int($count));
 assert(is_int($textId));
 assert(is_array($wordsData));
 assert(is_bool($useTooltips));
+assert(is_string($todoContent));
 
 ?>
 <p>
@@ -60,5 +59,5 @@ if ($status == 98) {
 <?php echo json_encode([
     'words' => $wordsData,
     'useTooltips' => $useTooltips,
-    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
+    'todoContent' => $todoContent
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>

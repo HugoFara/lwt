@@ -25,8 +25,6 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Views;
 
-use Lwt\Modules\Text\Application\Services\TextStatisticsService;
-
 // Type assertions for variables passed from controller
 assert(is_int($wid));
 assert(is_int($textId));
@@ -34,6 +32,7 @@ assert(is_int($ord));
 assert(is_int($status));
 assert(is_string($hex));
 assert(is_string($word));
+assert(is_string($todoContent));
 
 $statusName = $status === 99 ? 'Well-Known' : 'Ignored';
 ?>
@@ -47,5 +46,5 @@ $statusName = $status === 99 ? 'Well-Known' : 'Ignored';
     'word' => $word,
     'textId' => $textId,
     'ord' => $ord,
-    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
+    'todoContent' => $todoContent
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
