@@ -7,7 +7,7 @@
  * PHP version 8.1
  *
  * @category Integration
- * @package  Lwt\Core\Integration
+ * @package  Lwt\Modules\Dictionary\Infrastructure\Translation
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core\Integration;
+namespace Lwt\Modules\Dictionary\Infrastructure\Translation;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
 

@@ -19,7 +19,7 @@ namespace Lwt\Modules\Dictionary\Http;
 
 use Lwt\Controllers\BaseController;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
-use Lwt\Core\Integration\GoogleTimeToken;
+use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTimeToken;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Modules\Dictionary\Application\TranslationService;
 use Lwt\Shared\Infrastructure\Database\Settings;

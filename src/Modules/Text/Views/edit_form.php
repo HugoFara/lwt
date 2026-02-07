@@ -40,7 +40,7 @@ use Lwt\Shared\UI\Helpers\SearchableSelectHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Modules\Admin\Application\Services\MediaService;
-use Lwt\Core\Integration\YouTubeImport;
+use Lwt\Modules\Text\Http\YouTubeApiHandler;
 
 // Type-safe variable extraction from controller context
 assert(is_array($languageData));
@@ -322,7 +322,7 @@ if (!$isNew) {
                 <p class="help">YouTube, Vimeo, Dailymotion, Bilibili, NicoNico, or PeerTube URL. Captions will be imported if available.</p>
             </div>
 
-            <?php if (YouTubeImport::isConfigured()) : ?>
+            <?php if ((new YouTubeApiHandler())->formatIsConfigured()['configured']) : ?>
             <div class="field mt-3">
                 <label class="label is-small">Or enter YouTube Video ID directly</label>
                 <div class="control">
@@ -339,9 +339,6 @@ if (!$isNew) {
                             </button>
                         </div>
                     </div>
-                    <input type="hidden"
-                           id="ytApiKey"
-                           value="<?php echo htmlspecialchars(YouTubeImport::getApiKey() ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                 </div>
                 <p id="ytDataStatus" class="help"></p>
             </div>
