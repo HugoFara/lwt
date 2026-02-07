@@ -11,6 +11,8 @@
 import Alpine from 'alpinejs';
 import type { MultiWordFormStoreState } from '../stores/multi_word_form_store';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { trapFocus, releaseFocus } from '@shared/accessibility/focus_trap';
+import { announce } from '@shared/accessibility/aria_live';
 
 /**
  * Status display information.
@@ -61,12 +63,25 @@ export interface MultiWordModalData {
  */
 export function multiWordModalData(): MultiWordModalData {
   return {
-    // Initialize icons when modal opens
+    // Initialize icons and focus trap when modal opens
     init(): void {
+      // Close on Escape key
+      document.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && this.isOpen) {
+          this.close();
+        }
+      });
+
       Alpine.effect(() => {
         if (this.store.isVisible) {
           requestAnimationFrame(() => {
             initIcons();
+            const modalCard = document.querySelector<HTMLElement>('#multi-word-modal-title')
+              ?.closest('.modal-card');
+            if (modalCard) {
+              trapFocus(modalCard as HTMLElement);
+            }
+            announce(this.modalTitle);
           });
         }
       });
@@ -121,6 +136,7 @@ export function multiWordModalData(): MultiWordModalData {
      * Close the modal.
      */
     close(): void {
+      releaseFocus();
       this.store.close();
     },
 
@@ -132,6 +148,7 @@ export function multiWordModalData(): MultiWordModalData {
 
       if (result.success) {
         // Close modal on success
+        releaseFocus();
         this.store.reset();
       }
       // On error, store.errors.general will be set and displayed

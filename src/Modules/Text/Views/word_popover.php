@@ -25,6 +25,8 @@ namespace Lwt\Views\Text;
   <!-- Popover container - positioned absolutely near the target word -->
   <div
     class="word-popover"
+    role="dialog"
+    aria-label="Word details"
     x-show="isOpen"
     :style="getPositionStyle()"
     :class="'word-popover--' + position.placement"

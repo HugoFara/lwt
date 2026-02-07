@@ -23,12 +23,12 @@ namespace Lwt\Views\Text;
 
 ?>
 <div x-data="wordModal" x-cloak>
-  <div class="modal" :class="{ 'is-active': isOpen }">
+  <div class="modal" :class="{ 'is-active': isOpen }" role="dialog" aria-modal="true" aria-labelledby="word-modal-title">
     <div class="modal-background" @click="close"></div>
     <div class="modal-card" style="max-width: 500px;">
       <header class="modal-card-head py-3">
-        <p class="modal-card-title is-size-6" x-text="modalTitle"></p>
-        <button class="delete" aria-label="close" @click="close" :disabled="isLoading"></button>
+        <p class="modal-card-title is-size-6" id="word-modal-title" x-text="modalTitle"></p>
+        <button class="delete" aria-label="Close dialog" @click="close" :disabled="isLoading"></button>
       </header>
       <section class="modal-card-body">
         <!-- Loading overlay -->

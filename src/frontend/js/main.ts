@@ -55,6 +55,9 @@ import '@shared/components/theme_toggle';
 import '@shared/components/footer';
 import '@shared/components/searchable_select';
 
+// Shared accessibility
+import { initAriaLive } from '@shared/accessibility/aria_live';
+
 // Shared icons
 import '@shared/icons/lucide_icons';
 
@@ -132,6 +135,9 @@ const loaders = requestedModules
 
 // Wait for all dynamic modules to load, then initialize Alpine
 Promise.all(loaders).then(() => {
+  // Initialize ARIA live regions for screen reader announcements
+  initAriaLive();
+
   // Initialize Alpine.js globally
   window.Alpine = Alpine;
 

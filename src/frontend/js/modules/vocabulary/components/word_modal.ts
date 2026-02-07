@@ -14,6 +14,8 @@ import type { WordStoreState, WordData } from '../stores/word_store';
 import type { WordFormStoreState } from '../stores/word_form_store';
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { trapFocus, releaseFocus } from '@shared/accessibility/focus_trap';
+import { announce } from '@shared/accessibility/aria_live';
 
 /**
  * Status display information.
@@ -92,14 +94,27 @@ export function wordModalData(): WordModalData {
 
     // Initialize icons when modal opens (called by Alpine.js x-init or x-effect)
     init(): void {
+      // Close on Escape key
+      document.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && this.isOpen) {
+          this.close();
+        }
+      });
+
       // Watch for modal open state changes to load form data and re-initialize icons
       Alpine.effect(() => {
         if (this.store.isEditModalOpen) {
           // Load form data when modal opens
           this.showEditForm();
-          // Re-initialize icons after DOM update
+          // Re-initialize icons and trap focus after DOM update
           requestAnimationFrame(() => {
             initIcons();
+            const modalCard = document.querySelector<HTMLElement>('#word-modal-title')
+              ?.closest('.modal-card');
+            if (modalCard) {
+              trapFocus(modalCard as HTMLElement);
+            }
+            announce(this.modalTitle);
           });
         }
       });
@@ -109,6 +124,7 @@ export function wordModalData(): WordModalData {
         if (this.formStore.shouldCloseModal) {
           this.formStore.shouldCloseModal = false;
           this.formStore.reset();
+          releaseFocus();
           this.store.closeEditModal();
         }
       });
@@ -118,6 +134,7 @@ export function wordModalData(): WordModalData {
         if (this.formStore.shouldReturnToInfo) {
           this.formStore.shouldReturnToInfo = false;
           this.formStore.reset();
+          releaseFocus();
           this.store.closeEditModal();
         }
       });
@@ -170,6 +187,7 @@ export function wordModalData(): WordModalData {
         }
         this.formStore.reset();
       }
+      releaseFocus();
       this.store.closeEditModal();
     },
 
@@ -185,6 +203,8 @@ export function wordModalData(): WordModalData {
       if (!word) return;
 
       await this.store.setStatus(word.hex, status);
+      const statusInfo = STATUSES.find(s => s.value === status);
+      announce(`Changed to ${statusInfo?.label || 'status ' + status}`);
     },
 
     async markWellKnown(): Promise<void> {
@@ -272,11 +292,13 @@ export function wordModalData(): WordModalData {
     onFormSaved(): void {
       // Reset form and close modal after successful save
       this.formStore.reset();
+      releaseFocus();
       this.store.closeEditModal();
     },
 
     onFormCancelled(): void {
       this.formStore.reset();
+      releaseFocus();
       this.store.closeEditModal();
     }
   };

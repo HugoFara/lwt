@@ -619,6 +619,9 @@ HTML;
             ? ' class="' . htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8') . '"'
             : '';
         echo '<body' . $bodyAttr . '>';
+        echo '<a href="#main-content" class="sr-only sr-only-focusable" '
+            . 'style="position:absolute;z-index:10000;background:#485fc7;color:#fff;padding:0.5rem 1rem;">'
+            . 'Skip to main content</a>';
 
         flush();
     }
@@ -644,6 +647,7 @@ HTML;
             echo self::buildLogo();
             echo '</div>';
         }
+        echo '<main id="main-content">';
         echo self::buildPageTitle($title);
     }
 
@@ -654,7 +658,7 @@ HTML;
      */
     public static function renderPageEnd(): void
     {
-        echo '</body></html>';
+        echo '</main></body></html>';
     }
 
     /**
@@ -712,14 +716,14 @@ HTML;
                   IconHelper::render('arrow-left', ['alt' => 'Go back']) .
                   '<span class="ml-1">Go back and correct</span></button>';
 
-            echo '<div class="notification is-danger">' .
+            echo '<div class="notification is-danger" role="alert">' .
                 '<button class="delete" aria-label="close"></button>' .
                 '<strong>Error:</strong> ' . $escapedMessage .
                 $backButton .
                 '</div>';
         } else {
             $autoHideAttr = $autoHide ? ' data-auto-hide="true"' : '';
-            echo '<div class="notification is-success"' . $autoHideAttr . '>' .
+            echo '<div class="notification is-success" role="status"' . $autoHideAttr . '>' .
                 '<button class="delete" aria-label="close"></button>' .
                 $escapedMessage .
                 '</div>';

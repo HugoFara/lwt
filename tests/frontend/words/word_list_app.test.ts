@@ -97,6 +97,7 @@ vi.mock('lucide', () => ({
   MessageSquare: ['svg', {}, []],
   Minimize2: ['svg', {}, []],
   Minus: ['svg', {}, []],
+  Moon: ['svg', {}, []],
   MoreHorizontal: ['svg', {}, []],
   Newspaper: ['svg', {}, []],
   NotepadText: ['svg', {}, []],

@@ -12,6 +12,7 @@ import Alpine from 'alpinejs';
 import type { WordStoreState, WordData } from '../stores/word_store';
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { announce } from '@shared/accessibility/aria_live';
 
 /**
  * Status display information.
@@ -115,6 +116,13 @@ export function wordPopoverData(): WordPopoverData {
           requestAnimationFrame(() => {
             this.calculatePosition();
             initIcons();
+            // Announce word details for screen readers
+            const word = this.word;
+            if (word) {
+              const statusInfo = STATUSES.find(s => s.value === word.status);
+              const statusLabel = statusInfo?.label || 'Unknown';
+              announce(`${word.text}, ${statusLabel}`);
+            }
           });
         }
       });
@@ -208,6 +216,8 @@ export function wordPopoverData(): WordPopoverData {
       if (!word) return;
 
       await this.store.setStatus(word.hex, status);
+      const statusInfo = STATUSES.find(s => s.value === status);
+      announce(`Changed to ${statusInfo?.label || 'status ' + status}`);
     },
 
     async markWellKnown(): Promise<void> {

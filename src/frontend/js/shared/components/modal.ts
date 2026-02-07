@@ -8,6 +8,8 @@
  * @since   3.0.0
  */
 
+import { trapFocus, releaseFocus } from '@shared/accessibility/focus_trap';
+
 interface ModalOptions {
   title?: string;
   width?: string;
@@ -37,9 +39,9 @@ function ensureModalExists(): void {
   if (!document.getElementById('lwt-modal-overlay')) {
     const modalHtml = `
       <div id="lwt-modal-overlay" class="lwt-modal-overlay" style="display:none;">
-        <div id="lwt-modal" class="lwt-modal">
+        <div id="lwt-modal" class="lwt-modal" role="dialog" aria-modal="true" aria-labelledby="lwt-modal-title">
           <div class="lwt-modal-header">
-            <h2 class="lwt-modal-title"></h2>
+            <h2 class="lwt-modal-title" id="lwt-modal-title"></h2>
             <button type="button" class="lwt-modal-close" aria-label="Close">&times;</button>
           </div>
           <div class="lwt-modal-body"></div>
@@ -270,6 +272,11 @@ export function openModal(content: string, options: ModalOptions = {}): void {
   // Show modal
   fadeIn(overlayInstance);
 
+  // Trap focus within modal
+  if (modalInstance) {
+    trapFocus(modalInstance);
+  }
+
   // Close on overlay click
   if (opts.closeOnOverlayClick) {
     overlayInstance.onclick = function (e) {
@@ -302,6 +309,7 @@ export function openModal(content: string, options: ModalOptions = {}): void {
  * Close the currently open modal.
  */
 export function closeModal(): void {
+  releaseFocus();
   if (overlayInstance) {
     fadeOut(overlayInstance);
   }
