@@ -33,14 +33,19 @@ use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Modules\Text\Application\Services\TextPrintService;
 use Lwt\Modules\Text\Application\Services\TextScoringService;
 use Lwt\Shared\UI\Helpers\IconHelper;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
+use Lwt\Api\V1\Response;
 
 /**
  * Handler for text-related API operations.
  *
  * Extracted from api_v1.php lines 262-373.
  */
-class TextApiHandler
+class TextApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
     private WordDiscoveryService $discoveryService;
     private TextFacade $textService;
 
@@ -1229,5 +1234,116 @@ class TextApiHandler
             'recommendations' => $result,
             'target_comprehensibility' => $target
         ];
+    }
+
+    // =========================================================================
+    // Routing Methods (ApiRoutableInterface)
+    // =========================================================================
+
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === 'scoring') {
+            if ($frag2 === 'recommended') {
+                $langId = (int) ($params['language_id'] ?? 0);
+                if ($langId <= 0) {
+                    return Response::error('language_id is required', 400);
+                }
+                return Response::success($this->formatGetRecommendedTexts($langId, $params));
+            }
+            $textId = isset($params['text_id']) ? (int) $params['text_id'] : 0;
+            $textIds = (string) ($params['text_ids'] ?? '');
+
+            if ($textId > 0) {
+                return Response::success($this->formatGetTextScore($textId));
+            } elseif ($textIds !== '') {
+                $ids = array_map('intval', explode(',', $textIds));
+                $ids = array_filter($ids, fn($id) => $id > 0);
+                if (empty($ids)) {
+                    return Response::error('No valid text IDs provided', 400);
+                }
+                return Response::success($this->formatGetTextScores($ids));
+            }
+            return Response::error('text_id or text_ids parameter is required', 400);
+        } elseif ($frag1 === 'by-language') {
+            if ($frag2 === '' || !ctype_digit($frag2)) {
+                return Response::error('Expected Language ID after "by-language"', 404);
+            }
+            return Response::success($this->formatTextsByLanguage((int) $frag2, $params));
+        } elseif ($frag1 === 'archived-by-language') {
+            if ($frag2 === '' || !ctype_digit($frag2)) {
+                return Response::error('Expected Language ID after "archived-by-language"', 404);
+            }
+            return Response::success($this->formatArchivedTextsByLanguage((int) $frag2, $params));
+        } elseif ($frag1 !== '' && ctype_digit($frag1)) {
+            $textId = (int) $frag1;
+            if ($frag2 === 'words') {
+                return Response::success($this->formatGetWords($textId));
+            } elseif ($frag2 === 'print-items') {
+                return Response::success($this->formatGetPrintItems($textId));
+            } elseif ($frag2 === 'annotation') {
+                return Response::success($this->formatGetAnnotation($textId));
+            }
+            return Response::error('Expected "words", "print-items", or "annotation"', 404);
+        }
+        return Response::error('Expected "scoring", "by-language", "archived-by-language", or text ID', 404);
+    }
+
+    public function routePost(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === '' || !ctype_digit($frag1)) {
+            return Response::error('Text ID (Integer) Expected', 404);
+        }
+
+        $textId = (int) $frag1;
+
+        switch ($frag2) {
+            case 'annotation':
+                return Response::success($this->formatSetAnnotation(
+                    $textId,
+                    (string) ($params['elem'] ?? ''),
+                    (string) ($params['data'] ?? '')
+                ));
+            case 'audio-position':
+                return Response::success($this->formatSetAudioPosition(
+                    $textId,
+                    (int) ($params['position'] ?? 0)
+                ));
+            case 'reading-position':
+                return Response::success($this->formatSetTextPosition(
+                    $textId,
+                    (int) ($params['position'] ?? 0)
+                ));
+            default:
+                return Response::error('Endpoint Not Found: ' . $frag2, 404);
+        }
+    }
+
+    public function routePut(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === '' || !ctype_digit($frag1)) {
+            return Response::error('Text ID (Integer) Expected', 404);
+        }
+
+        $textId = (int) $frag1;
+
+        switch ($frag2) {
+            case 'display-mode':
+                return Response::success($this->formatSetDisplayMode($textId, $params));
+            case 'mark-all-wellknown':
+                return Response::success($this->formatMarkAllWellKnown($textId));
+            case 'mark-all-ignored':
+                return Response::success($this->formatMarkAllIgnored($textId));
+            default:
+                return Response::error('Expected "display-mode", "mark-all-wellknown", or "mark-all-ignored"', 404);
+        }
     }
 }

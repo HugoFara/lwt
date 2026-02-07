@@ -19,6 +19,10 @@ namespace Lwt\Modules\Language\Http;
 
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
+use Lwt\Api\V1\Response;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Text\Application\Services\SentenceService;
@@ -29,8 +33,10 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
  *
  * @since 3.0.0
  */
-class LanguageApiHandler
+class LanguageApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+
     /**
      * @var LanguageFacade Language facade instance
      */
@@ -481,5 +487,101 @@ class LanguageApiHandler
     {
         Settings::save('currentlanguage', (string)$id);
         return ['success' => true];
+    }
+
+    // =========================================================================
+    // API Routing Methods (ApiRoutableInterface)
+    // =========================================================================
+
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === '') {
+            return Response::success($this->formatGetAll());
+        }
+        if ($frag1 === 'definitions') {
+            return Response::success($this->formatGetDefinitions());
+        }
+        if ($frag1 === 'with-texts') {
+            return Response::success($this->formatLanguagesWithTexts());
+        }
+        if ($frag1 === 'with-archived-texts') {
+            return Response::success($this->formatLanguagesWithArchivedTexts());
+        }
+        if (!ctype_digit($frag1)) {
+            return Response::error('Expected Language ID, "definitions", "with-texts", or "with-archived-texts"', 404);
+        }
+
+        $langId = (int) $frag1;
+
+        if ($frag2 === 'stats') {
+            return Response::success($this->formatGetStats($langId));
+        }
+        if ($frag2 === 'reading-configuration') {
+            return Response::success($this->formatReadingConfiguration($langId));
+        }
+        if ($frag2 === '') {
+            $result = $this->formatGetOne($langId);
+            if ($result === null) {
+                return Response::error('Language not found', 404);
+            }
+            return Response::success($result);
+        }
+
+        return Response::error('Expected "reading-configuration", "stats", or no sub-path', 404);
+    }
+
+    public function routePost(array $fragments, array $params): JsonResponse
+    {
+        if (!isset($fragments[1]) || $fragments[1] === '') {
+            return Response::success($this->formatCreate($params));
+        }
+
+        if (ctype_digit($fragments[1])) {
+            $langId = (int)$fragments[1];
+
+            if (($fragments[2] ?? '') === 'refresh') {
+                return Response::success($this->formatRefresh($langId));
+            }
+            if (($fragments[2] ?? '') === 'set-default') {
+                return Response::success($this->formatSetDefault($langId));
+            }
+
+            return Response::error('Expected "refresh" or "set-default"', 404);
+        }
+
+        return Response::error('Language ID (Integer) Expected', 404);
+    }
+
+    public function routePut(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === '' || !ctype_digit($frag1)) {
+            return Response::error('Language ID (Integer) Expected', 404);
+        }
+
+        $langId = (int) $frag1;
+
+        if ($frag2 === '') {
+            return Response::success($this->formatUpdate($langId, $params));
+        }
+
+        return Response::error('Unexpected sub-path for PUT /languages/{id}', 404);
+    }
+
+    public function routeDelete(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === '' || !ctype_digit($frag1)) {
+            return Response::error('Language ID (Integer) Expected', 404);
+        }
+
+        $langId = (int) $frag1;
+        return Response::success($this->formatDelete($langId));
     }
 }

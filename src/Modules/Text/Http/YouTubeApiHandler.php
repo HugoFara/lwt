@@ -19,7 +19,11 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Http;
 
+use Lwt\Api\V1\Response;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
 
 /**
  * Handler for YouTube API proxy endpoints.
@@ -28,8 +32,10 @@ use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
  *
  * @since 3.0.0
  */
-class YouTubeApiHandler
+class YouTubeApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+
     /**
      * YouTube Data API v3 base URL.
      */
@@ -177,5 +183,31 @@ class YouTubeApiHandler
             }
         }
         return 0;
+    }
+
+    /**
+     * Route GET requests for the YouTube API handler.
+     *
+     * @param list<string> $fragments URL path fragments
+     * @param array<string, mixed> $params Query parameters
+     *
+     * @return JsonResponse
+     */
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+
+        switch ($frag1) {
+            case 'configured':
+                return Response::success($this->formatIsConfigured());
+            case 'video':
+                $videoId = (string) ($params['video_id'] ?? '');
+                if ($videoId === '') {
+                    return Response::error('video_id parameter is required', 400);
+                }
+                return Response::success($this->formatGetVideoInfo($videoId));
+            default:
+                return Response::error('Expected "configured" or "video"', 404);
+        }
     }
 }

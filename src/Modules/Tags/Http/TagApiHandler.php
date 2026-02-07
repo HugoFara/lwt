@@ -21,6 +21,8 @@ namespace Lwt\Modules\Tags\Http;
 
 use Lwt\Api\V1\Response;
 use Lwt\Modules\Tags\Application\TagsFacade;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
 
 /**
@@ -33,8 +35,22 @@ use Lwt\Shared\Infrastructure\Http\JsonResponse;
  *
  * @since 3.0.0
  */
-class TagApiHandler
+class TagApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+    /**
+     * Route a GET request to the appropriate handler.
+     *
+     * @param array $fragments URL path fragments
+     * @param array $params    Query parameters
+     *
+     * @return JsonResponse
+     */
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        return $this->handleGet(array_slice($fragments, 1));
+    }
+
     /**
      * Handle GET request for tags.
      *

@@ -20,6 +20,10 @@ namespace Lwt\Modules\Admin\Http;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
+use Lwt\Api\V1\Response;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Modules\Admin\Application\Services\MediaService;
@@ -31,8 +35,28 @@ use Lwt\Modules\Admin\Application\Services\MediaService;
  *
  * @since 3.0.0
  */
-class AdminApiHandler
+class AdminApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === 'theme-path') {
+            return Response::success($this->formatThemePath((string) ($params['path'] ?? '')));
+        }
+        return Response::error('Endpoint Not Found: ' . $frag1, 404);
+    }
+
+    public function routePost(array $fragments, array $params): JsonResponse
+    {
+        return Response::success($this->formatSaveSetting(
+            (string) ($params['key'] ?? ''),
+            (string) ($params['value'] ?? '')
+        ));
+    }
+
     /**
      * Constructor.
      *

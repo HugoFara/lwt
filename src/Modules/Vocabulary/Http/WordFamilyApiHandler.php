@@ -19,7 +19,11 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Http;
 
+use Lwt\Api\V1\Response;
 use Lwt\Modules\Vocabulary\Application\Services\LemmaService;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
 
 /**
  * Handler for word family/lemma-related API operations.
@@ -32,8 +36,10 @@ use Lwt\Modules\Vocabulary\Application\Services\LemmaService;
  *
  * @since 3.0.0
  */
-class WordFamilyApiHandler
+class WordFamilyApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+
     private ?LemmaService $lemmaService = null;
 
     /**
@@ -44,6 +50,44 @@ class WordFamilyApiHandler
     public function __construct(?LemmaService $lemmaService = null)
     {
         $this->lemmaService = $lemmaService;
+    }
+
+    /**
+     * Handle a GET request for word families.
+     *
+     * Routes:
+     * - GET /word-families/stats?language_id=N  -> lemma statistics
+     * - GET /word-families?language_id=N&lemma_lc=X -> family by lemma
+     * - GET /word-families?language_id=N         -> paginated list
+     *
+     * @param list<string>         $fragments URL path segments
+     * @param array<string, mixed> $params    Query parameters
+     *
+     * @return JsonResponse
+     */
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === 'stats') {
+            $langId = (int) ($params['language_id'] ?? 0);
+            if ($langId <= 0) {
+                return Response::error('language_id is required', 400);
+            }
+            return Response::success($this->getLemmaStatistics($langId));
+        }
+
+        $langId = (int) ($params['language_id'] ?? 0);
+        if ($langId <= 0) {
+            return Response::error('language_id is required', 400);
+        }
+
+        $lemmaLc = (string) ($params['lemma_lc'] ?? '');
+        if ($lemmaLc !== '') {
+            return Response::success($this->getWordFamilyByLemma($langId, $lemmaLc));
+        }
+
+        return Response::success($this->getWordFamilyListFromParams($langId, $params));
     }
 
     /**

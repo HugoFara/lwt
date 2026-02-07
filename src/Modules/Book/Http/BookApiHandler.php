@@ -17,8 +17,12 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Book\Http;
 
+use Lwt\Api\V1\Response;
 use Lwt\Modules\Book\Application\BookFacade;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
 
 /**
  * API handler for book operations.
@@ -27,8 +31,10 @@ use Lwt\Shared\Infrastructure\Globals;
  *
  * @since 3.0.0
  */
-class BookApiHandler
+class BookApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+
     private BookFacade $bookFacade;
 
     /**
@@ -181,5 +187,44 @@ class BookApiHandler
             'success' => true,
             'message' => 'Reading progress updated',
         ];
+    }
+
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'chapters') {
+            return Response::success($this->getChapters(['id' => $frag1]));
+        }
+        if ($frag1 !== '' && ctype_digit($frag1)) {
+            return Response::success($this->getBook(['id' => $frag1]));
+        }
+
+        return Response::success($this->listBooks($params));
+    }
+
+    public function routePut(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'progress') {
+            $params['id'] = $frag1;
+            return Response::success($this->updateProgress($params));
+        }
+
+        return Response::error('Expected "progress"', 404);
+    }
+
+    public function routeDelete(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 !== '' && ctype_digit($frag1)) {
+            return Response::success($this->deleteBook(['id' => $frag1]));
+        }
+
+        return Response::error('Book ID (Integer) Expected', 404);
     }
 }

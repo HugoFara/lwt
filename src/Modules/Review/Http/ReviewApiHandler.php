@@ -26,14 +26,20 @@ use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
+use Lwt\Api\V1\Response;
 
 /**
  * Handler for review/test-related API operations.
  *
  * @since 3.0.0
  */
-class ReviewApiHandler
+class ReviewApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+
     private ReviewFacade $reviewFacade;
     private SessionStateManager $sessionManager;
 
@@ -695,5 +701,33 @@ class ReviewApiHandler
                 'langCode' => $langCode
             ]
         ];
+    }
+
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+
+        switch ($frag1) {
+            case 'next-word':
+                return Response::success($this->formatNextWord($params));
+            case 'tomorrow-count':
+                return Response::success($this->formatTomorrowCount($params));
+            case 'config':
+                return Response::success($this->formatTestConfig($params));
+            case 'table-words':
+                return Response::success($this->formatTableWords($params));
+            default:
+                return Response::error('Endpoint Not Found: ' . $frag1, 404);
+        }
+    }
+
+    public function routePut(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === 'status') {
+            return Response::success($this->formatUpdateStatus($params));
+        }
+        return Response::error('Expected "status"', 404);
     }
 }

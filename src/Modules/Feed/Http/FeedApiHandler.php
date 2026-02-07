@@ -20,9 +20,13 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Feed\Http;
 
+use Lwt\Api\V1\Response;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
 use Lwt\Modules\Feed\Application\FeedFacade;
 
 /**
@@ -33,8 +37,10 @@ use Lwt\Modules\Feed\Application\FeedFacade;
  *
  * @since 3.0.0
  */
-class FeedApiHandler
+class FeedApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+
     private FeedFacade $feedFacade;
 
     public function __construct(FeedFacade $feedFacade)
@@ -917,5 +923,87 @@ class FeedApiHandler
     public function getFeedLoadConfig(int $feedId, bool $checkAutoupdate = false): array
     {
         return $this->feedFacade->getFeedLoadConfig($feedId, $checkAutoupdate);
+    }
+
+    // =========================================================================
+    // API Routing Methods
+    // =========================================================================
+
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === 'list') {
+            return Response::success($this->formatGetFeedList($params));
+        }
+        if ($frag1 === 'articles') {
+            return Response::success($this->formatGetArticles($params));
+        }
+        if ($frag1 !== '' && ctype_digit($frag1)) {
+            return Response::success($this->formatGetFeed((int) $frag1));
+        }
+
+        return Response::error('Expected "list", "articles", or feed ID', 404);
+    }
+
+    public function routePost(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === 'articles' && $frag2 === 'import') {
+            return Response::success($this->formatImportArticles($params));
+        }
+        if ($frag1 === '') {
+            return Response::success($this->formatCreateFeed($params));
+        }
+        if (ctype_digit($frag1) && $frag2 === 'load') {
+            return Response::success($this->formatLoadFeed(
+                (string) ($params['name'] ?? ''),
+                (int) $frag1,
+                (string) ($params['source_uri'] ?? ''),
+                (string) ($params['options'] ?? '')
+            ));
+        }
+
+        return Response::error('Expected "articles/import", feed data, or "{id}/load"', 404);
+    }
+
+    public function routePut(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === '' || !ctype_digit($frag1)) {
+            return Response::error('Feed ID (Integer) Expected', 404);
+        }
+
+        $feedId = (int) $frag1;
+        return Response::success($this->formatUpdateFeed($feedId, $params));
+    }
+
+    public function routeDelete(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === 'articles' && $frag2 !== '' && ctype_digit($frag2)) {
+            $feedId = (int) $frag2;
+            /** @var array<int> $articleIds */
+            $articleIds = is_array($params['article_ids'] ?? null) ? $params['article_ids'] : [];
+            return Response::success($this->formatDeleteArticles($feedId, $articleIds));
+        }
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'reset-errors') {
+            return Response::success($this->formatResetErrorArticles((int) $frag1));
+        }
+        if ($frag1 === '') {
+            /** @var array<int> $feedIds */
+            $feedIds = is_array($params['feed_ids'] ?? null) ? $params['feed_ids'] : [];
+            return Response::success($this->formatDeleteFeeds($feedIds));
+        }
+        if (ctype_digit($frag1)) {
+            return Response::success($this->formatDeleteFeeds([(int) $frag1]));
+        }
+
+        return Response::error('Expected feed ID or "articles/{feedId}"', 404);
     }
 }

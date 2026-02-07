@@ -10,9 +10,20 @@ use Lwt\Api\V1\ApiV1;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
-use Lwt\Modules\Admin\AdminServiceProvider;
-use Lwt\Modules\Feed\FeedServiceProvider;
+use Lwt\Shared\Infrastructure\Container\CoreServiceProvider;
+use Lwt\Shared\Infrastructure\Container\ControllerServiceProvider;
+use Lwt\Shared\Infrastructure\Container\RepositoryServiceProvider;
 use Lwt\Shared\Infrastructure\Database\Configuration;
+use Lwt\Modules\Text\TextServiceProvider;
+use Lwt\Modules\Language\LanguageServiceProvider;
+use Lwt\Modules\Feed\FeedServiceProvider;
+use Lwt\Modules\Vocabulary\VocabularyServiceProvider;
+use Lwt\Modules\Tags\TagsServiceProvider;
+use Lwt\Modules\Review\ReviewServiceProvider;
+use Lwt\Modules\Admin\AdminServiceProvider;
+use Lwt\Modules\User\UserServiceProvider;
+use Lwt\Modules\Dictionary\DictionaryServiceProvider;
+use Lwt\Modules\Book\BookServiceProvider;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -28,48 +39,44 @@ require_once __DIR__ . '/../../../../src/backend/Api/V1/ApiV1.php';
  */
 class ApiV1Test extends TestCase
 {
-    private static bool $dbConnected = false;
     private ApiV1 $api;
+    private static bool $providersRegistered = false;
 
     public static function setUpBeforeClass(): void
     {
-        $config = EnvLoader::getDatabaseConfig();
-        $testDbname = "test_" . $config['dbname'];
+        if (!self::$providersRegistered) {
+            $container = Container::getInstance();
 
-        if (!Globals::getDbConnection()) {
-            try {
-                $connection = Configuration::connect(
-                    $config['server'],
-                    $config['userid'],
-                    $config['passwd'],
-                    $testDbname,
-                    $config['socket'] ?? ''
-                );
-                Globals::setDbConnection($connection);
-                self::$dbConnected = true;
-            } catch (\Exception $e) {
-                self::$dbConnected = false;
+            $providers = [
+                new CoreServiceProvider(),
+                new ControllerServiceProvider(),
+                new RepositoryServiceProvider(),
+                new TextServiceProvider(),
+                new LanguageServiceProvider(),
+                new FeedServiceProvider(),
+                new VocabularyServiceProvider(),
+                new TagsServiceProvider(),
+                new ReviewServiceProvider(),
+                new AdminServiceProvider(),
+                new UserServiceProvider(),
+                new DictionaryServiceProvider(),
+                new BookServiceProvider(),
+            ];
+
+            foreach ($providers as $provider) {
+                $provider->register($container);
             }
-        } else {
-            self::$dbConnected = true;
+            foreach ($providers as $provider) {
+                $provider->boot($container);
+            }
+
+            self::$providersRegistered = true;
         }
     }
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Register service providers for handler dependencies
-        $container = Container::getInstance();
-
-        $feedProvider = new FeedServiceProvider();
-        $feedProvider->register($container);
-        $feedProvider->boot($container);
-
-        $adminProvider = new AdminServiceProvider();
-        $adminProvider->register($container);
-        $adminProvider->boot($container);
-
         $this->api = new ApiV1();
     }
 
@@ -113,33 +120,23 @@ class ApiV1Test extends TestCase
     }
 
     /**
-     * Test that constructor initializes all handlers.
+     * Test that constructor accepts optional Container parameter.
      */
-    public function testConstructorInitializesHandlers(): void
+    public function testConstructorAcceptsContainer(): void
     {
         $reflection = new \ReflectionClass(ApiV1::class);
 
-        // Get all private handler properties
-        // Note: importHandler, improvedTextHandler, and mediaHandler have been
-        // consolidated into their respective module handlers (termHandler, textHandler, adminHandler)
-        $expectedHandlers = [
-            'feedHandler',
-            'languageHandler',
-            'localDictionaryHandler',
-            'adminHandler',  // Combined settings + statistics + media handler
-            'reviewHandler',
-            'tagHandler',
-            'termHandler',   // Also handles import functionality
-            'textHandler',   // Also handles improved text functionality
-            'authHandler',
-        ];
+        $this->assertTrue(
+            $reflection->hasProperty('container'),
+            "ApiV1 should have a container property"
+        );
 
-        foreach ($expectedHandlers as $handlerName) {
-            $this->assertTrue(
-                $reflection->hasProperty($handlerName),
-                "ApiV1 should have property: $handlerName"
-            );
-        }
+        $constructor = $reflection->getConstructor();
+        $this->assertNotNull($constructor);
+        $params = $constructor->getParameters();
+        $this->assertCount(1, $params);
+        $this->assertEquals('container', $params[0]->getName());
+        $this->assertTrue($params[0]->allowsNull());
     }
 
     /**
@@ -148,9 +145,6 @@ class ApiV1Test extends TestCase
     public function testVersionConstantExists(): void
     {
         $reflection = new \ReflectionClass(ApiV1::class);
-        $constants = $reflection->getConstants();
-
-        // VERSION is private constant, check via ReflectionClassConstant
         $this->assertTrue($reflection->hasConstant('VERSION'));
     }
 
@@ -163,28 +157,59 @@ class ApiV1Test extends TestCase
         $this->assertTrue($reflection->hasConstant('RELEASE_DATE'));
     }
 
-    // ===== Handler private method tests =====
+    /**
+     * Test HANDLER_MAP constant exists and has expected entries.
+     */
+    public function testHandlerMapConstantExists(): void
+    {
+        $reflection = new \ReflectionClass(ApiV1::class);
+        $this->assertTrue($reflection->hasConstant('HANDLER_MAP'));
+
+        $constant = $reflection->getReflectionConstant('HANDLER_MAP');
+        $this->assertNotFalse($constant);
+        $map = $constant->getValue();
+        $this->assertIsArray($map);
+
+        // Verify key route entries exist
+        $expectedRoutes = [
+            'auth', 'languages', 'review', 'settings', 'tags',
+            'terms', 'word-families', 'texts', 'feeds', 'books',
+            'local-dictionaries', 'youtube', 'tts', 'whisper',
+        ];
+
+        foreach ($expectedRoutes as $route) {
+            $this->assertArrayHasKey(
+                $route,
+                $map,
+                "HANDLER_MAP should contain route: $route"
+            );
+        }
+    }
 
     /**
-     * Test that private handler methods exist.
+     * Test PUBLIC_ENDPOINTS constant exists.
      */
-    public function testPrivateHandlerMethodsExist(): void
+    public function testPublicEndpointsConstantExists(): void
+    {
+        $reflection = new \ReflectionClass(ApiV1::class);
+        $this->assertTrue($reflection->hasConstant('PUBLIC_ENDPOINTS'));
+    }
+
+    // ===== Key private methods exist =====
+
+    /**
+     * Test that key private methods exist.
+     */
+    public function testPrivateMethodsExist(): void
     {
         $reflection = new \ReflectionClass(ApiV1::class);
 
         $expectedMethods = [
-            'handleGet',
-            'handlePost',
-            'handleLanguagesGet',
-            'handleReviewGet',
+            'dispatch',
+            'handleInlineEndpoints',
             'handleSentencesGet',
-            'handleSettingsGet',
-            'handleTermsGet',
-            'handleTextsGet',
-            'handleTextsPost',
-            'handleTermsPost',
-            'handleTermStatusPost',
-            'handleFeedsPost',
+            'isPublicEndpoint',
+            'validateAuth',
             'parseQueryParams',
         ];
 

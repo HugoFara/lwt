@@ -21,6 +21,10 @@ use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
+use Lwt\Api\V1\Response;
 
 /**
  * API handler for user operations.
@@ -36,8 +40,10 @@ use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
  *
  * @since 3.0.0
  */
-class UserApiHandler
+class UserApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+
     /**
      * User facade instance.
      *
@@ -355,5 +361,31 @@ class UserApiHandler
     public function getUserFacade(): UserFacade
     {
         return $this->userFacade;
+    }
+
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        switch ($fragments[1] ?? '') {
+            case 'me':
+                return Response::success($this->formatMe());
+            default:
+                return Response::error('Endpoint Not Found: auth/' . ($fragments[1] ?? ''), 404);
+        }
+    }
+
+    public function routePost(array $fragments, array $params): JsonResponse
+    {
+        switch ($fragments[1] ?? '') {
+            case 'login':
+                return Response::success($this->formatLogin($params));
+            case 'register':
+                return Response::success($this->formatRegister($params));
+            case 'refresh':
+                return Response::success($this->formatRefresh());
+            case 'logout':
+                return Response::success($this->formatLogout());
+            default:
+                return Response::error('Endpoint Not Found: auth/' . ($fragments[1] ?? ''), 404);
+        }
     }
 }

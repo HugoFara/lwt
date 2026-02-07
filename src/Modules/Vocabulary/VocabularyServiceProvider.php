@@ -50,6 +50,8 @@ use Lwt\Modules\Vocabulary\Http\MultiWordApiHandler;
 use Lwt\Modules\Vocabulary\Http\WordListApiHandler;
 use Lwt\Modules\Vocabulary\Http\TermTranslationApiHandler;
 use Lwt\Modules\Vocabulary\Http\TermStatusApiHandler;
+use Lwt\Modules\Vocabulary\Http\VocabularyApiRouter;
+use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
@@ -273,6 +275,19 @@ class VocabularyServiceProvider implements ServiceProviderInterface
         $container->singleton(TermStatusApiHandler::class, function (Container $c) {
             return new TermStatusApiHandler(
                 $c->getTyped(VocabularyFacade::class)
+            );
+        });
+
+        // Register Vocabulary API Router (dispatches /terms/* requests)
+        $container->singleton(VocabularyApiRouter::class, function (Container $c) {
+            return new VocabularyApiRouter(
+                $c->getTyped(TermCrudApiHandler::class),
+                $c->getTyped(WordFamilyApiHandler::class),
+                $c->getTyped(MultiWordApiHandler::class),
+                $c->getTyped(WordListApiHandler::class),
+                $c->getTyped(TermTranslationApiHandler::class),
+                $c->getTyped(TermStatusApiHandler::class),
+                $c->getTyped(TextApiHandler::class)
             );
         });
 

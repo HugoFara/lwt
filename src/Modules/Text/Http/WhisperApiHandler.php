@@ -19,7 +19,11 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Http;
 
+use Lwt\Api\V1\Response;
 use Lwt\Modules\Text\Infrastructure\WhisperClient;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
 
 /**
  * Handler for Whisper transcription API endpoints.
@@ -28,8 +32,10 @@ use Lwt\Modules\Text\Infrastructure\WhisperClient;
  *
  * @since 3.0.0
  */
-class WhisperApiHandler
+class WhisperApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+
     /**
      * Allowed audio/video file extensions.
      */
@@ -190,5 +196,77 @@ class WhisperApiHandler
         }
 
         return ['cancelled' => $this->client->cancelJob($jobId)];
+    }
+
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        switch ($frag1) {
+            case 'available':
+                return Response::success($this->formatIsAvailable());
+            case 'languages':
+                return Response::success($this->formatGetLanguages());
+            case 'models':
+                return Response::success($this->formatGetModels());
+            case 'status':
+                if ($frag2 === '') {
+                    return Response::error('job_id is required', 400);
+                }
+                return Response::success($this->formatGetStatus($frag2));
+            case 'result':
+                if ($frag2 === '') {
+                    return Response::error('job_id is required', 400);
+                }
+                try {
+                    return Response::success($this->formatGetResult($frag2));
+                } catch (\RuntimeException $e) {
+                    return Response::error($e->getMessage(), 500);
+                }
+            default:
+                return Response::error(
+                    'Expected "available", "languages", "models", "status/{id}", or "result/{id}"',
+                    404
+                );
+        }
+    }
+
+    public function routePost(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 === 'transcribe') {
+            /** @var array{name?: string, tmp_name?: string, size?: int}|null $file */
+            $file = $_FILES['file'] ?? null;
+            if ($file === null) {
+                return Response::error('No file uploaded', 400);
+            }
+
+            $language = isset($params['language']) && $params['language'] !== '' ? (string) $params['language'] : null;
+            $model = (string) ($params['model'] ?? 'small');
+
+            try {
+                return Response::success($this->formatStartTranscription($file, $language, $model));
+            } catch (\InvalidArgumentException $e) {
+                return Response::error($e->getMessage(), 400);
+            } catch (\RuntimeException $e) {
+                return Response::error($e->getMessage(), 503);
+            }
+        }
+
+        return Response::error('Expected "transcribe"', 404);
+    }
+
+    public function routeDelete(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === 'job' && $frag2 !== '') {
+            return Response::success($this->formatCancelJob($frag2));
+        }
+
+        return Response::error('Expected "job/{id}"', 404);
     }
 }

@@ -17,11 +17,15 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Dictionary\Http;
 
+use Lwt\Api\V1\Response;
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
 use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 use Lwt\Modules\Dictionary\Infrastructure\Import\CsvImporter;
 use Lwt\Modules\Dictionary\Infrastructure\Import\JsonImporter;
 use Lwt\Modules\Dictionary\Infrastructure\Import\StarDictImporter;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
 use RuntimeException;
 
 /**
@@ -35,8 +39,10 @@ use RuntimeException;
  *
  * @since 3.0.0
  */
-class DictionaryApiHandler
+class DictionaryApiHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+
     private DictionaryFacade $facade;
     private LocalDictionaryService $dictService;
 
@@ -637,6 +643,87 @@ class DictionaryApiHandler
     public function formatClearEntries(int $dictId): array
     {
         return $this->clearEntries($dictId);
+    }
+
+    // =========================================================================
+    // Routing
+    // =========================================================================
+
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === 'lookup') {
+            $languageId = (int) ($params['language_id'] ?? 0);
+            $term = (string) ($params['term'] ?? '');
+            if ($languageId <= 0) {
+                return Response::error('language_id is required', 400);
+            }
+            if ($term === '') {
+                return Response::error('term is required', 400);
+            }
+            return Response::success($this->formatLookup($languageId, $term));
+        }
+        if ($frag1 === 'entries' && $frag2 !== '' && ctype_digit($frag2)) {
+            return Response::success($this->formatGetEntries((int) $frag2, $params));
+        }
+        if ($frag1 !== '' && ctype_digit($frag1)) {
+            return Response::success($this->formatGetDictionary((int) $frag1));
+        }
+
+        $languageId = (int) ($params['language_id'] ?? 0);
+        if ($languageId <= 0) {
+            return Response::error('language_id is required', 400);
+        }
+        return Response::success($this->formatGetDictionaries($languageId));
+    }
+
+    public function routePost(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === 'preview') {
+            return Response::success($this->formatPreview($params));
+        }
+        if ($frag1 === 'entries' && $frag2 !== '' && ctype_digit($frag2)) {
+            return Response::success($this->formatAddEntry((int) $frag2, $params));
+        }
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'import') {
+            return Response::success($this->formatImport((int) $frag1, $params));
+        }
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === 'clear') {
+            return Response::success($this->formatClearEntries((int) $frag1));
+        }
+        if ($frag1 === '') {
+            return Response::success($this->formatCreateDictionary($params));
+        }
+
+        return Response::error('Endpoint Not Found: local-dictionaries/' . $frag1, 404);
+    }
+
+    public function routePut(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 !== '' && ctype_digit($frag1) && $frag2 === '') {
+            return Response::success($this->formatUpdateDictionary((int) $frag1, $params));
+        }
+
+        return Response::error('Dictionary ID (Integer) Expected', 404);
+    }
+
+    public function routeDelete(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+
+        if ($frag1 !== '' && ctype_digit($frag1)) {
+            return Response::success($this->formatDeleteDictionary((int) $frag1));
+        }
+
+        return Response::error('Dictionary ID (Integer) Expected', 404);
     }
 
     // =========================================================================

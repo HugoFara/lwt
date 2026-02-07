@@ -17,7 +17,11 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Language\Infrastructure;
 
+use Lwt\Api\V1\Response;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
 
 /**
  * Handler for communicating with the Python NLP microservice.
@@ -25,8 +29,10 @@ use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
  * Provides text-to-speech (Piper TTS), text parsing (MeCab/Jieba),
  * and voice management functionality.
  */
-class NlpServiceHandler
+class NlpServiceHandler implements ApiRoutableInterface
 {
+    use ApiRoutableTrait;
+
     private string $baseUrl;
     private int $timeout;
 
@@ -355,5 +361,78 @@ class NlpServiceHandler
         /** @var array<array-key, mixed>|null $result */
         $result = json_decode($response, true);
         return is_array($result) ? $result : [];
+    }
+
+    // =========================================================================
+    // API Routing Methods
+    // =========================================================================
+
+    public function routeGet(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        switch ($frag1) {
+            case 'voices':
+                if ($frag2 === 'installed') {
+                    return Response::success(['voices' => $this->getInstalledVoices()]);
+                }
+                return Response::success(['voices' => $this->getVoices()]);
+            default:
+                return Response::error('Expected "voices"', 404);
+        }
+    }
+
+    public function routePost(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        switch ($frag1) {
+            case 'speak':
+                $text = (string) ($params['text'] ?? '');
+                $voiceId = (string) ($params['voice_id'] ?? '');
+                if ($text === '' || $voiceId === '') {
+                    return Response::error('text and voice_id are required', 400);
+                }
+                $audioData = $this->speak($text, $voiceId);
+                if ($audioData === null) {
+                    return Response::error('TTS service unavailable or synthesis failed', 503);
+                }
+                return Response::success(['audio' => $audioData]);
+
+            case 'voices':
+                if ($frag2 === 'download') {
+                    $voiceId = (string) ($params['voice_id'] ?? '');
+                    if ($voiceId === '') {
+                        return Response::error('voice_id is required', 400);
+                    }
+                    $success = $this->downloadVoice($voiceId);
+                    if (!$success) {
+                        return Response::error('Voice download failed', 500);
+                    }
+                    return Response::success(['success' => true, 'voice_id' => $voiceId]);
+                }
+                return Response::error('Expected "download"', 404);
+
+            default:
+                return Response::error('Expected "speak" or "voices/download"', 404);
+        }
+    }
+
+    public function routeDelete(array $fragments, array $params): JsonResponse
+    {
+        $frag1 = $this->frag($fragments, 1);
+        $frag2 = $this->frag($fragments, 2);
+
+        if ($frag1 === 'voices' && $frag2 !== '') {
+            $success = $this->deleteVoice($frag2);
+            if (!$success) {
+                return Response::error('Voice not found or deletion failed', 404);
+            }
+            return Response::success(['success' => true]);
+        }
+
+        return Response::error('Expected "voices/{id}"', 404);
     }
 }
