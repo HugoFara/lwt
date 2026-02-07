@@ -8,6 +8,8 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
+
 // All dictionary functions now open in popup windows.
 
 /**
@@ -329,6 +331,6 @@ function initDictionaryEventDelegation(): void {
 }
 
 // Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
   initDictionaryEventDelegation();
 });

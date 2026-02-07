@@ -7,6 +7,8 @@
  * @since 3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
+
 /**
  * Hide translations (text display).
  * Sets the translation ruby text to match background color.
@@ -110,7 +112,7 @@ export function initAnnotationToggles(): void {
 }
 
 // Auto-initialize on DOM ready if toggle elements are present
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
   // Only initialize if we're on a page with annotation toggles
   if (
     document.getElementById('hidet') ||

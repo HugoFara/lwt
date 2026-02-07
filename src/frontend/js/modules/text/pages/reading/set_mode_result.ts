@@ -8,6 +8,8 @@
  * @since   3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
+
 /**
  * Get the container element from a context parameter.
  *
@@ -119,4 +121,4 @@ export function initSetModeResult(): void {
 }
 
 // Auto-initialize on document ready
-document.addEventListener('DOMContentLoaded', initSetModeResult);
+onDomReady(initSetModeResult);

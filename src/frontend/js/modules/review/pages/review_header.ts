@@ -6,6 +6,8 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
+
 /**
  * Initialize the utterance (read aloud) setting from localStorage.
  *
@@ -72,7 +74,7 @@ function initReviewHeaderEvents(): void {
 }
 
 // Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
   initReviewHeaderEvents();
   // Initialize utterance setting if the checkbox exists
   if (document.getElementById('utterance-allowed')) {

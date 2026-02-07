@@ -6,6 +6,7 @@
  * @since   1.6.16-fork
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { saveSetting } from '@shared/utils/ajax_utilities';
 import { apiGet } from '@shared/api/client';
 import { updateAllTextStatusCharts } from '@modules/text/pages/text_status_chart';
@@ -279,4 +280,4 @@ function autoInitTextList(): void {
 }
 
 // Auto-initialize on DOM ready
-document.addEventListener('DOMContentLoaded', autoInitTextList);
+onDomReady(autoInitTextList);

@@ -11,6 +11,7 @@
  * @since 3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { getLangFromDict } from '@modules/vocabulary/services/dictionary';
 import { prepareTextInteractions } from './text_events';
 import { goToLastPosition, saveReadingPosition, saveAudioPosition, readRawTextAloud } from '@shared/utils/user_interactions';
@@ -341,7 +342,7 @@ export function autoInit(): void {
 }
 
 // Auto-initialize when DOM is ready (if Vite is already loaded)
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
   if (window.LWT_VITE_LOADED) {
     autoInit();
   }

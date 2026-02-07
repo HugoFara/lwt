@@ -14,6 +14,7 @@
  * @since   3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import Alpine from 'alpinejs';
 import { setLang, resetAll } from '@modules/language/stores/language_settings';
 import { selectToggle, multiActionGo } from '@shared/forms/bulk_actions';
@@ -304,4 +305,4 @@ export function initTextList(): void {
 }
 
 // Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', initTextList);
+onDomReady(initTextList);

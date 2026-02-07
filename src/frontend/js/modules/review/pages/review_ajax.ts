@@ -6,6 +6,7 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { closePopup } from '@modules/vocabulary/components/word_popup';
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { handleReviewWordClick, handleReviewKeydown } from './review_mode';
@@ -419,8 +420,4 @@ export function autoInitReviewViews(): void {
 }
 
 // Auto-initialize on DOM ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', autoInitReviewViews);
-} else {
-  autoInitReviewViews();
-}
+onDomReady(autoInitReviewViews);

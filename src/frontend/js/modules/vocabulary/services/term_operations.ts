@@ -6,6 +6,7 @@
  * @since   1.6.16-fork
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { escapeHtml } from '@shared/utils/html_utils';
 import { isInt } from '@shared/forms/form_validation';
 import { scrollTo } from '@shared/utils/hover_intent';
@@ -641,12 +642,7 @@ export function editImprTextInOpener(pagepos: number, word: string, termId: numb
 }
 
 // Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function () {
-    initSentenceEventDelegation();
-    initImprovedTextEventDelegation();
-  });
-} else {
+onDomReady(() => {
   initSentenceEventDelegation();
   initImprovedTextEventDelegation();
-}
+});

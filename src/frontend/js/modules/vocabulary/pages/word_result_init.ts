@@ -10,6 +10,7 @@
  * @since 3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import {
   updateNewWordInDOM,
   updateExistingWordInDOM,
@@ -522,8 +523,4 @@ export function autoInitWordResults(): void {
 }
 
 // Auto-initialize on DOM ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', autoInitWordResults);
-} else {
-  autoInitWordResults();
-}
+onDomReady(autoInitWordResults);

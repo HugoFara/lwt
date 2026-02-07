@@ -10,6 +10,7 @@
  * @since   3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import type { Chart as ChartType } from 'chart.js';
 
 // Chart.js module reference (loaded dynamically)
@@ -295,4 +296,4 @@ window.updateAllTextStatusCharts = updateAllTextStatusCharts;
 window.updateTextStatusChart = updateTextStatusChart;
 
 // Auto-initialize on DOM ready
-document.addEventListener('DOMContentLoaded', initTextStatusCharts);
+onDomReady(initTextStatusCharts);

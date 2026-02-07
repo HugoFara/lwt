@@ -6,6 +6,7 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { saveSetting } from '@shared/utils/ajax_utilities';
 
 /**
@@ -179,7 +180,7 @@ export function initTableReview(): void {
 }
 
 // Auto-initialize when DOM is ready if table review checkboxes exist
-document.addEventListener('DOMContentLoaded', function () {
+onDomReady(() => {
   if (document.getElementById('cbEdit')) {
     initTableReview();
   }

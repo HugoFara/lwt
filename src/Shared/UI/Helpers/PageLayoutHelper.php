@@ -439,6 +439,75 @@ HTML;
     // =========================================================================
 
     /**
+     * Determine which frontend feature modules the current page needs.
+     *
+     * Maps the request URI to the set of dynamically-loaded JS modules
+     * that should be imported. Pages that only use statically-bundled
+     * modules (home, auth, tags, dictionary) return an empty array.
+     *
+     * @return string[] Module names (e.g. ['vocabulary', 'text'])
+     */
+    private static function getRequiredModules(): array
+    {
+        $uri = $_SERVER['REQUEST_URI'] ?? '/';
+
+        // Strip query string and base path
+        $path = parse_url($uri, PHP_URL_PATH) ?: '/';
+        $basePath = UrlUtilities::getBasePath();
+        if ($basePath !== '' && str_starts_with($path, $basePath)) {
+            $path = substr($path, strlen($basePath));
+        }
+        $path = '/' . ltrim($path, '/');
+
+        // Text reading page needs vocabulary + text + review + language
+        if (preg_match('#^/text/\d+/read#', $path)) {
+            return ['vocabulary', 'text', 'review', 'language'];
+        }
+
+        // Review pages
+        if (str_starts_with($path, '/review')) {
+            return ['review', 'vocabulary', 'text', 'language'];
+        }
+
+        // Text management pages
+        if (
+            str_starts_with($path, '/text')
+            || str_starts_with($path, '/archived')
+            || str_starts_with($path, '/texts')
+        ) {
+            return ['text', 'vocabulary'];
+        }
+
+        // Vocabulary/word pages
+        if (str_starts_with($path, '/word') || str_starts_with($path, '/terms')) {
+            return ['vocabulary', 'language'];
+        }
+
+        // Feed pages
+        if (str_starts_with($path, '/feed')) {
+            return ['feed'];
+        }
+
+        // Language pages
+        if (str_starts_with($path, '/language')) {
+            return ['language'];
+        }
+
+        // Admin pages
+        if (str_starts_with($path, '/admin')) {
+            return ['admin'];
+        }
+
+        // Home page — everything is in the main bundle
+        if ($path === '/' || $path === '') {
+            return [];
+        }
+
+        // Unknown routes — load all modules as safe fallback
+        return ['vocabulary', 'text', 'review', 'feed', 'language', 'admin'];
+    }
+
+    /**
      * Render a minimal page header (kernel, no database).
      *
      * Outputs directly to browser. Sets cache control headers,
@@ -462,7 +531,7 @@ HTML;
         echo '<!--' . "\n";
         echo file_get_contents("UNLICENSE.md");
         echo '-->';
-        echo '<meta name="viewport" content="width=900" />';
+        echo '<meta name="viewport" content="width=device-width, initial-scale=1" />';
         echo '<link rel="shortcut icon" href="' . $favicon . '" type="image/x-icon"/>';
         echo '<link rel="apple-touch-icon" href="' . $icon180 . '" />';
         echo '<link rel="manifest" href="' . UrlUtilities::url('/assets/manifest.json') . '" />';
@@ -522,6 +591,13 @@ HTML;
         echo '<link rel="manifest" href="' . UrlUtilities::url('/assets/manifest.json') . '" />';
         echo '<meta name="theme-color" content="#3273dc" />';
         echo '<meta name="apple-mobile-web-app-capable" content="yes" />';
+
+        $modules = self::getRequiredModules();
+        if (!empty($modules)) {
+            echo '<meta name="lwt-modules" content="'
+                . htmlspecialchars(implode(',', $modules), ENT_QUOTES, 'UTF-8')
+                . '">';
+        }
 
         if (ViteHelper::shouldUse()) {
             echo '<!-- Critical CSS for fast first paint -->';
@@ -597,6 +673,7 @@ HTML;
         echo '<html lang="en"' . self::buildDataThemeAttr() . '>';
         echo '<head>';
         echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
+        echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
         echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';
         echo '<link rel="shortcut icon" href="' . UrlUtilities::url('/favicon.ico') . '" type="image/x-icon"/>';
         echo '<!--' . "\n";

@@ -8,6 +8,8 @@
  * @since   3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
+
 /**
  * Server proxy response structure.
  */
@@ -118,4 +120,4 @@ export function initYouTubeImport(): void {
 }
 
 // Auto-initialize on document ready
-document.addEventListener('DOMContentLoaded', initYouTubeImport);
+onDomReady(initYouTubeImport);

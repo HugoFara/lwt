@@ -7,6 +7,7 @@
  * @since   3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { TermsApi } from '@modules/vocabulary/api/terms_api';
 import { updateWordStatusInDOM } from '../services/word_dom_updates';
 import { cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
@@ -104,9 +105,5 @@ function autoInitWordStatusChange(): void {
   }
 }
 
-// Auto-initialize on DOMContentLoaded
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', autoInitWordStatusChange);
-} else {
-  autoInitWordStatusChange();
-}
+// Auto-initialize on DOM ready
+onDomReady(autoInitWordStatusChange);

@@ -6,6 +6,7 @@
  * @since   2.10.0-fork Extracted from legacy/pgm.ts
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { apiPut } from '@shared/api/client';
 
 /**
@@ -152,7 +153,7 @@ function initSetLangEventDelegation(): void {
 }
 
 // Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function () {
+onDomReady(() => {
   initSetLangEventDelegation();
 });
 

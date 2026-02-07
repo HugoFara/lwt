@@ -7,6 +7,8 @@
  * @since 3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
+
 /**
  * Handle click on an annotation (translation) to toggle visibility.
  * Clicking an annotation hides it (by matching background color),
@@ -66,7 +68,7 @@ function autoInit(): void {
 }
 
 // Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', autoInit);
+onDomReady(autoInit);
 
 // Export to window for potential external use
 declare global {

@@ -7,6 +7,7 @@
  * @since   3.1.0 Migrated to Alpine.js component
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import Alpine from 'alpinejs';
 import { lwtFormCheck } from '@shared/forms/unloadformcheck';
 
@@ -155,7 +156,7 @@ export function initHistoryBackButtons(): void {
 }
 
 // Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
   initSettingsForm();
   initConfirmSubmitForms();
   initNavigateButtons();

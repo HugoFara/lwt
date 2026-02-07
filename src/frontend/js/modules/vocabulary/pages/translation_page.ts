@@ -9,6 +9,7 @@
  * @since 3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { getGlosbeTranslation } from '../services/translation_api';
 
@@ -136,8 +137,4 @@ export function autoInitTranslationPages(): void {
 }
 
 // Auto-initialize on DOM ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', autoInitTranslationPages);
-} else {
-  autoInitTranslationPages();
-}
+onDomReady(autoInitTranslationPages);

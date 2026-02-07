@@ -10,6 +10,7 @@
  * @since   3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { isAudioVideoFile, handleFileSelection as handleWhisperFileSelection, initWhisperImport } from './whisper_import';
 
 /**
@@ -304,4 +305,4 @@ export function initFileImport(): void {
 }
 
 // Auto-initialize on document ready
-document.addEventListener('DOMContentLoaded', initFileImport);
+onDomReady(initFileImport);

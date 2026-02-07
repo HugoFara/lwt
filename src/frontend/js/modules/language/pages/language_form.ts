@@ -9,6 +9,7 @@
  * @since 3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { getLibreTranslateTranslation } from '@modules/vocabulary/services/translation_api';
 import { deepFindValue, readTextWithExternal } from '@shared/utils/user_interactions';
 import { lwtFormCheck } from '@shared/forms/unloadformcheck';
@@ -733,7 +734,7 @@ export function initLanguageForm(): void {
 }
 
 // Auto-initialize on DOM ready if config element is present
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
   if (document.getElementById('language-form-config')) {
     initLanguageForm();
   }

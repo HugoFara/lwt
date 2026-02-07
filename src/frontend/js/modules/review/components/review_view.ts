@@ -8,6 +8,7 @@
  * @since   3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import Alpine from 'alpinejs';
 import type { ReviewStoreState, ReviewConfig, LangSettings } from '../stores/review_store';
 import { getReviewStore, initReviewStore } from '../stores/review_store';
@@ -836,8 +837,8 @@ function registerTableReviewComponent(): void {
 }
 
 // Auto-initialize after Alpine has initialized the DOM
-// We use DOMContentLoaded + check because initReviewApp() needs to inject HTML and then call Alpine.initTree()
-document.addEventListener('DOMContentLoaded', () => {
+// We use onDomReady + check because initReviewApp() needs to inject HTML and then call Alpine.initTree()
+onDomReady(() => {
   // Only init if Alpine is available and we're on the review page
   const container = document.getElementById('review-app');
   const configEl = document.getElementById('review-config');

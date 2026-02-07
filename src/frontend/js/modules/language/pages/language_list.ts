@@ -5,6 +5,7 @@
  * @since   3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { SettingsApi } from '@modules/admin/api/settings_api';
 import { initIcons } from '@shared/icons/lucide_icons';
 
@@ -165,4 +166,4 @@ function initLanguageList(): void {
 }
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', initLanguageList);
+onDomReady(initLanguageList);

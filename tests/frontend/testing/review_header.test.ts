@@ -287,7 +287,9 @@ describe('review_header.ts', () => {
         <input type="checkbox" id="utterance-allowed" />
       `;
 
-      document.dispatchEvent(new Event('DOMContentLoaded'));
+      // onDomReady fires immediately when readyState is not 'loading',
+      // so we call setUtteranceSetting directly to simulate the init
+      setUtteranceSetting();
 
       const checkbox = document.getElementById('utterance-allowed') as HTMLInputElement;
       expect(checkbox.checked).toBe(true);

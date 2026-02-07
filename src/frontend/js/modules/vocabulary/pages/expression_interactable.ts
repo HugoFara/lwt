@@ -8,6 +8,7 @@
  * @since 3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { createWordTooltip } from '@modules/vocabulary/services/word_status';
 import { newExpressionInteractable } from '@shared/utils/user_interactions';
 import { getTextId } from '@modules/text/stores/text_config';
@@ -142,7 +143,7 @@ export function autoInitExpressionInteractables(): void {
 }
 
 // Auto-initialize on DOM ready
-document.addEventListener('DOMContentLoaded', autoInitExpressionInteractables);
+onDomReady(autoInitExpressionInteractables);
 
 // Also expose for manual initialization (useful when content is loaded dynamically)
 if (typeof window !== 'undefined') {

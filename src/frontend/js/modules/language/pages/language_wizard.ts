@@ -13,6 +13,7 @@
  * @since 3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { saveSetting } from '@shared/utils/ajax_utilities';
 import { lwtFormCheck } from '@shared/forms/unloadformcheck';
 import { languageForm } from './language_form';
@@ -262,7 +263,7 @@ export function initLanguageWizard(): void {
 }
 
 // Auto-initialize on DOM ready if config element is present
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
   if (document.getElementById('language-wizard-config')) {
     initLanguageWizard();
   }

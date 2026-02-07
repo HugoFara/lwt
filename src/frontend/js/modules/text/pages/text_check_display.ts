@@ -8,6 +8,8 @@
  * @since   3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
+
 /**
  * Word entry with text, count, and optional translation.
  * [word, count, translation]
@@ -164,7 +166,7 @@ export function initTextCheckWords(): void {
 }
 
 // Auto-initialize on document ready
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
   // Initialize words data first (from checkValid)
   initTextCheckWords();
 

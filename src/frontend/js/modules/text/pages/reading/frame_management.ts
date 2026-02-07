@@ -13,6 +13,7 @@
  * @since   1.6.16-fork
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import { closeParentPopup } from '@modules/vocabulary/components/word_popup';
 
 /**
@@ -138,8 +139,4 @@ export function initHideRightFramesHandler(): void {
 }
 
 // Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initHideRightFramesHandler);
-} else {
-  initHideRightFramesHandler();
-}
+onDomReady(initHideRightFramesHandler);

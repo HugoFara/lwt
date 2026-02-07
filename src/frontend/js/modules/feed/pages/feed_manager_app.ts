@@ -8,6 +8,7 @@
  * @since   3.0.0
  */
 
+import { onDomReady } from '@shared/utils/dom_ready';
 import Alpine from 'alpinejs';
 import { initFeedManagerStore, getFeedManagerStore } from '../stores/feed_manager_store';
 import type { FeedManagerStoreState } from '../stores/feed_manager_store';
@@ -374,7 +375,7 @@ export function shouldInitFeedManager(): boolean {
 }
 
 // Auto-initialize when the container exists
-document.addEventListener('DOMContentLoaded', () => {
+onDomReady(() => {
   if (shouldInitFeedManager()) {
     initFeedManagerApp();
 
