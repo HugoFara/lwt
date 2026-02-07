@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoad
 use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Domain\ValueObjects\UserId;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;

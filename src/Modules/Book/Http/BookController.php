@@ -23,7 +23,7 @@ use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 
 /**
  * Controller for book management operations.

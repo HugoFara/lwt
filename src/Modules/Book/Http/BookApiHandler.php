@@ -18,7 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Book\Http;
 
 use Lwt\Modules\Book\Application\BookFacade;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 
 /**
  * API handler for book operations.

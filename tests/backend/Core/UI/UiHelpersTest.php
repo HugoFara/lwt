@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\UI;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Globals.php';
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Utilities/StringUtils.php';
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/ApplicationInfo.php';
 require_once __DIR__ . '/../../../../src/Shared/UI/Helpers/PageLayoutHelper.php';
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use PHPUnit\Framework\TestCase;
 

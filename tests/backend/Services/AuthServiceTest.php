@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Services;
 
-require_once __DIR__ . '/../../../src/backend/Core/Globals.php';
+require_once __DIR__ . '/../../../src/Shared/Infrastructure/Globals.php';
 require_once __DIR__ . '/../../../src/Shared/Domain/ValueObjects/UserId.php';
 require_once __DIR__ . '/../../../src/Modules/User/Domain/User.php';
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Exception/AuthException.php';
@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../../src/Modules/User/Application/Services/AuthServ
 
 use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\Services\AuthService;
 use Lwt\Modules\User\Application\Services\PasswordService;
 use PHPUnit\Framework\TestCase;

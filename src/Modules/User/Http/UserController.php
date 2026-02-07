@@ -19,7 +19,7 @@ namespace Lwt\Modules\User\Http;
 
 use Lwt\Controllers\BaseController;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Modules\User\Infrastructure\AuthFormDataManager;
 use Lwt\Shared\Infrastructure\Http\FlashMessageService;

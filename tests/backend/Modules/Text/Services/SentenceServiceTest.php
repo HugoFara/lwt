@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Modules\Text\Services;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Language\Application\Services\TextParsingService;
 use PHPUnit\Framework\TestCase;

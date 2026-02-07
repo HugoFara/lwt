@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Lwt\Router\Middleware;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 
 /**
  * Middleware that validates CSRF tokens.

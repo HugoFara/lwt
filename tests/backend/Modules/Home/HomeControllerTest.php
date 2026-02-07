@@ -10,7 +10,7 @@ use Lwt\Modules\Home\Http\HomeController;
 use Lwt\Modules\Home\Application\HomeFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use PHPUnit\Framework\TestCase;
 

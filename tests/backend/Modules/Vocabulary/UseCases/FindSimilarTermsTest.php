@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Modules\Vocabulary\UseCases;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\Services\SimilarityCalculator;
 use PHPUnit\Framework\MockObject\MockObject;

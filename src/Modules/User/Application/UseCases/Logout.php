@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\User\Application\UseCases;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 
 /**
  * Use case for user logout.

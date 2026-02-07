@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoad
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Http/UrlUtilities.php';
 
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Tags\Application\TagsFacade;

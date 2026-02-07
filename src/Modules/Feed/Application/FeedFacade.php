@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Feed\Application;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Feed\Application\Services\ArticleExtractor;
 use Lwt\Modules\Feed\Application\Services\RssParser;
 use Lwt\Modules\Feed\Application\UseCases\CreateFeed;

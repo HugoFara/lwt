@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Admin;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Helpers\IconHelper;
 

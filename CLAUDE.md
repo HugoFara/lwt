@@ -147,7 +147,8 @@ src/Shared/                          # Cross-cutting infrastructure
 ├── Infrastructure/
 │   ├── Database/                    # Connection, DB, QueryBuilder, PreparedStatement, etc.
 │   ├── Http/                        # InputValidator, SecurityHeaders, UrlUtilities
-│   └── Container/                   # DI Container, ServiceProviders
+│   ├── Container/                   # DI Container, ServiceProviders
+│   └── Globals.php                  # Type-safe global state access
 ├── Domain/
 │   └── ValueObjects/                # UserId (cross-module identity)
 └── UI/
@@ -183,11 +184,6 @@ src/backend/
 │   ├── Handlers/                    # Endpoint handlers by resource
 │   ├── ApiV1.php                    # Main API router
 │   └── Endpoints.php                # Endpoint registry
-├── Core/                            # Core utilities
-│   ├── Bootstrap/                   # App initialization (EnvLoader, db_bootstrap)
-│   ├── Entity/                      # Domain entities (Language, Term, Text)
-│   ├── Export/                      # Export functionality (Anki, TSV)
-│   └── Globals.php                  # Type-safe global state access
 └── View/Helper/                     # StatusHelper (business logic dependency)
 
 src/frontend/
@@ -215,10 +211,10 @@ Key tables (InnoDB engine):
 
 ### Global State Access
 
-Use `Lwt\Core\Globals` class instead of PHP globals:
+Use `Lwt\Shared\Infrastructure\Globals` class instead of PHP globals:
 
 ```php
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 
 // Database operations
 $db = Globals::getDbConnection();

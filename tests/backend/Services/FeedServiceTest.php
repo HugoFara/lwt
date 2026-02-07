@@ -7,7 +7,7 @@ namespace Lwt\Tests\Services;
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Feed\Application\FeedFacade;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Modules\Feed\FeedServiceProvider;

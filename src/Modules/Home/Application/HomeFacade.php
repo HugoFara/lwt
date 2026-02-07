@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Home\Application;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Modules\Home\Application\UseCases\GetDashboardData;
 use Lwt\Modules\Home\Application\UseCases\GetTextStatistics;

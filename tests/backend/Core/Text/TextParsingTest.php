@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoad
 require_once __DIR__ . '/../../../../src/Modules/Language/Application/Services/TextParsingService.php';
 
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\TextParsing;

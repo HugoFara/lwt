@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Admin\Application\UseCases\Backup;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Admin\Domain\BackupRepositoryInterface;
 
 /**

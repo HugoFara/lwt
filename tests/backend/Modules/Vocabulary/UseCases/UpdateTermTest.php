@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Modules\Vocabulary\UseCases;
 
 use DateTimeImmutable;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Vocabulary\Application\UseCases\UpdateTerm;
 use Lwt\Modules\Vocabulary\Domain\Term;
 use Lwt\Modules\Vocabulary\Domain\TermRepositoryInterface;

@@ -26,11 +26,11 @@ declare(strict_types=1);
 namespace Lwt\Shared\Infrastructure\Bootstrap;
 
 // Core utilities
-require_once __DIR__ . '/../../../backend/Core/Globals.php';
+require_once __DIR__ . '/../Globals.php';
 require_once __DIR__ . '/../Utilities/StringUtils.php';
 require_once __DIR__ . '/../Utilities/ErrorHandler.php';
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 
 // Initialize globals (this was previously done in settings.php)
 Globals::initialize();

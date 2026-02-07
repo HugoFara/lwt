@@ -7,7 +7,7 @@ namespace Lwt\Tests\Modules\Vocabulary\Services;
 require_once __DIR__ . '/../../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
 use Lwt\Shared\Infrastructure\Database\Configuration;

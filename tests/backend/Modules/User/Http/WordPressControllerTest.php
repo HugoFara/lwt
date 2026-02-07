@@ -7,7 +7,7 @@ namespace Lwt\Tests\Modules\User\Http;
 require_once __DIR__ . '/../../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\Services\WordPressAuthService;
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Modules\User\Http\WordPressController;

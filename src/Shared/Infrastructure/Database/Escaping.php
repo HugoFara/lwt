@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Database;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 
 /**
  * SQL escaping and text preparation utilities.

@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace Lwt\Tests\Core;
 
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-require_once __DIR__ . '/../../../src/backend/Core/Globals.php';
+require_once __DIR__ . '/../../../src/Shared/Infrastructure/Globals.php';
 
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-\Lwt\Core\Globals::setDatabaseName("test_" . $config['dbname']);
+\Lwt\Shared\Infrastructure\Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Exception/AuthException.php';
 
 use Lwt\Shared\Infrastructure\Exception\AuthException;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use PHPUnit\Framework\TestCase;
 

@@ -19,7 +19,7 @@ namespace Lwt\Modules\Dictionary\Application\Services;
 
 use DateTimeImmutable;
 use Lwt\Modules\Dictionary\Domain\LocalDictionary;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 

@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Book\Infrastructure;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Book\Domain\Book;
 use Lwt\Modules\Book\Domain\BookRepositoryInterface;

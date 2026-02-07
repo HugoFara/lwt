@@ -19,7 +19,7 @@ declare(strict_types=1);
 namespace Lwt\Shared\Infrastructure\Database;
 
 use Lwt\Shared\Infrastructure\Exception\AuthException;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 
 /**
  * Fluent query builder for constructing SQL queries.

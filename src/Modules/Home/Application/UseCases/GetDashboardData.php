@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Home\Application\UseCases;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 

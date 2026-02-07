@@ -20,7 +20,7 @@ namespace Lwt\Tests;
 
 use Lwt\Shared\Infrastructure\Bootstrap\DatabaseBootstrap;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 
 // Load Composer autoloader
@@ -28,7 +28,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 // Load EnvLoader and Globals
 require_once __DIR__ . '/../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-require_once __DIR__ . '/../src/backend/Core/Globals.php';
+require_once __DIR__ . '/../src/Shared/Infrastructure/Globals.php';
 
 // Initialize Globals
 Globals::initialize();
@@ -55,8 +55,8 @@ try {
 // This prevents zombie connections from holding locks after test interruptions
 register_shutdown_function(function () {
     // Close the global database connection if it exists
-    if (class_exists('Lwt\Core\Globals', false)) {
-        $conn = \Lwt\Core\Globals::getDbConnection();
+    if (class_exists('Lwt\Shared\Infrastructure\Globals', false)) {
+        $conn = \Lwt\Shared\Infrastructure\Globals::getDbConnection();
         if ($conn instanceof \mysqli) {
             @mysqli_close($conn);
         }

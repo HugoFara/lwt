@@ -33,7 +33,7 @@ use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\Infrastructure\Http\RedirectResponse;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Container\Container;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 
 /**

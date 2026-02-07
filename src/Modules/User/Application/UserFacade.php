@@ -19,7 +19,7 @@ namespace Lwt\Modules\User\Application;
 
 use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\Services\PasswordHasher;
 use Lwt\Modules\User\Application\Services\TokenHasher;
 use Lwt\Modules\User\Application\Services\EmailService;

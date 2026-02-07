@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Controllers;
 
 use Lwt\Controllers\ApiController;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
 

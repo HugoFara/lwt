@@ -19,7 +19,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\User\Application\Services;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\UserFacade;
 
 /**

@@ -10,7 +10,7 @@ use Lwt\Api\V1\ApiV1;
 use Lwt\Api\V1\Response;
 use Lwt\Api\V1\Endpoints;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Modules\Admin\AdminServiceProvider;
 use Lwt\Modules\Feed\FeedServiceProvider;

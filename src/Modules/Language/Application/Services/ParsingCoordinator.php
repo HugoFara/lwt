@@ -21,7 +21,7 @@ use Lwt\Modules\Language\Domain\Language;
 use Lwt\Modules\Language\Domain\Parser\ParserConfig;
 use Lwt\Modules\Language\Domain\Parser\ParserResult;
 use Lwt\Modules\Language\Infrastructure\Parser\ParserRegistry;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;

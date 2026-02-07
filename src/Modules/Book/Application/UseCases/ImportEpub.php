@@ -27,7 +27,7 @@ use Lwt\Shared\Infrastructure\Database\TextParsing;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Text\Domain\Text;
 use Lwt\Modules\Text\Domain\TextRepositoryInterface;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use InvalidArgumentException;
 use RuntimeException;
 

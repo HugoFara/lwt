@@ -22,7 +22,7 @@ namespace Lwt\Modules\User\Application\Services;
 use League\OAuth2\Client\Provider\Google;
 use League\OAuth2\Client\Provider\GoogleUser;
 use Lwt\Modules\User\Domain\User;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\UserFacade;
 
 /**

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Http;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Globals.php';
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Http/UrlUtilities.php';
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use PHPUnit\Framework\TestCase;
 

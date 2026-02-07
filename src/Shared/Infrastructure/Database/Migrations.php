@@ -19,7 +19,7 @@ declare(strict_types=1);
 namespace Lwt\Shared\Infrastructure\Database;
 
 use Lwt\Shared\Infrastructure\ApplicationInfo;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Utilities\ErrorHandler;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 

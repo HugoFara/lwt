@@ -7,7 +7,7 @@ namespace Lwt\Tests\Modules\Admin;
 require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Admin\Application\DTO\DatabaseConnectionDTO;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Word;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
+require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Globals.php';
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use PHPUnit\Framework\TestCase;
 

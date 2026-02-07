@@ -20,7 +20,7 @@ namespace Lwt\Modules\User\Application\Services;
 use DateTimeImmutable;
 use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 
 /**

@@ -21,7 +21,7 @@ namespace Lwt\Modules\User\Application\Services;
 
 use TheNetworg\OAuth2\Client\Provider\Azure;
 use Lwt\Modules\User\Domain\User;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\UserFacade;
 
 /**

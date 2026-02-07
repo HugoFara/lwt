@@ -42,7 +42,7 @@ use Lwt\Modules\Book\Application\BookFacade;
 use Lwt\Modules\Text\Http\YouTubeApiHandler;
 use Lwt\Modules\Language\Infrastructure\NlpServiceHandler;
 use Lwt\Modules\Text\Http\WhisperApiHandler;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
 

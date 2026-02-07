@@ -11,7 +11,7 @@ use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use Lwt\Modules\Text\Domain\ValueObject\TextId;
 use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;

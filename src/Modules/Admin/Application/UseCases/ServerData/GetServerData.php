@@ -18,7 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Admin\Application\UseCases\ServerData;
 
 use Lwt\Shared\Infrastructure\ApplicationInfo;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 
 /**

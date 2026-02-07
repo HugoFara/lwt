@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\Infrastructure\Database;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Utilities\ErrorHandler;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Admin\Domain\SettingDefinitions;

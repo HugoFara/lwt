@@ -20,7 +20,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Core;
+namespace Lwt\Shared\Infrastructure;
 
 use Lwt\Shared\Infrastructure\Exception\AuthException;
 
@@ -43,7 +43,7 @@ use Lwt\Shared\Infrastructure\Exception\AuthException;
  * ```
  *
  * @category Lwt
- * @package  Lwt\Core
+ * @package  Lwt\Shared\Infrastructure
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-LWT-Globals.html

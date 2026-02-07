@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.
 use Lwt\Modules\Language\Domain\Language;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;

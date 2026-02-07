@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.
 
 use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Utilities\ErrorHandler;
 use Lwt\Shared\Infrastructure\Database\Configuration;

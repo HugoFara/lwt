@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Router\Middleware;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Shared\Infrastructure\Container\Container;
 

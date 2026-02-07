@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Admin\Application;
 
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Admin\Application\DTO\DatabaseConnectionDTO;
 use Lwt\Modules\Admin\Application\Services\SessionCleaner;
 use Lwt\Modules\Admin\Application\UseCases\Backup\DownloadBackup;

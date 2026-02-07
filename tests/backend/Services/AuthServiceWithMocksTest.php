@@ -7,7 +7,7 @@ namespace Lwt\Tests\Services;
 use DateTimeImmutable;
 use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
-use Lwt\Core\Globals;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\Services\AuthService;
 use Lwt\Modules\User\Application\Services\PasswordService;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
