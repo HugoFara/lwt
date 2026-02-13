@@ -10,7 +10,7 @@ on:
       - 'CHANGELOG.md'
       - 'UNLICENSE.md'
       - 'src/**'
-      - 'jsdoc.json'
+      - 'typedoc.json'
       - 'phpdoc.dist.xml'
   workflow_dispatch:
 
@@ -52,8 +52,8 @@ jobs:
       - name: Build VitePress docs
         run: npm run docs:build
 
-      - name: Build JSDoc API docs
-        run: ./node_modules/.bin/jsdoc -c jsdoc.json
+      - name: Build TypeDoc API docs
+        run: ./node_modules/.bin/typedoc
 
       - name: Build phpDoc API docs
         run: ./vendor/bin/phpdoc

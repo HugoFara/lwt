@@ -6,7 +6,7 @@ hero:
   text: Language learning by reading
   tagline: A self-hosted web application for learning languages through reading texts
   image:
-    src: /assets/images/lwt_icon_big.png
+    src: /assets/images/lwt_icon_512.png
     alt: LWT Logo
   actions:
     - theme: brand

@@ -70,7 +70,7 @@
         "phpcbf": "vendor/bin/phpcbf",
         "doc": [
             "npm run docs:build",
-            "./node_modules/.bin/jsdoc -c jsdoc.json",
+            "./node_modules/.bin/typedoc",
             "./vendor/bin/phpdoc"
         ],
         "build": "npm run build:all",
@@ -92,7 +92,7 @@
         "psalm": "Run Psalm static analysis",
         "phpcs": "Check PHP code style (PSR-12)",
         "phpcbf": "Auto-fix PHP code style issues",
-        "doc": "Regenerate all documentation (VitePress + JSDoc + phpDoc)",
+        "doc": "Regenerate all documentation (VitePress + TypeDoc + phpDoc)",
         "build": "Build frontend assets (Vite + themes)",
         "clean-doc": "Clear generated documentation"
     },
