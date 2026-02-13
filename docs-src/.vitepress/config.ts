@@ -14,7 +14,8 @@ export default defineConfig({
   // Ignore dead links for localhost URLs (used in examples) and changelog references
   ignoreDeadLinks: [
     /^http:\/\/localhost/,
-    /CHANGELOG$/
+    /CHANGELOG$/,
+    /^\/api\//
   ],
 
   head: [
@@ -92,6 +93,13 @@ export default defineConfig({
             { text: 'API Reference', link: '/developer/api' },
             { text: 'Contributing', link: '/developer/contributing' },
             { text: 'V3 Changes', link: '/developer/v3-changes' }
+          ]
+        },
+        {
+          text: 'Code Documentation',
+          items: [
+            { text: 'PHP API (phpDoc)', link: '/api/php/' },
+            { text: 'JavaScript API (JSDoc)', link: '/api/js/' }
           ]
         }
       ],

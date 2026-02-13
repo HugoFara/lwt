@@ -38,6 +38,7 @@ use Lwt\Shared\Infrastructure\Http\JsonResponse;
 class TagApiHandler implements ApiRoutableInterface
 {
     use ApiRoutableTrait;
+
     /**
      * Route a GET request to the appropriate handler.
      *

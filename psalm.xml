@@ -21,14 +21,6 @@
     </projectFiles>
 
     <issueHandlers>
-        <!-- curl extension constants not available in all analysis environments -->
-        <UndefinedConstant>
-            <errorLevel type="suppress">
-                <directory name="src/Modules/Dictionary/Infrastructure/Translation" />
-                <directory name="src/Modules/Text/Infrastructure" />
-                <directory name="src/Shared/UI/Assets" />
-            </errorLevel>
-        </UndefinedConstant>
 
         <!--
             ============================================
@@ -156,11 +148,6 @@
             </errorLevel>
         </UnnecessaryVarAnnotation>
 
-        <PossiblyInvalidArgument>
-            <errorLevel type="suppress">
-                <directory name="src/Modules/Book/Views" />
-            </errorLevel>
-        </PossiblyInvalidArgument>
 
         <!--
             ============================================

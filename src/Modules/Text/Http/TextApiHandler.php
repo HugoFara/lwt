@@ -46,6 +46,7 @@ use Lwt\Api\V1\Response;
 class TextApiHandler implements ApiRoutableInterface
 {
     use ApiRoutableTrait;
+
     private WordDiscoveryService $discoveryService;
     private TextFacade $textService;
 

@@ -5,6 +5,10 @@ The LWT API allows developers to interact with various features of the applicati
 such as retrieving media paths, getting sentences containing a specific term,
 managing settings, and more.
 
+::: tip Code-Level Documentation
+For source code documentation, see the [PHP API (phpDoc)](/api/php/) and [JavaScript API (JSDoc)](/api/js/).
+:::
+
 ## Base URL
 
 The base URL for all API endpoints is: `http://[base_url]/api/v1`,

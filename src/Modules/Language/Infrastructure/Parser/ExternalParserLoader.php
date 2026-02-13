@@ -18,7 +18,6 @@ declare(strict_types=1);
 namespace Lwt\Modules\Language\Infrastructure\Parser;
 
 use Lwt\Modules\Language\Domain\Parser\ExternalParserConfig;
-
 use InvalidArgumentException;
 
 /**
