@@ -1,0 +1,80 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs-src/**'
+      - '.github/workflows/docs.yml'
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - 'UNLICENSE.md'
+      - 'src/**'
+      - 'jsdoc.json'
+      - 'phpdoc.dist.xml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction
+
+      - name: Build VitePress docs
+        run: npm run docs:build
+
+      - name: Build JSDoc API docs
+        run: ./node_modules/.bin/jsdoc -c jsdoc.json
+
+      - name: Build phpDoc API docs
+        run: ./vendor/bin/phpdoc
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

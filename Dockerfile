@@ -2,7 +2,7 @@ FROM php:8.4-apache-bookworm
 
 LABEL org.opencontainers.image.title="LWT Community"
 LABEL org.opencontainers.image.description="An image for LWT"
-LABEL org.opencontainers.image.documentation="https://hugofara.github.io/lwt/docs/"
+LABEL org.opencontainers.image.documentation="https://hugofara.github.io/lwt/"
 LABEL org.opencontainers.image.url="https://hugofara.github.io/lwt/"
 LABEL org.opencontainers.image.author="HugoFara <contact@hugofara.net>"
 LABEL org.opencontainers.image.license=Unlicense

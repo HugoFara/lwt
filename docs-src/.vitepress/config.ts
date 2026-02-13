@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'LWT Documentation',
   description: 'Learning with Texts - Documentation',
-  base: '/docs/',
+  base: '/lwt/',
   outDir: '../docs',
   srcDir: '.',
   cleanUrls: true,
@@ -18,8 +18,8 @@ export default defineConfig({
   ],
 
   head: [
-    ['link', { rel: 'icon', href: '/docs/assets/images/lwt_icon_48.png' }],
-    ['link', { rel: 'apple-touch-icon', href: '/docs/assets/images/lwt_icon_180.png' }]
+    ['link', { rel: 'icon', href: '/lwt/assets/images/lwt_icon_48.png' }],
+    ['link', { rel: 'apple-touch-icon', href: '/lwt/assets/images/lwt_icon_180.png' }]
   ],
 
   themeConfig: {

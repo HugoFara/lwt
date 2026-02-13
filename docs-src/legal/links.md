@@ -6,7 +6,7 @@
   * [Latest development version @ GitHub](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip)
   * [Official version @ Sourceforge](http://sourceforge.net/projects/learning-with-texts/files/) (original, unmaintained)
 * [**Community Maintained Version** @ GitHub](https://github.com/HugoFara/lwt)
-* **Documentation**: try either the [local link](/) or the [online documentation](https://hugofara.github.io/lwt/docs/).
+* **Documentation**: try either the [local link](/) or the [online documentation](https://hugofara.github.io/lwt/).
 
 ## LWT Online Demo - *try it out:*
 

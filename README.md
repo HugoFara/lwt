@@ -162,7 +162,7 @@ chmod +x ./INSTALL.sh
    npm install && npm run build:all
    ```
 
-See the [Installation Guide](https://hugofara.github.io/lwt/docs/guide/installation) for detailed instructions.
+See the [Installation Guide](https://hugofara.github.io/lwt/guide/installation) for detailed instructions.
 
 ## Requirements
 
@@ -176,9 +176,9 @@ For development, you'll also need [Composer](https://getcomposer.org/) and [Node
 
 ## Documentation
 
-- **[User Guide](https://hugofara.github.io/lwt/docs/guide/getting-started)** — Getting started and usage
-- **[API Reference](https://hugofara.github.io/lwt/docs/reference/features)** — Features and REST API documentation
-- **[Developer Docs](https://hugofara.github.io/lwt/docs/developer/api)** — Architecture and contribution guide
+- **[User Guide](https://hugofara.github.io/lwt/guide/getting-started)** — Getting started and usage
+- **[API Reference](https://hugofara.github.io/lwt/reference/features)** — Features and REST API documentation
+- **[Developer Docs](https://hugofara.github.io/lwt/developer/api)** — Architecture and contribution guide
 
 ## Contributing
 
