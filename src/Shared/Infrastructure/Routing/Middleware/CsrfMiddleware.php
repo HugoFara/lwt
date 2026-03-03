@@ -72,11 +72,6 @@ class CsrfMiddleware implements MiddlewareInterface
      */
     public function handle(): bool
     {
-        // Skip CSRF if multi-user mode is disabled
-        if (!Globals::isMultiUserEnabled()) {
-            return true;
-        }
-
         // Skip for safe methods (GET, HEAD, OPTIONS)
         $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
         if (!in_array($method, self::PROTECTED_METHODS, true)) {
@@ -98,12 +93,14 @@ class CsrfMiddleware implements MiddlewareInterface
     }
 
     /**
-     * Check if request has API Bearer token.
+     * Check if request has a plausible API Bearer token.
      *
      * API tokens serve as CSRF protection since they're not automatically
-     * sent by browsers like cookies are.
+     * sent by browsers like cookies are. The actual token validity is
+     * verified by AuthMiddleware, which runs before CsrfMiddleware.
+     * Here we only confirm the token is non-trivial (minimum 20 chars).
      *
-     * @return bool True if Bearer token present
+     * @return bool True if Bearer token present and non-trivial
      */
     private function hasApiToken(): bool
     {
@@ -117,7 +114,13 @@ class CsrfMiddleware implements MiddlewareInterface
             }
         }
 
-        return str_starts_with(strtolower($authHeader), 'bearer ');
+        if (!str_starts_with(strtolower($authHeader), 'bearer ')) {
+            return false;
+        }
+
+        // Require a minimum token length to prevent trivial bypass
+        $token = trim(substr($authHeader, 7));
+        return strlen($token) >= 20;
     }
 
     /**

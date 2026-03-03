@@ -71,6 +71,7 @@ if ($isEdit && $tag !== null) {
           tagComment: '<?php echo $tagComment; ?>',
           charCount: <?php echo strlen($tagComment); ?>
       }">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <?php if ($isEdit && $tag !== null) : ?>
     <input type="hidden" name="<?php echo $formFieldPrefix; ?>ID" value="<?php echo $tagId; ?>" />
     <?php endif; ?>

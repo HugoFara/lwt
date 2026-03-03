@@ -51,6 +51,7 @@ $languagesTyped = $languages;
 <h2 class="title is-4">Edit Archived Text</h2>
 
 <form class="validate" action="/text/archived/<?php echo $textIdTyped; ?>/edit#rec<?php echo $textIdTyped; ?>" method="post">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
 
     <div class="box">

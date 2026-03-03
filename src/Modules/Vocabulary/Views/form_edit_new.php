@@ -61,6 +61,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 <form name="newword" class="validate" action="<?php echo $phpSelf; ?>" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
+<?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 <input type="hidden" name="fromAnn" value="<?php echo $fromAnn; ?>" />
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />
 <input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($termlc, ENT_QUOTES, 'UTF-8'); ?>" />

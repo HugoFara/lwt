@@ -43,6 +43,7 @@ $phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 
 <form name="newword" class="validate" action="<?php echo $phpSelf; ?>" method="post"
 data-lwt-clear-frame="true">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />
     <input type="hidden" name="tid" value="<?php echo $textId; ?>" />
     <table class="table is-bordered is-fullwidth">

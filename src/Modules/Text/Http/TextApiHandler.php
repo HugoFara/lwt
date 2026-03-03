@@ -981,8 +981,9 @@ class TextApiHandler implements ApiRoutableInterface
         $dictionaryAdapter = new DictionaryAdapter();
 
         $r =
-        '<form action="" method="post">
-            <table class="table is-bordered is-fullwidth">
+        '<form action="" method="post">' .
+            \Lwt\Shared\UI\Helpers\FormHelper::csrfField() .
+            '<table class="table is-bordered is-fullwidth">
                 <tr>
                     <th class="has-text-centered">Text</th>
                     <th class="has-text-centered">Dict.</th>

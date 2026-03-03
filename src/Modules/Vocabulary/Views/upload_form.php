@@ -75,6 +75,7 @@ echo PageLayoutHelper::buildActionCard($actions);
           showDelimiter: false,
           inputMethod: 'file'
       }">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 
     <div class="box">
         <!-- Language Selection -->
