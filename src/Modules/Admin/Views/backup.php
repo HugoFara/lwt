@@ -6,7 +6,6 @@
  * Modern Bulma + Alpine.js version of the backup/restore page.
  *
  * Variables expected:
- * - $prefinfo: string HTML prefix info
  * - $message: string Message to display (if any)
  *
  * PHP version 8.1
@@ -27,7 +26,6 @@ use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
-$prefinfo = (string)($prefinfo ?? '');
 $base = UrlUtilities::getBasePath();
 
 $escapedDbName = htmlspecialchars(Globals::getDatabaseName(), ENT_QUOTES, 'UTF-8');
@@ -58,7 +56,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
             <div class="content mt-4">
                 <p>
                     The database <strong><?php echo $escapedDbName; ?></strong>
-                    <?php echo $prefinfo; ?> will be exported to a gzipped SQL file.
+                    will be exported to a gzipped SQL file.
                 </p>
             </div>
 
@@ -139,7 +137,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
             <div class="content mt-4">
                 <p>
                     The database <strong><?php echo $escapedDbName; ?></strong>
-                    <?php echo $prefinfo; ?> will be <strong>replaced</strong> by the data in the specified backup file
+                    will be <strong>replaced</strong> by the data in the specified backup file
                     (gzipped or normal SQL file).
                 </p>
             </div>
@@ -252,7 +250,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
             <div class="content mt-4">
                 <p>
                     The database <strong><?php echo $escapedDbName; ?></strong>
-                    <?php echo $prefinfo; ?> will be <strong>replaced</strong> by the LWT demo database.
+                    will be <strong>replaced</strong> by the LWT demo database.
                 </p>
                 <p class="is-size-7 has-text-grey">
                     The demo includes sample texts and vocabulary in multiple languages

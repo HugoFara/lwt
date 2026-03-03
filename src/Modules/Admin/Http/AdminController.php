@@ -126,9 +126,6 @@ class AdminController extends BaseController
             $message = $result['success'] ? 'Database emptied' : 'Empty database failed';
         }
 
-        // Get view data (used by included view)
-        $prefinfo = $this->adminFacade->getPrefixInfo();
-
         // Render page
         $this->render('Database Operations', true);
         $this->message($message, true);
@@ -301,7 +298,6 @@ class AdminController extends BaseController
         }
 
         // Get view data (used by included view)
-        $prefinfo = $this->adminFacade->getPrefixInfo();
         $langcnt = $this->adminFacade->getLanguageCount();
 
         // Render page

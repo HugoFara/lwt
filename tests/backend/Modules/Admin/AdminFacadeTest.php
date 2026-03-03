@@ -355,17 +355,6 @@ class AdminFacadeTest extends TestCase
         $this->assertNotEmpty($result);
     }
 
-    public function testGetPrefixInfoReturnsEmptyString(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        // Prefix has been removed from LWT
-        $result = $this->facade->getPrefixInfo();
-        $this->assertEquals('', $result);
-    }
-
     // ===== Wizard tests =====
 
     public function testEnvFileExistsReturnsBoolean(): void

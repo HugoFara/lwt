@@ -247,16 +247,6 @@ class AdminFacade
         return Globals::getDatabaseName();
     }
 
-    /**
-     * Get prefix info for display (empty now that prefixes are removed).
-     *
-     * @return string Prefix info
-     */
-    public function getPrefixInfo(): string
-    {
-        return "";
-    }
-
     // =========================================================================
     // Statistics Operations
     // =========================================================================
