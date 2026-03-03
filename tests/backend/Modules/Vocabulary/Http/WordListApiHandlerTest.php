@@ -219,7 +219,7 @@ class WordListApiHandlerTest extends TestCase
     {
         $this->listService->expects($this->once())
             ->method('deleteByIdList')
-            ->with('(1,2,3)')
+            ->with([1, 2, 3])
             ->willReturn('Deleted 3 terms');
 
         $result = $this->handler->bulkAction([1, 2, 3], 'del');
@@ -232,7 +232,7 @@ class WordListApiHandlerTest extends TestCase
     {
         $this->listService->expects($this->once())
             ->method('updateStatusByIdList')
-            ->with('(1,2)', 1, true, 'spl1')
+            ->with([1, 2], 1, true, 'spl1')
             ->willReturn('Updated 2 terms');
 
         $result = $this->handler->bulkAction([1, 2], 'spl1');
@@ -244,7 +244,7 @@ class WordListApiHandlerTest extends TestCase
     {
         $this->listService->expects($this->once())
             ->method('updateStatusByIdList')
-            ->with('(1,2)', -1, true, 'smi1')
+            ->with([1, 2], -1, true, 'smi1')
             ->willReturn('Updated 2 terms');
 
         $result = $this->handler->bulkAction([1, 2], 'smi1');
@@ -259,7 +259,7 @@ class WordListApiHandlerTest extends TestCase
     {
         $this->listService->expects($this->once())
             ->method('updateStatusByIdList')
-            ->with('(1)', $expectedStatus, false, $action)
+            ->with([1], $expectedStatus, false, $action)
             ->willReturn('Updated 1 terms');
 
         $result = $this->handler->bulkAction([1], $action);
@@ -284,7 +284,7 @@ class WordListApiHandlerTest extends TestCase
     {
         $this->listService->expects($this->once())
             ->method('updateStatusDateByIdList')
-            ->with('(1,2)')
+            ->with([1, 2])
             ->willReturn('Updated 2 terms');
 
         $result = $this->handler->bulkAction([1, 2], 'today');
@@ -296,7 +296,7 @@ class WordListApiHandlerTest extends TestCase
     {
         $this->listService->expects($this->once())
             ->method('deleteSentencesByIdList')
-            ->with('(1,2)')
+            ->with([1, 2])
             ->willReturn('Deleted sentences');
 
         $result = $this->handler->bulkAction([1, 2], 'delsent');
@@ -308,7 +308,7 @@ class WordListApiHandlerTest extends TestCase
     {
         $this->listService->expects($this->once())
             ->method('toLowercaseByIdList')
-            ->with('(1)')
+            ->with([1])
             ->willReturn('Lowercased 1 terms');
 
         $result = $this->handler->bulkAction([1], 'lower');
@@ -320,7 +320,7 @@ class WordListApiHandlerTest extends TestCase
     {
         $this->listService->expects($this->once())
             ->method('capitalizeByIdList')
-            ->with('(1)')
+            ->with([1])
             ->willReturn('Capitalized 1 terms');
 
         $result = $this->handler->bulkAction([1], 'cap');

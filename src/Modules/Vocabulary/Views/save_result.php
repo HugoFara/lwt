@@ -44,7 +44,7 @@ assert(is_string($tagList));
 assert(is_string($todoContent));
 
 ?>
-<p><?php echo $message; ?></p>
+<p><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></p>
 
 <?php if ($success && $len == 1) : ?>
 <script type="application/json" data-lwt-save-result-config>

@@ -683,10 +683,11 @@ class TermEditController extends VocabularyBaseController
             if (!$result['success']) {
                 // Handle duplicate entry error
                 if (strpos($result['message'], 'Duplicate entry') !== false) {
-                    $message = 'Error: <b>Duplicate entry for <i>' . $result['textlc'] .
-                        '</i></b><br /><br /><input type="button" value="&lt;&lt; Back" data-action="back" />';
+                    $message = 'Error: <b>Duplicate entry for <i>'
+                        . htmlspecialchars($result['textlc'], ENT_QUOTES, 'UTF-8')
+                        . '</i></b><br /><br /><input type="button" value="&lt;&lt; Back" data-action="back" />';
                 } else {
-                    $message = $result['message'];
+                    $message = htmlspecialchars($result['message'], ENT_QUOTES, 'UTF-8');
                 }
                 echo '<p>' . $message . '</p>';
             } else {
@@ -694,7 +695,7 @@ class TermEditController extends VocabularyBaseController
                 TagsFacade::saveWordTagsFromForm($wid);
                 \Lwt\Shared\Infrastructure\Database\Maintenance::initWordCount();
 
-                echo '<p>' . $result['message'] . '</p>';
+                echo '<p>' . htmlspecialchars($result['message'], ENT_QUOTES, 'UTF-8') . '</p>';
 
                 $woLgId = InputValidator::getInt('WoLgID', 0) ?? 0;
                 $len = $crudService->getWordCount($wid);

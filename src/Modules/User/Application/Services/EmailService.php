@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\User\Application\Services;
 
 use DateTimeImmutable;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
@@ -159,11 +160,9 @@ class EmailService
      */
     private function buildResetUrl(string $token): string
     {
-        $isHttps = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && $_SERVER['HTTPS'] !== 'off';
-        $protocol = $isHttps ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $origin = UrlUtilities::getAppOrigin();
 
-        return "{$protocol}://{$host}/password/reset?token=" . urlencode($token);
+        return "{$origin}/password/reset?token=" . urlencode($token);
     }
 
     /**

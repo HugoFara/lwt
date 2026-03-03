@@ -105,8 +105,8 @@ class TtsService
             $languageCode = $this->languageService->getLanguageCode($language_id, $langArray);
             $output .= sprintf(
                 '<option value="%s">%s</option>',
-                $languageCode,
-                $language
+                htmlspecialchars($languageCode, ENT_QUOTES, 'UTF-8'),
+                htmlspecialchars($language, ENT_QUOTES, 'UTF-8')
             );
         }
         return $output;

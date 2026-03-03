@@ -426,23 +426,25 @@ class WordListService
     /**
      * Delete multiple words by ID list.
      *
-     * @param string $idList SQL IN clause with IDs (e.g., "(1,2,3)")
+     * @param int[] $ids Array of word IDs
      *
      * @return string Result message
      */
-    public function deleteByIdList(string $idList): string
+    public function deleteByIdList(array $ids): string
     {
+        $inClause = Connection::buildIntInClause($ids);
+
         // Delete multi-word text items first (before word deletion triggers FK SET NULL)
         Connection::query(
             'DELETE FROM word_occurrences
-            WHERE Ti2WordCount > 1 AND Ti2WoID in ' . $idList
+            WHERE Ti2WordCount > 1 AND Ti2WoID in ' . $inClause
         );
 
         // Delete words - FK constraints handle:
         // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
         // - word_tag_map deleted (ON DELETE CASCADE)
         $message = Connection::execute(
-            'DELETE FROM words WHERE WoID in ' . $idList,
+            'DELETE FROM words WHERE WoID in ' . $inClause,
             "Deleted"
         );
 
@@ -454,15 +456,16 @@ class WordListService
     /**
      * Update status for words in ID list.
      *
-     * @param string $idList     SQL IN clause with IDs
+     * @param int[]  $ids        Array of word IDs
      * @param int    $newStatus  New status value
      * @param bool   $relative   If true, change by +1 or -1
      * @param string $actionType Type of action (spl1, smi1, s5, s1, s99, s98)
      *
      * @return string Result message
      */
-    public function updateStatusByIdList(string $idList, int $newStatus, bool $relative, string $actionType): string
+    public function updateStatusByIdList(array $ids, int $newStatus, bool $relative, string $actionType): string
     {
+        $inClause = Connection::buildIntInClause($ids);
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
 
         if ($relative && $newStatus > 0) {
@@ -470,7 +473,7 @@ class WordListService
             return (string) Connection::execute(
                 'update words
                 set WoStatus=WoStatus+1, WoStatusChanged = NOW(),' . $scoreUpdate . '
-                where WoStatus in (1,2,3,4) and WoID in ' . $idList,
+                where WoStatus in (1,2,3,4) and WoID in ' . $inClause,
                 "Updated Status (+1)"
             );
         } elseif ($relative && $newStatus < 0) {
@@ -478,7 +481,7 @@ class WordListService
             return (string) Connection::execute(
                 'update words
                 set WoStatus=WoStatus-1, WoStatusChanged = NOW(),' . $scoreUpdate . '
-                where WoStatus in (2,3,4,5) and WoID in ' . $idList,
+                where WoStatus in (2,3,4,5) and WoID in ' . $inClause,
                 "Updated Status (-1)"
             );
         }
@@ -487,7 +490,7 @@ class WordListService
         return (string) Connection::execute(
             'update words
             set WoStatus=' . $newStatus . ', WoStatusChanged = NOW(),' . $scoreUpdate . '
-            where WoID in ' . $idList,
+            where WoID in ' . $inClause,
             "Updated Status (=" . $newStatus . ")"
         );
     }
@@ -495,16 +498,18 @@ class WordListService
     /**
      * Update status date to NOW for words in ID list.
      *
-     * @param string $idList SQL IN clause with IDs
+     * @param int[] $ids Array of word IDs
      *
      * @return string Result message
      */
-    public function updateStatusDateByIdList(string $idList): string
+    public function updateStatusDateByIdList(array $ids): string
     {
+        $inClause = Connection::buildIntInClause($ids);
+
         return (string) Connection::execute(
             'update words
             set WoStatusChanged = NOW(),' . TermStatusService::makeScoreRandomInsertUpdate('u') . '
-            where WoID in ' . $idList,
+            where WoID in ' . $inClause,
             "Updated Status Date (= Now)"
         );
     }
@@ -512,16 +517,18 @@ class WordListService
     /**
      * Delete sentences for words in ID list.
      *
-     * @param string $idList SQL IN clause with IDs
+     * @param int[] $ids Array of word IDs
      *
      * @return string Result message
      */
-    public function deleteSentencesByIdList(string $idList): string
+    public function deleteSentencesByIdList(array $ids): string
     {
+        $inClause = Connection::buildIntInClause($ids);
+
         return (string) Connection::execute(
             'update words
             set WoSentence = NULL
-            where WoID in ' . $idList,
+            where WoID in ' . $inClause,
             "Term Sentence(s) deleted"
         );
     }
@@ -529,16 +536,18 @@ class WordListService
     /**
      * Convert words to lowercase in ID list.
      *
-     * @param string $idList SQL IN clause with IDs
+     * @param int[] $ids Array of word IDs
      *
      * @return string Result message
      */
-    public function toLowercaseByIdList(string $idList): string
+    public function toLowercaseByIdList(array $ids): string
     {
+        $inClause = Connection::buildIntInClause($ids);
+
         return (string) Connection::execute(
             'update words
             set WoText = WoTextLC
-            where WoID in ' . $idList,
+            where WoID in ' . $inClause,
             "Term(s) set to lowercase"
         );
     }
@@ -546,18 +555,20 @@ class WordListService
     /**
      * Capitalize words in ID list.
      *
-     * @param string $idList SQL IN clause with IDs
+     * @param int[] $ids Array of word IDs
      *
      * @return string Result message
      */
-    public function capitalizeByIdList(string $idList): string
+    public function capitalizeByIdList(array $ids): string
     {
+        $inClause = Connection::buildIntInClause($ids);
+
         return (string) Connection::execute(
             'update words
             set WoText = CONCAT(
                 UPPER(LEFT(WoTextLC,1)),SUBSTRING(WoTextLC,2)
             )
-            where WoID in ' . $idList,
+            where WoID in ' . $inClause,
             "Term(s) capitalized"
         );
     }
@@ -641,7 +652,7 @@ class WordListService
     /**
      * Get Anki export SQL for selected words.
      *
-     * @param string $idList  SQL IN clause with IDs
+     * @param int[]  $ids     Array of word IDs (empty for filter-based export)
      * @param string $textId  Text ID filter (empty for no filter)
      * @param string $whLang  Language condition
      * @param string $whStat  Status condition
@@ -651,14 +662,16 @@ class WordListService
      * @return string SQL query for export
      */
     public function getAnkiExportSql(
-        string $idList,
+        array $ids,
         string $textId,
         string $whLang,
         string $whStat,
         string $whQuery,
         string $whTag
     ): string {
-        if ($idList !== '') {
+        if (!empty($ids)) {
+            $inClause = Connection::buildIntInClause($ids);
+
             return 'select distinct WoID, LgRightToLeft,
                 LgRegexpWordCharacters, LgName, WoText, WoTranslation,
                 WoRomanization, WoSentence,
@@ -682,7 +695,7 @@ class WordListService
                 where WoLgID = LgID AND WoTranslation != \'\' AND
                 WoTranslation != \'*\' and
                 WoSentence like concat(\'%{\',WoText,\'}%\') and
-                WoID in ' . $idList . '
+                WoID in ' . $inClause . '
                 group by WoID';
         }
 
@@ -723,7 +736,7 @@ class WordListService
     /**
      * Get TSV export SQL for selected words.
      *
-     * @param string $idList  SQL IN clause with IDs
+     * @param int[]  $ids     Array of word IDs (empty for filter-based export)
      * @param string $textId  Text ID filter (empty for no filter)
      * @param string $whLang  Language condition
      * @param string $whStat  Status condition
@@ -733,14 +746,16 @@ class WordListService
      * @return string SQL query for export
      */
     public function getTsvExportSql(
-        string $idList,
+        array $ids,
         string $textId,
         string $whLang,
         string $whStat,
         string $whQuery,
         string $whTag
     ): string {
-        if ($idList !== '') {
+        if (!empty($ids)) {
+            $inClause = Connection::buildIntInClause($ids);
+
             return 'select distinct WoID, LgName, WoText, WoTranslation,
                 WoRomanization, WoSentence, WoStatus,
                 ifnull(
@@ -756,7 +771,7 @@ class WordListService
                     )
                     left join tags on TgID = WtTgID
                 ), languages
-                where WoLgID = LgID and WoID in ' . $idList . '
+                where WoLgID = LgID and WoID in ' . $inClause . '
                 group by WoID';
         }
 
@@ -785,7 +800,7 @@ class WordListService
     /**
      * Get flexible export SQL for selected words.
      *
-     * @param string $idList  SQL IN clause with IDs
+     * @param int[]  $ids     Array of word IDs (empty for filter-based export)
      * @param string $textId  Text ID filter (empty for no filter)
      * @param string $whLang  Language condition
      * @param string $whStat  Status condition
@@ -795,14 +810,16 @@ class WordListService
      * @return string SQL query for export
      */
     public function getFlexibleExportSql(
-        string $idList,
+        array $ids,
         string $textId,
         string $whLang,
         string $whStat,
         string $whQuery,
         string $whTag
     ): string {
-        if ($idList !== '') {
+        if (!empty($ids)) {
+            $inClause = Connection::buildIntInClause($ids);
+
             return 'select distinct WoID, LgName, LgExportTemplate,
                 LgRightToLeft, WoText, WoTextLC, WoTranslation,
                 WoRomanization, WoSentence, WoStatus,
@@ -818,7 +835,7 @@ class WordListService
                     )
                     left join tags on TgID = WtTgID
                 ), languages
-                where WoLgID = LgID and WoID in ' . $idList . '
+                where WoLgID = LgID and WoID in ' . $inClause . '
                 group by WoID';
         }
 

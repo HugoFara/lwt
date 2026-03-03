@@ -81,11 +81,6 @@ class AdminApiHandler implements ApiRoutableInterface
      */
     public function saveSetting(string $key, string $value): array
     {
-        // Clear session settings when changing language
-        if ($key === 'currentlanguage') {
-            $this->clearSessionSettings();
-        }
-
         try {
             Settings::save($key, $value);
             $result = ["message" => "Setting saved"];
@@ -191,20 +186,6 @@ class AdminApiHandler implements ApiRoutableInterface
             ->where('TxLgID', '=', $languageId)
             ->whereNull('TxArchivedAt')
             ->count();
-    }
-
-    /**
-     * Clear session settings when changing language.
-     *
-     * Note: Pagination/filter state is now stored in URL parameters,
-     * so session clearing is no longer needed. This method is kept
-     * for backwards compatibility but is now a no-op.
-     *
-     * @return void
-     */
-    private function clearSessionSettings(): void
-    {
-        // No-op: pagination state is now in URL parameters, not session
     }
 
     /**

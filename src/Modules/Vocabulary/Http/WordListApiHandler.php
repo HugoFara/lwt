@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Http;
 
+use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Modules\Tags\Application\TagsFacade;
@@ -216,20 +217,20 @@ class WordListApiHandler
             return ['success' => false, 'count' => 0, 'message' => 'Invalid term IDs'];
         }
 
-        $idList = '(' . implode(',', $wordIds) . ')';
         $count = count($wordIds);
+        $idList = Connection::buildIntInClause($wordIds);
 
         switch ($action) {
             case 'del':
-                $message = $listService->deleteByIdList($idList);
+                $message = $listService->deleteByIdList($wordIds);
                 break;
 
             case 'spl1': // Status +1
-                $message = $listService->updateStatusByIdList($idList, 1, true, 'spl1');
+                $message = $listService->updateStatusByIdList($wordIds, 1, true, 'spl1');
                 break;
 
             case 'smi1': // Status -1
-                $message = $listService->updateStatusByIdList($idList, -1, true, 'smi1');
+                $message = $listService->updateStatusByIdList($wordIds, -1, true, 'smi1');
                 break;
 
             case 's1':
@@ -240,23 +241,23 @@ class WordListApiHandler
             case 's98':
             case 's99':
                 $status = (int) substr($action, 1);
-                $message = $listService->updateStatusByIdList($idList, $status, false, $action);
+                $message = $listService->updateStatusByIdList($wordIds, $status, false, $action);
                 break;
 
             case 'today':
-                $message = $listService->updateStatusDateByIdList($idList);
+                $message = $listService->updateStatusDateByIdList($wordIds);
                 break;
 
             case 'delsent':
-                $message = $listService->deleteSentencesByIdList($idList);
+                $message = $listService->deleteSentencesByIdList($wordIds);
                 break;
 
             case 'lower':
-                $message = $listService->toLowercaseByIdList($idList);
+                $message = $listService->toLowercaseByIdList($wordIds);
                 break;
 
             case 'cap':
-                $message = $listService->capitalizeByIdList($idList);
+                $message = $listService->capitalizeByIdList($wordIds);
                 break;
 
             case 'addtag':

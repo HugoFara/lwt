@@ -424,7 +424,7 @@ class UserFacade
                 return $user;
             }
         } catch (\RuntimeException $e) {
-            // Continue to try other methods
+            error_log("UserFacade::findOrCreateWordPressUser findByWordPressId failed: " . $e->getMessage());
         }
 
         // Try to find by email and link
@@ -436,7 +436,7 @@ class UserFacade
                 return $user;
             }
         } catch (\RuntimeException $e) {
-            // Continue to create new user
+            error_log("UserFacade::findOrCreateWordPressUser findByEmail failed: " . $e->getMessage());
         }
 
         // Create a new user from WordPress
@@ -458,6 +458,7 @@ class UserFacade
         try {
             return $this->repository->findByGoogleId($googleId);
         } catch (\RuntimeException $e) {
+            error_log("UserFacade::findByGoogleId failed: " . $e->getMessage());
             return null;
         }
     }
@@ -483,7 +484,7 @@ class UserFacade
                 return $user;
             }
         } catch (\RuntimeException $e) {
-            // Continue to try other methods
+            error_log("UserFacade::findOrCreateGoogleUser findByGoogleId failed: " . $e->getMessage());
         }
 
         // Try to find by email and link
@@ -495,7 +496,7 @@ class UserFacade
                 return $user;
             }
         } catch (\RuntimeException $e) {
-            // Continue to create new user
+            error_log("UserFacade::findOrCreateGoogleUser findByEmail failed: " . $e->getMessage());
         }
 
         // Create a new user from Google
@@ -529,6 +530,7 @@ class UserFacade
         try {
             return $this->repository->findByMicrosoftId($microsoftId);
         } catch (\RuntimeException $e) {
+            error_log("UserFacade::findByMicrosoftId failed: " . $e->getMessage());
             return null;
         }
     }
@@ -554,7 +556,7 @@ class UserFacade
                 return $user;
             }
         } catch (\RuntimeException $e) {
-            // Continue to try other methods
+            error_log("UserFacade::findOrCreateMicrosoftUser findByMicrosoftId failed: " . $e->getMessage());
         }
 
         // Try to find by email and link
@@ -566,7 +568,7 @@ class UserFacade
                 return $user;
             }
         } catch (\RuntimeException $e) {
-            // Continue to create new user
+            error_log("UserFacade::findOrCreateMicrosoftUser findByEmail failed: " . $e->getMessage());
         }
 
         // Create a new user from Microsoft

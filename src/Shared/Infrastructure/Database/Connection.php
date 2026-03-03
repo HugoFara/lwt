@@ -395,4 +395,25 @@ class Connection
         $stmt->execute();
         return $stmt->insertId();
     }
+
+    /**
+     * Build a safe SQL IN clause from an array of integer IDs.
+     *
+     * Each value is strictly cast to int to prevent SQL injection.
+     * Returns a string like "(1,2,3)" suitable for use in SQL IN clauses.
+     *
+     * @param int[] $ids Array of integer IDs
+     *
+     * @return string SQL IN clause, e.g., "(1,2,3)" or "()" if empty
+     */
+    public static function buildIntInClause(array $ids): string
+    {
+        if (empty($ids)) {
+            return '()';
+        }
+
+        $safeIds = array_map('intval', $ids);
+
+        return '(' . implode(',', $safeIds) . ')';
+    }
 }

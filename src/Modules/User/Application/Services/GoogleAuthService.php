@@ -23,6 +23,7 @@ use League\OAuth2\Client\Provider\Google;
 use League\OAuth2\Client\Provider\GoogleUser;
 use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Modules\User\Application\UserFacade;
 
 /**
@@ -117,10 +118,8 @@ class GoogleAuthService
      */
     private function getDefaultRedirectUri(): string
     {
-        $https = $_SERVER['HTTPS'] ?? '';
-        $protocol = ($https !== '' && $https !== 'off') ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        return "{$protocol}://{$host}/google/callback";
+        $origin = UrlUtilities::getAppOrigin();
+        return "{$origin}/google/callback";
     }
 
     /**

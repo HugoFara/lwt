@@ -42,6 +42,13 @@ class UrlUtilities
     private static ?string $basePath = null;
 
     /**
+     * Cached app URL value.
+     *
+     * @var string|null|false null = not yet resolved, false = no env var set
+     */
+    private static string|null|false $appUrl = null;
+
+    /**
      * Get the configured application base path.
      *
      * Returns the APP_BASE_PATH environment variable value, normalized
@@ -67,6 +74,64 @@ class UrlUtilities
         }
 
         return self::$basePath;
+    }
+
+    /**
+     * Get the configured application URL (scheme + host).
+     *
+     * Returns the APP_URL environment variable if set (e.g., 'https://example.com').
+     * This should be used instead of $_SERVER['HTTP_HOST'] to prevent
+     * Host Header Injection attacks.
+     *
+     * @return string|null The app URL, or null if not configured
+     */
+    public static function getAppUrl(): ?string
+    {
+        if (self::$appUrl === null) {
+            $envUrl = $_ENV['APP_URL'] ?? null;
+            if ($envUrl === null) {
+                $envUrl = getenv('APP_URL');
+            }
+            if (is_string($envUrl) && $envUrl !== '') {
+                // Normalize: remove trailing slash
+                self::$appUrl = rtrim($envUrl, '/');
+            } else {
+                self::$appUrl = false;
+            }
+        }
+
+        return self::$appUrl === false ? null : self::$appUrl;
+    }
+
+    /**
+     * Get the application origin (scheme + host), preferring APP_URL env var.
+     *
+     * Falls back to detecting from $_SERVER if APP_URL is not configured,
+     * but validates the host against allowed characters to mitigate
+     * Host Header Injection.
+     *
+     * @return string The application origin (e.g., 'https://example.com')
+     */
+    public static function getAppOrigin(): string
+    {
+        $appUrl = self::getAppUrl();
+        if ($appUrl !== null) {
+            return $appUrl;
+        }
+
+        // Fallback: detect from request headers with validation
+        $isHttps = isset($_SERVER['HTTPS'])
+            && $_SERVER['HTTPS'] !== ''
+            && $_SERVER['HTTPS'] !== 'off';
+        $protocol = $isHttps ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+        // Validate host: only allow alphanumeric, dots, hyphens, colons (port), brackets (IPv6)
+        if (!preg_match('/^[a-zA-Z0-9.\-:\[\]]+$/', $host)) {
+            $host = 'localhost';
+        }
+
+        return "{$protocol}://{$host}";
     }
 
     /**
@@ -142,6 +207,7 @@ class UrlUtilities
     public static function resetBasePath(): void
     {
         self::$basePath = null;
+        self::$appUrl = null;
     }
 
     /**

@@ -362,8 +362,7 @@ class WordListServiceTest extends TestCase
         }
 
         // Delete by list
-        $idList = '(' . implode(',', $ids) . ')';
-        $result = $listService->deleteByIdList($idList);
+        $result = $listService->deleteByIdList($ids);
 
         // Result is affected row count (should be 3) or success indicator
         $this->assertNotEmpty($result);
@@ -393,7 +392,7 @@ class WordListServiceTest extends TestCase
         $wordId = $result['id'];
 
         // Update status to 5
-        $message = $listService->updateStatusByIdList("($wordId)", 5, false, 's5');
+        $message = $listService->updateStatusByIdList([$wordId], 5, false, 's5');
 
         $this->assertNotEmpty($message);
 
@@ -421,7 +420,7 @@ class WordListServiceTest extends TestCase
         $wordId = $result['id'];
 
         // Increment status
-        $message = $listService->updateStatusByIdList("($wordId)", 1, true, 'spl1');
+        $message = $listService->updateStatusByIdList([$wordId], 1, true, 'spl1');
 
         // Verify status is now 3
         $word = $wordService->findById($wordId);
@@ -447,7 +446,7 @@ class WordListServiceTest extends TestCase
         $wordId = $result['id'];
 
         // Update date
-        $message = $listService->updateStatusDateByIdList("($wordId)");
+        $message = $listService->updateStatusDateByIdList([$wordId]);
 
         $this->assertNotEmpty($message);
     }
@@ -472,7 +471,7 @@ class WordListServiceTest extends TestCase
         $wordId = $result['id'];
 
         // Delete sentences
-        $message = $listService->deleteSentencesByIdList("($wordId)");
+        $message = $listService->deleteSentencesByIdList([$wordId]);
 
         $this->assertNotEmpty($message);
 
@@ -500,7 +499,7 @@ class WordListServiceTest extends TestCase
         $wordId = $result['id'];
 
         // Convert to lowercase
-        $message = $listService->toLowercaseByIdList("($wordId)");
+        $message = $listService->toLowercaseByIdList([$wordId]);
 
         $this->assertNotEmpty($message);
 
@@ -528,7 +527,7 @@ class WordListServiceTest extends TestCase
         $wordId = $result['id'];
 
         // Capitalize
-        $message = $listService->capitalizeByIdList("($wordId)");
+        $message = $listService->capitalizeByIdList([$wordId]);
 
         $this->assertNotEmpty($message);
 
@@ -628,7 +627,7 @@ class WordListServiceTest extends TestCase
         }
 
         $service = new WordListService();
-        $sql = $service->getAnkiExportSql('(1,2,3)', '', '', '', '', '');
+        $sql = $service->getAnkiExportSql([1, 2, 3], '', '', '', '', '');
 
         $this->assertStringContainsString('WoID', $sql);
         $this->assertStringContainsString('WoTranslation', $sql);
@@ -642,7 +641,7 @@ class WordListServiceTest extends TestCase
         }
 
         $service = new WordListService();
-        $sql = $service->getTsvExportSql('(1,2,3)', '', '', '', '', '');
+        $sql = $service->getTsvExportSql([1, 2, 3], '', '', '', '', '');
 
         $this->assertStringContainsString('WoStatus', $sql);
         $this->assertStringContainsString('in (1,2,3)', $sql);
@@ -655,7 +654,7 @@ class WordListServiceTest extends TestCase
         }
 
         $service = new WordListService();
-        $sql = $service->getFlexibleExportSql('(1,2,3)', '', '', '', '', '');
+        $sql = $service->getFlexibleExportSql([1, 2, 3], '', '', '', '', '');
 
         $this->assertStringContainsString('LgExportTemplate', $sql);
         $this->assertStringContainsString('in (1,2,3)', $sql);

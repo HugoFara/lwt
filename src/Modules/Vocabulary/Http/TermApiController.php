@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Http;
 
 use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 
 /**
@@ -60,21 +61,18 @@ class TermApiController
         $termId = InputValidator::getInt('wid', 0) ?? 0;
 
         if ($termId === 0) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Term ID required']);
+            JsonResponse::error('Term ID required', 400)->send();
             return;
         }
 
         $term = $this->facade->getTerm($termId);
 
         if ($term === null) {
-            http_response_code(404);
-            echo json_encode(['error' => 'Term not found']);
+            JsonResponse::notFound('Term not found')->send();
             return;
         }
 
-        header('Content-Type: application/json');
-        echo json_encode([
+        JsonResponse::success([
             'id' => $term->id()->toInt(),
             'text' => $term->text(),
             'textLc' => $term->textLowercase(),
@@ -83,7 +81,7 @@ class TermApiController
             'sentence' => $term->sentence(),
             'status' => $term->status()->toInt(),
             'langId' => $term->languageId(),
-        ]);
+        ])->send();
     }
 
     /**
@@ -103,8 +101,7 @@ class TermApiController
         $sentence = InputValidator::getString('sentence');
 
         if ($langId === 0 || $text === '') {
-            http_response_code(400);
-            echo json_encode(['error' => 'Language ID and text required']);
+            JsonResponse::error('Language ID and text required', 400)->send();
             return;
         }
 
@@ -118,16 +115,14 @@ class TermApiController
                 $sentence
             );
 
-            header('Content-Type: application/json');
-            echo json_encode([
+            JsonResponse::success([
                 'success' => true,
                 'id' => $term->id()->toInt(),
                 'text' => $term->text(),
                 'textLc' => $term->textLowercase(),
-            ]);
+            ])->send();
         } catch (\Exception $e) {
-            http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
+            JsonResponse::error($e->getMessage(), 500)->send();
         }
     }
 
@@ -147,8 +142,7 @@ class TermApiController
         $status = InputValidator::getInt('status', 0) ?? 0;
 
         if ($termId === 0) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Term ID required']);
+            JsonResponse::error('Term ID required', 400)->send();
             return;
         }
 
@@ -164,14 +158,12 @@ class TermApiController
                 $romanization !== '' ? $romanization : null
             );
 
-            header('Content-Type: application/json');
-            echo json_encode([
+            JsonResponse::success([
                 'success' => true,
                 'id' => $term->id()->toInt(),
-            ]);
+            ])->send();
         } catch (\Exception $e) {
-            http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
+            JsonResponse::error($e->getMessage(), 500)->send();
         }
     }
 
@@ -187,14 +179,12 @@ class TermApiController
         $termId = InputValidator::getInt('wid', 0) ?? 0;
 
         if ($termId === 0) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Term ID required']);
+            JsonResponse::error('Term ID required', 400)->send();
             return;
         }
 
         $result = $this->facade->deleteTerm($termId);
 
-        header('Content-Type: application/json');
-        echo json_encode(['deleted' => $result]);
+        JsonResponse::success(['deleted' => $result])->send();
     }
 }

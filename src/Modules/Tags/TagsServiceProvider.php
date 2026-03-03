@@ -213,7 +213,8 @@ class TagsServiceProvider implements ServiceProviderInterface
         $container->singleton(GetAllTagNames::class, function (Container $c) {
             return new GetAllTagNames(
                 $c->getTyped(MySqlTermTagRepository::class),
-                $c->getTyped(MySqlTextTagRepository::class)
+                $c->getTyped(MySqlTextTagRepository::class),
+                $_SERVER['REQUEST_URI'] ?? null
             );
         });
     }

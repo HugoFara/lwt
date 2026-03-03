@@ -22,6 +22,7 @@ namespace Lwt\Modules\User\Application\Services;
 use TheNetworg\OAuth2\Client\Provider\Azure;
 use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Modules\User\Application\UserFacade;
 
 /**
@@ -117,10 +118,8 @@ class MicrosoftAuthService
      */
     private function getDefaultRedirectUri(): string
     {
-        $https = $_SERVER['HTTPS'] ?? '';
-        $protocol = ($https !== '' && $https !== 'off') ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        return "{$protocol}://{$host}/microsoft/callback";
+        $origin = UrlUtilities::getAppOrigin();
+        return "{$origin}/microsoft/callback";
     }
 
     /**

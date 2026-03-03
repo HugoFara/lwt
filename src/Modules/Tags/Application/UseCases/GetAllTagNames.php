@@ -29,19 +29,23 @@ class GetAllTagNames
 {
     private TagRepositoryInterface $termRepository;
     private TagRepositoryInterface $textRepository;
+    private ?string $requestUri;
 
     /**
      * Constructor.
      *
      * @param TagRepositoryInterface $termRepository Term tag repository
      * @param TagRepositoryInterface $textRepository Text tag repository
+     * @param string|null            $requestUri     Current request URI (injected from controller)
      */
     public function __construct(
         TagRepositoryInterface $termRepository,
-        TagRepositoryInterface $textRepository
+        TagRepositoryInterface $textRepository,
+        ?string $requestUri = null
     ) {
         $this->termRepository = $termRepository;
         $this->textRepository = $textRepository;
+        $this->requestUri = $requestUri;
     }
 
     /**
@@ -133,7 +137,7 @@ class GetAllTagNames
      */
     private function getUrlBase(): string
     {
-        $url = $_SERVER['REQUEST_URI'] ?? '';
+        $url = $this->requestUri ?? ($_SERVER['REQUEST_URI'] ?? '');
         return substr($url, 0, (int) strrpos($url, '/'));
     }
 }
