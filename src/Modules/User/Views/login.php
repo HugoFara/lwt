@@ -150,6 +150,7 @@ if (isset($_SESSION['auth_success'])) {
                     </p>
 
                     <!-- WordPress login link (if available) -->
+                    <?php if (($_ENV['WORDPRESS_ENABLED'] ?? '') !== '') : ?>
                     <p class="has-text-centered mt-3">
                         <a href="/wordpress/start" class="has-text-grey">
                             <span class="icon-text">
@@ -160,6 +161,7 @@ if (isset($_SESSION['auth_success'])) {
                             </span>
                         </a>
                     </p>
+                    <?php endif; ?>
 
                     <!-- Google login link (if configured) -->
                     <?php if (($_ENV['GOOGLE_CLIENT_ID'] ?? '') !== '') : ?>

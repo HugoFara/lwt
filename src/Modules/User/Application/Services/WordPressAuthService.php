@@ -53,12 +53,26 @@ class WordPressAuthService
     }
 
     /**
+     * Check if WordPress integration is enabled via env var.
+     *
+     * @return bool True if WORDPRESS_ENABLED is set
+     */
+    public static function isConfigured(): bool
+    {
+        return ($_ENV['WORDPRESS_ENABLED'] ?? '') !== '';
+    }
+
+    /**
      * Check if WordPress is available and load it.
      *
      * @return bool True if WordPress was loaded successfully
      */
     public function loadWordPress(): bool
     {
+        if (!self::isConfigured()) {
+            return false;
+        }
+
         $wpLoadPath = $this->getWordPressLoadPath();
 
         if (!file_exists($wpLoadPath)) {
