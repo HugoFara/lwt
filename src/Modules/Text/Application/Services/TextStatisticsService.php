@@ -165,44 +165,16 @@ class TextStatisticsService
             $c . '</span>';
         }
 
-        // Raw SQL with implicit JOIN
-        // languages and texts both have user scope (LgUsID, TxUsID)
+        // Get language codes directly from language columns
         $bindings = [];
-        $sql = "SELECT LgGoogleTranslateURI
+        $sql = "SELECT LgSourceLang, LgTargetLang
             FROM languages, texts
             WHERE LgID = TxLgID and TxID = $textId"
             . UserScopedQuery::forTablePrepared('languages', $bindings, 'languages')
             . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts');
-        $dict = (string) Connection::fetchValue($sql, 'LgGoogleTranslateURI');
-        $tl = $sl = "";
-        if ($dict) {
-            // @deprecated(2.5.2-fork) For future version of LWT: do not use translator uri
-            // to find language code
-            if (str_starts_with($dict, '*')) {
-                $dict = substr($dict, 1);
-            }
-            if (str_starts_with($dict, 'ggl.php')) {
-                // We just need to form a valid URL
-                $dict = "http://" . $dict;
-            }
-            $queryString = parse_url($dict, PHP_URL_QUERY);
-            /** @var array<string, string> $url_query */
-            $url_query = [];
-            if (is_string($queryString)) {
-                parse_str($queryString, $url_query);
-            }
-            if (
-                array_key_exists('lwt_translator', $url_query)
-                && $url_query['lwt_translator'] == "libretranslate"
-            ) {
-                $tl = (string)($url_query['target'] ?? '');
-                $sl = (string)($url_query['source'] ?? '');
-            } else {
-                // Defaulting to Google Translate query style
-                $tl = (string)($url_query['tl'] ?? '');
-                $sl = (string)($url_query['sl'] ?? '');
-            }
-        }
+        $langRow = Connection::preparedFetchOne($sql, $bindings);
+        $sl = (string)($langRow['LgSourceLang'] ?? '');
+        $tl = (string)($langRow['LgTargetLang'] ?? '');
 
         $bulkTranslateUrl = 'bulk_translate_words.php?tid=' . $textId .
             '&offset=0&sl=' . $sl . '&tl=' . $tl;
