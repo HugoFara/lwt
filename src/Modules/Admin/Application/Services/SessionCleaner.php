@@ -42,5 +42,4 @@ class SessionCleaner
         // Clear current text setting (database-stored)
         Settings::save('currenttext', '');
     }
-
 }

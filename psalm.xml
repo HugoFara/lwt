@@ -14,7 +14,7 @@
             <directory name="vendor" />
             <directory name="node_modules" />
             <directory name="assets" />
-            <directory name="docs" />
+            <directory name="docs-src" />
             <directory name="src/tools" />
             <directory name="tests" />
         </ignoreFiles>
