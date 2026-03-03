@@ -39,7 +39,7 @@ use Lwt\Modules\Vocabulary\Application\Services\LemmaService;
 use Lwt\Modules\Vocabulary\Domain\LemmatizerInterface;
 use Lwt\Modules\Vocabulary\Infrastructure\Lemmatizers\DictionaryLemmatizer;
 // Infrastructure
-use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 // Application
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 // HTTP
@@ -51,7 +51,7 @@ use Lwt\Modules\Vocabulary\Http\WordListApiHandler;
 use Lwt\Modules\Vocabulary\Http\TermTranslationApiHandler;
 use Lwt\Modules\Vocabulary\Http\TermStatusApiHandler;
 use Lwt\Modules\Vocabulary\Http\VocabularyApiRouter;
-use Lwt\Modules\Text\Http\TextApiHandler;
+use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
@@ -226,8 +226,11 @@ class VocabularyServiceProvider implements ServiceProviderInterface
         });
 
         // Register CreateTermFromHover Use Case
-        $container->singleton(CreateTermFromHover::class, function (Container $_c): CreateTermFromHover {
-            return new CreateTermFromHover();
+        $container->singleton(CreateTermFromHover::class, function (Container $c): CreateTermFromHover {
+            return new CreateTermFromHover(
+                $c->getTyped(VocabularyFacade::class),
+                $c->getTyped(\Lwt\Modules\Dictionary\Application\DictionaryFacade::class)
+            );
         });
 
         // Register Term CRUD API Handler
@@ -287,7 +290,7 @@ class VocabularyServiceProvider implements ServiceProviderInterface
                 $c->getTyped(WordListApiHandler::class),
                 $c->getTyped(TermTranslationApiHandler::class),
                 $c->getTyped(TermStatusApiHandler::class),
-                $c->getTyped(TextApiHandler::class)
+                $c->getTyped(TextFacade::class)
             );
         });
 

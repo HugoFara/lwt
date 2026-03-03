@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
 use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
@@ -481,41 +482,49 @@ class WordUploadService
             ->where('LgID', '=', $langId)
             ->valuePrepared('LgRemoveSpaces');
 
-        $this->initTempTables();
+        DB::beginTransaction();
+        try {
+            $this->initTempTables();
 
-        if ($this->isLocalInfileEnabled()) {
-            $this->loadDataToTempTable(
-                $removeSpaces,
-                $fields,
-                $columnsClause,
-                $delimiter,
-                $fileName,
-                $ignoreFirst
-            );
-        } else {
-            $this->loadDataToTempTableWithPHP(
-                $removeSpaces,
-                $fields,
-                $delimiter,
-                $fileName,
-                $ignoreFirst
-            );
+            if ($this->isLocalInfileEnabled()) {
+                $this->loadDataToTempTable(
+                    $removeSpaces,
+                    $fields,
+                    $columnsClause,
+                    $delimiter,
+                    $fileName,
+                    $ignoreFirst
+                );
+            } else {
+                $this->loadDataToTempTableWithPHP(
+                    $removeSpaces,
+                    $fields,
+                    $delimiter,
+                    $fileName,
+                    $ignoreFirst
+                );
+            }
+
+            // Handle translation merging for overwrite modes 4 and 5
+            if ($overwrite > 3) {
+                $this->handleTranslationMerge($langId, $translDelim, $tabType);
+            }
+
+            // Execute the main import/update query
+            $this->executeMainImportQuery($langId, $fields, $status, $overwrite);
+
+            // Handle tags if tag list field is specified
+            if ($fields["tl"] != 0) {
+                $this->handleTagsImport($langId);
+            }
+
+            $this->cleanupTempTables();
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollback();
+            $this->cleanupTempTables();
+            throw $e;
         }
-
-        // Handle translation merging for overwrite modes 4 and 5
-        if ($overwrite > 3) {
-            $this->handleTranslationMerge($langId, $translDelim, $tabType);
-        }
-
-        // Execute the main import/update query
-        $this->executeMainImportQuery($langId, $fields, $status, $overwrite);
-
-        // Handle tags if tag list field is specified
-        if ($fields["tl"] != 0) {
-            $this->handleTagsImport($langId);
-        }
-
-        $this->cleanupTempTables();
     }
 
     /**

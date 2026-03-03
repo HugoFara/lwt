@@ -23,7 +23,7 @@ use Lwt\Api\V1\Response;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
-use Lwt\Modules\Text\Http\TextApiHandler;
+use Lwt\Modules\Text\Application\TextFacade;
 
 /**
  * Routes /terms/* API requests to the appropriate vocabulary handler.
@@ -48,7 +48,7 @@ class VocabularyApiRouter implements ApiRoutableInterface
     private WordListApiHandler $wordListHandler;
     private TermTranslationApiHandler $termTranslationHandler;
     private TermStatusApiHandler $termStatusHandler;
-    private TextApiHandler $textHandler;
+    private TextFacade $textFacade;
 
     public function __construct(
         TermCrudApiHandler $termHandler,
@@ -57,7 +57,7 @@ class VocabularyApiRouter implements ApiRoutableInterface
         WordListApiHandler $wordListHandler,
         TermTranslationApiHandler $termTranslationHandler,
         TermStatusApiHandler $termStatusHandler,
-        TextApiHandler $textHandler
+        TextFacade $textFacade
     ) {
         $this->termHandler = $termHandler;
         $this->wordFamilyHandler = $wordFamilyHandler;
@@ -65,7 +65,7 @@ class VocabularyApiRouter implements ApiRoutableInterface
         $this->wordListHandler = $wordListHandler;
         $this->termTranslationHandler = $termTranslationHandler;
         $this->termStatusHandler = $termStatusHandler;
-        $this->textHandler = $textHandler;
+        $this->textFacade = $textFacade;
     }
 
     public function routeGet(array $fragments, array $params): JsonResponse
@@ -113,7 +113,7 @@ class VocabularyApiRouter implements ApiRoutableInterface
         } elseif ($frag1 !== '' && ctype_digit($frag1)) {
             $termId = (int) $frag1;
             if ($frag2 === 'translations') {
-                return Response::success($this->textHandler->formatTermTranslations(
+                return Response::success($this->textFacade->getTermTranslations(
                     (string) ($params["term_lc"] ?? ''),
                     (int) ($params["text_id"] ?? 0)
                 ));

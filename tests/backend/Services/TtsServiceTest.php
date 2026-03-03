@@ -22,7 +22,7 @@ require_once __DIR__ . '/../../../src/Shared/Infrastructure/Http/UrlUtilities.ph
 require_once __DIR__ . '/../../../src/Modules/Admin/Application/Services/TtsService.php';
 
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Modules\Language\Infrastructure\LanguagePresets;
+use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 
 /**
  * Unit tests for the TtsService class.

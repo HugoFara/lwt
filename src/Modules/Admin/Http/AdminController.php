@@ -22,7 +22,7 @@ namespace Lwt\Modules\Admin\Http;
 use Lwt\Shared\Http\BaseController;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Modules\Admin\Application\AdminFacade;
-use Lwt\Modules\Language\Infrastructure\LanguagePresets;
+use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 use Lwt\Modules\Admin\Application\Services\TtsService;
 
 /**

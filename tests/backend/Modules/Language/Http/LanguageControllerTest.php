@@ -9,7 +9,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Lwt\Modules\Language\Http\LanguageController;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Domain\Language;
-use Lwt\Modules\Language\Infrastructure\LanguagePresets;
+use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 
 /**
  * Tests for LanguageController.

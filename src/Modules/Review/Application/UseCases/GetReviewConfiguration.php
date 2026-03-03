@@ -21,7 +21,7 @@ use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Modules\Language\Infrastructure\LanguagePresets;
+use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 
 // LanguageFacade loaded via autoloader
 

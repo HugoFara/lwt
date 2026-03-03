@@ -24,7 +24,7 @@ use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
 use Lwt\Api\V1\Response;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Modules\Language\Infrastructure\LanguagePresets;
+use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 

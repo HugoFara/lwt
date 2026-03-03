@@ -28,7 +28,7 @@ use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 use Lwt\Modules\Tags\Application\TagsFacade;
-use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Modules\Text\Application\Services\TextPrintService;
 use Lwt\Modules\Text\Application\Services\TextScoringService;

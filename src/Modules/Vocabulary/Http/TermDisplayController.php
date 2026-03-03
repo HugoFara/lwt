@@ -23,7 +23,7 @@ use Lwt\Shared\Infrastructure\Database\Validation;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
-use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;

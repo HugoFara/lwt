@@ -22,7 +22,7 @@ use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
-use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;

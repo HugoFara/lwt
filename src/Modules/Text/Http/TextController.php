@@ -23,7 +23,7 @@ use Lwt\Modules\Text\Application\Services\TextDisplayService;
 use Lwt\Modules\Text\Application\Services\TextNavigationService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Modules\Language\Infrastructure\LanguagePresets;
+use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\Validation;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;

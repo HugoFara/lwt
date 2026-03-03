@@ -13,7 +13,7 @@ use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Restore;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
-use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Admin\Application\Services\MediaService;
@@ -50,7 +50,7 @@ require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/Ex
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Database/Restore.php';
 require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExportService.php';
 require_once __DIR__ . '/../../../src/Modules/Admin/Application/Services/MediaService.php';
-require_once __DIR__ . '/../../../src/Modules/Vocabulary/Infrastructure/DictionaryAdapter.php';
+require_once __DIR__ . '/../../../src/Shared/Infrastructure/Dictionary/DictionaryAdapter.php';
 // LanguageFacade loaded via autoloader
 
 /**

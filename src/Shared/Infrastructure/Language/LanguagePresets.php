@@ -9,7 +9,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Modules\Language\Infrastructure
+ * @package  Lwt\Shared\Infrastructure\Language
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Modules\Language\Infrastructure;
+namespace Lwt\Shared\Infrastructure\Language;
 
 /**
  * Infrastructure class for predefined language definitions.
@@ -27,7 +27,7 @@ namespace Lwt\Modules\Language\Infrastructure;
  * ISO codes, regex patterns, and display settings.
  *
  * @category Lwt
- * @package  Lwt\Modules\Language\Infrastructure
+ * @package  Lwt\Shared\Infrastructure\Language
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/

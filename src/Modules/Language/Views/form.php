@@ -27,7 +27,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Language\Views;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
-use Lwt\Modules\Language\Infrastructure\LanguagePresets;
+use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 
 // Type assertions for view variables
 assert(is_object($language));

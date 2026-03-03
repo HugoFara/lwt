@@ -23,7 +23,7 @@ use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Modules\Language\Infrastructure\LanguagePresets;
+use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
 use Lwt\Shared\Http\ApiRoutableInterface;

@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Modules\Vocabulary\Infrastructure
+ * @package  Lwt\Shared\Infrastructure\Dictionary
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -15,7 +15,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Modules\Vocabulary\Infrastructure;
+namespace Lwt\Shared\Infrastructure\Dictionary;
 
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;

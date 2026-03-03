@@ -6,7 +6,7 @@ namespace Lwt\Tests\Modules\Vocabulary\Http;
 
 use Lwt\Modules\Vocabulary\Http\TermTranslationApiHandler;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
-use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 

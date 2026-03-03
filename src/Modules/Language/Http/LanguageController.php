@@ -25,7 +25,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Language\Domain\Language;
-use Lwt\Modules\Language\Infrastructure\LanguagePresets;
+use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Modules\Language\Infrastructure\Parser\ParserRegistry;
 

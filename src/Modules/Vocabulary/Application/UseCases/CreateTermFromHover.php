@@ -17,7 +17,8 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Application\UseCases;
 
-use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTranslateClient;
+use Lwt\Modules\Dictionary\Application\DictionaryFacade;
+use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Escaping;
@@ -35,15 +36,21 @@ use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 class CreateTermFromHover
 {
     private VocabularyFacade $vocabularyFacade;
+    private DictionaryFacade $dictionaryFacade;
 
     /**
      * Constructor.
      *
      * @param VocabularyFacade|null $vocabularyFacade Vocabulary facade
+     * @param DictionaryFacade|null $dictionaryFacade Dictionary facade
      */
-    public function __construct(?VocabularyFacade $vocabularyFacade = null)
-    {
+    public function __construct(
+        ?VocabularyFacade $vocabularyFacade = null,
+        ?DictionaryFacade $dictionaryFacade = null
+    ) {
         $this->vocabularyFacade = $vocabularyFacade ?? new VocabularyFacade();
+        $this->dictionaryFacade = $dictionaryFacade
+            ?? new DictionaryFacade(new LocalDictionaryService());
     }
 
     /**
@@ -74,7 +81,7 @@ class CreateTermFromHover
         // Get translation if status is 1 (new word) and translation params provided
         $translation = '*';
         if ($status === 1 && $sourceLang !== '' && $targetLang !== '') {
-            $translationResult = GoogleTranslateClient::staticTranslate(
+            $translationResult = $this->dictionaryFacade->translate(
                 $wordText,
                 $sourceLang,
                 $targetLang

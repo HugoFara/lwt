@@ -20,7 +20,7 @@ namespace Lwt\Modules\Review\Application\UseCases;
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Modules\Language\Infrastructure\LanguagePresets;
+use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 
 /**

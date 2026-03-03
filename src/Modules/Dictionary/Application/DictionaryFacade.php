@@ -23,6 +23,7 @@ use Lwt\Modules\Dictionary\Infrastructure\Import\ImporterInterface;
 use Lwt\Modules\Dictionary\Infrastructure\Import\CsvImporter;
 use Lwt\Modules\Dictionary\Infrastructure\Import\JsonImporter;
 use Lwt\Modules\Dictionary\Infrastructure\Import\StarDictImporter;
+use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTranslateClient;
 use RuntimeException;
 
 /**
@@ -203,6 +204,20 @@ class DictionaryFacade
     public function hasLocalDictionaries(int $languageId): bool
     {
         return $this->dictionaryService->hasLocalDictionaries($languageId);
+    }
+
+    /**
+     * Translate a word using Google Translate.
+     *
+     * @param string $word       Word to translate
+     * @param string $sourceLang Source language code
+     * @param string $targetLang Target language code
+     *
+     * @return string[]|false Array of translations, or false on failure
+     */
+    public function translate(string $word, string $sourceLang, string $targetLang): array|false
+    {
+        return GoogleTranslateClient::staticTranslate($word, $sourceLang, $targetLang);
     }
 
     /**

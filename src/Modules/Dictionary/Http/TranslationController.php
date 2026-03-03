@@ -19,7 +19,7 @@ namespace Lwt\Modules\Dictionary\Http;
 
 use Lwt\Shared\Http\BaseController;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
-use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 use Lwt\Modules\Dictionary\Application\TranslationService;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;

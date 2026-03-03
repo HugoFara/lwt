@@ -20,7 +20,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Dictionary\Application;
 
 use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTranslateClient;
-use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 

@@ -54,7 +54,7 @@ src/
 │   ├── Admin/                           # Settings, backup, statistics
 │   ├── Dictionary/                      # Local dictionaries, translation
 │   ├── Feed/                            # RSS feed management
-│   ├── Home/                            # Dashboard
+│   ├── Home/                            # Dashboard (lightweight: Application+Http only, no Domain/Infrastructure — read-only aggregation module)
 │   ├── Language/                        # Language configuration
 │   ├── Review/                          # Spaced repetition testing
 │   ├── Tags/                            # Term and text tagging

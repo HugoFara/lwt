@@ -20,7 +20,6 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Application;
 
-use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Escaping;
@@ -855,5 +854,121 @@ class TextFacade
             'textId' => $textId,
             'redirect' => false
         ];
+    }
+
+    // =========================
+    // TERM TRANSLATION METHODS
+    // =========================
+
+    /**
+     * Get translations for a word by ID.
+     *
+     * @param int $wordId Word ID
+     *
+     * @return string[] List of translation strings
+     */
+    public function getWordTranslations(int $wordId): array
+    {
+        $translations = [];
+        $alltrans = (string) QueryBuilder::table('words')
+            ->where('WoID', '=', $wordId)
+            ->valuePrepared('WoTranslation');
+        $transarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $alltrans);
+        if ($transarr === false) {
+            return $translations;
+        }
+        foreach ($transarr as $t) {
+            $tt = trim($t);
+            if ($tt === '*' || $tt === '') {
+                continue;
+            }
+            $translations[] = $tt;
+        }
+        return $translations;
+    }
+
+    /**
+     * Get term translation data for annotation editing.
+     *
+     * @param string $termLc Lowercase term text
+     * @param int    $textId Text ID
+     *
+     * @return array{term_lc?: string, wid?: int|null, trans?: string,
+     *               ann_index?: int, term_ord?: int, translations?: string[],
+     *               language_id?: int, error?: string}
+     */
+    public function getTermTranslations(string $termLc, int $textId): array
+    {
+        $record = QueryBuilder::table('texts')
+            ->select(['TxLgID', 'TxAnnotatedText'])
+            ->where('TxID', '=', $textId)
+            ->firstPrepared();
+        if ($record === null) {
+            return ['error' => 'Text not found'];
+        }
+        $langid = (int) $record['TxLgID'];
+        $ann = (string) $record['TxAnnotatedText'];
+        if (strlen($ann) > 0) {
+            $annotationService = new Services\AnnotationService();
+            $ann = $annotationService->recreateSaveAnnotation($textId, $ann);
+        }
+
+        $annotations = preg_split('/[\n]/u', $ann);
+        if ($annotations === false) {
+            return ['error' => 'Failed to parse annotations'];
+        }
+        $i = -1;
+        foreach ($annotations as $index => $annotationLine) {
+            $vals = preg_split('/[\t]/u', $annotationLine);
+            if ($vals === false) {
+                continue;
+            }
+            if ($vals[0] <= -1) {
+                continue;
+            }
+            if (trim($termLc) != mb_strtolower(trim($vals[1]), 'UTF-8')) {
+                continue;
+            }
+            $i = $index;
+            break;
+        }
+
+        $annData = [];
+        if ($i === -1) {
+            $annData['error'] = 'Annotation not found';
+            return $annData;
+        }
+
+        $annotationLine = $annotations[$i];
+        $vals = preg_split('/[\t]/u', $annotationLine);
+        if ($vals === false) {
+            $annData['error'] = 'Annotation line is ill-formatted';
+            return $annData;
+        }
+        $annData['term_lc'] = trim($termLc);
+        $annData['wid'] = null;
+        $annData['trans'] = '';
+        $annData['ann_index'] = $i;
+        $annData['term_ord'] = (int) $vals[0];
+
+        $wid = null;
+        if (count($vals) > 2 && ctype_digit($vals[2])) {
+            $wid = (int) $vals[2];
+            $tempWid = QueryBuilder::table('words')
+                ->where('WoID', '=', $wid)
+                ->countPrepared();
+            if ($tempWid < 1) {
+                $wid = null;
+            }
+        }
+        if ($wid !== null) {
+            $annData['wid'] = $wid;
+            $annData['translations'] = $this->getWordTranslations($wid);
+        }
+        if (count($vals) > 3) {
+            $annData['trans'] = $vals[3];
+        }
+        $annData['language_id'] = $langid;
+        return $annData;
     }
 }

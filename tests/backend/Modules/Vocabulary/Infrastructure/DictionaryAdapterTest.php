@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Tests\Modules\Vocabulary\Infrastructure;
 
 use PHPUnit\Framework\TestCase;
-use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
+use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 
 /**
  * Tests for DictionaryAdapter.
  *
- * @covers \Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter
+ * @covers \Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter
  */
 class DictionaryAdapterTest extends TestCase
 {
