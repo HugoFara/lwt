@@ -20,14 +20,12 @@
   </coverage>
   <source>
     <include>
-      <directory suffix=".php">./inc</directory>
       <directory suffix=".php">./src</directory>
     </include>
     <exclude>
       <directory>./vendor</directory>
       <directory>./tests</directory>
       <directory>./docs</directory>
-      <file>./inc/ajax_*.php</file>
     </exclude>
   </source>
 </phpunit>
