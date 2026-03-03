@@ -176,7 +176,7 @@ echo PageLayoutHelper::buildActionCard([
         &nbsp; <a href="/feeds/<?php echo $row['NfID']; ?>/load">
             <span title="Update Feed"><?php echo IconHelper::render('refresh-cw', ['alt' => '-']); ?></span>
         </a>&nbsp;
-        <a href="<?php echo $row['NfSourceURI']; ?>" data-action="open-window">
+        <a href="<?php echo htmlspecialchars($row['NfSourceURI'], ENT_QUOTES, 'UTF-8'); ?>" data-action="open-window">
             <?php echo IconHelper::render('external-link', ['title' => 'Show Feed', 'alt' => 'Link']); ?>
         </a>&nbsp;
         <span class="click" @click="confirmDelete('<?php echo $row['NfID']; ?>')">
@@ -184,7 +184,7 @@ echo PageLayoutHelper::buildActionCard([
         </span>
     </td>
     <td class="has-text-centered"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-    <td class="has-text-centered"><?php echo str_replace(',', ', ', $row['NfOptions']); ?></td>
+    <td class="has-text-centered"><?php echo htmlspecialchars(str_replace(',', ', ', $row['NfOptions']), ENT_QUOTES, 'UTF-8'); ?></td>
     <td class="has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
         <?php if ($row['NfUpdate']) {
             echo $feedService->formatLastUpdate($diff);
