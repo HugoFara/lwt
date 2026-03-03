@@ -68,7 +68,18 @@ class ReviewApiHandler implements ApiRoutableInterface
      */
     public function getWordReviewData(string $reviewsql, bool $wordMode, int $testtype): array
     {
-        $wordRecord = $this->reviewFacade->getNextWord($reviewsql);
+        try {
+            $wordRecord = $this->reviewFacade->getNextWord($reviewsql);
+        } catch (\mysqli_sql_exception $e) {
+            error_log('Review query failed: ' . $e->getMessage());
+            return [
+                "term_id" => 0,
+                "term_text" => '',
+                "group" => '',
+                "error" => 'Database error during review'
+            ];
+        }
+
         if ($wordRecord === null || $wordRecord === []) {
             return [
                 "term_id" => 0,
@@ -531,14 +542,9 @@ class ReviewApiHandler implements ApiRoutableInterface
             return ['error' => 'Invalid test identifier'];
         }
 
-        // Handle legacy raw_sql case
-        if ($identifier[0] === 'raw_sql') {
-            $reviewsql = is_string($identifier[1]) ? $identifier[1] : null;
-        } else {
-            /** @var int|int[] $sel */
-            $sel = $identifier[1];
-            $reviewsql = $this->reviewFacade->getReviewSql($identifier[0], $sel);
-        }
+        /** @var int|int[] $sel */
+        $sel = $identifier[1];
+        $reviewsql = $this->reviewFacade->getReviewSql($identifier[0], $sel);
 
         if ($reviewsql === null) {
             return ['error' => 'Unable to generate test SQL'];

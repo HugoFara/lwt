@@ -709,10 +709,12 @@ class ReviewControllerTest extends TestCase
 
         $service = new ReviewService();
 
+        // Unknown selection type (not 2 or 3) should return empty identifier
         $identifier = $service->getReviewIdentifier(1, 'SELECT * FROM words', null, null);
 
         $this->assertIsArray($identifier);
         $this->assertCount(2, $identifier);
+        $this->assertSame('', $identifier[0]);
     }
 
     // ===== ReviewService validation tests =====

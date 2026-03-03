@@ -97,8 +97,8 @@ class ReviewService
                 case 3:
                     return ['texts', $dataIntArray];
                 default:
-                    // Legacy behavior - direct SQL (deprecated)
-                    return ['raw_sql', $sessTestsql];
+                    // Unknown selection type — reject rather than passing raw SQL
+                    return ['', ''];
             }
         }
 
