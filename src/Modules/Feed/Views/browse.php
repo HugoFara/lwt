@@ -158,6 +158,7 @@ endif; ?>
 <?php if ($recno > 0) : ?>
     <?php $formAction = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
     <form name="form2" action="<?php echo $formAction; ?>" method="post">
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
   <table class="table is-bordered is-fullwidth">
   <tr>
     <th class="" colspan="2">
@@ -210,11 +211,12 @@ endif; ?>
             <td class="has-text-centered">
             <?php $descEscaped = htmlentities($row['FlDescription'], ENT_QUOTES, 'UTF-8', false); ?>
             <span title="<?php echo $descEscaped; ?>">
-                <b><?php echo $row['FlTitle']; ?></b>
+                <b><?php echo htmlspecialchars($row['FlTitle'], ENT_QUOTES, 'UTF-8'); ?></b>
             </span>
         <?php if ($row['FlAudio']) : ?>
-            <a href="<?php echo $row['FlAudio']; ?>"
-               @click.prevent="openPopup('<?php echo $row['FlAudio']; ?>', 'audio')"
+            <?php $audioEscaped = htmlspecialchars($row['FlAudio'], ENT_QUOTES, 'UTF-8'); ?>
+            <a href="<?php echo $audioEscaped; ?>"
+               @click.prevent="openPopup('<?php echo addslashes($audioEscaped); ?>', 'audio')"
                target="_blank"
                rel="noopener">
                 <?php echo IconHelper::render('volume-2', ['alt' => 'Audio']); ?>
@@ -223,15 +225,15 @@ endif; ?>
         </td>
             <td class="has-text-centered valign-middle">
         <?php if ($row['FlLink'] !== '' && !str_starts_with(trim($row['FlLink']), '#')) : ?>
-            <?php $linkTrimmed = trim($row['FlLink']); ?>
-            <a href="<?php echo $linkTrimmed; ?>"
-               title="<?php echo $linkTrimmed; ?>"
-               @click.prevent="openPopup('<?php echo $linkTrimmed; ?>', 'external')"
+            <?php $linkEscaped = htmlspecialchars(trim($row['FlLink']), ENT_QUOTES, 'UTF-8'); ?>
+            <a href="<?php echo $linkEscaped; ?>"
+               title="<?php echo $linkEscaped; ?>"
+               @click.prevent="openPopup('<?php echo addslashes($linkEscaped); ?>', 'external')"
                target="_blank"
                rel="noopener">
             <?php echo IconHelper::render('external-link', ['alt' => '-']); ?></a>
         <?php endif; ?>
-        </td><td class="has-text-centered"><?php echo $row['FlDate']; ?></td></tr>
+        </td><td class="has-text-centered"><?php echo htmlspecialchars($row['FlDate'], ENT_QUOTES, 'UTF-8'); ?></td></tr>
     <?php endforeach; ?>
 
     </table>
