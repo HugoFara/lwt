@@ -312,8 +312,8 @@ img[src*="test_notyet"] + .icon {
 }
 
 /**
- * Legacy support: X icon in required context.
- * @deprecated Use asterisk icon instead.
+ * Required field indicator icon styling.
+ * Colors the icon red next to required/notempty fields.
  */
 .notempty + .icon,
 input:required + .icon {

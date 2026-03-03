@@ -19,7 +19,6 @@ namespace Lwt\Modules\Dictionary\Http;
 
 use Lwt\Shared\Http\BaseController;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
-use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTimeToken;
 use Lwt\Modules\Vocabulary\Infrastructure\DictionaryAdapter;
 use Lwt\Modules\Dictionary\Application\TranslationService;
 use Lwt\Shared\Infrastructure\Database\Settings;
@@ -141,14 +140,10 @@ class TranslationController extends BaseController
         string $tgtLang,
         bool $sentenceMode
     ): void {
-        // Get time token for Google API
-        $timeToken = GoogleTimeToken::get();
-
         $result = $this->translationService->translateViaGoogle(
             $text,
             $srcLang,
-            $tgtLang,
-            $timeToken
+            $tgtLang
         );
 
         if (!$result['success']) {

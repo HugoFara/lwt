@@ -43,27 +43,4 @@ class SessionCleaner
         Settings::save('currenttext', '');
     }
 
-    /**
-     * Clear text-related filters.
-     *
-     * @return void
-     *
-     * @deprecated No longer needed - pagination state is now in URL params
-     */
-    public function clearTextFilters(): void
-    {
-        // No-op: pagination state is now in URL parameters
-    }
-
-    /**
-     * Clear word-related filters.
-     *
-     * @return void
-     *
-     * @deprecated No longer needed - pagination state is now in URL params
-     */
-    public function clearWordFilters(): void
-    {
-        // No-op: pagination state is now in URL parameters
-    }
 }

@@ -42,18 +42,16 @@ class TranslationService
     /**
      * Translate text using Google Translate.
      *
-     * @param string              $text      Text to translate
-     * @param string              $srcLang   Source language code (e.g., "es")
-     * @param string              $tgtLang   Target language code (e.g., "en")
-     * @param array<int>|null $timeToken Optional time token for Google API
+     * @param string $text    Text to translate
+     * @param string $srcLang Source language code (e.g., "es")
+     * @param string $tgtLang Target language code (e.g., "en")
      *
      * @return array{success: bool, translations: string[], error?: string}
      */
     public function translateViaGoogle(
         string $text,
         string $srcLang,
-        string $tgtLang,
-        ?array $timeToken = null
+        string $tgtLang
     ): array {
         if (trim($text) === '') {
             return [
@@ -71,7 +69,7 @@ class TranslationService
             ];
         }
 
-        $result = GoogleTranslateClient::staticTranslate($text, $srcLang, $tgtLang, $timeToken);
+        $result = GoogleTranslateClient::staticTranslate($text, $srcLang, $tgtLang);
 
         if ($result === false) {
             return [

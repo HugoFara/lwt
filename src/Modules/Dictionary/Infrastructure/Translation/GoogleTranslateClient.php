@@ -112,16 +112,6 @@ class GoogleTranslateClient
         $this->langTo = $lang;
         return $this;
     }
-    /**
-     * @param null|string $domain
-     *
-     * @deprecated Domain is no longer used for URL construction. The gtx endpoint
-     *             uses a fixed domain (translate.googleapis.com).
-     */
-    public static function setDomain(string|null $domain): void
-    {
-        self::setHeaders();
-    }
     public function __construct(string|null $from, string $to)
     {
         $this->setLangFrom($from)->setLangTo($to);
@@ -197,23 +187,18 @@ class GoogleTranslateClient
     /**
      * Returns an array of Translations
      *
-     * @param string     $string     Word to translate
-     * @param string     $from       Source language code (i.e. en,de,fr,...)
-     * @param string     $to         Target language code (i.e. en,de,fr,...)
-     *                               all supported language codes can be found here:
-     *                               https://cloud.google.com/translate/docs/basic/discovering-supported-languages#getting_a_list_of_supported_languages
-     *
-     * @param int[]|null $time_token @deprecated No longer used. The gtx endpoint requires no token.
-     * @param string|null $domain    @deprecated No longer used. The gtx endpoint uses a fixed domain.
+     * @param string $string Word to translate
+     * @param string $from   Source language code (i.e. en,de,fr,...)
+     * @param string $to     Target language code (i.e. en,de,fr,...)
+     *                       all supported language codes can be found here:
+     *                       https://cloud.google.com/translate/docs/basic/discovering-supported-languages#getting_a_list_of_supported_languages
      *
      * @return string[]|false An array of translation, or false if an error occured.
      */
     public static function staticTranslate(
-        $string,
-        $from,
-        $to,
-        $time_token = null,
-        $domain = null
+        string $string,
+        string $from,
+        string $to
     ): array|false {
         self::setHeaders();
         $url = sprintf(
