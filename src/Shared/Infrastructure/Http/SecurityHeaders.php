@@ -267,7 +267,7 @@ class SecurityHeaders
      *
      * @return bool True if connection is over HTTPS
      */
-    private static function isSecureConnection(): bool
+    public static function isSecureConnection(): bool
     {
         // Direct HTTPS
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {

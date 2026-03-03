@@ -24,6 +24,7 @@ use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
+use Lwt\Modules\Tags\Application\Services\TermTagService;
 use Lwt\Modules\Tags\Application\UseCases\CreateTag;
 use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Modules\Tags\Application\UseCases\DeleteTag;
@@ -488,7 +489,7 @@ class TagsFacade
      */
     public static function saveWordTags(int $wordId, array $tagNames): void
     {
-        self::getWordAssociation()->setTagsByName($wordId, $tagNames);
+        TermTagService::saveWordTags($wordId, $tagNames);
         self::getAllTermTags(true); // Refresh cache
     }
 
@@ -533,16 +534,7 @@ class TagsFacade
      */
     public static function getWordTagsHtml(int $wordId): string
     {
-        $html = '<ul id="termtags">';
-
-        if ($wordId > 0) {
-            $tagNames = self::getWordAssociation()->getTagTextsForItem($wordId);
-            foreach ($tagNames as $name) {
-                $html .= '<li>' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '</li>';
-            }
-        }
-
-        return $html . '</ul>';
+        return TermTagService::getWordTagsHtml($wordId);
     }
 
     /**
@@ -597,14 +589,7 @@ class TagsFacade
      */
     public static function getWordTagList(int $wordId, bool $escapeHtml = true): string
     {
-        if ($wordId <= 0) {
-            return '';
-        }
-
-        $tagNames = self::getWordAssociation()->getTagTextsForItem($wordId);
-        $list = implode(', ', $tagNames);
-
-        return $escapeHtml ? htmlspecialchars($list, ENT_QUOTES, 'UTF-8') : $list;
+        return TermTagService::getWordTagList($wordId, $escapeHtml);
     }
 
     /**
@@ -616,11 +601,7 @@ class TagsFacade
      */
     public static function getWordTagsArray(int $wordId): array
     {
-        if ($wordId <= 0) {
-            return [];
-        }
-
-        return self::getWordAssociation()->getTagTextsForItem($wordId);
+        return TermTagService::getWordTagsArray($wordId);
     }
 
     /**
@@ -633,45 +614,7 @@ class TagsFacade
      */
     public static function saveWordTagsFromArray(int $wordId, array $tagNames): void
     {
-        // Delete existing tags for this word
-        QueryBuilder::table('word_tag_map')
-            ->where('WtWoID', '=', $wordId)
-            ->delete();
-
-        if (empty($tagNames)) {
-            return;
-        }
-
-        // Refresh cache
-        self::getAllTermTags(true);
-
-        foreach ($tagNames as $tag) {
-            $tag = trim($tag);
-            if ($tag === '') {
-                continue;
-            }
-
-            // Create tag if it doesn't exist
-            // Use INSERT IGNORE to handle race condition / stale cache (Issue #120)
-            $sessionTags = isset($_SESSION['TAGS']) && is_array($_SESSION['TAGS']) ? $_SESSION['TAGS'] : [];
-            if (!in_array($tag, $sessionTags, true)) {
-                Connection::preparedExecute(
-                    'INSERT IGNORE INTO tags (TgText) VALUES (?)',
-                    [$tag]
-                );
-            }
-
-            // Link tag to word using raw SQL for INSERT...SELECT
-            Connection::preparedExecute(
-                "INSERT INTO word_tag_map (WtWoID, WtTgID)
-                SELECT ?, TgID
-                FROM tags
-                WHERE TgText = ?",
-                [$wordId, $tag]
-            );
-        }
-
-        // Refresh cache again after changes
+        TermTagService::saveWordTagsFromArray($wordId, $tagNames);
         self::getAllTermTags(true);
     }
 
@@ -700,21 +643,7 @@ class TagsFacade
      */
     public static function saveWordTagsFromForm(int $wordId): void
     {
-        $termTags = InputValidator::getArray('TermTags');
-        if (
-            empty($termTags)
-            || !isset($termTags['TagList'])
-            || !is_array($termTags['TagList'])
-        ) {
-            // Clear existing tags if no tags submitted
-            self::getWordAssociation()->setTagsByName($wordId, []);
-            return;
-        }
-
-        /** @var array<int|string, scalar> $tagList */
-        $tagList = $termTags['TagList'];
-        $tagNames = array_map('strval', $tagList);
-        self::saveWordTags($wordId, $tagNames);
+        TermTagService::saveWordTagsFromForm($wordId);
     }
 
     /**
@@ -788,37 +717,9 @@ class TagsFacade
      */
     public static function addTagToWords(string $tagText, string $idList): array
     {
-        if ($idList === '()') {
-            return ['count' => 0, 'error' => null];
-        }
-
-        $tagId = self::getOrCreateTermTag($tagText);
-        if ($tagId === null) {
-            return ['count' => 0, 'error' => 'Failed to create tag'];
-        }
-
-        // Use raw SQL for LEFT JOIN with dynamic IN clause
-        $sql = 'SELECT WoID
-            FROM words
-            LEFT JOIN word_tag_map ON WoID = WtWoID AND WtTgID = ' . $tagId . '
-            WHERE WtTgID IS NULL AND WoID IN ' . $idList
-            . UserScopedQuery::forTable('words');
-        $res = Connection::query($sql);
-
-        $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $count += (int) Connection::execute(
-                    'INSERT IGNORE INTO word_tag_map (WtWoID, WtTgID)
-                    VALUES(' . (int)$record['WoID'] . ', ' . $tagId . ')'
-                );
-            }
-            mysqli_free_result($res);
-        }
-
+        $result = TermTagService::addTagToWords($tagText, $idList);
         self::getAllTermTags(true);
-
-        return ['count' => $count, 'error' => null];
+        return $result;
     }
 
     /**
@@ -831,39 +732,7 @@ class TagsFacade
      */
     public static function removeTagFromWords(string $tagText, string $idList): array
     {
-        if ($idList === '()') {
-            return ['count' => 0, 'error' => null];
-        }
-
-        /** @var int|string|null $tagIdRaw */
-        $tagIdRaw = Connection::preparedFetchValue(
-            'SELECT TgID FROM tags WHERE TgText = ?',
-            [$tagText],
-            'TgID'
-        );
-
-        if ($tagIdRaw === null) {
-            return ['count' => 0, 'error' => "Tag {$tagText} not found"];
-        }
-        $tagId = (int) $tagIdRaw;
-
-        $sql = 'SELECT WoID FROM words WHERE WoID IN ' . $idList
-            . UserScopedQuery::forTable('words');
-        $res = Connection::query($sql);
-
-        $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $count++;
-                QueryBuilder::table('word_tag_map')
-                    ->where('WtWoID', '=', (int)$record['WoID'])
-                    ->where('WtTgID', '=', $tagId)
-                    ->delete();
-            }
-            mysqli_free_result($res);
-        }
-
-        return ['count' => $count, 'error' => null];
+        return TermTagService::removeTagFromWords($tagText, $idList);
     }
 
     /**
@@ -1057,47 +926,7 @@ class TagsFacade
         int|string|null $selected,
         int|string $langId
     ): string {
-        $selected = $selected ?? '';
-
-        $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
-        $html .= '[Filter off]</option>';
-
-        if ($langId === '') {
-            $rows = Connection::preparedFetchAll(
-                "SELECT TgID, TgText
-                FROM words, tags, word_tag_map
-                WHERE TgID = WtTgID AND WtWoID = WoID
-                GROUP BY TgID
-                ORDER BY UPPER(TgText)",
-                []
-            );
-        } else {
-            $rows = Connection::preparedFetchAll(
-                "SELECT TgID, TgText
-                FROM words, tags, word_tag_map
-                WHERE TgID = WtTgID AND WtWoID = WoID AND WoLgID = ?
-                GROUP BY TgID
-                ORDER BY UPPER(TgText)",
-                [$langId]
-            );
-        }
-
-        $count = 0;
-        foreach ($rows as $record) {
-            $count++;
-            $tagId = (int) $record['TgID'];
-            $tagText = (string) ($record['TgText'] ?? '');
-            $html .= '<option value="' . $tagId . '"' .
-                FormHelper::getSelected($selected, $tagId) . '>' .
-                htmlspecialchars($tagText, ENT_QUOTES, 'UTF-8') . '</option>';
-        }
-
-        if ($count > 0) {
-            $html .= '<option disabled="disabled">--------</option>';
-            $html .= '<option value="-1"' . FormHelper::getSelected($selected, -1) . '>UNTAGGED</option>';
-        }
-
-        return $html;
+        return TermTagService::getTermTagSelectOptions($selected, $langId);
     }
 
     /**
@@ -1283,24 +1112,7 @@ class TagsFacade
      */
     private static function getOrCreateTermTag(string $tagText): ?int
     {
-        /** @var int|string|null $tagIdRaw */
-        $tagIdRaw = Connection::preparedFetchValue(
-            'SELECT TgID FROM tags WHERE TgText = ?',
-            [$tagText],
-            'TgID'
-        );
-
-        if ($tagIdRaw === null) {
-            QueryBuilder::table('tags')->insertPrepared(['TgText' => $tagText]);
-            /** @var int|string|null $tagIdRaw */
-            $tagIdRaw = Connection::preparedFetchValue(
-                'SELECT TgID FROM tags WHERE TgText = ?',
-                [$tagText],
-                'TgID'
-            );
-        }
-
-        return $tagIdRaw !== null ? (int) $tagIdRaw : null;
+        return TermTagService::getOrCreateTermTag($tagText);
     }
 
     /**
@@ -1348,8 +1160,7 @@ class TagsFacade
         string $color = 'is-info',
         bool $isLight = true
     ): string {
-        $tagList = self::getWordTagList($wordId, false);
-        return \Lwt\Shared\UI\Helpers\TagHelper::renderInline($tagList, $size, $color, $isLight);
+        return TermTagService::getWordTagListHtml($wordId, $size, $color, $isLight);
     }
 
     /**

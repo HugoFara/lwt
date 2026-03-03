@@ -72,6 +72,7 @@ class GetCurrentUser
             $this->cachedUser = $this->repository->find($userId);
             return $this->cachedUser;
         } catch (\RuntimeException $e) {
+            error_log("GetCurrentUser::execute failed: " . $e->getMessage());
             return null;
         }
     }

@@ -19,6 +19,7 @@ namespace Lwt\Modules\Admin\Application\Services;
 
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\Infrastructure\Http\SecurityHeaders;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Language\Application\LanguageFacade;
 
@@ -137,10 +138,7 @@ class TtsService
         $lgname = InputValidator::getString('LgName');
         $prefix = 'tts[' . $lgname;
 
-        // Detect HTTPS for secure cookie flag
-        $isSecure = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
-            || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+        $isSecure = SecurityHeaders::isSecureConnection();
 
         $cookie_options = array(
             'expires' => strtotime('+5 years'),

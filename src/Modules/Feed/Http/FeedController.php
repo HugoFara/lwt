@@ -585,7 +585,7 @@ class FeedController
             $this->feedFacade->renderFeedLoadInterfaceModern(
                 (int)$currentFeed,
                 InputValidator::has('check_autoupdate'),
-                $_SERVER['PHP_SELF'] ?? '/'
+                '/feeds'
             );
         } elseif (empty($editText)) {
             $this->renderFeedsIndex((int)$currentLang, (int)$currentFeed);
@@ -927,7 +927,7 @@ class FeedController
             $this->feedFacade->renderFeedLoadInterfaceModern(
                 (int)$currentFeed,
                 InputValidator::has('check_autoupdate'),
-                $_SERVER['PHP_SELF'] ?? '/'
+                '/feeds/edit'
             );
         } elseif (InputValidator::has('new_feed')) {
             $this->showNewForm((int)$currentLang);

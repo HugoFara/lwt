@@ -89,6 +89,7 @@ class ValidateApiToken
 
             return $user;
         } catch (\RuntimeException $e) {
+            error_log("ValidateApiToken::execute failed: " . $e->getMessage());
             return null;
         }
     }

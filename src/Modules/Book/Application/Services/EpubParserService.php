@@ -344,6 +344,7 @@ class EpubParserService
                 'language' => $ebook->getLanguage(),
             ];
         } catch (\Throwable $e) {
+            error_log("EpubParserService::getMetadata failed for '$filePath': " . $e->getMessage());
             return null;
         }
     }

@@ -379,18 +379,14 @@ class ReviewService
                 WHERE t.Ti2WordCount = 1 AND t.Ti2WoID IS NULL
                 GROUP BY t.Ti2SeID
             ) AS sUnknownCount ON sUnknownCount.Ti2SeID = ti.Ti2SeID
-            WHERE ti.Ti2WoID = $wordId
+            WHERE ti.Ti2WoID = ?
             ORDER BY KnownRatio < 0.7, RAND()
             LIMIT 1";
 
-        $res = Connection::query($sql);
-        $record = null;
-        if ($res instanceof \mysqli_result) {
-            $record = mysqli_fetch_assoc($res);
-            mysqli_free_result($res);
-        }
+        $rows = Connection::preparedFetchAll($sql, [$wordId]);
+        $record = $rows[0] ?? null;
 
-        if ($record === null || $record === false) {
+        if ($record === null) {
             return ['sentence' => null, 'found' => false];
         }
 
@@ -469,12 +465,13 @@ class ReviewService
             ->where('WoID', '=', $wordId)
             ->valuePrepared('GREATEST(0, ROUND(WoTodayScore, 0))');
 
-        // Complex UPDATE with dynamic score calculation - use raw SQL
-        Connection::execute(
+        // Complex UPDATE with dynamic score calculation
+        Connection::preparedExecute(
             "UPDATE words
-            SET WoStatus = $newStatus, WoStatusChanged = NOW(), " .
+            SET WoStatus = ?, WoStatusChanged = NOW(), " .
             TermStatusService::makeScoreRandomInsertUpdate('u') . "
-            WHERE WoID = $wordId"
+            WHERE WoID = ?",
+            [$newStatus, $wordId]
         );
 
         $newScore = (int) QueryBuilder::table('words')

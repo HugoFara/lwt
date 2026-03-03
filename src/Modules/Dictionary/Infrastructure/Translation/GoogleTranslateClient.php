@@ -146,7 +146,6 @@ class GoogleTranslateClient
             if ($curl === false) {
                 return false;
             }
-            // curl_setopt($curl, CURLOPT_COOKIEFILE, $cookie); Commented in 2.7.0-fork, do not work
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_HTTPHEADER, self::$headers ?? []);
             curl_setopt($curl, CURLOPT_ENCODING, "gzip");

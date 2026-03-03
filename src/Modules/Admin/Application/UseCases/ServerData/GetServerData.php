@@ -20,6 +20,7 @@ namespace Lwt\Modules\Admin\Application\UseCases\ServerData;
 use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 
 /**
  * Use case for getting server and database information.
@@ -52,7 +53,7 @@ class GetServerData
             'php' => phpversion(),
             'mysql' => (string) Connection::fetchValue("SELECT VERSION() AS version", 'version'),
             'lwt_version' => ApplicationInfo::getVersionNumber(),
-            'server_location' => $_SERVER['HTTP_HOST'] ?? 'localhost',
+            'server_location' => UrlUtilities::getAppOrigin(),
         ];
     }
 

@@ -367,6 +367,7 @@ class UserFacade
         try {
             return $this->repository->find($id);
         } catch (\RuntimeException $e) {
+            error_log("UserFacade::findById failed: " . $e->getMessage());
             return null;
         }
     }
@@ -383,6 +384,7 @@ class UserFacade
         try {
             return $this->repository->findByUsername($username);
         } catch (\RuntimeException $e) {
+            error_log("UserFacade::findByUsername failed: " . $e->getMessage());
             return null;
         }
     }
@@ -399,6 +401,7 @@ class UserFacade
         try {
             return $this->repository->findByEmail($email);
         } catch (\RuntimeException $e) {
+            error_log("UserFacade::findByEmail failed: " . $e->getMessage());
             return null;
         }
     }

@@ -945,7 +945,6 @@ class TextParsing
         $termchar = (string)$record['LgRegexpWordCharacters'];
         $replace = explode("|", (string) $record['LgCharacterSubstitutions']);
         $text = Escaping::prepareTextdata($text);
-        //if(is_callable('normalizer_normalize')) $s = normalizer_normalize($s);
         QueryBuilder::table('temp_word_occurrences')->truncate();
 
         // because of sentence special characters

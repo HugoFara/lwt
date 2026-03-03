@@ -211,6 +211,7 @@ class UserApiHandler implements ApiRoutableInterface
                 'expires_at' => $user->apiTokenExpires()?->format('c')
             ];
         } catch (\Exception $e) {
+            error_log("UserApiHandler::formatRefreshToken failed: " . $e->getMessage());
             return [
                 'success' => false,
                 'error' => 'Failed to refresh token'

@@ -453,7 +453,7 @@ class AuthService
         try {
             return $this->repository->find($id);
         } catch (\RuntimeException $e) {
-            // Database not initialized or query failed
+            error_log("AuthService::findUserById failed: " . $e->getMessage());
             return null;
         }
     }
@@ -470,7 +470,7 @@ class AuthService
         try {
             return $this->repository->findByUsername($username);
         } catch (\RuntimeException $e) {
-            // Database not initialized or query failed
+            error_log("AuthService::findUserByUsername failed: " . $e->getMessage());
             return null;
         }
     }
@@ -487,7 +487,7 @@ class AuthService
         try {
             return $this->repository->findByEmail($email);
         } catch (\RuntimeException $e) {
-            // Database not initialized or query failed
+            error_log("AuthService::findUserByEmail failed: " . $e->getMessage());
             return null;
         }
     }
@@ -504,7 +504,7 @@ class AuthService
         try {
             return $this->repository->findByApiToken($token);
         } catch (\RuntimeException $e) {
-            // Database not initialized or query failed
+            error_log("AuthService::findUserByApiToken failed: " . $e->getMessage());
             return null;
         }
     }
@@ -521,7 +521,7 @@ class AuthService
         try {
             return $this->repository->findByWordPressId($wpUserId);
         } catch (\RuntimeException $e) {
-            // Database not initialized or query failed
+            error_log("AuthService::findUserByWordPressId failed: " . $e->getMessage());
             return null;
         }
     }
