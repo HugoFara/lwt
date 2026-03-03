@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Text\Application\UseCases;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
 use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
@@ -73,24 +74,32 @@ class DeleteText
 
         $ids = array_map('intval', $textIds);
 
-        // Delete text items
-        QueryBuilder::table('word_occurrences')
-            ->whereIn('Ti2TxID', $ids)
-            ->delete();
+        DB::beginTransaction();
+        try {
+            // Delete text items
+            QueryBuilder::table('word_occurrences')
+                ->whereIn('Ti2TxID', $ids)
+                ->delete();
 
-        // Delete sentences
-        QueryBuilder::table('sentences')
-            ->whereIn('SeTxID', $ids)
-            ->delete();
+            // Delete sentences
+            QueryBuilder::table('sentences')
+                ->whereIn('SeTxID', $ids)
+                ->delete();
 
-        // Delete texts
-        $affectedRows = QueryBuilder::table('texts')
-            ->whereIn('TxID', $ids)
-            ->delete();
+            // Delete texts
+            $affectedRows = QueryBuilder::table('texts')
+                ->whereIn('TxID', $ids)
+                ->delete();
 
-        Maintenance::adjustAutoIncrement('texts', 'TxID');
-        Maintenance::adjustAutoIncrement('sentences', 'SeID');
-        $this->cleanupTextTags();
+            Maintenance::adjustAutoIncrement('texts', 'TxID');
+            Maintenance::adjustAutoIncrement('sentences', 'SeID');
+            $this->cleanupTextTags();
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
 
         return ['count' => $affectedRows];
     }

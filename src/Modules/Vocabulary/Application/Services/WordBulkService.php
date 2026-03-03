@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 
@@ -237,21 +238,29 @@ class WordBulkService
         $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
-        // Insert each term using prepared statements for safety
-        foreach ($terms as $row) {
-            $trans = (!isset($row['trans']) || $row['trans'] == '') ? '*' : $row['trans'];
-            $textlc = mb_strtolower($row['text'], 'UTF-8');
+        DB::beginTransaction();
+        try {
+            // Insert each term using prepared statements for safety
+            foreach ($terms as $row) {
+                $trans = (!isset($row['trans']) || $row['trans'] == '') ? '*' : $row['trans'];
+                $textlc = mb_strtolower($row['text'], 'UTF-8');
 
-            $bindings = [$row['lg'], $textlc, $row['text'], $row['status'], $trans];
-            $sql = "INSERT INTO words (
-                    WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
-                    WoRomanization, WoStatusChanged, {$scoreColumns}"
-                    . UserScopedQuery::insertColumn('words')
-                . ") VALUES (?, ?, ?, ?, ?, '', '', NOW(), {$scoreValues}"
-                    . UserScopedQuery::insertValuePrepared('words', $bindings)
-                . ")";
+                $bindings = [$row['lg'], $textlc, $row['text'], $row['status'], $trans];
+                $sql = "INSERT INTO words (
+                        WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
+                        WoRomanization, WoStatusChanged, {$scoreColumns}"
+                        . UserScopedQuery::insertColumn('words')
+                    . ") VALUES (?, ?, ?, ?, ?, '', '', NOW(), {$scoreValues}"
+                        . UserScopedQuery::insertValuePrepared('words', $bindings)
+                    . ")";
 
-            Connection::preparedExecute($sql, $bindings);
+                Connection::preparedExecute($sql, $bindings);
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollback();
+            throw $e;
         }
 
         return $max;

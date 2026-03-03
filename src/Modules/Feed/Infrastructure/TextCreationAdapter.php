@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Feed\Infrastructure;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
 use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\TextParsing;
@@ -45,36 +46,44 @@ class TextCreationAdapter implements TextCreationInterface
         string $sourceUri,
         string $tagName
     ): int {
-        // Ensure tag exists - use raw SQL for INSERT IGNORE
-        $bindings = [$tagName];
-        $sql = "INSERT IGNORE INTO text_tags (T2Text) VALUES (?)"
-            . UserScopedQuery::forTablePrepared('text_tags', $bindings);
-        Connection::preparedExecute($sql, $bindings);
+        DB::beginTransaction();
+        try {
+            // Ensure tag exists - use raw SQL for INSERT IGNORE
+            $bindings = [$tagName];
+            $sql = "INSERT IGNORE INTO text_tags (T2Text) VALUES (?)"
+                . UserScopedQuery::forTablePrepared('text_tags', $bindings);
+            Connection::preparedExecute($sql, $bindings);
 
-        // Create the text
-        $textId = QueryBuilder::table('texts')
-            ->insertPrepared([
-                'TxLgID' => $languageId,
-                'TxTitle' => $title,
-                'TxText' => $text,
-                'TxAudioURI' => $audioUri,
-                'TxSourceURI' => $sourceUri,
-            ]);
+            // Create the text
+            $textId = QueryBuilder::table('texts')
+                ->insertPrepared([
+                    'TxLgID' => $languageId,
+                    'TxTitle' => $title,
+                    'TxText' => $text,
+                    'TxAudioURI' => $audioUri,
+                    'TxSourceURI' => $sourceUri,
+                ]);
 
-        // Parse the text into sentences and textitems
-        TextParsing::parseAndSave(
-            $text,
-            $languageId,
-            (int) $textId
-        );
+            // Parse the text into sentences and textitems
+            TextParsing::parseAndSave(
+                $text,
+                $languageId,
+                (int) $textId
+            );
 
-        // Apply tag to the text
-        $bindings = [(int) $textId, $tagName];
-        $sql = "INSERT INTO text_tag_map (TtTxID, TtT2ID)
-             SELECT ?, T2ID FROM text_tags
-             WHERE T2Text = ?"
-            . UserScopedQuery::forTablePrepared('text_tags', $bindings);
-        Connection::preparedExecute($sql, $bindings);
+            // Apply tag to the text
+            $bindings = [(int) $textId, $tagName];
+            $sql = "INSERT INTO text_tag_map (TtTxID, TtT2ID)
+                 SELECT ?, T2ID FROM text_tags
+                 WHERE T2Text = ?"
+                . UserScopedQuery::forTablePrepared('text_tags', $bindings);
+            Connection::preparedExecute($sql, $bindings);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
 
         return (int) $textId;
     }
@@ -107,29 +116,36 @@ class TextCreationAdapter implements TextCreationInterface
         sort($textIds, SORT_NUMERIC);
         $textsToArchive = array_slice($textIds, 0, count($textIds) - $maxTexts);
 
-        foreach ($textsToArchive as $textId) {
-            // Delete textitems
-            $stats['textitems'] += QueryBuilder::table('word_occurrences')
-                ->where('Ti2TxID', '=', $textId)
-                ->delete();
+        DB::beginTransaction();
+        try {
+            foreach ($textsToArchive as $textId) {
+                // Delete textitems
+                $stats['textitems'] += QueryBuilder::table('word_occurrences')
+                    ->where('Ti2TxID', '=', $textId)
+                    ->delete();
 
-            // Delete sentences
-            $stats['sentences'] += QueryBuilder::table('sentences')
-                ->where('SeTxID', '=', $textId)
-                ->delete();
+                // Delete sentences
+                $stats['sentences'] += QueryBuilder::table('sentences')
+                    ->where('SeTxID', '=', $textId)
+                    ->delete();
 
-            // Archive the text (soft delete - set TxArchivedAt)
-            $bindings = [$textId];
-            $sql = "UPDATE texts SET TxArchivedAt = NOW(), TxPosition = 0, TxAudioPosition = 0
-                    WHERE TxID = ? AND TxArchivedAt IS NULL"
-                . UserScopedQuery::forTablePrepared('texts', $bindings);
-            $archived = Connection::preparedExecute($sql, $bindings);
+                // Archive the text (soft delete - set TxArchivedAt)
+                $bindings = [$textId];
+                $sql = "UPDATE texts SET TxArchivedAt = NOW(), TxPosition = 0, TxAudioPosition = 0
+                        WHERE TxID = ? AND TxArchivedAt IS NULL"
+                    . UserScopedQuery::forTablePrepared('texts', $bindings);
+                $archived = Connection::preparedExecute($sql, $bindings);
 
-            if ($archived > 0) {
-                $stats['archived']++;
+                if ($archived > 0) {
+                    $stats['archived']++;
+                }
             }
 
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollback();
+            throw $e;
         }
 
         return $stats;

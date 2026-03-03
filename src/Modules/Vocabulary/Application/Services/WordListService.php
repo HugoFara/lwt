@@ -19,6 +19,7 @@ namespace Lwt\Modules\Vocabulary\Application\Services;
 
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\Maintenance;
@@ -434,21 +435,29 @@ class WordListService
     {
         $inClause = Connection::buildIntInClause($ids);
 
-        // Delete multi-word text items first (before word deletion triggers FK SET NULL)
-        Connection::query(
-            'DELETE FROM word_occurrences
-            WHERE Ti2WordCount > 1 AND Ti2WoID in ' . $inClause
-        );
+        DB::beginTransaction();
+        try {
+            // Delete multi-word text items first (before word deletion triggers FK SET NULL)
+            Connection::query(
+                'DELETE FROM word_occurrences
+                WHERE Ti2WordCount > 1 AND Ti2WoID in ' . $inClause
+            );
 
-        // Delete words - FK constraints handle:
-        // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
-        // - word_tag_map deleted (ON DELETE CASCADE)
-        $message = Connection::execute(
-            'DELETE FROM words WHERE WoID in ' . $inClause,
-            "Deleted"
-        );
+            // Delete words - FK constraints handle:
+            // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
+            // - word_tag_map deleted (ON DELETE CASCADE)
+            $message = Connection::execute(
+                'DELETE FROM words WHERE WoID in ' . $inClause,
+                "Deleted"
+            );
 
-        Maintenance::adjustAutoIncrement('words', 'WoID');
+            Maintenance::adjustAutoIncrement('words', 'WoID');
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollback();
+            throw $e;
+        }
 
         return (string) $message;
     }

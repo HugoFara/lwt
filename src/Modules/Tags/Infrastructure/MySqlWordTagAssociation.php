@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Tags\Infrastructure;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Tags\Domain\TagAssociationInterface;
 use Lwt\Modules\Tags\Domain\TagRepositoryInterface;
@@ -91,12 +92,20 @@ class MySqlWordTagAssociation implements TagAssociationInterface
      */
     public function setTagsForItem(int $itemId, array $tagIds): void
     {
-        // Delete existing associations
-        $this->clearTagsForItem($itemId);
+        DB::beginTransaction();
+        try {
+            // Delete existing associations
+            $this->clearTagsForItem($itemId);
 
-        // Insert new associations
-        foreach ($tagIds as $tagId) {
-            $this->addTag($itemId, $tagId);
+            // Insert new associations
+            foreach ($tagIds as $tagId) {
+                $this->addTag($itemId, $tagId);
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollback();
+            throw $e;
         }
     }
 
@@ -105,25 +114,33 @@ class MySqlWordTagAssociation implements TagAssociationInterface
      */
     public function setTagsByName(int $itemId, array $tagNames): void
     {
-        // Delete existing associations
-        $this->clearTagsForItem($itemId);
+        DB::beginTransaction();
+        try {
+            // Delete existing associations
+            $this->clearTagsForItem($itemId);
 
-        // Create/get tags and associate them
-        foreach ($tagNames as $tagName) {
-            $tagName = trim($tagName);
-            if ($tagName === '') {
-                continue;
+            // Create/get tags and associate them
+            foreach ($tagNames as $tagName) {
+                $tagName = trim($tagName);
+                if ($tagName === '') {
+                    continue;
+                }
+
+                // Get or create the tag
+                $tagId = $this->tagRepository->getOrCreate($tagName);
+
+                // Associate using INSERT...SELECT to handle concurrent inserts
+                Connection::preparedExecute(
+                    'INSERT IGNORE INTO word_tag_map (WtWoID, WtTgID)
+                    SELECT ?, TgID FROM tags WHERE TgText = ?',
+                    [$itemId, $tagName]
+                );
             }
 
-            // Get or create the tag
-            $tagId = $this->tagRepository->getOrCreate($tagName);
-
-            // Associate using INSERT...SELECT to handle concurrent inserts
-            Connection::preparedExecute(
-                'INSERT IGNORE INTO word_tag_map (WtWoID, WtTgID)
-                SELECT ?, TgID FROM tags WHERE TgText = ?',
-                [$itemId, $tagName]
-            );
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollback();
+            throw $e;
         }
     }
 

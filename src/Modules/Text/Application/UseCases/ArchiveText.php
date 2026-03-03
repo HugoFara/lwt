@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Text\Application\UseCases;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\DB;
 use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\TextParsing;
@@ -82,26 +83,33 @@ class ArchiveText
         $ids = array_map('intval', $textIds);
         $count = 0;
 
-        foreach ($ids as $textId) {
-            // Delete parsed data
-            QueryBuilder::table('word_occurrences')
-                ->where('Ti2TxID', '=', $textId)
-                ->delete();
-            QueryBuilder::table('sentences')
-                ->where('SeTxID', '=', $textId)
-                ->delete();
+        DB::beginTransaction();
+        try {
+            foreach ($ids as $textId) {
+                // Delete parsed data
+                QueryBuilder::table('word_occurrences')
+                    ->where('Ti2TxID', '=', $textId)
+                    ->delete();
+                QueryBuilder::table('sentences')
+                    ->where('SeTxID', '=', $textId)
+                    ->delete();
 
-            // Mark as archived
-            $bindings = [$textId];
-            $count += Connection::preparedExecute(
-                "UPDATE texts SET TxArchivedAt = NOW(), TxPosition = 0, TxAudioPosition = 0
-                WHERE TxID = ? AND TxArchivedAt IS NULL"
-                . UserScopedQuery::forTablePrepared('texts', $bindings),
-                $bindings
-            );
+                // Mark as archived
+                $bindings = [$textId];
+                $count += Connection::preparedExecute(
+                    "UPDATE texts SET TxArchivedAt = NOW(), TxPosition = 0, TxAudioPosition = 0
+                    WHERE TxID = ? AND TxArchivedAt IS NULL"
+                    . UserScopedQuery::forTablePrepared('texts', $bindings),
+                    $bindings
+                );
+            }
+
+            Maintenance::adjustAutoIncrement('sentences', 'SeID');
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollback();
+            throw $e;
         }
-
-        Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
         return ['count' => $count];
     }
