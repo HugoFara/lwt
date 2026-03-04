@@ -87,7 +87,7 @@ class PageLayoutHelper
         $isTexts = in_array($currentPage, ['texts', 'archived', 'text-tags', 'text-check', 'long-import', 'feeds']);
         $isTerms = in_array($currentPage, ['terms', 'term-tags', 'term-import']);
         $isLanguages = in_array($currentPage, ['languages', 'language-new', 'language-edit']);
-        $isAdmin = in_array($currentPage, ['backup', 'settings', 'tts']);
+        $isAdmin = in_array($currentPage, ['backup', 'settings', 'tts', 'users']);
 
         $textsActive = $isTexts ? ' is-active' : '';
         $termsActive = $isTerms ? ' is-active' : '';
@@ -213,6 +213,7 @@ class PageLayoutHelper
                 <div class="navbar-dropdown is-right">
                     <a class="navbar-item" href="{$base}/admin/backup">Database Operations</a>
                     <a class="navbar-item" href="{$base}/admin/settings">Settings</a>
+                    <a class="navbar-item" href="{$base}/admin/users">Users</a>
                     <hr class="navbar-divider">
                     <a class="navbar-item" href="{$base}/admin/server-data">Server Data</a>
                     <a class="navbar-item" href="{$base}/docs/info.html" target="_blank">Help</a>

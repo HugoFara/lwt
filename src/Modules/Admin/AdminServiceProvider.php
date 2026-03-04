@@ -35,8 +35,20 @@ use Lwt\Modules\Admin\Application\Services\SessionCleaner;
 // Http
 use Lwt\Modules\Admin\Http\AdminController;
 use Lwt\Modules\Admin\Http\AdminApiHandler;
+use Lwt\Modules\Admin\Http\UserManagementController;
 // Application Services
 use Lwt\Modules\Admin\Application\Services\TtsService;
+// User Management Use Cases
+use Lwt\Modules\Admin\Application\UseCases\UserManagement\ListUsers;
+use Lwt\Modules\Admin\Application\UseCases\UserManagement\CreateUser;
+use Lwt\Modules\Admin\Application\UseCases\UserManagement\UpdateUser;
+use Lwt\Modules\Admin\Application\UseCases\UserManagement\DeleteUser;
+use Lwt\Modules\Admin\Application\UseCases\UserManagement\ToggleUserStatus;
+use Lwt\Modules\Admin\Application\UseCases\UserManagement\ToggleUserRole;
+// Cross-module dependencies
+use Lwt\Modules\User\Domain\UserRepositoryInterface;
+use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
+use Lwt\Modules\User\Application\Services\PasswordHasher;
 
 /**
  * Service provider for the Admin module.
@@ -81,7 +93,69 @@ class AdminServiceProvider implements ServiceProviderInterface
                 $c->getTyped(AdminFacade::class)
             );
         });
+
+        // Register User Management Use Cases and Controller
+        $this->registerUserManagement($container);
     }
+
+    /**
+     * Register user management use cases and controller.
+     *
+     * @param Container $container The DI container
+     *
+     * @return void
+     */
+    private function registerUserManagement(Container $container): void
+    {
+        $container->singleton(ListUsers::class, function (Container $c) {
+            return new ListUsers(
+                $c->getTyped(MySqlUserRepository::class)
+            );
+        });
+
+        $container->singleton(CreateUser::class, function (Container $c) {
+            return new CreateUser(
+                $c->getTyped(UserRepositoryInterface::class),
+                $c->getTyped(PasswordHasher::class)
+            );
+        });
+
+        $container->singleton(UpdateUser::class, function (Container $c) {
+            return new UpdateUser(
+                $c->getTyped(UserRepositoryInterface::class),
+                $c->getTyped(PasswordHasher::class)
+            );
+        });
+
+        $container->singleton(DeleteUser::class, function (Container $c) {
+            return new DeleteUser(
+                $c->getTyped(UserRepositoryInterface::class)
+            );
+        });
+
+        $container->singleton(ToggleUserStatus::class, function (Container $c) {
+            return new ToggleUserStatus(
+                $c->getTyped(UserRepositoryInterface::class)
+            );
+        });
+
+        $container->singleton(ToggleUserRole::class, function (Container $c) {
+            return new ToggleUserRole(
+                $c->getTyped(MySqlUserRepository::class)
+            );
+        });
+
+        $container->bind(UserManagementController::class, function (Container $c) {
+            return new UserManagementController(
+                $c->getTyped(ListUsers::class),
+                $c->getTyped(CreateUser::class),
+                $c->getTyped(UpdateUser::class),
+                $c->getTyped(DeleteUser::class),
+                $c->getTyped(ToggleUserStatus::class),
+                $c->getTyped(ToggleUserRole::class),
+                $c->getTyped(UserRepositoryInterface::class)
+            );
+        });
 
     /**
      * Register repository bindings.
