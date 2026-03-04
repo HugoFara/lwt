@@ -12,10 +12,9 @@
     <version number="3.0.0">
         <api>
             <source dsn=".">
-                <path>.</path>
+                <path>src</path>
             </source>
             <ignore hidden="true" symlinks="true">
-                <path>vendor/*</path>
                 <path>.psalm/*</path>
             </ignore>
             <default-package-name>Lwt</default-package-name>
