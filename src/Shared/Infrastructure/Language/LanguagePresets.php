@@ -47,7 +47,7 @@ class LanguagePresets
      *
      * @var string
      */
-    private static string $jsonPath = __DIR__ . '/Data/langdefs.json';
+    private static string $jsonPath = __DIR__ . '/../../../Modules/Language/Infrastructure/Data/langdefs.json';
 
     /**
      * Get all language definitions in legacy array format.
