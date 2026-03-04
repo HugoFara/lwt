@@ -37,16 +37,22 @@ class ConfigurationTest extends TestCase
         $testDbname = "test_" . self::$dbConfig['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = Configuration::connect(
-                self::$dbConfig['server'],
-                self::$dbConfig['userid'],
-                self::$dbConfig['passwd'],
-                $testDbname,
-                self::$dbConfig['socket'] ?? ''
-            );
-            Globals::setDbConnection($connection);
+            try {
+                $connection = Configuration::connect(
+                    self::$dbConfig['server'],
+                    self::$dbConfig['userid'],
+                    self::$dbConfig['passwd'],
+                    $testDbname,
+                    self::$dbConfig['socket'] ?? ''
+                );
+                Globals::setDbConnection($connection);
+                self::$dbConnected = true;
+            } catch (\Exception $e) {
+                self::$dbConnected = false;
+            }
+        } else {
+            self::$dbConnected = true;
         }
-        self::$dbConnected = (Globals::getDbConnection() !== null);
     }
 
     // ===== loadFromEnv() tests =====

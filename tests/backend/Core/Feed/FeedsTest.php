@@ -37,14 +37,18 @@ class FeedsTest extends TestCase
         if (!Globals::getDbConnection()) {
             $config = EnvLoader::getDatabaseConfig();
             $test_dbname = "test_" . $config['dbname'];
-            $connection = Configuration::connect(
-                $config['server'],
-                $config['userid'],
-                $config['passwd'],
-                $test_dbname,
-                $config['socket']
-            );
-            Globals::setDbConnection($connection);
+            try {
+                $connection = Configuration::connect(
+                    $config['server'],
+                    $config['userid'],
+                    $config['passwd'],
+                    $test_dbname,
+                    $config['socket'] ?? ''
+                );
+                Globals::setDbConnection($connection);
+            } catch (\Exception $e) {
+                $this->markTestSkipped('Database connection not available');
+            }
         }
 
         // Register FeedServiceProvider and get FeedFacade

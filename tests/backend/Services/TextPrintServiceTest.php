@@ -39,16 +39,22 @@ class TextPrintServiceTest extends TestCase
         $testDbname = "test_" . $config['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = Configuration::connect(
-                $config['server'],
-                $config['userid'],
-                $config['passwd'],
-                $testDbname,
-                $config['socket'] ?? ''
-            );
-            Globals::setDbConnection($connection);
+            try {
+                $connection = Configuration::connect(
+                    $config['server'],
+                    $config['userid'],
+                    $config['passwd'],
+                    $testDbname,
+                    $config['socket'] ?? ''
+                );
+                Globals::setDbConnection($connection);
+                self::$dbConnected = true;
+            } catch (\Exception $e) {
+                self::$dbConnected = false;
+            }
+        } else {
+            self::$dbConnected = true;
         }
-        self::$dbConnected = (Globals::getDbConnection() !== null);
 
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist

@@ -62,6 +62,7 @@ require_once __DIR__ . '/../../../src/Shared/Infrastructure/Dictionary/Dictionar
 class IntegrationTest extends TestCase
 {
     private static ?LanguageFacade $languageService = null;
+    private static bool $dbConnected = false;
 
     public static function setUpBeforeClass(): void
     {
@@ -70,15 +71,24 @@ class IntegrationTest extends TestCase
         $testDbname = "test_" . $config['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = Configuration::connect(
-                $config['server'],
-                $config['userid'],
-                $config['passwd'],
-                $testDbname,
-                $config['socket'] ?? ''
-            );
-            Globals::setDbConnection($connection);
+            try {
+                $connection = Configuration::connect(
+                    $config['server'],
+                    $config['userid'],
+                    $config['passwd'],
+                    $testDbname,
+                    $config['socket'] ?? ''
+                );
+                Globals::setDbConnection($connection);
+                self::$dbConnected = true;
+            } catch (\Exception $e) {
+                self::$dbConnected = false;
+                return;
+            }
+        } else {
+            self::$dbConnected = true;
         }
+
         // Set the database name in Globals for migrations
         Globals::setDatabaseName($testDbname);
 
@@ -98,6 +108,13 @@ class IntegrationTest extends TestCase
         }
 
         self::$languageService = new LanguageFacade();
+    }
+
+    protected function setUp(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection not available');
+        }
     }
 
     public function testInstallDemoDB(): void

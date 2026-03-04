@@ -49,14 +49,18 @@ class TextParsingTest extends TestCase
         $testDbname = "test_" . $config['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = Configuration::connect(
-                $config['server'],
-                $config['userid'],
-                $config['passwd'],
-                $testDbname,
-                $config['socket']
-            );
-            Globals::setDbConnection($connection);
+            try {
+                $connection = Configuration::connect(
+                    $config['server'],
+                    $config['userid'],
+                    $config['passwd'],
+                    $testDbname,
+                    $config['socket'] ?? ''
+                );
+                Globals::setDbConnection($connection);
+            } catch (\Exception $e) {
+                // DB not available — individual tests will skip
+            }
         }
 
         self::$dbConnection = Globals::getDbConnection();

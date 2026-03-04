@@ -43,16 +43,22 @@ class LanguageControllerTest extends TestCase
         $testDbname = "test_" . $config['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = Configuration::connect(
-                $config['server'],
-                $config['userid'],
-                $config['passwd'],
-                $testDbname,
-                $config['socket'] ?? ''
-            );
-            Globals::setDbConnection($connection);
+            try {
+                $connection = Configuration::connect(
+                    $config['server'],
+                    $config['userid'],
+                    $config['passwd'],
+                    $testDbname,
+                    $config['socket'] ?? ''
+                );
+                Globals::setDbConnection($connection);
+                self::$dbConnected = true;
+            } catch (\Exception $e) {
+                self::$dbConnected = false;
+            }
+        } else {
+            self::$dbConnected = true;
         }
-        self::$dbConnected = (Globals::getDbConnection() !== null);
 
         if (self::$dbConnected) {
             // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
