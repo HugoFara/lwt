@@ -32,6 +32,52 @@ use Lwt\Shared\Infrastructure\Utilities\ErrorHandler;
 class Configuration
 {
     /**
+     * Build a helpful error message based on the mysqli connect error code.
+     *
+     * @param string $server The server that was being connected to
+     * @param string $dbname The database name (if relevant)
+     *
+     * @return string Human-readable error message with troubleshooting hints
+     */
+    private static function buildConnectErrorMessage(
+        string $server,
+        string $dbname = ''
+    ): string {
+        $errno = mysqli_connect_errno();
+        $error = mysqli_connect_error() ?? 'Unknown error';
+
+        $hint = match ($errno) {
+            2002 => "Cannot reach the database server at \"$server\".\n" .
+                    "  - Is MySQL/MariaDB running? Try: sudo systemctl status mysql\n" .
+                    "  - If using Docker, is the DB container up? Try: docker compose ps\n" .
+                    "  - Check DB_HOST in your .env (use \"db\" for Docker, \"localhost\" or \"127.0.0.1\" for local).",
+            2003 => "Connection refused by the database server at \"$server\".\n" .
+                    "  - Is MySQL/MariaDB running and accepting connections?\n" .
+                    "  - Check that DB_HOST and port are correct in your .env file.",
+            2005 => "Unknown database host \"$server\".\n" .
+                    "  - Check DB_HOST in your .env file — is the hostname spelled correctly?\n" .
+                    "  - If using Docker, the host should typically be \"db\" (the service name).",
+            1045 => "Access denied — wrong username or password.\n" .
+                    "  - Check DB_USER and DB_PASSWORD in your .env file.\n" .
+                    "  - Verify the credentials work: mysql -u <DB_USER> -p -h $server",
+            1049 => "Database \"$dbname\" does not exist and could not be created.\n" .
+                    "  - Check DB_NAME in your .env file.\n" .
+                    "  - Does the DB_USER have CREATE DATABASE privileges?",
+            1044 => "Access denied to database \"$dbname\".\n" .
+                    "  - The user can connect but lacks permission for this database.\n" .
+                    "  - Grant access: GRANT ALL ON `$dbname`.* TO '<user>'@'%';",
+            2006 => "MySQL server has gone away.\n" .
+                    "  - The server closed the connection. Is it overloaded or restarting?",
+            default => "Connection failed (error $errno: $error).\n" .
+                       "  - Check DB_HOST, DB_USER, DB_PASSWORD, and DB_NAME in your .env file.",
+        };
+
+        return "Database connection error:\n$hint\n\n" .
+               "Raw error: [$errno] $error\n" .
+               "Documentation: https://hugofara.github.io/lwt/docs/install.html";
+    }
+
+    /**
      * Load database configuration from .env file.
      *
      * @param string $envPath Path to the .env file
@@ -82,11 +128,9 @@ class Configuration
 
         if ($dbconnection === false) {
             ErrorHandler::die(
-                'Database connection error. Is MySQL running?
-                You can refer to the documentation:
-                https://hugofara.github.io/lwt/docs/install.html
-                [Error Code: ' . mysqli_connect_errno() .
-                ' / Error Message: ' . (mysqli_connect_error() ?? 'Unknown error') . ']'
+                "Database connection error: mysqli_init() failed.\n" .
+                "  - Is the mysqli PHP extension installed? Try: php -m | grep mysqli\n" .
+                "  - Documentation: https://hugofara.github.io/lwt/docs/install.html"
             );
         }
 
@@ -122,12 +166,7 @@ class Configuration
 
             if (!$success) {
                 ErrorHandler::die(
-                    'DB connect error, connection parameters may be wrong,
-                    please check your ".env" file.
-                    You can refer to the documentation:
-                    https://hugofara.github.io/lwt/docs/install.html
-                    [Error Code: ' . mysqli_connect_errno() .
-                    ' / Error Message: ' . (mysqli_connect_error() ?? 'Unknown error') . ']'
+                    self::buildConnectErrorMessage($server, $dbname)
                 );
             }
             $result = mysqli_query(
@@ -136,7 +175,12 @@ class Configuration
                 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
             );
             if (!$result) {
-                ErrorHandler::die("Failed to create database!");
+                ErrorHandler::die(
+                    "Database \"$dbname\" does not exist and could not be created.\n" .
+                    "  - Does the DB_USER have CREATE DATABASE privileges?\n" .
+                    "  - You can create it manually: CREATE DATABASE `$dbname` " .
+                    "DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+                );
             }
             mysqli_close($dbconnection);
             $success = @mysqli_real_connect(
@@ -150,12 +194,7 @@ class Configuration
 
         if (!$success) {
             ErrorHandler::die(
-                'DB connect error, connection parameters may be wrong,
-                please check your ".env" file.
-                You can refer to the documentation:
-                https://hugofara.github.io/lwt/docs/install.html
-                [Error Code: ' . mysqli_connect_errno() .
-                ' / Error Message: ' . (mysqli_connect_error() ?? 'Unknown error') . ']'
+                self::buildConnectErrorMessage($server, $dbname)
             );
         }
 
