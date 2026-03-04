@@ -57,6 +57,12 @@ COPY . /var/www/html${APP_BASE_PATH}
 # Note: Database configuration is provided at runtime via environment variables
 # or by mounting a .env file. See docker-compose.yml for examples.
 
+# Apache port configuration (use port >= 1024 to run as non-root)
+ARG APACHE_PORT=80
+RUN sed -i "s/Listen 80/Listen ${APACHE_PORT}/" /etc/apache2/ports.conf \
+    && sed -i "s/:80/:${APACHE_PORT}/" /etc/apache2/sites-available/000-default.conf
+EXPOSE ${APACHE_PORT}
+
 # Configure Apache: enable mod_rewrite and AllowOverride for .htaccess
 RUN a2enmod rewrite \
     && sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
