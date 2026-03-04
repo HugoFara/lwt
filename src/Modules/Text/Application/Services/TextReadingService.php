@@ -11,7 +11,7 @@
  * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0 Migrated from Core/Text/text_display.php
  */
 
@@ -33,7 +33,7 @@ use Lwt\Modules\Tags\Application\TagsFacade;
  * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  *
  * @psalm-suppress UnusedClass - Service class for text reading functionality

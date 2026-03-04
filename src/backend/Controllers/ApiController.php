@@ -10,7 +10,7 @@
  * @package  Lwt
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/src-php-controllers-apicontroller.html
+ * @link    https://hugofara.github.io/lwt/developer/api
  * @since   3.0.0
  */
 
@@ -35,7 +35,7 @@ use Lwt\Shared\Infrastructure\Routing\Middleware\RateLimitMiddleware;
  * @package  Lwt
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 class ApiController extends BaseController

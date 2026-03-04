@@ -12,7 +12,7 @@
  * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0 Migrated from Core/Text/sentence_operations.php
  */
 
@@ -35,7 +35,7 @@ use Lwt\Modules\Language\Application\Services\TextParsingService;
  * @package  Lwt\Modules\Text\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 class SentenceService

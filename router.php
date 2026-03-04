@@ -11,7 +11,7 @@
  * @package  Lwt
  * @author   HugoFara <hugo.farajallah@protonmailhotmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/files/router.html
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  *
  * Usage: php -S localhost:8000 router.php

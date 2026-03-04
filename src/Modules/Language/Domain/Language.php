@@ -9,7 +9,7 @@
  * @package  Lwt\Entity
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/files/inc-classes-language.html
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    2.7.0
  */
 

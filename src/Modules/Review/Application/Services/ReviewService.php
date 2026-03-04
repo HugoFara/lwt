@@ -9,7 +9,7 @@
  * @package  Lwt\Modules\Review\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 
@@ -38,7 +38,7 @@ use Lwt\Modules\Review\Infrastructure\SessionStateManager;
  * @package  Lwt\Modules\Review\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 class ReviewService

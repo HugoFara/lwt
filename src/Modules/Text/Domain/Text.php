@@ -9,7 +9,7 @@
  * @package  Lwt\Modules\Text\Domain
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/files/inc-classes-text.html
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    2.9.0
  */
 
@@ -32,7 +32,7 @@ use Lwt\Modules\Text\Domain\ValueObject\TextId;
  * @package  Lwt\Modules\Text\Domain
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 class Text

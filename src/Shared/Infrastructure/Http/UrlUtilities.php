@@ -12,7 +12,7 @@
  * @package  Lwt
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/files/inc-url-utilities.html
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0 Split from kernel_utility.php
  */
 
@@ -29,7 +29,7 @@ namespace Lwt\Shared\Infrastructure\Http;
  * @package  Lwt
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 class UrlUtilities

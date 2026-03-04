@@ -10,7 +10,7 @@
  * @package  Lwt\Shared\Infrastructure\Bootstrap
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/inc-start-session.html
+ * @link    https://hugofara.github.io/lwt/developer/api
  * @since   2.0.3-fork
  */
 

@@ -12,7 +12,7 @@
  * @package  Lwt\Modules\Language\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0 Migrated from Core/Text/text_parsing.php
  */
 
@@ -27,7 +27,7 @@ namespace Lwt\Modules\Language\Application\Services;
  * @package  Lwt\Modules\Language\Application\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 class TextParsingService
@@ -55,7 +55,7 @@ class TextParsingService
             throw new \RuntimeException(
                 "MeCab not detected on Linux/macOS. " .
                 "Please install MeCab or add it to your PATH. " .
-                "See: https://hugofara.github.io/lwt/docs/install.html"
+                "See: https://hugofara.github.io/lwt/guide/installation"
             );
         }
         if (str_starts_with($os, 'WIN')) {
@@ -74,7 +74,7 @@ class TextParsingService
             throw new \RuntimeException(
                 "MeCab not detected on Windows. " .
                 "Please install MeCab or add it to your PATH. " .
-                "See: https://hugofara.github.io/lwt/docs/install.html"
+                "See: https://hugofara.github.io/lwt/guide/installation"
             );
         }
         throw new \RuntimeException(

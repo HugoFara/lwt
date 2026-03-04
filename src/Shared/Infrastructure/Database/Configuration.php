@@ -10,7 +10,7 @@
  * @package  Lwt
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/files/inc-database-configuration.html
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 
@@ -74,7 +74,7 @@ class Configuration
 
         return "Database connection error:\n$hint\n\n" .
                "Raw error: [$errno] $error\n" .
-               "Documentation: https://hugofara.github.io/lwt/docs/install.html";
+               "Documentation: https://hugofara.github.io/lwt/guide/installation";
     }
 
     /**
@@ -130,7 +130,7 @@ class Configuration
             ErrorHandler::die(
                 "Database connection error: mysqli_init() failed.\n" .
                 "  - Is the mysqli PHP extension installed? Try: php -m | grep mysqli\n" .
-                "  - Documentation: https://hugofara.github.io/lwt/docs/install.html"
+                "  - Documentation: https://hugofara.github.io/lwt/guide/installation"
             );
         }
 

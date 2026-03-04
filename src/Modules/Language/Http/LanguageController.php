@@ -10,7 +10,7 @@
  * @package  Lwt\Modules\Language\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/src-php-controllers-languagecontroller.html
+ * @link    https://hugofara.github.io/lwt/developer/api
  * @since   3.0.0
  */
 
@@ -43,7 +43,7 @@ use Lwt\Modules\Language\Infrastructure\Parser\ParserRegistry;
  * @package  Lwt
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 class LanguageController extends BaseController

@@ -12,7 +12,7 @@
  * @package  Lwt
  * @author   LWT Project <lwt-project@hotmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/files/src-backend-Application.html
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 
@@ -52,7 +52,7 @@ use Lwt\Shared\Infrastructure\Routing\Router;
  * @package  Lwt
  * @author   LWT Project <lwt-project@hotmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/files/src-backend-Application.html
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 class Application

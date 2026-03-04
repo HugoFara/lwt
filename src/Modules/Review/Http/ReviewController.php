@@ -11,7 +11,7 @@
  * @package  Lwt\Modules\Review\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/files/src-modules-review-http-reviewcontroller.html
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 
@@ -41,7 +41,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  * @package  Lwt\Modules\Review\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  */
 class ReviewController extends BaseController

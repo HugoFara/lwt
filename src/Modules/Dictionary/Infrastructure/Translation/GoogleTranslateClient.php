@@ -33,7 +33,7 @@ namespace Lwt\Modules\Dictionary\Infrastructure\Translation;
  *
  * @author   LWT Project <lwt-project@hotmail.com>
  * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
+ * @link     https://hugofara.github.io/lwt/developer/api
  */
 class GoogleTranslateClient
 {
