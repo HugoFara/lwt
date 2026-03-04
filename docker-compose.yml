@@ -29,6 +29,8 @@ services:
       - DB_NAME=${DB_NAME:-learning-with-texts}
       - APP_BASE_PATH=${APP_BASE_PATH:-/lwt}
       - NLP_SERVICE_URL=http://nlp:8000
+      - MULTI_USER_ENABLED=${MULTI_USER_ENABLED:-false}
+      - APP_URL=${APP_URL:-}
     volumes:
       - ./media:/var/www/html${APP_BASE_PATH:-/lwt}/media
     ports:

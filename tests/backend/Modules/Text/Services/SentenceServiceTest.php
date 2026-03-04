@@ -238,36 +238,12 @@ class SentenceServiceTest extends TestCase
     }
 
     // =========================================================================
-    // buildSentencesContainingWordQuery() Tests
-    // (Tests structure without requiring database execution)
-    // =========================================================================
-
-    /**
-     * @group integration
-     */
-    public function testBuildSentencesContainingWordQueryReturnsEmptyForNoLanguage(): void
-    {
-        // This test requires database access to check language settings
-        // Marking as integration test
-        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
-            $this->markTestSkipped('Database connection required for this test');
-        }
-
-        $result = $this->service->buildSentencesContainingWordQuery('test', 999999);
-
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('sql', $result);
-        $this->assertArrayHasKey('params', $result);
-    }
-
-    // =========================================================================
     // Method Availability Tests
     // =========================================================================
 
     public function testServiceHasExpectedPublicMethods(): void
     {
         $expectedMethods = [
-            'buildSentencesContainingWordQuery',
             'findSentencesFromWord',
             'formatSentence',
             'getSentenceText',
