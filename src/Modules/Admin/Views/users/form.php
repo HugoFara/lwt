@@ -70,7 +70,7 @@ $formAction = $isEdit && $user !== null
             <div class="field">
                 <label class="label" for="password">
                     Password
-                    <?php if ($isEdit): ?>
+                    <?php if ($isEdit) : ?>
                         <span class="has-text-grey has-text-weight-normal">(leave blank to keep current)</span>
                     <?php endif; ?>
                 </label>
@@ -99,7 +99,7 @@ $formAction = $isEdit && $user !== null
                             </option>
                         </select>
                     </div>
-                    <?php if ($isSelf): ?>
+                    <?php if ($isSelf) : ?>
                         <input type="hidden" name="role" value="admin">
                         <p class="help">You cannot change your own role.</p>
                     <?php endif; ?>
@@ -115,33 +115,33 @@ $formAction = $isEdit && $user !== null
                                <?php echo $isSelf ? 'disabled' : ''; ?>>
                         Active
                     </label>
-                    <?php if ($isSelf): ?>
+                    <?php if ($isSelf) : ?>
                         <input type="hidden" name="is_active" value="1">
                         <p class="help">You cannot deactivate your own account.</p>
                     <?php endif; ?>
                 </div>
             </div>
 
-            <?php if ($isEdit && $user !== null): ?>
+            <?php if ($isEdit && $user !== null) : ?>
             <!-- OAuth Providers (read-only) -->
-            <?php
-            $providers = [];
-            if ($user->isLinkedToGoogle()) {
-                $providers[] = 'Google';
-            }
-            if ($user->isLinkedToMicrosoft()) {
-                $providers[] = 'Microsoft';
-            }
-            if ($user->isLinkedToWordPress()) {
-                $providers[] = 'WordPress';
-            }
-            ?>
-            <?php if (!empty($providers)): ?>
+                <?php
+                $providers = [];
+                if ($user->isLinkedToGoogle()) {
+                    $providers[] = 'Google';
+                }
+                if ($user->isLinkedToMicrosoft()) {
+                    $providers[] = 'Microsoft';
+                }
+                if ($user->isLinkedToWordPress()) {
+                    $providers[] = 'WordPress';
+                }
+                ?>
+                <?php if (!empty($providers)) : ?>
             <div class="field">
                 <label class="label">Linked OAuth Providers</label>
                 <div class="control">
                     <div class="tags">
-                        <?php foreach ($providers as $provider): ?>
+                        <?php foreach ($providers as $provider) : ?>
                             <span class="tag is-info is-light">
                                 <?php echo htmlspecialchars($provider, ENT_QUOTES, 'UTF-8'); ?>
                             </span>
@@ -149,7 +149,7 @@ $formAction = $isEdit && $user !== null
                     </div>
                 </div>
             </div>
-            <?php endif; ?>
+                <?php endif; ?>
 
             <!-- Metadata (read-only) -->
             <div class="field">

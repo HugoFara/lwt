@@ -37,14 +37,14 @@ $escapedEmail = htmlspecialchars($user->email(), ENT_QUOTES, 'UTF-8');
         <div class="columns is-centered">
             <div class="column is-6-tablet is-5-desktop">
 
-                <?php if ($error !== null): ?>
+                <?php if ($error !== null) : ?>
                     <div class="notification is-danger">
                         <button class="delete" aria-label="close"></button>
                         <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
                     </div>
                 <?php endif; ?>
 
-                <?php if ($success !== null): ?>
+                <?php if ($success !== null) : ?>
                     <div class="notification is-success" data-auto-hide="true">
                         <button class="delete" aria-label="close"></button>
                         <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?>
@@ -60,11 +60,11 @@ $escapedEmail = htmlspecialchars($user->email(), ENT_QUOTES, 'UTF-8');
                         </span>
                     </h2>
 
-                    <?php if ($user->isEmailVerified()): ?>
+                    <?php if ($user->isEmailVerified()) : ?>
                         <div class="notification is-success is-light is-size-7 py-2 px-3 mb-4">
                             Email verified
                         </div>
-                    <?php else: ?>
+                    <?php else : ?>
                         <div class="notification is-warning is-light is-size-7 py-2 px-3 mb-4">
                             Email not verified
                         </div>
@@ -110,7 +110,7 @@ $escapedEmail = htmlspecialchars($user->email(), ENT_QUOTES, 'UTF-8');
                 </div>
 
                 <!-- Change Password -->
-                <?php if ($user->hasPassword()): ?>
+                <?php if ($user->hasPassword()) : ?>
                 <div class="box">
                     <h2 class="title is-4">
                         <span class="icon-text">
@@ -172,7 +172,7 @@ $escapedEmail = htmlspecialchars($user->email(), ENT_QUOTES, 'UTF-8');
                     <div class="content is-small">
                         <p><strong>Role:</strong> <?= htmlspecialchars($user->role(), ENT_QUOTES, 'UTF-8') ?></p>
                         <p><strong>Member since:</strong> <?= $user->created()->format('F j, Y') ?></p>
-                        <?php if ($user->lastLogin() !== null): ?>
+                        <?php if ($user->lastLogin() !== null) : ?>
                             <p><strong>Last login:</strong> <?= $user->lastLogin()->format('F j, Y g:i A') ?></p>
                         <?php endif; ?>
                     </div>

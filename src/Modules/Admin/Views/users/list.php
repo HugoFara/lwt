@@ -46,7 +46,7 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
 <div class="container" x-data="userManagement()">
 
     <!-- Stats Summary -->
-    <?php if (!empty($stats)): ?>
+    <?php if (!empty($stats)) : ?>
     <div class="columns is-multiline mb-4">
         <div class="column is-3">
             <div class="box has-text-centered">
@@ -89,7 +89,7 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                         <div class="control">
                             <button class="button is-info" type="submit">Search</button>
                         </div>
-                        <?php if ($search !== ''): ?>
+                        <?php if ($search !== '') : ?>
                         <div class="control">
                             <a class="button" href="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users">Clear</a>
                         </div>
@@ -123,7 +123,7 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($items)): ?>
+                <?php if (empty($items)) : ?>
                 <tr>
                     <td colspan="7" class="has-text-centered has-text-grey">
                         <?php echo $search !== '' ? 'No users found matching your search.' : 'No users found.'; ?>
@@ -131,36 +131,36 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                 </tr>
                 <?php endif; ?>
 
-                <?php foreach ($items as $user): ?>
-                <?php
+                <?php foreach ($items as $user) : ?>
+                    <?php
                     $userId = $user->id()->toInt();
                     $isSelf = ($userId === $currentAdminId);
                     $isActive = $user->isActive();
                     $isAdmin = $user->isAdmin();
-                ?>
+                    ?>
                 <tr>
                     <td>
                         <strong><?php echo htmlspecialchars($user->username(), ENT_QUOTES, 'UTF-8'); ?></strong>
                     </td>
                     <td><?php echo htmlspecialchars($user->email(), ENT_QUOTES, 'UTF-8'); ?></td>
                     <td>
-                        <?php if ($isAdmin): ?>
+                        <?php if ($isAdmin) : ?>
                             <span class="tag is-info">Admin</span>
-                        <?php else: ?>
+                        <?php else : ?>
                             <span class="tag">User</span>
                         <?php endif; ?>
                     </td>
                     <td>
-                        <?php if ($isActive): ?>
+                        <?php if ($isActive) : ?>
                             <span class="tag is-success is-light">Active</span>
-                        <?php else: ?>
+                        <?php else : ?>
                             <span class="tag is-danger is-light">Inactive</span>
                         <?php endif; ?>
                     </td>
                     <td>
-                        <?php if ($user->lastLogin() !== null): ?>
+                        <?php if ($user->lastLogin() !== null) : ?>
                             <?php echo htmlspecialchars($user->lastLogin()->format('Y-m-d H:i'), ENT_QUOTES, 'UTF-8'); ?>
-                        <?php else: ?>
+                        <?php else : ?>
                             <span class="has-text-grey">Never</span>
                         <?php endif; ?>
                     </td>
@@ -176,54 +176,54 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                                 <?php echo IconHelper::render('edit', ['class' => 'icon']); ?>
                             </a>
 
-                            <?php if (!$isSelf): ?>
+                            <?php if (!$isSelf) : ?>
                             <!-- Toggle Active -->
-                            <?php if ($isActive): ?>
+                                <?php if ($isActive) : ?>
                             <form method="post"
                                   action="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/<?php echo $userId; ?>/deactivate"
                                   style="display:inline"
                                   @submit.prevent="toggleStatus(<?php echo $userId; ?>, 'deactivate', $event.target)">
-                                <?php echo FormHelper::csrfField(); ?>
+                                    <?php echo FormHelper::csrfField(); ?>
                                 <button class="button is-small is-warning" type="submit" title="Deactivate">
                                     <?php echo IconHelper::render('user-x', ['class' => 'icon']); ?>
                                 </button>
                             </form>
-                            <?php else: ?>
+                                <?php else : ?>
                             <form method="post"
                                   action="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/<?php echo $userId; ?>/activate"
                                   style="display:inline"
                                   @submit.prevent="toggleStatus(<?php echo $userId; ?>, 'activate', $event.target)">
-                                <?php echo FormHelper::csrfField(); ?>
+                                    <?php echo FormHelper::csrfField(); ?>
                                 <button class="button is-small is-success" type="submit" title="Activate">
                                     <?php echo IconHelper::render('user-check', ['class' => 'icon']); ?>
                                 </button>
                             </form>
-                            <?php endif; ?>
+                                <?php endif; ?>
 
                             <!-- Toggle Role -->
-                            <?php if ($isAdmin): ?>
+                                <?php if ($isAdmin) : ?>
                             <form method="post"
                                   action="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/<?php echo $userId; ?>/role"
                                   style="display:inline"
                                   @submit.prevent="toggleRole(<?php echo $userId; ?>, 'demote', $event.target)">
-                                <?php echo FormHelper::csrfField(); ?>
+                                    <?php echo FormHelper::csrfField(); ?>
                                 <input type="hidden" name="action" value="demote">
                                 <button class="button is-small is-info is-light" type="submit" title="Demote to User">
                                     <?php echo IconHelper::render('shield-off', ['class' => 'icon']); ?>
                                 </button>
                             </form>
-                            <?php else: ?>
+                                <?php else : ?>
                             <form method="post"
                                   action="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/<?php echo $userId; ?>/role"
                                   style="display:inline"
                                   @submit.prevent="toggleRole(<?php echo $userId; ?>, 'promote', $event.target)">
-                                <?php echo FormHelper::csrfField(); ?>
+                                    <?php echo FormHelper::csrfField(); ?>
                                 <input type="hidden" name="action" value="promote">
                                 <button class="button is-small is-info" type="submit" title="Promote to Admin">
                                     <?php echo IconHelper::render('shield', ['class' => 'icon']); ?>
                                 </button>
                             </form>
-                            <?php endif; ?>
+                                <?php endif; ?>
 
                             <!-- Delete -->
                             <form method="post"
@@ -237,7 +237,7 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                             </form>
                             <?php endif; ?>
 
-                            <?php if ($isSelf): ?>
+                            <?php if ($isSelf) : ?>
                                 <span class="tag is-light">You</span>
                             <?php endif; ?>
                         </div>
@@ -249,7 +249,7 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
     </div>
 
     <!-- Pagination -->
-    <?php if ($totalPages > 1): ?>
+    <?php if ($totalPages > 1) : ?>
     <nav class="pagination is-centered" role="navigation" aria-label="pagination">
         <?php
         echo PageLayoutHelper::buildPager(
