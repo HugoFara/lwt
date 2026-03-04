@@ -152,6 +152,134 @@ class EmailService
     }
 
     /**
+     * Send an email verification email.
+     *
+     * @param string            $email    Recipient email
+     * @param string            $username Recipient username
+     * @param string            $token    Verification token (plaintext)
+     * @param DateTimeImmutable $expires  Token expiration time
+     *
+     * @return bool True if sent successfully
+     */
+    public function sendVerificationEmail(
+        string $email,
+        string $username,
+        string $token,
+        DateTimeImmutable $expires
+    ): bool {
+        if (!$this->isEnabled()) {
+            error_log(sprintf(
+                "Email verification for %s (%s). Token: %s (expires: %s)",
+                $username,
+                $email,
+                $token,
+                $expires->format('Y-m-d H:i:s T')
+            ));
+            return true;
+        }
+
+        $verifyUrl = $this->buildVerifyUrl($token);
+        $expiryFormatted = $expires->format('Y-m-d H:i:s T');
+
+        $subject = 'Verify Your Email - LWT';
+        $body = $this->buildVerificationHtml($username, $verifyUrl, $expiryFormatted);
+        $altBody = $this->buildVerificationPlainText($username, $verifyUrl, $expiryFormatted);
+
+        return $this->send($email, $subject, $body, $altBody);
+    }
+
+    /**
+     * Build the email verification URL.
+     *
+     * @param string $token The verification token
+     *
+     * @return string
+     */
+    private function buildVerifyUrl(string $token): string
+    {
+        $origin = UrlUtilities::getAppOrigin();
+
+        return "{$origin}/verify-email?token=" . urlencode($token);
+    }
+
+    /**
+     * Build HTML email body for verification.
+     *
+     * @param string $username  Username for greeting
+     * @param string $verifyUrl The verification URL
+     * @param string $expiry    Expiration time formatted
+     *
+     * @return string HTML email body
+     */
+    private function buildVerificationHtml(string $username, string $verifyUrl, string $expiry): string
+    {
+        $escapedUsername = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
+        $escapedUrl = htmlspecialchars($verifyUrl, ENT_QUOTES, 'UTF-8');
+
+        return <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Your Email - LWT</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #3273dc;">Verify Your Email Address</h1>
+        <p>Hello {$escapedUsername},</p>
+        <p>Thank you for registering with LWT! Please verify your email address by clicking the button below:</p>
+        <p style="text-align: center; margin: 30px 0;">
+            <a href="{$escapedUrl}"
+               style="background-color: #3273dc; color: white; padding: 12px 24px;
+                      text-decoration: none; border-radius: 4px; display: inline-block;">
+                Verify Email
+            </a>
+        </p>
+        <p>Or copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; background: #f5f5f5; padding: 10px; border-radius: 4px;">
+            <a href="{$escapedUrl}">{$escapedUrl}</a>
+        </p>
+        <p><strong>This link will expire at {$expiry}.</strong></p>
+        <p>If you did not create an account, you can safely ignore this email.</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        <p style="color: #777; font-size: 12px;">
+            Learning With Texts (LWT) - Language Learning by Reading
+        </p>
+    </div>
+</body>
+</html>
+HTML;
+    }
+
+    /**
+     * Build plain text email body for verification.
+     *
+     * @param string $username  Username for greeting
+     * @param string $verifyUrl The verification URL
+     * @param string $expiry    Expiration time formatted
+     *
+     * @return string Plain text email body
+     */
+    private function buildVerificationPlainText(string $username, string $verifyUrl, string $expiry): string
+    {
+        return <<<TEXT
+Verify Your Email Address
+
+Hello {$username},
+
+Thank you for registering with LWT! Please verify your email address by visiting the following link:
+{$verifyUrl}
+
+This link will expire at {$expiry}.
+
+If you did not create an account, you can safely ignore this email.
+
+---
+Learning With Texts (LWT) - Language Learning by Reading
+TEXT;
+    }
+
+    /**
      * Build the reset URL.
      *
      * @param string $token The reset token

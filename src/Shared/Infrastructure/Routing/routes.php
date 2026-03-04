@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace Lwt\Shared\Infrastructure\Routing;
 
 use Lwt\Shared\Infrastructure\Routing\Middleware\AuthMiddleware;
+use Lwt\Shared\Infrastructure\Routing\Middleware\AuthRateLimitMiddleware;
 use Lwt\Shared\Infrastructure\Routing\Middleware\AdminMiddleware;
 use Lwt\Shared\Infrastructure\Routing\Middleware\CsrfMiddleware;
 
@@ -550,25 +551,34 @@ function registerRoutes(Router $router): void
     $router->post('/admin/users/{id:int}/deactivate', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@deactivate', ADMIN_MIDDLEWARE);
     $router->post('/admin/users/{id:int}/role', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@setRole', ADMIN_MIDDLEWARE);
 
+    // ==================== USER PROFILE (AUTH REQUIRED) ====================
+    $router->get('/profile', 'Lwt\\Modules\\User\\Http\\UserController@profileForm', AUTH_MIDDLEWARE);
+    $router->post('/profile', 'Lwt\\Modules\\User\\Http\\UserController@updateProfile', AUTH_MIDDLEWARE);
+    $router->post('/profile/password', 'Lwt\\Modules\\User\\Http\\UserController@changePassword', AUTH_MIDDLEWARE);
+
     // ==================== AUTHENTICATION ROUTES (PUBLIC) ====================
     // All auth routes use UserController from the User module
 
-    // Login - no auth required
+    // Login - no auth required, rate limited on POST
     $router->register('/login', 'Lwt\\Modules\\User\\Http\\UserController@loginForm', 'GET');
-    $router->register('/login', 'Lwt\\Modules\\User\\Http\\UserController@login', 'POST');
+    $router->post('/login', 'Lwt\\Modules\\User\\Http\\UserController@login', [AuthRateLimitMiddleware::class]);
 
-    // Registration - no auth required
+    // Registration - no auth required, rate limited on POST
     $router->register('/register', 'Lwt\\Modules\\User\\Http\\UserController@registerForm', 'GET');
-    $router->register('/register', 'Lwt\\Modules\\User\\Http\\UserController@register', 'POST');
+    $router->post('/register', 'Lwt\\Modules\\User\\Http\\UserController@register', [AuthRateLimitMiddleware::class]);
 
     // Logout - technically needs auth but handles gracefully if not
     $router->register('/logout', 'Lwt\\Modules\\User\\Http\\UserController@logout');
 
-    // Password Reset - no auth required
+    // Email Verification - no auth required for token link
+    $router->register('/verify-email', 'Lwt\\Modules\\User\\Http\\UserController@verifyEmail', 'GET');
+    $router->register('/email/resend-verification', 'Lwt\\Modules\\User\\Http\\UserController@resendVerification', 'POST');
+
+    // Password Reset - no auth required, rate limited on POST
     $router->register('/password/forgot', 'Lwt\\Modules\\User\\Http\\UserController@forgotPasswordForm', 'GET');
-    $router->register('/password/forgot', 'Lwt\\Modules\\User\\Http\\UserController@forgotPassword', 'POST');
+    $router->post('/password/forgot', 'Lwt\\Modules\\User\\Http\\UserController@forgotPassword', [AuthRateLimitMiddleware::class]);
     $router->register('/password/reset', 'Lwt\\Modules\\User\\Http\\UserController@resetPasswordForm', 'GET');
-    $router->register('/password/reset', 'Lwt\\Modules\\User\\Http\\UserController@resetPassword', 'POST');
+    $router->post('/password/reset', 'Lwt\\Modules\\User\\Http\\UserController@resetPassword', [AuthRateLimitMiddleware::class]);
 
     // ==================== WORDPRESS INTEGRATION (PUBLIC) ====================
 

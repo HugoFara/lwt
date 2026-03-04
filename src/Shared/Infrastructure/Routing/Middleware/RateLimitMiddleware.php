@@ -182,8 +182,11 @@ class RateLimitMiddleware implements MiddlewareInterface
         $parsedUrl = parse_url($path);
         $requestPath = $parsedUrl['path'] ?? '/';
 
-        // Check if this is an auth endpoint
+        // Check if this is an auth endpoint (API or web)
         if (preg_match('#/api(?:\.php)?/v1/auth/(login|register)#', $requestPath)) {
+            return 'auth';
+        }
+        if (preg_match('#^/(login|register|password/forgot|password/reset)$#', $requestPath)) {
             return 'auth';
         }
 

@@ -232,4 +232,58 @@ class RegisterTest extends TestCase
         $this->assertTrue($result->id()->isNew());
         $this->assertTrue($result->isActive());
     }
+
+    // =========================================================================
+    // Admin Promotion Tests
+    // =========================================================================
+
+    public function testExecutePromotesFirstUserToAdmin(): void
+    {
+        $this->passwordHasher->method('validateStrength')
+            ->willReturn(['valid' => true, 'errors' => []]);
+
+        $this->repository->method('findByUsername')
+            ->willReturn(null);
+
+        $this->repository->method('findByEmail')
+            ->willReturn(null);
+
+        $this->passwordHasher->method('hash')
+            ->willReturn('hashed');
+
+        $this->repository->expects($this->once())
+            ->method('countAdmins')
+            ->willReturn(0);
+
+        $this->repository->method('save');
+
+        $result = $this->useCase->execute('firstuser', 'first@example.com', 'ValidPass123!');
+
+        $this->assertTrue($result->isAdmin());
+    }
+
+    public function testExecuteDoesNotPromoteWhenAdminsExist(): void
+    {
+        $this->passwordHasher->method('validateStrength')
+            ->willReturn(['valid' => true, 'errors' => []]);
+
+        $this->repository->method('findByUsername')
+            ->willReturn(null);
+
+        $this->repository->method('findByEmail')
+            ->willReturn(null);
+
+        $this->passwordHasher->method('hash')
+            ->willReturn('hashed');
+
+        $this->repository->expects($this->once())
+            ->method('countAdmins')
+            ->willReturn(1);
+
+        $this->repository->method('save');
+
+        $result = $this->useCase->execute('seconduser', 'second@example.com', 'ValidPass123!');
+
+        $this->assertFalse($result->isAdmin());
+    }
 }

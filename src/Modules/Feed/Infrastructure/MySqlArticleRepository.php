@@ -327,8 +327,22 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
             try {
                 $this->save($article);
                 $inserted++;
+            } catch (\mysqli_sql_exception $e) {
+                if ($e->getCode() === 1062) {
+                    // Duplicate key error
+                    $duplicates++;
+                } else {
+                    error_log(
+                        'MySqlArticleRepository::insertBatch: '
+                        . $e->getMessage()
+                    );
+                    $duplicates++;
+                }
             } catch (\Exception $e) {
-                // Likely duplicate key error
+                error_log(
+                    'MySqlArticleRepository::insertBatch: '
+                    . $e->getMessage()
+                );
                 $duplicates++;
             }
         }

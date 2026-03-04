@@ -1145,6 +1145,42 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
         </div>
     </div>
 
+    <!-- Multi-User Settings -->
+    <div class="card mb-5" x-data="{ open: false }">
+        <header class="card-header is-clickable" @click="open = !open">
+            <p class="card-header-title">
+                <?php echo IconHelper::render('users', ['alt' => 'Multi-User']); ?>
+                <span class="ml-2">Multi-User</span>
+            </p>
+            <button class="card-header-icon" aria-label="expand">
+                <span class="icon" :class="{ 'has-text-primary': open }">
+                    <i data-lucide="chevron-down"
+                       :style="open && 'transform: rotate(180deg)'"></i>
+                </span>
+            </button>
+        </header>
+        <div class="card-content" x-show="open" x-transition>
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label">Allow Registration</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control">
+                            <label class="checkbox">
+                                <input type="checkbox"
+                                       name="set-allow-registration"
+                                       value="1"
+                                       <?php echo ((int)($settings['set-allow-registration'] ?? '1') ? "checked" : ""); ?> />
+                                Allow new users to register accounts
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Form Actions -->
     <div class="field is-grouped is-grouped-right">
         <div class="control">

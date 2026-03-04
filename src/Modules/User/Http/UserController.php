@@ -23,6 +23,7 @@ use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Modules\User\Infrastructure\AuthFormDataManager;
 use Lwt\Shared\Infrastructure\Http\FlashMessageService;
+use Lwt\Shared\Infrastructure\Http\SecurityHeaders;
 
 /**
  * Controller for user authentication operations.
@@ -225,6 +226,9 @@ class UserController extends BaseController
         try {
             $user = $this->userFacade->register($username, $email, $password);
 
+            // Send verification email (non-blocking)
+            $this->userFacade->sendVerificationEmail($user);
+
             // Auto-login after registration
             $this->userFacade->setCurrentUser($user);
 
@@ -233,7 +237,14 @@ class UserController extends BaseController
             $this->formData->clearEmail();
 
             // Redirect to home with success message
-            $this->flash->success('Account created successfully. Welcome to LWT!');
+            $message = 'Account created successfully. Welcome to LWT!';
+            if ($user->isAdmin()) {
+                $message .= ' You have been granted admin privileges as the first user.';
+            }
+            if (!$user->isEmailVerified()) {
+                $message .= ' Please check your email to verify your account.';
+            }
+            $this->flash->success($message);
             $this->redirect('/');
         } catch (\InvalidArgumentException $e) {
             $this->flash->error($e->getMessage());
@@ -265,6 +276,191 @@ class UserController extends BaseController
 
         // Redirect to login
         $this->redirect('/login');
+    }
+
+    // =========================================================================
+    // Profile Methods
+    // =========================================================================
+
+    /**
+     * Display the user profile form.
+     *
+     * GET /profile
+     *
+     * @return void
+     */
+    public function profileForm(): void
+    {
+        $user = $this->userFacade->getCurrentUser();
+        if ($user === null) {
+            $this->redirect('/login');
+            return;
+        }
+
+        $errorMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_ERROR);
+        $error = !empty($errorMessages) ? $errorMessages[0]['message'] : null;
+
+        $successMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_SUCCESS);
+        $success = !empty($successMessages) ? $successMessages[0]['message'] : null;
+
+        $this->render('Profile', true);
+        require __DIR__ . '/../Views/profile.php';
+        $this->endRender();
+    }
+
+    /**
+     * Process profile update.
+     *
+     * POST /profile
+     *
+     * @return void
+     */
+    public function updateProfile(): void
+    {
+        if (!$this->isPost()) {
+            $this->redirect('/profile');
+            return;
+        }
+
+        $user = $this->userFacade->getCurrentUser();
+        if ($user === null) {
+            $this->redirect('/login');
+            return;
+        }
+
+        $username = $this->post('username');
+        $email = $this->post('email');
+
+        if (empty($username) || empty($email)) {
+            $this->flash->error('Please fill in all required fields');
+            $this->redirect('/profile');
+            return;
+        }
+
+        try {
+            $emailChanged = $this->userFacade->updateProfile($user, $username, $email);
+
+            if ($emailChanged) {
+                $this->userFacade->sendVerificationEmail($user);
+                $this->flash->success('Profile updated. Please verify your new email address.');
+            } else {
+                $this->flash->success('Profile updated successfully.');
+            }
+        } catch (\InvalidArgumentException $e) {
+            $this->flash->error($e->getMessage());
+        }
+
+        $this->redirect('/profile');
+    }
+
+    /**
+     * Process password change.
+     *
+     * POST /profile/password
+     *
+     * @return void
+     */
+    public function changePassword(): void
+    {
+        if (!$this->isPost()) {
+            $this->redirect('/profile');
+            return;
+        }
+
+        $user = $this->userFacade->getCurrentUser();
+        if ($user === null) {
+            $this->redirect('/login');
+            return;
+        }
+
+        $currentPassword = $this->post('current_password');
+        $newPassword = $this->post('new_password');
+        $confirmPassword = $this->post('new_password_confirm');
+
+        if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+            $this->flash->error('Please fill in all password fields');
+            $this->redirect('/profile');
+            return;
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            $this->flash->error('New passwords do not match');
+            $this->redirect('/profile');
+            return;
+        }
+
+        try {
+            $this->userFacade->changePassword($user, $currentPassword, $newPassword);
+            $this->flash->success('Password changed successfully.');
+        } catch (\InvalidArgumentException $e) {
+            $this->flash->error($e->getMessage());
+        }
+
+        $this->redirect('/profile');
+    }
+
+    // =========================================================================
+    // Email Verification Methods
+    // =========================================================================
+
+    /**
+     * Verify a user's email via token link.
+     *
+     * GET /verify-email?token=...
+     *
+     * @return void
+     */
+    public function verifyEmail(): void
+    {
+        $token = $this->param('token');
+
+        if (empty($token)) {
+            $this->flash->error('Invalid verification link.');
+            $this->redirect('/');
+            return;
+        }
+
+        $user = $this->userFacade->verifyEmail($token);
+
+        if ($user === null) {
+            $this->flash->error('Invalid or expired verification link. Please request a new one.');
+            $this->redirect('/');
+            return;
+        }
+
+        $this->flash->success('Your email has been verified successfully!');
+        $this->redirect('/');
+    }
+
+    /**
+     * Resend email verification link.
+     *
+     * POST /email/resend-verification
+     *
+     * @return void
+     */
+    public function resendVerification(): void
+    {
+        if (!$this->isPost()) {
+            $this->redirect('/');
+            return;
+        }
+
+        $user = $this->userFacade->getCurrentUser();
+        if ($user === null) {
+            $this->redirect('/login');
+            return;
+        }
+
+        if ($user->isEmailVerified()) {
+            $this->flash->success('Your email is already verified.');
+            $this->redirect('/');
+            return;
+        }
+
+        $this->userFacade->sendVerificationEmail($user);
+        $this->flash->success('Verification email sent. Please check your inbox.');
+        $this->redirect('/');
     }
 
     // =========================================================================
@@ -429,7 +625,7 @@ class UserController extends BaseController
         }
 
         // Check for remember cookie
-        $token = $_COOKIE['lwt_remember'] ?? '';
+        $token = filter_input(INPUT_COOKIE, 'lwt_remember') ?? '';
         if (empty($token)) {
             return false;
         }
@@ -467,8 +663,9 @@ class UserController extends BaseController
      */
     private function isRegistrationEnabled(): bool
     {
-        // For now, always enabled. Can be configured via settings later.
-        return true;
+        return \Lwt\Shared\Infrastructure\Database\Settings::getWithDefault(
+            'set-allow-registration'
+        ) === '1';
     }
 
     /**
@@ -496,7 +693,7 @@ class UserController extends BaseController
             [
                 'expires' => $expires,
                 'path' => '/',
-                'secure' => isset($_SERVER['HTTPS']),
+                'secure' => SecurityHeaders::isSecureConnection(),
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]
@@ -516,7 +713,7 @@ class UserController extends BaseController
             [
                 'expires' => time() - 3600,
                 'path' => '/',
-                'secure' => isset($_SERVER['HTTPS']),
+                'secure' => SecurityHeaders::isSecureConnection(),
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]

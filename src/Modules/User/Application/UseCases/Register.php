@@ -94,6 +94,11 @@ class Register
         // Create the user entity
         $user = User::create($username, $email, $passwordHash);
 
+        // First-admin bootstrap: promote if no real admins exist
+        if ($this->repository->countAdmins() === 0) {
+            $user->promoteToAdmin();
+        }
+
         // Persist to database
         $this->repository->save($user);
 

@@ -117,6 +117,9 @@ final class SettingDefinitions
         ],
         'set-show-text-word-counts' => [
             "dft" => '1', "num" => 0
+        ],
+        'set-allow-registration' => [
+            "dft" => '1', "num" => 0
         ]
     ];
 

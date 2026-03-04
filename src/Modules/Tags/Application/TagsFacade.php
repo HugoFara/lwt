@@ -25,6 +25,7 @@ use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Tags\Application\Services\TermTagService;
+use Lwt\Modules\Tags\Application\Services\TextTagService;
 use Lwt\Modules\Tags\Application\UseCases\CreateTag;
 use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Modules\Tags\Application\UseCases\DeleteTag;
@@ -503,7 +504,7 @@ class TagsFacade
      */
     public static function saveTextTags(int $textId, array $tagNames): void
     {
-        self::getTextAssociation()->setTagsByName($textId, $tagNames);
+        TextTagService::saveTextTags($textId, $tagNames);
         self::getAllTextTags(true); // Refresh cache
     }
 
@@ -517,7 +518,7 @@ class TagsFacade
      */
     public static function saveArchivedTextTags(int $textId, array $tagNames): void
     {
-        self::getArchivedTextAssociation()->setTagsByName($textId, $tagNames);
+        TextTagService::saveArchivedTextTags($textId, $tagNames);
         self::getAllTextTags(true); // Refresh cache
     }
 
@@ -546,16 +547,7 @@ class TagsFacade
      */
     public static function getTextTagsHtml(int $textId): string
     {
-        $html = '<ul id="texttags" class="respinput">';
-
-        if ($textId > 0) {
-            $tagNames = self::getTextAssociation()->getTagTextsForItem($textId);
-            foreach ($tagNames as $name) {
-                $html .= '<li>' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '</li>';
-            }
-        }
-
-        return $html . '</ul>';
+        return TextTagService::getTextTagsHtml($textId);
     }
 
     /**
@@ -567,16 +559,7 @@ class TagsFacade
      */
     public static function getArchivedTextTagsHtml(int $textId): string
     {
-        $html = '<ul id="text_tag_map" class="respinput">';
-
-        if ($textId > 0) {
-            $tagNames = self::getArchivedTextAssociation()->getTagTextsForItem($textId);
-            foreach ($tagNames as $name) {
-                $html .= '<li>' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '</li>';
-            }
-        }
-
-        return $html . '</ul>';
+        return TextTagService::getArchivedTextTagsHtml($textId);
     }
 
     /**
@@ -656,24 +639,7 @@ class TagsFacade
      */
     public static function saveTextTagsFromForm(int $textId, ?array $textTags = null): void
     {
-        if ($textTags === null) {
-            $textTags = InputValidator::getArray('TextTags');
-        }
-
-        if (
-            empty($textTags)
-            || !isset($textTags['TagList'])
-            || !is_array($textTags['TagList'])
-        ) {
-            // Clear existing tags if no tags submitted
-            self::getTextAssociation()->setTagsByName($textId, []);
-            return;
-        }
-
-        /** @var array<int|string, scalar> $tagList */
-        $tagList = $textTags['TagList'];
-        $tagNames = array_map('strval', $tagList);
-        self::saveTextTags($textId, $tagNames);
+        TextTagService::saveTextTagsFromForm($textId, $textTags);
     }
 
     /**
@@ -685,22 +651,7 @@ class TagsFacade
      */
     public static function saveArchivedTextTagsFromForm(int $textId): void
     {
-        $textTags = InputValidator::getArray('TextTags');
-
-        if (
-            empty($textTags)
-            || !isset($textTags['TagList'])
-            || !is_array($textTags['TagList'])
-        ) {
-            // Clear existing tags if no tags submitted
-            self::getArchivedTextAssociation()->setTagsByName($textId, []);
-            return;
-        }
-
-        /** @var array<int|string, scalar> $tagList */
-        $tagList = $textTags['TagList'];
-        $tagNames = array_map('strval', $tagList);
-        self::saveArchivedTextTags($textId, $tagNames);
+        TextTagService::saveArchivedTextTagsFromForm($textId);
     }
 
     // =====================
@@ -745,35 +696,9 @@ class TagsFacade
      */
     public static function addTagToTexts(string $tagText, string $idList): array
     {
-        if ($idList === '()') {
-            return ['count' => 0, 'error' => null];
-        }
-
-        $tagId = self::getOrCreateTextTag($tagText);
-        if ($tagId === null) {
-            return ['count' => 0, 'error' => 'Failed to create tag'];
-        }
-
-        $sql = 'SELECT TxID FROM texts
-            LEFT JOIN text_tag_map ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
-            WHERE TtT2ID IS NULL AND TxID IN ' . $idList
-            . UserScopedQuery::forTable('texts');
-        $res = Connection::query($sql);
-
-        $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $count += (int) Connection::execute(
-                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID)
-                    VALUES(' . (int)$record['TxID'] . ', ' . $tagId . ')'
-                );
-            }
-            mysqli_free_result($res);
-        }
-
+        $result = TextTagService::addTagToTexts($tagText, $idList);
         self::getAllTextTags(true);
-
-        return ['count' => $count, 'error' => null];
+        return $result;
     }
 
     /**
@@ -786,39 +711,7 @@ class TagsFacade
      */
     public static function removeTagFromTexts(string $tagText, string $idList): array
     {
-        if ($idList === '()') {
-            return ['count' => 0, 'error' => null];
-        }
-
-        /** @var int|string|null $tagIdRaw */
-        $tagIdRaw = Connection::preparedFetchValue(
-            'SELECT T2ID FROM text_tags WHERE T2Text = ?',
-            [$tagText],
-            'T2ID'
-        );
-
-        if ($tagIdRaw === null) {
-            return ['count' => 0, 'error' => "Tag {$tagText} not found"];
-        }
-        $tagId = (int) $tagIdRaw;
-
-        $sql = 'SELECT TxID FROM texts WHERE TxID IN ' . $idList
-            . UserScopedQuery::forTable('texts');
-        $res = Connection::query($sql);
-
-        $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $count++;
-                QueryBuilder::table('text_tag_map')
-                    ->where('TtTxID', '=', (int)$record['TxID'])
-                    ->where('TtT2ID', '=', $tagId)
-                    ->delete();
-            }
-            mysqli_free_result($res);
-        }
-
-        return ['count' => $count, 'error' => null];
+        return TextTagService::removeTagFromTexts($tagText, $idList);
     }
 
     /**
@@ -831,36 +724,9 @@ class TagsFacade
      */
     public static function addTagToArchivedTexts(string $tagText, string $idList): array
     {
-        if ($idList === '()') {
-            return ['count' => 0, 'error' => null];
-        }
-
-        $tagId = self::getOrCreateTextTag($tagText);
-        if ($tagId === null) {
-            return ['count' => 0, 'error' => 'Failed to create tag'];
-        }
-
-        // Archived texts are in texts table with TxArchivedAt IS NOT NULL
-        $sql = 'SELECT TxID FROM texts
-            LEFT JOIN text_tag_map ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
-            WHERE TtT2ID IS NULL AND TxArchivedAt IS NOT NULL AND TxID IN ' . $idList
-            . UserScopedQuery::forTable('texts');
-        $res = Connection::query($sql);
-
-        $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $count += (int) Connection::execute(
-                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID)
-                    VALUES(' . (int)$record['TxID'] . ', ' . $tagId . ')'
-                );
-            }
-            mysqli_free_result($res);
-        }
-
+        $result = TextTagService::addTagToArchivedTexts($tagText, $idList);
         self::getAllTextTags(true);
-
-        return ['count' => $count, 'error' => null];
+        return $result;
     }
 
     /**
@@ -875,39 +741,7 @@ class TagsFacade
         string $tagText,
         string $idList
     ): array {
-        if ($idList === '()') {
-            return ['count' => 0, 'error' => null];
-        }
-
-        /** @var int|string|null $tagIdRaw */
-        $tagIdRaw = Connection::preparedFetchValue(
-            'SELECT T2ID FROM text_tags WHERE T2Text = ?',
-            [$tagText],
-            'T2ID'
-        );
-
-        if ($tagIdRaw === null) {
-            return ['count' => 0, 'error' => "Tag {$tagText} not found"];
-        }
-        $tagId = (int) $tagIdRaw;
-
-        // Archived texts are in texts table with TxArchivedAt IS NOT NULL
-        $sql = 'SELECT TxID FROM texts WHERE TxArchivedAt IS NOT NULL AND TxID IN ' . $idList
-            . UserScopedQuery::forTable('texts');
-        $res = Connection::query($sql);
-
-        $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $count++;
-                QueryBuilder::table('text_tag_map')
-                    ->where('TtTxID', '=', (int)$record['TxID'])
-                    ->delete();
-            }
-            mysqli_free_result($res);
-        }
-
-        return ['count' => $count, 'error' => null];
+        return TextTagService::removeTagFromArchivedTexts($tagText, $idList);
     }
 
     // =====================
@@ -941,47 +775,7 @@ class TagsFacade
         int|string|null $selected,
         int|string $langId
     ): string {
-        $selected = $selected ?? '';
-
-        $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
-        $html .= '[Filter off]</option>';
-
-        if ($langId === '') {
-            $rows = Connection::preparedFetchAll(
-                "SELECT T2ID, T2Text
-                FROM texts, text_tags, text_tag_map
-                WHERE T2ID = TtT2ID AND TtTxID = TxID
-                GROUP BY T2ID
-                ORDER BY UPPER(T2Text)",
-                []
-            );
-        } else {
-            $rows = Connection::preparedFetchAll(
-                "SELECT T2ID, T2Text
-                FROM texts, text_tags, text_tag_map
-                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxLgID = ?
-                GROUP BY T2ID
-                ORDER BY UPPER(T2Text)",
-                [$langId]
-            );
-        }
-
-        $count = 0;
-        foreach ($rows as $record) {
-            $count++;
-            $tagId = (int) $record['T2ID'];
-            $tagText = (string) ($record['T2Text'] ?? '');
-            $html .= '<option value="' . $tagId . '"' .
-                FormHelper::getSelected($selected, $tagId) . '>' .
-                htmlspecialchars($tagText, ENT_QUOTES, 'UTF-8') . '</option>';
-        }
-
-        if ($count > 0) {
-            $html .= '<option disabled="disabled">--------</option>';
-            $html .= '<option value="-1"' . FormHelper::getSelected($selected, -1) . '>UNTAGGED</option>';
-        }
-
-        return $html;
+        return TextTagService::getTextTagSelectOptions($selected, $langId);
     }
 
     /**
@@ -996,51 +790,7 @@ class TagsFacade
         int|string $langId,
         int|string|null $selected
     ): string {
-        $selected = $selected ?? '';
-        $untaggedOption = '';
-
-        $html = '<option value="&amp;texttag"' . FormHelper::getSelected($selected, '') . '>';
-        $html .= '[Filter off]</option>';
-
-        if ($langId) {
-            $rows = Connection::preparedFetchAll(
-                'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
-                GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
-                FROM texts
-                LEFT JOIN text_tag_map ON TxID = TtTxID
-                LEFT JOIN text_tags ON TtT2ID = T2ID
-                WHERE TxLgID = ?
-                GROUP BY UPPER(TagName)',
-                [$langId]
-            );
-        } else {
-            $rows = Connection::preparedFetchAll(
-                'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
-                GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
-                FROM texts
-                LEFT JOIN text_tag_map ON TxID = TtTxID
-                LEFT JOIN text_tags ON TtT2ID = T2ID
-                GROUP BY UPPER(TagName)',
-                []
-            );
-        }
-
-        foreach ($rows as $record) {
-            $tagName = (string) $record['TagName'];
-            $textId = (string) $record['TextID'];
-            $tagId = (int) $record['TagID'];
-            if ($tagName === '1') {
-                $untaggedOption = '<option disabled="disabled">--------</option>' .
-                    '<option value="' . $textId . '&amp;texttag=-1"' .
-                    FormHelper::getSelected($selected, "-1") . '>UNTAGGED</option>';
-            } else {
-                $html .= '<option value="' . $textId . '&amp;texttag=' .
-                    $tagId . '"' . FormHelper::getSelected($selected, $tagId) .
-                    '>' . $tagName . '</option>';
-            }
-        }
-
-        return $html . $untaggedOption;
+        return TextTagService::getTextTagSelectOptionsWithTextIds($langId, $selected);
     }
 
     /**
@@ -1055,48 +805,7 @@ class TagsFacade
         int|string|null $selected,
         int|string $langId
     ): string {
-        $selected = $selected ?? '';
-
-        $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
-        $html .= '[Filter off]</option>';
-
-        // Archived texts are in texts table with TxArchivedAt IS NOT NULL
-        if ($langId === '') {
-            $rows = Connection::preparedFetchAll(
-                "SELECT T2ID, T2Text
-                FROM texts, text_tags, text_tag_map
-                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxArchivedAt IS NOT NULL
-                GROUP BY T2ID
-                ORDER BY UPPER(T2Text)",
-                []
-            );
-        } else {
-            $rows = Connection::preparedFetchAll(
-                "SELECT T2ID, T2Text
-                FROM texts, text_tags, text_tag_map
-                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxArchivedAt IS NOT NULL AND TxLgID = ?
-                GROUP BY T2ID
-                ORDER BY UPPER(T2Text)",
-                [$langId]
-            );
-        }
-
-        $count = 0;
-        foreach ($rows as $record) {
-            $count++;
-            $tagId = (int) $record['T2ID'];
-            $tagText = (string) ($record['T2Text'] ?? '');
-            $html .= '<option value="' . $tagId . '"' .
-                FormHelper::getSelected($selected, $tagId) . '>' .
-                htmlspecialchars($tagText, ENT_QUOTES, 'UTF-8') . '</option>';
-        }
-
-        if ($count > 0) {
-            $html .= '<option disabled="disabled">--------</option>';
-            $html .= '<option value="-1"' . FormHelper::getSelected($selected, -1) . '>UNTAGGED</option>';
-        }
-
-        return $html;
+        return TextTagService::getArchivedTextTagSelectOptions($selected, $langId);
     }
 
     // =====================
@@ -1112,24 +821,7 @@ class TagsFacade
      */
     private static function getOrCreateTextTag(string $tagText): ?int
     {
-        /** @var int|string|null $tagIdRaw */
-        $tagIdRaw = Connection::preparedFetchValue(
-            'SELECT T2ID FROM text_tags WHERE T2Text = ?',
-            [$tagText],
-            'T2ID'
-        );
-
-        if ($tagIdRaw === null) {
-            QueryBuilder::table('text_tags')->insertPrepared(['T2Text' => $tagText]);
-            /** @var int|string|null $tagIdRaw */
-            $tagIdRaw = Connection::preparedFetchValue(
-                'SELECT T2ID FROM text_tags WHERE T2Text = ?',
-                [$tagText],
-                'T2ID'
-            );
-        }
-
-        return $tagIdRaw !== null ? (int) $tagIdRaw : null;
+        return TextTagService::getOrCreateTextTag($tagText);
     }
 
     /**

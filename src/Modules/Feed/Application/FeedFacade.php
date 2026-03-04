@@ -691,7 +691,10 @@ class FeedFacade
             );
             $stmt->bind('s', $pattern)->execute();
             return true;
+        } catch (\mysqli_sql_exception $e) {
+            return false;
         } catch (\Exception $e) {
+            error_log('FeedFacade::validateRegexPattern: ' . $e->getMessage());
             return false;
         }
     }

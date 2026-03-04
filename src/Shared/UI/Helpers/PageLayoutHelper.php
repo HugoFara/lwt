@@ -18,10 +18,13 @@ declare(strict_types=1);
 
 namespace Lwt\Shared\UI\Helpers;
 
+use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Assets\ViteHelper;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
+use Lwt\Modules\User\Application\UserFacade;
 
 /**
  * Helper class for generating page layout elements.
@@ -649,6 +652,7 @@ HTML;
             echo '</div>';
         }
         echo '<main id="main-content">';
+        self::renderEmailVerificationBanner();
         echo self::buildPageTitle($title);
     }
 
@@ -687,6 +691,43 @@ HTML;
         echo '-->';
         echo '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
         echo '</head>';
+    }
+
+    /**
+     * Render a warning banner when the current user's email is not verified.
+     *
+     * Only shows in multi-user mode when the user is authenticated
+     * but has not yet verified their email address.
+     *
+     * @return void
+     */
+    public static function renderEmailVerificationBanner(): void
+    {
+        if (!Globals::isMultiUserEnabled() || !Globals::isAuthenticated()) {
+            return;
+        }
+
+        try {
+            /** @var UserFacade $facade */
+            $facade = Container::getInstance()->get(UserFacade::class);
+            $user = $facade->getCurrentUser();
+        } catch (\Throwable $e) {
+            return;
+        }
+
+        if ($user === null || $user->isEmailVerified()) {
+            return;
+        }
+
+        echo '<div class="notification is-warning" role="alert">'
+            . '<strong>Email not verified.</strong> '
+            . 'Please check your inbox for a verification link. '
+            . '<form method="post" action="/email/resend-verification" style="display:inline">'
+            . FormHelper::csrfField()
+            . '<button type="submit" class="button is-small is-warning is-outlined ml-2">'
+            . 'Resend verification email</button>'
+            . '</form>'
+            . '</div>';
     }
 
     /**

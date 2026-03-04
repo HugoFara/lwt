@@ -29,9 +29,13 @@ use Lwt\Modules\User\Application\UseCases\GetCurrentUser;
 use Lwt\Modules\User\Application\UseCases\Login;
 use Lwt\Modules\User\Application\UseCases\Logout;
 use Lwt\Modules\User\Application\UseCases\Register;
+use Lwt\Modules\User\Application\UseCases\ChangePassword;
 use Lwt\Modules\User\Application\UseCases\RequestPasswordReset;
+use Lwt\Modules\User\Application\UseCases\SendVerificationEmail;
+use Lwt\Modules\User\Application\UseCases\UpdateProfile;
 use Lwt\Modules\User\Application\UseCases\ValidateApiToken;
 use Lwt\Modules\User\Application\UseCases\ValidateSession;
+use Lwt\Modules\User\Application\UseCases\VerifyEmail;
 use Lwt\Modules\User\Domain\UserRepositoryInterface;
 
 /**
@@ -75,6 +79,10 @@ class UserFacade
     private ?ValidateApiToken $validateApiTokenUseCase = null;
     private ?RequestPasswordReset $requestPasswordResetUseCase = null;
     private ?CompletePasswordReset $completePasswordResetUseCase = null;
+    private ?SendVerificationEmail $sendVerificationEmailUseCase = null;
+    private ?VerifyEmail $verifyEmailUseCase = null;
+    private ?UpdateProfile $updateProfileUseCase = null;
+    private ?ChangePassword $changePasswordUseCase = null;
 
     /**
      * Constructor.
@@ -127,6 +135,65 @@ class UserFacade
     public function register(string $username, string $email, string $password): User
     {
         return $this->getRegisterUseCase()->execute($username, $email, $password);
+    }
+
+    /**
+     * Send a verification email to the given user.
+     *
+     * Non-blocking — failure doesn't prevent registration.
+     * When MAIL_ENABLED=false, auto-verifies the user.
+     *
+     * @param User $user The user to verify
+     *
+     * @return bool True if sent or auto-verified
+     */
+    public function sendVerificationEmail(User $user): bool
+    {
+        return $this->getSendVerificationEmailUseCase()->execute($user);
+    }
+
+    /**
+     * Verify a user's email using a plaintext token.
+     *
+     * @param string $token The token from the verification URL
+     *
+     * @return User|null The verified user, or null if invalid/expired
+     */
+    public function verifyEmail(string $token): ?User
+    {
+        return $this->getVerifyEmailUseCase()->execute($token);
+    }
+
+    /**
+     * Update a user's profile (username, email).
+     *
+     * @param User   $user     The user to update
+     * @param string $username New username
+     * @param string $email    New email
+     *
+     * @return bool Whether the email changed (triggers re-verification)
+     *
+     * @throws \InvalidArgumentException If validation fails
+     */
+    public function updateProfile(User $user, string $username, string $email): bool
+    {
+        return $this->getUpdateProfileUseCase()->execute($user, $username, $email);
+    }
+
+    /**
+     * Change a user's password.
+     *
+     * @param User   $user            The user
+     * @param string $currentPassword Current password for verification
+     * @param string $newPassword     New password
+     *
+     * @return void
+     *
+     * @throws \InvalidArgumentException If validation fails
+     */
+    public function changePassword(User $user, string $currentPassword, string $newPassword): void
+    {
+        $this->getChangePasswordUseCase()->execute($user, $currentPassword, $newPassword);
     }
 
     /**
@@ -718,5 +785,59 @@ class UserFacade
             );
         }
         return $this->completePasswordResetUseCase;
+    }
+
+    /**
+     * @return SendVerificationEmail
+     */
+    private function getSendVerificationEmailUseCase(): SendVerificationEmail
+    {
+        if ($this->sendVerificationEmailUseCase === null) {
+            $this->sendVerificationEmailUseCase = new SendVerificationEmail(
+                $this->repository,
+                $this->tokenHasher,
+                new EmailService()
+            );
+        }
+        return $this->sendVerificationEmailUseCase;
+    }
+
+    /**
+     * @return VerifyEmail
+     */
+    private function getVerifyEmailUseCase(): VerifyEmail
+    {
+        if ($this->verifyEmailUseCase === null) {
+            $this->verifyEmailUseCase = new VerifyEmail(
+                $this->repository,
+                $this->tokenHasher
+            );
+        }
+        return $this->verifyEmailUseCase;
+    }
+
+    /**
+     * @return UpdateProfile
+     */
+    private function getUpdateProfileUseCase(): UpdateProfile
+    {
+        if ($this->updateProfileUseCase === null) {
+            $this->updateProfileUseCase = new UpdateProfile($this->repository);
+        }
+        return $this->updateProfileUseCase;
+    }
+
+    /**
+     * @return ChangePassword
+     */
+    private function getChangePasswordUseCase(): ChangePassword
+    {
+        if ($this->changePasswordUseCase === null) {
+            $this->changePasswordUseCase = new ChangePassword(
+                $this->repository,
+                $this->passwordHasher
+            );
+        }
+        return $this->changePasswordUseCase;
     }
 }

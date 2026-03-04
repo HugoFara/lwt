@@ -76,6 +76,9 @@ class MySqlUserRepository implements UserRepositoryInterface
             $this->parseNullableDateTime($this->getNullableString($row['UsRememberTokenExpires'] ?? null)),
             ($row['UsPasswordResetToken'] ?? null) !== null ? (string) $row['UsPasswordResetToken'] : null,
             $this->parseNullableDateTime($this->getNullableString($row['UsPasswordResetTokenExpires'] ?? null)),
+            $this->parseNullableDateTime($this->getNullableString($row['UsEmailVerifiedAt'] ?? null)),
+            ($row['UsEmailVerificationToken'] ?? null) !== null ? (string) $row['UsEmailVerificationToken'] : null,
+            $this->parseNullableDateTime($this->getNullableString($row['UsEmailVerificationTokenExpires'] ?? null)),
             $row['UsWordPressId'] !== null ? (int) $row['UsWordPressId'] : null,
             ($row['UsGoogleId'] ?? null) !== null ? (string) $row['UsGoogleId'] : null,
             ($row['UsMicrosoftId'] ?? null) !== null ? (string) $row['UsMicrosoftId'] : null,
@@ -106,6 +109,9 @@ class MySqlUserRepository implements UserRepositoryInterface
             'UsRememberTokenExpires' => $entity->rememberTokenExpires()?->format('Y-m-d H:i:s'),
             'UsPasswordResetToken' => $entity->passwordResetToken(),
             'UsPasswordResetTokenExpires' => $entity->passwordResetTokenExpires()?->format('Y-m-d H:i:s'),
+            'UsEmailVerifiedAt' => $entity->emailVerifiedAt()?->format('Y-m-d H:i:s'),
+            'UsEmailVerificationToken' => $entity->emailVerificationToken(),
+            'UsEmailVerificationTokenExpires' => $entity->emailVerificationTokenExpires()?->format('Y-m-d H:i:s'),
             'UsWordPressId' => $entity->wordPressId(),
             'UsGoogleId' => $entity->googleId(),
             'UsMicrosoftId' => $entity->microsoftId(),
@@ -530,6 +536,18 @@ class MySqlUserRepository implements UserRepositoryInterface
     /**
      * {@inheritdoc}
      */
+    public function findByEmailVerificationToken(string $token): ?User
+    {
+        $row = $this->query()
+            ->where('UsEmailVerificationToken', '=', $token)
+            ->firstPrepared();
+
+        return $row !== null ? $this->mapToEntity($row) : null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function activate(int $userId): bool
     {
         $affected = $this->query()
@@ -940,6 +958,18 @@ class MySqlUserRepository implements UserRepositoryInterface
         return $this->query()
             ->whereIn('UsID', array_map('intval', $userIds))
             ->deletePrepared();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function countAdmins(): int
+    {
+        $sql = "SELECT COUNT(*) as cnt FROM users "
+             . "WHERE UsRole = ? AND UsPassword IS NOT NULL";
+        $rows = Connection::preparedFetchAll($sql, [User::ROLE_ADMIN]);
+
+        return (int) ($rows[0]['cnt'] ?? 0);
     }
 
     /**

@@ -247,6 +247,25 @@ interface UserRepositoryInterface
     public function getForSelect(int $maxNameLength = 40): array;
 
     /**
+     * Find a user by email verification token.
+     *
+     * @param string $token The verification token (hashed)
+     *
+     * @return User|null
+     */
+    public function findByEmailVerificationToken(string $token): ?User;
+
+    /**
+     * Count the number of admin users with a valid (non-null) password.
+     *
+     * Used for first-admin bootstrap: the migration seed admin has
+     * a NULL password and should not count.
+     *
+     * @return int
+     */
+    public function countAdmins(): int;
+
+    /**
      * Get basic user info (minimal data for lists).
      *
      * @param int $userId User ID

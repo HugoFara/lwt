@@ -26,6 +26,11 @@ use Lwt\Shared\Infrastructure\Database\Configuration;
 // Load Composer autoloader
 require_once __DIR__ . '/../vendor/autoload.php';
 
+// Ensure PHPUnit TestCase is loaded so ErrorHandler::die() can detect test context.
+// ErrorHandler checks class_exists('PHPUnit\Framework\TestCase', false) without
+// autoloading, so the class must be explicitly loaded before any DB connect attempt.
+class_exists(\PHPUnit\Framework\TestCase::class, true);
+
 // Load EnvLoader and Globals
 require_once __DIR__ . '/../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 require_once __DIR__ . '/../src/Shared/Infrastructure/Globals.php';

@@ -46,6 +46,9 @@ class User
     private ?DateTimeImmutable $rememberTokenExpires;
     private ?string $passwordResetToken;
     private ?DateTimeImmutable $passwordResetTokenExpires;
+    private ?DateTimeImmutable $emailVerifiedAt;
+    private ?string $emailVerificationToken;
+    private ?DateTimeImmutable $emailVerificationTokenExpires;
     private ?int $wordPressId;
     private ?string $googleId;
     private ?string $microsoftId;
@@ -68,6 +71,9 @@ class User
         ?DateTimeImmutable $rememberTokenExpires,
         ?string $passwordResetToken,
         ?DateTimeImmutable $passwordResetTokenExpires,
+        ?DateTimeImmutable $emailVerifiedAt,
+        ?string $emailVerificationToken,
+        ?DateTimeImmutable $emailVerificationTokenExpires,
         ?int $wordPressId,
         ?string $googleId,
         ?string $microsoftId,
@@ -86,6 +92,9 @@ class User
         $this->rememberTokenExpires = $rememberTokenExpires;
         $this->passwordResetToken = $passwordResetToken;
         $this->passwordResetTokenExpires = $passwordResetTokenExpires;
+        $this->emailVerifiedAt = $emailVerifiedAt;
+        $this->emailVerificationToken = $emailVerificationToken;
+        $this->emailVerificationTokenExpires = $emailVerificationTokenExpires;
         $this->wordPressId = $wordPressId;
         $this->googleId = $googleId;
         $this->microsoftId = $microsoftId;
@@ -128,6 +137,9 @@ class User
             null,
             null,
             null,
+            null, // emailVerifiedAt
+            null, // emailVerificationToken
+            null, // emailVerificationTokenExpires
             null,
             null,
             null,
@@ -173,6 +185,9 @@ class User
             null,
             null,
             null,
+            null,
+            null,
+            new DateTimeImmutable(), // OAuth users auto-verified
             null,
             null,
             $wordPressId,
@@ -222,6 +237,9 @@ class User
             null,
             null,
             null,
+            new DateTimeImmutable(), // OAuth users auto-verified
+            null,
+            null,
             null,
             $googleId,
             null,
@@ -267,6 +285,9 @@ class User
             null,
             null,
             null,
+            null,
+            null,
+            new DateTimeImmutable(), // OAuth users auto-verified
             null,
             null,
             null,
@@ -315,6 +336,9 @@ class User
         ?DateTimeImmutable $rememberTokenExpires,
         ?string $passwordResetToken,
         ?DateTimeImmutable $passwordResetTokenExpires,
+        ?DateTimeImmutable $emailVerifiedAt,
+        ?string $emailVerificationToken,
+        ?DateTimeImmutable $emailVerificationTokenExpires,
         ?int $wordPressId,
         ?string $googleId,
         ?string $microsoftId,
@@ -334,6 +358,9 @@ class User
             $rememberTokenExpires,
             $passwordResetToken,
             $passwordResetTokenExpires,
+            $emailVerifiedAt,
+            $emailVerificationToken,
+            $emailVerificationTokenExpires,
             $wordPressId,
             $googleId,
             $microsoftId,
@@ -476,6 +503,75 @@ class User
             return false;
         }
         return $this->passwordResetTokenExpires > new DateTimeImmutable();
+    }
+
+    /**
+     * Set a new email verification token.
+     *
+     * @param string            $token   The verification token (hashed)
+     * @param DateTimeImmutable $expires When the token expires
+     *
+     * @return void
+     */
+    public function setEmailVerificationToken(string $token, DateTimeImmutable $expires): void
+    {
+        $this->emailVerificationToken = $token;
+        $this->emailVerificationTokenExpires = $expires;
+    }
+
+    /**
+     * Invalidate the email verification token.
+     *
+     * @return void
+     */
+    public function invalidateEmailVerificationToken(): void
+    {
+        $this->emailVerificationToken = null;
+        $this->emailVerificationTokenExpires = null;
+    }
+
+    /**
+     * Check if the email verification token is valid (not expired).
+     *
+     * @return bool
+     */
+    public function hasValidEmailVerificationToken(): bool
+    {
+        if ($this->emailVerificationToken === null || $this->emailVerificationTokenExpires === null) {
+            return false;
+        }
+        return $this->emailVerificationTokenExpires > new DateTimeImmutable();
+    }
+
+    /**
+     * Check if the user's email is verified.
+     *
+     * @return bool
+     */
+    public function isEmailVerified(): bool
+    {
+        return $this->emailVerifiedAt !== null;
+    }
+
+    /**
+     * Mark the email as verified.
+     *
+     * @return void
+     */
+    public function markEmailVerified(): void
+    {
+        $this->emailVerifiedAt = new DateTimeImmutable();
+        $this->invalidateEmailVerificationToken();
+    }
+
+    /**
+     * Mark the email as unverified (e.g. after email change).
+     *
+     * @return void
+     */
+    public function markEmailUnverified(): void
+    {
+        $this->emailVerifiedAt = null;
     }
 
     /**
@@ -798,6 +894,21 @@ class User
     public function passwordResetTokenExpires(): ?DateTimeImmutable
     {
         return $this->passwordResetTokenExpires;
+    }
+
+    public function emailVerifiedAt(): ?DateTimeImmutable
+    {
+        return $this->emailVerifiedAt;
+    }
+
+    public function emailVerificationToken(): ?string
+    {
+        return $this->emailVerificationToken;
+    }
+
+    public function emailVerificationTokenExpires(): ?DateTimeImmutable
+    {
+        return $this->emailVerificationTokenExpires;
     }
 
     public function wordPressId(): ?int
