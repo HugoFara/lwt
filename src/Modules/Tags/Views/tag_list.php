@@ -155,7 +155,7 @@ echo PageLayoutHelper::buildActionCard([
 <p class="has-text-grey">No tags found.</p>
 <?php else : ?>
 <form name="form2" action="<?php echo $baseUrl; ?>" method="post">
-<?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
+    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 <input type="hidden" name="data" value="" />
 
 <!-- Multi Actions Section -->

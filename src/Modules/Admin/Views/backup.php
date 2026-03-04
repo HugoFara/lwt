@@ -289,7 +289,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
             <div class="content mt-4">
                 <p>
                     Delete the contents of all tables (except Settings) in database
-                    <strong><?php echo $escapedDbName; ?></strong> <?php echo $prefinfo; ?>.
+                    <strong><?php echo $escapedDbName; ?></strong>.
                 </p>
             </div>
 

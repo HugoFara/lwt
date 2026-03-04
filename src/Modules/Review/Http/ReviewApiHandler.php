@@ -64,7 +64,7 @@ class ReviewApiHandler implements ApiRoutableInterface
      * @param bool   $wordMode Test is in word mode
      * @param int    $testtype Test type
      *
-     * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
+     * @return array{term_id: int|string, solution?: string, term_text: string, group: string, error?: string}
      */
     public function getWordReviewData(string $reviewsql, bool $wordMode, int $testtype): array
     {

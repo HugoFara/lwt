@@ -1104,18 +1104,6 @@ class TagsFacade
     // =====================
 
     /**
-     * Get or create a term tag, returning its ID.
-     *
-     * @param string $tagText Tag text
-     *
-     * @return int|null Tag ID or null on failure
-     */
-    private static function getOrCreateTermTag(string $tagText): ?int
-    {
-        return TermTagService::getOrCreateTermTag($tagText);
-    }
-
-    /**
      * Get or create a text tag, returning its ID.
      *
      * @param string $tagText Tag text
