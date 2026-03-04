@@ -44,15 +44,18 @@ class UserManagementUseCaseTest extends TestCase
             $username,
             $email,
             'hashed_password',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
+            null, // apiToken
+            null, // apiTokenExpires
+            null, // rememberToken
+            null, // rememberTokenExpires
+            null, // passwordResetToken
+            null, // passwordResetTokenExpires
+            null, // emailVerifiedAt
+            null, // emailVerificationToken
+            null, // emailVerificationTokenExpires
+            null, // wordPressId
+            null, // googleId
+            null, // microsoftId
             new DateTimeImmutable('2024-01-01'),
             null,
             $isActive,

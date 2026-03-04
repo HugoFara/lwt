@@ -172,8 +172,9 @@ $escapedEmail = htmlspecialchars($user->email(), ENT_QUOTES, 'UTF-8');
                     <div class="content is-small">
                         <p><strong>Role:</strong> <?= htmlspecialchars($user->role(), ENT_QUOTES, 'UTF-8') ?></p>
                         <p><strong>Member since:</strong> <?= $user->created()->format('F j, Y') ?></p>
-                        <?php if ($user->lastLogin() !== null) : ?>
-                            <p><strong>Last login:</strong> <?= $user->lastLogin()->format('F j, Y g:i A') ?></p>
+                        <?php $lastLogin = $user->lastLogin(); ?>
+                        <?php if ($lastLogin !== null) : ?>
+                            <p><strong>Last login:</strong> <?= $lastLogin->format('F j, Y g:i A') ?></p>
                         <?php endif; ?>
                     </div>
                 </div>

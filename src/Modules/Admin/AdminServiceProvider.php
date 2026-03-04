@@ -63,40 +63,40 @@ class AdminServiceProvider implements ServiceProviderInterface
     /**
      * {@inheritdoc}
      */
-public function register(Container $container): void
-{
-    // Register Repository Interface bindings
-    $this->registerRepositories($container);
+    public function register(Container $container): void
+    {
+        // Register Repository Interface bindings
+        $this->registerRepositories($container);
 
-    // Register Services
-    $this->registerServices($container);
+        // Register Services
+        $this->registerServices($container);
 
-    // Register Facade
-    $container->singleton(AdminFacade::class, function (Container $c) {
-        return new AdminFacade(
-            $c->getTyped(SettingsRepositoryInterface::class),
-            $c->getTyped(BackupRepositoryInterface::class)
-        );
-    });
+        // Register Facade
+        $container->singleton(AdminFacade::class, function (Container $c) {
+            return new AdminFacade(
+                $c->getTyped(SettingsRepositoryInterface::class),
+                $c->getTyped(BackupRepositoryInterface::class)
+            );
+        });
 
-    // Register Controller (optional dependencies for BC)
-    $container->bind(AdminController::class, function (Container $c) {
-        return new AdminController(
-            $c->getTyped(AdminFacade::class),
-            $c->getTyped(TtsService::class)
-        );
-    });
+        // Register Controller (optional dependencies for BC)
+        $container->bind(AdminController::class, function (Container $c) {
+            return new AdminController(
+                $c->getTyped(AdminFacade::class),
+                $c->getTyped(TtsService::class)
+            );
+        });
 
-    // Register API Handler
-    $container->singleton(AdminApiHandler::class, function (Container $c) {
-        return new AdminApiHandler(
-            $c->getTyped(AdminFacade::class)
-        );
-    });
+        // Register API Handler
+        $container->singleton(AdminApiHandler::class, function (Container $c) {
+            return new AdminApiHandler(
+                $c->getTyped(AdminFacade::class)
+            );
+        });
 
-    // Register User Management Use Cases and Controller
-    $this->registerUserManagement($container);
-}
+        // Register User Management Use Cases and Controller
+        $this->registerUserManagement($container);
+    }
 
     /**
      * Register user management use cases and controller.
@@ -105,57 +105,58 @@ public function register(Container $container): void
      *
      * @return void
      */
-private function registerUserManagement(Container $container): void
-{
-    $container->singleton(ListUsers::class, function (Container $c) {
-        return new ListUsers(
-            $c->getTyped(MySqlUserRepository::class)
-        );
-    });
+    private function registerUserManagement(Container $container): void
+    {
+        $container->singleton(ListUsers::class, function (Container $c) {
+            return new ListUsers(
+                $c->getTyped(MySqlUserRepository::class)
+            );
+        });
 
-    $container->singleton(CreateUser::class, function (Container $c) {
-        return new CreateUser(
-            $c->getTyped(UserRepositoryInterface::class),
-            $c->getTyped(PasswordHasher::class)
-        );
-    });
+        $container->singleton(CreateUser::class, function (Container $c) {
+            return new CreateUser(
+                $c->getTyped(UserRepositoryInterface::class),
+                $c->getTyped(PasswordHasher::class)
+            );
+        });
 
-    $container->singleton(UpdateUser::class, function (Container $c) {
-        return new UpdateUser(
-            $c->getTyped(UserRepositoryInterface::class),
-            $c->getTyped(PasswordHasher::class)
-        );
-    });
+        $container->singleton(UpdateUser::class, function (Container $c) {
+            return new UpdateUser(
+                $c->getTyped(UserRepositoryInterface::class),
+                $c->getTyped(PasswordHasher::class)
+            );
+        });
 
-    $container->singleton(DeleteUser::class, function (Container $c) {
-        return new DeleteUser(
-            $c->getTyped(UserRepositoryInterface::class)
-        );
-    });
+        $container->singleton(DeleteUser::class, function (Container $c) {
+            return new DeleteUser(
+                $c->getTyped(UserRepositoryInterface::class)
+            );
+        });
 
-    $container->singleton(ToggleUserStatus::class, function (Container $c) {
-        return new ToggleUserStatus(
-            $c->getTyped(UserRepositoryInterface::class)
-        );
-    });
+        $container->singleton(ToggleUserStatus::class, function (Container $c) {
+            return new ToggleUserStatus(
+                $c->getTyped(UserRepositoryInterface::class)
+            );
+        });
 
-    $container->singleton(ToggleUserRole::class, function (Container $c) {
-        return new ToggleUserRole(
-            $c->getTyped(MySqlUserRepository::class)
-        );
-    });
+        $container->singleton(ToggleUserRole::class, function (Container $c) {
+            return new ToggleUserRole(
+                $c->getTyped(MySqlUserRepository::class)
+            );
+        });
 
-    $container->bind(UserManagementController::class, function (Container $c) {
-        return new UserManagementController(
-            $c->getTyped(ListUsers::class),
-            $c->getTyped(CreateUser::class),
-            $c->getTyped(UpdateUser::class),
-            $c->getTyped(DeleteUser::class),
-            $c->getTyped(ToggleUserStatus::class),
-            $c->getTyped(ToggleUserRole::class),
-            $c->getTyped(UserRepositoryInterface::class)
-        );
-    });
+        $container->bind(UserManagementController::class, function (Container $c) {
+            return new UserManagementController(
+                $c->getTyped(ListUsers::class),
+                $c->getTyped(CreateUser::class),
+                $c->getTyped(UpdateUser::class),
+                $c->getTyped(DeleteUser::class),
+                $c->getTyped(ToggleUserStatus::class),
+                $c->getTyped(ToggleUserRole::class),
+                $c->getTyped(UserRepositoryInterface::class)
+            );
+        });
+    }
 
     /**
      * Register repository bindings.

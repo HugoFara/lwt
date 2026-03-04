@@ -187,6 +187,9 @@ class UserTest extends TestCase
             $rememberExpires,
             null, // passwordResetToken
             null, // passwordResetTokenExpires
+            null, // emailVerifiedAt
+            null, // emailVerificationToken
+            null, // emailVerificationTokenExpires
             null, // wordPressId
             null, // googleId
             null, // microsoftId
@@ -409,6 +412,9 @@ class UserTest extends TestCase
             null, // rememberTokenExpires
             null, // passwordResetToken
             null, // passwordResetTokenExpires
+            null, // emailVerifiedAt
+            null, // emailVerificationToken
+            null, // emailVerificationTokenExpires
             null, // wordPressId
             null, // googleId
             null, // microsoftId

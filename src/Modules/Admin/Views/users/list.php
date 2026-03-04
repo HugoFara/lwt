@@ -8,19 +8,20 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
+use Lwt\Modules\User\Domain\User;
 
-/** @var array $data */
+/** @var array<string, mixed> $data */
 $data = is_array($data ?? null) ? $data : [];
-$items = $data['items'] ?? [];
-$total = $data['total'] ?? 0;
-$page = $data['page'] ?? 1;
-$perPage = $data['per_page'] ?? 20;
-$totalPages = $data['total_pages'] ?? 0;
-$stats = $data['statistics'] ?? [];
-$currentAdminId = $data['current_admin_id'] ?? 0;
-$search = $data['search'] ?? '';
-$sort = $data['sort'] ?? 'username';
-$dir = $data['dir'] ?? 'ASC';
+/** @var list<User> $items */
+$items = isset($data['items']) && is_array($data['items']) ? $data['items'] : [];
+$page = isset($data['page']) ? (int) $data['page'] : 1;
+$totalPages = isset($data['total_pages']) ? (int) $data['total_pages'] : 0;
+/** @var array{total?: int, active?: int, inactive?: int, admins?: int} $stats */
+$stats = isset($data['statistics']) && is_array($data['statistics']) ? $data['statistics'] : [];
+$currentAdminId = isset($data['current_admin_id']) ? (int) $data['current_admin_id'] : 0;
+$search = isset($data['search']) && is_string($data['search']) ? $data['search'] : '';
+$sort = isset($data['sort']) && is_string($data['sort']) ? $data['sort'] : 'username';
+$dir = isset($data['dir']) && is_string($data['dir']) ? $data['dir'] : 'ASC';
 
 $base = UrlUtilities::getBasePath();
 
@@ -33,6 +34,7 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
     if ($sort === $column) {
         $arrow = $dir === 'ASC' ? ' &uarr;' : ' &darr;';
     }
+    /** @var array<string, string> $params */
     $params = ['sort' => $column, 'dir' => $newDir];
     if ($search !== '') {
         $params['search'] = $search;
@@ -51,25 +53,25 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
         <div class="column is-3">
             <div class="box has-text-centered">
                 <p class="heading">Total Users</p>
-                <p class="title"><?php echo (int) ($stats['total'] ?? 0); ?></p>
+                <p class="title"><?php echo $stats['total'] ?? 0; ?></p>
             </div>
         </div>
         <div class="column is-3">
             <div class="box has-text-centered">
                 <p class="heading">Active</p>
-                <p class="title has-text-success"><?php echo (int) ($stats['active'] ?? 0); ?></p>
+                <p class="title has-text-success"><?php echo $stats['active'] ?? 0; ?></p>
             </div>
         </div>
         <div class="column is-3">
             <div class="box has-text-centered">
                 <p class="heading">Inactive</p>
-                <p class="title has-text-grey"><?php echo (int) ($stats['inactive'] ?? 0); ?></p>
+                <p class="title has-text-grey"><?php echo $stats['inactive'] ?? 0; ?></p>
             </div>
         </div>
         <div class="column is-3">
             <div class="box has-text-centered">
                 <p class="heading">Admins</p>
-                <p class="title has-text-info"><?php echo (int) ($stats['admins'] ?? 0); ?></p>
+                <p class="title has-text-info"><?php echo $stats['admins'] ?? 0; ?></p>
             </div>
         </div>
     </div>
@@ -158,8 +160,10 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                         <?php endif; ?>
                     </td>
                     <td>
-                        <?php if ($user->lastLogin() !== null) : ?>
-                            <?php echo htmlspecialchars($user->lastLogin()->format('Y-m-d H:i'), ENT_QUOTES, 'UTF-8'); ?>
+                        <?php
+                        $lastLogin = $user->lastLogin();
+                        if ($lastLogin !== null) : ?>
+                            <?php echo htmlspecialchars($lastLogin->format('Y-m-d H:i'), ENT_QUOTES, 'UTF-8'); ?>
                         <?php else : ?>
                             <span class="has-text-grey">Never</span>
                         <?php endif; ?>
@@ -253,8 +257,8 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
     <nav class="pagination is-centered" role="navigation" aria-label="pagination">
         <?php
         echo PageLayoutHelper::buildPager(
-            (int) $page,
-            (int) $totalPages,
+            $page,
+            $totalPages,
             $base . '/admin/users',
             'users',
             ['search' => $search, 'sort' => $sort, 'dir' => $dir]

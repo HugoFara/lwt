@@ -47,6 +47,8 @@ class UserManagementController extends BaseController
 
     /**
      * List users with pagination and search.
+     *
+     * @psalm-suppress UnusedVariable, UnresolvableInclude
      */
     public function index(array $params): void
     {
@@ -79,6 +81,8 @@ class UserManagementController extends BaseController
 
     /**
      * Show create form or process new user creation.
+     *
+     * @psalm-suppress UnusedVariable, UnresolvableInclude, InvalidReturnStatement
      */
     public function create(array $params): void
     {
@@ -127,6 +131,8 @@ class UserManagementController extends BaseController
 
     /**
      * Show edit form or process user update.
+     *
+     * @psalm-suppress UnusedVariable, UnresolvableInclude, InvalidReturnStatement
      */
     public function edit(array $params): void
     {

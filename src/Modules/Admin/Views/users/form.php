@@ -13,10 +13,8 @@ use Lwt\Modules\User\Domain\User;
 $isEdit = $isEdit ?? false;
 /** @var \Lwt\Modules\User\Domain\User|null $user */
 $user = $user ?? null;
-/** @var array $formData */
+/** @var array<string, string> $formData */
 $formData = $formData ?? [];
-/** @var array $errors */
-$errors = $errors ?? [];
 /** @var int|null $currentAdminId */
 $currentAdminId = $currentAdminId ?? null;
 
@@ -111,7 +109,7 @@ $formAction = $isEdit && $user !== null
                 <div class="control">
                     <label class="checkbox">
                         <input type="checkbox" name="is_active" value="1"
-                               <?php echo ($formData['is_active'] ?? true) ? 'checked' : ''; ?>
+                               <?php echo ($formData['is_active'] ?? '1') === '1' ? 'checked' : ''; ?>
                                <?php echo $isSelf ? 'disabled' : ''; ?>>
                         Active
                     </label>
@@ -160,9 +158,12 @@ $formAction = $isEdit && $user !== null
                         <?php echo htmlspecialchars($user->created()->format('Y-m-d H:i:s'), ENT_QUOTES, 'UTF-8'); ?>
                         <br>
                         <strong>Last Login:</strong>
-                        <?php echo $user->lastLogin() !== null
-                            ? htmlspecialchars($user->lastLogin()->format('Y-m-d H:i:s'), ENT_QUOTES, 'UTF-8')
-                            : '<em>Never</em>'; ?>
+                        <?php
+                        $lastLogin = $user->lastLogin();
+                        echo $lastLogin !== null
+                            ? htmlspecialchars($lastLogin->format('Y-m-d H:i:s'), ENT_QUOTES, 'UTF-8')
+                            : '<em>Never</em>';
+                        ?>
                         <br>
                         <strong>Has Password:</strong>
                         <?php echo $user->hasPassword() ? 'Yes' : 'No (OAuth only)'; ?>

@@ -313,7 +313,7 @@ class ReviewApiHandler implements ApiRoutableInterface
      *
      * @param array<string, mixed> $params Request parameters
      *
-     * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
+     * @return array{term_id: int|string, solution?: string, term_text: string, group: string, error?: string}
      */
     public function wordTestAjax(array $params): array
     {
@@ -413,7 +413,7 @@ class ReviewApiHandler implements ApiRoutableInterface
      *
      * @param array<string, mixed> $params Request parameters
      *
-     * @return array{term_id: int|string, solution?: string, term_text: string, group: string}
+     * @return array{term_id: int|string, solution?: string, term_text: string, group: string, error?: string}
      */
     public function formatNextWord(array $params): array
     {

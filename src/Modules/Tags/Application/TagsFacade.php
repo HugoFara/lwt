@@ -813,18 +813,6 @@ class TagsFacade
     // =====================
 
     /**
-     * Get or create a text tag, returning its ID.
-     *
-     * @param string $tagText Tag text
-     *
-     * @return int|null Tag ID or null on failure
-     */
-    private static function getOrCreateTextTag(string $tagText): ?int
-    {
-        return TextTagService::getOrCreateTextTag($tagText);
-    }
-
-    /**
      * Get formatted tag list as Bulma tag components for a word.
      *
      * @param int    $wordId  Word ID
