@@ -75,3 +75,7 @@ coverage.xml
 
 # Lighthouse reports
 /lighthouse-reports/
+
+# Unused SVG logo drafts
+docs-src/public/assets/images/favicon.svg
+docs-src/public/assets/images/lwt-logo*.svg
