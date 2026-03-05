@@ -183,6 +183,14 @@ class Configuration
                 );
             }
             mysqli_close($dbconnection);
+            // Create a new mysqli object — PHP 8.1+ does not allow
+            // mysqli_real_connect() on a closed mysqli instance.
+            $dbconnection = mysqli_init();
+            if ($dbconnection === false) {
+                ErrorHandler::die(
+                    "Database connection error: mysqli_init() failed after creating database."
+                );
+            }
             $success = @mysqli_real_connect(
                 $dbconnection,
                 $server,

@@ -366,18 +366,23 @@ class Migrations
                 foreach ($pendingMigrations as $filename) {
                     $filepath = $migrationsDir . $filename;
                     $queries = SqlFileParser::parseFile($filepath);
-                    try {
-                        foreach ($queries as $sql_query) {
+                    $migrationFailed = false;
+                    foreach ($queries as $sql_query) {
+                        try {
                             Connection::execute($sql_query);
+                        } catch (\RuntimeException $e) {
+                            // Log per-statement failure but continue with remaining
+                            // statements. This handles fresh installs where baseline
+                            // creates modern tables and legacy migrations reference
+                            // old table names that no longer exist.
+                            error_log("Migration failed: $filename - " . $e->getMessage());
+                            $migrationFailed = true;
                         }
-                        // Record migration as applied with checksum
-                        $checksum = self::calculateChecksum($filepath);
-                        self::recordMigration($filename, $checksum);
-                    } catch (\RuntimeException $e) {
-                        // Log migration failure but continue with other migrations
-                        // This allows the app to recover from partial migration states
-                        error_log("Migration failed: $filename - " . $e->getMessage());
                     }
+                    // Always record the migration so it won't be retried on every
+                    // request. Failed statements are logged for investigation.
+                    $checksum = self::calculateChecksum($filepath);
+                    self::recordMigration($filename, $checksum);
                 }
             } finally {
                 Connection::execute("SET FOREIGN_KEY_CHECKS = 1");
