@@ -44,12 +44,11 @@ assert(is_string($formFieldPrefix));
 $isEdit = $mode === 'edit';
 $pageTitle = $isEdit ? 'Edit Tag' : 'New Tag';
 $formName = $isEdit ? 'edittag' : 'newtag';
-$phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
+$baseUrl = $service->getBaseUrl();
 $tagId = $tag !== null && isset($tag['id']) ? $tag['id'] : 0;
 $actionUrl = $isEdit && $tag !== null ?
-    $phpSelf . '#rec' . $tagId :
-    $phpSelf;
-$baseUrl = $service->getBaseUrl();
+    $baseUrl . '/' . $tagId . '/edit#rec' . $tagId :
+    $baseUrl . '/new';
 $cancelUrl = $isEdit && $tag !== null ?
     $baseUrl . '#rec' . $tagId :
     $baseUrl;

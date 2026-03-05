@@ -401,7 +401,7 @@ class Router
                     ? $methodRoutes[$matchedMethod]
                     : null;
 
-                if ($handler !== null) {
+                if ($handler !== null && $matchedMethod !== null) {
                     $middleware = $this->middleware[$pattern][$matchedMethod] ?? [];
                     /** @psalm-suppress InvalidReturnStatement - Dynamic route resolution */
                     return [
@@ -425,7 +425,7 @@ class Router
                     ? $methods[$matchedMethod]
                     : null;
 
-                if ($handler !== null) {
+                if ($handler !== null && $matchedMethod !== null) {
                     $middleware = $this->prefixMiddleware[$prefix][$matchedMethod] ?? [];
                     /** @psalm-suppress InvalidReturnStatement - Dynamic route resolution */
                     return [

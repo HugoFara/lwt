@@ -6,13 +6,17 @@ namespace Lwt\Tests\Modules\Feed\Http;
 
 use Lwt\Modules\Feed\Http\FeedApiHandler;
 use Lwt\Modules\Feed\Application\FeedFacade;
+use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Shared\Infrastructure\Http\JsonResponse;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Unit tests for FeedApiHandler.
  *
- * Tests feed API operations including CRUD, articles, and import functionality.
+ * Tests feed API operations including CRUD, articles, import functionality,
+ * routing dispatch, formatArticleRecord, and structural validation.
  */
 class FeedApiHandlerTest extends TestCase
 {
@@ -615,4 +619,709 @@ class FeedApiHandlerTest extends TestCase
         $this->assertSame(0, $result['imported']);
     }
 
+    public function testImportArticlesHandlesExtractionErrors(): void
+    {
+        $row = [
+            'NfID' => 1,
+            'NfName' => 'Feed',
+            'NfLgID' => 1,
+            'NfOptions' => '',
+            'NfArticleSectionTags' => '',
+            'NfFilterTags' => '',
+            'FlID' => 10,
+            'FlTitle' => 'Article',
+            'FlLink' => 'http://example.com/1',
+            'FlAudio' => '',
+            'FlText' => 'Text',
+        ];
+
+        $this->feedFacade->method('getMarkedFeedLinks')->willReturn([$row]);
+        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('extractTextFromArticle')
+            ->willReturn([
+                'error' => [
+                    'message' => 'Parse error',
+                    'link' => ['http://example.com/1']
+                ]
+            ]);
+
+        $this->feedFacade->expects($this->once())
+            ->method('markLinkAsError')
+            ->with('http://example.com/1');
+
+        $this->feedFacade->method('archiveOldTexts')
+            ->willReturn(['archived' => 0, 'sentences' => 0, 'textitems' => 0]);
+
+        $result = $this->handler->importArticles(['article_ids' => [10]]);
+
+        $this->assertTrue($result['success']);
+        $this->assertContains('Parse error', $result['errors']);
+    }
+
+    public function testImportArticlesCreatesTextsSuccessfully(): void
+    {
+        $row = [
+            'NfID' => 1,
+            'NfName' => 'Feed',
+            'NfLgID' => 2,
+            'NfOptions' => 'tag:custom',
+            'NfArticleSectionTags' => '',
+            'NfFilterTags' => '',
+            'FlID' => 10,
+            'FlTitle' => 'Article',
+            'FlLink' => 'http://example.com/1',
+            'FlAudio' => 'http://example.com/audio.mp3',
+            'FlText' => 'Article text',
+        ];
+
+        $this->feedFacade->method('getMarkedFeedLinks')->willReturn([$row]);
+        $this->feedFacade->method('getNfOption')
+            ->willReturnCallback(function (string $opts, string $opt) {
+                if ($opt === 'tag') {
+                    return 'custom';
+                }
+                if ($opt === 'max_texts') {
+                    return '5';
+                }
+                return null;
+            });
+        $this->feedFacade->method('extractTextFromArticle')
+            ->willReturn([
+                ['TxTitle' => 'Art1', 'TxText' => 'Body1', 'TxAudioURI' => '', 'TxSourceURI' => 'http://example.com/1'],
+                ['TxTitle' => 'Art2', 'TxText' => 'Body2', 'TxAudioURI' => '', 'TxSourceURI' => 'http://example.com/2'],
+            ]);
+
+        $this->feedFacade->expects($this->exactly(2))
+            ->method('createTextFromFeed');
+        $this->feedFacade->method('archiveOldTexts')
+            ->willReturn(['archived' => 0, 'sentences' => 0, 'textitems' => 0]);
+
+        $result = $this->handler->importArticles(['article_ids' => [10]]);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(2, $result['imported']);
+    }
+
+    // =========================================================================
+    // loadFeed additional tests
+    // =========================================================================
+
+    public function testLoadFeedErrorMessageContainsFeedName(): void
+    {
+        $this->feedFacade->method('getNfOption')->willReturn('');
+        $this->feedFacade->method('parseRssFeed')->willReturn(false);
+
+        $result = $this->handler->loadFeed('My Special Feed', 1, 'http://example.com', '');
+
+        $this->assertStringContainsString('My Special Feed', $result['error']);
+    }
+
+    public function testLoadFeedPassesArticleSourceToParser(): void
+    {
+        $this->feedFacade->method('getNfOption')
+            ->willReturnCallback(function (string $opts, string $option) {
+                if ($option === 'article_source') {
+                    return 'full_text';
+                }
+                return '';
+            });
+        $this->feedFacade->expects($this->once())
+            ->method('parseRssFeed')
+            ->with('http://example.com/rss', 'full_text')
+            ->willReturn(false);
+
+        $this->handler->loadFeed('Feed', 1, 'http://example.com/rss', 'article_source:full_text');
+    }
+
+    // =========================================================================
+    // Class structure tests
+    // =========================================================================
+
+    #[Test]
+    public function handlerImplementsApiRoutableInterface(): void
+    {
+        $this->assertInstanceOf(ApiRoutableInterface::class, $this->handler);
+    }
+
+    #[Test]
+    public function classUsesApiRoutableTrait(): void
+    {
+        $reflection = new \ReflectionClass(FeedApiHandler::class);
+        $traitNames = array_map(
+            fn(\ReflectionClass $t) => $t->getName(),
+            $reflection->getTraits()
+        );
+
+        $this->assertContains(
+            'Lwt\Shared\Http\ApiRoutableTrait',
+            $traitNames
+        );
+    }
+
+    #[Test]
+    public function classHasAllRouteMethods(): void
+    {
+        $reflection = new \ReflectionClass(FeedApiHandler::class);
+
+        foreach (['routeGet', 'routePost', 'routePut', 'routeDelete'] as $method) {
+            $this->assertTrue($reflection->hasMethod($method));
+            $m = $reflection->getMethod($method);
+            $this->assertTrue($m->isPublic());
+        }
+    }
+
+    // =========================================================================
+    // routeGet tests
+    // =========================================================================
+
+    #[Test]
+    public function routeGetListDelegatestoGetFeedList(): void
+    {
+        // getFeedList calls Connection:: which needs DB
+        $result = $this->handler->routeGet(['feeds', 'list'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routeGetArticlesDelegatesToGetArticles(): void
+    {
+        $result = $this->handler->routeGet(['feeds', 'articles'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routeGetWithNumericIdDelegatesToGetFeed(): void
+    {
+        $this->feedFacade->method('getFeedById')->willReturn(null);
+
+        $result = $this->handler->routeGet(['feeds', '999'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routeGetWithInvalidFragmentReturnsError(): void
+    {
+        $result = $this->handler->routeGet(['feeds', 'invalid'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routeGetWithEmptyFragmentReturnsError(): void
+    {
+        $result = $this->handler->routeGet(['feeds', ''], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    // =========================================================================
+    // routePost tests
+    // =========================================================================
+
+    #[Test]
+    public function routePostArticlesImportDelegatesToImportArticles(): void
+    {
+        $result = $this->handler->routePost(['feeds', 'articles', 'import'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routePostEmptyFragmentDelegatesToCreateFeed(): void
+    {
+        $result = $this->handler->routePost(['feeds', ''], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routePostWithIdAndLoadDelegatesToLoadFeed(): void
+    {
+        $this->feedFacade->method('getNfOption')->willReturn('');
+        $this->feedFacade->method('parseRssFeed')->willReturn(false);
+
+        $result = $this->handler->routePost(
+            ['feeds', '42', 'load'],
+            ['name' => 'Feed', 'source_uri' => 'http://test.com', 'options' => '']
+        );
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routePostWithInvalidFragmentReturnsError(): void
+    {
+        $result = $this->handler->routePost(['feeds', 'invalid', 'bad'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    // =========================================================================
+    // routePut tests
+    // =========================================================================
+
+    #[Test]
+    public function routePutWithValidIdDelegatesToUpdateFeed(): void
+    {
+        $this->feedFacade->method('getFeedById')->willReturn(null);
+
+        $result = $this->handler->routePut(['feeds', '1'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routePutWithEmptyIdReturnsError(): void
+    {
+        $result = $this->handler->routePut(['feeds', ''], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routePutWithNonNumericIdReturnsError(): void
+    {
+        $result = $this->handler->routePut(['feeds', 'abc'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    // =========================================================================
+    // routeDelete tests
+    // =========================================================================
+
+    #[Test]
+    public function routeDeleteArticlesWithFeedIdDelegatesToDeleteArticles(): void
+    {
+        $this->feedFacade->method('deleteArticles')->willReturn(0);
+
+        $result = $this->handler->routeDelete(['feeds', 'articles', '5'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routeDeleteResetErrorsDelegatesToResetErrorArticles(): void
+    {
+        $this->feedFacade->method('resetUnloadableArticles')->willReturn(0);
+
+        $result = $this->handler->routeDelete(['feeds', '5', 'reset-errors'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routeDeleteEmptyFragmentDelegatesToDeleteFeeds(): void
+    {
+        $result = $this->handler->routeDelete(['feeds', ''], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routeDeleteWithNumericIdDelegatesToDeleteSingleFeed(): void
+    {
+        $this->feedFacade->method('deleteFeeds')->willReturn(['feeds' => 1]);
+
+        $result = $this->handler->routeDelete(['feeds', '42'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routeDeleteWithInvalidFragmentReturnsError(): void
+    {
+        $result = $this->handler->routeDelete(['feeds', 'invalid'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routeDeleteArticlesPassesArticleIdsFromParams(): void
+    {
+        $this->feedFacade->method('deleteArticles')->willReturn(0);
+
+        $result = $this->handler->routeDelete(
+            ['feeds', 'articles', '5'],
+            ['article_ids' => [1, 2, 3]]
+        );
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routeDeleteArticlesHandlesNullArticleIds(): void
+    {
+        $this->feedFacade->method('deleteArticles')->willReturn(0);
+
+        $result = $this->handler->routeDelete(
+            ['feeds', 'articles', '5'],
+            []
+        );
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    #[Test]
+    public function routeDeleteEmptyFragmentHandlesFeedIdsParam(): void
+    {
+        $result = $this->handler->routeDelete(
+            ['feeds', ''],
+            ['feed_ids' => [1, 2]]
+        );
+
+        $this->assertInstanceOf(JsonResponse::class, $result);
+    }
+
+    // =========================================================================
+    // formatArticleRecord tests (via reflection)
+    // =========================================================================
+
+    #[Test]
+    public function formatArticleRecordSetsNewStatusForFreshArticle(): void
+    {
+        $row = [
+            'FlID' => 1,
+            'FlTitle' => 'Test Article',
+            'FlLink' => 'http://example.com/article',
+            'FlDescription' => 'Description',
+            'FlDate' => '2025-01-01',
+            'FlAudio' => '',
+            'FlText' => '',
+            'TxID' => null,
+            'TxArchivedAt' => null,
+        ];
+
+        $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($this->handler, $row);
+
+        $this->assertSame('new', $result['status']);
+        $this->assertSame(1, $result['id']);
+        $this->assertSame('Test Article', $result['title']);
+        $this->assertNull($result['textId']);
+        $this->assertNull($result['archivedTextId']);
+    }
+
+    #[Test]
+    public function formatArticleRecordSetsImportedStatusForActiveText(): void
+    {
+        $row = [
+            'FlID' => 2,
+            'FlTitle' => 'Imported Article',
+            'FlLink' => 'http://example.com/article',
+            'FlDescription' => '',
+            'FlDate' => '2025-01-01',
+            'FlAudio' => '',
+            'FlText' => 'some text',
+            'TxID' => 42,
+            'TxArchivedAt' => null,
+        ];
+
+        $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($this->handler, $row);
+
+        $this->assertSame('imported', $result['status']);
+        $this->assertSame(42, $result['textId']);
+        $this->assertNull($result['archivedTextId']);
+        $this->assertTrue($result['hasText']);
+    }
+
+    #[Test]
+    public function formatArticleRecordSetsArchivedStatusForArchivedText(): void
+    {
+        $row = [
+            'FlID' => 3,
+            'FlTitle' => 'Archived',
+            'FlLink' => 'http://example.com/article',
+            'FlDescription' => '',
+            'FlDate' => '2025-01-01',
+            'FlAudio' => '',
+            'FlText' => '',
+            'TxID' => 50,
+            'TxArchivedAt' => '2025-02-01',
+        ];
+
+        $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($this->handler, $row);
+
+        $this->assertSame('archived', $result['status']);
+        $this->assertNull($result['textId']);
+        $this->assertSame(50, $result['archivedTextId']);
+    }
+
+    #[Test]
+    public function formatArticleRecordSetsErrorStatusForLeadingSpaceLink(): void
+    {
+        $row = [
+            'FlID' => 4,
+            'FlTitle' => 'Error Article',
+            'FlLink' => ' http://example.com/error',
+            'FlDescription' => '',
+            'FlDate' => '2025-01-01',
+            'FlAudio' => '',
+            'FlText' => '',
+            'TxID' => null,
+            'TxArchivedAt' => null,
+        ];
+
+        $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($this->handler, $row);
+
+        $this->assertSame('error', $result['status']);
+        $this->assertSame('http://example.com/error', $result['link']);
+    }
+
+    #[Test]
+    public function formatArticleRecordHandlesEmptyTxId(): void
+    {
+        $row = [
+            'FlID' => 5,
+            'FlTitle' => 'Test',
+            'FlLink' => 'http://example.com',
+            'FlDescription' => '',
+            'FlDate' => '',
+            'FlAudio' => 'audio.mp3',
+            'FlText' => '',
+            'TxID' => '',
+            'TxArchivedAt' => null,
+        ];
+
+        $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($this->handler, $row);
+
+        $this->assertSame('new', $result['status']);
+        $this->assertNull($result['textId']);
+    }
+
+    #[Test]
+    public function formatArticleRecordDetectsHasText(): void
+    {
+        $row = [
+            'FlID' => 6,
+            'FlTitle' => 'Test',
+            'FlLink' => 'http://example.com',
+            'FlDescription' => 'Desc',
+            'FlDate' => '2025-01-15',
+            'FlAudio' => '',
+            'FlText' => 'Full article text here',
+            'TxID' => null,
+            'TxArchivedAt' => null,
+        ];
+
+        $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($this->handler, $row);
+
+        $this->assertTrue($result['hasText']);
+    }
+
+    #[Test]
+    public function formatArticleRecordDetectsNoText(): void
+    {
+        $row = [
+            'FlID' => 7,
+            'FlTitle' => 'Test',
+            'FlLink' => 'http://example.com',
+            'FlDescription' => 'Desc',
+            'FlDate' => '2025-01-15',
+            'FlAudio' => '',
+            'FlText' => '',
+            'TxID' => null,
+            'TxArchivedAt' => null,
+        ];
+
+        $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($this->handler, $row);
+
+        $this->assertFalse($result['hasText']);
+    }
+
+    // =========================================================================
+    // createFeed validation edge cases
+    // =========================================================================
+
+    #[Test]
+    public function createFeedReturnsErrorWhenNegativeLanguageId(): void
+    {
+        $result = $this->handler->createFeed([
+            'langId' => -1,
+            'name' => 'Feed',
+            'sourceUri' => 'http://example.com'
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('Language is required', $result['error']);
+    }
+
+    #[Test]
+    public function createFeedTrimsNameAndUri(): void
+    {
+        $this->feedFacade->expects($this->once())
+            ->method('createFeed')
+            ->with($this->callback(function (array $data) {
+                return $data['NfName'] === 'Trimmed Feed'
+                    && $data['NfSourceURI'] === 'http://trimmed.com';
+            }))
+            ->willReturn(1);
+
+        $this->feedFacade->method('getFeedById')->willReturn([
+            'NfID' => 1, 'NfName' => 'Trimmed Feed',
+            'NfSourceURI' => 'http://trimmed.com', 'NfLgID' => 1,
+            'NfArticleSectionTags' => '', 'NfFilterTags' => '',
+            'NfOptions' => '', 'NfUpdate' => 0,
+        ]);
+        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('formatLastUpdate')->willReturn('never');
+
+        $this->handler->createFeed([
+            'langId' => 1,
+            'name' => '  Trimmed Feed  ',
+            'sourceUri' => '  http://trimmed.com  '
+        ]);
+    }
+
+    // =========================================================================
+    // updateFeed merges existing data tests
+    // =========================================================================
+
+    #[Test]
+    public function updateFeedPreservesExistingFieldsWhenNotProvided(): void
+    {
+        $existing = [
+            'NfID' => 1,
+            'NfName' => 'Original',
+            'NfSourceURI' => 'http://original.com',
+            'NfLgID' => 3,
+            'NfArticleSectionTags' => 'article',
+            'NfFilterTags' => 'script',
+            'NfOptions' => 'tag:old',
+            'NfUpdate' => time(),
+        ];
+
+        $this->feedFacade->method('getFeedById')->willReturn($existing);
+        $this->feedFacade->expects($this->once())
+            ->method('updateFeed')
+            ->with(1, $this->callback(function (array $data) {
+                return $data['NfLgID'] === 3
+                    && $data['NfSourceURI'] === 'http://original.com'
+                    && $data['NfArticleSectionTags'] === 'article'
+                    && $data['NfFilterTags'] === 'script'
+                    && $data['NfOptions'] === 'tag:old'
+                    && $data['NfName'] === 'Updated Name';
+            }));
+        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('formatLastUpdate')->willReturn('1h ago');
+
+        $this->handler->updateFeed(1, ['name' => 'Updated Name']);
+    }
+
+    // =========================================================================
+    // deleteFeeds with single ID
+    // =========================================================================
+
+    #[Test]
+    public function deleteFeedsWithSingleId(): void
+    {
+        $this->feedFacade->expects($this->once())
+            ->method('deleteFeeds')
+            ->with('42')
+            ->willReturn(['feeds' => 1]);
+
+        $result = $this->handler->deleteFeeds([42]);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(1, $result['deleted']);
+    }
+
+    // =========================================================================
+    // resetErrorArticles additional tests
+    // =========================================================================
+
+    #[Test]
+    public function resetErrorArticlesReturnsZeroResetForUnknownFeed(): void
+    {
+        $this->feedFacade->method('resetUnloadableArticles')->willReturn(0);
+
+        $result = $this->handler->resetErrorArticles(999);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(0, $result['reset']);
+    }
+
+    // =========================================================================
+    // getFeed returning formatted record tests
+    // =========================================================================
+
+    #[Test]
+    public function getFeedReturnsFormattedRecordWhenFound(): void
+    {
+        $feed = [
+            'NfID' => 1,
+            'NfName' => 'Test Feed',
+            'NfSourceURI' => 'http://test.com',
+            'NfLgID' => 2,
+            'NfArticleSectionTags' => 'article',
+            'NfFilterTags' => 'script',
+            'NfOptions' => '',
+            'NfUpdate' => 0,
+        ];
+
+        $this->feedFacade->method('getFeedById')->willReturn($feed);
+        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('formatLastUpdate')->willReturn('never');
+
+        $result = $this->handler->getFeed(1);
+
+        $this->assertArrayHasKey('id', $result);
+        $this->assertArrayHasKey('name', $result);
+        $this->assertArrayHasKey('sourceUri', $result);
+        $this->assertArrayHasKey('langId', $result);
+        $this->assertArrayHasKey('lastUpdate', $result);
+        $this->assertSame(1, $result['id']);
+        $this->assertSame('Test Feed', $result['name']);
+    }
+
+    // =========================================================================
+    // getArticles with negative feed_id
+    // =========================================================================
+
+    #[Test]
+    public function getArticlesReturnsErrorForNegativeFeedId(): void
+    {
+        $result = $this->handler->getArticles(['feed_id' => -1]);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Feed ID is required', $result['error']);
+    }
+
+    // =========================================================================
+    // Method return types
+    // =========================================================================
+
+    #[Test]
+    public function routeMethodsReturnJsonResponse(): void
+    {
+        foreach (['routeGet', 'routePost', 'routePut', 'routeDelete'] as $method) {
+            $rm = new \ReflectionMethod(FeedApiHandler::class, $method);
+            $returnType = $rm->getReturnType();
+            $this->assertNotNull($returnType);
+            $this->assertSame(JsonResponse::class, $returnType->getName());
+        }
+    }
 }

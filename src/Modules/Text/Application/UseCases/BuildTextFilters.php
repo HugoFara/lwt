@@ -209,6 +209,7 @@ class BuildTextFilters
             $stmt->bind('s', $query)->execute();
             return true;
         } catch (\Exception $e) {
+            error_log('BuildTextFilters::isValidRegex: ' . $e->getMessage());
             return false;
         }
     }

@@ -177,6 +177,12 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
     /**
      * {@inheritdoc}
      */
+    private const ALLOWED_ORDER_COLUMNS = [
+        'FlDate', 'FlTitle', 'FlID', 'FlLink',
+    ];
+
+    private const ALLOWED_DIRECTIONS = ['ASC', 'DESC'];
+
     public function findByFeedsWithStatus(
         array $feedIds,
         int $offset = 0,
@@ -187,6 +193,14 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
     ): array {
         if (empty($feedIds)) {
             return [];
+        }
+
+        if (!in_array($orderBy, self::ALLOWED_ORDER_COLUMNS, true)) {
+            $orderBy = 'FlDate';
+        }
+        $direction = strtoupper($direction);
+        if (!in_array($direction, self::ALLOWED_DIRECTIONS, true)) {
+            $direction = 'DESC';
         }
 
         $feedIdList = implode(',', array_map('intval', $feedIds));

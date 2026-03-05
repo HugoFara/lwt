@@ -54,9 +54,8 @@ assert(is_string($dictLinksHtml));
 assert(is_string($sentenceAreaHtml));
 assert(is_string($wordTagsHtml));
 
-$phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
-<form name="editword" class="validate" action="<?php echo $phpSelf; ?>" method="post"
+<form name="editword" class="validate" action="/word/edit" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />

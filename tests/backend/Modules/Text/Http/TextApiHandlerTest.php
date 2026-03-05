@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Modules\Text\Http;
 
 use Lwt\Modules\Text\Http\TextApiHandler;
+use Lwt\Modules\Text\Http\TextAnnotationApiHandler;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -51,15 +52,11 @@ class TextApiHandlerTest extends TestCase
 
     public function testSaveImprTextHandlesRegularElement(): void
     {
-        // Create a data object with the expected property
         $data = new \stdClass();
         $data->tx5 = 'test annotation';
 
-        // We can't easily test this without database, but we can test the method exists
-        // and handles input correctly (will fail gracefully without DB)
         $result = $this->handler->saveImprText(0, 'tx5', $data);
 
-        // Without DB, we expect an error
         $this->assertIsArray($result);
     }
 
@@ -91,7 +88,6 @@ class TextApiHandlerTest extends TestCase
 
     public function testFormatSetTextPositionReturnsMessage(): void
     {
-        // This will fail without DB but tests structure
         $result = $this->handler->formatSetTextPosition(1, 100);
 
         $this->assertIsArray($result);
@@ -100,25 +96,27 @@ class TextApiHandlerTest extends TestCase
     }
 
     // =========================================================================
-    // Data parsing tests (using reflection for private method)
+    // Data parsing tests (formatAnnotationError now on TextAnnotationApiHandler)
     // =========================================================================
 
     public function testFormatAnnotationErrorReturnsOkForSuccess(): void
     {
-        $method = new \ReflectionMethod(TextApiHandler::class, 'formatAnnotationError');
+        $annHandler = new TextAnnotationApiHandler();
+        $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->handler, ['success' => true]);
+        $result = $method->invoke($annHandler, ['success' => true]);
 
         $this->assertSame('OK', $result);
     }
 
     public function testFormatAnnotationErrorReturnsParseAnnotationFailed(): void
     {
-        $method = new \ReflectionMethod(TextApiHandler::class, 'formatAnnotationError');
+        $annHandler = new TextAnnotationApiHandler();
+        $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->handler, [
+        $result = $method->invoke($annHandler, [
             'success' => false,
             'error' => 'parse_annotation_failed'
         ]);
@@ -128,10 +126,11 @@ class TextApiHandlerTest extends TestCase
 
     public function testFormatAnnotationErrorReturnsLineOutOfRange(): void
     {
-        $method = new \ReflectionMethod(TextApiHandler::class, 'formatAnnotationError');
+        $annHandler = new TextAnnotationApiHandler();
+        $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->handler, [
+        $result = $method->invoke($annHandler, [
             'success' => false,
             'error' => 'line_out_of_range',
             'requested' => 10,
@@ -144,10 +143,11 @@ class TextApiHandlerTest extends TestCase
 
     public function testFormatAnnotationErrorReturnsParseLineFailed(): void
     {
-        $method = new \ReflectionMethod(TextApiHandler::class, 'formatAnnotationError');
+        $annHandler = new TextAnnotationApiHandler();
+        $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->handler, [
+        $result = $method->invoke($annHandler, [
             'success' => false,
             'error' => 'parse_line_failed'
         ]);
@@ -157,10 +157,11 @@ class TextApiHandlerTest extends TestCase
 
     public function testFormatAnnotationErrorReturnsPunctuationTerm(): void
     {
-        $method = new \ReflectionMethod(TextApiHandler::class, 'formatAnnotationError');
+        $annHandler = new TextAnnotationApiHandler();
+        $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->handler, [
+        $result = $method->invoke($annHandler, [
             'success' => false,
             'error' => 'punctuation_term',
             'position' => -1
@@ -172,10 +173,11 @@ class TextApiHandlerTest extends TestCase
 
     public function testFormatAnnotationErrorReturnsInsufficientColumns(): void
     {
-        $method = new \ReflectionMethod(TextApiHandler::class, 'formatAnnotationError');
+        $annHandler = new TextAnnotationApiHandler();
+        $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->handler, [
+        $result = $method->invoke($annHandler, [
             'success' => false,
             'error' => 'insufficient_columns',
             'found' => 2
@@ -187,10 +189,11 @@ class TextApiHandlerTest extends TestCase
 
     public function testFormatAnnotationErrorReturnsUnknownError(): void
     {
-        $method = new \ReflectionMethod(TextApiHandler::class, 'formatAnnotationError');
+        $annHandler = new TextAnnotationApiHandler();
+        $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->handler, [
+        $result = $method->invoke($annHandler, [
             'success' => false,
             'error' => 'some_unknown_error'
         ]);
@@ -200,10 +203,11 @@ class TextApiHandlerTest extends TestCase
 
     public function testFormatAnnotationErrorHandlesMissingErrorKey(): void
     {
-        $method = new \ReflectionMethod(TextApiHandler::class, 'formatAnnotationError');
+        $annHandler = new TextAnnotationApiHandler();
+        $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->handler, [
+        $result = $method->invoke($annHandler, [
             'success' => false
         ]);
 
@@ -212,10 +216,11 @@ class TextApiHandlerTest extends TestCase
 
     public function testFormatAnnotationErrorHandlesMissingOptionalFields(): void
     {
-        $method = new \ReflectionMethod(TextApiHandler::class, 'formatAnnotationError');
+        $annHandler = new TextAnnotationApiHandler();
+        $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->handler, [
+        $result = $method->invoke($annHandler, [
             'success' => false,
             'error' => 'line_out_of_range'
         ]);
@@ -263,7 +268,6 @@ class TextApiHandlerTest extends TestCase
 
     public function testFormatGetRecommendedTextsReturnsArray(): void
     {
-        // Without DB this will return empty/error, but tests structure
         $result = $this->handler->formatGetRecommendedTexts(1, []);
 
         $this->assertIsArray($result);
@@ -275,7 +279,6 @@ class TextApiHandlerTest extends TestCase
 
     public function testFormatGetTextScoreReturnsArray(): void
     {
-        // Without DB this will return empty/error, but tests structure
         $result = $this->handler->formatGetTextScore(1);
 
         $this->assertIsArray($result);

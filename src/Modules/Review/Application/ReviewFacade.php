@@ -134,6 +134,7 @@ class ReviewFacade
         try {
             return $config->toSqlProjection();
         } catch (\InvalidArgumentException $e) {
+            error_log('ReviewFacade::getReviewSql: ' . $e->getMessage());
             return null;
         }
     }

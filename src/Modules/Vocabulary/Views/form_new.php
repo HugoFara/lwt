@@ -38,10 +38,9 @@ assert(is_string($similarTermsRow));
 assert(is_string($dictLinksHtml));
 assert(is_string($wordTagsHtml));
 
-$phpSelf = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
 
-<form name="newword" class="validate" action="<?php echo $phpSelf; ?>" method="post"
+<form name="newword" class="validate" action="/word/new" method="post"
 data-lwt-clear-frame="true">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />

@@ -156,8 +156,7 @@ endif; ?>
 </form>
 
 <?php if ($recno > 0) : ?>
-    <?php $formAction = htmlspecialchars($_SERVER['PHP_SELF'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-    <form name="form2" action="<?php echo $formAction; ?>" method="post">
+    <form name="form2" action="/feeds" method="post">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
   <table class="table is-bordered is-fullwidth">
   <tr>

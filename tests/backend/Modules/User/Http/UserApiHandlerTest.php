@@ -603,6 +603,153 @@ class UserApiHandlerTest extends TestCase
     }
 
     // =========================================================================
+    // routeGet tests
+    // =========================================================================
+
+    public function testRouteGetMeReturnsJsonResponse(): void
+    {
+        $user = $this->createMockUser(1, 'testuser', 'test@example.com');
+        $this->facade->method('getCurrentUser')->willReturn($user);
+
+        $result = $this->handler->routeGet(['auth', 'me'], []);
+
+        $this->assertInstanceOf(\Lwt\Shared\Infrastructure\Http\JsonResponse::class, $result);
+    }
+
+    public function testRouteGetUnknownEndpointReturns404(): void
+    {
+        $result = $this->handler->routeGet(['auth', 'unknown'], []);
+
+        $this->assertInstanceOf(\Lwt\Shared\Infrastructure\Http\JsonResponse::class, $result);
+        $this->assertSame(404, $result->getStatusCode());
+    }
+
+    public function testRouteGetEmptyFragmentReturns404(): void
+    {
+        $result = $this->handler->routeGet(['auth', ''], []);
+
+        $this->assertInstanceOf(\Lwt\Shared\Infrastructure\Http\JsonResponse::class, $result);
+        $this->assertSame(404, $result->getStatusCode());
+    }
+
+    public function testRouteGetMissingFragmentReturns404(): void
+    {
+        $result = $this->handler->routeGet(['auth'], []);
+
+        $this->assertInstanceOf(\Lwt\Shared\Infrastructure\Http\JsonResponse::class, $result);
+        $this->assertSame(404, $result->getStatusCode());
+    }
+
+    // =========================================================================
+    // routePost tests
+    // =========================================================================
+
+    public function testRoutePostLoginReturnsJsonResponse(): void
+    {
+        $this->facade->method('login')
+            ->willThrowException(new AuthException('Invalid'));
+
+        $result = $this->handler->routePost(['auth', 'login'], ['username' => 'test', 'password' => 'pass']);
+
+        $this->assertInstanceOf(\Lwt\Shared\Infrastructure\Http\JsonResponse::class, $result);
+    }
+
+    public function testRoutePostRegisterReturnsJsonResponse(): void
+    {
+        $result = $this->handler->routePost(['auth', 'register'], [
+            'username' => '', 'email' => '', 'password' => '', 'password_confirm' => ''
+        ]);
+
+        $this->assertInstanceOf(\Lwt\Shared\Infrastructure\Http\JsonResponse::class, $result);
+    }
+
+    public function testRoutePostRefreshReturnsJsonResponse(): void
+    {
+        $this->facade->method('getCurrentUser')->willReturn(null);
+
+        $result = $this->handler->routePost(['auth', 'refresh'], []);
+
+        $this->assertInstanceOf(\Lwt\Shared\Infrastructure\Http\JsonResponse::class, $result);
+    }
+
+    public function testRoutePostLogoutReturnsJsonResponse(): void
+    {
+        $this->facade->method('getCurrentUser')->willReturn(null);
+
+        $result = $this->handler->routePost(['auth', 'logout'], []);
+
+        $this->assertInstanceOf(\Lwt\Shared\Infrastructure\Http\JsonResponse::class, $result);
+    }
+
+    public function testRoutePostUnknownEndpointReturns404(): void
+    {
+        $result = $this->handler->routePost(['auth', 'unknown'], []);
+
+        $this->assertInstanceOf(\Lwt\Shared\Infrastructure\Http\JsonResponse::class, $result);
+        $this->assertSame(404, $result->getStatusCode());
+    }
+
+    public function testRoutePostEmptyFragmentReturns404(): void
+    {
+        $result = $this->handler->routePost(['auth', ''], []);
+
+        $this->assertInstanceOf(\Lwt\Shared\Infrastructure\Http\JsonResponse::class, $result);
+        $this->assertSame(404, $result->getStatusCode());
+    }
+
+    // =========================================================================
+    // formatUserData tests (via formatMe)
+    // =========================================================================
+
+    public function testFormatMeReturnsCompleteUserData(): void
+    {
+        $user = $this->createMockUser(1, 'testuser', 'test@example.com');
+
+        $this->facade->method('getCurrentUser')->willReturn($user);
+
+        $result = $this->handler->formatMe();
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(1, $result['user']['id']);
+        $this->assertSame('testuser', $result['user']['username']);
+        $this->assertSame('test@example.com', $result['user']['email']);
+        $this->assertSame('user', $result['user']['role']);
+        $this->assertSame('2024-01-01T00:00:00+00:00', $result['user']['created']);
+        $this->assertNull($result['user']['last_login']);
+        $this->assertFalse($result['user']['has_wordpress']);
+    }
+
+    public function testFormatMeUserFieldsComplete(): void
+    {
+        $user = $this->createMockUser(1, 'testuser', 'test@example.com');
+
+        $this->facade->method('getCurrentUser')->willReturn($user);
+
+        $result = $this->handler->formatMe();
+
+        $this->assertArrayHasKey('id', $result['user']);
+        $this->assertArrayHasKey('username', $result['user']);
+        $this->assertArrayHasKey('email', $result['user']);
+        $this->assertArrayHasKey('role', $result['user']);
+        $this->assertArrayHasKey('created', $result['user']);
+        $this->assertArrayHasKey('last_login', $result['user']);
+        $this->assertArrayHasKey('has_wordpress', $result['user']);
+    }
+
+    public function testFormatLoginReturnsTokenOnSuccess(): void
+    {
+        $user = $this->createMockUser(1, 'testuser', 'test@example.com');
+
+        $this->facade->method('login')->willReturn($user);
+        $this->facade->method('generateApiToken')->willReturn('token123');
+
+        $result = $this->handler->formatLogin(['username' => 'testuser', 'password' => 'pass']);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame('token123', $result['token']);
+    }
+
+    // =========================================================================
     // Helper methods
     // =========================================================================
 
