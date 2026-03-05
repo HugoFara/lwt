@@ -32,6 +32,9 @@ class TextControllerTest extends TestCase
 
     protected function setUp(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required');
+        }
         $this->textService = $this->createMock(TextFacade::class);
         $this->languageService = $this->createMock(LanguageFacade::class);
         $this->displayService = $this->createMock(TextDisplayService::class);

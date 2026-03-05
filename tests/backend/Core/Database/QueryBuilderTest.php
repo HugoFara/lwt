@@ -32,25 +32,14 @@ class QueryBuilderTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        $config = EnvLoader::getDatabaseConfig();
-        $testDbname = "test_" . $config['dbname'];
+        self::$dbConnected = defined('LWT_TEST_DB_AVAILABLE') && LWT_TEST_DB_AVAILABLE;
+    }
 
-        if (!Globals::getDbConnection()) {
-            try {
-                $connection = Configuration::connect(
-                    $config['server'],
-                    $config['userid'],
-                    $config['passwd'],
-                    $testDbname,
-                    $config['socket'] ?? ''
-                );
-                Globals::setDbConnection($connection);
-                self::$dbConnected = true;
-            } catch (\Exception $e) {
-                self::$dbConnected = false;
-            }
-        } else {
-            self::$dbConnected = true;
+    protected function setUp(): void
+    {
+        parent::setUp();
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
         }
     }
 
@@ -76,9 +65,6 @@ class QueryBuilderTest extends TestCase
 
     public function testConstructorAddsPrefix(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $qb = new QueryBuilder('tags');
         $sql = $qb->toSql();
@@ -166,9 +152,6 @@ class QueryBuilderTest extends TestCase
 
     public function testWhereWithBooleanTrue(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $sql = QueryBuilder::table('tags')->where('TgID', '=', true)->toSql();
         $this->assertStringContainsString("WHERE TgID = 1", $sql);
@@ -176,9 +159,6 @@ class QueryBuilderTest extends TestCase
 
     public function testWhereWithBooleanFalse(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $sql = QueryBuilder::table('tags')->where('TgID', '=', false)->toSql();
         $this->assertStringContainsString("WHERE TgID = 0", $sql);
@@ -186,9 +166,6 @@ class QueryBuilderTest extends TestCase
 
     public function testWhereWithFloat(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $sql = QueryBuilder::table('tags')->where('TgID', '>', 3.14)->toSql();
         $this->assertStringContainsString("WHERE TgID > 3.14", $sql);
@@ -196,9 +173,6 @@ class QueryBuilderTest extends TestCase
 
     public function testWhereWithNull(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // When using null with =, it should produce IS NULL
         $sql = QueryBuilder::table('tags')->whereNull('TgComment')->toSql();
@@ -376,9 +350,6 @@ class QueryBuilderTest extends TestCase
 
     public function testGetReturnsArray(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $results = QueryBuilder::table('tags')->limit(5)->get();
         $this->assertIsArray($results);
@@ -387,9 +358,6 @@ class QueryBuilderTest extends TestCase
 
     public function testGetWithWhere(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_get']);
@@ -404,9 +372,6 @@ class QueryBuilderTest extends TestCase
 
     public function testFirstReturnsRow(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_first']);
@@ -419,9 +384,6 @@ class QueryBuilderTest extends TestCase
 
     public function testFirstReturnsNull(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $row = QueryBuilder::table('tags')->where('TgText', 'nonexistent_xyz')->first();
         $this->assertNull($row);
@@ -431,9 +393,6 @@ class QueryBuilderTest extends TestCase
 
     public function testValueReturnsValue(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_value']);
@@ -445,9 +404,6 @@ class QueryBuilderTest extends TestCase
 
     public function testValueReturnsNullWhenNoMatch(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $value = QueryBuilder::table('tags')->where('TgText', 'nonexistent_xyz_123')->value('TgText');
 
@@ -458,9 +414,6 @@ class QueryBuilderTest extends TestCase
 
     public function testCountReturnsInteger(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $count = QueryBuilder::table('tags')->count();
         $this->assertIsInt($count);
@@ -469,9 +422,6 @@ class QueryBuilderTest extends TestCase
 
     public function testCountWithWhere(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_count1']);
@@ -486,9 +436,6 @@ class QueryBuilderTest extends TestCase
 
     public function testExistsReturnsTrue(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_exists']);
@@ -500,9 +447,6 @@ class QueryBuilderTest extends TestCase
 
     public function testExistsReturnsFalse(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $exists = QueryBuilder::table('tags')->where('TgText', 'nonexistent_xyz')->exists();
         $this->assertFalse($exists);
@@ -512,9 +456,6 @@ class QueryBuilderTest extends TestCase
 
     public function testInsertReturnsId(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $id = QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_insert']);
 
@@ -527,9 +468,6 @@ class QueryBuilderTest extends TestCase
 
     public function testInsertWithMultipleColumns(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $id = QueryBuilder::table('tags')->insert([
             'TgText' => 'test_qb_multi',
@@ -545,9 +483,6 @@ class QueryBuilderTest extends TestCase
 
     public function testInsertManyReturnsAffectedRows(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $affected = QueryBuilder::table('tags')->insertMany([
             ['TgText' => 'test_qb_many1'],
@@ -564,9 +499,6 @@ class QueryBuilderTest extends TestCase
 
     public function testInsertManyWithEmptyArray(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $affected = QueryBuilder::table('tags')->insertMany([]);
         $this->assertEquals(0, $affected);
@@ -576,9 +508,6 @@ class QueryBuilderTest extends TestCase
 
     public function testUpdateReturnsAffectedRows(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test data
         $id = QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_update_old']);
@@ -597,9 +526,6 @@ class QueryBuilderTest extends TestCase
 
     public function testUpdateWithMultipleColumns(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test data with unique suffix
         $suffix = substr(uniqid(), -6);
@@ -621,9 +547,6 @@ class QueryBuilderTest extends TestCase
 
     public function testDeleteReturnsAffectedRows(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test data
         $id = QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_delete']);
@@ -640,9 +563,6 @@ class QueryBuilderTest extends TestCase
 
     public function testDeleteMultipleRows(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Use random suffix to avoid conflicts (TgText is varchar(20))
         $rand = substr(uniqid(), -6);
@@ -674,9 +594,6 @@ class QueryBuilderTest extends TestCase
 
     public function testTruncateEmptiesTable(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Create a temporary test table
         $prefix = '';
@@ -705,9 +622,6 @@ class QueryBuilderTest extends TestCase
 
     public function testComplexQueryWithMultipleClauses(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test data
         QueryBuilder::table('tags')->insertMany([
@@ -732,9 +646,6 @@ class QueryBuilderTest extends TestCase
 
     public function testFluentInterfaceChaining(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test data
         QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_fluent']);

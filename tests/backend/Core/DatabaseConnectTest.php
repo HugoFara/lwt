@@ -62,6 +62,14 @@ function userLogging(): array
 
 class DatabaseConnectTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required');
+        }
+    }
+
     public function testDatabaseInstallation(): void
     {
         list($userid, $passwd, $server, $dbname) = userLogging();

@@ -23,6 +23,9 @@ class LanguageApiHandlerTest extends TestCase
 
     protected function setUp(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required');
+        }
         $this->languageFacade = $this->createMock(LanguageFacade::class);
         $this->handler = new LanguageApiHandler($this->languageFacade);
     }

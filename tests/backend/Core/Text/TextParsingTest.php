@@ -38,35 +38,29 @@ class TextParsingTest extends TestCase
 {
     private static $dbConnection;
     private static $testLanguageId;
+    private static bool $dbConnected = false;
 
     /**
      * Set up database connection and create test language
      */
     public static function setUpBeforeClass(): void
     {
-        // Connect to database
-        $config = EnvLoader::getDatabaseConfig();
-        $testDbname = "test_" . $config['dbname'];
+        self::$dbConnected = defined('LWT_TEST_DB_AVAILABLE') && LWT_TEST_DB_AVAILABLE;
 
-        if (!Globals::getDbConnection()) {
-            try {
-                $connection = Configuration::connect(
-                    $config['server'],
-                    $config['userid'],
-                    $config['passwd'],
-                    $testDbname,
-                    $config['socket'] ?? ''
-                );
-                Globals::setDbConnection($connection);
-            } catch (\Exception $e) {
-                // DB not available — individual tests will skip
-            }
+        if (self::$dbConnected) {
+            self::$dbConnection = Globals::getDbConnection();
+
+            // Create a test language for parsing tests
+            self::createTestLanguage();
         }
+    }
 
-        self::$dbConnection = Globals::getDbConnection();
-
-        // Create a test language for parsing tests
-        self::createTestLanguage();
+    protected function setUp(): void
+    {
+        parent::setUp();
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
     }
 
     /**
@@ -137,10 +131,6 @@ class TextParsingTest extends TestCase
     public function testSplitIntoSentencesBasic(): void
     {
 
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         // Test with split mode which returns sentences array
         $text = "Hello world. This is a test.";
         $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
@@ -154,10 +144,6 @@ class TextParsingTest extends TestCase
      */
     public function testSplitIntoSentencesCharacterSubstitution(): void
     {
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         // Create language with character substitutions
         $sql = "INSERT INTO languages (
             LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
@@ -199,10 +185,6 @@ class TextParsingTest extends TestCase
     public function testSplitIntoSentencesBraceReplacement(): void
     {
 
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         // Text with braces should have them replaced with brackets
         $text = "Text with {braces} and more {content}.";
         $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
@@ -220,10 +202,6 @@ class TextParsingTest extends TestCase
     public function testSplitIntoSentencesEmpty(): void
     {
 
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         $result = $this->callSplitIntoSentences('', self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should return array even for empty text');
@@ -237,10 +215,6 @@ class TextParsingTest extends TestCase
     public function testSplitIntoSentencesWhitespaceOnly(): void
     {
 
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         $result = $this->callSplitIntoSentences("   \n\t  ", self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should return array');
@@ -253,10 +227,6 @@ class TextParsingTest extends TestCase
      */
     public function testSplitIntoSentencesUnicode(): void
     {
-
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
 
         // Text with various Unicode characters
         $text = "Hello 世界. Γεια σου κόσμε. مرحبا بالعالم.";
@@ -272,10 +242,6 @@ class TextParsingTest extends TestCase
     public function testSplitIntoSentencesMultipleParagraphs(): void
     {
 
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         $text = "First paragraph here.\n\nSecond paragraph here.\n\nThird paragraph.";
         $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
@@ -288,10 +254,6 @@ class TextParsingTest extends TestCase
      */
     public function testSplitIntoSentencesWindowsLineEndings(): void
     {
-
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
 
         // Text with Windows line endings
         $text = "Line one.\r\nLine two.\r\nLine three.";
@@ -307,10 +269,6 @@ class TextParsingTest extends TestCase
     public function testSplitIntoSentencesSpecialPunctuation(): void
     {
 
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         $text = "Question? Exclamation! Period. Comma, semicolon; colon: dash-word.";
         $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
@@ -323,10 +281,6 @@ class TextParsingTest extends TestCase
      */
     public function testSplitIntoSentencesAbbreviations(): void
     {
-
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
 
         // Should try not to split on Mr. or Dr. (in exception list)
         $text = "Mr. Smith met Dr. Jones. They talked.";
@@ -344,10 +298,6 @@ class TextParsingTest extends TestCase
     public function testSplitIntoSentencesNumbers(): void
     {
 
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         $text = "The value is 3.14. Another number is 42. Version 2.0.1 is here.";
         $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
@@ -360,10 +310,6 @@ class TextParsingTest extends TestCase
      */
     public function testSplitIntoSentencesMixedCase(): void
     {
-
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
 
         $text = "UPPERCASE SENTENCE. lowercase sentence. MiXeD CaSe SeNtEnCe.";
         $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
@@ -378,10 +324,6 @@ class TextParsingTest extends TestCase
     public function testSplitIntoSentencesQuotes(): void
     {
 
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         $text = '"First sentence." "Second sentence." \'Third sentence.\'';
         $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
@@ -394,10 +336,6 @@ class TextParsingTest extends TestCase
      */
     public function testParseAndDisplayPreviewCheckMode(): void
     {
-
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
 
         // parseAndDisplayPreview outputs HTML and returns void
         $text = "Test sentence.";
@@ -415,10 +353,6 @@ class TextParsingTest extends TestCase
      */
     public function testSplitIntoSentencesLongText(): void
     {
-
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
 
         // Generate long text
         $sentences = [];
@@ -441,10 +375,6 @@ class TextParsingTest extends TestCase
     public function testSplitIntoSentencesSpecialCharacters(): void
     {
 
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         // Text with SQL-special characters
         $text = "Test with 'single quotes'. Test with \"double quotes\". Test with \\ backslash.";
         $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
@@ -459,10 +389,6 @@ class TextParsingTest extends TestCase
     public function testSplitIntoSentencesEmoji(): void
     {
 
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         $text = "Hello 😀 world. How are you 🌍 doing?";
         $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
@@ -475,10 +401,6 @@ class TextParsingTest extends TestCase
      */
     public function testSplitIntoSentencesInvalidLanguage(): void
     {
-
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
 
         // Invalid language ID - splitIntoSentences returns [''] for invalid language
         $result = $this->callSplitIntoSentences("Test text.", 99999);
@@ -494,10 +416,6 @@ class TextParsingTest extends TestCase
     public function testSplitIntoSentencesEllipsis(): void
     {
 
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
         $text = "Wait for it... Here it comes. Done.";
         $result = $this->callSplitIntoSentences($text, self::$testLanguageId);
 
@@ -510,10 +428,6 @@ class TextParsingTest extends TestCase
      */
     public function testSplitIntoSentencesNoPunctuation(): void
     {
-
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
 
         $text = "Text without any sentence ending punctuation marks";
         $result = $this->callSplitIntoSentences($text, self::$testLanguageId);

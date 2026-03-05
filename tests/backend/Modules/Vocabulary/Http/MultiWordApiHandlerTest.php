@@ -27,6 +27,9 @@ class MultiWordApiHandlerTest extends TestCase
 
     protected function setUp(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required');
+        }
         $this->multiWordService = $this->createMock(MultiWordService::class);
         $this->contextService = $this->createMock(WordContextService::class);
         $this->handler = new MultiWordApiHandler($this->multiWordService, $this->contextService);

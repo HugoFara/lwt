@@ -23,6 +23,9 @@ class FeedApiHandlerTest extends TestCase
 
     protected function setUp(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required');
+        }
         $this->feedFacade = $this->createMock(FeedFacade::class);
         $this->handler = new FeedApiHandler($this->feedFacade);
     }

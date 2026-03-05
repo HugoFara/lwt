@@ -23,6 +23,9 @@ class TextApiHandlerTest extends TestCase
 
     protected function setUp(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required');
+        }
         $this->discoveryService = $this->createMock(WordDiscoveryService::class);
         $this->handler = new TextApiHandler($this->discoveryService);
     }

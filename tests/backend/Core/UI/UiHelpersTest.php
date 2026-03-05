@@ -20,6 +20,13 @@ Globals::initialize();
  */
 final class UiHelpersTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required');
+        }
+    }
+
     /**
      * Test PageLayoutHelper::buildNavbar() function
      */

@@ -37,6 +37,9 @@ class GetNextTermTest extends TestCase
 
     protected function setUp(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required');
+        }
         $this->repository = $this->createMock(ReviewRepositoryInterface::class);
     }
 

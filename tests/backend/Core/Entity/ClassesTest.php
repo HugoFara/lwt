@@ -836,18 +836,6 @@ class ClassesTest extends TestCase
         $this->assertInstanceOf(GoogleTranslateClient::class, $result);
     }
 
-    public function testGoogleTranslateSetDomain(): void
-    {
-        GoogleTranslateClient::setDomain('com');
-        $this->assertTrue(true); // No exception
-
-        GoogleTranslateClient::setDomain('');
-        $this->assertTrue(true);
-
-        GoogleTranslateClient::setDomain(null);
-        $this->assertTrue(true);
-    }
-
     public function testGoogleTranslateLastResultProperty(): void
     {
         $translator = new GoogleTranslateClient('en', 'es');

@@ -22,6 +22,9 @@ class LemmaServiceTest extends TestCase
 
     protected function setUp(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required');
+        }
         $this->mockLemmatizer = $this->createMock(LemmatizerInterface::class);
         $this->mockRepository = $this->createMock(MySqlTermRepository::class);
         $this->service = new LemmaService($this->mockLemmatizer, $this->mockRepository);

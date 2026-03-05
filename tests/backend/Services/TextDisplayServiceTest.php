@@ -36,26 +36,7 @@ class TextDisplayServiceTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        $config = EnvLoader::getDatabaseConfig();
-        $testDbname = "test_" . $config['dbname'];
-
-        if (!Globals::getDbConnection()) {
-            try {
-                $connection = Configuration::connect(
-                    $config['server'],
-                    $config['userid'],
-                    $config['passwd'],
-                    $testDbname,
-                    $config['socket'] ?? ''
-                );
-                Globals::setDbConnection($connection);
-                self::$dbConnected = true;
-            } catch (\Exception $e) {
-                self::$dbConnected = false;
-            }
-        } else {
-            self::$dbConnected = true;
-        }
+        self::$dbConnected = defined('LWT_TEST_DB_AVAILABLE') && LWT_TEST_DB_AVAILABLE;
 
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist
@@ -118,6 +99,10 @@ class TextDisplayServiceTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
         $this->service = new TextDisplayService();
     }
 
@@ -125,9 +110,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetHeaderDataReturnsCorrectData(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $result = $this->service->getHeaderData(self::$testTextId);
 
@@ -143,9 +125,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetHeaderDataReturnsNullForNonExistent(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $result = $this->service->getHeaderData(999999);
 
@@ -154,9 +133,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetHeaderDataHandlesEmptyAudio(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Create a text without audio
         Connection::query(
@@ -178,9 +154,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetTextDisplaySettingsReturnsCorrectData(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $result = $this->service->getTextDisplaySettings(self::$testTextId);
 
@@ -194,9 +167,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetTextDisplaySettingsReturnsNullForNonExistent(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $result = $this->service->getTextDisplaySettings(999999);
 
@@ -207,9 +177,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetAnnotatedTextReturnsContent(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $result = $this->service->getAnnotatedText(self::$testTextId);
 
@@ -221,9 +188,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetAnnotatedTextReturnsEmptyForNonExistent(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $result = $this->service->getAnnotatedText(999999);
 
@@ -234,9 +198,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetAudioUriReturnsUri(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $result = $this->service->getAudioUri(self::$testTextId);
 
@@ -245,9 +206,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetAudioUriReturnsNullForNonExistent(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $result = $this->service->getAudioUri(999999);
 
@@ -258,9 +216,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetWordRomanizationReturnsRomanization(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $result = $this->service->getWordRomanization(self::$testWordId);
 
@@ -269,9 +224,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetWordRomanizationReturnsEmptyForNonExistent(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $result = $this->service->getWordRomanization(999999);
 
@@ -383,9 +335,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testFullTextDisplayWorkflow(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Get header data
         $headerData = $this->service->getHeaderData(self::$testTextId);
@@ -417,9 +366,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testGetHeaderDataWithRtlLanguage(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Create an RTL language
         Connection::query(
@@ -451,9 +397,6 @@ class TextDisplayServiceTest extends TestCase
 
     public function testParseAnnotationItemWithWordId(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Test parsing with actual word ID to get romanization
         $item = "0\ttestword\t" . self::$testWordId . "\ttranslation";

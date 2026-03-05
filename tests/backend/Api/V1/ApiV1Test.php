@@ -44,6 +44,10 @@ class ApiV1Test extends TestCase
 
     public static function setUpBeforeClass(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            return;
+        }
+
         if (!self::$providersRegistered) {
             $container = Container::getInstance();
 
@@ -77,6 +81,9 @@ class ApiV1Test extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required');
+        }
         $this->api = new ApiV1();
     }
 

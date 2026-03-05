@@ -31,27 +31,18 @@ class ConfigurationTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
+        self::$dbConnected = defined('LWT_TEST_DB_AVAILABLE') && LWT_TEST_DB_AVAILABLE;
+
         // Ensure EnvLoader has loaded the .env file (may have been reset by other tests)
         EnvLoader::load(__DIR__ . '/../../../../.env');
         self::$dbConfig = EnvLoader::getDatabaseConfig();
-        $testDbname = "test_" . self::$dbConfig['dbname'];
+    }
 
-        if (!Globals::getDbConnection()) {
-            try {
-                $connection = Configuration::connect(
-                    self::$dbConfig['server'],
-                    self::$dbConfig['userid'],
-                    self::$dbConfig['passwd'],
-                    $testDbname,
-                    self::$dbConfig['socket'] ?? ''
-                );
-                Globals::setDbConnection($connection);
-                self::$dbConnected = true;
-            } catch (\Exception $e) {
-                self::$dbConnected = false;
-            }
-        } else {
-            self::$dbConnected = true;
+    protected function setUp(): void
+    {
+        parent::setUp();
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
         }
     }
 
@@ -109,10 +100,6 @@ class ConfigurationTest extends TestCase
 
     public function testConnectWithValidCredentials(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
         $testDbname = "test_" . self::$dbConfig['dbname'];
         $connection = Configuration::connect(
             self::$dbConfig['server'],
@@ -128,10 +115,6 @@ class ConfigurationTest extends TestCase
 
     public function testConnectReturnsWorkingConnection(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
         $testDbname = "test_" . self::$dbConfig['dbname'];
         $connection = Configuration::connect(
             self::$dbConfig['server'],
@@ -152,10 +135,6 @@ class ConfigurationTest extends TestCase
 
     public function testConnectSetsUtf8Charset(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
         $testDbname = "test_" . self::$dbConfig['dbname'];
         $connection = Configuration::connect(
             self::$dbConfig['server'],
@@ -175,10 +154,6 @@ class ConfigurationTest extends TestCase
 
     public function testConnectWithSocket(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
         // Test that socket parameter is accepted (even if empty)
         $testDbname = "test_" . self::$dbConfig['dbname'];
         $connection = Configuration::connect(
@@ -220,10 +195,6 @@ class ConfigurationTest extends TestCase
 
     public function testConnectSetsSqlMode(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
         $testDbname = "test_" . self::$dbConfig['dbname'];
         $connection = Configuration::connect(
             self::$dbConfig['server'],

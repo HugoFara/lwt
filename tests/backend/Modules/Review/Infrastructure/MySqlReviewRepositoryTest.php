@@ -27,6 +27,9 @@ class MySqlReviewRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required');
+        }
         $this->sentenceService = $this->createMock(SentenceService::class);
         $this->repository = new MySqlReviewRepository($this->sentenceService);
     }

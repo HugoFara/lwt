@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Modules\Tags\Http;
 
+use Lwt\Modules\Tags\Http\TermTagController;
 use Lwt\Modules\Tags\Http\TextTagController;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use PHPUnit\Framework\TestCase;

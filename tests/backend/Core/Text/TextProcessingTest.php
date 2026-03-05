@@ -51,27 +51,18 @@ class TextProcessingTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        $config = EnvLoader::getDatabaseConfig();
-        $testDbname = "test_" . $config['dbname'];
-
-        if (!Globals::getDbConnection()) {
-            try {
-                $connection = Configuration::connect(
-                    $config['server'],
-                    $config['userid'],
-                    $config['passwd'],
-                    $testDbname,
-                    $config['socket'] ?? ''
-                );
-                Globals::setDbConnection($connection);
-                self::$dbConnected = true;
-            } catch (\Exception $e) {
-                self::$dbConnected = false;
-            }
-        } else {
-            self::$dbConnected = true;
+        self::$dbConnected = defined('LWT_TEST_DB_AVAILABLE') && LWT_TEST_DB_AVAILABLE;
+        if (self::$dbConnected) {
+            self::$languageService = new LanguageFacade();
         }
-        self::$languageService = new LanguageFacade();
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
     }
 
     protected function tearDown(): void
@@ -88,9 +79,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetLanguagesReturnsArray(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $languages = self::$languageService->getAllLanguages();
         $this->assertIsArray($languages);
@@ -98,9 +86,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetLanguagesContainsNameIdPairs(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test language
         Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
@@ -118,9 +103,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetLanguagesExcludesEmptyNames(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Clean up any existing empty-name language first
         Connection::query("DELETE FROM languages WHERE LgName = ''");
@@ -143,9 +125,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetLanguageWithIntId(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test language
         Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
@@ -162,9 +141,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetLanguageWithStringId(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test language
         Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
@@ -181,9 +157,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetLanguageWithInvalidId(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $name = self::$languageService->getLanguageName(999999);
         $this->assertEquals('', $name);
@@ -191,9 +164,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetLanguageWithEmptyString(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $name = self::$languageService->getLanguageName('');
         $this->assertEquals('', $name);
@@ -201,9 +171,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetLanguageWithNonNumericString(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $name = self::$languageService->getLanguageName('invalid');
         $this->assertEquals('', $name);
@@ -213,9 +180,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetScriptDirectionTagWithLTRLanguage(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test language (LTR)
         Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
@@ -232,9 +196,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetScriptDirectionTagWithRTLLanguage(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test language (RTL)
         Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
@@ -251,9 +212,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetScriptDirectionTagWithStringId(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Insert test language (RTL)
         Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
@@ -270,9 +228,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetScriptDirectionTagWithNull(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $tag = self::$languageService->getScriptDirectionTag(null);
         $this->assertEquals('', $tag);
@@ -280,9 +235,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetScriptDirectionTagWithEmptyString(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $tag = self::$languageService->getScriptDirectionTag('');
         $this->assertEquals('', $tag);
@@ -290,9 +242,6 @@ class TextProcessingTest extends TestCase
 
     public function testGetScriptDirectionTagWithNonNumericString(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $tag = self::$languageService->getScriptDirectionTag('invalid');
         $this->assertEquals('', $tag);
@@ -302,9 +251,6 @@ class TextProcessingTest extends TestCase
 
     public function testTodoWordsCountWithNoUnknownWords(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         // Use a non-existent text ID
         $statsService = new TextStatisticsService();
@@ -314,9 +260,6 @@ class TextProcessingTest extends TestCase
 
     public function testTodoWordsCountReturnsInteger(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $statsService = new TextStatisticsService();
         $count = $statsService->getTodoWordsCount(1);
@@ -328,9 +271,6 @@ class TextProcessingTest extends TestCase
 
     public function testReturnTextWordCountReturnsArray(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $statsService = new TextStatisticsService();
         $result = $statsService->getTextWordCount('1');
@@ -346,9 +286,6 @@ class TextProcessingTest extends TestCase
 
     public function testReturnTextWordCountWithMultipleTexts(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $statsService = new TextStatisticsService();
         $result = $statsService->getTextWordCount('1,2');
@@ -359,9 +296,6 @@ class TextProcessingTest extends TestCase
 
     public function testReturnTextWordCountWithNonExistentText(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
 
         $statsService = new TextStatisticsService();
         $result = $statsService->getTextWordCount('999999');

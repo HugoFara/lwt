@@ -33,31 +33,15 @@ class SettingsHandlerTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        $config = EnvLoader::getDatabaseConfig();
-        $testDbname = "test_" . $config['dbname'];
-
-        if (!Globals::getDbConnection()) {
-            try {
-                $connection = Configuration::connect(
-                    $config['server'],
-                    $config['userid'],
-                    $config['passwd'],
-                    $testDbname,
-                    $config['socket'] ?? ''
-                );
-                Globals::setDbConnection($connection);
-                self::$dbConnected = true;
-            } catch (\Exception $e) {
-                self::$dbConnected = false;
-            }
-        } else {
-            self::$dbConnected = true;
-        }
+        self::$dbConnected = defined('LWT_TEST_DB_AVAILABLE') && LWT_TEST_DB_AVAILABLE;
     }
 
     protected function setUp(): void
     {
         parent::setUp();
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
         // Create mock AdminFacade for testing
         $mockFacade = $this->createMock(AdminFacade::class);
         $mockFacade->method('getIntensityStatistics')->willReturn(['languages' => [], 'totals' => []]);
@@ -100,10 +84,6 @@ class SettingsHandlerTest extends TestCase
      */
     public function testFormatSaveSettingReturnsMessageOnSuccess(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
         $result = $this->handler->formatSaveSetting('test_api_setting', 'test_value');
 
         $this->assertIsArray($result);

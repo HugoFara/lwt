@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoad
 
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Escaping;
 use PHPUnit\Framework\TestCase;
 
