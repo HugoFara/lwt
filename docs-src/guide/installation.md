@@ -221,7 +221,7 @@ For a light-weight installer, you may use
    Edit `.env` to customize:
    * `DB_HOST=db` (use "db" for the Docker container)
    * `DB_PASSWORD=your_secure_password` (change for security)
-   * `APP_BASE_PATH=/lwt` (URL path to access LWT)
+   * `APP_BASE_PATH=/mypath` (optional, only if you need a URL subdirectory)
 
    If you skip this step, Docker will use sensible defaults (password: `root`).
 
@@ -231,7 +231,7 @@ For a light-weight installer, you may use
    docker compose up -d
    ```
 
-4. Access LWT at <http://localhost:8010/lwt>
+4. Access LWT at <http://localhost:8010/>
 
 To stop and remove the containers:
 

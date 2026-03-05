@@ -48,7 +48,7 @@ COPY parsers/ /opt/lwt/parsers/
 
 # Application base path configuration
 # Set to /lwt for subdirectory installation, or leave empty for root installation
-ARG APP_BASE_PATH=/lwt
+ARG APP_BASE_PATH=
 
 # Copy application files
 # Files go to /var/www/html{APP_BASE_PATH} (e.g., /var/www/html/lwt or /var/www/html)

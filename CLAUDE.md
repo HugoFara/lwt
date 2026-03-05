@@ -48,7 +48,7 @@ The `.env` file contains:
 
 ```bash
 # Docker (recommended for quick setup)
-docker compose up                # Start app at http://localhost:8010/lwt/
+docker compose up                # Start app at http://localhost:8010/
 
 # PHP built-in server (for development)
 php -S localhost:8000            # Start at http://localhost:8000/

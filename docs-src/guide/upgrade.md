@@ -162,10 +162,14 @@ docker compose build --no-cache
 docker compose up -d
 
 # 5. Migrations run automatically on first request
-# Visit http://localhost:8010/lwt/ and wait for migrations to complete
+# Visit http://localhost:8010/ and wait for migrations to complete
 ```
 
 Your data persists in Docker volumes across upgrades.
+
+> **Note for users upgrading from older Docker setups:** The default Docker URL
+> has changed from `http://localhost:8010/lwt/` to `http://localhost:8010/`.
+> If you prefer the old `/lwt` path, add `APP_BASE_PATH=/lwt` to your `.env` file.
 
 ### Troubleshooting v3 Upgrade Issues
 

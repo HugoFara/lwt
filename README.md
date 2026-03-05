@@ -48,7 +48,7 @@ cd lwt
 docker compose up
 ```
 
-Then open <http://localhost:8010/lwt/> in your browser.
+Then open <http://localhost:8010/> in your browser.
 
 ## How It Works
 
@@ -128,7 +128,7 @@ cp .env.example .env
 docker compose up
 ```
 
-Access at <http://localhost:8010/lwt/>
+Access at <http://localhost:8010/>
 
 Configuration is done via `.env` file (see `.env.example` for all options).
 
