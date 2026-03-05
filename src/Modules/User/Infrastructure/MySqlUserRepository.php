@@ -966,7 +966,7 @@ class MySqlUserRepository implements UserRepositoryInterface
     public function countAdmins(): int
     {
         $sql = "SELECT COUNT(*) as cnt FROM users "
-             . "WHERE UsRole = ? AND UsPassword IS NOT NULL";
+             . "WHERE UsRole = ? AND UsPasswordHash IS NOT NULL";
         $rows = Connection::preparedFetchAll($sql, [User::ROLE_ADMIN]);
 
         return (int) ($rows[0]['cnt'] ?? 0);

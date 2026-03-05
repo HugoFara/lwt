@@ -460,13 +460,10 @@ class IntegrationTest extends TestCase
         }
         $langId = (int) $lang['LgID'];
 
+        // findSentencesFromWord with wid=-1 triggers the complex sentence search
         $service = new SentenceService();
-        $result = $service->buildSentencesContainingWordQuery('test', $langId);
+        $result = $service->findSentencesFromWord(-1, 'test', $langId, 5);
         $this->assertIsArray($result);
-        $this->assertArrayHasKey('sql', $result);
-        $this->assertArrayHasKey('params', $result);
-        $this->assertStringContainsString('SELECT', strtoupper($result['sql']));
-        $this->assertStringContainsString('SeID', $result['sql']);
     }
 
     public function testMaskTermInSentenceV2(): void

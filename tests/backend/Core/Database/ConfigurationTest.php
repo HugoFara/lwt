@@ -144,9 +144,13 @@ class ConfigurationTest extends TestCase
             self::$dbConfig['socket'] ?? ''
         );
 
-        $charset = mysqli_character_set_name($connection);
+        // SET NAMES updates server-side variables but not the client library charset,
+        // so we check character_set_client instead of mysqli_character_set_name().
+        $result = mysqli_query($connection, "SHOW VARIABLES LIKE 'character_set_client'");
+        $row = mysqli_fetch_assoc($result);
+        mysqli_free_result($result);
         $this->assertContains(
-            $charset,
+            $row['Value'],
             ['utf8', 'utf8mb3', 'utf8mb4'],
             'Connection should use UTF-8 charset'
         );

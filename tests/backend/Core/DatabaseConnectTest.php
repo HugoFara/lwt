@@ -1497,10 +1497,13 @@ class DatabaseConnectTest extends TestCase
             Globals::setDbConnection($connection);
         }
 
-        // Check connection charset (should be utf8, utf8mb3, or utf8mb4)
-        $charset = \mysqli_character_set_name(Globals::getDbConnection());
+        // SET NAMES updates server-side variables but not the client library charset,
+        // so we check character_set_client instead of mysqli_character_set_name().
+        $result = Connection::query("SHOW VARIABLES LIKE 'character_set_client'");
+        $row = \mysqli_fetch_assoc($result);
+        \mysqli_free_result($result);
         $this->assertContains(
-            $charset,
+            $row['Value'],
             ['utf8', 'utf8mb3', 'utf8mb4'],
             'Database connection should use UTF-8 encoding (utf8, utf8mb3, or utf8mb4)'
         );

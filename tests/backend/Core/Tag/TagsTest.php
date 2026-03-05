@@ -68,7 +68,7 @@ class TagsTest extends TestCase
 
         // This function adds tags to words but needs words to exist
         // We'll test the basic function structure
-        $result = TagsFacade::addTagToWords('TestTag', '(1,2,3)');
+        $result = TagsFacade::addTagToWords('TestTag', [1, 2, 3]);
 
         $this->assertIsArray($result, 'Should return an array');
         $this->assertArrayHasKey('count', $result, 'Should have count key');
@@ -87,16 +87,16 @@ class TagsTest extends TestCase
         }
 
         // Test with special characters in tag name
-        $result = TagsFacade::addTagToWords('Tag-With-Dashes', '(1)');
+        $result = TagsFacade::addTagToWords('Tag-With-Dashes', [1]);
         $this->assertIsArray($result);
         $this->assertNull($result['error']);
 
-        $result = TagsFacade::addTagToWords('Tag_With_Underscores', '(1)');
+        $result = TagsFacade::addTagToWords('Tag_With_Underscores', [1]);
         $this->assertIsArray($result);
         $this->assertNull($result['error']);
 
         // Test with spaces
-        $result = TagsFacade::addTagToWords('Tag With Spaces', '(1)');
+        $result = TagsFacade::addTagToWords('Tag With Spaces', [1]);
         $this->assertIsArray($result);
         $this->assertNull($result['error']);
     }
@@ -116,7 +116,7 @@ class TagsTest extends TestCase
 
         // Should handle SQL injection safely by escaping
         // The tag name will be stored as escaped string, not executed
-        $result = TagsFacade::addTagToWords("SafeTag_NoInjection", '(1)');
+        $result = TagsFacade::addTagToWords("SafeTag_NoInjection", [1]);
         $this->assertIsArray($result, 'Should handle tag creation safely');
         $this->assertNull($result['error']);
     }
@@ -135,7 +135,7 @@ class TagsTest extends TestCase
         }
 
         // Single space should work (gets trimmed and becomes non-empty in DB)
-        $result = TagsFacade::addTagToWords(' Trimmed Tag ', '(1)');
+        $result = TagsFacade::addTagToWords(' Trimmed Tag ', [1]);
         $this->assertIsArray($result, 'Should handle whitespace-padded tag name');
         $this->assertNull($result['error']);
     }
@@ -150,7 +150,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagsFacade::addTagToWords('TestTag', '()');
+        $result = TagsFacade::addTagToWords('TestTag', []);
         $this->assertIsArray($result);
         $this->assertSame(0, $result['count'], 'Should indicate 0 items affected');
         $this->assertNull($result['error']);
@@ -166,7 +166,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagsFacade::addTagToArchivedTexts('ArchiveTag', '(1)');
+        $result = TagsFacade::addTagToArchivedTexts('ArchiveTag', [1]);
         $this->assertIsArray($result);
         $this->assertArrayHasKey('count', $result);
         $this->assertNull($result['error']);
@@ -182,7 +182,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagsFacade::addTagToArchivedTexts('Archive-Tag_2023', '(1)');
+        $result = TagsFacade::addTagToArchivedTexts('Archive-Tag_2023', [1]);
         $this->assertIsArray($result);
         $this->assertNull($result['error']);
     }
@@ -197,7 +197,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagsFacade::addTagToTexts('TextTag', '(1)');
+        $result = TagsFacade::addTagToTexts('TextTag', [1]);
         $this->assertIsArray($result);
         $this->assertArrayHasKey('count', $result);
         $this->assertNull($result['error']);
@@ -214,10 +214,10 @@ class TagsTest extends TestCase
         }
 
         // First add a tag to ensure it exists
-        TagsFacade::addTagToWords('RemoveTestTag', '(1)');
+        TagsFacade::addTagToWords('RemoveTestTag', [1]);
 
         // Now remove it
-        $result = TagsFacade::removeTagFromWords('RemoveTestTag', '(1,2,3)');
+        $result = TagsFacade::removeTagFromWords('RemoveTestTag', [1, 2, 3]);
         $this->assertIsArray($result);
         $this->assertArrayHasKey('count', $result);
         $this->assertNull($result['error']);
@@ -234,7 +234,7 @@ class TagsTest extends TestCase
         }
 
         // Non-existent tag ID - should return error
-        $result = TagsFacade::removeTagFromWords('99999', '(1)');
+        $result = TagsFacade::removeTagFromWords('99999', [1]);
         $this->assertIsArray($result);
         $this->assertNotNull($result['error'], 'Should have error for non-existent tag');
         $this->assertStringContainsString('not found', $result['error']);
@@ -251,10 +251,10 @@ class TagsTest extends TestCase
         }
 
         // First add a tag to ensure it exists
-        TagsFacade::addTagToArchivedTexts('RemoveArchTestTag', '(1)');
+        TagsFacade::addTagToArchivedTexts('RemoveArchTestTag', [1]);
 
         // Now remove it
-        $result = TagsFacade::removeTagFromArchivedTexts('RemoveArchTestTag', '(1)');
+        $result = TagsFacade::removeTagFromArchivedTexts('RemoveArchTestTag', [1]);
         $this->assertIsArray($result);
         $this->assertArrayHasKey('count', $result);
         $this->assertNull($result['error']);
@@ -271,10 +271,10 @@ class TagsTest extends TestCase
         }
 
         // First add a tag to ensure it exists
-        TagsFacade::addTagToTexts('RemoveTextTestTag', '(1)');
+        TagsFacade::addTagToTexts('RemoveTextTestTag', [1]);
 
         // Now remove it
-        $result = TagsFacade::removeTagFromTexts('RemoveTextTestTag', '(1)');
+        $result = TagsFacade::removeTagFromTexts('RemoveTextTestTag', [1]);
         $this->assertIsArray($result);
         $this->assertArrayHasKey('count', $result);
         $this->assertNull($result['error']);
@@ -347,15 +347,15 @@ class TagsTest extends TestCase
         }
 
         // Test with Unicode tag names
-        $result = TagsFacade::addTagToWords('日本語タグ', '(1)');
+        $result = TagsFacade::addTagToWords('日本語タグ', [1]);
         $this->assertIsArray($result, 'Should handle Unicode in tag names');
         $this->assertNull($result['error']);
 
-        $result = TagsFacade::addTagToWords('العربية', '(1)');
+        $result = TagsFacade::addTagToWords('العربية', [1]);
         $this->assertIsArray($result, 'Should handle Arabic in tag names');
         $this->assertNull($result['error']);
 
-        $result = TagsFacade::addTagToWords('Ελληνικά', '(1)');
+        $result = TagsFacade::addTagToWords('Ελληνικά', [1]);
         $this->assertIsArray($result, 'Should handle Greek in tag names');
         $this->assertNull($result['error']);
     }
@@ -372,7 +372,7 @@ class TagsTest extends TestCase
 
         // Use a unique tag name (max 20 chars for TgText column)
         $longTag = 'LT_' . substr((string)time(), -7);
-        $result = TagsFacade::addTagToWords($longTag, '(1)');
+        $result = TagsFacade::addTagToWords($longTag, [1]);
         $this->assertIsArray($result, 'Should handle long tag names');
         $this->assertNull($result['error']);
     }
@@ -388,7 +388,7 @@ class TagsTest extends TestCase
         }
 
         // Add tag
-        $result = TagsFacade::addTagToWords('SequentialTag', '(1)');
+        $result = TagsFacade::addTagToWords('SequentialTag', [1]);
         $this->assertIsArray($result);
         $this->assertNull($result['error']);
 
@@ -752,7 +752,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagsFacade::removeTagFromWords('', '(1)');
+        $result = TagsFacade::removeTagFromWords('', [1]);
         $this->assertIsArray($result);
         $this->assertNotNull($result['error']);
         $this->assertStringContainsString('not found', $result['error']);
@@ -768,7 +768,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagsFacade::removeTagFromTexts('', '(1)');
+        $result = TagsFacade::removeTagFromTexts('', [1]);
         $this->assertIsArray($result);
         $this->assertNotNull($result['error']);
         $this->assertStringContainsString('not found', $result['error']);
@@ -784,7 +784,7 @@ class TagsTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = TagsFacade::removeTagFromArchivedTexts('', '(1)');
+        $result = TagsFacade::removeTagFromArchivedTexts('', [1]);
         $this->assertIsArray($result);
         $this->assertNotNull($result['error']);
         $this->assertStringContainsString('not found', $result['error']);
