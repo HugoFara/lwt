@@ -110,7 +110,8 @@ if (!isset($bookContext) || !is_array($bookContext)) {
             <div class="control">
               <button class="button is-small" :class="showAll ? 'is-info' : 'is-light'" @click="toggleShowAll">
                 <span class="icon is-small">
-                  <i class="fas" :class="showAll ? 'fa-check-square' : 'fa-square'"></i>
+                  <i x-show="showAll" data-lucide="square-check-big" style="width:14px;height:14px"></i>
+                  <i x-show="!showAll" data-lucide="square" style="width:14px;height:14px"></i>
                 </span>
                 <span>Show All</span>
               </button>
@@ -122,7 +123,8 @@ if (!isset($bookContext) || !is_array($bookContext)) {
                 @click="toggleTranslations"
               >
                 <span class="icon is-small">
-                  <i class="fas" :class="showTranslations ? 'fa-check-square' : 'fa-square'"></i>
+                  <i x-show="showTranslations" data-lucide="square-check-big" style="width:14px;height:14px"></i>
+                  <i x-show="!showTranslations" data-lucide="square" style="width:14px;height:14px"></i>
                 </span>
                 <span>Translations</span>
               </button>
@@ -175,7 +177,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
         <div class="level-item">
           <a href="/book/<?php echo $bookId; ?>" class="has-text-grey-dark" title="View book">
             <span class="icon is-small mr-1">
-              <i class="fas fa-book"></i>
+              <i data-lucide="book-open" style="width:14px;height:14px"></i>
             </span>
             <strong><?php echo htmlspecialchars($bookTitle); ?></strong>
           </a>
@@ -195,14 +197,14 @@ if (!isset($bookContext) || !is_array($bookContext)) {
             <a href="/text/<?php echo $prevTextId; ?>/read"
                class="button is-small" title="Previous chapter">
               <span class="icon is-small">
-                <i class="fas fa-chevron-left"></i>
+                <i data-lucide="chevron-left" style="width:14px;height:14px"></i>
               </span>
               <span>Prev</span>
             </a>
             <?php else : ?>
             <button class="button is-small" disabled title="No previous chapter">
               <span class="icon is-small">
-                <i class="fas fa-chevron-left"></i>
+                <i data-lucide="chevron-left" style="width:14px;height:14px"></i>
               </span>
               <span>Prev</span>
             </button>
@@ -214,7 +216,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
                 <button class="button is-small">
                   <span>Ch. <?php echo $chapterNum; ?></span>
                   <span class="icon is-small">
-                    <i class="fas fa-angle-down"></i>
+                    <i data-lucide="chevron-down" style="width:14px;height:14px"></i>
                   </span>
                 </button>
               </div>
@@ -237,14 +239,14 @@ if (!isset($bookContext) || !is_array($bookContext)) {
                class="button is-small" title="Next chapter">
               <span>Next</span>
               <span class="icon is-small">
-                <i class="fas fa-chevron-right"></i>
+                <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
               </span>
             </a>
             <?php else : ?>
             <button class="button is-small" disabled title="No next chapter">
               <span>Next</span>
               <span class="icon is-small">
-                <i class="fas fa-chevron-right"></i>
+                <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
               </span>
             </button>
             <?php endif; ?>

@@ -380,11 +380,20 @@ body
   background-color: var(--lwt-body-bg);
   color: var(--lwt-body-fg);
   font: 100%/1.25 "Lucida Grande",Arial,STHeiti,"Arial Unicode MS",MingLiu,sans-serif;
-  margin: 20px;
+  margin: 0;
   padding: 0px;
   max-width: 900px;
   margin-left: auto;
   margin-right: auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#main-content
+{
+  flex: 1;
+  padding: 20px;
 }
 
 /* Full-width body for test and read pages */
@@ -975,6 +984,8 @@ img.lwtlogo
 {
   margin-right: 15px;
   float: left;
+  width: 48px;
+  height: 48px;
 }
 
 img.lwtlogoright
@@ -2275,17 +2286,13 @@ select {
   color: #296fa8;
 }
 
-/* Footer styling - break out of body max-width to span full viewport */
+/* Footer styling */
 .footer {
-  background-color: var(--lwt-navbar-bg) !important;
-  padding: 1.5rem !important;
+  background-color: transparent !important;
+  padding: 1rem 1.5rem !important;
   position: static !important;
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-top: 1px solid var(--lwt-footer-border, #333);
+  margin-top: auto;
 }
 
 /* Footer license image inline */
@@ -2480,7 +2487,20 @@ Navigation Bar Styles (Alpine.js + Bulma)
 /* Main navbar styling */
 .navbar.is-light {
   background-color: var(--lwt-navbar-bg);
+  color: var(--lwt-body-fg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar.is-light .navbar-item,
+.navbar.is-light .navbar-link,
+.navbar.is-light .navbar-brand .navbar-item {
+  color: var(--lwt-body-fg);
+}
+
+.navbar.is-light .navbar-item:hover,
+.navbar.is-light .navbar-link:hover {
+  background-color: rgba(128, 128, 128, 0.15);
+  color: var(--lwt-body-fg);
 }
 
 /* Navbar brand - logo and title */
@@ -2501,11 +2521,16 @@ Navigation Bar Styles (Alpine.js + Bulma)
   display: none;
   opacity: 0;
   transition: opacity 0.15s ease-in-out;
+  background-color: var(--lwt-navbar-bg);
 }
 
 .navbar-item.has-dropdown.is-active .navbar-dropdown {
   display: block;
   opacity: 1;
+}
+
+.navbar-dropdown .navbar-item {
+  color: var(--lwt-body-fg);
 }
 
 /* Mobile menu improvements */

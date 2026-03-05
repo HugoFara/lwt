@@ -42,7 +42,7 @@ function renderWordPressLogout(bool $isWordPress, string $base): void
 <div class="card menu menu-logout">
     <div class="card-content has-text-centered">
         <a href="<?php echo $base; ?>/wordpress/stop" class="button is-danger is-outlined">
-            <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+            <span class="icon"><i data-lucide="log-out" style="width:16px;height:16px"></i></span>
             <span><strong>LOGOUT</strong> (from WordPress and LWT)</span>
         </a>
     </div>

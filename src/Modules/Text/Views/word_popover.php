@@ -45,7 +45,7 @@ namespace Lwt\Views\Text;
       <!-- Loading state -->
       <div x-show="isLoading" class="has-text-centered py-2">
         <span class="icon">
-          <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+          <i data-lucide="loader-2" class="icon-spin" style="width:16px;height:16px" aria-hidden="true"></i>
         </span>
       </div>
 

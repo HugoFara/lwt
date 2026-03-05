@@ -33,7 +33,7 @@ namespace Lwt\Views\Text;
         <!-- Loading overlay -->
         <div x-show="isLoading" class="has-text-centered py-4">
           <span class="icon is-large">
-            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+            <i data-lucide="loader-2" class="icon-spin" style="width:24px;height:24px" aria-hidden="true"></i>
           </span>
           <p class="mt-2">Loading...</p>
         </div>

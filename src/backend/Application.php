@@ -41,6 +41,7 @@ use Lwt\Modules\Admin\Application\UseCases\Wizard\AutocompleteConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\LoadConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\SaveConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\TestConnection;
+use Lwt\Shared\Infrastructure\Bootstrap\SessionBootstrap;
 use Lwt\Shared\Infrastructure\Exception\ExceptionHandler;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Routing\Router;
@@ -130,6 +131,14 @@ class Application
 
         // Register autoloader for Lwt namespace
         $this->registerAutoloader();
+
+        // Start the session early, before any output is sent.
+        // This ensures the session cookie is set in the HTTP response headers
+        // and CSRF tokens generated during page rendering are persisted.
+        SessionBootstrap::configureSessionCookie();
+        if (session_id() === '') {
+            @session_start();
+        }
 
         // Register service providers with the DI container
         $this->registerServiceProviders();

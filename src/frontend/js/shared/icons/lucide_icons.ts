@@ -125,6 +125,7 @@ import {
   Smile,
   SpellCheck,
   Square,
+  SquareCheckBig,
   SquareMinus,
   SquarePen,
   SquarePlus,
@@ -150,7 +151,7 @@ import {
   WrapText,
   X,
   XCircle,
-  Zap
+  Zap,
 } from 'lucide';
 
 /**
@@ -269,6 +270,7 @@ const usedIcons: Record<string, IconNode> = {
   Smile,
   SpellCheck,
   Square,
+  SquareCheckBig,
   SquareMinus,
   SquarePen,
   SquarePlus,
