@@ -366,7 +366,6 @@ class Migrations
                 foreach ($pendingMigrations as $filename) {
                     $filepath = $migrationsDir . $filename;
                     $queries = SqlFileParser::parseFile($filepath);
-                    $migrationFailed = false;
                     foreach ($queries as $sql_query) {
                         try {
                             Connection::execute($sql_query);
@@ -376,7 +375,6 @@ class Migrations
                             // creates modern tables and legacy migrations reference
                             // old table names that no longer exist.
                             error_log("Migration failed: $filename - " . $e->getMessage());
-                            $migrationFailed = true;
                         }
                     }
                     // Always record the migration so it won't be retried on every

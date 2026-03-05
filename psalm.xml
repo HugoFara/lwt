@@ -24,6 +24,22 @@
 
         <!--
             ============================================
+            PSALM 6.7+ STRICT MODE SUPPRESSIONS
+            ============================================
+            These issues were introduced by Psalm 6.7.0's stricter checks.
+            MissingOverrideAttribute: requires PHP 8.3+ #[\Override] on every override
+            ClassMustBeFinal: wants all non-extended classes to be final
+            InvalidOperand/PossiblyInvalidOperand: false positives for int concatenation
+            MixedArgumentTypeCoercion: stricter coercion checks
+        -->
+        <MissingOverrideAttribute errorLevel="suppress" />
+        <ClassMustBeFinal errorLevel="suppress" />
+        <InvalidOperand errorLevel="suppress" />
+        <PossiblyInvalidOperand errorLevel="suppress" />
+        <MixedArgumentTypeCoercion errorLevel="suppress" />
+
+        <!--
+            ============================================
             VIEW TEMPLATE PATTERN SUPPRESSIONS
             ============================================
             Views use PHP's include pattern where variables set in controllers

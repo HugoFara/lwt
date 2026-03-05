@@ -122,7 +122,14 @@ class GetCurrentUserTest extends TestCase
             ->with(10)
             ->willThrowException(new \RuntimeException('DB error'));
 
-        $result = $this->useCase->execute();
+        // Redirect error_log to a temp file to prevent PHPUnit from
+        // capturing stderr output as a test error (Windows CI issue)
+        $previousLog = ini_set('error_log', tempnam(sys_get_temp_dir(), 'phpunit'));
+        try {
+            $result = $this->useCase->execute();
+        } finally {
+            ini_set('error_log', $previousLog !== false ? $previousLog : '');
+        }
 
         $this->assertNull($result);
     }
