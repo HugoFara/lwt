@@ -137,7 +137,7 @@ class GetAllTagNames
      */
     private function getUrlBase(): string
     {
-        $url = $this->requestUri ?? ($_SERVER['REQUEST_URI'] ?? '');
+        $url = $this->requestUri ?? '';
         return substr($url, 0, (int) strrpos($url, '/'));
     }
 }

@@ -103,12 +103,12 @@ class GetAllTagNamesTest extends TestCase
             ->willReturnOnConsecutiveCalls($initialTags, $newTags);
 
         // First call with one URL
-        $_SERVER['REQUEST_URI'] = '/project1/tags';
-        $tags1 = $this->useCase->getTermTags();
+        $useCase1 = new GetAllTagNames($this->termRepository, $this->textRepository, '/project1/tags');
+        $tags1 = $useCase1->getTermTags();
 
-        // Change URL base
-        $_SERVER['REQUEST_URI'] = '/project2/tags';
-        $tags2 = $this->useCase->getTermTags();
+        // Different URL base invalidates cache
+        $useCase2 = new GetAllTagNames($this->termRepository, $this->textRepository, '/project2/tags');
+        $tags2 = $useCase2->getTermTags();
 
         $this->assertEquals($initialTags, $tags1);
         $this->assertEquals($newTags, $tags2);
@@ -199,12 +199,12 @@ class GetAllTagNamesTest extends TestCase
             ->willReturnOnConsecutiveCalls($initialTags, $newTags);
 
         // First call with one URL
-        $_SERVER['REQUEST_URI'] = '/project1/tags/text';
-        $tags1 = $this->useCase->getTextTags();
+        $useCase1 = new GetAllTagNames($this->termRepository, $this->textRepository, '/project1/tags/text');
+        $tags1 = $useCase1->getTextTags();
 
-        // Change URL base
-        $_SERVER['REQUEST_URI'] = '/project2/tags/text';
-        $tags2 = $this->useCase->getTextTags();
+        // Different URL base invalidates cache
+        $useCase2 = new GetAllTagNames($this->termRepository, $this->textRepository, '/project2/tags/text');
+        $tags2 = $useCase2->getTextTags();
 
         $this->assertEquals($initialTags, $tags1);
         $this->assertEquals($newTags, $tags2);

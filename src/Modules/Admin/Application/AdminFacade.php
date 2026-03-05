@@ -118,7 +118,7 @@ class AdminFacade
         $this->getLanguageCount = new GetLanguageCount();
 
         // Initialize ServerData use case
-        $this->getServerData = new GetServerData();
+        $this->getServerData = new GetServerData($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown');
 
         // Initialize Theme use case
         $this->getAvailableThemes = new GetAvailableThemes();

@@ -29,6 +29,18 @@ use Lwt\Shared\Infrastructure\Http\UrlUtilities;
  */
 class GetServerData
 {
+    private string $serverSoftware;
+
+    /**
+     * Constructor.
+     *
+     * @param string $serverSoftware Server software string (e.g. from $_SERVER['SERVER_SOFTWARE'])
+     */
+    public function __construct(string $serverSoftware = 'Unknown')
+    {
+        $this->serverSoftware = $serverSoftware;
+    }
+
     /**
      * Execute the use case.
      *
@@ -48,8 +60,8 @@ class GetServerData
         return [
             'db_name' => Globals::getDatabaseName(),
             'db_size' => $this->getDatabaseSize(),
-            'server_soft' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
-            'apache' => $this->parseApacheVersion($_SERVER['SERVER_SOFTWARE'] ?? ''),
+            'server_soft' => $this->serverSoftware,
+            'apache' => $this->parseApacheVersion($this->serverSoftware),
             'php' => phpversion(),
             'mysql' => (string) Connection::fetchValue("SELECT VERSION() AS version", 'version'),
             'lwt_version' => ApplicationInfo::getVersionNumber(),

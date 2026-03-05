@@ -96,7 +96,8 @@ class UserManagementController extends BaseController
             );
 
             if ($result['success']) {
-                return $this->redirect('/admin/users?message=User+created+successfully')->send();
+                $this->redirect('/admin/users?message=User+created+successfully')->send();
+                return;
             }
 
             $errors = $result['errors'] ?? [];
@@ -151,14 +152,16 @@ class UserManagementController extends BaseController
             );
 
             if ($result['success']) {
-                return $this->redirect('/admin/users?message=User+updated+successfully')->send();
+                $this->redirect('/admin/users?message=User+updated+successfully')->send();
+                return;
             }
 
             $errors = $result['errors'] ?? [];
             $user = $this->userRepository->find($userId);
 
             if ($user === null) {
-                return $this->redirect('/admin/users?message=Error:+User+not+found')->send();
+                $this->redirect('/admin/users?message=Error:+User+not+found')->send();
+                return;
             }
 
             $formData = [
@@ -178,7 +181,8 @@ class UserManagementController extends BaseController
 
         $user = $this->userRepository->find($userId);
         if ($user === null) {
-            return $this->redirect('/admin/users?message=Error:+User+not+found')->send();
+            $this->redirect('/admin/users?message=Error:+User+not+found')->send();
+            return;
         }
 
         $isEdit = true;

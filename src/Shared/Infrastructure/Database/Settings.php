@@ -62,6 +62,9 @@ class Settings
      */
     public static function get(string $key): string
     {
+        if ($key === '') {
+            return '';
+        }
         $val = QueryBuilder::table('settings')
             ->where('StKey', '=', $key)
             ->valuePrepared('StValue');
@@ -87,6 +90,9 @@ class Settings
      */
     public static function getWithDefault(string $key): string
     {
+        if ($key === '') {
+            return '';
+        }
         $dft = SettingDefinitions::getAll();
         $val = (string) QueryBuilder::table('settings')
             ->where('StKey', '=', $key)
