@@ -488,9 +488,10 @@ class TextParsing
             // Get next auto-increment value for accurate TiSeID calculation
             $dbname = Globals::getDatabaseName();
             $sentencesTable = Globals::table('sentences');
-            $autoInc = (int)Connection::fetchValue(
+            $autoInc = (int)Connection::preparedFetchValue(
                 "SELECT AUTO_INCREMENT as value FROM information_schema.TABLES
-                 WHERE TABLE_SCHEMA = '$dbname' AND TABLE_NAME = '$sentencesTable'"
+                 WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
+                [$dbname, $sentencesTable]
             );
             // Fall back to MAX+1 if AUTO_INCREMENT is not available
             if ($autoInc <= 0) {
@@ -557,9 +558,10 @@ class TextParsing
             // Get next auto-increment value for accurate TiSeID calculation
             $dbname = Globals::getDatabaseName();
             $sentencesTable = Globals::table('sentences');
-            $sid = (int)Connection::fetchValue(
+            $sid = (int)Connection::preparedFetchValue(
                 "SELECT AUTO_INCREMENT as value FROM information_schema.TABLES
-                 WHERE TABLE_SCHEMA = '$dbname' AND TABLE_NAME = '$sentencesTable'"
+                 WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
+                [$dbname, $sentencesTable]
             );
             // Fall back to MAX+1 if AUTO_INCREMENT is not available
             if ($sid <= 0) {
@@ -809,9 +811,10 @@ class TextParsing
                 // This is more reliable than MAX(SeID)+1 when there are gaps
                 $dbname = Globals::getDatabaseName();
                 $sentencesTable = Globals::table('sentences');
-                $sid = (int)Connection::fetchValue(
+                $sid = (int)Connection::preparedFetchValue(
                     "SELECT AUTO_INCREMENT as value FROM information_schema.TABLES
-                     WHERE TABLE_SCHEMA = '$dbname' AND TABLE_NAME = '$sentencesTable'"
+                     WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
+                    [$dbname, $sentencesTable]
                 );
                 // Fall back to MAX+1 if AUTO_INCREMENT is not available
                 if ($sid <= 0) {
