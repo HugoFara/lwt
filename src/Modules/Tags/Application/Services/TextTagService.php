@@ -223,13 +223,14 @@ class TextTagService
      * Add a tag to multiple texts.
      *
      * @param string $tagText Tag text to add
-     * @param string $idList  SQL list of text IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of text IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function addTagToTexts(string $tagText, string $idList): array
+    public static function addTagToTexts(string $tagText, array $ids): array
     {
-        if ($idList === '()') {
+        $inClause = Connection::buildIntInClause($ids);
+        if ($inClause === '()') {
             return ['count' => 0, 'error' => null];
         }
 
@@ -240,17 +241,18 @@ class TextTagService
 
         $sql = 'SELECT TxID FROM texts
             LEFT JOIN text_tag_map ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
-            WHERE TtT2ID IS NULL AND TxID IN ' . $idList
+            WHERE TtT2ID IS NULL AND TxID IN ' . $inClause
             . UserScopedQuery::forTable('texts');
         $res = Connection::query($sql);
 
         $count = 0;
         if ($res instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($res)) {
-                $count += (int) Connection::execute(
-                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID)
-                    VALUES(' . (int)$record['TxID'] . ', ' . $tagId . ')'
+                Connection::preparedExecute(
+                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID) VALUES(?, ?)',
+                    [(int)$record['TxID'], $tagId]
                 );
+                $count++;
             }
             mysqli_free_result($res);
         }
@@ -262,13 +264,14 @@ class TextTagService
      * Remove a tag from multiple texts.
      *
      * @param string $tagText Tag text to remove
-     * @param string $idList  SQL list of text IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of text IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function removeTagFromTexts(string $tagText, string $idList): array
+    public static function removeTagFromTexts(string $tagText, array $ids): array
     {
-        if ($idList === '()') {
+        $inClause = Connection::buildIntInClause($ids);
+        if ($inClause === '()') {
             return ['count' => 0, 'error' => null];
         }
 
@@ -284,7 +287,7 @@ class TextTagService
         }
         $tagId = (int) $tagIdRaw;
 
-        $sql = 'SELECT TxID FROM texts WHERE TxID IN ' . $idList
+        $sql = 'SELECT TxID FROM texts WHERE TxID IN ' . $inClause
             . UserScopedQuery::forTable('texts');
         $res = Connection::query($sql);
 
@@ -307,13 +310,14 @@ class TextTagService
      * Add a tag to multiple archived texts.
      *
      * @param string $tagText Tag text to add
-     * @param string $idList  SQL list of archived text IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of archived text IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function addTagToArchivedTexts(string $tagText, string $idList): array
+    public static function addTagToArchivedTexts(string $tagText, array $ids): array
     {
-        if ($idList === '()') {
+        $inClause = Connection::buildIntInClause($ids);
+        if ($inClause === '()') {
             return ['count' => 0, 'error' => null];
         }
 
@@ -324,17 +328,18 @@ class TextTagService
 
         $sql = 'SELECT TxID FROM texts
             LEFT JOIN text_tag_map ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
-            WHERE TtT2ID IS NULL AND TxArchivedAt IS NOT NULL AND TxID IN ' . $idList
+            WHERE TtT2ID IS NULL AND TxArchivedAt IS NOT NULL AND TxID IN ' . $inClause
             . UserScopedQuery::forTable('texts');
         $res = Connection::query($sql);
 
         $count = 0;
         if ($res instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($res)) {
-                $count += (int) Connection::execute(
-                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID)
-                    VALUES(' . (int)$record['TxID'] . ', ' . $tagId . ')'
+                Connection::preparedExecute(
+                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID) VALUES(?, ?)',
+                    [(int)$record['TxID'], $tagId]
                 );
+                $count++;
             }
             mysqli_free_result($res);
         }
@@ -346,15 +351,16 @@ class TextTagService
      * Remove a tag from multiple archived texts.
      *
      * @param string $tagText Tag text to remove
-     * @param string $idList  SQL list of archived text IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of archived text IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
     public static function removeTagFromArchivedTexts(
         string $tagText,
-        string $idList
+        array $ids
     ): array {
-        if ($idList === '()') {
+        $inClause = Connection::buildIntInClause($ids);
+        if ($inClause === '()') {
             return ['count' => 0, 'error' => null];
         }
 
@@ -370,7 +376,7 @@ class TextTagService
         }
         $tagId = (int) $tagIdRaw;
 
-        $sql = 'SELECT TxID FROM texts WHERE TxArchivedAt IS NOT NULL AND TxID IN ' . $idList
+        $sql = 'SELECT TxID FROM texts WHERE TxArchivedAt IS NOT NULL AND TxID IN ' . $inClause
             . UserScopedQuery::forTable('texts');
         $res = Connection::query($sql);
 

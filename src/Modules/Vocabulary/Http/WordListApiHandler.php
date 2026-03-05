@@ -19,7 +19,6 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Http;
 
-use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Modules\Tags\Application\TagsFacade;
@@ -218,7 +217,6 @@ class WordListApiHandler
         }
 
         $count = count($wordIds);
-        $idList = Connection::buildIntInClause($wordIds);
 
         switch ($action) {
             case 'del':
@@ -264,7 +262,7 @@ class WordListApiHandler
                 if ($data === null || $data === '') {
                     return ['success' => false, 'count' => 0, 'message' => 'Tag name required'];
                 }
-                $result = TagsFacade::addTagToWords($data, $idList);
+                $result = TagsFacade::addTagToWords($data, $wordIds);
                 if ($result['error'] !== null) {
                     return ['success' => false, 'count' => 0, 'message' => $result['error']];
                 }
@@ -275,7 +273,7 @@ class WordListApiHandler
                 if ($data === null || $data === '') {
                     return ['success' => false, 'count' => 0, 'message' => 'Tag name required'];
                 }
-                $result = TagsFacade::removeTagFromWords($data, $idList);
+                $result = TagsFacade::removeTagFromWords($data, $wordIds);
                 if ($result['error'] !== null) {
                     return ['success' => false, 'count' => 0, 'message' => $result['error']];
                 }

@@ -662,13 +662,13 @@ class TagsFacade
      * Add a tag to multiple words.
      *
      * @param string $tagText Tag text to add
-     * @param string $idList  SQL list of word IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of word IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function addTagToWords(string $tagText, string $idList): array
+    public static function addTagToWords(string $tagText, array $ids): array
     {
-        $result = TermTagService::addTagToWords($tagText, $idList);
+        $result = TermTagService::addTagToWords($tagText, $ids);
         self::getAllTermTags(true);
         return $result;
     }
@@ -677,26 +677,26 @@ class TagsFacade
      * Remove a tag from multiple words.
      *
      * @param string $tagText Tag text to remove
-     * @param string $idList  SQL list of word IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of word IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function removeTagFromWords(string $tagText, string $idList): array
+    public static function removeTagFromWords(string $tagText, array $ids): array
     {
-        return TermTagService::removeTagFromWords($tagText, $idList);
+        return TermTagService::removeTagFromWords($tagText, $ids);
     }
 
     /**
      * Add a tag to multiple texts.
      *
      * @param string $tagText Tag text to add
-     * @param string $idList  SQL list of text IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of text IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function addTagToTexts(string $tagText, string $idList): array
+    public static function addTagToTexts(string $tagText, array $ids): array
     {
-        $result = TextTagService::addTagToTexts($tagText, $idList);
+        $result = TextTagService::addTagToTexts($tagText, $ids);
         self::getAllTextTags(true);
         return $result;
     }
@@ -705,26 +705,26 @@ class TagsFacade
      * Remove a tag from multiple texts.
      *
      * @param string $tagText Tag text to remove
-     * @param string $idList  SQL list of text IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of text IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function removeTagFromTexts(string $tagText, string $idList): array
+    public static function removeTagFromTexts(string $tagText, array $ids): array
     {
-        return TextTagService::removeTagFromTexts($tagText, $idList);
+        return TextTagService::removeTagFromTexts($tagText, $ids);
     }
 
     /**
      * Add a tag to multiple archived texts.
      *
      * @param string $tagText Tag text to add
-     * @param string $idList  SQL list of archived text IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of archived text IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function addTagToArchivedTexts(string $tagText, string $idList): array
+    public static function addTagToArchivedTexts(string $tagText, array $ids): array
     {
-        $result = TextTagService::addTagToArchivedTexts($tagText, $idList);
+        $result = TextTagService::addTagToArchivedTexts($tagText, $ids);
         self::getAllTextTags(true);
         return $result;
     }
@@ -733,15 +733,15 @@ class TagsFacade
      * Remove a tag from multiple archived texts.
      *
      * @param string $tagText Tag text to remove
-     * @param string $idList  SQL list of archived text IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of archived text IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
     public static function removeTagFromArchivedTexts(
         string $tagText,
-        string $idList
+        array $ids
     ): array {
-        return TextTagService::removeTagFromArchivedTexts($tagText, $idList);
+        return TextTagService::removeTagFromArchivedTexts($tagText, $ids);
     }
 
     // =====================

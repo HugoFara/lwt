@@ -416,8 +416,6 @@ class TextController extends BaseController
             return $message;
         }
 
-        $list = "(" . implode(",", array_map('intval', $marked)) . ")";
-
         switch ($markAction) {
             case 'del':
                 $result = $this->textService->deleteTexts($marked);
@@ -430,12 +428,12 @@ class TextController extends BaseController
                 break;
 
             case 'addtag':
-                $result = TagsFacade::addTagToTexts($actionData, $list);
+                $result = TagsFacade::addTagToTexts($actionData, $marked);
                 $message = $result['error'] ?? "Tag added in {$result['count']} Texts";
                 break;
 
             case 'deltag':
-                TagsFacade::removeTagFromTexts($actionData, $list);
+                TagsFacade::removeTagFromTexts($actionData, $marked);
                 return $this->redirect('/texts');
 
             case 'setsent':
@@ -1069,14 +1067,12 @@ class TextController extends BaseController
                 break;
 
             case 'addtag':
-                $list = "(" . implode(",", array_map('intval', $marked)) . ")";
-                $result = TagsFacade::addTagToArchivedTexts($actionData, $list);
+                $result = TagsFacade::addTagToArchivedTexts($actionData, $marked);
                 $message = $result['error'] ?? "Tag added in {$result['count']} Texts";
                 break;
 
             case 'deltag':
-                $list = "(" . implode(",", array_map('intval', $marked)) . ")";
-                TagsFacade::removeTagFromArchivedTexts($actionData, $list);
+                TagsFacade::removeTagFromArchivedTexts($actionData, $marked);
                 return $this->redirect('/text/archived');
 
             case 'unarch':

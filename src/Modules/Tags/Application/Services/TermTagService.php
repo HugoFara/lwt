@@ -249,13 +249,14 @@ class TermTagService
      * Add a tag to multiple words.
      *
      * @param string $tagText Tag text to add
-     * @param string $idList  SQL list of word IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of word IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function addTagToWords(string $tagText, string $idList): array
+    public static function addTagToWords(string $tagText, array $ids): array
     {
-        if ($idList === '()') {
+        $inClause = Connection::buildIntInClause($ids);
+        if ($inClause === '()') {
             return ['count' => 0, 'error' => null];
         }
 
@@ -264,21 +265,21 @@ class TermTagService
             return ['count' => 0, 'error' => 'Failed to create tag'];
         }
 
-        // Use raw SQL for LEFT JOIN with dynamic IN clause
         $sql = 'SELECT WoID
             FROM words
             LEFT JOIN word_tag_map ON WoID = WtWoID AND WtTgID = ' . $tagId . '
-            WHERE WtTgID IS NULL AND WoID IN ' . $idList
+            WHERE WtTgID IS NULL AND WoID IN ' . $inClause
             . UserScopedQuery::forTable('words');
         $res = Connection::query($sql);
 
         $count = 0;
         if ($res instanceof \mysqli_result) {
             while ($record = mysqli_fetch_assoc($res)) {
-                $count += (int) Connection::execute(
-                    'INSERT IGNORE INTO word_tag_map (WtWoID, WtTgID)
-                    VALUES(' . (int)$record['WoID'] . ', ' . $tagId . ')'
+                Connection::preparedExecute(
+                    'INSERT IGNORE INTO word_tag_map (WtWoID, WtTgID) VALUES(?, ?)',
+                    [(int)$record['WoID'], $tagId]
                 );
+                $count++;
             }
             mysqli_free_result($res);
         }
@@ -290,13 +291,14 @@ class TermTagService
      * Remove a tag from multiple words.
      *
      * @param string $tagText Tag text to remove
-     * @param string $idList  SQL list of word IDs, e.g. "(1,2,3)"
+     * @param int[]  $ids     Array of word IDs
      *
      * @return array{count: int, error: ?string} Result with count and optional error
      */
-    public static function removeTagFromWords(string $tagText, string $idList): array
+    public static function removeTagFromWords(string $tagText, array $ids): array
     {
-        if ($idList === '()') {
+        $inClause = Connection::buildIntInClause($ids);
+        if ($inClause === '()') {
             return ['count' => 0, 'error' => null];
         }
 
@@ -312,7 +314,7 @@ class TermTagService
         }
         $tagId = (int) $tagIdRaw;
 
-        $sql = 'SELECT WoID FROM words WHERE WoID IN ' . $idList
+        $sql = 'SELECT WoID FROM words WHERE WoID IN ' . $inClause
             . UserScopedQuery::forTable('words');
         $res = Connection::query($sql);
 
