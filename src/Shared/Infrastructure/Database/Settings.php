@@ -122,9 +122,6 @@ class Settings
         if (!isset($v)) {
             throw new \InvalidArgumentException('Value is not set');
         }
-        if ($v === '') {
-            throw new \InvalidArgumentException('Value is an empty string');
-        }
         if (isset($dft[$k]) && $dft[$k]['num']) {
             $v = (int)$v;
             if (isset($dft[$k]['min']) && $v < $dft[$k]['min']) {

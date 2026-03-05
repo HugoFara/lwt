@@ -108,6 +108,11 @@ select {
   background-image: none !important;
 }
 
+option {
+  background-color: rgb(34,34,34);
+  color: #F3F3F3;
+}
+
 button, input[type=button], input[type=submit] {
   background: linear-gradient(to top, rgb(34,34,34) 0%, rgb(58,59,60) 100%);
   color: #F3F3F3;

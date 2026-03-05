@@ -160,6 +160,9 @@
   --lwt-ss-trigger-bg: white;
   --lwt-ss-dropdown-bg: white;
   --lwt-ss-hover-bg: #f5f5f5;
+  --lwt-ss-selected-bg: #eff5fb;
+  --lwt-ss-selected-fg: #485fc7;
+  --lwt-ss-selected-hover-bg: #e8f0fc;
   --lwt-label-fg: #363636;
   --lwt-stats-chart-bg: #fff;
   --lwt-stats-chart-border: #ddd;
@@ -258,6 +261,9 @@
     --lwt-ss-trigger-bg: #1a1a1a;
     --lwt-ss-dropdown-bg: #1a1a1a;
     --lwt-ss-hover-bg: #222222;
+    --lwt-ss-selected-bg: #1a2744;
+    --lwt-ss-selected-fg: #8da4e0;
+    --lwt-ss-selected-hover-bg: #1f2e4d;
     --lwt-label-fg: #EEEEEE;
     --lwt-stats-chart-bg: #1a1a1a;
     --lwt-stats-chart-border: #404040;
@@ -356,6 +362,9 @@
   --lwt-ss-trigger-bg: #1a1a1a;
   --lwt-ss-dropdown-bg: #1a1a1a;
   --lwt-ss-hover-bg: #222222;
+  --lwt-ss-selected-bg: #1a2744;
+  --lwt-ss-selected-fg: #8da4e0;
+  --lwt-ss-selected-hover-bg: #1f2e4d;
   --lwt-label-fg: #EEEEEE;
   --lwt-stats-chart-bg: #1a1a1a;
   --lwt-stats-chart-border: #404040;
@@ -548,6 +557,13 @@ select:disabled
   background-color: var(--lwt-input-disabled-bg);
   color: var(--lwt-input-disabled-fg);
   cursor: not-allowed;
+}
+
+/* Option elements inside selects - inherit dark background */
+option
+{
+  background-color: var(--lwt-input-bg);
+  color: var(--lwt-input-fg);
 }
 
 /* Buttons - apply Bulma .button styles */
@@ -3164,12 +3180,12 @@ Searchable Select Component (Alpine.js)
 }
 
 .searchable-select__options li.is-selected {
-  background-color: #eff5fb;
-  color: #485fc7;
+  background-color: var(--lwt-ss-selected-bg);
+  color: var(--lwt-ss-selected-fg);
 }
 
 .searchable-select__options li.is-selected.is-highlighted {
-  background-color: #e8f0fc;
+  background-color: var(--lwt-ss-selected-hover-bg);
 }
 
 .searchable-select__empty {

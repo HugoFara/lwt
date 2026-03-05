@@ -333,9 +333,9 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Value is an empty string');
         Settings::save('test_empty_key', '');
+        $value = Settings::get('test_empty_key');
+        $this->assertEquals('', $value, 'Empty string should be saved successfully');
     }
 
     public function testSaveUpdateExisting(): void

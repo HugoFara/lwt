@@ -712,15 +712,10 @@ class DatabaseConnectTest extends TestCase
         }
         $this->assertTrue($nullThrown, 'NULL value should throw InvalidArgumentException');
 
-        // Test empty string value (should throw)
-        $emptyThrown = false;
-        try {
-            Settings::save('test_key', '');
-        } catch (\InvalidArgumentException $e) {
-            $emptyThrown = true;
-            $this->assertStringContainsString('Value is an empty string', $e->getMessage());
-        }
-        $this->assertTrue($emptyThrown, 'Empty string should throw InvalidArgumentException');
+        // Test empty string value (should save successfully)
+        Settings::save('test_key_empty', '');
+        $emptyValue = Settings::get('test_key_empty');
+        $this->assertEquals('', $emptyValue, 'Empty string should be saved');
 
         // Test updating existing setting (returns void on success)
         Settings::save('test_key_update', 'value1');
