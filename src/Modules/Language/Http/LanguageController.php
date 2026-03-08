@@ -28,6 +28,8 @@ use Lwt\Modules\Language\Domain\Language;
 use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Modules\Language\Infrastructure\Parser\ParserRegistry;
+use Lwt\Modules\Dictionary\Application\DictionaryFacade;
+use Lwt\Shared\Infrastructure\Globals;
 
 /**
  * Controller for language configuration.
@@ -49,16 +51,19 @@ use Lwt\Modules\Language\Infrastructure\Parser\ParserRegistry;
 class LanguageController extends BaseController
 {
     private LanguageFacade $languageFacade;
+    private DictionaryFacade $dictionaryFacade;
 
     /**
      * Create a new LanguageController.
      *
-     * @param LanguageFacade $languageFacade Language facade for language operations
+     * @param LanguageFacade   $languageFacade   Language facade for language operations
+     * @param DictionaryFacade $dictionaryFacade Dictionary facade for local dictionaries
      */
-    public function __construct(LanguageFacade $languageFacade)
+    public function __construct(LanguageFacade $languageFacade, DictionaryFacade $dictionaryFacade)
     {
         parent::__construct();
         $this->languageFacade = $languageFacade;
+        $this->dictionaryFacade = $dictionaryFacade;
     }
 
     /**
@@ -250,6 +255,8 @@ class LanguageController extends BaseController
 
         $allLanguages = $this->languageFacade->getAllLanguages();
         $parserInfo = (new ParserRegistry())->getParserInfo();
+        $isAdmin = false;
+        $dictionaries = [];
 
         include __DIR__ . '/../Views/form.php';
     }
@@ -282,6 +289,10 @@ class LanguageController extends BaseController
 
         $allLanguages = $this->languageFacade->getAllLanguages();
         $parserInfo = (new ParserRegistry())->getParserInfo();
+
+        // Dictionary data for admin users (single-user mode = always admin)
+        $isAdmin = !Globals::isMultiUserEnabled() || Globals::isCurrentUserAdmin();
+        $dictionaries = $isAdmin ? $this->dictionaryFacade->getAllForLanguage($lid) : [];
 
         ?>
     <h2>Edit Language

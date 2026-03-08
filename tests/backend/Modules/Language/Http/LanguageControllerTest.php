@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Lwt\Modules\Language\Http\LanguageController;
 use Lwt\Modules\Language\Application\LanguageFacade;
+use Lwt\Modules\Dictionary\Application\DictionaryFacade;
 use Lwt\Modules\Language\Domain\Language;
 use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 
@@ -20,11 +21,13 @@ class LanguageControllerTest extends TestCase
 {
     private LanguageController $controller;
     private MockObject&LanguageFacade $mockFacade;
+    private MockObject&DictionaryFacade $mockDictFacade;
 
     protected function setUp(): void
     {
         $this->mockFacade = $this->createMock(LanguageFacade::class);
-        $this->controller = new LanguageController($this->mockFacade);
+        $this->mockDictFacade = $this->createMock(DictionaryFacade::class);
+        $this->controller = new LanguageController($this->mockFacade, $this->mockDictFacade);
     }
 
     // =========================================================================

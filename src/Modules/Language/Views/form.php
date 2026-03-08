@@ -320,6 +320,78 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                     </div>
                 </div>
 
+                <?php if (!$isNew && !empty($isAdmin)) : ?>
+                <!-- Local Dictionaries (admin only) -->
+                <div class="mt-4 p-4 has-background-white-bis" style="border-radius: 6px;">
+                    <h6 class="title is-6 mb-3 is-flex is-align-items-center is-justify-content-space-between">
+                        <span>
+                            <?php echo IconHelper::render('book-open', ['alt' => 'Dictionaries']); ?>
+                            Local Dictionaries
+                        </span>
+                        <a href="<?php echo url('/languages/' . $langId . '/dictionaries/import'); ?>"
+                           class="button is-primary is-small">
+                            <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
+                            <span class="ml-1">Import</span>
+                        </a>
+                    </h6>
+
+                    <?php if (empty($dictionaries)) : ?>
+                    <p class="has-text-grey">
+                        No local dictionaries installed.
+                        <a href="<?php echo url('/languages/' . $langId . '/dictionaries/import'); ?>">Import one</a>
+                        (CSV, JSON, or StarDict).
+                    </p>
+                    <?php else : ?>
+                    <table class="table is-fullwidth is-narrow is-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Entries</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($dictionaries as $dict) : ?>
+                            <tr>
+                                <td>
+                                    <?php echo htmlspecialchars($dict->name(), ENT_QUOTES, 'UTF-8'); ?>
+                                    <span class="tag is-light is-small ml-1"><?php
+                                        echo strtoupper($dict->sourceFormat());
+                                    ?></span>
+                                </td>
+                                <td><?php echo number_format($dict->entryCount()); ?></td>
+                                <td>
+                                    <?php if ($dict->isEnabled()) : ?>
+                                    <span class="tag is-success is-light">Enabled</span>
+                                    <?php else : ?>
+                                    <span class="tag is-warning is-light">Disabled</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="has-text-right">
+                                    <a href="<?php echo url(
+                                        '/languages/' . $langId
+                                        . '/dictionaries/import?dict_id=' . $dict->id()
+                                    ); ?>"
+                                       class="button is-small is-info is-outlined"
+                                       title="Import more entries">
+                                        <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
+                                    </a>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <p class="help mt-2">
+                        <a href="<?php echo url('/languages/' . $langId . '/dictionaries'); ?>">
+                            Manage dictionaries
+                        </a>
+                        (enable/disable, delete, change priority)
+                    </p>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
                 <hr class="my-5" />
 
                 <!-- Display Settings -->

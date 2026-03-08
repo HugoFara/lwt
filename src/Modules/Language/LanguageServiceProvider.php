@@ -40,6 +40,8 @@ use Lwt\Modules\Language\Application\Services\TextParsingService;
 // Http
 use Lwt\Modules\Language\Http\LanguageController;
 use Lwt\Modules\Language\Http\LanguageApiHandler;
+// Cross-module
+use Lwt\Modules\Dictionary\Application\DictionaryFacade;
 // NLP Service
 use Lwt\Modules\Language\Infrastructure\NlpServiceHandler;
 // Parser Infrastructure
@@ -117,7 +119,8 @@ class LanguageServiceProvider implements ServiceProviderInterface
         // Register Controller
         $container->singleton(LanguageController::class, function (Container $c) {
             return new LanguageController(
-                $c->getTyped(LanguageFacade::class)
+                $c->getTyped(LanguageFacade::class),
+                $c->getTyped(DictionaryFacade::class)
             );
         });
 

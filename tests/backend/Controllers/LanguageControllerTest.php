@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.
 
 use Lwt\Modules\Language\Http\LanguageController;
 use Lwt\Modules\Language\Application\LanguageFacade;
+use Lwt\Modules\Dictionary\Application\DictionaryFacade;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
@@ -136,7 +137,8 @@ class LanguageControllerTest extends TestCase
      */
     private function createController(): LanguageController
     {
-        return new LanguageController(new LanguageFacade());
+        $dictFacade = $this->createMock(DictionaryFacade::class);
+        return new LanguageController(new LanguageFacade(), $dictFacade);
     }
 
     // ===== Constructor tests =====
