@@ -24,8 +24,7 @@ namespace Lwt\Modules\Home\Views;
 
 use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
-use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
-use Lwt\Shared\UI\Helpers\SearchableSelectHelper;
+
 
 /**
  * When on a WordPress server, make a logout button.
@@ -59,10 +58,11 @@ function renderWordPressLogout(bool $isWordPress, string $base): void
  * @param array|null $lastTextInfo Current text info for Alpine.js initial state
  * @param string     $base         The application base path
  * @param int        $textCount    Number of texts for current language
+ * @param int        $currentlang  Current language ID
  *
  * @return void
  */
-function renderHomeConfig(?array $lastTextInfo, string $base, int $textCount): void
+function renderHomeConfig(?array $lastTextInfo, string $base, int $textCount, int $currentlang): void
 {
     $config = [
         'phpVersion' => phpversion(),
@@ -70,6 +70,7 @@ function renderHomeConfig(?array $lastTextInfo, string $base, int $textCount): v
         'lastText' => $lastTextInfo,
         'basePath' => $base,
         'textCount' => $textCount,
+        'currentLanguageId' => $currentlang,
     ];
     ?>
 <script type="application/json" id="home-warnings-config">
@@ -164,28 +165,18 @@ $base = UrlUtilities::getBasePath();
 <!-- Current text section -->
 <section class="section py-4 mb-4">
     <div class="container">
-        <!-- Language selector -->
-        <div class="field mb-4">
-            <label class="label" for="filterlang">Language</label>
-            <div class="control">
-                <?php
-                /** @var list<array{id: int, name: string}> $languages */
-                echo SearchableSelectHelper::forLanguages(
-                    $languages,
-                    $currentlang,
-                    [
-                        'name' => 'filterlang',
-                        'id' => 'filterlang',
-                        'placeholder' => '[Select...]',
-                        'required' => false,
-                        'dataAction' => 'set-lang',
-                        'dataAjax' => true,
-                        'dataRedirect' => $base . '/',
-                        'size' => 'medium'
-                    ]
-                );
-                ?>
-            </div>
+        <!-- Language tabs -->
+        <div class="tabs is-boxed is-medium mb-4">
+            <ul>
+                <?php foreach ($languages as $lang) : ?>
+                <li :class="{ 'is-active': currentLanguageId === <?php echo $lang['id']; ?> }">
+                    <a @click.prevent="switchLanguage(<?php echo $lang['id']; ?>, '<?php echo htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8'); ?>')"
+                       href="#">
+                        <span><?php echo htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8'); ?></span>
+                    </a>
+                </li>
+                <?php endforeach; ?>
+            </ul>
         </div>
 
         <!-- Text cards -->
@@ -497,4 +488,4 @@ $base = UrlUtilities::getBasePath();
 
 </div><!-- End Alpine.js container -->
 
-<?php renderHomeConfig($lastTextInfo, $base, $textCount); ?>
+<?php renderHomeConfig($lastTextInfo, $base, $textCount, $currentlang); ?>

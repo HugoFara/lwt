@@ -10,6 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { setLangAsync } from '@modules/language/stores/language_settings';
 import type { LanguageChangedEvent, TextStats } from '@modules/language/stores/language_settings';
 
 const STORAGE_KEY = 'lwt_collapsed_menus';
@@ -29,6 +30,7 @@ interface HomeWarningsConfig {
   lastText: LastTextInfo | null;
   basePath: string;
   textCount: number;
+  currentLanguageId: number;
 }
 
 interface Warning {
@@ -57,6 +59,9 @@ interface HomeData {
   // Menu state
   collapsedMenus: string[];
 
+  // Current language ID (for active tab highlighting)
+  currentLanguageId: number;
+
   // Last text info (dynamically updated when language changes)
   lastText: LastTextInfo | null;
 
@@ -84,6 +89,7 @@ interface HomeData {
   toggleMenu(menuId: string): void;
   initWarnings(): void;
   initLanguageChangeListener(): void;
+  switchLanguage(languageId: number, languageName: string): Promise<void>;
   handleLanguageChange(event: LanguageChangedEvent): void;
   checkCookies(): void;
   checkPHPVersion(version: string): void;
@@ -99,6 +105,8 @@ interface HomeData {
 export function homeData(): HomeData {
   return {
     collapsedMenus: [],
+
+    currentLanguageId: 0,
 
     lastText: null,
 
@@ -200,6 +208,9 @@ export function homeData(): HomeData {
         // Load base path for URL generation
         this.basePath = config.basePath || '';
 
+        // Load current language ID for tab highlighting
+        this.currentLanguageId = config.currentLanguageId || 0;
+
         // Check all warnings
         this.checkCookies();
         this.checkPHPVersion(config.phpVersion);
@@ -214,6 +225,27 @@ export function homeData(): HomeData {
       document.addEventListener('lwt:languageChanged', ((event: LanguageChangedEvent) => {
         this.handleLanguageChange(event);
       }) as EventListener);
+    },
+
+    async switchLanguage(languageId: number, languageName: string) {
+      if (languageId === this.currentLanguageId) {
+        return;
+      }
+      try {
+        const response = await setLangAsync(String(languageId));
+        this.currentLanguageId = languageId;
+
+        // Dispatch the same event other components listen for
+        document.dispatchEvent(new CustomEvent('lwt:languageChanged', {
+          detail: {
+            languageId: String(languageId),
+            languageName,
+            response
+          }
+        }));
+      } catch (error) {
+        console.error('Failed to change language:', error);
+      }
     },
 
     handleLanguageChange(event: LanguageChangedEvent) {

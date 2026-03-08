@@ -238,7 +238,7 @@ class Application
      */
     private function isDebugMode(): bool
     {
-        // Check APP_DEBUG env variable
+        // Check APP_DEBUG env variable (explicit override)
         $envDebug = getenv('APP_DEBUG');
         $appDebug = ($envDebug !== false && $envDebug !== '') ? $envDebug : ($_ENV['APP_DEBUG'] ?? null);
         if ($appDebug !== null && $appDebug !== false) {
@@ -248,7 +248,14 @@ class Application
         // Check APP_ENV
         $envAppEnv = getenv('APP_ENV');
         $appEnv = ($envAppEnv !== false && $envAppEnv !== '') ? $envAppEnv : ($_ENV['APP_ENV'] ?? 'production');
-        return in_array(strtolower($appEnv), ['development', 'local', 'dev'], true);
+        if (in_array(strtolower($appEnv), ['development', 'local', 'dev'], true)) {
+            return true;
+        }
+
+        // Single-user mode: show debug info by default (no security concern)
+        $multiUser = getenv('MULTI_USER_ENABLED');
+        $multiUserVal = ($multiUser !== false && $multiUser !== '') ? $multiUser : ($_ENV['MULTI_USER_ENABLED'] ?? 'false');
+        return !in_array(strtolower((string)$multiUserVal), ['true', '1', 'yes'], true);
     }
 
     /**
