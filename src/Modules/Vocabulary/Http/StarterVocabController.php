@@ -11,6 +11,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Vocabulary\Application\Services\FrequencyImportService;
 use Lwt\Modules\Vocabulary\Application\Services\FrequencyLanguageMap;
+use Lwt\Modules\Vocabulary\Application\Services\WiktionaryEnrichmentService;
 
 /**
  * Controller for the starter vocabulary import flow.
@@ -22,17 +23,21 @@ use Lwt\Modules\Vocabulary\Application\Services\FrequencyLanguageMap;
 class StarterVocabController extends BaseController
 {
     private const ALLOWED_COUNTS = [500, 1000, 2000, 5000];
+    private const ALLOWED_MODES = ['translation', 'definition'];
 
     private LanguageFacade $languageFacade;
     private FrequencyImportService $frequencyImportService;
+    private WiktionaryEnrichmentService $enrichmentService;
 
     public function __construct(
         LanguageFacade $languageFacade,
-        FrequencyImportService $frequencyImportService
+        FrequencyImportService $frequencyImportService,
+        WiktionaryEnrichmentService $enrichmentService
     ) {
         parent::__construct();
         $this->languageFacade = $languageFacade;
         $this->frequencyImportService = $frequencyImportService;
+        $this->enrichmentService = $enrichmentService;
     }
 
     /**
@@ -109,13 +114,48 @@ class StarterVocabController extends BaseController
      *
      * Route: POST /languages/{id}/starter-vocab/enrich
      *
-     * Placeholder for Phase 2 — returns a "not yet implemented" response.
+     * Each call processes ~20 words. The client polls until
+     * remaining === 0 or the user stops manually.
      *
      * @return JsonResponse
      */
     public function enrich(int $id): JsonResponse
     {
-        return JsonResponse::error('Enrichment not yet available.', 501);
+        $mode = $this->param('mode', 'translation');
+        if (!in_array($mode, self::ALLOWED_MODES, true)) {
+            return JsonResponse::error('Invalid mode. Choose "translation" or "definition".');
+        }
+
+        $language = $this->languageFacade->getById($id);
+        if ($language === null) {
+            return JsonResponse::notFound('Language not found.');
+        }
+
+        $langName = $language->name();
+        if (!FrequencyLanguageMap::isSupported($langName)) {
+            return JsonResponse::error(
+                "Enrichment is not available for $langName."
+            );
+        }
+
+        try {
+            if ($mode === 'translation') {
+                $result = $this->enrichmentService->enrichBatchTranslation($id, $langName);
+            } else {
+                $result = $this->enrichmentService->enrichBatchDefinition($id, $langName);
+            }
+        } catch (\Throwable $e) {
+            error_log('StarterVocab enrich error: ' . $e->getMessage());
+            return JsonResponse::error('Enrichment failed: ' . $e->getMessage(), 500);
+        }
+
+        return JsonResponse::success([
+            'enriched' => $result['enriched'],
+            'failed' => $result['failed'],
+            'remaining' => $result['remaining'],
+            'total' => $result['total'],
+            'warning' => $result['warning'],
+        ]);
     }
 
     /**

@@ -7,6 +7,7 @@ namespace Lwt\Tests\Modules\Vocabulary\Http;
 use Lwt\Modules\Vocabulary\Http\StarterVocabController;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Vocabulary\Application\Services\FrequencyImportService;
+use Lwt\Modules\Vocabulary\Application\Services\WiktionaryEnrichmentService;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -19,15 +20,20 @@ class StarterVocabControllerTest extends TestCase
     /** @var FrequencyImportService&MockObject */
     private FrequencyImportService $frequencyImportService;
 
+    /** @var WiktionaryEnrichmentService&MockObject */
+    private WiktionaryEnrichmentService $enrichmentService;
+
     private StarterVocabController $controller;
 
     protected function setUp(): void
     {
         $this->languageFacade = $this->createMock(LanguageFacade::class);
         $this->frequencyImportService = $this->createMock(FrequencyImportService::class);
+        $this->enrichmentService = $this->createMock(WiktionaryEnrichmentService::class);
         $this->controller = new StarterVocabController(
             $this->languageFacade,
-            $this->frequencyImportService
+            $this->frequencyImportService,
+            $this->enrichmentService
         );
     }
 
@@ -57,8 +63,16 @@ class StarterVocabControllerTest extends TestCase
         $this->assertSame($this->frequencyImportService, $ref->getValue($this->controller));
     }
 
+    #[Test]
+    public function constructorStoresEnrichmentService(): void
+    {
+        $ref = new \ReflectionProperty(StarterVocabController::class, 'enrichmentService');
+        $ref->setAccessible(true);
+        $this->assertSame($this->enrichmentService, $ref->getValue($this->controller));
+    }
+
     // =========================================================================
-    // import() via reflection on method structure
+    // import()
     // =========================================================================
 
     #[Test]
@@ -97,20 +111,22 @@ class StarterVocabControllerTest extends TestCase
     }
 
     #[Test]
-    public function enrichReturns501(): void
+    public function enrichReturnTypeIsJsonResponse(): void
     {
-        $response = $this->controller->enrich(1);
-        $this->assertSame(501, $response->getStatusCode());
+        $method = new \ReflectionMethod(StarterVocabController::class, 'enrich');
+        $returnType = $method->getReturnType();
+        $this->assertNotNull($returnType);
+        $this->assertSame('Lwt\Shared\Infrastructure\Http\JsonResponse', $returnType->getName());
     }
 
     #[Test]
-    public function enrichResponseContainsErrorMessage(): void
+    public function enrichMethodAcceptsIntId(): void
     {
-        $response = $this->controller->enrich(1);
-        $data = $response->getData();
-        $this->assertIsArray($data);
-        $this->assertArrayHasKey('error', $data);
-        $this->assertStringContainsString('not yet', $data['error']);
+        $method = new \ReflectionMethod(StarterVocabController::class, 'enrich');
+        $params = $method->getParameters();
+        $this->assertCount(1, $params);
+        $this->assertSame('id', $params[0]->getName());
+        $this->assertSame('int', $params[0]->getType()?->getName());
     }
 
     // =========================================================================
@@ -143,7 +159,7 @@ class StarterVocabControllerTest extends TestCase
     }
 
     // =========================================================================
-    // ALLOWED_COUNTS
+    // Constants
     // =========================================================================
 
     #[Test]
@@ -151,5 +167,12 @@ class StarterVocabControllerTest extends TestCase
     {
         $ref = new \ReflectionClassConstant(StarterVocabController::class, 'ALLOWED_COUNTS');
         $this->assertSame([500, 1000, 2000, 5000], $ref->getValue());
+    }
+
+    #[Test]
+    public function allowedModesContainsExpectedValues(): void
+    {
+        $ref = new \ReflectionClassConstant(StarterVocabController::class, 'ALLOWED_MODES');
+        $this->assertSame(['translation', 'definition'], $ref->getValue());
     }
 }
