@@ -363,6 +363,93 @@ if (!$isNew) {
         </div>
     </div>
 
+    <!-- Where to find texts (collapsible, for new texts) -->
+    <div class="container mt-5" style="max-width: 600px;">
+        <div class="box" x-data="{ open: false }">
+            <header class="is-flex is-align-items-center is-justify-content-space-between is-clickable"
+                    @click="open = !open">
+                <h4 class="title is-6 mb-0 is-flex is-align-items-center">
+                    <span class="icon mr-2">
+                        <?php echo IconHelper::render('lightbulb', ['alt' => 'Tips']); ?>
+                    </span>
+                    Where to find texts?
+                </h4>
+                <span class="icon">
+                    <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
+                </span>
+            </header>
+
+            <div x-show="open" x-transition x-cloak class="mt-4 content is-small">
+                <p>Here are free sources for reading material in many languages:</p>
+
+                <h5 class="mb-2">Literature &amp; Public Domain</h5>
+                <ul>
+                    <li>
+                        <a href="https://www.gutenberg.org/" target="_blank" rel="noopener">Project Gutenberg</a>
+                        &mdash; 75,000+ free e-books in 60+ languages (plain text, EPUB)
+                    </li>
+                    <li>
+                        <a href="https://wikisource.org/" target="_blank" rel="noopener">Wikisource</a>
+                        &mdash; Public domain texts in 70+ languages (novels, speeches, historical docs)
+                    </li>
+                </ul>
+
+                <h5 class="mb-2">Simplified News (great for learners)</h5>
+                <ul>
+                    <li>
+                        <a href="https://www3.nhk.or.jp/news/easy/" target="_blank" rel="noopener">NHK News Web Easy</a>
+                        &mdash; Simplified Japanese news with furigana
+                    </li>
+                    <li>
+                        <a href="https://www.dw.com/de/deutsch-lernen/nachrichten/s-8030" target="_blank" rel="noopener">DW Langsam gesprochene Nachrichten</a>
+                        &mdash; Slow German news with transcripts
+                    </li>
+                    <li>
+                        <a href="https://savoirs.rfi.fr/fr/apprendre-enseigner/langue-francaise/journal-en-francais-facile" target="_blank" rel="noopener">RFI Journal en fran&ccedil;ais facile</a>
+                        &mdash; Simple French news with transcripts
+                    </li>
+                    <li>
+                        <a href="https://learningenglish.voanews.com/" target="_blank" rel="noopener">VOA Learning English</a>
+                        &mdash; Slow-spoken English news (also has
+                        <a href="https://learningenglish.voanews.com/rssfeeds" target="_blank" rel="noopener">RSS feeds</a>)
+                    </li>
+                </ul>
+
+                <h5 class="mb-2">Subtitles &amp; Sentences</h5>
+                <ul>
+                    <li>
+                        <a href="https://www.opensubtitles.org/" target="_blank" rel="noopener">OpenSubtitles</a>
+                        &mdash; Movie/TV subtitles in 100+ languages (SRT files can be imported directly)
+                    </li>
+                    <li>
+                        <a href="https://tatoeba.org/" target="_blank" rel="noopener">Tatoeba</a>
+                        &mdash; Community-curated sentences with translations in 400+ languages
+                    </li>
+                </ul>
+
+                <h5 class="mb-2">Other Sources</h5>
+                <ul>
+                    <li>
+                        <a href="https://simple.wikipedia.org/" target="_blank" rel="noopener">Simple English Wikipedia</a>
+                        &mdash; Articles in simplified English
+                    </li>
+                    <li>
+                        <strong>RSS feeds</strong> &mdash; LWT can import from newsfeeds directly via
+                        <a href="/feeds">Newsfeeds</a>. Most newspapers offer RSS feeds.
+                    </li>
+                    <li>
+                        <strong>EPUB books</strong> &mdash; Import e-books via
+                        <a href="/book/import">Import EPUB</a>
+                    </li>
+                </ul>
+
+                <p class="has-text-grey mt-3">
+                    Tip: Copy-paste text from any webpage, or download SRT/EPUB files and import them.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Additional Options (collapsible, for new texts) -->
     <div class="container" style="max-width: 600px;">
         <div class="box" x-data="{ open: showAdvanced }">
