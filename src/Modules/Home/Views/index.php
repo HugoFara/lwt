@@ -290,6 +290,8 @@ $base = UrlUtilities::getBasePath();
 
 <?php if ($langcnt > 0 && $textCount > 0) : ?>
 <!-- Main menu grid (only shown when user has texts) -->
+<section class="section py-4">
+<div class="container">
 <div class="columns is-multiline is-centered home-menu-container">
     <!-- Languages Card -->
     <div class="column is-one-third-desktop is-half-tablet">
@@ -469,6 +471,8 @@ $base = UrlUtilities::getBasePath();
 
     <?php renderWordPressLogout($isWordPress, $base); ?>
 </div>
+</div>
+</section>
 <?php endif; ?>
 
 <!-- Version info -->

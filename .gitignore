@@ -15,6 +15,7 @@ docker-compose.prod.yml
 
 # Docker data
 /lwt_db_data/
+docker-compose.override.yml
 
 # Dev files
 

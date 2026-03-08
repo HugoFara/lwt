@@ -98,11 +98,12 @@ class HomeController extends BaseController
 
         PageLayoutHelper::renderPageStartNobody("Home");
         echo PageLayoutHelper::buildLogo();
-        echo '<h1>Learning With Texts (LWT)</h1>
-        <h2>Home</h2>';
+        echo '<main id="main-content">';
+        echo '<h2>Home</h2>';
 
         include __DIR__ . '/../Views/index.php';
 
+        echo '</main>';
         PageLayoutHelper::renderPageEnd();
     }
 
