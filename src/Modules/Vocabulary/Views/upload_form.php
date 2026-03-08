@@ -96,142 +96,202 @@ echo PageLayoutHelper::buildActionCard($actions);
     <!-- ==================== LANGUAGE & INPUT SOURCE ==================== -->
     <div class="box">
         <!-- Language Selection -->
-        <div class="field is-horizontal">
-            <div class="field-label is-normal">
-                <label class="label">Language</label>
-            </div>
-            <div class="field-body">
-                <div class="field has-addons">
-                    <div class="control is-expanded">
-                        <?php echo SearchableSelectHelper::forLanguages(
-                            $languages,
-                            $langToUse,
-                            [
-                                'name' => 'LgID',
-                                'id' => 'LgID',
-                                'placeholder' => '[Choose...]',
-                                'required' => true
-                            ]
-                        ); ?>
-                    </div>
-                    <div class="control">
-                        <span class="icon has-text-danger mt-2" title="Required">
-                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                        </span>
-                    </div>
+        <div class="field">
+            <label class="label">Language</label>
+            <div class="field has-addons">
+                <div class="control is-expanded">
+                    <?php echo SearchableSelectHelper::forLanguages(
+                        $languages,
+                        $langToUse,
+                        [
+                            'name' => 'LgID',
+                            'id' => 'LgID',
+                            'placeholder' => '[Choose...]',
+                            'required' => true
+                        ]
+                    ); ?>
+                </div>
+                <div class="control">
+                    <span class="icon has-text-danger mt-2" title="Required">
+                        <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                    </span>
                 </div>
             </div>
         </div>
 
         <!-- Import Source Tabs -->
-        <div class="field is-horizontal">
-            <div class="field-label is-normal">
-                <label class="label">Import from</label>
+        <div class="field">
+            <label class="label">Import from</label>
+            <div class="tabs is-boxed is-small mb-3">
+                <ul>
+                    <li :class="{ 'is-active': inputMethod === 'file' }">
+                        <a @click.prevent="inputMethod = 'file'">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('file-up', ['alt' => 'File']); ?>
+                            </span>
+                            <span>CSV / TSV File</span>
+                        </a>
+                    </li>
+                    <li :class="{ 'is-active': inputMethod === 'paste' }">
+                        <a @click.prevent="inputMethod = 'paste'">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('clipboard-paste', ['alt' => 'Paste']); ?>
+                            </span>
+                            <span>Paste Text</span>
+                        </a>
+                    </li>
+                    <li :class="{ 'is-active': inputMethod === 'dictionary' }">
+                        <a @click.prevent="inputMethod = 'dictionary'">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('book-open', ['alt' => 'Dictionary']); ?>
+                            </span>
+                            <span>Dictionary File</span>
+                        </a>
+                    </li>
+                </ul>
             </div>
-            <div class="field-body">
-                <div class="field">
-                    <div class="tabs is-boxed is-small mb-3">
-                        <ul>
-                            <li :class="{ 'is-active': inputMethod === 'file' }">
-                                <a @click.prevent="inputMethod = 'file'">
-                                    <span class="icon is-small">
-                                        <?php echo IconHelper::render('file-up', ['alt' => 'File']); ?>
-                                    </span>
-                                    <span>CSV / TSV File</span>
-                                </a>
-                            </li>
-                            <li :class="{ 'is-active': inputMethod === 'paste' }">
-                                <a @click.prevent="inputMethod = 'paste'">
-                                    <span class="icon is-small">
-                                        <?php echo IconHelper::render('clipboard-paste', ['alt' => 'Paste']); ?>
-                                    </span>
-                                    <span>Paste Text</span>
-                                </a>
-                            </li>
-                            <li :class="{ 'is-active': inputMethod === 'dictionary' }">
-                                <a @click.prevent="inputMethod = 'dictionary'">
-                                    <span class="icon is-small">
-                                        <?php echo IconHelper::render('book-open', ['alt' => 'Dictionary']); ?>
-                                    </span>
-                                    <span>Dictionary File</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
 
-                    <!-- CSV/TSV File Upload -->
-                    <div x-show="inputMethod === 'file'" x-transition>
-                        <div class="file has-name is-fullwidth">
-                            <label class="file-label">
-                                <input class="file-input" type="file" name="thefile" />
-                                <span class="file-cta">
-                                    <span class="file-icon">
-                                        <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>
-                                    </span>
-                                    <span class="file-label">Choose a file...</span>
-                                </span>
-                                <span class="file-name">No file selected</span>
-                            </label>
-                        </div>
-                        <p class="help">CSV, TSV, or text file with one term per line</p>
-                    </div>
+            <!-- CSV/TSV File Upload -->
+            <div x-show="inputMethod === 'file'" x-transition
+                 <?php echo $activeTab !== 'file' ? 'style="display:none"' : ''; ?>>
+                <div class="file has-name is-fullwidth">
+                    <label class="file-label">
+                        <input class="file-input" type="file" name="thefile" />
+                        <span class="file-cta">
+                            <span class="file-icon">
+                                <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>
+                            </span>
+                            <span class="file-label">Choose a file...</span>
+                        </span>
+                        <span class="file-name">No file selected</span>
+                    </label>
+                </div>
+                <p class="help">CSV, TSV, or text file with one term per line</p>
+            </div>
 
-                    <!-- Paste Text -->
-                    <div x-show="inputMethod === 'paste'" x-transition x-cloak>
-                        <div class="control">
-                            <textarea class="textarea checkoutsidebmp"
-                                      data_info="Upload"
-                                      name="Upload"
-                                      rows="10"
-                                      placeholder="One term per line, e.g.:&#10;Haus,house&#10;Katze,cat"></textarea>
-                        </div>
-                        <p class="help">One term per line, using the delimiter chosen below</p>
-                    </div>
+            <!-- Paste Text -->
+            <div x-show="inputMethod === 'paste'" x-transition
+                 <?php echo $activeTab !== 'paste' ? 'style="display:none"' : ''; ?>>
+                <div class="control">
+                    <textarea class="textarea checkoutsidebmp"
+                              data_info="Upload"
+                              name="Upload"
+                              rows="10"
+                              placeholder="One term per line, e.g.:&#10;Haus,house&#10;Katze,cat"></textarea>
+                </div>
+                <p class="help">One term per line, using the delimiter chosen below</p>
+            </div>
 
-                    <!-- Dictionary File -->
-                    <div x-show="inputMethod === 'dictionary'" x-transition x-cloak>
-                        <div class="field mb-3">
-                            <div class="control">
-                                <div class="select is-fullwidth">
-                                    <select name="dict_format" x-model="dictFormat">
-                                        <option value="csv">CSV / TSV dictionary</option>
-                                        <option value="json">JSON</option>
-                                        <option value="stardict">StarDict (.ifo file)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="file has-name is-fullwidth">
-                            <label class="file-label">
-                                <input class="file-input" type="file" name="dict_file"
-                                       @change="dictFileName = $event.target.files[0]?.name || ''" />
-                                <span class="file-cta">
-                                    <span class="file-icon">
-                                        <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>
-                                    </span>
-                                    <span class="file-label">Choose a file...</span>
-                                </span>
-                                <span class="file-name" x-text="dictFileName || 'No file selected'"></span>
-                            </label>
-                        </div>
-                        <p class="help" x-show="dictFormat === 'stardict'">
-                            Select the .ifo file. The .idx and .dict files must be in the same directory.
-                        </p>
-                        <div class="field mt-3">
-                            <label class="label is-small">Dictionary Name</label>
-                            <div class="control">
-                                <input type="text" name="dict_name" class="input is-small"
-                                       placeholder="Auto-generated from filename if empty">
-                            </div>
+            <!-- Dictionary File -->
+            <div x-show="inputMethod === 'dictionary'" x-transition
+                 <?php echo $activeTab !== 'dictionary' ? 'style="display:none"' : ''; ?>>
+                <div class="field mb-3">
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="dict_format" x-model="dictFormat">
+                                <option value="csv">CSV / TSV dictionary</option>
+                                <option value="json">JSON</option>
+                                <option value="stardict">StarDict (.ifo file)</option>
+                            </select>
                         </div>
                     </div>
                 </div>
+                <div class="file has-name is-fullwidth">
+                    <label class="file-label">
+                        <input class="file-input" type="file" name="dict_file"
+                               @change="dictFileName = $event.target.files[0]?.name || ''" />
+                        <span class="file-cta">
+                            <span class="file-icon">
+                                <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>
+                            </span>
+                            <span class="file-label">Choose a file...</span>
+                        </span>
+                        <span class="file-name" x-text="dictFileName || 'No file selected'"></span>
+                    </label>
+                </div>
+                <p class="help" x-show="dictFormat === 'stardict'">
+                    Select the .ifo file. The .idx and .dict files must be in the same directory.
+                </p>
+                <div class="field mt-3">
+                    <label class="label is-small">Dictionary Name</label>
+                    <div class="control">
+                        <input type="text" name="dict_name" class="input is-small"
+                               placeholder="Auto-generated from filename if empty">
+                    </div>
+                </div>
+
+                <!-- Where to find dictionaries (collapsible) -->
+                <details class="mt-4">
+                    <summary class="is-flex is-align-items-center is-clickable has-text-grey">
+                        <span class="icon mr-1">
+                            <?php echo IconHelper::render('lightbulb', ['alt' => 'Tips']); ?>
+                        </span>
+                        Where to find dictionary files?
+                    </summary>
+                    <div class="content is-small mt-3">
+                        <p>Free downloadable dictionaries you can import:</p>
+
+                        <h5 class="mb-2">StarDict Format (recommended)</h5>
+                        <ul>
+                            <li>
+                                <a href="https://freedict.org/downloads/" target="_blank" rel="noopener">FreeDict</a>
+                                &mdash; 140+ free bilingual dictionaries in ~45 languages
+                            </li>
+                            <li>
+                                <a href="https://download.wikdict.com/dictionaries/stardict/" target="_blank" rel="noopener">WikDict</a>
+                                &mdash; 17M+ translations across 26 languages, from Wiktionary
+                            </li>
+                            <li>
+                                <a href="https://github.com/Vuizur/Wiktionary-Dictionaries" target="_blank" rel="noopener">Wiktionary Dictionaries</a>
+                                &mdash; StarDict and TSV for nearly all languages
+                            </li>
+                            <li>
+                                <a href="https://archive.org/details/stardict_collections" target="_blank" rel="noopener">Internet Archive StarDict</a>
+                                &mdash; Archived StarDict collections in many languages
+                            </li>
+                        </ul>
+
+                        <h5 class="mb-2">CSV / TSV Format</h5>
+                        <ul>
+                            <li>
+                                <a href="https://tatoeba.org/en/downloads" target="_blank" rel="noopener">Tatoeba</a>
+                                &mdash; Bilingual sentence pairs in 400+ languages (tab-separated)
+                            </li>
+                            <li>
+                                <a href="https://www.manythings.org/anki/" target="_blank" rel="noopener">ManyThings.org</a>
+                                &mdash; Pre-formatted bilingual pairs from Tatoeba (tab-separated)
+                            </li>
+                        </ul>
+
+                        <h5 class="mb-2">Language-Specific</h5>
+                        <ul>
+                            <li>
+                                <a href="https://www.mdbg.net/chinese/dictionary?page=cedict" target="_blank" rel="noopener">CC-CEDICT</a>
+                                &mdash; 124,000+ entry Chinese-English dictionary
+                            </li>
+                            <li>
+                                <a href="http://www.edrdg.org/jmdict/edict.html" target="_blank" rel="noopener">JMdict / EDICT</a>
+                                &mdash; 214,000+ entry Japanese-English dictionary
+                            </li>
+                            <li>
+                                <a href="https://kaikki.org/dictionary/rawdata.html" target="_blank" rel="noopener">Kaikki.org</a>
+                                &mdash; Machine-readable Wiktionary data for hundreds of languages
+                            </li>
+                        </ul>
+
+                        <p class="has-text-grey mt-2">
+                            Tip: For StarDict files, select the .ifo file &mdash; the .idx and .dict
+                            files must be in the same directory.
+                        </p>
+                    </div>
+                </details>
             </div>
         </div>
     </div>
 
     <!-- ==================== FORMAT SETTINGS (text/paste modes) ==================== -->
-    <div class="box" x-show="!isDictMode()" x-transition x-cloak>
+    <div class="box" x-show="!isDictMode()" x-transition
+         <?php echo $activeTab === 'dictionary' ? 'style="display:none"' : ''; ?>>
         <h4 class="title is-5 mb-4">
             <span class="icon-text">
                 <span class="icon">
@@ -384,7 +444,8 @@ echo PageLayoutHelper::buildActionCard($actions);
     </div>
 
     <!-- ==================== DICTIONARY CSV OPTIONS (dict CSV mode only) ==================== -->
-    <div class="box" x-show="isDictMode() && dictFormat === 'csv'" x-transition x-cloak>
+    <div class="box" x-show="isDictMode() && dictFormat === 'csv'" x-transition
+         <?php echo $activeTab !== 'dictionary' ? 'style="display:none"' : ''; ?>>
         <h4 class="title is-5 mb-4">
             <span class="icon-text">
                 <span class="icon">
@@ -448,7 +509,8 @@ echo PageLayoutHelper::buildActionCard($actions);
     </div>
 
     <!-- ==================== IMPORT OPTIONS (text/paste modes) ==================== -->
-    <div class="box" x-show="!isDictMode()" x-transition x-cloak>
+    <div class="box" x-show="!isDictMode()" x-transition
+         <?php echo $activeTab === 'dictionary' ? 'style="display:none"' : ''; ?>>
         <h4 class="title is-5 mb-4">
             <span class="icon-text">
                 <span class="icon">
@@ -611,75 +673,3 @@ echo PageLayoutHelper::buildActionCard($actions);
     </div>
 </article>
 
-<!-- Where to find dictionaries (collapsible) -->
-<div class="box mt-4" x-data="{ open: false }">
-    <header class="is-flex is-align-items-center is-justify-content-space-between is-clickable"
-            @click="open = !open">
-        <h4 class="title is-6 mb-0 is-flex is-align-items-center">
-            <span class="icon mr-2">
-                <?php echo IconHelper::render('lightbulb', ['alt' => 'Tips']); ?>
-            </span>
-            Where to find dictionary files?
-        </h4>
-        <span class="icon">
-            <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
-        </span>
-    </header>
-
-    <div x-show="open" x-transition x-cloak class="mt-4 content is-small">
-        <p>Free downloadable dictionaries you can import:</p>
-
-        <h5 class="mb-2">StarDict Format (recommended)</h5>
-        <ul>
-            <li>
-                <a href="https://freedict.org/downloads/" target="_blank" rel="noopener">FreeDict</a>
-                &mdash; 140+ free bilingual dictionaries in ~45 languages (StarDict, DICT formats)
-            </li>
-            <li>
-                <a href="https://download.wikdict.com/dictionaries/stardict/" target="_blank" rel="noopener">WikDict</a>
-                &mdash; 17M+ translations across 26 languages, generated from Wiktionary (StarDict)
-            </li>
-            <li>
-                <a href="https://github.com/Vuizur/Wiktionary-Dictionaries" target="_blank" rel="noopener">Wiktionary Dictionaries</a>
-                &mdash; Wiktionary data in StarDict and TSV for nearly all languages
-            </li>
-            <li>
-                <a href="https://archive.org/details/stardict_collections" target="_blank" rel="noopener">Internet Archive StarDict</a>
-                &mdash; Archived StarDict dictionary collections in many languages
-            </li>
-        </ul>
-
-        <h5 class="mb-2">CSV / TSV Format</h5>
-        <ul>
-            <li>
-                <a href="https://tatoeba.org/en/downloads" target="_blank" rel="noopener">Tatoeba</a>
-                &mdash; Bilingual sentence pairs in 400+ languages (tab-separated)
-            </li>
-            <li>
-                <a href="https://www.manythings.org/anki/" target="_blank" rel="noopener">ManyThings.org</a>
-                &mdash; Pre-formatted bilingual sentence pairs from Tatoeba (tab-separated)
-            </li>
-        </ul>
-
-        <h5 class="mb-2">Language-Specific</h5>
-        <ul>
-            <li>
-                <a href="https://www.mdbg.net/chinese/dictionary?page=cedict" target="_blank" rel="noopener">CC-CEDICT</a>
-                &mdash; 124,000+ entry Chinese-English dictionary (downloadable text)
-            </li>
-            <li>
-                <a href="http://www.edrdg.org/jmdict/edict.html" target="_blank" rel="noopener">JMdict / EDICT</a>
-                &mdash; 214,000+ entry Japanese-English dictionary (XML, text)
-            </li>
-            <li>
-                <a href="https://kaikki.org/dictionary/rawdata.html" target="_blank" rel="noopener">Kaikki.org</a>
-                &mdash; Machine-readable Wiktionary data for hundreds of languages (JSONL)
-            </li>
-        </ul>
-
-        <p class="has-text-grey mt-3">
-            Tip: For StarDict files, select the .ifo file &mdash; the .idx and .dict files
-            must be in the same directory.
-        </p>
-    </div>
-</div>
