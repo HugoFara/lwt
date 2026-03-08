@@ -13,7 +13,7 @@
  * - $skipUrl: string - URL to skip and go to text creation
  * - $importUrl: string - AJAX endpoint for importing words
  * - $enrichUrl: string - AJAX endpoint for enrichment
- * - $csrfToken: string - CSRF token for POST requests
+ * - $csrfToken: string - CSRF token for POST requests (field: _csrf_token)
  *
  * PHP version 8.1
  */
@@ -222,7 +222,7 @@ function starterVocab() {
             try {
                 const formData = new FormData();
                 formData.append('count', String(this.size));
-                formData.append('_token', <?= json_encode($csrfToken) ?>);
+                formData.append('_csrf_token', <?= json_encode($csrfToken) ?>);
 
                 const response = await fetch(<?= json_encode($importUrl) ?>, {
                     method: 'POST',
@@ -265,7 +265,7 @@ function starterVocab() {
             try {
                 const formData = new FormData();
                 formData.append('mode', this.mode);
-                formData.append('_token', <?= json_encode($csrfToken) ?>);
+                formData.append('_csrf_token', <?= json_encode($csrfToken) ?>);
 
                 const response = await fetch(<?= json_encode($enrichUrl) ?>, {
                     method: 'POST',

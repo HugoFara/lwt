@@ -37,7 +37,7 @@ class WiktionaryEnrichmentService
         $userScope = UserScopedQuery::forTable('words');
         $sql = "SELECT WoID, WoText FROM words
                 WHERE WoLgID = ?
-                AND (WoTranslation IS NULL OR WoTranslation = '')
+                AND (WoTranslation IS NULL OR WoTranslation = '' OR WoTranslation = '*')
                 $userScope
                 ORDER BY WoID ASC
                 LIMIT ?";
@@ -54,7 +54,7 @@ class WiktionaryEnrichmentService
         $userScope = UserScopedQuery::forTable('words');
         $sql = "SELECT COUNT(*) as value FROM words
                 WHERE WoLgID = ?
-                AND (WoTranslation IS NULL OR WoTranslation = '')
+                AND (WoTranslation IS NULL OR WoTranslation = '' OR WoTranslation = '*')
                 $userScope";
 
         /** @var int|string|null $result */
