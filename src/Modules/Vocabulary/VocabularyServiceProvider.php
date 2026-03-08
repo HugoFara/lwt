@@ -64,6 +64,8 @@ use Lwt\Modules\Vocabulary\Application\Services\WordBulkService;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
 use Lwt\Modules\Text\Application\Services\SentenceService;
+use Lwt\Modules\Vocabulary\Application\Services\FrequencyImportService;
+use Lwt\Modules\Vocabulary\Http\StarterVocabController;
 // Controllers
 use Lwt\Modules\Vocabulary\Http\TermEditController;
 use Lwt\Modules\Vocabulary\Http\TermDisplayController;
@@ -338,6 +340,18 @@ class VocabularyServiceProvider implements ServiceProviderInterface
                 $c->getTyped(VocabularyFacade::class),
                 $c->getTyped(DictionaryAdapter::class),
                 $c->getTyped(LanguageFacade::class)
+            );
+        });
+
+        // Register Starter Vocabulary services
+        $container->singleton(FrequencyImportService::class, function (Container $_c) {
+            return new FrequencyImportService();
+        });
+
+        $container->singleton(StarterVocabController::class, function (Container $c) {
+            return new StarterVocabController(
+                $c->getTyped(LanguageFacade::class),
+                $c->getTyped(FrequencyImportService::class)
             );
         });
     }

@@ -342,6 +342,28 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
+    // Starter vocabulary (shown after language creation)
+    $router->get(
+        '/languages/{id:int}/starter-vocab',
+        'Lwt\\Modules\\Vocabulary\\Http\\StarterVocabController@show',
+        AUTH_MIDDLEWARE
+    );
+    $router->post(
+        '/languages/{id:int}/starter-vocab/import',
+        'Lwt\\Modules\\Vocabulary\\Http\\StarterVocabController@import',
+        AUTH_MIDDLEWARE
+    );
+    $router->post(
+        '/languages/{id:int}/starter-vocab/enrich',
+        'Lwt\\Modules\\Vocabulary\\Http\\StarterVocabController@enrich',
+        AUTH_MIDDLEWARE
+    );
+    $router->get(
+        '/languages/{id:int}/starter-vocab/skip',
+        'Lwt\\Modules\\Vocabulary\\Http\\StarterVocabController@skip',
+        AUTH_MIDDLEWARE
+    );
+
     // Languages list (Language module)
     $router->registerWithMiddleware(
         '/languages',

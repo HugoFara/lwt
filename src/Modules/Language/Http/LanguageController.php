@@ -83,9 +83,8 @@ class LanguageController extends BaseController
             if ($result['success']) {
                 // Set the newly created language as the current language
                 Settings::save('currentlanguage', (string)$result['id']);
-                // Redirect to text creation page after successful language creation
-                // Use filterlang parameter to select the new language and bust browser cache
-                header('Location: ' . url('/texts/new') . '?filterlang=' . $result['id']);
+                // Redirect to starter vocabulary page after successful language creation
+                header('Location: ' . url('/languages/' . $result['id'] . '/starter-vocab'));
                 exit;
             }
             // On error, fall through to show the form with error message
