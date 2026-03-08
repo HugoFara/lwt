@@ -97,7 +97,8 @@ if (!$isNew) {
       x-data="{
           importMode: 'manual',
           showAdvanced: <?php echo $isNew ? 'false' : 'true'; ?>
-      }">
+      }"
+      @webpage-imported="importMode = 'manual'">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
 
@@ -309,40 +310,89 @@ if (!$isNew) {
         </div>
 
         <!-- URL Import Section -->
-        <div x-show="importMode === 'url'" x-transition x-cloak class="mt-4" :inert="importMode !== 'url'">
-            <div class="field">
-                <label class="label">Video URL</label>
-                <div class="control">
-                    <input type="url"
-                           class="input"
-                           name="TxMediaURL"
-                           id="TxMediaURL"
-                           placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." />
-                </div>
-                <p class="help">YouTube, Vimeo, Dailymotion, Bilibili, NicoNico, or PeerTube URL. Captions will be imported if available.</p>
+        <div x-show="importMode === 'url'" x-transition x-cloak class="mt-4"
+             :inert="importMode !== 'url'"
+             x-data="{ urlSubMode: 'webpage' }">
+
+            <!-- Sub-mode toggle: Web page vs Video -->
+            <div class="tabs is-small is-toggle is-centered mb-4">
+                <ul>
+                    <li :class="urlSubMode === 'webpage' ? 'is-active' : ''">
+                        <a @click.prevent="urlSubMode = 'webpage'">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('globe', ['alt' => 'Web']); ?>
+                            </span>
+                            <span>Web Page</span>
+                        </a>
+                    </li>
+                    <li :class="urlSubMode === 'video' ? 'is-active' : ''">
+                        <a @click.prevent="urlSubMode = 'video'">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('video', ['alt' => 'Video']); ?>
+                            </span>
+                            <span>Video</span>
+                        </a>
+                    </li>
+                </ul>
             </div>
 
-            <?php if ($youtubeConfigured) : ?>
-            <div class="field mt-3">
-                <label class="label is-small">Or enter YouTube Video ID directly</label>
-                <div class="control">
+            <!-- Web page import -->
+            <div x-show="urlSubMode === 'webpage'" x-transition>
+                <div class="field">
+                    <label class="label">Web Page URL</label>
                     <div class="field has-addons mb-0">
                         <div class="control is-expanded">
-                            <input type="text"
-                                   class="input is-small"
-                                   id="ytVideoId"
-                                   placeholder="e.g., dQw4w9WgXcQ" />
+                            <input type="url" class="input" id="webpageUrl"
+                                   placeholder="https://example.com/article" />
                         </div>
                         <div class="control">
-                            <button type="button" class="button is-info is-small" data-action="fetch-youtube">
-                                Fetch Captions
+                            <button type="button" class="button is-info"
+                                    data-action="fetch-webpage" id="fetchWebpageBtn">
+                                Fetch Content
                             </button>
                         </div>
                     </div>
+                    <p class="help">Paste any article or web page URL. The main text content will be extracted automatically.</p>
+                    <p id="webpageImportStatus" class="help mt-2"></p>
                 </div>
-                <p id="ytDataStatus" class="help"></p>
             </div>
-            <?php endif; ?>
+
+            <!-- Video import -->
+            <div x-show="urlSubMode === 'video'" x-transition>
+                <div class="field">
+                    <label class="label">Video URL</label>
+                    <div class="control">
+                        <input type="url"
+                               class="input"
+                               name="TxMediaURL"
+                               id="TxMediaURL"
+                               placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." />
+                    </div>
+                    <p class="help">YouTube, Vimeo, Dailymotion, Bilibili, NicoNico, or PeerTube URL. Captions will be imported if available.</p>
+                </div>
+
+                <?php if ($youtubeConfigured) : ?>
+                <div class="field mt-3">
+                    <label class="label is-small">Or enter YouTube Video ID directly</label>
+                    <div class="control">
+                        <div class="field has-addons mb-0">
+                            <div class="control is-expanded">
+                                <input type="text"
+                                       class="input is-small"
+                                       id="ytVideoId"
+                                       placeholder="e.g., dQw4w9WgXcQ" />
+                            </div>
+                            <div class="control">
+                                <button type="button" class="button is-info is-small" data-action="fetch-youtube">
+                                    Fetch Captions
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="ytDataStatus" class="help"></p>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
 
         <!-- Save Button -->
@@ -444,7 +494,7 @@ if (!$isNew) {
                 </ul>
 
                 <p class="has-text-grey mt-3">
-                    Tip: Copy-paste text from any webpage, or download SRT/EPUB files and import them.
+                    Tip: Use <strong>Import from URL &rarr; Web Page</strong> above to fetch text directly from any of these sites. Just paste the article URL and click &ldquo;Fetch Content&rdquo;.
                 </p>
             </div>
         </div>

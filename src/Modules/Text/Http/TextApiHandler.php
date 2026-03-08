@@ -271,6 +271,19 @@ class TextApiHandler implements ApiRoutableInterface
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
+        if ($frag1 === 'extract-url') {
+            $url = (string) ($params['url'] ?? '');
+            if ($url === '') {
+                return Response::error('url parameter is required', 400);
+            }
+            $extractor = new \Lwt\Shared\Infrastructure\Http\WebPageExtractor();
+            $result = $extractor->extractFromUrl($url);
+            if (isset($result['error'])) {
+                return Response::error($result['error'], 422);
+            }
+            return Response::success($result);
+        }
+
         if ($frag1 === '' || !ctype_digit($frag1)) {
             return Response::error('Text ID (Integer) Expected', 404);
         }
