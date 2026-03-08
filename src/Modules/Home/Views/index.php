@@ -273,6 +273,123 @@ $base = UrlUtilities::getBasePath();
                     <p class="mt-3 has-text-weight-semibold">New Text</p>
                 </a>
             </div>
+
+            <!-- Search library card -->
+            <div class="column is-narrow" x-data="librarySearch()">
+                <div
+                    @click="open = !open"
+                    class="box has-background-warning-light has-text-centered"
+                    style="width: 180px; min-height: 180px; display: flex;
+                        flex-direction: column; justify-content: center; align-items: center;
+                        cursor: pointer;"
+                >
+                    <span class="icon is-large has-text-warning-dark">
+                        <i data-lucide="search" style="width: 48px; height: 48px;"></i>
+                    </span>
+                    <p class="mt-3 has-text-weight-semibold">Search Library</p>
+                </div>
+
+                <!-- Search panel (appears below) -->
+                <div
+                    x-show="open"
+                    x-transition
+                    class="box mt-3"
+                    style="width: 500px; max-width: 90vw;"
+                    @click.outside="close()"
+                >
+                    <p class="subtitle is-6 mb-3">Search Project Gutenberg</p>
+                    <form @submit.prevent="search()" class="mb-4">
+                        <div class="field has-addons">
+                            <div class="control is-expanded">
+                                <input
+                                    x-model="query"
+                                    class="input"
+                                    type="text"
+                                    placeholder="Search by title or author..."
+                                    autofocus
+                                />
+                            </div>
+                            <div class="control">
+                                <button
+                                    type="submit"
+                                    class="button is-warning"
+                                    :class="{ 'is-loading': loading && !searched }"
+                                    :disabled="loading"
+                                >
+                                    <span class="icon"><i data-lucide="search"></i></span>
+                                    <span>Search</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Error message -->
+                    <div x-show="error" class="notification is-danger is-light" x-text="error"></div>
+
+                    <!-- Results count -->
+                    <p
+                        x-show="searched && !error && !loading"
+                        class="has-text-grey is-size-7 mb-2"
+                    >
+                        <span x-text="totalCount"></span> books found
+                    </p>
+
+                    <!-- Results list -->
+                    <div
+                        x-show="results.length > 0"
+                        style="max-height: 400px; overflow-y: auto;"
+                    >
+                        <template x-for="book in results" :key="book.id">
+                            <div class="box p-3 mb-2" style="cursor: default;">
+                                <div class="is-flex is-justify-content-space-between is-align-items-start">
+                                    <div style="flex: 1; min-width: 0;">
+                                        <p
+                                            class="has-text-weight-semibold is-size-6"
+                                            x-text="book.title"
+                                            style="overflow: hidden; text-overflow: ellipsis;"
+                                        ></p>
+                                        <p
+                                            class="has-text-grey is-size-7"
+                                            x-text="formatAuthors(book.authors)"
+                                        ></p>
+                                        <p class="has-text-grey-light is-size-7">
+                                            <span x-text="formatDownloads(book.downloadCount)"></span> downloads
+                                        </p>
+                                    </div>
+                                    <button
+                                        @click="importBook(book)"
+                                        class="button is-primary is-small ml-3"
+                                        :class="{ 'is-loading': importing === book.id }"
+                                        :disabled="importing !== null"
+                                    >
+                                        <span class="icon"><i data-lucide="download"></i></span>
+                                        <span>Import</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Load more -->
+                    <button
+                        x-show="hasMore && results.length > 0"
+                        @click="loadMore()"
+                        class="button is-small is-fullwidth mt-2"
+                        :class="{ 'is-loading': loading }"
+                        :disabled="loading"
+                    >
+                        Load more
+                    </button>
+
+                    <!-- No results -->
+                    <p
+                        x-show="searched && results.length === 0 && !loading && !error"
+                        class="has-text-grey is-italic"
+                    >
+                        No books found. Try a different search term.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </section>

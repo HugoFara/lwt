@@ -25,6 +25,8 @@ namespace Lwt\Modules\Text\Http;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Http\GutenbergClient;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
 use Lwt\Api\V1\Response;
 
@@ -220,7 +222,9 @@ class TextApiHandler implements ApiRoutableInterface
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
-        if ($frag1 === 'scoring') {
+        if ($frag1 === 'library-search') {
+            return $this->handleLibrarySearch($params);
+        } elseif ($frag1 === 'scoring') {
             if ($frag2 === 'recommended') {
                 $langId = (int) ($params['language_id'] ?? 0);
                 if ($langId <= 0) {
@@ -263,7 +267,7 @@ class TextApiHandler implements ApiRoutableInterface
             }
             return Response::error('Expected "words", "print-items", or "annotation"', 404);
         }
-        return Response::error('Expected "scoring", "by-language", "archived-by-language", or text ID', 404);
+        return Response::error('Expected "library-search", "scoring", "by-language", "archived-by-language", or text ID', 404);
     }
 
     public function routePost(array $fragments, array $params): JsonResponse
@@ -333,5 +337,68 @@ class TextApiHandler implements ApiRoutableInterface
             default:
                 return Response::error('Expected "display-mode", "mark-all-wellknown", or "mark-all-ignored"', 404);
         }
+    }
+
+    // =========================================================================
+    // Library Search (Project Gutenberg)
+    // =========================================================================
+
+    /**
+     * Handle library search requests.
+     *
+     * @param array $params Request parameters (q, language_id, page)
+     *
+     * @return JsonResponse
+     */
+    private function handleLibrarySearch(array $params): JsonResponse
+    {
+        $query = trim((string) ($params['q'] ?? ''));
+        $languageId = (int) ($params['language_id'] ?? 0);
+        $page = max(1, (int) ($params['page'] ?? 1));
+
+        $languageCode = null;
+        if ($languageId > 0) {
+            $languageCode = $this->resolveLanguageCode($languageId);
+        }
+
+        $client = new GutenbergClient();
+        $result = $client->search($query, $languageCode, $page);
+
+        if (isset($result['error'])) {
+            return Response::error($result['error'], 502);
+        }
+
+        return Response::success($result);
+    }
+
+    /**
+     * Resolve a language ID to an ISO 639-1 code for Gutenberg.
+     *
+     * Tries LgSourceLang first, then guesses from LgName.
+     *
+     * @param int $languageId Language ID
+     *
+     * @return string|null ISO code or null
+     */
+    private function resolveLanguageCode(int $languageId): ?string
+    {
+        $row = QueryBuilder::table('languages')
+            ->select(['LgSourceLang', 'LgName'])
+            ->where('LgID', '=', $languageId)
+            ->firstPrepared();
+
+        if ($row === null) {
+            return null;
+        }
+
+        // Use explicit source language code if set
+        $sourceLang = (string) ($row['LgSourceLang'] ?? '');
+        if ($sourceLang !== '') {
+            return $sourceLang;
+        }
+
+        // Fall back to guessing from language name
+        $name = (string) ($row['LgName'] ?? '');
+        return GutenbergClient::guessLanguageCode($name);
     }
 }

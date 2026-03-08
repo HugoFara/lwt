@@ -98,7 +98,8 @@ if (!$isNew) {
           importMode: 'manual',
           showAdvanced: <?php echo $isNew ? 'false' : 'true'; ?>
       }"
-      @webpage-imported="importMode = 'manual'">
+      @webpage-imported="importMode = 'manual'"
+      @auto-import-url="importMode = 'url'">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
 

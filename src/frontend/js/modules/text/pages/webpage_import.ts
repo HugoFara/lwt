@@ -124,8 +124,44 @@ async function fetchWebpage(): Promise<void> {
 }
 
 /**
+ * Check for import_url query parameter and auto-trigger import.
+ *
+ * Used when redirecting from library search to pre-populate the form.
+ */
+function checkAutoImport(): void {
+  const params = new URLSearchParams(window.location.search);
+  const importUrl = params.get('import_url');
+  if (!importUrl) return;
+
+  const urlInput = document.getElementById('webpageUrl') as HTMLInputElement | null;
+  if (!urlInput) return;
+
+  // Pre-fill the URL and switch to URL import mode
+  urlInput.value = importUrl;
+
+  // Also pre-fill title if provided (as fallback)
+  const importTitle = params.get('import_title');
+  if (importTitle) {
+    setInputByName('TxTitle', importTitle);
+  }
+
+  // Switch the form to URL mode and trigger fetch
+  const formEl = document.querySelector<HTMLFormElement>('form[x-data]');
+  if (formEl) {
+    formEl.dispatchEvent(
+      new CustomEvent('auto-import-url', { bubbles: true }),
+    );
+  }
+
+  // Auto-trigger the fetch after a short delay (let Alpine.js update)
+  setTimeout(() => {
+    fetchWebpage();
+  }, 200);
+}
+
+/**
  * Initialize webpage import functionality.
- * Binds click handler to the fetch button.
+ * Binds click handler to the fetch button and checks for auto-import.
  */
 export function initWebpageImport(): void {
   document.addEventListener('click', (e) => {
@@ -135,6 +171,9 @@ export function initWebpageImport(): void {
       fetchWebpage();
     }
   });
+
+  // Check for auto-import from library search
+  checkAutoImport();
 }
 
 // Auto-initialize on document ready
