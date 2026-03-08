@@ -63,7 +63,7 @@ if (!empty($message)) :
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/languages', 'label' => 'Languages', 'icon' => 'globe'],
     [
-        'url' => '/dictionaries/import?lang=' . $langId, 'label' => 'Import Dictionary',
+        'url' => '/word/upload?tab=dictionary', 'label' => 'Import Dictionary',
         'icon' => 'upload', 'class' => 'is-primary'
     ],
 ]);
@@ -143,7 +143,7 @@ echo PageLayoutHelper::buildActionCard([
     <div class="notification is-light">
         <p>No local dictionaries found for this language.</p>
         <p class="mt-2">
-            <a href="/languages/<?php echo $langId; ?>/dictionaries/import" class="button is-primary is-small">
+            <a href="/word/upload?tab=dictionary" class="button is-primary is-small">
                 <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
                 Import a dictionary
             </a>
@@ -209,8 +209,7 @@ echo PageLayoutHelper::buildActionCard([
                             </form>
 
                             <!-- Import more entries -->
-                            <a href="/languages/<?php echo $langId;
-                            ?>/dictionaries/import?dict_id=<?php echo $dict->id(); ?>"
+                            <a href="/word/upload?tab=dictionary"
                                class="button is-info" title="Import entries">
                                 <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
                             </a>

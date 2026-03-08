@@ -328,7 +328,8 @@ class VocabularyServiceProvider implements ServiceProviderInterface
 
         $container->singleton(TermImportController::class, function (Container $c) {
             return new TermImportController(
-                $c->getTyped(LanguageFacade::class)
+                $c->getTyped(LanguageFacade::class),
+                $c->getTyped(\Lwt\Modules\Dictionary\Application\DictionaryFacade::class)
             );
         });
 

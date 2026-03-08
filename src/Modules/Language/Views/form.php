@@ -328,7 +328,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                             <?php echo IconHelper::render('book-open', ['alt' => 'Dictionaries']); ?>
                             Local Dictionaries
                         </span>
-                        <a href="<?php echo url('/languages/' . $langId . '/dictionaries/import'); ?>"
+                        <a href="<?php echo url('/word/upload?tab=dictionary'); ?>"
                            class="button is-primary is-small">
                             <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
                             <span class="ml-1">Import</span>
@@ -338,7 +338,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                     <?php if (empty($dictionaries)) : ?>
                     <p class="has-text-grey">
                         No local dictionaries installed.
-                        <a href="<?php echo url('/languages/' . $langId . '/dictionaries/import'); ?>">Import one</a>
+                        <a href="<?php echo url('/word/upload?tab=dictionary'); ?>">Import one</a>
                         (CSV, JSON, or StarDict).
                     </p>
                     <?php else : ?>
@@ -369,10 +369,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                     <?php endif; ?>
                                 </td>
                                 <td class="has-text-right">
-                                    <a href="<?php echo url(
-                                        '/languages/' . $langId
-                                        . '/dictionaries/import?dict_id=' . $dict->id()
-                                    ); ?>"
+                                    <a href="<?php echo url('/word/upload?tab=dictionary'); ?>"
                                        class="button is-small is-info is-outlined"
                                        title="Import more entries">
                                         <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>

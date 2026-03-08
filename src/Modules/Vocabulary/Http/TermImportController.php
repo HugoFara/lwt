@@ -23,7 +23,9 @@ use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Modules\Language\Application\LanguageFacade;
+use Lwt\Modules\Dictionary\Application\DictionaryFacade;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use RuntimeException;
 
 /**
  * Controller for bulk translate and file import operations.
@@ -42,14 +44,25 @@ class TermImportController extends VocabularyBaseController
     private LanguageFacade $languageFacade;
 
     /**
+     * Dictionary facade.
+     */
+    private DictionaryFacade $dictionaryFacade;
+
+    /**
      * Constructor.
      *
-     * @param LanguageFacade|null $languageFacade Language facade
+     * @param LanguageFacade|null   $languageFacade   Language facade
+     * @param DictionaryFacade|null $dictionaryFacade Dictionary facade
      */
-    public function __construct(?LanguageFacade $languageFacade = null)
-    {
+    public function __construct(
+        ?LanguageFacade $languageFacade = null,
+        ?DictionaryFacade $dictionaryFacade = null
+    ) {
         parent::__construct();
         $this->languageFacade = $languageFacade ?? new LanguageFacade();
+        if ($dictionaryFacade !== null) {
+            $this->dictionaryFacade = $dictionaryFacade;
+        }
     }
 
     /**
@@ -185,6 +198,8 @@ class TermImportController extends VocabularyBaseController
         $op = InputValidator::getString('op');
         if ($op === 'Import') {
             $this->handleUploadImport();
+        } elseif ($op === 'ImportDictionary') {
+            $this->handleDictionaryImport();
         } else {
             $this->displayUploadForm();
         }
@@ -203,6 +218,7 @@ class TermImportController extends VocabularyBaseController
     {
         $currentLanguage = Settings::get('currentlanguage');
         $languages = $this->languageFacade->getLanguagesForSelect();
+        $activeTab = InputValidator::getString('tab') ?: 'text';
         include $this->viewPath . 'upload_form.php';
     }
 
@@ -318,6 +334,102 @@ class TermImportController extends VocabularyBaseController
                 unlink($fileName);
             }
         }
+    }
+
+    /**
+     * Handle dictionary file import.
+     *
+     * @return void
+     */
+    private function handleDictionaryImport(): void
+    {
+        $langId = InputValidator::getInt("LgID", 0) ?? 0;
+        if ($langId === 0) {
+            echo '<div class="notification is-danger">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Error: No language selected</div>';
+            return;
+        }
+
+        $format = InputValidator::getString('dict_format') ?: 'csv';
+        $dictName = InputValidator::getString('dict_name');
+
+        $uploadedFile = InputValidator::getUploadedFile('dict_file');
+        if ($uploadedFile === null) {
+            echo '<div class="notification is-danger">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Error: No file uploaded</div>';
+            return;
+        }
+
+        if (empty($dictName)) {
+            $dictName = pathinfo($uploadedFile['name'], PATHINFO_FILENAME) ?: 'Imported Dictionary';
+        }
+
+        try {
+            $importer = $this->dictionaryFacade->getImporter($format, $uploadedFile['name']);
+
+            if (!$importer->canImport($uploadedFile['tmp_name'])) {
+                echo '<div class="notification is-danger">' .
+                    '<button class="delete" aria-label="close"></button>' .
+                    'Error: Invalid file format</div>';
+                return;
+            }
+
+            // Build import options
+            $options = $this->getDictImportOptions($format);
+
+            $dictId = $this->dictionaryFacade->create($langId, $dictName, $format);
+            $entries = $importer->parse($uploadedFile['tmp_name'], $options);
+            $count = $this->dictionaryFacade->addEntriesBatch($dictId, $entries);
+
+            echo '<div class="notification is-success">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Dictionary <strong>' . htmlspecialchars($dictName, ENT_QUOTES, 'UTF-8') .
+                '</strong> created with ' . number_format($count) . ' entries.</div>';
+        } catch (RuntimeException $e) {
+            echo '<div class="notification is-danger">' .
+                '<button class="delete" aria-label="close"></button>' .
+                'Error: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</div>';
+            return;
+        }
+
+        // Re-display the form with dictionary tab active
+        $currentLanguage = Settings::get('currentlanguage');
+        $languages = $this->languageFacade->getLanguagesForSelect();
+        $activeTab = 'dictionary';
+        include $this->viewPath . 'upload_form.php';
+    }
+
+    /**
+     * Get dictionary import options from form parameters.
+     *
+     * @param string $format Import format
+     *
+     * @return array<string, mixed>
+     */
+    private function getDictImportOptions(string $format): array
+    {
+        $options = [];
+
+        if ($format === 'csv' || $format === 'tsv') {
+            $delimiter = InputValidator::getString('dict_delimiter') ?: ',';
+            if ($delimiter === 'tab') {
+                $delimiter = "\t";
+            }
+            $options['delimiter'] = $delimiter;
+            $options['hasHeader'] = InputValidator::getString('dict_has_header') !== 'no';
+
+            $termCol = InputValidator::getInt('dict_term_column');
+            $defCol = InputValidator::getInt('dict_definition_column');
+
+            $options['columnMap'] = [
+                'term' => $termCol ?? 0,
+                'definition' => $defCol ?? 1,
+            ];
+        }
+
+        return $options;
     }
 
     /**
