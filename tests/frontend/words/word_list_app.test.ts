@@ -130,6 +130,7 @@ vi.mock('lucide', () => ({
   Smile: ['svg', {}, []],
   SpellCheck: ['svg', {}, []],
   Square: ['svg', {}, []],
+  SquareCheckBig: ['svg', {}, []],
   SquareMinus: ['svg', {}, []],
   SquarePen: ['svg', {}, []],
   SquarePlus: ['svg', {}, []],

@@ -168,7 +168,7 @@ $base = UrlUtilities::getBasePath();
         <!-- Language tabs -->
         <div class="tabs is-boxed is-medium mb-4">
             <ul>
-                <?php foreach ($languages as $lang) : ?>
+                <?php /** @var array{id: int, name: string} $lang */ foreach ($languages as $lang) : ?>
                 <li :class="{ 'is-active': currentLanguageId === <?php echo $lang['id']; ?> }">
                     <a @click.prevent="switchLanguage(<?php echo $lang['id']; ?>, '<?php echo htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8'); ?>')"
                        href="#">

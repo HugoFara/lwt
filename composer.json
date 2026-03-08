@@ -99,6 +99,9 @@
     "config": {
         "allow-plugins": {
             "phpdocumentor/shim": true
+        },
+        "platform": {
+            "php": "8.2.27"
         }
     }
 }

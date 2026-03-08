@@ -30,6 +30,7 @@ use Lwt\Modules\Text\Http\TextController;
 // Note: WordPressController moved to Modules/User - registered by UserServiceProvider
 // Note: AuthService now primarily used via UserFacade in User module
 // Note: HomeService moved to Modules/Home as HomeFacade
+use Lwt\Modules\Dictionary\Application\DictionaryFacade;
 use Lwt\Modules\Language\Application\LanguageFacade;
 // Note: TestService now primarily used via ReviewFacade in Review module
 use Lwt\Modules\Text\Application\Services\TextDisplayService;
@@ -67,7 +68,8 @@ class ControllerServiceProvider implements ServiceProviderInterface
 
         $container->bind(LanguageController::class, function (Container $c) {
             return new LanguageController(
-                $c->getTyped(LanguageFacade::class)
+                $c->getTyped(LanguageFacade::class),
+                $c->getTyped(DictionaryFacade::class)
             );
         });
 

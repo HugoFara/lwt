@@ -35,7 +35,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 assert($currentLanguage === null || is_int($currentLanguage) || is_string($currentLanguage));
 assert(is_array($languages));
 /** @var array<int, array{id: int, name: string}> $languages */
-/** @var string $activeTab */
+/** @var string|null $activeTab */
 
 if (!isset($activeTab)) {
     $activeTab = 'file';

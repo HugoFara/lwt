@@ -255,7 +255,7 @@ class Application
         // Single-user mode: show debug info by default (no security concern)
         $multiUser = getenv('MULTI_USER_ENABLED');
         $multiUserVal = ($multiUser !== false && $multiUser !== '') ? $multiUser : ($_ENV['MULTI_USER_ENABLED'] ?? 'false');
-        return !in_array(strtolower((string)$multiUserVal), ['true', '1', 'yes'], true);
+        return !in_array(strtolower($multiUserVal), ['true', '1', 'yes'], true);
     }
 
     /**

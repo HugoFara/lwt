@@ -45,6 +45,8 @@ class TermImportController extends VocabularyBaseController
 
     /**
      * Dictionary facade.
+     *
+     * @psalm-suppress PropertyNotSetInConstructor Set conditionally when dictionary features are available
      */
     private DictionaryFacade $dictionaryFacade;
 
@@ -338,6 +340,8 @@ class TermImportController extends VocabularyBaseController
 
     /**
      * Handle dictionary file import.
+     *
+     * @psalm-suppress UnresolvableInclude Path computed from viewPath property
      *
      * @return void
      */

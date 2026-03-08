@@ -28,6 +28,7 @@ namespace Lwt\Modules\Language\Views;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\Infrastructure\Language\LanguagePresets;
+use Lwt\Modules\Dictionary\Domain\LocalDictionary;
 
 // Type assertions for view variables
 assert(is_object($language));
@@ -42,6 +43,8 @@ assert(is_array($allLanguages));
  * @var string $sourceLg
  * @var string $targetLg
  * @var bool $isNew
+ * @var bool $isAdmin
+ * @var LocalDictionary[] $dictionaries
  * @var array<string, array<string, mixed>> $parserInfo
  * @var array<int, array{id: int, name: string}> $allLanguages
  */
@@ -320,7 +323,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                     </div>
                 </div>
 
-                <?php if (!$isNew && !empty($isAdmin)) : ?>
+                <?php if (!$isNew && $isAdmin) : ?>
                 <!-- Local Dictionaries (admin only) -->
                 <div class="mt-4 p-4 has-background-white-bis" style="border-radius: 6px;">
                     <h6 class="title is-6 mb-3 is-flex is-align-items-center is-justify-content-space-between">
