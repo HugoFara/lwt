@@ -83,7 +83,7 @@ This fork adds features not in the official LWT:
 | Feature | Description |
 | --- | --- |
 | Mobile support | Responsive design for phones and tablets |
-| RSS feeds | Automatically import texts from feeds |
+| RSS feeds | Import texts from feeds, with [curated sources](data/curated_feeds.json) for 19 languages |
 | Themes | Customizable appearance |
 | Multi-word selection | Click and drag to select phrases |
 | Bulk translation | Translate multiple new words at once |

@@ -1,0 +1,581 @@
+{
+  "$schema": "./curated_feeds.schema.json",
+  "_comment": "Curated RSS/Atom feeds for language learning. Run bin/check-feeds.php to validate.",
+  "_lastVerified": "2026-03-09",
+  "feeds": [
+    {
+      "language": "ar",
+      "languageName": "Arabic",
+      "sources": [
+        {
+          "name": "BBC Arabic",
+          "url": "https://feeds.bbci.co.uk/arabic/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "Al Jazeera Arabic",
+          "url": "https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe|//aside",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        }
+      ]
+    },
+    {
+      "language": "de",
+      "languageName": "German",
+      "sources": [
+        {
+          "name": "Tagesschau",
+          "url": "https://www.tagesschau.de/index~rss2.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe|//aside",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "Deutsche Welle Top",
+          "url": "https://rss.dw.com/rdf/rss-de-top",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "DW Langsam gesprochene Nachr.",
+          "url": "https://rss.dw.com/xml/DKpodcast_lgn_de",
+          "articleSectionTags": "",
+          "filterTags": "",
+          "options": "max_links=30,article_source=description",
+          "category": "news-slow",
+          "level": "beginner"
+        },
+        {
+          "name": "Spiegel Schlagzeilen",
+          "url": "https://www.spiegel.de/schlagzeilen/index.rss",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//aside|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "advanced"
+        }
+      ]
+    },
+    {
+      "language": "el",
+      "languageName": "Greek",
+      "sources": [
+        {
+          "name": "in.gr",
+          "url": "https://www.in.gr/feed/",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "ERT News",
+          "url": "https://www.ertnews.gr/feed/",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        }
+      ]
+    },
+    {
+      "language": "en",
+      "languageName": "English",
+      "sources": [
+        {
+          "name": "BBC World News",
+          "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "NPR News",
+          "url": "https://feeds.npr.org/1001/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//aside|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "News in Levels",
+          "url": "https://www.newsinlevels.com/feed/",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=30",
+          "category": "news-simple",
+          "level": "beginner"
+        },
+        {
+          "name": "Breaking News English",
+          "url": "https://breakingnewsenglish.com/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=30",
+          "category": "news-simple",
+          "level": "beginner"
+        },
+        {
+          "name": "The Guardian World",
+          "url": "https://www.theguardian.com/world/rss",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//aside|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "advanced"
+        }
+      ]
+    },
+    {
+      "language": "es",
+      "languageName": "Spanish",
+      "sources": [
+        {
+          "name": "BBC Mundo",
+          "url": "https://feeds.bbci.co.uk/mundo/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "El País Internacional",
+          "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/internacional/portada",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//aside|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "advanced"
+        },
+        {
+          "name": "DW Español",
+          "url": "https://rss.dw.com/rdf/rss-sp-top",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "El Mundo",
+          "url": "https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//aside|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "advanced"
+        }
+      ]
+    },
+    {
+      "language": "fr",
+      "languageName": "French",
+      "sources": [
+        {
+          "name": "France 24",
+          "url": "https://www.france24.com/fr/rss",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "Le Monde À la une",
+          "url": "https://www.lemonde.fr/rss/une.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//aside|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "advanced"
+        },
+        {
+          "name": "RFI Actualités",
+          "url": "https://www.rfi.fr/fr/rss",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "TV5Monde Info",
+          "url": "https://information.tv5monde.com/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        }
+      ]
+    },
+    {
+      "language": "hi",
+      "languageName": "Hindi",
+      "sources": [
+        {
+          "name": "BBC Hindi",
+          "url": "https://feeds.bbci.co.uk/hindi/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "Amar Ujala",
+          "url": "https://www.amarujala.com/rss/breaking-news.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        }
+      ]
+    },
+    {
+      "language": "it",
+      "languageName": "Italian",
+      "sources": [
+        {
+          "name": "ANSA Ultima Ora",
+          "url": "https://www.ansa.it/sito/ansait_rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "Internazionale",
+          "url": "https://www.internazionale.it/sitemaps/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//aside|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "advanced"
+        },
+        {
+          "name": "RAI News",
+          "url": "https://www.rainews.it/rss/tutti",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        }
+      ]
+    },
+    {
+      "language": "ja",
+      "languageName": "Japanese",
+      "sources": [
+        {
+          "name": "NHK News Web",
+          "url": "https://www.nhk.or.jp/rss/news/cat0.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "advanced"
+        },
+        {
+          "name": "NHK News Web Easy",
+          "url": "https://www3.nhk.or.jp/news/easy/news-list.json",
+          "articleSectionTags": "",
+          "filterTags": "",
+          "options": "max_links=30",
+          "category": "news-simple",
+          "level": "beginner",
+          "_note": "JSON feed, not RSS — requires custom handling"
+        },
+        {
+          "name": "Asahi Shimbun",
+          "url": "https://www.asahi.com/rss/asahi/newsheadlines.rdf",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "advanced"
+        }
+      ]
+    },
+    {
+      "language": "ko",
+      "languageName": "Korean",
+      "sources": [
+        {
+          "name": "Korea Times",
+          "url": "https://feed.koreatimes.co.kr/k/allnews.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "Yonhap News",
+          "url": "https://www.yna.co.kr/rss/news.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "advanced"
+        }
+      ]
+    },
+    {
+      "language": "nl",
+      "languageName": "Dutch",
+      "sources": [
+        {
+          "name": "NOS Nieuws Algemeen",
+          "url": "https://feeds.nos.nl/nosnieuwsalgemeen",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "NU.nl Algemeen",
+          "url": "https://www.nu.nl/rss/Algemeen",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//aside|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        }
+      ]
+    },
+    {
+      "language": "pl",
+      "languageName": "Polish",
+      "sources": [
+        {
+          "name": "TVN24",
+          "url": "https://tvn24.pl/najnowsze.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "Gazeta.pl Wiadomości",
+          "url": "https://wiadomosci.gazeta.pl/pub/rss/wiadomosci.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        }
+      ]
+    },
+    {
+      "language": "pt",
+      "languageName": "Portuguese",
+      "sources": [
+        {
+          "name": "BBC Brasil",
+          "url": "https://feeds.bbci.co.uk/portuguese/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "DW Brasil",
+          "url": "https://rss.dw.com/rdf/rss-br-top",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "Público",
+          "url": "https://feeds.feedburner.com/PublicoRSS",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "advanced"
+        }
+      ]
+    },
+    {
+      "language": "ru",
+      "languageName": "Russian",
+      "sources": [
+        {
+          "name": "BBC Russian",
+          "url": "https://feeds.bbci.co.uk/russian/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "DW Russian",
+          "url": "https://rss.dw.com/rdf/rss-ru-top",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "Meduza",
+          "url": "https://meduza.io/rss/all",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//aside|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "advanced"
+        }
+      ]
+    },
+    {
+      "language": "sv",
+      "languageName": "Swedish",
+      "sources": [
+        {
+          "name": "SVT Nyheter",
+          "url": "https://www.svt.se/nyheter/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "8 Sidor (lätt svenska)",
+          "url": "https://8sidor.se/feed/",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=30",
+          "category": "news-simple",
+          "level": "beginner"
+        }
+      ]
+    },
+    {
+      "language": "tr",
+      "languageName": "Turkish",
+      "sources": [
+        {
+          "name": "BBC Türkçe",
+          "url": "https://feeds.bbci.co.uk/turkce/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "DW Türkçe",
+          "url": "https://rss.dw.com/rdf/rss-tur-all",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        }
+      ]
+    },
+    {
+      "language": "uk",
+      "languageName": "Ukrainian",
+      "sources": [
+        {
+          "name": "BBC Ukrainian",
+          "url": "https://feeds.bbci.co.uk/ukrainian/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "DW Ukrainian",
+          "url": "https://rss.dw.com/rdf/rss-ukr-all",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        }
+      ]
+    },
+    {
+      "language": "vi",
+      "languageName": "Vietnamese",
+      "sources": [
+        {
+          "name": "BBC Vietnamese",
+          "url": "https://feeds.bbci.co.uk/vietnamese/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "VnExpress",
+          "url": "https://vnexpress.net/rss/tin-moi-nhat.rss",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        }
+      ]
+    },
+    {
+      "language": "zh",
+      "languageName": "Chinese",
+      "sources": [
+        {
+          "name": "BBC 中文",
+          "url": "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        },
+        {
+          "name": "DW 中文",
+          "url": "https://rss.dw.com/rdf/rss-chi-all",
+          "articleSectionTags": "article",
+          "filterTags": "//img|//script|//figure|//iframe",
+          "options": "max_links=50",
+          "category": "news",
+          "level": "intermediate"
+        }
+      ]
+    }
+  ]
+}
