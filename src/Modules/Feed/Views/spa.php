@@ -43,10 +43,10 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 </div>
 
 <!-- Main Alpine.js container -->
-<div id="feed-manager-app" x-data="{ get store() { return $store.feedManager; } }" x-cloak>
+<div id="feed-manager-app" x-data x-cloak>
 
     <!-- Loading state -->
-    <div x-show="store.isLoading && store.viewMode === 'list'" class="has-text-centered py-6">
+    <div x-show="$store.feedManager.isLoading && $store.feedManager.viewMode === 'list'" class="has-text-centered py-6">
         <span class="icon is-large">
             <?php echo IconHelper::render('loader-2', ['class' => 'animate-spin', 'alt' => 'Loading']); ?>
         </span>
@@ -56,7 +56,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
     <!-- ===================================================================
          FEED LIST VIEW
          =================================================================== -->
-    <template x-if="store.viewMode === 'list'">
+    <template x-if="$store.feedManager.viewMode === 'list'">
         <div>
             <!-- Action buttons -->
             <?php
@@ -66,7 +66,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                     'label' => 'New Feed',
                     'icon' => 'circle-plus',
                     'class' => 'is-primary',
-                    'attrs' => '@click.prevent="store.showCreateForm()"'
+                    'attrs' => '@click.prevent="$store.feedManager.showCreateForm()"'
                 ],
                 ['url' => '/feeds/wizard', 'label' => 'Feed Wizard', 'icon' => 'wand-2'],
             ]);
@@ -244,7 +244,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
     <!-- ===================================================================
          ARTICLES VIEW
          =================================================================== -->
-    <template x-if="store.viewMode === 'articles'">
+    <template x-if="$store.feedManager.viewMode === 'articles'">
         <div x-data="articleList()">
             <!-- Header -->
             <div class="level mb-4">
@@ -426,7 +426,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
     <!-- ===================================================================
          CREATE/EDIT FORM VIEW
          =================================================================== -->
-    <template x-if="store.viewMode === 'create' || store.viewMode === 'edit'">
+    <template x-if="$store.feedManager.viewMode === 'create' || $store.feedManager.viewMode === 'edit'">
         <div x-data="feedForm()">
             <!-- Header -->
             <div class="level mb-4">

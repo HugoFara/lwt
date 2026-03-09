@@ -146,14 +146,40 @@ class FeedWizardController
     {
         $this->initWizardSession();
 
-        PageLayoutHelper::renderPageStart('Feed Wizard - Step 1', true);
+        PageLayoutHelper::renderPageStart('Add a Feed', true);
 
         $errorMessage = InputValidator::has('err') ? true : null;
         $rssUrl = $this->wizardSession->getRssUrl() ?: null;
+        $languages = $this->languageFacade->getLanguagesArray();
+        $curatedFeeds = $this->loadCuratedFeeds();
 
         include $this->viewPath . 'wizard_step1.php';
 
         PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Load curated feeds from the JSON registry.
+     *
+     * @return array<int, array{language: string, languageName: string,
+     *     sources: list<array{name: string, url: string, articleSectionTags: string,
+     *     filterTags: string, options: string, category: string, level: string}>}>
+     */
+    private function loadCuratedFeeds(): array
+    {
+        $path = dirname(__DIR__, 4) . '/data/curated_feeds.json';
+        if (!file_exists($path)) {
+            return [];
+        }
+        $json = file_get_contents($path);
+        if ($json === false) {
+            return [];
+        }
+        $data = json_decode($json, true);
+        if (!is_array($data) || !isset($data['feeds'])) {
+            return [];
+        }
+        return $data['feeds'];
     }
 
     /**
