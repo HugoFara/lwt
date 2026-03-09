@@ -111,7 +111,9 @@ class WebPageExtractor
 
         // Plain text files (no HTML tags) — return directly
         if ($this->isPlainText($html)) {
-            $text = $this->cleanText($html);
+            $html = $this->stripGutenbergBoilerplate($html);
+            $text = $this->unwrapHardLineBreaks($html);
+            $text = $this->cleanText($text);
             $title = $this->titleFromUrl($url);
             return [
                 'title' => $title,
@@ -514,6 +516,79 @@ class WebPageExtractor
         }
 
         return $best;
+    }
+
+    /**
+     * Strip Project Gutenberg header and footer boilerplate.
+     *
+     * Gutenberg plain text files have a preamble ending with
+     * "*** START OF THE PROJECT GUTENBERG EBOOK ..." and a footer
+     * starting with "*** END OF THE PROJECT GUTENBERG EBOOK ...".
+     *
+     * @param string $text Raw Gutenberg text
+     *
+     * @return string Text with boilerplate removed (unchanged if no markers found)
+     */
+    private function stripGutenbergBoilerplate(string $text): string
+    {
+        // Strip header: everything up to and including the START marker line
+        $text = (string) preg_replace(
+            '/\A.*\*{3}\s*START OF (?:THE |THIS )?PROJECT GUTENBERG[^\n]*\n/si',
+            '',
+            $text
+        );
+
+        // Strip footer: everything from the END marker line onward
+        $text = (string) preg_replace(
+            '/\n\*{3}\s*END OF (?:THE |THIS )?PROJECT GUTENBERG.*\z/si',
+            '',
+            $text
+        );
+
+        return $text;
+    }
+
+    /**
+     * Unwrap hard line breaks typical of plain text files (e.g. ~72-char wraps).
+     *
+     * Joins consecutive non-blank lines into paragraphs. Blank lines are
+     * treated as paragraph separators.
+     *
+     * @param string $text Text with hard line breaks
+     *
+     * @return string Text with natural paragraphs
+     */
+    private function unwrapHardLineBreaks(string $text): string
+    {
+        $lines = explode("\n", $text);
+        $paragraphs = [];
+        $buffer = '';
+
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+
+            if ($trimmed === '') {
+                // Blank line = paragraph break
+                if ($buffer !== '') {
+                    $paragraphs[] = $buffer;
+                    $buffer = '';
+                }
+                $paragraphs[] = '';
+                continue;
+            }
+
+            if ($buffer === '') {
+                $buffer = $trimmed;
+            } else {
+                $buffer .= ' ' . $trimmed;
+            }
+        }
+
+        if ($buffer !== '') {
+            $paragraphs[] = $buffer;
+        }
+
+        return implode("\n", $paragraphs);
     }
 
     /**
