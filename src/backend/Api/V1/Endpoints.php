@@ -77,6 +77,7 @@ class Endpoints
         'texts' => ['GET', 'POST', 'PUT'],
         'texts/extract-url' => ['POST'],
         'texts/library-search' => ['GET'],
+        'texts/library-preview' => ['GET'],
         'texts/statistics' => ['GET'],
         'texts/scoring' => ['GET'],
         'texts/scoring/recommended' => ['GET'],

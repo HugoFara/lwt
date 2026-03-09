@@ -558,11 +558,19 @@ $base = UrlUtilities::getBasePath();
                         <div class="box p-3 mb-2" style="cursor: default;">
                             <div class="is-flex is-justify-content-space-between is-align-items-start">
                                 <div style="flex: 1; min-width: 0;">
-                                    <p
-                                        class="has-text-weight-semibold is-size-6"
-                                        x-text="book.title"
-                                        style="overflow: hidden; text-overflow: ellipsis;"
-                                    ></p>
+                                    <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
+                                        <p
+                                            class="has-text-weight-semibold is-size-6"
+                                            x-text="book.title"
+                                            style="overflow: hidden; text-overflow: ellipsis;"
+                                        ></p>
+                                        <span
+                                            x-show="book.difficultyTier"
+                                            class="tag is-rounded is-small"
+                                            :class="tierClass(book.difficultyTier || '')"
+                                            x-text="tierLabel(book.difficultyTier || '')"
+                                        ></span>
+                                    </div>
                                     <p
                                         class="has-text-grey is-size-7"
                                         x-text="formatAuthors(book.authors)"
@@ -571,16 +579,59 @@ $base = UrlUtilities::getBasePath();
                                         <span x-text="formatDownloads(book.downloadCount)"></span> downloads
                                     </p>
                                 </div>
-                                <button
-                                    @click="importBook(book)"
-                                    class="button is-primary is-small ml-3"
-                                    :class="{ 'is-loading': importing === book.id }"
-                                    :disabled="importing !== null"
-                                >
-                                    <span class="icon"><i data-lucide="download"></i></span>
-                                    <span>Import</span>
-                                </button>
+                                <div class="buttons are-small ml-3" style="flex-shrink: 0;">
+                                    <button
+                                        @click="togglePreview(book)"
+                                        class="button is-info is-outlined is-small"
+                                        :class="{ 'is-loading': previewLoading && previewBookId === book.id }"
+                                        :disabled="previewLoading && previewBookId === book.id"
+                                        title="Analyze difficulty"
+                                    >
+                                        <span class="icon"><i data-lucide="bar-chart-2"></i></span>
+                                    </button>
+                                    <button
+                                        @click="importBook(book)"
+                                        class="button is-primary is-small"
+                                        :class="{ 'is-loading': importing === book.id }"
+                                        :disabled="importing !== null"
+                                    >
+                                        <span class="icon"><i data-lucide="download"></i></span>
+                                        <span>Import</span>
+                                    </button>
+                                </div>
                             </div>
+                            <!-- Preview panel -->
+                            <template x-if="previewBookId === book.id && !previewLoading">
+                                <div class="mt-3 pt-3" style="border-top: 1px solid #eee;">
+                                    <template x-if="previewError">
+                                        <p class="has-text-danger is-size-7" x-text="previewError"></p>
+                                    </template>
+                                    <template x-if="previewData && !previewError">
+                                        <div>
+                                            <progress
+                                                class="progress is-small mb-2"
+                                                :class="coverageClass(previewData.difficulty_label)"
+                                                :value="previewData.coverage_percent"
+                                                max="100"
+                                            ></progress>
+                                            <p class="is-size-7">
+                                                You know
+                                                <strong x-text="previewData.coverage_percent + '%'"></strong>
+                                                of unique words
+                                                (<span x-text="previewData.known_words"></span>/<span x-text="previewData.total_unique_words"></span>)
+                                            </p>
+                                            <div x-show="previewData.sample_unknown_words.length > 0" class="mt-2">
+                                                <p class="has-text-grey is-size-7 mb-1">Unknown words in sample:</p>
+                                                <div class="tags">
+                                                    <template x-for="w in previewData.sample_unknown_words" :key="w">
+                                                        <span class="tag is-light is-small" x-text="w"></span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
                         </div>
                     </template>
                 </div>

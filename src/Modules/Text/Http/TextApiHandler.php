@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Http;
 
+use Lwt\Modules\Text\Application\Services\DifficultyEstimationService;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
@@ -224,6 +225,8 @@ class TextApiHandler implements ApiRoutableInterface
 
         if ($frag1 === 'library-search') {
             return $this->handleLibrarySearch($params);
+        } elseif ($frag1 === 'library-preview') {
+            return $this->handleLibraryPreview($params);
         } elseif ($frag1 === 'scoring') {
             if ($frag2 === 'recommended') {
                 $langId = (int) ($params['language_id'] ?? 0);
@@ -267,7 +270,7 @@ class TextApiHandler implements ApiRoutableInterface
             }
             return Response::error('Expected "words", "print-items", or "annotation"', 404);
         }
-        return Response::error('Expected "library-search", "scoring", "by-language", "archived-by-language", or text ID', 404);
+        return Response::error('Expected "library-search", "library-preview", "scoring", "by-language", "archived-by-language", or text ID', 404);
     }
 
     public function routePost(array $fragments, array $params): JsonResponse
@@ -366,6 +369,54 @@ class TextApiHandler implements ApiRoutableInterface
 
         if (isset($result['error'])) {
             return Response::error($result['error'], 502);
+        }
+
+        // Add quick difficulty tiers if a language is selected
+        /** @var list<array{id: int, subjects: list<string>}> $resultBooks */
+        $resultBooks = $result['results'] ?? [];
+        if ($languageId > 0 && $resultBooks !== []) {
+            /** @var array<int, list<string>> $subjectsMap */
+            $subjectsMap = [];
+            foreach ($resultBooks as $book) {
+                $subjectsMap[$book['id']] = $book['subjects'] ?? [];
+            }
+
+            $service = new DifficultyEstimationService();
+            $tiers = $service->estimateQuickTiers($languageId, $subjectsMap);
+
+            foreach ($result['results'] as $i => $book) {
+                $result['results'][$i]['difficultyTier'] = $tiers[(int) $book['id']] ?? 'medium';
+            }
+        }
+
+        return Response::success($result);
+    }
+
+    /**
+     * Handle library preview requests (accurate vocabulary coverage).
+     *
+     * @param array $params Request parameters (url, language_id)
+     *
+     * @return JsonResponse
+     */
+    private function handleLibraryPreview(array $params): JsonResponse
+    {
+        $url = trim((string) ($params['url'] ?? ''));
+        $languageId = (int) ($params['language_id'] ?? 0);
+
+        if ($url === '') {
+            return Response::error('url parameter is required', 400);
+        }
+
+        if ($languageId <= 0) {
+            return Response::error('language_id is required', 400);
+        }
+
+        $service = new DifficultyEstimationService();
+        $result = $service->analyzeTextSample($url, $languageId);
+
+        if (isset($result['error'])) {
+            return Response::error($result['error'], 422);
         }
 
         return Response::success($result);

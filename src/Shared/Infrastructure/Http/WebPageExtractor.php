@@ -532,8 +532,9 @@ class WebPageExtractor
     private function stripGutenbergBoilerplate(string $text): string
     {
         // Strip header: everything up to and including the START marker line
+        // Use non-greedy .*? so we match the FIRST occurrence, not the last
         $text = (string) preg_replace(
-            '/\A.*\*{3}\s*START OF (?:THE |THIS )?PROJECT GUTENBERG[^\n]*\n/si',
+            '/\A.*?\*{3}\s*START OF (?:THE |THIS )?PROJECT GUTENBERG[^\n]*\n/si',
             '',
             $text
         );

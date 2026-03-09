@@ -19,6 +19,7 @@ interface GutenbergBook {
   subjects: string[];
   downloadCount: number;
   textUrl: string;
+  difficultyTier?: 'easy' | 'medium' | 'hard';
 }
 
 interface SearchResponse {
@@ -26,6 +27,15 @@ interface SearchResponse {
   count: number;
   next: boolean;
   error?: string;
+}
+
+interface PreviewData {
+  total_unique_words: number;
+  known_words: number;
+  unknown_words: number;
+  coverage_percent: number;
+  difficulty_label: string;
+  sample_unknown_words: string[];
 }
 
 interface LibrarySearchData {
@@ -39,12 +49,20 @@ interface LibrarySearchData {
   error: string;
   searched: boolean;
   importing: number | null;
+  previewBookId: number | null;
+  previewLoading: boolean;
+  previewData: PreviewData | null;
+  previewError: string;
 
   search(): Promise<void>;
   loadMore(): Promise<void>;
   importBook(book: GutenbergBook): void;
+  togglePreview(book: GutenbergBook): Promise<void>;
   formatAuthors(authors: string[]): string;
   formatDownloads(count: number): string;
+  tierLabel(tier: string): string;
+  tierClass(tier: string): string;
+  coverageClass(label: string): string;
   close(): void;
 }
 
@@ -63,6 +81,10 @@ export function librarySearchData(): LibrarySearchData {
     error: '',
     searched: false,
     importing: null,
+    previewBookId: null,
+    previewLoading: false,
+    previewData: null,
+    previewError: '',
 
     async search() {
       const q = this.query.trim();
@@ -151,6 +173,51 @@ export function librarySearchData(): LibrarySearchData {
       window.location.href = `${basePath}/texts/new?${params}`;
     },
 
+    async togglePreview(book: GutenbergBook) {
+      // Toggle off if already previewing this book
+      if (this.previewBookId === book.id) {
+        this.previewBookId = null;
+        this.previewData = null;
+        this.previewError = '';
+        return;
+      }
+
+      this.previewBookId = book.id;
+      this.previewLoading = true;
+      this.previewData = null;
+      this.previewError = '';
+
+      try {
+        const configEl = document.getElementById('home-warnings-config');
+        const config = configEl ? JSON.parse(configEl.textContent || '{}') : {};
+        const langId = config.currentLanguageId || 0;
+
+        const params = new URLSearchParams({
+          url: book.textUrl,
+          language_id: String(langId),
+        });
+
+        const response = await fetch(`/api/v1/texts/library-preview?${params}`);
+        const data = await response.json();
+
+        // Check that we're still previewing the same book
+        if (this.previewBookId !== book.id) return;
+
+        if (!response.ok || data.error) {
+          this.previewError = data.error || 'Could not analyze this text.';
+          return;
+        }
+
+        this.previewData = data as unknown as PreviewData;
+      } catch {
+        if (this.previewBookId === book.id) {
+          this.previewError = 'Could not reach the server.';
+        }
+      } finally {
+        this.previewLoading = false;
+      }
+    },
+
     formatAuthors(authors: string[]): string {
       if (authors.length === 0) return 'Unknown author';
       return authors.join(', ');
@@ -162,8 +229,27 @@ export function librarySearchData(): LibrarySearchData {
       return String(count);
     },
 
+    tierLabel(tier: string): string {
+      return tier === 'easy' ? 'Easy' : tier === 'hard' ? 'Hard' : 'Medium';
+    },
+
+    tierClass(tier: string): string {
+      if (tier === 'easy') return 'is-success is-light';
+      if (tier === 'hard') return 'is-danger is-light';
+      return 'is-warning is-light';
+    },
+
+    coverageClass(label: string): string {
+      if (label === 'easy') return 'is-success';
+      if (label === 'hard') return 'is-danger';
+      return 'is-warning';
+    },
+
     close() {
       this.open = false;
+      this.previewBookId = null;
+      this.previewData = null;
+      this.previewError = '';
     },
   };
 }
