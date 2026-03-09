@@ -19,7 +19,7 @@
         {
           "name": "Al Jazeera Arabic",
           "url": "https://www.aljazeera.net/aljazeerarss/a7c186be-1baa-4bd4-9d80-a84db769f779/73d0e1b4-532f-45ef-b135-bfdff8b8cab9",
-          "articleSectionTags": "article",
+          "articleSectionTags": "//div[contains(@class,'wysiwyg')]",
           "filterTags": "//img|//script|//figure|//iframe|//aside",
           "options": "max_links=50",
           "category": "news",

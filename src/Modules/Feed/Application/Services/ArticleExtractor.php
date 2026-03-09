@@ -155,6 +155,14 @@ class ArticleExtractor
             $hasInlineText
         );
 
+        // Fallback: try //main then //body if primary selector found nothing
+        if ($text === '' && $effectiveSection !== 'main' && $effectiveSection !== '//main') {
+            $text = $this->extractWithXPath($dom, '//main', $filterTagsList, $hasInlineText);
+        }
+        if ($text === '' && $effectiveSection !== 'body' && $effectiveSection !== '//body') {
+            $text = $this->extractWithXPath($dom, '//body', $filterTagsList, $hasInlineText);
+        }
+
         if ($text === '') {
             return null;
         }
@@ -263,7 +271,13 @@ class ArticleExtractor
             return $converted !== false ? $converted : $htmlString;
         }
 
-        $result = mb_convert_encoding($htmlString, 'HTML-ENTITIES', $encoding);
+        // Convert non-ASCII characters to HTML numeric entities
+        // (mb_convert_encoding with HTML-ENTITIES was removed in PHP 8.2)
+        $result = mb_encode_numericentity(
+            $htmlString,
+            [0x80, 0x10FFFF, 0, 0x1FFFFF],
+            $encoding
+        );
         return $result !== false ? $result : $htmlString;
     }
 
@@ -325,7 +339,7 @@ class ArticleExtractor
         }
 
         foreach ($header as $k => $v) {
-            if (strtolower($k) !== 'content-type') {
+            if (!is_string($k) || strtolower($k) !== 'content-type') {
                 continue;
             }
 
@@ -534,7 +548,12 @@ class ArticleExtractor
         }
 
         foreach ($articleTags as $articleTag) {
-            $queryResult = @$selector->query(trim($articleTag));
+            $tag = trim($articleTag);
+            // Normalize bare tag names (e.g. "article") to XPath "//article"
+            if ($tag !== '' && preg_match('/^[a-zA-Z][a-zA-Z0-9]*$/', $tag)) {
+                $tag = '//' . $tag;
+            }
+            $queryResult = @$selector->query($tag);
             if ($queryResult === false) {
                 continue;
             }

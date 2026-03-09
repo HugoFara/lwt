@@ -256,7 +256,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                         </button>
                     </div>
                     <div class="level-item">
-                        <h2 class="title is-4" x-text="feed?.name || 'Articles'"></h2>
+                        <h2 class="title is-4" x-text="feed ? feed.name : 'Articles'"></h2>
                     </div>
                 </div>
             </div>
@@ -369,7 +369,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                                        class="has-text-weight-semibold"></a>
                                     <p
                                         class="is-size-7 has-text-grey"
-                                        x-text="article.description.substring(0, 100) + '...'"
+                                        x-text="truncateText(article.description, 100)"
                                     ></p>
                                 </td>
                                 <td>

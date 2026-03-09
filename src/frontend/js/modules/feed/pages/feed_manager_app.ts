@@ -221,6 +221,12 @@ function articleListComponent() {
       await this.store.resetErrorArticles();
     },
 
+    truncateText(text: string, maxLength: number): string {
+      if (!text) return '';
+      if (text.length <= maxLength) return text;
+      return text.substring(0, maxLength) + '...';
+    },
+
     goToPage(page: number): void {
       this.store.goToArticlesPage(page);
     }

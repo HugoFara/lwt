@@ -12,7 +12,7 @@
  * - $errorMessage: string|null error message to display
  * - $rssUrl: string|null previously entered RSS URL
  * - $editFeedId: int|null ID of feed being edited
- * - $languages: array of language data [{LgID, LgName}, ...]
+ * - $languages: array of language data [{id, name}, ...]
  * - $curatedFeeds: array of curated feed groups [{language, languageName, sources: [...]}]
  *
  * PHP version 8.1
@@ -34,9 +34,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
 
 // Build JSON config for Alpine.js
 $languagesJson = array_map(
-    /** @param array{LgID: int|string, LgName: string} $lang */
+    /** @param array{id: int, name: string} $lang */
     function (array $lang): array {
-        return ['id' => (int)$lang['LgID'], 'name' => $lang['LgName']];
+        return ['id' => (int)$lang['id'], 'name' => $lang['name']];
     },
     $languages ?? []
 );
@@ -314,8 +314,8 @@ $configJson = json_encode([
                                 <select name="NfLgID" id="manual_NfLgID" required>
                                     <option value="">[Select...]</option>
                                     <?php foreach ($languages as $lang) : ?>
-                                    <option value="<?php echo (int)$lang['LgID']; ?>">
-                                        <?php echo htmlspecialchars($lang['LgName'], ENT_QUOTES, 'UTF-8'); ?>
+                                    <option value="<?php echo (int)$lang['id']; ?>">
+                                        <?php echo htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8'); ?>
                                     </option>
                                     <?php endforeach; ?>
                                 </select>

@@ -204,6 +204,11 @@ function createFeedManagerStore(): FeedManagerStoreState {
       }
 
       this.isLoading = false;
+
+      // Re-initialize icons after Alpine renders the new content
+      requestAnimationFrame(() => {
+        document.dispatchEvent(new CustomEvent('lwt:contentLoaded'));
+      });
     },
 
     async loadArticles(feedId: number, params: Partial<ArticleParams> = {}): Promise<void> {
@@ -226,6 +231,11 @@ function createFeedManagerStore(): FeedManagerStoreState {
       }
 
       this.isLoadingArticles = false;
+
+      // Re-initialize icons after Alpine renders the new content
+      requestAnimationFrame(() => {
+        document.dispatchEvent(new CustomEvent('lwt:contentLoaded'));
+      });
     },
 
     // =========================================================================
@@ -446,6 +456,11 @@ function createFeedManagerStore(): FeedManagerStoreState {
       this.articles = [];
       this.selectedArticleIds = [];
       this.editingFeed = null;
+
+      // Re-initialize icons after Alpine renders the view
+      requestAnimationFrame(() => {
+        document.dispatchEvent(new CustomEvent('lwt:contentLoaded'));
+      });
     },
 
     showArticles(feed: Feed): void {

@@ -154,14 +154,7 @@ class FeedEditController
      */
     public function newFeed(array $params): void
     {
-        $currentLang = Validation::language(
-            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
-        );
-
-        $langName = $this->languageFacade->getLanguageName($currentLang);
-        PageLayoutHelper::renderPageStart('New Feed - ' . $langName, true);
-
-        // Handle form submission
+        // Handle form submission before any output
         if (InputValidator::has('save_feed')) {
             $data = [
                 'NfLgID' => InputValidator::getString('NfLgID'),
@@ -177,6 +170,13 @@ class FeedEditController
             header('Location: ' . url('/feeds/' . $feedId . '/edit'));
             exit;
         }
+
+        $currentLang = Validation::language(
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
+        );
+
+        $langName = $this->languageFacade->getLanguageName($currentLang);
+        PageLayoutHelper::renderPageStart('New Feed - ' . $langName, true);
 
         $this->showNewForm((int)$currentLang);
         PageLayoutHelper::renderPageEnd();
@@ -201,10 +201,7 @@ class FeedEditController
             exit;
         }
 
-        $langName = $this->languageFacade->getLanguageName($feed['NfLgID']);
-        PageLayoutHelper::renderPageStart('Edit Feed - ' . $langName, true);
-
-        // Handle form submission
+        // Handle form submission before any output
         if (InputValidator::has('update_feed')) {
             $data = [
                 'NfLgID' => InputValidator::getString('NfLgID'),
@@ -220,6 +217,9 @@ class FeedEditController
             header('Location: ' . url('/feeds/manage'));
             exit;
         }
+
+        $langName = $this->languageFacade->getLanguageName($feed['NfLgID']);
+        PageLayoutHelper::renderPageStart('Edit Feed - ' . $langName, true);
 
         $this->showEditForm($id);
         PageLayoutHelper::renderPageEnd();

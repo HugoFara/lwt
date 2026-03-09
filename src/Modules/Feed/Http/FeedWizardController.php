@@ -150,7 +150,7 @@ class FeedWizardController
 
         $errorMessage = InputValidator::has('err') ? true : null;
         $rssUrl = $this->wizardSession->getRssUrl() ?: null;
-        $languages = $this->languageFacade->getLanguagesArray();
+        $languages = $this->languageFacade->getLanguagesForSelect();
         $curatedFeeds = $this->loadCuratedFeeds();
 
         include $this->viewPath . 'wizard_step1.php';
