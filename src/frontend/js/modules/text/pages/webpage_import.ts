@@ -93,7 +93,7 @@ async function fetchWebpage(): Promise<void> {
       return;
     }
 
-    const data = result.data as ExtractUrlResponse;
+    const data = result as ExtractUrlResponse;
 
     // Populate form fields
     setInputByName('TxTitle', data.title);
@@ -127,36 +127,48 @@ async function fetchWebpage(): Promise<void> {
  * Check for import_url query parameter and auto-trigger import.
  *
  * Used when redirecting from library search to pre-populate the form.
+ * Waits for Alpine.js to initialize before switching tabs and fetching.
  */
 function checkAutoImport(): void {
   const params = new URLSearchParams(window.location.search);
   const importUrl = params.get('import_url');
   if (!importUrl) return;
 
-  const urlInput = document.getElementById('webpageUrl') as HTMLInputElement | null;
-  if (!urlInput) return;
+  // Wait for Alpine.js to initialize and bind event handlers
+  const doImport = (): void => {
+    const urlInput = document.getElementById('webpageUrl') as HTMLInputElement | null;
+    if (!urlInput) return;
 
-  // Pre-fill the URL and switch to URL import mode
-  urlInput.value = importUrl;
+    // Pre-fill the URL
+    urlInput.value = importUrl;
 
-  // Also pre-fill title if provided (as fallback)
-  const importTitle = params.get('import_title');
-  if (importTitle) {
-    setInputByName('TxTitle', importTitle);
+    // Also pre-fill title if provided (as fallback)
+    const importTitle = params.get('import_title');
+    if (importTitle) {
+      setInputByName('TxTitle', importTitle);
+    }
+
+    // Switch the form to URL mode
+    const formEl = document.querySelector<HTMLFormElement>('form[x-data]');
+    if (formEl) {
+      formEl.dispatchEvent(
+        new CustomEvent('auto-import-url', { bubbles: true }),
+      );
+    }
+
+    // Auto-trigger the fetch after Alpine updates the DOM
+    setTimeout(() => {
+      fetchWebpage();
+    }, 200);
+  };
+
+  // Alpine dispatches 'alpine:init' before processing, 'alpine:initialized' after
+  if (document.querySelector('[x-data]._x_dataStack')) {
+    // Alpine already initialized
+    doImport();
+  } else {
+    document.addEventListener('alpine:initialized', () => doImport(), { once: true });
   }
-
-  // Switch the form to URL mode and trigger fetch
-  const formEl = document.querySelector<HTMLFormElement>('form[x-data]');
-  if (formEl) {
-    formEl.dispatchEvent(
-      new CustomEvent('auto-import-url', { bubbles: true }),
-    );
-  }
-
-  // Auto-trigger the fetch after a short delay (let Alpine.js update)
-  setTimeout(() => {
-    fetchWebpage();
-  }, 200);
 }
 
 /**

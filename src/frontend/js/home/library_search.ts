@@ -9,6 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
+import { initIcons } from '@shared/icons/lucide_icons';
 
 interface GutenbergBook {
   id: number;
@@ -21,11 +22,10 @@ interface GutenbergBook {
 }
 
 interface SearchResponse {
-  data: {
-    results: GutenbergBook[];
-    count: number;
-    next: boolean;
-  };
+  results: GutenbergBook[];
+  count: number;
+  next: boolean;
+  error?: string;
 }
 
 interface LibrarySearchData {
@@ -88,16 +88,15 @@ export function librarySearchData(): LibrarySearchData {
         const response = await fetch(`/api/v1/texts/library-search?${params}`);
         const data: SearchResponse = await response.json();
 
-        if (!response.ok) {
-          this.error =
-            (data as unknown as { error?: string }).error ||
-            'Search failed. Please try again.';
+        if (!response.ok || data.error) {
+          this.error = data.error || 'Search failed. Please try again.';
           return;
         }
 
-        this.results = data.data.results;
-        this.totalCount = data.data.count;
-        this.hasMore = data.data.next;
+        this.results = data.results;
+        this.totalCount = data.count;
+        this.hasMore = data.next;
+        requestAnimationFrame(() => initIcons());
       } catch {
         this.error = 'Could not reach the server. Please try again.';
       } finally {
@@ -125,9 +124,10 @@ export function librarySearchData(): LibrarySearchData {
         const response = await fetch(`/api/v1/texts/library-search?${params}`);
         const data: SearchResponse = await response.json();
 
-        if (response.ok) {
-          this.results = this.results.concat(data.data.results);
-          this.hasMore = data.data.next;
+        if (response.ok && !data.error) {
+          this.results = this.results.concat(data.results);
+          this.hasMore = data.next;
+          requestAnimationFrame(() => initIcons());
         }
       } catch {
         // Silently fail on load-more
@@ -173,6 +173,14 @@ export function librarySearchData(): LibrarySearchData {
  */
 export function initLibrarySearch(): void {
   Alpine.data('librarySearch', librarySearchData);
+
+  // Delegated click handler for the search card (CSP-safe, no inline JS)
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-action="open-library-search"]')) {
+      document.dispatchEvent(new CustomEvent('open-library-search'));
+    }
+  });
 }
 
 // Register immediately (before Alpine.start())

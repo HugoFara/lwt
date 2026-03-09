@@ -339,6 +339,27 @@ class UrlUtilities
      */
     private static function isPublicIp(string $ip): bool
     {
+        // IPv4-mapped IPv6 addresses (::ffff:x.x.x.x) are flagged as reserved
+        // by PHP's FILTER_FLAG_NO_RES_RANGE, but they're just IPv4 addresses
+        // in IPv6 notation. Extract and validate the IPv4 part instead.
+        if (str_starts_with($ip, '::ffff:') && substr_count($ip, ':') <= 4) {
+            $ipv4Part = substr($ip, 7);
+            // The IPv4 part may be in hex notation (e.g. 9813:862f) or dotted decimal
+            if (filter_var($ipv4Part, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
+                return self::isPublicIp($ipv4Part);
+            }
+            // Hex-encoded IPv4 (e.g. ::ffff:9813:862f → 152.19.134.47)
+            $hexParts = explode(':', $ipv4Part);
+            if (count($hexParts) === 2) {
+                $hi = (int) hexdec($hexParts[0]);
+                $lo = (int) hexdec($hexParts[1]);
+                $decoded = (($hi >> 8) & 0xFF) . '.' . ($hi & 0xFF) . '.' . (($lo >> 8) & 0xFF) . '.' . ($lo & 0xFF);
+                if (filter_var($decoded, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
+                    return self::isPublicIp($decoded);
+                }
+            }
+        }
+
         // Use PHP's built-in filters to check for private and reserved ranges
         // FILTER_FLAG_NO_PRIV_RANGE blocks: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7
         // FILTER_FLAG_NO_RES_RANGE blocks: 0.0.0.0/8, 169.254.0.0/16, 127.0.0.0/8, 240.0.0.0/4,
