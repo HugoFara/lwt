@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Text\Http;
 
 use Lwt\Modules\Text\Application\Services\DifficultyEstimationService;
+use Lwt\Modules\Text\Application\Services\GutenbergSuggestionService;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
@@ -223,7 +224,9 @@ class TextApiHandler implements ApiRoutableInterface
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
-        if ($frag1 === 'library-search') {
+        if ($frag1 === 'gutenberg-suggestions') {
+            return $this->handleGutenbergSuggestions($params);
+        } elseif ($frag1 === 'library-search') {
             return $this->handleLibrarySearch($params);
         } elseif ($frag1 === 'library-preview') {
             return $this->handleLibraryPreview($params);
@@ -270,7 +273,7 @@ class TextApiHandler implements ApiRoutableInterface
             }
             return Response::error('Expected "words", "print-items", or "annotation"', 404);
         }
-        return Response::error('Expected "library-search", "library-preview", "scoring", "by-language", "archived-by-language", or text ID', 404);
+        return Response::error('Expected "gutenberg-suggestions", "library-search", "library-preview", "scoring", "by-language", "archived-by-language", or text ID', 404);
     }
 
     public function routePost(array $fragments, array $params): JsonResponse
@@ -345,6 +348,32 @@ class TextApiHandler implements ApiRoutableInterface
     // =========================================================================
     // Library Search (Project Gutenberg)
     // =========================================================================
+
+    /**
+     * Handle Gutenberg suggestion requests (popular books by language).
+     *
+     * @param array $params Request parameters (language_id, page)
+     *
+     * @return JsonResponse
+     */
+    private function handleGutenbergSuggestions(array $params): JsonResponse
+    {
+        $languageId = (int) ($params['language_id'] ?? 0);
+        $page = max(1, (int) ($params['page'] ?? 1));
+
+        if ($languageId <= 0) {
+            return Response::error('language_id is required', 400);
+        }
+
+        $service = new GutenbergSuggestionService();
+        $result = $service->getSuggestions($languageId, $page);
+
+        if (isset($result['error'])) {
+            return Response::error($result['error'], 502);
+        }
+
+        return Response::success($result);
+    }
 
     /**
      * Handle library search requests.

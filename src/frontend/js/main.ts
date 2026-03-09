@@ -89,6 +89,7 @@ import './media/audio_player_alpine';
 // Home
 import './home/home_app';
 import './home/library_search';
+import './home/gutenberg_suggestions';
 
 // =============================================================================
 // ASYNC CSS LOADING (CSP-compliant)

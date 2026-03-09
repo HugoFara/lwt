@@ -79,6 +79,90 @@ function renderHomeConfig(?array $lastTextInfo, string $base, int $textCount, in
     <?php
 }
 
+/**
+ * Render the suggestions card grid (reused for onboarding and main page).
+ *
+ * Must be called inside a `gutenbergSuggestions` Alpine scope.
+ *
+ * @return void
+ */
+function renderSuggestionsGrid(): void
+{
+    ?>
+    <!-- Loading state -->
+    <div x-show="loading && books.length === 0" class="has-text-centered py-4">
+        <span class="icon is-large has-text-grey-light">
+            <i data-lucide="loader" style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
+        </span>
+    </div>
+
+    <!-- Error -->
+    <div x-show="error" class="notification is-danger is-light is-size-7" x-text="error"></div>
+
+    <!-- Books grid (horizontal scroll) -->
+    <div
+        :style="books.length > 0
+            ? 'display: flex; flex-wrap: nowrap; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem;'
+            : 'display: none;'"
+    >
+        <template x-for="book in books" :key="book.id">
+            <div
+                class="box p-3"
+                style="flex: 0 0 220px; width: 220px; min-width: 220px; min-height: 140px;
+                    display: flex; flex-direction: column; justify-content: space-between;"
+            >
+                <div>
+                    <div class="is-flex is-align-items-center mb-1" style="gap: 0.4rem;">
+                        <p
+                            class="has-text-weight-semibold is-size-7"
+                            x-text="book.title"
+                            style="overflow: hidden; text-overflow: ellipsis;
+                                display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"
+                        ></p>
+                    </div>
+                    <span
+                        x-show="book.difficultyTier"
+                        class="tag is-rounded mb-1"
+                        style="font-size: 0.65rem;"
+                        :class="tierClass(book.difficultyTier || '')"
+                        x-text="tierLabel(book.difficultyTier || '')"
+                    ></span>
+                    <p
+                        class="has-text-grey is-size-7"
+                        x-text="formatAuthors(book.authors)"
+                        style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                    ></p>
+                </div>
+                <div class="mt-2">
+                    <button
+                        @click="importBook(book)"
+                        class="button is-primary is-small is-fullwidth"
+                        :class="{ 'is-loading': importing === book.id }"
+                        :disabled="importing !== null"
+                    >
+                        <span class="icon"><i data-lucide="download"></i></span>
+                        <span>Import</span>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Load more -->
+    <div x-show="hasMore && books.length > 0" class="has-text-centered mt-2">
+        <button
+            @click="loadMore()"
+            class="button is-small is-light"
+            :class="{ 'is-loading': loading }"
+            :disabled="loading"
+        >
+            <span class="icon"><i data-lucide="chevron-right"></i></span>
+            <span>Load more</span>
+        </button>
+    </div>
+    <?php
+}
+
 // Validate injected variables from controller
 assert(isset($dashboardData) && is_array($dashboardData));
 assert(isset($languages) && is_array($languages));
@@ -150,14 +234,29 @@ $base = UrlUtilities::getBasePath();
     </div>
 </section>
 <?php elseif ($langcnt > 0 && $textCount == 0) : ?>
-<!-- Has language but no texts: Add a text -->
+<!-- Has language but no texts: Add a text + suggestions -->
 <section class="section py-6">
     <div class="container">
-        <div class="has-text-centered">
+        <div class="has-text-centered mb-5">
             <a href="<?php echo $base; ?>/texts/new" class="button is-large is-primary">
                 <span class="icon"><i data-lucide="plus"></i></span>
                 <span>Add a text to read</span>
             </a>
+        </div>
+
+        <!-- Gutenberg suggestions for onboarding -->
+        <div x-data="gutenbergSuggestions" x-cloak>
+            <template x-if="books.length > 0 || loading">
+                <div>
+                    <p class="title is-5 mb-3">
+                        <span class="icon-text">
+                            <span class="icon has-text-warning"><i data-lucide="book-open-text"></i></span>
+                            <span>Popular books to get started</span>
+                        </span>
+                    </p>
+                    <?php renderSuggestionsGrid(); ?>
+                </div>
+            </template>
         </div>
     </div>
 </section>
@@ -289,6 +388,21 @@ $base = UrlUtilities::getBasePath();
                     <p class="mt-3 has-text-weight-semibold">Search Library</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Gutenberg suggestions (second row) -->
+        <div x-data="gutenbergSuggestions" x-cloak class="mt-4">
+            <template x-if="books.length > 0 || loading">
+                <div>
+                    <p class="is-size-6 has-text-grey mb-2">
+                        <span class="icon-text">
+                            <span class="icon"><i data-lucide="book-open-text"></i></span>
+                            <span>Suggested from Project Gutenberg</span>
+                        </span>
+                    </p>
+                    <?php renderSuggestionsGrid(); ?>
+                </div>
+            </template>
         </div>
     </div>
 </section>

@@ -230,6 +230,18 @@ class DifficultyEstimationService
     }
 
     /**
+     * Classify subjects into a difficulty tier (public API).
+     *
+     * @param list<string> $subjects Subject categories
+     *
+     * @return string 'easy'|'medium'|'hard'
+     */
+    public function classifySubjectsPublic(array $subjects): string
+    {
+        return $this->classifySubjects($subjects);
+    }
+
+    /**
      * Classify subject list into a difficulty tier.
      *
      * Picks the most favorable (lowest difficulty) match.

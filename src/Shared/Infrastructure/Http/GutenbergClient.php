@@ -75,6 +75,19 @@ class GutenbergClient
     ];
 
     /**
+     * Browse popular books for a language (no search query).
+     *
+     * @param string $languageCode ISO 639-1 language code (e.g. "en", "fr")
+     * @param int    $page         Page number (1-based)
+     *
+     * @return array{results: list<array>, count: int, next: bool}|array{error: string}
+     */
+    public function browse(string $languageCode, int $page = 1): array
+    {
+        return $this->search('', $languageCode, $page);
+    }
+
+    /**
      * Search Project Gutenberg catalog.
      *
      * @param string      $query        Search query (title or author)
