@@ -369,7 +369,7 @@ class TextApiHandler implements ApiRoutableInterface
         $result = $service->getSuggestions($languageId, $page);
 
         if (isset($result['error'])) {
-            return Response::error($result['error'], 502);
+            return Response::error((string) $result['error'], 502);
         }
 
         return Response::success($result);
@@ -413,9 +413,12 @@ class TextApiHandler implements ApiRoutableInterface
             $service = new DifficultyEstimationService();
             $tiers = $service->estimateQuickTiers($languageId, $subjectsMap);
 
-            foreach ($result['results'] as $i => $book) {
-                $result['results'][$i]['difficultyTier'] = $tiers[(int) $book['id']] ?? 'medium';
+            $enriched = [];
+            foreach ($resultBooks as $book) {
+                $book['difficultyTier'] = $tiers[$book['id']] ?? 'medium';
+                $enriched[] = $book;
             }
+            $result['results'] = $enriched;
         }
 
         return Response::success($result);
