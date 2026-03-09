@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>Learn languages by reading texts you love</strong>
+  <strong>Learn languages by reading — with smart suggestions and built-in definitions</strong>
 </p>
 
 <p align="center">
@@ -21,7 +21,9 @@
 
 ---
 
-**Learning with Texts** (LWT) is a self-hosted web application for language learning through reading. Import any text, click unknown words to see translations, and build vocabulary with spaced repetition.
+**Learning with Texts** (LWT) is a self-hosted web app for language learning through reading. **Import any text you want to study** — a novel, a news article, song lyrics — or let LWT **suggest reading material adapted to your level** from open libraries. Either way, words are enriched with **translations and definitions from open sources**, and you build vocabulary through reading and spaced repetition.
+
+Don't know where to start? LWT suggests books from [Project Gutenberg](https://www.gutenberg.org/) ranked by difficulty, plus curated news feeds in 19 languages. Already have a text you love? Paste it in and start reading. As you mark words, suggestions get smarter and new vocabulary is pre-enriched from [Wiktionary](https://www.wiktionary.org/).
 
 > [!IMPORTANT]
 > This is a **community-maintained fork** with significant improvements over the [official version](https://sourceforge.net/projects/learning-with-texts): modern PHP support (8.1-8.4), smaller database footprint, mobile support, and active development.
@@ -52,11 +54,9 @@ Then open <http://localhost:8010/> in your browser.
 
 ## How It Works
 
-**1. Import a text** — Paste any content you want to read, or import from RSS feeds.
+**1. Pick a text** — Import something you want to read, or browse suggestions matched to your level from Project Gutenberg and curated news feeds.
 
-![Adding French text](https://hugofara.github.io/lwt/assets/images/adding-text.png)
-
-**2. Read and learn** — Unknown words are highlighted. Click any word to see its translation and save it to your vocabulary.
+**2. Read and learn** — Unknown words are highlighted. Click any word to see its translation (pre-loaded from Wiktionary) and save it to your vocabulary.
 
 ![Reading text](https://hugofara.github.io/lwt/assets/images/reading-text.png)
 
@@ -64,40 +64,51 @@ Then open <http://localhost:8010/> in your browser.
 
 ![Reviewing word](https://hugofara.github.io/lwt/assets/images/reviewing-word.png)
 
-Unlike flashcard apps like [Anki](https://apps.ankiweb.net/), LWT keeps words connected to the texts where you found them. We also include an Anki exporter if you want both.
+**4. Keep going** — As you mark words known or unknown, difficulty estimates adapt. Suggestions get smarter, and your next text is always ready.
+
+Unlike flashcard apps like [Anki](https://apps.ankiweb.net/), LWT keeps words connected to the texts where you found them. We include an Anki exporter if you want both.
 
 ## Features
 
-### Core Features
+### Smart Content Suggestions
+
+- **Book suggestions** — Browse Project Gutenberg's catalog, ranked by difficulty for your level
+- **Curated news feeds** — [Ready-to-use RSS sources](data/curated_feeds.json) for 19 languages (Arabic, Chinese, French, German, Japanese, Korean, Spanish, and more)
+- **Difficulty estimation** — Books are classified easy/medium/hard based on subject matter and your known vocabulary
+- **Adaptive recommendations** — Suggestions improve as you learn more words
+
+### Built-in Enrichment
+
+- **Wiktionary definitions** — Starter vocabulary comes pre-enriched with translations and definitions from open sources
+- **Click-to-translate** — Instant dictionary lookups while reading
+- **Bulk translation** — Translate multiple new words at once
+- **Text-to-speech** — Hear pronunciation of words
+
+### Reading & Review
 
 - **40+ languages supported** — Roman, right-to-left, and East-Asian writing systems
-- **Click-to-translate** — Instant dictionary lookups while reading
 - **Audio integration** — Sync audio tracks with your texts
-- **Spaced repetition** — Review words at optimal intervals
+- **Spaced repetition** — Review words at optimal intervals, always in context
 - **Progress tracking** — Statistics to monitor your learning
+- **Multi-word selection** — Click and drag to select phrases
 
-### Community Additions
-
-This fork adds features not in the official LWT:
+### More Features
 
 | Feature | Description |
 | --- | --- |
 | Mobile support | Responsive design for phones and tablets |
-| RSS feeds | Import texts from feeds, with [curated sources](data/curated_feeds.json) for 19 languages |
 | Themes | Customizable appearance |
-| Multi-word selection | Click and drag to select phrases |
-| Bulk translation | Translate multiple new words at once |
-| Text-to-speech | Hear pronunciation of words |
 | Keyboard shortcuts | Navigate efficiently while reading |
 | Video embedding | Include videos from YouTube and other platforms |
 | MeCab integration | Japanese word-by-word translation |
+| Position memory | Resume reading where you left off |
+| Anki export | Export vocabulary to Anki for additional review |
 
 ### Technical Improvements
 
 - **Smaller database** — Optimized schema reduces storage significantly
 - **Long expressions** — Save phrases up to 250 characters (was limited to 9)
 - **Better search** — Improved querying for words and texts
-- **Position memory** — Resume reading where you left off
 - **Modern PHP** — Supports PHP 8.1, 8.2, 8.3, and 8.4
 
 ## Installation
