@@ -100,10 +100,29 @@ echo PageLayoutHelper::buildActionCard($actions);
 <script type="application/json" id="curated-dictionaries-config"><?php echo $curatedDictionariesJson; ?></script>
 <div x-show="isDictionary" x-transition
      <?php echo $activeTab !== 'dictionary' ? 'style="display:none"' : ''; ?>>
-    <div x-data="curatedDictBrowser()" class="box mb-4">
+    <div x-data="curatedDictBrowser" class="box mb-4">
         <p class="mb-4 has-text-grey">
-            Download a tested dictionary for your language, then upload it below.
+            Import a curated dictionary directly, or download it to upload manually.
         </p>
+
+        <!-- Import result notification -->
+        <template x-if="importResult !== null">
+            <div :class="importResult.success ? 'notification is-success is-light' : 'notification is-danger is-light'" class="mb-4">
+                <button class="delete" @click="dismissResult()"></button>
+                <template x-if="importResult.success">
+                    <p>
+                        <strong>Import successful!</strong>
+                        Imported <span x-text="importResult.imported"></span> entries.
+                    </p>
+                </template>
+                <template x-if="!importResult.success">
+                    <p>
+                        <strong>Import failed:</strong>
+                        <span x-text="importResult.error"></span>
+                    </p>
+                </template>
+            </div>
+        </template>
 
         <!-- Language filter + search -->
         <div class="field is-grouped mb-4">
@@ -147,6 +166,14 @@ echo PageLayoutHelper::buildActionCard($actions);
                                     <p class="is-size-7 has-text-grey" x-text="source.notes"></p>
                                 </div>
                                 <footer class="card-footer">
+                                    <a class="card-footer-item has-text-success"
+                                       x-show="source.directDownload"
+                                       @click.prevent="importCurated(source)">
+                                        <span class="icon is-small mr-1" x-show="!isImporting(source.url)">
+                                            <?php echo IconHelper::render('download', ['alt' => 'Import']); ?>
+                                        </span>
+                                        <span x-text="isImporting(source.url) ? 'Importing...' : 'Import'"></span>
+                                    </a>
                                     <a class="card-footer-item has-text-primary"
                                        :href="source.url" target="_blank" rel="noopener">
                                         <span class="icon is-small mr-1">

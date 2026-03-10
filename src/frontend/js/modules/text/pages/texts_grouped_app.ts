@@ -130,19 +130,28 @@ export interface TextsGroupedData {
   loadMoreTexts(langId: number): Promise<void>;
   isLoadingMore(langId: number): boolean;
 
-  // Selection
+  // Summary
+  get summaryText(): string;
+
+  // Selection (CSP-friendly: read IDs from data-* attributes)
   markAll(langId: number, checked: boolean): void;
+  markAllFromEvent(event: Event): void;
+  unmarkAllFromEvent(event: Event): void;
   toggleMark(langId: number, textId: number, checked: boolean): void;
+  toggleMarkFromEvent(event: Event): void;
   isMarked(langId: number, textId: number): boolean;
   hasMarkedInLanguage(langId: number): boolean;
   getMarkedIds(langId: number): number[];
   getMarkedCount(langId: number): number;
 
-  // Actions
+  // Actions (CSP-friendly: read URL/langId from data-* or closest element)
   handleMultiAction(langId: number, event: Event): void;
+  handleMultiActionFromEvent(event: Event): void;
   handleDelete(event: Event, url: string): void;
   handleRestDelete(event: Event, url: string): void;
+  handleRestDeleteFromEvent(event: Event): void;
   handlePostAction(event: Event, url: string): void;
+  handlePostActionFromEvent(event: Event): void;
 
   // Sorting
   handleSortChange(event: Event): void;
@@ -211,6 +220,12 @@ export function textsGroupedData(): TextsGroupedData {
       setTimeout(() => {
         initIcons();
       }, 0);
+    },
+
+    get summaryText(): string {
+      const total = this.languages.reduce((sum, lang) => sum + lang.text_count, 0);
+      const count = this.languages.length;
+      return `${total} texts in ${count} language${count === 1 ? '' : 's'}`;
     },
 
     async loadLanguages() {
@@ -382,6 +397,18 @@ export function textsGroupedData(): TextsGroupedData {
       }
     },
 
+    /** CSP-friendly: read data-lang-id from button, mark all */
+    markAllFromEvent(event: Event) {
+      const el = event.currentTarget as HTMLElement;
+      this.markAll(parseInt(el.dataset.langId || '0', 10), true);
+    },
+
+    /** CSP-friendly: read data-lang-id from button, unmark all */
+    unmarkAllFromEvent(event: Event) {
+      const el = event.currentTarget as HTMLElement;
+      this.markAll(parseInt(el.dataset.langId || '0', 10), false);
+    },
+
     toggleMark(langId: number, textId: number, checked: boolean) {
       const state = this.languageStates.get(langId);
       if (!state) return;
@@ -391,6 +418,14 @@ export function textsGroupedData(): TextsGroupedData {
       } else {
         state.marked.delete(textId);
       }
+    },
+
+    /** CSP-friendly: read data-lang-id and data-text-id from checkbox */
+    toggleMarkFromEvent(event: Event) {
+      const el = event.target as HTMLInputElement;
+      const langId = parseInt(el.dataset.langId || '0', 10);
+      const textId = parseInt(el.dataset.textId || '0', 10);
+      this.toggleMark(langId, textId, el.checked);
     },
 
     isMarked(langId: number, textId: number): boolean {
@@ -491,6 +526,25 @@ export function textsGroupedData(): TextsGroupedData {
       form.submit();
     },
 
+    /** CSP-friendly: read data-lang-id from select */
+    handleMultiActionFromEvent(event: Event) {
+      const select = event.target as HTMLSelectElement;
+      const langId = parseInt(select.dataset.langId || '0', 10);
+      this.handleMultiAction(langId, event);
+    },
+
+    /** CSP-friendly: read data-url from element */
+    handleRestDeleteFromEvent(event: Event) {
+      const el = event.currentTarget as HTMLElement;
+      this.handleRestDelete(event, el.dataset.url || '');
+    },
+
+    /** CSP-friendly: read data-url from element */
+    handlePostActionFromEvent(event: Event) {
+      const el = event.currentTarget as HTMLElement;
+      this.handlePostAction(event, el.dataset.url || '');
+    },
+
     // Sorting
     handleSortChange(event: Event) {
       const select = event.target as HTMLSelectElement;
@@ -577,8 +631,20 @@ export function textsGroupedData(): TextsGroupedData {
 /**
  * Initialize the texts grouped app Alpine.js component.
  */
+/**
+ * Simple dropdown toggle component (CSP-compatible replacement for x-data="{ open: false }").
+ */
+function dropdownToggle() {
+  return {
+    open: false,
+    toggle() { this.open = !this.open; },
+    close() { this.open = false; }
+  };
+}
+
 export function initTextsGroupedAlpine(): void {
   Alpine.data('textsGroupedApp', textsGroupedData);
+  Alpine.data('dropdownToggle', dropdownToggle);
 }
 
 // Expose for global access

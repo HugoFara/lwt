@@ -52,7 +52,7 @@ echo PageLayoutHelper::buildActionCard(
 ?>
 
 <!-- Alpine.js container for grouped texts -->
-<div x-data="textsGroupedApp()" x-init="init()" x-cloak>
+<div x-data="textsGroupedApp" x-cloak>
 
     <!-- Loading state -->
     <div x-show="loading" class="has-text-centered py-6">
@@ -69,9 +69,7 @@ echo PageLayoutHelper::buildActionCard(
                 <div class="level-item">
                     <span
                         class="has-text-weight-semibold"
-                        x-text="languages.reduce((sum, lang) => sum + lang.text_count, 0) +
-                            ' texts in ' + languages.length + ' language' +
-                            (languages.length === 1 ? '' : 's')"></span>
+                        x-text="summaryText"></span>
                 </div>
             </div>
             <div class="level-right">
@@ -134,11 +132,11 @@ echo PageLayoutHelper::buildActionCard(
                     <div class="level-left">
                         <div class="level-item">
                             <div class="buttons are-small">
-                                <button type="button" class="button" @click="markAll(lang.id, true)">
+                                <button type="button" class="button" :data-lang-id="lang.id" @click="markAllFromEvent($event)">
                                     <?php echo IconHelper::render('check-square', ['size' => 14]); ?>
                                     <span class="ml-1">Mark All</span>
                                 </button>
-                                <button type="button" class="button" @click="markAll(lang.id, false)">
+                                <button type="button" class="button" :data-lang-id="lang.id" @click="unmarkAllFromEvent($event)">
                                     <?php echo IconHelper::render('square', ['size' => 14]); ?>
                                     <span class="ml-1">Mark None</span>
                                 </button>
@@ -162,7 +160,8 @@ echo PageLayoutHelper::buildActionCard(
                                     <div class="select is-small">
                                         <select
                                             :disabled="!hasMarkedInLanguage(lang.id)"
-                                            @change="handleMultiAction(lang.id, $event)"
+                                            :data-lang-id="lang.id"
+                                            @change="handleMultiActionFromEvent($event)"
                                             aria-label="Bulk actions for selected texts">
                                             <?php echo SelectOptionsBuilder::forMultipleTextsActions(); ?>
                                         </select>
@@ -184,7 +183,9 @@ echo PageLayoutHelper::buildActionCard(
                                                class="markcheck"
                                                :aria-label="'Select ' + text.title"
                                                :checked="isMarked(lang.id, text.id)"
-                                               @change="toggleMark(lang.id, text.id, $event.target.checked)" />
+                                               :data-lang-id="lang.id"
+                                               :data-text-id="text.id"
+                                               @change="toggleMarkFromEvent($event)" />
                                     </label>
                                     <p class="card-header-title" x-text="text.title"></p>
                                     <div class="card-header-icon card-icons">
@@ -293,15 +294,15 @@ echo PageLayoutHelper::buildActionCard(
                                         <?php echo IconHelper::render('circle-help', ['size' => 16]); ?>
                                         <span>Review</span>
                                     </a>
-                                    <div class="card-footer-item has-dropdown" x-data="{ open: false }">
-                                        <a @click.prevent.stop="open = !open" class="dropdown-trigger-link">
+                                    <div class="card-footer-item has-dropdown" x-data="dropdownToggle">
+                                        <a @click.prevent.stop="toggle()" class="dropdown-trigger-link">
                                             <?php echo IconHelper::render('more-horizontal', ['size' => 16]); ?>
                                             <span>More</span>
                                         </a>
                                         <div
                                             class="dropdown-menu card-dropdown"
                                             x-show="open"
-                                            @click.outside="open = false"
+                                            @click.outside="close()"
                                             x-cloak>
                                             <div class="dropdown-content">
                                                 <a :href="'/text/' + text.id + '/print-plain'" class="dropdown-item">
@@ -310,7 +311,8 @@ echo PageLayoutHelper::buildActionCard(
                                                 </a>
                                                 <a href="#"
                                                    class="dropdown-item"
-                                                   @click.prevent="handlePostAction($event, '/texts/' + text.id + '/archive')">
+                                                   :data-url="'/texts/' + text.id + '/archive'"
+                                                   @click.prevent="handlePostActionFromEvent($event)">
                                                     <?php echo IconHelper::render('archive', ['size' => 14]); ?>
                                                     <span>Archive</span>
                                                 </a>
@@ -321,9 +323,8 @@ echo PageLayoutHelper::buildActionCard(
                                                 <hr class="dropdown-divider">
                                                 <a
                                                     class="dropdown-item has-text-danger"
-                                                    @click.prevent="handleRestDelete(
-                                                        $event, '/texts/' + text.id
-                                                    )">
+                                                    :data-url="'/texts/' + text.id"
+                                                    @click.prevent="handleRestDeleteFromEvent($event)">
                                                     <?php echo IconHelper::render('trash-2', ['size' => 14]); ?>
                                                     <span>Delete</span>
                                                 </a>

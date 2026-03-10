@@ -19,6 +19,7 @@ namespace Lwt\Modules\Dictionary\Http;
 
 use Lwt\Api\V1\Response;
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
+use Lwt\Modules\Dictionary\Application\Services\CuratedDictImportService;
 use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 use Lwt\Modules\Dictionary\Infrastructure\Import\CsvImporter;
 use Lwt\Modules\Dictionary\Infrastructure\Import\JsonImporter;
@@ -45,16 +46,21 @@ class DictionaryApiHandler implements ApiRoutableInterface
 
     private DictionaryFacade $facade;
     private LocalDictionaryService $dictService;
+    private ?CuratedDictImportService $curatedImportService;
 
     /**
      * Create a new DictionaryApiHandler.
      *
-     * @param DictionaryFacade|null $facade Facade instance (optional for BC)
+     * @param DictionaryFacade|null          $facade               Facade instance
+     * @param CuratedDictImportService|null  $curatedImportService Curated import service
      */
-    public function __construct(?DictionaryFacade $facade = null)
-    {
+    public function __construct(
+        ?DictionaryFacade $facade = null,
+        ?CuratedDictImportService $curatedImportService = null
+    ) {
         $this->dictService = new LocalDictionaryService();
         $this->facade = $facade ?? new DictionaryFacade($this->dictService);
+        $this->curatedImportService = $curatedImportService;
     }
 
     // =========================================================================
@@ -133,6 +139,41 @@ class DictionaryApiHandler implements ApiRoutableInterface
         }
 
         return $result;
+    }
+
+    /**
+     * Import a curated dictionary from a remote URL.
+     *
+     * @param array $data Request data:
+     *                    - language_id: int (required)
+     *                    - url: string (required, must be in curated registry)
+     *                    - format: string (required, e.g. 'stardict')
+     *                    - name: string (required)
+     *
+     * @return array{success: bool, dictId?: int, imported?: int, error?: string}
+     */
+    public function importCurated(array $data): array
+    {
+        if ($this->curatedImportService === null) {
+            return ['success' => false, 'error' => 'Curated import service not available'];
+        }
+
+        $langId = (int) ($data['language_id'] ?? 0);
+        $url = trim((string) ($data['url'] ?? ''));
+        $format = trim((string) ($data['format'] ?? 'stardict'));
+        $name = trim((string) ($data['name'] ?? ''));
+
+        if ($langId <= 0) {
+            return ['success' => false, 'error' => 'Language ID is required'];
+        }
+        if ($url === '') {
+            return ['success' => false, 'error' => 'URL is required'];
+        }
+        if ($name === '') {
+            return ['success' => false, 'error' => 'Dictionary name is required'];
+        }
+
+        return $this->curatedImportService->importFromUrl($langId, $url, $format, $name);
     }
 
     /**
@@ -684,6 +725,9 @@ class DictionaryApiHandler implements ApiRoutableInterface
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
+        if ($frag1 === 'import-curated') {
+            return Response::success($this->importCurated($params));
+        }
         if ($frag1 === 'preview') {
             return Response::success($this->formatPreview($params));
         }

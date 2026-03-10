@@ -279,6 +279,21 @@ Key modules:
 - `audio_controller.ts` - Audio playback
 - `translation_api.ts` - Translation integration
 
+### Alpine.js (CSP Build)
+
+This project uses `@alpinejs/csp` (aliased in `vite.config.ts`), which **cannot evaluate inline expressions**. The CSP header (`script-src 'self'` in `SecurityHeaders.php`) enforces this.
+
+**Never do:**
+- `x-data="{ foo: 'bar', count: 0 }"` — inline object literals
+- `@click="count++"` or `@change="show = ['a','b'].includes($event.target.value)"` — complex inline expressions
+- `x-data="componentName()"` with parentheses — function call syntax
+
+**Instead:**
+- Register components via `Alpine.data('name', () => ({ ... }))` in TypeScript
+- Use `x-data="name"` (no parentheses) in HTML
+- Move all logic into component methods: `@click="increment()"`, `@change="updateMode($event)"`
+- Pass config from PHP via `<script type="application/json" id="config-id">` and read it in the component's `init()` method
+
 ### Creating/Editing Themes
 
 1. Create folder `src/frontend/css/themes/your-theme/`

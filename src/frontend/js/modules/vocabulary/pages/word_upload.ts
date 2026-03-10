@@ -11,6 +11,7 @@
  */
 
 import Alpine from 'alpinejs';
+import { apiPost } from '@shared/api/client';
 import { escapeHtml, renderTags } from '@shared/utils/html_utils';
 import { statuses } from '@shared/stores/app_data';
 import { iconHtml } from '@shared/icons/icons';
@@ -376,6 +377,17 @@ interface CuratedDictSource {
   entries: string;
   license: string;
   notes: string;
+  directDownload?: boolean;
+}
+
+/**
+ * API response for curated dictionary import.
+ */
+interface CuratedImportResponse {
+  success: boolean;
+  dictId?: number;
+  imported?: number;
+  error?: string;
 }
 
 /**
@@ -469,6 +481,54 @@ export function curatedDictBrowser() {
       }
 
       return groups;
+    },
+
+    // Import state
+    importingUrl: '' as string,
+    importResult: null as CuratedImportResponse | null,
+
+    /**
+     * Check if a source is currently being imported.
+     */
+    isImporting(url: string): boolean {
+      return this.importingUrl === url;
+    },
+
+    /**
+     * Import a curated dictionary directly into the database.
+     */
+    async importCurated(source: CuratedDictSource): Promise<void> {
+      const langId = (this as Record<string, unknown>).selectedLanguageId as number;
+      if (!langId) {
+        this.importResult = { success: false, error: 'Please select a language first' };
+        return;
+      }
+
+      this.importingUrl = source.url;
+      this.importResult = null;
+
+      const response = await apiPost<CuratedImportResponse>(
+        '/local-dictionaries/import-curated',
+        {
+          language_id: langId,
+          url: source.url,
+          format: source.format,
+          name: source.name,
+        }
+      );
+
+      this.importingUrl = '';
+      this.importResult = response.data ?? {
+        success: false,
+        error: response.error || 'Unknown error'
+      };
+    },
+
+    /**
+     * Dismiss the import result notification.
+     */
+    dismissResult(): void {
+      this.importResult = null;
     }
   };
 }

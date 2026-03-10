@@ -94,6 +94,7 @@ class Endpoints
         'local-dictionaries' => ['GET', 'POST', 'PUT', 'DELETE'],
         'local-dictionaries/lookup' => ['GET'],
         'local-dictionaries/preview' => ['POST'],
+        'local-dictionaries/import-curated' => ['POST'],
         'local-dictionaries/entries' => ['GET', 'POST', 'PUT', 'DELETE'],
         'version' => ['GET'],
 

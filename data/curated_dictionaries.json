@@ -12,7 +12,8 @@
                     "format": "stardict",
                     "entries": "~6,200",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 }
             ]
         },
@@ -26,7 +27,8 @@
                     "format": "stardict",
                     "entries": "~96,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "FreeDict German-English",
@@ -34,7 +36,8 @@
                     "format": "stardict",
                     "entries": "~230,000",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 },
                 {
                     "name": "Wiktionary German-English",
@@ -42,7 +45,8 @@
                     "format": "stardict",
                     "entries": "~90,000",
                     "license": "CC BY-SA",
-                    "notes": "Download kaikki-de-en.zip from latest release, extract .ifo file"
+                    "notes": "Download kaikki-de-en.zip from latest release, extract .ifo file",
+                    "directDownload": false
                 }
             ]
         },
@@ -56,7 +60,8 @@
                     "format": "stardict",
                     "entries": "~18,000",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 },
                 {
                     "name": "WikDict Greek-English",
@@ -64,7 +69,8 @@
                     "format": "stardict",
                     "entries": "~14,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 }
             ]
         },
@@ -78,7 +84,8 @@
                     "format": "stardict",
                     "entries": "~127,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "WikDict English-German",
@@ -86,7 +93,8 @@
                     "format": "stardict",
                     "entries": "~96,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "WikDict English-Spanish",
@@ -94,7 +102,8 @@
                     "format": "stardict",
                     "entries": "~75,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 }
             ]
         },
@@ -108,7 +117,8 @@
                     "format": "stardict",
                     "entries": "~75,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "FreeDict Spanish-English",
@@ -116,7 +126,8 @@
                     "format": "stardict",
                     "entries": "~28,000",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 },
                 {
                     "name": "Wiktionary Spanish-English",
@@ -124,7 +135,8 @@
                     "format": "stardict",
                     "entries": "~60,000",
                     "license": "CC BY-SA",
-                    "notes": "Download kaikki-es-en.zip from latest release, extract .ifo file"
+                    "notes": "Download kaikki-es-en.zip from latest release, extract .ifo file",
+                    "directDownload": false
                 }
             ]
         },
@@ -138,7 +150,8 @@
                     "format": "stardict",
                     "entries": "~127,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "FreeDict French-English",
@@ -146,7 +159,8 @@
                     "format": "stardict",
                     "entries": "~12,000",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 },
                 {
                     "name": "Wiktionary French-English",
@@ -154,7 +168,8 @@
                     "format": "stardict",
                     "entries": "~80,000",
                     "license": "CC BY-SA",
-                    "notes": "Download kaikki-fr-en.zip from latest release, extract .ifo file"
+                    "notes": "Download kaikki-fr-en.zip from latest release, extract .ifo file",
+                    "directDownload": false
                 }
             ]
         },
@@ -168,7 +183,8 @@
                     "format": "stardict",
                     "entries": "~26,000",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 },
                 {
                     "name": "Wiktionary Hindi-English",
@@ -176,7 +192,8 @@
                     "format": "stardict",
                     "entries": "~8,000",
                     "license": "CC BY-SA",
-                    "notes": "Download kaikki-hi-en.zip from latest release, extract .ifo file"
+                    "notes": "Download kaikki-hi-en.zip from latest release, extract .ifo file",
+                    "directDownload": false
                 }
             ]
         },
@@ -190,7 +207,8 @@
                     "format": "stardict",
                     "entries": "~56,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "FreeDict Italian-English",
@@ -198,7 +216,8 @@
                     "format": "stardict",
                     "entries": "~8,700",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 }
             ]
         },
@@ -212,7 +231,8 @@
                     "format": "stardict",
                     "entries": "~214,000",
                     "license": "CC BY-SA",
-                    "notes": "Multiple StarDict versions available on the Internet Archive or via Wiktionary Dictionaries repo"
+                    "notes": "Multiple StarDict versions available on the Internet Archive or via Wiktionary Dictionaries repo",
+                    "directDownload": false
                 },
                 {
                     "name": "WikDict Japanese-English",
@@ -220,7 +240,8 @@
                     "format": "stardict",
                     "entries": "~21,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "Wiktionary Japanese-English",
@@ -228,7 +249,8 @@
                     "format": "stardict",
                     "entries": "~30,000",
                     "license": "CC BY-SA",
-                    "notes": "Download kaikki-ja-en.zip from latest release, extract .ifo file"
+                    "notes": "Download kaikki-ja-en.zip from latest release, extract .ifo file",
+                    "directDownload": false
                 }
             ]
         },
@@ -242,7 +264,8 @@
                     "format": "stardict",
                     "entries": "~12,000",
                     "license": "CC BY-SA",
-                    "notes": "Download kaikki-ko-en.zip from latest release, extract .ifo file"
+                    "notes": "Download kaikki-ko-en.zip from latest release, extract .ifo file",
+                    "directDownload": false
                 }
             ]
         },
@@ -256,7 +279,8 @@
                     "format": "stardict",
                     "entries": "~48,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "FreeDict Dutch-English",
@@ -264,7 +288,8 @@
                     "format": "stardict",
                     "entries": "~24,000",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 }
             ]
         },
@@ -278,7 +303,8 @@
                     "format": "stardict",
                     "entries": "~24,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "FreeDict Polish-English",
@@ -286,7 +312,8 @@
                     "format": "stardict",
                     "entries": "~6,600",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 }
             ]
         },
@@ -300,7 +327,8 @@
                     "format": "stardict",
                     "entries": "~31,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "FreeDict Portuguese-English",
@@ -308,7 +336,8 @@
                     "format": "stardict",
                     "entries": "~5,600",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 }
             ]
         },
@@ -322,7 +351,8 @@
                     "format": "stardict",
                     "entries": "~50,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "FreeDict Russian-English",
@@ -330,7 +360,8 @@
                     "format": "stardict",
                     "entries": "~8,600",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 },
                 {
                     "name": "Wiktionary Russian-English",
@@ -338,7 +369,8 @@
                     "format": "stardict",
                     "entries": "~60,000",
                     "license": "CC BY-SA",
-                    "notes": "Download kaikki-ru-en.zip from latest release, extract .ifo file"
+                    "notes": "Download kaikki-ru-en.zip from latest release, extract .ifo file",
+                    "directDownload": false
                 }
             ]
         },
@@ -352,7 +384,8 @@
                     "format": "stardict",
                     "entries": "~40,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "FreeDict Swedish-English",
@@ -360,7 +393,8 @@
                     "format": "stardict",
                     "entries": "~10,000",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 }
             ]
         },
@@ -374,7 +408,8 @@
                     "format": "stardict",
                     "entries": "~22,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "FreeDict Turkish-English",
@@ -382,7 +417,8 @@
                     "format": "stardict",
                     "entries": "~13,000",
                     "license": "GPL",
-                    "notes": "Download the StarDict version from the FreeDict page"
+                    "notes": "Download the StarDict version from the FreeDict page",
+                    "directDownload": false
                 }
             ]
         },
@@ -396,7 +432,8 @@
                     "format": "stardict",
                     "entries": "~15,000",
                     "license": "CC BY-SA",
-                    "notes": "Download kaikki-uk-en.zip from latest release, extract .ifo file"
+                    "notes": "Download kaikki-uk-en.zip from latest release, extract .ifo file",
+                    "directDownload": false
                 }
             ]
         },
@@ -410,7 +447,8 @@
                     "format": "stardict",
                     "entries": "~8,000",
                     "license": "CC BY-SA",
-                    "notes": "Download kaikki-vi-en.zip from latest release, extract .ifo file"
+                    "notes": "Download kaikki-vi-en.zip from latest release, extract .ifo file",
+                    "directDownload": false
                 }
             ]
         },
@@ -424,7 +462,8 @@
                     "format": "csv",
                     "entries": "~124,000",
                     "license": "CC BY-SA",
-                    "notes": "Tab-separated format available. Use TSV import with term column 1, definition column 5"
+                    "notes": "Tab-separated format available. Use TSV import with term column 1, definition column 5",
+                    "directDownload": false
                 },
                 {
                     "name": "WikDict Chinese-English",
@@ -432,7 +471,8 @@
                     "format": "stardict",
                     "entries": "~24,000",
                     "license": "CC BY-SA",
-                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                    "notes": "Direct download ZIP, extract and select the .ifo file",
+                    "directDownload": true
                 },
                 {
                     "name": "Wiktionary Chinese-English",
@@ -440,7 +480,8 @@
                     "format": "stardict",
                     "entries": "~35,000",
                     "license": "CC BY-SA",
-                    "notes": "Download kaikki-zh-en.zip from latest release, extract .ifo file"
+                    "notes": "Download kaikki-zh-en.zip from latest release, extract .ifo file",
+                    "directDownload": false
                 }
             ]
         }

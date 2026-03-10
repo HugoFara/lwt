@@ -29,6 +29,7 @@ use Lwt\Modules\Dictionary\Http\DictionaryApiHandler;
 use Lwt\Modules\Dictionary\Http\DictionaryController;
 use Lwt\Modules\Dictionary\Http\TranslationController;
 // Application Services
+use Lwt\Modules\Dictionary\Application\Services\CuratedDictImportService;
 use Lwt\Modules\Dictionary\Application\Services\LocalDictionaryService;
 // Infrastructure - Dictionary Importers
 use Lwt\Modules\Dictionary\Infrastructure\Import\ImporterInterface;
@@ -65,10 +66,18 @@ class DictionaryServiceProvider implements ServiceProviderInterface
             );
         });
 
+        // Register Curated Import Service
+        $container->singleton(CuratedDictImportService::class, function (Container $c) {
+            return new CuratedDictImportService(
+                $c->getTyped(DictionaryFacade::class)
+            );
+        });
+
         // Register API Handler
         $container->singleton(DictionaryApiHandler::class, function (Container $c) {
             return new DictionaryApiHandler(
-                $c->getTyped(DictionaryFacade::class)
+                $c->getTyped(DictionaryFacade::class),
+                $c->getTyped(CuratedDictImportService::class)
             );
         });
 
