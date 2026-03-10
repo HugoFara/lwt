@@ -27,7 +27,6 @@ namespace Lwt\Views\Word;
 
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
-use Lwt\Shared\UI\Helpers\SearchableSelectHelper;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
@@ -36,16 +35,22 @@ assert($currentLanguage === null || is_int($currentLanguage) || is_string($curre
 assert(is_array($languages));
 /** @var array<int, array{id: int, name: string}> $languages */
 /** @var string|null $activeTab */
+/** @var list<array<string, mixed>> $curatedDictionaries */
+if (!isset($curatedDictionaries)) {
+    $curatedDictionaries = [];
+}
+$curatedDictionariesJson = json_encode(
+    $curatedDictionaries,
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT
+);
 
 if (!isset($activeTab)) {
-    $activeTab = 'file';
+    $activeTab = 'dictionary';
 }
 // Map legacy tab values
 if ($activeTab === 'text') {
     $activeTab = 'file';
 }
-
-$langToUse = $currentLanguage;
 
 // Column options for reuse (text/paste modes)
 $columnOptions = [
@@ -66,66 +71,125 @@ $actions = [
 echo PageLayoutHelper::buildActionCard($actions);
 ?>
 
+<script type="application/json" id="word-upload-page-config"><?php echo json_encode(
+    [
+        'activeTab' => $activeTab ?: 'dictionary',
+        'currentLanguageId' => $currentLanguage ? (int) $currentLanguage : 0,
+        'currentLanguageName' => $currentLanguageName ?? '',
+    ],
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT
+); ?></script>
+<div x-data="wordUploadPageApp">
+
+<!-- ==================== LANGUAGE TABS ==================== -->
+<?php if (!empty($languages)) : ?>
+<div class="tabs is-toggle is-fullwidth mb-4">
+    <ul>
+        <?php foreach ($languages as $lang) : ?>
+        <li :class="{ 'is-active': selectedLanguageId === <?php echo $lang['id']; ?> }">
+            <a @click.prevent="selectLanguage(<?php echo $lang['id']; ?>, '<?php echo htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8'); ?>')">
+                <span><?php echo htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8'); ?></span>
+            </a>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+</div>
+<?php endif; ?>
+
+<!-- Curated Dictionaries Browser (outside form to avoid Alpine scope conflicts) -->
+<script type="application/json" id="curated-dictionaries-config"><?php echo $curatedDictionariesJson; ?></script>
+<div x-show="isDictionary" x-transition
+     <?php echo $activeTab !== 'dictionary' ? 'style="display:none"' : ''; ?>>
+    <div x-data="curatedDictBrowser()" class="box mb-4">
+        <p class="mb-4 has-text-grey">
+            Download a tested dictionary for your language, then upload it below.
+        </p>
+
+        <!-- Language filter + search -->
+        <div class="field is-grouped mb-4">
+            <div class="control">
+                <div class="select">
+                    <select x-model="dictLanguageFilter">
+                        <option value="">All languages</option>
+                        <template x-for="group in allGroups" :key="group.language">
+                            <option :value="group.language" x-text="group.languageName"></option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+            <div class="control is-expanded">
+                <input class="input" type="search" placeholder="Search dictionaries..."
+                       x-model="dictSearch" />
+            </div>
+        </div>
+
+        <!-- Dictionary cards grouped by language -->
+        <template x-if="filteredGroups.length === 0">
+            <div class="notification is-light">
+                No dictionaries match your search.
+            </div>
+        </template>
+
+        <template x-for="group in filteredGroups" :key="group.language">
+            <div class="mb-5">
+                <h3 class="title is-5 mb-3" x-text="group.languageName"></h3>
+                <div class="columns is-multiline">
+                    <template x-for="source in group.sources" :key="source.name">
+                        <div class="column is-half-tablet is-one-third-desktop">
+                            <div class="card">
+                                <div class="card-content p-4">
+                                    <p class="title is-6 mb-2" x-text="source.name"></p>
+                                    <div class="tags mb-2">
+                                        <span class="tag is-info is-light" x-text="source.format"></span>
+                                        <span class="tag is-light" x-text="source.entries"></span>
+                                        <span class="tag is-success is-light" x-text="source.license"></span>
+                                    </div>
+                                    <p class="is-size-7 has-text-grey" x-text="source.notes"></p>
+                                </div>
+                                <footer class="card-footer">
+                                    <a class="card-footer-item has-text-primary"
+                                       :href="source.url" target="_blank" rel="noopener">
+                                        <span class="icon is-small mr-1">
+                                            <?php echo IconHelper::render('external-link', ['alt' => 'Download']); ?>
+                                        </span>
+                                        Download
+                                    </a>
+                                </footer>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
 <form enctype="multipart/form-data"
       class="validate"
       action="/word/upload"
       method="post"
-      x-data="{
-          inputMethod: '<?php echo htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8'); ?>',
-          importMode: '0',
-          showDelimiter: false,
-          delimiter: 'c',
-          cols: ['w', 't', 'x', 'x', 'x'],
-          extraCols: 0,
-          dictFormat: 'csv',
-          dictFileName: '',
-          _labels: {w:'Term',t:'Translation',r:'Romanization',s:'Sentence',g:'Tags'},
-          _examples: {w:'Haus',t:'house',r:'haus',s:'Das Haus ist gross.',g:'A1 housing'},
-          previewHeaders() {
-              return this.cols.map(c => this._labels[c]).filter(Boolean);
-          },
-          previewRow() {
-              return this.cols.map(c => this._examples[c]).filter(Boolean);
-          },
-          isDictMode() {
-              return this.inputMethod === 'dictionary';
-          }
-      }">
+      x-data="wordUploadFormApp">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
+    <!-- Language ID synced from tabs above -->
+    <input type="hidden" name="LgID" :value="selectedLanguageId" />
 
-    <!-- ==================== LANGUAGE & INPUT SOURCE ==================== -->
+    <!-- ==================== INPUT SOURCE ==================== -->
     <div class="box">
-        <!-- Language Selection -->
-        <div class="field">
-            <label class="label">Language</label>
-            <div class="field has-addons">
-                <div class="control is-expanded">
-                    <?php echo SearchableSelectHelper::forLanguages(
-                        $languages,
-                        $langToUse,
-                        [
-                            'name' => 'LgID',
-                            'id' => 'LgID',
-                            'placeholder' => '[Choose...]',
-                            'required' => true
-                        ]
-                    ); ?>
-                </div>
-                <div class="control">
-                    <span class="icon has-text-danger mt-2" title="Required">
-                        <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                    </span>
-                </div>
-            </div>
-        </div>
-
         <!-- Import Source Tabs -->
         <div class="field">
             <label class="label">Import from</label>
             <div class="tabs is-boxed is-small mb-3">
                 <ul>
+                    <li :class="{ 'is-active': inputMethod === 'dictionary' }">
+                        <a @click.prevent="setInputMethod('dictionary')">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('book-open', ['alt' => 'Dictionary']); ?>
+                            </span>
+                            <span>Dictionary File</span>
+                        </a>
+                    </li>
                     <li :class="{ 'is-active': inputMethod === 'file' }">
-                        <a @click.prevent="inputMethod = 'file'">
+                        <a @click.prevent="setInputMethod('file')">
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('file-up', ['alt' => 'File']); ?>
                             </span>
@@ -133,22 +197,57 @@ echo PageLayoutHelper::buildActionCard($actions);
                         </a>
                     </li>
                     <li :class="{ 'is-active': inputMethod === 'paste' }">
-                        <a @click.prevent="inputMethod = 'paste'">
+                        <a @click.prevent="setInputMethod('paste')">
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('clipboard-paste', ['alt' => 'Paste']); ?>
                             </span>
                             <span>Paste Text</span>
                         </a>
                     </li>
-                    <li :class="{ 'is-active': inputMethod === 'dictionary' }">
-                        <a @click.prevent="inputMethod = 'dictionary'">
-                            <span class="icon is-small">
-                                <?php echo IconHelper::render('book-open', ['alt' => 'Dictionary']); ?>
-                            </span>
-                            <span>Dictionary File</span>
-                        </a>
-                    </li>
                 </ul>
+            </div>
+
+            <!-- Dictionary File -->
+            <div x-show="isDictionary" x-transition
+                 <?php echo $activeTab !== 'dictionary' ? 'style="display:none"' : ''; ?>>
+
+                <!-- Upload section -->
+                <h5 class="title is-6 mb-3">Upload a dictionary file</h5>
+                <div class="field mb-3">
+                    <label class="label is-small">File Format</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="dict_format" x-model="dictFormat">
+                                <option value="csv">CSV / TSV dictionary</option>
+                                <option value="json">JSON</option>
+                                <option value="stardict">StarDict (.ifo file)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="file has-name is-fullwidth">
+                    <label class="file-label">
+                        <input class="file-input" type="file" name="dict_file"
+                               @change="updateDictFileName($event)" />
+                        <span class="file-cta">
+                            <span class="file-icon">
+                                <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>
+                            </span>
+                            <span class="file-label">Choose a file...</span>
+                        </span>
+                        <span class="file-name" x-text="dictFileLabel"></span>
+                    </label>
+                </div>
+                <p class="help" x-show="dictFormat === 'stardict'">
+                    Select the .ifo file. The .idx and .dict files must be in the same directory.
+                </p>
+                <div class="field mt-3">
+                    <label class="label is-small">Dictionary Name</label>
+                    <div class="control">
+                        <input type="text" name="dict_name" class="input is-small"
+                               placeholder="Auto-generated from filename if empty">
+                    </div>
+                </div>
             </div>
 
             <!-- CSV/TSV File Upload -->
@@ -181,116 +280,11 @@ echo PageLayoutHelper::buildActionCard($actions);
                 </div>
                 <p class="help">One term per line, using the delimiter chosen below</p>
             </div>
-
-            <!-- Dictionary File -->
-            <div x-show="inputMethod === 'dictionary'" x-transition
-                 <?php echo $activeTab !== 'dictionary' ? 'style="display:none"' : ''; ?>>
-                <div class="field mb-3">
-                    <div class="control">
-                        <div class="select is-fullwidth">
-                            <select name="dict_format" x-model="dictFormat">
-                                <option value="csv">CSV / TSV dictionary</option>
-                                <option value="json">JSON</option>
-                                <option value="stardict">StarDict (.ifo file)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="file has-name is-fullwidth">
-                    <label class="file-label">
-                        <input class="file-input" type="file" name="dict_file"
-                               @change="dictFileName = $event.target.files[0]?.name || ''" />
-                        <span class="file-cta">
-                            <span class="file-icon">
-                                <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>
-                            </span>
-                            <span class="file-label">Choose a file...</span>
-                        </span>
-                        <span class="file-name" x-text="dictFileName || 'No file selected'"></span>
-                    </label>
-                </div>
-                <p class="help" x-show="dictFormat === 'stardict'">
-                    Select the .ifo file. The .idx and .dict files must be in the same directory.
-                </p>
-                <div class="field mt-3">
-                    <label class="label is-small">Dictionary Name</label>
-                    <div class="control">
-                        <input type="text" name="dict_name" class="input is-small"
-                               placeholder="Auto-generated from filename if empty">
-                    </div>
-                </div>
-
-                <!-- Where to find dictionaries (collapsible) -->
-                <details class="mt-4">
-                    <summary class="is-flex is-align-items-center is-clickable has-text-grey">
-                        <span class="icon mr-1">
-                            <?php echo IconHelper::render('lightbulb', ['alt' => 'Tips']); ?>
-                        </span>
-                        Where to find dictionary files?
-                    </summary>
-                    <div class="content is-small mt-3">
-                        <p>Free downloadable dictionaries you can import:</p>
-
-                        <h5 class="mb-2">StarDict Format (recommended)</h5>
-                        <ul>
-                            <li>
-                                <a href="https://freedict.org/downloads/" target="_blank" rel="noopener">FreeDict</a>
-                                &mdash; 140+ free bilingual dictionaries in ~45 languages
-                            </li>
-                            <li>
-                                <a href="https://download.wikdict.com/dictionaries/stardict/" target="_blank" rel="noopener">WikDict</a>
-                                &mdash; 17M+ translations across 26 languages, from Wiktionary
-                            </li>
-                            <li>
-                                <a href="https://github.com/Vuizur/Wiktionary-Dictionaries" target="_blank" rel="noopener">Wiktionary Dictionaries</a>
-                                &mdash; StarDict and TSV for nearly all languages
-                            </li>
-                            <li>
-                                <a href="https://archive.org/details/stardict_collections" target="_blank" rel="noopener">Internet Archive StarDict</a>
-                                &mdash; Archived StarDict collections in many languages
-                            </li>
-                        </ul>
-
-                        <h5 class="mb-2">CSV / TSV Format</h5>
-                        <ul>
-                            <li>
-                                <a href="https://tatoeba.org/en/downloads" target="_blank" rel="noopener">Tatoeba</a>
-                                &mdash; Bilingual sentence pairs in 400+ languages (tab-separated)
-                            </li>
-                            <li>
-                                <a href="https://www.manythings.org/anki/" target="_blank" rel="noopener">ManyThings.org</a>
-                                &mdash; Pre-formatted bilingual pairs from Tatoeba (tab-separated)
-                            </li>
-                        </ul>
-
-                        <h5 class="mb-2">Language-Specific</h5>
-                        <ul>
-                            <li>
-                                <a href="https://www.mdbg.net/chinese/dictionary?page=cedict" target="_blank" rel="noopener">CC-CEDICT</a>
-                                &mdash; 124,000+ entry Chinese-English dictionary
-                            </li>
-                            <li>
-                                <a href="http://www.edrdg.org/jmdict/edict.html" target="_blank" rel="noopener">JMdict / EDICT</a>
-                                &mdash; 214,000+ entry Japanese-English dictionary
-                            </li>
-                            <li>
-                                <a href="https://kaikki.org/dictionary/rawdata.html" target="_blank" rel="noopener">Kaikki.org</a>
-                                &mdash; Machine-readable Wiktionary data for hundreds of languages
-                            </li>
-                        </ul>
-
-                        <p class="has-text-grey mt-2">
-                            Tip: For StarDict files, select the .ifo file &mdash; the .idx and .dict
-                            files must be in the same directory.
-                        </p>
-                    </div>
-                </details>
-            </div>
         </div>
     </div>
 
     <!-- ==================== FORMAT SETTINGS (text/paste modes) ==================== -->
-    <div class="box" x-show="!isDictMode()" x-transition
+    <div class="box" x-show="isNotDictionary" x-transition
          <?php echo $activeTab === 'dictionary' ? 'style="display:none"' : ''; ?>>
         <h4 class="title is-5 mb-4">
             <span class="icon-text">
@@ -399,7 +393,7 @@ echo PageLayoutHelper::buildActionCard($actions);
             <button type="button"
                     class="button is-small is-light"
                     x-show="extraCols < 3"
-                    @click="extraCols++">
+                    @click="addColumn()">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('plus', ['alt' => 'Add']); ?>
                 </span>
@@ -408,7 +402,7 @@ echo PageLayoutHelper::buildActionCard($actions);
             <button type="button"
                     class="button is-small is-light"
                     x-show="extraCols > 0"
-                    @click="cols[1 + extraCols] = 'x'; extraCols--">
+                    @click="removeColumn()">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('minus', ['alt' => 'Remove']); ?>
                 </span>
@@ -417,7 +411,7 @@ echo PageLayoutHelper::buildActionCard($actions);
         </div>
 
         <!-- Live Preview -->
-        <div class="mt-3" x-show="previewHeaders().length > 0" x-transition>
+        <div class="mt-3" x-show="hasPreview()" x-transition>
             <h5 class="title is-6 mb-2">Preview</h5>
             <div class="table-container">
                 <table class="table is-bordered is-narrow is-size-7 is-fullwidth">
@@ -444,7 +438,7 @@ echo PageLayoutHelper::buildActionCard($actions);
     </div>
 
     <!-- ==================== DICTIONARY CSV OPTIONS (dict CSV mode only) ==================== -->
-    <div class="box" x-show="isDictMode() && dictFormat === 'csv'" x-transition
+    <div class="box" x-show="showDictCsvOptions" x-transition
          <?php echo $activeTab !== 'dictionary' ? 'style="display:none"' : ''; ?>>
         <h4 class="title is-5 mb-4">
             <span class="icon-text">
@@ -509,7 +503,7 @@ echo PageLayoutHelper::buildActionCard($actions);
     </div>
 
     <!-- ==================== IMPORT OPTIONS (text/paste modes) ==================== -->
-    <div class="box" x-show="!isDictMode()" x-transition
+    <div class="box" x-show="isNotDictionary" x-transition
          <?php echo $activeTab === 'dictionary' ? 'style="display:none"' : ''; ?>>
         <h4 class="title is-5 mb-4">
             <span class="icon-text">
@@ -529,7 +523,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                             <select name="Over"
                                     data-action="update-import-mode"
                                     x-model="importMode"
-                                    @change="showDelimiter = ['4', '5'].includes($event.target.value)">
+                                    @change="updateImportMode($event)">
                                 <option value="0" title="Don't overwrite existing terms, import new terms">
                                     Import only new terms
                                 </option>
@@ -596,7 +590,7 @@ echo PageLayoutHelper::buildActionCard($actions);
     </div>
 
     <!-- ==================== WARNING & SUBMIT ==================== -->
-    <article class="message is-warning" x-show="!isDictMode()">
+    <article class="message is-warning" x-show="isNotDictionary">
         <div class="message-body">
             <div class="level">
                 <div class="level-left">
@@ -642,7 +636,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span>Back</span>
             </button>
         </div>
-        <div class="control" x-show="!isDictMode()">
+        <div class="control" x-show="isNotDictionary">
             <button type="submit" name="op" value="Import" class="button is-primary">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
@@ -650,7 +644,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span>Import Terms</span>
             </button>
         </div>
-        <div class="control" x-show="isDictMode()">
+        <div class="control" x-show="isDictionary">
             <button type="submit" name="op" value="ImportDictionary" class="button is-primary">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
@@ -662,7 +656,7 @@ echo PageLayoutHelper::buildActionCard($actions);
 </form>
 
 <!-- Help notes (context-sensitive) -->
-<article class="message is-light mt-5" x-data="{ inputMethod: '<?php echo htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8'); ?>' }">
+<article class="message is-light mt-5">
     <div class="message-body is-size-7">
         <p>
             <strong>Note:</strong> Sentences should contain the term in curly brackets, e.g., "... {term} ...".
@@ -672,4 +666,5 @@ echo PageLayoutHelper::buildActionCard($actions);
         </p>
     </div>
 </article>
+</div><!-- /x-data inputMethod wrapper -->
 

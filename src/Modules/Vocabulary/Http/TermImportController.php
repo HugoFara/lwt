@@ -219,9 +219,40 @@ class TermImportController extends VocabularyBaseController
     private function displayUploadForm(): void
     {
         $currentLanguage = Settings::get('currentlanguage');
+        $currentLanguageName = '';
+        if ($currentLanguage !== null) {
+            $currentLanguageName = $this->languageFacade->getLanguageName(
+                (int) $currentLanguage
+            );
+        }
         $languages = $this->languageFacade->getLanguagesForSelect();
-        $activeTab = InputValidator::getString('tab') ?: 'text';
+        $activeTab = InputValidator::getString('tab') ?: 'dictionary';
+        $curatedDictionaries = $this->loadCuratedDictionaries();
         include $this->viewPath . 'upload_form.php';
+    }
+
+    /**
+     * Load curated dictionaries from the JSON registry.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function loadCuratedDictionaries(): array
+    {
+        $path = dirname(__DIR__, 4) . '/data/curated_dictionaries.json';
+        if (!file_exists($path)) {
+            return [];
+        }
+        $json = file_get_contents($path);
+        if ($json === false) {
+            return [];
+        }
+        $data = json_decode($json, true);
+        if (!is_array($data) || !isset($data['dictionaries'])) {
+            return [];
+        }
+        /** @var list<array<string, mixed>> */
+        $dictionaries = $data['dictionaries'];
+        return $dictionaries;
     }
 
     /**
