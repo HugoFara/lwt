@@ -107,9 +107,11 @@ class GetTextForEdit
      */
     public function getLanguageDataForForm(): array
     {
-        $rows = Connection::fetchAll(
+        $bindings = [];
+        $rows = Connection::preparedFetchAll(
             "SELECT LgID, LgGoogleTranslateURI FROM languages"
-            . UserScopedQuery::forTable('languages')
+            . UserScopedQuery::forTablePrepared('languages', $bindings),
+            $bindings
         );
 
         $result = [];

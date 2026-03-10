@@ -95,18 +95,19 @@ class Validation
             }
             $currenttag_int = (int)$currenttag;
 
-            $bindings = [];
+            $bindings = [$currenttag_int];
             $lang_condition = '';
             if ($currentlang != '') {
                 if (!is_numeric($currentlang)) {
                     return '';
                 }
                 $currentlang_int = (int)$currentlang;
-                $lang_condition = " AND WoLgID = " . $currentlang_int;
+                $lang_condition = " AND WoLgID = ?";
+                $bindings[] = $currentlang_int;
             }
 
             $sql = "SELECT (
-                " . $currenttag_int . " IN (
+                ? IN (
                     SELECT TgID
                     FROM words, tags, word_tag_map
                     WHERE TgID = WtTgID AND WtWoID = WoID" .
@@ -116,7 +117,7 @@ class Validation
             ) AS tag_exists"
                 . UserScopedQuery::forTablePrepared('words', $bindings);
             /** @var int|string|null $r */
-            $r = Connection::fetchValue($sql, 'tag_exists');
+            $r = Connection::preparedFetchValue($sql, $bindings, 'tag_exists');
             if ($r == 0) {
                 $currenttag = '';
             }
@@ -141,10 +142,10 @@ class Validation
             }
             $currenttag_int = (int)$currenttag;
 
-            $bindings = [];
+            $bindings = [$currenttag_int];
             if ($currentlang == '') {
                 $sql = "select (
-                    " . $currenttag_int . " in (
+                    ? in (
                         select T2ID
                         from texts,
                         text_tags,
@@ -159,21 +160,22 @@ class Validation
                     return '';
                 }
                 $currentlang_int = (int)$currentlang;
+                $bindings[] = $currentlang_int;
                 $sql = "select (
-                    " . $currenttag_int . " in (
+                    ? in (
                         select T2ID
                         from texts,
                         text_tags,
                         text_tag_map
                         where T2ID = TtT2ID and TtTxID = TxID and TxArchivedAt IS NOT NULL
-                            and TxLgID = " . $currentlang_int . "
+                            and TxLgID = ?
                         group by T2ID order by T2Text
                     )
                 ) as value"
                     . UserScopedQuery::forTablePrepared('texts', $bindings);
             }
             /** @var int|string|null $r */
-            $r = Connection::fetchValue($sql);
+            $r = Connection::preparedFetchValue($sql, $bindings);
             if ($r == 0) {
                 $currenttag = '';
             }
@@ -198,10 +200,10 @@ class Validation
             }
             $currenttag_int = (int)$currenttag;
 
-            $bindings = [];
+            $bindings = [$currenttag_int];
             if ($currentlang == '') {
                 $sql = "select (
-                    $currenttag_int in (
+                    ? in (
                         select T2ID
                         from texts, text_tags, text_tag_map
                         where T2ID = TtT2ID and TtTxID = TxID
@@ -215,18 +217,19 @@ class Validation
                     return '';
                 }
                 $currentlang_int = (int)$currentlang;
+                $bindings[] = $currentlang_int;
                 $sql = "select (
-                    $currenttag_int in (
+                    ? in (
                         select T2ID
                         from texts, text_tags, text_tag_map
-                        where T2ID = TtT2ID and TtTxID = TxID and TxLgID = $currentlang_int
+                        where T2ID = TtT2ID and TtTxID = TxID and TxLgID = ?
                         group by T2ID order by T2Text
                     )
                 ) as value"
                     . UserScopedQuery::forTablePrepared('texts', $bindings);
             }
             /** @var int|string|null $r */
-            $r = Connection::fetchValue($sql);
+            $r = Connection::preparedFetchValue($sql, $bindings);
             if ($r == 0) {
                 $currenttag = '';
             }

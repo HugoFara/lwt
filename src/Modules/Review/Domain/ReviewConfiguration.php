@@ -169,35 +169,9 @@ final readonly class ReviewConfiguration
     }
 
     /**
-     * Get SQL projection string for this configuration.
-     *
-     * @return string SQL fragment for FROM/WHERE clause
-     *
-     * @throws \InvalidArgumentException If review key is invalid
-     */
-    public function toSqlProjection(): string
-    {
-        $selectionInt = is_int($this->selection)
-            ? $this->selection
-            : (int) (is_array($this->selection) ? ($this->selection[0] ?? 0) : $this->selection);
-        return match ($this->reviewKey) {
-            self::KEY_LANG => " words WHERE WoLgID = {$selectionInt} ",
-            self::KEY_TEXT => " words, word_occurrences
-                WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = {$selectionInt} ",
-            self::KEY_WORDS => " words WHERE WoID IN (" . implode(',', (array) $this->selection) . ") ",
-            self::KEY_TEXTS => " words, word_occurrences
-                WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ("
-                . implode(',', (array) $this->selection) . ") ",
-            self::KEY_RAW_SQL => is_string($this->selection) ? $this->selection : '',
-            default => throw new \InvalidArgumentException("Invalid review key: {$this->reviewKey}")
-        };
-    }
-
-    /**
      * Get SQL projection string with prepared statement placeholders.
      *
      * Returns SQL with `?` placeholders and pushes bound values into $params.
-     * The logic mirrors toSqlProjection() but uses parameter binding.
      *
      * @param array<int, int|string> $params Reference to params array for binding
      *

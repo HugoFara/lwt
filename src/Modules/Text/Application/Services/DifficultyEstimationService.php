@@ -182,12 +182,13 @@ class DifficultyEstimationService
      */
     private function getKnownWordCount(int $languageId): int
     {
+        $bindings = [$languageId];
         $sql = "SELECT COUNT(*) FROM words
                 WHERE WoLgID = ? AND WoStatus IN (5, 98, 99)"
-            . UserScopedQuery::forTable('words');
+            . UserScopedQuery::forTablePrepared('words', $bindings);
 
         /** @var int|string|false $count */
-        $count = Connection::preparedFetchValue($sql, [$languageId]);
+        $count = Connection::preparedFetchValue($sql, $bindings);
 
         return (int) $count;
     }
@@ -343,12 +344,12 @@ class DifficultyEstimationService
         }
 
         $known = [];
-        $userScope = UserScopedQuery::forTable('words');
 
         // Batch lookups to avoid huge IN clauses
         foreach (array_chunk($words, self::LOOKUP_BATCH_SIZE) as $batch) {
             $placeholders = implode(',', array_fill(0, count($batch), '?'));
             $params = array_merge([$languageId], $batch);
+            $userScope = UserScopedQuery::forTablePrepared('words', $params);
 
             $sql = "SELECT WoTextLC FROM words
                     WHERE WoLgID = ? AND WoTextLC IN ($placeholders)"

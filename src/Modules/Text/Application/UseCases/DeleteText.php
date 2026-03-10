@@ -159,15 +159,16 @@ class DeleteText
      */
     private function cleanupTextTags(): void
     {
-        Connection::execute(
+        $bindings = [];
+        Connection::preparedExecute(
             "DELETE text_tag_map
             FROM (
                 text_tag_map
                 LEFT JOIN texts ON TtTxID = TxID
             )
             WHERE TxID IS NULL"
-            . UserScopedQuery::forTable('text_tag_map', '', 'texts'),
-            ''
+            . UserScopedQuery::forTablePrepared('text_tag_map', $bindings, '', 'texts'),
+            $bindings
         );
     }
 }

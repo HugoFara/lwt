@@ -220,16 +220,43 @@ class ReviewSessionUseCaseTest extends TestCase
     /**
      * Test type 1 shows term and solution contains translation.
      *
-     * Note: This test is skipped because GetNextTerm::getSolution() for type 1
-     * calls TagsFacade::getWordTagList() which requires database access.
-     * In integration tests, this would be covered properly.
+     * Type 1 calls TagsFacade::getWordTagList() which needs a DB connection.
+     * The test DB is available via bootstrap, and will return '' for
+     * non-existent word IDs.
      */
     public function testGetNextTermType1ShowsTermGuessesTranstation(): void
     {
-        $this->markTestSkipped(
-            'Test type 1 requires database for TagsFacade::getWordTagList(). ' .
-            'See ReviewFacadeTest for integration coverage.'
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for TagsFacade::getWordTagList()');
+        }
+
+        $config = ReviewConfiguration::fromLanguage(1, ReviewConfiguration::TYPE_TERM_TO_TRANSLATION);
+
+        $testWord = $this->createReviewWord(
+            id: 100,
+            text: 'hello',
+            translation: 'hola',
+            sentence: 'Say {hello} to the world.'
         );
+
+        $this->repository
+            ->method('findNextWordForReview')
+            ->willReturn($testWord);
+
+        $this->repository
+            ->method('getSentenceForWord')
+            ->willReturn(['sentence' => 'Say {hello} to the world.']);
+
+        $getNextTerm = new GetNextTerm($this->repository);
+        $result = $getNextTerm->execute($config);
+
+        // Type 1: term shown, solution is translation (possibly with tags)
+        $this->assertEquals(100, $result['word_id']);
+        $this->assertEquals('hello', $result['word_text']);
+        $this->assertStringContainsString('hola', $result['solution']);
+        // Group should show the term (not hidden)
+        $this->assertStringContainsString('hello', $result['group']);
+        $this->assertStringNotContainsString('[...]', $result['group']);
     }
 
     public function testGetNextTermType2HidesTermGuessesFromTranslation(): void

@@ -475,22 +475,26 @@ class WordListService
      */
     public function deleteByIdList(array $ids): string
     {
-        $inClause = Connection::buildIntInClause($ids);
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
 
         DB::beginTransaction();
         try {
             // Delete multi-word text items first (before word deletion triggers FK SET NULL)
-            Connection::query(
+            Connection::preparedExecute(
                 'DELETE FROM word_occurrences
-                WHERE Ti2WordCount > 1 AND Ti2WoID in ' . $inClause
+                WHERE Ti2WordCount > 1 AND Ti2WoID in ' . $inClause,
+                $bindings
             );
 
             // Delete words - FK constraints handle:
             // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
             // - word_tag_map deleted (ON DELETE CASCADE)
-            $message = Connection::execute(
-                'DELETE FROM words WHERE WoID in ' . $inClause,
-                "Deleted"
+            $bindings2 = [];
+            $inClause2 = Connection::buildPreparedInClause($ids, $bindings2);
+            Connection::preparedExecute(
+                'DELETE FROM words WHERE WoID in ' . $inClause2,
+                $bindings2
             );
 
             Maintenance::adjustAutoIncrement('words', 'WoID');
@@ -501,7 +505,7 @@ class WordListService
             throw $e;
         }
 
-        return (string) $message;
+        return "Deleted";
     }
 
     /**
@@ -516,34 +520,42 @@ class WordListService
      */
     public function updateStatusByIdList(array $ids, int $newStatus, bool $relative, string $actionType): string
     {
-        $inClause = Connection::buildIntInClause($ids);
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
 
         if ($relative && $newStatus > 0) {
             // Status +1
-            return (string) Connection::execute(
+            $bindings = [];
+            $inClause = Connection::buildPreparedInClause($ids, $bindings);
+            Connection::preparedExecute(
                 'update words
                 set WoStatus=WoStatus+1, WoStatusChanged = NOW(),' . $scoreUpdate . '
                 where WoStatus in (1,2,3,4) and WoID in ' . $inClause,
-                "Updated Status (+1)"
+                $bindings
             );
+            return "Updated Status (+1)";
         } elseif ($relative && $newStatus < 0) {
             // Status -1
-            return (string) Connection::execute(
+            $bindings = [];
+            $inClause = Connection::buildPreparedInClause($ids, $bindings);
+            Connection::preparedExecute(
                 'update words
                 set WoStatus=WoStatus-1, WoStatusChanged = NOW(),' . $scoreUpdate . '
                 where WoStatus in (2,3,4,5) and WoID in ' . $inClause,
-                "Updated Status (-1)"
+                $bindings
             );
+            return "Updated Status (-1)";
         }
 
         // Absolute status
-        return (string) Connection::execute(
+        $bindings = [$newStatus];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
+        Connection::preparedExecute(
             'update words
-            set WoStatus=' . $newStatus . ', WoStatusChanged = NOW(),' . $scoreUpdate . '
+            set WoStatus=?, WoStatusChanged = NOW(),' . $scoreUpdate . '
             where WoID in ' . $inClause,
-            "Updated Status (=" . $newStatus . ")"
+            $bindings
         );
+        return "Updated Status (=" . $newStatus . ")";
     }
 
     /**
@@ -555,14 +567,16 @@ class WordListService
      */
     public function updateStatusDateByIdList(array $ids): string
     {
-        $inClause = Connection::buildIntInClause($ids);
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
 
-        return (string) Connection::execute(
+        Connection::preparedExecute(
             'update words
             set WoStatusChanged = NOW(),' . TermStatusService::makeScoreRandomInsertUpdate('u') . '
             where WoID in ' . $inClause,
-            "Updated Status Date (= Now)"
+            $bindings
         );
+        return "Updated Status Date (= Now)";
     }
 
     /**
@@ -574,14 +588,16 @@ class WordListService
      */
     public function deleteSentencesByIdList(array $ids): string
     {
-        $inClause = Connection::buildIntInClause($ids);
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
 
-        return (string) Connection::execute(
+        Connection::preparedExecute(
             'update words
             set WoSentence = NULL
             where WoID in ' . $inClause,
-            "Term Sentence(s) deleted"
+            $bindings
         );
+        return "Term Sentence(s) deleted";
     }
 
     /**
@@ -593,14 +609,16 @@ class WordListService
      */
     public function toLowercaseByIdList(array $ids): string
     {
-        $inClause = Connection::buildIntInClause($ids);
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
 
-        return (string) Connection::execute(
+        Connection::preparedExecute(
             'update words
             set WoText = WoTextLC
             where WoID in ' . $inClause,
-            "Term(s) set to lowercase"
+            $bindings
         );
+        return "Term(s) set to lowercase";
     }
 
     /**
@@ -612,16 +630,18 @@ class WordListService
      */
     public function capitalizeByIdList(array $ids): string
     {
-        $inClause = Connection::buildIntInClause($ids);
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
 
-        return (string) Connection::execute(
+        Connection::preparedExecute(
             'update words
             set WoText = CONCAT(
                 UPPER(LEFT(WoTextLC,1)),SUBSTRING(WoTextLC,2)
             )
             where WoID in ' . $inClause,
-            "Term(s) capitalized"
+            $bindings
         );
+        return "Term(s) capitalized";
     }
 
     /**

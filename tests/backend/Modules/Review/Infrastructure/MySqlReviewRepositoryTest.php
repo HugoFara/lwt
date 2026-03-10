@@ -116,59 +116,70 @@ class MySqlReviewRepositoryTest extends TestCase
     // ReviewConfiguration SQL Projection Tests
     // =========================================================================
 
-    public function testToSqlProjectionForLanguage(): void
+    public function testToSqlProjectionPreparedForLanguage(): void
     {
         $config = ReviewConfiguration::fromLanguage(5);
-        $sql = $config->toSqlProjection();
+        $params = [];
+        $sql = $config->toSqlProjectionPrepared($params);
 
         $this->assertStringContainsString('words', $sql);
-        $this->assertStringContainsString('WoLgID = 5', $sql);
+        $this->assertStringContainsString('WoLgID = ?', $sql);
+        $this->assertEquals([5], $params);
     }
 
-    public function testToSqlProjectionForText(): void
+    public function testToSqlProjectionPreparedForText(): void
     {
         $config = ReviewConfiguration::fromText(42);
-        $sql = $config->toSqlProjection();
+        $params = [];
+        $sql = $config->toSqlProjectionPrepared($params);
 
         $this->assertStringContainsString('words', $sql);
         $this->assertStringContainsString('word_occurrences', $sql);
-        $this->assertStringContainsString('Ti2TxID = 42', $sql);
+        $this->assertStringContainsString('Ti2TxID = ?', $sql);
+        $this->assertEquals([42], $params);
     }
 
-    public function testToSqlProjectionForWords(): void
+    public function testToSqlProjectionPreparedForWords(): void
     {
         $config = ReviewConfiguration::fromWords([1, 2, 3]);
-        $sql = $config->toSqlProjection();
+        $params = [];
+        $sql = $config->toSqlProjectionPrepared($params);
 
-        $this->assertStringContainsString('WoID IN (1,2,3)', $sql);
+        $this->assertStringContainsString('WoID IN (?,?,?)', $sql);
+        $this->assertEquals([1, 2, 3], $params);
     }
 
-    public function testToSqlProjectionForTexts(): void
+    public function testToSqlProjectionPreparedForTexts(): void
     {
         $config = ReviewConfiguration::fromTexts([10, 20, 30]);
-        $sql = $config->toSqlProjection();
+        $params = [];
+        $sql = $config->toSqlProjectionPrepared($params);
 
-        $this->assertStringContainsString('Ti2TxID IN (10,20,30)', $sql);
+        $this->assertStringContainsString('Ti2TxID IN (?,?,?)', $sql);
+        $this->assertEquals([10, 20, 30], $params);
     }
 
-    public function testToSqlProjectionForRawSql(): void
+    public function testToSqlProjectionPreparedForRawSql(): void
     {
         $config = new ReviewConfiguration(
             ReviewConfiguration::KEY_RAW_SQL,
             'words WHERE WoStatus = 1'
         );
-        $sql = $config->toSqlProjection();
+        $params = [];
+        $sql = $config->toSqlProjectionPrepared($params);
 
         $this->assertSame('words WHERE WoStatus = 1', $sql);
+        $this->assertEmpty($params);
     }
 
-    public function testToSqlProjectionThrowsForInvalidKey(): void
+    public function testToSqlProjectionPreparedThrowsForInvalidKey(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid review key');
 
         $config = new ReviewConfiguration('invalid', 1);
-        $config->toSqlProjection();
+        $params = [];
+        $config->toSqlProjectionPrepared($params);
     }
 
     // =========================================================================

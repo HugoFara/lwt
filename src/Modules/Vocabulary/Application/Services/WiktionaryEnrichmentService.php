@@ -34,7 +34,9 @@ class WiktionaryEnrichmentService
      */
     public function getUnenrichedWords(int $langId, int $batchSize = self::BATCH_SIZE): array
     {
-        $userScope = UserScopedQuery::forTable('words');
+        $bindings = [$langId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
+        $bindings[] = $batchSize;
         $sql = "SELECT WoID, WoText FROM words
                 WHERE WoLgID = ?
                 AND (WoTranslation IS NULL OR WoTranslation = '' OR WoTranslation = '*')
@@ -43,7 +45,7 @@ class WiktionaryEnrichmentService
                 LIMIT ?";
 
         /** @var list<array{WoID: int, WoText: string}> */
-        return Connection::preparedFetchAll($sql, [$langId, $batchSize]);
+        return Connection::preparedFetchAll($sql, $bindings);
     }
 
     /**
@@ -51,14 +53,15 @@ class WiktionaryEnrichmentService
      */
     public function countUnenriched(int $langId): int
     {
-        $userScope = UserScopedQuery::forTable('words');
+        $bindings = [$langId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
         $sql = "SELECT COUNT(*) as value FROM words
                 WHERE WoLgID = ?
                 AND (WoTranslation IS NULL OR WoTranslation = '' OR WoTranslation = '*')
                 $userScope";
 
         /** @var int|string|null $result */
-        $result = Connection::preparedFetchValue($sql, [$langId]);
+        $result = Connection::preparedFetchValue($sql, $bindings);
         return (int) $result;
     }
 
@@ -67,12 +70,13 @@ class WiktionaryEnrichmentService
      */
     public function countTotal(int $langId): int
     {
-        $userScope = UserScopedQuery::forTable('words');
+        $bindings = [$langId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
         $sql = "SELECT COUNT(*) as value FROM words
                 WHERE WoLgID = ? $userScope";
 
         /** @var int|string|null $result */
-        $result = Connection::preparedFetchValue($sql, [$langId]);
+        $result = Connection::preparedFetchValue($sql, $bindings);
         return (int) $result;
     }
 

@@ -143,31 +143,37 @@ class ReviewFacadeTest extends TestCase
         $this->assertEquals(1, $config4->getBaseType()); // 4 -> 1 (word mode)
     }
 
-    public function testReviewConfigurationToSqlProjectionForLang(): void
+    public function testReviewConfigurationToSqlProjectionPreparedForLang(): void
     {
         $config = ReviewConfiguration::fromLanguage(5);
-        $sql = $config->toSqlProjection();
+        $params = [];
+        $sql = $config->toSqlProjectionPrepared($params);
 
         $this->assertStringContainsString('words', $sql);
-        $this->assertStringContainsString('WoLgID = 5', $sql);
+        $this->assertStringContainsString('WoLgID = ?', $sql);
+        $this->assertEquals([5], $params);
     }
 
-    public function testReviewConfigurationToSqlProjectionForText(): void
+    public function testReviewConfigurationToSqlProjectionPreparedForText(): void
     {
         $config = ReviewConfiguration::fromText(10);
-        $sql = $config->toSqlProjection();
+        $params = [];
+        $sql = $config->toSqlProjectionPrepared($params);
 
         $this->assertStringContainsString('words', $sql);
         $this->assertStringContainsString('word_occurrences', $sql);
-        $this->assertStringContainsString('Ti2TxID = 10', $sql);
+        $this->assertStringContainsString('Ti2TxID = ?', $sql);
+        $this->assertEquals([10], $params);
     }
 
-    public function testReviewConfigurationToSqlProjectionForWords(): void
+    public function testReviewConfigurationToSqlProjectionPreparedForWords(): void
     {
         $config = ReviewConfiguration::fromWords([1, 2, 3]);
-        $sql = $config->toSqlProjection();
+        $params = [];
+        $sql = $config->toSqlProjectionPrepared($params);
 
-        $this->assertStringContainsString('WoID IN (1,2,3)', $sql);
+        $this->assertStringContainsString('WoID IN (?,?,?)', $sql);
+        $this->assertEquals([1, 2, 3], $params);
     }
 
     public function testReviewConfigurationToUrlProperty(): void
