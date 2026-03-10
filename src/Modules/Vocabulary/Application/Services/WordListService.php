@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Word List Service - Business logic for word list/edit operations
+ * Word List Service - Facade for word list/edit operations
  *
  * PHP version 8.1
  *
@@ -17,21 +17,18 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
-use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\DB;
-use Lwt\Shared\Infrastructure\Database\QueryBuilder;
-use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
-use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
-use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 
 /**
- * Service class for managing word list operations.
+ * Facade for managing word list operations.
  *
- * Handles filtering, pagination, bulk operations on words list.
+ * Delegates filtering to WordListFilterBuilder, queries to WordListQueryService,
+ * and export SQL building to WordListExportBuilder. Retains bulk operations,
+ * single-word CRUD, and form data methods directly.
  *
  * @category   Lwt
  * @package    Lwt\Modules\Vocabulary\Application\Services
@@ -42,23 +39,35 @@ use Lwt\Modules\Language\Application\LanguageFacade;
  */
 class WordListService
 {
+    private WordListFilterBuilder $filterBuilder;
+    private WordListQueryService $queryService;
+    private WordListExportBuilder $exportBuilder;
+
+    public function __construct(
+        ?WordListFilterBuilder $filterBuilder = null,
+        ?WordListQueryService $queryService = null,
+        ?WordListExportBuilder $exportBuilder = null
+    ) {
+        $this->filterBuilder = $filterBuilder ?? new WordListFilterBuilder();
+        $this->queryService = $queryService ?? new WordListQueryService();
+        $this->exportBuilder = $exportBuilder ?? new WordListExportBuilder();
+    }
+
+    // =========================================================================
+    // Delegated filter methods (WordListFilterBuilder)
+    // =========================================================================
+
     /**
      * Build query condition for language filter.
      *
-     * @param string $langId Language ID
+     * @param string     $langId Language ID
+     * @param array|null &$params Optional: Reference to params array for prepared statements
      *
      * @return string SQL condition
      */
     public function buildLangCondition(string $langId, ?array &$params = null): string
     {
-        if ($langId == '') {
-            return '';
-        }
-        if ($params !== null) {
-            $params[] = (int)$langId;
-            return ' and WoLgID = ?';
-        }
-        return ' and WoLgID=' . (int)$langId;
+        return $this->filterBuilder->buildLangCondition($langId, $params);
     }
 
     /**
@@ -70,25 +79,18 @@ class WordListService
      */
     public function buildStatusCondition(string $status): string
     {
-        if ($status == '') {
-            return '';
-        }
-        return ' and ' . StatusHelper::makeCondition('WoStatus', (int)$status);
+        return $this->filterBuilder->buildStatusCondition($status);
     }
 
     /**
      * Build query condition for search query with prepared statement parameters.
-     *
-     * NOTE: When upgrading calling code, pass a $params array by reference to get
-     * parameterized queries. For backward compatibility, if $params is null,
-     * this returns old-style SQL with embedded values (using mysqli_real_escape_string).
      *
      * @param string     $query     Search query
      * @param string     $queryMode Query mode (term, rom, transl, etc.)
      * @param string     $regexMode Regex mode ('' or 'r')
      * @param array|null &$params   Optional: Reference to params array for prepared statements
      *
-     * @return string SQL condition (with ? placeholders if $params provided, or embedded values if not)
+     * @return string SQL condition
      */
     public function buildQueryCondition(
         string $query,
@@ -96,67 +98,7 @@ class WordListService
         string $regexMode,
         ?array &$params = null
     ): string {
-        if ($query === '') {
-            return '';
-        }
-
-        /** @var string $queryValue */
-        $queryValue = ($regexMode == '') ?
-            str_replace("*", "%", mb_strtolower($query, 'UTF-8')) :
-            $query;
-
-        $op = $regexMode . 'like';
-
-        $fieldSets = [
-            'term,rom,transl' => ['WoText', "IFNULL(WoRomanization,'*')", 'WoTranslation'],
-            'term,rom' => ['WoText', "IFNULL(WoRomanization,'*')"],
-            'rom,transl' => ["IFNULL(WoRomanization,'*')", 'WoTranslation'],
-            'term,transl' => ['WoText', 'WoTranslation'],
-            'term' => ['WoText'],
-            'rom' => ["IFNULL(WoRomanization,'*')"],
-            'transl' => ['WoTranslation'],
-        ];
-
-        $fields = $fieldSets[$queryMode] ?? $fieldSets['term,rom,transl'];
-
-        // If $params is provided, use prepared statements with ? placeholders
-        if ($params !== null) {
-            $conditions = [];
-            foreach ($fields as $field) {
-                $conditions[] = "{$field} {$op} ?";
-                $params[] = $queryValue;
-            }
-            return ' and (' . implode(' or ', $conditions) . ')';
-        }
-
-        // Backward compatibility: build old-style SQL with embedded values
-        // Using mysqli_real_escape_string directly instead of Escaping::toSqlSyntax()
-        $dbConn = Globals::getDbConnection();
-        if ($dbConn === null) {
-            return '';
-        }
-        $escapedValue = "'" . (string) mysqli_real_escape_string($dbConn, $queryValue) . "'";
-
-        $whQuery = "{$op} {$escapedValue}";
-
-        switch ($queryMode) {
-            case 'term,rom,transl':
-                return " and (WoText $whQuery or IFNULL(WoRomanization,'*') $whQuery or WoTranslation $whQuery)";
-            case 'term,rom':
-                return " and (WoText $whQuery or IFNULL(WoRomanization,'*') $whQuery)";
-            case 'rom,transl':
-                return " and (IFNULL(WoRomanization,'*') $whQuery or WoTranslation $whQuery)";
-            case 'term,transl':
-                return " and (WoText $whQuery or WoTranslation $whQuery)";
-            case 'term':
-                return " and (WoText $whQuery)";
-            case 'rom':
-                return " and (IFNULL(WoRomanization,'*') $whQuery)";
-            case 'transl':
-                return " and (WoTranslation $whQuery)";
-            default:
-                return " and (WoText $whQuery or IFNULL(WoRomanization,'*') $whQuery or WoTranslation $whQuery)";
-        }
+        return $this->filterBuilder->buildQueryCondition($query, $queryMode, $regexMode, $params);
     }
 
     /**
@@ -168,69 +110,27 @@ class WordListService
      */
     public function validateRegexPattern(string $pattern): bool
     {
-        try {
-            Connection::preparedFetchValue('SELECT "test" RLIKE ?', [$pattern]);
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
+        return $this->filterBuilder->validateRegexPattern($pattern);
     }
 
     /**
      * Build tag filter condition.
      *
-     * @param string $tag1  First tag ID (must be numeric or empty)
-     * @param string $tag2  Second tag ID (must be numeric or empty)
-     * @param string $tag12 Tag logic (0=OR, 1=AND)
+     * @param string     $tag1   First tag ID (must be numeric or empty)
+     * @param string     $tag2   Second tag ID (must be numeric or empty)
+     * @param string     $tag12  Tag logic (0=OR, 1=AND)
+     * @param array|null &$params Optional: Reference to params array for prepared statements
      *
      * @return string SQL HAVING clause
      */
     public function buildTagCondition(string $tag1, string $tag2, string $tag12, ?array &$params = null): string
     {
-        if ($tag1 == '' && $tag2 == '') {
-            return '';
-        }
-
-        // Sanitize tag IDs to prevent SQL injection - cast to int for safety
-        // Non-numeric strings become null and are ignored
-        $tag1Int = ($tag1 !== '' && is_numeric($tag1)) ? (int)$tag1 : null;
-        $tag2Int = ($tag2 !== '' && is_numeric($tag2)) ? (int)$tag2 : null;
-
-        $whTag1 = null;
-        $whTag2 = null;
-
-        if ($tag1Int !== null) {
-            if ($tag1Int === -1) {
-                $whTag1 = "group_concat(WtTgID) IS NULL";
-            } elseif ($params !== null) {
-                $whTag1 = "concat('/',group_concat(WtTgID separator '/'),'/') like concat('%/', ?, '/%')";
-                $params[] = $tag1Int;
-            } else {
-                $whTag1 = "concat('/',group_concat(WtTgID separator '/'),'/') like '%/" . $tag1Int . "/%'";
-            }
-        }
-
-        if ($tag2Int !== null) {
-            if ($tag2Int === -1) {
-                $whTag2 = "group_concat(WtTgID) IS NULL";
-            } elseif ($params !== null) {
-                $whTag2 = "concat('/',group_concat(WtTgID separator '/'),'/') like concat('%/', ?, '/%')";
-                $params[] = $tag2Int;
-            } else {
-                $whTag2 = "concat('/',group_concat(WtTgID separator '/'),'/') like '%/" . $tag2Int . "/%'";
-            }
-        }
-
-        if ($whTag1 !== null && $whTag2 === null) {
-            return " having (" . $whTag1 . ') ';
-        } elseif ($whTag2 !== null && $whTag1 === null) {
-            return " having (" . $whTag2 . ') ';
-        } elseif ($whTag1 === null && $whTag2 === null) {
-            return '';
-        } else {
-            return " having ((" . $whTag1 . ($tag12 ? ') AND (' : ') OR (') . $whTag2 . ")) ";
-        }
+        return $this->filterBuilder->buildTagCondition($tag1, $tag2, $tag12, $params);
     }
+
+    // =========================================================================
+    // Delegated query methods (WordListQueryService)
+    // =========================================================================
 
     /**
      * Count words matching the filter criteria.
@@ -252,26 +152,7 @@ class WordListService
         string $whTag,
         array $params = []
     ): int {
-        if ($textId == '') {
-            $bindings = $params;
-            $sql = 'select count(*) as value from (select WoID from (' .
-                'words left JOIN word_tag_map' .
-                ' ON WoID = WtWoID) where (1=1) ' .
-                $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag . ') as dummy';
-        } else {
-            $bindings = [];
-            $textIds = array_map('intval', explode(',', $textId));
-            $inClause = Connection::buildPreparedInClause($textIds, $bindings);
-            /** @var array<int, mixed> $bindings */
-            $bindings = array_values(array_merge($bindings, $params));
-            $sql = 'select count(*) as value from (select WoID from (' .
-                'words left JOIN word_tag_map' .
-                ' ON WoID = WtWoID), word_occurrences' .
-                ' where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in ' .
-                $inClause . $whLang . $whStat . $whQuery .
-                ' group by WoID ' . $whTag . ') as dummy';
-        }
-        return (int) Connection::preparedFetchValue($sql, $bindings);
+        return $this->queryService->countWords($textId, $whLang, $whStat, $whQuery, $whTag, $params);
     }
 
     /**
@@ -287,184 +168,137 @@ class WordListService
      */
     public function getWordsList(array $filters, int $sort, int $page, int $perPage): array
     {
-        $sorts = [
-            'WoTextLC',
-            'lower(WoTranslation)',
-            'WoID desc',
-            'WoID asc',
-            'WoStatus, WoTextLC',
-            'WoTodayScore',
-            'textswordcount desc, WoTextLC asc'
-        ];
-
-        $lsorts = count($sorts);
-        if ($sort < 1) {
-            $sort = 1;
-        }
-        if ($sort > $lsorts) {
-            $sort = $lsorts;
-        }
-
-        $whLang = $filters['whLang'] ?? '';
-        $whStat = $filters['whStat'] ?? '';
-        $whQuery = $filters['whQuery'] ?? '';
-        $whTag = $filters['whTag'] ?? '';
-        $textId = $filters['textId'] ?? '';
-        $filterParams = $filters['params'] ?? [];
-
-        if ($sort == 7) {
-            // Sort by word count in texts
-            return $this->getWordsListWithWordCount($filters, $sorts[$sort - 1]);
-        }
-
-        $offset = ($page - 1) * $perPage;
-
-        if ($textId == '') {
-            if ($whTag == '') {
-                $bindings = $filterParams;
-                $bindings[] = $offset;
-                $bindings[] = $perPage;
-                $sql = 'select WoID, WoText, WoTranslation, WoRomanization, WoSentence,
-                        SentOK, WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI, Days,
-                        WoTodayScore AS Score, WoTomorrowScore AS Score2,
-                        ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist
-                        from (select WoID, WoTextLC, WoText, WoTranslation, WoRomanization,
-                        WoSentence,
-                        ifnull(WoSentence,\'\') like concat(\'%{\',WoText,\'}%\') as SentOK,
-                        WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
-                        DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore,
-                        WoTomorrowScore
-                        from words, languages
-                        where WoLgID = LgID ' . $whLang . $whStat . $whQuery . '
-                        group by WoID
-                        order by ' . $sorts[$sort - 1] . ' LIMIT ?, ?) AS AA
-                        left JOIN word_tag_map ON WoID = WtWoID
-                        left join tags on TgID = WtTgID
-                        group by WoID
-                        order by ' . $sorts[$sort - 1];
-            } else {
-                $bindings = $filterParams;
-                $bindings[] = $offset;
-                $bindings[] = $perPage;
-                $sql = 'select WoID, WoText, WoTranslation, WoRomanization, WoSentence,
-                        ifnull(WoSentence,\'\') like concat(\'%{\',WoText,\'}%\') as SentOK,
-                        WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
-                        DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
-                        WoTomorrowScore AS Score2,
-                        ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist
-                        from ((words left JOIN word_tag_map
-                        ON WoID = WtWoID) left join tags
-                        on TgID = WtTgID), languages
-                        where WoLgID = LgID ' . $whLang . $whStat . $whQuery .
-                        ' group by WoID ' . $whTag . ' order by ' . $sorts[$sort - 1] . ' LIMIT ?, ?';
-            }
-        } else {
-            $bindings = [];
-            $textIds = array_map('intval', explode(',', $textId));
-            $inClause = Connection::buildPreparedInClause($textIds, $bindings);
-            /** @var array<int, mixed> $bindings */
-            $bindings = array_values(array_merge($bindings, $filterParams));
-            $bindings[] = $offset;
-            $bindings[] = $perPage;
-            $sql = 'select distinct WoID, WoText, WoTranslation, WoRomanization,
-                    WoSentence, ifnull(WoSentence,\'\') like \'%{%}%\' as SentOK, WoStatus,
-                    LgName, LgRightToLeft, LgGoogleTranslateURI,
-                    DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
-                    WoTomorrowScore AS Score2,
-                    ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist
-                    from ((words
-                    left JOIN word_tag_map ON WoID = WtWoID)
-                    left join tags on TgID = WtTgID),
-                    languages, word_occurrences
-                    where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in ' .
-                    $inClause . ' and WoLgID = LgID ' . $whLang . $whStat . $whQuery . '
-                    group by WoID ' . $whTag . '
-                    order by ' . $sorts[$sort - 1] . ' LIMIT ?, ?';
-        }
-
-        return Connection::preparedFetchAll($sql, $bindings);
+        return $this->queryService->getWordsList($filters, $sort, $page, $perPage);
     }
 
     /**
-     * Get words list with word count (for sort option 7).
+     * Get word IDs matching filter criteria (for 'all' actions).
      *
-     * @param array{whLang?: string, whStat?: string, whQuery?: string,
-     *               whTag?: string, textId?: string, params?: array} $filters Filter parameters
-     * @param string $sortExpr Sort expression
+     * @param string $textId  Text ID filter (comma-separated IDs or empty)
+     * @param string $whLang  Language condition (with ? placeholders)
+     * @param string $whStat  Status condition
+     * @param string $whQuery Query condition (with ? placeholders)
+     * @param string $whTag   Tag condition (with ? placeholders)
+     * @param array  $params  Merged binding parameters for filters
      *
-     * @return array Array of word records
+     * @return int[] Array of word IDs
      */
-    private function getWordsListWithWordCount(array $filters, string $sortExpr): array
-    {
-        $whLang = $filters['whLang'] ?? '';
-        $whStat = $filters['whStat'] ?? '';
-        $whQuery = $filters['whQuery'] ?? '';
-        $whTag = $filters['whTag'] ?? '';
-        $textId = $filters['textId'] ?? '';
-        $filterParams = $filters['params'] ?? [];
-
-        if ($textId != '') {
-            $bindings = [];
-            $textIds = array_map('intval', explode(',', $textId));
-            $inClause = Connection::buildPreparedInClause($textIds, $bindings);
-            /** @var array<int, mixed> $bindings */
-            $bindings = array_values(array_merge($bindings, $filterParams));
-            $sql = 'select WoID, count(WoID) AS textswordcount, WoText, WoTranslation,
-                    WoRomanization, WoSentence,
-                    ifnull(WoSentence,\'\') like concat(\'%{\',WoText,\'}%\') as SentOK,
-                    WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
-                    DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
-                    WoTomorrowScore AS Score2,
-                    ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
-                    WoTextLC, WoTodayScore
-                    from ((words left JOIN word_tag_map
-                    ON WoID = WtWoID)
-                    left join tags on TgID = WtTgID),
-                    languages, word_occurrences
-                    where Ti2LgID = WoLgID and Ti2WoID = WoID and WoLgID = LgID
-                    and Ti2TxID in ' . $inClause . ' ' .
-                    $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag .
-                    ' order by ' . $sortExpr;
-        } else {
-            // UNION query: first part = words NOT in any text, second = words with occurrences
-            // Both parts share the same filter params, so we need to duplicate them
-            $bindings = array_merge($filterParams, $filterParams);
-            $sql = 'select WoID, 0 AS textswordcount, WoText, WoTranslation,
-                    WoRomanization, WoSentence,
-                    ifnull(WoSentence,\'\') like concat(\'%{\',WoText,\'}%\') as SentOK,
-                    WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
-                    DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
-                    WoTomorrowScore AS Score2,
-                    ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
-                    WoTextLC, WoTodayScore
-                    from ((words left JOIN word_tag_map
-                    ON WoID = WtWoID)
-                    left join tags on TgID = WtTgID),
-                    languages
-                    where WoLgID = LgID and WoID NOT IN (SELECT DISTINCT Ti2WoID
-                    from word_occurrences where Ti2LgID = LgID) ' .
-                    $whLang . $whStat . $whQuery . '
-                    group by WoID ' . $whTag . '
-                    UNION
-                    select WoID, count(WoID) AS textswordcount, WoText, WoTranslation,
-                    WoRomanization, WoSentence,
-                    ifnull(WoSentence,\'\') like concat(\'%{\',WoText,\'}%\') as SentOK,
-                    WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
-                    DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
-                    WoTomorrowScore AS Score2,
-                    ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
-                    WoTextLC, WoTodayScore
-                    from ((words left JOIN word_tag_map
-                    ON WoID = WtWoID)
-                    left join tags on TgID = WtTgID),
-                    languages, word_occurrences
-                    where Ti2LgID = WoLgID and Ti2WoID = WoID and WoLgID = LgID ' .
-                    $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag .
-                    ' order by ' . $sortExpr;
-        }
-
-        return Connection::preparedFetchAll($sql, $bindings);
+    public function getFilteredWordIds(
+        string $textId,
+        string $whLang,
+        string $whStat,
+        string $whQuery,
+        string $whTag,
+        array $params = []
+    ): array {
+        return $this->queryService->getFilteredWordIds($textId, $whLang, $whStat, $whQuery, $whTag, $params);
     }
+
+    // =========================================================================
+    // Delegated export methods (WordListExportBuilder)
+    // =========================================================================
+
+    /**
+     * Get Anki export SQL for selected words.
+     *
+     * @param int[]  $ids          Array of word IDs (empty for filter-based export)
+     * @param string $textId       Text ID filter (comma-separated, empty for no filter)
+     * @param string $whLang       Language condition (with ? placeholders)
+     * @param string $whStat       Status condition
+     * @param string $whQuery      Query condition (with ? placeholders)
+     * @param string $whTag        Tag condition (with ? placeholders)
+     * @param array  $filterParams Merged binding parameters for filter conditions
+     *
+     * @return array{sql: string, params: array} SQL query and parameters
+     */
+    public function getAnkiExportSql(
+        array $ids,
+        string $textId,
+        string $whLang,
+        string $whStat,
+        string $whQuery,
+        string $whTag,
+        array $filterParams = []
+    ): array {
+        return $this->exportBuilder->getAnkiExportSql($ids, $textId, $whLang, $whStat, $whQuery, $whTag, $filterParams);
+    }
+
+    /**
+     * Get TSV export SQL for selected words.
+     *
+     * @param int[]  $ids          Array of word IDs (empty for filter-based export)
+     * @param string $textId       Text ID filter (comma-separated, empty for no filter)
+     * @param string $whLang       Language condition (with ? placeholders)
+     * @param string $whStat       Status condition
+     * @param string $whQuery      Query condition (with ? placeholders)
+     * @param string $whTag        Tag condition (with ? placeholders)
+     * @param array  $filterParams Merged binding parameters for filter conditions
+     *
+     * @return array{sql: string, params: array} SQL query and parameters
+     */
+    public function getTsvExportSql(
+        array $ids,
+        string $textId,
+        string $whLang,
+        string $whStat,
+        string $whQuery,
+        string $whTag,
+        array $filterParams = []
+    ): array {
+        return $this->exportBuilder->getTsvExportSql($ids, $textId, $whLang, $whStat, $whQuery, $whTag, $filterParams);
+    }
+
+    /**
+     * Get flexible export SQL for selected words.
+     *
+     * @param int[]  $ids          Array of word IDs (empty for filter-based export)
+     * @param string $textId       Text ID filter (comma-separated, empty for no filter)
+     * @param string $whLang       Language condition (with ? placeholders)
+     * @param string $whStat       Status condition
+     * @param string $whQuery      Query condition (with ? placeholders)
+     * @param string $whTag        Tag condition (with ? placeholders)
+     * @param array  $filterParams Merged binding parameters for filter conditions
+     *
+     * @return array{sql: string, params: array} SQL query and parameters
+     */
+    public function getFlexibleExportSql(
+        array $ids,
+        string $textId,
+        string $whLang,
+        string $whStat,
+        string $whQuery,
+        string $whTag,
+        array $filterParams = []
+    ): array {
+        return $this->exportBuilder->getFlexibleExportSql($ids, $textId, $whLang, $whStat, $whQuery, $whTag, $filterParams);
+    }
+
+    /**
+     * Get test SQL for selected words.
+     *
+     * @param string $textId       Text ID filter (comma-separated, empty for no filter)
+     * @param string $whLang       Language condition (with ? placeholders)
+     * @param string $whStat       Status condition
+     * @param string $whQuery      Query condition (with ? placeholders)
+     * @param string $whTag        Tag condition (with ? placeholders)
+     * @param array  $filterParams Merged binding parameters for filter conditions
+     *
+     * @return array{sql: string, params: array} SQL query and parameters
+     */
+    public function getTestWordIdsSql(
+        string $textId,
+        string $whLang,
+        string $whStat,
+        string $whQuery,
+        string $whTag,
+        array $filterParams = []
+    ): array {
+        return $this->exportBuilder->getTestWordIdsSql($textId, $whLang, $whStat, $whQuery, $whTag, $filterParams);
+    }
+
+    // =========================================================================
+    // Bulk operations (kept in facade)
+    // =========================================================================
 
     /**
      * Delete multiple words by ID list.
@@ -644,58 +478,9 @@ class WordListService
         return "Term(s) capitalized";
     }
 
-    /**
-     * Get word IDs matching filter criteria (for 'all' actions).
-     *
-     * @param string $textId  Text ID filter (comma-separated IDs or empty)
-     * @param string $whLang  Language condition (with ? placeholders)
-     * @param string $whStat  Status condition
-     * @param string $whQuery Query condition (with ? placeholders)
-     * @param string $whTag   Tag condition (with ? placeholders)
-     * @param array  $params  Merged binding parameters for filters
-     *
-     * @return int[] Array of word IDs
-     */
-    public function getFilteredWordIds(
-        string $textId,
-        string $whLang,
-        string $whStat,
-        string $whQuery,
-        string $whTag,
-        array $params = []
-    ): array {
-        if ($textId == '') {
-            $bindings = $params;
-            $sql = 'select distinct WoID from (
-                words
-                left JOIN word_tag_map
-                ON WoID = WtWoID
-            ) where (1=1) ' . $whLang . $whStat . $whQuery . '
-            group by WoID ' . $whTag;
-        } else {
-            $bindings = [];
-            $textIds = array_map('intval', explode(',', $textId));
-            $inClause = Connection::buildPreparedInClause($textIds, $bindings);
-            /** @var array<int, mixed> $bindings */
-            $bindings = array_values(array_merge($bindings, $params));
-            $sql = 'select distinct WoID
-            from (
-                words
-                left JOIN word_tag_map ON WoID = WtWoID
-            ), word_occurrences
-            where Ti2LgID = WoLgID and Ti2WoID = WoID and
-            Ti2TxID in ' . $inClause . $whLang . $whStat . $whQuery .
-            ' group by WoID ' . $whTag;
-        }
-
-        $records = Connection::preparedFetchAll($sql, $bindings);
-        $ids = [];
-        foreach ($records as $record) {
-            $ids[] = (int) $record['WoID'];
-        }
-
-        return $ids;
-    }
+    // =========================================================================
+    // Single-word operations (kept in facade)
+    // =========================================================================
 
     /**
      * Delete a single word by ID.
@@ -725,242 +510,9 @@ class WordListService
         Maintenance::adjustAutoIncrement('words', 'WoID');
     }
 
-    /**
-     * Get Anki export SQL for selected words.
-     *
-     * @param int[]  $ids        Array of word IDs (empty for filter-based export)
-     * @param string $textId     Text ID filter (comma-separated, empty for no filter)
-     * @param string $whLang     Language condition (with ? placeholders)
-     * @param string $whStat     Status condition
-     * @param string $whQuery    Query condition (with ? placeholders)
-     * @param string $whTag      Tag condition (with ? placeholders)
-     * @param array  $filterParams Merged binding parameters for filter conditions
-     *
-     * @return array{sql: string, params: array} SQL query and parameters
-     */
-    public function getAnkiExportSql(
-        array $ids,
-        string $textId,
-        string $whLang,
-        string $whStat,
-        string $whQuery,
-        string $whTag,
-        array $filterParams = []
-    ): array {
-        $ankiSelect = 'select distinct WoID, LgRightToLeft,
-            LgRegexpWordCharacters, LgName, WoText, WoTranslation,
-            WoRomanization, WoSentence,
-            ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist';
-        $ankiFrom = 'from ((words left JOIN word_tag_map ON WoID = WtWoID)
-            left join tags on TgID = WtTgID), languages';
-        $ankiWhere = 'WoLgID = LgID AND WoTranslation != \'*\'
-            and WoSentence like concat(\'%{\',WoText,\'}%\')';
-
-        if (!empty($ids)) {
-            $params = [];
-            $inClause = Connection::buildPreparedInClause($ids, $params);
-
-            return [
-                'sql' => "$ankiSelect $ankiFrom
-                    where $ankiWhere AND WoTranslation != ''
-                    and WoID in $inClause group by WoID",
-                'params' => $params,
-            ];
-        }
-
-        if ($textId == '') {
-            return [
-                'sql' => "$ankiSelect $ankiFrom
-                    where $ankiWhere $whLang $whStat $whQuery
-                    group by WoID $whTag",
-                'params' => $filterParams,
-            ];
-        }
-
-        $params = [];
-        $textIds = array_map('intval', explode(',', $textId));
-        $inClause = Connection::buildPreparedInClause($textIds, $params);
-        $params = array_values(array_merge($params, $filterParams));
-
-        return [
-            'sql' => "$ankiSelect $ankiFrom, word_occurrences
-                where Ti2LgID = WoLgID and Ti2WoID = WoID
-                and Ti2TxID in $inClause and $ankiWhere
-                $whLang $whStat $whQuery group by WoID $whTag",
-            'params' => $params,
-        ];
-    }
-
-    /**
-     * Get TSV export SQL for selected words.
-     *
-     * @param int[]  $ids        Array of word IDs (empty for filter-based export)
-     * @param string $textId     Text ID filter (comma-separated, empty for no filter)
-     * @param string $whLang     Language condition (with ? placeholders)
-     * @param string $whStat     Status condition
-     * @param string $whQuery    Query condition (with ? placeholders)
-     * @param string $whTag      Tag condition (with ? placeholders)
-     * @param array  $filterParams Merged binding parameters for filter conditions
-     *
-     * @return array{sql: string, params: array} SQL query and parameters
-     */
-    public function getTsvExportSql(
-        array $ids,
-        string $textId,
-        string $whLang,
-        string $whStat,
-        string $whQuery,
-        string $whTag,
-        array $filterParams = []
-    ): array {
-        $tsvSelect = 'select distinct WoID, LgName, WoText, WoTranslation,
-            WoRomanization, WoSentence, WoStatus,
-            ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist';
-        $tsvFrom = 'from ((words left JOIN word_tag_map ON WoID = WtWoID)
-            left join tags on TgID = WtTgID), languages';
-
-        if (!empty($ids)) {
-            $params = [];
-            $inClause = Connection::buildPreparedInClause($ids, $params);
-
-            return [
-                'sql' => "$tsvSelect $tsvFrom
-                    where WoLgID = LgID and WoID in $inClause group by WoID",
-                'params' => $params,
-            ];
-        }
-
-        if ($textId == '') {
-            return [
-                'sql' => "$tsvSelect $tsvFrom
-                    where WoLgID = LgID $whLang $whStat $whQuery
-                    group by WoID $whTag",
-                'params' => $filterParams,
-            ];
-        }
-
-        $params = [];
-        $textIds = array_map('intval', explode(',', $textId));
-        $inClause = Connection::buildPreparedInClause($textIds, $params);
-        $params = array_values(array_merge($params, $filterParams));
-
-        return [
-            'sql' => "$tsvSelect $tsvFrom, word_occurrences
-                where Ti2LgID = WoLgID and Ti2WoID = WoID
-                and Ti2TxID in $inClause and WoLgID = LgID
-                $whLang $whStat $whQuery group by WoID $whTag",
-            'params' => $params,
-        ];
-    }
-
-    /**
-     * Get flexible export SQL for selected words.
-     *
-     * @param int[]  $ids        Array of word IDs (empty for filter-based export)
-     * @param string $textId     Text ID filter (comma-separated, empty for no filter)
-     * @param string $whLang     Language condition (with ? placeholders)
-     * @param string $whStat     Status condition
-     * @param string $whQuery    Query condition (with ? placeholders)
-     * @param string $whTag      Tag condition (with ? placeholders)
-     * @param array  $filterParams Merged binding parameters for filter conditions
-     *
-     * @return array{sql: string, params: array} SQL query and parameters
-     */
-    public function getFlexibleExportSql(
-        array $ids,
-        string $textId,
-        string $whLang,
-        string $whStat,
-        string $whQuery,
-        string $whTag,
-        array $filterParams = []
-    ): array {
-        $flexSelect = 'select distinct WoID, LgName, LgExportTemplate, LgRightToLeft,
-            WoText, WoTextLC, WoTranslation, WoRomanization, WoSentence, WoStatus,
-            ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist';
-        $flexFrom = 'from ((words left JOIN word_tag_map ON WoID = WtWoID)
-            left join tags on TgID = WtTgID), languages';
-
-        if (!empty($ids)) {
-            $params = [];
-            $inClause = Connection::buildPreparedInClause($ids, $params);
-
-            return [
-                'sql' => "$flexSelect $flexFrom
-                    where WoLgID = LgID and WoID in $inClause group by WoID",
-                'params' => $params,
-            ];
-        }
-
-        if ($textId == '') {
-            return [
-                'sql' => "$flexSelect $flexFrom
-                    where WoLgID = LgID $whLang $whStat $whQuery
-                    group by WoID $whTag",
-                'params' => $filterParams,
-            ];
-        }
-
-        $params = [];
-        $textIds = array_map('intval', explode(',', $textId));
-        $inClause = Connection::buildPreparedInClause($textIds, $params);
-        $params = array_values(array_merge($params, $filterParams));
-
-        return [
-            'sql' => "$flexSelect $flexFrom, word_occurrences
-                where Ti2LgID = WoLgID and Ti2WoID = WoID
-                and Ti2TxID in $inClause and WoLgID = LgID
-                $whLang $whStat $whQuery group by WoID $whTag",
-            'params' => $params,
-        ];
-    }
-
-    /**
-     * Get test SQL for selected words.
-     *
-     * @param string $textId     Text ID filter (comma-separated, empty for no filter)
-     * @param string $whLang     Language condition (with ? placeholders)
-     * @param string $whStat     Status condition
-     * @param string $whQuery    Query condition (with ? placeholders)
-     * @param string $whTag      Tag condition (with ? placeholders)
-     * @param array  $filterParams Merged binding parameters for filter conditions
-     *
-     * @return array{sql: string, params: array} SQL query and parameters
-     */
-    public function getTestWordIdsSql(
-        string $textId,
-        string $whLang,
-        string $whStat,
-        string $whQuery,
-        string $whTag,
-        array $filterParams = []
-    ): array {
-        if ($textId == '') {
-            return [
-                'sql' => 'select distinct WoID
-                    from (words left JOIN word_tag_map ON WoID = WtWoID)
-                    where (1=1) ' . $whLang . $whStat . $whQuery .
-                    ' group by WoID ' . $whTag,
-                'params' => $filterParams,
-            ];
-        }
-
-        $params = [];
-        $textIds = array_map('intval', explode(',', $textId));
-        $inClause = Connection::buildPreparedInClause($textIds, $params);
-        $params = array_values(array_merge($params, $filterParams));
-
-        return [
-            'sql' => 'select distinct WoID
-                from (words left JOIN word_tag_map ON WoID = WtWoID),
-                word_occurrences
-                where Ti2LgID = WoLgID and Ti2WoID = WoID
-                and Ti2TxID in ' . $inClause .
-                $whLang . $whStat . $whQuery .
-                ' group by WoID ' . $whTag,
-            'params' => $params,
-        ];
-    }
+    // =========================================================================
+    // Form data methods (kept in facade)
+    // =========================================================================
 
     /**
      * Get word data for new term form.

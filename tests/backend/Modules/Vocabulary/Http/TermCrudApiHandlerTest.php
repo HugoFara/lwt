@@ -16,11 +16,13 @@ use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use ReflectionMethod;
 
 /**
  * Unit tests for TermCrudApiHandler.
  *
- * Tests term CRUD API operations including get, create, update, and delete.
+ * Tests term CRUD API operations including get, create, update, delete,
+ * quick create, term details, term editing, and full CRUD.
  */
 class TermCrudApiHandlerTest extends TestCase
 {
@@ -123,6 +125,36 @@ class TermCrudApiHandlerTest extends TestCase
         $this->assertArrayHasKey('statusLabel', $result);
         $this->assertArrayHasKey('langId', $result);
         $this->assertArrayHasKey('wordCount', $result);
+    }
+
+    public function testGetTermReturnsCorrectTextLc(): void
+    {
+        $term = $this->createMockTerm(1, 'Hello', 'hola', 1);
+        $this->facade->method('getTerm')->willReturn($term);
+
+        $result = $this->handler->getTerm(1);
+
+        $this->assertSame('hello', $result['textLc']);
+    }
+
+    public function testGetTermReturnsWordCount(): void
+    {
+        $term = $this->createMockTerm(1, 'hello world', 'hola mundo', 1, 2);
+        $this->facade->method('getTerm')->willReturn($term);
+
+        $result = $this->handler->getTerm(1);
+
+        $this->assertSame(2, $result['wordCount']);
+    }
+
+    public function testGetTermCallsFacadeWithCorrectId(): void
+    {
+        $this->facade->expects($this->once())
+            ->method('getTerm')
+            ->with(42)
+            ->willReturn(null);
+
+        $this->handler->getTerm(42);
     }
 
     // =========================================================================
@@ -280,6 +312,88 @@ class TermCrudApiHandlerTest extends TestCase
         $this->assertSame('Database error', $result['error']);
     }
 
+    public function testCreateTermReturnsErrorWhenTextMissing(): void
+    {
+        $result = $this->handler->createTerm([
+            'langId' => 1
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('Language ID and text are required', $result['error']);
+    }
+
+    public function testCreateTermReturnsErrorForStatus6(): void
+    {
+        $result = $this->handler->createTerm([
+            'langId' => 1,
+            'text' => 'hello',
+            'status' => 6
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('Invalid status', $result['error']);
+    }
+
+    public function testCreateTermReturnsErrorForStatus0(): void
+    {
+        $result = $this->handler->createTerm([
+            'langId' => 1,
+            'text' => 'hello',
+            'status' => 0
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('Invalid status', $result['error']);
+    }
+
+    // =========================================================================
+    // createTerm valid status tests
+    // =========================================================================
+
+    public function testCreateTermAcceptsStatus98(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', '*', 98);
+        $this->facade->method('createTerm')
+            ->willReturn($term);
+
+        $result = $this->handler->createTerm([
+            'langId' => 1,
+            'text' => 'hello',
+            'status' => 98
+        ]);
+
+        $this->assertTrue($result['success']);
+    }
+
+    public function testCreateTermAcceptsStatus99(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', '*', 99);
+        $this->facade->method('createTerm')
+            ->willReturn($term);
+
+        $result = $this->handler->createTerm([
+            'langId' => 1,
+            'text' => 'hello',
+            'status' => 99
+        ]);
+
+        $this->assertTrue($result['success']);
+    }
+
+    public function testCreateTermDefaultsStatus(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', '*', 1);
+        $this->facade->expects($this->once())
+            ->method('createTerm')
+            ->with(1, 'hello', 1, '*', '', '')
+            ->willReturn($term);
+
+        $this->handler->createTerm([
+            'langId' => 1,
+            'text' => 'hello'
+        ]);
+    }
+
     // =========================================================================
     // updateTerm tests
     // =========================================================================
@@ -325,10 +439,6 @@ class TermCrudApiHandlerTest extends TestCase
 
         $this->handler->updateTerm(1, ['translation' => '']);
     }
-
-    // =========================================================================
-    // updateTerm additional tests
-    // =========================================================================
 
     public function testUpdateTermTrimsWhitespace(): void
     {
@@ -398,6 +508,56 @@ class TermCrudApiHandlerTest extends TestCase
         $this->assertTrue($result['success']);
     }
 
+    public function testUpdateTermPassesValidStatusToFacade(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', 'old', 1);
+        $this->facade->method('getTerm')
+            ->willReturn($term);
+        $this->facade->expects($this->once())
+            ->method('updateTerm')
+            ->with(
+                1,
+                3, // Valid status should be passed through
+                $this->anything(),
+                $this->anything(),
+                $this->anything()
+            );
+
+        $this->handler->updateTerm(1, ['status' => 3]);
+    }
+
+    public function testUpdateTermPassesSentenceToFacade(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', 'old', 1);
+        $this->facade->method('getTerm')
+            ->willReturn($term);
+        $this->facade->expects($this->once())
+            ->method('updateTerm')
+            ->with(
+                1,
+                null,
+                null,
+                'Example sentence',
+                null
+            );
+
+        $this->handler->updateTerm(1, ['sentence' => 'Example sentence']);
+    }
+
+    public function testUpdateTermWithNoDataStillSucceeds(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', 'old', 1);
+        $this->facade->method('getTerm')
+            ->willReturn($term);
+        $this->facade->expects($this->once())
+            ->method('updateTerm')
+            ->with(1, null, null, null, null);
+
+        $result = $this->handler->updateTerm(1, []);
+
+        $this->assertTrue($result['success']);
+    }
+
     // =========================================================================
     // deleteTerm tests
     // =========================================================================
@@ -441,6 +601,17 @@ class TermCrudApiHandlerTest extends TestCase
         $this->assertFalse($result['deleted']);
     }
 
+    public function testDeleteTermNoErrorKeyOnSuccess(): void
+    {
+        $term = $this->createMockTerm(1, 'hello', 'hola', 1);
+        $this->facade->method('getTerm')->willReturn($term);
+        $this->facade->method('deleteTerm')->willReturn(true);
+
+        $result = $this->handler->deleteTerm(1);
+
+        $this->assertArrayNotHasKey('error', $result);
+    }
+
     // =========================================================================
     // deleteTerms tests
     // =========================================================================
@@ -475,6 +646,19 @@ class TermCrudApiHandlerTest extends TestCase
         $this->assertSame(2, $result['deleted']);
     }
 
+    public function testDeleteTermsSingleId(): void
+    {
+        $this->facade->expects($this->once())
+            ->method('deleteTerms')
+            ->with([42])
+            ->willReturn(1);
+
+        $result = $this->handler->deleteTerms([42]);
+
+        $this->assertSame(1, $result['deleted']);
+        $this->assertArrayNotHasKey('error', $result);
+    }
+
     // =========================================================================
     // formatGetTerm tests
     // =========================================================================
@@ -487,6 +671,16 @@ class TermCrudApiHandlerTest extends TestCase
         $result = $this->handler->formatGetTerm(999);
 
         $this->assertArrayHasKey('error', $result);
+    }
+
+    public function testFormatGetTermReturnsDataWhenFound(): void
+    {
+        $term = $this->createMockTerm(1, 'test', 'test', 1);
+        $this->facade->method('getTerm')->willReturn($term);
+
+        $result = $this->handler->formatGetTerm(1);
+
+        $this->assertSame(1, $result['id']);
     }
 
     // =========================================================================
@@ -543,6 +737,21 @@ class TermCrudApiHandlerTest extends TestCase
         $this->assertSame('Status must be 98 (ignored) or 99 (well-known)', $result['error']);
     }
 
+    public function testCreateQuickTermReturnsErrorForStatus5(): void
+    {
+        $result = $this->handler->createQuickTerm(1, 5, 5);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Status must be 98 (ignored) or 99 (well-known)', $result['error']);
+    }
+
+    public function testCreateQuickTermReturnsErrorForStatus0(): void
+    {
+        $result = $this->handler->createQuickTerm(1, 5, 0);
+
+        $this->assertArrayHasKey('error', $result);
+    }
+
     public function testCreateQuickTermReturnsErrorWhenWordNotFound(): void
     {
         $this->linkingService->method('getWordAtPosition')
@@ -574,6 +783,25 @@ class TermCrudApiHandlerTest extends TestCase
         $this->assertSame('hex123', $result['hex']);
     }
 
+    public function testCreateQuickTermWith98Status(): void
+    {
+        $this->linkingService->method('getWordAtPosition')
+            ->willReturn('test');
+        $this->discoveryService->expects($this->once())
+            ->method('insertWordWithStatus')
+            ->with(1, 'test', 98)
+            ->willReturn([
+                'id' => 10,
+                'term' => 'test',
+                'termlc' => 'test',
+                'hex' => 'abc'
+            ]);
+
+        $result = $this->handler->createQuickTerm(1, 3, 98);
+
+        $this->assertSame(10, $result['term_id']);
+    }
+
     public function testCreateQuickTermHandlesException(): void
     {
         $this->linkingService->method('getWordAtPosition')
@@ -587,6 +815,16 @@ class TermCrudApiHandlerTest extends TestCase
         $this->assertSame('Insert failed', $result['error']);
     }
 
+    public function testCreateQuickTermCallsLinkingServiceWithCorrectArgs(): void
+    {
+        $this->linkingService->expects($this->once())
+            ->method('getWordAtPosition')
+            ->with(42, 7)
+            ->willReturn(null);
+
+        $this->handler->createQuickTerm(42, 7, 98);
+    }
+
     // =========================================================================
     // formatQuickCreate tests
     // =========================================================================
@@ -598,52 +836,609 @@ class TermCrudApiHandlerTest extends TestCase
         $this->assertArrayHasKey('error', $result);
     }
 
-    // =========================================================================
-    // createTerm valid status tests
-    // =========================================================================
-
-    public function testCreateTermAcceptsStatus98(): void
+    public function testFormatQuickCreatePassesAllArgs(): void
     {
-        $term = $this->createMockTerm(1, 'hello', '*', 98);
-        $this->facade->method('createTerm')
-            ->willReturn($term);
+        $this->linkingService->expects($this->once())
+            ->method('getWordAtPosition')
+            ->with(10, 3)
+            ->willReturn(null);
 
-        $result = $this->handler->createTerm([
-            'langId' => 1,
-            'text' => 'hello',
-            'status' => 98
-        ]);
-
-        $this->assertTrue($result['success']);
+        $this->handler->formatQuickCreate(10, 3, 99);
     }
 
-    public function testCreateTermAcceptsStatus99(): void
+    // =========================================================================
+    // getTermDetails — method signature & source analysis
+    // =========================================================================
+
+    public function testGetTermDetailsMethodSignature(): void
     {
-        $term = $this->createMockTerm(1, 'hello', '*', 99);
-        $this->facade->method('createTerm')
-            ->willReturn($term);
+        $method = new ReflectionMethod(TermCrudApiHandler::class, 'getTermDetails');
 
-        $result = $this->handler->createTerm([
-            'langId' => 1,
-            'text' => 'hello',
-            'status' => 99
-        ]);
+        $this->assertTrue($method->isPublic());
+        $this->assertSame('array', $method->getReturnType()?->getName());
 
-        $this->assertTrue($result['success']);
+        $params = $method->getParameters();
+        $this->assertCount(2, $params);
+        $this->assertSame('termId', $params[0]->getName());
+        $this->assertSame('int', $params[0]->getType()?->getName());
+        $this->assertSame('ann', $params[1]->getName());
+        $this->assertTrue($params[1]->getType()?->allowsNull());
+        $this->assertTrue($params[1]->isDefaultValueAvailable());
+        $this->assertNull($params[1]->getDefaultValue());
     }
 
-    public function testCreateTermDefaultsStatus(): void
+    public function testGetTermDetailsUsesQueryBuilderPrepared(): void
     {
-        $term = $this->createMockTerm(1, 'hello', '*', 1);
-        $this->facade->expects($this->once())
-            ->method('createTerm')
-            ->with(1, 'hello', 1, '*', '', '')
-            ->willReturn($term);
+        $source = $this->getMethodSource('getTermDetails');
 
-        $this->handler->createTerm([
-            'langId' => 1,
-            'text' => 'hello'
+        $this->assertStringContainsString('firstPrepared()', $source);
+        $this->assertStringContainsString('getPrepared()', $source);
+    }
+
+    public function testGetTermDetailsReturnsErrorKeyOnNotFound(): void
+    {
+        $source = $this->getMethodSource('getTermDetails');
+
+        $this->assertStringContainsString("return ['error' => 'Term not found']", $source);
+    }
+
+    public function testGetTermDetailsQueriesWordTagMap(): void
+    {
+        $source = $this->getMethodSource('getTermDetails');
+
+        $this->assertStringContainsString("table('word_tag_map')", $source);
+        $this->assertStringContainsString("join('tags'", $source);
+    }
+
+    public function testGetTermDetailsHighlightsAnnotationInTranslation(): void
+    {
+        $source = $this->getMethodSource('getTermDetails');
+
+        $this->assertStringContainsString("str_replace(\$ann, '<b>' . \$ann . '</b>'", $source);
+    }
+
+    public function testGetTermDetailsReturnStructureIncludesExpectedKeys(): void
+    {
+        $source = $this->getMethodSource('getTermDetails');
+
+        $expectedKeys = [
+            "'id'", "'text'", "'textLc'", "'lemma'", "'lemmaLc'",
+            "'translation'", "'romanization'", "'status'", "'langId'",
+            "'sentence'", "'notes'", "'tags'", "'statusLabel'"
+        ];
+
+        foreach ($expectedKeys as $key) {
+            $this->assertStringContainsString(
+                $key,
+                $source,
+                "getTermDetails should return key $key"
+            );
+        }
+    }
+
+    // =========================================================================
+    // formatGetTermDetails tests
+    // =========================================================================
+
+    public function testFormatGetTermDetailsMethodSignature(): void
+    {
+        $method = new ReflectionMethod(TermCrudApiHandler::class, 'formatGetTermDetails');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame('array', $method->getReturnType()?->getName());
+
+        $params = $method->getParameters();
+        $this->assertCount(2, $params);
+        $this->assertSame('termId', $params[0]->getName());
+        $this->assertSame('ann', $params[1]->getName());
+    }
+
+    public function testFormatGetTermDetailsDelegatesToGetTermDetails(): void
+    {
+        $source = $this->getMethodSource('formatGetTermDetails');
+
+        $this->assertStringContainsString('getTermDetails(', $source);
+    }
+
+    // =========================================================================
+    // getTermForEdit — method signature & source analysis
+    // =========================================================================
+
+    public function testGetTermForEditMethodSignature(): void
+    {
+        $method = new ReflectionMethod(TermCrudApiHandler::class, 'getTermForEdit');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame('array', $method->getReturnType()?->getName());
+
+        $params = $method->getParameters();
+        $this->assertCount(3, $params);
+        $this->assertSame('textId', $params[0]->getName());
+        $this->assertSame('position', $params[1]->getName());
+        $this->assertSame('wordId', $params[2]->getName());
+        $this->assertTrue($params[2]->getType()?->allowsNull());
+        $this->assertNull($params[2]->getDefaultValue());
+    }
+
+    public function testGetTermForEditReturnsTextNotFoundError(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString("return ['error' => 'Text not found']", $source);
+    }
+
+    public function testGetTermForEditReturnsLanguageNotFoundError(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString("return ['error' => 'Language not found']", $source);
+    }
+
+    public function testGetTermForEditReturnsTermNotFoundErrorForExisting(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString("return ['error' => 'Term not found']", $source);
+    }
+
+    public function testGetTermForEditReturnsWordNotFoundAtPositionError(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString("return ['error' => 'Word not found at position']", $source);
+    }
+
+    public function testGetTermForEditReturnsIsNewFalseForExistingTerm(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString("'isNew' => false", $source);
+    }
+
+    public function testGetTermForEditReturnsIsNewTrueForNewTerm(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString("'isNew' => true", $source);
+    }
+
+    public function testGetTermForEditQueriesTextsTable(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString("table('texts')", $source);
+        $this->assertStringContainsString("'TxLgID'", $source);
+    }
+
+    public function testGetTermForEditQueriesLanguagesTable(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString("table('languages')", $source);
+        $this->assertStringContainsString("'LgName'", $source);
+    }
+
+    public function testGetTermForEditCallsGetAllTermTags(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString('TagsFacade::getAllTermTags()', $source);
+    }
+
+    public function testGetTermForEditCallsFindSimilarTerms(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString('getSimilarTermsForEdit(', $source);
+    }
+
+    public function testGetTermForEditReturnsLanguageStructure(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString("'id' => \$langId", $source);
+        $this->assertStringContainsString("'name'", $source);
+        $this->assertStringContainsString("'showRomanization'", $source);
+        $this->assertStringContainsString("'translateUri'", $source);
+    }
+
+    public function testGetTermForEditNewTermHasDefaultStatus1(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString("'status' => 1", $source);
+    }
+
+    public function testGetTermForEditUsesContextServiceForSentence(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString('getSentenceTextAtPosition(', $source);
+    }
+
+    public function testGetTermForEditUsesLinkingServiceForWord(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $this->assertStringContainsString('getWordAtPosition(', $source);
+    }
+
+    // =========================================================================
+    // formatGetTermForEdit tests
+    // =========================================================================
+
+    public function testFormatGetTermForEditDelegates(): void
+    {
+        $source = $this->getMethodSource('formatGetTermForEdit');
+
+        $this->assertStringContainsString('getTermForEdit(', $source);
+    }
+
+    // =========================================================================
+    // createTermFull — validation branches (mockable, no static DB calls)
+    // =========================================================================
+
+    public function testCreateTermFullReturnsErrorWhenTextIdMissing(): void
+    {
+        $result = $this->handler->createTermFull([]);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Text ID is required', $result['error']);
+    }
+
+    public function testCreateTermFullReturnsErrorWhenTextIdZero(): void
+    {
+        $result = $this->handler->createTermFull(['textId' => 0]);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Text ID is required', $result['error']);
+    }
+
+    public function testCreateTermFullReturnsErrorWhenTextNotFound(): void
+    {
+        $this->contextService->method('getLanguageIdFromText')
+            ->willReturn(null);
+
+        $result = $this->handler->createTermFull(['textId' => 1]);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Text not found', $result['error']);
+    }
+
+    public function testCreateTermFullReturnsErrorWhenWordNotFound(): void
+    {
+        $this->contextService->method('getLanguageIdFromText')
+            ->willReturn(5);
+        $this->linkingService->method('getWordAtPosition')
+            ->willReturn(null);
+
+        $result = $this->handler->createTermFull(['textId' => 1, 'position' => 3]);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Word not found at position', $result['error']);
+    }
+
+    public function testCreateTermFullReturnsErrorForInvalidStatus(): void
+    {
+        $this->contextService->method('getLanguageIdFromText')
+            ->willReturn(5);
+        $this->linkingService->method('getWordAtPosition')
+            ->willReturn('hello');
+
+        $result = $this->handler->createTermFull([
+            'textId' => 1,
+            'position' => 3,
+            'status' => 100
         ]);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Status must be 1-5, 98, or 99', $result['error']);
+    }
+
+    public function testCreateTermFullReturnsErrorForStatus0(): void
+    {
+        $this->contextService->method('getLanguageIdFromText')
+            ->willReturn(5);
+        $this->linkingService->method('getWordAtPosition')
+            ->willReturn('hello');
+
+        $result = $this->handler->createTermFull([
+            'textId' => 1,
+            'position' => 3,
+            'status' => 0
+        ]);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Status must be 1-5, 98, or 99', $result['error']);
+    }
+
+    public function testCreateTermFullReturnsErrorForStatus6(): void
+    {
+        $this->contextService->method('getLanguageIdFromText')
+            ->willReturn(5);
+        $this->linkingService->method('getWordAtPosition')
+            ->willReturn('hello');
+
+        $result = $this->handler->createTermFull([
+            'textId' => 1,
+            'position' => 3,
+            'status' => 6
+        ]);
+
+        $this->assertArrayHasKey('error', $result);
+        $this->assertSame('Status must be 1-5, 98, or 99', $result['error']);
+    }
+
+    public function testCreateTermFullCallsContextServiceWithTextId(): void
+    {
+        $this->contextService->expects($this->once())
+            ->method('getLanguageIdFromText')
+            ->with(42)
+            ->willReturn(null);
+
+        $this->handler->createTermFull(['textId' => 42]);
+    }
+
+    public function testCreateTermFullCallsLinkingServiceWithCorrectArgs(): void
+    {
+        $this->contextService->method('getLanguageIdFromText')
+            ->willReturn(5);
+        $this->linkingService->expects($this->once())
+            ->method('getWordAtPosition')
+            ->with(10, 7)
+            ->willReturn(null);
+
+        $this->handler->createTermFull(['textId' => 10, 'position' => 7]);
+    }
+
+    // =========================================================================
+    // createTermFull — source analysis for DB operations
+    // =========================================================================
+
+    public function testCreateTermFullUsesInsertPreparedStatement(): void
+    {
+        $source = $this->getMethodSource('createTermFull');
+
+        $this->assertStringContainsString('Connection::prepare(', $source);
+        $this->assertStringContainsString('->bind(', $source);
+        $this->assertStringContainsString('->execute()', $source);
+    }
+
+    public function testCreateTermFullUsesUserScopedQuery(): void
+    {
+        $source = $this->getMethodSource('createTermFull');
+
+        $this->assertStringContainsString('UserScopedQuery::forTablePrepared(', $source);
+    }
+
+    public function testCreateTermFullUpdatesWordOccurrences(): void
+    {
+        $source = $this->getMethodSource('createTermFull');
+
+        $this->assertStringContainsString('UPDATE word_occurrences', $source);
+        $this->assertStringContainsString('Ti2WoID = ?', $source);
+    }
+
+    public function testCreateTermFullSavesTagsWhenProvided(): void
+    {
+        $source = $this->getMethodSource('createTermFull');
+
+        $this->assertStringContainsString('TagsFacade::saveWordTagsFromArray(', $source);
+    }
+
+    public function testCreateTermFullReturnsSuccessStructure(): void
+    {
+        $source = $this->getMethodSource('createTermFull');
+
+        $this->assertStringContainsString("'success' => true", $source);
+        $this->assertStringContainsString("'term' =>", $source);
+    }
+
+    public function testCreateTermFullReturnsFailedToCreateOnZeroAffected(): void
+    {
+        $source = $this->getMethodSource('createTermFull');
+
+        $this->assertStringContainsString("'error' => 'Failed to create term'", $source);
+    }
+
+    public function testCreateTermFullDefaultsTranslationToStar(): void
+    {
+        $source = $this->getMethodSource('createTermFull');
+
+        $this->assertStringContainsString("\$translation = '*'", $source);
+    }
+
+    public function testCreateTermFullHandlesLemma(): void
+    {
+        $source = $this->getMethodSource('createTermFull');
+
+        $this->assertStringContainsString('WoLemma', $source);
+        $this->assertStringContainsString('WoLemmaLC', $source);
+        $this->assertStringContainsString('mb_strtolower($lemma', $source);
+    }
+
+    // =========================================================================
+    // updateTermFull — method signature & source analysis
+    // =========================================================================
+
+    public function testUpdateTermFullMethodSignature(): void
+    {
+        $method = new ReflectionMethod(TermCrudApiHandler::class, 'updateTermFull');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertSame('array', $method->getReturnType()?->getName());
+
+        $params = $method->getParameters();
+        $this->assertCount(2, $params);
+        $this->assertSame('termId', $params[0]->getName());
+        $this->assertSame('int', $params[0]->getType()?->getName());
+        $this->assertSame('data', $params[1]->getName());
+        $this->assertSame('array', $params[1]->getType()?->getName());
+    }
+
+    public function testUpdateTermFullReturnsTermNotFoundError(): void
+    {
+        $source = $this->getMethodSource('updateTermFull');
+
+        $this->assertStringContainsString("return ['error' => 'Term not found']", $source);
+    }
+
+    public function testUpdateTermFullReturnsInvalidStatusError(): void
+    {
+        $source = $this->getMethodSource('updateTermFull');
+
+        $this->assertStringContainsString("return ['error' => 'Status must be 1-5, 98, or 99']", $source);
+    }
+
+    public function testUpdateTermFullUsesPreparedExecute(): void
+    {
+        $source = $this->getMethodSource('updateTermFull');
+
+        $this->assertStringContainsString('Connection::preparedExecute(', $source);
+    }
+
+    public function testUpdateTermFullUsesUserScopedQuery(): void
+    {
+        $source = $this->getMethodSource('updateTermFull');
+
+        $this->assertStringContainsString('UserScopedQuery::forTablePrepared(', $source);
+    }
+
+    public function testUpdateTermFullSavesTagsWhenProvided(): void
+    {
+        $source = $this->getMethodSource('updateTermFull');
+
+        $this->assertStringContainsString('TagsFacade::saveWordTagsFromArray(', $source);
+    }
+
+    public function testUpdateTermFullReturnsSuccessWithTermData(): void
+    {
+        $source = $this->getMethodSource('updateTermFull');
+
+        $this->assertStringContainsString("'success' => true", $source);
+        $this->assertStringContainsString("'term' =>", $source);
+    }
+
+    public function testUpdateTermFullDefaultsTranslationToStar(): void
+    {
+        $source = $this->getMethodSource('updateTermFull');
+
+        $this->assertStringContainsString("\$translation = '*'", $source);
+    }
+
+    public function testUpdateTermFullHandlesLemma(): void
+    {
+        $source = $this->getMethodSource('updateTermFull');
+
+        $this->assertStringContainsString('WoLemma = ?', $source);
+        $this->assertStringContainsString('WoLemmaLC = ?', $source);
+    }
+
+    public function testUpdateTermFullUsesScoreRandomUpdate(): void
+    {
+        $source = $this->getMethodSource('updateTermFull');
+
+        $this->assertStringContainsString("makeScoreRandomInsertUpdate('u')", $source);
+    }
+
+    // =========================================================================
+    // formatCreateTermFull tests
+    // =========================================================================
+
+    public function testFormatCreateTermFullDelegates(): void
+    {
+        $source = $this->getMethodSource('formatCreateTermFull');
+
+        $this->assertStringContainsString('createTermFull(', $source);
+    }
+
+    // =========================================================================
+    // formatUpdateTermFull tests
+    // =========================================================================
+
+    public function testFormatUpdateTermFullDelegates(): void
+    {
+        $source = $this->getMethodSource('formatUpdateTermFull');
+
+        $this->assertStringContainsString('updateTermFull(', $source);
+    }
+
+    // =========================================================================
+    // getSimilarTermsForEdit — source analysis (private method)
+    // =========================================================================
+
+    public function testGetSimilarTermsForEditMethodExists(): void
+    {
+        $method = new ReflectionMethod(TermCrudApiHandler::class, 'getSimilarTermsForEdit');
+
+        $this->assertTrue($method->isPrivate());
+        $this->assertSame('array', $method->getReturnType()?->getName());
+
+        $params = $method->getParameters();
+        $this->assertCount(3, $params);
+        $this->assertSame('langId', $params[0]->getName());
+        $this->assertSame('termLc', $params[1]->getName());
+        $this->assertSame('excludeId', $params[2]->getName());
+    }
+
+    public function testGetSimilarTermsForEditCallsFindSimilarTerms(): void
+    {
+        $source = $this->getMethodSource('getSimilarTermsForEdit');
+
+        $this->assertStringContainsString('findSimilarTerms->execute(', $source);
+    }
+
+    public function testGetSimilarTermsForEditExcludesCurrentTerm(): void
+    {
+        $source = $this->getMethodSource('getSimilarTermsForEdit');
+
+        $this->assertStringContainsString('$termId === $excludeId', $source);
+    }
+
+    // =========================================================================
+    // Overall class structure tests
+    // =========================================================================
+
+    public function testClassHasAllExpectedPublicMethods(): void
+    {
+        $expectedMethods = [
+            'getTerm', 'createTerm', 'updateTerm', 'deleteTerm', 'deleteTerms',
+            'formatGetTerm', 'formatCreateTerm', 'formatUpdateTerm', 'formatDeleteTerm',
+            'getTermDetails', 'formatGetTermDetails',
+            'createQuickTerm', 'formatQuickCreate',
+            'getTermForEdit', 'formatGetTermForEdit',
+            'createTermFull', 'formatCreateTermFull',
+            'updateTermFull', 'formatUpdateTermFull'
+        ];
+
+        foreach ($expectedMethods as $method) {
+            $this->assertTrue(
+                method_exists(TermCrudApiHandler::class, $method),
+                "TermCrudApiHandler should have public method $method"
+            );
+        }
+    }
+
+    public function testAllPublicMethodsReturnArray(): void
+    {
+        $publicMethods = [
+            'getTerm', 'createTerm', 'updateTerm', 'deleteTerm', 'deleteTerms',
+            'formatGetTerm', 'formatCreateTerm', 'formatUpdateTerm', 'formatDeleteTerm',
+            'getTermDetails', 'formatGetTermDetails',
+            'createQuickTerm', 'formatQuickCreate',
+            'getTermForEdit', 'formatGetTermForEdit',
+            'createTermFull', 'formatCreateTermFull',
+            'updateTermFull', 'formatUpdateTermFull'
+        ];
+
+        foreach ($publicMethods as $methodName) {
+            $method = new ReflectionMethod(TermCrudApiHandler::class, $methodName);
+            $this->assertSame(
+                'array',
+                $method->getReturnType()?->getName(),
+                "$methodName should return array"
+            );
+        }
     }
 
     // =========================================================================
@@ -657,11 +1452,17 @@ class TermCrudApiHandlerTest extends TestCase
      * @param string $text        Term text
      * @param string $translation Translation
      * @param int    $status      Status
+     * @param int    $wordCount   Word count
      *
      * @return Term&MockObject
      */
-    private function createMockTerm(int $id, string $text, string $translation, int $status): Term
-    {
+    private function createMockTerm(
+        int $id,
+        string $text,
+        string $translation,
+        int $status,
+        int $wordCount = 1
+    ): Term {
         // Use real value objects since they are final readonly
         $termId = TermId::fromInt($id);
         $termStatus = TermStatus::fromInt($status);
@@ -678,8 +1479,24 @@ class TermCrudApiHandlerTest extends TestCase
         $term->method('sentence')->willReturn('');
         $term->method('status')->willReturn($termStatus);
         $term->method('languageId')->willReturn($languageId);
-        $term->method('wordCount')->willReturn(1);
+        $term->method('wordCount')->willReturn($wordCount);
 
         return $term;
+    }
+
+    /**
+     * Get source code of a method for source-level analysis.
+     */
+    private function getMethodSource(string $methodName): string
+    {
+        $method = new ReflectionMethod(TermCrudApiHandler::class, $methodName);
+        $filename = $method->getFileName();
+        $startLine = $method->getStartLine();
+        $endLine = $method->getEndLine();
+
+        $source = file_get_contents($filename);
+        $lines = explode("\n", $source);
+
+        return implode("\n", array_slice($lines, $startLine - 1, $endLine - $startLine + 1));
     }
 }

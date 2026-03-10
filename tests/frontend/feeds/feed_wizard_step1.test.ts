@@ -54,7 +54,9 @@ describe('feed_wizard_step1.ts', () => {
       const config: Step1Config = {
         rssUrl: 'https://example.com/feed.xml',
         hasError: true,
-        editFeedId: 5
+        editFeedId: 5,
+        languages: [],
+        curatedFeeds: []
       };
       document.body.innerHTML = `
         <script id="wizard-step1-config" type="application/json">
@@ -148,7 +150,9 @@ describe('feed_wizard_step1.ts', () => {
       const config: Step1Config = {
         rssUrl: 'https://test.com/feed',
         hasError: false,
-        editFeedId: 10
+        editFeedId: 10,
+        languages: [],
+        curatedFeeds: []
       };
       document.body.innerHTML = `
         <script id="wizard-step1-config" type="application/json">

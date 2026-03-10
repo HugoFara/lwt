@@ -106,7 +106,15 @@ function readConfig(): Step1Config {
   }
 
   try {
-    return JSON.parse(configEl.textContent || '{}');
+    const parsed = JSON.parse(configEl.textContent || '{}');
+    return {
+      rssUrl: '',
+      hasError: false,
+      editFeedId: null,
+      languages: [],
+      curatedFeeds: [],
+      ...parsed
+    };
   } catch {
     console.error('Failed to parse wizard step 1 config');
     return {
