@@ -158,14 +158,17 @@ class ParsingCoordinator
         // Get next sentence ID
         $dbname = Globals::getDatabaseName();
         $sentencesTable = Globals::table('sentences');
-        $nextSeID = (int) Connection::fetchValue(
+        $nextSeID = (int) Connection::preparedFetchValue(
             "SELECT AUTO_INCREMENT as value FROM information_schema.TABLES
-             WHERE TABLE_SCHEMA = '$dbname' AND TABLE_NAME = '$sentencesTable'"
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
+            [$dbname, $sentencesTable]
         );
         if ($nextSeID <= 0) {
-            $nextSeID = (int) Connection::fetchValue(
+            $bindings = [];
+            $nextSeID = (int) Connection::preparedFetchValue(
                 "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences"
-                . UserScopedQuery::forTable('sentences')
+                . UserScopedQuery::forTablePrepared('sentences', $bindings),
+                $bindings
             );
         }
 

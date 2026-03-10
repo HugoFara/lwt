@@ -1011,6 +1011,148 @@ class ExportServiceTest extends TestCase
     }
 
     // ====================================
+    // Parameterized Method Signature Tests
+    // ====================================
+
+    /**
+     * @dataProvider parameterizedMethodProvider
+     */
+    public function testMethodAcceptsParamsArray(string $methodName): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, $methodName);
+        $parameters = $method->getParameters();
+
+        // Find the $params parameter
+        $paramsParam = null;
+        foreach ($parameters as $param) {
+            if ($param->getName() === 'params') {
+                $paramsParam = $param;
+                break;
+            }
+        }
+
+        $this->assertNotNull($paramsParam, "Method {$methodName} should have a \$params parameter");
+        $this->assertTrue($paramsParam->isOptional(), "The \$params parameter should be optional");
+        $this->assertEquals([], $paramsParam->getDefaultValue(), "The \$params default should be []");
+        $this->assertSame('array', $paramsParam->getType()->getName(), "The \$params type should be array");
+    }
+
+    public static function parameterizedMethodProvider(): array
+    {
+        return [
+            'generateAnkiContent' => ['generateAnkiContent'],
+            'generateTsvContent' => ['generateTsvContent'],
+            'generateFlexibleContent' => ['generateFlexibleContent'],
+            'exportAnki' => ['exportAnki'],
+            'exportTsv' => ['exportTsv'],
+            'exportFlexible' => ['exportFlexible'],
+        ];
+    }
+
+    public function testGenerateAnkiContentHasSqlAndParamsParameters(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'generateAnkiContent');
+        $params = $method->getParameters();
+
+        $this->assertCount(2, $params);
+        $this->assertEquals('sql', $params[0]->getName());
+        $this->assertEquals('params', $params[1]->getName());
+    }
+
+    public function testGenerateTsvContentHasSqlAndParamsParameters(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'generateTsvContent');
+        $params = $method->getParameters();
+
+        $this->assertCount(2, $params);
+        $this->assertEquals('sql', $params[0]->getName());
+        $this->assertEquals('params', $params[1]->getName());
+    }
+
+    public function testGenerateFlexibleContentHasSqlAndParamsParameters(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'generateFlexibleContent');
+        $params = $method->getParameters();
+
+        $this->assertCount(2, $params);
+        $this->assertEquals('sql', $params[0]->getName());
+        $this->assertEquals('params', $params[1]->getName());
+    }
+
+    public function testExportAnkiHasSqlAndParamsParameters(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'exportAnki');
+        $params = $method->getParameters();
+
+        $this->assertCount(2, $params);
+        $this->assertEquals('sql', $params[0]->getName());
+        $this->assertEquals('params', $params[1]->getName());
+        $this->assertSame('never', (string) $method->getReturnType());
+    }
+
+    public function testExportTsvHasSqlAndParamsParameters(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'exportTsv');
+        $params = $method->getParameters();
+
+        $this->assertCount(2, $params);
+        $this->assertEquals('sql', $params[0]->getName());
+        $this->assertEquals('params', $params[1]->getName());
+        $this->assertSame('never', (string) $method->getReturnType());
+    }
+
+    public function testExportFlexibleHasSqlAndParamsParameters(): void
+    {
+        $method = new \ReflectionMethod(ExportService::class, 'exportFlexible');
+        $params = $method->getParameters();
+
+        $this->assertCount(2, $params);
+        $this->assertEquals('sql', $params[0]->getName());
+        $this->assertEquals('params', $params[1]->getName());
+        $this->assertSame('never', (string) $method->getReturnType());
+    }
+
+    public function testGenerateMethodsReturnString(): void
+    {
+        $methods = ['generateAnkiContent', 'generateTsvContent', 'generateFlexibleContent'];
+
+        foreach ($methods as $methodName) {
+            $method = new \ReflectionMethod(ExportService::class, $methodName);
+            $this->assertSame(
+                'string',
+                (string) $method->getReturnType(),
+                "{$methodName} should return string"
+            );
+        }
+    }
+
+    public function testGenerateMethodsArePublic(): void
+    {
+        $methods = ['generateAnkiContent', 'generateTsvContent', 'generateFlexibleContent'];
+
+        foreach ($methods as $methodName) {
+            $method = new \ReflectionMethod(ExportService::class, $methodName);
+            $this->assertTrue(
+                $method->isPublic(),
+                "{$methodName} should be public"
+            );
+        }
+    }
+
+    public function testExportMethodsArePublic(): void
+    {
+        $methods = ['exportAnki', 'exportTsv', 'exportFlexible'];
+
+        foreach ($methods as $methodName) {
+            $method = new \ReflectionMethod(ExportService::class, $methodName);
+            $this->assertTrue(
+                $method->isPublic(),
+                "{$methodName} should be public"
+            );
+        }
+    }
+
+    // ====================================
     // Data Provider for Complex Scenarios
     // ====================================
 

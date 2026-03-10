@@ -434,73 +434,240 @@ class WordListServiceTest extends TestCase
     }
 
     // =========================================================================
-    // getTestWordIdsSql()
+    // getTestWordIdsSql() — returns ['sql' => ..., 'params' => [...]]
     // =========================================================================
 
     #[Test]
-    public function getTestWordIdsSqlNoTextId(): void
+    public function getTestWordIdsSqlNoTextIdReturnsArray(): void
     {
-        $sql = $this->service->getTestWordIdsSql('', '', ' and WoLgID=1', '', '', '');
-        $this->assertStringContainsString('select distinct WoID', $sql);
-        $this->assertStringContainsString('WoLgID=1', $sql);
-        $this->assertStringNotContainsString('word_occurrences', $sql);
+        $result = $this->service->getTestWordIdsSql('', ' and WoLgID = ?', '', '', '', [1]);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('sql', $result);
+        $this->assertArrayHasKey('params', $result);
+        $this->assertStringContainsString('select distinct WoID', $result['sql']);
+        $this->assertStringContainsString('WoLgID = ?', $result['sql']);
+        $this->assertStringNotContainsString('word_occurrences', $result['sql']);
+        $this->assertSame([1], $result['params']);
     }
 
     #[Test]
-    public function getTestWordIdsSqlWithTextId(): void
+    public function getTestWordIdsSqlWithTextIdUsesInClause(): void
     {
-        $sql = $this->service->getTestWordIdsSql('', '42', '', '', '', '');
-        $this->assertStringContainsString('word_occurrences', $sql);
-        $this->assertStringContainsString('Ti2TxID in (42)', $sql);
+        $result = $this->service->getTestWordIdsSql('42', '', '', '', '');
+        $this->assertStringContainsString('word_occurrences', $result['sql']);
+        $this->assertStringContainsString('Ti2TxID in', $result['sql']);
+        $this->assertStringContainsString('?', $result['sql']);
+        $this->assertSame([42], $result['params']);
+    }
+
+    #[Test]
+    public function getTestWordIdsSqlMultipleTextIds(): void
+    {
+        $result = $this->service->getTestWordIdsSql('1,2,3', '', '', '', '');
+        $this->assertCount(3, $result['params']);
+        $this->assertSame([1, 2, 3], $result['params']);
+    }
+
+    #[Test]
+    public function getTestWordIdsSqlWithFilterParams(): void
+    {
+        $result = $this->service->getTestWordIdsSql(
+            '5',
+            ' and WoLgID = ?',
+            ' and WoStatus = 2',
+            ' and (WoText like ?)',
+            '',
+            [7, 'test%']
+        );
+        // textId params first, then filter params
+        $this->assertSame([5, 7, 'test%'], $result['params']);
+    }
+
+    #[Test]
+    public function getTestWordIdsSqlEmptyFilters(): void
+    {
+        $result = $this->service->getTestWordIdsSql('', '', '', '', '');
+        $this->assertEmpty($result['params']);
+        $this->assertStringContainsString('where (1=1)', $result['sql']);
     }
 
     // =========================================================================
-    // Export SQL methods — verify condition embedding
+    // Export SQL methods — return ['sql' => ..., 'params' => [...]]
     // =========================================================================
 
     #[Test]
-    public function getAnkiExportSqlWithFilters(): void
+    public function getAnkiExportSqlWithFiltersReturnsArray(): void
     {
-        $sql = $this->service->getAnkiExportSql(
+        $result = $this->service->getAnkiExportSql(
             [],
             '',
-            ' and WoLgID=1',
+            ' and WoLgID = ?',
             ' and WoStatus = 2',
             '',
-            ''
+            '',
+            [1]
         );
-        $this->assertStringContainsString('WoLgID=1', $sql);
-        $this->assertStringContainsString('WoStatus = 2', $sql);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('sql', $result);
+        $this->assertArrayHasKey('params', $result);
+        $this->assertStringContainsString('WoLgID = ?', $result['sql']);
+        $this->assertStringContainsString('WoStatus = 2', $result['sql']);
+        $this->assertSame([1], $result['params']);
     }
 
     #[Test]
-    public function getTsvExportSqlWithTextId(): void
+    public function getAnkiExportSqlWithIds(): void
     {
-        $sql = $this->service->getTsvExportSql(
-            [],
-            '10',
-            '',
-            '',
-            '',
-            ''
-        );
-        $this->assertStringContainsString('Ti2TxID in (10)', $sql);
-        $this->assertStringContainsString('word_occurrences', $sql);
+        $result = $this->service->getAnkiExportSql([10, 20, 30], '', '', '', '', '');
+        $this->assertStringContainsString('WoID in', $result['sql']);
+        $this->assertStringContainsString('?', $result['sql']);
+        $this->assertSame([10, 20, 30], $result['params']);
+        $this->assertStringContainsString('WoTranslation', $result['sql']);
     }
 
     #[Test]
-    public function getFlexibleExportSqlNoTextId(): void
+    public function getAnkiExportSqlWithTextId(): void
     {
-        $sql = $this->service->getFlexibleExportSql(
+        $result = $this->service->getAnkiExportSql([], '5,10', '', '', '', '');
+        $this->assertStringContainsString('word_occurrences', $result['sql']);
+        $this->assertStringContainsString('Ti2TxID in', $result['sql']);
+        $this->assertSame([5, 10], $result['params']);
+    }
+
+    #[Test]
+    public function getAnkiExportSqlWithTextIdAndFilters(): void
+    {
+        $result = $this->service->getAnkiExportSql(
+            [],
+            '5',
+            ' and WoLgID = ?',
+            '',
+            '',
+            '',
+            [3]
+        );
+        // textId param first, then filter params
+        $this->assertSame([5, 3], $result['params']);
+    }
+
+    #[Test]
+    public function getTsvExportSqlWithTextIdReturnsArray(): void
+    {
+        $result = $this->service->getTsvExportSql([], '10', '', '', '', '');
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('Ti2TxID in', $result['sql']);
+        $this->assertStringContainsString('word_occurrences', $result['sql']);
+        $this->assertSame([10], $result['params']);
+    }
+
+    #[Test]
+    public function getTsvExportSqlWithIds(): void
+    {
+        $result = $this->service->getTsvExportSql([1, 2], '', '', '', '', '');
+        $this->assertStringContainsString('WoID in', $result['sql']);
+        $this->assertSame([1, 2], $result['params']);
+        $this->assertStringContainsString('WoStatus', $result['sql']);
+    }
+
+    #[Test]
+    public function getTsvExportSqlNoTextId(): void
+    {
+        $result = $this->service->getTsvExportSql(
             [],
             '',
-            ' and WoLgID=3',
+            ' and WoLgID = ?',
             '',
             '',
-            ''
+            '',
+            [2]
         );
-        $this->assertStringContainsString('LgExportTemplate', $sql);
-        $this->assertStringContainsString('WoLgID=3', $sql);
-        $this->assertStringNotContainsString('word_occurrences', $sql);
+        $this->assertStringContainsString('WoLgID = ?', $result['sql']);
+        $this->assertStringNotContainsString('word_occurrences', $result['sql']);
+        $this->assertSame([2], $result['params']);
+    }
+
+    #[Test]
+    public function getFlexibleExportSqlNoTextIdReturnsArray(): void
+    {
+        $result = $this->service->getFlexibleExportSql(
+            [],
+            '',
+            ' and WoLgID = ?',
+            '',
+            '',
+            '',
+            [3]
+        );
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('LgExportTemplate', $result['sql']);
+        $this->assertStringContainsString('WoLgID = ?', $result['sql']);
+        $this->assertStringNotContainsString('word_occurrences', $result['sql']);
+        $this->assertSame([3], $result['params']);
+    }
+
+    #[Test]
+    public function getFlexibleExportSqlWithIds(): void
+    {
+        $result = $this->service->getFlexibleExportSql([5, 6], '', '', '', '', '');
+        $this->assertStringContainsString('WoID in', $result['sql']);
+        $this->assertSame([5, 6], $result['params']);
+        $this->assertStringContainsString('LgExportTemplate', $result['sql']);
+    }
+
+    #[Test]
+    public function getFlexibleExportSqlWithTextId(): void
+    {
+        $result = $this->service->getFlexibleExportSql([], '7,8', '', '', '', '');
+        $this->assertStringContainsString('word_occurrences', $result['sql']);
+        $this->assertSame([7, 8], $result['params']);
+    }
+
+    // =========================================================================
+    // Export SQL — IDs take priority over filters
+    // =========================================================================
+
+    #[Test]
+    public function exportSqlIdsIgnoreFilters(): void
+    {
+        $result = $this->service->getAnkiExportSql(
+            [1],
+            '99',
+            ' and WoLgID = ?',
+            '',
+            '',
+            '',
+            [5]
+        );
+        // When IDs are provided, textId and filters are ignored
+        $this->assertSame([1], $result['params']);
+        $this->assertStringNotContainsString('word_occurrences', $result['sql']);
+    }
+
+    // =========================================================================
+    // Export SQL — no raw concatenation
+    // =========================================================================
+
+    #[Test]
+    public function exportSqlNoRawTextIdConcatenation(): void
+    {
+        // Verify textId values are never directly concatenated into SQL
+        $methods = ['getAnkiExportSql', 'getTsvExportSql', 'getFlexibleExportSql'];
+        foreach ($methods as $method) {
+            $result = $this->service->$method([], '99', '', '', '', '');
+            $this->assertStringNotContainsString(
+                'in (99)',
+                $result['sql'],
+                "$method should not concatenate textId directly"
+            );
+            $this->assertStringContainsString('?', $result['sql']);
+        }
+    }
+
+    #[Test]
+    public function getTestWordIdsSqlNoRawTextIdConcatenation(): void
+    {
+        $result = $this->service->getTestWordIdsSql('99', '', '', '', '');
+        $this->assertStringNotContainsString('in (99)', $result['sql']);
+        $this->assertStringContainsString('?', $result['sql']);
     }
 }

@@ -633,11 +633,13 @@ class WordListServiceTest extends TestCase
         }
 
         $service = new WordListService();
-        $sql = $service->getAnkiExportSql([1, 2, 3], '', '', '', '', '');
+        $result = $service->getAnkiExportSql([1, 2, 3], '', '', '', '', '');
 
-        $this->assertStringContainsString('WoID', $sql);
-        $this->assertStringContainsString('WoTranslation', $sql);
-        $this->assertStringContainsString('in (1,2,3)', $sql);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('WoID', $result['sql']);
+        $this->assertStringContainsString('WoTranslation', $result['sql']);
+        $this->assertStringContainsString('?', $result['sql']);
+        $this->assertSame([1, 2, 3], $result['params']);
     }
 
     public function testGetTsvExportSqlWithIdList(): void
@@ -647,10 +649,12 @@ class WordListServiceTest extends TestCase
         }
 
         $service = new WordListService();
-        $sql = $service->getTsvExportSql([1, 2, 3], '', '', '', '', '');
+        $result = $service->getTsvExportSql([1, 2, 3], '', '', '', '', '');
 
-        $this->assertStringContainsString('WoStatus', $sql);
-        $this->assertStringContainsString('in (1,2,3)', $sql);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('WoStatus', $result['sql']);
+        $this->assertStringContainsString('?', $result['sql']);
+        $this->assertSame([1, 2, 3], $result['params']);
     }
 
     public function testGetFlexibleExportSqlWithIdList(): void
@@ -660,10 +664,12 @@ class WordListServiceTest extends TestCase
         }
 
         $service = new WordListService();
-        $sql = $service->getFlexibleExportSql([1, 2, 3], '', '', '', '', '');
+        $result = $service->getFlexibleExportSql([1, 2, 3], '', '', '', '', '');
 
-        $this->assertStringContainsString('LgExportTemplate', $sql);
-        $this->assertStringContainsString('in (1,2,3)', $sql);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('LgExportTemplate', $result['sql']);
+        $this->assertStringContainsString('?', $result['sql']);
+        $this->assertSame([1, 2, 3], $result['params']);
     }
 
     public function testGetTestWordIdsSql(): void
@@ -673,10 +679,12 @@ class WordListServiceTest extends TestCase
         }
 
         $service = new WordListService();
-        $sql = $service->getTestWordIdsSql('', '', '', '', '', '');
+        $result = $service->getTestWordIdsSql('', '', '', '', '');
 
-        $this->assertStringContainsString('WoID', $sql);
-        $this->assertStringContainsString('words', $sql);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('WoID', $result['sql']);
+        $this->assertStringContainsString('words', $result['sql']);
+        $this->assertEmpty($result['params']);
     }
 
     // ===== Get filtered word IDs =====

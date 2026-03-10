@@ -190,9 +190,6 @@ class Maintenance
      */
     public static function initWordCount(): void
     {
-        $sqlarr = array();
-        $i = 0;
-        $min = 0;
         /**
          * @var array<string, mixed>|null $row ID for the Japanese language using MeCab
          */
@@ -212,6 +209,9 @@ class Maintenance
             ->where('WoWordCount', '=', 0)
             ->orderBy('WoID')
             ->getPrepared();
+
+        // Collect all (WoID, wordCount) pairs
+        $data = [];
         foreach ($rows as $rec) {
             $splitEachChar = (int) $rec['LgSplitEachChar'];
             $woTextLC = (string) $rec['WoTextLC'];
@@ -228,27 +228,36 @@ class Maintenance
                 $textlc ?? '',
                 $ma
             );
-            // Ensure word count is at least 1 to avoid invalid SQL CASE statement
             if ($wordCount < 1) {
                 $wordCount = 1;
             }
-            $sqlarr[] = ' WHEN ' . $woID . ' THEN ' . $wordCount;
-            if (++$i % 1000 == 0) {
-                $max = $woID;
-                $sqltext = "UPDATE words
-                SET WoWordCount = CASE WoID" . implode(' ', $sqlarr) . "
-                END
-                WHERE WoWordCount=0 AND WoID BETWEEN $min AND $max";
-                Connection::query($sqltext);
-                $min = $max;
-                $sqlarr = array();
-            }
+            $data[] = ['id' => $woID, 'count' => $wordCount];
         }
-        if (!empty($sqlarr)) {
-            $sqltext = "UPDATE words
-            SET WoWordCount = CASE WoID" . implode(' ', $sqlarr) . '
-            END where WoWordCount=0';
-            Connection::query($sqltext);
+
+        if (empty($data)) {
+            return;
         }
+
+        // Use temporary table for batch update (same pattern as updateJapaneseWordCount)
+        Connection::query(
+            "CREATE TEMPORARY TABLE IF NOT EXISTS temp_word_counts (
+                WcID mediumint(8) unsigned NOT NULL,
+                WcCount tinyint(3) unsigned NOT NULL,
+                PRIMARY KEY (WcID)
+            ) CHARSET=utf8"
+        );
+        Connection::query("TRUNCATE TABLE temp_word_counts");
+
+        $insertSql = "INSERT INTO temp_word_counts (WcID, WcCount) VALUES (?, ?)";
+        foreach ($data as $entry) {
+            Connection::preparedExecute($insertSql, [$entry['id'], $entry['count']]);
+        }
+
+        Connection::query(
+            "UPDATE words
+            JOIN temp_word_counts ON WcID = WoID
+            SET WoWordCount = WcCount"
+        );
+        Connection::execute("DROP TABLE IF EXISTS temp_word_counts");
     }
 }

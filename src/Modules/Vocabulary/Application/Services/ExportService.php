@@ -50,13 +50,14 @@ class ExportService
     /**
      * Export terms to Anki format and send as download.
      *
-     * @param string $sql SQL query to retrieve terms
+     * @param string $sql    SQL query to retrieve terms
+     * @param array  $params Prepared statement parameters
      *
      * @return never
      */
-    public function exportAnki(string $sql): never
+    public function exportAnki(string $sql, array $params = []): never
     {
-        $content = $this->generateAnkiContent($sql);
+        $content = $this->generateAnkiContent($sql, $params);
         $this->sendDownloadResponse(
             $content,
             'lwt_anki_export_' . date('Y-m-d-H-i-s') . '.txt'
@@ -66,13 +67,14 @@ class ExportService
     /**
      * Export terms to TSV format and send as download.
      *
-     * @param string $sql SQL query to retrieve terms
+     * @param string $sql    SQL query to retrieve terms
+     * @param array  $params Prepared statement parameters
      *
      * @return never
      */
-    public function exportTsv(string $sql): never
+    public function exportTsv(string $sql, array $params = []): never
     {
-        $content = $this->generateTsvContent($sql);
+        $content = $this->generateTsvContent($sql, $params);
         $this->sendDownloadResponse(
             $content,
             'lwt_tsv_export_' . date('Y-m-d-H-i-s') . '.txt'
@@ -82,13 +84,14 @@ class ExportService
     /**
      * Export terms using flexible template and send as download.
      *
-     * @param string $sql SQL query to retrieve terms
+     * @param string $sql    SQL query to retrieve terms
+     * @param array  $params Prepared statement parameters
      *
      * @return never
      */
-    public function exportFlexible(string $sql): never
+    public function exportFlexible(string $sql, array $params = []): never
     {
-        $content = $this->generateFlexibleContent($sql);
+        $content = $this->generateFlexibleContent($sql, $params);
         $this->sendDownloadResponse(
             $content,
             'lwt_flexible_export_' . date('Y-m-d-H-i-s') . '.txt'
@@ -102,22 +105,22 @@ class ExportService
     /**
      * Generate Anki export content from SQL query.
      *
-     * @param string $sql SQL query to retrieve terms
+     * @param string $sql    SQL query to retrieve terms
+     * @param array  $params Prepared statement parameters
      *
      * @return string Anki-formatted export content
      */
-    public function generateAnkiContent(string $sql): string
+    public function generateAnkiContent(string $sql, array $params = []): string
     {
-        $res = Connection::query($sql);
-        if (!($res instanceof \mysqli_result)) {
+        $results = Connection::preparedFetchAll($sql, $params);
+        if (empty($results)) {
             return '';
         }
 
         $content = '';
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($results as $record) {
             $content .= $this->formatAnkiRow($record);
         }
-        mysqli_free_result($res);
 
         return $content;
     }
@@ -125,22 +128,22 @@ class ExportService
     /**
      * Generate TSV export content from SQL query.
      *
-     * @param string $sql SQL query to retrieve terms
+     * @param string $sql    SQL query to retrieve terms
+     * @param array  $params Prepared statement parameters
      *
      * @return string TSV-formatted export content
      */
-    public function generateTsvContent(string $sql): string
+    public function generateTsvContent(string $sql, array $params = []): string
     {
-        $res = Connection::query($sql);
-        if (!($res instanceof \mysqli_result)) {
+        $results = Connection::preparedFetchAll($sql, $params);
+        if (empty($results)) {
             return '';
         }
 
         $content = '';
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($results as $record) {
             $content .= $this->formatTsvRow($record);
         }
-        mysqli_free_result($res);
 
         return $content;
     }
@@ -148,22 +151,22 @@ class ExportService
     /**
      * Generate flexible export content from SQL query.
      *
-     * @param string $sql SQL query to retrieve terms
+     * @param string $sql    SQL query to retrieve terms
+     * @param array  $params Prepared statement parameters
      *
      * @return string Template-formatted export content
      */
-    public function generateFlexibleContent(string $sql): string
+    public function generateFlexibleContent(string $sql, array $params = []): string
     {
-        $res = Connection::query($sql);
-        if (!($res instanceof \mysqli_result)) {
+        $results = Connection::preparedFetchAll($sql, $params);
+        if (empty($results)) {
             return '';
         }
 
         $content = '';
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($results as $record) {
             $content .= $this->formatFlexibleRow($record);
         }
-        mysqli_free_result($res);
 
         return $content;
     }

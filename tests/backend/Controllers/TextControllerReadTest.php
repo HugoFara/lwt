@@ -7,6 +7,7 @@ namespace Lwt\Tests\Controllers;
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 use Lwt\Modules\Text\Http\TextController;
+use Lwt\Modules\Text\Http\TextReadController;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Text\Application\TextFacade;
@@ -242,16 +243,11 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = (string)self::$testTextId;
 
-        $controller = new TextController(
-            new \Lwt\Modules\Text\Application\TextFacade(),
-            new \Lwt\Modules\Language\Application\LanguageFacade()
+        $controller = new TextReadController(
+            new \Lwt\Modules\Text\Application\TextFacade()
         );
 
-        // Use reflection to test private method
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller);
+        $result = $controller->getTextIdFromRequest();
 
         $this->assertEquals(self::$testTextId, $result);
     }
@@ -264,16 +260,11 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['start'] = (string)self::$testTextId;
 
-        $controller = new TextController(
-            new \Lwt\Modules\Text\Application\TextFacade(),
-            new \Lwt\Modules\Language\Application\LanguageFacade()
+        $controller = new TextReadController(
+            new \Lwt\Modules\Text\Application\TextFacade()
         );
 
-        // Use reflection to test private method
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller);
+        $result = $controller->getTextIdFromRequest();
 
         $this->assertEquals(self::$testTextId, $result);
     }
@@ -287,16 +278,11 @@ class TextControllerReadTest extends TestCase
         $_REQUEST['text'] = (string)self::$testTextId;
         $_REQUEST['start'] = (string)self::$testText2Id;
 
-        $controller = new TextController(
-            new \Lwt\Modules\Text\Application\TextFacade(),
-            new \Lwt\Modules\Language\Application\LanguageFacade()
+        $controller = new TextReadController(
+            new \Lwt\Modules\Text\Application\TextFacade()
         );
 
-        // Use reflection to test private method
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller);
+        $result = $controller->getTextIdFromRequest();
 
         // Should prefer 'text' over 'start'
         $this->assertEquals(self::$testTextId, $result);
@@ -310,16 +296,11 @@ class TextControllerReadTest extends TestCase
 
         // No text or start parameter set
 
-        $controller = new TextController(
-            new \Lwt\Modules\Text\Application\TextFacade(),
-            new \Lwt\Modules\Language\Application\LanguageFacade()
+        $controller = new TextReadController(
+            new \Lwt\Modules\Text\Application\TextFacade()
         );
 
-        // Use reflection to test private method
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller);
+        $result = $controller->getTextIdFromRequest();
 
         $this->assertNull($result);
     }
@@ -332,16 +313,11 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = 'not-a-number';
 
-        $controller = new TextController(
-            new \Lwt\Modules\Text\Application\TextFacade(),
-            new \Lwt\Modules\Language\Application\LanguageFacade()
+        $controller = new TextReadController(
+            new \Lwt\Modules\Text\Application\TextFacade()
         );
 
-        // Use reflection to test private method
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller);
+        $result = $controller->getTextIdFromRequest();
 
         $this->assertNull($result);
     }
@@ -354,16 +330,11 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '0';
 
-        $controller = new TextController(
-            new \Lwt\Modules\Text\Application\TextFacade(),
-            new \Lwt\Modules\Language\Application\LanguageFacade()
+        $controller = new TextReadController(
+            new \Lwt\Modules\Text\Application\TextFacade()
         );
 
-        // Use reflection to test private method
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller);
+        $result = $controller->getTextIdFromRequest();
 
         // '0' is numeric, so it should return 0
         $this->assertEquals(0, $result);
@@ -533,15 +504,11 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '2147483647'; // Max 32-bit int
 
-        $controller = new TextController(
-            new \Lwt\Modules\Text\Application\TextFacade(),
-            new \Lwt\Modules\Language\Application\LanguageFacade()
+        $controller = new TextReadController(
+            new \Lwt\Modules\Text\Application\TextFacade()
         );
 
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller);
+        $result = $controller->getTextIdFromRequest();
 
         $this->assertEquals(2147483647, $result);
     }
@@ -554,15 +521,11 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '-1';
 
-        $controller = new TextController(
-            new \Lwt\Modules\Text\Application\TextFacade(),
-            new \Lwt\Modules\Language\Application\LanguageFacade()
+        $controller = new TextReadController(
+            new \Lwt\Modules\Text\Application\TextFacade()
         );
 
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller);
+        $result = $controller->getTextIdFromRequest();
 
         // is_numeric returns true for negative numbers
         $this->assertEquals(-1, $result);
@@ -576,15 +539,11 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '123.45';
 
-        $controller = new TextController(
-            new \Lwt\Modules\Text\Application\TextFacade(),
-            new \Lwt\Modules\Language\Application\LanguageFacade()
+        $controller = new TextReadController(
+            new \Lwt\Modules\Text\Application\TextFacade()
         );
 
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller);
+        $result = $controller->getTextIdFromRequest();
 
         // is_numeric returns true for decimals, will be cast to int
         $this->assertEquals(123, $result);
@@ -598,15 +557,11 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '  123  ';
 
-        $controller = new TextController(
-            new \Lwt\Modules\Text\Application\TextFacade(),
-            new \Lwt\Modules\Language\Application\LanguageFacade()
+        $controller = new TextReadController(
+            new \Lwt\Modules\Text\Application\TextFacade()
         );
 
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller);
+        $result = $controller->getTextIdFromRequest();
 
         // Trimmed string is numeric, cast to int
         // Note: is_numeric may behave differently with leading/trailing spaces

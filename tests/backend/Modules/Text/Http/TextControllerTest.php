@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Lwt\Tests\Modules\Text\Http;
 
 use Lwt\Modules\Text\Http\TextController;
+use Lwt\Modules\Text\Http\TextReadController;
+use Lwt\Modules\Text\Http\TextCrudController;
+use Lwt\Modules\Text\Http\ArchivedTextController;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Modules\Text\Application\Services\TextDisplayService;
 use Lwt\Modules\Language\Application\LanguageFacade;
@@ -14,7 +17,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
- * Unit tests for TextController.
+ * Unit tests for TextController (facade) and sub-controllers.
  *
  * Tests text management, reading, display, archive/unarchive,
  * mark actions, class structure, and method signatures.
@@ -31,6 +34,9 @@ class TextControllerTest extends TestCase
     private TextDisplayService $displayService;
 
     private TextController $controller;
+    private TextCrudController $crudController;
+    private ArchivedTextController $archivedController;
+    private TextReadController $readController;
 
     protected function setUp(): void
     {
@@ -44,6 +50,21 @@ class TextControllerTest extends TestCase
         $this->controller = new TextController(
             $this->textService,
             $this->languageService,
+            $this->displayService
+        );
+
+        $this->crudController = new TextCrudController(
+            $this->textService,
+            $this->languageService
+        );
+
+        $this->archivedController = new ArchivedTextController(
+            $this->textService,
+            $this->languageService
+        );
+
+        $this->readController = new TextReadController(
+            $this->textService,
             $this->displayService
         );
     }
@@ -66,40 +87,29 @@ class TextControllerTest extends TestCase
     }
 
     #[Test]
-    public function constructorSetsTextServiceProperty(): void
+    public function constructorCreatesSubControllers(): void
     {
-        $reflection = new \ReflectionProperty(TextController::class, 'textService');
+        $reflection = new \ReflectionProperty(TextController::class, 'readController');
         $reflection->setAccessible(true);
+        $this->assertInstanceOf(TextReadController::class, $reflection->getValue($this->controller));
 
-        $this->assertSame($this->textService, $reflection->getValue($this->controller));
+        $reflection = new \ReflectionProperty(TextController::class, 'crudController');
+        $reflection->setAccessible(true);
+        $this->assertInstanceOf(TextCrudController::class, $reflection->getValue($this->controller));
+
+        $reflection = new \ReflectionProperty(TextController::class, 'archivedController');
+        $reflection->setAccessible(true);
+        $this->assertInstanceOf(ArchivedTextController::class, $reflection->getValue($this->controller));
     }
 
     #[Test]
-    public function constructorSetsLanguageServiceProperty(): void
-    {
-        $reflection = new \ReflectionProperty(TextController::class, 'languageService');
-        $reflection->setAccessible(true);
-
-        $this->assertSame($this->languageService, $reflection->getValue($this->controller));
-    }
-
-    #[Test]
-    public function constructorSetsDisplayServiceProperty(): void
-    {
-        $reflection = new \ReflectionProperty(TextController::class, 'displayService');
-        $reflection->setAccessible(true);
-
-        $this->assertSame($this->displayService, $reflection->getValue($this->controller));
-    }
-
-    #[Test]
-    public function constructorWithNullCreatesDefaultServices(): void
+    public function constructorWithNullCreatesDefaultSubControllers(): void
     {
         $controller = new TextController(null, null, null);
-        $reflection = new \ReflectionProperty(TextController::class, 'textService');
+        $reflection = new \ReflectionProperty(TextController::class, 'readController');
         $reflection->setAccessible(true);
 
-        $this->assertInstanceOf(TextFacade::class, $reflection->getValue($controller));
+        $this->assertInstanceOf(TextReadController::class, $reflection->getValue($controller));
     }
 
     // =========================================================================
@@ -141,36 +151,38 @@ class TextControllerTest extends TestCase
     }
 
     #[Test]
-    public function classHasRequiredPrivateMethods(): void
+    public function subControllersHaveExpectedMethods(): void
     {
-        $reflection = new \ReflectionClass(TextController::class);
+        // TextReadController
+        $readMethods = ['read', 'display', 'setMode', 'check', 'getTextIdFromRequest', 'renderReadPage'];
+        $readReflection = new \ReflectionClass(TextReadController::class);
+        foreach ($readMethods as $method) {
+            $this->assertTrue($readReflection->hasMethod($method), "TextReadController should have: $method");
+        }
 
-        $expectedMethods = [
-            'getTextIdFromRequest', 'renderReadPage', 'handleMarkAction',
-            'handleTextOperation', 'handleAutoSplitImport', 'showNewTextForm',
-            'showEditTextForm', 'showTextsList', 'handleArchivedMarkAction',
-        ];
+        // TextCrudController
+        $crudMethods = ['new', 'editSingle', 'delete', 'archive', 'unarchive', 'edit',
+            'handleMarkAction', 'handleTextOperation', 'showNewTextForm', 'showEditTextForm', 'showTextsList'];
+        $crudReflection = new \ReflectionClass(TextCrudController::class);
+        foreach ($crudMethods as $method) {
+            $this->assertTrue($crudReflection->hasMethod($method), "TextCrudController should have: $method");
+        }
 
-        foreach ($expectedMethods as $methodName) {
-            $this->assertTrue(
-                $reflection->hasMethod($methodName),
-                "TextController should have private method: $methodName"
-            );
-            $method = $reflection->getMethod($methodName);
-            $this->assertTrue(
-                $method->isPrivate(),
-                "Method $methodName should be private"
-            );
+        // ArchivedTextController
+        $archMethods = ['archived', 'archivedEdit', 'deleteArchived', 'handleArchivedMarkAction'];
+        $archReflection = new \ReflectionClass(ArchivedTextController::class);
+        foreach ($archMethods as $method) {
+            $this->assertTrue($archReflection->hasMethod($method), "ArchivedTextController should have: $method");
         }
     }
 
     #[Test]
-    public function moduleViewsConstantPointsToViewsDirectory(): void
+    public function subControllersHaveViewsConstants(): void
     {
-        $reflection = new \ReflectionClassConstant(TextController::class, 'MODULE_VIEWS');
-        $value = $reflection->getValue();
-
-        $this->assertStringEndsWith('/Views', $value);
+        foreach ([TextReadController::class, TextCrudController::class, ArchivedTextController::class] as $class) {
+            $reflection = new \ReflectionClassConstant($class, 'MODULE_VIEWS');
+            $this->assertStringEndsWith('/Views', $reflection->getValue());
+        }
     }
 
     // =========================================================================
@@ -305,16 +317,13 @@ class TextControllerTest extends TestCase
     }
 
     // =========================================================================
-    // getTextIdFromRequest() private method tests via reflection
+    // getTextIdFromRequest() tests via TextReadController
     // =========================================================================
 
     #[Test]
     public function getTextIdFromRequestReturnsInjectedId(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, 123);
+        $result = $this->readController->getTextIdFromRequest(123);
 
         $this->assertSame(123, $result);
     }
@@ -322,10 +331,7 @@ class TextControllerTest extends TestCase
     #[Test]
     public function getTextIdFromRequestReturnsNullWhenEmpty(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, null);
+        $result = $this->readController->getTextIdFromRequest(null);
 
         $this->assertNull($result);
     }
@@ -333,11 +339,7 @@ class TextControllerTest extends TestCase
     #[Test]
     public function getTextIdFromRequestPrioritizesInjectedOverQueryParam(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        // Even if query params exist, injected takes priority
-        $result = $method->invoke($this->controller, 42);
+        $result = $this->readController->getTextIdFromRequest(42);
 
         $this->assertSame(42, $result);
     }
@@ -345,26 +347,19 @@ class TextControllerTest extends TestCase
     #[Test]
     public function getTextIdFromRequestReturnsZeroInjectedId(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
-        $method->setAccessible(true);
-
-        // 0 is not null, should be returned
-        $result = $method->invoke($this->controller, 0);
+        $result = $this->readController->getTextIdFromRequest(0);
 
         $this->assertSame(0, $result);
     }
 
     // =========================================================================
-    // handleMarkAction() private method tests via reflection
+    // handleMarkAction() tests via TextCrudController
     // =========================================================================
 
     #[Test]
     public function handleMarkActionReturnsDefaultForEmptyMarked(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, 'del', [], '');
+        $result = $this->crudController->handleMarkAction('del', [], '');
 
         $this->assertSame('Multiple Actions: 0', $result);
     }
@@ -372,15 +367,12 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleMarkActionDeleteCallsService(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
         $this->textService->expects($this->once())
             ->method('deleteTexts')
             ->with([1, 2, 3])
             ->willReturn(['count' => 3]);
 
-        $result = $method->invoke($this->controller, 'del', ['1', '2', '3'], '');
+        $result = $this->crudController->handleMarkAction('del', ['1', '2', '3'], '');
 
         $this->assertSame('Texts deleted: 3', $result);
     }
@@ -388,15 +380,12 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleMarkActionArchiveCallsService(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
         $this->textService->expects($this->once())
             ->method('archiveTexts')
             ->with([1, 2])
             ->willReturn(['count' => 2]);
 
-        $result = $method->invoke($this->controller, 'arch', ['1', '2'], '');
+        $result = $this->crudController->handleMarkAction('arch', ['1', '2'], '');
 
         $this->assertSame('Archived Text(s): 2', $result);
     }
@@ -404,15 +393,12 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleMarkActionSetSentencesCallsService(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
         $this->textService->expects($this->once())
             ->method('setTermSentences')
             ->with([1], false)
             ->willReturn(5);
 
-        $result = $method->invoke($this->controller, 'setsent', ['1'], '');
+        $result = $this->crudController->handleMarkAction('setsent', ['1'], '');
 
         $this->assertSame('Term sentences set: 5', $result);
     }
@@ -420,15 +406,12 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleMarkActionSetActiveSentencesCallsService(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
         $this->textService->expects($this->once())
             ->method('setTermSentences')
             ->with([1], true)
             ->willReturn(3);
 
-        $result = $method->invoke($this->controller, 'setactsent', ['1'], '');
+        $result = $this->crudController->handleMarkAction('setactsent', ['1'], '');
 
         $this->assertSame('Active term sentences set: 3', $result);
     }
@@ -436,15 +419,12 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleMarkActionRebuildCallsService(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
         $this->textService->expects($this->once())
             ->method('rebuildTexts')
             ->with([1, 2])
             ->willReturn(2);
 
-        $result = $method->invoke($this->controller, 'rebuild', ['1', '2'], '');
+        $result = $this->crudController->handleMarkAction('rebuild', ['1', '2'], '');
 
         $this->assertSame('Rebuilt Text(s): 2', $result);
     }
@@ -452,10 +432,7 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleMarkActionReviewReturnsRedirect(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, 'review', ['1', '2'], '');
+        $result = $this->crudController->handleMarkAction('review', ['1', '2'], '');
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
@@ -463,10 +440,7 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleMarkActionReviewRedirectsToReview(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, 'review', ['1'], '');
+        $result = $this->crudController->handleMarkAction('review', ['1'], '');
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
         $this->assertSame('/review?selection=3', $result->getUrl());
@@ -475,10 +449,7 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleMarkActionDeltagReturnsRedirect(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, 'deltag', ['1'], 'tag');
+        $result = $this->crudController->handleMarkAction('deltag', ['1'], 'tag');
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
@@ -486,10 +457,7 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleMarkActionDeltagRedirectsToTexts(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, 'deltag', ['1'], 'tag');
+        $result = $this->crudController->handleMarkAction('deltag', ['1'], 'tag');
 
         $this->assertSame('/texts', $result->getUrl());
     }
@@ -497,25 +465,19 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleMarkActionUnknownActionReturnsDefault(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, 'unknownaction', ['1'], '');
+        $result = $this->crudController->handleMarkAction('unknownaction', ['1'], '');
 
         $this->assertSame('Multiple Actions: 0', $result);
     }
 
     // =========================================================================
-    // handleArchivedMarkAction() private method tests via reflection
+    // handleArchivedMarkAction() tests via ArchivedTextController
     // =========================================================================
 
     #[Test]
     public function handleArchivedMarkActionReturnsDefaultForEmptyMarked(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleArchivedMarkAction');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, 'del', [], '');
+        $result = $this->archivedController->handleArchivedMarkAction('del', [], '');
 
         $this->assertSame('Multiple Actions: 0', $result);
     }
@@ -523,15 +485,12 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleArchivedMarkActionDeleteCallsService(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleArchivedMarkAction');
-        $method->setAccessible(true);
-
         $this->textService->expects($this->once())
             ->method('deleteArchivedTexts')
             ->with([1, 2])
             ->willReturn(['count' => 2]);
 
-        $result = $method->invoke($this->controller, 'del', ['1', '2'], '');
+        $result = $this->archivedController->handleArchivedMarkAction('del', ['1', '2'], '');
 
         $this->assertSame('Archived Texts deleted: 2', $result);
     }
@@ -539,15 +498,12 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleArchivedMarkActionUnarchiveCallsService(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleArchivedMarkAction');
-        $method->setAccessible(true);
-
         $this->textService->expects($this->once())
             ->method('unarchiveTexts')
             ->with([1])
             ->willReturn(['count' => 1]);
 
-        $result = $method->invoke($this->controller, 'unarch', ['1'], '');
+        $result = $this->archivedController->handleArchivedMarkAction('unarch', ['1'], '');
 
         $this->assertSame('Unarchived Text(s): 1', $result);
     }
@@ -555,10 +511,7 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleArchivedMarkActionDeltagReturnsRedirect(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleArchivedMarkAction');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, 'deltag', ['1'], 'tag');
+        $result = $this->archivedController->handleArchivedMarkAction('deltag', ['1'], 'tag');
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
@@ -566,10 +519,7 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleArchivedMarkActionDeltagRedirectsToArchived(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleArchivedMarkAction');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, 'deltag', ['1'], 'tag');
+        $result = $this->archivedController->handleArchivedMarkAction('deltag', ['1'], 'tag');
 
         $this->assertSame('/text/archived', $result->getUrl());
     }
@@ -577,10 +527,7 @@ class TextControllerTest extends TestCase
     #[Test]
     public function handleArchivedMarkActionUnknownReturnsDefault(): void
     {
-        $method = new \ReflectionMethod(TextController::class, 'handleArchivedMarkAction');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->controller, 'unknownaction', ['1'], '');
+        $result = $this->archivedController->handleArchivedMarkAction('unknownaction', ['1'], '');
 
         $this->assertSame('Multiple Actions: 0', $result);
     }
@@ -643,7 +590,6 @@ class TextControllerTest extends TestCase
     #[Test]
     public function displayRedirectsWhenNullPassedAndNoQueryParam(): void
     {
-        // null defaults to 0, which should redirect
         $result = $this->controller->display(null);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);

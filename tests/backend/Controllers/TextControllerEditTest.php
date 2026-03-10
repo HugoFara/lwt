@@ -7,6 +7,7 @@ namespace Lwt\Tests\Controllers;
 require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
 
 use Lwt\Modules\Text\Http\TextController;
+use Lwt\Modules\Text\Http\TextCrudController;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Text\Application\TextFacade;
@@ -362,16 +363,12 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController(
+        $controller = new TextCrudController(
             new \Lwt\Modules\Text\Application\TextFacade(),
             new \Lwt\Modules\Language\Application\LanguageFacade()
         );
 
-        // Use reflection to test private method
-        $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller, 'del', [], '');
+        $result = $controller->handleMarkAction('del', [], '');
 
         $this->assertEquals('Multiple Actions: 0', $result);
     }
