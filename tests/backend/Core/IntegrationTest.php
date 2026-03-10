@@ -417,7 +417,7 @@ class IntegrationTest extends TestCase
         if ($text_row = \mysqli_fetch_assoc($text_res)) {
             $text_id = (int)$text_row['TxID'];
             $statsService = new TextStatisticsService();
-            $counts = $statsService->getTextWordCount((string)$text_id);
+            $counts = $statsService->getTextWordCount([$text_id]);
 
             $this->assertIsArray($counts);
             // Function returns: total, expr, stat, totalu, expru, statu

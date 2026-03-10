@@ -43,7 +43,7 @@ class TextStatisticsService
      *
      * It is useful for unknown percent with this fork.
      *
-     * @param string $textsId Texts ID separated by comma
+     * @param int[] $textIds Array of text IDs
      *
      * @return array{
      *     total: array<int, int>, expr: array<int, int>, stat: array<int, array<int, int>>,
@@ -52,7 +52,7 @@ class TextStatisticsService
      *               Total number of words, number of expressions, statistics, total unique,
      *               number of unique expressions, unique statistics
      */
-    public function getTextWordCount(string $textsId): array
+    public function getTextWordCount(array $textIds): array
     {
         $r = array(
             // Total for text
@@ -65,60 +65,59 @@ class TextStatisticsService
             'statu' => array()
         );
 
+        if (empty($textIds)) {
+            return $r;
+        }
+
         // Raw SQL needed for complex aggregation with DISTINCT LOWER()
         // word_occurrences inherits user context via Ti2TxID -> texts FK
         $bindings = [];
+        $inClause = Connection::buildPreparedInClause($textIds, $bindings);
         $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS unique_cnt,
             COUNT(LOWER(Ti2Text)) AS total
             FROM word_occurrences
-            WHERE Ti2WordCount = 1 AND Ti2TxID IN($textsId)
+            WHERE Ti2WordCount = 1 AND Ti2TxID IN {$inClause}
             GROUP BY Ti2TxID";
-        $res = Connection::query($sql);
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $textId = (int) $record['text'];
-                $r["total"][$textId] = (int) $record['total'];
-                $r["totalu"][$textId] = (int) $record['unique_cnt'];
-            }
-            mysqli_free_result($res);
+        $rows = Connection::preparedFetchAll($sql, $bindings);
+        foreach ($rows as $record) {
+            $textId = (int) $record['text'];
+            $r["total"][$textId] = (int) $record['total'];
+            $r["totalu"][$textId] = (int) $record['unique_cnt'];
         }
 
         // Raw SQL needed for complex aggregation with DISTINCT
         // word_occurrences inherits user context via Ti2TxID -> texts FK
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($textIds, $bindings);
         $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS unique_cnt,
             COUNT(Ti2WoID) AS total
             FROM word_occurrences
-            WHERE Ti2WordCount > 1 AND Ti2TxID IN({$textsId})
+            WHERE Ti2WordCount > 1 AND Ti2TxID IN {$inClause}
             GROUP BY Ti2TxID";
-        $res = Connection::query($sql);
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $textId = (int) $record['text'];
-                $r["expr"][$textId] = (int) $record['total'];
-                $r["expru"][$textId] = (int) $record['unique_cnt'];
-            }
-            mysqli_free_result($res);
+        $rows = Connection::preparedFetchAll($sql, $bindings);
+        foreach ($rows as $record) {
+            $textId = (int) $record['text'];
+            $r["expr"][$textId] = (int) $record['total'];
+            $r["expru"][$textId] = (int) $record['unique_cnt'];
         }
 
         // Raw SQL needed for complex aggregation with DISTINCT and implicit JOIN
         // word_occurrences inherits user context via Ti2TxID -> texts FK
         // words has user scope (WoUsID), need to apply user filtering
         $bindings = [];
+        $inClause = Connection::buildPreparedInClause($textIds, $bindings);
         $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS unique_cnt,
             COUNT(Ti2WoID) AS total, WoStatus AS status
             FROM word_occurrences, words
-            WHERE Ti2WoID != 0 AND Ti2TxID IN({$textsId}) AND Ti2WoID = WoID"
+            WHERE Ti2WoID != 0 AND Ti2TxID IN {$inClause} AND Ti2WoID = WoID"
             . UserScopedQuery::forTablePrepared('words', $bindings, 'words') .
             " GROUP BY Ti2TxID, WoStatus";
-        $res = Connection::query($sql);
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $textId = (int) $record['text'];
-                $status = (int) $record['status'];
-                $r["stat"][$textId][$status] = (int) $record['total'];
-                $r["statu"][$textId][$status] = (int) $record['unique_cnt'];
-            }
-            mysqli_free_result($res);
+        $rows = Connection::preparedFetchAll($sql, $bindings);
+        foreach ($rows as $record) {
+            $textId = (int) $record['text'];
+            $status = (int) $record['status'];
+            $r["stat"][$textId][$status] = (int) $record['total'];
+            $r["statu"][$textId][$status] = (int) $record['unique_cnt'];
         }
 
         return $r;
@@ -136,10 +135,11 @@ class TextStatisticsService
         // Raw SQL needed for COUNT(DISTINCT LOWER())
         // word_occurrences inherits user context via Ti2TxID -> texts FK
         /** @var int|string|null $count */
-        $count = Connection::fetchValue(
+        $count = Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS cnt
             FROM word_occurrences
-            WHERE Ti2WordCount=1 AND Ti2WoID IS NULL AND Ti2TxID=$textId",
+            WHERE Ti2WordCount=1 AND Ti2WoID IS NULL AND Ti2TxID=?",
+            [$textId],
             'cnt'
         );
         if ($count === null) {
@@ -166,10 +166,10 @@ class TextStatisticsService
         }
 
         // Get language codes directly from language columns
-        $bindings = [];
+        $bindings = [$textId];
         $sql = "SELECT LgSourceLang, LgTargetLang
             FROM languages, texts
-            WHERE LgID = TxLgID and TxID = $textId"
+            WHERE LgID = TxLgID and TxID = ?"
             . UserScopedQuery::forTablePrepared('languages', $bindings, 'languages')
             . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts');
         $langRow = Connection::preparedFetchOne($sql, $bindings);

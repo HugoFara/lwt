@@ -167,6 +167,7 @@ class TranslationController extends BaseController
             $this->renderTermTranslation($text, $result['translations'], $srcLang, $tgtLang);
         }
 
+        // Safe: $ggLink is HTML from makeOpenDictStr() with proper escaping
         echo $ggLink;
     }
 

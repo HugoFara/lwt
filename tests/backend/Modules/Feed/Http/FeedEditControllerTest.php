@@ -50,6 +50,31 @@ class FeedEditControllerTest extends TestCase
         );
     }
 
+    /**
+     * Create a controller with redirect() stubbed out to prevent exit().
+     *
+     * @return FeedEditController&MockObject
+     */
+    private function createControllerWithRedirectStub(): FeedEditController
+    {
+        $controller = $this->getMockBuilder(FeedEditController::class)
+            ->setConstructorArgs([
+                $this->feedFacade,
+                $this->languageFacade,
+                $this->wizardSession,
+                $this->flashService,
+            ])
+            ->onlyMethods(['redirect'])
+            ->getMock();
+
+        $controller->method('redirect')
+            ->willReturnCallback(function (string $url): void {
+                // no-op: prevents header() + exit() in tests
+            });
+
+        return $controller;
+    }
+
     protected function tearDown(): void
     {
         $_REQUEST = [];
@@ -667,6 +692,8 @@ class FeedEditControllerTest extends TestCase
     #[Test]
     public function deleteFeedCallsFacadeWithStringId(): void
     {
+        $controller = $this->createControllerWithRedirectStub();
+
         $this->feedFacade->expects($this->once())
             ->method('deleteFeeds')
             ->with('42')
@@ -676,17 +703,14 @@ class FeedEditControllerTest extends TestCase
             ->method('success')
             ->with('Feed deleted successfully');
 
-        try {
-            $this->controller->deleteFeed(42);
-        } catch (\Throwable $e) {
-            // header() and exit will cause issues in testing
-            $this->assertStringContainsString('exit', strtolower($e::class) . strtolower($e->getMessage()));
-        }
+        $controller->deleteFeed(42);
     }
 
     #[Test]
     public function deleteFeedShowsErrorWhenNoFeedsDeleted(): void
     {
+        $controller = $this->createControllerWithRedirectStub();
+
         $this->feedFacade->expects($this->once())
             ->method('deleteFeeds')
             ->with('99')
@@ -696,11 +720,7 @@ class FeedEditControllerTest extends TestCase
             ->method('error')
             ->with('Failed to delete feed');
 
-        try {
-            $this->controller->deleteFeed(99);
-        } catch (\Throwable $e) {
-            // exit() in controller
-        }
+        $controller->deleteFeed(99);
     }
 
     // =========================================================================
@@ -710,6 +730,8 @@ class FeedEditControllerTest extends TestCase
     #[Test]
     public function editFeedRedirectsWhenFeedNotFound(): void
     {
+        $controller = $this->createControllerWithRedirectStub();
+
         $this->feedFacade->method('getFeedById')
             ->with(999)
             ->willReturn(null);
@@ -718,11 +740,7 @@ class FeedEditControllerTest extends TestCase
             ->method('error')
             ->with('Feed not found');
 
-        try {
-            $this->controller->editFeed(999);
-        } catch (\Throwable $e) {
-            // exit() in controller
-        }
+        $controller->editFeed(999);
     }
 
     #[Test]

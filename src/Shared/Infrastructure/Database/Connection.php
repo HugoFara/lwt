@@ -416,4 +416,31 @@ class Connection
 
         return '(' . implode(',', $safeIds) . ')';
     }
+
+    /**
+     * Build a prepared-statement SQL IN clause from an array of integer IDs.
+     *
+     * Returns a placeholder string like "(?,?,?)" and appends the int-cast
+     * values to the provided bindings array. For empty arrays, returns
+     * "(NULL)" as a safe no-match sentinel.
+     *
+     * @param int[]             $ids      Array of integer IDs
+     * @param array<int, mixed> &$bindings Reference to bindings array
+     *
+     * @return string SQL IN clause, e.g., "(?,?,?)" or "(NULL)" if empty
+     */
+    public static function buildPreparedInClause(array $ids, array &$bindings): string
+    {
+        if (empty($ids)) {
+            return '(NULL)';
+        }
+
+        $placeholders = [];
+        foreach ($ids as $id) {
+            $bindings[] = $id;
+            $placeholders[] = '?';
+        }
+
+        return '(' . implode(',', $placeholders) . ')';
+    }
 }

@@ -175,11 +175,13 @@ class TermStatusController extends VocabularyBaseController
 
             if ($ajax === '1') {
                 header('Content-Type: text/html; charset=utf-8');
+                // Safe: $result['increment'] is pre-escaped HTML from TermStatusApiHandler
                 echo $result['increment'] ?? '';
                 return;
             }
 
             PageLayoutHelper::renderPageStartNobody('Status Changed');
+            // Safe: $result['increment'] is pre-escaped HTML from TermStatusApiHandler
             echo $result['increment'] ?? '<p>Status updated</p>';
             PageLayoutHelper::renderPageEnd();
             return;

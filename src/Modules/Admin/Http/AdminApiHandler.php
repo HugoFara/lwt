@@ -147,7 +147,7 @@ class AdminApiHandler implements ApiRoutableInterface
 
         // Get text statistics
         $textStatsService = new TextStatisticsService();
-        $textStats = $textStatsService->getTextWordCount((string)$textId);
+        $textStats = $textStatsService->getTextWordCount([$textId]);
         $todoCount = $textStatsService->getTodoWordsCount($textId);
 
         $stats = [
@@ -239,7 +239,8 @@ class AdminApiHandler implements ApiRoutableInterface
     public function getTextsStatistics(string $textsId): array
     {
         $service = new TextStatisticsService();
-        return $service->getTextWordCount($textsId);
+        $textIds = array_map('intval', array_filter(explode(',', $textsId), 'strlen'));
+        return $service->getTextWordCount($textIds);
     }
 
     /**

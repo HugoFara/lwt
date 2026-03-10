@@ -167,8 +167,8 @@ class FeedEditController
 
             $feedId = $this->feedFacade->createFeed($data);
             $this->flashService->success('Feed created successfully');
-            header('Location: ' . url('/feeds/' . $feedId . '/edit'));
-            exit;
+            $this->redirect(url('/feeds/' . $feedId . '/edit'));
+            return;
         }
 
         $currentLang = Validation::language(
@@ -197,8 +197,8 @@ class FeedEditController
 
         if ($feed === null) {
             $this->flashService->error('Feed not found');
-            header('Location: ' . url('/feeds/manage'));
-            exit;
+            $this->redirect(url('/feeds/manage'));
+            return;
         }
 
         // Handle form submission before any output
@@ -214,8 +214,8 @@ class FeedEditController
 
             $this->feedFacade->updateFeed($id, $data);
             $this->flashService->success('Feed updated successfully');
-            header('Location: ' . url('/feeds/manage'));
-            exit;
+            $this->redirect(url('/feeds/manage'));
+            return;
         }
 
         $langName = $this->languageFacade->getLanguageName($feed['NfLgID']);
@@ -244,7 +244,23 @@ class FeedEditController
             $this->flashService->error('Failed to delete feed');
         }
 
-        header('Location: ' . url('/feeds/manage'));
+        $this->redirect(url('/feeds/manage'));
+    }
+
+    /**
+     * Send a redirect response.
+     *
+     * Extracted to allow tests to override and prevent exit().
+     *
+     * @param string $url Target URL
+     *
+     * @return void
+     *
+     * @codeCoverageIgnore
+     */
+    protected function redirect(string $url): void
+    {
+        header('Location: ' . $url);
         exit;
     }
 

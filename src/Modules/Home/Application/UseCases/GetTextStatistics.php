@@ -48,7 +48,7 @@ class GetTextStatistics
      */
     public function execute(int $textId, array $textInfo): ?array
     {
-        $textStats = $this->statsService->getTextWordCount((string)$textId);
+        $textStats = $this->statsService->getTextWordCount([$textId]);
         $todoCount = $this->statsService->getTodoWordsCount($textId);
 
         // Build statistics array with status counts

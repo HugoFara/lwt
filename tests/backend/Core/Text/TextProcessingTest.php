@@ -273,7 +273,7 @@ class TextProcessingTest extends TestCase
     {
 
         $statsService = new TextStatisticsService();
-        $result = $statsService->getTextWordCount('1');
+        $result = $statsService->getTextWordCount([1]);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('total', $result);
@@ -288,7 +288,7 @@ class TextProcessingTest extends TestCase
     {
 
         $statsService = new TextStatisticsService();
-        $result = $statsService->getTextWordCount('1,2');
+        $result = $statsService->getTextWordCount([1, 2]);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('total', $result);
@@ -298,7 +298,7 @@ class TextProcessingTest extends TestCase
     {
 
         $statsService = new TextStatisticsService();
-        $result = $statsService->getTextWordCount('999999');
+        $result = $statsService->getTextWordCount([999999]);
 
         $this->assertIsArray($result);
         // Should return empty arrays for each key

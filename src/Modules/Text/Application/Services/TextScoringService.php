@@ -186,11 +186,10 @@ class TextScoringService
         $stats['unknown'] = $unknown !== null ? (int) $unknown : 0;
 
         // Count words by status (known vs learning)
-        // Note: textIds must be integers so direct interpolation is safe
-        $bindings = [];
+        $bindings = [$textId];
         $statusQuery = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS unique_cnt, WoStatus AS status
             FROM word_occurrences, words
-            WHERE Ti2WoID IS NOT NULL AND Ti2TxID = {$textId} AND Ti2WoID = WoID"
+            WHERE Ti2WoID IS NOT NULL AND Ti2TxID = ? AND Ti2WoID = WoID"
             . UserScopedQuery::forTablePrepared('words', $bindings, 'words')
             . " GROUP BY Ti2TxID, WoStatus";
 
@@ -236,17 +235,16 @@ class TextScoringService
             return $results;
         }
 
-        // Build IN clause with integer IDs (safe for SQL)
-        $inClause = implode(',', array_map('intval', $textIds));
-
         // Count total unique words per text
         // word_occurrences inherits user context via Ti2TxID -> texts FK
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($textIds, $bindings);
         $totalQuery = "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS cnt
             FROM word_occurrences
-            WHERE Ti2WordCount = 1 AND Ti2TxID IN ($inClause)
+            WHERE Ti2WordCount = 1 AND Ti2TxID IN {$inClause}
             GROUP BY Ti2TxID";
 
-        $rows = Connection::fetchAll($totalQuery);
+        $rows = Connection::preparedFetchAll($totalQuery, $bindings);
         foreach ($rows as $row) {
             $textId = (int) $row['text'];
             if (isset($results[$textId])) {
@@ -255,12 +253,14 @@ class TextScoringService
         }
 
         // Count unknown words per text
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($textIds, $bindings);
         $unknownQuery = "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS cnt
             FROM word_occurrences
-            WHERE Ti2WordCount = 1 AND Ti2WoID IS NULL AND Ti2TxID IN ($inClause)
+            WHERE Ti2WordCount = 1 AND Ti2WoID IS NULL AND Ti2TxID IN {$inClause}
             GROUP BY Ti2TxID";
 
-        $rows = Connection::fetchAll($unknownQuery);
+        $rows = Connection::preparedFetchAll($unknownQuery, $bindings);
         foreach ($rows as $row) {
             $textId = (int) $row['text'];
             if (isset($results[$textId])) {
@@ -269,11 +269,11 @@ class TextScoringService
         }
 
         // Count words by status
-        // Note: Using raw query with integer IDs which is safe
         $bindings = [];
+        $inClause = Connection::buildPreparedInClause($textIds, $bindings);
         $statusQuery = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS unique_cnt, WoStatus AS status
             FROM word_occurrences, words
-            WHERE Ti2WoID IS NOT NULL AND Ti2TxID IN ({$inClause}) AND Ti2WoID = WoID"
+            WHERE Ti2WoID IS NOT NULL AND Ti2TxID IN {$inClause} AND Ti2WoID = WoID"
             . UserScopedQuery::forTablePrepared('words', $bindings, 'words')
             . " GROUP BY Ti2TxID, WoStatus";
 

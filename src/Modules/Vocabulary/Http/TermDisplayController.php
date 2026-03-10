@@ -324,6 +324,7 @@ class TermDisplayController extends VocabularyBaseController
         $term = InputValidator::getString('term');
 
         header('Content-Type: text/html; charset=utf-8');
+        // Safe: getFormattedTerms() returns pre-escaped HTML
         echo $this->findSimilarTerms->getFormattedTerms($langId, $term);
     }
 

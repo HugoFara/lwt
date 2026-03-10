@@ -203,34 +203,38 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
             $direction = 'DESC';
         }
 
-        $feedIdList = implode(',', array_map('intval', $feedIds));
         $bindings = [];
+        $feedInClause = Connection::buildPreparedInClause($feedIds, $bindings);
+
+        // UserScopedQuery for texts LEFT JOIN (bindings added before WHERE)
+        // We build this first since it goes in the JOIN clause
+        $textScopeBindings = [];
+        $textScope = UserScopedQuery::forTablePrepared('texts', $textScopeBindings, 'texts');
 
         // Build WHERE clause for search
         $searchClause = '';
+        $searchBindings = [];
         if ($search !== '') {
             $searchClause = " AND (FlTitle LIKE ? OR FlDescription LIKE ?)";
-            $bindings[] = '%' . $search . '%';
-            $bindings[] = '%' . $search . '%';
+            $searchBindings[] = '%' . $search . '%';
+            $searchBindings[] = '%' . $search . '%';
         }
+
+        // Merge all bindings in correct order: text scope, feed IDs, search
+        $allBindings = array_merge($textScopeBindings, $bindings, $searchBindings);
 
         // Complex query with LEFT JOIN to texts (archived texts are in same table with TxArchivedAt)
         $sql = "SELECT FlID, FlNfID, FlTitle, FlLink, FlDescription, FlDate, FlAudio, FlText,
                        TxID, TxArchivedAt
                 FROM feed_links
                 LEFT JOIN texts ON TxSourceURI = TRIM(FlLink)"
-                . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts')
-                . " WHERE FlNfID IN ($feedIdList) $searchClause"
-                . " ORDER BY $orderBy $direction"
-                . " LIMIT $offset, $limit";
+                . $textScope
+                . " WHERE FlNfID IN {$feedInClause} {$searchClause}"
+                . " ORDER BY {$orderBy} {$direction}"
+                . " LIMIT {$offset}, {$limit}";
 
         $result = [];
-
-        if (!empty($bindings)) {
-            $rows = Connection::preparedFetchAll($sql, $bindings);
-        } else {
-            $rows = Connection::fetchAll($sql);
-        }
+        $rows = Connection::preparedFetchAll($sql, $allBindings);
 
         foreach ($rows as $row) {
             $article = $this->mapToEntity($row);
@@ -283,11 +287,13 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
 
         if ($search !== '') {
             // Use raw SQL for OR condition with IN clause
-            $feedIdList = implode(',', array_map('intval', $feedIds));
+            $bindings = [];
+            $feedInClause = Connection::buildPreparedInClause($feedIds, $bindings);
             $searchPattern = '%' . $search . '%';
-            $bindings = [$searchPattern, $searchPattern];
+            $bindings[] = $searchPattern;
+            $bindings[] = $searchPattern;
             $sql = "SELECT COUNT(*) as cnt FROM feed_links
-                    WHERE FlNfID IN ($feedIdList)
+                    WHERE FlNfID IN {$feedInClause}
                     AND (FlTitle LIKE ? OR FlDescription LIKE ?)";
             $row = Connection::preparedFetchOne($sql, $bindings);
             return (int) ($row['cnt'] ?? 0);
@@ -428,12 +434,14 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
             return 0;
         }
 
-        $feedIdList = implode(',', array_map('intval', $feedIds));
+        $bindings = [];
+        $feedInClause = Connection::buildPreparedInClause($feedIds, $bindings);
 
         // Use raw SQL for TRIM() expression
-        return (int) Connection::execute(
+        return Connection::preparedExecute(
             "UPDATE feed_links SET FlLink = TRIM(FlLink)
-             WHERE FlNfID IN ($feedIdList)"
+             WHERE FlNfID IN {$feedInClause}",
+            $bindings
         );
     }
 
@@ -464,16 +472,17 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
      */
     public function getCountPerFeed(array $feedIds = []): array
     {
+        $bindings = [];
         $sql = "SELECT FlNfID, COUNT(*) as cnt FROM feed_links";
 
         if (!empty($feedIds)) {
-            $feedIdList = implode(',', array_map('intval', $feedIds));
-            $sql .= " WHERE FlNfID IN ($feedIdList)";
+            $feedInClause = Connection::buildPreparedInClause($feedIds, $bindings);
+            $sql .= " WHERE FlNfID IN {$feedInClause}";
         }
 
         $sql .= " GROUP BY FlNfID";
 
-        $rows = Connection::fetchAll($sql);
+        $rows = Connection::preparedFetchAll($sql, $bindings);
         $counts = [];
 
         foreach ($rows as $row) {

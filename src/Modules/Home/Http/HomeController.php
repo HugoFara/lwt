@@ -70,7 +70,7 @@ class HomeController extends BaseController
         $lastTextInfo = null;
         if ($currentTextInfo !== null && $currenttext !== null) {
             $textStatsService = new \Lwt\Modules\Text\Application\Services\TextStatisticsService();
-            $textStats = $textStatsService->getTextWordCount((string)$currenttext);
+            $textStats = $textStatsService->getTextWordCount([$currenttext]);
             $todoCount = $textStatsService->getTodoWordsCount($currenttext);
 
             $stats = [

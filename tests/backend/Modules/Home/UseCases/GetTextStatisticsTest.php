@@ -41,7 +41,7 @@ class GetTextStatisticsTest extends TestCase
 
         $this->statsService->expects($this->once())
             ->method('getTextWordCount')
-            ->with('42')
+            ->with([42])
             ->willReturn([
                 'total' => [42 => 100],
                 'expr' => [42 => 10],
@@ -294,7 +294,7 @@ class GetTextStatisticsTest extends TestCase
 
         $this->statsService->expects($this->once())
             ->method('getTextWordCount')
-            ->with('12345')  // String conversion of text ID
+            ->with([12345])  // Array of text IDs
             ->willReturn(['total' => [], 'expr' => [], 'stat' => [], 'totalu' => [], 'expru' => [], 'statu' => []]);
 
         $this->statsService->expects($this->once())

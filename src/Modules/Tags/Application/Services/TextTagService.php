@@ -229,8 +229,7 @@ class TextTagService
      */
     public static function addTagToTexts(string $tagText, array $ids): array
     {
-        $inClause = Connection::buildIntInClause($ids);
-        if ($inClause === '()') {
+        if (empty($ids)) {
             return ['count' => 0, 'error' => null];
         }
 
@@ -239,22 +238,21 @@ class TextTagService
             return ['count' => 0, 'error' => 'Failed to create tag'];
         }
 
+        $bindings = [$tagId];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
         $sql = 'SELECT TxID FROM texts
-            LEFT JOIN text_tag_map ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
+            LEFT JOIN text_tag_map ON TxID = TtTxID AND TtT2ID = ?
             WHERE TtT2ID IS NULL AND TxID IN ' . $inClause
-            . UserScopedQuery::forTable('texts');
-        $res = Connection::query($sql);
+            . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts');
+        $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                Connection::preparedExecute(
-                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID) VALUES(?, ?)',
-                    [(int)$record['TxID'], $tagId]
-                );
-                $count++;
-            }
-            mysqli_free_result($res);
+        foreach ($rows as $record) {
+            Connection::preparedExecute(
+                'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID) VALUES(?, ?)',
+                [(int)$record['TxID'], $tagId]
+            );
+            $count++;
         }
 
         return ['count' => $count, 'error' => null];
@@ -270,8 +268,7 @@ class TextTagService
      */
     public static function removeTagFromTexts(string $tagText, array $ids): array
     {
-        $inClause = Connection::buildIntInClause($ids);
-        if ($inClause === '()') {
+        if (empty($ids)) {
             return ['count' => 0, 'error' => null];
         }
 
@@ -287,20 +284,19 @@ class TextTagService
         }
         $tagId = (int) $tagIdRaw;
 
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
         $sql = 'SELECT TxID FROM texts WHERE TxID IN ' . $inClause
-            . UserScopedQuery::forTable('texts');
-        $res = Connection::query($sql);
+            . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts');
+        $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $count++;
-                QueryBuilder::table('text_tag_map')
-                    ->where('TtTxID', '=', (int)$record['TxID'])
-                    ->where('TtT2ID', '=', $tagId)
-                    ->delete();
-            }
-            mysqli_free_result($res);
+        foreach ($rows as $record) {
+            $count++;
+            QueryBuilder::table('text_tag_map')
+                ->where('TtTxID', '=', (int)$record['TxID'])
+                ->where('TtT2ID', '=', $tagId)
+                ->delete();
         }
 
         return ['count' => $count, 'error' => null];
@@ -316,8 +312,7 @@ class TextTagService
      */
     public static function addTagToArchivedTexts(string $tagText, array $ids): array
     {
-        $inClause = Connection::buildIntInClause($ids);
-        if ($inClause === '()') {
+        if (empty($ids)) {
             return ['count' => 0, 'error' => null];
         }
 
@@ -326,22 +321,21 @@ class TextTagService
             return ['count' => 0, 'error' => 'Failed to create tag'];
         }
 
+        $bindings = [$tagId];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
         $sql = 'SELECT TxID FROM texts
-            LEFT JOIN text_tag_map ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
+            LEFT JOIN text_tag_map ON TxID = TtTxID AND TtT2ID = ?
             WHERE TtT2ID IS NULL AND TxArchivedAt IS NOT NULL AND TxID IN ' . $inClause
-            . UserScopedQuery::forTable('texts');
-        $res = Connection::query($sql);
+            . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts');
+        $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                Connection::preparedExecute(
-                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID) VALUES(?, ?)',
-                    [(int)$record['TxID'], $tagId]
-                );
-                $count++;
-            }
-            mysqli_free_result($res);
+        foreach ($rows as $record) {
+            Connection::preparedExecute(
+                'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID) VALUES(?, ?)',
+                [(int)$record['TxID'], $tagId]
+            );
+            $count++;
         }
 
         return ['count' => $count, 'error' => null];
@@ -359,8 +353,7 @@ class TextTagService
         string $tagText,
         array $ids
     ): array {
-        $inClause = Connection::buildIntInClause($ids);
-        if ($inClause === '()') {
+        if (empty($ids)) {
             return ['count' => 0, 'error' => null];
         }
 
@@ -376,19 +369,18 @@ class TextTagService
         }
         $tagId = (int) $tagIdRaw;
 
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
         $sql = 'SELECT TxID FROM texts WHERE TxArchivedAt IS NOT NULL AND TxID IN ' . $inClause
-            . UserScopedQuery::forTable('texts');
-        $res = Connection::query($sql);
+            . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts');
+        $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $count++;
-                QueryBuilder::table('text_tag_map')
-                    ->where('TtTxID', '=', (int)$record['TxID'])
-                    ->delete();
-            }
-            mysqli_free_result($res);
+        foreach ($rows as $record) {
+            $count++;
+            QueryBuilder::table('text_tag_map')
+                ->where('TtTxID', '=', (int)$record['TxID'])
+                ->delete();
         }
 
         return ['count' => $count, 'error' => null];

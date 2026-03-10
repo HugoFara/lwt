@@ -255,8 +255,7 @@ class TermTagService
      */
     public static function addTagToWords(string $tagText, array $ids): array
     {
-        $inClause = Connection::buildIntInClause($ids);
-        if ($inClause === '()') {
+        if (empty($ids)) {
             return ['count' => 0, 'error' => null];
         }
 
@@ -265,23 +264,22 @@ class TermTagService
             return ['count' => 0, 'error' => 'Failed to create tag'];
         }
 
+        $bindings = [$tagId];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
         $sql = 'SELECT WoID
             FROM words
-            LEFT JOIN word_tag_map ON WoID = WtWoID AND WtTgID = ' . $tagId . '
+            LEFT JOIN word_tag_map ON WoID = WtWoID AND WtTgID = ?
             WHERE WtTgID IS NULL AND WoID IN ' . $inClause
-            . UserScopedQuery::forTable('words');
-        $res = Connection::query($sql);
+            . UserScopedQuery::forTablePrepared('words', $bindings, 'words');
+        $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                Connection::preparedExecute(
-                    'INSERT IGNORE INTO word_tag_map (WtWoID, WtTgID) VALUES(?, ?)',
-                    [(int)$record['WoID'], $tagId]
-                );
-                $count++;
-            }
-            mysqli_free_result($res);
+        foreach ($rows as $record) {
+            Connection::preparedExecute(
+                'INSERT IGNORE INTO word_tag_map (WtWoID, WtTgID) VALUES(?, ?)',
+                [(int)$record['WoID'], $tagId]
+            );
+            $count++;
         }
 
         return ['count' => $count, 'error' => null];
@@ -297,8 +295,7 @@ class TermTagService
      */
     public static function removeTagFromWords(string $tagText, array $ids): array
     {
-        $inClause = Connection::buildIntInClause($ids);
-        if ($inClause === '()') {
+        if (empty($ids)) {
             return ['count' => 0, 'error' => null];
         }
 
@@ -314,20 +311,19 @@ class TermTagService
         }
         $tagId = (int) $tagIdRaw;
 
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
         $sql = 'SELECT WoID FROM words WHERE WoID IN ' . $inClause
-            . UserScopedQuery::forTable('words');
-        $res = Connection::query($sql);
+            . UserScopedQuery::forTablePrepared('words', $bindings, 'words');
+        $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $count = 0;
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $count++;
-                QueryBuilder::table('word_tag_map')
-                    ->where('WtWoID', '=', (int)$record['WoID'])
-                    ->where('WtTgID', '=', $tagId)
-                    ->delete();
-            }
-            mysqli_free_result($res);
+        foreach ($rows as $record) {
+            $count++;
+            QueryBuilder::table('word_tag_map')
+                ->where('WtWoID', '=', (int)$record['WoID'])
+                ->where('WtTgID', '=', $tagId)
+                ->delete();
         }
 
         return ['count' => $count, 'error' => null];
