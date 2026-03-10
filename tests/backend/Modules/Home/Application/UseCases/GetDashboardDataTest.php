@@ -110,6 +110,8 @@ class GetDashboardDataTest extends TestCase
 
         if ($result['current_text_id'] === null) {
             $this->assertNull($result['current_text_info']);
+        } else {
+            $this->assertIsArray($result['current_text_info']);
         }
     }
 

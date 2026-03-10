@@ -204,11 +204,13 @@ class ReviewServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = $this->service->getReviewSql('lang', self::$testLangId);
+        $result = $this->service->getReviewSql('lang', self::$testLangId);
 
-        $this->assertIsString($sql);
-        $this->assertStringContainsString('words', $sql);
-        $this->assertStringContainsString('WoLgID', $sql);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('sql', $result);
+        $this->assertArrayHasKey('params', $result);
+        $this->assertStringContainsString('words', $result['sql']);
+        $this->assertStringContainsString('WoLgID', $result['sql']);
     }
 
     public function testGetTestSqlWithText(): void
@@ -217,11 +219,12 @@ class ReviewServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = $this->service->getReviewSql('text', self::$testTextId);
+        $result = $this->service->getReviewSql('text', self::$testTextId);
 
-        $this->assertIsString($sql);
-        $this->assertStringContainsString('words', $sql);
-        $this->assertStringContainsString('word_occurrences', $sql);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('sql', $result);
+        $this->assertStringContainsString('words', $result['sql']);
+        $this->assertStringContainsString('word_occurrences', $result['sql']);
     }
 
     // ===== validateReviewSelection() tests =====
@@ -232,8 +235,8 @@ class ReviewServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = $this->service->getReviewSql('lang', self::$testLangId);
-        $result = $this->service->validateReviewSelection($sql);
+        $reviewData = $this->service->getReviewSql('lang', self::$testLangId);
+        $result = $this->service->validateReviewSelection($reviewData['sql'], $reviewData['params']);
 
         $this->assertTrue($result['valid']);
         $this->assertEquals(1, $result['langCount']);
@@ -279,8 +282,8 @@ class ReviewServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = $this->service->getReviewSql('lang', self::$testLangId);
-        $counts = $this->service->getReviewCounts($sql);
+        $reviewData = $this->service->getReviewSql('lang', self::$testLangId);
+        $counts = $this->service->getReviewCounts($reviewData['sql'], $reviewData['params']);
 
         $this->assertIsArray($counts);
         $this->assertArrayHasKey('due', $counts);
@@ -297,8 +300,8 @@ class ReviewServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = $this->service->getReviewSql('lang', self::$testLangId);
-        $count = $this->service->getTomorrowReviewCount($sql);
+        $reviewData = $this->service->getReviewSql('lang', self::$testLangId);
+        $count = $this->service->getTomorrowReviewCount($reviewData['sql'], $reviewData['params']);
 
         $this->assertIsInt($count);
         $this->assertGreaterThanOrEqual(0, $count);
@@ -312,8 +315,8 @@ class ReviewServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = $this->service->getReviewSql('lang', self::$testLangId);
-        $word = $this->service->getNextWord($sql);
+        $reviewData = $this->service->getReviewSql('lang', self::$testLangId);
+        $word = $this->service->getNextWord($reviewData['sql'], $reviewData['params']);
 
         // May be null if no words are due
         if ($word !== null) {
@@ -368,8 +371,8 @@ class ReviewServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = $this->service->getReviewSql('lang', self::$testLangId);
-        $langId = $this->service->getLanguageIdFromReviewSql($sql);
+        $reviewData = $this->service->getReviewSql('lang', self::$testLangId);
+        $langId = $this->service->getLanguageIdFromReviewSql($reviewData['sql'], $reviewData['params']);
 
         $this->assertEquals(self::$testLangId, $langId);
     }
@@ -723,11 +726,13 @@ class ReviewServiceTest extends TestCase
         $this->assertEquals('lang', $identifier[0]);
 
         // 2. Get test SQL
-        $reviewsql = $this->service->getReviewSql($identifier[0], $identifier[1]);
-        $this->assertIsString($reviewsql);
+        $reviewData = $this->service->getReviewSql($identifier[0], $identifier[1]);
+        $this->assertIsArray($reviewData);
+        $this->assertArrayHasKey('sql', $reviewData);
+        $this->assertArrayHasKey('params', $reviewData);
 
         // 3. Validate selection
-        $validation = $this->service->validateReviewSelection($reviewsql);
+        $validation = $this->service->validateReviewSelection($reviewData['sql'], $reviewData['params']);
         $this->assertTrue($validation['valid']);
 
         // 4. Get language name
@@ -739,7 +744,7 @@ class ReviewServiceTest extends TestCase
         $this->assertNotEmpty($langSettings);
 
         // 6. Get test counts
-        $counts = $this->service->getReviewCounts($reviewsql);
+        $counts = $this->service->getReviewCounts($reviewData['sql'], $reviewData['params']);
         $this->assertArrayHasKey('due', $counts);
         $this->assertArrayHasKey('total', $counts);
     }

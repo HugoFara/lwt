@@ -381,11 +381,12 @@ class ArticleExtractorTest extends TestCase
             ]
         ];
 
-        // Invalid XPath should not cause crash
+        // Invalid XPath should not cause crash — falls back to //body
         $result = $this->extractor->extract($feedData, '[invalid xpath', '');
 
-        // Should return error for this item
-        $this->assertArrayHasKey('error', $result);
+        // Should succeed via //body fallback (not produce an error)
+        $this->assertArrayNotHasKey('error', $result);
+        $this->assertNotEmpty($result);
     }
 
     public function testExtractHandlesNestedHtml(): void
