@@ -161,9 +161,7 @@ class FeedWizardController
     /**
      * Load curated feeds from the JSON registry.
      *
-     * @return array<int, array{language: string, languageName: string,
-     *     sources: list<array{name: string, url: string, articleSectionTags: string,
-     *     filterTags: string, options: string, category: string, level: string}>}>
+     * @return list<array<string, mixed>>
      */
     private function loadCuratedFeeds(): array
     {
@@ -179,7 +177,9 @@ class FeedWizardController
         if (!is_array($data) || !isset($data['feeds'])) {
             return [];
         }
-        return $data['feeds'];
+        /** @var list<array<string, mixed>> */
+        $feeds = $data['feeds'];
+        return $feeds;
     }
 
     /**

@@ -32,7 +32,7 @@ declare(strict_types=1);
 <div x-data="starterVocab()" class="container" style="max-width: 640px;">
     <h2 class="title is-4 mb-4">Starter Vocabulary</h2>
 
-    <?php if (!$isAvailable): ?>
+    <?php if (!$isAvailable) : ?>
     <div class="notification is-warning">
         Starter vocabulary is not available for
         <strong><?= htmlspecialchars($langName, ENT_QUOTES, 'UTF-8') ?></strong>.
@@ -41,8 +41,7 @@ declare(strict_types=1);
     <a class="button is-primary" href="<?= htmlspecialchars($skipUrl, ENT_QUOTES, 'UTF-8') ?>">
         Continue to Text Import
     </a>
-    <?php else: ?>
-
+    <?php else : ?>
     <!-- Step 1: Choose options -->
     <template x-if="step === 'choose'">
         <div class="box">

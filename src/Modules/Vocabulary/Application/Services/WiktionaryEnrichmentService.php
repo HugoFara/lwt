@@ -367,7 +367,8 @@ class WiktionaryEnrichmentService
 
         /** @var mixed $data */
         $data = json_decode($content, true);
-        if (!is_array($data)
+        if (
+            !is_array($data)
             || !isset($data['parse'])
             || !is_array($data['parse'])
             || !isset($data['parse']['wikitext'])

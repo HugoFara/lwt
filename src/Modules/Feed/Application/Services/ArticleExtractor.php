@@ -273,12 +273,11 @@ class ArticleExtractor
 
         // Convert non-ASCII characters to HTML numeric entities
         // (mb_convert_encoding with HTML-ENTITIES was removed in PHP 8.2)
-        $result = mb_encode_numericentity(
+        return mb_encode_numericentity(
             $htmlString,
             [0x80, 0x10FFFF, 0, 0x1FFFFF],
             $encoding
         );
-        return $result !== false ? $result : $htmlString;
     }
 
     /**
@@ -339,6 +338,8 @@ class ArticleExtractor
         }
 
         foreach ($header as $k => $v) {
+            // Keys can be int (status line at index 0) or string (header names)
+            /** @psalm-suppress DocblockTypeContradiction */
             if (!is_string($k) || strtolower($k) !== 'content-type') {
                 continue;
             }

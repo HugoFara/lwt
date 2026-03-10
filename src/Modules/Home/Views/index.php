@@ -25,7 +25,6 @@ namespace Lwt\Modules\Home\Views;
 use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 
-
 /**
  * When on a WordPress server, make a logout button.
  *

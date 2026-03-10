@@ -33,12 +33,13 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\FormHelper;
 
 // Build JSON config for Alpine.js
+/** @var array<int, array{id: int, name: string}> $languages */
+$languages = $languages ?? [];
 $languagesJson = array_map(
-    /** @param array{id: int, name: string} $lang */
     function (array $lang): array {
-        return ['id' => (int)$lang['id'], 'name' => $lang['name']];
+        return ['id' => $lang['id'], 'name' => $lang['name']];
     },
-    $languages ?? []
+    $languages
 );
 
 $configJson = json_encode([
@@ -314,7 +315,7 @@ $configJson = json_encode([
                                 <select name="NfLgID" id="manual_NfLgID" required>
                                     <option value="">[Select...]</option>
                                     <?php foreach ($languages as $lang) : ?>
-                                    <option value="<?php echo (int)$lang['id']; ?>">
+                                    <option value="<?php echo $lang['id']; ?>">
                                         <?php echo htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8'); ?>
                                     </option>
                                     <?php endforeach; ?>
