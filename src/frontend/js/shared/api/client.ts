@@ -225,12 +225,19 @@ export async function apiPut<T>(
  * @example
  * const response = await apiDelete('/terms/123');
  */
-export async function apiDelete<T>(endpoint: string): Promise<ApiResponse<T>> {
+export async function apiDelete<T>(
+  endpoint: string,
+  body?: Record<string, unknown>
+): Promise<ApiResponse<T>> {
   try {
-    const response = await fetch(defaultConfig.baseUrl + endpoint, {
+    const options: RequestInit = {
       method: 'DELETE',
       headers: defaultConfig.defaultHeaders
-    });
+    };
+    if (body) {
+      options.body = JSON.stringify(body);
+    }
+    const response = await fetch(defaultConfig.baseUrl + endpoint, options);
 
     if (!response.ok) {
       const errorData = await parseResponse<{ message?: string }>(response);

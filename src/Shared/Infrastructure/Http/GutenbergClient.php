@@ -191,7 +191,7 @@ class GutenbergClient
      *
      * @return string|null Plain text URL or null
      */
-    private function extractTextUrl(array $book): ?string
+    protected function extractTextUrl(array $book): ?string
     {
         /** @var array<string, string> $formats */
         $formats = $book['formats'] ?? [];
@@ -220,7 +220,7 @@ class GutenbergClient
      *
      * @return array|null Decoded JSON or null on failure
      */
-    private function fetchJson(string $url): ?array
+    protected function fetchJson(string $url): ?array
     {
         $context = stream_context_create([
             'http' => [

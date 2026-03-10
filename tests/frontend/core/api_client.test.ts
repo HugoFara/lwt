@@ -425,6 +425,76 @@ describe('core/api_client.ts', () => {
 
       expect(result.error).toBe('Error: Server unavailable');
     });
+
+    it('sends JSON body when body parameter is provided', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('{"deleted": 3}')
+      });
+
+      await apiDelete('/feeds', { feed_ids: [1, 2, 3] });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/v1/feeds'),
+        expect.objectContaining({
+          method: 'DELETE',
+          body: JSON.stringify({ feed_ids: [1, 2, 3] })
+        })
+      );
+    });
+
+    it('does not include body when body parameter is undefined', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('{}')
+      });
+
+      await apiDelete('/terms/1');
+
+      const calledOptions = mockFetch.mock.calls[0][1];
+      expect(calledOptions.body).toBeUndefined();
+    });
+
+    it('sends body with nested objects', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('{"success": true}')
+      });
+
+      const body = { article_ids: [10, 20], options: { force: true } };
+      await apiDelete('/feeds/articles/1', body);
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: JSON.stringify(body)
+        })
+      );
+    });
+
+    it('returns parsed data when body is provided', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('{"success": true, "deleted": 5}')
+      });
+
+      const result = await apiDelete('/feeds', { feed_ids: [1, 2, 3, 4, 5] });
+
+      expect(result.data).toEqual({ success: true, deleted: 5 });
+    });
+
+    it('returns error on HTTP error when body is provided', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 400,
+        statusText: 'Bad Request',
+        text: () => Promise.resolve('{"message": "Invalid feed IDs"}')
+      });
+
+      const result = await apiDelete('/feeds', { feed_ids: [] });
+
+      expect(result.error).toBe('Invalid feed IDs');
+    });
   });
 
   // ===========================================================================

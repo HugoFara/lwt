@@ -155,7 +155,7 @@ class WebPageExtractor
      *
      * @return string|null HTML content or null on failure
      */
-    private function fetchPage(string $url): ?string
+    protected function fetchPage(string $url): ?string
     {
         $context = stream_context_create([
             'http' => [
@@ -187,7 +187,7 @@ class WebPageExtractor
      *
      * @return bool True if content appears to be binary
      */
-    private function looksLikeBinary(string $content): bool
+    protected function looksLikeBinary(string $content): bool
     {
         // Check first 512 bytes for null bytes (binary indicator)
         $sample = substr($content, 0, 512);
@@ -201,7 +201,7 @@ class WebPageExtractor
      *
      * @return bool True if content appears to be plain text
      */
-    private function isPlainText(string $content): bool
+    protected function isPlainText(string $content): bool
     {
         // If there are no HTML-like tags, treat as plain text
         return !preg_match('/<[a-z!\/][^>]*>/i', $content);
@@ -214,7 +214,7 @@ class WebPageExtractor
      *
      * @return string A human-readable title
      */
-    private function titleFromUrl(string $url): string
+    protected function titleFromUrl(string $url): string
     {
         $path = parse_url($url, PHP_URL_PATH);
         if ($path === null || $path === false) {
@@ -234,7 +234,7 @@ class WebPageExtractor
      *
      * @return string UTF-8 encoded HTML
      */
-    private function normalizeCharset(string $html): string
+    protected function normalizeCharset(string $html): string
     {
         $charset = $this->detectCharset($html);
 
@@ -255,7 +255,7 @@ class WebPageExtractor
      *
      * @return string|null Detected charset or null
      */
-    private function detectCharset(string $html): ?string
+    protected function detectCharset(string $html): ?string
     {
         // Check <meta charset="...">
         if (preg_match('/<meta\s+charset=["\']?([^"\'\s>]+)/i', $html, $m)) {
@@ -311,7 +311,7 @@ class WebPageExtractor
      *
      * @return string Extracted title
      */
-    private function extractTitle(\DOMDocument $dom): string
+    protected function extractTitle(\DOMDocument $dom): string
     {
         $xpath = new \DOMXPath($dom);
 
@@ -347,7 +347,7 @@ class WebPageExtractor
      *
      * @return string Extracted text content
      */
-    private function extractBodyText(\DOMDocument $dom): string
+    protected function extractBodyText(\DOMDocument $dom): string
     {
         // Remove noise elements by tag name
         $this->stripElements($dom, self::STRIP_TAGS);
@@ -529,7 +529,7 @@ class WebPageExtractor
      *
      * @return string Text with boilerplate removed (unchanged if no markers found)
      */
-    private function stripGutenbergBoilerplate(string $text): string
+    protected function stripGutenbergBoilerplate(string $text): string
     {
         // Strip header: everything up to and including the START marker line
         // Use non-greedy .*? so we match the FIRST occurrence, not the last
@@ -559,7 +559,7 @@ class WebPageExtractor
      *
      * @return string Text with natural paragraphs
      */
-    private function unwrapHardLineBreaks(string $text): string
+    protected function unwrapHardLineBreaks(string $text): string
     {
         $lines = explode("\n", $text);
         $paragraphs = [];
@@ -599,7 +599,7 @@ class WebPageExtractor
      *
      * @return string Cleaned text
      */
-    private function cleanText(string $text): string
+    protected function cleanText(string $text): string
     {
         // Replace tabs and carriage returns with spaces
         $text = str_replace(["\r", "\t"], ["\n", ' '], $text);

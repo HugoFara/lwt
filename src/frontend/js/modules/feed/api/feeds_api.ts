@@ -206,11 +206,9 @@ export async function deleteFeed(
  * Delete multiple feeds.
  */
 export async function deleteFeeds(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   feedIds: number[]
 ): Promise<ApiResponse<{ success: boolean; deleted: number }>> {
-  // NOTE: feedIds parameter ready for when bulk delete API endpoint is added
-  return apiDelete('/feeds');
+  return apiDelete('/feeds', { feed_ids: feedIds });
 }
 
 /**
@@ -243,11 +241,9 @@ export async function getArticles(
  */
 export async function deleteArticles(
   feedId: number,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   articleIds: number[] = []
 ): Promise<ApiResponse<{ success: boolean; deleted: number }>> {
-  // NOTE: articleIds parameter ready for when selective delete API endpoint is added
-  return apiDelete(`/feeds/articles/${feedId}`);
+  return apiDelete(`/feeds/articles/${feedId}`, articleIds.length > 0 ? { article_ids: articleIds } : undefined);
 }
 
 /**
@@ -359,7 +355,7 @@ export function getStatusBadgeClass(status: Article['status']): string {
     case 'error':
       return 'is-danger';
     default:
-      return 'is-light';
+      return 'is-warning';
   }
 }
 

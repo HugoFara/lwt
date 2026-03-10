@@ -344,7 +344,7 @@ describe('feeds/api/feeds_api.ts', () => {
 
       await deleteFeeds([1, 2, 3]);
 
-      expect(apiClient.apiDelete).toHaveBeenCalledWith('/feeds');
+      expect(apiClient.apiDelete).toHaveBeenCalledWith('/feeds', { feed_ids: [1, 2, 3] });
     });
   });
 
@@ -470,7 +470,7 @@ describe('feeds/api/feeds_api.ts', () => {
 
       await deleteArticles(1, [1, 2, 3]);
 
-      expect(apiClient.apiDelete).toHaveBeenCalledWith('/feeds/articles/1');
+      expect(apiClient.apiDelete).toHaveBeenCalledWith('/feeds/articles/1', { article_ids: [1, 2, 3] });
     });
 
     it('works without article IDs', async () => {
@@ -482,7 +482,7 @@ describe('feeds/api/feeds_api.ts', () => {
 
       await deleteArticles(5);
 
-      expect(apiClient.apiDelete).toHaveBeenCalledWith('/feeds/articles/5');
+      expect(apiClient.apiDelete).toHaveBeenCalledWith('/feeds/articles/5', undefined);
     });
   });
 
@@ -724,8 +724,8 @@ describe('feeds/api/feeds_api.ts', () => {
       expect(getStatusBadgeClass('error')).toBe('is-danger');
     });
 
-    it('returns is-light for new status', () => {
-      expect(getStatusBadgeClass('new')).toBe('is-light');
+    it('returns is-warning for new status', () => {
+      expect(getStatusBadgeClass('new')).toBe('is-warning');
     });
   });
 
