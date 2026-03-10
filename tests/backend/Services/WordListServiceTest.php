@@ -745,16 +745,15 @@ class WordListServiceTest extends TestCase
 
         $result = $listService->getWordsList($filters, 1, 1, 10);
 
-        $this->assertNotFalse($result);
+        $this->assertIsArray($result);
 
         $found = false;
-        while ($record = mysqli_fetch_assoc($result)) {
+        foreach ($result as $record) {
             if ($record['WoText'] === 'list_test_listword') {
                 $found = true;
                 $this->assertEquals('list word test', $record['WoTranslation']);
             }
         }
-        mysqli_free_result($result);
 
         $this->assertTrue($found);
     }

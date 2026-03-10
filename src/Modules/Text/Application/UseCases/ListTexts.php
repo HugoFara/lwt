@@ -97,36 +97,40 @@ class ListTexts
     /**
      * Get count of active texts matching filters.
      *
-     * @param string $whLang  Language WHERE clause
-     * @param string $whQuery Query WHERE clause
+     * @param string $whLang  Language WHERE clause (with ? placeholders)
+     * @param string $whQuery Query WHERE clause (with ? placeholders)
      * @param string $whTag   Tag HAVING clause
+     * @param array  $params  Merged binding parameters for whLang + whQuery + whTag
      *
      * @return int Number of matching texts
      */
     public function getTextCount(
         string $whLang,
         string $whQuery,
-        string $whTag
+        string $whTag,
+        array $params = []
     ): int {
+        $bindings = $params;
         $sql = "SELECT COUNT(*) AS cnt FROM (
             SELECT TxID FROM (
                 texts
                 LEFT JOIN text_tag_map ON TxID = TtTxID
             ) WHERE TxArchivedAt IS NULL {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
-        ) AS dummy" . UserScopedQuery::forTable('texts');
-        return (int) Connection::fetchValue($sql, 'cnt');
+        ) AS dummy" . UserScopedQuery::forTablePrepared('texts', $bindings);
+        return (int) Connection::preparedFetchValue($sql, $bindings, 'cnt');
     }
 
     /**
      * Get active texts list with pagination.
      *
-     * @param string $whLang  Language WHERE clause
-     * @param string $whQuery Query WHERE clause
+     * @param string $whLang  Language WHERE clause (with ? placeholders)
+     * @param string $whQuery Query WHERE clause (with ? placeholders)
      * @param string $whTag   Tag HAVING clause
      * @param int    $sort    Sort index (1-based)
      * @param int    $page    Page number (1-based)
      * @param int    $perPage Items per page
+     * @param array  $params  Merged binding parameters for whLang + whQuery + whTag
      *
      * @return array Array of text records
      */
@@ -136,12 +140,16 @@ class ListTexts
         string $whTag,
         int $sort,
         int $page,
-        int $perPage
+        int $perPage,
+        array $params = []
     ): array {
         $sorts = ['TxTitle', 'TxID desc', 'TxID'];
         $sortColumn = $sorts[max(0, min($sort - 1, count($sorts) - 1))];
         $offset = ($page - 1) * $perPage;
-        $limit = "LIMIT {$offset},{$perPage}";
+
+        $bindings = $params;
+        $bindings[] = $offset;
+        $bindings[] = $perPage;
 
         $sql = "SELECT TxID, TxTitle, LgName, TxAudioURI, TxSourceURI,
             LENGTH(TxAnnotatedText) AS annotlen,
@@ -155,55 +163,51 @@ class ListTexts
             WHERE LgID=TxLgID AND TxArchivedAt IS NULL {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
             ORDER BY {$sortColumn}
-            {$limit}"
-            . UserScopedQuery::forTable('texts')
-            . UserScopedQuery::forTable('text_tags')
-            . UserScopedQuery::forTable('languages');
+            LIMIT ?, ?"
+            . UserScopedQuery::forTablePrepared('texts', $bindings)
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings)
+            . UserScopedQuery::forTablePrepared('languages', $bindings);
 
-        $res = Connection::query($sql);
-        $texts = [];
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $texts[] = $record;
-            }
-            mysqli_free_result($res);
-        }
-        return $texts;
+        return Connection::preparedFetchAll($sql, $bindings);
     }
 
     /**
      * Get count of archived texts matching filters.
      *
-     * @param string $whLang  Language WHERE clause
-     * @param string $whQuery Query WHERE clause
+     * @param string $whLang  Language WHERE clause (with ? placeholders)
+     * @param string $whQuery Query WHERE clause (with ? placeholders)
      * @param string $whTag   Tag HAVING clause
+     * @param array  $params  Merged binding parameters for whLang + whQuery + whTag
      *
      * @return int Number of matching archived texts
      */
     public function getArchivedTextCount(
         string $whLang,
         string $whQuery,
-        string $whTag
+        string $whTag,
+        array $params = []
     ): int {
+        $bindings = $params;
         $sql = "SELECT COUNT(*) AS cnt FROM (
             SELECT TxID FROM (
                 texts
                 LEFT JOIN text_tag_map ON TxID = TtTxID
             ) WHERE TxArchivedAt IS NOT NULL {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
-        ) AS dummy" . UserScopedQuery::forTable('texts');
-        return (int) Connection::fetchValue($sql, 'cnt');
+        ) AS dummy" . UserScopedQuery::forTablePrepared('texts', $bindings);
+        return (int) Connection::preparedFetchValue($sql, $bindings, 'cnt');
     }
 
     /**
      * Get archived texts list with pagination.
      *
-     * @param string $whLang  Language WHERE clause
-     * @param string $whQuery Query WHERE clause
+     * @param string $whLang  Language WHERE clause (with ? placeholders)
+     * @param string $whQuery Query WHERE clause (with ? placeholders)
      * @param string $whTag   Tag HAVING clause
      * @param int    $sort    Sort index (1-based)
      * @param int    $page    Page number (1-based)
      * @param int    $perPage Items per page
+     * @param array  $params  Merged binding parameters for whLang + whQuery + whTag
      *
      * @return array Array of archived text records
      */
@@ -213,12 +217,16 @@ class ListTexts
         string $whTag,
         int $sort,
         int $page,
-        int $perPage
+        int $perPage,
+        array $params = []
     ): array {
         $sorts = ['TxTitle', 'TxID desc', 'TxID'];
         $sortColumn = $sorts[max(0, min($sort - 1, count($sorts) - 1))];
         $offset = ($page - 1) * $perPage;
-        $limit = "LIMIT {$offset},{$perPage}";
+
+        $bindings = $params;
+        $bindings[] = $offset;
+        $bindings[] = $perPage;
 
         $sql = "SELECT TxID, TxTitle, LgName, TxAudioURI, TxSourceURI,
             LENGTH(TxAnnotatedText) AS annotlen,
@@ -231,20 +239,12 @@ class ListTexts
             WHERE LgID=TxLgID AND TxArchivedAt IS NOT NULL {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
             ORDER BY {$sortColumn}
-            {$limit}"
-            . UserScopedQuery::forTable('texts')
-            . UserScopedQuery::forTable('text_tags')
-            . UserScopedQuery::forTable('languages');
+            LIMIT ?, ?"
+            . UserScopedQuery::forTablePrepared('texts', $bindings)
+            . UserScopedQuery::forTablePrepared('text_tags', $bindings)
+            . UserScopedQuery::forTablePrepared('languages', $bindings);
 
-        $res = Connection::query($sql);
-        $texts = [];
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $texts[] = $record;
-            }
-            mysqli_free_result($res);
-        }
-        return $texts;
+        return Connection::preparedFetchAll($sql, $bindings);
     }
 
     /**

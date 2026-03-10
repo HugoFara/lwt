@@ -113,9 +113,13 @@ class TextFacade
     /**
      * Get count of archived texts matching filters.
      */
-    public function getArchivedTextCount(string $whLang, string $whQuery, string $whTag): int
-    {
-        return $this->listTexts->getArchivedTextCount($whLang, $whQuery, $whTag);
+    public function getArchivedTextCount(
+        string $whLang,
+        string $whQuery,
+        string $whTag,
+        array $params = []
+    ): int {
+        return $this->listTexts->getArchivedTextCount($whLang, $whQuery, $whTag, $params);
     }
 
     /**
@@ -127,9 +131,10 @@ class TextFacade
         string $whTag,
         int $sort,
         int $page,
-        int $perPage
+        int $perPage,
+        array $params = []
     ): array {
-        return $this->listTexts->getArchivedTextsList($whLang, $whQuery, $whTag, $sort, $page, $perPage);
+        return $this->listTexts->getArchivedTextsList($whLang, $whQuery, $whTag, $sort, $page, $perPage, $params);
     }
 
     /**
@@ -201,6 +206,14 @@ class TextFacade
     // =======================
 
     /**
+     * Build WHERE clause for language filtering.
+     */
+    public function buildLangWhereClause(string|int $langId): array
+    {
+        return $this->buildTextFilters->buildLangWhereClause($langId);
+    }
+
+    /**
      * Build WHERE clause for archived text query.
      */
     public function buildArchivedQueryWhereClause(
@@ -217,6 +230,18 @@ class TextFacade
     public function buildArchivedTagHavingClause(string|int $tag1, string|int $tag2, string $tag12): string
     {
         return $this->buildTextFilters->buildArchivedTagHavingClause($tag1, $tag2, $tag12);
+    }
+
+    /**
+     * Build HAVING clause for tag filtering (parameterized version).
+     */
+    public function buildTagHavingClausePrepared(
+        string|int $tag1,
+        string|int $tag2,
+        string $tag12,
+        string $tagIdCol = 'TtT2ID'
+    ): array {
+        return $this->buildTextFilters->buildTagHavingClausePrepared($tag1, $tag2, $tag12, $tagIdCol);
     }
 
     /**
@@ -309,9 +334,9 @@ class TextFacade
     /**
      * Get count of active texts matching filters.
      */
-    public function getTextCount(string $whLang, string $whQuery, string $whTag): int
+    public function getTextCount(string $whLang, string $whQuery, string $whTag, array $params = []): int
     {
-        return $this->listTexts->getTextCount($whLang, $whQuery, $whTag);
+        return $this->listTexts->getTextCount($whLang, $whQuery, $whTag, $params);
     }
 
     /**
@@ -323,9 +348,10 @@ class TextFacade
         string $whTag,
         int $sort,
         int $page,
-        int $perPage
+        int $perPage,
+        array $params = []
     ): array {
-        return $this->listTexts->getTextsList($whLang, $whQuery, $whTag, $sort, $page, $perPage);
+        return $this->listTexts->getTextsList($whLang, $whQuery, $whTag, $sort, $page, $perPage, $params);
     }
 
     /**

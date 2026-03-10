@@ -98,14 +98,17 @@ class WordListApiHandler
         $textId = (string) ($params['text_id'] ?? '');
         $sort = max(1, min(7, (int) ($params['sort'] ?? 1)));
 
-        // Build filter conditions
-        $whLang = $listService->buildLangCondition($lang);
+        // Build filter conditions with parameterized queries
+        /** @var array<int, mixed> $filterBindings */
+        $filterBindings = [];
+        $whLang = $listService->buildLangCondition($lang, $filterBindings);
         $whStat = $listService->buildStatusCondition($status);
-        $whQuery = $listService->buildQueryCondition($query, $queryMode, $regexMode);
-        $whTag = $listService->buildTagCondition($tag1, $tag2, $tag12);
+        $whQuery = $listService->buildQueryCondition($query, $queryMode, $regexMode, $filterBindings);
+        $whTag = $listService->buildTagCondition($tag1, $tag2, $tag12, $filterBindings);
 
-        // Get total count
-        $total = $listService->countWords($textId, $whLang, $whStat, $whQuery, $whTag);
+        // Get total count — $filterBindings is always array after build* calls (never set to null)
+        /** @psalm-suppress PossiblyNullArgument */
+        $total = $listService->countWords($textId, $whLang, $whStat, $whQuery, $whTag, $filterBindings);
 
         // Calculate pagination
         $totalPages = (int) ceil($total / $perPage);
@@ -119,17 +122,16 @@ class WordListApiHandler
             'whStat' => $whStat,
             'whQuery' => $whQuery,
             'whTag' => $whTag,
-            'textId' => $textId
+            'textId' => $textId,
+            'params' => $filterBindings
         ];
 
-        $result = $listService->getWordsList($filters, $sort, $page, $perPage);
+        $records = $listService->getWordsList($filters, $sort, $page, $perPage);
         $words = [];
 
-        if ($result instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($result)) {
-                $words[] = $this->formatWordRecord($record, $sort);
-            }
-            mysqli_free_result($result);
+        /** @var array<string, mixed> $record */
+        foreach ($records as $record) {
+            $words[] = $this->formatWordRecord($record, $sort);
         }
 
         return [
@@ -311,13 +313,16 @@ class WordListApiHandler
         $tag12 = (string) ($filters['tag12'] ?? '0');
         $textId = (string) ($filters['text_id'] ?? '');
 
-        $whLang = $listService->buildLangCondition($lang);
+        /** @var array<int, mixed> $filterBindings */
+        $filterBindings = [];
+        $whLang = $listService->buildLangCondition($lang, $filterBindings);
         $whStat = $listService->buildStatusCondition($status);
-        $whQuery = $listService->buildQueryCondition($query, $queryMode, $regexMode);
-        $whTag = $listService->buildTagCondition($tag1, $tag2, $tag12);
+        $whQuery = $listService->buildQueryCondition($query, $queryMode, $regexMode, $filterBindings);
+        $whTag = $listService->buildTagCondition($tag1, $tag2, $tag12, $filterBindings);
 
-        // Get all word IDs matching the filter
-        $wordIds = $listService->getFilteredWordIds($textId, $whLang, $whStat, $whQuery, $whTag);
+        // Get all word IDs matching the filter — $filterBindings is always array (never set to null)
+        /** @psalm-suppress PossiblyNullArgument */
+        $wordIds = $listService->getFilteredWordIds($textId, $whLang, $whStat, $whQuery, $whTag, $filterBindings);
 
         if (empty($wordIds)) {
             return ['success' => false, 'count' => 0, 'message' => 'No terms match the filter'];

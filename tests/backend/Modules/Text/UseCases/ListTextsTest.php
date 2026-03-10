@@ -318,4 +318,81 @@ class ListTextsTest extends TestCase
 
         $this->useCase->getTextsForLanguage(1);
     }
+
+    // =========================================================================
+    // Parameterized Method Signature Tests (Sprint 12)
+    // =========================================================================
+
+    public function testGetTextCountAcceptsParamsParameter(): void
+    {
+        $ref = new \ReflectionMethod(ListTexts::class, 'getTextCount');
+        $params = $ref->getParameters();
+        $this->assertCount(4, $params);
+        $this->assertSame('params', $params[3]->getName());
+        $this->assertTrue($params[3]->isOptional());
+        $this->assertSame([], $params[3]->getDefaultValue());
+    }
+
+    public function testGetTextsListAcceptsParamsParameter(): void
+    {
+        $ref = new \ReflectionMethod(ListTexts::class, 'getTextsList');
+        $params = $ref->getParameters();
+        $this->assertCount(7, $params);
+        $this->assertSame('params', $params[6]->getName());
+        $this->assertTrue($params[6]->isOptional());
+    }
+
+    public function testGetArchivedTextCountAcceptsParamsParameter(): void
+    {
+        $ref = new \ReflectionMethod(ListTexts::class, 'getArchivedTextCount');
+        $params = $ref->getParameters();
+        $this->assertCount(4, $params);
+        $this->assertSame('params', $params[3]->getName());
+        $this->assertTrue($params[3]->isOptional());
+    }
+
+    public function testGetArchivedTextsListAcceptsParamsParameter(): void
+    {
+        $ref = new \ReflectionMethod(ListTexts::class, 'getArchivedTextsList');
+        $params = $ref->getParameters();
+        $this->assertCount(7, $params);
+        $this->assertSame('params', $params[6]->getName());
+        $this->assertTrue($params[6]->isOptional());
+    }
+
+    public function testGetTextCountParamsDefaultIsEmptyArray(): void
+    {
+        $ref = new \ReflectionMethod(ListTexts::class, 'getTextCount');
+        $this->assertSame([], $ref->getParameters()[3]->getDefaultValue());
+    }
+
+    public function testGetTextsListParamsDefaultIsEmptyArray(): void
+    {
+        $ref = new \ReflectionMethod(ListTexts::class, 'getTextsList');
+        $this->assertSame([], $ref->getParameters()[6]->getDefaultValue());
+    }
+
+    public function testGetArchivedTextCountReturnTypeIsInt(): void
+    {
+        $ref = new \ReflectionMethod(ListTexts::class, 'getArchivedTextCount');
+        $this->assertSame('int', $ref->getReturnType()?->getName());
+    }
+
+    public function testGetArchivedTextsListReturnTypeIsArray(): void
+    {
+        $ref = new \ReflectionMethod(ListTexts::class, 'getArchivedTextsList');
+        $this->assertSame('array', $ref->getReturnType()?->getName());
+    }
+
+    public function testGetTextsListReturnTypeIsArray(): void
+    {
+        $ref = new \ReflectionMethod(ListTexts::class, 'getTextsList');
+        $this->assertSame('array', $ref->getReturnType()?->getName());
+    }
+
+    public function testGetTextCountReturnTypeIsInt(): void
+    {
+        $ref = new \ReflectionMethod(ListTexts::class, 'getTextCount');
+        $this->assertSame('int', $ref->getReturnType()?->getName());
+    }
 }

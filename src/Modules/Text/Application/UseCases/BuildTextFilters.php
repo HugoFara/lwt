@@ -30,6 +30,21 @@ use Lwt\Shared\Infrastructure\Database\Connection;
 class BuildTextFilters
 {
     /**
+     * Build WHERE clause for language filtering.
+     *
+     * @param string|int $langId Language ID (empty string or 0 for no filter)
+     *
+     * @return array{clause: string, params: array} SQL WHERE clause and parameters
+     */
+    public function buildLangWhereClause(string|int $langId): array
+    {
+        if ($langId === '' || $langId === 0) {
+            return ['clause' => '', 'params' => []];
+        }
+        return ['clause' => ' AND TxLgID = ?', 'params' => [(int)$langId]];
+    }
+
+    /**
      * Build WHERE clause for text query filtering.
      *
      * @param string $query       Search query string
@@ -157,6 +172,67 @@ class BuildTextFilters
 
         $operator = $tag12 ? 'AND' : 'OR';
         return " HAVING (({$whTag1}) {$operator} ({$whTag2}))";
+    }
+
+    /**
+     * Build HAVING clause for tag filtering (parameterized version).
+     *
+     * Returns {clause, params} like the query WHERE clause builders.
+     *
+     * @param string|int $tag1     First tag filter (must be numeric or empty)
+     * @param string|int $tag2     Second tag filter (must be numeric or empty)
+     * @param string     $tag12    AND/OR operator
+     * @param string     $tagIdCol Tag ID column (TtT2ID for active/archived)
+     *
+     * @return array{clause: string, params: array} SQL HAVING clause and parameters
+     */
+    public function buildTagHavingClausePrepared(
+        string|int $tag1,
+        string|int $tag2,
+        string $tag12,
+        string $tagIdCol = 'TtT2ID'
+    ): array {
+        if ($tag1 === '' && $tag2 === '') {
+            return ['clause' => '', 'params' => []];
+        }
+
+        $tag1Int = ($tag1 !== '' && is_numeric($tag1)) ? (int)$tag1 : null;
+        $tag2Int = ($tag2 !== '' && is_numeric($tag2)) ? (int)$tag2 : null;
+
+        $whTag1 = null;
+        $whTag2 = null;
+        $params = [];
+
+        if ($tag1Int !== null) {
+            if ($tag1Int === -1) {
+                $whTag1 = "GROUP_CONCAT({$tagIdCol}) IS NULL";
+            } else {
+                $whTag1 = "CONCAT('/', GROUP_CONCAT({$tagIdCol} SEPARATOR '/'), '/') LIKE CONCAT('%/', ?, '/%')";
+                $params[] = $tag1Int;
+            }
+        }
+
+        if ($tag2Int !== null) {
+            if ($tag2Int === -1) {
+                $whTag2 = "GROUP_CONCAT({$tagIdCol}) IS NULL";
+            } else {
+                $whTag2 = "CONCAT('/', GROUP_CONCAT({$tagIdCol} SEPARATOR '/'), '/') LIKE CONCAT('%/', ?, '/%')";
+                $params[] = $tag2Int;
+            }
+        }
+
+        if ($tag1Int !== null && $tag2Int === null) {
+            return ['clause' => " HAVING ({$whTag1})", 'params' => $params];
+        }
+        if ($tag2Int !== null && $tag1Int === null) {
+            return ['clause' => " HAVING ({$whTag2})", 'params' => $params];
+        }
+        if ($tag1Int === null && $tag2Int === null) {
+            return ['clause' => '', 'params' => []];
+        }
+
+        $operator = $tag12 ? 'AND' : 'OR';
+        return ['clause' => " HAVING (({$whTag1}) {$operator} ({$whTag2}))", 'params' => $params];
     }
 
     /**
