@@ -55,11 +55,12 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function findNextWordForReview(ReviewConfiguration $config): ?ReviewWord
     {
-        $reviewsql = $config->toSqlProjection();
         $pass = 0;
 
         while ($pass < 2) {
             $pass++;
+            $params = [];
+            $reviewsql = $config->toSqlProjectionPrepared($params);
             $sql = "SELECT DISTINCT WoID, WoText, WoTextLC, WoTranslation,
                 WoRomanization, WoSentence, WoLgID,
                 (IFNULL(WoSentence, '') NOT LIKE CONCAT('%{', WoText, '}%')) AS notvalid,
@@ -71,14 +72,10 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
                 ORDER BY WoTodayScore, WoRandom
                 LIMIT 1';
 
-            $res = Connection::query($sql);
-            if (!$res instanceof \mysqli_result) {
-                continue;
-            }
-            $record = mysqli_fetch_assoc($res);
-            mysqli_free_result($res);
+            $rows = Connection::preparedFetchAll($sql, $params);
+            $record = $rows[0] ?? null;
 
-            if ($record !== null && $record !== false) {
+            if ($record !== null) {
                 return ReviewWord::fromRecord($record);
             }
         }
@@ -130,19 +127,25 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getReviewCounts(ReviewConfiguration $config): array
     {
-        $reviewsql = $config->toSqlProjection();
+        $dueParams = [];
+        $dueReviewsql = $config->toSqlProjectionPrepared($dueParams);
 
-        $due = (int) Connection::fetchValue(
+        $due = (int) Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
-            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
+            FROM $dueReviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0",
+            $dueParams,
             'cnt'
         );
 
-        $total = (int) Connection::fetchValue(
+        $totalParams = [];
+        $totalReviewsql = $config->toSqlProjectionPrepared($totalParams);
+
+        $total = (int) Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
-            FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
+            FROM $totalReviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*'",
+            $totalParams,
             'cnt'
         );
 
@@ -154,12 +157,14 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getTomorrowCount(ReviewConfiguration $config): int
     {
-        $reviewsql = $config->toSqlProjection();
+        $params = [];
+        $reviewsql = $config->toSqlProjectionPrepared($params);
 
-        return (int) Connection::fetchValue(
+        return (int) Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
             FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*' AND WoTomorrowScore < 0",
+            $params,
             'cnt'
         );
     }
@@ -169,7 +174,8 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getTableWords(ReviewConfiguration $config): array
     {
-        $reviewsql = $config->toSqlProjection();
+        $params = [];
+        $reviewsql = $config->toSqlProjectionPrepared($params);
 
         $sql = "SELECT DISTINCT WoID, WoText, WoTextLC, WoTranslation, WoRomanization,
             WoSentence, WoLgID, WoStatus, WoTodayScore AS Score,
@@ -178,14 +184,11 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             AND WoTranslation != '' AND WoTranslation != '*'
             ORDER BY WoTodayScore, WoRandom * RAND()";
 
-        $result = Connection::query($sql);
+        $rows = Connection::preparedFetchAll($sql, $params);
         $words = [];
 
-        if ($result instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($result)) {
-                $words[] = ReviewWord::fromRecord($record);
-            }
-            mysqli_free_result($result);
+        foreach ($rows as $record) {
+            $words[] = ReviewWord::fromRecord($record);
         }
 
         return $words;
@@ -293,11 +296,13 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function getLanguageIdFromConfig(ReviewConfiguration $config): ?int
     {
-        $reviewsql = $config->toSqlProjection();
+        $params = [];
+        $reviewsql = $config->toSqlProjectionPrepared($params);
 
         /** @var mixed $langId */
-        $langId = Connection::fetchValue(
+        $langId = Connection::preparedFetchValue(
             "SELECT WoLgID FROM $reviewsql LIMIT 1",
+            $params,
             'WoLgID'
         );
 
@@ -309,10 +314,12 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
      */
     public function validateSingleLanguage(ReviewConfiguration $config): array
     {
-        $reviewsql = $config->toSqlProjection();
+        $params = [];
+        $reviewsql = $config->toSqlProjectionPrepared($params);
 
-        $langCount = (int) Connection::fetchValue(
+        $langCount = (int) Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $reviewsql",
+            $params,
             'cnt'
         );
 
@@ -357,18 +364,20 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         }
 
         // For selection-based tests, get language from first word
-        $reviewsql = $config->toSqlProjection();
         $validation = $this->validateSingleLanguage($config);
 
         if ($validation['langCount'] === 1) {
+            $params = [];
+            $reviewsql = $config->toSqlProjectionPrepared($params);
             $bindings = [];
+            $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
             /** @var mixed $name */
             $name = Connection::preparedFetchValue(
                 "SELECT LgName
                 FROM languages, {$reviewsql} AND LgID = WoLgID"
-                . UserScopedQuery::forTablePrepared('words', $bindings) . "
+                . $userScope . "
                 LIMIT 1",
-                $bindings,
+                array_merge($params, $bindings),
                 'LgName'
             );
             return $name !== null ? (string) $name : 'L2';
@@ -494,11 +503,12 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         if ($sentenceCount > 1) {
             // Get previous sentence
             /** @var mixed $prevSeid */
-            $prevSeid = Connection::fetchValue(
+            $prevSeid = Connection::preparedFetchValue(
                 "SELECT SeID FROM sentences
-                WHERE SeID < $seid AND SeTxID = $txid
+                WHERE SeID < ? AND SeTxID = ?
                 AND TRIM(SeText) NOT IN ('¶', '')
                 ORDER BY SeID DESC LIMIT 1",
+                [$seid, $txid],
                 'SeID'
             );
             if ($prevSeid !== null) {
@@ -509,11 +519,12 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         if ($sentenceCount > 2) {
             // Get next sentence
             /** @var mixed $nextSeid */
-            $nextSeid = Connection::fetchValue(
+            $nextSeid = Connection::preparedFetchValue(
                 "SELECT SeID FROM sentences
-                WHERE SeID > $seid AND SeTxID = $txid
+                WHERE SeID > ? AND SeTxID = ?
                 AND TRIM(SeText) NOT IN ('¶', '')
                 ORDER BY SeID ASC LIMIT 1",
+                [$seid, $txid],
                 'SeID'
             );
             if ($nextSeid !== null) {
@@ -525,31 +536,30 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             return [];
         }
 
-        $seidList = implode(',', $sentenceIds);
+        $placeholders = implode(',', array_fill(0, count($sentenceIds), '?'));
 
         // Fetch all text items with their word data
         $sql = "SELECT ti.Ti2Order, ti.Ti2Text, ti.Ti2WordCount, ti.Ti2WoID,
                 w.WoTextLC, w.WoRomanization, w.WoTranslation
             FROM word_occurrences ti
             LEFT JOIN words w ON ti.Ti2WoID = w.WoID
-            WHERE ti.Ti2SeID IN ($seidList) AND ti.Ti2WordCount < 2
+            WHERE ti.Ti2SeID IN ($placeholders) AND ti.Ti2WordCount < 2
             AND ti.Ti2Text != '¶'
             ORDER BY ti.Ti2Order";
 
-        $result = Connection::query($sql);
-        if (!$result instanceof \mysqli_result) {
-            return [];
-        }
+        $rows = Connection::preparedFetchAll($sql, $sentenceIds);
 
         $annotations = [];
-        while ($row = mysqli_fetch_assoc($result)) {
+        foreach ($rows as $row) {
             $order = (int) $row['Ti2Order'];
             $text = (string) $row['Ti2Text'];
+            /** @var mixed $woId */
             $woId = $row['Ti2WoID'];
             $isTarget = mb_strtolower($text, 'UTF-8') === $targetWordLc;
 
             // Only include annotation data if the word is known (has a WoID)
             if ($woId !== null) {
+                /** @var mixed $romanization */
                 $romanization = $row['WoRomanization'];
                 $annotations[$order] = [
                     'text' => $text,
@@ -569,7 +579,6 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
                 ];
             }
         }
-        mysqli_free_result($result);
 
         return $annotations;
     }

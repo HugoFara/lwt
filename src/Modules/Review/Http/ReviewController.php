@@ -196,22 +196,25 @@ class ReviewController extends BaseController
         }
 
         /** @psalm-suppress InvalidScalarArgument */
-        $reviewsql = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
+        $reviewResult = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
 
-        if ($reviewsql === null) {
+        if ($reviewResult === null) {
             echo '<p>Sorry - Unable to generate review SQL</p>';
             return;
         }
 
+        $reviewsql = $reviewResult['sql'];
+        $reviewParams = $reviewResult['params'];
+
         // Validate single language
-        $validation = $this->reviewFacade->validateReviewSelection($reviewsql);
+        $validation = $this->reviewFacade->validateReviewSelection($reviewsql, $reviewParams);
         if (!$validation['valid']) {
             echo '<p>Sorry - ' . ($validation['error'] ?? 'Unknown error') . '</p>';
             return;
         }
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql, $reviewParams);
         if ($langIdFromSql === null) {
             include __DIR__ . '/../Views/no_terms.php';
             PageLayoutHelper::renderPageEnd();
@@ -230,17 +233,14 @@ class ReviewController extends BaseController
         include __DIR__ . '/../Views/table_review_header.php';
 
         // Render table rows
-        $words = $this->reviewFacade->getTableReviewWords($reviewsql);
+        $wordsArray = $this->reviewFacade->getTableReviewWords($reviewsql, $reviewParams);
         /** @var mixed $regexWordRaw */
         $regexWordRaw = $langSettings['regexWord'] ?? '';
         $regexWord = is_string($regexWordRaw) ? $regexWordRaw : '';
         $rtl = (bool) ($langSettings['rtl'] ?? false);
 
-        if ($words instanceof \mysqli_result) {
-            while ($word = mysqli_fetch_assoc($words)) {
-                include __DIR__ . '/../Views/table_review_row.php';
-            }
-            mysqli_free_result($words);
+        foreach ($wordsArray as $word) {
+            include __DIR__ . '/../Views/table_review_row.php';
         }
 
         echo '</table>';
@@ -319,18 +319,21 @@ class ReviewController extends BaseController
         }
 
         /** @psalm-suppress InvalidScalarArgument */
-        $reviewsql = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
-        if ($reviewsql === null) {
+        $reviewResult = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
+        if ($reviewResult === null) {
             $this->redirect('/text/edit');
             return;
         }
+
+        $reviewsql = $reviewResult['sql'];
+        $reviewParams = $reviewResult['params'];
 
         $testType = $isTableMode ? 1 : $this->reviewFacade->clampReviewType((int) $testTypeParam);
         $wordMode = $this->reviewFacade->isWordMode($testType);
         $baseType = $this->reviewFacade->getBaseReviewType($testType);
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql, $reviewParams);
         if ($langIdFromSql === null) {
             PageLayoutHelper::renderPageStartNobody('Review', 'full-width');
             include __DIR__ . '/../Views/no_terms.php';

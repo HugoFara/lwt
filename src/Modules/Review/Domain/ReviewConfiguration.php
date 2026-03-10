@@ -194,6 +194,96 @@ final readonly class ReviewConfiguration
     }
 
     /**
+     * Get SQL projection string with prepared statement placeholders.
+     *
+     * Returns SQL with `?` placeholders and pushes bound values into $params.
+     * The logic mirrors toSqlProjection() but uses parameter binding.
+     *
+     * @param array<int, int|string> $params Reference to params array for binding
+     *
+     * @return string SQL fragment for FROM/WHERE clause with ? placeholders
+     *
+     * @throws \InvalidArgumentException If review key is invalid
+     */
+    public function toSqlProjectionPrepared(array &$params): string
+    {
+        return match ($this->reviewKey) {
+            self::KEY_LANG => $this->langPrepared($params),
+            self::KEY_TEXT => $this->textPrepared($params),
+            self::KEY_WORDS => $this->wordsPrepared($params),
+            self::KEY_TEXTS => $this->textsPrepared($params),
+            self::KEY_RAW_SQL => is_string($this->selection) ? $this->selection : '',
+            default => throw new \InvalidArgumentException("Invalid review key: {$this->reviewKey}")
+        };
+    }
+
+    /**
+     * Build prepared SQL for language selection.
+     *
+     * @param array<int, int|string> $params Reference to params array
+     *
+     * @return string SQL fragment
+     */
+    private function langPrepared(array &$params): string
+    {
+        $langId = is_int($this->selection)
+            ? $this->selection
+            : (int) (is_array($this->selection) ? ($this->selection[0] ?? 0) : $this->selection);
+        $params[] = $langId;
+        return " words WHERE WoLgID = ? ";
+    }
+
+    /**
+     * Build prepared SQL for text selection.
+     *
+     * @param array<int, int|string> $params Reference to params array
+     *
+     * @return string SQL fragment
+     */
+    private function textPrepared(array &$params): string
+    {
+        $textId = is_int($this->selection)
+            ? $this->selection
+            : (int) (is_array($this->selection) ? ($this->selection[0] ?? 0) : $this->selection);
+        $params[] = $textId;
+        return " words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ? ";
+    }
+
+    /**
+     * Build prepared SQL for word ID list selection.
+     *
+     * @param array<int, int|string> $params Reference to params array
+     *
+     * @return string SQL fragment
+     */
+    private function wordsPrepared(array &$params): string
+    {
+        $ids = is_array($this->selection) ? $this->selection : [$this->selection];
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        foreach ($ids as $id) {
+            $params[] = (int) $id;
+        }
+        return " words WHERE WoID IN ($placeholders) ";
+    }
+
+    /**
+     * Build prepared SQL for text ID list selection.
+     *
+     * @param array<int, int|string> $params Reference to params array
+     *
+     * @return string SQL fragment
+     */
+    private function textsPrepared(array &$params): string
+    {
+        $ids = is_array($this->selection) ? $this->selection : [$this->selection];
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        foreach ($ids as $id) {
+            $params[] = (int) $id;
+        }
+        return " words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($placeholders) ";
+    }
+
+    /**
      * Get selection as string for URL parameters.
      *
      * @return string Selection as comma-separated string

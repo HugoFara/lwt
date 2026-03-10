@@ -114,60 +114,62 @@ class ReviewService
     }
 
     /**
-     * Get SQL projection for test.
+     * Get SQL projection for test with prepared statement parameters.
      *
      * @param string    $selector  Type of test ('words', 'texts', 'lang', 'text')
      * @param int|int[] $selection Selection value
      *
-     * @return string|null SQL projection string
+     * @return array{sql: string, params: array<int, int>} SQL projection and bound params
+     *
+     * @throws \InvalidArgumentException If selector is invalid
      */
-    public function getReviewSql(string $selector, int|array $selection): ?string
+    public function getReviewSql(string $selector, int|array $selection): array
     {
-        $reviewsql = null;
         switch ($selector) {
             case 'words':
-                // Test words in a list of words ID
-                $idString = is_array($selection) ? implode(",", $selection) : (string)$selection;
-                $reviewsql = " words WHERE WoID IN ($idString) ";
-                // Note: Multi-language validation is done by caller via validateReviewSelection()
-                break;
+                $ids = is_array($selection) ? $selection : [$selection];
+                $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                /** @var array<int, int> $params */
+                $params = array_values(array_map('intval', $ids));
+                return ['sql' => " words WHERE WoID IN ($placeholders) ", 'params' => $params];
             case 'texts':
-                // Test text items from a list of texts ID
-                $idString = is_array($selection) ? implode(",", $selection) : (string)$selection;
-                $reviewsql = " words, word_occurrences
-                WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($idString) ";
-                // Note: Multi-language validation is done by caller via validateReviewSelection()
-                break;
+                $ids = is_array($selection) ? $selection : [$selection];
+                $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                /** @var array<int, int> $params */
+                $params = array_values(array_map('intval', $ids));
+                return [
+                    'sql' => " words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($placeholders) ",
+                    'params' => $params
+                ];
             case 'lang':
-                // Test words from a specific language
                 $langId = is_array($selection) ? ($selection[0] ?? 0) : $selection;
-                $reviewsql = " words WHERE WoLgID = $langId ";
-                break;
+                return ['sql' => " words WHERE WoLgID = ? ", 'params' => [$langId]];
             case 'text':
-                // Test text items from a specific text ID
                 $textId = is_array($selection) ? ($selection[0] ?? 0) : $selection;
-                $reviewsql = " words, word_occurrences
-                WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
-                break;
+                return [
+                    'sql' => " words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ? ",
+                    'params' => [$textId]
+                ];
             default:
                 throw new \InvalidArgumentException(
                     "Invalid selector '$selector': must be 'words', 'texts', 'lang', or 'text'"
                 );
         }
-        return $reviewsql;
     }
 
     /**
      * Validate test selection (check single language).
      *
-     * @param string $reviewsql SQL projection string
+     * @param string             $reviewsql SQL projection string with ? placeholders
+     * @param array<int, int>    $params    Bound parameters for the SQL
      *
      * @return array{valid: bool, langCount: int, error: string|null}
      */
-    public function validateReviewSelection(string $reviewsql): array
+    public function validateReviewSelection(string $reviewsql, array $params = []): array
     {
-        $langCount = (int) Connection::fetchValue(
+        $langCount = (int) Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $reviewsql",
+            $params,
             'cnt'
         );
 
@@ -223,18 +225,19 @@ class ReviewService
         }
 
         if ($selection !== null && $reviewsql !== null) {
-            $testSqlProjection = $this->buildSelectionReviewSql($selection, $reviewsql);
-            if ($testSqlProjection !== null) {
-                $validation = $this->validateReviewSelection($testSqlProjection);
+            $result = $this->buildSelectionReviewSql($selection, $reviewsql);
+            if ($result !== null) {
+                $validation = $this->validateReviewSelection($result['sql'], $result['params']);
                 if ($validation['langCount'] == 1) {
                     $bindings = [];
+                    $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
                     /** @var mixed $nameRawFromQuery */
                     $nameRawFromQuery = Connection::preparedFetchValue(
                         "SELECT LgName
-                        FROM languages, {$testSqlProjection} AND LgID = WoLgID"
-                        . UserScopedQuery::forTablePrepared('words', $bindings) . "
+                        FROM languages, {$result['sql']} AND LgID = WoLgID"
+                        . $userScope . "
                         LIMIT 1",
-                        $bindings,
+                        array_merge($result['params'], $bindings),
                         'LgName'
                     );
                     return is_string($nameRawFromQuery) ? $nameRawFromQuery : 'L2';
@@ -246,52 +249,50 @@ class ReviewService
     }
 
     /**
-     * Build test SQL from selection.
+     * Build test SQL from selection with prepared statement parameters.
      *
      * @param int    $selectionType Selection type (2=words, 3=texts)
      * @param string $selectionData Comma-separated IDs
      *
-     * @return string|null SQL projection string
+     * @return array{sql: string, params: array<int, int>}|null SQL and params, or null
      */
-    public function buildSelectionReviewSql(int $selectionType, string $selectionData): ?string
+    public function buildSelectionReviewSql(int $selectionType, string $selectionData): ?array
     {
         $dataStringArray = explode(",", trim($selectionData, "()"));
         $dataIntArray = array_map('intval', $dataStringArray);
         switch ($selectionType) {
             case 2:
-                $testSql = $this->getReviewSql('words', $dataIntArray);
-                break;
+                return $this->getReviewSql('words', $dataIntArray);
             case 3:
-                $testSql = $this->getReviewSql('texts', $dataIntArray);
-                break;
+                return $this->getReviewSql('texts', $dataIntArray);
             default:
-                // Legacy: raw SQL passed directly
-                // Note: Multi-language validation is done by caller via validateReviewSelection()
-                $testSql = $selectionData;
+                return null;
         }
-        return $testSql;
     }
 
     /**
      * Get test counts (due and total).
      *
-     * @param string $reviewsql SQL projection string
+     * @param string          $reviewsql SQL projection string with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
      *
      * @return array{due: int, total: int}
      */
-    public function getReviewCounts(string $reviewsql): array
+    public function getReviewCounts(string $reviewsql, array $params = []): array
     {
-        $due = (int) Connection::fetchValue(
+        $due = (int) Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
             FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0",
+            $params,
             'cnt'
         );
 
-        $total = (int) Connection::fetchValue(
+        $total = (int) Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
             FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*'",
+            $params,
             'cnt'
         );
 
@@ -301,16 +302,18 @@ class ReviewService
     /**
      * Get tomorrow's test count.
      *
-     * @param string $reviewsql SQL projection string
+     * @param string          $reviewsql SQL projection string with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
      *
      * @return int Number of tests due tomorrow
      */
-    public function getTomorrowReviewCount(string $reviewsql): int
+    public function getTomorrowReviewCount(string $reviewsql, array $params = []): int
     {
-        return (int) Connection::fetchValue(
+        return (int) Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT WoID) AS cnt
             FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*' AND WoTomorrowScore < 0",
+            $params,
             'cnt'
         );
     }
@@ -318,11 +321,12 @@ class ReviewService
     /**
      * Get the next word to test.
      *
-     * @param string $reviewsql SQL projection string
+     * @param string          $reviewsql SQL projection string with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
      *
      * @return array|null Word record or null if none available
      */
-    public function getNextWord(string $reviewsql): ?array
+    public function getNextWord(string $reviewsql, array $params = []): ?array
     {
         $pass = 0;
         while ($pass < 2) {
@@ -338,14 +342,11 @@ class ReviewService
                 ORDER BY WoTodayScore, WoRandom
                 LIMIT 1';
 
-            $res = Connection::query($sql);
-            if ($res instanceof \mysqli_result) {
-                $record = mysqli_fetch_assoc($res);
-                mysqli_free_result($res);
+            $rows = Connection::preparedFetchAll($sql, $params);
+            $record = $rows[0] ?? null;
 
-                if ($record !== null && $record !== false) {
-                    return $record;
-                }
+            if ($record !== null) {
+                return $record;
             }
         }
         return null;
@@ -433,15 +434,17 @@ class ReviewService
     /**
      * Get the language ID from test SQL.
      *
-     * @param string $reviewsql Test SQL projection
+     * @param string          $reviewsql Test SQL projection with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
      *
      * @return int|null Language ID or null
      */
-    public function getLanguageIdFromReviewSql(string $reviewsql): ?int
+    public function getLanguageIdFromReviewSql(string $reviewsql, array $params = []): ?int
     {
         /** @var mixed $langIdRaw */
-        $langIdRaw = Connection::fetchValue(
+        $langIdRaw = Connection::preparedFetchValue(
             "SELECT WoLgID FROM $reviewsql LIMIT 1",
+            $params,
             'WoLgID'
         );
         return is_numeric($langIdRaw) ? (int) $langIdRaw : null;
@@ -592,11 +595,12 @@ class ReviewService
     /**
      * Get words for table test.
      *
-     * @param string $reviewsql SQL projection string
+     * @param string          $reviewsql SQL projection string with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
      *
-     * @return \mysqli_result|bool Query result
+     * @return array<int, array<string, mixed>> Query results as array
      */
-    public function getTableReviewWords(string $reviewsql): \mysqli_result|bool
+    public function getTableReviewWords(string $reviewsql, array $params = []): array
     {
         $sql = "SELECT DISTINCT WoID, WoText, WoTranslation, WoRomanization,
             WoSentence, WoStatus, WoTodayScore AS Score
@@ -604,7 +608,7 @@ class ReviewService
             AND WoTranslation != '' AND WoTranslation != '*'
             ORDER BY WoTodayScore, WoRandom * RAND()";
 
-        return Connection::query($sql);
+        return Connection::preparedFetchAll($sql, $params);
     }
 
     /**
@@ -615,7 +619,7 @@ class ReviewService
      * @param int|null    $langId       Language ID
      * @param int|null    $textId       Text ID
      *
-     * @return array{title: string, property: string, reviewsql: string, counts: array{due: int, total: int}}|null
+     * @return array{title: string, property: string, reviewsql: string, reviewParams: array<int, int>, counts: array{due: int, total: int}}|null
      */
     public function getReviewDataFromParams(
         ?int $selection,
@@ -626,38 +630,42 @@ class ReviewService
         $title = '';
         $property = '';
         $reviewsql = '';
+        /** @var array<int, int> $reviewParams */
+        $reviewParams = [];
 
         if ($selection !== null && $sessTestsql !== null) {
             $property = "selection=$selection";
-            $reviewsqlResult = $this->buildSelectionReviewSql($selection, $sessTestsql);
+            $result = $this->buildSelectionReviewSql($selection, $sessTestsql);
 
-            if ($reviewsqlResult === null) {
+            if ($result === null) {
                 return null;
             }
-            $reviewsql = $reviewsqlResult;
+            $reviewsql = $result['sql'];
+            $reviewParams = $result['params'];
 
-            $validation = $this->validateReviewSelection($reviewsql);
+            $validation = $this->validateReviewSelection($reviewsql, $reviewParams);
             if (!$validation['valid']) {
                 return null;
             }
 
             $bindings = [];
+            $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
             $totalCount = (int) Connection::preparedFetchValue(
-                "SELECT COUNT(DISTINCT WoID) AS cnt FROM $reviewsql"
-                    . UserScopedQuery::forTablePrepared('words', $bindings),
-                $bindings,
+                "SELECT COUNT(DISTINCT WoID) AS cnt FROM $reviewsql" . $userScope,
+                array_merge($reviewParams, $bindings),
                 'cnt'
             );
             $title = 'Selected ' . $totalCount . ' Term' . ($totalCount < 2 ? '' : 's');
 
-            $bindings = [];
+            $bindings2 = [];
+            $userScope2 = UserScopedQuery::forTablePrepared('words', $bindings2);
             /** @var mixed $langNameRaw */
             $langNameRaw = Connection::preparedFetchValue(
                 "SELECT LgName
                 FROM languages, {$reviewsql} AND LgID = WoLgID"
-                . UserScopedQuery::forTablePrepared('words', $bindings) . "
+                . $userScope2 . "
                 LIMIT 1",
-                $bindings,
+                array_merge($reviewParams, $bindings2),
                 'LgName'
             );
             $langName = is_string($langNameRaw) ? $langNameRaw : null;
@@ -666,7 +674,8 @@ class ReviewService
             }
         } elseif ($langId !== null) {
             $property = "lang=$langId";
-            $reviewsql = " words WHERE WoLgID = $langId ";
+            $reviewsql = " words WHERE WoLgID = ? ";
+            $reviewParams = [$langId];
 
             /** @var mixed $langNameRawFromLang */
             $langNameRawFromLang = QueryBuilder::table('languages')
@@ -676,8 +685,8 @@ class ReviewService
             $title = "All Terms in " . $langName;
         } elseif ($textId !== null) {
             $property = "text=$textId";
-            $reviewsql = " words, word_occurrences
-                WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
+            $reviewsql = " words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ? ";
+            $reviewParams = [$textId];
 
             /** @var mixed $titleRaw */
             $titleRaw = QueryBuilder::table('texts')
@@ -690,12 +699,13 @@ class ReviewService
             return null;
         }
 
-        $counts = $this->getReviewCounts($reviewsql);
+        $counts = $this->getReviewCounts($reviewsql, $reviewParams);
 
         return [
             'title' => $title,
             'property' => $property,
             'reviewsql' => $reviewsql,
+            'reviewParams' => $reviewParams,
             'counts' => $counts
         ];
     }

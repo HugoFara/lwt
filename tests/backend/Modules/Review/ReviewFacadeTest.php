@@ -301,28 +301,33 @@ class ReviewFacadeTest extends TestCase
 
     public function testGetTestSqlForLang(): void
     {
-        $sql = $this->facade->getReviewSql(ReviewConfiguration::KEY_LANG, 1);
+        $result = $this->facade->getReviewSql(ReviewConfiguration::KEY_LANG, 1);
 
-        $this->assertIsString($sql);
-        $this->assertStringContainsString('words', $sql);
-        $this->assertStringContainsString('WoLgID = 1', $sql);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('sql', $result);
+        $this->assertArrayHasKey('params', $result);
+        $this->assertStringContainsString('words', $result['sql']);
+        $this->assertStringContainsString('WoLgID = ?', $result['sql']);
+        $this->assertSame([1], $result['params']);
     }
 
     public function testGetTestSqlForText(): void
     {
-        $sql = $this->facade->getReviewSql(ReviewConfiguration::KEY_TEXT, 42);
+        $result = $this->facade->getReviewSql(ReviewConfiguration::KEY_TEXT, 42);
 
-        $this->assertIsString($sql);
-        $this->assertStringContainsString('word_occurrences', $sql);
-        $this->assertStringContainsString('Ti2TxID = 42', $sql);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('word_occurrences', $result['sql']);
+        $this->assertStringContainsString('Ti2TxID = ?', $result['sql']);
+        $this->assertSame([42], $result['params']);
     }
 
     public function testGetTestSqlForWords(): void
     {
-        $sql = $this->facade->getReviewSql(ReviewConfiguration::KEY_WORDS, [1, 2, 3]);
+        $result = $this->facade->getReviewSql(ReviewConfiguration::KEY_WORDS, [1, 2, 3]);
 
-        $this->assertIsString($sql);
-        $this->assertStringContainsString('WoID IN', $sql);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('WoID IN', $result['sql']);
+        $this->assertSame([1, 2, 3], $result['params']);
     }
 
     // ===== Session tests =====
@@ -529,18 +534,19 @@ class ReviewFacadeTest extends TestCase
     {
         // Type 2 = words
         $result = $this->facade->buildSelectionReviewSql(2, '1,2,3');
-        $this->assertIsString($result);
-        $this->assertStringContainsString('WoID IN', $result);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('WoID IN', $result['sql']);
+        $this->assertSame([1, 2, 3], $result['params']);
 
         // Type 3 = texts
         $result = $this->facade->buildSelectionReviewSql(3, '10,20');
-        $this->assertIsString($result);
-        $this->assertStringContainsString('Ti2TxID IN', $result);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('Ti2TxID IN', $result['sql']);
+        $this->assertSame([10, 20], $result['params']);
 
-        // Type 1 = raw SQL (returns as-is)
-        $rawSql = 'words WHERE WoLgID = 1';
-        $result = $this->facade->buildSelectionReviewSql(1, $rawSql);
-        $this->assertEquals($rawSql, $result);
+        // Type 1 = unknown selection type (returns null)
+        $result = $this->facade->buildSelectionReviewSql(1, 'words WHERE WoLgID = 1');
+        $this->assertNull($result);
     }
 
     // ===== Method existence tests =====

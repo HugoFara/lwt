@@ -49,9 +49,16 @@ class WordListService
      *
      * @return string SQL condition
      */
-    public function buildLangCondition(string $langId): string
+    public function buildLangCondition(string $langId, ?array &$params = null): string
     {
-        return ($langId != '') ? (' and WoLgID=' . $langId) : '';
+        if ($langId == '') {
+            return '';
+        }
+        if ($params !== null) {
+            $params[] = (int)$langId;
+            return ' and WoLgID = ?';
+        }
+        return ' and WoLgID=' . (int)$langId;
     }
 
     /**
@@ -178,7 +185,7 @@ class WordListService
      *
      * @return string SQL HAVING clause
      */
-    public function buildTagCondition(string $tag1, string $tag2, string $tag12): string
+    public function buildTagCondition(string $tag1, string $tag2, string $tag12, ?array &$params = null): string
     {
         if ($tag1 == '' && $tag2 == '') {
             return '';
@@ -195,6 +202,9 @@ class WordListService
         if ($tag1Int !== null) {
             if ($tag1Int === -1) {
                 $whTag1 = "group_concat(WtTgID) IS NULL";
+            } elseif ($params !== null) {
+                $whTag1 = "concat('/',group_concat(WtTgID separator '/'),'/') like concat('%/', ?, '/%')";
+                $params[] = $tag1Int;
             } else {
                 $whTag1 = "concat('/',group_concat(WtTgID separator '/'),'/') like '%/" . $tag1Int . "/%'";
             }
@@ -203,6 +213,9 @@ class WordListService
         if ($tag2Int !== null) {
             if ($tag2Int === -1) {
                 $whTag2 = "group_concat(WtTgID) IS NULL";
+            } elseif ($params !== null) {
+                $whTag2 = "concat('/',group_concat(WtTgID separator '/'),'/') like concat('%/', ?, '/%')";
+                $params[] = $tag2Int;
             } else {
                 $whTag2 = "concat('/',group_concat(WtTgID separator '/'),'/') like '%/" . $tag2Int . "/%'";
             }

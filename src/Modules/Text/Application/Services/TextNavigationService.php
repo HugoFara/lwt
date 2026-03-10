@@ -119,17 +119,21 @@ class TextNavigationService
             $wh_tag = '';
         } else {
             if ($currenttag1 != '') {
-                if ($currenttag1 == -1) {
+                $tag1Int = (int)$currenttag1;
+                if ($tag1Int === -1) {
                     $wh_tag1 = "group_concat(TtT2ID) IS NULL";
                 } else {
-                    $wh_tag1 = "concat('/',group_concat(TtT2ID separator '/'),'/') like '%/" . $currenttag1 . "/%'";
+                    $wh_tag1 = "concat('/',group_concat(TtT2ID separator '/'),'/') like concat('%/', ?, '/%')";
+                    $params[] = $tag1Int;
                 }
             }
             if ($currenttag2 != '') {
-                if ($currenttag2 == -1) {
+                $tag2Int = (int)$currenttag2;
+                if ($tag2Int === -1) {
                     $wh_tag2 = "group_concat(TtT2ID) IS NULL";
                 } else {
-                    $wh_tag2 = "concat('/',group_concat(TtT2ID separator '/'),'/') like '%/" . $currenttag2 . "/%'";
+                    $wh_tag2 = "concat('/',group_concat(TtT2ID separator '/'),'/') like concat('%/', ?, '/%')";
+                    $params[] = $tag2Int;
                 }
             }
             if ($currenttag1 != '' && $currenttag2 == '') {

@@ -60,16 +60,17 @@ class ReviewApiHandler implements ApiRoutableInterface
     /**
      * Get the next word to test as structured data.
      *
-     * @param string $reviewsql  SQL projection query
-     * @param bool   $wordMode Test is in word mode
-     * @param int    $testtype Test type
+     * @param string          $reviewsql SQL projection query with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
+     * @param bool            $wordMode  Test is in word mode
+     * @param int             $testtype  Test type
      *
      * @return array{term_id: int|string, solution?: string, term_text: string, group: string, error?: string}
      */
-    public function getWordReviewData(string $reviewsql, bool $wordMode, int $testtype): array
+    public function getWordReviewData(string $reviewsql, array $params, bool $wordMode, int $testtype): array
     {
         try {
-            $wordRecord = $this->reviewFacade->getNextWord($reviewsql);
+            $wordRecord = $this->reviewFacade->getNextWord($reviewsql, $params);
         } catch (\mysqli_sql_exception $e) {
             error_log('Review query failed: ' . $e->getMessage());
             return [
@@ -332,11 +333,11 @@ class ReviewApiHandler implements ApiRoutableInterface
             ];
         }
 
-        $testSql = $this->reviewFacade->getReviewSql(
+        $result = $this->reviewFacade->getReviewSql(
             $reviewKey,
             $this->parseSelection($reviewKey, $selection)
         );
-        if ($testSql === null) {
+        if ($result === null) {
             return [
                 "term_id" => 0,
                 "term_text" => '',
@@ -350,7 +351,8 @@ class ReviewApiHandler implements ApiRoutableInterface
         $typeRaw = $params['type'] ?? 1;
 
         return $this->getWordReviewData(
-            $testSql,
+            $result['sql'],
+            $result['params'],
             filter_var($wordModeRaw, FILTER_VALIDATE_BOOLEAN),
             (int) $typeRaw
         );
@@ -376,15 +378,15 @@ class ReviewApiHandler implements ApiRoutableInterface
             return ["count" => 0];
         }
 
-        $testSql = $this->reviewFacade->getReviewSql(
+        $result = $this->reviewFacade->getReviewSql(
             $reviewKey,
             $this->parseSelection($reviewKey, $selection)
         );
-        if ($testSql === null) {
+        if ($result === null) {
             return ["count" => 0];
         }
         return [
-            "count" => $this->reviewFacade->getTomorrowReviewCount($testSql)
+            "count" => $this->reviewFacade->getTomorrowReviewCount($result['sql'], $result['params'])
         ];
     }
 
@@ -544,18 +546,21 @@ class ReviewApiHandler implements ApiRoutableInterface
 
         /** @var int|int[] $sel */
         $sel = $identifier[1];
-        $reviewsql = $this->reviewFacade->getReviewSql($identifier[0], $sel);
+        $reviewResult = $this->reviewFacade->getReviewSql($identifier[0], $sel);
 
-        if ($reviewsql === null) {
+        if ($reviewResult === null) {
             return ['error' => 'Unable to generate test SQL'];
         }
+
+        $reviewsql = $reviewResult['sql'];
+        $reviewParams = $reviewResult['params'];
 
         $testType = $this->reviewFacade->clampReviewType($testType);
         $wordMode = $this->reviewFacade->isWordMode($testType);
         $baseType = $this->reviewFacade->getBaseReviewType($testType);
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql, $reviewParams);
         if ($langIdFromSql === null) {
             return ['error' => 'No words available for testing'];
         }
@@ -629,20 +634,23 @@ class ReviewApiHandler implements ApiRoutableInterface
         }
 
         $parsedSelection = $this->parseSelection($reviewKey, $selection);
-        $reviewsql = $this->reviewFacade->getReviewSql($reviewKey, $parsedSelection);
+        $reviewResult = $this->reviewFacade->getReviewSql($reviewKey, $parsedSelection);
 
-        if ($reviewsql === null) {
+        if ($reviewResult === null) {
             return ['error' => 'Unable to generate test SQL'];
         }
 
+        $reviewsql = $reviewResult['sql'];
+        $reviewParams = $reviewResult['params'];
+
         // Validate single language
-        $validation = $this->reviewFacade->validateReviewSelection($reviewsql);
+        $validation = $this->reviewFacade->validateReviewSelection($reviewsql, $reviewParams);
         if (!$validation['valid']) {
             return ['error' => $validation['error']];
         }
 
         // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql);
+        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql, $reviewParams);
         if ($langIdFromSql === null) {
             return ['words' => [], 'langSettings' => null];
         }
@@ -660,39 +668,36 @@ class ReviewApiHandler implements ApiRoutableInterface
         );
 
         // Get words
-        $wordsResult = $this->reviewFacade->getTableReviewWords($reviewsql);
+        $wordsResult = $this->reviewFacade->getTableReviewWords($reviewsql, $reviewParams);
         $words = [];
 
-        if ($wordsResult instanceof \mysqli_result) {
-            while ($word = mysqli_fetch_assoc($wordsResult)) {
-                // Format sentence with highlighted word
-                $sent = htmlspecialchars(
-                    ExportService::replaceTabNewline((string)($word['WoSentence'] ?? '')),
-                    ENT_QUOTES,
-                    'UTF-8'
-                );
-                $sentenceHtml = str_replace(
-                    "{",
-                    ' <b>[',
-                    str_replace(
-                        "}",
-                        ']</b> ',
-                        ExportService::maskTermInSentence($sent, $regexWord)
-                    )
-                );
+        foreach ($wordsResult as $word) {
+            // Format sentence with highlighted word
+            $sent = htmlspecialchars(
+                ExportService::replaceTabNewline((string)($word['WoSentence'] ?? '')),
+                ENT_QUOTES,
+                'UTF-8'
+            );
+            $sentenceHtml = str_replace(
+                "{",
+                ' <b>[',
+                str_replace(
+                    "}",
+                    ']</b> ',
+                    ExportService::maskTermInSentence($sent, $regexWord)
+                )
+            );
 
-                $words[] = [
-                    'id' => (int)$word['WoID'],
-                    'text' => $word['WoText'] ?? '',
-                    'translation' => $word['WoTranslation'] ?? '',
-                    'romanization' => $word['WoRomanization'] ?? '',
-                    'sentence' => $sent,
-                    'sentenceHtml' => $sentenceHtml,
-                    'status' => (int)($word['WoStatus'] ?? 1),
-                    'score' => (int)($word['Score'] ?? 0)
-                ];
-            }
-            mysqli_free_result($wordsResult);
+            $words[] = [
+                'id' => (int)$word['WoID'],
+                'text' => $word['WoText'] ?? '',
+                'translation' => $word['WoTranslation'] ?? '',
+                'romanization' => $word['WoRomanization'] ?? '',
+                'sentence' => $sent,
+                'sentenceHtml' => $sentenceHtml,
+                'status' => (int)($word['WoStatus'] ?? 1),
+                'score' => (int)($word['Score'] ?? 0)
+            ];
         }
 
         return [

@@ -1,0 +1,506 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Lwt\Tests\Modules\Vocabulary\Application\Services;
+
+use Lwt\Modules\Vocabulary\Application\Services\WordListService;
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
+
+class WordListServiceTest extends TestCase
+{
+    private WordListService $service;
+
+    protected function setUp(): void
+    {
+        $this->service = new WordListService();
+    }
+
+    // =========================================================================
+    // buildLangCondition()
+    // =========================================================================
+
+    #[Test]
+    public function buildLangConditionReturnsEmptyForEmptyString(): void
+    {
+        $this->assertSame('', $this->service->buildLangCondition(''));
+    }
+
+    #[Test]
+    public function buildLangConditionReturnsConditionWithoutParams(): void
+    {
+        $result = $this->service->buildLangCondition('5');
+        $this->assertSame(' and WoLgID=5', $result);
+    }
+
+    #[Test]
+    public function buildLangConditionCastsToInt(): void
+    {
+        $result = $this->service->buildLangCondition('abc');
+        $this->assertSame(' and WoLgID=0', $result);
+    }
+
+    #[Test]
+    public function buildLangConditionWithParamsUsesPlaceholder(): void
+    {
+        $params = [];
+        $result = $this->service->buildLangCondition('7', $params);
+        $this->assertSame(' and WoLgID = ?', $result);
+        $this->assertSame([7], $params);
+    }
+
+    #[Test]
+    public function buildLangConditionWithParamsEmptyStringReturnsEmpty(): void
+    {
+        $params = [];
+        $result = $this->service->buildLangCondition('', $params);
+        $this->assertSame('', $result);
+        $this->assertSame([], $params);
+    }
+
+    #[Test]
+    public function buildLangConditionWithParamsCastsToInt(): void
+    {
+        $params = [];
+        $result = $this->service->buildLangCondition('abc', $params);
+        $this->assertSame(' and WoLgID = ?', $result);
+        $this->assertSame([0], $params);
+    }
+
+    // =========================================================================
+    // buildStatusCondition()
+    // =========================================================================
+
+    #[Test]
+    public function buildStatusConditionReturnsEmptyForEmptyString(): void
+    {
+        $this->assertSame('', $this->service->buildStatusCondition(''));
+    }
+
+    #[Test]
+    public function buildStatusConditionSingleStatus(): void
+    {
+        $result = $this->service->buildStatusCondition('1');
+        $this->assertSame(' and WoStatus = 1', $result);
+    }
+
+    #[Test]
+    public function buildStatusConditionRange12(): void
+    {
+        $result = $this->service->buildStatusCondition('12');
+        $this->assertSame(' and (WoStatus between 1 and 2)', $result);
+    }
+
+    #[Test]
+    public function buildStatusConditionRange15(): void
+    {
+        $result = $this->service->buildStatusCondition('15');
+        $this->assertSame(' and (WoStatus between 1 and 5)', $result);
+    }
+
+    #[Test]
+    public function buildStatusConditionRange25(): void
+    {
+        $result = $this->service->buildStatusCondition('25');
+        $this->assertSame(' and (WoStatus between 2 and 5)', $result);
+    }
+
+    #[Test]
+    public function buildStatusConditionRange45(): void
+    {
+        $result = $this->service->buildStatusCondition('45');
+        $this->assertSame(' and (WoStatus between 4 and 5)', $result);
+    }
+
+    #[Test]
+    public function buildStatusCondition599(): void
+    {
+        $result = $this->service->buildStatusCondition('599');
+        $this->assertSame(' and WoStatus in (5,99)', $result);
+    }
+
+    #[Test]
+    public function buildStatusConditionIgnored(): void
+    {
+        $result = $this->service->buildStatusCondition('98');
+        $this->assertSame(' and WoStatus = 98', $result);
+    }
+
+    #[Test]
+    public function buildStatusConditionWellKnown(): void
+    {
+        $result = $this->service->buildStatusCondition('99');
+        $this->assertSame(' and WoStatus = 99', $result);
+    }
+
+    // =========================================================================
+    // buildQueryCondition() — with $params (prepared statement path)
+    // =========================================================================
+
+    #[Test]
+    public function buildQueryConditionReturnsEmptyForEmptyQuery(): void
+    {
+        $params = [];
+        $result = $this->service->buildQueryCondition('', 'term', '', $params);
+        $this->assertSame('', $result);
+        $this->assertSame([], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionTermMode(): void
+    {
+        $params = [];
+        $result = $this->service->buildQueryCondition('hello', 'term', '', $params);
+        $this->assertSame(' and (WoText like ?)', $result);
+        $this->assertSame(['hello'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionRomMode(): void
+    {
+        $params = [];
+        $result = $this->service->buildQueryCondition('test', 'rom', '', $params);
+        $this->assertSame(" and (IFNULL(WoRomanization,'*') like ?)", $result);
+        $this->assertSame(['test'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionTranslMode(): void
+    {
+        $params = [];
+        $result = $this->service->buildQueryCondition('meaning', 'transl', '', $params);
+        $this->assertSame(' and (WoTranslation like ?)', $result);
+        $this->assertSame(['meaning'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionTermRomMode(): void
+    {
+        $params = [];
+        $result = $this->service->buildQueryCondition('test', 'term,rom', '', $params);
+        $this->assertSame(" and (WoText like ? or IFNULL(WoRomanization,'*') like ?)", $result);
+        $this->assertSame(['test', 'test'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionRomTranslMode(): void
+    {
+        $params = [];
+        $result = $this->service->buildQueryCondition('test', 'rom,transl', '', $params);
+        $this->assertSame(" and (IFNULL(WoRomanization,'*') like ? or WoTranslation like ?)", $result);
+        $this->assertSame(['test', 'test'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionTermTranslMode(): void
+    {
+        $params = [];
+        $result = $this->service->buildQueryCondition('test', 'term,transl', '', $params);
+        $this->assertSame(' and (WoText like ? or WoTranslation like ?)', $result);
+        $this->assertSame(['test', 'test'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionTermRomTranslMode(): void
+    {
+        $params = [];
+        $result = $this->service->buildQueryCondition('test', 'term,rom,transl', '', $params);
+        $this->assertSame(
+            " and (WoText like ? or IFNULL(WoRomanization,'*') like ? or WoTranslation like ?)",
+            $result
+        );
+        $this->assertSame(['test', 'test', 'test'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionUnknownModeFallsBackToAll(): void
+    {
+        $params = [];
+        $result = $this->service->buildQueryCondition('test', 'unknown', '', $params);
+        $this->assertSame(
+            " and (WoText like ? or IFNULL(WoRomanization,'*') like ? or WoTranslation like ?)",
+            $result
+        );
+        $this->assertSame(['test', 'test', 'test'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionWildcardReplacedWithPercent(): void
+    {
+        $params = [];
+        $this->service->buildQueryCondition('hel*o', 'term', '', $params);
+        $this->assertSame(['hel%o'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionMultipleWildcards(): void
+    {
+        $params = [];
+        $this->service->buildQueryCondition('*hello*', 'term', '', $params);
+        $this->assertSame(['%hello%'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionLowercasesQuery(): void
+    {
+        $params = [];
+        $this->service->buildQueryCondition('HELLO', 'term', '', $params);
+        $this->assertSame(['hello'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionRegexModeUsesRlike(): void
+    {
+        $params = [];
+        $result = $this->service->buildQueryCondition('^test$', 'term', 'r', $params);
+        $this->assertSame(' and (WoText rlike ?)', $result);
+        $this->assertSame(['^test$'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionRegexDoesNotLowercase(): void
+    {
+        $params = [];
+        $this->service->buildQueryCondition('^TEST$', 'term', 'r', $params);
+        // In regex mode, the query is not lowercased (it's used as-is)
+        $this->assertSame(['^TEST$'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionRegexDoesNotReplaceWildcards(): void
+    {
+        $params = [];
+        $this->service->buildQueryCondition('te*st', 'term', 'r', $params);
+        // In regex mode, * is not replaced with %
+        $this->assertSame(['te*st'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionAppendsToExistingParams(): void
+    {
+        $params = [42, 'existing'];
+        $this->service->buildQueryCondition('test', 'term', '', $params);
+        $this->assertSame([42, 'existing', 'test'], $params);
+    }
+
+    #[Test]
+    public function buildQueryConditionUtf8Lowercase(): void
+    {
+        $params = [];
+        $this->service->buildQueryCondition("\xC3\x9Cber", 'term', '', $params);
+        // U+00DC (Latin Capital Letter U with Diaeresis) -> lowercase
+        $this->assertSame(["\xC3\xBCber"], $params);
+    }
+
+    // =========================================================================
+    // buildTagCondition()
+    // =========================================================================
+
+    #[Test]
+    public function buildTagConditionBothEmptyReturnsEmpty(): void
+    {
+        $this->assertSame('', $this->service->buildTagCondition('', '', '0'));
+    }
+
+    #[Test]
+    public function buildTagConditionTag1OnlyWithoutParams(): void
+    {
+        $result = $this->service->buildTagCondition('5', '', '0');
+        $this->assertStringContainsString('having', $result);
+        $this->assertStringContainsString("'%/5/%'", $result);
+    }
+
+    #[Test]
+    public function buildTagConditionTag2OnlyWithoutParams(): void
+    {
+        $result = $this->service->buildTagCondition('', '3', '0');
+        $this->assertStringContainsString('having', $result);
+        $this->assertStringContainsString("'%/3/%'", $result);
+    }
+
+    #[Test]
+    public function buildTagConditionBothTagsWithOr(): void
+    {
+        $result = $this->service->buildTagCondition('5', '3', '0');
+        $this->assertStringContainsString('having', $result);
+        $this->assertStringContainsString(') OR (', $result);
+    }
+
+    #[Test]
+    public function buildTagConditionBothTagsWithAnd(): void
+    {
+        $result = $this->service->buildTagCondition('5', '3', '1');
+        $this->assertStringContainsString('having', $result);
+        $this->assertStringContainsString(') AND (', $result);
+    }
+
+    #[Test]
+    public function buildTagConditionUntaggedTag1(): void
+    {
+        $result = $this->service->buildTagCondition('-1', '', '0');
+        $this->assertStringContainsString('having', $result);
+        $this->assertStringContainsString('group_concat(WtTgID) IS NULL', $result);
+    }
+
+    #[Test]
+    public function buildTagConditionUntaggedTag2(): void
+    {
+        $result = $this->service->buildTagCondition('', '-1', '0');
+        $this->assertStringContainsString('having', $result);
+        $this->assertStringContainsString('group_concat(WtTgID) IS NULL', $result);
+    }
+
+    #[Test]
+    public function buildTagConditionTag1WithParams(): void
+    {
+        $params = [];
+        $result = $this->service->buildTagCondition('5', '', '0', $params);
+        $this->assertStringContainsString('having', $result);
+        $this->assertStringContainsString('?', $result);
+        $this->assertSame([5], $params);
+    }
+
+    #[Test]
+    public function buildTagConditionTag2WithParams(): void
+    {
+        $params = [];
+        $result = $this->service->buildTagCondition('', '8', '0', $params);
+        $this->assertStringContainsString('having', $result);
+        $this->assertStringContainsString('?', $result);
+        $this->assertSame([8], $params);
+    }
+
+    #[Test]
+    public function buildTagConditionBothWithParamsOr(): void
+    {
+        $params = [];
+        $result = $this->service->buildTagCondition('5', '3', '0', $params);
+        $this->assertStringContainsString(') OR (', $result);
+        $this->assertSame([5, 3], $params);
+    }
+
+    #[Test]
+    public function buildTagConditionBothWithParamsAnd(): void
+    {
+        $params = [];
+        $result = $this->service->buildTagCondition('5', '3', '1', $params);
+        $this->assertStringContainsString(') AND (', $result);
+        $this->assertSame([5, 3], $params);
+    }
+
+    #[Test]
+    public function buildTagConditionUntaggedTag1WithParams(): void
+    {
+        $params = [];
+        $result = $this->service->buildTagCondition('-1', '', '0', $params);
+        $this->assertStringContainsString('group_concat(WtTgID) IS NULL', $result);
+        $this->assertSame([], $params); // -1 doesn't add a param
+    }
+
+    #[Test]
+    public function buildTagConditionNonNumericTag1Ignored(): void
+    {
+        $result = $this->service->buildTagCondition('abc', '', '0');
+        $this->assertSame('', $result);
+    }
+
+    #[Test]
+    public function buildTagConditionNonNumericTag2Ignored(): void
+    {
+        $result = $this->service->buildTagCondition('', 'xyz', '0');
+        $this->assertSame('', $result);
+    }
+
+    #[Test]
+    public function buildTagConditionUntaggedBothWithAnd(): void
+    {
+        $params = [];
+        $result = $this->service->buildTagCondition('-1', '-1', '1', $params);
+        $this->assertStringContainsString(') AND (', $result);
+        // Both use IS NULL, no params added
+        $this->assertSame([], $params);
+    }
+
+    #[Test]
+    public function buildTagConditionMixedUntaggedAndTagWithParams(): void
+    {
+        $params = [];
+        $result = $this->service->buildTagCondition('-1', '5', '0', $params);
+        $this->assertStringContainsString('group_concat(WtTgID) IS NULL', $result);
+        $this->assertStringContainsString(') OR (', $result);
+        $this->assertSame([5], $params);
+    }
+
+    // =========================================================================
+    // getTestWordIdsSql()
+    // =========================================================================
+
+    #[Test]
+    public function getTestWordIdsSqlNoTextId(): void
+    {
+        $sql = $this->service->getTestWordIdsSql('', '', ' and WoLgID=1', '', '', '');
+        $this->assertStringContainsString('select distinct WoID', $sql);
+        $this->assertStringContainsString('WoLgID=1', $sql);
+        $this->assertStringNotContainsString('word_occurrences', $sql);
+    }
+
+    #[Test]
+    public function getTestWordIdsSqlWithTextId(): void
+    {
+        $sql = $this->service->getTestWordIdsSql('', '42', '', '', '', '');
+        $this->assertStringContainsString('word_occurrences', $sql);
+        $this->assertStringContainsString('Ti2TxID in (42)', $sql);
+    }
+
+    // =========================================================================
+    // Export SQL methods — verify condition embedding
+    // =========================================================================
+
+    #[Test]
+    public function getAnkiExportSqlWithFilters(): void
+    {
+        $sql = $this->service->getAnkiExportSql(
+            [],
+            '',
+            ' and WoLgID=1',
+            ' and WoStatus = 2',
+            '',
+            ''
+        );
+        $this->assertStringContainsString('WoLgID=1', $sql);
+        $this->assertStringContainsString('WoStatus = 2', $sql);
+    }
+
+    #[Test]
+    public function getTsvExportSqlWithTextId(): void
+    {
+        $sql = $this->service->getTsvExportSql(
+            [],
+            '10',
+            '',
+            '',
+            '',
+            ''
+        );
+        $this->assertStringContainsString('Ti2TxID in (10)', $sql);
+        $this->assertStringContainsString('word_occurrences', $sql);
+    }
+
+    #[Test]
+    public function getFlexibleExportSqlNoTextId(): void
+    {
+        $sql = $this->service->getFlexibleExportSql(
+            [],
+            '',
+            ' and WoLgID=3',
+            '',
+            '',
+            ''
+        );
+        $this->assertStringContainsString('LgExportTemplate', $sql);
+        $this->assertStringContainsString('WoLgID=3', $sql);
+        $this->assertStringNotContainsString('word_occurrences', $sql);
+    }
+}

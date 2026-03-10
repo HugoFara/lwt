@@ -30,6 +30,7 @@ use Lwt\Modules\Review\Domain\ReviewSession;
 use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Review\Infrastructure\MySqlReviewRepository;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
+use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 
 /**
@@ -121,18 +122,20 @@ class ReviewFacade
     }
 
     /**
-     * Get SQL projection for test.
+     * Get SQL projection for test with prepared statement parameters.
      *
      * @param string    $selector  Type of test
      * @param int|int[] $selection Selection value
      *
-     * @return string|null SQL projection string
+     * @return array{sql: string, params: array<int, int|string>}|null SQL and params, or null
      */
-    public function getReviewSql(string $selector, int|array $selection): ?string
+    public function getReviewSql(string $selector, int|array $selection): ?array
     {
         $config = new ReviewConfiguration($selector, $selection);
         try {
-            return $config->toSqlProjection();
+            $params = [];
+            $sql = $config->toSqlProjectionPrepared($params);
+            return ['sql' => $sql, 'params' => $params];
         } catch (\InvalidArgumentException $e) {
             error_log('ReviewFacade::getReviewSql: ' . $e->getMessage());
             return null;
@@ -142,11 +145,12 @@ class ReviewFacade
     /**
      * Validate test selection.
      *
-     * @param string $reviewsql SQL projection string
+     * @param string          $reviewsql SQL projection string with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
      *
      * @return array{valid: bool, langCount: int, error: string|null}
      */
-    public function validateReviewSelection(string $reviewsql): array
+    public function validateReviewSelection(string $reviewsql, array $params = []): array
     {
         // Create a raw SQL config for validation
         $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
@@ -156,11 +160,12 @@ class ReviewFacade
     /**
      * Get test counts.
      *
-     * @param string $reviewsql SQL projection string
+     * @param string          $reviewsql SQL projection string with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
      *
      * @return array{due: int, total: int}
      */
-    public function getReviewCounts(string $reviewsql): array
+    public function getReviewCounts(string $reviewsql, array $params = []): array
     {
         $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         return $this->repository->getReviewCounts($config);
@@ -169,11 +174,12 @@ class ReviewFacade
     /**
      * Get tomorrow's test count.
      *
-     * @param string $reviewsql SQL projection string
+     * @param string          $reviewsql SQL projection string with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
      *
      * @return int
      */
-    public function getTomorrowReviewCount(string $reviewsql): int
+    public function getTomorrowReviewCount(string $reviewsql, array $params = []): int
     {
         $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         $result = $this->getTomorrowCount->execute($config);
@@ -183,11 +189,12 @@ class ReviewFacade
     /**
      * Get the next word to test.
      *
-     * @param string $reviewsql SQL projection string
+     * @param string          $reviewsql SQL projection string with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
      *
      * @return array<string, mixed>|null Word record or null
      */
-    public function getNextWord(string $reviewsql): ?array
+    public function getNextWord(string $reviewsql, array $params = []): ?array
     {
         $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         $word = $this->repository->findNextWordForReview($config);
@@ -276,11 +283,12 @@ class ReviewFacade
     /**
      * Get language ID from test SQL.
      *
-     * @param string $reviewsql Test SQL
+     * @param string          $reviewsql Test SQL with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
      *
      * @return int|null
      */
-    public function getLanguageIdFromReviewSql(string $reviewsql): ?int
+    public function getLanguageIdFromReviewSql(string $reviewsql, array $params = []): ?int
     {
         $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
         return $this->repository->getLanguageIdFromConfig($config);
@@ -357,21 +365,20 @@ class ReviewFacade
     /**
      * Get table test words.
      *
-     * @param string $reviewsql SQL projection
+     * @param string          $reviewsql SQL projection with ? placeholders
+     * @param array<int, int|string> $params    Bound parameters for the SQL
      *
-     * @return \mysqli_result|bool
+     * @return array<int, array<string, mixed>> Query results as array
      */
-    public function getTableReviewWords(string $reviewsql): \mysqli_result|bool
+    public function getTableReviewWords(string $reviewsql, array $params = []): array
     {
-        // For backward compatibility, return raw query result
-        // New code should use getTableWords use case
         $sql = "SELECT DISTINCT WoID, WoText, WoTranslation, WoRomanization,
             WoSentence, WoStatus, WoTodayScore AS Score
             FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*'
             ORDER BY WoTodayScore, WoRandom * RAND()";
 
-        return \Lwt\Shared\Infrastructure\Database\Connection::query($sql);
+        return Connection::preparedFetchAll($sql, $params);
     }
 
     /**
@@ -434,10 +441,14 @@ class ReviewFacade
 
         $counts = $this->repository->getReviewCounts($config);
 
+        $params = [];
+        $reviewsql = $config->toSqlProjectionPrepared($params);
+
         return [
             'title' => $this->buildTitle($config),
             'property' => $config->toUrlProperty(),
-            'reviewsql' => $config->toSqlProjection(),
+            'reviewsql' => $reviewsql,
+            'reviewParams' => $params,
             'counts' => $counts
         ];
     }
@@ -661,14 +672,14 @@ class ReviewFacade
     }
 
     /**
-     * Build selection test SQL.
+     * Build selection test SQL with prepared statement parameters.
      *
      * @param int    $selectionType Selection type
      * @param string $selectionData Comma-separated IDs
      *
-     * @return string|null
+     * @return array{sql: string, params: array<int, int|string>}|null SQL and params, or null
      */
-    public function buildSelectionReviewSql(int $selectionType, string $selectionData): ?string
+    public function buildSelectionReviewSql(int $selectionType, string $selectionData): ?array
     {
         $dataStringArray = explode(',', trim($selectionData, '()'));
         $dataIntArray = array_map('intval', $dataStringArray);
@@ -676,15 +687,17 @@ class ReviewFacade
         $testKey = match ($selectionType) {
             2 => ReviewConfiguration::KEY_WORDS,
             3 => ReviewConfiguration::KEY_TEXTS,
-            default => ReviewConfiguration::KEY_RAW_SQL
+            default => null
         };
 
-        if ($testKey === ReviewConfiguration::KEY_RAW_SQL) {
-            return $selectionData;
+        if ($testKey === null) {
+            return null;
         }
 
         $config = new ReviewConfiguration($testKey, $dataIntArray);
-        return $config->toSqlProjection();
+        $params = [];
+        $sql = $config->toSqlProjectionPrepared($params);
+        return ['sql' => $sql, 'params' => $params];
     }
 
     /**

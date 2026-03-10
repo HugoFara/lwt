@@ -334,7 +334,7 @@ class ReviewControllerTest extends TestCase
         $this->reviewFacade->method('getReviewIdentifier')
             ->willReturn(['lang', 5]);
         $this->reviewFacade->method('getReviewSql')
-            ->willReturn('SELECT * FROM words');
+            ->willReturn(['sql' => ' words WHERE WoLgID = ? ', 'params' => [5]]);
         $this->reviewFacade->method('validateReviewSelection')
             ->willReturn(['valid' => false, 'error' => 'Multiple languages']);
 
@@ -446,7 +446,7 @@ class ReviewControllerTest extends TestCase
         $this->reviewFacade->method('getReviewIdentifier')
             ->willReturn(['lang', 5]);
         $this->reviewFacade->method('getReviewSql')
-            ->willReturn('SELECT * FROM words');
+            ->willReturn(['sql' => ' words WHERE WoLgID = ? ', 'params' => [5]]);
 
         // In table mode, testType is set to 1
         $this->reviewFacade->expects($this->once())
@@ -484,7 +484,7 @@ class ReviewControllerTest extends TestCase
         $this->reviewFacade->method('getReviewIdentifier')
             ->willReturn(['lang', 5]);
         $this->reviewFacade->method('getReviewSql')
-            ->willReturn('SELECT * FROM words');
+            ->willReturn(['sql' => ' words WHERE WoLgID = ? ', 'params' => [5]]);
 
         $this->reviewFacade->expects($this->once())
             ->method('clampReviewType')

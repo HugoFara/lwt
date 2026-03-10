@@ -57,7 +57,7 @@ class ReviewApiHandlerTest extends TestCase
         $this->reviewFacade->method('getNextWord')
             ->willReturn(null);
 
-        $result = $this->handler->getWordReviewData('SELECT 1', false, 1);
+        $result = $this->handler->getWordReviewData('SELECT 1', [], false, 1);
 
         $this->assertSame(0, $result['term_id']);
         $this->assertSame('', $result['term_text']);
@@ -69,7 +69,7 @@ class ReviewApiHandlerTest extends TestCase
         $this->reviewFacade->method('getNextWord')
             ->willReturn([]);
 
-        $result = $this->handler->getWordReviewData('SELECT 1', false, 1);
+        $result = $this->handler->getWordReviewData('SELECT 1', [], false, 1);
 
         $this->assertSame(0, $result['term_id']);
     }
@@ -95,7 +95,7 @@ class ReviewApiHandlerTest extends TestCase
         $this->reviewFacade->method('getTestSolution')
             ->willReturn('prueba');
 
-        $result = $this->handler->getWordReviewData('SELECT 1', true, 1);
+        $result = $this->handler->getWordReviewData('SELECT 1', [], true, 1);
 
         $this->assertSame(123, $result['term_id']);
         $this->assertSame('test', $result['term_text']);
@@ -126,7 +126,7 @@ class ReviewApiHandlerTest extends TestCase
         $this->reviewFacade->method('getTestSolution')
             ->willReturn('prueba');
 
-        $result = $this->handler->getWordReviewData('SELECT 1', false, 1);
+        $result = $this->handler->getWordReviewData('SELECT 1', [], false, 1);
 
         $this->assertSame(123, $result['term_id']);
     }
@@ -158,7 +158,7 @@ class ReviewApiHandlerTest extends TestCase
         $this->reviewFacade->method('getTestSolution')
             ->willReturn('prueba');
 
-        $this->handler->getWordReviewData('SELECT 1', false, 1);
+        $this->handler->getWordReviewData('SELECT 1', [], false, 1);
     }
 
     // =========================================================================
@@ -248,7 +248,7 @@ class ReviewApiHandlerTest extends TestCase
     public function testTomorrowTestCountReturnsFacadeCount(): void
     {
         $this->reviewFacade->method('getReviewSql')
-            ->willReturn('SELECT 1');
+            ->willReturn(['sql' => ' words WHERE WoLgID = ? ', 'params' => [1]]);
         $this->reviewFacade->method('getTomorrowReviewCount')
             ->willReturn(42);
 
@@ -452,6 +452,7 @@ class ReviewApiHandlerTest extends TestCase
             ->willReturn(['counts' => ['due' => 10], 'title' => 'Test', 'property' => '']);
         $this->reviewFacade->method('getReviewIdentifier')
             ->willReturn(['lang', 1]);
+        /** @psalm-suppress InvalidArgument */
         $this->reviewFacade->method('getReviewSql')
             ->willReturn(null);
 
@@ -470,7 +471,7 @@ class ReviewApiHandlerTest extends TestCase
         $this->reviewFacade->method('getReviewIdentifier')
             ->willReturn(['lang', 1]);
         $this->reviewFacade->method('getReviewSql')
-            ->willReturn('SELECT 1');
+            ->willReturn(['sql' => ' words WHERE WoLgID = ? ', 'params' => [1]]);
         $this->reviewFacade->method('clampReviewType')
             ->willReturn(1);
         $this->reviewFacade->method('isWordMode')
@@ -523,7 +524,7 @@ class ReviewApiHandlerTest extends TestCase
     public function testFormatTableWordsReturnsErrorWhenValidationFails(): void
     {
         $this->reviewFacade->method('getReviewSql')
-            ->willReturn('SELECT 1');
+            ->willReturn(['sql' => ' words WHERE WoLgID = ? ', 'params' => [1]]);
         $this->reviewFacade->method('validateReviewSelection')
             ->willReturn(['valid' => false, 'error' => 'Multiple languages selected']);
 
@@ -539,7 +540,7 @@ class ReviewApiHandlerTest extends TestCase
     public function testFormatTableWordsReturnsEmptyWhenNoLanguage(): void
     {
         $this->reviewFacade->method('getReviewSql')
-            ->willReturn('SELECT 1');
+            ->willReturn(['sql' => ' words WHERE WoLgID = ? ', 'params' => [1]]);
         $this->reviewFacade->method('validateReviewSelection')
             ->willReturn(['valid' => true]);
         $this->reviewFacade->method('getLanguageIdFromReviewSql')
