@@ -48,3 +48,4 @@ import './pages/word_upload';
 import './pages/expression_interactable';
 import './pages/word_result_init';
 import './pages/translation_page';
+import './pages/starter_vocab';

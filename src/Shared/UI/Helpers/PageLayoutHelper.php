@@ -92,10 +92,12 @@ class PageLayoutHelper
         $isLanguages = in_array($currentPage, ['languages', 'language-new', 'language-edit']);
         $isAdmin = in_array($currentPage, ['backup', 'settings', 'tts', 'users']);
 
-        $textsActive = $isTexts ? ' is-active' : '';
-        $termsActive = $isTerms ? ' is-active' : '';
-        $languagesActive = $isLanguages ? ' is-active' : '';
+        $textsLinkClass = $isTexts ? ' is-active' : '';
+        $termsLinkClass = $isTerms ? ' is-active' : '';
+        $languagesLinkClass = $isLanguages ? ' is-active' : '';
         $adminActive = $isAdmin ? ' is-active' : '';
+
+        $plusIcon = IconHelper::render('plus', ['alt' => 'Add new', 'size' => 16]);
 
         $base = UrlUtilities::getBasePath();
         $logoUrl = UrlUtilities::url('/assets/images/lwt_icon_48.png');
@@ -150,45 +152,39 @@ class PageLayoutHelper
                 <span class="ml-1">Home</span>
             </a>
 
-            <div class="navbar-item has-dropdown{$textsActive}" :class="{ 'is-active': activeDropdown === 'texts' }">
-                <a class="navbar-link" @click.prevent="toggleDropdown('texts')">
-                    {$textsIcon}
-                    <span class="ml-1">Texts</span>
-                </a>
-                <div class="navbar-dropdown">
-                    <a class="navbar-item" href="{$base}/texts">Texts</a>
-                    <a class="navbar-item" href="{$base}/text/archived">Archived Texts</a>
-                    <hr class="navbar-divider">
-                    <a class="navbar-item" href="{$base}/tags/text">Text Tags</a>
-                    <a class="navbar-item" href="{$base}/text/check">Text Check</a>
-                    <hr class="navbar-divider">
-                    <a class="navbar-item" href="{$base}/feeds">Newsfeed Import</a>
+            <div class="navbar-item">
+                <div class="buttons has-addons mb-0">
+                    <a class="button is-small{$textsLinkClass}" href="{$base}/texts">
+                        <span class="icon is-small">{$textsIcon}</span>
+                        <span>Texts</span>
+                    </a>
+                    <a class="button is-small" href="{$base}/texts/new" title="New Text">
+                        <span class="icon is-small">{$plusIcon}</span>
+                    </a>
                 </div>
             </div>
 
-            <div class="navbar-item has-dropdown{$termsActive}" :class="{ 'is-active': activeDropdown === 'terms' }">
-                <a class="navbar-link" @click.prevent="toggleDropdown('terms')">
-                    {$termsIcon}
-                    <span class="ml-1">Terms</span>
-                </a>
-                <div class="navbar-dropdown">
-                    <a class="navbar-item" href="{$base}/words/edit">Terms</a>
-                    <a class="navbar-item" href="{$base}/tags">Term Tags</a>
-                    <hr class="navbar-divider">
-                    <a class="navbar-item" href="{$base}/word/upload">Import Terms</a>
+            <div class="navbar-item">
+                <div class="buttons has-addons mb-0">
+                    <a class="button is-small{$termsLinkClass}" href="{$base}/words/edit">
+                        <span class="icon is-small">{$termsIcon}</span>
+                        <span>Terms</span>
+                    </a>
+                    <a class="button is-small" href="{$base}/word/upload" title="Import Terms">
+                        <span class="icon is-small">{$plusIcon}</span>
+                    </a>
                 </div>
             </div>
 
-            <div class="navbar-item has-dropdown{$languagesActive}"
-                :class="{ 'is-active': activeDropdown === 'languages' }">
-                <a class="navbar-link" @click.prevent="toggleDropdown('languages')">
-                    {$languagesIcon}
-                    <span class="ml-1">Languages</span>
-                </a>
-                <div class="navbar-dropdown">
-                    <a class="navbar-item" href="{$base}/languages">Languages</a>
-                    <hr class="navbar-divider">
-                    <a class="navbar-item" href="{$base}/languages/new">Add New Language</a>
+            <div class="navbar-item">
+                <div class="buttons has-addons mb-0">
+                    <a class="button is-small{$languagesLinkClass}" href="{$base}/languages">
+                        <span class="icon is-small">{$languagesIcon}</span>
+                        <span>Languages</span>
+                    </a>
+                    <a class="button is-small" href="{$base}/languages/new" title="New Language">
+                        <span class="icon is-small">{$plusIcon}</span>
+                    </a>
                 </div>
             </div>
 
@@ -491,6 +487,11 @@ HTML;
         // Feed pages
         if (str_starts_with($path, '/feed')) {
             return ['feed'];
+        }
+
+        // Starter vocab page (under /languages but needs vocabulary module)
+        if (preg_match('#^/languages/\d+/starter-vocab#', $path)) {
+            return ['vocabulary', 'language'];
         }
 
         // Language pages

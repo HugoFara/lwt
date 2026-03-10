@@ -2590,6 +2590,22 @@ Navigation Bar Styles (Alpine.js + Bulma)
   }
 }
 
+/* Navbar split-button groups */
+.navbar .buttons.has-addons {
+  flex-wrap: nowrap;
+}
+
+.navbar .buttons.has-addons .button.is-active {
+  background-color: var(--bulma-primary, #485fc7);
+  border-color: var(--bulma-primary, #485fc7);
+  color: #fff;
+}
+
+.navbar .buttons.has-addons .button.is-active:hover {
+  background-color: var(--bulma-primary-dark, #3a51bb);
+  border-color: var(--bulma-primary-dark, #3a51bb);
+}
+
 /**************************************************************
 Action Card Styles (Alpine.js + Bulma)
 ***************************************************************/

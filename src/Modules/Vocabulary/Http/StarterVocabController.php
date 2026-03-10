@@ -63,6 +63,7 @@ class StarterVocabController extends BaseController
         $importUrl = url('/languages/' . $id . '/starter-vocab/import');
         $enrichUrl = url('/languages/' . $id . '/starter-vocab/enrich');
         $csrfToken = FormHelper::csrfToken();
+        $curatedDictionaries = $this->loadCuratedDictionariesForLanguage($langName);
 
         PageLayoutHelper::renderPageStart('Starter Vocabulary', true);
         include __DIR__ . '/../Views/starter_vocab.php';
@@ -156,6 +157,41 @@ class StarterVocabController extends BaseController
             'total' => $result['total'],
             'warning' => $result['warning'],
         ]);
+    }
+
+    /**
+     * Load curated dictionaries filtered for a specific language.
+     *
+     * @param string $langName Language name (e.g., "German", "French")
+     *
+     * @return list<array<string, mixed>> Matching dictionary groups
+     */
+    private function loadCuratedDictionariesForLanguage(string $langName): array
+    {
+        $path = dirname(__DIR__, 4) . '/data/curated_dictionaries.json';
+        if (!file_exists($path)) {
+            return [];
+        }
+        $json = file_get_contents($path);
+        if ($json === false) {
+            return [];
+        }
+        $data = json_decode($json, true);
+        if (!is_array($data) || !isset($data['dictionaries'])) {
+            return [];
+        }
+
+        $langLower = strtolower($langName);
+        $result = [];
+        /** @var array<string, mixed> $group */
+        foreach ($data['dictionaries'] as $group) {
+            $groupName = strtolower((string) ($group['languageName'] ?? ''));
+            if ($groupName === $langLower || str_contains($groupName, $langLower) || str_contains($langLower, $groupName)) {
+                $result[] = $group;
+            }
+        }
+
+        return $result;
     }
 
     /**
