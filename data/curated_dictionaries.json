@@ -1,464 +1,448 @@
 {
-  "_comment": "Curated dictionary files for language learning. Each entry links to a downloadable dictionary with tested import settings.",
-  "_lastVerified": "2026-03-10",
-  "dictionaries": [
-    {
-      "language": "ar",
-      "languageName": "Arabic",
-      "sources": [
+    "_comment": "Curated dictionary files for language learning. Each entry links to a downloadable dictionary with tested import settings.",
+    "_lastVerified": "2026-03-10",
+    "dictionaries": [
         {
-          "name": "FreeDict Arabic-English",
-          "url": "https://freedict.org/downloads/#702e5024",
-          "format": "stardict",
-          "entries": "~6,200",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
+            "language": "ar",
+            "languageName": "Arabic",
+            "sources": [
+                {
+                    "name": "FreeDict Arabic-English",
+                    "url": "https://freedict.org/downloads/#702e5024",
+                    "format": "stardict",
+                    "entries": "~6,200",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                }
+            ]
         },
         {
-          "name": "WikDict Arabic-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/ar-en.tar.gz",
-          "format": "stardict",
-          "entries": "~11,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
+            "language": "de",
+            "languageName": "German",
+            "sources": [
+                {
+                    "name": "WikDict German-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-de-en.zip",
+                    "format": "stardict",
+                    "entries": "~96,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "FreeDict German-English",
+                    "url": "https://freedict.org/downloads/#deu-eng",
+                    "format": "stardict",
+                    "entries": "~230,000",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                },
+                {
+                    "name": "Wiktionary German-English",
+                    "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
+                    "format": "stardict",
+                    "entries": "~90,000",
+                    "license": "CC BY-SA",
+                    "notes": "Download kaikki-de-en.zip from latest release, extract .ifo file"
+                }
+            ]
+        },
+        {
+            "language": "el",
+            "languageName": "Greek",
+            "sources": [
+                {
+                    "name": "FreeDict Greek-English",
+                    "url": "https://freedict.org/downloads/#ell-eng",
+                    "format": "stardict",
+                    "entries": "~18,000",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                },
+                {
+                    "name": "WikDict Greek-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-el-en.zip",
+                    "format": "stardict",
+                    "entries": "~14,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                }
+            ]
+        },
+        {
+            "language": "en",
+            "languageName": "English",
+            "sources": [
+                {
+                    "name": "WikDict English-French",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-en-fr.zip",
+                    "format": "stardict",
+                    "entries": "~127,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "WikDict English-German",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-en-de.zip",
+                    "format": "stardict",
+                    "entries": "~96,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "WikDict English-Spanish",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-en-es.zip",
+                    "format": "stardict",
+                    "entries": "~75,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                }
+            ]
+        },
+        {
+            "language": "es",
+            "languageName": "Spanish",
+            "sources": [
+                {
+                    "name": "WikDict Spanish-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-es-en.zip",
+                    "format": "stardict",
+                    "entries": "~75,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "FreeDict Spanish-English",
+                    "url": "https://freedict.org/downloads/#spa-eng",
+                    "format": "stardict",
+                    "entries": "~28,000",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                },
+                {
+                    "name": "Wiktionary Spanish-English",
+                    "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
+                    "format": "stardict",
+                    "entries": "~60,000",
+                    "license": "CC BY-SA",
+                    "notes": "Download kaikki-es-en.zip from latest release, extract .ifo file"
+                }
+            ]
+        },
+        {
+            "language": "fr",
+            "languageName": "French",
+            "sources": [
+                {
+                    "name": "WikDict French-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-fr-en.zip",
+                    "format": "stardict",
+                    "entries": "~127,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "FreeDict French-English",
+                    "url": "https://freedict.org/downloads/#fra-eng",
+                    "format": "stardict",
+                    "entries": "~12,000",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                },
+                {
+                    "name": "Wiktionary French-English",
+                    "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
+                    "format": "stardict",
+                    "entries": "~80,000",
+                    "license": "CC BY-SA",
+                    "notes": "Download kaikki-fr-en.zip from latest release, extract .ifo file"
+                }
+            ]
+        },
+        {
+            "language": "hi",
+            "languageName": "Hindi",
+            "sources": [
+                {
+                    "name": "FreeDict Hindi-English",
+                    "url": "https://freedict.org/downloads/#hin-eng",
+                    "format": "stardict",
+                    "entries": "~26,000",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                },
+                {
+                    "name": "Wiktionary Hindi-English",
+                    "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
+                    "format": "stardict",
+                    "entries": "~8,000",
+                    "license": "CC BY-SA",
+                    "notes": "Download kaikki-hi-en.zip from latest release, extract .ifo file"
+                }
+            ]
+        },
+        {
+            "language": "it",
+            "languageName": "Italian",
+            "sources": [
+                {
+                    "name": "WikDict Italian-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-it-en.zip",
+                    "format": "stardict",
+                    "entries": "~56,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "FreeDict Italian-English",
+                    "url": "https://freedict.org/downloads/#ita-eng",
+                    "format": "stardict",
+                    "entries": "~8,700",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                }
+            ]
+        },
+        {
+            "language": "ja",
+            "languageName": "Japanese",
+            "sources": [
+                {
+                    "name": "JMdict (Japanese-English)",
+                    "url": "http://www.edrdg.org/jmdict/edict.html",
+                    "format": "stardict",
+                    "entries": "~214,000",
+                    "license": "CC BY-SA",
+                    "notes": "Multiple StarDict versions available on the Internet Archive or via Wiktionary Dictionaries repo"
+                },
+                {
+                    "name": "WikDict Japanese-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-ja-en.zip",
+                    "format": "stardict",
+                    "entries": "~21,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "Wiktionary Japanese-English",
+                    "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
+                    "format": "stardict",
+                    "entries": "~30,000",
+                    "license": "CC BY-SA",
+                    "notes": "Download kaikki-ja-en.zip from latest release, extract .ifo file"
+                }
+            ]
+        },
+        {
+            "language": "ko",
+            "languageName": "Korean",
+            "sources": [
+                {
+                    "name": "Wiktionary Korean-English",
+                    "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
+                    "format": "stardict",
+                    "entries": "~12,000",
+                    "license": "CC BY-SA",
+                    "notes": "Download kaikki-ko-en.zip from latest release, extract .ifo file"
+                }
+            ]
+        },
+        {
+            "language": "nl",
+            "languageName": "Dutch",
+            "sources": [
+                {
+                    "name": "WikDict Dutch-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-nl-en.zip",
+                    "format": "stardict",
+                    "entries": "~48,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "FreeDict Dutch-English",
+                    "url": "https://freedict.org/downloads/#nld-eng",
+                    "format": "stardict",
+                    "entries": "~24,000",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                }
+            ]
+        },
+        {
+            "language": "pl",
+            "languageName": "Polish",
+            "sources": [
+                {
+                    "name": "WikDict Polish-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-pl-en.zip",
+                    "format": "stardict",
+                    "entries": "~24,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "FreeDict Polish-English",
+                    "url": "https://freedict.org/downloads/#pol-eng",
+                    "format": "stardict",
+                    "entries": "~6,600",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                }
+            ]
+        },
+        {
+            "language": "pt",
+            "languageName": "Portuguese",
+            "sources": [
+                {
+                    "name": "WikDict Portuguese-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-pt-en.zip",
+                    "format": "stardict",
+                    "entries": "~31,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "FreeDict Portuguese-English",
+                    "url": "https://freedict.org/downloads/#por-eng",
+                    "format": "stardict",
+                    "entries": "~5,600",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                }
+            ]
+        },
+        {
+            "language": "ru",
+            "languageName": "Russian",
+            "sources": [
+                {
+                    "name": "WikDict Russian-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-ru-en.zip",
+                    "format": "stardict",
+                    "entries": "~50,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "FreeDict Russian-English",
+                    "url": "https://freedict.org/downloads/#rus-eng",
+                    "format": "stardict",
+                    "entries": "~8,600",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                },
+                {
+                    "name": "Wiktionary Russian-English",
+                    "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
+                    "format": "stardict",
+                    "entries": "~60,000",
+                    "license": "CC BY-SA",
+                    "notes": "Download kaikki-ru-en.zip from latest release, extract .ifo file"
+                }
+            ]
+        },
+        {
+            "language": "sv",
+            "languageName": "Swedish",
+            "sources": [
+                {
+                    "name": "WikDict Swedish-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-sv-en.zip",
+                    "format": "stardict",
+                    "entries": "~40,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "FreeDict Swedish-English",
+                    "url": "https://freedict.org/downloads/#swe-eng",
+                    "format": "stardict",
+                    "entries": "~10,000",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                }
+            ]
+        },
+        {
+            "language": "tr",
+            "languageName": "Turkish",
+            "sources": [
+                {
+                    "name": "WikDict Turkish-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-tr-en.zip",
+                    "format": "stardict",
+                    "entries": "~22,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "FreeDict Turkish-English",
+                    "url": "https://freedict.org/downloads/#tur-eng",
+                    "format": "stardict",
+                    "entries": "~13,000",
+                    "license": "GPL",
+                    "notes": "Download the StarDict version from the FreeDict page"
+                }
+            ]
+        },
+        {
+            "language": "uk",
+            "languageName": "Ukrainian",
+            "sources": [
+                {
+                    "name": "Wiktionary Ukrainian-English",
+                    "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
+                    "format": "stardict",
+                    "entries": "~15,000",
+                    "license": "CC BY-SA",
+                    "notes": "Download kaikki-uk-en.zip from latest release, extract .ifo file"
+                }
+            ]
+        },
+        {
+            "language": "vi",
+            "languageName": "Vietnamese",
+            "sources": [
+                {
+                    "name": "Wiktionary Vietnamese-English",
+                    "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
+                    "format": "stardict",
+                    "entries": "~8,000",
+                    "license": "CC BY-SA",
+                    "notes": "Download kaikki-vi-en.zip from latest release, extract .ifo file"
+                }
+            ]
+        },
+        {
+            "language": "zh",
+            "languageName": "Chinese",
+            "sources": [
+                {
+                    "name": "CC-CEDICT (Chinese-English)",
+                    "url": "https://www.mdbg.net/chinese/dictionary?page=cedict",
+                    "format": "csv",
+                    "entries": "~124,000",
+                    "license": "CC BY-SA",
+                    "notes": "Tab-separated format available. Use TSV import with term column 1, definition column 5"
+                },
+                {
+                    "name": "WikDict Chinese-English",
+                    "url": "https://download.wikdict.com/dictionaries/stardict/wikdict-zh-en.zip",
+                    "format": "stardict",
+                    "entries": "~24,000",
+                    "license": "CC BY-SA",
+                    "notes": "Direct download ZIP, extract and select the .ifo file"
+                },
+                {
+                    "name": "Wiktionary Chinese-English",
+                    "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
+                    "format": "stardict",
+                    "entries": "~35,000",
+                    "license": "CC BY-SA",
+                    "notes": "Download kaikki-zh-en.zip from latest release, extract .ifo file"
+                }
+            ]
         }
-      ]
-    },
-    {
-      "language": "de",
-      "languageName": "German",
-      "sources": [
-        {
-          "name": "WikDict German-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/de-en.tar.gz",
-          "format": "stardict",
-          "entries": "~96,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "FreeDict German-English",
-          "url": "https://freedict.org/downloads/#deu-eng",
-          "format": "stardict",
-          "entries": "~230,000",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        },
-        {
-          "name": "Wiktionary German-English",
-          "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
-          "format": "stardict",
-          "entries": "~90,000",
-          "license": "CC BY-SA",
-          "notes": "Download kaikki-de-en.zip from latest release, extract .ifo file"
-        }
-      ]
-    },
-    {
-      "language": "el",
-      "languageName": "Greek",
-      "sources": [
-        {
-          "name": "FreeDict Greek-English",
-          "url": "https://freedict.org/downloads/#ell-eng",
-          "format": "stardict",
-          "entries": "~18,000",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        },
-        {
-          "name": "WikDict Greek-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/el-en.tar.gz",
-          "format": "stardict",
-          "entries": "~14,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        }
-      ]
-    },
-    {
-      "language": "en",
-      "languageName": "English",
-      "sources": [
-        {
-          "name": "WikDict English-French",
-          "url": "https://download.wikdict.com/dictionaries/stardict/en-fr.tar.gz",
-          "format": "stardict",
-          "entries": "~127,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "WikDict English-German",
-          "url": "https://download.wikdict.com/dictionaries/stardict/en-de.tar.gz",
-          "format": "stardict",
-          "entries": "~96,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "WikDict English-Spanish",
-          "url": "https://download.wikdict.com/dictionaries/stardict/en-es.tar.gz",
-          "format": "stardict",
-          "entries": "~75,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        }
-      ]
-    },
-    {
-      "language": "es",
-      "languageName": "Spanish",
-      "sources": [
-        {
-          "name": "WikDict Spanish-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/es-en.tar.gz",
-          "format": "stardict",
-          "entries": "~75,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "FreeDict Spanish-English",
-          "url": "https://freedict.org/downloads/#spa-eng",
-          "format": "stardict",
-          "entries": "~28,000",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        },
-        {
-          "name": "Wiktionary Spanish-English",
-          "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
-          "format": "stardict",
-          "entries": "~60,000",
-          "license": "CC BY-SA",
-          "notes": "Download kaikki-es-en.zip from latest release, extract .ifo file"
-        }
-      ]
-    },
-    {
-      "language": "fr",
-      "languageName": "French",
-      "sources": [
-        {
-          "name": "WikDict French-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/fr-en.tar.gz",
-          "format": "stardict",
-          "entries": "~127,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "FreeDict French-English",
-          "url": "https://freedict.org/downloads/#fra-eng",
-          "format": "stardict",
-          "entries": "~12,000",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        },
-        {
-          "name": "Wiktionary French-English",
-          "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
-          "format": "stardict",
-          "entries": "~80,000",
-          "license": "CC BY-SA",
-          "notes": "Download kaikki-fr-en.zip from latest release, extract .ifo file"
-        }
-      ]
-    },
-    {
-      "language": "hi",
-      "languageName": "Hindi",
-      "sources": [
-        {
-          "name": "FreeDict Hindi-English",
-          "url": "https://freedict.org/downloads/#hin-eng",
-          "format": "stardict",
-          "entries": "~26,000",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        },
-        {
-          "name": "Wiktionary Hindi-English",
-          "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
-          "format": "stardict",
-          "entries": "~8,000",
-          "license": "CC BY-SA",
-          "notes": "Download kaikki-hi-en.zip from latest release, extract .ifo file"
-        }
-      ]
-    },
-    {
-      "language": "it",
-      "languageName": "Italian",
-      "sources": [
-        {
-          "name": "WikDict Italian-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/it-en.tar.gz",
-          "format": "stardict",
-          "entries": "~56,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "FreeDict Italian-English",
-          "url": "https://freedict.org/downloads/#ita-eng",
-          "format": "stardict",
-          "entries": "~8,700",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        }
-      ]
-    },
-    {
-      "language": "ja",
-      "languageName": "Japanese",
-      "sources": [
-        {
-          "name": "JMdict (Japanese-English)",
-          "url": "http://www.edrdg.org/jmdict/edict.html",
-          "format": "stardict",
-          "entries": "~214,000",
-          "license": "CC BY-SA",
-          "notes": "Multiple StarDict versions available on the Internet Archive or via Wiktionary Dictionaries repo"
-        },
-        {
-          "name": "WikDict Japanese-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/ja-en.tar.gz",
-          "format": "stardict",
-          "entries": "~21,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "Wiktionary Japanese-English",
-          "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
-          "format": "stardict",
-          "entries": "~30,000",
-          "license": "CC BY-SA",
-          "notes": "Download kaikki-ja-en.zip from latest release, extract .ifo file"
-        }
-      ]
-    },
-    {
-      "language": "ko",
-      "languageName": "Korean",
-      "sources": [
-        {
-          "name": "WikDict Korean-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/ko-en.tar.gz",
-          "format": "stardict",
-          "entries": "~15,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "Wiktionary Korean-English",
-          "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
-          "format": "stardict",
-          "entries": "~12,000",
-          "license": "CC BY-SA",
-          "notes": "Download kaikki-ko-en.zip from latest release, extract .ifo file"
-        }
-      ]
-    },
-    {
-      "language": "nl",
-      "languageName": "Dutch",
-      "sources": [
-        {
-          "name": "WikDict Dutch-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/nl-en.tar.gz",
-          "format": "stardict",
-          "entries": "~48,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "FreeDict Dutch-English",
-          "url": "https://freedict.org/downloads/#nld-eng",
-          "format": "stardict",
-          "entries": "~24,000",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        }
-      ]
-    },
-    {
-      "language": "pl",
-      "languageName": "Polish",
-      "sources": [
-        {
-          "name": "WikDict Polish-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/pl-en.tar.gz",
-          "format": "stardict",
-          "entries": "~24,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "FreeDict Polish-English",
-          "url": "https://freedict.org/downloads/#pol-eng",
-          "format": "stardict",
-          "entries": "~6,600",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        }
-      ]
-    },
-    {
-      "language": "pt",
-      "languageName": "Portuguese",
-      "sources": [
-        {
-          "name": "WikDict Portuguese-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/pt-en.tar.gz",
-          "format": "stardict",
-          "entries": "~31,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "FreeDict Portuguese-English",
-          "url": "https://freedict.org/downloads/#por-eng",
-          "format": "stardict",
-          "entries": "~5,600",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        }
-      ]
-    },
-    {
-      "language": "ru",
-      "languageName": "Russian",
-      "sources": [
-        {
-          "name": "WikDict Russian-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/ru-en.tar.gz",
-          "format": "stardict",
-          "entries": "~50,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "FreeDict Russian-English",
-          "url": "https://freedict.org/downloads/#rus-eng",
-          "format": "stardict",
-          "entries": "~8,600",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        },
-        {
-          "name": "Wiktionary Russian-English",
-          "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
-          "format": "stardict",
-          "entries": "~60,000",
-          "license": "CC BY-SA",
-          "notes": "Download kaikki-ru-en.zip from latest release, extract .ifo file"
-        }
-      ]
-    },
-    {
-      "language": "sv",
-      "languageName": "Swedish",
-      "sources": [
-        {
-          "name": "WikDict Swedish-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/sv-en.tar.gz",
-          "format": "stardict",
-          "entries": "~40,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "FreeDict Swedish-English",
-          "url": "https://freedict.org/downloads/#swe-eng",
-          "format": "stardict",
-          "entries": "~10,000",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        }
-      ]
-    },
-    {
-      "language": "tr",
-      "languageName": "Turkish",
-      "sources": [
-        {
-          "name": "WikDict Turkish-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/tr-en.tar.gz",
-          "format": "stardict",
-          "entries": "~22,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "FreeDict Turkish-English",
-          "url": "https://freedict.org/downloads/#tur-eng",
-          "format": "stardict",
-          "entries": "~13,000",
-          "license": "GPL",
-          "notes": "Download the StarDict version from the FreeDict page"
-        }
-      ]
-    },
-    {
-      "language": "uk",
-      "languageName": "Ukrainian",
-      "sources": [
-        {
-          "name": "Wiktionary Ukrainian-English",
-          "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
-          "format": "stardict",
-          "entries": "~15,000",
-          "license": "CC BY-SA",
-          "notes": "Download kaikki-uk-en.zip from latest release, extract .ifo file"
-        }
-      ]
-    },
-    {
-      "language": "vi",
-      "languageName": "Vietnamese",
-      "sources": [
-        {
-          "name": "Wiktionary Vietnamese-English",
-          "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
-          "format": "stardict",
-          "entries": "~8,000",
-          "license": "CC BY-SA",
-          "notes": "Download kaikki-vi-en.zip from latest release, extract .ifo file"
-        }
-      ]
-    },
-    {
-      "language": "zh",
-      "languageName": "Chinese",
-      "sources": [
-        {
-          "name": "CC-CEDICT (Chinese-English)",
-          "url": "https://www.mdbg.net/chinese/dictionary?page=cedict",
-          "format": "csv",
-          "entries": "~124,000",
-          "license": "CC BY-SA",
-          "notes": "Tab-separated format available. Use TSV import with term column 1, definition column 5"
-        },
-        {
-          "name": "WikDict Chinese-English",
-          "url": "https://download.wikdict.com/dictionaries/stardict/zh-en.tar.gz",
-          "format": "stardict",
-          "entries": "~24,000",
-          "license": "CC BY-SA",
-          "notes": "Direct download, extract and select the .ifo file"
-        },
-        {
-          "name": "Wiktionary Chinese-English",
-          "url": "https://github.com/Vuizur/Wiktionary-Dictionaries/releases",
-          "format": "stardict",
-          "entries": "~35,000",
-          "license": "CC BY-SA",
-          "notes": "Download kaikki-zh-en.zip from latest release, extract .ifo file"
-        }
-      ]
-    }
-  ]
+    ]
 }
