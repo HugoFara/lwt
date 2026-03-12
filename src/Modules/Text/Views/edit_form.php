@@ -94,12 +94,12 @@ if (!$isNew) {
 
 <form class="validate" method="post" enctype="multipart/form-data"
       action="<?php echo $isNew ? '/texts/new' : '/texts#rec' . $textIdTyped; ?>"
-      x-data="{
-          importMode: 'manual',
-          showAdvanced: <?php echo $isNew ? 'false' : 'true'; ?>
-      }"
-      @webpage-imported="importMode = 'manual'"
-      @auto-import-url="importMode = 'url'">
+      <?php if ($isNew) : ?>
+      x-data="textNewForm"
+      @webpage-imported="goToReview()"
+      <?php else : ?>
+      x-data
+      <?php endif; ?>>
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
 
@@ -125,44 +125,46 @@ if (!$isNew) {
             </div>
         </div>
 
-        <!-- Import Method Selection -->
-        <div class="field">
-            <label class="label is-medium">How do you want to add your text?</label>
-            <div class="control">
-                <div class="buttons is-centered" style="flex-wrap: wrap;">
-                    <button type="button"
-                            class="button"
-                            :class="importMode === 'file' ? 'is-primary is-selected' : ''"
-                            @click="importMode = 'file'">
-                        <span class="icon">
-                            <?php echo IconHelper::render('file-up', ['alt' => 'File']); ?>
-                        </span>
-                        <span>Import from file</span>
-                    </button>
-                    <button type="button"
-                            class="button"
-                            :class="importMode === 'manual' ? 'is-primary is-selected' : ''"
-                            @click="importMode = 'manual'">
-                        <span class="icon">
-                            <?php echo IconHelper::render('pencil', ['alt' => 'Manual']); ?>
-                        </span>
-                        <span>Paste text</span>
-                    </button>
-                    <button type="button"
-                            class="button"
-                            :class="importMode === 'url' ? 'is-primary is-selected' : ''"
-                            @click="importMode = 'url'">
-                        <span class="icon">
-                            <?php echo IconHelper::render('link', ['alt' => 'URL']); ?>
-                        </span>
-                        <span>Import from URL</span>
-                    </button>
+        <!-- ═══ STEP 1: Choose Source ═══ -->
+        <div x-show="step === 1" x-transition>
+            <label class="label is-medium mb-3">How do you want to add your text?</label>
+
+            <!-- Source cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem;" class="mb-4">
+                <div class="box has-text-centered p-3 is-clickable" :class="sourceActive('paste')" @click="selectSource('paste')" style="cursor: pointer;">
+                    <span class="icon is-medium has-text-primary">
+                        <?php echo IconHelper::render('pencil', ['alt' => 'Paste']); ?>
+                    </span>
+                    <p class="is-size-7 has-text-weight-medium mt-1">Paste Text</p>
+                </div>
+                <div class="box has-text-centered p-3 is-clickable" :class="sourceActive('url')" @click="selectSource('url')" style="cursor: pointer;">
+                    <span class="icon is-medium has-text-primary">
+                        <?php echo IconHelper::render('globe', ['alt' => 'URL']); ?>
+                    </span>
+                    <p class="is-size-7 has-text-weight-medium mt-1">Web / URL</p>
+                </div>
+                <div class="box has-text-centered p-3 is-clickable" :class="sourceActive('file')" @click="selectSource('file')" style="cursor: pointer;">
+                    <span class="icon is-medium has-text-primary">
+                        <?php echo IconHelper::render('file-up', ['alt' => 'File']); ?>
+                    </span>
+                    <p class="is-size-7 has-text-weight-medium mt-1">Upload File</p>
+                </div>
+                <div class="box has-text-centered p-3 is-clickable" :class="sourceActive('gutenberg')" @click="selectSource('gutenberg')" style="cursor: pointer;">
+                    <span class="icon is-medium has-text-primary">
+                        <?php echo IconHelper::render('book-open-text', ['alt' => 'Gutenberg']); ?>
+                    </span>
+                    <p class="is-size-7 has-text-weight-medium mt-1">Gutenberg</p>
+                </div>
+                <div class="box has-text-centered p-3 is-clickable" :class="sourceActive('feeds')" @click="selectSource('feeds')" style="cursor: pointer;">
+                    <span class="icon is-medium has-text-primary">
+                        <?php echo IconHelper::render('rss', ['alt' => 'Feeds']); ?>
+                    </span>
+                    <p class="is-size-7 has-text-weight-medium mt-1">My Feeds</p>
                 </div>
             </div>
-        </div>
 
         <!-- File Import Section -->
-        <div x-show="importMode === 'file'" x-transition x-cloak class="mt-4" :inert="importMode !== 'file'">
+        <div x-show="source === 'file'" x-transition x-cloak class="mt-4">
             <p class="help mb-4">
                 Text files, EPUB, SRT/VTT subtitles, or audio/video for transcription
             </p>
@@ -177,8 +179,7 @@ if (!$isNew) {
                                name="importFile"
                                id="importFile"
                                accept=".srt,.vtt,.epub,.txt,.mp3,.mp4,.wav,.webm,.ogg,.m4a,.mkv,.flac"
-                               @change="$el.closest('.file').querySelector('.file-name').textContent =
-                                   $el.files[0]?.name || 'No file selected'" />
+                               @change="handleFileChange($event)" />
                         <span class="file-cta">
                             <span class="file-icon">
                                 <?php echo IconHelper::render('file-up', ['alt' => 'Upload']); ?>
@@ -274,45 +275,18 @@ if (!$isNew) {
                     <span>Whisper transcription is not available. Please ensure the NLP service is running.</span>
                 </span>
             </div>
-        </div>
 
-        <!-- Manual Text Entry Section -->
-        <div x-show="importMode === 'manual'" x-transition class="mt-4" :inert="importMode !== 'manual'">
-            <!-- Title -->
-            <div class="field">
-                <label class="label" for="TxTitle">Title</label>
-                <div class="control">
-                    <input type="text"
-                           class="input notempty checkoutsidebmp"
-                           data_info="Title"
-                           name="TxTitle"
-                           id="TxTitle"
-                           value="<?php echo \htmlspecialchars($textTitle, ENT_QUOTES, 'UTF-8'); ?>"
-                           maxlength="200"
-                           placeholder="Enter a title"
-                           required />
-                </div>
-            </div>
-
-            <!-- Text Content -->
-            <div class="field">
-                <label class="label" for="TxText">Text</label>
-                <div class="control">
-                    <textarea <?php echo $scrdirTyped; ?>
-                              name="TxText"
-                              id="TxText"
-                              class="textarea notempty checkoutsidebmp"
-                              data_info="Text"
-                              rows="10"
-                              placeholder="Paste your text here..."
-                              required><?php echo \htmlspecialchars($textContent, ENT_QUOTES, 'UTF-8'); ?></textarea>
-                </div>
+            <!-- Next: Review -->
+            <div class="field mt-4">
+                <button type="button" class="button is-primary is-fullwidth" @click="goToReview()">
+                    <span>Next: Review</span>
+                    <span class="icon"><?php echo IconHelper::render('arrow-right', ['alt' => 'Next']); ?></span>
+                </button>
             </div>
         </div>
 
         <!-- URL Import Section -->
-        <div x-show="importMode === 'url'" x-transition x-cloak class="mt-4"
-             :inert="importMode !== 'url'"
+        <div x-show="source === 'url'" x-transition x-cloak class="mt-4"
              x-data="{ urlSubMode: 'webpage' }">
 
             <!-- Sub-mode toggle: Web page vs Video -->
@@ -396,26 +370,254 @@ if (!$isNew) {
             </div>
         </div>
 
-        <!-- Save Button -->
-        <div class="field mt-5">
-            <div class="control">
-                <button type="submit" name="op" value="Save and Open" class="button is-primary is-medium is-fullwidth">
-                    <span class="icon">
-                        <?php echo IconHelper::render('book-open', ['alt' => 'Save and Open']); ?>
+        <!-- Gutenberg Browser Section -->
+        <div x-show="source === 'gutenberg'" x-transition x-cloak class="mt-4">
+            <div x-data="gutenbergBrowser">
+                <p class="help mb-4">
+                    Browse popular books from Project Gutenberg for your selected language.
+                </p>
+
+                <!-- No language & no books -->
+                <div x-show="showPlaceholder()" class="notification is-warning is-light">
+                    Please select a language above to browse Gutenberg books.
+                </div>
+
+                <!-- Loading state -->
+                <div x-show="loading && books.length === 0" class="has-text-centered py-4">
+                    <span class="icon is-large has-text-grey-light">
+                        <i data-lucide="loader" style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
                     </span>
-                    <span>Save &amp; Start Reading</span>
-                </button>
+                </div>
+
+                <!-- Error -->
+                <div x-show="error" class="notification is-danger is-light is-size-7" x-text="error"></div>
+
+                <!-- Books grid -->
+                <div x-show="books.length > 0"
+                     style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
+                    <template x-for="book in books" :key="book.id">
+                        <div class="box p-3" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 140px;">
+                            <div>
+                                <p class="has-text-weight-semibold is-size-7" x-text="book.title"
+                                   style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"></p>
+                                <span x-show="book.difficultyTier"
+                                      class="tag is-rounded mb-1" style="font-size: 0.65rem;"
+                                      :class="bookTierClass(book)"
+                                      x-text="bookTierLabel(book)"></span>
+                                <p class="has-text-grey is-size-7" x-text="formatAuthors(book.authors)"
+                                   style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></p>
+                            </div>
+                            <div class="mt-2">
+                                <button type="button" @click="importBook(book)"
+                                        class="button is-primary is-small is-fullwidth"
+                                        :class="importingClass(book)"
+                                        :disabled="isImporting()">
+                                    <span class="icon"><i data-lucide="download"></i></span>
+                                    <span>Import</span>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Load more -->
+                <div x-show="hasMore && books.length > 0" class="has-text-centered mt-3">
+                    <button type="button" @click="loadMore()"
+                            class="button is-small is-light"
+                            :class="loadingClass()"
+                            :disabled="loading">
+                        <span class="icon"><i data-lucide="chevron-right"></i></span>
+                        <span>Load more</span>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Cancel link -->
-        <div class="has-text-centered mt-3">
-            <a href="/" class="has-text-grey">Cancel</a>
+        <!-- Feed Browser Section -->
+        <div x-show="source === 'feeds'" x-transition x-cloak class="mt-4">
+            <div x-data="feedBrowser">
+                <p class="help mb-4">
+                    Browse articles from your configured newsfeeds.
+                    <a href="/feeds/wizard">Set up a new feed</a> if you don't have any yet.
+                </p>
+
+                <!-- Loading feeds -->
+                <div x-show="loadingFeeds" class="has-text-centered py-4">
+                    <span class="icon is-large has-text-grey-light">
+                        <i data-lucide="loader" style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
+                    </span>
+                </div>
+
+                <!-- Error -->
+                <div x-show="error" class="notification is-danger is-light is-size-7" x-text="error"></div>
+
+                <!-- Feed list (when no feed selected) -->
+                <div x-show="!selectedFeed && !loadingFeeds">
+                    <template x-if="showEmptyFeeds()">
+                        <div class="notification is-info is-light">
+                            <p>No feeds configured yet.</p>
+                            <a href="/feeds/wizard" class="button is-info is-small mt-2">
+                                <span class="icon"><i data-lucide="plus"></i></span>
+                                <span>Add a feed</span>
+                            </a>
+                        </div>
+                    </template>
+
+                    <div x-show="feeds.length > 0" class="menu">
+                        <template x-for="feed in feeds" :key="feed.id">
+                            <a class="box p-3 mb-2 is-flex is-align-items-center is-justify-content-space-between"
+                               style="cursor: pointer; text-decoration: none;"
+                               @click="selectFeed(feed)">
+                                <div>
+                                    <p class="has-text-weight-semibold is-size-7" x-text="feed.name"></p>
+                                    <p class="has-text-grey is-size-7" x-text="feedInfo(feed)"></p>
+                                </div>
+                                <span class="icon has-text-grey">
+                                    <i data-lucide="chevron-right"></i>
+                                </span>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Article list (when a feed is selected) -->
+                <div x-show="selectedFeed">
+                    <div class="is-flex is-align-items-center mb-3" style="gap: 0.5rem;">
+                        <button type="button" class="button is-small is-light" @click="backToFeeds()">
+                            <span class="icon"><i data-lucide="arrow-left"></i></span>
+                            <span>Back</span>
+                        </button>
+                        <p class="has-text-weight-semibold is-size-6" x-text="selectedFeedName()"></p>
+                    </div>
+
+                    <!-- Loading articles -->
+                    <div x-show="loadingArticles" class="has-text-centered py-4">
+                        <span class="icon has-text-grey-light">
+                            <i data-lucide="loader" style="width: 24px; height: 24px; animation: spin 1s linear infinite;"></i>
+                        </span>
+                    </div>
+
+                    <template x-if="showEmptyArticles()">
+                        <div class="notification is-info is-light is-size-7">
+                            No articles in this feed. Try loading new articles from the
+                            <a href="/feeds">Feeds page</a>.
+                        </div>
+                    </template>
+
+                    <div x-show="articles.length > 0">
+                        <template x-for="article in articles" :key="article.id">
+                            <div class="box p-3 mb-2">
+                                <div class="is-flex is-align-items-start is-justify-content-space-between" style="gap: 0.5rem;">
+                                    <div style="flex: 1; min-width: 0;">
+                                        <p class="has-text-weight-semibold is-size-7" x-text="article.title"
+                                           style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></p>
+                                        <p class="has-text-grey is-size-7" x-text="article.date"></p>
+                                        <span class="tag is-rounded mt-1" style="font-size: 0.6rem;"
+                                              :class="statusClass(article.status)"
+                                              x-text="statusLabel(article.status)"></span>
+                                    </div>
+                                    <button type="button" @click="importArticle(article)"
+                                            class="button is-primary is-small"
+                                            :disabled="isImported(article)">
+                                        <span class="icon"><i data-lucide="download"></i></span>
+                                        <span>Import</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Pagination -->
+                        <div x-show="showPagination()" class="is-flex is-justify-content-center mt-3" style="gap: 0.5rem;">
+                            <button type="button" class="button is-small"
+                                    :disabled="canGoPrev()"
+                                    @click="prevPage()">
+                                <span class="icon"><i data-lucide="chevron-left"></i></span>
+                            </button>
+                            <span class="is-size-7 is-flex is-align-items-center">
+                                Page <span x-text="articlePage" class="mx-1"></span> of <span x-text="articleTotalPages" class="ml-1"></span>
+                            </span>
+                            <button type="button" class="button is-small"
+                                    :disabled="canGoNext()"
+                                    @click="nextPage()">
+                                <span class="icon"><i data-lucide="chevron-right"></i></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        </div><!-- end step 1 -->
+
+        <!-- ═══ STEP 2: Review & Import ═══ -->
+        <div x-show="step === 2" x-transition x-cloak>
+            <!-- Back button -->
+            <div class="is-flex is-align-items-center mb-4" style="gap: 0.5rem;">
+                <button type="button" class="button is-small is-light" @click="goBack()">
+                    <span class="icon"><?php echo IconHelper::render('arrow-left', ['alt' => 'Back']); ?></span>
+                    <span>Back</span>
+                </button>
+                <h3 class="title is-5 mb-0">Review your text</h3>
+            </div>
+
+            <!-- Title -->
+            <div class="field">
+                <label class="label" for="TxTitle">Title</label>
+                <div class="control">
+                    <input type="text"
+                           class="input notempty checkoutsidebmp"
+                           data_info="Title"
+                           name="TxTitle"
+                           id="TxTitle"
+                           value="<?php echo \htmlspecialchars($textTitle, ENT_QUOTES, 'UTF-8'); ?>"
+                           maxlength="200"
+                           placeholder="Enter a title" />
+                </div>
+            </div>
+
+            <!-- Text Content (hidden for file import) -->
+            <div x-show="showTextArea()" class="field">
+                <label class="label" for="TxText">Text</label>
+                <div class="control">
+                    <textarea <?php echo $scrdirTyped; ?>
+                              name="TxText"
+                              id="TxText"
+                              class="textarea notempty checkoutsidebmp"
+                              data_info="Text"
+                              rows="10"
+                              placeholder="Paste or edit your text here..."><?php echo \htmlspecialchars($textContent, ENT_QUOTES, 'UTF-8'); ?></textarea>
+                </div>
+            </div>
+
+            <!-- File info (shown for file import) -->
+            <div x-show="showFileInfo()" class="notification is-info is-light" x-cloak>
+                <span class="icon-text">
+                    <span class="icon"><?php echo IconHelper::render('file-check', ['alt' => 'File ready']); ?></span>
+                    <span>Your file is ready. Text will be extracted when you save.</span>
+                </span>
+            </div>
+
+            <!-- Save Button -->
+            <div class="field mt-5">
+                <div class="control">
+                    <button type="submit" name="op" value="Save and Open" class="button is-primary is-medium is-fullwidth">
+                        <span class="icon">
+                            <?php echo IconHelper::render('book-open', ['alt' => 'Save and Open']); ?>
+                        </span>
+                        <span>Save &amp; Start Reading</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cancel link -->
+            <div class="has-text-centered mt-3">
+                <a href="/" class="has-text-grey">Cancel</a>
+            </div>
+        </div><!-- end step 2 -->
     </div>
 
-    <!-- Where to find texts (collapsible, for new texts) -->
-    <div class="container mt-5" style="max-width: 600px;">
+    <!-- Where to find texts (step 1 only) -->
+    <div x-show="step === 1" class="container mt-5" style="max-width: 600px;">
         <div class="box" x-data="{ open: false }">
             <header class="is-flex is-align-items-center is-justify-content-space-between is-clickable"
                     @click="open = !open">
@@ -501,8 +703,8 @@ if (!$isNew) {
         </div>
     </div>
 
-    <!-- Additional Options (collapsible, for new texts) -->
-    <div class="container" style="max-width: 600px;">
+    <!-- Additional Options (step 2 only) -->
+    <div x-show="step === 2" x-cloak class="container" style="max-width: 600px;">
         <div class="box" x-data="{ open: showAdvanced }">
             <header class="is-flex is-align-items-center is-justify-content-space-between is-clickable"
                     @click="open = !open">

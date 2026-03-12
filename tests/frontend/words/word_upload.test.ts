@@ -5,7 +5,6 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   wordUploadFormApp,
   wordUploadResultApp,
-  type WordUploadFormConfig,
   type UploadResultConfig
 } from '../../../src/frontend/js/modules/vocabulary/pages/word_upload';
 
@@ -25,67 +24,62 @@ describe('word_upload.ts', () => {
   // ===========================================================================
 
   describe('wordUploadFormApp', () => {
+    /** Create a fake change Event with the given select value. */
+    function fakeSelectEvent(value: string): Event {
+      const select = document.createElement('select');
+      const option = document.createElement('option');
+      option.value = value;
+      select.appendChild(option);
+      select.value = value;
+      return { target: select } as unknown as Event;
+    }
+
     it('initializes with default values', () => {
       const component = wordUploadFormApp();
 
-      expect(component.importMode).toBe(0);
+      expect(component.importMode).toBe('0');
       expect(component.showDelimiter).toBe(false);
-    });
-
-    it('initializes with config values', () => {
-      const config: WordUploadFormConfig = { initialMode: 4 };
-      const component = wordUploadFormApp(config);
-
-      expect(component.importMode).toBe(4);
-    });
-
-    it('init sets showDelimiter based on importMode', () => {
-      const config: WordUploadFormConfig = { initialMode: 5 };
-      const component = wordUploadFormApp(config);
-      component.init();
-
-      expect(component.showDelimiter).toBe(true);
     });
 
     describe('updateImportMode', () => {
       it('shows delimiter for mode 4', () => {
         const component = wordUploadFormApp();
-        component.updateImportMode(4);
+        component.updateImportMode(fakeSelectEvent('4'));
 
-        expect(component.importMode).toBe(4);
+        expect(component.importMode).toBe('4');
         expect(component.showDelimiter).toBe(true);
       });
 
       it('shows delimiter for mode 5', () => {
         const component = wordUploadFormApp();
-        component.updateImportMode(5);
+        component.updateImportMode(fakeSelectEvent('5'));
 
-        expect(component.importMode).toBe(5);
+        expect(component.importMode).toBe('5');
         expect(component.showDelimiter).toBe(true);
       });
 
       it('hides delimiter for modes 0-3', () => {
         const component = wordUploadFormApp();
-        component.updateImportMode(4); // First show it
+        component.updateImportMode(fakeSelectEvent('4')); // First show it
 
-        component.updateImportMode(0);
+        component.updateImportMode(fakeSelectEvent('0'));
         expect(component.showDelimiter).toBe(false);
 
-        component.updateImportMode(1);
+        component.updateImportMode(fakeSelectEvent('1'));
         expect(component.showDelimiter).toBe(false);
 
-        component.updateImportMode(2);
+        component.updateImportMode(fakeSelectEvent('2'));
         expect(component.showDelimiter).toBe(false);
 
-        component.updateImportMode(3);
+        component.updateImportMode(fakeSelectEvent('3'));
         expect(component.showDelimiter).toBe(false);
       });
 
-      it('handles string values', () => {
+      it('handles string values from select', () => {
         const component = wordUploadFormApp();
-        component.updateImportMode('4');
+        component.updateImportMode(fakeSelectEvent('4'));
 
-        expect(component.importMode).toBe(4);
+        expect(component.importMode).toBe('4');
         expect(component.showDelimiter).toBe(true);
       });
     });

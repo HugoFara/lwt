@@ -156,10 +156,7 @@ function checkAutoImport(): void {
       );
     }
 
-    // Auto-trigger the fetch after Alpine updates the DOM
-    setTimeout(() => {
-      fetchWebpage();
-    }, 200);
+    // The auto-import-url event listener will trigger fetchWebpage()
   };
 
   // Alpine dispatches 'alpine:init' before processing, 'alpine:initialized' after
@@ -182,6 +179,11 @@ export function initWebpageImport(): void {
       e.preventDefault();
       fetchWebpage();
     }
+  });
+
+  // Auto-fetch when triggered by Gutenberg/Feed import or auto-import
+  document.addEventListener('auto-import-url', () => {
+    setTimeout(() => fetchWebpage(), 200);
   });
 
   // Check for auto-import from library search

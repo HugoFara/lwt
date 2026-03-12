@@ -294,6 +294,8 @@ This project uses `@alpinejs/csp` (aliased in `vite.config.ts`), which **cannot 
 - Move all logic into component methods: `@click="increment()"`, `@change="updateMode($event)"`
 - Pass config from PHP via `<script type="application/json" id="config-id">` and read it in the component's `init()` method
 
+**Known violations:** Some older views (e.g., `edit_form.php`) still use inline `x-data` object literals and simple inline assignments like `@click="importMode = 'file'"`. These work at runtime because `@alpinejs/csp` actually supports simple property assignments and ternaries — it only breaks on complex expressions like function calls or array methods. New code should still follow the strict pattern above (registered components), but be aware that existing inline patterns may not cause errors.
+
 ### Creating/Editing Themes
 
 1. Create folder `src/frontend/css/themes/your-theme/`
