@@ -73,7 +73,6 @@ if (!$isNew) {
     $actions[] = ['url' => '/texts/new', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'];
     $actions[] = ['url' => '/book/import', 'label' => 'Import EPUB', 'icon' => 'book'];
     $actions[] = ['url' => '/books', 'label' => 'My Books', 'icon' => 'library'];
-    $actions[] = ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'];
     $actions[] = ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'];
 }
 
