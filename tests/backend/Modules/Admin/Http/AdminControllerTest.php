@@ -567,9 +567,6 @@ class AdminControllerTest extends TestCase
             ->method('getAllSettings')
             ->willReturn([]);
 
-        $this->facade->expects($this->once())
-            ->method('getAvailableThemes')
-            ->willReturn(['default']);
 
         ob_start();
         try {
@@ -595,9 +592,6 @@ class AdminControllerTest extends TestCase
             ->method('getAllSettings')
             ->willReturn([]);
 
-        $this->facade->expects($this->once())
-            ->method('getAvailableThemes')
-            ->willReturn([]);
 
         ob_start();
         try {
@@ -620,7 +614,7 @@ class AdminControllerTest extends TestCase
             ->willReturn(['success' => false]);
 
         $this->facade->expects($this->once())->method('getAllSettings')->willReturn([]);
-        $this->facade->expects($this->once())->method('getAvailableThemes')->willReturn([]);
+
 
         ob_start();
         try {
@@ -643,7 +637,7 @@ class AdminControllerTest extends TestCase
             ->willReturn(['success' => true]);
 
         $this->facade->expects($this->once())->method('getAllSettings')->willReturn([]);
-        $this->facade->expects($this->once())->method('getAvailableThemes')->willReturn([]);
+
 
         ob_start();
         try {
@@ -666,7 +660,7 @@ class AdminControllerTest extends TestCase
             ->willReturn(['success' => false]);
 
         $this->facade->expects($this->once())->method('getAllSettings')->willReturn([]);
-        $this->facade->expects($this->once())->method('getAvailableThemes')->willReturn([]);
+
 
         ob_start();
         try {

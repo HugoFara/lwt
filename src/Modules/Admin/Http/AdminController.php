@@ -253,9 +253,6 @@ class AdminController extends BaseController
         // Load current admin settings for the form (used by included view)
         $settings = $this->adminFacade->getAllSettings();
 
-        // Get available themes for the dropdown (used by included view)
-        $themes = $this->adminFacade->getAvailableThemes();
-
         // Render page
         $this->render('Admin Settings', true);
         $this->message($message, true);

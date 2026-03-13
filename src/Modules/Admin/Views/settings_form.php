@@ -3,13 +3,12 @@
 /**
  * Admin Settings Form View
  *
- * Server-wide admin settings: appearance, feed limits, multi-user.
- * User-scoped preferences (reading, review, TTS, pagination) have moved to
- * the user preferences page at /profile/preferences.
+ * Server-wide admin settings: feed limits, multi-user.
+ * User-scoped preferences (reading, review, appearance, TTS, pagination) have
+ * moved to the user preferences page at /profile/preferences.
  *
  * Variables expected:
  * - $settings: array of current settings values
- * - $themes: array of available themes (from ThemeService)
  *
  * PHP version 8.1
  *
@@ -25,7 +24,6 @@ declare(strict_types=1);
 
 namespace Lwt\Views\Admin;
 
-use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
@@ -41,18 +39,6 @@ $settings = array_map(
     is_array($settings ?? null) ? $settings : []
 );
 
-/**
- * @var array<int, array{
- *     name: string,
- *     path: string,
- *     description?: string,
- *     mode?: string,
- *     highlighting?: string,
- *     wordBreaking?: string
- * }> $themes Available themes from ThemeService
- */
-$themes = is_array($themes ?? null) ? $themes : [];
-
 ?>
 
 <!-- Link to user preferences -->
@@ -60,7 +46,7 @@ $themes = is_array($themes ?? null) ? $themes : [];
     <span class="icon-text">
         <?php echo IconHelper::render('settings', ['alt' => 'Preferences']); ?>
         <span class="ml-2">
-            Looking for reading, review, TTS, or pagination settings?
+            Looking for reading, review, appearance, or pagination settings?
             <a href="/profile/preferences"><strong>Go to Preferences</strong></a>
         </span>
     </span>
@@ -69,72 +55,8 @@ $themes = is_array($themes ?? null) ? $themes : [];
 <form class="validate" action="/admin/settings" method="post" data-lwt-settings-form>
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 
-    <!-- Appearance Section -->
-    <div class="card settings-section mb-4" x-data="{ open: false }">
-        <header class="card-header is-clickable" @click="open = !open">
-            <p class="card-header-title">
-                <?php echo IconHelper::render('palette', ['alt' => 'Appearance']); ?>
-                <span class="ml-2">Appearance</span>
-            </p>
-            <button type="button" class="card-header-icon" aria-label="toggle section">
-                <span class="icon">
-                    <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
-                </span>
-            </button>
-        </header>
-        <div class="card-content" x-show="open" x-transition>
-            <?php $currentTheme = htmlspecialchars($settings['set-theme-dir'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-            <div x-data="themeSelector"
-                 data-current-theme="<?php echo $currentTheme; ?>">
-                <div class="field">
-                    <label class="label" for="set-theme-dir">Theme</label>
-                    <div class="field has-addons">
-                        <div class="control is-expanded">
-                            <div class="select is-fullwidth">
-                                <select name="set-theme-dir" id="set-theme-dir" class="notempty" required
-                                        x-model="currentTheme"
-                                        @change="onThemeChange()">
-                                    <?php
-                                    echo SelectOptionsBuilder::forThemes(
-                                        $themes,
-                                        $settings['set-theme-dir']
-                                    );
-                                    ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="box mt-3" x-show="description || highlighting || wordBreaking" x-transition>
-                        <p class="mb-2" x-show="description">
-                            <strong>Description:</strong> <span x-text="description"></span>
-                        </p>
-                        <div class="tags">
-                            <span class="tag" :class="mode === 'dark' ? 'is-dark' : 'is-light'" x-show="mode">
-                                <i data-lucide="sun" style="width:14px;height:14px;margin-right:4px"></i>
-                                <span x-text="mode === 'dark' ? 'Dark Mode' : 'Light Mode'"></span>
-                            </span>
-                            <span class="tag is-info is-light" x-show="highlighting">
-                                <i data-lucide="palette" style="width:14px;height:14px;margin-right:4px"></i>
-                                <span x-text="highlighting"></span>
-                            </span>
-                            <span class="tag is-primary is-light" x-show="wordBreaking">
-                                <i data-lucide="wrap-text" style="width:14px;height:14px;margin-right:4px"></i>
-                                <span x-text="wordBreaking"></span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Newsfeeds Section -->
-    <div class="card settings-section mb-4" x-data="{ open: false }">
+    <div class="card settings-section mb-4" x-data="{ open: true }">
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('rss', ['alt' => 'Newsfeeds']); ?>
@@ -149,7 +71,7 @@ $themes = is_array($themes ?? null) ? $themes : [];
         <div class="card-content" x-show="open" x-transition>
             <div class="field">
                 <label class="label" for="set-max-articles-with-text">
-                    Max Articles <span class="has-text-weight-normal">(with cache)</span>
+                    Maximum Articles <span class="has-text-weight-normal">(with cache)</span>
                 </label>
                 <div class="field has-addons">
                     <div class="control">
@@ -181,7 +103,7 @@ $themes = is_array($themes ?? null) ? $themes : [];
 
             <div class="field">
                 <label class="label" for="set-max-articles-without-text">
-                    Max Articles <span class="has-text-weight-normal">(no cache)</span>
+                    Maximum Articles <span class="has-text-weight-normal">(no cache)</span>
                 </label>
                 <div class="field has-addons">
                     <div class="control">
@@ -212,7 +134,7 @@ $themes = is_array($themes ?? null) ? $themes : [];
             </div>
 
             <div class="field">
-                <label class="label" for="set-max-texts-per-feed">Max Texts per Feed</label>
+                <label class="label" for="set-max-texts-per-feed">Maximum Texts per Feed</label>
                 <div class="field has-addons">
                     <div class="control">
                         <input class="input notempty posintnumber"
@@ -244,7 +166,7 @@ $themes = is_array($themes ?? null) ? $themes : [];
     </div>
 
     <!-- Multi-User Settings -->
-    <div class="card settings-section mb-5" x-data="{ open: false }">
+    <div class="card settings-section mb-5" x-data="{ open: true }">
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('users', ['alt' => 'Multi-User']); ?>

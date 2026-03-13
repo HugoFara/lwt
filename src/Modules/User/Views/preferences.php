@@ -3,7 +3,7 @@
 /**
  * User Preferences View
  *
- * User-scoped settings for reading, review, TTS, and pagination.
+ * User-scoped settings for appearance, reading, review, TTS, and pagination.
  * In multi-user mode, these are stored per-user in the settings table.
  *
  * Variables expected:
@@ -33,11 +33,83 @@ use Lwt\Shared\UI\Helpers\FormHelper;
  * @var array<string, string> $settings Current user preference values
  * @var string $currentLanguageCode Current language code for TTS (already JSON-encoded)
  * @var string $languageOptions HTML options for language select
+ * @var array<int, array{
+ *     name: string,
+ *     path: string,
+ *     description?: string,
+ *     mode?: string,
+ *     highlighting?: string,
+ *     wordBreaking?: string
+ * }> $themes Available themes from ThemeService
  */
 
 ?>
 <form class="validate" action="/profile/preferences" method="post" data-lwt-settings-form>
     <?php echo FormHelper::csrfField(); ?>
+
+    <!-- Appearance Section -->
+    <div class="card settings-section mb-4" x-data="{ open: false }">
+        <header class="card-header is-clickable" @click="open = !open">
+            <p class="card-header-title">
+                <?php echo IconHelper::render('palette', ['alt' => 'Appearance']); ?>
+                <span class="ml-2">Appearance</span>
+            </p>
+            <button type="button" class="card-header-icon" aria-label="toggle section">
+                <span class="icon">
+                    <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
+                </span>
+            </button>
+        </header>
+        <div class="card-content" x-show="open" x-transition>
+            <?php $currentTheme = htmlspecialchars($settings['set-theme-dir'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+            <div x-data="themeSelector"
+                 data-current-theme="<?php echo $currentTheme; ?>">
+                <div class="field">
+                    <label class="label" for="set-theme-dir">Theme</label>
+                    <div class="field has-addons">
+                        <div class="control is-expanded">
+                            <div class="select is-fullwidth">
+                                <select name="set-theme-dir" id="set-theme-dir" class="notempty" required
+                                        x-model="currentTheme"
+                                        @change="onThemeChange()">
+                                    <?php
+                                    echo SelectOptionsBuilder::forThemes(
+                                        $themes,
+                                        $settings['set-theme-dir']
+                                    );
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="control">
+                            <span class="icon has-text-danger" title="Field must not be empty">
+                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="box mt-3" x-show="description || highlighting || wordBreaking" x-transition>
+                        <p class="mb-2" x-show="description">
+                            <strong>Description:</strong> <span x-text="description"></span>
+                        </p>
+                        <div class="tags">
+                            <span class="tag" :class="mode === 'dark' ? 'is-dark' : 'is-light'" x-show="mode">
+                                <i data-lucide="sun" style="width:14px;height:14px;margin-right:4px"></i>
+                                <span x-text="mode === 'dark' ? 'Dark Mode' : 'Light Mode'"></span>
+                            </span>
+                            <span class="tag is-info is-light" x-show="highlighting">
+                                <i data-lucide="palette" style="width:14px;height:14px;margin-right:4px"></i>
+                                <span x-text="highlighting"></span>
+                            </span>
+                            <span class="tag is-primary is-light" x-show="wordBreaking">
+                                <i data-lucide="wrap-text" style="width:14px;height:14px;margin-right:4px"></i>
+                                <span x-text="wordBreaking"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Read Text Screen Section -->
     <div class="card settings-section mb-4" x-data="{ open: false }">

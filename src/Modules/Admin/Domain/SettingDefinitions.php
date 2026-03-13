@@ -125,9 +125,9 @@ final class SettingDefinitions
             "dft" => '', "num" => 0, "scope" => self::SCOPE_USER
         ],
 
-        // Admin settings: appearance
+        // User preferences: appearance
         'set-theme-dir' => [
-            "dft" => 'themes/default/', "num" => 0, "scope" => self::SCOPE_ADMIN
+            "dft" => 'themes/default/', "num" => 0, "scope" => self::SCOPE_USER
         ],
 
         // Admin settings: feed limits

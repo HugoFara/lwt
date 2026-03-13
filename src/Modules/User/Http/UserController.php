@@ -22,6 +22,7 @@ use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 use Lwt\Modules\Admin\Application\Services\TtsService;
+use Lwt\Modules\Admin\Application\UseCases\Theme\GetAvailableThemes;
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Modules\User\Infrastructure\AuthFormDataManager;
 use Lwt\Shared\Infrastructure\Http\FlashMessageService;
@@ -426,6 +427,9 @@ class UserController extends BaseController
         $success = !empty($successMessages) ? $successMessages[0]['message'] : null;
 
         $settings = $this->userFacade->getUserPreferences();
+
+        // Theme data for appearance section
+        $themes = (new GetAvailableThemes())->execute();
 
         // TTS data
         $ttsService = new TtsService();

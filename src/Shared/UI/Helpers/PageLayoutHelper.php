@@ -585,6 +585,11 @@ HTML;
             return ['admin'];
         }
 
+        // User preferences (needs admin module for theme selector component)
+        if (str_starts_with($path, '/profile/preferences')) {
+            return ['admin'];
+        }
+
         // Home page — everything is in the main bundle
         if ($path === '/') {
             return [];
