@@ -84,11 +84,12 @@ class WebPageExtractor
     /**
      * Extract title and text content from a URL.
      *
-     * @param string $url The URL to fetch and extract from
+     * @param string $url       The URL to fetch and extract from
+     * @param string $titleHint Optional pre-filled title (used as fallback for plain text files)
      *
      * @return array{title: string, text: string, sourceUri: string}|array{error: string}
      */
-    public function extractFromUrl(string $url): array
+    public function extractFromUrl(string $url, string $titleHint = ''): array
     {
         $url = trim($url);
 
@@ -114,7 +115,7 @@ class WebPageExtractor
             $html = $this->stripGutenbergBoilerplate($html);
             $text = $this->unwrapHardLineBreaks($html);
             $text = $this->cleanText($text);
-            $title = $this->titleFromUrl($url);
+            $title = $titleHint !== '' ? $titleHint : $this->titleFromUrl($url);
             return [
                 'title' => $title,
                 'text' => $text,
@@ -542,6 +543,14 @@ class WebPageExtractor
         // Strip footer: everything from the END marker line onward
         $text = (string) preg_replace(
             '/\n\*{3}\s*END OF (?:THE |THIS )?PROJECT GUTENBERG.*\z/si',
+            '',
+            $text
+        );
+
+        // Strip common post-header boilerplate (donation/license notices before actual text)
+        // These lines appear after the START marker but before the real content
+        $text = (string) preg_replace(
+            '/\A\s*(?:This eBook is (?:for the use of|donated to)[^\n]*\n\s*)+/i',
             '',
             $text
         );

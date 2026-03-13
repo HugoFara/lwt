@@ -286,8 +286,9 @@ class TextApiHandler implements ApiRoutableInterface
             if ($url === '') {
                 return Response::error('url parameter is required', 400);
             }
+            $titleHint = (string) ($params['titleHint'] ?? '');
             $extractor = new \Lwt\Shared\Infrastructure\Http\WebPageExtractor();
-            $result = $extractor->extractFromUrl($url);
+            $result = $extractor->extractFromUrl($url, $titleHint);
             if (isset($result['error'])) {
                 return Response::error($result['error'], 422);
             }

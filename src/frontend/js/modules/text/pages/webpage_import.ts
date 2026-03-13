@@ -80,10 +80,14 @@ async function fetchWebpage(): Promise<void> {
   setWebpageStatus('Fetching page content...');
 
   try {
+    // Send the current title as a hint (e.g. pre-filled by Gutenberg/Feed import)
+    const titleInput = document.querySelector<HTMLInputElement>('[name="TxTitle"]');
+    const titleHint = titleInput?.value.trim() || '';
+
     const response = await fetch('/api/v1/texts/extract-url', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, titleHint }),
     });
 
     const result = await response.json();

@@ -483,7 +483,7 @@ if (!$isNew) {
                                         :class="importingClass(book)"
                                         :disabled="isImporting()">
                                     <span class="icon"><i data-lucide="download"></i></span>
-                                    <span>Import</span>
+                                    <span>Preview</span>
                                 </button>
                             </div>
                         </div>
@@ -590,7 +590,7 @@ if (!$isNew) {
                                             class="button is-primary is-small"
                                             :disabled="isImported(article)">
                                         <span class="icon"><i data-lucide="download"></i></span>
-                                        <span>Import</span>
+                                        <span>Preview</span>
                                     </button>
                                 </div>
                             </div>
