@@ -161,6 +161,7 @@ export function wordListData(): WordListData {
       await this.loadFilterOptions();
       await this.loadWords();
       this.loading = false;
+      this.updatePageTitle();
 
       // Refresh icons after render
       setTimeout(() => {
@@ -212,6 +213,7 @@ export function wordListData(): WordListData {
       if (key === 'lang') {
         this.filters.text_id = null;
         this.loadFilterOptions();
+        this.updatePageTitle();
       }
     },
 

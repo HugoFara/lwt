@@ -39,14 +39,14 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 
 <?php
 echo PageLayoutHelper::buildActionCard([
-    ['url' => '/words/new', 'label' => 'New Term', 'icon' => 'circle-plus', 'class' => 'is-primary'],
-    ['url' => '/word/upload', 'label' => 'Import Terms', 'icon' => 'file-up'],
+    ['url' => '/words/new', 'label' => 'Import Single Term', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+    ['url' => '/word/upload', 'label' => 'Import from Dictionary', 'icon' => 'file-up'],
     ['url' => '/word/tags', 'label' => 'Term Tags', 'icon' => 'tags'],
 ]);
 ?>
 
 <!-- Alpine.js container for word list -->
-<div x-data="wordListApp()" x-init="init()" x-cloak x-effect="filters.lang; filterOptions.languages; updatePageTitle()">
+<div x-data="wordListApp" x-cloak>
 
     <!-- Loading state -->
     <div x-show="loading" class="has-text-centered py-6">
