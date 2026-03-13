@@ -400,7 +400,7 @@ class CuratedDictImportService
      */
     private function loadRegistry(): ?array
     {
-        $path = $this->registryPath ?? (dirname(__DIR__, 4) . '/data/curated_dictionaries.json');
+        $path = $this->registryPath ?? (dirname(__DIR__, 5) . '/data/curated_dictionaries.json');
         if (!file_exists($path)) {
             return null;
         }

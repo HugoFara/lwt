@@ -504,6 +504,8 @@ interface CuratedDictSource {
   license: string;
   notes: string;
   directDownload?: boolean;
+  dictType?: string;
+  targetLanguage?: string;
 }
 
 /**
@@ -690,7 +692,7 @@ export function curatedDictBrowser() {
         if (result.success) {
           this.batchMessages.push({
             success: true,
-            text: `${source.name}: imported ${result.imported ?? 0} entries.`,
+            text: `${source.name}: imported ${result.imported ?? 0} entries as a lookup dictionary.`,
           });
         } else {
           this.batchMessages.push({

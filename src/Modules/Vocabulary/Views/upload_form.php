@@ -297,9 +297,12 @@ echo PageLayoutHelper::buildActionCard($actions);
 <div x-show="activeTab === 'dictionary'" x-transition
      <?php echo $activeTab !== 'dictionary' ? 'style="display:none"' : ''; ?>>
     <div x-data="curatedDictBrowser">
-        <p class="mb-4 has-text-grey">
-            Select dictionaries to import, or download them to upload manually.
-        </p>
+        <div class="notification is-info is-light mb-4">
+            <strong>Offline dictionaries for lookups</strong> &mdash;
+            these are installed as reference dictionaries used when you click a word while reading.
+            They do <em>not</em> add terms to your vocabulary list.
+            To import vocabulary, use the <strong>Frequency Words</strong> or <strong>Manual Upload</strong> tabs.
+        </div>
 
         <!-- Batch import results -->
         <template x-for="(msg, i) in batchMessages" :key="i">
@@ -362,6 +365,9 @@ echo PageLayoutHelper::buildActionCard($actions);
                                     <span class="tag is-info is-light" x-text="source.format"></span>
                                     <span class="tag is-light" x-text="source.entries"></span>
                                     <span class="tag is-success is-light" x-text="source.license"></span>
+                                    <template x-if="source.targetLanguage">
+                                        <span class="tag is-warning is-light" x-text="source.targetLanguage + ' translations'"></span>
+                                    </template>
                                 </div>
                                 <p class="is-size-7 has-text-grey" x-text="source.notes"></p>
                                 <p class="is-size-7 has-text-warning-dark"

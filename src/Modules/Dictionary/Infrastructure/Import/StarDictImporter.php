@@ -47,8 +47,12 @@ class StarDictImporter implements ImporterInterface
         // Parse .ifo file
         $this->parseIfo($basePath . '.ifo');
 
-        // Get index entries from .idx file
-        $indexEntries = $this->parseIdx($basePath . '.idx');
+        // Get index entries from .idx or .idx.gz file
+        $idxFile = $this->findIdxFile($basePath);
+        if ($idxFile === null) {
+            throw new RuntimeException("IDX file not found for: $basePath");
+        }
+        $indexEntries = $this->parseIdx($idxFile);
 
         // Open dictionary data file
         $dictPath = $this->findDictFile($basePath);
@@ -81,7 +85,7 @@ class StarDictImporter implements ImporterInterface
      */
     public function getSupportedExtensions(): array
     {
-        return ['ifo', 'idx', 'dict', 'dz'];
+        return ['ifo', 'idx', 'dict', 'dz', 'gz'];
     }
 
     /**
@@ -93,18 +97,16 @@ class StarDictImporter implements ImporterInterface
 
         // Check all required files exist
         $ifoPath = $basePath . '.ifo';
-        $idxPath = $basePath . '.idx';
 
         if (!file_exists($ifoPath) || !is_readable($ifoPath)) {
             return false;
         }
 
-        if (!file_exists($idxPath) || !is_readable($idxPath)) {
+        if ($this->findIdxFile($basePath) === null) {
             return false;
         }
 
-        $dictPath = $this->findDictFile($basePath);
-        if ($dictPath === null) {
+        if ($this->findDictFile($basePath) === null) {
             return false;
         }
 
@@ -228,11 +230,12 @@ class StarDictImporter implements ImporterInterface
      */
     private function parseIdx(string $idxPath): Generator
     {
-        if (!file_exists($idxPath)) {
-            throw new RuntimeException("IDX file not found: $idxPath");
+        // Support both .idx and .idx.gz
+        if (str_ends_with($idxPath, '.gz')) {
+            $content = file_get_contents('compress.zlib://' . $idxPath);
+        } else {
+            $content = file_get_contents($idxPath);
         }
-
-        $content = file_get_contents($idxPath);
         if ($content === false) {
             throw new RuntimeException("Cannot read IDX file: $idxPath");
         }
@@ -299,6 +302,28 @@ class StarDictImporter implements ImporterInterface
                 ];
             }
         }
+    }
+
+    /**
+     * Find the index file (.idx or .idx.gz).
+     *
+     * @param string $basePath Base path without extension
+     *
+     * @return string|null Path to idx file or null
+     */
+    private function findIdxFile(string $basePath): ?string
+    {
+        $idxPath = $basePath . '.idx';
+        if (file_exists($idxPath) && is_readable($idxPath)) {
+            return $idxPath;
+        }
+
+        $idxGzPath = $basePath . '.idx.gz';
+        if (file_exists($idxGzPath) && is_readable($idxGzPath)) {
+            return $idxGzPath;
+        }
+
+        return null;
     }
 
     /**
