@@ -22,9 +22,11 @@ use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
+use Lwt\Modules\Vocabulary\Application\Services\FrequencyLanguageMap;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use Lwt\Shared\UI\Helpers\FormHelper;
 use RuntimeException;
 
 /**
@@ -220,14 +222,23 @@ class TermImportController extends VocabularyBaseController
     {
         $currentLanguage = Settings::get('currentlanguage');
         $currentLanguageName = '';
+        $isFrequencyAvailable = false;
+        $langId = 0;
         if ($currentLanguage !== '') {
-            $currentLanguageName = $this->languageFacade->getLanguageName(
-                (int) $currentLanguage
-            );
+            $langId = (int) $currentLanguage;
+            $currentLanguageName = $this->languageFacade->getLanguageName($langId);
+            $isFrequencyAvailable = FrequencyLanguageMap::isSupported($currentLanguageName);
         }
         $languages = $this->languageFacade->getLanguagesForSelect();
-        $activeTab = InputValidator::getString('tab') ?: 'dictionary';
+        $activeTab = InputValidator::getString('tab') ?: 'frequency';
+        // Map legacy tab values
+        if ($activeTab === 'file' || $activeTab === 'text' || $activeTab === 'paste') {
+            $activeTab = 'manual';
+        }
         $curatedDictionaries = $this->loadCuratedDictionaries();
+        $csrfToken = FormHelper::csrfToken();
+        $importUrl = $langId > 0 ? '/languages/' . $langId . '/starter-vocab/import' : '';
+        $enrichUrl = $langId > 0 ? '/languages/' . $langId . '/starter-vocab/enrich' : '';
         include $this->viewPath . 'upload_form.php';
     }
 
@@ -429,10 +440,21 @@ class TermImportController extends VocabularyBaseController
             return;
         }
 
-        // Re-display the form with dictionary tab active
+        // Re-display the form with manual tab active (dictionary file sub-tab)
+        // $langId is already set from InputValidator::getInt("LgID") above
         $currentLanguage = Settings::get('currentlanguage');
+        $currentLanguageName = '';
+        $isFrequencyAvailable = false;
+        if ($currentLanguage !== '') {
+            $currentLanguageName = $this->languageFacade->getLanguageName((int) $currentLanguage);
+            $isFrequencyAvailable = FrequencyLanguageMap::isSupported($currentLanguageName);
+        }
         $languages = $this->languageFacade->getLanguagesForSelect();
-        $activeTab = 'dictionary';
+        $activeTab = 'manual';
+        $curatedDictionaries = $this->loadCuratedDictionaries();
+        $csrfToken = FormHelper::csrfToken();
+        $importUrl = $langId > 0 ? '/languages/' . $langId . '/starter-vocab/import' : '';
+        $enrichUrl = $langId > 0 ? '/languages/' . $langId . '/starter-vocab/enrich' : '';
         include $this->viewPath . 'upload_form.php';
     }
 

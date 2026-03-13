@@ -2,7 +2,10 @@
  * Word Upload Module - Alpine.js component for word import.
  *
  * Handles word import form, import mode selection, and paginated
- * display of imported terms.
+ * display of imported terms. Supports three import modes:
+ * - Frequency word import with Wiktionary enrichment
+ * - Curated dictionary browser
+ * - Manual upload (CSV/TSV file, paste, dictionary file)
  *
  * @author  HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
@@ -66,12 +69,17 @@ interface PageConfig {
   activeTab?: string;
   currentLanguageId?: number;
   currentLanguageName?: string;
+  isFrequencyAvailable?: boolean;
+  importUrl?: string;
+  enrichUrl?: string;
+  csrfToken?: string;
 }
 
 /**
- * Page-level wrapper component for language + input method tab state.
+ * Page-level wrapper component for main tab state and frequency import.
  *
- * Reads initial config from JSON config script tag.
+ * Manages three tabs: frequency, dictionary, manual.
+ * Handles frequency word import with enrichment (AJAX-driven).
  */
 export function wordUploadPageApp() {
   const configEl = document.getElementById('word-upload-page-config');
@@ -84,37 +92,145 @@ export function wordUploadPageApp() {
     }
   }
 
+  const importUrl = cfg.importUrl || '';
+  const enrichUrl = cfg.enrichUrl || '';
+  const csrfToken = cfg.csrfToken || '';
+
   return {
-    inputMethod: cfg.activeTab || 'dictionary',
+    activeTab: cfg.activeTab || 'frequency',
     selectedLanguageId: cfg.currentLanguageId || 0,
     selectedLanguageName: cfg.currentLanguageName || '',
 
-    setInputMethod(method: string): void {
-      this.inputMethod = method;
+    // Frequency import state
+    freqStep: 'choose' as string,
+    freqSize: 100,
+    freqMode: 'translation' as string,
+    freqResult: { imported: 0, skipped: 0, total: 0 },
+    enrichStats: { done: 0, failed: 0, total: 0 },
+    enrichProgress: 0,
+    enrichWarning: '',
+    _stopEnrichment: false,
+    freqError: '',
+
+    setActiveTab(tab: string): void {
+      this.activeTab = tab;
     },
 
-    selectLanguage(id: number, name: string): void {
-      this.selectedLanguageId = id;
-      this.selectedLanguageName = name;
+    sizeClass(value: number): string {
+      return this.freqSize === value ? 'button is-info is-selected' : 'button';
     },
 
-    get isDictionary(): boolean {
-      return this.inputMethod === 'dictionary';
+    setSize(value: number): void {
+      this.freqSize = value;
     },
 
-    get isNotDictionary(): boolean {
-      return this.inputMethod !== 'dictionary';
+    freqEnrichingLabel(): string {
+      return this.freqMode === 'translation'
+        ? 'Fetching translations...'
+        : 'Fetching definitions...';
+    },
+
+    freqEnrichedModeLabel(): string {
+      return this.freqMode === 'translation' ? 'translations' : 'definitions';
+    },
+
+    async startFrequencyImport(): Promise<void> {
+      this.freqStep = 'importing';
+      this.freqError = '';
+
+      try {
+        const formData = new FormData();
+        formData.append('count', String(this.freqSize));
+        formData.append('_csrf_token', csrfToken);
+
+        const response = await fetch(importUrl, {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          this.freqError = data.error || 'Unknown error occurred.';
+          this.freqStep = 'error';
+          return;
+        }
+
+        this.freqResult = data;
+
+        if (data.imported > 0) {
+          this.enrichStats = { done: 0, failed: 0, total: data.imported };
+          this._stopEnrichment = false;
+          this.freqStep = 'enriching';
+          await this.enrichAll();
+        }
+
+        this.freqStep = 'done';
+      } catch {
+        this.freqError = 'Network error. Please check your connection.';
+        this.freqStep = 'error';
+      }
+    },
+
+    async enrichAll(): Promise<void> {
+      while (!this._stopEnrichment) {
+        const formData = new FormData();
+        formData.append('mode', this.freqMode);
+        formData.append('_csrf_token', csrfToken);
+
+        const response = await fetch(enrichUrl, {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          this.enrichWarning = data.error || 'Enrichment encountered an error.';
+          return;
+        }
+
+        this.enrichStats.done = data.total - data.remaining;
+        this.enrichStats.total = data.total;
+        this.enrichStats.failed += data.failed;
+        this.enrichProgress = data.total > 0
+          ? Math.round(((data.total - data.remaining) / data.total) * 100)
+          : 100;
+
+        if (data.warning) {
+          this.enrichWarning = data.warning;
+        }
+
+        if (data.remaining <= 0) {
+          return;
+        }
+      }
+    },
+
+    stopEnrichment(): void {
+      this._stopEnrichment = true;
+    },
+
+    resetFrequencyImport(): void {
+      this.freqStep = 'choose';
+      this.freqResult = { imported: 0, skipped: 0, total: 0 };
+      this.enrichStats = { done: 0, failed: 0, total: 0 };
+      this.enrichProgress = 0;
+      this.enrichWarning = '';
+      this.freqError = '';
     }
   };
 }
 
 /**
- * Alpine.js component for the word upload form.
+ * Alpine.js component for the manual upload form.
  *
- * Manages import mode, column assignment, delimiter, and dictionary format.
+ * Manages manual method sub-tabs, import mode, column assignment,
+ * delimiter, and dictionary format.
  */
 export function wordUploadFormApp() {
   return {
+    manualMethod: 'dict-file' as string,
     importMode: '0',
     showDelimiter: false,
     delimiter: 'c',
@@ -122,6 +238,10 @@ export function wordUploadFormApp() {
     extraCols: 0,
     dictFormat: 'csv',
     dictFileName: '',
+
+    setManualMethod(method: string): void {
+      this.manualMethod = method;
+    },
 
     updateImportMode(event: Event): void {
       const val = (event.target as HTMLSelectElement).value;
@@ -167,14 +287,20 @@ export function wordUploadFormApp() {
       return this.dictFileName || 'No file selected';
     },
 
+    get isDictFile(): boolean {
+      return this.manualMethod === 'dict-file';
+    },
+
+    get isNotDictFile(): boolean {
+      return this.manualMethod !== 'dict-file';
+    },
+
     get showDictCsvOptions(): boolean {
-      // inputMethod inherited from parent wordUploadPageApp scope
-      return (this as Record<string, unknown>).inputMethod === 'dictionary'
-        && this.dictFormat === 'csv';
+      return this.manualMethod === 'dict-file' && this.dictFormat === 'csv';
     },
 
     get showNonDictOptions(): boolean {
-      return (this as Record<string, unknown>).inputMethod !== 'dictionary';
+      return this.manualMethod !== 'dict-file';
     }
   };
 }
@@ -414,7 +540,7 @@ function findGroupByLanguageName(
   // Exact match first
   const exact = groups.find(g => g.languageName.toLowerCase() === lower);
   if (exact) return exact;
-  // User name starts with curated name ("Chinese (Simplified)" → "Chinese")
+  // User name starts with curated name ("Chinese (Simplified)" -> "Chinese")
   const prefix = groups.find(g => lower.startsWith(g.languageName.toLowerCase()));
   if (prefix) return prefix;
   // Curated name starts with user name

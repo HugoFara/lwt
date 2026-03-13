@@ -40,7 +40,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 <?php
 echo PageLayoutHelper::buildActionCard([
     ['url' => '/words/new', 'label' => 'Import Single Term', 'icon' => 'circle-plus', 'class' => 'is-primary'],
-    ['url' => '/word/upload', 'label' => 'Import from Dictionary', 'icon' => 'file-up'],
+    ['url' => '/word/upload', 'label' => 'Import Terms', 'icon' => 'file-up'],
     ['url' => '/word/tags', 'label' => 'Term Tags', 'icon' => 'tags'],
 ]);
 ?>
