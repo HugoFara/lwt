@@ -296,7 +296,15 @@ class UserController extends BaseController
     {
         $user = $this->userFacade->getCurrentUser();
         if ($user === null) {
-            $this->redirect('/login');
+            if (Globals::isMultiUserEnabled()) {
+                $this->redirect('/login');
+                return;
+            }
+
+            // Single-user mode: show simplified profile page
+            $this->render('Profile', true);
+            require __DIR__ . '/../Views/profile_single_user.php';
+            $this->endRender();
             return;
         }
 
