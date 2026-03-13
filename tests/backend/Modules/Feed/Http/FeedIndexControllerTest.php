@@ -217,6 +217,10 @@ class FeedIndexControllerTest extends TestCase
     #[Test]
     public function processMarkedItemsCreatesTextsForNonEditFeeds(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for TagsFacade::getAllTextTags()');
+        }
+
         $_REQUEST = ['marked_items' => ['1']];
 
         $feedLink = [
@@ -272,6 +276,9 @@ class FeedIndexControllerTest extends TestCase
     #[Test]
     public function processMarkedItemsHandlesExtractionError(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for TagsFacade::getAllTextTags()');
+        }
         $_REQUEST = ['marked_items' => ['1']];
 
         $feedLink = [
@@ -316,6 +323,9 @@ class FeedIndexControllerTest extends TestCase
     #[Test]
     public function processMarkedItemsBuildsArchiveMessage(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for TagsFacade::getAllTextTags()');
+        }
         $_REQUEST = ['marked_items' => ['1']];
 
         $feedLink = [
@@ -355,6 +365,9 @@ class FeedIndexControllerTest extends TestCase
     #[Test]
     public function processMarkedItemsUsesTagNameFromOptions(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for TagsFacade::getAllTextTags()');
+        }
         $_REQUEST = ['marked_items' => ['1']];
 
         $feedLink = [
@@ -407,6 +420,10 @@ class FeedIndexControllerTest extends TestCase
     #[Test]
     public function createTextsFromFeedOutputsSuccessNotifications(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for TagsFacade::getAllTextTags()');
+        }
+
         $texts = [
             ['TxTitle' => 'Article One', 'TxText' => 'Content 1', 'TxAudioURI' => '', 'TxSourceURI' => 'http://example.com/1'],
             ['TxTitle' => 'Article Two', 'TxText' => 'Content 2', 'TxAudioURI' => '', 'TxSourceURI' => 'http://example.com/2'],
@@ -440,6 +457,10 @@ class FeedIndexControllerTest extends TestCase
     #[Test]
     public function createTextsFromFeedEscapesTitleInOutput(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for TagsFacade::getAllTextTags()');
+        }
+
         $texts = [
             ['TxTitle' => '<script>alert("xss")</script>', 'TxText' => 'Content'],
         ];
@@ -463,6 +484,10 @@ class FeedIndexControllerTest extends TestCase
     #[Test]
     public function createTextsFromFeedPassesCorrectDataToFacade(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for TagsFacade::getAllTextTags()');
+        }
+
         $texts = [
             [
                 'TxTitle' => 'My Article',
@@ -662,6 +687,9 @@ class FeedIndexControllerTest extends TestCase
     #[Test]
     public function processMarkedItemsUsesDefaultTagNameFromFeedName(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for TagsFacade::getAllTextTags()');
+        }
         $_REQUEST = ['marked_items' => ['1']];
 
         $feedLink = [
@@ -704,6 +732,9 @@ class FeedIndexControllerTest extends TestCase
     #[Test]
     public function processMarkedItemsUsesEmptyLinkFallback(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for TagsFacade::getAllTextTags()');
+        }
         $_REQUEST = ['marked_items' => ['1']];
 
         $feedLink = [

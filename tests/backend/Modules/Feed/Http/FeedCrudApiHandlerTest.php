@@ -468,6 +468,10 @@ class FeedCrudApiHandlerTest extends TestCase
 
     public function testUpdateFeedCallsFacadeWithMergedData(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for getFeed() language lookup');
+        }
+
         $existing = $this->makeFeedRow();
         $this->feedFacade->method('getFeedById')
             ->willReturn($existing);
@@ -491,6 +495,10 @@ class FeedCrudApiHandlerTest extends TestCase
 
     public function testUpdateFeedPreservesExistingFieldsWhenNotProvided(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for getFeed() language lookup');
+        }
+
         $existing = $this->makeFeedRow();
         $this->feedFacade->method('getFeedById')
             ->willReturn($existing);
@@ -514,6 +522,10 @@ class FeedCrudApiHandlerTest extends TestCase
 
     public function testUpdateFeedCanUpdateAllFields(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for getFeed() language lookup');
+        }
+
         $existing = $this->makeFeedRow();
         $this->feedFacade->method('getFeedById')
             ->willReturn($existing);
@@ -544,6 +556,10 @@ class FeedCrudApiHandlerTest extends TestCase
 
     public function testUpdateFeedReturnsSuccess(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for getFeed() language lookup');
+        }
+
         $existing = $this->makeFeedRow();
         $this->feedFacade->method('getFeedById')
             ->willReturn($existing);

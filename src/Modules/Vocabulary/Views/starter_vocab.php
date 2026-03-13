@@ -64,8 +64,7 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
         Continue to Text Import
     </a>
     <?php else : ?>
-
-    <?php if ($isAvailable) : ?>
+        <?php if ($isAvailable) : ?>
     <!-- Step 1: Choose options -->
     <template x-if="step === 'choose'">
         <div class="box">
@@ -219,9 +218,9 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
             </div>
         </div>
     </template>
-    <?php endif; ?>
+        <?php endif; ?>
 
-    <?php if (!empty($curatedDictionaries)) : ?>
+        <?php if (!empty($curatedDictionaries)) : ?>
     <!-- Curated Dictionary Import -->
     <template x-if="step === 'choose' || step === 'done'">
         <div class="box mt-4">
@@ -282,7 +281,7 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
             </template>
         </div>
     </template>
-    <?php endif; ?>
+        <?php endif; ?>
 
     <?php endif; ?>
 </div>

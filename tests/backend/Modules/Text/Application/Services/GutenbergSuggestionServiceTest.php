@@ -122,6 +122,10 @@ class GutenbergSuggestionServiceTest extends TestCase
 
     public function testGetSuggestionsRequiresValidLanguage(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for language lookup');
+        }
+
         // Language ID 999999 won't exist — should return error
         $result = $this->service->getSuggestions(999999);
         $this->assertArrayHasKey('error', $result);

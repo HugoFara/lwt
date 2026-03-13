@@ -137,7 +137,13 @@ class WordUploadService
         bool $ignoreFirst
     ): void {
         $this->simpleImport->importSimple(
-            $langId, $fields, $columnsClause, $delimiter, $fileName, $status, $ignoreFirst
+            $langId,
+            $fields,
+            $columnsClause,
+            $delimiter,
+            $fileName,
+            $status,
+            $ignoreFirst
         );
     }
 
@@ -170,8 +176,16 @@ class WordUploadService
         string $tabType
     ): void {
         $this->completeImport->importComplete(
-            $langId, $fields, $columnsClause, $delimiter, $fileName,
-            $status, $overwrite, $ignoreFirst, $translDelim, $tabType
+            $langId,
+            $fields,
+            $columnsClause,
+            $delimiter,
+            $fileName,
+            $status,
+            $overwrite,
+            $ignoreFirst,
+            $translDelim,
+            $tabType
         );
     }
 

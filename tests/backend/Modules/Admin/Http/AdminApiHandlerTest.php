@@ -201,6 +201,10 @@ class AdminApiHandlerTest extends TestCase
     #[Test]
     public function routePostCallsFormatSaveSetting(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for Settings::save()');
+        }
+
         // routePost always calls formatSaveSetting with key/value from params
         // Since saveSetting calls Settings::save() which is static and needs DB,
         // we test that it returns a JsonResponse
@@ -216,6 +220,10 @@ class AdminApiHandlerTest extends TestCase
     #[Test]
     public function routePostWithEmptyParams(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for Settings::save()');
+        }
+
         $response = $this->handler->routePost(
             ['settings'],
             []
@@ -228,6 +236,10 @@ class AdminApiHandlerTest extends TestCase
     #[Test]
     public function routePostWithMissingKeyParam(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for Settings::save()');
+        }
+
         $response = $this->handler->routePost(
             ['settings'],
             ['value' => 'test']
@@ -239,6 +251,10 @@ class AdminApiHandlerTest extends TestCase
     #[Test]
     public function routePostWithMissingValueParam(): void
     {
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            $this->markTestSkipped('Database connection required for Settings::save()');
+        }
+
         $response = $this->handler->routePost(
             ['settings'],
             ['key' => 'test']

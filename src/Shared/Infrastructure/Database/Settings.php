@@ -94,11 +94,15 @@ class Settings
             return '';
         }
         $dft = SettingDefinitions::getAll();
-        $val = (string) QueryBuilder::table('settings')
-            ->where('StKey', '=', $key)
-            ->valuePrepared('StValue');
-        if ($val != '') {
-            return trim($val);
+        try {
+            $val = (string) QueryBuilder::table('settings')
+                ->where('StKey', '=', $key)
+                ->valuePrepared('StValue');
+            if ($val != '') {
+                return trim($val);
+            }
+        } catch (\RuntimeException $e) {
+            // DB not available — fall through to default
         }
         if (isset($dft[$key])) {
             return $dft[$key]['dft'];

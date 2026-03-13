@@ -235,7 +235,7 @@ class CuratedDictImportService
         }
 
         /**
-         * @psalm-suppress UndefinedDocblockClass
+         * @psalm-suppress UndefinedDocblockClass, UnnecessaryVarAnnotation
          * @var \ZipArchive $zip
          */
         $zip = new ZipArchive();
@@ -246,7 +246,7 @@ class CuratedDictImportService
 
         // Safety check: limit file count
         /**
-         * @psalm-suppress UndefinedDocblockClass
+         * @psalm-suppress UndefinedDocblockClass, UnnecessaryVarAnnotation
          * @var int $numFiles
          */
         $numFiles = $zip->numFiles;
@@ -257,7 +257,10 @@ class CuratedDictImportService
 
         // Safety check: no path traversal
         for ($i = 0; $i < $numFiles; $i++) {
-            /** @var string|false $entryName */
+            /**
+             * @psalm-suppress UnnecessaryVarAnnotation
+             * @var string|false $entryName
+             */
             $entryName = $zip->getNameIndex($i);
             if ($entryName === false) {
                 continue;
