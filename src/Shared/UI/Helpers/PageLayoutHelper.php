@@ -168,9 +168,9 @@ class PageLayoutHelper
                 <div class="buttons has-addons mb-0">
                     <a class="button is-small{$termsLinkClass}" href="{$base}/words/edit">
                         <span class="icon is-small">{$termsIcon}</span>
-                        <span>Terms</span>
+                        <span>Vocabulary</span>
                     </a>
-                    <a class="button is-small" href="{$base}/word/upload" title="Import Terms">
+                    <a class="button is-small" href="{$base}/word/upload" title="Add Vocabulary">
                         <span class="icon is-small">{$plusIcon}</span>
                     </a>
                 </div>
