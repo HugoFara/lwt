@@ -296,27 +296,27 @@ echo PageLayoutHelper::buildActionCard($actions);
 <!-- ==================== TAB 2: DICTIONARIES ==================== -->
 <div x-show="activeTab === 'dictionary'" x-transition
      <?php echo $activeTab !== 'dictionary' ? 'style="display:none"' : ''; ?>>
-    <div x-data="curatedDictBrowser" class="box mb-4">
+    <div x-data="curatedDictBrowser">
         <p class="mb-4 has-text-grey">
-            Import a curated dictionary directly, or download it to upload manually.
+            Select dictionaries to import, or download them to upload manually.
         </p>
 
-        <!-- Import result notification -->
-        <template x-if="importResult !== null">
-            <div :class="importResult.success ? 'notification is-success is-light' : 'notification is-danger is-light'" class="mb-4">
-                <button class="delete" @click="dismissResult()"></button>
-                <template x-if="importResult.success">
-                    <p>
-                        <strong>Import successful!</strong>
-                        Imported <span x-text="importResult.imported"></span> entries.
-                    </p>
-                </template>
-                <template x-if="!importResult.success">
-                    <p>
-                        <strong>Import failed:</strong>
-                        <span x-text="importResult.error"></span>
-                    </p>
-                </template>
+        <!-- Batch import results -->
+        <template x-for="(msg, i) in batchMessages" :key="i">
+            <div :class="msg.success ? 'notification is-success is-light' : 'notification is-danger is-light'" class="mb-3">
+                <button class="delete" @click="dismissMessage(i)"></button>
+                <span x-text="msg.text"></span>
+            </div>
+        </template>
+
+        <!-- Batch import progress -->
+        <template x-if="batchImporting">
+            <div class="notification is-info is-light mb-4">
+                <p class="mb-2">
+                    <strong>Importing dictionaries...</strong>
+                    <span x-text="batchCurrent"></span> of <span x-text="batchTotal"></span>
+                </p>
+                <progress class="progress is-info is-small" :value="batchCurrent" :max="batchTotal"></progress>
             </div>
         </template>
 
@@ -338,7 +338,7 @@ echo PageLayoutHelper::buildActionCard($actions);
             </div>
         </div>
 
-        <!-- Dictionary cards grouped by language -->
+        <!-- Dictionary list grouped by language -->
         <template x-if="filteredGroups.length === 0">
             <div class="notification is-light">
                 No dictionaries match your search.
@@ -348,42 +348,50 @@ echo PageLayoutHelper::buildActionCard($actions);
         <template x-for="group in filteredGroups" :key="group.language">
             <div class="mb-5">
                 <h3 class="title is-5 mb-3" x-text="group.languageName"></h3>
-                <div class="columns is-multiline">
-                    <template x-for="source in group.sources" :key="source.name">
-                        <div class="column is-half-tablet is-one-third-desktop">
-                            <div class="card">
-                                <div class="card-content p-4">
-                                    <p class="title is-6 mb-2" x-text="source.name"></p>
-                                    <div class="tags mb-2">
-                                        <span class="tag is-info is-light" x-text="source.format"></span>
-                                        <span class="tag is-light" x-text="source.entries"></span>
-                                        <span class="tag is-success is-light" x-text="source.license"></span>
-                                    </div>
-                                    <p class="is-size-7 has-text-grey" x-text="source.notes"></p>
+                <template x-for="source in group.sources" :key="source.name">
+                    <label class="box mb-3 p-4" style="cursor: pointer;"
+                           :class="isSelected(source.url) ? 'has-background-success-light' : ''">
+                        <div class="is-flex is-align-items-center">
+                            <input type="checkbox" class="mr-3"
+                                   :checked="isSelected(source.url)"
+                                   :disabled="!source.directDownload || batchImporting"
+                                   @change="toggleSelection(source.url)">
+                            <div class="is-flex-grow-1">
+                                <p class="has-text-weight-semibold mb-1" x-text="source.name"></p>
+                                <div class="tags mb-1">
+                                    <span class="tag is-info is-light" x-text="source.format"></span>
+                                    <span class="tag is-light" x-text="source.entries"></span>
+                                    <span class="tag is-success is-light" x-text="source.license"></span>
                                 </div>
-                                <footer class="card-footer">
-                                    <a class="card-footer-item has-text-success"
-                                       x-show="source.directDownload"
-                                       @click.prevent="importCurated(source)">
-                                        <span class="icon is-small mr-1" x-show="!isImporting(source.url)">
-                                            <?php echo IconHelper::render('download', ['alt' => 'Import']); ?>
-                                        </span>
-                                        <span x-text="isImporting(source.url) ? 'Importing...' : 'Import'"></span>
+                                <p class="is-size-7 has-text-grey" x-text="source.notes"></p>
+                                <p class="is-size-7 has-text-warning-dark"
+                                   x-show="!source.directDownload">
+                                    Manual download required &mdash;
+                                    <a :href="source.url" target="_blank" rel="noopener">
+                                        visit site
+                                        <?php echo IconHelper::render('external-link', ['alt' => 'Download', 'size' => 14]); ?>
                                     </a>
-                                    <a class="card-footer-item has-text-primary"
-                                       :href="source.url" target="_blank" rel="noopener">
-                                        <span class="icon is-small mr-1">
-                                            <?php echo IconHelper::render('external-link', ['alt' => 'Download']); ?>
-                                        </span>
-                                        Download
-                                    </a>
-                                </footer>
+                                </p>
                             </div>
                         </div>
-                    </template>
-                </div>
+                    </label>
+                </template>
             </div>
         </template>
+
+        <!-- Import button -->
+        <div class="field is-grouped mt-4">
+            <div class="control">
+                <button type="button" class="button is-success"
+                        :disabled="getSelectedCount() === 0 || batchImporting"
+                        @click="importSelected()">
+                    <span class="icon is-small">
+                        <?php echo IconHelper::render('download', ['alt' => 'Import']); ?>
+                    </span>
+                    <span>Import Selected</span>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 

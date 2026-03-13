@@ -566,6 +566,13 @@ export function curatedDictBrowser() {
     dictLanguageFilter: '',
     dictSearch: '',
 
+    // Selection + batch import state
+    selectedUrls: [] as string[],
+    batchImporting: false,
+    batchCurrent: 0,
+    batchTotal: 0,
+    batchMessages: [] as { success: boolean; text: string }[],
+
     /**
      * Initialize: sync filter with parent's selectedLanguageName.
      */
@@ -609,52 +616,99 @@ export function curatedDictBrowser() {
       return groups;
     },
 
-    // Import state
-    importingUrl: '' as string,
-    importResult: null as CuratedImportResponse | null,
-
     /**
-     * Check if a source is currently being imported.
+     * Check if a source URL is selected.
      */
-    isImporting(url: string): boolean {
-      return this.importingUrl === url;
+    isSelected(url: string): boolean {
+      return this.selectedUrls.includes(url);
     },
 
     /**
-     * Import a curated dictionary directly into the database.
+     * Toggle selection of a dictionary source.
      */
-    async importCurated(source: CuratedDictSource): Promise<void> {
+    toggleSelection(url: string): void {
+      const idx = this.selectedUrls.indexOf(url);
+      if (idx >= 0) {
+        this.selectedUrls.splice(idx, 1);
+      } else {
+        this.selectedUrls.push(url);
+      }
+    },
+
+    /**
+     * Get count of selected dictionaries.
+     */
+    getSelectedCount(): number {
+      return this.selectedUrls.length;
+    },
+
+    /**
+     * Batch import all selected dictionaries.
+     */
+    async importSelected(): Promise<void> {
       const langId = (this as Record<string, unknown>).selectedLanguageId as number;
       if (!langId) {
-        this.importResult = { success: false, error: 'Please select a language first' };
+        this.batchMessages = [{ success: false, text: 'Please select a language first.' }];
         return;
       }
 
-      this.importingUrl = source.url;
-      this.importResult = null;
-
-      const response = await apiPost<CuratedImportResponse>(
-        '/local-dictionaries/import-curated',
-        {
-          language_id: langId,
-          url: source.url,
-          format: source.format,
-          name: source.name,
+      // Collect selected sources from all groups
+      const sources: CuratedDictSource[] = [];
+      for (const group of this.allGroups) {
+        for (const source of group.sources) {
+          if (this.selectedUrls.includes(source.url)) {
+            sources.push(source);
+          }
         }
-      );
+      }
 
-      this.importingUrl = '';
-      this.importResult = response.data ?? {
-        success: false,
-        error: response.error || 'Unknown error'
-      };
+      if (sources.length === 0) return;
+
+      this.batchImporting = true;
+      this.batchTotal = sources.length;
+      this.batchCurrent = 0;
+      this.batchMessages = [];
+
+      for (const source of sources) {
+        this.batchCurrent++;
+
+        const response = await apiPost<CuratedImportResponse>(
+          '/local-dictionaries/import-curated',
+          {
+            language_id: langId,
+            url: source.url,
+            format: source.format,
+            name: source.name,
+          }
+        );
+
+        const result = response.data ?? {
+          success: false,
+          error: response.error || 'Unknown error',
+        };
+
+        if (result.success) {
+          this.batchMessages.push({
+            success: true,
+            text: `${source.name}: imported ${result.imported ?? 0} entries.`,
+          });
+        } else {
+          this.batchMessages.push({
+            success: false,
+            text: `${source.name}: ${result.error ?? 'Import failed.'}`,
+          });
+        }
+      }
+
+      this.batchImporting = false;
+      this.selectedUrls = [];
     },
 
     /**
-     * Dismiss the import result notification.
+     * Dismiss a batch message by index.
      */
-    dismissResult(): void {
-      this.importResult = null;
+    dismissMessage(index: number): void {
+      this.batchMessages.splice(index, 1);
     }
   };
 }
