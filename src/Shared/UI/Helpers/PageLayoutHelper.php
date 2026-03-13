@@ -121,11 +121,13 @@ class PageLayoutHelper
         $isTerms = in_array($currentPage, ['terms', 'term-tags', 'term-import']);
         $isLanguages = in_array($currentPage, ['languages', 'language-new', 'language-edit']);
         $isAdmin = in_array($currentPage, ['backup', 'settings', 'tts', 'users']);
+        $isUser = in_array($currentPage, ['preferences', 'profile']);
 
         $textsLinkClass = $isTexts ? ' is-active' : '';
         $termsLinkClass = $isTerms ? ' is-active' : '';
         $languagesLinkClass = $isLanguages ? ' is-active' : '';
         $adminActive = $isAdmin ? ' is-active' : '';
+        $userActive = $isUser ? ' is-active' : '';
 
         $plusIcon = IconHelper::render('plus', ['alt' => 'Add new', 'size' => 16]);
 
@@ -157,6 +159,32 @@ class PageLayoutHelper
         $escapedCounterpart = htmlspecialchars($themeCounterpart, ENT_QUOTES, 'UTF-8');
         $escapedThemeDir = htmlspecialchars($themeDir, ENT_QUOTES, 'UTF-8');
         $autoThemeAttr = $isAutoTheme ? 'true' : 'false';
+
+        // User icon and profile/admin links
+        $userIcon = IconHelper::render('user', ['alt' => 'User']);
+        $isMultiUser = Globals::isMultiUserEnabled();
+        $profileLink = $isMultiUser
+            ? '<a class="navbar-item" href="' . $base . '/profile">Profile</a>'
+            : '';
+        $showAdminDropdown = !$isMultiUser || Globals::isCurrentUserAdmin();
+        $adminDropdownHtml = '';
+        if ($showAdminDropdown) {
+            $adminDropdownHtml = <<<ADMIN
+            <div class="navbar-item has-dropdown{$adminActive}" :class="{ 'is-active': activeDropdown === 'admin' }">
+                <a class="navbar-link" @click.prevent="toggleDropdown('admin')">
+                    {$settingsIcon}
+                    <span class="ml-1">Admin</span>
+                </a>
+                <div class="navbar-dropdown is-right">
+                    <a class="navbar-item" href="{$base}/admin/backup">Database Operations</a>
+                    <a class="navbar-item" href="{$base}/admin/settings">Admin Settings</a>
+                    <a class="navbar-item" href="{$base}/admin/users">Users</a>
+                    <hr class="navbar-divider">
+                    <a class="navbar-item" href="{$base}/admin/server-data">Server Data</a>
+                </div>
+            </div>
+ADMIN;
+        }
 
         // Language selector data
         $langData = self::getLanguagesForNavbar();
@@ -258,20 +286,19 @@ LANG;
                 {$toggleIconHtml}
             </a>
 
-            <div class="navbar-item has-dropdown{$adminActive}" :class="{ 'is-active': activeDropdown === 'admin' }">
-                <a class="navbar-link" @click.prevent="toggleDropdown('admin')">
-                    {$settingsIcon}
-                    <span class="ml-1">Admin</span>
+            <div class="navbar-item has-dropdown{$userActive}" :class="{ 'is-active': activeDropdown === 'user' }">
+                <a class="navbar-link" @click.prevent="toggleDropdown('user')">
+                    {$userIcon}
+                    <span class="ml-1">User</span>
                 </a>
                 <div class="navbar-dropdown is-right">
-                    <a class="navbar-item" href="{$base}/admin/backup">Database Operations</a>
-                    <a class="navbar-item" href="{$base}/admin/settings">Settings</a>
-                    <a class="navbar-item" href="{$base}/admin/users">Users</a>
+                    <a class="navbar-item" href="{$base}/profile/preferences">Preferences</a>
+                    {$profileLink}
                     <hr class="navbar-divider">
-                    <a class="navbar-item" href="{$base}/admin/server-data">Server Data</a>
                     <a class="navbar-item" href="{$base}/docs/info.html" target="_blank">Help</a>
                 </div>
             </div>
+            {$adminDropdownHtml}
         </div>
     </div>
 </nav>

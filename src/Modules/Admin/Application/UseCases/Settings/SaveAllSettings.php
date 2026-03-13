@@ -19,56 +19,27 @@ namespace Lwt\Modules\Admin\Application\UseCases\Settings;
 
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Modules\Admin\Domain\SettingDefinitions;
 
 /**
- * Use case for saving all application settings from form data.
+ * Use case for saving admin-scoped settings from form data.
+ *
+ * Only saves server-wide admin settings (theme, feed limits, registration).
+ * User-scoped preferences are handled by SaveUserPreferences in the User module.
  *
  * @since 3.0.0
  */
 class SaveAllSettings
 {
     /**
-     * All setting keys that can be saved.
-     *
-     * @var string[]
-     */
-    private const SETTING_KEYS = [
-        'set-theme-dir',
-        'set-words-to-do-buttons',
-        'set-tooltip-mode',
-        'set-ggl-translation-per-page',
-        'set-test-main-frame-waiting-time',
-        'set-test-edit-frame-waiting-time',
-        'set-test-sentence-count',
-        'set-term-sentence-count',
-        'set-tts',
-        'set-hts',
-        'set-archived_texts-per-page',
-        'set-texts-per-page',
-        'set-terms-per-page',
-        'set-regex-mode',
-        'set-tags-per-page',
-        'set-articles-per-page',
-        'set-feeds-per-page',
-        'set-max-articles-with-text',
-        'set-max-articles-without-text',
-        'set-max-texts-per-feed',
-        'set-text-visit-statuses-via-key',
-        'set-display-text-frame-term-translation',
-        'set-text-frame-annotation-position',
-        'set-term-translation-delimiters',
-        'set-similar-terms-count',
-    ];
-
-    /**
-     * Execute the use case - save all settings from request.
+     * Execute the use case - save admin settings from request.
      *
      * @return array{success: bool}
      */
     public function execute(): array
     {
-        foreach (self::SETTING_KEYS as $key) {
-            if ($key === 'set-tts') {
+        foreach (SettingDefinitions::getAdminKeys() as $key) {
+            if ($key === 'set-allow-registration') {
                 // Handle checkbox - convert to 0/1
                 $value = InputValidator::getBool($key, false) ? '1' : '0';
             } elseif (InputValidator::has($key)) {
@@ -91,10 +62,10 @@ class SaveAllSettings
      */
     public function executeWithData(array $data): array
     {
-        foreach (self::SETTING_KEYS as $key) {
+        foreach (SettingDefinitions::getAdminKeys() as $key) {
             if (isset($data[$key])) {
                 $value = $data[$key];
-                if ($key === 'set-tts') {
+                if ($key === 'set-allow-registration') {
                     $value = ($value === '1' || $value === 'true') ? '1' : '0';
                 }
                 Settings::save($key, $value);

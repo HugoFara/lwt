@@ -166,7 +166,7 @@ class StarterVocabControllerTest extends TestCase
     public function allowedCountsContainsExpectedValues(): void
     {
         $ref = new \ReflectionClassConstant(StarterVocabController::class, 'ALLOWED_COUNTS');
-        $this->assertSame([500, 1000, 2000, 5000], $ref->getValue());
+        $this->assertSame([50, 100, 500], $ref->getValue());
     }
 
     #[Test]

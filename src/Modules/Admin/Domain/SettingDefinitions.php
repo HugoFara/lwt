@@ -29,104 +29,128 @@ namespace Lwt\Modules\Admin\Domain;
 final class SettingDefinitions
 {
     /**
-     * Setting definitions with defaults and validation rules.
+     * Setting scope: admin-only (server-wide).
+     */
+    public const SCOPE_ADMIN = 'admin';
+
+    /**
+     * Setting scope: user preference (per-user in multi-user mode).
+     */
+    public const SCOPE_USER = 'user';
+
+    /**
+     * Setting definitions with defaults, validation rules, and scope.
      *
      * Each setting has:
      * - dft: Default value (string)
      * - num: Whether it's numeric (0 = no, 1 = yes)
      * - min: Minimum value (for numeric settings)
      * - max: Maximum value (for numeric settings)
+     * - scope: 'admin' or 'user' (defaults to 'user' if not set)
      *
-     * @var array<string, array{dft: string, num: int, min?: int, max?: int}>
+     * @var array<string, array{dft: string, num: int, min?: int, max?: int, scope: string}>
      */
     private const DEFINITIONS = [
+        // User preferences: reading
         'set-words-to-do-buttons' => [
-            "dft" => '1', "num" => 0
+            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
         ],
         'set-tooltip-mode' => [
-            "dft" => '2', "num" => 0
+            "dft" => '2', "num" => 0, "scope" => self::SCOPE_USER
         ],
         'set-display-text-frame-term-translation' => [
-            "dft" => '1', "num" => 0
+            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
         ],
         'set-text-frame-annotation-position' => [
-            "dft" => '2', "num" => 0
-        ],
-        'set-test-main-frame-waiting-time' => [
-            "dft" => '0', "num" => 1, "min" => 0, "max" => 9999
-        ],
-        'set-test-edit-frame-waiting-time' => [
-            "dft" => '500', "num" => 1, "min" => 0, "max" => 99999999
-        ],
-        'set-test-sentence-count' => [
-            "dft" => '1', "num" => 0
-        ],
-        'set-tts' => [
-            "dft" => '1', "num" => 0
-        ],
-        'set-hts' => [
-            "dft" => '1', "num" => 0
-        ],
-        'set-term-sentence-count' => [
-            "dft" => '1', "num" => 0
-        ],
-        'set-archived_texts-per-page' => [
-            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999
-        ],
-        'set-texts-per-page' => [
-            "dft" => '10', "num" => 1, "min" => 1, "max" => 9999
-        ],
-        'set-terms-per-page' => [
-            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999
-        ],
-        'set-tags-per-page' => [
-            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999
-        ],
-        'set-articles-per-page' => [
-            "dft" => '10', "num" => 1, "min" => 1, "max" => 9999
-        ],
-        'set-feeds-per-page' => [
-            "dft" => '50', "num" => 1, "min" => 1, "max" => 9999
-        ],
-        'set-max-articles-with-text' => [
-            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999
-        ],
-        'set-max-articles-without-text' => [
-            "dft" => '250', "num" => 1, "min" => 1, "max" => 9999
-        ],
-        'set-max-texts-per-feed' => [
-            "dft" => '20', "num" => 1, "min" => 1, "max" => 9999
-        ],
-        'set-ggl-translation-per-page' => [
-            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999
-        ],
-        'set-regex-mode' => [
-            "dft" => '', "num" => 0
-        ],
-        'set-theme_dir' => [
-            "dft" => 'themes/default/', "num" => 0
+            "dft" => '2', "num" => 0, "scope" => self::SCOPE_USER
         ],
         'set-text-visit-statuses-via-key' => [
-            "dft" => '', "num" => 0
-        ],
-        'set-term-translation-delimiters' => [
-            "dft" => '/;|', "num" => 0
-        ],
-        'set-similar-terms-count' => [
-            "dft" => '0', "num" => 1, "min" => 0, "max" => 9
+            "dft" => '', "num" => 0, "scope" => self::SCOPE_USER
         ],
         'set-show-text-word-counts' => [
-            "dft" => '1', "num" => 0
+            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
         ],
+
+        // User preferences: review
+        'set-test-main-frame-waiting-time' => [
+            "dft" => '0', "num" => 1, "min" => 0, "max" => 9999, "scope" => self::SCOPE_USER
+        ],
+        'set-test-edit-frame-waiting-time' => [
+            "dft" => '500', "num" => 1, "min" => 0, "max" => 99999999, "scope" => self::SCOPE_USER
+        ],
+        'set-test-sentence-count' => [
+            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
+        ],
+        'set-term-sentence-count' => [
+            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
+        ],
+        'set-similar-terms-count' => [
+            "dft" => '0', "num" => 1, "min" => 0, "max" => 9, "scope" => self::SCOPE_USER
+        ],
+        'set-term-translation-delimiters' => [
+            "dft" => '/;|', "num" => 0, "scope" => self::SCOPE_USER
+        ],
+
+        // User preferences: TTS
+        'set-tts' => [
+            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
+        ],
+        'set-hts' => [
+            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
+        ],
+
+        // User preferences: pagination
+        'set-archived_texts-per-page' => [
+            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+        ],
+        'set-texts-per-page' => [
+            "dft" => '10', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+        ],
+        'set-terms-per-page' => [
+            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+        ],
+        'set-tags-per-page' => [
+            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+        ],
+        'set-articles-per-page' => [
+            "dft" => '10', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+        ],
+        'set-feeds-per-page' => [
+            "dft" => '50', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+        ],
+        'set-ggl-translation-per-page' => [
+            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+        ],
+        'set-regex-mode' => [
+            "dft" => '', "num" => 0, "scope" => self::SCOPE_USER
+        ],
+
+        // Admin settings: appearance
+        'set-theme-dir' => [
+            "dft" => 'themes/default/', "num" => 0, "scope" => self::SCOPE_ADMIN
+        ],
+
+        // Admin settings: feed limits
+        'set-max-articles-with-text' => [
+            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_ADMIN
+        ],
+        'set-max-articles-without-text' => [
+            "dft" => '250', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_ADMIN
+        ],
+        'set-max-texts-per-feed' => [
+            "dft" => '20', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_ADMIN
+        ],
+
+        // Admin settings: multi-user
         'set-allow-registration' => [
-            "dft" => '1', "num" => 0
+            "dft" => '1', "num" => 0, "scope" => self::SCOPE_ADMIN
         ]
     ];
 
     /**
      * Get all setting definitions.
      *
-     * @return array<string, array{dft: string, num: int, min?: int, max?: int}>
+     * @return array<string, array{dft: string, num: int, min?: int, max?: int, scope: string}>
      */
     public static function getAll(): array
     {
@@ -138,7 +162,7 @@ final class SettingDefinitions
      *
      * @param string $key Setting key
      *
-     * @return array{dft: string, num: int, min?: int, max?: int}|null
+     * @return array{dft: string, num: int, min?: int, max?: int, scope: string}|null
      */
     public static function get(string $key): ?array
     {
@@ -177,5 +201,47 @@ final class SettingDefinitions
     public static function getKeys(): array
     {
         return array_keys(self::DEFINITIONS);
+    }
+
+    /**
+     * Get the scope of a setting.
+     *
+     * @param string $key Setting key
+     *
+     * @return string Scope ('admin' or 'user')
+     */
+    public static function getScope(string $key): string
+    {
+        return self::DEFINITIONS[$key]['scope'] ?? self::SCOPE_USER;
+    }
+
+    /**
+     * Get all admin-scoped setting keys.
+     *
+     * @return string[]
+     */
+    public static function getAdminKeys(): array
+    {
+        return array_keys(
+            array_filter(
+                self::DEFINITIONS,
+                static fn(array $def): bool => ($def['scope'] ?? self::SCOPE_USER) === self::SCOPE_ADMIN
+            )
+        );
+    }
+
+    /**
+     * Get all user-scoped setting keys.
+     *
+     * @return string[]
+     */
+    public static function getUserKeys(): array
+    {
+        return array_keys(
+            array_filter(
+                self::DEFINITIONS,
+                static fn(array $def): bool => ($def['scope'] ?? self::SCOPE_USER) === self::SCOPE_USER
+            )
+        );
     }
 }

@@ -20,6 +20,8 @@ namespace Lwt\Modules\User\Http;
 use Lwt\Shared\Http\BaseController;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\Infrastructure\Language\LanguagePresets;
+use Lwt\Modules\Admin\Application\Services\TtsService;
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Modules\User\Infrastructure\AuthFormDataManager;
 use Lwt\Shared\Infrastructure\Http\FlashMessageService;
@@ -397,6 +399,79 @@ class UserController extends BaseController
         }
 
         $this->redirect('/profile');
+    }
+
+    // =========================================================================
+    // Preferences Methods
+    // =========================================================================
+
+    /**
+     * Display the user preferences form.
+     *
+     * GET /profile/preferences
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
+     */
+    public function preferencesForm(array $params = []): void
+    {
+        $errorMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_ERROR);
+        $error = !empty($errorMessages) ? $errorMessages[0]['message'] : null;
+
+        $successMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_SUCCESS);
+        $success = !empty($successMessages) ? $successMessages[0]['message'] : null;
+
+        $settings = $this->userFacade->getUserPreferences();
+
+        // TTS data
+        $ttsService = new TtsService();
+        $languageOptions = $ttsService->getLanguageOptions(LanguagePresets::getAll());
+        $currentLanguageCode = json_encode(
+            $ttsService->getCurrentLanguageCode(LanguagePresets::getAll())
+        );
+
+        $this->render('Preferences', true);
+
+        if ($success !== null && $success !== '') {
+            $this->message($success, true);
+        }
+        if ($error !== null && $error !== '') {
+            $this->message($error, true);
+        }
+
+        require __DIR__ . '/../Views/preferences.php';
+        $this->endRender();
+    }
+
+    /**
+     * Save user preferences.
+     *
+     * POST /profile/preferences
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function savePreferences(array $params = []): void
+    {
+        if (!$this->isPost()) {
+            $this->redirect('/profile/preferences');
+            return;
+        }
+
+        $result = $this->userFacade->saveUserPreferences();
+
+        if ($result['success']) {
+            $this->flash->success('Preferences saved successfully.');
+        } else {
+            $this->flash->error('Failed to save preferences.');
+        }
+
+        $this->redirect('/profile/preferences');
     }
 
     // =========================================================================

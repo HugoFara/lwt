@@ -577,6 +577,8 @@ function registerRoutes(Router $router): void
     $router->get('/profile', 'Lwt\\Modules\\User\\Http\\UserController@profileForm', AUTH_MIDDLEWARE);
     $router->post('/profile', 'Lwt\\Modules\\User\\Http\\UserController@updateProfile', AUTH_MIDDLEWARE);
     $router->post('/profile/password', 'Lwt\\Modules\\User\\Http\\UserController@changePassword', AUTH_MIDDLEWARE);
+    $router->get('/profile/preferences', 'Lwt\\Modules\\User\\Http\\UserController@preferencesForm', AUTH_MIDDLEWARE);
+    $router->post('/profile/preferences', 'Lwt\\Modules\\User\\Http\\UserController@savePreferences', AUTH_MIDDLEWARE);
 
     // ==================== AUTHENTICATION ROUTES (PUBLIC) ====================
     // All auth routes use UserController from the User module

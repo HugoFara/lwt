@@ -84,6 +84,9 @@ class Settings
     /**
      * Get the settings value for a specific key. Return a default value when possible.
      *
+     * In multi-user mode, user-scoped settings are checked for the current user first,
+     * falling back to the global value (StUsID=0), then to the default.
+     *
      * @param string $key Settings key
      *
      * @return string Requested setting, or default value, or ''
@@ -93,10 +96,29 @@ class Settings
         if ($key === '') {
             return '';
         }
+
+        // For user-scoped settings in multi-user mode, try user-specific row first
+        $userId = Globals::getCurrentUserId();
+        if ($userId !== null && SettingDefinitions::getScope($key) === SettingDefinitions::SCOPE_USER) {
+            try {
+                $val = (string) Connection::preparedFetchValue(
+                    "SELECT StValue FROM settings WHERE StKey = ? AND StUsID = ?",
+                    [$key, $userId]
+                );
+                if ($val !== '') {
+                    return trim($val);
+                }
+            } catch (\RuntimeException $e) {
+                // DB not available — fall through
+            }
+        }
+
+        // Fall back to global row (StUsID=0)
         $dft = SettingDefinitions::getAll();
         try {
             $val = (string) QueryBuilder::table('settings')
                 ->where('StKey', '=', $key)
+                ->where('StUsID', '=', 0)
                 ->valuePrepared('StValue');
             if ($val != '') {
                 return trim($val);
@@ -142,6 +164,39 @@ class Settings
             "INSERT INTO settings (StKey, StUsID, StValue) VALUES (?, 0, ?)
              ON DUPLICATE KEY UPDATE StValue = ?",
             [$k, (string)$v, (string)$v]
+        );
+    }
+
+    /**
+     * Save a user-scoped setting for a specific user.
+     *
+     * Uses StUsID = $userId for per-user storage.
+     *
+     * @param string $k      Setting key
+     * @param mixed  $v      Setting value
+     * @param int    $userId User ID
+     *
+     * @return void
+     */
+    public static function saveForUser(string $k, mixed $v, int $userId): void
+    {
+        $dft = SettingDefinitions::getAll();
+        if (!isset($v)) {
+            throw new \InvalidArgumentException('Value is not set');
+        }
+        if (isset($dft[$k]) && $dft[$k]['num']) {
+            $v = (int)$v;
+            if (isset($dft[$k]['min']) && $v < $dft[$k]['min']) {
+                $v = $dft[$k]['dft'];
+            }
+            if (isset($dft[$k]['max']) && $v > $dft[$k]['max']) {
+                $v = $dft[$k]['dft'];
+            }
+        }
+        Connection::preparedExecute(
+            "INSERT INTO settings (StKey, StUsID, StValue) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE StValue = ?",
+            [$k, $userId, (string)$v, (string)$v]
         );
     }
 

@@ -250,20 +250,14 @@ class AdminController extends BaseController
             }
         }
 
-        // Load current settings for the form (used by included view)
+        // Load current admin settings for the form (used by included view)
         $settings = $this->adminFacade->getAllSettings();
 
         // Get available themes for the dropdown (used by included view)
         $themes = $this->adminFacade->getAvailableThemes();
 
-        // Get TTS data for the form (used by included view)
-        $languageOptions = $this->ttsService->getLanguageOptions(LanguagePresets::getAll());
-        $currentLanguageCode = json_encode(
-            $this->ttsService->getCurrentLanguageCode(LanguagePresets::getAll())
-        );
-
         // Render page
-        $this->render('Settings/Preferences', true);
+        $this->render('Admin Settings', true);
         $this->message($message, true);
 
         include $this->viewPath . 'settings_form.php';

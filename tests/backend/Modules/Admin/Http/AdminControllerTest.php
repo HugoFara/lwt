@@ -571,14 +571,6 @@ class AdminControllerTest extends TestCase
             ->method('getAvailableThemes')
             ->willReturn(['default']);
 
-        $this->ttsService->expects($this->once())
-            ->method('getLanguageOptions')
-            ->willReturn('<option>English</option>');
-
-        $this->ttsService->expects($this->once())
-            ->method('getCurrentLanguageCode')
-            ->willReturn('en-US');
-
         ob_start();
         try {
             $this->controller->settings([]);
@@ -607,14 +599,6 @@ class AdminControllerTest extends TestCase
             ->method('getAvailableThemes')
             ->willReturn([]);
 
-        $this->ttsService->expects($this->once())
-            ->method('getLanguageOptions')
-            ->willReturn('');
-
-        $this->ttsService->expects($this->once())
-            ->method('getCurrentLanguageCode')
-            ->willReturn('');
-
         ob_start();
         try {
             $this->controller->settings([]);
@@ -637,8 +621,6 @@ class AdminControllerTest extends TestCase
 
         $this->facade->expects($this->once())->method('getAllSettings')->willReturn([]);
         $this->facade->expects($this->once())->method('getAvailableThemes')->willReturn([]);
-        $this->ttsService->expects($this->once())->method('getLanguageOptions')->willReturn('');
-        $this->ttsService->expects($this->once())->method('getCurrentLanguageCode')->willReturn('');
 
         ob_start();
         try {
@@ -662,8 +644,6 @@ class AdminControllerTest extends TestCase
 
         $this->facade->expects($this->once())->method('getAllSettings')->willReturn([]);
         $this->facade->expects($this->once())->method('getAvailableThemes')->willReturn([]);
-        $this->ttsService->expects($this->once())->method('getLanguageOptions')->willReturn('');
-        $this->ttsService->expects($this->once())->method('getCurrentLanguageCode')->willReturn('');
 
         ob_start();
         try {
@@ -687,8 +667,6 @@ class AdminControllerTest extends TestCase
 
         $this->facade->expects($this->once())->method('getAllSettings')->willReturn([]);
         $this->facade->expects($this->once())->method('getAvailableThemes')->willReturn([]);
-        $this->ttsService->expects($this->once())->method('getLanguageOptions')->willReturn('');
-        $this->ttsService->expects($this->once())->method('getCurrentLanguageCode')->willReturn('');
 
         ob_start();
         try {

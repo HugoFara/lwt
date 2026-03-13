@@ -51,22 +51,41 @@ class GetAllSettingsTest extends TestCase
     }
 
     #[Test]
-    public function getSettingKeysContainsExpectedKeys(): void
+    public function getSettingKeysContainsAdminKeys(): void
     {
         $keys = GetAllSettings::getSettingKeys();
         $expectedSubset = [
             'set-theme-dir',
+            'set-max-articles-with-text',
+            'set-max-articles-without-text',
+            'set-max-texts-per-feed',
+            'set-allow-registration',
+        ];
+        foreach ($expectedSubset as $expected) {
+            $this->assertContains(
+                $expected,
+                $keys,
+                "Admin setting keys should contain '$expected'"
+            );
+        }
+    }
+
+    #[Test]
+    public function getSettingKeysDoesNotContainUserKeys(): void
+    {
+        $keys = GetAllSettings::getSettingKeys();
+        $userKeys = [
             'set-tooltip-mode',
             'set-tts',
             'set-texts-per-page',
             'set-terms-per-page',
             'set-regex-mode',
         ];
-        foreach ($expectedSubset as $expected) {
-            $this->assertContains(
-                $expected,
+        foreach ($userKeys as $userKey) {
+            $this->assertNotContains(
+                $userKey,
                 $keys,
-                "Setting keys should contain '$expected'"
+                "Admin setting keys should not contain user key '$userKey'"
             );
         }
     }

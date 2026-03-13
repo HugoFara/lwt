@@ -26,11 +26,13 @@ use Lwt\Modules\User\Application\Services\EmailService;
 use Lwt\Modules\User\Application\UseCases\CompletePasswordReset;
 use Lwt\Modules\User\Application\UseCases\GenerateApiToken;
 use Lwt\Modules\User\Application\UseCases\GetCurrentUser;
+use Lwt\Modules\User\Application\UseCases\GetUserPreferences;
 use Lwt\Modules\User\Application\UseCases\Login;
 use Lwt\Modules\User\Application\UseCases\Logout;
 use Lwt\Modules\User\Application\UseCases\Register;
 use Lwt\Modules\User\Application\UseCases\ChangePassword;
 use Lwt\Modules\User\Application\UseCases\RequestPasswordReset;
+use Lwt\Modules\User\Application\UseCases\SaveUserPreferences;
 use Lwt\Modules\User\Application\UseCases\SendVerificationEmail;
 use Lwt\Modules\User\Application\UseCases\UpdateProfile;
 use Lwt\Modules\User\Application\UseCases\ValidateApiToken;
@@ -646,6 +648,30 @@ class UserFacade
         $this->repository->save($user);
 
         return $user;
+    }
+
+    // =========================================================================
+    // Preferences Operations
+    // =========================================================================
+
+    /**
+     * Get all user-scoped preferences.
+     *
+     * @return array<string, string> Preferences with current values
+     */
+    public function getUserPreferences(): array
+    {
+        return (new GetUserPreferences())->execute();
+    }
+
+    /**
+     * Save user preferences from form submission.
+     *
+     * @return array{success: bool}
+     */
+    public function saveUserPreferences(): array
+    {
+        return (new SaveUserPreferences())->execute();
     }
 
     // =========================================================================

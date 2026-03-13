@@ -166,6 +166,23 @@ $escapedEmail = htmlspecialchars($user->email(), ENT_QUOTES, 'UTF-8');
                 </div>
                 <?php endif; ?>
 
+                <!-- Preferences Link -->
+                <div class="box">
+                    <h2 class="title is-4">
+                        <span class="icon-text">
+                            <span class="icon"><i data-lucide="sliders-horizontal"></i></span>
+                            <span>Preferences</span>
+                        </span>
+                    </h2>
+                    <p class="mb-3">
+                        Configure your reading, review, text-to-speech, and pagination settings.
+                    </p>
+                    <a href="/profile/preferences" class="button is-primary is-outlined">
+                        <span class="icon"><i data-lucide="settings"></i></span>
+                        <span>Edit Preferences</span>
+                    </a>
+                </div>
+
                 <!-- Account Info -->
                 <div class="box">
                     <h2 class="title is-5 mb-3">Account Info</h2>

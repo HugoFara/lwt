@@ -9,6 +9,7 @@ use Lwt\Modules\Admin\Application\UseCases\Backup\EmptyDatabase;
 use Lwt\Modules\Admin\Application\UseCases\Backup\RestoreFromUpload;
 use Lwt\Modules\Admin\Application\UseCases\Settings\SaveAllSettings;
 use Lwt\Modules\Admin\Domain\BackupRepositoryInterface;
+use Lwt\Modules\Admin\Domain\SettingDefinitions;
 use Lwt\Shared\Infrastructure\Globals;
 use PHPUnit\Framework\TestCase;
 
@@ -40,68 +41,68 @@ class AdminUseCaseTest extends TestCase
         );
     }
 
-    public function testSaveAllSettingsSettingKeysAreComplete(): void
+    public function testSaveAllSettingsAdminKeysAreComplete(): void
     {
-        // Use reflection to verify SETTING_KEYS constant exists and contains
-        // expected settings
-        $reflection = new \ReflectionClass(SaveAllSettings::class);
-        $constants = $reflection->getConstants();
+        // SaveAllSettings now uses SettingDefinitions::getAdminKeys()
+        $keys = SettingDefinitions::getAdminKeys();
 
-        $this->assertArrayHasKey('SETTING_KEYS', $constants);
-        $keys = $constants['SETTING_KEYS'];
-
-        $this->assertIsArray($keys);
         $this->assertNotEmpty($keys);
 
-        // Verify critical settings are present
+        // Verify admin-scoped settings are present
         $this->assertContains('set-theme-dir', $keys);
+        $this->assertContains('set-max-articles-with-text', $keys);
+        $this->assertContains('set-allow-registration', $keys);
+
+        // Verify user-scoped settings are NOT present
+        $this->assertNotContains('set-tts', $keys);
+        $this->assertNotContains('set-tooltip-mode', $keys);
+        $this->assertNotContains('set-texts-per-page', $keys);
+    }
+
+    public function testUserKeysContainUserPreferences(): void
+    {
+        $keys = SettingDefinitions::getUserKeys();
+
+        $this->assertNotEmpty($keys);
+
+        // Verify user-scoped settings are present
         $this->assertContains('set-tts', $keys);
         $this->assertContains('set-tooltip-mode', $keys);
         $this->assertContains('set-texts-per-page', $keys);
         $this->assertContains('set-terms-per-page', $keys);
         $this->assertContains('set-regex-mode', $keys);
+
+        // Verify admin settings are NOT present
+        $this->assertNotContains('set-theme-dir', $keys);
+        $this->assertNotContains('set-allow-registration', $keys);
     }
 
     public function testSaveAllSettingsExecuteWithDataIgnoresUnknownKeys(): void
     {
-        // Verify the use case only processes known keys by checking
-        // reflection on the constant
-        $reflection = new \ReflectionClass(SaveAllSettings::class);
-        $keys = $reflection->getConstant('SETTING_KEYS');
+        $adminKeys = SettingDefinitions::getAdminKeys();
 
-        $this->assertNotContains('unknown-key', $keys);
-        $this->assertNotContains('set-nonexistent', $keys);
+        $this->assertNotContains('unknown-key', $adminKeys);
+        $this->assertNotContains('set-nonexistent', $adminKeys);
     }
 
-    public function testSaveAllSettingsExecuteWithDataHandlesTtsCheckbox(): void
+    public function testSaveAllSettingsAdminKeysContainsFeedSettings(): void
     {
-        // Verify set-tts is in SETTING_KEYS (it requires special boolean handling)
-        $reflection = new \ReflectionClass(SaveAllSettings::class);
-        $keys = $reflection->getConstant('SETTING_KEYS');
+        $keys = SettingDefinitions::getAdminKeys();
 
-        $this->assertContains('set-tts', $keys);
-    }
-
-    public function testSaveAllSettingsSettingKeysContainsFeedSettings(): void
-    {
-        $reflection = new \ReflectionClass(SaveAllSettings::class);
-        $keys = $reflection->getConstant('SETTING_KEYS');
-
-        $this->assertContains('set-articles-per-page', $keys);
-        $this->assertContains('set-feeds-per-page', $keys);
         $this->assertContains('set-max-articles-with-text', $keys);
         $this->assertContains('set-max-articles-without-text', $keys);
         $this->assertContains('set-max-texts-per-feed', $keys);
     }
 
-    public function testSaveAllSettingsSettingKeysContainsTestSettings(): void
+    public function testUserKeysContainsReviewAndPaginationSettings(): void
     {
-        $reflection = new \ReflectionClass(SaveAllSettings::class);
-        $keys = $reflection->getConstant('SETTING_KEYS');
+        $keys = SettingDefinitions::getUserKeys();
 
         $this->assertContains('set-test-main-frame-waiting-time', $keys);
         $this->assertContains('set-test-edit-frame-waiting-time', $keys);
         $this->assertContains('set-test-sentence-count', $keys);
+        $this->assertContains('set-articles-per-page', $keys);
+        $this->assertContains('set-feeds-per-page', $keys);
     }
 
     // ===== DownloadBackup tests =====
