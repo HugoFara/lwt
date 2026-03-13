@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## About This Project
 
-Learning with Texts (LWT) is a self-hosted web application for language learning by reading. This is a third-party community-maintained fork that improves upon the official SourceForge version with modern PHP support (8.1-8.4), smaller database size, better mobile support, and active development.
+Learning with Texts (LWT) is a self-hosted web application for language learning by reading. This is a third-party community-maintained fork that improves upon the official SourceForge version with modern PHP support (8.2-8.5), smaller database size, better mobile support, and active development.
 
 **Tech Stack:**
 
-- Backend: PHP 8.1+ with MySQLi
+- Backend: PHP 8.2+ with MySQLi
 - Frontend: TypeScript, Alpine.js, Bulma CSS, jQuery (legacy)
 - Database: MySQL/MariaDB with InnoDB engine
 - Build Tools: Composer (PHP), NPM with Vite (JS/CSS)
@@ -117,7 +117,7 @@ npm run typecheck                                    # TypeScript type checking
 
 **After every PHP file change**, always run these checks and fix any issues before committing:
 
-1. `./vendor/bin/psalm --threads=1` — Psalm static analysis must pass with 0 errors
+1. `./vendor/bin/psalm --threads=1` — Psalm static analysis must pass with 0 errors (multi-thread crashes due to amphp bug; always use `--threads=1`)
 2. `./vendor/bin/phpcs --standard=PSR12 [changed files]` — PHP CodeSniffer must have 0 errors (warnings are acceptable)
 3. `composer test:no-coverage` — PHPUnit tests must all pass (run after any important PHP change)
 
@@ -156,6 +156,16 @@ All requests route through `index.php` → `Router` → `Controller` → `Servic
 4. Services in `src/backend/Services/` contain business logic
 5. Views in `src/backend/Views/` render HTML output
 
+### Dual Codebase: Legacy vs Modules
+
+The codebase has two parallel structures. New feature work should target `src/Modules/` when the relevant module exists; `src/backend/` is the legacy layer being incrementally migrated.
+
+- **`src/Modules/`** — New modular architecture with bounded contexts, DI containers, and repository pattern
+- **`src/backend/`** — Legacy MVC layer (Controllers/Services/Views) still handling most routes
+- **`src/Shared/`** — Cross-cutting infrastructure used by both (Database, Http, Container, UI helpers)
+
+Both share the `Lwt\` PSR-4 root, with explicit mappings: `Lwt\` → `src/backend/`, `Lwt\Shared\` → `src/Shared/`, `Lwt\Modules\` → `src/Modules/`.
+
 ### Key Directories
 
 ```text
@@ -191,7 +201,7 @@ src/Modules/                         # Feature modules (bounded contexts)
 ├── Views/                           # Module-specific view templates
 └── [Module]ServiceProvider.php      # DI container registration
 
-src/backend/
+src/backend/                         # Legacy MVC (being migrated to src/Modules/)
 ├── Controllers/                     # MVC Controllers
 ├── Services/                        # Business logic layer
 ├── Views/                           # PHP templates organized by feature
@@ -271,9 +281,11 @@ Key endpoint groups (see `src/backend/Api/V1/Endpoints.php` for full list):
 
 - Controllers extend `BaseController` which provides helper methods for input validation, rendering, and database access
 - Use prepared statements for database queries: `Connection::preparedFetchAll($sql, [$param1, $param2])`
+- For IN clauses with arrays of IDs: `Connection::buildPreparedInClause($ids, $bindings)` returns `(?,?,?)` and appends values to `$bindings`; returns `(NULL)` for empty arrays
 - Use `Globals::table('tablename')` for table names
 - Use `getSettingWithDefault()` for application settings
 - Use `InputValidator` for request parameter validation (accessed via `$this->param()`, `$this->paramInt()` in controllers)
+- Use `forTablePrepared()` instead of legacy `forTable()` for parameterized queries in module code
 
 **Key Namespaces:**
 - Database: `Lwt\Shared\Infrastructure\Database\{Connection, DB, QueryBuilder}`
@@ -323,7 +335,8 @@ This project uses `@alpinejs/csp` (aliased in `vite.config.ts`), which **cannot 
 - **Character Encoding:** UTF-8 throughout
 - **Namespaces:** PSR-4 autoloading with `Lwt\` prefix
 - **ID Columns:** `LgID` (language), `TxID`/`AtID` (text/archived), `WoID` (word)
-- **Database Queries:** Prefer `Connection::preparedFetchAll()` and `Connection::preparedExecute()` over manual escaping
+- **Database Queries:** Always use prepared statements (`Connection::preparedFetchAll()`, `preparedExecute()`, `preparedFetchValue()`). Never interpolate variables into SQL strings. Use `buildPreparedInClause()` for IN clauses.
+- **Test Namespaces:** `Lwt\Tests\` maps to `tests/backend/`
 
 ## Database Migrations
 
