@@ -90,6 +90,24 @@ class AdminController extends BaseController
     }
 
     /**
+     * Admin dashboard page.
+     *
+     * Shows links to all admin subpages.
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     *
+     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
+     */
+    public function dashboard(array $params): void
+    {
+        $this->render('Administration', true);
+        include $this->viewPath . 'dashboard.php';
+        $this->endRender();
+    }
+
+    /**
      * Backup and restore page.
      *
      * Handles:

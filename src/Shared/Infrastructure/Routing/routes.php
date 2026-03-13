@@ -512,6 +512,13 @@ function registerRoutes(Router $router): void
     // ==================== ADMIN ROUTES (ADMIN ONLY) ====================
     // These routes require admin role, not just authentication
 
+    // Admin dashboard
+    $router->registerWithMiddleware(
+        '/admin',
+        'Lwt\\Modules\\Admin\\Http\\AdminController@dashboard',
+        ADMIN_MIDDLEWARE
+    );
+
     // Backup & Restore (Admin module)
     $router->registerWithMiddleware(
         '/admin/backup',
