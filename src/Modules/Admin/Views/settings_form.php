@@ -84,79 +84,48 @@ $themes = is_array($themes ?? null) ? $themes : [];
         </header>
         <div class="card-content" x-show="open" x-transition>
             <?php $currentTheme = htmlspecialchars($settings['set-theme-dir'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-            <div class="field is-horizontal"
-                 x-data="{
-                     currentTheme: '<?php echo $currentTheme; ?>',
-                     description: '',
-                     mode: '',
-                     highlighting: '',
-                     wordBreaking: '',
-                     updateInfo() {
-                         const select = document.getElementById('set-theme-dir');
-                         const option = select.options[select.selectedIndex];
-                         this.description = option.dataset.description || '';
-                         this.mode = option.dataset.mode || 'light';
-                         this.highlighting = option.dataset.highlighting || '';
-                         this.wordBreaking = option.dataset.wordBreaking || '';
-                     },
-                     previewTheme() {
-                         const themePath = document.getElementById('set-theme-dir').value;
-                         const styleId = 'theme-preview-styles';
-                         let styleEl = document.getElementById(styleId);
-                         if (!styleEl) {
-                             styleEl = document.createElement('link');
-                             styleEl.id = styleId;
-                             styleEl.rel = 'stylesheet';
-                             document.head.appendChild(styleEl);
-                         }
-                         styleEl.href = '/' + themePath + 'styles.css?preview=' + Date.now();
-                     }
-                 }"
-                 x-init="updateInfo()">
-                <div class="field-label is-normal">
+            <div x-data="themeSelector"
+                 data-current-theme="<?php echo $currentTheme; ?>">
+                <div class="field">
                     <label class="label" for="set-theme-dir">Theme</label>
-                </div>
-                <div class="field-body">
-                    <div class="field">
-                        <div class="field has-addons">
-                            <div class="control is-expanded">
-                                <div class="select is-fullwidth">
-                                    <select name="set-theme-dir" id="set-theme-dir" class="notempty" required
-                                            x-model="currentTheme"
-                                            @change="updateInfo(); previewTheme()">
-                                        <?php
-                                        echo SelectOptionsBuilder::forThemes(
-                                            $themes,
-                                            $settings['set-theme-dir']
-                                        );
-                                        ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="control">
-                                <span class="icon has-text-danger" title="Field must not be empty">
-                                    <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                                </span>
+                    <div class="field has-addons">
+                        <div class="control is-expanded">
+                            <div class="select is-fullwidth">
+                                <select name="set-theme-dir" id="set-theme-dir" class="notempty" required
+                                        x-model="currentTheme"
+                                        @change="onThemeChange()">
+                                    <?php
+                                    echo SelectOptionsBuilder::forThemes(
+                                        $themes,
+                                        $settings['set-theme-dir']
+                                    );
+                                    ?>
+                                </select>
                             </div>
                         </div>
-                        <div class="box mt-3" x-show="description || highlighting || wordBreaking" x-transition>
-                            <p class="mb-2" x-show="description">
-                                <strong>Description:</strong> <span x-text="description"></span>
-                            </p>
-                            <div class="tags">
-                                <span class="tag" :class="mode === 'dark' ? 'is-dark' : 'is-light'" x-show="mode">
-                                    <i data-lucide="sun" style="width:14px;height:14px;margin-right:4px"></i>
-                                    <span x-text="mode === 'dark' ? 'Dark Mode' : 'Light Mode'"></span>
-                                </span>
-                                <span class="tag is-info is-light" x-show="highlighting">
-                                    <i data-lucide="palette" style="width:14px;height:14px;margin-right:4px"></i>
-                                    <span x-text="highlighting"></span>
-                                </span>
-                                <span class="tag is-primary is-light" x-show="wordBreaking">
-                                    <i data-lucide="wrap-text" style="width:14px;height:14px;margin-right:4px"></i>
-                                    <span x-text="wordBreaking"></span>
-                                </span>
-                            </div>
+                        <div class="control">
+                            <span class="icon has-text-danger" title="Field must not be empty">
+                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="box mt-3" x-show="description || highlighting || wordBreaking" x-transition>
+                        <p class="mb-2" x-show="description">
+                            <strong>Description:</strong> <span x-text="description"></span>
+                        </p>
+                        <div class="tags">
+                            <span class="tag" :class="mode === 'dark' ? 'is-dark' : 'is-light'" x-show="mode">
+                                <i data-lucide="sun" style="width:14px;height:14px;margin-right:4px"></i>
+                                <span x-text="mode === 'dark' ? 'Dark Mode' : 'Light Mode'"></span>
+                            </span>
+                            <span class="tag is-info is-light" x-show="highlighting">
+                                <i data-lucide="palette" style="width:14px;height:14px;margin-right:4px"></i>
+                                <span x-text="highlighting"></span>
+                            </span>
+                            <span class="tag is-primary is-light" x-show="wordBreaking">
+                                <i data-lucide="wrap-text" style="width:14px;height:14px;margin-right:4px"></i>
+                                <span x-text="wordBreaking"></span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -178,145 +147,126 @@ $themes = is_array($themes ?? null) ? $themes : [];
             </button>
         </header>
         <div class="card-content" x-show="open" x-transition>
-            <div class="field is-horizontal">
-                <div class="field-label is-normal">
-                    <label class="label" for="set-max-articles-with-text">
-                        Max Articles <span class="has-text-weight-normal">(with cache)</span>
-                    </label>
-                </div>
-                <div class="field-body">
-                    <div class="field has-addons">
-                        <div class="control">
-                            <input class="input notempty posintnumber"
-                                   type="number"
-                                   min="0"
-                                   id="set-max-articles-with-text"
-                                   name="set-max-articles-with-text"
-                                   data_info="Max Articles per Feed with cached text"
-                                   value="<?php
-                                       echo htmlspecialchars(
-                                           $settings['set-max-articles-with-text'] ?? '',
-                                           ENT_QUOTES,
-                                           'UTF-8'
-                                       );
-                                        ?>"
-                                   maxlength="4"
-                                   style="width: 100px;"
-                                   required />
-                        </div>
-                        <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                            </span>
-                        </div>
+            <div class="field">
+                <label class="label" for="set-max-articles-with-text">
+                    Max Articles <span class="has-text-weight-normal">(with cache)</span>
+                </label>
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               id="set-max-articles-with-text"
+                               name="set-max-articles-with-text"
+                               data_info="Max Articles per Feed with cached text"
+                               value="<?php
+                                   echo htmlspecialchars(
+                                       $settings['set-max-articles-with-text'] ?? '',
+                                       ENT_QUOTES,
+                                       'UTF-8'
+                                   );
+                                    ?>"
+                               maxlength="4"
+                               style="width: 100px;"
+                               required />
                     </div>
-                    <p class="help">Maximum articles per feed with cached text</p>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
                 </div>
+                <p class="help">Maximum articles per feed with cached text</p>
             </div>
 
-            <div class="field is-horizontal">
-                <div class="field-label is-normal">
-                    <label class="label" for="set-max-articles-without-text">
-                        Max Articles <span class="has-text-weight-normal">(no cache)</span>
-                    </label>
-                </div>
-                <div class="field-body">
-                    <div class="field has-addons">
-                        <div class="control">
-                            <input class="input notempty posintnumber"
-                                   type="number"
-                                   min="0"
-                                   id="set-max-articles-without-text"
-                                   name="set-max-articles-without-text"
-                                   data_info="Max Articles per Feed without cached text"
-                                   value="<?php
-                                       echo htmlspecialchars(
-                                           $settings['set-max-articles-without-text'] ?? '',
-                                           ENT_QUOTES,
-                                           'UTF-8'
-                                       );
-                                        ?>"
-                                   maxlength="4"
-                                   style="width: 100px;"
-                                   required />
-                        </div>
-                        <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                            </span>
-                        </div>
+            <div class="field">
+                <label class="label" for="set-max-articles-without-text">
+                    Max Articles <span class="has-text-weight-normal">(no cache)</span>
+                </label>
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               id="set-max-articles-without-text"
+                               name="set-max-articles-without-text"
+                               data_info="Max Articles per Feed without cached text"
+                               value="<?php
+                                   echo htmlspecialchars(
+                                       $settings['set-max-articles-without-text'] ?? '',
+                                       ENT_QUOTES,
+                                       'UTF-8'
+                                   );
+                                    ?>"
+                               maxlength="4"
+                               style="width: 100px;"
+                               required />
                     </div>
-                    <p class="help">Maximum articles per feed without cached text</p>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
                 </div>
+                <p class="help">Maximum articles per feed without cached text</p>
             </div>
 
-            <div class="field is-horizontal">
-                <div class="field-label is-normal">
-                    <label class="label" for="set-max-texts-per-feed">Max Texts per Feed</label>
-                </div>
-                <div class="field-body">
-                    <div class="field has-addons">
-                        <div class="control">
-                            <input class="input notempty posintnumber"
-                                   type="number"
-                                   min="0"
-                                   id="set-max-texts-per-feed"
-                                   name="set-max-texts-per-feed"
-                                   data_info="Max Texts per Feed"
-                                   value="<?php
-                                       echo htmlspecialchars(
-                                           $settings['set-max-texts-per-feed'] ?? '',
-                                           ENT_QUOTES,
-                                           'UTF-8'
-                                       );
-                                        ?>"
-                                   maxlength="4"
-                                   style="width: 100px;"
-                                   required />
-                        </div>
-                        <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                            </span>
-                        </div>
+            <div class="field">
+                <label class="label" for="set-max-texts-per-feed">Max Texts per Feed</label>
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               id="set-max-texts-per-feed"
+                               name="set-max-texts-per-feed"
+                               data_info="Max Texts per Feed"
+                               value="<?php
+                                   echo htmlspecialchars(
+                                       $settings['set-max-texts-per-feed'] ?? '',
+                                       ENT_QUOTES,
+                                       'UTF-8'
+                                   );
+                                    ?>"
+                               maxlength="4"
+                               style="width: 100px;"
+                               required />
                     </div>
-                    <p class="help">Older texts are moved to the Text Archive</p>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
                 </div>
+                <p class="help">Older texts are moved to the Text Archive</p>
             </div>
         </div>
     </div>
 
     <!-- Multi-User Settings -->
-    <div class="card mb-5" x-data="{ open: false }">
+    <div class="card settings-section mb-5" x-data="{ open: false }">
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('users', ['alt' => 'Multi-User']); ?>
                 <span class="ml-2">Multi-User</span>
             </p>
-            <button class="card-header-icon" aria-label="expand">
-                <span class="icon" :class="{ 'has-text-primary': open }">
-                    <i data-lucide="chevron-down"
-                       :style="open && 'transform: rotate(180deg)'"></i>
+            <button type="button" class="card-header-icon" aria-label="toggle section">
+                <span class="icon">
+                    <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
                 </span>
             </button>
         </header>
         <div class="card-content" x-show="open" x-transition>
-            <div class="field is-horizontal">
-                <div class="field-label is-normal">
-                    <label class="label">Allow Registration</label>
-                </div>
-                <div class="field-body">
-                    <div class="field">
-                        <div class="control">
-                            <label class="checkbox">
-                                <input type="checkbox"
-                                       name="set-allow-registration"
-                                       value="1"
-                                       <?php echo ((int)($settings['set-allow-registration'] ?? '1') ? "checked" : ""); ?> />
-                                Allow new users to register accounts
-                            </label>
-                        </div>
-                    </div>
+            <div class="field">
+                <label class="label">Allow Registration</label>
+                <div class="control">
+                    <label class="checkbox">
+                        <input type="checkbox"
+                               name="set-allow-registration"
+                               value="1"
+                               <?php echo ((int)($settings['set-allow-registration'] ?? '1') ? "checked" : ""); ?> />
+                        Allow new users to register accounts
+                    </label>
                 </div>
             </div>
         </div>

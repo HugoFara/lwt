@@ -60,9 +60,60 @@ export function settingsFormApp() {
   };
 }
 
-// Register Alpine component
+/**
+ * Alpine.js component for the theme selector with live preview.
+ * Reads initial theme from the `data-current-theme` attribute on its root element.
+ */
+export function themeSelector() {
+  return {
+    currentTheme: '',
+    description: '',
+    mode: '',
+    highlighting: '',
+    wordBreaking: '',
+
+    init() {
+      const el = (this as unknown as { $el: HTMLElement }).$el;
+      this.currentTheme = el.dataset.currentTheme || '';
+      this.updateInfo();
+    },
+
+    updateInfo() {
+      const select = document.getElementById('set-theme-dir') as HTMLSelectElement | null;
+      if (!select) return;
+      const option = select.options[select.selectedIndex];
+      this.description = option?.dataset.description || '';
+      this.mode = option?.dataset.mode || 'light';
+      this.highlighting = option?.dataset.highlighting || '';
+      this.wordBreaking = option?.dataset.wordBreaking || '';
+    },
+
+    previewTheme() {
+      const select = document.getElementById('set-theme-dir') as HTMLSelectElement | null;
+      if (!select) return;
+      const themePath = select.value;
+      const styleId = 'theme-preview-styles';
+      let styleEl = document.getElementById(styleId) as HTMLLinkElement | null;
+      if (!styleEl) {
+        styleEl = document.createElement('link');
+        styleEl.id = styleId;
+        styleEl.rel = 'stylesheet';
+        document.head.appendChild(styleEl);
+      }
+      styleEl.href = '/' + themePath + 'styles.css?preview=' + Date.now();
+    },
+
+    onThemeChange() {
+      this.updateInfo();
+      this.previewTheme();
+    },
+  };
+}
+
+// Register Alpine components
 if (typeof Alpine !== 'undefined') {
   Alpine.data('settingsFormApp', settingsFormApp);
+  Alpine.data('themeSelector', themeSelector);
 }
 
 // ============================================================================

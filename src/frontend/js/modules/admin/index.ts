@@ -15,3 +15,4 @@ import './pages/statistics_charts';
 import './pages/table_management';
 import './pages/tts_settings';
 import './pages/server_data';
+import './pages/user_management';

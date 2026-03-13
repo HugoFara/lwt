@@ -154,6 +154,7 @@
   --lwt-popover-bg: white;
   --lwt-popover-border: #dbdbdb;
   --lwt-settings-header-bg: #f5f5f5;
+  --lwt-settings-header-hover-bg: #eeeeee;
   --lwt-settings-header-border: #dbdbdb;
   --lwt-audio-bg: #f5f5f5;
   --lwt-progress-track-bg: #dbdbdb;
@@ -255,6 +256,7 @@
     --lwt-popover-bg: #1a1a1a;
     --lwt-popover-border: #404040;
     --lwt-settings-header-bg: #1a1a1a;
+    --lwt-settings-header-hover-bg: #252525;
     --lwt-settings-header-border: #404040;
     --lwt-audio-bg: #1a1a1a;
     --lwt-progress-track-bg: #333333;
@@ -356,6 +358,7 @@
   --lwt-popover-bg: #1a1a1a;
   --lwt-popover-border: #404040;
   --lwt-settings-header-bg: #1a1a1a;
+  --lwt-settings-header-hover-bg: #252525;
   --lwt-settings-header-border: #404040;
   --lwt-audio-bg: #1a1a1a;
   --lwt-progress-track-bg: #333333;
@@ -2755,7 +2758,7 @@ Settings Page - Collapsible Sections
 }
 
 .settings-section .card-header:hover {
-  background-color: #eeeeee;
+  background-color: var(--lwt-settings-header-hover-bg);
 }
 
 .settings-section .card-header-title {

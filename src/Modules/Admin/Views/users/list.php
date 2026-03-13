@@ -45,7 +45,7 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
 };
 ?>
 
-<div class="container" x-data="userManagement()">
+<div class="container" x-data="userManagement">
 
     <!-- Stats Summary -->
     <?php if (!empty($stats)) : ?>
@@ -233,7 +233,7 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                             <form method="post"
                                   action="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/<?php echo $userId; ?>/delete"
                                   style="display:inline"
-                                  onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                                  @submit="confirmDelete($event)">
                                 <?php echo FormHelper::csrfField(); ?>
                                 <button class="button is-small is-danger" type="submit" title="Delete">
                                     <?php echo IconHelper::render('trash-2', ['class' => 'icon']); ?>
@@ -268,42 +268,3 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
     <?php endif; ?>
 
 </div>
-
-<script>
-function userManagement() {
-    return {
-        toggleStatus(userId, action, form) {
-            const formData = new FormData(form);
-            fetch(form.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.reload();
-                } else {
-                    alert(data.error || 'Action failed');
-                }
-            })
-            .catch(() => alert('Request failed'));
-        },
-        toggleRole(userId, action, form) {
-            const formData = new FormData(form);
-            fetch(form.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.reload();
-                } else {
-                    alert(data.error || 'Action failed');
-                }
-            })
-            .catch(() => alert('Request failed'));
-        }
-    };
-}
-</script>
