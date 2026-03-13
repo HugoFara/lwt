@@ -232,33 +232,6 @@ $base = UrlUtilities::getBasePath();
         </div>
     </div>
 </section>
-<?php elseif ($langcnt > 0 && $textCount == 0) : ?>
-<!-- Has language but no texts: Add a text + suggestions -->
-<section class="section py-6">
-    <div class="container">
-        <div class="has-text-centered mb-5">
-            <a href="<?php echo $base; ?>/texts/new" class="button is-large is-primary">
-                <span class="icon"><i data-lucide="plus"></i></span>
-                <span>Add a text to read</span>
-            </a>
-        </div>
-
-        <!-- Gutenberg suggestions for onboarding -->
-        <div x-data="gutenbergSuggestions" x-cloak>
-            <template x-if="books.length > 0 || loading">
-                <div>
-                    <p class="title is-5 mb-3">
-                        <span class="icon-text">
-                            <span class="icon has-text-warning"><i data-lucide="book-open-text"></i></span>
-                            <span>Popular books to get started</span>
-                        </span>
-                    </p>
-                    <?php renderSuggestionsGrid(); ?>
-                </div>
-            </template>
-        </div>
-    </div>
-</section>
 <?php elseif ($langcnt > 0) : ?>
 <!-- Current text section -->
 <section class="section py-4 mb-4">
@@ -351,8 +324,14 @@ $base = UrlUtilities::getBasePath();
                     </div>
                 </template>
                 <template x-if="!lastText">
-                    <div class="box has-background-light" style="width: 280px; min-height: 180px;">
-                        <p class="has-text-grey is-italic">No text selected for this language</p>
+                    <div class="box has-background-light" style="width: 280px; min-height: 180px;
+                        display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <span class="icon is-large has-text-grey-light mb-2">
+                            <i data-lucide="book-open" style="width: 36px; height: 36px;"></i>
+                        </span>
+                        <p class="has-text-grey is-size-7 has-text-centered">
+                            Add a text or import a book to start reading
+                        </p>
                     </div>
                 </template>
             </div>
@@ -408,8 +387,8 @@ $base = UrlUtilities::getBasePath();
 
 <?php endif; ?>
 
-<?php if ($langcnt > 0 && $textCount > 0) : ?>
-<!-- Main menu grid (only shown when user has texts) -->
+<?php if ($langcnt > 0) : ?>
+<!-- Main menu grid -->
 <section class="section py-4">
 <div class="container">
 <div class="columns is-multiline is-centered home-menu-container">
