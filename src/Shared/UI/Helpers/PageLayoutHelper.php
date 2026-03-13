@@ -111,7 +111,6 @@ class PageLayoutHelper
      */
     public static function buildNavbar(string $currentPage = ''): string
     {
-        $homeIcon = IconHelper::render('home', ['alt' => 'Home']);
         $textsIcon = IconHelper::render('book-text', ['alt' => 'Texts']);
         $termsIcon = IconHelper::render('spell-check', ['alt' => 'Terms']);
         $languagesIcon = IconHelper::render('languages', ['alt' => 'Languages']);
@@ -205,11 +204,6 @@ LANG;
 
     <div class="navbar-menu" :class="{ 'is-active': isOpen }">
         <div class="navbar-start">
-            <a class="navbar-item" href="{$base}/">
-                {$homeIcon}
-                <span class="ml-1">Home</span>
-            </a>
-
             <div class="navbar-item">
                 <div class="buttons has-addons mb-0">
                     <a class="button is-small{$textsLinkClass}" href="{$base}/texts">
