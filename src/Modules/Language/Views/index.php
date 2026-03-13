@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Languages Index View - Alpine.js SPA Version
+ * Languages Index View - Full-page current language layout.
  *
  * Variables expected:
  * - $languages: array of language data with stats
@@ -30,25 +30,6 @@ $base = UrlUtilities::getBasePath();
 ?>
 <!-- Alpine.js Language List Component -->
 <div x-data="languageList" x-init="init()" data-base-path="<?php echo $base; ?>">
-    <!-- Action card - inside Alpine scope for store access -->
-    <div class="card action-card mb-4">
-        <div class="card-content">
-            <div class="buttons is-centered">
-                <a href="<?php echo $base; ?>/languages/new" class="button is-light is-primary">
-                    <span class="icon"><?php
-                        echo IconHelper::render('circle-plus', ['alt' => 'New Language']);
-                    ?></span>
-                    <span>New Language</span>
-                </a>
-                <a href="#" class="button is-light is-info" @click.prevent="store.openWizardModal()">
-                    <span class="icon"><?php
-                        echo IconHelper::render('wand-2', ['alt' => 'Quick Setup Wizard']);
-                    ?></span>
-                    <span>Quick Setup Wizard</span>
-                </a>
-            </div>
-        </div>
-    </div>
 
     <!-- Notification area -->
     <div
@@ -80,162 +61,240 @@ $base = UrlUtilities::getBasePath();
     </div>
 
     <!-- Empty state -->
-    <p x-show="!store.isLoading && !store.error && store.languages.length === 0">
-        No languages found.
-    </p>
+    <div x-show="!store.isLoading && !store.error && store.languages.length === 0" class="has-text-centered py-6">
+        <p class="mb-4">No languages found. Create your first language to get started.</p>
+        <a href="<?php echo $base; ?>/languages/new" class="button is-primary">
+            <span class="icon"><?php
+                echo IconHelper::render('circle-plus', ['alt' => 'New Language']);
+            ?></span>
+            <span>New Language</span>
+        </a>
+    </div>
 
-    <!-- Language cards -->
-    <div x-show="!store.isLoading && store.languages.length > 0" class="columns is-multiline language-cards">
-        <template x-for="lang in store.languages" :key="lang.id">
-            <div class="column is-4-desktop is-6-tablet is-12-mobile">
-                <div
-                    class="card language-card"
-                    :class="{'is-current': lang.id === store.currentLanguageId}"
-                    :data-lang-id="lang.id"
-                >
-                    <header class="card-header">
-                        <p class="card-header-title">
-                            <template x-if="lang.id === store.currentLanguageId">
-                                <span class="icon mr-1" title="Current Language">
-                                    <i data-lucide="circle-alert" style="width: 18px; height: 18px;"></i>
+    <!-- Main content (when languages exist) -->
+    <div x-show="!store.isLoading && store.languages.length > 0">
+
+        <!-- Current Language Section -->
+        <template x-if="store.currentLanguage">
+            <div class="box mb-5">
+                <div class="level mb-4">
+                    <div class="level-left">
+                        <div class="level-item">
+                            <h2 class="title is-4 mb-0">
+                                <span class="icon mr-2 has-text-primary">
+                                    <i data-lucide="languages" style="width: 24px; height: 24px;"></i>
                                 </span>
-                            </template>
-                            <span x-text="lang.name"></span>
-                        </p>
-                        <div class="card-header-icon">
-                            <template x-if="lang.id !== store.currentLanguageId">
-                                <button
-                                    type="button"
-                                    class="button is-small is-primary is-outlined"
-                                    @click="handleSetDefault(lang.id)"
-                                    title="Set as Current Language"
-                                >
-                                    <span class="icon">
-                                        <i data-lucide="circle-check" style="width: 14px; height: 14px;"></i>
-                                    </span>
-                                    <span>Set as Default</span>
-                                </button>
-                            </template>
+                                <span x-text="store.currentLanguage.name"></span>
+                            </h2>
                         </div>
-                    </header>
-
-                    <div class="card-content">
-                        <div class="language-stats">
-                            <div class="stat-item">
-                                <span class="stat-label">Texts</span>
-                                <span class="stat-value">
-                                    <template x-if="lang.textCount > 0">
-                                        <a
-                                            :href="'/texts?page=1&query=&filterlang=' + lang.id"
-                                            x-text="lang.textCount"
-                                        ></a>
-                                    </template>
-                                    <template x-if="lang.textCount === 0">
-                                        <span>0</span>
-                                    </template>
-                                </span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Archived</span>
-                                <span class="stat-value">
-                                    <template x-if="lang.archivedTextCount > 0">
-                                        <a
-                                            :href="'/text/archived?page=1&query=&filterlang=' + lang.id"
-                                            x-text="lang.archivedTextCount"
-                                        ></a>
-                                    </template>
-                                    <template x-if="lang.archivedTextCount === 0">
-                                        <span>0</span>
-                                    </template>
-                                </span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Terms</span>
-                                <span class="stat-value">
-                                    <template x-if="lang.wordCount > 0">
-                                        <a
-                                            :href="'/words?page=1&query=&text=&status=&filterlang='
-                                                + lang.id + '&status=&tag12=0&tag2=&tag1='"
-                                            x-text="lang.wordCount"
-                                        ></a>
-                                    </template>
-                                    <template x-if="lang.wordCount === 0">
-                                        <span>0</span>
-                                    </template>
-                                </span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Feeds</span>
-                                <span class="stat-value">
-                                    <template x-if="lang.feedCount > 0">
-                                        <a
-                                            :href="'/feeds?query=&selected_feed=&check_autoupdate=1&filterlang='
-                                                + lang.id"
-                                        >
-                                            <span x-text="lang.feedCount"></span>
-                                            (<span x-text="lang.articleCount"></span>)
-                                        </a>
-                                    </template>
-                                    <template x-if="lang.feedCount === 0">
-                                        <span>0</span>
-                                    </template>
-                                </span>
-                            </div>
-                        </div>
-
-                        <template x-if="lang.hasExportTemplate">
-                            <div class="tags mt-3">
+                        <div class="level-item">
+                            <template x-if="store.currentLanguage.hasExportTemplate">
                                 <span
-                                    class="tag is-info is-light export-template-tag"
-                                    title="This language has a custom export template for flexible term exports"
+                                    class="tag is-info is-light"
+                                    title="Custom export template available"
                                 >
                                     <span class="icon">
                                         <i data-lucide="file-down" style="width: 12px; height: 12px;"></i>
                                     </span>
                                     <span>Export Template</span>
                                 </span>
-                            </div>
-                        </template>
+                            </template>
+                        </div>
                     </div>
-
-                    <footer class="card-footer">
-                        <a :href="'/review?lang=' + lang.id" class="card-footer-item">
-                            <span class="icon">
-                                <i data-lucide="circle-help" style="width: 16px; height: 16px;"></i>
-                            </span>
-                            <span>Review</span>
-                        </a>
-                        <template x-if="lang.textCount > 0">
-                            <a
-                                href="#"
-                                class="card-footer-item"
-                                :class="{'is-loading': store.refreshingId === lang.id}"
-                                @click.prevent="handleRefresh(lang.id)"
-                            >
-                                <span class="icon">
-                                    <i data-lucide="zap" style="width: 16px; height: 16px;"></i>
-                                </span>
-                                <span>Reparse</span>
-                            </a>
-                        </template>
-                        <a :href="'/languages/' + lang.id + '/edit'" class="card-footer-item">
-                            <span class="icon">
-                                <i data-lucide="file-pen" style="width: 16px; height: 16px;"></i>
-                            </span>
-                            <span>Edit</span>
-                        </a>
-                        <template x-if="canDelete(lang)">
-                            <span class="card-footer-item click" @click="store.showDeleteConfirm(lang.id)">
-                                <span class="icon">
-                                    <i data-lucide="circle-minus" style="width: 16px; height: 16px;"></i>
-                                </span>
-                                <span>Delete</span>
-                            </span>
-                        </template>
-                    </footer>
+                    <div class="level-right">
+                        <div class="level-item">
+                            <div class="buttons">
+                                <a :href="'/review?lang=' + store.currentLanguage.id"
+                                   class="button is-primary is-outlined">
+                                    <span class="icon">
+                                        <i data-lucide="circle-help" style="width: 16px; height: 16px;"></i>
+                                    </span>
+                                    <span>Review</span>
+                                </a>
+                                <template x-if="store.currentLanguage.textCount > 0">
+                                    <button
+                                        type="button"
+                                        class="button is-warning is-outlined"
+                                        :class="{'is-loading': store.refreshingId === store.currentLanguage.id}"
+                                        @click="handleRefresh(store.currentLanguage.id)"
+                                    >
+                                        <span class="icon">
+                                            <i data-lucide="zap" style="width: 16px; height: 16px;"></i>
+                                        </span>
+                                        <span>Reparse</span>
+                                    </button>
+                                </template>
+                                <a :href="'/languages/' + store.currentLanguage.id + '/edit'"
+                                   class="button is-info is-outlined">
+                                    <span class="icon">
+                                        <i data-lucide="file-pen" style="width: 16px; height: 16px;"></i>
+                                    </span>
+                                    <span>Edit</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Stats grid -->
+                <nav class="level">
+                    <div class="level-item has-text-centered">
+                        <a :href="'/texts?page=1&query=&filterlang=' + store.currentLanguage.id"
+                           class="has-text-centered">
+                            <p class="heading">Texts</p>
+                            <p class="title is-5" x-text="store.currentLanguage.textCount"></p>
+                        </a>
+                    </div>
+                    <div class="level-item has-text-centered">
+                        <a :href="'/text/archived?page=1&query=&filterlang=' + store.currentLanguage.id"
+                           class="has-text-centered">
+                            <p class="heading">Archived</p>
+                            <p class="title is-5" x-text="store.currentLanguage.archivedTextCount"></p>
+                        </a>
+                    </div>
+                    <div class="level-item has-text-centered">
+                        <a :href="'/words?lang=' + store.currentLanguage.id"
+                           class="has-text-centered">
+                            <p class="heading">Terms</p>
+                            <p class="title is-5" x-text="store.currentLanguage.wordCount"></p>
+                        </a>
+                    </div>
+                    <div class="level-item has-text-centered">
+                        <a :href="'/feeds?query=&selected_feed=&check_autoupdate=1&filterlang=' + store.currentLanguage.id"
+                           class="has-text-centered">
+                            <p class="heading">Feeds</p>
+                            <p class="title is-5">
+                                <span x-text="store.currentLanguage.feedCount"></span>
+                                (<span x-text="store.currentLanguage.articleCount"></span>)
+                            </p>
+                        </a>
+                    </div>
+                </nav>
             </div>
         </template>
+
+        <!-- All Languages Table -->
+        <div class="box">
+            <div class="level mb-4">
+                <div class="level-left">
+                    <div class="level-item">
+                        <h3 class="title is-5 mb-0">All Languages</h3>
+                    </div>
+                </div>
+                <div class="level-right">
+                    <div class="level-item">
+                        <a href="<?php echo $base; ?>/languages/new" class="button is-primary">
+                            <span class="icon"><?php
+                                echo IconHelper::render('circle-plus', ['alt' => 'New Language']);
+                            ?></span>
+                            <span>New Language</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="table is-fullwidth is-hoverable">
+                    <thead>
+                        <tr>
+                            <th>Language</th>
+                            <th class="has-text-centered">Texts</th>
+                            <th class="has-text-centered">Archived</th>
+                            <th class="has-text-centered">Terms</th>
+                            <th class="has-text-centered">Feeds</th>
+                            <th class="has-text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="lang in store.languages" :key="lang.id">
+                            <tr :style="lang.id === store.currentLanguageId
+                                ? 'border-left: 3px solid hsl(171, 100%, 41%)'
+                                : ''">
+                                <td>
+                                    <strong x-text="lang.name"></strong>
+                                    <template x-if="lang.id === store.currentLanguageId">
+                                        <span class="tag is-primary is-light ml-2">Current</span>
+                                    </template>
+                                    <template x-if="lang.hasExportTemplate">
+                                        <span class="tag is-info is-light ml-1" title="Export template">
+                                            <span class="icon is-small">
+                                                <i data-lucide="file-down" style="width: 10px; height: 10px;"></i>
+                                            </span>
+                                        </span>
+                                    </template>
+                                </td>
+                                <td class="has-text-centered">
+                                    <a :href="'/texts?page=1&query=&filterlang=' + lang.id"
+                                       x-text="lang.textCount"></a>
+                                </td>
+                                <td class="has-text-centered">
+                                    <a :href="'/text/archived?page=1&query=&filterlang=' + lang.id"
+                                       x-text="lang.archivedTextCount"></a>
+                                </td>
+                                <td class="has-text-centered">
+                                    <a :href="'/words?lang=' + lang.id"
+                                       x-text="lang.wordCount"></a>
+                                </td>
+                                <td class="has-text-centered">
+                                    <a :href="'/feeds?query=&selected_feed=&check_autoupdate=1&filterlang=' + lang.id">
+                                        <span x-text="lang.feedCount"></span>
+                                        (<span x-text="lang.articleCount"></span>)
+                                    </a>
+                                </td>
+                                <td class="has-text-right">
+                                    <div class="buttons is-right are-small">
+                                        <template x-if="lang.id !== store.currentLanguageId">
+                                            <button
+                                                type="button"
+                                                class="button is-small is-primary is-outlined"
+                                                @click="handleSetDefault(lang.id)"
+                                                title="Set as Current"
+                                            >
+                                                <span class="icon">
+                                                    <i data-lucide="circle-check" style="width: 14px; height: 14px;"></i>
+                                                </span>
+                                            </button>
+                                        </template>
+                                        <a :href="'/languages/' + lang.id + '/edit'"
+                                           class="button is-small is-info is-outlined"
+                                           title="Edit">
+                                            <span class="icon">
+                                                <i data-lucide="file-pen" style="width: 14px; height: 14px;"></i>
+                                            </span>
+                                        </a>
+                                        <template x-if="lang.textCount > 0">
+                                            <button
+                                                type="button"
+                                                class="button is-small is-warning is-outlined"
+                                                :class="{'is-loading': store.refreshingId === lang.id}"
+                                                @click="handleRefresh(lang.id)"
+                                                title="Reparse Texts"
+                                            >
+                                                <span class="icon">
+                                                    <i data-lucide="zap" style="width: 14px; height: 14px;"></i>
+                                                </span>
+                                            </button>
+                                        </template>
+                                        <template x-if="canDelete(lang)">
+                                            <button
+                                                type="button"
+                                                class="button is-small is-danger is-outlined"
+                                                @click="store.showDeleteConfirm(lang.id)"
+                                                title="Delete"
+                                            >
+                                                <span class="icon">
+                                                    <i data-lucide="circle-minus" style="width: 14px; height: 14px;"></i>
+                                                </span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Delete confirmation modal -->
@@ -258,80 +317,6 @@ $base = UrlUtilities::getBasePath();
             <footer class="modal-card-foot">
                 <button class="button is-danger" @click="handleDelete(store.deleteConfirmId)">Delete</button>
                 <button class="button" @click="store.hideDeleteConfirm()">Cancel</button>
-            </footer>
-        </div>
-    </div>
-</div>
-
-<!-- Language Wizard Modal -->
-<div x-data="wizardModal" x-init="init()">
-    <div class="modal" :class="{'is-active': store.wizardModalOpen}">
-        <div class="modal-background" @click="close()"></div>
-        <div class="modal-card">
-            <header class="modal-card-head">
-                <p class="modal-card-title">
-                    <span class="icon mr-2">
-                        <i data-lucide="wand-2" style="width: 20px; height: 20px;"></i>
-                    </span>
-                    Quick Language Setup
-                </p>
-                <button class="delete" aria-label="close" @click="close()"></button>
-            </header>
-            <section class="modal-card-body">
-                <p class="mb-4">
-                    Choose your native language and the language you want to study.
-                    We'll set up dictionary links and parsing rules automatically.
-                </p>
-
-                <!-- Error display -->
-                <template x-if="error">
-                    <div class="notification is-danger is-light mb-4">
-                        <span x-text="error"></span>
-                    </div>
-                </template>
-
-                <div class="field">
-                    <label class="label">Your Native Language (L1)</label>
-                    <div class="control">
-                        <div class="select is-fullwidth">
-                            <select x-model="l1" @change="handleL1Change()">
-                                <option value="">-- Select your native language --</option>
-                                <template x-for="lang in sortedLanguages" :key="lang">
-                                    <option :value="lang" x-text="lang"></option>
-                                </template>
-                            </select>
-                        </div>
-                    </div>
-                    <p class="help">Used for translations and dictionary lookups</p>
-                </div>
-
-                <div class="field">
-                    <label class="label">Language to Study (L2)</label>
-                    <div class="control">
-                        <div class="select is-fullwidth">
-                            <select x-model="l2">
-                                <option value="">-- Select the language to study --</option>
-                                <template x-for="lang in sortedLanguages" :key="lang">
-                                    <option :value="lang" x-text="lang" :disabled="lang === l1"></option>
-                                </template>
-                            </select>
-                        </div>
-                    </div>
-                    <p class="help">The language you want to read and learn</p>
-                </div>
-            </section>
-            <footer class="modal-card-foot">
-                <button
-                    class="button is-primary"
-                    @click="apply()"
-                    :disabled="!isValid"
-                >
-                    <span class="icon">
-                        <i data-lucide="check" style="width: 16px; height: 16px;"></i>
-                    </span>
-                    <span>Create Language</span>
-                </button>
-                <button class="button" @click="close()">Cancel</button>
             </footer>
         </div>
     </div>
