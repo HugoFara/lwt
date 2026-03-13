@@ -85,6 +85,16 @@ npm run cy:open                  # Interactive Cypress test runner
 
 **Integration Tests:** Some tests require a MySQL database with FK constraints. Run `composer test:setup-db` once to create the test database (`test_<dbname>` from your `.env`). The integration test suite includes FK cascade tests, tag service tests, and other database-dependent tests.
 
+**Unit Tests and Database Guards:** CI runs PHPUnit without a MySQL service, so any unit test that reaches a database call (directly or via static methods like `Settings::getWithDefault()`, `TagsFacade::*`, `QueryBuilder::table()`) will fail on CI. When writing unit tests, add a skip guard to any test method that may hit the database:
+
+```php
+if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+    $this->markTestSkipped('Database connection required');
+}
+```
+
+Prefer mocking or restructuring code to avoid DB calls in unit tests. Use the skip guard only when static/global DB calls cannot be avoided (e.g., deeply nested static method calls).
+
 **When to run E2E tests:** Run `npm run e2e` after making changes to:
 
 - Routes or URL handling (`src/backend/Router/`)
