@@ -49,8 +49,8 @@ $settings = array_map(
  */
 $themes = is_array($themes ?? null) ? $themes : [];
 
-/** @var string $currentLanguageCode Current language code for TTS settings */
-$currentLanguageCode = is_string($currentLanguageCode ?? null) ? json_encode($currentLanguageCode) : 'null';
+/** @var string $currentLanguageCode Current language code for TTS settings (already JSON-encoded by controller) */
+$currentLanguageCode = is_string($currentLanguageCode ?? null) ? $currentLanguageCode : 'null';
 
 /** @var string $languageOptions HTML options for language select */
 $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
@@ -642,7 +642,8 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
             <hr class="my-4">
 
             <!-- Browser Voice Settings - Alpine.js Component -->
-            <div x-data="ttsSettingsApp({ currentLanguageCode: <?php echo $currentLanguageCode; ?> })"
+            <script type="application/json" id="tts-settings-config">{"currentLanguageCode": <?php echo $currentLanguageCode; ?>}</script>
+            <div x-data="ttsSettingsApp"
                  @submit.window="saveSettings()">
 
                 <h4 class="subtitle is-6 mb-3">Browser Voice Settings</h4>
@@ -726,7 +727,7 @@ $languageOptions = is_string($languageOptions ?? null) ? $languageOptions : '';
                                         <span class="tag is-light">2x</span>
                                     </div>
                                     <div class="column is-narrow">
-                                        <span class="tag is-info" x-text="rate + 'x'"></span>
+                                        <span class="tag is-info" x-text="getRateDisplay()"></span>
                                     </div>
                                 </div>
                             </div>
