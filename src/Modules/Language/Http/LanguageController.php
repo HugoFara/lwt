@@ -289,9 +289,9 @@ class LanguageController extends BaseController
         $allLanguages = $this->languageFacade->getAllLanguages();
         $parserInfo = (new ParserRegistry())->getParserInfo();
 
-        // Dictionary data for admin users (single-user mode = always admin)
+        // Dictionary data (all users can see their dictionaries)
         $isAdmin = !Globals::isMultiUserEnabled() || Globals::isCurrentUserAdmin();
-        $dictionaries = $isAdmin ? $this->dictionaryFacade->getAllForLanguage($lid) : [];
+        $dictionaries = $this->dictionaryFacade->getAllForLanguage($lid);
 
         ?>
     <h2>Edit Language

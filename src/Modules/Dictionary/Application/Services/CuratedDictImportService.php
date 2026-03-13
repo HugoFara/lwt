@@ -63,7 +63,7 @@ class CuratedDictImportService
      * @param string $format     Dictionary format (stardict, csv)
      * @param string $name       Dictionary name
      *
-     * @return array{success: bool, dictId?: int, imported?: int, error?: string}
+     * @return array{success: bool, dictId?: int, imported?: int, vocabCreated?: int, error?: string}
      */
     public function importFromUrl(
         int $languageId,
@@ -121,10 +121,17 @@ class CuratedDictImportService
                 return ['success' => false, 'error' => 'No entries found in the dictionary file'];
             }
 
+            // Create vocabulary terms (status 1) from dictionary entries
+            $vocabCreated = $this->facade->createVocabularyFromEntries($dictId, $languageId);
+
+            // Auto-enable local dict mode if currently online-only
+            $this->facade->autoEnableLocalDictMode($languageId);
+
             return [
                 'success' => true,
                 'dictId' => $dictId,
                 'imported' => $count,
+                'vocabCreated' => $vocabCreated,
             ];
         } catch (RuntimeException $e) {
             return ['success' => false, 'error' => $e->getMessage()];

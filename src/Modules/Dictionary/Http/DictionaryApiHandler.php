@@ -150,7 +150,7 @@ class DictionaryApiHandler implements ApiRoutableInterface
      *                    - format: string (required, e.g. 'stardict')
      *                    - name: string (required)
      *
-     * @return array{success: bool, dictId?: int, imported?: int, error?: string}
+     * @return array{success: bool, dictId?: int, imported?: int, vocabCreated?: int, error?: string}
      */
     public function importCurated(array $data): array
     {

@@ -429,10 +429,20 @@ class TermImportController extends VocabularyBaseController
             $entries = $importer->parse($uploadedFile['tmp_name'], $options);
             $count = $this->dictionaryFacade->addEntriesBatch($dictId, $entries);
 
+            // Create vocabulary terms (status 1) from dictionary entries
+            $vocabCreated = $this->dictionaryFacade->createVocabularyFromEntries($dictId, $langId);
+
+            // Auto-enable local dict mode if currently online-only
+            $this->dictionaryFacade->autoEnableLocalDictMode($langId);
+
+            $vocabMsg = $vocabCreated > 0
+                ? ' and ' . number_format($vocabCreated) . ' vocabulary terms'
+                : '';
             echo '<div class="notification is-success">' .
                 '<button class="delete" aria-label="close"></button>' .
                 'Dictionary <strong>' . htmlspecialchars($dictName, ENT_QUOTES, 'UTF-8') .
-                '</strong> created with ' . number_format($count) . ' entries.</div>';
+                '</strong> created with ' . number_format($count) . ' entries' .
+                $vocabMsg . '.</div>';
         } catch (RuntimeException $e) {
             echo '<div class="notification is-danger">' .
                 '<button class="delete" aria-label="close"></button>' .

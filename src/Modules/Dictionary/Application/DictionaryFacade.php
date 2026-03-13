@@ -207,6 +207,31 @@ class DictionaryFacade
     }
 
     /**
+     * Create vocabulary terms (status 1) from dictionary entries.
+     *
+     * @param int $dictId     Dictionary ID
+     * @param int $languageId Language ID
+     *
+     * @return int Number of vocabulary terms created
+     */
+    public function createVocabularyFromEntries(int $dictId, int $languageId): int
+    {
+        return $this->dictionaryService->createVocabularyFromEntries($dictId, $languageId);
+    }
+
+    /**
+     * Auto-enable local dictionary mode if currently online-only.
+     *
+     * @param int $languageId Language ID
+     *
+     * @return void
+     */
+    public function autoEnableLocalDictMode(int $languageId): void
+    {
+        $this->dictionaryService->autoEnableLocalDictMode($languageId);
+    }
+
+    /**
      * Translate a word using Google Translate.
      *
      * @param string $word       Word to translate

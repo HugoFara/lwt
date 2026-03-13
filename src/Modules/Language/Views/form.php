@@ -184,6 +184,102 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 <!-- Dictionaries & Translation -->
                 <h5 class="title is-6 mt-4 mb-3">Dictionaries & Translation</h5>
 
+                <!-- Local Dictionaries (shown first - more valuable than online) -->
+                <?php if (!$isNew) : ?>
+                <div class="p-4 has-background-white-bis mb-4" style="border-radius: 6px;">
+                    <h6 class="title is-6 mb-3 is-flex is-align-items-center is-justify-content-space-between">
+                        <span>
+                            <?php echo IconHelper::render('book-open', ['alt' => 'Dictionaries']); ?>
+                            Local Dictionaries
+                        </span>
+                        <a href="<?php echo url('/word/upload?tab=dictionary'); ?>"
+                           class="button is-primary is-small">
+                            <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
+                            <span class="ml-1">Import</span>
+                        </a>
+                    </h6>
+
+                    <?php if (empty($dictionaries)) : ?>
+                    <p class="has-text-grey">
+                        No local dictionaries installed.
+                        <a href="<?php echo url('/word/upload?tab=dictionary'); ?>">Import one</a>
+                        to get offline lookups and auto-populate your vocabulary.
+                    </p>
+                    <?php else : ?>
+                    <table class="table is-fullwidth is-narrow is-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Entries</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($dictionaries as $dict) : ?>
+                            <tr>
+                                <td>
+                                    <?php echo htmlspecialchars($dict->name(), ENT_QUOTES, 'UTF-8'); ?>
+                                    <span class="tag is-light is-small ml-1"><?php
+                                        echo strtoupper($dict->sourceFormat());
+                                    ?></span>
+                                </td>
+                                <td><?php echo number_format($dict->entryCount()); ?></td>
+                                <td>
+                                    <?php if ($dict->isEnabled()) : ?>
+                                    <span class="tag is-success is-light">Enabled</span>
+                                    <?php else : ?>
+                                    <span class="tag is-warning is-light">Disabled</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="has-text-right">
+                                    <a href="<?php echo url('/word/upload?tab=dictionary'); ?>"
+                                       class="button is-small is-info is-outlined"
+                                       title="Import more entries">
+                                        <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
+                                    </a>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <p class="help mt-2">
+                        <a href="<?php echo url('/languages/' . $langId . '/dictionaries'); ?>">
+                            Manage dictionaries
+                        </a>
+                        (enable/disable, delete, change priority)
+                    </p>
+                    <?php endif; ?>
+
+                    <!-- Local Dictionary Mode -->
+                    <div class="field mt-3">
+                        <label class="label is-small">Lookup Mode</label>
+                        <div class="control">
+                            <div class="select is-small">
+                                <select name="LgLocalDictMode" id="LgLocalDictMode">
+                                    <option value="0" <?php echo $langLocalDictMode === 0 ? 'selected' : ''; ?>>
+                                        Online dictionaries only
+                                    </option>
+                                    <option value="1" <?php echo $langLocalDictMode === 1 ? 'selected' : ''; ?>>
+                                        Local first, online fallback
+                                    </option>
+                                    <option value="2" <?php echo $langLocalDictMode === 2 ? 'selected' : ''; ?>>
+                                        Local dictionaries only
+                                    </option>
+                                    <option value="3" <?php echo $langLocalDictMode === 3 ? 'selected' : ''; ?>>
+                                        Combined (show both)
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php else : ?>
+                <!-- Hidden field for new languages (default to local first) -->
+                <input type="hidden" name="LgLocalDictMode" value="1" />
+                <?php endif; ?>
+
+                <!-- Online Dictionary URIs -->
                 <!-- Dictionary 1 URI -->
                 <div class="field">
                     <label class="label">
@@ -299,98 +395,6 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                         </div>
                     </div>
                 </div>
-
-                <!-- Local Dictionary Mode -->
-                <div class="field mt-4">
-                    <label class="label">Local Dictionary Mode</label>
-                    <div class="control">
-                        <div class="select">
-                            <select name="LgLocalDictMode" id="LgLocalDictMode">
-                                <option value="0" <?php echo $langLocalDictMode === 0 ? 'selected' : ''; ?>>
-                                    Online dictionaries only
-                                </option>
-                                <option value="1" <?php echo $langLocalDictMode === 1 ? 'selected' : ''; ?>>
-                                    Local first, online fallback
-                                </option>
-                                <option value="2" <?php echo $langLocalDictMode === 2 ? 'selected' : ''; ?>>
-                                    Local dictionaries only
-                                </option>
-                                <option value="3" <?php echo $langLocalDictMode === 3 ? 'selected' : ''; ?>>
-                                    Combined (show both)
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <?php if (!$isNew && $isAdmin) : ?>
-                <!-- Local Dictionaries (admin only) -->
-                <div class="mt-4 p-4 has-background-white-bis" style="border-radius: 6px;">
-                    <h6 class="title is-6 mb-3 is-flex is-align-items-center is-justify-content-space-between">
-                        <span>
-                            <?php echo IconHelper::render('book-open', ['alt' => 'Dictionaries']); ?>
-                            Local Dictionaries
-                        </span>
-                        <a href="<?php echo url('/word/upload?tab=dictionary'); ?>"
-                           class="button is-primary is-small">
-                            <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
-                            <span class="ml-1">Import</span>
-                        </a>
-                    </h6>
-
-                    <?php if (empty($dictionaries)) : ?>
-                    <p class="has-text-grey">
-                        No local dictionaries installed.
-                        <a href="<?php echo url('/word/upload?tab=dictionary'); ?>">Import one</a>
-                        (CSV, JSON, or StarDict).
-                    </p>
-                    <?php else : ?>
-                    <table class="table is-fullwidth is-narrow is-striped mb-0">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Entries</th>
-                                <th>Status</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($dictionaries as $dict) : ?>
-                            <tr>
-                                <td>
-                                    <?php echo htmlspecialchars($dict->name(), ENT_QUOTES, 'UTF-8'); ?>
-                                    <span class="tag is-light is-small ml-1"><?php
-                                        echo strtoupper($dict->sourceFormat());
-                                    ?></span>
-                                </td>
-                                <td><?php echo number_format($dict->entryCount()); ?></td>
-                                <td>
-                                    <?php if ($dict->isEnabled()) : ?>
-                                    <span class="tag is-success is-light">Enabled</span>
-                                    <?php else : ?>
-                                    <span class="tag is-warning is-light">Disabled</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="has-text-right">
-                                    <a href="<?php echo url('/word/upload?tab=dictionary'); ?>"
-                                       class="button is-small is-info is-outlined"
-                                       title="Import more entries">
-                                        <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
-                                    </a>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    <p class="help mt-2">
-                        <a href="<?php echo url('/languages/' . $langId . '/dictionaries'); ?>">
-                            Manage dictionaries
-                        </a>
-                        (enable/disable, delete, change priority)
-                    </p>
-                    <?php endif; ?>
-                </div>
-                <?php endif; ?>
 
                 <hr class="my-5" />
 

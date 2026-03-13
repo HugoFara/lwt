@@ -22,6 +22,7 @@ use Lwt\Modules\Dictionary\Domain\LocalDictionary;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 
 /**
  * Service class for managing local dictionaries.
@@ -463,6 +464,61 @@ class LocalDictionaryService
             ->firstPrepared();
 
         return ((int) ($result['cnt'] ?? 0)) > 0;
+    }
+
+    /**
+     * Create vocabulary terms (status 1) from dictionary entries.
+     *
+     * Uses INSERT IGNORE to skip terms that already exist in the
+     * vocabulary for this language. Sets WoStatus = 1 (new/unknown)
+     * and WoTranslation from the dictionary definition.
+     *
+     * @param int $dictId     Dictionary ID
+     * @param int $languageId Language ID
+     *
+     * @return int Number of vocabulary terms created
+     */
+    public function createVocabularyFromEntries(int $dictId, int $languageId): int
+    {
+        $entriesTable = Globals::table('local_dictionary_entries');
+        $wordsTable = Globals::table('words');
+
+        $bindings = [$languageId, $dictId];
+        $userColumn = UserScopedQuery::insertColumn('words');
+        $userValue = UserScopedQuery::insertValuePrepared('words', $bindings);
+
+        $sql = "INSERT IGNORE INTO {$wordsTable} (
+                    WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
+                    WoSentence, WoRomanization, WoStatusChanged,
+                    WoTodayScore, WoTomorrowScore, WoRandom{$userColumn}
+                )
+                SELECT ?, le.LeTermLc, le.LeTerm, 1, le.LeDefinition,
+                       '', '', NOW(),
+                       0, -7, RAND(){$userValue}
+                FROM {$entriesTable} le
+                WHERE le.LeLdID = ?";
+
+        return Connection::preparedExecute($sql, $bindings);
+    }
+
+    /**
+     * Auto-enable local dictionary mode if currently set to online-only.
+     *
+     * When a dictionary is imported, if the language's local dict mode
+     * is 0 (online only), upgrade it to 1 (local first, online fallback).
+     *
+     * @param int $languageId Language ID
+     *
+     * @return void
+     */
+    public function autoEnableLocalDictMode(int $languageId): void
+    {
+        $currentMode = $this->getLocalDictMode($languageId);
+        if ($currentMode === 0) {
+            QueryBuilder::table('languages')
+                ->where('LgID', '=', $languageId)
+                ->updatePrepared(['LgLocalDictMode' => 1]);
+        }
     }
 
     /**

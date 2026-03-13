@@ -515,6 +515,7 @@ interface CuratedImportResponse {
   success: boolean;
   dictId?: number;
   imported?: number;
+  vocabCreated?: number;
   error?: string;
 }
 
@@ -692,7 +693,9 @@ export function curatedDictBrowser() {
         if (result.success) {
           this.batchMessages.push({
             success: true,
-            text: `${source.name}: imported ${result.imported ?? 0} entries as a lookup dictionary.`,
+            text: `${source.name}: imported ${result.imported ?? 0} entries` +
+              (result.vocabCreated ? ` and ${result.vocabCreated} vocabulary terms` : '') +
+              '.',
           });
         } else {
           this.batchMessages.push({
