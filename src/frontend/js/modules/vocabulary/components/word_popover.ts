@@ -87,6 +87,7 @@ export interface WordPopoverData {
   deleteWord(): Promise<void>;
   openEditForm(): void;
   getDictUrl(which: 'dict1' | 'dict2' | 'translator'): string;
+  hasDictUrl(which: 'dict1' | 'dict2' | 'translator'): boolean;
   isCurrentStatus(status: number): boolean;
   getStatusButtonClass(status: number): string;
 
@@ -249,6 +250,10 @@ export function wordPopoverData(): WordPopoverData {
 
     getDictUrl(which: 'dict1' | 'dict2' | 'translator'): string {
       return this.store.getDictUrl(which);
+    },
+
+    hasDictUrl(which: 'dict1' | 'dict2' | 'translator'): boolean {
+      return this.store.hasDictUrl(which);
     },
 
     isCurrentStatus(status: number): boolean {

@@ -132,15 +132,15 @@ namespace Lwt\Views\Text;
 
             <!-- Dictionary links -->
             <div class="buttons are-small mb-0">
-              <a :href="getDictUrl('dict1')" target="_blank"
+              <a x-show="hasDictUrl('dict1')" :href="getDictUrl('dict1')" target="_blank"
                  class="button is-link is-outlined is-small" rel="noopener" title="Dictionary 1">
-                D1
+                Dict 1
               </a>
-              <a :href="getDictUrl('dict2')" target="_blank"
+              <a x-show="hasDictUrl('dict2')" :href="getDictUrl('dict2')" target="_blank"
                  class="button is-link is-outlined is-small" rel="noopener" title="Dictionary 2">
-                D2
+                Dict 2
               </a>
-              <a :href="getDictUrl('translator')" target="_blank"
+              <a x-show="hasDictUrl('translator')" :href="getDictUrl('translator')" target="_blank"
                  class="button is-link is-outlined is-small" rel="noopener" title="Translate">
                 <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('languages', ['size' => 12]); ?>
               </a>

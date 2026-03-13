@@ -409,20 +409,22 @@ function buildWordModal(): string {
                 <p class="has-text-grey-dark is-size-5" x-text="store.currentWord.solution"></p>
               </div>
 
+              <template x-if="store.hasDictUrl('dict1') || store.hasDictUrl('dict2') || store.hasDictUrl('translator')">
               <div class="mb-4">
                 <p class="is-size-7 has-text-grey mb-2">Look up in dictionary:</p>
                 <div class="buttons">
-                  <a :href="store.getDictUrl('dict1')" target="_blank" class="button is-outlined" rel="noopener">
+                  <a x-show="store.hasDictUrl('dict1')" :href="store.getDictUrl('dict1')" target="_blank" class="button is-outlined" rel="noopener">
                     Dictionary 1
                   </a>
-                  <a :href="store.getDictUrl('dict2')" target="_blank" class="button is-outlined" rel="noopener">
+                  <a x-show="store.hasDictUrl('dict2')" :href="store.getDictUrl('dict2')" target="_blank" class="button is-outlined" rel="noopener">
                     Dictionary 2
                   </a>
-                  <a :href="store.getDictUrl('translator')" target="_blank" class="button is-outlined" rel="noopener">
+                  <a x-show="store.hasDictUrl('translator')" :href="store.getDictUrl('translator')" target="_blank" class="button is-outlined" rel="noopener">
                     Translate
                   </a>
                 </div>
               </div>
+              </template>
             </div>
           </template>
         </section>

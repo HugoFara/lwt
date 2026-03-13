@@ -149,23 +149,25 @@ namespace Lwt\Views\Text;
             </template>
 
             <!-- Dictionary links -->
+            <template x-if="hasDictUrl('dict1') || hasDictUrl('dict2') || hasDictUrl('translator')">
             <div class="pt-3" style="border-top: 1px solid #dbdbdb;">
               <p class="is-size-7 has-text-grey mb-2">Lookup:</p>
               <div class="buttons are-small">
-                <a :href="getDictUrl('dict1')" target="_blank" class="button is-outlined is-link" rel="noopener">
+                <a x-show="hasDictUrl('dict1')" :href="getDictUrl('dict1')" target="_blank" class="button is-outlined is-link" rel="noopener">
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['size' => 14]); ?>
                   <span class="ml-1">Dict 1</span>
                 </a>
-                <a :href="getDictUrl('dict2')" target="_blank" class="button is-outlined is-link" rel="noopener">
+                <a x-show="hasDictUrl('dict2')" :href="getDictUrl('dict2')" target="_blank" class="button is-outlined is-link" rel="noopener">
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['size' => 14]); ?>
                   <span class="ml-1">Dict 2</span>
                 </a>
-                <a :href="getDictUrl('translator')" target="_blank" class="button is-outlined is-link" rel="noopener">
+                <a x-show="hasDictUrl('translator')" :href="getDictUrl('translator')" target="_blank" class="button is-outlined is-link" rel="noopener">
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('languages', ['size' => 14]); ?>
                   <span class="ml-1">Translate</span>
                 </a>
               </div>
             </div>
+            </template>
           </div>
         </template>
 

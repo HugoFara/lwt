@@ -100,6 +100,7 @@ export interface WordStoreState {
   createQuickWord(hex: string, position: number, status: 98 | 99): Promise<boolean>;
   deleteWord(hex: string): Promise<boolean>;
   getDictUrl(which: 'dict1' | 'dict2' | 'translator'): string;
+  hasDictUrl(which: 'dict1' | 'dict2' | 'translator'): boolean;
   updateWordInStore(hex: string, updates: Partial<WordData>): void;
 }
 
@@ -467,6 +468,13 @@ function createWordStore(): WordStoreState {
       if (!template) return '#';
 
       return template.replace('lwt_term', encodeURIComponent(word.text));
+    },
+
+    /**
+     * Check if a dictionary URL is configured.
+     */
+    hasDictUrl(which: 'dict1' | 'dict2' | 'translator'): boolean {
+      return !!this.dictLinks[which];
     },
 
     /**

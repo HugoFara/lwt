@@ -129,6 +129,7 @@ export interface ReviewStoreState {
   stopTimer(): void;
   formatElapsed(seconds: number): string;
   getDictUrl(which: 'dict1' | 'dict2' | 'translator'): string;
+  hasDictUrl(which: 'dict1' | 'dict2' | 'translator'): boolean;
   getEditUrl(): string;
   openModal(): void;
   closeModal(): void;
@@ -458,6 +459,17 @@ function createReviewStore(initialValues?: ReviewStoreInitialValues): ReviewStor
       if (!template) return '#';
 
       return template.replace('lwt_term', encodeURIComponent(this.currentWord.text));
+    },
+
+    /**
+     * Check if a dictionary URL is configured.
+     */
+    hasDictUrl(which: 'dict1' | 'dict2' | 'translator'): boolean {
+      switch (which) {
+        case 'dict1': return !!this.langSettings.dict1Uri;
+        case 'dict2': return !!this.langSettings.dict2Uri;
+        case 'translator': return !!this.langSettings.translateUri;
+      }
     },
 
     /**
