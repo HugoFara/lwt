@@ -35,7 +35,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 
 $escapedLangName = htmlspecialchars($langName, ENT_QUOTES, 'UTF-8');
 $escapedSkipUrl = htmlspecialchars($skipUrl, ENT_QUOTES, 'UTF-8');
-$escapedVocabUrl = htmlspecialchars(url('/words') . '?filterlang=' . (int) $langId, ENT_QUOTES, 'UTF-8');
+$escapedVocabUrl = htmlspecialchars(url('/words') . '?filterlang=' . (string) $langId, ENT_QUOTES, 'UTF-8');
 
 $downloadIcon = IconHelper::render('download', ['alt' => 'Import', 'size' => 14]);
 $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 'size' => 14]);

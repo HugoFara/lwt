@@ -220,7 +220,7 @@ class TermImportController extends VocabularyBaseController
     {
         $currentLanguage = Settings::get('currentlanguage');
         $currentLanguageName = '';
-        if ($currentLanguage !== null) {
+        if ($currentLanguage !== '') {
             $currentLanguageName = $this->languageFacade->getLanguageName(
                 (int) $currentLanguage
             );

@@ -35,7 +35,7 @@ assert($currentLanguage === null || is_int($currentLanguage) || is_string($curre
 assert(is_array($languages));
 /** @var array<int, array{id: int, name: string}> $languages */
 /** @var string|null $activeTab */
-/** @var list<array<string, mixed>> $curatedDictionaries */
+/** @var list<array<string, mixed>>|null $curatedDictionaries */
 if (!isset($curatedDictionaries)) {
     $curatedDictionaries = [];
 }
@@ -74,7 +74,7 @@ echo PageLayoutHelper::buildActionCard($actions);
 <script type="application/json" id="word-upload-page-config"><?php echo json_encode(
     [
         'activeTab' => $activeTab ?: 'dictionary',
-        'currentLanguageId' => $currentLanguage ? (int) $currentLanguage : 0,
+        'currentLanguageId' => ($currentLanguage !== null && $currentLanguage !== '' && $currentLanguage !== 0) ? (int) $currentLanguage : 0,
         'currentLanguageName' => $currentLanguageName ?? '',
     ],
     JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT
