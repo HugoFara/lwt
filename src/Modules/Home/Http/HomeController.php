@@ -96,14 +96,10 @@ class HomeController extends BaseController
             ];
         }
 
-        PageLayoutHelper::renderPageStartNobody("Home");
-        echo PageLayoutHelper::buildLogo();
-        echo '<main id="main-content">';
-        echo '<h2>Home</h2>';
+        PageLayoutHelper::renderPageStart("Home", true, 'home');
 
         include __DIR__ . '/../Views/index.php';
 
-        echo '</main>';
         PageLayoutHelper::renderPageEnd();
     }
 

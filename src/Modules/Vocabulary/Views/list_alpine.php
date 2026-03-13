@@ -59,25 +59,6 @@ echo PageLayoutHelper::buildActionCard([
     <!-- Filter bar -->
     <div x-show="!loading" class="box mb-4">
         <div class="columns is-multiline is-vcentered">
-            <!-- Language filter -->
-            <div class="column is-narrow">
-                <div class="field has-addons">
-                    <div class="control">
-                        <span class="button is-static is-small">Language</span>
-                    </div>
-                    <div class="control">
-                        <div class="select is-small">
-                            <select x-model="filters.lang" @change="setFilter('lang', filters.lang)">
-                                <option value="">All Languages</option>
-                                <template x-for="lang in filterOptions.languages" :key="lang.id">
-                                    <option :value="lang.id" x-text="lang.name"></option>
-                                </template>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Text filter (only when language is selected) -->
             <div class="column is-narrow" x-show="filters.lang && filterOptions.texts.length > 0">
                 <div class="field has-addons">
@@ -327,7 +308,6 @@ echo PageLayoutHelper::buildActionCard([
                 <tr>
                     <th class="has-text-centered" style="width: 3em;">Mark</th>
                     <th class="has-text-centered" style="width: 5em;">Act.</th>
-                    <th x-show="!filters.lang">Lang.</th>
                     <th>Term / Romanization</th>
                     <th>Translation [Tags]</th>
                     <th class="has-text-centered" style="width: 3em;" title="Has valid sentence?">Se.?</th>
@@ -369,9 +349,6 @@ echo PageLayoutHelper::buildActionCard([
                                 </a>
                             </div>
                         </td>
-
-                        <!-- Language (when showing all) -->
-                        <td x-show="!filters.lang" class="has-text-centered" x-text="word.langName"></td>
 
                         <!-- Term / Romanization -->
                         <td>
@@ -578,11 +555,6 @@ echo PageLayoutHelper::buildActionCard([
 
                     <div class="is-flex is-justify-content-space-between is-align-items-center">
                         <div class="tags">
-                            <span
-                                x-show="!filters.lang && word.langName"
-                                class="tag is-info is-light"
-                                x-text="word.langName"
-                            ></span>
                             <span x-show="word.tags" class="tag is-light" x-text="word.tags"></span>
                             <template x-if="word.sentenceOk">
                                 <span class="tag is-success is-light" :title="word.sentence">

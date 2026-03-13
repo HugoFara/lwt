@@ -20,6 +20,7 @@ namespace Lwt\Shared\UI\Helpers;
 
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\UI\Assets\ViteHelper;
@@ -69,6 +70,36 @@ class PageLayoutHelper
         }
 
         return ' data-theme="' . htmlspecialchars($themeMode, ENT_QUOTES, 'UTF-8') . '"';
+    }
+
+    /**
+     * Fetch language list for the navbar dropdown.
+     *
+     * @return array{languages: array<int, array{id: int, name: string}>, currentId: int}
+     */
+    private static function getLanguagesForNavbar(): array
+    {
+        try {
+            $languages = QueryBuilder::table('languages')
+                ->select(['LgID', 'LgName'])
+                ->where('LgName', '<>', '')
+                ->orderBy('LgName')
+                ->getPrepared();
+
+            $result = [];
+            foreach ($languages as $row) {
+                $result[] = [
+                    'id' => (int) $row['LgID'],
+                    'name' => (string) $row['LgName'],
+                ];
+            }
+
+            $currentId = (int) Settings::getWithDefault('currentlanguage');
+
+            return ['languages' => $result, 'currentId' => $currentId];
+        } catch (\Throwable $e) {
+            return ['languages' => [], 'currentId' => 0];
+        }
     }
 
     /**
@@ -127,6 +158,33 @@ class PageLayoutHelper
         $escapedCounterpart = htmlspecialchars($themeCounterpart, ENT_QUOTES, 'UTF-8');
         $escapedThemeDir = htmlspecialchars($themeDir, ENT_QUOTES, 'UTF-8');
         $autoThemeAttr = $isAutoTheme ? 'true' : 'false';
+
+        // Language selector data
+        $langData = self::getLanguagesForNavbar();
+        $langOptions = '';
+        foreach ($langData['languages'] as $lang) {
+            $langId = $lang['id'];
+            $langName = htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8');
+            $selected = ($langId === $langData['currentId']) ? ' selected' : '';
+            $langOptions .= '<option value="' . $langId . '"' . $selected . '>'
+                . $langName . '</option>';
+        }
+        $langSelectorHtml = '';
+        if ($langOptions !== '') {
+            $langSelectorHtml = <<<LANG
+            <div class="navbar-item">
+                <div class="field has-addons mb-0">
+                    <div class="control">
+                        <div class="select is-small">
+                            <select @change="switchLanguage(\$event)" data-current-lang="{$langData['currentId']}">
+                                {$langOptions}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+LANG;
+        }
 
         return <<<HTML
 <nav class="navbar is-light" role="navigation" aria-label="main navigation" x-data="navbar()">
@@ -187,6 +245,8 @@ class PageLayoutHelper
                     </a>
                 </div>
             </div>
+
+            {$langSelectorHtml}
 
             <a class="navbar-item" href="{$base}/admin/statistics">
                 {$statsIcon}

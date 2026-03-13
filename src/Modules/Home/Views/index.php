@@ -236,20 +236,6 @@ $base = UrlUtilities::getBasePath();
 <!-- Current text section -->
 <section class="section py-4 mb-4">
     <div class="container">
-        <!-- Language tabs -->
-        <div class="tabs is-boxed is-medium mb-4">
-            <ul>
-                <?php /** @var array{id: int, name: string} $lang */ foreach ($languages as $lang) : ?>
-                <li :class="{ 'is-active': currentLanguageId === <?php echo $lang['id']; ?> }">
-                    <a @click.prevent="switchLanguage(<?php echo $lang['id']; ?>, '<?php echo htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8'); ?>')"
-                       href="#">
-                        <span><?php echo htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8'); ?></span>
-                    </a>
-                </li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-
         <!-- Text cards (single row, horizontal scroll) -->
         <div style="display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem;">
             <!-- Current text card -->

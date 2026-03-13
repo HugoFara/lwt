@@ -36,14 +36,10 @@ namespace Lwt\Views\Feed;
 <form name="form1" action="/feeds" data-auto-submit-button="querybutton">
 <table class="table is-bordered" style="border-left: none;border-top: none; background-color:inherit">
 <tr>
-<th class="borderleft" colspan="2">Language:<select name="filterlang"
-@change="handleLanguageFilter($event)">
-    <?php echo \Lwt\Shared\UI\Helpers\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
-</select>
-</th>
-<th class="borderright" colspan="2">
+<th class="borderleft" colspan="2">
 <input type="button" value="Mark All" @click="markAll()" />
 <input type="button" value="Mark None" @click="markNone()" /></th>
+<th class="borderright" colspan="2">&nbsp;</th>
 </tr>
 <tr>
 <td colspan="4"

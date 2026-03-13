@@ -3,11 +3,12 @@
 declare(strict_types=1);
 
 /**
- * Active Text List View - Display grouped texts by language
+ * Active Text List View - Display texts for current language
  *
  * Variables expected:
  * - $message: string - Status/error message to display
  * - $statuses: array - Word status definitions
+ * - $activeLanguageId: int - Currently selected language ID
  *
  * PHP version 8.1
  *
@@ -22,6 +23,7 @@ declare(strict_types=1);
  *
  * @var string $message
  * @var array<int, array{status: int, label: string}> $statuses
+ * @var int $activeLanguageId
  */
 
 namespace Lwt\Views\Text;
@@ -50,7 +52,7 @@ echo PageLayoutHelper::buildActionCard(
 );
 ?>
 
-<!-- Alpine.js container for grouped texts -->
+<!-- Alpine.js container for texts list -->
 <div x-data="textsGroupedApp" x-cloak>
 
     <!-- Loading state -->
@@ -61,8 +63,8 @@ echo PageLayoutHelper::buildActionCard(
         <p class="mt-2">Loading texts...</p>
     </div>
 
-    <!-- Global sort control -->
-    <div x-show="!loading && languages.length > 0" class="box mb-4">
+    <!-- Sort control and summary -->
+    <div x-show="!loading && texts.length > 0" class="box mb-4">
         <div class="level">
             <div class="level-left">
                 <div class="level-item">
@@ -90,278 +92,237 @@ echo PageLayoutHelper::buildActionCard(
         </div>
     </div>
 
-    <!-- Language sections -->
-    <template x-for="lang in languages" :key="lang.id">
-        <div class="card mb-4">
-            <!-- Collapsible header -->
-            <header class="card-header is-clickable" @click="toggleLanguage(lang.id)" style="user-select: none;">
-                <p class="card-header-title">
-                    <span x-text="lang.name"></span>
-                    <span
-                        class="tag is-info ml-2"
-                        x-text="lang.text_count + ' text' + (lang.text_count === 1 ? '' : 's')"></span>
-                </p>
-                <button
-                    class="card-header-icon"
-                    type="button"
-                    :aria-label="isCollapsed(lang.id) ?
-                        'Expand ' + lang.name + ' texts' :
-                        'Collapse ' + lang.name + ' texts'"
-                    :aria-expanded="!isCollapsed(lang.id)">
-                    <span class="icon">
-                        <i :data-lucide="isCollapsed(lang.id) ? 'chevron-right' : 'chevron-down'"></i>
-                    </span>
-                </button>
-            </header>
-
-            <!-- Content (texts for this language) -->
-            <div class="card-content" x-show="!isCollapsed(lang.id)" x-collapse.duration.200ms>
-                <!-- Loading state for this language -->
-                <div
-                    x-show="isLoadingMore(lang.id) && getTextsForLanguage(lang.id).length === 0"
-                    class="has-text-centered py-4">
-                    <span class="icon">
-                        <i data-lucide="loader-2" class="icon-spin"></i>
-                    </span>
-                    <span class="ml-2">Loading...</span>
-                </div>
-
-                <!-- Per-language bulk actions -->
-                <div x-show="getTextsForLanguage(lang.id).length > 0" class="level mb-4">
-                    <div class="level-left">
-                        <div class="level-item">
-                            <div class="buttons are-small">
-                                <button type="button" class="button" :data-lang-id="lang.id" @click="markAllFromEvent($event)">
-                                    <?php echo IconHelper::render('check-square', ['size' => 14]); ?>
-                                    <span class="ml-1">Mark All</span>
-                                </button>
-                                <button type="button" class="button" :data-lang-id="lang.id" @click="unmarkAllFromEvent($event)">
-                                    <?php echo IconHelper::render('square', ['size' => 14]); ?>
-                                    <span class="ml-1">Mark None</span>
-                                </button>
-                                <span
-                                    x-show="hasMarkedInLanguage(lang.id)"
-                                    class="tag is-warning ml-2"
-                                    x-text="getMarkedCount(lang.id) + ' selected'"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="level-right">
-                        <div class="level-item">
-                            <div class="field has-addons">
-                                <div class="control">
-                                    <span class="button is-static is-small">
-                                        <?php echo IconHelper::render('zap', ['size' => 14]); ?>
-                                        <span class="ml-1">Actions</span>
-                                    </span>
-                                </div>
-                                <div class="control">
-                                    <div class="select is-small">
-                                        <select
-                                            :disabled="!hasMarkedInLanguage(lang.id)"
-                                            :data-lang-id="lang.id"
-                                            @change="handleMultiActionFromEvent($event)"
-                                            aria-label="Bulk actions for selected texts">
-                                            <?php echo SelectOptionsBuilder::forMultipleTextsActions(); ?>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Text cards grid -->
-                <div class="columns is-multiline text-cards" x-show="getTextsForLanguage(lang.id).length > 0">
-                    <template x-for="text in getTextsForLanguage(lang.id)" :key="text.id">
-                        <div class="column is-4-desktop is-6-tablet is-12-mobile">
-                            <div class="card text-card">
-                                <header class="card-header">
-                                    <label class="card-header-icon checkbox-wrapper" @click.stop>
-                                        <input type="checkbox"
-                                               class="markcheck"
-                                               :aria-label="'Select ' + text.title"
-                                               :checked="isMarked(lang.id, text.id)"
-                                               :data-lang-id="lang.id"
-                                               :data-text-id="text.id"
-                                               @change="toggleMarkFromEvent($event)" />
-                                    </label>
-                                    <p class="card-header-title" x-text="text.title"></p>
-                                    <div class="card-header-icon card-icons">
-                                        <span x-show="text.has_audio" title="With Audio">
-                                            <?php echo IconHelper::render('volume-2', ['size' => 16]); ?>
-                                        </span>
-                                        <a
-                                            x-show="text.has_source"
-                                            :href="text.source_uri"
-                                            target="_blank"
-                                            title="Source Link"
-                                            @click.stop>
-                                            <?php echo IconHelper::render('external-link', ['size' => 16]); ?>
-                                        </a>
-                                        <a
-                                            x-show="text.annotated"
-                                            :href="'/text/' + text.id + '/print'"
-                                            title="Annotated Text"
-                                            @click.stop>
-                                            <?php echo IconHelper::render('file-text', ['size' => 16]); ?>
-                                        </a>
-                                    </div>
-                                </header>
-
-                                <div class="card-content">
-                                    <!-- Tags -->
-                                    <div x-show="text.taglist" class="text-meta mb-3">
-                                        <div class="tags">
-                                            <template x-for="tag in parseTags(text.taglist)" :key="tag">
-                                                <span class="tag is-info is-light is-small" x-text="tag"></span>
-                                            </template>
-                                        </div>
-                                    </div>
-
-                                    <!-- Word Statistics -->
-                                    <div class="text-stats">
-                                        <template x-if="getStatsForText(lang.id, text.id)">
-                                            <div>
-                                                <div class="stat-row">
-                                                    <div
-                                                        class="stat-item"
-                                                        title="Total number of unique words in this text">
-                                                        <span class="stat-label">Total</span>
-                                                        <span
-                                                            class="stat-value"
-                                                            x-text="getStatTotal(lang.id, text.id)"></span>
-                                                    </div>
-                                                    <div
-                                                        class="stat-item"
-                                                        title="Words you have saved to your vocabulary">
-                                                        <span class="stat-label">Saved</span>
-                                                        <span class="stat-value">
-                                                            <a
-                                                                class="status4"
-                                                                :href="'/words/edit?page=1&query=&status=' +
-                                                                    '&tag12=0&tag2=&tag1=&text_mode=0&text=' +
-                                                                    text.id"
-                                                                @click.stop
-                                                                x-text="getStatSaved(lang.id, text.id)"></a>
-                                                        </span>
-                                                    </div>
-                                                    <div
-                                                        class="stat-item"
-                                                        title="Words you haven't saved yet">
-                                                        <span class="stat-label">Unknown</span>
-                                                        <span
-                                                            class="stat-value status0"
-                                                            x-text="getStatUnknown(lang.id, text.id)"></span>
-                                                    </div>
-                                                    <div
-                                                        class="stat-item"
-                                                        title="Percentage of unknown words">
-                                                        <span class="stat-label">Unkn.%</span>
-                                                        <span
-                                                            class="stat-value"
-                                                            x-text="getStatUnknownPercent(lang.id, text.id)">
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <!-- Status distribution bar chart -->
-                                                <div class="status-bar-chart">
-                                                    <template
-                                                        x-for="seg in getStatusSegments(lang.id, text.id)"
-                                                        :key="seg.status">
-                                                        <div :class="'status-segment bc' + seg.status"
-                                                             :style="'width: ' + seg.percent"
-                                                             :title="seg.label"></div>
-                                                    </template>
-                                                </div>
-                                            </div>
-                                        </template>
-                                        <template x-if="!getStatsForText(lang.id, text.id)">
-                                            <div class="stat-row">
-                                                <span class="has-text-grey is-size-7">Loading statistics...</span>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                <footer class="card-footer">
-                                    <a :href="'/text/' + text.id + '/read'" class="card-footer-item is-primary-action">
-                                        <?php echo IconHelper::render('book-open', ['size' => 16]); ?>
-                                        <span>Read</span>
-                                    </a>
-                                    <a :href="'/review?text=' + text.id" class="card-footer-item">
-                                        <?php echo IconHelper::render('circle-help', ['size' => 16]); ?>
-                                        <span>Review</span>
-                                    </a>
-                                    <div class="card-footer-item has-dropdown" x-data="dropdownToggle">
-                                        <a @click.prevent.stop="toggle()" class="dropdown-trigger-link">
-                                            <?php echo IconHelper::render('more-horizontal', ['size' => 16]); ?>
-                                            <span>More</span>
-                                        </a>
-                                        <div
-                                            class="dropdown-menu card-dropdown"
-                                            x-show="open"
-                                            @click.outside="close()"
-                                            x-cloak>
-                                            <div class="dropdown-content">
-                                                <a :href="'/text/' + text.id + '/print-plain'" class="dropdown-item">
-                                                    <?php echo IconHelper::render('printer', ['size' => 14]); ?>
-                                                    <span>Print</span>
-                                                </a>
-                                                <a href="#"
-                                                   class="dropdown-item"
-                                                   :data-url="'/texts/' + text.id + '/archive'"
-                                                   @click.prevent="handlePostActionFromEvent($event)">
-                                                    <?php echo IconHelper::render('archive', ['size' => 14]); ?>
-                                                    <span>Archive</span>
-                                                </a>
-                                                <a :href="'/texts/' + text.id + '/edit'" class="dropdown-item">
-                                                    <?php echo IconHelper::render('file-pen', ['size' => 14]); ?>
-                                                    <span>Edit</span>
-                                                </a>
-                                                <hr class="dropdown-divider">
-                                                <a
-                                                    class="dropdown-item has-text-danger"
-                                                    :data-url="'/texts/' + text.id"
-                                                    @click.prevent="handleRestDeleteFromEvent($event)">
-                                                    <?php echo IconHelper::render('trash-2', ['size' => 14]); ?>
-                                                    <span>Delete</span>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </footer>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <!-- Per-language "Show More" pagination -->
-                <div x-show="hasMoreTexts(lang.id)" class="has-text-centered mt-4">
-                    <button type="button"
-                            class="button is-info is-outlined"
-                            @click="loadMoreTexts(lang.id)"
-                            :class="{ 'is-loading': isLoadingMore(lang.id) }">
-                        <span class="icon">
-                            <i data-lucide="chevron-down"></i>
-                        </span>
-                        <span>Show More</span>
+    <!-- Bulk actions -->
+    <div x-show="!loading && texts.length > 0" class="level mb-4">
+        <div class="level-left">
+            <div class="level-item">
+                <div class="buttons are-small">
+                    <button type="button" class="button" @click="markAllTexts(true)">
+                        <?php echo IconHelper::render('check-square', ['size' => 14]); ?>
+                        <span class="ml-1">Mark All</span>
                     </button>
+                    <button type="button" class="button" @click="markAllTexts(false)">
+                        <?php echo IconHelper::render('square', ['size' => 14]); ?>
+                        <span class="ml-1">Mark None</span>
+                    </button>
+                    <span
+                        x-show="markedTexts.size > 0"
+                        class="tag is-warning ml-2"
+                        x-text="markedTexts.size + ' selected'"></span>
                 </div>
             </div>
         </div>
-    </template>
+        <div class="level-right">
+            <div class="level-item">
+                <div class="field has-addons">
+                    <div class="control">
+                        <span class="button is-static is-small">
+                            <?php echo IconHelper::render('zap', ['size' => 14]); ?>
+                            <span class="ml-1">Actions</span>
+                        </span>
+                    </div>
+                    <div class="control">
+                        <div class="select is-small">
+                            <select
+                                :disabled="markedTexts.size === 0"
+                                @change="handleMultiAction($event)"
+                                aria-label="Bulk actions for selected texts">
+                                <?php echo SelectOptionsBuilder::forMultipleTextsActions(); ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text cards grid -->
+    <div class="columns is-multiline text-cards" x-show="!loading && texts.length > 0">
+        <template x-for="text in texts" :key="text.id">
+            <div class="column is-4-desktop is-6-tablet is-12-mobile">
+                <div class="card text-card">
+                    <header class="card-header">
+                        <label class="card-header-icon checkbox-wrapper" @click.stop>
+                            <input type="checkbox"
+                                   class="markcheck"
+                                   :aria-label="'Select ' + text.title"
+                                   :checked="isTextMarked(text.id)"
+                                   :data-text-id="text.id"
+                                   @change="toggleTextMark($event)" />
+                        </label>
+                        <p class="card-header-title" x-text="text.title"></p>
+                        <div class="card-header-icon card-icons">
+                            <span x-show="text.has_audio" title="With Audio">
+                                <?php echo IconHelper::render('volume-2', ['size' => 16]); ?>
+                            </span>
+                            <a
+                                x-show="text.has_source"
+                                :href="text.source_uri"
+                                target="_blank"
+                                title="Source Link"
+                                @click.stop>
+                                <?php echo IconHelper::render('external-link', ['size' => 16]); ?>
+                            </a>
+                            <a
+                                x-show="text.annotated"
+                                :href="'/text/' + text.id + '/print'"
+                                title="Annotated Text"
+                                @click.stop>
+                                <?php echo IconHelper::render('file-text', ['size' => 16]); ?>
+                            </a>
+                        </div>
+                    </header>
+
+                    <div class="card-content">
+                        <!-- Tags -->
+                        <div x-show="text.taglist" class="text-meta mb-3">
+                            <div class="tags">
+                                <template x-for="tag in parseTags(text.taglist)" :key="tag">
+                                    <span class="tag is-info is-light is-small" x-text="tag"></span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Word Statistics -->
+                        <div class="text-stats">
+                            <template x-if="getStatsForText(text.id)">
+                                <div>
+                                    <div class="stat-row">
+                                        <div
+                                            class="stat-item"
+                                            title="Total number of unique words in this text">
+                                            <span class="stat-label">Total</span>
+                                            <span
+                                                class="stat-value"
+                                                x-text="getStatTotal(text.id)"></span>
+                                        </div>
+                                        <div
+                                            class="stat-item"
+                                            title="Words you have saved to your vocabulary">
+                                            <span class="stat-label">Saved</span>
+                                            <span class="stat-value">
+                                                <a
+                                                    class="status4"
+                                                    :href="'/words/edit?page=1&query=&status=' +
+                                                        '&tag12=0&tag2=&tag1=&text_mode=0&text=' +
+                                                        text.id"
+                                                    @click.stop
+                                                    x-text="getStatSaved(text.id)"></a>
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="stat-item"
+                                            title="Words you haven't saved yet">
+                                            <span class="stat-label">Unknown</span>
+                                            <span
+                                                class="stat-value status0"
+                                                x-text="getStatUnknown(text.id)"></span>
+                                        </div>
+                                        <div
+                                            class="stat-item"
+                                            title="Percentage of unknown words">
+                                            <span class="stat-label">Unkn.%</span>
+                                            <span
+                                                class="stat-value"
+                                                x-text="getStatUnknownPercent(text.id)">
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!-- Status distribution bar chart -->
+                                    <div class="status-bar-chart">
+                                        <template
+                                            x-for="seg in getStatusSegments(text.id)"
+                                            :key="seg.status">
+                                            <div :class="'status-segment bc' + seg.status"
+                                                 :style="'width: ' + seg.percent"
+                                                 :title="seg.label"></div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="!getStatsForText(text.id)">
+                                <div class="stat-row">
+                                    <span class="has-text-grey is-size-7">Loading statistics...</span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <footer class="card-footer">
+                        <a :href="'/text/' + text.id + '/read'" class="card-footer-item is-primary-action">
+                            <?php echo IconHelper::render('book-open', ['size' => 16]); ?>
+                            <span>Read</span>
+                        </a>
+                        <a :href="'/review?text=' + text.id" class="card-footer-item">
+                            <?php echo IconHelper::render('circle-help', ['size' => 16]); ?>
+                            <span>Review</span>
+                        </a>
+                        <div class="card-footer-item has-dropdown" x-data="dropdownToggle">
+                            <a @click.prevent.stop="toggle()" class="dropdown-trigger-link">
+                                <?php echo IconHelper::render('more-horizontal', ['size' => 16]); ?>
+                                <span>More</span>
+                            </a>
+                            <div
+                                class="dropdown-menu card-dropdown"
+                                x-show="open"
+                                @click.outside="close()"
+                                x-cloak>
+                                <div class="dropdown-content">
+                                    <a :href="'/text/' + text.id + '/print-plain'" class="dropdown-item">
+                                        <?php echo IconHelper::render('printer', ['size' => 14]); ?>
+                                        <span>Print</span>
+                                    </a>
+                                    <a href="#"
+                                       class="dropdown-item"
+                                       :data-url="'/texts/' + text.id + '/archive'"
+                                       @click.prevent="handlePostActionFromEvent($event)">
+                                        <?php echo IconHelper::render('archive', ['size' => 14]); ?>
+                                        <span>Archive</span>
+                                    </a>
+                                    <a :href="'/texts/' + text.id + '/edit'" class="dropdown-item">
+                                        <?php echo IconHelper::render('file-pen', ['size' => 14]); ?>
+                                        <span>Edit</span>
+                                    </a>
+                                    <hr class="dropdown-divider">
+                                    <a
+                                        class="dropdown-item has-text-danger"
+                                        :data-url="'/texts/' + text.id"
+                                        @click.prevent="handleRestDeleteFromEvent($event)">
+                                        <?php echo IconHelper::render('trash-2', ['size' => 14]); ?>
+                                        <span>Delete</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Show More pagination -->
+    <div x-show="!loading && hasMore" class="has-text-centered mt-4">
+        <button type="button"
+                class="button is-info is-outlined"
+                @click="loadMore()"
+                :class="{ 'is-loading': loadingMore }">
+            <span class="icon">
+                <i data-lucide="chevron-down"></i>
+            </span>
+            <span>Show More</span>
+        </button>
+    </div>
 
     <!-- Empty state -->
-    <div x-show="!loading && languages.length === 0" class="notification is-info is-light">
-        <p>No texts found.
+    <div x-show="!loading && texts.length === 0" class="notification is-info is-light">
+        <p>No texts found for this language.
             <a href="<?php
                 echo \Lwt\Shared\Infrastructure\Http\UrlUtilities::url('/texts/new');
             ?>">Create your first text</a> to get started!</p>
     </div>
 </div>
 
-<!-- Config for Alpine - pass statuses and active language for default expansion -->
+<!-- Config for Alpine - pass statuses and active language -->
 <script type="application/json" id="texts-grouped-config"><?php echo json_encode(
     [
     'statuses' => $statuses,

@@ -9,6 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
+import { setLangAsync } from '@modules/language/stores/language_settings';
 
 interface NavbarData {
   isOpen: boolean;
@@ -20,6 +21,7 @@ interface NavbarData {
   toggleDropdown(name: string): void;
   closeDropdowns(): void;
   navigate(url: string): void;
+  switchLanguage(event: Event): void;
 }
 
 /**
@@ -74,6 +76,18 @@ export function navbarData(): NavbarData {
     navigate(url: string) {
       this.close();
       window.location.href = url;
+    },
+
+    switchLanguage(event: Event) {
+      const select = event.target as HTMLSelectElement;
+      const languageId = select.value;
+      if (!languageId) return;
+
+      setLangAsync(languageId).then(() => {
+        window.location.reload();
+      }).catch((error) => {
+        console.error('Failed to change language:', error);
+      });
     }
   };
 }
