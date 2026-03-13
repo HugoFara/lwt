@@ -23,11 +23,6 @@ describe('home_app.ts', () => {
 
   describe('homeData', () => {
     describe('initial state', () => {
-      it('initializes with empty collapsedMenus array', () => {
-        const data = homeData();
-        expect(data.collapsedMenus).toEqual([]);
-      });
-
       it('initializes with all warnings hidden', () => {
         const data = homeData();
         expect(data.warnings.phpOutdated.visible).toBe(false);
@@ -40,80 +35,6 @@ describe('home_app.ts', () => {
         expect(data.warnings.phpOutdated.type).toBe('danger');
         expect(data.warnings.cookiesDisabled.type).toBe('warning');
         expect(data.warnings.updateAvailable.type).toBe('info');
-      });
-    });
-
-    describe('init', () => {
-      it('loads menu state on first visit and collapses all except languages and texts', () => {
-        const data = homeData();
-        data.init();
-
-        // The code collapses: terms, feeds, admin, settings (not texts or languages)
-        expect(data.collapsedMenus).toContain('terms');
-        expect(data.collapsedMenus).toContain('feeds');
-        expect(data.collapsedMenus).toContain('admin');
-        expect(data.collapsedMenus).toContain('settings');
-        expect(data.collapsedMenus).not.toContain('languages');
-        expect(data.collapsedMenus).not.toContain('texts');
-      });
-
-      it('restores saved menu state from localStorage', () => {
-        localStorage.setItem('lwt_collapsed_menus', JSON.stringify(['languages', 'texts']));
-
-        const data = homeData();
-        data.init();
-
-        expect(data.collapsedMenus).toContain('languages');
-        expect(data.collapsedMenus).toContain('texts');
-        expect(data.collapsedMenus).not.toContain('terms');
-      });
-    });
-
-    describe('isCollapsed', () => {
-      it('returns true for collapsed menu', () => {
-        const data = homeData();
-        data.collapsedMenus = ['texts', 'terms'];
-
-        expect(data.isCollapsed('texts')).toBe(true);
-        expect(data.isCollapsed('terms')).toBe(true);
-      });
-
-      it('returns false for expanded menu', () => {
-        const data = homeData();
-        data.collapsedMenus = ['texts'];
-
-        expect(data.isCollapsed('languages')).toBe(false);
-        expect(data.isCollapsed('terms')).toBe(false);
-      });
-    });
-
-    describe('toggleMenu', () => {
-      it('collapses an expanded menu', () => {
-        const data = homeData();
-        data.collapsedMenus = [];
-
-        data.toggleMenu('languages');
-
-        expect(data.collapsedMenus).toContain('languages');
-      });
-
-      it('expands a collapsed menu', () => {
-        const data = homeData();
-        data.collapsedMenus = ['languages'];
-
-        data.toggleMenu('languages');
-
-        expect(data.collapsedMenus).not.toContain('languages');
-      });
-
-      it('saves state to localStorage after toggle', () => {
-        const data = homeData();
-        data.collapsedMenus = [];
-
-        data.toggleMenu('texts');
-
-        const saved = JSON.parse(localStorage.getItem('lwt_collapsed_menus') || '[]');
-        expect(saved).toContain('texts');
       });
     });
 

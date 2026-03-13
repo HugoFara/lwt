@@ -13,8 +13,6 @@ import { initIcons } from '@shared/icons/lucide_icons';
 import { setLangAsync } from '@modules/language/stores/language_settings';
 import type { LanguageChangedEvent, TextStats } from '@modules/language/stores/language_settings';
 
-const STORAGE_KEY = 'lwt_collapsed_menus';
-
 interface LastTextInfo {
   id: number;
   title: string;
@@ -56,9 +54,6 @@ interface LanguageNotification {
 }
 
 interface HomeData {
-  // Menu state
-  collapsedMenus: string[];
-
   // Current language ID (for active tab highlighting)
   currentLanguageId: number;
 
@@ -83,10 +78,6 @@ interface HomeData {
 
   // Methods
   init(): void;
-  loadMenuState(): void;
-  saveMenuState(): void;
-  isCollapsed(menuId: string): boolean;
-  toggleMenu(menuId: string): void;
   initWarnings(): void;
   initLanguageChangeListener(): void;
   switchLanguage(languageId: number, languageName: string): Promise<void>;
@@ -104,8 +95,6 @@ interface HomeData {
  */
 export function homeData(): HomeData {
   return {
-    collapsedMenus: [],
-
     currentLanguageId: 0,
 
     lastText: null,
@@ -143,51 +132,11 @@ export function homeData(): HomeData {
     },
 
     init() {
-      // Load collapsed menus from localStorage
-      this.loadMenuState();
-
       // Initialize warnings and last text from config
       this.initWarnings();
 
       // Listen for language changes
       this.initLanguageChangeListener();
-    },
-
-    loadMenuState() {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored === null) {
-          // First visit: collapse all except Texts
-          this.collapsedMenus = ['terms', 'feeds', 'admin', 'settings'];
-          this.saveMenuState();
-        } else {
-          this.collapsedMenus = JSON.parse(stored);
-        }
-      } catch {
-        this.collapsedMenus = [];
-      }
-    },
-
-    saveMenuState() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.collapsedMenus));
-      } catch {
-        // localStorage not available
-      }
-    },
-
-    isCollapsed(menuId: string): boolean {
-      return this.collapsedMenus.includes(menuId);
-    },
-
-    toggleMenu(menuId: string) {
-      const index = this.collapsedMenus.indexOf(menuId);
-      if (index > -1) {
-        this.collapsedMenus.splice(index, 1);
-      } else {
-        this.collapsedMenus.push(menuId);
-      }
-      this.saveMenuState();
     },
 
     initWarnings() {

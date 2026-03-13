@@ -1281,112 +1281,6 @@ footer
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-/**
-* Main page (index.php) navigation menu section header - Bulma card-header
-*/
-.menu .menu-header.card-header {
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s ease;
-}
-
-.menu .menu-header.card-header:hover {
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
-/* Ensure card-header-icon stretches and centers its content */
-.card.menu .card-header .card-header-icon,
-.card.menu .card-header button.card-header-icon {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  align-self: stretch !important;
-  height: auto !important;
-  min-height: 100% !important;
-}
-
-.menu .card-header-icon .icon i,
-.menu .card-header-icon .icon svg {
-  transition: transform 0.3s ease;
-}
-
-.menu.collapsed .card-header-icon .icon i,
-.menu.collapsed .card-header-icon .icon svg {
-  transform: rotate(-90deg);
-}
-
-.menu .menu-content.card-content {
-  overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-  max-height: 600px;
-  opacity: 1;
-}
-
-.menu.collapsed .menu-content.card-content {
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-/**
-* Color-coded menu categories - card header backgrounds
-*/
-
-/* Languages menu - blue accent */
-.menu-languages .card-header {
-  background: linear-gradient(135deg, #485fc7 0%, #3e56c4 100%);
-}
-.menu-languages .card-header-title,
-.menu-languages .card-header-icon {
-  color: white;
-}
-
-/* Texts menu - green accent */
-.menu-texts .card-header {
-  background: linear-gradient(135deg, #48c78e 0%, #3ec487 100%);
-}
-.menu-texts .card-header-title,
-.menu-texts .card-header-icon {
-  color: white;
-}
-
-/* Terms menu - purple accent */
-.menu-terms .card-header {
-  background: linear-gradient(135deg, #b86bff 0%, #a855f7 100%);
-}
-.menu-terms .card-header-title,
-.menu-terms .card-header-icon {
-  color: white;
-}
-
-/* Feeds menu - orange accent */
-.menu-feeds .card-header {
-  background: linear-gradient(135deg, #ffe08a 0%, #ffdd57 100%);
-}
-.menu-feeds .card-header-title,
-.menu-feeds .card-header-icon {
-  color: rgba(0, 0, 0, 0.7);
-}
-
-/* Admin menu - cyan accent */
-.menu-admin .card-header {
-  background: linear-gradient(135deg, #3e8ed0 0%, #3082c5 100%);
-}
-.menu-admin .card-header-title,
-.menu-admin .card-header-icon {
-  color: white;
-}
-
-/* Settings menu - gray accent */
-.menu-settings .card-header {
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-}
-.menu-settings .card-header-title,
-.menu-settings .card-header-icon {
-  color: white;
-}
-
 /**************************************************************
 Language Cards (language list page)
 ***************************************************************/
@@ -2167,72 +2061,11 @@ Home page styles - Bulma integration
   justify-content: center;
 }
 
-/* Home menu container - uses Bulma columns */
-.home-menu-container.columns
-{
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-/* Ensure cards fill column height */
-.home-menu-container .column {
-  display: flex;
-}
-
-.home-menu-container .card {
-  width: 100%;
-  background-color: var(--lwt-card-bg);
-}
-
-/* Button styling within menu cards - fix icon/text alignment */
-.menu-content .button.is-fullwidth {
-  justify-content: flex-start;
-  align-items: center;
-}
-
-.menu-content .button .icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5em;
-  height: 1.5em;
-  flex-shrink: 0;
-}
-
-.menu-content .button .icon + span {
-  flex: 1;
-}
-
-.menu-content .button .icon img {
-  max-width: 16px;
-  max-height: 16px;
-}
-
-/* Lucide icons in buttons - proper sizing and alignment */
-.menu-content .button .icon svg,
-.menu-content .button .icon i {
-  width: 1em;
-  height: 1em;
-}
-
-/* Override Bulma select wrapper for home page */
-.menu-content .select.is-fullwidth {
-  width: 100%;
-}
-
-.menu-content .select.is-fullwidth select {
-  width: 100%;
-}
-
 /* WordPress logout - styled as Bulma card */
 .menu-logout {
   width: 100%;
 }
 
-/* Card content needs explicit background */
-.menu .card-content {
-  background-color: var(--lwt-card-bg);
-}
 
 /* Fix icon-text alignment in card headers - prevent overlapping */
 .card-header-title .icon-text {
@@ -2274,7 +2107,6 @@ Home page styles - Bulma integration
 
 /* Fix select/dropdown background - use theme variables */
 .select select,
-.menu-content select,
 select {
   background-color: var(--lwt-input-bg) !important;
   color: var(--lwt-input-fg) !important;
