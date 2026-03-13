@@ -2,10 +2,7 @@
  * Starter Vocabulary Alpine.js Component (CSP-compliant)
  *
  * Handles the starter vocabulary import flow after language creation:
- * choose options -> import frequency words -> enrich with translations -> done
- *
- * Also supports one-click curated dictionary import as an alternative
- * enrichment method for larger word sets.
+ * choose sources -> import frequency words -> enrich -> import dicts -> done
  *
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
@@ -20,6 +17,7 @@ interface StarterVocabConfig {
   csrfToken: string;
   langId: number;
   curatedDictionaries: CuratedDictGroup[];
+  isAvailable: boolean;
 }
 
 interface ImportResult {
@@ -42,6 +40,8 @@ interface CuratedDictSource {
   license: string;
   notes: string;
   directDownload?: boolean;
+  dictType?: 'translation' | 'definition';
+  targetLanguage?: string;
 }
 
 interface CuratedDictGroup {
@@ -57,12 +57,20 @@ interface CuratedImportResponse {
   error?: string;
 }
 
+interface DictMessage {
+  success: boolean;
+  text: string;
+}
+
 function readConfig(): StarterVocabConfig {
   const el = document.getElementById('starter-vocab-config');
   if (el) {
     return JSON.parse(el.textContent || '{}');
   }
-  return { importUrl: '', enrichUrl: '', csrfToken: '', langId: 0, curatedDictionaries: [] };
+  return {
+    importUrl: '', enrichUrl: '', csrfToken: '', langId: 0,
+    curatedDictionaries: [], isAvailable: false,
+  };
 }
 
 Alpine.data('starterVocab', () => {
@@ -70,9 +78,10 @@ Alpine.data('starterVocab', () => {
 
   return {
     step: 'choose' as string,
-    size: 1000,
+    size: 100,
     mode: 'translation' as string,
-    result: { imported: 0, skipped: 0, total: 0 } as ImportResult,
+    useWiktionary: config.isAvailable,
+    wiktResult: { imported: 0, skipped: 0, total: 0 } as ImportResult,
     enrichStats: { done: 0, failed: 0, total: 0 } as EnrichStats,
     enrichWarning: '',
     enrichProgress: 0,
@@ -81,9 +90,11 @@ Alpine.data('starterVocab', () => {
 
     // Curated dictionary state
     dictSources: config.curatedDictionaries.flatMap(g => g.sources),
-    hasDictionaries: config.curatedDictionaries.length > 0,
-    dictImportingUrl: '',
-    dictImportResult: null as CuratedImportResponse | null,
+    selectedDictUrls: [] as string[],
+    dictMessages: [] as DictMessage[],
+    dictBatchImporting: false,
+    dictBatchCurrent: 0,
+    dictBatchTotal: 0,
 
     sizeClass(value: number): string {
       return this.size === value ? 'button is-primary is-selected' : 'button';
@@ -91,6 +102,14 @@ Alpine.data('starterVocab', () => {
 
     setSize(value: number): void {
       this.size = value;
+    },
+
+    toggleWiktionary(): void {
+      this.useWiktionary = !this.useWiktionary;
+    },
+
+    canImport(): boolean {
+      return this.useWiktionary || this.selectedDictUrls.length > 0;
     },
 
     enrichingLabel(): string {
@@ -104,50 +123,52 @@ Alpine.data('starterVocab', () => {
     },
 
     async startImport(): Promise<void> {
-      this.step = 'importing';
-
       try {
-        const formData = new FormData();
-        formData.append('count', String(this.size));
-        formData.append('_csrf_token', config.csrfToken);
+        // Phase 1: Wiktionary frequency words
+        if (this.useWiktionary) {
+          this.step = 'importing';
 
-        const response = await fetch(config.importUrl, {
-          method: 'POST',
-          body: formData,
-        });
+          const formData = new FormData();
+          formData.append('count', String(this.size));
+          formData.append('_csrf_token', config.csrfToken);
 
-        const data = await response.json();
+          const response = await fetch(config.importUrl, {
+            method: 'POST',
+            body: formData,
+          });
 
-        if (!response.ok) {
-          this.errorMessage = data.error || 'Unknown error occurred.';
-          this.step = 'error';
-          return;
+          const data = await response.json();
+
+          if (!response.ok) {
+            this.errorMessage = data.error || 'Unknown error occurred.';
+            this.step = 'error';
+            return;
+          }
+
+          this.wiktResult = data;
+
+          if (data.imported > 0) {
+            this.enrichStats = { done: 0, failed: 0, total: data.imported };
+            this._stopEnrichment = false;
+            this.step = 'enriching';
+            await this.enrichAll();
+          }
         }
 
-        this.result = data;
-
-        if (this.mode === 'none' || data.imported === 0) {
-          this.step = 'done';
-          return;
+        // Phase 2: Curated dictionaries
+        if (this.selectedDictUrls.length > 0) {
+          await this.importDictBatch();
         }
 
-        this.enrichStats = { done: 0, failed: 0, total: data.imported };
-        this._stopEnrichment = false;
-        this.step = 'enriching';
-        this.enrichNext();
+        this.step = 'done';
       } catch {
         this.errorMessage = 'Network error. Please check your connection.';
         this.step = 'error';
       }
     },
 
-    async enrichNext(): Promise<void> {
-      if (this._stopEnrichment) {
-        this.step = 'done';
-        return;
-      }
-
-      try {
+    async enrichAll(): Promise<void> {
+      while (!this._stopEnrichment) {
         const formData = new FormData();
         formData.append('mode', this.mode);
         formData.append('_csrf_token', config.csrfToken);
@@ -161,7 +182,6 @@ Alpine.data('starterVocab', () => {
 
         if (!response.ok) {
           this.enrichWarning = data.error || 'Enrichment encountered an error.';
-          this.step = 'done';
           return;
         }
 
@@ -176,20 +196,60 @@ Alpine.data('starterVocab', () => {
           this.enrichWarning = data.warning;
         }
 
-        if (data.remaining > 0 && !this._stopEnrichment) {
-          setTimeout(() => this.enrichNext(), 100);
-        } else {
-          this.step = 'done';
+        if (data.remaining <= 0) {
+          return;
         }
-      } catch {
-        this.enrichWarning = 'Network error during enrichment.';
-        this.step = 'done';
       }
+    },
+
+    async importDictBatch(): Promise<void> {
+      const sources = this.dictSources.filter(
+        (s: CuratedDictSource) => this.selectedDictUrls.includes(s.url)
+      );
+      if (sources.length === 0) return;
+
+      this.step = 'dictImporting';
+      this.dictBatchImporting = true;
+      this.dictBatchTotal = sources.length;
+      this.dictBatchCurrent = 0;
+      this.dictMessages = [];
+
+      for (const source of sources) {
+        this.dictBatchCurrent++;
+        const response = await apiPost<CuratedImportResponse>(
+          '/local-dictionaries/import-curated',
+          {
+            language_id: config.langId,
+            url: source.url,
+            format: source.format,
+            name: source.name,
+          }
+        );
+
+        const result = response.data ?? {
+          success: false,
+          error: response.error || 'Unknown error',
+        };
+
+        if (result.success) {
+          this.dictMessages.push({
+            success: true,
+            text: `${source.name}: imported ${result.imported ?? 0} entries.`,
+          });
+        } else {
+          this.dictMessages.push({
+            success: false,
+            text: `${source.name}: ${result.error ?? 'Import failed.'}`,
+          });
+        }
+      }
+
+      this.dictBatchImporting = false;
+      this.selectedDictUrls = [];
     },
 
     stopEnrichment(): void {
       this._stopEnrichment = true;
-      this.step = 'done';
     },
 
     retryImport(): void {
@@ -198,44 +258,31 @@ Alpine.data('starterVocab', () => {
 
     // Curated dictionary methods
 
-    isDictImporting(url: string): boolean {
-      return this.dictImportingUrl === url;
+    isSourceSelected(url: string): boolean {
+      return this.selectedDictUrls.includes(url);
     },
 
-    dictButtonLabel(url: string): string {
-      return this.dictImportingUrl === url ? 'Importing...' : 'Import';
+    toggleSource(url: string): void {
+      const idx = this.selectedDictUrls.indexOf(url);
+      if (idx >= 0) {
+        this.selectedDictUrls.splice(idx, 1);
+      } else {
+        this.selectedDictUrls.push(url);
+      }
     },
 
-    async importDictionary(source: CuratedDictSource): Promise<void> {
-      this.dictImportingUrl = source.url;
-      this.dictImportResult = null;
-
-      const response = await apiPost<CuratedImportResponse>(
-        '/local-dictionaries/import-curated',
-        {
-          language_id: config.langId,
-          url: source.url,
-          format: source.format,
-          name: source.name,
-        }
-      );
-
-      this.dictImportingUrl = '';
-      this.dictImportResult = response.data ?? {
-        success: false,
-        error: response.error || 'Unknown error'
-      };
+    dictTypeLabel(source: CuratedDictSource): string {
+      if (source.dictType === 'definition') {
+        return 'Definitions';
+      }
+      if (source.dictType === 'translation' && source.targetLanguage) {
+        return source.targetLanguage;
+      }
+      return 'Translation';
     },
 
-    dictResultClass(): string {
-      if (!this.dictImportResult) return '';
-      return this.dictImportResult.success
-        ? 'notification is-success is-light mb-4'
-        : 'notification is-danger is-light mb-4';
-    },
-
-    dismissDictResult(): void {
-      this.dictImportResult = null;
+    removeDictMessage(index: number): void {
+      this.dictMessages.splice(index, 1);
     },
   };
 });

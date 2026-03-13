@@ -48,6 +48,7 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
     'csrfToken' => $csrfToken,
     'langId' => $langId,
     'curatedDictionaries' => $curatedDictionaries,
+    'isAvailable' => $isAvailable,
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>
 
@@ -64,55 +65,106 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
         Continue to Text Import
     </a>
     <?php else : ?>
-        <?php if ($isAvailable) : ?>
-    <!-- Step 1: Choose options -->
+
+    <!-- Step 1: Choose sources and options -->
     <template x-if="step === 'choose'">
         <div class="box">
             <p class="mb-4">
-                Get a head start with the most common words in
+                Build starter vocabulary for
                 <strong><?= $escapedLangName ?></strong>.
+                Pick your sources and enrichment mode, then import.
             </p>
-
-            <div class="field">
-                <label class="label">How many words?</label>
-                <div class="buttons has-addons">
-                    <button :class="sizeClass(500)"
-                            @click="setSize(500)">500</button>
-                    <button :class="sizeClass(1000)"
-                            @click="setSize(1000)">1,000</button>
-                    <button :class="sizeClass(2000)"
-                            @click="setSize(2000)">2,000</button>
-                    <button :class="sizeClass(5000)"
-                            @click="setSize(5000)">5,000</button>
-                </div>
-            </div>
 
             <div class="field">
                 <label class="label">Enrichment mode</label>
                 <div class="control">
                     <label class="radio">
                         <input type="radio" x-model="mode" value="translation">
-                        Translation <span class="has-text-grey is-size-7">(English glosses — for beginners)</span>
+                        Translation <span class="has-text-grey is-size-7">(English glosses &mdash; for beginners)</span>
                     </label>
                 </div>
                 <div class="control mt-1">
                     <label class="radio">
                         <input type="radio" x-model="mode" value="definition">
-                        Definition <span class="has-text-grey is-size-7">(monolingual — for advanced learners)</span>
-                    </label>
-                </div>
-                <div class="control mt-1">
-                    <label class="radio">
-                        <input type="radio" x-model="mode" value="none">
-                        Words only <span class="has-text-grey is-size-7">(no translations, fastest)</span>
+                        Definition <span class="has-text-grey is-size-7">(monolingual &mdash; for advanced learners)</span>
                     </label>
                 </div>
             </div>
 
+            <hr>
+            <label class="label">Sources</label>
+
+            <?php if ($isAvailable) : ?>
+            <!-- Wiktionary frequency words source -->
+            <label class="box mb-3 p-4" style="cursor: pointer;"
+                   :class="useWiktionary ? 'has-background-success-light' : ''">
+                <div class="is-flex is-align-items-center">
+                    <input type="checkbox" class="mr-3"
+                           :checked="useWiktionary"
+                           @change="toggleWiktionary()">
+                    <div class="is-flex-grow-1">
+                        <p class="has-text-weight-semibold mb-1">Most common words (Wiktionary)</p>
+                        <p class="is-size-7 has-text-grey mb-2">
+                            Frequency-ranked words from the
+                            <a href="https://github.com/hermitdave/FrequencyWords" target="_blank" rel="noopener">FrequencyWords</a>
+                            project, enriched via
+                            <a href="https://kaikki.org" target="_blank" rel="noopener">Wiktionary</a>.
+                        </p>
+                        <template x-if="useWiktionary">
+                            <div class="field">
+                                <label class="label is-small">How many words?</label>
+                                <div class="buttons has-addons are-small">
+                                    <button :class="sizeClass(50)"
+                                            @click="setSize(50)">50</button>
+                                    <button :class="sizeClass(100)"
+                                            @click="setSize(100)">100</button>
+                                    <button :class="sizeClass(500)"
+                                            @click="setSize(500)">500</button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </label>
+            <?php endif; ?>
+
+            <!-- Curated dictionaries -->
+            <template x-for="source in dictSources" :key="source.name">
+                <label class="box mb-3 p-4" style="cursor: pointer;"
+                       :class="isSourceSelected(source.url) ? 'has-background-success-light' : ''">
+                    <div class="is-flex is-align-items-center">
+                        <input type="checkbox" class="mr-3"
+                               :checked="isSourceSelected(source.url)"
+                               :disabled="!source.directDownload"
+                               @change="toggleSource(source.url)">
+                        <div class="is-flex-grow-1">
+                            <p class="has-text-weight-semibold mb-1" x-text="source.name"></p>
+                            <div class="tags mb-1">
+                                <span class="tag is-light" x-text="source.entries"></span>
+                                <span class="tag is-info is-light" x-text="source.format"></span>
+                                <span class="tag is-success is-light" x-text="source.license"></span>
+                                <span class="tag is-primary is-light"
+                                      x-text="dictTypeLabel(source)"></span>
+                            </div>
+                            <p class="is-size-7 has-text-grey" x-text="source.notes"></p>
+                            <p class="is-size-7 has-text-warning-dark" x-show="!source.directDownload">
+                                Manual download required &mdash;
+                                <a :href="source.url" target="_blank" rel="noopener">
+                                    visit site <?= $externalLinkIcon ?>
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </label>
+            </template>
+
             <div class="field is-grouped mt-5">
                 <div class="control">
-                    <button class="button is-success" @click="startImport()">
-                        Import Words
+                    <button class="button is-success"
+                            :disabled="!canImport()"
+                            @click="startImport()">
+                        <?= $downloadIcon ?>
+                        <span class="ml-1">Import</span>
                     </button>
                 </div>
                 <div class="control">
@@ -166,22 +218,42 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
         </div>
     </template>
 
-    <!-- Step 4: Done -->
+    <!-- Step 4: Importing curated dictionaries -->
+    <template x-if="step === 'dictImporting'">
+        <div class="box">
+            <p class="mb-3">
+                <strong>Importing dictionaries...</strong>
+            </p>
+            <progress class="progress is-info"
+                      :value="dictBatchCurrent" :max="dictBatchTotal"></progress>
+            <p class="is-size-7 has-text-grey">
+                Dictionary <span x-text="dictBatchCurrent"></span>
+                of <span x-text="dictBatchTotal"></span>
+            </p>
+        </div>
+    </template>
+
+    <!-- Step 5: Done -->
     <template x-if="step === 'done'">
         <div class="box">
             <div class="notification is-success is-light">
-                <p>
-                    Imported <strong x-text="result.imported"></strong> words
-                    <template x-if="result.skipped > 0">
-                        <span>(<span x-text="result.skipped"></span> already existed)</span>
-                    </template>
-                    for <strong><?= $escapedLangName ?></strong>.
-                </p>
+                <template x-if="wiktResult.imported > 0 || wiktResult.skipped > 0">
+                    <p>
+                        Imported <strong x-text="wiktResult.imported"></strong> words
+                        <template x-if="wiktResult.skipped > 0">
+                            <span>(<span x-text="wiktResult.skipped"></span> already existed)</span>
+                        </template>
+                        for <strong><?= $escapedLangName ?></strong>.
+                    </p>
+                </template>
                 <template x-if="enrichStats.done > 0">
                     <p class="mt-1">
                         <span x-text="enrichStats.done"></span> words enriched with
                         <span x-text="enrichedModeLabel()"></span>.
                     </p>
+                </template>
+                <template x-for="(msg, i) in dictMessages" :key="i">
+                    <p class="mt-1" :class="msg.success ? '' : 'has-text-danger'" x-text="msg.text"></p>
                 </template>
             </div>
 
@@ -218,70 +290,6 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
             </div>
         </div>
     </template>
-        <?php endif; ?>
-
-        <?php if (!empty($curatedDictionaries)) : ?>
-    <!-- Curated Dictionary Import -->
-    <template x-if="step === 'choose' || step === 'done'">
-        <div class="box mt-4">
-            <h3 class="title is-5 mb-3">Dictionary Import</h3>
-            <p class="mb-4 has-text-grey">
-                Import a full dictionary for <strong><?= $escapedLangName ?></strong>
-                to get translations for all your words at once.
-            </p>
-
-            <!-- Import result notification -->
-            <template x-if="dictImportResult !== null">
-                <div :class="dictResultClass()" class="mb-4">
-                    <button class="delete" @click="dismissDictResult()"></button>
-                    <template x-if="dictImportResult.success">
-                        <p>
-                            <strong>Dictionary imported!</strong>
-                            <span x-text="dictImportResult.imported"></span> entries added.
-                        </p>
-                    </template>
-                    <template x-if="!dictImportResult.success">
-                        <p>
-                            <strong>Import failed:</strong>
-                            <span x-text="dictImportResult.error"></span>
-                        </p>
-                    </template>
-                </div>
-            </template>
-
-            <template x-for="source in dictSources" :key="source.name">
-                <div class="card mb-3">
-                    <div class="card-content p-4">
-                        <p class="title is-6 mb-2" x-text="source.name"></p>
-                        <div class="tags mb-2">
-                            <span class="tag is-info is-light" x-text="source.format"></span>
-                            <span class="tag is-light" x-text="source.entries"></span>
-                            <span class="tag is-success is-light" x-text="source.license"></span>
-                        </div>
-                        <p class="is-size-7 has-text-grey" x-text="source.notes"></p>
-                    </div>
-                    <footer class="card-footer">
-                        <a class="card-footer-item has-text-success"
-                           x-show="source.directDownload"
-                           @click.prevent="importDictionary(source)">
-                            <span class="icon is-small mr-1" x-show="!isDictImporting(source.url)">
-                                <?= $downloadIcon ?>
-                            </span>
-                            <span x-text="dictButtonLabel(source.url)"></span>
-                        </a>
-                        <a class="card-footer-item has-text-primary"
-                           :href="source.url" target="_blank" rel="noopener">
-                            <span class="icon is-small mr-1">
-                                <?= $externalLinkIcon ?>
-                            </span>
-                            Download
-                        </a>
-                    </footer>
-                </div>
-            </template>
-        </div>
-    </template>
-        <?php endif; ?>
 
     <?php endif; ?>
 </div>

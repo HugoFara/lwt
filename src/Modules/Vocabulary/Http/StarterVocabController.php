@@ -22,7 +22,7 @@ use Lwt\Modules\Vocabulary\Application\Services\WiktionaryEnrichmentService;
  */
 class StarterVocabController extends BaseController
 {
-    private const ALLOWED_COUNTS = [500, 1000, 2000, 5000];
+    private const ALLOWED_COUNTS = [50, 100, 500];
     private const ALLOWED_MODES = ['translation', 'definition'];
 
     private LanguageFacade $languageFacade;
@@ -81,7 +81,7 @@ class StarterVocabController extends BaseController
     {
         $count = $this->paramInt('count', 1000);
         if ($count === null || !in_array($count, self::ALLOWED_COUNTS, true)) {
-            return JsonResponse::error('Invalid count. Choose 500, 1000, 2000, or 5000.');
+            return JsonResponse::error('Invalid count. Choose 50, 100, or 500.');
         }
 
         $language = $this->languageFacade->getById($id);

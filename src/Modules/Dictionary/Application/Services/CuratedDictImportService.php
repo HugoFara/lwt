@@ -94,6 +94,10 @@ class CuratedDictImportService
                 $extractDir = $this->extractZip($archivePath);
                 $tempFiles[] = $extractDir;
                 $importFile = $this->findImportFile($extractDir, $format);
+            } elseif ($this->isTarArchive($url)) {
+                $extractDir = $this->extractTar($archivePath);
+                $tempFiles[] = $extractDir;
+                $importFile = $this->findImportFile($extractDir, $format);
             } else {
                 // Direct file (e.g. CSV) - use as-is
                 $importFile = $archivePath;
@@ -219,6 +223,68 @@ class CuratedDictImportService
         }
 
         return $tempPath;
+    }
+
+    /**
+     * Check whether a URL points to a tar archive (.tar.xz, .tar.gz, .tar.bz2).
+     */
+    private function isTarArchive(string $url): bool
+    {
+        $urlPath = parse_url($url, PHP_URL_PATH);
+        $path = is_string($urlPath) ? strtolower($urlPath) : '';
+        return (bool) preg_match('/\.tar\.(xz|gz|bz2)$/', $path);
+    }
+
+    /**
+     * Extract a tar archive (.tar.xz, .tar.gz, .tar.bz2) to a temporary directory.
+     *
+     * Uses the system `tar` command which handles xz/gzip/bzip2 auto-detection.
+     *
+     * @return string Path to the extraction directory
+     *
+     * @throws RuntimeException On extraction failure
+     */
+    private function extractTar(string $tarPath): string
+    {
+        $extractDir = sys_get_temp_dir() . '/lwt_dict_' . bin2hex(random_bytes(8));
+        if (!mkdir($extractDir, 0700, true)) {
+            throw new RuntimeException('Failed to create extraction directory');
+        }
+
+        $command = sprintf(
+            'tar xf %s -C %s 2>&1',
+            escapeshellarg($tarPath),
+            escapeshellarg($extractDir)
+        );
+
+        $output = [];
+        $exitCode = 0;
+        exec($command, $output, $exitCode);
+
+        if ($exitCode !== 0) {
+            $this->removeDir($extractDir);
+            throw new RuntimeException(
+                'Failed to extract tar archive (exit code ' . $exitCode . '): ' .
+                implode("\n", $output)
+            );
+        }
+
+        // Safety check: verify reasonable file count
+        $fileCount = 0;
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($extractDir, \FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($iterator as $_) {
+            $fileCount++;
+            if ($fileCount > self::MAX_ZIP_FILES) {
+                $this->removeDir($extractDir);
+                throw new RuntimeException(
+                    'Archive contains too many files (>' . self::MAX_ZIP_FILES . ')'
+                );
+            }
+        }
+
+        return $extractDir;
     }
 
     /**
