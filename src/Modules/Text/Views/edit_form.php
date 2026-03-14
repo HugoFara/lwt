@@ -447,9 +447,15 @@ if (!$isNew) {
                     Browse popular books from Project Gutenberg for your selected language.
                 </p>
 
-                <!-- No language & no books -->
+                <!-- No language selected -->
                 <div x-show="showPlaceholder()" class="notification is-warning is-light">
                     Please select a language above to browse Gutenberg books.
+                </div>
+
+                <!-- Language selected but no books found -->
+                <div x-show="showNoResults()" class="notification is-info is-light">
+                    No Gutenberg books found for this language.
+                    Not all languages are available in the Project Gutenberg catalog.
                 </div>
 
                 <!-- Loading state -->

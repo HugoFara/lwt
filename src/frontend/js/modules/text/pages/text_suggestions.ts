@@ -45,6 +45,7 @@ interface GutenbergBrowserData {
   isImporting(): boolean;
   loadingClass(): string;
   showPlaceholder(): boolean;
+  showNoResults(): boolean;
 }
 
 function getSelectedLanguageId(): number {
@@ -192,7 +193,11 @@ export function gutenbergBrowserData(): GutenbergBrowserData {
     },
 
     showPlaceholder(): boolean {
-      return !this.loading && this.books.length === 0 && !this.error;
+      return !this.loading && this.books.length === 0 && !this.error && getSelectedLanguageId() <= 0;
+    },
+
+    showNoResults(): boolean {
+      return !this.loading && this.books.length === 0 && !this.error && getSelectedLanguageId() > 0;
     },
   };
 }
