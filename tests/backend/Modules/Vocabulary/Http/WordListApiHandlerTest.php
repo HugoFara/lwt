@@ -109,8 +109,8 @@ class WordListApiHandlerTest extends TestCase
         $this->assertEquals(1, $result['pagination']['per_page']);
 
         // Test maximum clamping
-        $result = $this->handler->getWordList(['per_page' => '200']);
-        $this->assertEquals(100, $result['pagination']['per_page']);
+        $result = $this->handler->getWordList(['per_page' => '600']);
+        $this->assertEquals(500, $result['pagination']['per_page']);
     }
 
     public function testGetWordListClampsSortToRange(): void

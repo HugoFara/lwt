@@ -55,7 +55,6 @@ class GetAllSettingsTest extends TestCase
     {
         $keys = GetAllSettings::getSettingKeys();
         $expectedSubset = [
-            'set-theme-dir',
             'set-max-articles-with-text',
             'set-max-articles-without-text',
             'set-max-texts-per-feed',

@@ -86,6 +86,7 @@ vi.mock('lucide', () => ({
   Key: ['svg', {}, []],
   Languages: ['svg', {}, []],
   Layers: ['svg', {}, []],
+  Library: ['svg', {}, []],
   Lightbulb: ['svg', {}, []],
   LightbulbOff: ['svg', {}, []],
   Link: ['svg', {}, []],

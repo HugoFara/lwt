@@ -406,7 +406,7 @@ $base = UrlUtilities::getBasePath();
 <?php endif; ?>
 
 <?php if ($langcnt > 0) : ?>
-<?php renderWordPressLogout($isWordPress, $base); ?>
+    <?php renderWordPressLogout($isWordPress, $base); ?>
 <?php endif; ?>
 
 <!-- Version info -->

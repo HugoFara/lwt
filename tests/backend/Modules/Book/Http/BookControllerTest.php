@@ -65,7 +65,8 @@ class BookControllerTest extends TestCase
         $reflection->setAccessible(true);
 
         $viewPath = $reflection->getValue($this->controller);
-        $this->assertStringContainsString('Book/Http/../Views/', $viewPath);
+        $normalizedPath = str_replace('\\', '/', $viewPath);
+        $this->assertStringContainsString('Book/Http/../Views/', $normalizedPath);
     }
 
     // =========================================================================

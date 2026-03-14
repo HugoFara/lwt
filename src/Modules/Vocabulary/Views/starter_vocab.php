@@ -65,7 +65,6 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
         Continue to Text Import
     </a>
     <?php else : ?>
-
     <!-- Step 1: Choose sources and options -->
     <template x-if="step === 'choose'">
         <div class="box">

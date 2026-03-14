@@ -49,7 +49,6 @@ class AdminUseCaseTest extends TestCase
         $this->assertNotEmpty($keys);
 
         // Verify admin-scoped settings are present
-        $this->assertContains('set-theme-dir', $keys);
         $this->assertContains('set-max-articles-with-text', $keys);
         $this->assertContains('set-allow-registration', $keys);
 
@@ -73,7 +72,6 @@ class AdminUseCaseTest extends TestCase
         $this->assertContains('set-regex-mode', $keys);
 
         // Verify admin settings are NOT present
-        $this->assertNotContains('set-theme-dir', $keys);
         $this->assertNotContains('set-allow-registration', $keys);
     }
 
