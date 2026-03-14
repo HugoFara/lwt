@@ -123,31 +123,35 @@ class DifficultyEstimationService
      */
     public function analyzeTextSample(string $textUrl, int $languageId): array
     {
-        // Fetch text via WebPageExtractor (reuses SSRF protection + boilerplate strip)
-        $extractor = new WebPageExtractor();
-        $result = $extractor->extractFromUrl($textUrl);
-
-        if (isset($result['error'])) {
-            return ['error' => $result['error']];
+        $text = $this->fetchTextContent($textUrl);
+        if ($text === null) {
+            return ['error' => 'Could not fetch text. The site may be unreachable.'];
         }
 
-        $text = $result['text'] ?? '';
         if ($text === '') {
             return ['error' => 'No text content could be extracted.'];
         }
 
-        // Get word character regex for this language
-        $wordRegex = $this->getWordCharRegex($languageId);
-        if ($wordRegex === null) {
+        // Get language parsing settings
+        $parseSettings = $this->getLanguageParseSettings($languageId);
+        if ($parseSettings === null) {
             return ['error' => 'Language not found.'];
         }
 
-        // Tokenize — get all words first for total count, then sample
-        $allTokens = $this->tokenize($text, $wordRegex, PHP_INT_MAX);
-        $totalWords = count($allTokens);
-        $sampledTokens = array_slice($allTokens, 0, self::SAMPLE_WORD_COUNT);
+        $wordRegex = $parseSettings['regex'];
+        $splitEachChar = $parseSettings['splitEachChar'];
 
-        $uniqueWords = array_unique(array_map('mb_strtolower', $sampledTokens));
+        // Estimate total words from full text length and sample average
+        $tokens = $this->tokenize($text, $wordRegex, self::SAMPLE_WORD_COUNT, $splitEachChar);
+        $sampleLen = mb_strlen(implode(' ', $tokens));
+        $totalLen = mb_strlen($text);
+        $sampleCount = count($tokens);
+        // Extrapolate total word count from the ratio of sampled text to full text
+        $totalWords = $sampleLen > 0
+            ? (int) round($sampleCount * ($totalLen / $sampleLen))
+            : $sampleCount;
+
+        $uniqueWords = array_unique(array_map('mb_strtolower', $tokens));
         $uniqueWords = array_values($uniqueWords);
 
         $totalUnique = count($uniqueWords);
@@ -174,6 +178,38 @@ class DifficultyEstimationService
             'difficulty_label' => $this->labelFromCoverage($coveragePercent),
             'sample_unknown_words' => $sampleUnknown,
         ];
+    }
+
+    /**
+     * Fetch text content from a URL.
+     *
+     * Uses GutenbergClient for Gutenberg URLs (simpler, follows redirects),
+     * falls back to WebPageExtractor for other URLs.
+     *
+     * @param string $url Text URL
+     *
+     * @return string|null Extracted text or null on fetch failure
+     */
+    private function fetchTextContent(string $url): ?string
+    {
+        if (str_contains($url, 'gutenberg.org')) {
+            $client = new \Lwt\Shared\Infrastructure\Http\GutenbergClient();
+            $raw = $client->fetchText($url);
+            if ($raw === null) {
+                return null;
+            }
+            // Strip Gutenberg boilerplate
+            $extractor = new WebPageExtractor();
+            return $extractor->stripGutenbergBoilerplatePublic($raw);
+        }
+
+        // Non-Gutenberg URLs: use the full extractor pipeline
+        $extractor = new WebPageExtractor();
+        $result = $extractor->extractFromUrl($url);
+        if (isset($result['error'])) {
+            return null;
+        }
+        return $result['text'] ?? null;
     }
 
     /**
@@ -276,16 +312,16 @@ class DifficultyEstimationService
     }
 
     /**
-     * Get the word character regex for a language.
+     * Get language parsing settings for tokenization.
      *
      * @param int $languageId Language ID
      *
-     * @return string|null Regex character class content, or null if not found
+     * @return array{regex: string, splitEachChar: bool}|null Settings or null if not found
      */
-    private function getWordCharRegex(int $languageId): ?string
+    private function getLanguageParseSettings(int $languageId): ?array
     {
         $row = QueryBuilder::table('languages')
-            ->select(['LgRegexpWordCharacters'])
+            ->select(['LgRegexpWordCharacters', 'LgSplitEachChar'])
             ->where('LgID', '=', $languageId)
             ->firstPrepared();
 
@@ -295,22 +331,42 @@ class DifficultyEstimationService
 
         $regex = (string) ($row['LgRegexpWordCharacters'] ?? '');
 
-        // Default fallback: Unicode letters and combining marks
-        return $regex !== '' ? $regex : '\\w';
+        return [
+            'regex' => $regex !== '' ? $regex : '\\w',
+            'splitEachChar' => (int) ($row['LgSplitEachChar'] ?? 0) === 1,
+        ];
     }
 
     /**
      * Tokenize text into words using the language's word character regex.
      *
-     * @param string $text      Text to tokenize
-     * @param string $wordRegex Word character regex class content
-     * @param int    $maxWords  Maximum number of words to return
+     * For languages with splitEachChar (Chinese, etc.), each matched
+     * character becomes its own token.
+     *
+     * @param string $text         Text to tokenize
+     * @param string $wordRegex    Word character regex class content
+     * @param int    $maxWords     Maximum number of words to return
+     * @param bool   $splitEachChar Whether to treat each character as a word
      *
      * @return list<string> Word tokens
      */
-    private function tokenize(string $text, string $wordRegex, int $maxWords): array
-    {
-        // Split on non-word characters
+    private function tokenize(
+        string $text,
+        string $wordRegex,
+        int $maxWords,
+        bool $splitEachChar = false
+    ): array {
+        if ($splitEachChar) {
+            // Match individual word characters (for CJK languages)
+            $pattern = '/[' . $wordRegex . ']/u';
+            $count = preg_match_all($pattern, $text, $matches);
+            if ($count === false || $count === 0) {
+                return [];
+            }
+            return array_slice($matches[0], 0, $maxWords);
+        }
+
+        // Split on non-word characters (for alphabetic languages)
         $pattern = '/[^' . $wordRegex . ']+/u';
         $tokens = preg_split($pattern, $text, -1, PREG_SPLIT_NO_EMPTY);
 
@@ -318,7 +374,6 @@ class DifficultyEstimationService
             return [];
         }
 
-        // Filter out very short tokens (single characters unless CJK)
         $filtered = [];
         foreach ($tokens as $token) {
             if (mb_strlen($token) >= 1) {

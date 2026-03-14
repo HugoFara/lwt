@@ -198,19 +198,72 @@ class GutenbergClient
 
         // Prefer UTF-8 plain text
         foreach ($formats as $mime => $url) {
-            if (str_starts_with($mime, 'text/plain') && str_contains($mime, 'utf-8')) {
+            if (
+                str_starts_with($mime, 'text/plain')
+                && str_contains($mime, 'utf-8')
+                && !$this->isNonBookFile($url)
+            ) {
                 return $url;
             }
         }
 
         // Fall back to any plain text
         foreach ($formats as $mime => $url) {
-            if (str_starts_with($mime, 'text/plain')) {
+            if (str_starts_with($mime, 'text/plain') && !$this->isNonBookFile($url)) {
                 return $url;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Check if a URL points to a non-book file (readme, about, license).
+     *
+     * @param string $url File URL
+     *
+     * @return bool True if the URL should be skipped
+     */
+    private function isNonBookFile(string $url): bool
+    {
+        $lower = strtolower($url);
+        return str_contains($lower, 'readme')
+            || str_contains($lower, 'license')
+            || str_contains($lower, 'about.');
+    }
+
+    /**
+     * Fetch plain text content from a Gutenberg text URL.
+     *
+     * Strips the standard Project Gutenberg header/footer boilerplate.
+     *
+     * @param string $url Plain text URL from Gutendex
+     *
+     * @return string|null Text content or null on failure
+     */
+    public function fetchText(string $url): ?string
+    {
+        $context = stream_context_create([
+            'http' => [
+                'follow_location' => true,
+                'max_redirects' => 5,
+                'timeout' => 15,
+                'user_agent' => 'LWT/3.0 (Language Learning Tool)',
+                'header' => "Accept: text/plain\r\n",
+            ],
+            'ssl' => [
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+            ],
+        ]);
+
+        $text = @file_get_contents($url, false, $context, 0, 2 * 1024 * 1024);
+
+        if ($text === false || $text === '') {
+            return null;
+        }
+
+        return $text;
     }
 
     /**

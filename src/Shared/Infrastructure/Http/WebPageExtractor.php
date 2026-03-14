@@ -520,6 +520,20 @@ class WebPageExtractor
     }
 
     /**
+     * Strip Gutenberg boilerplate and clean up text (public API).
+     *
+     * @param string $text Raw Gutenberg text
+     *
+     * @return string Cleaned text
+     */
+    public function stripGutenbergBoilerplatePublic(string $text): string
+    {
+        $text = $this->stripGutenbergBoilerplate($text);
+        $text = $this->unwrapHardLineBreaks($text);
+        return $this->cleanText($text);
+    }
+
+    /**
      * Strip Project Gutenberg header and footer boilerplate.
      *
      * Gutenberg plain text files have a preamble ending with
