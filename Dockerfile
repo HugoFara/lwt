@@ -10,9 +10,11 @@ LABEL org.opencontainers.image.source="https://github.com/HugoFara/lwt"
 
 
 # Creating config file php.ini
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
-    echo 'mysqli.allow_local_infile = On' >> "$PHP_INI_DIR/php.ini"; \
-    docker-php-ext-install pdo pdo_mysql mysqli
+RUN apt-get update && apt-get install -y --no-install-recommends libzip-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && echo 'mysqli.allow_local_infile = On' >> "$PHP_INI_DIR/php.ini" \
+    && docker-php-ext-install pdo pdo_mysql mysqli zip
 
 # Install Python and Composer dependencies
 ENV DEBIAN_FRONTEND=noninteractive
