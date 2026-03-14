@@ -184,7 +184,7 @@ describe('feed_wizard_step1.ts', () => {
       const component = feedWizardStep1Data();
       component.cancel();
 
-      expect(window.location.href).toBe('/feeds/edit?del_wiz=1');
+      expect(window.location.href).toBe('/feeds/manage');
 
       window.location = originalLocation;
     });

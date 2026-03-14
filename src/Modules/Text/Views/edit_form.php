@@ -508,7 +508,7 @@ if (!$isNew) {
             <div x-data="feedBrowser">
                 <p class="help mb-4">
                     Browse articles from your configured newsfeeds.
-                    <a href="/feeds/wizard">Set up a new feed</a> if you don't have any yet.
+                    <a href="/feeds/new">Set up a new feed</a> if you don't have any yet.
                 </p>
 
                 <!-- Loading feeds -->
@@ -526,7 +526,7 @@ if (!$isNew) {
                     <template x-if="showEmptyFeeds()">
                         <div class="notification is-info is-light">
                             <p>No feeds configured yet.</p>
-                            <a href="/feeds/wizard" class="button is-info is-small mt-2">
+                            <a href="/feeds/new" class="button is-info is-small mt-2">
                                 <span class="icon"><i data-lucide="plus"></i></span>
                                 <span>Add a feed</span>
                             </a>

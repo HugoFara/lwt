@@ -108,7 +108,7 @@ class FeedEditController
                 '/feeds/edit'
             );
         } elseif (InputValidator::has('new_feed')) {
-            $this->showNewForm((int)$currentLang);
+            $this->showNewForm();
         } elseif (InputValidator::has('edit_feed')) {
             $this->showEditForm((int)$currentFeed);
         } elseif (InputValidator::has('multi_load_feed')) {
@@ -144,7 +144,7 @@ class FeedEditController
     }
 
     /**
-     * New feed form.
+     * New feed form (wizard with 3 tabs: Browse, URL Wizard, Manual).
      *
      * Route: GET/POST /feeds/new
      *
@@ -171,14 +171,14 @@ class FeedEditController
             return;
         }
 
-        $currentLang = Validation::language(
-            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
-        );
+        // Clear wizard session if exists (must be before any output)
+        if ($this->wizardSession->exists()) {
+            $this->wizardSession->clear();
+        }
 
-        $langName = $this->languageFacade->getLanguageName($currentLang);
-        PageLayoutHelper::renderPageStart('New Feed - ' . $langName, true);
+        PageLayoutHelper::renderPageStart('Add a Feed', true);
 
-        $this->showNewForm((int)$currentLang);
+        $this->showNewForm();
         PageLayoutHelper::renderPageEnd();
     }
 
@@ -366,23 +366,45 @@ class FeedEditController
     }
 
     /**
-     * Show the new feed form.
-     *
-     * @param int $currentLang Current language ID to pre-select
+     * Show the new feed form (wizard step 1 with 3 tabs).
      *
      * @return void
      *
      * @psalm-suppress UnresolvableInclude View path is constructed at runtime
      */
-    private function showNewForm(int $currentLang): void
+    private function showNewForm(): void
     {
-        $viewData = [
-            'languages' => $this->feedFacade->getLanguages(),
-            'currentLang' => $currentLang,
-        ];
-        extract($viewData);
+        $errorMessage = InputValidator::has('err') ? true : null;
+        $rssUrl = null;
+        $editFeedId = null;
+        $languages = $this->languageFacade->getLanguagesForSelect();
+        $curatedFeeds = $this->loadCuratedFeeds();
 
-        include $this->viewPath . 'new.php';
+        include $this->viewPath . 'wizard_step1.php';
+    }
+
+    /**
+     * Load curated feeds from the JSON registry.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function loadCuratedFeeds(): array
+    {
+        $path = dirname(__DIR__, 4) . '/data/curated_feeds.json';
+        if (!file_exists($path)) {
+            return [];
+        }
+        $json = file_get_contents($path);
+        if ($json === false) {
+            return [];
+        }
+        $data = json_decode($json, true);
+        if (!is_array($data) || !isset($data['feeds'])) {
+            return [];
+        }
+        /** @var list<array<string, mixed>> */
+        $feeds = $data['feeds'];
+        return $feeds;
     }
 
     /**

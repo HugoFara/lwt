@@ -168,43 +168,23 @@ class FeedWizardControllerTest extends TestCase
     // =========================================================================
 
     #[Test]
-    public function wizardDefaultsToStep1(): void
+    public function wizardDefaultsToRedirectToFeedsNew(): void
     {
-        $this->wizardSession->expects($this->once())->method('init');
-        $this->wizardSession->method('getRssUrl')->willReturn('');
-        $this->languageFacade->method('getLanguagesForSelect')->willReturn([]);
-        $this->useStubViews();
+        $result = $this->controller->wizard([]);
 
-        ob_start();
-        try {
-            $result = $this->controller->wizard([]);
-        } catch (\Throwable) {
-            $result = null;
-        }
-        ob_end_clean();
-
-        $this->assertNull($result);
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertSame('/feeds/new', $result->getUrl());
     }
 
     #[Test]
-    public function wizardStep1IsCalledForStep1(): void
+    public function wizardStep1RedirectsToFeedsNew(): void
     {
         $_REQUEST['step'] = '1';
 
-        $this->wizardSession->expects($this->once())->method('init');
-        $this->wizardSession->method('getRssUrl')->willReturn('');
-        $this->languageFacade->method('getLanguagesForSelect')->willReturn([]);
-        $this->useStubViews();
+        $result = $this->controller->wizard([]);
 
-        ob_start();
-        try {
-            $result = $this->controller->wizard([]);
-        } catch (\Throwable) {
-            $result = null;
-        }
-        ob_end_clean();
-
-        $this->assertNull($result);
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertSame('/feeds/new', $result->getUrl());
     }
 
     #[Test]

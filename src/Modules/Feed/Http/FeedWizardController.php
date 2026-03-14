@@ -128,8 +128,7 @@ class FeedWizardController
                 break;
             case 1:
             default:
-                $this->wizardStep1();
-                break;
+                return new RedirectResponse('/feeds/new');
         }
 
         return null;
@@ -324,7 +323,7 @@ class FeedWizardController
         $row = $this->feedFacade->getFeedById($feedId);
 
         if ($row === null) {
-            return new RedirectResponse('/feeds/wizard?step=1&err=1');
+            return new RedirectResponse('/feeds/new?err=1');
         }
 
         $this->wizardSession->setEditFeedId($feedId);
@@ -361,7 +360,7 @@ class FeedWizardController
         $feedData = $this->feedFacade->detectAndParseFeed($row['NfSourceURI']);
         if (!is_array($feedData) || empty($feedData)) {
             $this->wizardSession->remove('feed');
-            return new RedirectResponse('/feeds/wizard?step=1&err=1');
+            return new RedirectResponse('/feeds/new?err=1');
         }
         // Update feed data with title
         $feedData['feed_title'] = $row['NfName'];
@@ -431,7 +430,7 @@ class FeedWizardController
         $currentFeed = $this->wizardSession->getFeed();
         if (empty($currentFeed)) {
             $this->wizardSession->remove('feed');
-            return new RedirectResponse('/feeds/wizard?step=1&err=1');
+            return new RedirectResponse('/feeds/new?err=1');
         }
 
         if (!$this->wizardSession->has('article_tags')) {

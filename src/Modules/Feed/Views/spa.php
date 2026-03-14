@@ -68,7 +68,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                     'class' => 'is-primary',
                     'attrs' => '@click.prevent="$store.feedManager.showCreateForm()"'
                 ],
-                ['url' => '/feeds/wizard', 'label' => 'Feed Wizard', 'icon' => 'wand-2'],
+                ['url' => '/feeds/new', 'label' => 'Feed Wizard', 'icon' => 'wand-2'],
             ]);
             ?>
 
@@ -539,7 +539,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
             <div class="notification is-info is-light mt-4">
                 <p>
                     <strong>Tip:</strong> For more advanced feed configuration with live XPath preview,
-                    use the <a href="/feeds/wizard">Feed Wizard</a>.
+                    use the <a href="/feeds/new">Feed Wizard</a>.
                 </p>
             </div>
         </div>

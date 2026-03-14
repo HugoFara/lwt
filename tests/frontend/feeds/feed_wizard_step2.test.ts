@@ -273,7 +273,7 @@ describe('feed_wizard_step2.ts', () => {
       const component = feedWizardStep2Data();
       component.goBack();
 
-      expect(window.location.href).toContain('/feeds/wizard?step=1');
+      expect(window.location.href).toContain('/feeds/new');
 
       window.location = originalLocation;
     });

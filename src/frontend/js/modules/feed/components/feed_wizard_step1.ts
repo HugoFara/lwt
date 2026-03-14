@@ -214,7 +214,7 @@ export function feedWizardStep1Data(): FeedWizardStep1Data {
     },
 
     cancel(): void {
-      window.location.href = '/feeds/edit?del_wiz=1';
+      window.location.href = '/feeds/manage';
     },
 
     addCuratedFeed(source: CuratedSource): void {

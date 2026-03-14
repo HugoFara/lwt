@@ -468,10 +468,7 @@ export function feedWizardStep2Data(): FeedWizardStep2Data {
     },
 
     goBack(): void {
-      const url = '/feeds/wizard?step=1' +
-        `&select_mode=${encodeURIComponent(this.selectionMode)}` +
-        `&hide_images=${encodeURIComponent(this.hideImages ? 'yes' : 'no')}`;
-      window.location.href = url;
+      window.location.href = '/feeds/new';
     },
 
     goNext(): void {

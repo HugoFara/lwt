@@ -202,7 +202,8 @@ class FeedEditControllerTest extends TestCase
         $expectedMethods = [
             'handleMarkAction', 'formatMarkActionMessage',
             'handleUpdateFeed', 'handleSaveFeed',
-            'showNewForm', 'showEditForm', 'showMultiLoadForm', 'showList'
+            'showNewForm', 'showEditForm', 'showMultiLoadForm', 'showList',
+            'loadCuratedFeeds'
         ];
 
         foreach ($expectedMethods as $methodName) {
@@ -618,18 +619,18 @@ class FeedEditControllerTest extends TestCase
     // =========================================================================
 
     #[Test]
-    public function showNewFormCallsGetLanguages(): void
+    public function showNewFormCallsGetLanguagesForSelect(): void
     {
-        $this->feedFacade->expects($this->once())
-            ->method('getLanguages')
-            ->willReturn([['LgID' => 1, 'LgName' => 'English']]);
+        $this->languageFacade->expects($this->once())
+            ->method('getLanguagesForSelect')
+            ->willReturn([['id' => 1, 'name' => 'English']]);
 
         $method = new \ReflectionMethod(FeedEditController::class, 'showNewForm');
         $method->setAccessible(true);
 
         ob_start();
         try {
-            $method->invoke($this->controller, 1);
+            $method->invoke($this->controller);
         } catch (\Throwable $e) {
             // View include may fail
         }
