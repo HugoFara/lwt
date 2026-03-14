@@ -67,7 +67,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.text_id" @change="setFilter('text_id', filters.text_id)">
+                            <select x-model="filters.text_id" @change="applyFilter('text_id')">
                                 <option value="">All Texts</option>
                                 <template x-for="text in filterOptions.texts" :key="text.id">
                                     <option :value="text.id" x-text="text.title"></option>
@@ -86,7 +86,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.status" @change="setFilter('status', filters.status)">
+                            <select x-model="filters.status" @change="applyFilter('status')">
                                 <template x-for="status in filterOptions.statuses" :key="status.value">
                                     <option :value="status.value" x-text="status.label"></option>
                                 </template>
@@ -104,7 +104,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.tag1" @change="setFilter('tag1', filters.tag1)">
+                            <select x-model="filters.tag1" @change="applyFilter('tag1')">
                                 <option value="">Any Tag</option>
                                 <template x-for="tag in filterOptions.tags" :key="tag.id">
                                     <option :value="tag.id" x-text="tag.name"></option>
@@ -123,7 +123,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.sort" @change="setFilter('sort', filters.sort)">
+                            <select x-model="filters.sort" @change="applyFilter('sort')">
                                 <template x-for="sort in filterOptions.sorts" :key="sort.value">
                                     <option :value="sort.value" x-text="sort.label"></option>
                                 </template>
@@ -141,7 +141,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.per_page" @change="setPerPage(filters.per_page)">
+                            <select x-model="filters.per_page" @change="applyPerPage()">
                                 <template x-for="opt in perPageOptions" :key="opt">
                                     <option :value="opt" x-text="opt"></option>
                                 </template>
@@ -436,7 +436,7 @@ echo PageLayoutHelper::buildActionCard([
                                 </span>
                             </template>
                             <template x-if="!isEditing(word.id, 'romanization')">
-                                <span class="clickedit has-text-grey-dark"
+                                <span class="clickedit"
                                       @click="startEdit(word.id, 'romanization')"
                                       x-text="getDisplayValue(word, 'romanization')"></span>
                             </template>
@@ -493,8 +493,9 @@ echo PageLayoutHelper::buildActionCard([
                         <!-- Status / Days -->
                         <td class="has-text-centered" x-show="columns.status" :title="word.statusLabel">
                             <span
-                                class="tag is-light"
-                                x-text="word.statusAbbr + (word.status < 98 ? '/' + word.days : '')"
+                                class="tag"
+                                :class="getStatusClass(word.status)"
+                                x-text="statusDisplay(word)"
                             ></span>
                         </td>
 
@@ -543,9 +544,9 @@ echo PageLayoutHelper::buildActionCard([
                         <div class="level-right">
                             <div class="level-item">
                                 <div class="tags has-addons mb-0">
-                                    <span class="tag is-light" x-text="word.statusAbbr"></span>
+                                    <span class="tag" :class="getStatusClass(word.status)" x-text="word.statusAbbr"></span>
                                     <span
-                                        class="tag is-light"
+                                        class="tag"
                                         :class="getStatusClass(word.status)"
                                         x-text="formatScore(word.score)"
                                     ></span>
@@ -637,33 +638,33 @@ echo PageLayoutHelper::buildActionCard([
                 <div class="buttons">
                     <button type="button"
                             class="button is-small"
-                            :disabled="pagination.page <= 1"
+                            :disabled="isFirstPage()"
                             @click="goToPage(1)"
                             title="First page">
                         <?php echo IconHelper::render('chevrons-left', ['alt' => 'First']); ?>
                     </button>
                     <button type="button"
                             class="button is-small"
-                            :disabled="pagination.page <= 1"
-                            @click="goToPage(pagination.page - 1)"
+                            :disabled="isFirstPage()"
+                            @click="goToPrevPage()"
                             title="Previous page">
                         <?php echo IconHelper::render('chevron-left', ['alt' => 'Previous']); ?>
                     </button>
                     <span
                         class="button is-static is-small"
-                        x-text="pagination.page + ' / ' + pagination.total_pages"
+                        x-text="paginationText()"
                     ></span>
                     <button type="button"
                             class="button is-small"
-                            :disabled="pagination.page >= pagination.total_pages"
-                            @click="goToPage(pagination.page + 1)"
+                            :disabled="isLastPage()"
+                            @click="goToNextPage()"
                             title="Next page">
                         <?php echo IconHelper::render('chevron-right', ['alt' => 'Next']); ?>
                     </button>
                     <button type="button"
                             class="button is-small"
-                            :disabled="pagination.page >= pagination.total_pages"
-                            @click="goToPage(pagination.total_pages)"
+                            :disabled="isLastPage()"
+                            @click="goToLastPage()"
                             title="Last page">
                         <?php echo IconHelper::render('chevrons-right', ['alt' => 'Last']); ?>
                     </button>
@@ -685,7 +686,7 @@ echo PageLayoutHelper::buildActionCard([
         border-bottom: 1px dotted #ccc;
     }
     .clickedit:hover {
-        background-color: #f5f5f5;
+        background-color: var(--bulma-scheme-main-bis, #f5f5f5);
     }
     .inline-edit-container {
         display: inline-block;

@@ -87,6 +87,7 @@ export interface WordListData {
 
   // Filter methods
   setFilter(key: keyof WordListFilters, value: unknown): void;
+  applyFilter(key: keyof WordListFilters): void;
   resetFilters(): void;
   loadFilterState(): void;
   saveFilterState(): void;
@@ -94,7 +95,14 @@ export interface WordListData {
   // Pagination
   perPageOptions: number[];
   setPerPage(value: number | string): void;
+  applyPerPage(): void;
   goToPage(page: number): Promise<void>;
+  goToPrevPage(): Promise<void>;
+  goToNextPage(): Promise<void>;
+  goToLastPage(): Promise<void>;
+  isFirstPage(): boolean;
+  isLastPage(): boolean;
+  paginationText(): string;
 
   // Selection
   markAll(checked: boolean): void;
@@ -116,6 +124,7 @@ export interface WordListData {
   // Helpers
   formatScore(score: number): string;
   getStatusClass(status: number): string;
+  statusDisplay(word: WordItem): string;
   getDisplayValue(word: WordItem, field: 'translation' | 'romanization'): string;
 
   // Page title
@@ -268,6 +277,14 @@ export function wordListData(): WordListData {
       }
     },
 
+    /**
+     * Apply filter from x-model (CSP-safe: reads value from this.filters).
+     * Use in templates as @change="applyFilter('key')" after x-model sets the value.
+     */
+    applyFilter(key) {
+      this.setFilter(key, (this.filters as Record<string, unknown>)[key]);
+    },
+
     resetFilters() {
       const config = getPageConfig();
       this.filters = {
@@ -338,6 +355,13 @@ export function wordListData(): WordListData {
       this.loadWords();
     },
 
+    /**
+     * Apply per-page from x-model (CSP-safe: reads from this.filters.per_page).
+     */
+    applyPerPage() {
+      this.setPerPage(this.filters.per_page || 50);
+    },
+
     toggleColumn(col: keyof ColumnVisibility) {
       this.columns[col] = !this.columns[col];
       this.saveColumnState();
@@ -367,6 +391,31 @@ export function wordListData(): WordListData {
       if (page < 1 || page > this.pagination.total_pages) return;
       this.setFilter('page', page);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    async goToPrevPage() {
+      await this.goToPage(this.pagination.page - 1);
+    },
+
+    async goToNextPage() {
+      await this.goToPage(this.pagination.page + 1);
+    },
+
+    async goToLastPage() {
+      await this.goToPage(this.pagination.total_pages);
+    },
+
+    isFirstPage(): boolean {
+      return this.pagination.page <= 1;
+    },
+
+    isLastPage(): boolean {
+      return this.pagination.page >= this.pagination.total_pages;
+    },
+
+    paginationText(): string {
+      if (this.pagination.total_pages === 0) return '0 / 0';
+      return this.pagination.page + ' / ' + this.pagination.total_pages;
     },
 
     markAll(checked: boolean) {
@@ -572,6 +621,11 @@ export function wordListData(): WordListData {
       if (status >= 5) return 'is-success';
       if (status >= 3) return 'is-warning';
       return 'is-danger';
+    },
+
+    statusDisplay(word: WordItem): string {
+      if (word.status >= 98) return word.statusAbbr;
+      return word.statusAbbr + '/' + word.days;
     },
 
     getDisplayValue(
