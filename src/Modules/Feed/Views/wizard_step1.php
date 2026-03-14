@@ -48,6 +48,8 @@ $configJson = json_encode([
     'editFeedId' => $editFeedId ?? null,
     'languages' => $languagesJson,
     'curatedFeeds' => $curatedFeeds ?? [],
+    'currentLanguageId' => $currentLanguageId ?? 0,
+    'currentLanguageName' => $currentLanguageName ?? '',
 ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
 ?>
 <script type="application/json" id="wizard-step1-config"><?php echo $configJson; ?></script>
@@ -118,30 +120,6 @@ $configJson = json_encode([
             </div>
         </div>
 
-        <!-- LWT Language mapping -->
-        <div class="field mb-4">
-            <label class="label">Your LWT Language</label>
-            <div class="control">
-                <div class="select is-fullwidth">
-                    <select x-model="browseLwtLanguageId" required>
-                        <option value="">Select your language in LWT...</option>
-                        <template x-for="lang in languages" :key="lang.id">
-                            <option :value="lang.id" x-text="lang.name"></option>
-                        </template>
-                    </select>
-                </div>
-            </div>
-            <p class="help">Required: which LWT language should imported texts belong to?</p>
-        </div>
-
-        <!-- No languages warning -->
-        <template x-if="languages.length === 0">
-            <div class="notification is-warning is-light">
-                <strong>No languages configured.</strong>
-                <a href="/languages/new">Create a language</a> first, then come back to add feeds.
-            </div>
-        </template>
-
         <!-- Feed cards grouped by language -->
         <template x-if="filteredCuratedFeeds.length === 0">
             <div class="notification is-light">
@@ -167,8 +145,7 @@ $configJson = json_encode([
                                 </div>
                                 <footer class="card-footer">
                                     <a class="card-footer-item has-text-primary"
-                                       @click.prevent="addCuratedFeed(source)"
-                                       :class="{ 'is-disabled': !browseLwtLanguageId }">
+                                       @click.prevent="addCuratedFeed(source)">
                                         <span class="icon is-small mr-1">
                                             <?php echo IconHelper::render('plus', ['alt' => 'Add']); ?>
                                         </span>
@@ -186,7 +163,7 @@ $configJson = json_encode([
         <form id="curated-feed-form" action="/feeds/new" method="post" style="display: none;">
             <?php echo FormHelper::csrfField(); ?>
             <input type="hidden" name="save_feed" value="1" />
-            <input type="hidden" name="NfLgID" x-model="curatedFormData.NfLgID" />
+            <input type="hidden" name="NfLgID" x-bind:value="curatedFormData.NfLgID" />
             <input type="hidden" name="NfName" x-model="curatedFormData.NfName" />
             <input type="hidden" name="NfSourceURI" x-model="curatedFormData.NfSourceURI" />
             <input type="hidden" name="NfArticleSectionTags" x-model="curatedFormData.NfArticleSectionTags" />
@@ -304,22 +281,7 @@ $configJson = json_encode([
             <input type="hidden" name="save_feed" value="1" />
 
             <div class="box">
-                <!-- Language -->
-                <div class="field">
-                    <label class="label" for="manual_NfLgID">Language</label>
-                    <div class="control">
-                        <div class="select is-fullwidth">
-                            <select name="NfLgID" id="manual_NfLgID" required>
-                                <option value="">[Select...]</option>
-                                <?php foreach ($languages as $lang) : ?>
-                                <option value="<?php echo $lang['id']; ?>">
-                                    <?php echo htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8'); ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+                <input type="hidden" name="NfLgID" x-bind:value="currentLanguageId" />
 
                 <!-- Name -->
                 <div class="field">
@@ -384,7 +346,7 @@ $configJson = json_encode([
                 <!-- Options Section -->
                 <div class="field">
                     <label class="label">Options</label>
-                    <div class="box has-background-light">
+                    <div class="box" style="background-color: var(--bulma-scheme-main-bis);">
                         <div class="columns is-multiline">
                             <!-- Edit Text -->
                             <div class="column is-half">

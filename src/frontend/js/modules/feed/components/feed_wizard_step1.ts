@@ -45,6 +45,8 @@ export interface Step1Config {
   editFeedId: number | null;
   languages: Array<{ id: number; name: string }>;
   curatedFeeds: CuratedFeedGroup[];
+  currentLanguageId: number;
+  currentLanguageName: string;
 }
 
 /**
@@ -76,7 +78,7 @@ export interface FeedWizardStep1Data {
   // Browse tab
   browseLanguageFilter: string;
   browseSearch: string;
-  browseLwtLanguageId: string;
+  currentLanguageId: number;
   languages: Array<{ id: number; name: string }>;
   curatedFeeds: CuratedFeedGroup[];
   readonly filteredCuratedFeeds: CuratedFeedGroup[];
@@ -95,35 +97,26 @@ export interface FeedWizardStep1Data {
  */
 function readConfig(): Step1Config {
   const configEl = document.getElementById('wizard-step1-config');
+  const defaults: Step1Config = {
+    rssUrl: '',
+    hasError: false,
+    editFeedId: null,
+    languages: [],
+    curatedFeeds: [],
+    currentLanguageId: 0,
+    currentLanguageName: ''
+  };
+
   if (!configEl) {
-    return {
-      rssUrl: '',
-      hasError: false,
-      editFeedId: null,
-      languages: [],
-      curatedFeeds: []
-    };
+    return defaults;
   }
 
   try {
     const parsed = JSON.parse(configEl.textContent || '{}');
-    return {
-      rssUrl: '',
-      hasError: false,
-      editFeedId: null,
-      languages: [],
-      curatedFeeds: [],
-      ...parsed
-    };
+    return { ...defaults, ...parsed };
   } catch {
     console.error('Failed to parse wizard step 1 config');
-    return {
-      rssUrl: '',
-      hasError: false,
-      editFeedId: null,
-      languages: [],
-      curatedFeeds: []
-    };
+    return defaults;
   }
 }
 
@@ -156,10 +149,18 @@ export function feedWizardStep1Data(): FeedWizardStep1Data {
       }
     },
 
-    // Browse tab
-    browseLanguageFilter: '',
+    // Browse tab — auto-preselect language filter based on current navbar language
+    browseLanguageFilter: (() => {
+      const name = config.currentLanguageName.toLowerCase();
+      if (!name) return '';
+      const match = config.curatedFeeds.find(
+        g => name.includes(g.languageName.toLowerCase())
+          || g.languageName.toLowerCase().includes(name)
+      );
+      return match?.language ?? '';
+    })(),
     browseSearch: '',
-    browseLwtLanguageId: '',
+    currentLanguageId: config.currentLanguageId,
     languages: config.languages,
     curatedFeeds: config.curatedFeeds,
 
@@ -218,22 +219,9 @@ export function feedWizardStep1Data(): FeedWizardStep1Data {
     },
 
     addCuratedFeed(source: CuratedSource): void {
-      if (!this.browseLwtLanguageId) {
-        // Highlight the language selector
-        const select = document.querySelector<HTMLSelectElement>(
-          'select[x-model="browseLwtLanguageId"]'
-        );
-        if (select) {
-          select.focus();
-          select.classList.add('is-danger');
-          setTimeout(() => select.classList.remove('is-danger'), 2000);
-        }
-        return;
-      }
-
-      // Populate hidden form and submit
+      // Populate hidden form and submit using current language from navbar
       this.curatedFormData = {
-        NfLgID: this.browseLwtLanguageId,
+        NfLgID: String(this.currentLanguageId),
         NfName: source.name,
         NfSourceURI: source.url,
         NfArticleSectionTags: source.articleSectionTags,

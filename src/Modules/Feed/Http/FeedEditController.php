@@ -379,6 +379,8 @@ class FeedEditController
         $editFeedId = null;
         $languages = $this->languageFacade->getLanguagesForSelect();
         $curatedFeeds = $this->loadCuratedFeeds();
+        $currentLanguageId = (int) Settings::get('currentlanguage');
+        $currentLanguageName = $this->languageFacade->getLanguageName($currentLanguageId);
 
         include $this->viewPath . 'wizard_step1.php';
     }
