@@ -316,9 +316,16 @@ class Migrations
             );
         }
 
-        // Do DB Updates if tables seem to be old versions
+        // Always check for pending migrations, even if dbversion is current.
+        // This handles fix migrations added after a version was released.
+        $allMigrations = self::getMigrationFiles();
+        $appliedMigrations = self::getAppliedMigrations();
+        $pendingMigrations = array_diff($allMigrations, $appliedMigrations);
 
-        if ($dbversion < $currversion) {
+        // Do DB Updates if tables seem to be old versions
+        $needsVersionUpdate = $dbversion < $currversion;
+
+        if ($needsVersionUpdate) {
             if (
                 'utf8utf8_general_ci' != Connection::preparedFetchValue(
                     'SELECT concat(default_character_set_name, default_collation_name) AS collation
@@ -337,7 +344,9 @@ class Migrations
                     ' CHARACTER SET utf8 COLLATE utf8_general_ci'
                 );
             }
+        }
 
+        if (count($pendingMigrations) > 0) {
             // Validate integrity of already-applied migrations
             $integrityCheck = self::validateMigrationIntegrity();
             if (!$integrityCheck['valid']) {
@@ -347,10 +356,6 @@ class Migrations
                 }
             }
 
-            // Get pending migrations (not yet applied)
-            $allMigrations = self::getMigrationFiles();
-            $appliedMigrations = self::getAppliedMigrations();
-            $pendingMigrations = array_diff($allMigrations, $appliedMigrations);
             $migrationsDir = __DIR__ . '/../../../../db/migrations/';
 
             // Drop all FK constraints before running migrations.
@@ -385,7 +390,9 @@ class Migrations
             } finally {
                 Connection::execute("SET FOREIGN_KEY_CHECKS = 1");
             }
+        }
 
+        if ($needsVersionUpdate) {
             Connection::execute(
                 "CREATE TABLE IF NOT EXISTS tts (
                     TtsID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,

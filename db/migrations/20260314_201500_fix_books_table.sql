@@ -1,7 +1,8 @@
--- Migration: Add books table and book-related columns to texts table
--- This enables EPUB import and multi-chapter book support
+-- Migration: Fix books table creation
+-- The original migration (20260109) used TINYINT(3) for BkLgID which doesn't
+-- match languages.LgID INT(11). This migration creates the table if it was
+-- not created due to the FK type mismatch.
 
--- Create books table
 CREATE TABLE IF NOT EXISTS books (
     BkID SMALLINT(5) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     BkUsID INT(10) UNSIGNED NULL,
@@ -27,19 +28,17 @@ CREATE TABLE IF NOT EXISTS books (
         REFERENCES users(UsID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Add book-related columns to texts table
+-- Add book-related columns to texts table (idempotent)
 ALTER TABLE texts
     ADD COLUMN IF NOT EXISTS TxBkID SMALLINT(5) UNSIGNED NULL AFTER TxUsID,
     ADD COLUMN IF NOT EXISTS TxChapterNum SMALLINT(5) UNSIGNED NULL AFTER TxBkID,
     ADD COLUMN IF NOT EXISTS TxChapterTitle VARCHAR(200) NULL AFTER TxChapterNum;
 
 -- Add index for book-chapter queries (if not exists)
--- MariaDB 10.5+ supports IF NOT EXISTS for indexes
 ALTER TABLE texts
     ADD INDEX IF NOT EXISTS idx_texts_book (TxBkID, TxChapterNum);
 
--- Add foreign key constraint for book reference
--- First check if constraint exists to make migration idempotent
+-- Add foreign key constraint for book reference (idempotent)
 SET @fk_exists = (
     SELECT COUNT(*)
     FROM information_schema.TABLE_CONSTRAINTS
@@ -48,7 +47,6 @@ SET @fk_exists = (
     AND CONSTRAINT_NAME = 'fk_texts_book'
 );
 
--- Only add FK if it doesn't exist (using prepared statement)
 SET @sql = IF(@fk_exists = 0,
     'ALTER TABLE texts ADD CONSTRAINT fk_texts_book FOREIGN KEY (TxBkID) REFERENCES books(BkID) ON DELETE CASCADE',
     'SELECT 1'
