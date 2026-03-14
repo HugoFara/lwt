@@ -38,6 +38,17 @@ class StarDictImporter implements ImporterInterface
     private array $info = [];
 
     /**
+     * Known part-of-speech tags (lowercase) used to detect POS in entry data.
+     */
+    private const POS_TAGS = [
+        'noun', 'verb', 'adjective', 'adverb', 'pronoun', 'preposition',
+        'conjunction', 'interjection', 'determiner', 'particle', 'article',
+        'numeral', 'classifier', 'prefix', 'suffix', 'infix', 'affix',
+        'phrase', 'proverb', 'idiom', 'abbreviation', 'initialism',
+        'proper noun', 'adj', 'adv', 'prep', 'conj', 'det', 'pron',
+    ];
+
+    /**
      * {@inheritdoc}
      */
     public function parse(string $filePath, array $options = []): iterable
@@ -67,12 +78,16 @@ class StarDictImporter implements ImporterInterface
 
         try {
             foreach ($indexEntries as $entry) {
-                $definition = $this->readDefinition($dictHandle, $entry['offset'], $entry['size']);
-                if ($definition !== null) {
-                    yield [
+                $parsed = $this->readEntry($dictHandle, $entry['offset'], $entry['size']);
+                if ($parsed !== null) {
+                    $result = [
                         'term' => $entry['term'],
-                        'definition' => $definition,
+                        'definition' => $parsed['definition'],
                     ];
+                    if ($parsed['pos'] !== null) {
+                        $result['pos'] = $parsed['pos'];
+                    }
+                    yield $result;
                 }
             }
         } finally {
@@ -368,15 +383,15 @@ class StarDictImporter implements ImporterInterface
     }
 
     /**
-     * Read a definition from the dictionary file.
+     * Read and parse an entry from the dictionary file.
      *
      * @param resource $handle File handle
      * @param int      $offset Byte offset
      * @param int      $size   Data size
      *
-     * @return string|null Definition text
+     * @return array{definition: string, pos: string|null}|null Parsed entry
      */
-    private function readDefinition($handle, int $offset, int $size): ?string
+    private function readEntry($handle, int $offset, int $size): ?array
     {
         if (fseek($handle, $offset) === -1) {
             return null;
@@ -387,24 +402,18 @@ class StarDictImporter implements ImporterInterface
             return null;
         }
 
-        // StarDict can have different data types (m, l, g, t, etc.)
-        // For simplicity, treat all as plain text
-        // Remove type markers if present
         $sameTypeSequence = $this->info['sametypesequence'] ?? null;
 
         if ($sameTypeSequence !== null) {
-            // All entries have same type, no per-entry markers
-            return $this->cleanDefinition($data);
+            // All entries share the same type sequence — split fields on null bytes
+            return $this->parseFields($data);
         }
 
-        // Check for type marker at start
+        // Per-entry type markers: first byte is the type character
         if (strlen($data) > 1) {
             $typeMarker = $data[0];
             if (ctype_alpha($typeMarker)) {
-                // Has type marker, skip it
                 $data = substr($data, 1);
-
-                // Find end of this type's data (null byte)
                 $nullPos = strpos($data, "\0");
                 if ($nullPos !== false) {
                     $data = substr($data, 0, $nullPos);
@@ -412,35 +421,85 @@ class StarDictImporter implements ImporterInterface
             }
         }
 
-        return $this->cleanDefinition($data);
+        return $this->parseFields($data);
     }
 
     /**
-     * Clean up a definition string.
+     * Parse raw entry data into definition and optional POS.
      *
-     * @param string $definition Raw definition
+     * StarDict entries may contain multiple null-byte-separated fields.
+     * The first field is often a POS tag (e.g., "noun", "verb").
      *
-     * @return string Cleaned definition
+     * @param string $data Raw entry data
+     *
+     * @return array{definition: string, pos: string|null}|null
      */
-    private function cleanDefinition(string $definition): string
+    private function parseFields(string $data): ?array
     {
-        // Remove null bytes
-        $definition = str_replace("\0", '', $definition);
+        // Split on null bytes — these separate fields in StarDict data
+        $segments = explode("\0", $data);
 
-        // Convert to UTF-8 if needed
-        if (!mb_check_encoding($definition, 'UTF-8')) {
-            $converted = mb_convert_encoding($definition, 'UTF-8', 'auto');
-            if ($converted !== false) {
-                $definition = $converted;
+        // Clean each segment
+        $cleaned = [];
+        foreach ($segments as $segment) {
+            $segment = $this->cleanSegment($segment);
+            if ($segment !== '') {
+                $cleaned[] = $segment;
             }
         }
 
-        // Clean up whitespace
-        $definition = trim($definition);
+        if ($cleaned === []) {
+            return null;
+        }
 
-        // Remove Pango markup tags if present
-        $definition = strip_tags($definition);
+        // Check if the first segment is a POS tag
+        $pos = null;
+        $firstLower = mb_strtolower($cleaned[0], 'UTF-8');
+        if (count($cleaned) > 1 && in_array($firstLower, self::POS_TAGS, true)) {
+            $pos = $cleaned[0];
+            array_shift($cleaned);
+        }
 
-        return $definition;
+        $definition = implode('; ', $cleaned);
+
+        return ['definition' => $definition, 'pos' => $pos];
+    }
+
+    /**
+     * Clean up a single text segment.
+     *
+     * @param string $segment Raw segment
+     *
+     * @return string Cleaned segment
+     */
+    private function cleanSegment(string $segment): string
+    {
+        // Convert to UTF-8 if needed
+        if (!mb_check_encoding($segment, 'UTF-8')) {
+            $converted = mb_convert_encoding($segment, 'UTF-8', 'auto');
+            if ($converted !== false) {
+                $segment = $converted;
+            }
+        }
+
+        // Convert block-level HTML to separators before stripping
+        $segment = preg_replace('/<br\s*\/?>/i', '; ', $segment) ?? $segment;
+        $segment = preg_replace('/<\/(?:div|p|li|tr|dt|dd)>/i', '; ', $segment) ?? $segment;
+
+        // Remove remaining HTML/Pango markup tags
+        $segment = strip_tags($segment);
+
+        // Strip WikDict Lua template parser error prefixes
+        $segment = preg_replace(
+            '/^\w+TemplateParserError:LuaError\s*/',
+            '',
+            $segment
+        ) ?? $segment;
+
+        // Collapse whitespace and trim
+        $segment = preg_replace('/\s+/', ' ', $segment) ?? $segment;
+        $segment = trim($segment, " \t\n\r;");
+
+        return $segment;
     }
 }
