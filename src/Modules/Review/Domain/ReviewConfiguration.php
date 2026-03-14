@@ -55,13 +55,15 @@ final readonly class ReviewConfiguration
      * @param int             $reviewType  Review type (1-5)
      * @param bool            $wordMode    Whether in word mode (no sentence)
      * @param bool            $isTableMode Whether in table review mode
+     * @param array<int, int|string> $rawParams Pre-bound parameters for KEY_RAW_SQL
      */
     public function __construct(
         public string $reviewKey,
         public int|array|string $selection,
         public int $reviewType = 1,
         public bool $wordMode = false,
-        public bool $isTableMode = false
+        public bool $isTableMode = false,
+        public array $rawParams = []
     ) {
     }
 
@@ -186,7 +188,7 @@ final readonly class ReviewConfiguration
             self::KEY_TEXT => $this->textPrepared($params),
             self::KEY_WORDS => $this->wordsPrepared($params),
             self::KEY_TEXTS => $this->textsPrepared($params),
-            self::KEY_RAW_SQL => is_string($this->selection) ? $this->selection : '',
+            self::KEY_RAW_SQL => $this->rawSqlPrepared($params),
             default => throw new \InvalidArgumentException("Invalid review key: {$this->reviewKey}")
         };
     }
@@ -255,6 +257,21 @@ final readonly class ReviewConfiguration
             $params[] = (int) $id;
         }
         return " words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($placeholders) ";
+    }
+
+    /**
+     * Build prepared SQL for raw SQL selection.
+     *
+     * @param array<int, int|string> $params Reference to params array
+     *
+     * @return string SQL fragment
+     */
+    private function rawSqlPrepared(array &$params): string
+    {
+        foreach ($this->rawParams as $p) {
+            $params[] = $p;
+        }
+        return is_string($this->selection) ? $this->selection : '';
     }
 
     /**

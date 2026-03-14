@@ -763,8 +763,8 @@ describe('review_view.ts', () => {
 
       renderReviewApp(container);
 
-      expect(container.innerHTML).toContain('Nothing more to review');
-      expect(container.innerHTML).toContain('tomorrowCount');
+      expect(container.innerHTML).toContain('getFinishedTitle()');
+      expect(container.innerHTML).toContain('hasTomorrowWords()');
       expect(container.innerHTML).toContain('Back to Texts');
     });
   });

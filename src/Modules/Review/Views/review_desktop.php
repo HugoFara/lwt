@@ -31,7 +31,23 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 <?php echo PageLayoutHelper::buildNavbar(); ?>
 
 <!-- Review application root - all UI rendered by Alpine.js -->
-<div id="review-app"></div>
+<div id="review-app">
+<?php /** @psalm-suppress MixedArrayAccess */ if (($config['progress']['total'] ?? 0) === 0) : ?>
+  <div class="container py-6">
+    <div class="notification is-info is-light has-text-centered">
+      <p class="is-size-5 has-text-weight-bold mb-2">No vocabulary to review for the day.</p>
+      <p class="has-text-grey-dark">Start reading a text and mark words to build your review queue.</p>
+      <div class="buttons is-centered mt-5">
+        <a href="/texts" class="button is-primary">Back to Texts</a>
+      </div>
+    </div>
+  </div>
+<?php else : ?>
+  <div class="has-text-centered py-6">
+    <p class="has-text-grey">Loading review...</p>
+  </div>
+<?php endif; ?>
+</div>
 
 <!-- Audio elements for feedback -->
 <audio id="success_sound" preload="auto">

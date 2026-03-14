@@ -152,8 +152,11 @@ class ReviewFacade
      */
     public function validateReviewSelection(string $reviewsql, array $params = []): array
     {
-        // Create a raw SQL config for validation
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
+        $config = new ReviewConfiguration(
+            ReviewConfiguration::KEY_RAW_SQL,
+            $reviewsql,
+            rawParams: $params
+        );
         return $this->repository->validateSingleLanguage($config);
     }
 
@@ -167,7 +170,11 @@ class ReviewFacade
      */
     public function getReviewCounts(string $reviewsql, array $params = []): array
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
+        $config = new ReviewConfiguration(
+            ReviewConfiguration::KEY_RAW_SQL,
+            $reviewsql,
+            rawParams: $params
+        );
         return $this->repository->getReviewCounts($config);
     }
 
@@ -181,7 +188,11 @@ class ReviewFacade
      */
     public function getTomorrowReviewCount(string $reviewsql, array $params = []): int
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
+        $config = new ReviewConfiguration(
+            ReviewConfiguration::KEY_RAW_SQL,
+            $reviewsql,
+            rawParams: $params
+        );
         $result = $this->getTomorrowCount->execute($config);
         return $result['count'];
     }
@@ -196,7 +207,11 @@ class ReviewFacade
      */
     public function getNextWord(string $reviewsql, array $params = []): ?array
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
+        $config = new ReviewConfiguration(
+            ReviewConfiguration::KEY_RAW_SQL,
+            $reviewsql,
+            rawParams: $params
+        );
         $word = $this->repository->findNextWordForReview($config);
 
         if ($word === null) {
@@ -290,7 +305,11 @@ class ReviewFacade
      */
     public function getLanguageIdFromReviewSql(string $reviewsql, array $params = []): ?int
     {
-        $config = new ReviewConfiguration(ReviewConfiguration::KEY_RAW_SQL, $reviewsql);
+        $config = new ReviewConfiguration(
+            ReviewConfiguration::KEY_RAW_SQL,
+            $reviewsql,
+            rawParams: $params
+        );
         return $this->repository->getLanguageIdFromConfig($config);
     }
 

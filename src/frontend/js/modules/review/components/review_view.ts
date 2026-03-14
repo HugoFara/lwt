@@ -180,11 +180,11 @@ function buildFinishedMessage(): string {
   return `
     <div x-show="store.isFinished" class="has-text-centered py-6">
       <div class="notification is-success is-light">
-        <p class="is-size-5 has-text-weight-bold"
-           x-text="store.progress.total > 0 ? 'Nothing more to review here!' : 'Nothing to review here!'"></p>
-        <p class="mt-3" x-show="store.tomorrowCount > 0">
+        <p class="is-size-5 has-text-weight-bold" x-text="getFinishedTitle()"></p>
+        <p class="mt-2 has-text-grey-dark" x-show="hasNoVocabulary()" x-text="getNoVocabularyHint()"></p>
+        <p class="mt-3" x-show="hasTomorrowWords()">
           Tomorrow you'll find here <strong x-text="store.tomorrowCount"></strong>
-          review<span x-show="store.tomorrowCount !== 1">s</span>!
+          <span x-text="getTomorrowLabel()"></span>!
         </p>
         <div class="buttons is-centered mt-5">
           <a href="/texts" class="button is-primary">Back to Texts</a>
@@ -712,6 +712,30 @@ function registerReviewAppComponent(config: ReviewConfig): void {
           if (this.store.answerRevealed) this.setStatus(parseInt(e.key, 10));
           break;
       }
+    },
+
+    // Finished state helpers (CSP-compatible)
+    getFinishedTitle(): string {
+      if (this.store.progress.total > 0) {
+        return 'Nothing more to review here!';
+      }
+      return 'No vocabulary to review for the day.';
+    },
+
+    hasNoVocabulary(): boolean {
+      return this.store.progress.total === 0;
+    },
+
+    getNoVocabularyHint(): string {
+      return 'Start reading a text and mark words to build your review queue.';
+    },
+
+    hasTomorrowWords(): boolean {
+      return this.store.tomorrowCount > 0;
+    },
+
+    getTomorrowLabel(): string {
+      return this.store.tomorrowCount === 1 ? 'review' : 'reviews';
     },
 
     // Safe accessors (CSP-compatible - avoid ?. in templates)
