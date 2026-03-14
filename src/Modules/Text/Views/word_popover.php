@@ -53,18 +53,18 @@ namespace Lwt\Views\Text;
         <div>
           <!-- Word text and audio button -->
           <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
-            <span class="is-size-5 has-text-weight-bold" x-text="word.text"></span>
+            <span class="is-size-5 has-text-weight-bold" x-text="wordText"></span>
             <button class="button is-small is-rounded is-ghost" @click="speakWord" title="Listen">
               <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('volume-2', ['size' => 14]); ?>
             </button>
           </div>
 
           <!-- Translation for known words -->
-          <template x-if="!isUnknown && word.translation">
+          <template x-if="hasTranslation">
             <div class="mb-2">
-              <p class="is-size-7 word-popover__translation" x-text="word.translation"></p>
-              <template x-if="word.romanization">
-                <p class="is-size-7 word-popover__romanization" x-text="word.romanization"></p>
+              <p class="is-size-7 word-popover__translation" x-text="wordTranslation"></p>
+              <template x-if="hasRomanization">
+                <p class="is-size-7 word-popover__romanization" x-text="wordRomanization"></p>
               </template>
             </div>
           </template>
@@ -120,10 +120,10 @@ namespace Lwt\Views\Text;
               <!-- Edit button -->
               <button class="button is-info is-outlined is-small" @click="openEditForm" :disabled="isLoading">
                 <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('edit', ['size' => 12]); ?>
-                <span class="ml-1" x-text="isUnknown ? 'Add' : 'Edit'"></span>
+                <span class="ml-1" x-text="wordLabel"></span>
               </button>
               <!-- Delete button for known words -->
-              <template x-if="!isUnknown && word.wordId">
+              <template x-if="!isUnknown && hasWordId">
                 <button class="button is-danger is-outlined is-small" :disabled="isLoading" @click="deleteWord">
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('trash-2', ['size' => 12]); ?>
                 </button>

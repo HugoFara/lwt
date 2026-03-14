@@ -67,6 +67,15 @@ export interface WordPopoverData {
   readonly isUnknown: boolean;
   readonly statuses: StatusInfo[];
 
+  // CSP-safe proxy properties (null-safe access to word.*)
+  readonly wordText: string;
+  readonly wordTranslation: string;
+  readonly wordRomanization: string;
+  readonly hasTranslation: boolean;
+  readonly hasRomanization: boolean;
+  readonly hasWordId: boolean;
+  readonly wordLabel: string;
+
   // Position state
   position: PopoverPosition;
   popoverEl: HTMLElement | null;
@@ -156,6 +165,38 @@ export function wordPopoverData(): WordPopoverData {
 
     get statuses(): StatusInfo[] {
       return STATUSES;
+    },
+
+    // CSP-safe null-safe proxy properties for word.* access.
+    // During batched reactive updates, word can become null (selectedHex cleared)
+    // while word.* bindings are still dirty, causing MemberExpression on null.
+    get wordText(): string {
+      return this.word?.text ?? '';
+    },
+
+    get wordTranslation(): string {
+      return this.word?.translation ?? '';
+    },
+
+    get wordRomanization(): string {
+      return this.word?.romanization ?? '';
+    },
+
+    get hasTranslation(): boolean {
+      const word = this.word;
+      return !!word && !this.isUnknown && !!word.translation;
+    },
+
+    get hasRomanization(): boolean {
+      return !!this.word?.romanization;
+    },
+
+    get hasWordId(): boolean {
+      return !!this.word?.wordId;
+    },
+
+    get wordLabel(): string {
+      return this.isUnknown ? 'Add' : 'Edit';
     },
 
     calculatePosition(): void {

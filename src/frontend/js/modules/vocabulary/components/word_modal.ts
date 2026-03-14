@@ -59,6 +59,18 @@ export interface WordModalData {
   readonly modalTitle: string;
   readonly statuses: StatusInfo[];
 
+  // CSP-safe null-safe proxy properties for word.*
+  readonly wordText: string;
+  readonly wordTranslation: string;
+  readonly wordRomanization: string;
+  readonly wordNotes: string;
+  readonly wordTags: string;
+  readonly hasTranslation: boolean;
+  readonly hasRomanization: boolean;
+  readonly hasNotes: boolean;
+  readonly hasTags: boolean;
+  readonly hasWordId: boolean;
+
   // View mode
   viewMode: ViewMode;
 
@@ -182,6 +194,51 @@ export function wordModalData(): WordModalData {
 
     get statuses(): StatusInfo[] {
       return STATUSES;
+    },
+
+    // CSP-safe null-safe proxies for word.* — during batched reactive updates
+    // word can become null while word.* bindings are still dirty.
+    get wordText(): string {
+      return this.word?.text ?? '';
+    },
+
+    get wordTranslation(): string {
+      return this.word?.translation ?? '';
+    },
+
+    get wordRomanization(): string {
+      return this.word?.romanization ?? '';
+    },
+
+    get wordNotes(): string {
+      return this.word?.notes ?? '';
+    },
+
+    get wordTags(): string {
+      return this.word?.tags ?? '';
+    },
+
+    get hasTranslation(): boolean {
+      const word = this.word;
+      return !!word && !this.isUnknown && !!word.translation;
+    },
+
+    get hasRomanization(): boolean {
+      return !!this.word?.romanization;
+    },
+
+    get hasNotes(): boolean {
+      const word = this.word;
+      return !!word && !this.isUnknown && !!word.notes;
+    },
+
+    get hasTags(): boolean {
+      const word = this.word;
+      return !!word && !this.isUnknown && !!word.tags;
+    },
+
+    get hasWordId(): boolean {
+      return !!this.word?.wordId;
     },
 
     close(): void {

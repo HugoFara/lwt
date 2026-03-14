@@ -44,34 +44,34 @@ namespace Lwt\Views\Text;
           <div>
             <!-- Word text and audio -->
             <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
-              <span class="is-size-4 has-text-weight-bold" x-text="word.text"></span>
+              <span class="is-size-4 has-text-weight-bold" x-text="wordText"></span>
               <button class="button is-small is-rounded" @click="speakWord" title="Listen">
                 <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('volume-2', ['size' => 16]); ?>
               </button>
             </div>
 
             <!-- Translation/Romanization for known words -->
-            <template x-if="!isUnknown && word.translation">
+            <template x-if="hasTranslation">
               <div class="mb-3">
-                <p class="has-text-grey-dark" x-text="$markdown(word.translation)"></p>
-                <template x-if="word.romanization">
-                  <p class="is-size-7 has-text-grey" x-text="word.romanization"></p>
+                <p class="has-text-grey-dark" x-text="$markdown(wordTranslation)"></p>
+                <template x-if="hasRomanization">
+                  <p class="is-size-7 has-text-grey" x-text="wordRomanization"></p>
                 </template>
               </div>
             </template>
 
             <!-- Notes for known words -->
-            <template x-if="!isUnknown && word.notes">
+            <template x-if="hasNotes">
               <div class="mb-3">
                 <p class="is-size-7 has-text-grey mb-1">Notes:</p>
-                <p class="has-text-grey-dark is-size-7" x-text="$markdown(word.notes)"></p>
+                <p class="has-text-grey-dark is-size-7" x-text="$markdown(wordNotes)"></p>
               </div>
             </template>
 
             <!-- Tags if present -->
-            <template x-if="!isUnknown && word.tags">
+            <template x-if="hasTags">
               <div class="mb-3">
-                <span class="tag is-info is-light" x-text="word.tags"></span>
+                <span class="tag is-info is-light" x-text="wordTags"></span>
               </div>
             </template>
 
@@ -123,7 +123,7 @@ namespace Lwt\Views\Text;
             </template>
 
             <!-- Edit/Delete for known words -->
-            <template x-if="!isUnknown && word.wordId">
+            <template x-if="!isUnknown && hasWordId">
               <div class="mb-4">
                 <div class="buttons are-small">
                   <button class="button is-info is-outlined" @click="showEditForm" :disabled="isLoading">
