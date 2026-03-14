@@ -314,6 +314,7 @@ This project uses `@alpinejs/csp` (aliased in `vite.config.ts`), which **cannot 
 **Never do:**
 - `x-data="{ foo: 'bar', count: 0 }"` — inline object literals
 - `@click="count++"` or `@change="show = ['a','b'].includes($event.target.value)"` — complex inline expressions
+- `@change="setPerPage(parseInt(value))"` — calls to JS globals (`parseInt`, `Number`, `JSON`, etc.) are undefined in CSP eval scope; do the conversion inside the component method instead
 - `x-data="componentName()"` with parentheses — function call syntax
 
 **Instead:**

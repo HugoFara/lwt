@@ -74,7 +74,7 @@ export interface WordListData {
 
   // Pagination
   perPageOptions: number[];
-  setPerPage(value: number): void;
+  setPerPage(value: number | string): void;
   goToPage(page: number): Promise<void>;
 
   // Selection
@@ -206,6 +206,10 @@ export function wordListData(): WordListData {
     },
 
     setFilter(key, value) {
+      // Select elements return strings; coerce numeric filter keys
+      if (key === 'sort' || key === 'page' || key === 'per_page') {
+        value = Number(value);
+      }
       (this.filters as Record<string, unknown>)[key] = value;
 
       // Reset to page 1 when filter changes (except for page changes)
@@ -287,8 +291,8 @@ export function wordListData(): WordListData {
       }
     },
 
-    setPerPage(value: number) {
-      this.filters.per_page = value;
+    setPerPage(value: number | string) {
+      this.filters.per_page = Number(value);
       this.filters.page = 1;
       this.marked.clear();
       this.saveFilterState();

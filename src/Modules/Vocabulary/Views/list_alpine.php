@@ -123,7 +123,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.sort" @change="setFilter('sort', parseInt(filters.sort))">
+                            <select x-model="filters.sort" @change="setFilter('sort', filters.sort)">
                                 <template x-for="sort in filterOptions.sorts" :key="sort.value">
                                     <option :value="sort.value" x-text="sort.label"></option>
                                 </template>
@@ -141,7 +141,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.per_page" @change="setPerPage(parseInt(filters.per_page))">
+                            <select x-model="filters.per_page" @change="setPerPage(filters.per_page)">
                                 <template x-for="opt in perPageOptions" :key="opt">
                                     <option :value="opt" x-text="opt"></option>
                                 </template>
