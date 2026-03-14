@@ -546,7 +546,9 @@ interface TextNewFormData {
   step: number;
   source: string;
   showAdvanced: boolean;
+  autoImporting: boolean;
 
+  init(): void;
   selectSource(source: string): void;
   goBack(): void;
   goToReview(): void;
@@ -561,6 +563,17 @@ export function textNewFormData(): TextNewFormData {
     step: 1,
     source: '',
     showAdvanced: false,
+    autoImporting: false,
+
+    init() {
+      // When arriving via import_url (Gutenberg/Feed), skip step 1 and show loading
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('import_url')) {
+        this.source = 'url';
+        this.step = 2;
+        this.autoImporting = true;
+      }
+    },
 
     selectSource(source: string) {
       this.source = source;
@@ -571,10 +584,12 @@ export function textNewFormData(): TextNewFormData {
 
     goBack() {
       this.step = 1;
+      this.autoImporting = false;
     },
 
     goToReview() {
       this.step = 2;
+      this.autoImporting = false;
     },
 
     sourceActive(source: string): string {

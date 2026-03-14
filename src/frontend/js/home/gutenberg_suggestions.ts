@@ -22,6 +22,15 @@ interface SuggestedBook {
   difficultyTier?: 'easy' | 'medium' | 'hard';
 }
 
+interface PreviewData {
+  total_unique_words: number;
+  known_words: number;
+  unknown_words: number;
+  coverage_percent: number;
+  difficulty_label: string;
+  sample_unknown_words: string[];
+}
+
 interface SuggestionsData {
   books: SuggestedBook[];
   hasMore: boolean;
@@ -31,14 +40,20 @@ interface SuggestionsData {
   languageId: number;
   basePath: string;
   importing: number | null;
+  previewBookId: number | null;
+  previewLoading: boolean;
+  previewData: PreviewData | null;
+  previewError: string;
 
   init(): void;
   fetchSuggestions(page: number): Promise<void>;
   loadMore(): Promise<void>;
+  previewBook(book: SuggestedBook): Promise<void>;
   importBook(book: SuggestedBook): void;
   formatAuthors(authors: string[]): string;
   tierLabel(tier: string): string;
   tierClass(tier: string): string;
+  coverageClass(label: string): string;
 }
 
 /**
@@ -54,6 +69,10 @@ export function gutenbergSuggestionsData(): SuggestionsData {
     languageId: 0,
     basePath: '',
     importing: null,
+    previewBookId: null,
+    previewLoading: false,
+    previewData: null,
+    previewError: '',
 
     init() {
       const configEl = document.getElementById('home-warnings-config');
@@ -119,6 +138,46 @@ export function gutenbergSuggestionsData(): SuggestionsData {
       await this.fetchSuggestions(this.page + 1);
     },
 
+    async previewBook(book: SuggestedBook) {
+      // Toggle off if already previewing this book
+      if (this.previewBookId === book.id) {
+        this.previewBookId = null;
+        this.previewData = null;
+        this.previewError = '';
+        return;
+      }
+
+      this.previewBookId = book.id;
+      this.previewLoading = true;
+      this.previewData = null;
+      this.previewError = '';
+
+      try {
+        const params = new URLSearchParams({
+          url: book.textUrl,
+          language_id: String(this.languageId),
+        });
+
+        const response = await fetch(`/api/v1/texts/library-preview?${params}`);
+        const data = await response.json();
+
+        if (this.previewBookId !== book.id) return;
+
+        if (!response.ok || data.error) {
+          this.previewError = data.error || 'Could not analyze this text.';
+          return;
+        }
+
+        this.previewData = data as unknown as PreviewData;
+      } catch {
+        if (this.previewBookId === book.id) {
+          this.previewError = 'Could not reach the server.';
+        }
+      } finally {
+        this.previewLoading = false;
+      }
+    },
+
     importBook(book: SuggestedBook) {
       this.importing = book.id;
       const params = new URLSearchParams({
@@ -141,6 +200,12 @@ export function gutenbergSuggestionsData(): SuggestionsData {
       if (tier === 'easy') return 'is-success is-light';
       if (tier === 'hard') return 'is-danger is-light';
       return 'is-warning is-light';
+    },
+
+    coverageClass(label: string): string {
+      if (label === 'easy') return 'is-success';
+      if (label === 'hard') return 'is-danger';
+      return 'is-warning';
     },
   };
 }

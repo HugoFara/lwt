@@ -67,7 +67,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.text_id" @change="applyFilter('text_id')">
+                            <select :value="filters.text_id" @change="setFilterFromEvent('text_id', $event)">
                                 <option value="">All Texts</option>
                                 <template x-for="text in filterOptions.texts" :key="text.id">
                                     <option :value="text.id" x-text="text.title"></option>
@@ -86,7 +86,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.status" @change="applyFilter('status')">
+                            <select :value="filters.status" @change="setFilterFromEvent('status', $event)">
                                 <template x-for="status in filterOptions.statuses" :key="status.value">
                                     <option :value="status.value" x-text="status.label"></option>
                                 </template>
@@ -104,7 +104,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.tag1" @change="applyFilter('tag1')">
+                            <select :value="filters.tag1" @change="setFilterFromEvent('tag1', $event)">
                                 <option value="">Any Tag</option>
                                 <template x-for="tag in filterOptions.tags" :key="tag.id">
                                     <option :value="tag.id" x-text="tag.name"></option>
@@ -123,7 +123,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.sort" @change="applyFilter('sort')">
+                            <select :value="filters.sort" @change="setFilterFromEvent('sort', $event)">
                                 <template x-for="sort in filterOptions.sorts" :key="sort.value">
                                     <option :value="sort.value" x-text="sort.label"></option>
                                 </template>
@@ -141,7 +141,7 @@ echo PageLayoutHelper::buildActionCard([
                     </div>
                     <div class="control">
                         <div class="select is-small">
-                            <select x-model="filters.per_page" @change="applyPerPage()">
+                            <select :value="filters.per_page" @change="setPerPageFromEvent($event)">
                                 <template x-for="opt in perPageOptions" :key="opt">
                                     <option :value="opt" x-text="opt"></option>
                                 </template>
@@ -155,7 +155,7 @@ echo PageLayoutHelper::buildActionCard([
             <div class="column is-narrow">
                 <div class="dropdown" :class="columnsOpen ? 'is-active' : ''">
                     <div class="dropdown-trigger">
-                        <button type="button" class="button is-small" @click="columnsOpen = !columnsOpen" @click.outside="columnsOpen = false">
+                        <button type="button" class="button is-small" @click="toggleColumnsDropdown()" @click.outside="closeColumnsDropdown()">
                             <span>Columns</span>
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('chevron-down', ['alt' => 'Toggle']); ?>
@@ -165,22 +165,22 @@ echo PageLayoutHelper::buildActionCard([
                     <div class="dropdown-menu" style="min-width: 10rem;">
                         <div class="dropdown-content">
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" x-model="columns.romanization" @change="saveColumnState()" /> Romanization
+                                <input type="checkbox" :checked="columns.romanization" @change="toggleColumn('romanization')" /> Romanization
                             </label>
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" x-model="columns.translation" @change="saveColumnState()" /> Translation
+                                <input type="checkbox" :checked="columns.translation" @change="toggleColumn('translation')" /> Translation
                             </label>
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" x-model="columns.tags" @change="saveColumnState()" /> Tags
+                                <input type="checkbox" :checked="columns.tags" @change="toggleColumn('tags')" /> Tags
                             </label>
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" x-model="columns.sentence" @change="saveColumnState()" /> Sentence
+                                <input type="checkbox" :checked="columns.sentence" @change="toggleColumn('sentence')" /> Sentence
                             </label>
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" x-model="columns.status" @change="saveColumnState()" /> Status
+                                <input type="checkbox" :checked="columns.status" @change="toggleColumn('status')" /> Status
                             </label>
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" x-model="columns.score" @change="saveColumnState()" /> Score
+                                <input type="checkbox" :checked="columns.score" @change="toggleColumn('score')" /> Score
                             </label>
                         </div>
                     </div>
@@ -194,9 +194,10 @@ echo PageLayoutHelper::buildActionCard([
                         <input type="text"
                                class="input is-small"
                                placeholder="Search terms..."
-                               x-model="filters.query"
-                               @keyup.enter="setFilter('query', filters.query)"
-                               @keyup.debounce.500ms="setFilter('query', filters.query)" />
+                               :value="filters.query"
+                               @input="syncQueryValue($event)"
+                               @keyup.enter="applyQueryFilter()"
+                               @keyup.debounce.500ms="applyQueryFilter()" />
                         <span class="icon is-left">
                             <?php echo IconHelper::render('search', ['alt' => 'Search']); ?>
                         </span>
@@ -216,7 +217,7 @@ echo PageLayoutHelper::buildActionCard([
                 <div class="level-item">
                     <span
                         class="tag is-info is-medium"
-                        x-text="pagination.total + ' Term' + (pagination.total === 1 ? '' : 's')"
+                        x-text="termCountLabel()"
                     ></span>
                 </div>
             </div>
@@ -224,7 +225,7 @@ echo PageLayoutHelper::buildActionCard([
                 <div class="level-item">
                     <span
                         class="has-text-grey is-size-7"
-                        x-text="'Page ' + pagination.page + ' of ' + pagination.total_pages"
+                        x-text="pageLabel()"
                     ></span>
                 </div>
             </div>
@@ -256,7 +257,7 @@ echo PageLayoutHelper::buildActionCard([
                     <div class="control">
                         <span class="button is-static is-small">
                             <strong>ALL</strong>&nbsp;<span
-                                x-text="pagination.total + ' Term' + (pagination.total === 1 ? '' : 's')"
+                                x-text="termCountLabel()"
                             ></span>
                         </span>
                     </div>
@@ -305,7 +306,7 @@ echo PageLayoutHelper::buildActionCard([
                     <span
                         x-show="getMarkedCount() > 0"
                         class="tag is-warning ml-2"
-                        x-text="getMarkedCount() + ' selected'"
+                        x-text="markedCountLabel()"
                     ></span>
                 </div>
             </div>
@@ -629,7 +630,7 @@ echo PageLayoutHelper::buildActionCard([
             <div class="level-item">
                 <span
                     class="tag is-info is-medium"
-                    x-text="pagination.total + ' Term' + (pagination.total === 1 ? '' : 's')"
+                    x-text="termCountLabel()"
                 ></span>
             </div>
         </div>

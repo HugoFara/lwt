@@ -94,6 +94,10 @@ async function fetchWebpage(): Promise<void> {
 
     if (!response.ok || result.error) {
       setWebpageStatus(result.error || `Server error: ${response.status}`, true);
+      const formEl2 = document.querySelector<HTMLFormElement>('form[x-data]');
+      if (formEl2) {
+        formEl2.dispatchEvent(new CustomEvent('webpage-import-error', { bubbles: true }));
+      }
       return;
     }
 
@@ -119,6 +123,10 @@ async function fetchWebpage(): Promise<void> {
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     setWebpageStatus(`Error: ${msg}`, true);
+    const formEl3 = document.querySelector<HTMLFormElement>('form[x-data]');
+    if (formEl3) {
+      formEl3.dispatchEvent(new CustomEvent('webpage-import-error', { bubbles: true }));
+    }
   } finally {
     if (btn) {
       btn.disabled = false;

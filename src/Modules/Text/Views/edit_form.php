@@ -648,6 +648,17 @@ if (!$isNew) {
 
         <!-- ═══ STEP 2: Review & Import ═══ -->
         <div x-show="step === 2" x-transition x-cloak>
+            <!-- Auto-import loading indicator -->
+            <div x-show="autoImporting" class="notification is-info is-light has-text-centered mb-5"
+                 @webpage-imported.window="autoImporting = false"
+                 @webpage-import-error.window="autoImporting = false">
+                <span class="icon is-medium">
+                    <i data-lucide="loader" style="width: 24px; height: 24px; animation: spin 1s linear infinite;"></i>
+                </span>
+                <p class="mt-2 has-text-weight-medium">Fetching text from Project Gutenberg...</p>
+                <p class="is-size-7 has-text-grey">This may take a few seconds.</p>
+            </div>
+
             <!-- Back button -->
             <div class="is-flex is-align-items-center mb-4" style="gap: 0.5rem;">
                 <button type="button" class="button is-small is-light" @click="goBack()">

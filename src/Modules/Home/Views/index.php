@@ -134,15 +134,47 @@ function renderSuggestionsGrid(): void
                 </div>
                 <div class="mt-2">
                     <button
-                        @click="importBook(book)"
-                        class="button is-primary is-small is-fullwidth"
-                        :class="{ 'is-loading': importing === book.id }"
-                        :disabled="importing !== null"
+                        @click="previewBook(book)"
+                        class="button is-info is-small is-fullwidth"
+                        :class="{ 'is-loading': previewLoading && previewBookId === book.id }"
+                        :disabled="previewLoading && previewBookId === book.id"
                     >
-                        <span class="icon"><i data-lucide="download"></i></span>
-                        <span>Import</span>
+                        <span class="icon"><i data-lucide="bar-chart-2"></i></span>
+                        <span>Preview</span>
                     </button>
                 </div>
+                <!-- Preview panel -->
+                <template x-if="previewBookId === book.id && !previewLoading">
+                    <div class="mt-2 pt-2" style="border-top: 1px solid #eee;">
+                        <template x-if="previewError">
+                            <p class="has-text-danger is-size-7" x-text="previewError"></p>
+                        </template>
+                        <template x-if="previewData && !previewError">
+                            <div>
+                                <progress
+                                    class="progress is-small mb-2"
+                                    :class="coverageClass(previewData.difficulty_label)"
+                                    :value="previewData.coverage_percent"
+                                    max="100"
+                                ></progress>
+                                <p class="is-size-7">
+                                    You know
+                                    <strong x-text="previewData.coverage_percent + '%'"></strong>
+                                    of unique words
+                                </p>
+                                <button
+                                    @click="importBook(book)"
+                                    class="button is-primary is-small is-fullwidth mt-2"
+                                    :class="{ 'is-loading': importing === book.id }"
+                                    :disabled="importing !== null"
+                                >
+                                    <span class="icon"><i data-lucide="download"></i></span>
+                                    <span>Import</span>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </template>
             </div>
         </template>
     </div>

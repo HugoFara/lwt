@@ -69,6 +69,8 @@ export interface WordListData {
   columns: ColumnVisibility;
   columnsOpen: boolean;
   toggleColumn(col: keyof ColumnVisibility): void;
+  toggleColumnsDropdown(): void;
+  closeColumnsDropdown(): void;
   loadColumnState(): void;
   saveColumnState(): void;
   updateRomanizationVisibility(): void;
@@ -87,6 +89,9 @@ export interface WordListData {
 
   // Filter methods
   setFilter(key: keyof WordListFilters, value: unknown): void;
+  setFilterFromEvent(key: keyof WordListFilters, event: Event): void;
+  syncQueryValue(event: Event): void;
+  applyQueryFilter(): void;
   applyFilter(key: keyof WordListFilters): void;
   resetFilters(): void;
   loadFilterState(): void;
@@ -95,7 +100,7 @@ export interface WordListData {
   // Pagination
   perPageOptions: number[];
   setPerPage(value: number | string): void;
-  applyPerPage(): void;
+  setPerPageFromEvent(event: Event): void;
   goToPage(page: number): Promise<void>;
   goToPrevPage(): Promise<void>;
   goToNextPage(): Promise<void>;
@@ -126,6 +131,9 @@ export interface WordListData {
   getStatusClass(status: number): string;
   statusDisplay(word: WordItem): string;
   getDisplayValue(word: WordItem, field: 'translation' | 'romanization'): string;
+  termCountLabel(): string;
+  pageLabel(): string;
+  markedCountLabel(): string;
 
   // Page title
   updatePageTitle(): void;
@@ -277,10 +285,19 @@ export function wordListData(): WordListData {
       }
     },
 
-    /**
-     * Apply filter from x-model (CSP-safe: reads value from this.filters).
-     * Use in templates as @change="applyFilter('key')" after x-model sets the value.
-     */
+    setFilterFromEvent(key: keyof WordListFilters, event: Event) {
+      const target = event.target as HTMLSelectElement;
+      this.setFilter(key, target.value);
+    },
+
+    syncQueryValue(event: Event) {
+      this.filters.query = (event.target as HTMLInputElement).value;
+    },
+
+    applyQueryFilter() {
+      this.setFilter('query', this.filters.query);
+    },
+
     applyFilter(key) {
       this.setFilter(key, (this.filters as Record<string, unknown>)[key]);
     },
@@ -355,16 +372,22 @@ export function wordListData(): WordListData {
       this.loadWords();
     },
 
-    /**
-     * Apply per-page from x-model (CSP-safe: reads from this.filters.per_page).
-     */
-    applyPerPage() {
-      this.setPerPage(this.filters.per_page || 50);
+    setPerPageFromEvent(event: Event) {
+      const target = event.target as HTMLSelectElement;
+      this.setPerPage(target.value);
     },
 
     toggleColumn(col: keyof ColumnVisibility) {
       this.columns[col] = !this.columns[col];
       this.saveColumnState();
+    },
+
+    toggleColumnsDropdown() {
+      this.columnsOpen = !this.columnsOpen;
+    },
+
+    closeColumnsDropdown() {
+      this.columnsOpen = false;
     },
 
     loadColumnState() {
@@ -634,6 +657,18 @@ export function wordListData(): WordListData {
     ): string {
       const value = field === 'translation' ? word.translation : word.romanization;
       return value || '*';
+    },
+
+    termCountLabel(): string {
+      return this.pagination.total + ' Term' + (this.pagination.total === 1 ? '' : 's');
+    },
+
+    pageLabel(): string {
+      return 'Page ' + this.pagination.page + ' of ' + this.pagination.total_pages;
+    },
+
+    markedCountLabel(): string {
+      return this.getMarkedCount() + ' selected';
     },
 
     /**
