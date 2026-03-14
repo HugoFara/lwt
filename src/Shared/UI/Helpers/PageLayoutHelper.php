@@ -246,11 +246,11 @@ LANG;
 
             <div class="navbar-item">
                 <div class="buttons has-addons mb-0">
-                    <a class="button is-small{$termsLinkClass}" href="{$base}/words/edit">
+                    <a class="button is-small{$termsLinkClass}" href="{$base}/words">
                         <span class="icon is-small">{$termsIcon}</span>
                         <span>Vocabulary</span>
                     </a>
-                    <a class="button is-small" href="{$base}/word/upload" title="Add Vocabulary">
+                    <a class="button is-small" href="{$base}/words/new" title="New Term">
                         <span class="icon is-small">{$plusIcon}</span>
                     </a>
                 </div>
