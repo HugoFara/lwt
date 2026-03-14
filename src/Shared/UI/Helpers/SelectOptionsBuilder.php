@@ -447,8 +447,14 @@ class SelectOptionsBuilder
         foreach ($statuses as $n => $status) {
             $escapedName = htmlspecialchars($status['name'], ENT_QUOTES, 'UTF-8');
             $escapedAbbr = htmlspecialchars($status['abbr'], ENT_QUOTES, 'UTF-8');
-            $label = $useFullLabels ? $escapedName : $escapedAbbr;
-            $title = $useFullLabels ? $escapedAbbr : $escapedName;
+            if ($useFullLabels) {
+                // For numeric statuses (1-5), show "1 - Learning" to distinguish levels
+                $label = ($n <= 5) ? $escapedAbbr . ' - ' . $escapedName : $escapedName;
+                $title = $escapedAbbr;
+            } else {
+                $label = $escapedAbbr;
+                $title = $escapedName;
+            }
             $result .= '<span class="status' . $n . '" title="' . $title . '">';
             $result .= '&nbsp;<input type="radio" name="WoStatus" value="' . $n . '"';
             if ($selected == $n) {
