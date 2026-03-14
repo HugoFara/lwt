@@ -40,6 +40,20 @@ interface EditingState {
 }
 
 /**
+ * Column visibility settings.
+ */
+export interface ColumnVisibility {
+  romanization: boolean;
+  translation: boolean;
+  tags: boolean;
+  sentence: boolean;
+  status: boolean;
+  score: boolean;
+}
+
+const COLUMNS_STORAGE_KEY = 'lwt_word_list_columns';
+
+/**
  * Alpine.js component data interface.
  */
 export interface WordListData {
@@ -52,7 +66,12 @@ export interface WordListData {
   marked: Set<number>;
 
   // Column visibility
-  showSentenceCol: boolean;
+  columns: ColumnVisibility;
+  columnsOpen: boolean;
+  toggleColumn(col: keyof ColumnVisibility): void;
+  loadColumnState(): void;
+  saveColumnState(): void;
+  updateRomanizationVisibility(): void;
 
   // Inline edit state
   editingWord: EditingState | null;
@@ -158,13 +177,22 @@ export function wordListData(): WordListData {
     marked: new Set(),
 
     perPageOptions: [25, 50, 100, 200, 500],
-    showSentenceCol: false,
+    columns: {
+      romanization: true,
+      translation: true,
+      tags: true,
+      sentence: false,
+      status: true,
+      score: true
+    },
+    columnsOpen: false,
 
     editingWord: null,
     editValue: '',
     editSaving: false,
 
     async init() {
+      this.loadColumnState();
       this.loadFilterState();
       await this.loadFilterOptions();
       await this.loadWords();
@@ -202,6 +230,17 @@ export function wordListData(): WordListData {
 
       if (response.data) {
         this.filterOptions = response.data;
+        this.updateRomanizationVisibility();
+      }
+    },
+
+    updateRomanizationVisibility() {
+      if (!this.filters.lang) return;
+      const langId = Number(this.filters.lang);
+      const lang = this.filterOptions.languages.find((l) => l.id === langId);
+      if (lang) {
+        this.columns.romanization = lang.showRomanization;
+        this.saveColumnState();
       }
     },
 
@@ -297,6 +336,31 @@ export function wordListData(): WordListData {
       this.marked.clear();
       this.saveFilterState();
       this.loadWords();
+    },
+
+    toggleColumn(col: keyof ColumnVisibility) {
+      this.columns[col] = !this.columns[col];
+      this.saveColumnState();
+    },
+
+    loadColumnState() {
+      try {
+        const stored = localStorage.getItem(COLUMNS_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          this.columns = { ...this.columns, ...parsed };
+        }
+      } catch {
+        // localStorage unavailable
+      }
+    },
+
+    saveColumnState() {
+      try {
+        localStorage.setItem(COLUMNS_STORAGE_KEY, JSON.stringify(this.columns));
+      } catch {
+        // localStorage unavailable
+      }
     },
 
     async goToPage(page: number) {

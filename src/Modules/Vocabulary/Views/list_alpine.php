@@ -151,12 +151,40 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
             </div>
 
-            <!-- Sentence column toggle -->
+            <!-- Column visibility -->
             <div class="column is-narrow">
-                <label class="checkbox is-size-7">
-                    <input type="checkbox" x-model="showSentenceCol" />
-                    Sentence
-                </label>
+                <div class="dropdown" :class="columnsOpen ? 'is-active' : ''">
+                    <div class="dropdown-trigger">
+                        <button type="button" class="button is-small" @click="columnsOpen = !columnsOpen" @click.outside="columnsOpen = false">
+                            <span>Columns</span>
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('chevron-down', ['alt' => 'Toggle']); ?>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="dropdown-menu" style="min-width: 10rem;">
+                        <div class="dropdown-content">
+                            <label class="dropdown-item checkbox is-size-7">
+                                <input type="checkbox" x-model="columns.romanization" @change="saveColumnState()" /> Romanization
+                            </label>
+                            <label class="dropdown-item checkbox is-size-7">
+                                <input type="checkbox" x-model="columns.translation" @change="saveColumnState()" /> Translation
+                            </label>
+                            <label class="dropdown-item checkbox is-size-7">
+                                <input type="checkbox" x-model="columns.tags" @change="saveColumnState()" /> Tags
+                            </label>
+                            <label class="dropdown-item checkbox is-size-7">
+                                <input type="checkbox" x-model="columns.sentence" @change="saveColumnState()" /> Sentence
+                            </label>
+                            <label class="dropdown-item checkbox is-size-7">
+                                <input type="checkbox" x-model="columns.status" @change="saveColumnState()" /> Status
+                            </label>
+                            <label class="dropdown-item checkbox is-size-7">
+                                <input type="checkbox" x-model="columns.score" @change="saveColumnState()" /> Score
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Search query -->
@@ -333,18 +361,20 @@ echo PageLayoutHelper::buildActionCard([
             <thead>
                 <tr>
                     <th class="has-text-centered" style="width: 3em;">Mark</th>
-                    <th class="has-text-centered" style="width: 5em;">Act.</th>
-                    <th>Term / Romanization</th>
-                    <th>Translation [Tags]</th>
-                    <th class="has-text-centered" style="width: 6em;" x-show="showSentenceCol">Has valid sentence</th>
-                    <th class="has-text-centered" style="width: 5em;">Stat./Days</th>
-                    <th class="has-text-centered" style="width: 5em;">Score %</th>
+                    <th class="has-text-centered" style="width: 3em;">Act.</th>
+                    <th>Term</th>
+                    <th x-show="columns.romanization">Romanization</th>
+                    <th x-show="columns.translation">Translation</th>
+                    <th x-show="columns.tags">Tags</th>
+                    <th class="has-text-centered" style="width: 6em;" x-show="columns.sentence">Sentence</th>
+                    <th class="has-text-centered" style="width: 5em;" x-show="columns.status">Status</th>
+                    <th class="has-text-centered" style="width: 5em;" x-show="columns.score">Score</th>
                     <th
                         class="has-text-centered"
                         style="width: 5em;"
                         x-show="filters.sort === 7"
                         title="Word Count in Active Texts"
-                    >WCnt Txts</th>
+                    >WCnt</th>
                 </tr>
             </thead>
             <tbody>
@@ -376,13 +406,15 @@ echo PageLayoutHelper::buildActionCard([
                             </div>
                         </td>
 
-                        <!-- Term / Romanization -->
+                        <!-- Term -->
                         <td>
                             <span :class="word.ttsClass" :dir="word.rightToLeft ? 'rtl' : 'ltr'">
                                 <strong x-text="word.text"></strong>
                             </span>
-                            <span class="has-text-grey"> / </span>
-                            <!-- Inline edit for romanization -->
+                        </td>
+
+                        <!-- Romanization -->
+                        <td x-show="columns.romanization">
                             <template x-if="isEditing(word.id, 'romanization')">
                                 <span class="inline-edit-container">
                                     <textarea class="textarea is-small"
@@ -393,15 +425,9 @@ echo PageLayoutHelper::buildActionCard([
                                               @keydown.ctrl.enter="saveEdit()"
                                               rows="1"></textarea>
                                     <div class="buttons are-small mt-1">
-                                        <button
-                                            type="button"
-                                            class="button is-small is-success"
-                                            @click="saveEdit()"
-                                            :disabled="editSaving"
-                                        >
-                                            <?php
-                                            echo IconHelper::render('check', ['alt' => 'Save']);
-                                            ?>
+                                        <button type="button" class="button is-small is-success"
+                                            @click="saveEdit()" :disabled="editSaving">
+                                            <?php echo IconHelper::render('check', ['alt' => 'Save']); ?>
                                         </button>
                                         <button type="button" class="button is-small" @click="cancelEdit()">
                                             <?php echo IconHelper::render('x', ['alt' => 'Cancel']); ?>
@@ -416,9 +442,8 @@ echo PageLayoutHelper::buildActionCard([
                             </template>
                         </td>
 
-                        <!-- Translation [Tags] -->
-                        <td>
-                            <!-- Inline edit for translation -->
+                        <!-- Translation -->
+                        <td x-show="columns.translation">
                             <template x-if="isEditing(word.id, 'translation')">
                                 <span class="inline-edit-container">
                                     <textarea class="textarea is-small"
@@ -429,15 +454,9 @@ echo PageLayoutHelper::buildActionCard([
                                               @keydown.ctrl.enter="saveEdit()"
                                               rows="2"></textarea>
                                     <div class="buttons are-small mt-1">
-                                        <button
-                                            type="button"
-                                            class="button is-small is-success"
-                                            @click="saveEdit()"
-                                            :disabled="editSaving"
-                                        >
-                                            <?php
-                                            echo IconHelper::render('check', ['alt' => 'Save']);
-                                            ?>
+                                        <button type="button" class="button is-small is-success"
+                                            @click="saveEdit()" :disabled="editSaving">
+                                            <?php echo IconHelper::render('check', ['alt' => 'Save']); ?>
                                         </button>
                                         <button type="button" class="button is-small" @click="cancelEdit()">
                                             <?php echo IconHelper::render('x', ['alt' => 'Cancel']); ?>
@@ -450,11 +469,15 @@ echo PageLayoutHelper::buildActionCard([
                                       @click="startEdit(word.id, 'translation')"
                                       x-text="$markdown(getDisplayValue(word, 'translation'))"></span>
                             </template>
-                            <span x-show="word.tags" class="has-text-grey is-size-7 ml-1" x-text="word.tags"></span>
                         </td>
 
-                        <!-- Sentence OK -->
-                        <td class="has-text-centered" x-show="showSentenceCol">
+                        <!-- Tags -->
+                        <td x-show="columns.tags">
+                            <span class="has-text-grey is-size-7" x-text="word.tags"></span>
+                        </td>
+
+                        <!-- Sentence -->
+                        <td class="has-text-centered" x-show="columns.sentence">
                             <template x-if="word.sentenceOk">
                                 <span class="has-text-success" :title="word.sentence">
                                     <?php echo IconHelper::render('circle-check', ['alt' => 'Yes']); ?>
@@ -468,7 +491,7 @@ echo PageLayoutHelper::buildActionCard([
                         </td>
 
                         <!-- Status / Days -->
-                        <td class="has-text-centered" :title="word.statusLabel">
+                        <td class="has-text-centered" x-show="columns.status" :title="word.statusLabel">
                             <span
                                 class="tag is-light"
                                 x-text="word.statusAbbr + (word.status < 98 ? '/' + word.days : '')"
@@ -476,7 +499,7 @@ echo PageLayoutHelper::buildActionCard([
                         </td>
 
                         <!-- Score -->
-                        <td class="has-text-centered" style="white-space: nowrap;">
+                        <td class="has-text-centered" x-show="columns.score" style="white-space: nowrap;">
                             <span
                                 class="tag is-light"
                                 :class="getStatusClass(word.status)"
@@ -582,7 +605,7 @@ echo PageLayoutHelper::buildActionCard([
                     <div class="is-flex is-justify-content-space-between is-align-items-center">
                         <div class="tags">
                             <span x-show="word.tags" class="tag is-light" x-text="word.tags"></span>
-                            <template x-if="showSentenceCol && word.sentenceOk">
+                            <template x-if="columns.sentence && word.sentenceOk">
                                 <span class="tag is-success is-light" :title="word.sentence">
                                     <?php echo IconHelper::render('message-square', ['alt' => 'Has sentence']); ?>
                                 </span>

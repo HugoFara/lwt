@@ -34,10 +34,24 @@ interface VoiceOption {
  * Alpine.js component for TTS settings management.
  * Replaces the vanilla JS ttsSettings object.
  */
-export function ttsSettingsApp() {
+export function ttsSettingsApp(initialConfig?: TTSSettingsConfig) {
+  // Read config from parameter or DOM
+  let langCode = initialConfig?.currentLanguageCode || '';
+  if (!langCode) {
+    const configEl = document.getElementById('tts-settings-config');
+    if (configEl) {
+      try {
+        const parsed: TTSSettingsConfig = JSON.parse(configEl.textContent || '{}');
+        langCode = parsed.currentLanguageCode || '';
+      } catch {
+        // Ignore parse errors
+      }
+    }
+  }
+
   return {
     /** Current language being learnt */
-    currentLanguage: '',
+    currentLanguage: langCode,
 
     /** Available voice options */
     voices: [] as VoiceOption[],
@@ -61,16 +75,6 @@ export function ttsSettingsApp() {
      * Initialize the component.
      */
     init() {
-      // Read config from JSON script tag
-      const configEl = document.getElementById('tts-settings-config');
-      if (configEl) {
-        try {
-          const config: TTSSettingsConfig = JSON.parse(configEl.textContent || '{}');
-          this.currentLanguage = config.currentLanguageCode || '';
-        } catch {
-          // Ignore parse errors
-        }
-      }
 
       // Auto-set language from URL if present
       this.autoSetCurrentLanguage();

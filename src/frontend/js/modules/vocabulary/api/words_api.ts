@@ -73,6 +73,7 @@ export interface WordListFilters {
 export interface LanguageOption {
   id: number;
   name: string;
+  showRomanization: boolean;
 }
 
 /**

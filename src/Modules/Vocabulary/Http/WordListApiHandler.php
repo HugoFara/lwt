@@ -396,13 +396,14 @@ class WordListApiHandler
         // Get languages
         $languages = [];
         $langResult = QueryBuilder::table('languages')
-            ->select(['LgID', 'LgName'])
+            ->select(['LgID', 'LgName', 'LgShowRomanization'])
             ->orderBy('LgName')
             ->getPrepared();
         foreach ($langResult as $row) {
             $languages[] = [
                 'id' => (int) $row['LgID'],
-                'name' => (string) $row['LgName']
+                'name' => (string) $row['LgName'],
+                'showRomanization' => (bool) $row['LgShowRomanization']
             ];
         }
 
