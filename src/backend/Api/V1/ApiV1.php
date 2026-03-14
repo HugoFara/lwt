@@ -120,6 +120,13 @@ class ApiV1
             }
         }
 
+        // Release the session lock early so concurrent browser requests
+        // (e.g. form submissions) are not blocked while API calls run.
+        // API handlers do not write to the session after this point.
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
         $params = $method === 'GET'
             ? $this->parseQueryParams($uri)
             : ($postData ?? []);

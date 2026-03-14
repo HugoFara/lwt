@@ -85,7 +85,7 @@ class CsrfMiddleware implements MiddlewareInterface
 
         // Validate CSRF token
         if (!$this->validateToken()) {
-            $this->handleInvalidToken();
+            $this->handleInvalidToken($this->diagnoseFailure());
             return false;
         }
 
@@ -174,16 +174,100 @@ class CsrfMiddleware implements MiddlewareInterface
     }
 
     /**
+     * Diagnose why CSRF validation failed.
+     *
+     * @return string Human-readable reason for the failure
+     */
+    private function diagnoseFailure(): string
+    {
+        // Check if POST body was truncated (post_max_size exceeded)
+        $requestMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        if (
+            $requestMethod === 'POST'
+            && empty($_POST)
+            && empty($_FILES)
+        ) {
+            $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+            $postMaxSize = self::parseIniSize((string) ini_get('post_max_size'));
+            if ($contentLength > 0 && $postMaxSize > 0 && $contentLength > $postMaxSize) {
+                return 'The submitted data (' . self::formatBytes($contentLength)
+                    . ') exceeded PHP\'s post_max_size ('
+                    . ini_get('post_max_size')
+                    . '). Try importing a shorter text or increase post_max_size in php.ini.';
+            }
+        }
+
+        // Check session state
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            return 'Your session could not be started. Check that cookies are enabled.';
+        }
+
+        $expectedTokenRaw = $_SESSION[self::SESSION_TOKEN] ?? null;
+        if (!is_string($expectedTokenRaw) || $expectedTokenRaw === '') {
+            return 'Your session does not contain a security token. '
+                . 'This usually means the session expired or was reset.';
+        }
+
+        $providedToken = $this->extractToken();
+        if ($providedToken === null || $providedToken === '') {
+            return 'No security token was included in the request. '
+                . 'This may happen if another request was still in progress.';
+        }
+
+        return 'The security token did not match. '
+            . 'This usually means your session has changed since the page loaded.';
+    }
+
+    /**
+     * Parse a PHP ini size value (e.g. "8M") to bytes.
+     *
+     * @param string $size The ini size string
+     *
+     * @return int Size in bytes
+     */
+    private static function parseIniSize(string $size): int
+    {
+        $value = (int) $size;
+        $unit = strtolower(substr(trim($size), -1));
+        return match ($unit) {
+            'g' => $value * 1024 * 1024 * 1024,
+            'm' => $value * 1024 * 1024,
+            'k' => $value * 1024,
+            default => $value,
+        };
+    }
+
+    /**
+     * Format bytes into a human-readable string.
+     *
+     * @param int $bytes Number of bytes
+     *
+     * @return string Formatted string (e.g. "1.5 MB")
+     */
+    private static function formatBytes(int $bytes): string
+    {
+        if ($bytes >= 1024 * 1024) {
+            return round($bytes / (1024 * 1024), 1) . ' MB';
+        }
+        if ($bytes >= 1024) {
+            return round($bytes / 1024, 1) . ' KB';
+        }
+        return $bytes . ' bytes';
+    }
+
+    /**
      * Handle invalid or missing CSRF token.
+     *
+     * @param string $reason Diagnostic reason for the failure
      *
      * @return void
      */
-    private function handleInvalidToken(): void
+    private function handleInvalidToken(string $reason = ''): void
     {
         if ($this->isApiRequest()) {
             $this->sendForbiddenResponse();
         } else {
-            $this->sendForbiddenPage();
+            $this->sendForbiddenPage($reason);
         }
     }
 
@@ -230,12 +314,20 @@ class CsrfMiddleware implements MiddlewareInterface
     /**
      * Send 403 Forbidden HTML page.
      *
+     * @param string $reason Diagnostic reason for the failure
+     *
      * @return never
      */
-    private function sendForbiddenPage(): void
+    private function sendForbiddenPage(string $reason = ''): void
     {
         http_response_code(403);
         header('Content-Type: text/html; charset=utf-8');
+        $reasonHtml = $reason !== ''
+            ? '<p style="background:#fef3cd;border:1px solid #ffc107;padding:10px;border-radius:4px;">'
+              . '<strong>Details:</strong> '
+              . htmlspecialchars($reason, ENT_QUOTES, 'UTF-8')
+              . '</p>'
+            : '';
         echo <<<HTML
 <!DOCTYPE html>
 <html lang="en">
@@ -252,6 +344,7 @@ class CsrfMiddleware implements MiddlewareInterface
 <body>
     <h1>403 Forbidden</h1>
     <p>Your request could not be processed because the security token was missing or invalid.</p>
+    {$reasonHtml}
     <p>This usually happens when:</p>
     <ul>
         <li>Your session has expired</li>

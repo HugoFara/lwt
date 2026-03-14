@@ -708,7 +708,10 @@ if (!$isNew) {
             <!-- Save Button -->
             <div class="field mt-5">
                 <div class="control">
-                    <button type="submit" name="op" value="Save and Open" class="button is-primary is-medium is-fullwidth">
+                    <button type="submit" name="op" value="Save and Open"
+                            class="button is-primary is-medium is-fullwidth"
+                            :disabled="autoImporting"
+                            :class="{ 'is-loading': autoImporting }">
                         <span class="icon">
                             <?php echo IconHelper::render('book-open', ['alt' => 'Save and Open']); ?>
                         </span>

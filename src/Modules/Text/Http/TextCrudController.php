@@ -85,6 +85,15 @@ class TextCrudController extends BaseController
             if ($result['redirect']) {
                 return null;
             }
+            // Ensure page structure exists for error messages
+            if ($noPagestart) {
+                PageLayoutHelper::renderPageStart('Texts', true);
+            }
+            if (isset($result['message']) && $result['message'] !== '') {
+                echo '<p class="notification is-danger">'
+                    . htmlspecialchars($result['message'], ENT_QUOTES, 'UTF-8')
+                    . '</p>';
+            }
             PageLayoutHelper::renderPageEnd();
             return null;
         }
@@ -123,6 +132,14 @@ class TextCrudController extends BaseController
             }
             if ($result['redirect']) {
                 return null;
+            }
+            if ($noPagestart) {
+                PageLayoutHelper::renderPageStart('Texts', true);
+            }
+            if (isset($result['message']) && $result['message'] !== '') {
+                echo '<p class="notification is-danger">'
+                    . htmlspecialchars($result['message'], ENT_QUOTES, 'UTF-8')
+                    . '</p>';
             }
             PageLayoutHelper::renderPageEnd();
             return null;
@@ -359,12 +376,10 @@ class TextCrudController extends BaseController
         }
 
         if (!$needsAutoSplit && !$this->textService->validateTextLength($txText)) {
-            $message = "Error: Text too long, must be below 65000 Bytes";
-            if ($noPagestart) {
-                $pageName = $this->languageService->getLanguageName($currentLang) . ' Texts';
-                PageLayoutHelper::renderPageStart($pageName, true);
-            }
-            return ['message' => $message, 'redirect' => false];
+            return [
+                'message' => "Error: Text too long, must be below 65000 Bytes",
+                'redirect' => false,
+            ];
         }
 
         if ($op == 'Check') {

@@ -84,7 +84,14 @@ export function navbarData(): NavbarData {
       if (!languageId) return;
 
       setLangAsync(languageId).then(() => {
-        window.location.reload();
+        // Strip filterlang from the URL so the new DB setting takes effect
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('filterlang')) {
+          url.searchParams.delete('filterlang');
+          window.location.href = url.toString();
+        } else {
+          window.location.reload();
+        }
       }).catch((error) => {
         console.error('Failed to change language:', error);
       });

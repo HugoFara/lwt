@@ -59,7 +59,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
  *     chapterTitle: string,
  *     prevTextId: int|null,
  *     nextTextId: int|null,
- *     chapters: array<int, array{textId: int, chapterNum: int, title: string}>
+ *     chapters: array<int, array{id: int, num: int, title: string}>
  * }|null $bookContext
  */
 
@@ -167,7 +167,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
         $prevTextId = $bookContext['prevTextId'];
         $nextTextId = $bookContext['nextTextId'];
         /**
- * @var array<int, array{textId: int, chapterNum: int, title: string}>
+ * @var array<int, array{id: int, num: int, title: string}>
 */
         $chapters = $bookContext['chapters'];
         ?>
@@ -223,10 +223,10 @@ if (!isset($bookContext) || !is_array($bookContext)) {
               <div class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                 <div class="dropdown-content">
                   <?php foreach ($chapters as $chapter) : ?>
-                  <a href="/text/<?php echo $chapter['textId']; ?>/read"
-                     class="dropdown-item <?php echo ($chapter['chapterNum'] === $chapterNum) ? 'is-active' : ''; ?>">
-                        <?php echo $chapter['chapterNum']; ?>.
-                        <?php echo htmlspecialchars($chapter['title'] ?: 'Chapter ' . $chapter['chapterNum']); ?>
+                  <a href="/text/<?php echo $chapter['id']; ?>/read"
+                     class="dropdown-item <?php echo ($chapter['num'] === $chapterNum) ? 'is-active' : ''; ?>">
+                        <?php echo $chapter['num']; ?>.
+                        <?php echo htmlspecialchars($chapter['title'] ?: 'Chapter ' . $chapter['num']); ?>
                   </a>
                   <?php endforeach; ?>
                 </div>

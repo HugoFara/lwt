@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS temp_word_occurrences (
     TiOrder smallint(5) unsigned NOT NULL,
     TiWordCount tinyint(3) unsigned NOT NULL,
     TiText varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
-) ENGINE=MEMORY DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS temp_words (
     WoText varchar(250) DEFAULT NULL,
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS temp_words (
     WoSentence varchar(1000) DEFAULT NULL,
     WoTaglist varchar(255) DEFAULT NULL,
     PRIMARY KEY(WoTextLC)
-) ENGINE=MEMORY DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS texts (
     TxID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
