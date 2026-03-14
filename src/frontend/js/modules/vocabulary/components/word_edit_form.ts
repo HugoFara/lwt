@@ -23,6 +23,8 @@ interface StatusInfo {
   abbr: string;
 }
 
+type FormDataField = 'translation' | 'romanization' | 'sentence' | 'notes';
+
 /**
  * Status definitions matching word_modal.ts.
  */
@@ -51,6 +53,20 @@ export interface WordEditFormData {
   readonly showRomanization: boolean;
   readonly statuses: StatusInfo[];
 
+  // CSP-safe proxy properties for x-model (avoids nested property assignments)
+  translation: string;
+  romanization: string;
+  sentence: string;
+  notes: string;
+  readonly formText: string;
+  readonly hasGeneralError: boolean;
+  readonly generalError: string | null;
+  readonly formTags: string[];
+  readonly hasTags: boolean;
+  readonly hasSimilarTerms: boolean;
+  readonly formSimilarTerms: SimilarTermForEdit[];
+  readonly canSubmit: boolean;
+
   // Tag input state
   tagInput: string;
   showTagSuggestions: boolean;
@@ -58,6 +74,12 @@ export interface WordEditFormData {
 
   // Methods
   validateField(field: string): void;
+  clearGeneralError(): void;
+  setFormStatus(value: number): void;
+  getStatusButtonClass(status: number): string;
+  getSimilarTermDisplay(term: SimilarTermForEdit): string;
+  hasFieldError(field: FormDataField): boolean;
+  getFieldError(field: FormDataField): string | null;
   save(): Promise<void>;
   cancel(): void;
   addTag(tag: string): void;
@@ -117,6 +139,94 @@ export function wordEditFormData(): WordEditFormData {
 
     get statuses(): StatusInfo[] {
       return STATUSES;
+    },
+
+    // CSP-safe proxy properties — Alpine CSP build prohibits nested property
+    // assignments like `formStore.formData.translation = ...` in x-model.
+    get translation(): string {
+      return this.formStore.formData.translation;
+    },
+    set translation(value: string) {
+      this.formStore.formData.translation = value;
+    },
+
+    get romanization(): string {
+      return this.formStore.formData.romanization;
+    },
+    set romanization(value: string) {
+      this.formStore.formData.romanization = value;
+    },
+
+    get sentence(): string {
+      return this.formStore.formData.sentence;
+    },
+    set sentence(value: string) {
+      this.formStore.formData.sentence = value;
+    },
+
+    get notes(): string {
+      return this.formStore.formData.notes;
+    },
+    set notes(value: string) {
+      this.formStore.formData.notes = value;
+    },
+
+    get formText(): string {
+      return this.formStore.formData.text;
+    },
+
+    get hasGeneralError(): boolean {
+      return !!this.formStore.errors.general;
+    },
+
+    get generalError(): string | null {
+      return this.formStore.errors.general;
+    },
+
+    get formTags(): string[] {
+      return this.formStore.formData.tags;
+    },
+
+    get hasTags(): boolean {
+      return this.formStore.formData.tags.length > 0;
+    },
+
+    get hasSimilarTerms(): boolean {
+      return this.formStore.similarTerms.length > 0;
+    },
+
+    get formSimilarTerms(): SimilarTermForEdit[] {
+      return this.formStore.similarTerms;
+    },
+
+    get canSubmit(): boolean {
+      return this.formStore.canSubmit;
+    },
+
+    clearGeneralError(): void {
+      this.formStore.errors.general = null;
+    },
+
+    setFormStatus(value: number): void {
+      this.formStore.formData.status = value;
+    },
+
+    getStatusButtonClass(status: number): string {
+      const colorClass = this.getStatusClass(status);
+      const outlined = this.formStore.formData.status !== status ? ' is-outlined' : '';
+      return colorClass + outlined;
+    },
+
+    hasFieldError(field: FormDataField): boolean {
+      return !!this.formStore.errors[field];
+    },
+
+    getFieldError(field: FormDataField): string | null {
+      return this.formStore.errors[field] ?? null;
+    },
+
+    getSimilarTermDisplay(term: SimilarTermForEdit): string {
+      return term.translation ? ': ' + term.translation : '';
     },
 
     validateField(field: string): void {

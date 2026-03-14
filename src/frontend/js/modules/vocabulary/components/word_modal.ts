@@ -124,6 +124,9 @@ export function wordModalData(): WordModalData {
       Alpine.effect(() => {
         if (this.formStore.shouldCloseModal) {
           this.formStore.shouldCloseModal = false;
+          // Set viewMode first so x-if tears down the edit template
+          // before reset() triggers reactive updates on form fields
+          this.viewMode = 'info';
           this.formStore.reset();
           releaseFocus();
           this.store.closeEditModal();
@@ -134,6 +137,7 @@ export function wordModalData(): WordModalData {
       Alpine.effect(() => {
         if (this.formStore.shouldReturnToInfo) {
           this.formStore.shouldReturnToInfo = false;
+          this.viewMode = 'info';
           this.formStore.reset();
           releaseFocus();
           this.store.closeEditModal();
@@ -287,6 +291,9 @@ export function wordModalData(): WordModalData {
 
       // Set view mode to edit (modal is now edit-only)
       this.viewMode = 'edit';
+
+      // Re-initialize Lucide icons after the edit form template renders
+      requestAnimationFrame(() => initIcons());
     },
 
     hideEditForm(): void {

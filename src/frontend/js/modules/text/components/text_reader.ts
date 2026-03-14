@@ -24,6 +24,7 @@ export interface TextReaderData {
   showAll: boolean;
   showTranslations: boolean;
   error: string | null;
+  statusMessage: string | null;
 
   // Computed properties
   readonly store: WordStoreState;
@@ -65,6 +66,7 @@ export function textReaderData(): TextReaderData {
     showAll: false,
     showTranslations: true,
     error: null,
+    statusMessage: null,
 
     get store(): WordStoreState {
       return Alpine.store('words') as WordStoreState;
@@ -216,64 +218,62 @@ export function textReaderData(): TextReaderData {
     async markAllWellKnown(): Promise<void> {
       if (!confirm('Mark all unknown words as Well Known?')) return;
 
-      this.isLoading = true;
+      this.statusMessage = null;
 
       try {
         const response = await TextsApi.markAllWellKnown(this.store.textId);
 
         if (response.error) {
           console.error('Failed to mark all well-known:', response.error);
-          this.isLoading = false;
+          this.statusMessage = 'Failed to mark words as well-known.';
           return;
         }
 
         // Update display for each affected word
-        if (response.data?.words) {
-          for (const word of response.data.words) {
-            this.updateWordDisplay(word.hex, 99, word.wid);
-            this.store.updateWordInStore(word.hex, {
-              wordId: word.wid,
-              status: 99
-            });
-          }
+        const words = response.data?.words ?? [];
+        for (const word of words) {
+          this.updateWordDisplay(word.hex, 99, word.wid);
+          this.store.updateWordInStore(word.hex, {
+            wordId: word.wid,
+            status: 99
+          });
         }
 
-        this.isLoading = false;
+        this.statusMessage = `Marked ${words.length} word${words.length !== 1 ? 's' : ''} as Well Known.`;
       } catch (err) {
         console.error('Error marking all well-known:', err);
-        this.isLoading = false;
+        this.statusMessage = 'Error marking words as well-known.';
       }
     },
 
     async markAllIgnored(): Promise<void> {
       if (!confirm('Mark all unknown words as Ignored?')) return;
 
-      this.isLoading = true;
+      this.statusMessage = null;
 
       try {
         const response = await TextsApi.markAllIgnored(this.store.textId);
 
         if (response.error) {
           console.error('Failed to mark all ignored:', response.error);
-          this.isLoading = false;
+          this.statusMessage = 'Failed to mark words as ignored.';
           return;
         }
 
         // Update display for each affected word
-        if (response.data?.words) {
-          for (const word of response.data.words) {
-            this.updateWordDisplay(word.hex, 98, word.wid);
-            this.store.updateWordInStore(word.hex, {
-              wordId: word.wid,
-              status: 98
-            });
-          }
+        const words = response.data?.words ?? [];
+        for (const word of words) {
+          this.updateWordDisplay(word.hex, 98, word.wid);
+          this.store.updateWordInStore(word.hex, {
+            wordId: word.wid,
+            status: 98
+          });
         }
 
-        this.isLoading = false;
+        this.statusMessage = `Marked ${words.length} word${words.length !== 1 ? 's' : ''} as Ignored.`;
       } catch (err) {
         console.error('Error marking all ignored:', err);
-        this.isLoading = false;
+        this.statusMessage = 'Error marking words as ignored.';
       }
     },
 

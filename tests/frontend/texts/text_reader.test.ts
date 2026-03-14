@@ -739,7 +739,7 @@ describe('text_reader.ts', () => {
       await component.markAllWellKnown();
 
       expect(consoleSpy).toHaveBeenCalledWith('Failed to mark all well-known:', 'API Error');
-      expect(component.isLoading).toBe(false);
+      expect(component.statusMessage).toBe('Failed to mark words as well-known.');
     });
 
     it('updates words in DOM and store on success', async () => {
@@ -761,6 +761,7 @@ describe('text_reader.ts', () => {
       expect(updateWordStatusInDOM).toHaveBeenCalledWith('ABC123', 99, 1);
       expect(updateWordStatusInDOM).toHaveBeenCalledWith('DEF456', 99, 2);
       expect(mockWordStore.updateWordInStore).toHaveBeenCalledTimes(2);
+      expect(component.statusMessage).toBe('Marked 2 words as Well Known.');
     });
 
     it('handles exception during API call', async () => {
@@ -773,7 +774,7 @@ describe('text_reader.ts', () => {
       await component.markAllWellKnown();
 
       expect(consoleSpy).toHaveBeenCalledWith('Error marking all well-known:', expect.any(Error));
-      expect(component.isLoading).toBe(false);
+      expect(component.statusMessage).toBe('Error marking words as well-known.');
     });
   });
 
@@ -795,7 +796,7 @@ describe('text_reader.ts', () => {
       await component.markAllIgnored();
 
       expect(consoleSpy).toHaveBeenCalledWith('Failed to mark all ignored:', 'API Error');
-      expect(component.isLoading).toBe(false);
+      expect(component.statusMessage).toBe('Failed to mark words as ignored.');
     });
 
     it('updates words in DOM and store on success', async () => {
@@ -817,6 +818,7 @@ describe('text_reader.ts', () => {
       expect(updateWordStatusInDOM).toHaveBeenCalledWith('ABC123', 98, 1);
       expect(updateWordStatusInDOM).toHaveBeenCalledWith('DEF456', 98, 2);
       expect(mockWordStore.updateWordInStore).toHaveBeenCalledTimes(2);
+      expect(component.statusMessage).toBe('Marked 2 words as Ignored.');
     });
 
     it('handles exception during API call', async () => {
@@ -829,7 +831,7 @@ describe('text_reader.ts', () => {
       await component.markAllIgnored();
 
       expect(consoleSpy).toHaveBeenCalledWith('Error marking all ignored:', expect.any(Error));
-      expect(component.isLoading).toBe(false);
+      expect(component.statusMessage).toBe('Error marking words as ignored.');
     });
   });
 

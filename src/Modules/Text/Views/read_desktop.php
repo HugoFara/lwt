@@ -271,6 +271,14 @@ if (!isset($bookContext) || !is_array($bookContext)) {
     </div>
   </template>
 
+  <!-- Status message (mark-all feedback) -->
+  <template x-if="statusMessage">
+    <div class="notification is-info is-light mx-4 mt-2 py-2 px-4">
+      <button class="delete is-small" @click="statusMessage = null"></button>
+      <span x-text="statusMessage"></span>
+    </div>
+  </template>
+
   <!-- Text content -->
   <div x-show="!isLoading && !error" class="reading-content p-4">
     <div

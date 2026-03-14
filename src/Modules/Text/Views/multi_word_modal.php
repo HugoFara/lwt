@@ -42,10 +42,10 @@ namespace Lwt\Views\Text;
         <template x-if="!isLoading">
           <div>
             <!-- General error message -->
-            <template x-if="store.errors.general">
+            <template x-if="hasGeneralError">
               <div class="notification is-danger is-light mb-4">
-                <button class="delete" @click="store.errors.general = null"></button>
-                <span x-text="store.errors.general"></span>
+                <button class="delete" @click="clearGeneralError()"></button>
+                <span x-text="generalError"></span>
               </div>
             </template>
 
@@ -53,9 +53,9 @@ namespace Lwt\Views\Text;
             <div class="field">
               <label class="label is-small">Multi-Word Expression</label>
               <div class="control">
-                <input class="input" type="text" :value="store.formData.text" disabled>
+                <input class="input" type="text" :value="formText" disabled>
               </div>
-              <p class="help" x-text="store.formData.wordCount + ' words'"></p>
+              <p class="help" x-text="wordCountLabel"></p>
             </div>
 
             <!-- Translation -->
@@ -64,34 +64,34 @@ namespace Lwt\Views\Text;
               <div class="control">
                 <textarea
                   class="textarea"
-                  :class="{ 'is-danger': store.errors.translation }"
-                  x-model="store.formData.translation"
-                  @blur="store.validateField('translation')"
+                  :class="{ 'is-danger': hasTranslationError }"
+                  x-model="translation"
+                  @blur="validateField('translation')"
                   rows="2"
                   placeholder="Enter translation..."
                 ></textarea>
               </div>
-              <template x-if="store.errors.translation">
-                <p class="help is-danger" x-text="store.errors.translation"></p>
+              <template x-if="hasTranslationError">
+                <p class="help is-danger" x-text="translationError"></p>
               </template>
             </div>
 
             <!-- Romanization (if enabled for language) -->
-            <template x-if="store.showRomanization">
+            <template x-if="showRomanization">
               <div class="field">
                 <label class="label is-small">Romanization</label>
                 <div class="control">
                   <input
                     class="input"
-                    :class="{ 'is-danger': store.errors.romanization }"
+                    :class="{ 'is-danger': hasRomanizationError }"
                     type="text"
-                    x-model="store.formData.romanization"
-                    @blur="store.validateField('romanization')"
+                    x-model="romanization"
+                    @blur="validateField('romanization')"
                     placeholder="Enter romanization..."
                   >
                 </div>
-                <template x-if="store.errors.romanization">
-                  <p class="help is-danger" x-text="store.errors.romanization"></p>
+                <template x-if="hasRomanizationError">
+                  <p class="help is-danger" x-text="romanizationError"></p>
                 </template>
               </div>
             </template>
@@ -102,15 +102,15 @@ namespace Lwt\Views\Text;
               <div class="control">
                 <textarea
                   class="textarea"
-                  :class="{ 'is-danger': store.errors.sentence }"
-                  x-model="store.formData.sentence"
-                  @blur="store.validateField('sentence')"
+                  :class="{ 'is-danger': hasSentenceError }"
+                  x-model="sentence"
+                  @blur="validateField('sentence')"
                   rows="2"
                   placeholder="Example sentence with {term} in braces..."
                 ></textarea>
               </div>
-              <template x-if="store.errors.sentence">
-                <p class="help is-danger" x-text="store.errors.sentence"></p>
+              <template x-if="hasSentenceError">
+                <p class="help is-danger" x-text="sentenceError"></p>
               </template>
               <p class="help">Use {curly braces} around the term</p>
             </div>
@@ -139,7 +139,7 @@ namespace Lwt\Views\Text;
                   type="button"
                   class="button is-primary"
                   :class="{ 'is-loading': isSubmitting }"
-                  :disabled="!store.canSubmit"
+                  :disabled="!canSubmit"
                   @click="save"
                 >
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('save', ['size' => 16]); ?>

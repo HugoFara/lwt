@@ -47,6 +47,23 @@ export interface MultiWordModalData {
   readonly modalTitle: string;
   readonly statuses: StatusInfo[];
 
+  // CSP-safe proxy properties for x-model
+  translation: string;
+  romanization: string;
+  sentence: string;
+  readonly formText: string;
+  readonly wordCountLabel: string;
+  readonly hasGeneralError: boolean;
+  readonly generalError: string | null;
+  readonly hasTranslationError: boolean;
+  readonly translationError: string | null;
+  readonly hasRomanizationError: boolean;
+  readonly romanizationError: string | null;
+  readonly hasSentenceError: boolean;
+  readonly sentenceError: string | null;
+  readonly showRomanization: boolean;
+  readonly canSubmit: boolean;
+
   // Lifecycle
   init(): void;
 
@@ -54,6 +71,8 @@ export interface MultiWordModalData {
   close(): void;
   save(): Promise<void>;
   setStatus(status: number): void;
+  clearGeneralError(): void;
+  validateField(field: string): void;
   isCurrentStatus(status: number): boolean;
   getStatusButtonClass(status: number): string;
 }
@@ -87,37 +106,22 @@ export function multiWordModalData(): MultiWordModalData {
       });
     },
 
-    /**
-     * Get the multi-word form store.
-     */
     get store(): MultiWordFormStoreState {
       return Alpine.store('multiWordForm') as MultiWordFormStoreState;
     },
 
-    /**
-     * Check if modal is open.
-     */
     get isOpen(): boolean {
       return this.store.isVisible;
     },
 
-    /**
-     * Check if loading.
-     */
     get isLoading(): boolean {
       return this.store.isLoading;
     },
 
-    /**
-     * Check if submitting.
-     */
     get isSubmitting(): boolean {
       return this.store.isSubmitting;
     },
 
-    /**
-     * Get modal title.
-     */
     get modalTitle(): string {
       if (this.store.isNewWord) {
         return `New Multi-Word Expression (${this.store.formData.wordCount} words)`;
@@ -125,11 +129,87 @@ export function multiWordModalData(): MultiWordModalData {
       return `Edit Multi-Word Expression (${this.store.formData.wordCount} words)`;
     },
 
-    /**
-     * Get available statuses.
-     */
     get statuses(): StatusInfo[] {
       return STATUSES;
+    },
+
+    // CSP-safe proxy properties — Alpine CSP build prohibits nested
+    // property assignments like `store.formData.translation = ...`.
+    get translation(): string {
+      return this.store.formData.translation;
+    },
+    set translation(value: string) {
+      this.store.formData.translation = value;
+    },
+
+    get romanization(): string {
+      return this.store.formData.romanization;
+    },
+    set romanization(value: string) {
+      this.store.formData.romanization = value;
+    },
+
+    get sentence(): string {
+      return this.store.formData.sentence;
+    },
+    set sentence(value: string) {
+      this.store.formData.sentence = value;
+    },
+
+    get formText(): string {
+      return this.store.formData.text;
+    },
+
+    get wordCountLabel(): string {
+      return this.store.formData.wordCount + ' words';
+    },
+
+    get hasGeneralError(): boolean {
+      return !!this.store.errors.general;
+    },
+
+    get generalError(): string | null {
+      return this.store.errors.general;
+    },
+
+    get hasTranslationError(): boolean {
+      return !!this.store.errors.translation;
+    },
+
+    get translationError(): string | null {
+      return this.store.errors.translation ?? null;
+    },
+
+    get hasRomanizationError(): boolean {
+      return !!this.store.errors.romanization;
+    },
+
+    get romanizationError(): string | null {
+      return this.store.errors.romanization ?? null;
+    },
+
+    get hasSentenceError(): boolean {
+      return !!this.store.errors.sentence;
+    },
+
+    get sentenceError(): string | null {
+      return this.store.errors.sentence ?? null;
+    },
+
+    get showRomanization(): boolean {
+      return this.store.showRomanization;
+    },
+
+    get canSubmit(): boolean {
+      return this.store.canSubmit;
+    },
+
+    clearGeneralError(): void {
+      this.store.errors.general = null;
+    },
+
+    validateField(field: string): void {
+      this.store.validateField(field as keyof import('../stores/multi_word_form_store').MultiWordFormData);
     },
 
     /**

@@ -172,13 +172,13 @@ namespace Lwt\Views\Text;
         </template>
 
         <!-- EDIT VIEW -->
-        <template x-if="viewMode === 'edit' && !formStore.isLoading">
+        <template x-if="viewMode === 'edit' && !isLoading">
           <div x-data="wordEditForm">
             <!-- General error message -->
-            <template x-if="formStore.errors.general">
+            <template x-if="hasGeneralError">
               <div class="notification is-danger is-light mb-4">
-                <button class="delete" @click="formStore.errors.general = null"></button>
-                <span x-text="formStore.errors.general"></span>
+                <button class="delete" @click="clearGeneralError()"></button>
+                <span x-text="generalError"></span>
               </div>
             </template>
 
@@ -186,7 +186,7 @@ namespace Lwt\Views\Text;
             <div class="field">
               <label class="label is-small">Term</label>
               <div class="control">
-                <input class="input" type="text" :value="formStore.formData.text" disabled>
+                <input class="input" type="text" :value="formText" disabled>
               </div>
             </div>
 
@@ -196,15 +196,15 @@ namespace Lwt\Views\Text;
               <div class="control">
                 <textarea
                   class="textarea"
-                  :class="{ 'is-danger': formStore.errors.translation }"
-                  x-model="formStore.formData.translation"
+                  :class="{ 'is-danger': hasFieldError('translation') }"
+                  x-model="translation"
                   @blur="validateField('translation')"
                   rows="2"
                   placeholder="Enter translation..."
                 ></textarea>
               </div>
-              <template x-if="formStore.errors.translation">
-                <p class="help is-danger" x-text="formStore.errors.translation"></p>
+              <template x-if="hasFieldError('translation')">
+                <p class="help is-danger" x-text="getFieldError('translation')"></p>
               </template>
             </div>
 
@@ -215,15 +215,15 @@ namespace Lwt\Views\Text;
                 <div class="control">
                   <input
                     class="input"
-                    :class="{ 'is-danger': formStore.errors.romanization }"
+                    :class="{ 'is-danger': hasFieldError('romanization') }"
                     type="text"
-                    x-model="formStore.formData.romanization"
+                    x-model="romanization"
                     @blur="validateField('romanization')"
                     placeholder="Enter romanization..."
                   >
                 </div>
-                <template x-if="formStore.errors.romanization">
-                  <p class="help is-danger" x-text="formStore.errors.romanization"></p>
+                <template x-if="hasFieldError('romanization')">
+                  <p class="help is-danger" x-text="getFieldError('romanization')"></p>
                 </template>
               </div>
             </template>
@@ -234,15 +234,15 @@ namespace Lwt\Views\Text;
               <div class="control">
                 <textarea
                   class="textarea"
-                  :class="{ 'is-danger': formStore.errors.sentence }"
-                  x-model="formStore.formData.sentence"
+                  :class="{ 'is-danger': hasFieldError('sentence') }"
+                  x-model="sentence"
                   @blur="validateField('sentence')"
                   rows="2"
                   placeholder="Example sentence with {term} in braces..."
                 ></textarea>
               </div>
-              <template x-if="formStore.errors.sentence">
-                <p class="help is-danger" x-text="formStore.errors.sentence"></p>
+              <template x-if="hasFieldError('sentence')">
+                <p class="help is-danger" x-text="getFieldError('sentence')"></p>
               </template>
               <p class="help">Use {curly braces} around the term</p>
             </div>
@@ -253,15 +253,15 @@ namespace Lwt\Views\Text;
               <div class="control">
                 <textarea
                   class="textarea"
-                  :class="{ 'is-danger': formStore.errors.notes }"
-                  x-model="formStore.formData.notes"
+                  :class="{ 'is-danger': hasFieldError('notes') }"
+                  x-model="notes"
                   @blur="validateField('notes')"
                   rows="2"
                   placeholder="Personal notes about this term..."
                 ></textarea>
               </div>
-              <template x-if="formStore.errors.notes">
-                <p class="help is-danger" x-text="formStore.errors.notes"></p>
+              <template x-if="hasFieldError('notes')">
+                <p class="help is-danger" x-text="getFieldError('notes')"></p>
               </template>
             </div>
 
@@ -273,8 +273,8 @@ namespace Lwt\Views\Text;
                   <button
                     type="button"
                     class="button"
-                    :class="getStatusClass(s.value) + (formStore.formData.status !== s.value ? ' is-outlined' : '')"
-                    @click="formStore.formData.status = s.value"
+                    :class="getStatusButtonClass(s.value)"
+                    @click="setFormStatus(s.value)"
                     x-text="s.abbr"
                   ></button>
                 </template>
@@ -286,8 +286,8 @@ namespace Lwt\Views\Text;
               <label class="label is-small">Tags</label>
               <div class="control">
                 <!-- Current tags -->
-                <div class="tags mb-2" x-show="formStore.formData.tags.length > 0">
-                  <template x-for="tag in formStore.formData.tags" :key="tag">
+                <div class="tags mb-2" x-show="hasTags">
+                  <template x-for="tag in formTags" :key="tag">
                     <span class="tag is-info is-light">
                       <span x-text="tag"></span>
                       <button type="button" class="delete is-small" @click="removeTag(tag)"></button>
@@ -320,16 +320,16 @@ namespace Lwt\Views\Text;
             </div>
 
             <!-- Similar Terms -->
-            <template x-if="formStore.similarTerms.length > 0">
+            <template x-if="hasSimilarTerms">
               <div class="field">
                 <label class="label is-small">Similar Terms</label>
                 <div class="is-size-7">
-                  <template x-for="term in formStore.similarTerms" :key="term.id">
+                  <template x-for="term in formSimilarTerms" :key="term.id">
                     <div class="is-flex is-justify-content-space-between is-align-items-center py-1"
                          style="border-bottom: 1px solid #f0f0f0;">
                       <div>
                         <span class="has-text-weight-semibold" x-text="term.text"></span>
-                        <span class="has-text-grey" x-text="term.translation ? ': ' + term.translation : ''"></span>
+                        <span class="has-text-grey" x-text="getSimilarTermDisplay(term)"></span>
                       </div>
                       <button
                         type="button"
@@ -353,7 +353,7 @@ namespace Lwt\Views\Text;
                   type="button"
                   class="button is-primary"
                   :class="{ 'is-loading': isSubmitting }"
-                  :disabled="!formStore.canSubmit"
+                  :disabled="!canSubmit"
                   @click="save"
                 >
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('save', ['size' => 16]); ?>
