@@ -15,7 +15,7 @@ import { SettingsApi } from '@modules/admin/api/settings_api';
 
 interface ThemeToggleData {
   init(): void;
-  toggle(): void;
+  switchTheme(): void;
   updateIconForMode(el: HTMLElement, mode: string): void;
 }
 
@@ -36,7 +36,7 @@ function themeToggleData(): ThemeToggleData {
       }
     },
 
-    toggle() {
+    switchTheme() {
       const el = (this as unknown as { $el: HTMLElement }).$el;
       const counterpart = el.dataset.themeCounterpart;
       if (!counterpart) return;
