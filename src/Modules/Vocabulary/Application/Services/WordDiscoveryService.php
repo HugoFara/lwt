@@ -83,15 +83,16 @@ class WordDiscoveryService
      */
     public function getAllUnknownWordsInText(int $textId): array
     {
-        // word_occurrences inherits user context via Ti2TxID -> texts FK
-        // words has WoUsID - user scope auto-applied
+        // Use Ti2WoID IS NULL to match how the reading interface identifies
+        // unknown words (joined via Ti2WoID = WoID). This avoids disagreement
+        // with the text-based join when a word was learned in another text
+        // but Ti2WoID was not yet updated in this text.
         $bindings = [$textId];
         return Connection::preparedFetchAll(
             "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
-             FROM (word_occurrences LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
-             WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
-             ORDER BY Ti2Order"
-             . UserScopedQuery::forTablePrepared('words', $bindings, 'words'),
+             FROM word_occurrences
+             WHERE Ti2WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
+             ORDER BY Ti2Order",
             $bindings
         );
     }
@@ -282,16 +283,31 @@ class WordDiscoveryService
      */
     public function processWordForWellKnown(int $status, string $term, string $termlc, int $langId): array
     {
-        $bindings = [$termlc];
+        $bindings = [$termlc, $langId];
         $wid = Connection::preparedFetchValue(
-            "SELECT WoID FROM words WHERE WoTextLC = ?"
+            "SELECT WoID FROM words WHERE WoTextLC = ? AND WoLgID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
             $bindings,
             'WoID'
         );
 
         if ($wid !== null) {
-            return [0, null];
+            // Word already exists — update its status
+            $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
+            /** @var list<int|string> $updateBindings */
+            $updateBindings = [$status, (int) $wid];
+            Connection::preparedExecute(
+                "UPDATE words SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate} WHERE WoID = ?"
+                . UserScopedQuery::forTablePrepared('words', $updateBindings),
+                $updateBindings
+            );
+
+            return [1, [
+                'wid' => (int) $wid,
+                'hex' => StringUtils::toClassName($termlc),
+                'term' => $term,
+                'status' => $status
+            ]];
         }
 
         try {
