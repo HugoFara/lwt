@@ -252,6 +252,42 @@ const styles = `
   vertical-align: middle;
   cursor: pointer;
 }
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .lwt-popup-dialog {
+    border-color: #3d3d8d;
+  }
+  .lwt-popup-titlebar {
+    background: #3d3d8d;
+  }
+  .lwt-popup-content {
+    background: #2d2d2d;
+    color: #e0e0e0;
+  }
+  .lwt-popup-content a {
+    color: #6699ff;
+  }
+  .lwt-popup-content a:hover {
+    color: #ff6666;
+  }
+}
+:root[data-theme="dark"] .lwt-popup-dialog {
+  border-color: #3d3d8d;
+}
+:root[data-theme="dark"] .lwt-popup-titlebar {
+  background: #3d3d8d;
+}
+:root[data-theme="dark"] .lwt-popup-content {
+  background: #2d2d2d;
+  color: #e0e0e0;
+}
+:root[data-theme="dark"] .lwt-popup-content a {
+  color: #6699ff;
+}
+:root[data-theme="dark"] .lwt-popup-content a:hover {
+  color: #ff6666;
+}
 `;
 
 // Inject styles when module loads

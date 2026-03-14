@@ -441,6 +441,66 @@ const styles = `
   .lwt-word-status {
     color: #aaa;
   }
+
+  .lwt-status-btn,
+  .lwt-action-btn {
+    color: #6699ff;
+  }
+
+  .lwt-status-btn:hover:not(:disabled),
+  .lwt-action-btn:hover:not(:disabled) {
+    color: #ff6666;
+  }
+
+  .lwt-status-btn--current {
+    color: #e0e0e0;
+  }
+
+  .lwt-status-btn:disabled {
+    color: #888;
+  }
+
+  .lwt-test-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Explicit dark theme */
+:root[data-theme="dark"] .lwt-result-panel {
+  background: #2d2d2d;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+:root[data-theme="dark"] .lwt-result-panel-header {
+  background: #3d3d8d;
+}
+
+:root[data-theme="dark"] .lwt-word-romanization,
+:root[data-theme="dark"] .lwt-word-status {
+  color: #aaa;
+}
+
+:root[data-theme="dark"] .lwt-status-btn,
+:root[data-theme="dark"] .lwt-action-btn {
+  color: #6699ff;
+}
+
+:root[data-theme="dark"] .lwt-status-btn:hover:not(:disabled),
+:root[data-theme="dark"] .lwt-action-btn:hover:not(:disabled) {
+  color: #ff6666;
+}
+
+:root[data-theme="dark"] .lwt-status-btn--current {
+  color: #e0e0e0;
+}
+
+:root[data-theme="dark"] .lwt-status-btn:disabled {
+  color: #888;
+}
+
+:root[data-theme="dark"] .lwt-test-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* Popup button styles (for word popup API-based buttons) */

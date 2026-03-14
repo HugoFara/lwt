@@ -2845,6 +2845,15 @@ Settings Page - Collapsible Sections
   height: auto;
 }
 
+/* Translation and romanization text */
+.word-popover__translation {
+  color: #4a4a4a;
+}
+
+.word-popover__romanization {
+  color: #7a7a7a;
+}
+
 /* Actions row separator */
 .word-popover__actions {
   border-top: 1px solid #f0f0f0;
@@ -2905,6 +2914,33 @@ Settings Page - Collapsible Sections
   .word-popover__content {
     padding: 1rem 1.25rem;
   }
+}
+
+/* Dark theme overrides for word popover */
+@media (prefers-color-scheme: dark) {
+  .word-popover__translation {
+    color: #dbdbdb;
+  }
+
+  .word-popover__romanization {
+    color: #aaa;
+  }
+
+  .word-popover__actions {
+    border-top-color: #404040;
+  }
+}
+
+:root[data-theme="dark"] .word-popover__translation {
+  color: #dbdbdb;
+}
+
+:root[data-theme="dark"] .word-popover__romanization {
+  color: #aaa;
+}
+
+:root[data-theme="dark"] .word-popover__actions {
+  border-top-color: #404040;
 }
 
 @media print
