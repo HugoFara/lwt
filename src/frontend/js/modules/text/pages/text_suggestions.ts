@@ -13,6 +13,14 @@ import { initIcons } from '@shared/icons/lucide_icons';
 
 // ── Gutenberg browser ───────────────────────────────────────────────
 
+interface BookStats {
+  totalWords: number;
+  totalUniqueWords: number;
+  knownWords: number;
+  unknownWords: number;
+  coveragePercent: number;
+}
+
 interface GutenbergBook {
   id: number;
   title: string;
@@ -22,6 +30,9 @@ interface GutenbergBook {
   downloadCount: number;
   textUrl: string;
   difficultyTier?: 'easy' | 'medium' | 'hard';
+  stats?: BookStats;
+  statsLoading?: boolean;
+  statsError?: boolean;
 }
 
 interface GutenbergBrowserData {
@@ -34,6 +45,7 @@ interface GutenbergBrowserData {
 
   init(): void;
   fetchBooks(page: number): Promise<void>;
+  fetchStatsForBooks(books: GutenbergBook[]): void;
   loadMore(): Promise<void>;
   importBook(book: GutenbergBook): void;
   formatAuthors(authors: string[]): string;
@@ -46,6 +58,11 @@ interface GutenbergBrowserData {
   loadingClass(): string;
   showPlaceholder(): boolean;
   showNoResults(): boolean;
+  formatWordCount(n: number): string;
+  coverageBarWidth(book: GutenbergBook): string;
+  coverageBarClass(book: GutenbergBook): string;
+  coverageLabel(book: GutenbergBook): string;
+  bookWordCount(book: GutenbergBook): string;
 }
 
 function getSelectedLanguageId(): number {
@@ -115,19 +132,75 @@ export function gutenbergBrowserData(): GutenbergBrowserData {
           return;
         }
 
+        const newBooks: GutenbergBook[] = data.results || [];
         if (page === 1) {
-          this.books = data.results || [];
+          this.books = newBooks;
         } else {
-          this.books = this.books.concat(data.results || []);
+          this.books = this.books.concat(newBooks);
         }
         this.hasMore = data.next || false;
         this.page = page;
         requestAnimationFrame(() => initIcons());
+
+        // Progressively fetch vocabulary stats for each book
+        this.fetchStatsForBooks(newBooks);
       } catch {
         this.error = 'Could not reach the server.';
       } finally {
         this.loading = false;
       }
+    },
+
+    fetchStatsForBooks(books: GutenbergBook[]) {
+      const langId = getSelectedLanguageId();
+      if (langId <= 0) return;
+
+      const maxConcurrent = 3;
+      let running = 0;
+      const queue = [...books];
+
+      const next = () => {
+        while (running < maxConcurrent && queue.length > 0) {
+          const book = queue.shift()!;
+          running++;
+          book.statsLoading = true;
+
+          const params = new URLSearchParams({
+            url: book.textUrl,
+            language_id: String(langId),
+          });
+
+          fetch(`/api/v1/texts/library-preview?${params}`)
+            .then(r => r.json())
+            .then(data => {
+              if (data.data && !data.error) {
+                book.stats = {
+                  totalWords: data.data.total_words || 0,
+                  totalUniqueWords: data.data.total_unique_words || 0,
+                  knownWords: data.data.known_words || 0,
+                  unknownWords: data.data.unknown_words || 0,
+                  coveragePercent: data.data.coverage_percent || 0,
+                };
+                // Update difficulty from actual coverage analysis
+                if (data.data.difficulty_label) {
+                  book.difficultyTier = data.data.difficulty_label;
+                }
+              } else {
+                book.statsError = true;
+              }
+            })
+            .catch(() => {
+              book.statsError = true;
+            })
+            .finally(() => {
+              book.statsLoading = false;
+              running--;
+              next();
+            });
+        }
+      };
+
+      next();
     },
 
     async loadMore() {
@@ -198,6 +271,34 @@ export function gutenbergBrowserData(): GutenbergBrowserData {
 
     showNoResults(): boolean {
       return !this.loading && this.books.length === 0 && !this.error && getSelectedLanguageId() > 0;
+    },
+
+    formatWordCount(n: number): string {
+      if (n >= 1000) return Math.round(n / 1000) + 'k';
+      return String(n);
+    },
+
+    coverageBarWidth(book: GutenbergBook): string {
+      if (!book.stats) return 'width: 0%';
+      return 'width: ' + Math.round(book.stats.coveragePercent) + '%';
+    },
+
+    coverageBarClass(book: GutenbergBook): string {
+      if (!book.stats) return 'has-background-grey-light';
+      const pct = book.stats.coveragePercent;
+      if (pct >= 95) return 'has-background-success';
+      if (pct >= 85) return 'has-background-warning';
+      return 'has-background-danger';
+    },
+
+    coverageLabel(book: GutenbergBook): string {
+      if (!book.stats) return '';
+      return book.stats.coveragePercent + '% known';
+    },
+
+    bookWordCount(book: GutenbergBook): string {
+      if (!book.stats) return '';
+      return this.formatWordCount(book.stats.totalWords) + ' words';
     },
   };
 }

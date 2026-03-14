@@ -472,16 +472,37 @@ if (!$isNew) {
                 <div x-show="books.length > 0"
                      style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
                     <template x-for="book in books" :key="book.id">
-                        <div class="box p-3" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 140px;">
+                        <div class="box p-3" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 160px;">
                             <div>
                                 <p class="has-text-weight-semibold is-size-7" x-text="book.title"
                                    style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"></p>
-                                <span x-show="book.difficultyTier"
-                                      class="tag is-rounded mb-1" style="font-size: 0.65rem;"
-                                      :class="bookTierClass(book)"
-                                      x-text="bookTierLabel(book)"></span>
+                                <div class="mb-1">
+                                    <span x-show="book.difficultyTier"
+                                          class="tag is-rounded" style="font-size: 0.65rem;"
+                                          :class="bookTierClass(book)"
+                                          x-text="bookTierLabel(book)"></span>
+                                </div>
                                 <p class="has-text-grey is-size-7" x-text="formatAuthors(book.authors)"
                                    style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></p>
+
+                                <!-- Vocabulary stats (loaded progressively) -->
+                                <div x-show="book.statsLoading" class="mt-2">
+                                    <span class="is-size-7 has-text-grey-light">Analyzing...</span>
+                                </div>
+                                <div x-show="book.stats" class="mt-2">
+                                    <p class="is-size-7 has-text-grey mb-1">
+                                        <span x-text="bookWordCount(book)"></span>
+                                        &middot;
+                                        <span x-text="coverageLabel(book)"></span>
+                                    </p>
+                                    <!-- Coverage bar -->
+                                    <div style="height: 4px; border-radius: 2px; overflow: hidden;"
+                                         class="has-background-grey-lighter">
+                                        <div style="height: 100%; border-radius: 2px; transition: width 0.3s ease;"
+                                             :style="coverageBarWidth(book)"
+                                             :class="coverageBarClass(book)"></div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="mt-2">
                                 <button type="button" @click="importBook(book)"

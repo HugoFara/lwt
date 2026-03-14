@@ -112,6 +112,7 @@ class DifficultyEstimationService
      * @param int    $languageId Language ID (for tokenization and vocab lookup)
      *
      * @return array{
+     *     total_words: int,
      *     total_unique_words: int,
      *     known_words: int,
      *     unknown_words: int,
@@ -141,9 +142,12 @@ class DifficultyEstimationService
             return ['error' => 'Language not found.'];
         }
 
-        // Tokenize and sample
-        $tokens = $this->tokenize($text, $wordRegex, self::SAMPLE_WORD_COUNT);
-        $uniqueWords = array_unique(array_map('mb_strtolower', $tokens));
+        // Tokenize — get all words first for total count, then sample
+        $allTokens = $this->tokenize($text, $wordRegex, PHP_INT_MAX);
+        $totalWords = count($allTokens);
+        $sampledTokens = array_slice($allTokens, 0, self::SAMPLE_WORD_COUNT);
+
+        $uniqueWords = array_unique(array_map('mb_strtolower', $sampledTokens));
         $uniqueWords = array_values($uniqueWords);
 
         $totalUnique = count($uniqueWords);
@@ -162,6 +166,7 @@ class DifficultyEstimationService
         $sampleUnknown = array_slice($unknownWords, 0, 20);
 
         return [
+            'total_words' => $totalWords,
             'total_unique_words' => $totalUnique,
             'known_words' => $knownCount,
             'unknown_words' => $unknownCount,
