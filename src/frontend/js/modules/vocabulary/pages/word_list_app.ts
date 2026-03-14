@@ -51,6 +51,9 @@ export interface WordListData {
   filterOptions: FilterOptions;
   marked: Set<number>;
 
+  // Column visibility
+  showSentenceCol: boolean;
+
   // Inline edit state
   editingWord: EditingState | null;
   editValue: string;
@@ -70,6 +73,8 @@ export interface WordListData {
   saveFilterState(): void;
 
   // Pagination
+  perPageOptions: number[];
+  setPerPage(value: number): void;
   goToPage(page: number): Promise<void>;
 
   // Selection
@@ -151,6 +156,9 @@ export function wordListData(): WordListData {
       sorts: []
     },
     marked: new Set(),
+
+    perPageOptions: [25, 50, 100, 200, 500],
+    showSentenceCol: false,
 
     editingWord: null,
     editValue: '',
@@ -277,6 +285,14 @@ export function wordListData(): WordListData {
       } catch {
         // localStorage unavailable
       }
+    },
+
+    setPerPage(value: number) {
+      this.filters.per_page = value;
+      this.filters.page = 1;
+      this.marked.clear();
+      this.saveFilterState();
+      this.loadWords();
     },
 
     async goToPage(page: number) {

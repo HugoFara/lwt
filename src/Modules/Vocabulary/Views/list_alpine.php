@@ -133,6 +133,32 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
             </div>
 
+            <!-- Per page -->
+            <div class="column is-narrow">
+                <div class="field has-addons">
+                    <div class="control">
+                        <span class="button is-static is-small">Show</span>
+                    </div>
+                    <div class="control">
+                        <div class="select is-small">
+                            <select x-model="filters.per_page" @change="setPerPage(parseInt(filters.per_page))">
+                                <template x-for="opt in perPageOptions" :key="opt">
+                                    <option :value="opt" x-text="opt"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sentence column toggle -->
+            <div class="column is-narrow">
+                <label class="checkbox is-size-7">
+                    <input type="checkbox" x-model="showSentenceCol" />
+                    Sentence
+                </label>
+            </div>
+
             <!-- Search query -->
             <div class="column">
                 <div class="field has-addons">
@@ -310,7 +336,7 @@ echo PageLayoutHelper::buildActionCard([
                     <th class="has-text-centered" style="width: 5em;">Act.</th>
                     <th>Term / Romanization</th>
                     <th>Translation [Tags]</th>
-                    <th class="has-text-centered" style="width: 3em;" title="Has valid sentence?">Se.?</th>
+                    <th class="has-text-centered" style="width: 6em;" x-show="showSentenceCol">Has valid sentence</th>
                     <th class="has-text-centered" style="width: 5em;">Stat./Days</th>
                     <th class="has-text-centered" style="width: 5em;">Score %</th>
                     <th
@@ -428,7 +454,7 @@ echo PageLayoutHelper::buildActionCard([
                         </td>
 
                         <!-- Sentence OK -->
-                        <td class="has-text-centered">
+                        <td class="has-text-centered" x-show="showSentenceCol">
                             <template x-if="word.sentenceOk">
                                 <span class="has-text-success" :title="word.sentence">
                                     <?php echo IconHelper::render('circle-check', ['alt' => 'Yes']); ?>
@@ -556,7 +582,7 @@ echo PageLayoutHelper::buildActionCard([
                     <div class="is-flex is-justify-content-space-between is-align-items-center">
                         <div class="tags">
                             <span x-show="word.tags" class="tag is-light" x-text="word.tags"></span>
-                            <template x-if="word.sentenceOk">
+                            <template x-if="showSentenceCol && word.sentenceOk">
                                 <span class="tag is-success is-light" :title="word.sentence">
                                     <?php echo IconHelper::render('message-square', ['alt' => 'Has sentence']); ?>
                                 </span>

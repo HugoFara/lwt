@@ -86,7 +86,7 @@ class WordListApiHandler
 
         // Parse parameters with defaults
         $page = max(1, (int) ($params['page'] ?? 1));
-        $perPage = max(1, min(100, (int) ($params['per_page'] ?? 50)));
+        $perPage = max(1, min(500, (int) ($params['per_page'] ?? 50)));
         $lang = (string) ($params['lang'] ?? '');
         $status = (string) ($params['status'] ?? '');
         $query = (string) ($params['query'] ?? '');
