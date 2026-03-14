@@ -174,26 +174,6 @@ $configJson = json_encode([
 
     <!-- ===================== TAB 2: Wizard (Enter Feed URL) ===================== -->
     <div class="box" x-show="activeTab === 'wizard'" x-transition>
-        <!-- Steps indicator -->
-        <div class="steps is-small mb-5">
-            <div class="step-item is-active is-primary">
-                <div class="step-marker">1</div>
-                <div class="step-details"><p class="step-title">Feed URL</p></div>
-            </div>
-            <div class="step-item">
-                <div class="step-marker">2</div>
-                <div class="step-details"><p class="step-title">Select Article</p></div>
-            </div>
-            <div class="step-item">
-                <div class="step-marker">3</div>
-                <div class="step-details"><p class="step-title">Filter Text</p></div>
-            </div>
-            <div class="step-item">
-                <div class="step-marker">4</div>
-                <div class="step-details"><p class="step-title">Save</p></div>
-            </div>
-        </div>
-
         <p class="mb-4 has-text-grey">
             Enter a feed URL and we'll guide you through configuring article extraction step by step.
         </p>
@@ -204,30 +184,22 @@ $configJson = json_encode([
             <input type="hidden" name="selected_feed" value="0" />
             <input type="hidden" name="article_tags" value="1" />
 
-            <div class="field is-horizontal">
-                <div class="field-label is-normal">
-                    <label class="label" for="rss_url">Feed URI</label>
+            <div class="field">
+                <label class="label" for="rss_url">
+                    Feed URI
+                    <span class="has-text-danger" title="Required">*</span>
+                </label>
+                <div class="control">
+                    <input class="input notempty"
+                           type="url"
+                           name="rss_url"
+                           id="rss_url"
+                           placeholder="https://example.com/feed.xml"
+                           x-model="rssUrl"
+                           :class="{ 'is-success': isValidUrl, 'is-danger': rssUrl && !isValidUrl }"
+                           required />
                 </div>
-                <div class="field-body">
-                    <div class="field has-addons">
-                        <div class="control is-expanded">
-                            <input class="input notempty"
-                                   type="url"
-                                   name="rss_url"
-                                   id="rss_url"
-                                   placeholder="https://example.com/feed.xml"
-                                   x-model="rssUrl"
-                                   :class="{ 'is-success': isValidUrl, 'is-danger': rssUrl && !isValidUrl }"
-                                   required />
-                        </div>
-                        <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                            </span>
-                        </div>
-                    </div>
-                    <p class="help">Enter the URL of an RSS or Atom feed</p>
-                </div>
+                <p class="help">Enter the URL of an RSS or Atom feed</p>
             </div>
 
             <!-- Form Actions -->
