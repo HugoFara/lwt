@@ -22,6 +22,7 @@ use Lwt\Shared\Infrastructure\Http\RedirectResponse;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Escaping;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
@@ -744,18 +745,18 @@ class TermEditController extends VocabularyBaseController
             $langData = $contextService->getLanguageData($lang);
             $showRoman = $langData['showRoman'];
 
-            $similarTermsRow = (new \Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms())->getTableRow();
+            $showSimilarTerms = (int) Settings::getWithDefault("set-similar-terms-count") > 0;
             $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin3($lang, 'WoSentence', 'WoText');
             $wordTagsHtml = TagsFacade::getWordTagsHtml(0);
 
-            PageLayoutHelper::renderPageStartNobody('');
+            PageLayoutHelper::renderPageStart('New Term', true, 'terms');
 
             $this->render('form_new', [
                 'lang' => $lang,
                 'textId' => $textId,
                 'scrdir' => $scrdir,
                 'showRoman' => $showRoman,
-                'similarTermsRow' => $similarTermsRow,
+                'showSimilarTerms' => $showSimilarTerms,
                 'dictLinksHtml' => $dictLinksHtml,
                 'wordTagsHtml' => $wordTagsHtml,
             ]);

@@ -348,13 +348,13 @@ class DictionaryAdapter
         $r .= '<span class="click" data-action="' . $action1 . '" ' .
         'data-url="' . htmlspecialchars($wb1, ENT_QUOTES, 'UTF-8') . '" ' .
         'data-wordctl="' . htmlspecialchars($wordctlid, ENT_QUOTES, 'UTF-8') . '">
-        Dict1</span> ';
+        Dictionary 1</span> ';
         if ($wb2 !== '') {
             $action2 = $popup2 ? 'translate-word-popup' : 'translate-word';
             $r .= '<span class="click" data-action="' . $action2 . '" ' .
             'data-url="' . htmlspecialchars($wb2, ENT_QUOTES, 'UTF-8') . '" ' .
             'data-wordctl="' . htmlspecialchars($wordctlid, ENT_QUOTES, 'UTF-8') . '">
-            Dict2</span> ';
+            Dictionary 2</span> ';
         }
         if ($wb3 !== '') {
             $action3 = $popup3 ? 'translate-word-popup' : 'translate-word';

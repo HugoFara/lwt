@@ -430,25 +430,31 @@ class SelectOptionsBuilder
     /**
      * Build word status radio options.
      *
-     * @param int|string|null $selected Currently selected status (default: 1)
+     * @param int|string|null $selected      Currently selected status (default: 1)
+     * @param bool            $useFullLabels Show full names instead of abbreviations
      *
      * @return string HTML radio options string
      */
-    public static function forWordStatusRadio(int|string|null $selected = null): string
-    {
+    public static function forWordStatusRadio(
+        int|string|null $selected = null,
+        bool $useFullLabels = false
+    ): string {
         if (!isset($selected)) {
             $selected = 1;
         }
         $result = '';
         $statuses = \Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses();
         foreach ($statuses as $n => $status) {
-            $result .= '<span class="status' . $n . '" title="'
-                    . htmlspecialchars($status['name'], ENT_QUOTES, 'UTF-8') . '">';
+            $escapedName = htmlspecialchars($status['name'], ENT_QUOTES, 'UTF-8');
+            $escapedAbbr = htmlspecialchars($status['abbr'], ENT_QUOTES, 'UTF-8');
+            $label = $useFullLabels ? $escapedName : $escapedAbbr;
+            $title = $useFullLabels ? $escapedAbbr : $escapedName;
+            $result .= '<span class="status' . $n . '" title="' . $title . '">';
             $result .= '&nbsp;<input type="radio" name="WoStatus" value="' . $n . '"';
             if ($selected == $n) {
                 $result .= ' checked="checked"';
             }
-            $result .= ' />' . htmlspecialchars($status['abbr'], ENT_QUOTES, 'UTF-8') . '&nbsp;</span> ';
+            $result .= ' />' . $label . '&nbsp;</span> ';
         }
         return $result;
     }

@@ -370,7 +370,7 @@ class DictionaryAdapterTest extends TestCase
         $result = $this->adapter->createDictLinksInEditWin3(99999, 'sentctl', 'wordctl');
 
         $this->assertStringContainsString('Lookup Term:', $result);
-        $this->assertStringContainsString('Dict1</span>', $result);
+        $this->assertStringContainsString('Dictionary 1</span>', $result);
     }
 
     public function testCreateDictLinksInEditWin3HandlesEmptyDictionaries(): void
