@@ -133,9 +133,15 @@ $configJson = json_encode([
                 <div class="columns is-multiline">
                     <template x-for="source in group.sources" :key="source.url">
                         <div class="column is-half-tablet is-one-third-desktop">
-                            <div class="card">
+                            <label class="card" style="display: block; cursor: pointer;">
                                 <div class="card-content p-4">
-                                    <p class="title is-6 mb-2" x-text="source.name"></p>
+                                    <div class="is-flex is-align-items-center mb-2">
+                                        <input type="checkbox"
+                                               class="mr-2"
+                                               x-model="selectedUrls"
+                                               :value="source.url" />
+                                        <p class="title is-6 mb-0" x-text="source.name"></p>
+                                    </div>
                                     <div class="tags mb-2">
                                         <span class="tag is-info is-light" x-text="source.category"></span>
                                         <span class="tag is-light" x-text="source.level"></span>
@@ -143,21 +149,24 @@ $configJson = json_encode([
                                     <p class="is-size-7 has-text-grey is-clipped" x-text="source.url"
                                        style="max-height: 1.5em; overflow: hidden; text-overflow: ellipsis;"></p>
                                 </div>
-                                <footer class="card-footer">
-                                    <a class="card-footer-item has-text-primary"
-                                       @click.prevent="addCuratedFeed(source)">
-                                        <span class="icon is-small mr-1">
-                                            <?php echo IconHelper::render('plus', ['alt' => 'Add']); ?>
-                                        </span>
-                                        Add
-                                    </a>
-                                </footer>
-                            </div>
+                            </label>
                         </div>
                     </template>
                 </div>
             </div>
         </template>
+
+        <!-- Add selected feeds button -->
+        <div class="field is-grouped is-grouped-right mt-4">
+            <div class="control">
+                <button type="button" class="button is-primary" @click="addSelectedFeeds()">
+                    <span class="icon is-small">
+                        <?php echo IconHelper::render('plus', ['alt' => 'Add']); ?>
+                    </span>
+                    <span>Add Selected Feeds</span>
+                </button>
+            </div>
+        </div>
 
         <!-- Hidden form for curated feed submission -->
         <form id="curated-feed-form" action="/feeds/new" method="post" style="display: none;">

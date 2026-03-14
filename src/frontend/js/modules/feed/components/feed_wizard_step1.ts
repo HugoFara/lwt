@@ -79,6 +79,7 @@ export interface FeedWizardStep1Data {
   browseLanguageFilter: string;
   browseSearch: string;
   currentLanguageId: number;
+  selectedUrls: string[];
   languages: Array<{ id: number; name: string }>;
   curatedFeeds: CuratedFeedGroup[];
   readonly filteredCuratedFeeds: CuratedFeedGroup[];
@@ -89,7 +90,9 @@ export interface FeedWizardStep1Data {
 
   // Actions
   cancel(): void;
+  addSelectedFeeds(): void;
   addCuratedFeed(source: CuratedSource): void;
+
 }
 
 /**
@@ -161,6 +164,7 @@ export function feedWizardStep1Data(): FeedWizardStep1Data {
     })(),
     browseSearch: '',
     currentLanguageId: config.currentLanguageId,
+    selectedUrls: [] as string[],
     languages: config.languages,
     curatedFeeds: config.curatedFeeds,
 
@@ -218,6 +222,19 @@ export function feedWizardStep1Data(): FeedWizardStep1Data {
       window.location.href = '/feeds/manage';
     },
 
+    addSelectedFeeds(): void {
+      if (this.selectedUrls.length === 0) return;
+
+      // Find the first selected source object by URL
+      for (const group of this.curatedFeeds) {
+        const source = group.sources.find(s => this.selectedUrls.includes(s.url));
+        if (source) {
+          this.addCuratedFeed(source);
+          return;
+        }
+      }
+    },
+
     addCuratedFeed(source: CuratedSource): void {
       // Populate hidden form and submit using current language from navbar
       this.curatedFormData = {
@@ -230,14 +247,15 @@ export function feedWizardStep1Data(): FeedWizardStep1Data {
       };
 
       // Need to wait one tick for Alpine to update the hidden inputs
-      this.$nextTick(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this as any).$nextTick(() => {
         const form = document.getElementById('curated-feed-form') as HTMLFormElement | null;
         if (form) {
           form.submit();
         }
       });
     }
-  } as FeedWizardStep1Data & { $nextTick: (fn: () => void) => void };
+  } as FeedWizardStep1Data;
 }
 
 /**
