@@ -201,7 +201,7 @@ $configJson = json_encode([
         </div>
 
         <!-- Selected elements list -->
-        <div class="box has-background-light mb-4">
+        <div class="box mb-4" style="background-color: var(--bulma-scheme-main-bis);">
             <p class="is-size-7 has-text-grey mb-2">Selected elements:</p>
             <ol id="lwt_sel" class="ml-4">
                 <template x-for="selector in articleSelectors" :key="selector.id">

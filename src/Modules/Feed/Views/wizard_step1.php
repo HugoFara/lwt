@@ -333,15 +333,16 @@ $configJson = json_encode([
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="edit_text" x-model="editText" checked />
-                                    <strong>Edit Text</strong>
+                                    <strong>Review before importing</strong>
                                 </label>
+                                <p class="help">Show the article text for editing before saving it</p>
                             </div>
 
                             <!-- Auto Update -->
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="c_autoupdate" x-model="autoUpdate" />
-                                    <strong>Auto Update Interval</strong>
+                                    <strong>Auto-refresh feed</strong>
                                 </label>
                                 <div class="field has-addons mt-2" x-show="autoUpdate" x-transition>
                                     <div class="control">
@@ -372,8 +373,9 @@ $configJson = json_encode([
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="c_max_links" x-model="maxLinks" />
-                                    <strong>Max. Links</strong>
+                                    <strong>Limit stored articles</strong>
                                 </label>
+                                <p class="help">Maximum number of article links to keep</p>
                                 <div class="control mt-2" x-show="maxLinks" x-transition>
                                     <input class="input is-small posintnumber maxint_300"
                                            :class="maxLinks ? 'notempty' : ''"
@@ -392,8 +394,9 @@ $configJson = json_encode([
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="c_charset" x-model="charset" />
-                                    <strong>Charset</strong>
+                                    <strong>Character encoding</strong>
                                 </label>
+                                <p class="help">Override the feed's character encoding (e.g. UTF-8)</p>
                                 <div class="control mt-2" x-show="charset" x-transition>
                                     <input class="input is-small"
                                            :class="charset ? 'notempty' : ''"
@@ -410,8 +413,9 @@ $configJson = json_encode([
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="c_max_texts" x-model="maxTexts" />
-                                    <strong>Max. Texts</strong>
+                                    <strong>Limit imported texts</strong>
                                 </label>
+                                <p class="help">Maximum number of texts to import at once</p>
                                 <div class="control mt-2" x-show="maxTexts" x-transition>
                                     <input class="input is-small posintnumber maxint_30"
                                            :class="maxTexts ? 'notempty' : ''"
@@ -430,8 +434,9 @@ $configJson = json_encode([
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="c_tag" x-model="tag" />
-                                    <strong>Tag</strong>
+                                    <strong>Auto-tag imported texts</strong>
                                 </label>
+                                <p class="help">Automatically add a tag to every text imported from this feed</p>
                                 <div class="control mt-2" x-show="tag" x-transition>
                                     <input class="input is-small"
                                            :class="tag ? 'notempty' : ''"
