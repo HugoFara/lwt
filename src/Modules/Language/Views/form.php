@@ -186,7 +186,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
 
                 <!-- Local Dictionaries (shown first - more valuable than online) -->
                 <?php if (!$isNew) : ?>
-                <div class="p-4 has-background-white-bis mb-4" style="border-radius: 6px;">
+                <div class="p-4 mb-4" style="border-radius: 6px; background-color: var(--lwt-panel-bg, #fafafa);">
                     <h6 class="title is-6 mb-3 is-flex is-align-items-center is-justify-content-space-between">
                         <span>
                             <?php echo IconHelper::render('book-open', ['alt' => 'Dictionaries']); ?>

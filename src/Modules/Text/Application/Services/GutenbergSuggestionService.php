@@ -144,7 +144,11 @@ class GutenbergSuggestionService
 
         $sourceLang = (string) ($row['LgSourceLang'] ?? '');
         if ($sourceLang !== '') {
-            return $sourceLang;
+            // Gutendex uses bare ISO 639-1 codes (e.g. "zh"), not BCP 47
+            // subtags like "zh-CN" or "zh-Hans". Strip everything after
+            // the first hyphen so that "zh-CN" → "zh", "pt-BR" → "pt", etc.
+            $parts = explode('-', $sourceLang, 2);
+            return strtolower($parts[0]);
         }
 
         $name = (string) ($row['LgName'] ?? '');

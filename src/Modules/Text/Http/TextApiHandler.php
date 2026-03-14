@@ -475,10 +475,13 @@ class TextApiHandler implements ApiRoutableInterface
             return null;
         }
 
-        // Use explicit source language code if set
+        // Use explicit source language code if set.
+        // Strip region/script subtags (e.g. "zh-CN" → "zh") because
+        // Gutendex only accepts bare ISO 639-1 codes.
         $sourceLang = (string) ($row['LgSourceLang'] ?? '');
         if ($sourceLang !== '') {
-            return $sourceLang;
+            $parts = explode('-', $sourceLang, 2);
+            return strtolower($parts[0]);
         }
 
         // Fall back to guessing from language name
