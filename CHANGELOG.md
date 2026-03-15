@@ -5,6 +5,15 @@ other versions come from the canonical LWT ("official" branch on Git).
 For git tags, official releases are marked like "v1.0.0", while unofficial
 ones are marked like "v1.0.0-fork".
 
+## [3.0.1-fork] - 2026-03-15
+
+### Fixed
+
+* **Docker image build** ([#230](https://github.com/HugoFara/lwt/discussions/230)):
+  MeCab system packages and `mecab-python3` now skip gracefully on unsupported
+  architectures (arm/v7, s390x, mips64le, etc.) instead of failing the entire
+  Docker build. Japanese parsing remains available on amd64 and arm64.
+
 ## [3.0.0-fork] - 2026-03-14
 
 ### Added
