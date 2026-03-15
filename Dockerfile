@@ -28,22 +28,28 @@ RUN apt-get update --fix-missing \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install MeCab with error recovery for CI environments (QEMU emulation issues)
+# Install MeCab (Japanese morphological analyzer)
+# Only available on architectures where apt packages configure correctly under QEMU.
+# arm/v7 and some others hit dpkg segfaults under QEMU emulation (moby/buildkit#1929).
 RUN apt-get update \
-    && (apt-get install -y --no-install-recommends mecab libmecab-dev mecab-ipadic-utf8 \
-        || (dpkg --configure -a && apt-get install -y -f --no-install-recommends mecab libmecab-dev mecab-ipadic-utf8)) \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /usr/local/etc \
-    && (test -f /etc/mecabrc && ln -sf /etc/mecabrc /usr/local/etc/mecabrc || true)
+    && if apt-get install -y --no-install-recommends mecab libmecab-dev mecab-ipadic-utf8; then \
+        mkdir -p /usr/local/etc \
+        && (test -f /etc/mecabrc && ln -sf /etc/mecabrc /usr/local/etc/mecabrc || true); \
+    else \
+        echo "WARNING: MeCab installation failed on $(dpkg --print-architecture) — Japanese parsing will be unavailable"; \
+    fi \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Create Python virtual environment and install NLP packages
+# mecab-python3 only has binary wheels for x86_64 and aarch64;
+# on other architectures we skip it (source build requires a full C toolchain).
 RUN python3 -m venv /opt/lwt-parsers && \
-    /opt/lwt-parsers/bin/pip install --no-cache-dir \
-    jieba>=0.42.1 \
-    mecab-python3>=1.0.6
+    /opt/lwt-parsers/bin/pip install --no-cache-dir jieba>=0.42.1 && \
+    /opt/lwt-parsers/bin/pip install --no-cache-dir --only-binary=:all: mecab-python3>=1.0.6 \
+    || echo "WARNING: mecab-python3 not available for $(uname -m) — Japanese parsing will be unavailable"
 
 # Copy parser scripts first (for better caching)
 COPY parsers/ /opt/lwt/parsers/
