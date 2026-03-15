@@ -4,7 +4,7 @@
     "type": "library",
     "keywords": ["language-learning","reading","lwt","Learning-with-Texts"],
     "homepage": "https://hugofara.github.io/lwt/",
-    "license": "UNLICENSE",
+    "license": "Unlicense",
     "minimum-stability": "stable",
     "support": {
         "docs": "https://hugofara.github.io/lwt",
