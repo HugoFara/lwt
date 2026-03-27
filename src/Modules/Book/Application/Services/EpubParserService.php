@@ -56,17 +56,37 @@ class EpubParserService
      */
     public function parse(string $filePath): array
     {
+        if (!extension_loaded('zip')) {
+            throw new RuntimeException("The 'zip' PHP extension is required for EPUB import but is not installed. Please install php-zip extension.");
+        }
+
         if (!file_exists($filePath)) {
             throw new InvalidArgumentException("EPUB file not found: {$filePath}");
+        }
+
+        // Additional validation - check if file is readable and has content
+        if (!is_readable($filePath)) {
+            throw new InvalidArgumentException("EPUB file is not readable: {$filePath}");
+        }
+
+        if (filesize($filePath) === 0) {
+            throw new InvalidArgumentException("EPUB file is empty: {$filePath}");
         }
 
         try {
             $ebook = Ebook::read($filePath);
             if ($ebook === null) {
-                throw new RuntimeException("Failed to read EPUB file: {$filePath}");
+                throw new RuntimeException("Failed to read EPUB file: {$filePath}. The file may be corrupted or not a valid EPUB format.");
             }
         } catch (\Throwable $e) {
-            throw new RuntimeException("Failed to parse EPUB file: {$e->getMessage()}", 0, $e);
+            // Provide more specific error messages
+            $message = $e->getMessage();
+            if (str_contains($message, 'getManifest() on null')) {
+                $message = "EPUB file appears to be corrupted or has an invalid internal structure (missing manifest).";
+            } elseif (str_contains($message, 'ZIP')) {
+                $message = "EPUB file could not be read as a ZIP archive. The file may be corrupted.";
+            }
+            throw new RuntimeException("Failed to parse EPUB file: {$message}", 0, $e);
         }
 
         $metadata = [
@@ -123,23 +143,28 @@ class EpubParserService
         // Try to get chapters from the ebook via the EPUB parser
         $epubModule = $this->getEpubModule($ebook);
         if ($epubModule !== null) {
-            /** @var EpubChapter[] $ebookChapters */
-            $ebookChapters = $epubModule->getChapters();
+            try {
+                /** @var EpubChapter[] $ebookChapters */
+                $ebookChapters = $epubModule->getChapters();
 
-            foreach ($ebookChapters as $chapter) {
-                $content = $this->cleanHtmlContent($chapter->content());
+                foreach ($ebookChapters as $chapter) {
+                    $content = $this->cleanHtmlContent($chapter->content());
 
-                // Skip empty chapters
-                if (trim($content) === '') {
-                    continue;
+                    // Skip empty chapters
+                    if (trim($content) === '') {
+                        continue;
+                    }
+
+                    $chapters[] = [
+                        'num' => $chapterNum,
+                        'title' => $chapter->label() ?: "Chapter {$chapterNum}",
+                        'content' => $content,
+                    ];
+                    $chapterNum++;
                 }
-
-                $chapters[] = [
-                    'num' => $chapterNum,
-                    'title' => $chapter->label() ?: "Chapter {$chapterNum}",
-                    'content' => $content,
-                ];
-                $chapterNum++;
+            } catch (\Throwable $e) {
+                // If chapter extraction fails, log the error and continue with HTML fallback
+                error_log("EPUB chapter extraction failed, trying HTML fallback: " . $e->getMessage());
             }
         }
 
@@ -182,24 +207,28 @@ class EpubParserService
         // Try to get HTML content via the EPUB module
         $epubModule = $this->getEpubModule($ebook);
         if ($epubModule !== null) {
-            /** @var EpubHtml[] $htmlFiles */
-            $htmlFiles = $epubModule->getHtml();
-            foreach ($htmlFiles as $htmlFile) {
-                $content = $this->cleanHtmlContent($htmlFile->getBody() ?? '');
+            try {
+                /** @var EpubHtml[] $htmlFiles */
+                $htmlFiles = $epubModule->getHtml();
+                foreach ($htmlFiles as $htmlFile) {
+                    $content = $this->cleanHtmlContent($htmlFile->getBody() ?? '');
 
-                if (trim($content) === '') {
-                    continue;
+                    if (trim($content) === '') {
+                        continue;
+                    }
+
+                    // Try to extract title from content
+                    $title = $this->extractTitleFromContent($content, $chapterNum);
+
+                    $chapters[] = [
+                        'num' => $chapterNum,
+                        'title' => $title,
+                        'content' => $content,
+                    ];
+                    $chapterNum++;
                 }
-
-                // Try to extract title from content
-                $title = $this->extractTitleFromContent($content, $chapterNum);
-
-                $chapters[] = [
-                    'num' => $chapterNum,
-                    'title' => $title,
-                    'content' => $content,
-                ];
-                $chapterNum++;
+            } catch (\Throwable $e) {
+                error_log("EPUB HTML extraction fallback failed: " . $e->getMessage());
             }
         }
 
@@ -265,7 +294,7 @@ class EpubParserService
 
         // Normalize whitespace
         // Replace multiple spaces/tabs with single space
-        $text = preg_replace('/[ \t]+/', ' ', $text) ?? $text;
+        $text = preg_replace('/[ \t\r]+/', ' ', $text) ?? $text;
 
         // Normalize multiple newlines to double newline (paragraph break)
         $text = preg_replace('/\n\s*\n/', "\n\n", $text) ?? $text;
@@ -294,6 +323,14 @@ class EpubParserService
             return false;
         }
 
+        if (!is_readable($filePath)) {
+            return false;
+        }
+
+        if (filesize($filePath) === 0) {
+            return false;
+        }
+
         // Check file extension
         $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
         if ($extension !== 'epub') {
@@ -309,8 +346,33 @@ class EpubParserService
         $header = fread($fh, 4);
         fclose($fh);
 
-        // ZIP magic number
-        return $header === "PK\x03\x04";
+        // ZIP magic number - basic validation that doesn't require zip extension
+        if ($header !== "PK\x03\x04") {
+            return false;
+        }
+
+        // If ZIP extension is not loaded, we can't do deeper validation
+        if (!extension_loaded('zip')) {
+            return true; // Basic validation passed, let the parser handle the rest
+        }
+
+        // Additional validation with ZIP extension if available
+        /** @psalm-suppress UndefinedClass */
+        $zip = new \ZipArchive();
+        /** @psalm-suppress UndefinedClass */
+        $result = $zip->open($filePath, \ZipArchive::RDONLY);
+
+        if ($result !== true) {
+            return false;
+        }
+
+        // Check for EPUB-specific files
+        $hasMimetype = $zip->locateName('mimetype') !== false;
+        $hasContainer = $zip->locateName('META-INF/container.xml') !== false;
+
+        $zip->close();
+
+        return $hasMimetype && $hasContainer;
     }
 
     /**
@@ -327,6 +389,10 @@ class EpubParserService
      */
     public function getMetadata(string $filePath): ?array
     {
+        if (!extension_loaded('zip')) {
+            return null;
+        }
+
         if (!file_exists($filePath)) {
             return null;
         }

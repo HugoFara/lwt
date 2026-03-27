@@ -181,7 +181,7 @@ See the [Installation Guide](https://hugofara.github.io/lwt/guide/installation) 
 | --- | --- |
 | PHP | 8.1, 8.2, 8.3, or 8.4 |
 | MySQL/MariaDB | 5.7+ / 10.3+ |
-| PHP Extensions | mysqli, mbstring, dom |
+| PHP Extensions | mysqli, mbstring, dom, zip (for EPUB support) |
 
 For development, you'll also need [Composer](https://getcomposer.org/) and [Node.js](https://nodejs.org/) 18+.
 

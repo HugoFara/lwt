@@ -54,7 +54,35 @@ $actions = [
 </div>
 <?php endif; ?>
 
-<form enctype="multipart/form-data" class="validate" action="/book/import" method="post">
+<?php if (!extension_loaded('zip')) : ?>
+<div class="notification is-danger">
+    <p>
+        <strong><?php echo IconHelper::render('alert-circle', ['alt' => 'Error', 'class' => 'mr-2']); ?>
+        ZIP Extension Required</strong>
+    </p>
+    <p>
+        The PHP ZIP extension is required for EPUB import but is not currently installed.
+        Please contact your system administrator to install the <code>php-zip</code> extension.
+    </p>
+    <details class="mt-2">
+        <summary>Installation Instructions</summary>
+        <div class="content mt-2">
+            <p><strong>For Ubuntu/Debian systems:</strong></p>
+            <pre><code>sudo apt-get install php-zip
+sudo systemctl restart apache2  # or nginx</code></pre>
+
+            <p><strong>For CentOS/RHEL/Fedora systems:</strong></p>
+            <pre><code>sudo dnf install php-zip  # or yum install php-zip
+sudo systemctl restart httpd  # or nginx</code></pre>
+
+            <p><strong>For Docker setups:</strong></p>
+            <p>Add <code>RUN docker-php-ext-install zip</code> to your Dockerfile and rebuild the container.</p>
+        </div>
+    </details>
+</div>
+<?php endif; ?>
+
+<form enctype="multipart/form-data" class="validate" action="/book/import" method="post"<?php echo !extension_loaded('zip') ? ' style="pointer-events: none; opacity: 0.6;"' : ''; ?>>
     <?php echo FormHelper::csrfField(); ?>
 
     <div class="box">
@@ -140,7 +168,7 @@ $actions = [
             <a href="/books" class="button is-light">Cancel</a>
         </div>
         <div class="control">
-            <button type="submit" name="op" value="Import" class="button is-primary">
+            <button type="submit" name="op" value="Import" class="button is-primary"<?php echo !extension_loaded('zip') ? ' disabled title="ZIP extension required"' : ''; ?>>
                 <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
                 <span class="ml-2">Import EPUB</span>
             </button>
