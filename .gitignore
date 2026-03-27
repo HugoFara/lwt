@@ -2,6 +2,7 @@
 
 # Claude Code local config
 .claude/
+CLAUDE.local.md
 
 # Environment configuration (contains secrets)
 .env

@@ -26,6 +26,7 @@ use Lwt\Modules\Admin\Application\UseCases\Theme\GetAvailableThemes;
 use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Modules\User\Infrastructure\AuthFormDataManager;
 use Lwt\Shared\Infrastructure\Http\FlashMessageService;
+use Lwt\Shared\Infrastructure\Http\ResponseInterface;
 use Lwt\Shared\Infrastructure\Http\SecurityHeaders;
 
 /**
@@ -94,11 +95,11 @@ class UserController extends BaseController
      *
      * @return void
      */
-    public function loginForm(): void
+    public function loginForm(): mixed
     {
         // If already authenticated, redirect to home
         if (Globals::isAuthenticated()) {
-            $this->redirect('/');
+            return $this->redirect('/');
         }
 
         // Get flash error messages
@@ -111,6 +112,8 @@ class UserController extends BaseController
         $this->render('Login', false);
         require __DIR__ . '/../Views/login.php';
         $this->endRender();
+
+        return null;
     }
 
     /**
@@ -120,10 +123,10 @@ class UserController extends BaseController
      *
      * @return void
      */
-    public function login(): void
+    public function login(): ResponseInterface
     {
         if (!$this->isPost()) {
-            $this->redirect('/login');
+            return $this->redirect('/login');
         }
 
         $usernameOrEmail = $this->post('username');
@@ -134,7 +137,7 @@ class UserController extends BaseController
         if (empty($usernameOrEmail) || empty($password)) {
             $this->flash->error('Please enter your username/email and password');
             $this->formData->setUsername($usernameOrEmail);
-            $this->redirect('/login');
+            return $this->redirect('/login');
         }
 
         try {
@@ -147,11 +150,11 @@ class UserController extends BaseController
 
             // Redirect to intended URL or home
             $redirectTo = $this->formData->getAndClearRedirectUrl('/');
-            $this->redirect($redirectTo);
+            return $this->redirect($redirectTo);
         } catch (AuthException $e) {
             $this->flash->error($e->getMessage());
             $this->formData->setUsername($usernameOrEmail);
-            $this->redirect('/login');
+            return $this->redirect('/login');
         }
     }
 
@@ -162,16 +165,16 @@ class UserController extends BaseController
      *
      * @return void
      */
-    public function registerForm(): void
+    public function registerForm(): mixed
     {
         // Check if registration is enabled
         if (!$this->isRegistrationEnabled()) {
-            $this->redirect('/login');
+            return $this->redirect('/login');
         }
 
         // If already authenticated, redirect to home
         if (Globals::isAuthenticated()) {
-            $this->redirect('/');
+            return $this->redirect('/');
         }
 
         // Get flash error messages
@@ -194,15 +197,15 @@ class UserController extends BaseController
      *
      * @return void
      */
-    public function register(): void
+    public function register(): ResponseInterface
     {
         if (!$this->isPost()) {
-            $this->redirect('/register');
+            return $this->redirect('/register');
         }
 
         // Check if registration is enabled
         if (!$this->isRegistrationEnabled()) {
-            $this->redirect('/login');
+            return $this->redirect('/login');
         }
 
         $username = $this->post('username');
@@ -217,13 +220,13 @@ class UserController extends BaseController
         // Basic validation
         if (empty($username) || empty($email) || empty($password)) {
             $this->flash->error('Please fill in all required fields');
-            $this->redirect('/register');
+            return $this->redirect('/register');
         }
 
         // Password confirmation
         if ($password !== $passwordConfirm) {
             $this->flash->error('Passwords do not match');
-            $this->redirect('/register');
+            return $this->redirect('/register');
         }
 
         try {
@@ -248,13 +251,13 @@ class UserController extends BaseController
                 $message .= ' Please check your email to verify your account.';
             }
             $this->flash->success($message);
-            $this->redirect('/');
+            return $this->redirect('/');
         } catch (\InvalidArgumentException $e) {
             $this->flash->error($e->getMessage());
-            $this->redirect('/register');
+            return $this->redirect('/register');
         } catch (\RuntimeException $e) {
             $this->flash->error('Registration failed. Please try again.');
-            $this->redirect('/register');
+            return $this->redirect('/register');
         }
     }
 
@@ -265,7 +268,7 @@ class UserController extends BaseController
      *
      * @return void
      */
-    public function logout(): void
+    public function logout(): ResponseInterface
     {
         // Invalidate and clear remember me cookie
         $currentUser = $this->userFacade->getCurrentUser();
@@ -278,7 +281,7 @@ class UserController extends BaseController
         $this->userFacade->logout();
 
         // Redirect to login
-        $this->redirect('/login');
+        return $this->redirect('/login');
     }
 
     // =========================================================================
@@ -292,20 +295,19 @@ class UserController extends BaseController
      *
      * @return void
      */
-    public function profileForm(): void
+    public function profileForm(): mixed
     {
         $user = $this->userFacade->getCurrentUser();
         if ($user === null) {
             if (Globals::isMultiUserEnabled()) {
-                $this->redirect('/login');
-                return;
+                return $this->redirect('/login');
             }
 
             // Single-user mode: show simplified profile page
             $this->render('Profile', true);
             require __DIR__ . '/../Views/profile_single_user.php';
             $this->endRender();
-            return;
+            return null;
         }
 
         $errorMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_ERROR);
@@ -326,17 +328,15 @@ class UserController extends BaseController
      *
      * @return void
      */
-    public function updateProfile(): void
+    public function updateProfile(): ResponseInterface
     {
         if (!$this->isPost()) {
-            $this->redirect('/profile');
-            return;
+            return $this->redirect('/profile');
         }
 
         $user = $this->userFacade->getCurrentUser();
         if ($user === null) {
-            $this->redirect('/login');
-            return;
+            return $this->redirect('/login');
         }
 
         $username = $this->post('username');
@@ -344,8 +344,7 @@ class UserController extends BaseController
 
         if (empty($username) || empty($email)) {
             $this->flash->error('Please fill in all required fields');
-            $this->redirect('/profile');
-            return;
+            return $this->redirect('/profile');
         }
 
         try {
@@ -361,7 +360,7 @@ class UserController extends BaseController
             $this->flash->error($e->getMessage());
         }
 
-        $this->redirect('/profile');
+        return $this->redirect('/profile');
     }
 
     /**
@@ -371,17 +370,15 @@ class UserController extends BaseController
      *
      * @return void
      */
-    public function changePassword(): void
+    public function changePassword(): ResponseInterface
     {
         if (!$this->isPost()) {
-            $this->redirect('/profile');
-            return;
+            return $this->redirect('/profile');
         }
 
         $user = $this->userFacade->getCurrentUser();
         if ($user === null) {
-            $this->redirect('/login');
-            return;
+            return $this->redirect('/login');
         }
 
         $currentPassword = $this->post('current_password');
@@ -390,14 +387,12 @@ class UserController extends BaseController
 
         if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
             $this->flash->error('Please fill in all password fields');
-            $this->redirect('/profile');
-            return;
+            return $this->redirect('/profile');
         }
 
         if ($newPassword !== $confirmPassword) {
             $this->flash->error('New passwords do not match');
-            $this->redirect('/profile');
-            return;
+            return $this->redirect('/profile');
         }
 
         try {
@@ -407,7 +402,7 @@ class UserController extends BaseController
             $this->flash->error($e->getMessage());
         }
 
-        $this->redirect('/profile');
+        return $this->redirect('/profile');
     }
 
     // =========================================================================
@@ -468,11 +463,10 @@ class UserController extends BaseController
      *
      * @return void
      */
-    public function savePreferences(array $params = []): void
+    public function savePreferences(array $params = []): ResponseInterface
     {
         if (!$this->isPost()) {
-            $this->redirect('/profile/preferences');
-            return;
+            return $this->redirect('/profile/preferences');
         }
 
         $result = $this->userFacade->saveUserPreferences();
@@ -483,7 +477,7 @@ class UserController extends BaseController
             $this->flash->error('Failed to save preferences.');
         }
 
-        $this->redirect('/profile/preferences');
+        return $this->redirect('/profile/preferences');
     }
 
     // =========================================================================
@@ -497,26 +491,24 @@ class UserController extends BaseController
      *
      * @return void
      */
-    public function verifyEmail(): void
+    public function verifyEmail(): ResponseInterface
     {
         $token = $this->param('token');
 
         if (empty($token)) {
             $this->flash->error('Invalid verification link.');
-            $this->redirect('/');
-            return;
+            return $this->redirect('/');
         }
 
         $user = $this->userFacade->verifyEmail($token);
 
         if ($user === null) {
             $this->flash->error('Invalid or expired verification link. Please request a new one.');
-            $this->redirect('/');
-            return;
+            return $this->redirect('/');
         }
 
         $this->flash->success('Your email has been verified successfully!');
-        $this->redirect('/');
+        return $this->redirect('/');
     }
 
     /**
@@ -526,28 +518,25 @@ class UserController extends BaseController
      *
      * @return void
      */
-    public function resendVerification(): void
+    public function resendVerification(): ResponseInterface
     {
         if (!$this->isPost()) {
-            $this->redirect('/');
-            return;
+            return $this->redirect('/');
         }
 
         $user = $this->userFacade->getCurrentUser();
         if ($user === null) {
-            $this->redirect('/login');
-            return;
+            return $this->redirect('/login');
         }
 
         if ($user->isEmailVerified()) {
             $this->flash->success('Your email is already verified.');
-            $this->redirect('/');
-            return;
+            return $this->redirect('/');
         }
 
         $this->userFacade->sendVerificationEmail($user);
         $this->flash->success('Verification email sent. Please check your inbox.');
-        $this->redirect('/');
+        return $this->redirect('/');
     }
 
     // =========================================================================

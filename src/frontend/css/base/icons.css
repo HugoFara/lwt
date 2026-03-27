@@ -289,6 +289,26 @@ img[src*="test_notyet"] + .icon {
    ========================================================================== */
 
 /**
+ * Icons inside Bulma form controls (.has-icons-left / .has-icons-right).
+ * Bulma positions these absolutely and sizes them to match the input height.
+ * Restore Bulma's expected values that the base .icon rule overrides.
+ */
+.control.has-icons-left > .icon,
+.control.has-icons-right > .icon {
+  width: 2.5em;
+  height: 2.5em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control.has-icons-left > .icon > svg,
+.control.has-icons-right > .icon > svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/**
  * Required field indicator - asterisk icon.
  * Modern, universally recognized indicator for mandatory fields.
  */

@@ -39,7 +39,7 @@ if (isset($_SESSION['auth_success'])) {
 <section class="section">
     <div class="container">
         <div class="columns is-centered">
-            <div class="column is-5-tablet is-4-desktop">
+            <div class="column is-6-tablet is-5-desktop">
                 <div class="box">
                     <!-- Logo/Title -->
                     <div class="has-text-centered mb-5">
