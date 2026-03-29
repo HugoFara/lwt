@@ -196,7 +196,15 @@ class ExportService
         $lpar = ($rtlScript ? ']' : '[');
         $rpar = ($rtlScript ? '[' : ']');
 
-        $sent = htmlspecialchars(self::replaceTabNewline((string)$record["WoSentence"]), ENT_QUOTES, 'UTF-8');
+        $rawSentence = (string)$record["WoSentence"];
+        $woText = (string)$record["WoText"];
+
+        // If sentence doesn't have {word} markup but contains the word, add it
+        if (!str_contains($rawSentence, '{' . $woText . '}') && str_contains($rawSentence, $woText)) {
+            $rawSentence = str_replace($woText, '{' . $woText . '}', $rawSentence);
+        }
+
+        $sent = htmlspecialchars(self::replaceTabNewline($rawSentence), ENT_QUOTES, 'UTF-8');
         $sent1 = str_replace(
             "{",
             '<span style="font-weight:600; color:#0000ff;">' . $lpar,
@@ -212,8 +220,8 @@ class ExportService
             str_replace("}", '</span>', $sent)
         );
 
-        $woText = htmlspecialchars(self::replaceTabNewline((string)$record["WoText"]), ENT_QUOTES, 'UTF-8');
-        return $span1 . $woText . $span2 . "\t" .
+        $woTextDisplay = htmlspecialchars(self::replaceTabNewline($woText), ENT_QUOTES, 'UTF-8');
+        return $span1 . $woTextDisplay . $span2 . "\t" .
             htmlspecialchars(self::replaceTabNewline((string)$record["WoTranslation"]), ENT_QUOTES, 'UTF-8') . "\t" .
             htmlspecialchars(self::replaceTabNewline((string)$record["WoRomanization"]), ENT_QUOTES, 'UTF-8') . "\t" .
             $span1 . $sent1 . $span2 . "\t" .

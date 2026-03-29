@@ -63,7 +63,10 @@ class WordListExportBuilder
         $ankiFrom = 'from ((words left JOIN word_tag_map ON WoID = WtWoID)
             left join tags on TgID = WtTgID), languages';
         $ankiWhere = 'WoLgID = LgID AND WoTranslation != \'*\'
-            and WoSentence like concat(\'%{\',WoText,\'}%\')';
+            AND WoTranslation != \'\' AND WoTranslation IS NOT NULL
+            AND WoSentence IS NOT NULL AND WoSentence != \'\'
+            AND (WoSentence LIKE CONCAT(\'%{\',WoText,\'}%\')
+                 OR (WoSentence LIKE CONCAT(\'%\',WoText,\'%\') AND CHAR_LENGTH(WoSentence) > CHAR_LENGTH(WoText)))';
 
         if (!empty($ids)) {
             $params = [];
