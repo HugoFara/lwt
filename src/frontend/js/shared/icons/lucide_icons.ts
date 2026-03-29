@@ -15,6 +15,8 @@ import { createIcons, type IconNode } from 'lucide';
 
 // Import only the icons we actually use
 import {
+  AArrowDown,
+  AArrowUp,
   AlertCircle,
   AlertTriangle,
   Archive,
@@ -54,6 +56,7 @@ import {
   ClipboardPaste,
   Clock,
   Cloud,
+  Columns2,
   Copy,
   Database,
   Download,
@@ -163,6 +166,8 @@ import {
  * The library converts data-lucide="book-open" to "BookOpen" before lookup.
  */
 const usedIcons: Record<string, IconNode> = {
+  AArrowDown,
+  AArrowUp,
   AlertCircle,
   AlertTriangle,
   Archive,
@@ -202,6 +207,7 @@ const usedIcons: Record<string, IconNode> = {
   ClipboardPaste,
   Clock,
   Cloud,
+  Columns2,
   Copy,
   Database,
   Download,

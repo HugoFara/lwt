@@ -36,6 +36,8 @@ export interface TextReadingConfig {
   modeTrans: number;
   termDelimiter: string;
   annTextSize: number;
+  // Reader layout settings
+  readerWidth: number;
 }
 
 /**

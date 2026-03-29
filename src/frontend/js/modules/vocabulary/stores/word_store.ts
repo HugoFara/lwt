@@ -66,6 +66,9 @@ export interface WordStoreState {
   termDelimiter: string;
   annTextSize: number;
 
+  // Reader layout
+  readerWidth: number;
+
   // Generated paragraph styles
   paragraphStyles: string;
 
@@ -135,6 +138,9 @@ function createWordStore(): WordStoreState {
     modeTrans: 2,
     termDelimiter: '',
     annTextSize: 50,
+
+    // Reader layout
+    readerWidth: 100,
 
     // Generated paragraph styles
     paragraphStyles: '',
@@ -233,6 +239,7 @@ function createWordStore(): WordStoreState {
       this.modeTrans = config.modeTrans ?? 2;
       this.termDelimiter = config.termDelimiter ?? '';
       this.annTextSize = config.annTextSize ?? 50;
+      this.readerWidth = config.readerWidth ?? 100;
 
       // Generate and inject dynamic styles
       injectTextStyles(config);

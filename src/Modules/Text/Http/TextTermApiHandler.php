@@ -188,6 +188,13 @@ class TextTermApiHandler
         $modeTrans = (int)Settings::getWithDefault('set-text-frame-annotation-position');
         $termDelimiter = Settings::getWithDefault('set-term-translation-delimiters');
         $textSize = (int)$langInfo['LgTextSize'];
+        $readerWidth = (int)Settings::getWithDefault('set-reader-width');
+        $readerTextSize = (int)Settings::getWithDefault(
+            'set-reader-text-size'
+        );
+        if ($readerTextSize > 0) {
+            $textSize = $readerTextSize;
+        }
 
         $config = [
             'textId' => $textId,
@@ -208,6 +215,7 @@ class TextTermApiHandler
             'displayStatTrans' => $displayStatTrans,
             'modeTrans' => $modeTrans,
             'termDelimiter' => $termDelimiter,
+            'readerWidth' => $readerWidth,
             'annTextSize' => match ($textSize) {
                 100 => 50,
                 150 => 50,

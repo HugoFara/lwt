@@ -125,6 +125,16 @@ final class SettingDefinitions
             "dft" => '', "num" => 0, "scope" => self::SCOPE_USER
         ],
 
+        // User preferences: reading layout
+        'set-reader-width' => [
+            "dft" => '100', "num" => 1, "min" => 40, "max" => 100,
+            "scope" => self::SCOPE_USER
+        ],
+        'set-reader-text-size' => [
+            "dft" => '0', "num" => 1, "min" => 0, "max" => 300,
+            "scope" => self::SCOPE_USER
+        ],
+
         // User preferences: appearance
         'set-theme-dir' => [
             "dft" => 'themes/default/', "num" => 0, "scope" => self::SCOPE_USER

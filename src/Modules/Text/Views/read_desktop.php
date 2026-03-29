@@ -129,6 +129,58 @@ if (!isset($bookContext) || !is_array($bookContext)) {
                 <span>Translations</span>
               </button>
             </div>
+            <!-- Text size controls -->
+            <div class="control">
+              <div class="field has-addons">
+                <p class="control">
+                  <button class="button is-small"
+                    @click="decreaseTextSize()"
+                    title="Decrease text size">
+                    <span class="icon is-small">
+                      <i data-lucide="a-arrow-down"
+                        style="width:14px;height:14px"></i>
+                    </span>
+                  </button>
+                </p>
+                <p class="control">
+                  <button class="button is-small is-static"
+                    x-text="readerTextSize + '%'"
+                    style="min-width:3.5em;pointer-events:none">
+                  </button>
+                </p>
+                <p class="control">
+                  <button class="button is-small"
+                    @click="increaseTextSize()"
+                    title="Increase text size">
+                    <span class="icon is-small">
+                      <i data-lucide="a-arrow-up"
+                        style="width:14px;height:14px"></i>
+                    </span>
+                  </button>
+                </p>
+              </div>
+            </div>
+            <!-- Reader width slider -->
+            <div class="control">
+              <div class="field has-addons">
+                <p class="control">
+                  <span class="button is-small is-static"
+                    title="Reading area width">
+                    <span class="icon is-small">
+                      <i data-lucide="columns-2"
+                        style="width:14px;height:14px"></i>
+                    </span>
+                  </span>
+                </p>
+                <p class="control" style="display:flex;align-items:center">
+                  <input type="range" min="40" max="100" step="5"
+                    x-model.number="readerWidth"
+                    @input="onReaderWidthChange()"
+                    style="width:70px;height:20px"
+                    title="Reading area width">
+                </p>
+              </div>
+            </div>
             <div class="control">
               <div class="dropdown is-hoverable is-right">
                 <div class="dropdown-trigger">
@@ -310,6 +362,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
 .reading-content {
   max-width: 100%;
   margin: 0 auto;
+  transition: max-width 0.2s ease;
 }
 
 #thetext {

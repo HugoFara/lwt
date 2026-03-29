@@ -13,7 +13,7 @@ import type { WordStoreState } from '@modules/vocabulary/stores/word_store';
 import { renderText, updateWordStatusInDOM, type RenderSettings } from '../pages/reading/text_renderer';
 import { setupMultiWordSelection } from '../pages/reading/text_multiword_selection';
 import { TextsApi } from '@modules/text/api/texts_api';
-// speechDispatcher available when TTS is implemented
+import { SettingsApi } from '@modules/admin/api/settings_api';
 
 /**
  * Text reader Alpine.js component interface.
@@ -51,10 +51,36 @@ export interface TextReaderData {
   goBack(): void;
   goNext(): void;
 
+  // Reader layout
+  readerWidth: number;
+  readerTextSize: number;
+  increaseTextSize(): void;
+  decreaseTextSize(): void;
+  onReaderWidthChange(): void;
+  applyReaderLayout(): void;
+
   // Helpers
   getTextIdFromUrl(): number;
   updateWordDisplay(hex: string, status: number, wordId: number | null): void;
   setupEventListeners(): void;
+}
+
+/** Debounce timer for persisting reader settings. */
+let saveWidthTimer: ReturnType<typeof setTimeout> | null = null;
+let saveTextSizeTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Debounced save of a setting (300ms).
+ */
+function debouncedSave(
+  timer: ReturnType<typeof setTimeout> | null,
+  key: string,
+  value: string
+): ReturnType<typeof setTimeout> {
+  if (timer) clearTimeout(timer);
+  return setTimeout(() => {
+    SettingsApi.save(key, value);
+  }, 300);
 }
 
 /**
@@ -67,6 +93,8 @@ export function textReaderData(): TextReaderData {
     showTranslations: true,
     error: null,
     statusMessage: null,
+    readerWidth: 100,
+    readerTextSize: 0,
 
     get store(): WordStoreState {
       return Alpine.store('words') as WordStoreState;
@@ -104,8 +132,13 @@ export function textReaderData(): TextReaderData {
           return;
         }
 
+        // Initialize reader layout from store
+        this.readerWidth = this.store.readerWidth;
+        this.readerTextSize = this.store.textSize;
+
         // Render the text content
         this.renderTextContent();
+        this.applyReaderLayout();
 
         // Set up event listeners
         this.setupEventListeners();
@@ -212,6 +245,45 @@ export function textReaderData(): TextReaderData {
       const container = document.getElementById('thetext');
       if (container) {
         container.classList.toggle('hide-translations', !this.showTranslations);
+      }
+    },
+
+    increaseTextSize(): void {
+      const next = Math.min(this.readerTextSize + 10, 300);
+      this.readerTextSize = next;
+      this.applyReaderLayout();
+      saveTextSizeTimer = debouncedSave(
+        saveTextSizeTimer, 'set-reader-text-size', String(next)
+      );
+    },
+
+    decreaseTextSize(): void {
+      const next = Math.max(this.readerTextSize - 10, 50);
+      this.readerTextSize = next;
+      this.applyReaderLayout();
+      saveTextSizeTimer = debouncedSave(
+        saveTextSizeTimer, 'set-reader-text-size', String(next)
+      );
+    },
+
+    onReaderWidthChange(): void {
+      this.applyReaderLayout();
+      saveWidthTimer = debouncedSave(
+        saveWidthTimer, 'set-reader-width', String(this.readerWidth)
+      );
+    },
+
+    applyReaderLayout(): void {
+      const content = document.querySelector(
+        '.reading-content'
+      ) as HTMLElement | null;
+      if (content) {
+        content.style.maxWidth = this.readerWidth < 100
+          ? this.readerWidth + '%' : '';
+      }
+      const textEl = document.getElementById('thetext');
+      if (textEl) {
+        textEl.style.fontSize = this.readerTextSize + '%';
       }
     },
 
