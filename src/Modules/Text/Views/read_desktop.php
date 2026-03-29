@@ -99,88 +99,112 @@ if (!isset($bookContext) || !is_array($bookContext)) {
         <div class="level-item">
           <div class="field is-grouped is-grouped-multiline">
             <div class="control">
-              <a href="/review?text=<?php echo $textId; ?>" class="button is-small">Review</a>
+              <a href="/review?text=<?php echo $textId; ?>"
+                class="button is-small">Review</a>
             </div>
             <div class="control">
-              <a href="/text/<?php echo $textId; ?>/print-plain" class="button is-small">Print</a>
+              <a href="/texts/<?php echo $textId; ?>/edit"
+                class="button is-small">Edit</a>
             </div>
+            <!-- Display settings dropdown -->
             <div class="control">
-              <a href="/texts/<?php echo $textId; ?>/edit" class="button is-small">Edit</a>
-            </div>
-            <div class="control">
-              <button class="button is-small" :class="showAll ? 'is-info' : 'is-light'" @click="toggleShowAll">
-                <span class="icon is-small">
-                  <i x-show="showAll" data-lucide="square-check-big" style="width:14px;height:14px"></i>
-                  <i x-show="!showAll" data-lucide="square" style="width:14px;height:14px"></i>
-                </span>
-                <span>Show All</span>
-              </button>
-            </div>
-            <div class="control">
-              <button
-                class="button is-small"
-                :class="showTranslations ? 'is-info' : 'is-light'"
-                @click="toggleTranslations"
-              >
-                <span class="icon is-small">
-                  <i x-show="showTranslations" data-lucide="square-check-big" style="width:14px;height:14px"></i>
-                  <i x-show="!showTranslations" data-lucide="square" style="width:14px;height:14px"></i>
-                </span>
-                <span>Translations</span>
-              </button>
-            </div>
-            <!-- Text size controls -->
-            <div class="control">
-              <div class="field has-addons">
-                <p class="control">
-                  <button class="button is-small"
-                    @click="decreaseTextSize()"
-                    title="Decrease text size">
+              <div class="dropdown is-hoverable is-right">
+                <div class="dropdown-trigger">
+                  <button class="button is-small">
                     <span class="icon is-small">
-                      <i data-lucide="a-arrow-down"
+                      <i data-lucide="sliders"
                         style="width:14px;height:14px"></i>
                     </span>
+                    <span>Display</span>
                   </button>
-                </p>
-                <p class="control">
-                  <button class="button is-small is-static"
-                    x-text="readerTextSize + '%'"
-                    style="min-width:3.5em;pointer-events:none">
-                  </button>
-                </p>
-                <p class="control">
-                  <button class="button is-small"
-                    @click="increaseTextSize()"
-                    title="Increase text size">
-                    <span class="icon is-small">
-                      <i data-lucide="a-arrow-up"
-                        style="width:14px;height:14px"></i>
-                    </span>
-                  </button>
-                </p>
+                </div>
+                <div class="dropdown-menu" style="min-width:220px">
+                  <div class="dropdown-content">
+                    <!-- Toggles -->
+                    <a class="dropdown-item"
+                      @click.prevent="toggleShowAll()">
+                      <span class="icon is-small mr-2">
+                        <i x-show="showAll" data-lucide="square-check-big"
+                          style="width:14px;height:14px"></i>
+                        <i x-show="!showAll" data-lucide="square"
+                          style="width:14px;height:14px"></i>
+                      </span>
+                      Multi-word expressions
+                    </a>
+                    <a class="dropdown-item"
+                      @click.prevent="toggleTranslations()">
+                      <span class="icon is-small mr-2">
+                        <i x-show="showTranslations"
+                          data-lucide="square-check-big"
+                          style="width:14px;height:14px"></i>
+                        <i x-show="!showTranslations"
+                          data-lucide="square"
+                          style="width:14px;height:14px"></i>
+                      </span>
+                      Translations
+                    </a>
+                    <hr class="dropdown-divider">
+                    <!-- Text size -->
+                    <div class="dropdown-item">
+                      <label class="label is-small mb-1">
+                        Text size
+                      </label>
+                      <div class="field has-addons">
+                        <p class="control">
+                          <button class="button is-small"
+                            @click="decreaseTextSize()">
+                            <span class="icon is-small">
+                              <i data-lucide="minus"
+                                style="width:12px;height:12px">
+                              </i>
+                            </span>
+                          </button>
+                        </p>
+                        <p class="control">
+                          <span class="button is-small is-static"
+                            x-text="readerTextSize + '%'"
+                            style="min-width:3.5em">
+                          </span>
+                        </p>
+                        <p class="control">
+                          <button class="button is-small"
+                            @click="increaseTextSize()">
+                            <span class="icon is-small">
+                              <i data-lucide="plus"
+                                style="width:12px;height:12px">
+                              </i>
+                            </span>
+                          </button>
+                        </p>
+                      </div>
+                    </div>
+                    <!-- Reader width -->
+                    <div class="dropdown-item">
+                      <label class="label is-small mb-1">
+                        Reading width
+                      </label>
+                      <input type="range" min="40" max="100"
+                        step="5"
+                        x-model.number="readerWidth"
+                        @input="onReaderWidthChange()"
+                        style="width:100%"
+                        title="Reading area width">
+                    </div>
+                    <hr class="dropdown-divider">
+                    <!-- Print -->
+                    <a class="dropdown-item"
+                      href="/text/<?php echo $textId; ?>/print-plain">
+                      <span class="icon is-small mr-2">
+                        <i data-lucide="printer"
+                          style="width:14px;height:14px"></i>
+                      </span>
+                      Print
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
-            <!-- Reader width slider -->
-            <div class="control">
-              <div class="field has-addons">
-                <p class="control">
-                  <span class="button is-small is-static"
-                    title="Reading area width">
-                    <span class="icon is-small">
-                      <i data-lucide="columns-2"
-                        style="width:14px;height:14px"></i>
-                    </span>
-                  </span>
-                </p>
-                <p class="control" style="display:flex;align-items:center">
-                  <input type="range" min="40" max="100" step="5"
-                    x-model.number="readerWidth"
-                    @input="onReaderWidthChange()"
-                    style="width:70px;height:20px"
-                    title="Reading area width">
-                </p>
-              </div>
-            </div>
+            <!-- Actions dropdown -->
             <div class="control">
               <div class="dropdown is-hoverable is-right">
                 <div class="dropdown-trigger">
@@ -188,8 +212,14 @@ if (!isset($bookContext) || !is_array($bookContext)) {
                 </div>
                 <div class="dropdown-menu">
                   <div class="dropdown-content">
-                    <a class="dropdown-item" @click.prevent="markAllWellKnown">Mark all Well Known</a>
-                    <a class="dropdown-item" @click.prevent="markAllIgnored">Mark all Ignored</a>
+                    <a class="dropdown-item"
+                      @click.prevent="markAllWellKnown()">
+                      Mark all Well Known
+                    </a>
+                    <a class="dropdown-item"
+                      @click.prevent="markAllIgnored()">
+                      Mark all Ignored
+                    </a>
                   </div>
                 </div>
               </div>

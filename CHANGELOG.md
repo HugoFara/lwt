@@ -7,6 +7,15 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Added
+
+* **Reading area width and text size controls**
+  ([#225](https://github.com/HugoFara/lwt/issues/225)): The text reading
+  toolbar now has a "Display" dropdown with controls for adjusting reading area
+  width (40–100% slider) and text size (+/- buttons). Both settings persist
+  across sessions as user preferences. The dropdown also groups the multi-word
+  expressions toggle, translations toggle, and print link.
+
 ### Fixed
 
 * **EPUB import failing** ([#231](https://github.com/HugoFara/lwt/issues/231)):
