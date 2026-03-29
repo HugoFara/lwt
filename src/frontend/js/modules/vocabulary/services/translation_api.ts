@@ -114,7 +114,7 @@ export function getGlosbeTranslation(text: string, lang: string, dest: string): 
   (window as unknown as Record<string, unknown>).getTranslationFromGlosbeApi = getTranslationFromGlosbeApi;
 
   const script = document.createElement('script');
-  script.src = 'http://glosbe.com/gapi/translate?' + params.toString();
+  script.src = 'https://glosbe.com/gapi/translate?' + params.toString();
   script.async = true;
   script.onerror = () => {
     const translationsEl = document.getElementById('translations');

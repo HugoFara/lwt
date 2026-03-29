@@ -126,6 +126,8 @@ class SecurityHeaders
             "font-src 'self'",
             // AJAX/fetch requests: self + GitHub API for release checks
             "connect-src 'self' https://api.github.com",
+            // External scripts: Glosbe JSONP translation API
+            "script-src-elem 'self' https://glosbe.com",
             // Audio/video: configurable, defaults to self + blob for TTS
             self::buildMediaSrcDirective(),
             // Frames: block all embedding (clickjacking protection)
