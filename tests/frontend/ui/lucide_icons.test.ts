@@ -8,6 +8,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 vi.mock('lucide', () => ({
   createIcons: vi.fn(),
   // Mock all icons imported by lucide_icons.ts
+  AArrowDown: ['svg', {}, []],
+  AArrowUp: ['svg', {}, []],
   AlertCircle: ['svg', {}, []],
   AlertTriangle: ['svg', {}, []],
   Archive: ['svg', {}, []],
@@ -47,6 +49,7 @@ vi.mock('lucide', () => ({
   ClipboardPaste: ['svg', {}, []],
   Clock: ['svg', {}, []],
   Cloud: ['svg', {}, []],
+  Columns2: ['svg', {}, []],
   Copy: ['svg', {}, []],
   Database: ['svg', {}, []],
   Download: ['svg', {}, []],

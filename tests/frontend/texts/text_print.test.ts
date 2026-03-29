@@ -61,6 +61,8 @@ vi.mock('lucide', () => ({
   createIcons: vi.fn(),
   icons: {},
   // Mock all icons imported by lucide_icons.ts
+  AArrowDown: ['svg', {}, []],
+  AArrowUp: ['svg', {}, []],
   AlertCircle: ['svg', {}, []],
   AlertTriangle: ['svg', {}, []],
   Archive: ['svg', {}, []],
@@ -100,6 +102,7 @@ vi.mock('lucide', () => ({
   ClipboardPaste: ['svg', {}, []],
   Clock: ['svg', {}, []],
   Cloud: ['svg', {}, []],
+  Columns2: ['svg', {}, []],
   Copy: ['svg', {}, []],
   Database: ['svg', {}, []],
   Download: ['svg', {}, []],
