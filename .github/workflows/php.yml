@@ -27,7 +27,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          extensions: mbstring, mysqli, dom
+          extensions: mbstring, mysqli, dom, zip
           coverage: xdebug
 
       - name: Validate composer.json and composer.lock
