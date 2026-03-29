@@ -161,7 +161,10 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <div class="control mt-1">
                     <label class="radio">
                         <input type="radio" x-model="freqMode" value="definition">
-                        Definition <span class="has-text-grey is-size-7">(monolingual &mdash; for advanced learners)</span>
+                        Definition
+                        <span class="has-text-grey is-size-7">
+                            (monolingual &mdash; for advanced learners)
+                        </span>
                     </label>
                 </div>
             </div>
@@ -179,7 +182,9 @@ echo PageLayoutHelper::buildActionCard($actions);
                 </div>
                 <p class="help has-text-grey">
                     Frequency-ranked words from the
-                    <a href="https://github.com/hermitdave/FrequencyWords" target="_blank" rel="noopener">FrequencyWords</a>
+                    <a href="https://github.com/hermitdave/FrequencyWords"
+                        target="_blank"
+                        rel="noopener">FrequencyWords</a>
                     project, enriched via
                     <a href="https://kaikki.org" target="_blank" rel="noopener">Wiktionary</a>.
                 </p>
@@ -306,7 +311,10 @@ echo PageLayoutHelper::buildActionCard($actions);
 
         <!-- Batch import results -->
         <template x-for="(msg, i) in batchMessages" :key="i">
-            <div :class="msg.success ? 'notification is-success is-light' : 'notification is-danger is-light'" class="mb-3">
+            <div :class="msg.success
+                ? 'notification is-success is-light'
+                : 'notification is-danger is-light'"
+                class="mb-3">
                 <button class="delete" @click="dismissMessage(i)"></button>
                 <span x-text="msg.text"></span>
             </div>
@@ -366,7 +374,10 @@ echo PageLayoutHelper::buildActionCard($actions);
                                     <span class="tag is-light" x-text="source.entries"></span>
                                     <span class="tag is-success is-light" x-text="source.license"></span>
                                     <template x-if="source.targetLanguage">
-                                        <span class="tag is-warning is-light" x-text="source.targetLanguage + ' translations'"></span>
+                                        <span class="tag is-warning is-light"
+                                            x-text="source.targetLanguage
+                                                + ' translations'">
+                                        </span>
                                     </template>
                                 </div>
                                 <p class="is-size-7 has-text-grey" x-text="source.notes"></p>
@@ -375,7 +386,12 @@ echo PageLayoutHelper::buildActionCard($actions);
                                     Manual download required &mdash;
                                     <a :href="source.url" target="_blank" rel="noopener">
                                         visit site
-                                        <?php echo IconHelper::render('external-link', ['alt' => 'Download', 'size' => 14]); ?>
+                                        <?php
+                                        echo IconHelper::render(
+                                            'external-link',
+                                            ['alt' => 'Download', 'size' => 14]
+                                        );
+                                        ?>
                                     </a>
                                 </p>
                             </div>
@@ -574,8 +590,9 @@ echo PageLayoutHelper::buildActionCard($actions);
             <?php
             $columnDefaults = ['w', 't', 'x', 'x', 'x'];
             for ($i = 1; $i <= 2; $i++) {
-                $default = $columnDefaults[$i - 1];
+                /** @var int<0, 4> $colIndex */
                 $colIndex = $i - 1;
+                $default = $columnDefaults[$colIndex];
                 ?>
             <div class="column is-half-tablet">
                 <div class="field">

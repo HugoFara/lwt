@@ -4,22 +4,29 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\UI;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Globals.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Utilities/StringUtils.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/ApplicationInfo.php';
-require_once __DIR__ . '/../../../../src/Shared/UI/Helpers/PageLayoutHelper.php';
-
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use PHPUnit\Framework\TestCase;
-
-Globals::initialize();
 
 /**
  * Tests for PageLayoutHelper (migrated from ui_helpers.php)
  */
 final class UiHelpersTest extends TestCase
 {
+    public static function setUpBeforeClass(): void
+    {
+        require_once __DIR__
+            . '/../../../../src/Shared/Infrastructure/Globals.php';
+        require_once __DIR__
+            . '/../../../../src/Shared/Infrastructure/Utilities'
+            . '/StringUtils.php';
+        require_once __DIR__
+            . '/../../../../src/Shared/Infrastructure/ApplicationInfo.php';
+        require_once __DIR__
+            . '/../../../../src/Shared/UI/Helpers/PageLayoutHelper.php';
+        Globals::initialize();
+    }
+
     protected function setUp(): void
     {
         if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
@@ -43,7 +50,7 @@ final class UiHelpersTest extends TestCase
         $this->assertStringContainsString('href="/"', $output);
         $this->assertStringContainsString('href="/languages"', $output);
         $this->assertStringContainsString('href="/texts"', $output);
-        $this->assertStringContainsString('href="/words/edit"', $output);
+        $this->assertStringContainsString('href="/words"', $output);
     }
 
     /**

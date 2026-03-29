@@ -192,32 +192,66 @@ class TextNavigationService
         $listlen = count($list);
         for ($i = 1; $i < $listlen - 1; $i++) {
             if ($list[$i] == $textId) {
-                if ($list[$i - 1] !== 0) {
-                    $title = htmlspecialchars(self::getTextTitle($list[$i - 1]), ENT_QUOTES, 'UTF-8');
+                /** @var int<0, max> $prevIdx */
+                $prevIdx = $i - 1;
+                $prevId = $list[$prevIdx];
+                $nextId = $list[$i + 1];
+                if ($prevId !== 0) {
+                    $title = htmlspecialchars(
+                        self::getTextTitle($prevId),
+                        ENT_QUOTES,
+                        'UTF-8'
+                    );
                     $icon = IconHelper::render(
                         'circle-chevron-left',
-                        ['title' => 'Previous Text: ' . $title, 'alt' => 'Previous Text: ' . $title]
+                        [
+                            'title' => 'Previous Text: ' . $title,
+                            'alt' => 'Previous Text: ' . $title
+                        ]
                     );
-                    $prevUrl = $this->buildNavigationUrl($url, $list[$i - 1]);
-                    $prev = '<a href="' . $prevUrl . '" target="_top">' . $icon . '</a>';
+                    $prevUrl = $this->buildNavigationUrl(
+                        $url,
+                        $prevId
+                    );
+                    $prev = '<a href="' . $prevUrl
+                        . '" target="_top">' . $icon . '</a>';
                 } else {
                     $prev = IconHelper::render(
                         'circle-chevron-left',
-                        ['title' => 'No Previous Text', 'alt' => 'No Previous Text', 'class' => 'icon-muted']
+                        [
+                            'title' => 'No Previous Text',
+                            'alt' => 'No Previous Text',
+                            'class' => 'icon-muted'
+                        ]
                     );
                 }
-                if ($list[$i + 1] !== 0) {
-                    $title = htmlspecialchars(self::getTextTitle($list[$i + 1]), ENT_QUOTES, 'UTF-8');
+                if ($nextId !== 0) {
+                    $title = htmlspecialchars(
+                        self::getTextTitle($nextId),
+                        ENT_QUOTES,
+                        'UTF-8'
+                    );
                     $icon = IconHelper::render(
                         'circle-chevron-right',
-                        ['title' => 'Next Text: ' . $title, 'alt' => 'Next Text: ' . $title]
+                        [
+                            'title' => 'Next Text: ' . $title,
+                            'alt' => 'Next Text: ' . $title
+                        ]
                     );
-                    $nextUrl = $this->buildNavigationUrl($url, $list[$i + 1]);
-                    $next = '<a href="' . $nextUrl . '" target="_top">' . $icon . '</a>';
+                    $nextUrl = $this->buildNavigationUrl(
+                        $url,
+                        $nextId
+                    );
+                    $next = '<a href="' . $nextUrl
+                        . '" target="_top">' . $icon . '</a>';
                 } else {
                     $next = IconHelper::render(
                         'circle-chevron-right',
-                        ['title' => 'No Next Text', 'alt' => 'No Next Text', 'class' => 'icon-muted']
+                        [
+                            'title' => 'No Next Text',
+                            'alt' => 'No Next Text',
+                            'class' => 'icon-muted'
+                        ]
                     );
                 }
                 return $add . $prev . ' ' . $next;

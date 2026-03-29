@@ -178,10 +178,10 @@ class SimilarityCalculator
     {
         $allPairs = [];
         $words = explode(' ', $str);
-        for ($w = 0; $w < count($words); $w++) {
-            $pairsInWord = $this->letterPairs($words[$w]);
-            for ($p = 0; $p < count($pairsInWord); $p++) {
-                $allPairs[$pairsInWord[$p]] = $pairsInWord[$p];
+        foreach ($words as $word) {
+            $pairsInWord = $this->letterPairs($word);
+            foreach ($pairsInWord as $pair) {
+                $allPairs[$pair] = $pair;
             }
         }
         return array_values($allPairs);

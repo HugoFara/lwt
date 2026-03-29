@@ -77,7 +77,6 @@ class MySqlBackupRepository implements BackupRepositoryInterface
 
         foreach (self::BACKUP_TABLES as $table) {
             $result = Connection::querySelect('SELECT * FROM ' . $table);
-            $num_fields = mysqli_num_fields($result);
             $out .= "\nDROP TABLE IF EXISTS " . $table . ";\n";
             $row2 = mysqli_fetch_row(
                 Connection::querySelect("SHOW CREATE TABLE " . $table)
@@ -88,14 +87,12 @@ class MySqlBackupRepository implements BackupRepositoryInterface
 
             if ($table !== 'sentences' && $table !== 'word_occurrences') {
                 while ($row = mysqli_fetch_row($result)) {
-                    $return = 'INSERT INTO ' . $table . ' VALUES(';
-                    for ($j = 0; $j < $num_fields; $j++) {
-                        $return .= Escaping::formatValueForSqlOutput($row[$j]);
-                        if ($j < ($num_fields - 1)) {
-                            $return .= ',';
-                        }
+                    $values = [];
+                    foreach ($row as $cell) {
+                        $values[] = Escaping::formatValueForSqlOutput($cell);
                     }
-                    $out .= $return . ");\n";
+                    $out .= 'INSERT INTO ' . $table
+                        . ' VALUES(' . implode(',', $values) . ");\n";
                 }
             }
         }
@@ -112,21 +109,18 @@ class MySqlBackupRepository implements BackupRepositoryInterface
 
         foreach (self::OFFICIAL_BACKUP_TABLES as $table) {
             $result = null;
-            $num_fields = 0;
 
             if ($table == 'texts') {
                 $result = Connection::querySelect(
                     'SELECT TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
                     TxSourceURI FROM ' . $table
                 );
-                $num_fields = 7;
             } elseif ($table == 'words') {
                 $result = Connection::querySelect(
                     'SELECT WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation,
                     WoRomanization, WoSentence, WoCreated, WoStatusChanged, WoTodayScore,
                     WoTomorrowScore, WoRandom FROM ' . $table
                 );
-                $num_fields = 13;
             } elseif ($table == 'languages') {
                 $result = Connection::querySelect(
                     'SELECT LgID, LgName, LgDict1URI, LgDict2URI,
@@ -138,13 +132,11 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                     LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar,
                     LgRightToLeft FROM ' . $table . ' WHERE LgName<>""'
                 );
-                $num_fields = mysqli_num_fields($result);
             } elseif (
                 $table !== 'sentences' && $table !== 'word_occurrences' &&
                 $table !== 'settings'
             ) {
                 $result = Connection::querySelect('SELECT * FROM ' . $table);
-                $num_fields = mysqli_num_fields($result);
             }
 
             $out .= "\nDROP TABLE IF EXISTS " . $table . ";\n";
@@ -155,14 +147,12 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 $table !== 'settings' && $result !== null
             ) {
                 while ($row = mysqli_fetch_row($result)) {
-                    $return = 'INSERT INTO ' . $table . ' VALUES(';
-                    for ($j = 0; $j < $num_fields; $j++) {
-                        $return .= Escaping::formatValueForSqlOutput($row[$j]);
-                        if ($j < ($num_fields - 1)) {
-                            $return .= ',';
-                        }
+                    $values = [];
+                    foreach ($row as $cell) {
+                        $values[] = Escaping::formatValueForSqlOutput($cell);
                     }
-                    $out .= $return . ");\n";
+                    $out .= 'INSERT INTO ' . $table
+                        . ' VALUES(' . implode(',', $values) . ");\n";
                 }
             }
         }

@@ -69,12 +69,13 @@ class ApplicationInfo
         $vn = \preg_split("/[.]/", \substr($v, 0, $pos));
         if ($vn === false || \count($vn) < 3) {
             throw new \InvalidArgumentException(
-                "Invalid version format '$v': expected at least 3 version components (X.Y.Z)"
+                "Invalid version format '$v':"
+                . " expected at least 3 version components (X.Y.Z)"
             );
         }
-        for ($i = 0; $i < 3; $i++) {
-            $r .= \substr('000' . $vn[$i], -3);
-        }
+        $r .= \substr('000' . $vn[0], -3);
+        $r .= \substr('000' . $vn[1], -3);
+        $r .= \substr('000' . $vn[2], -3);
         return $r;
     }
 
