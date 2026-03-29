@@ -1,3 +1,13 @@
+# Stage 1: Build frontend assets on a platform with reliable Node.js support
+FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS frontend-builder
+
+WORKDIR /build
+COPY package.json package-lock.json vite.config.ts tsconfig.json ./
+COPY src/frontend/ src/frontend/
+COPY scripts/ scripts/
+RUN npm ci --ignore-scripts && npm run build:all
+
+# Stage 2: Final application image
 FROM php:8.4-apache-bookworm
 
 LABEL org.opencontainers.image.title="LWT Community"
@@ -79,13 +89,9 @@ RUN a2enmod rewrite \
 WORKDIR /var/www/html${APP_BASE_PATH}
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Build frontend assets (Alpine.js, Vite bundles)
-RUN apt-get update && apt-get install -y --no-install-recommends nodejs npm \
-    && npm ci --ignore-scripts \
-    && npm run build:all \
-    && rm -rf node_modules \
-    && apt-get purge -y nodejs npm && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+# Copy pre-built frontend assets from the builder stage
+COPY --from=frontend-builder /build/assets/ assets/
+COPY --from=frontend-builder /build/sw.js sw.js
 
 # Set proper ownership for Apache (www-data user)
 RUN chown -R www-data:www-data /var/www/html${APP_BASE_PATH}
