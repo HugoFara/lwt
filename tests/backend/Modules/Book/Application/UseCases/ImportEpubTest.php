@@ -91,6 +91,10 @@ class ImportEpubTest extends TestCase
     #[Test]
     public function returnsFailureWhenZipExtensionMissing(): void
     {
+        if (extension_loaded('zip')) {
+            $this->markTestSkipped('ZIP extension is loaded, cannot test missing extension scenario');
+        }
+
         // When ZIP extension is missing, we expect the extension check error,
         // not the EPUB validation error
         $result = $this->useCase->execute(1, ['tmp_name' => '/tmp/test.epub']);
@@ -110,7 +114,7 @@ class ImportEpubTest extends TestCase
 
         $this->epubParser->expects($this->once())
             ->method('isValidEpub')
-            ->with('/tmp/test.epub')
+            ->with('/tmp/test.epub', '')
             ->willReturn(false);
 
         $result = $this->useCase->execute(1, ['tmp_name' => '/tmp/test.epub']);

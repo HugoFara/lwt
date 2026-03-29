@@ -5,6 +5,15 @@ other versions come from the canonical LWT ("official" branch on Git).
 For git tags, official releases are marked like "v1.0.0", while unofficial
 ones are marked like "v1.0.0-fork".
 
+## [Unreleased]
+
+### Fixed
+
+* **EPUB import failing** ([#231](https://github.com/HugoFara/lwt/issues/231)):
+  EPUB uploads always failed with "Invalid EPUB file" because the extension check
+  validated the PHP temp path (`/tmp/phpXXXXXX`) instead of the original filename.
+  The validation now uses the uploaded filename for the extension check.
+
 ## [3.0.1-fork] - 2026-03-15
 
 ### Fixed

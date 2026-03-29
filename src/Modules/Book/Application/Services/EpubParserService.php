@@ -57,7 +57,10 @@ class EpubParserService
     public function parse(string $filePath): array
     {
         if (!extension_loaded('zip')) {
-            throw new RuntimeException("The 'zip' PHP extension is required for EPUB import but is not installed. Please install php-zip extension.");
+            throw new RuntimeException(
+                "The 'zip' PHP extension is required for EPUB import "
+                . "but is not installed. Please install php-zip extension."
+            );
         }
 
         if (!file_exists($filePath)) {
@@ -76,7 +79,10 @@ class EpubParserService
         try {
             $ebook = Ebook::read($filePath);
             if ($ebook === null) {
-                throw new RuntimeException("Failed to read EPUB file: {$filePath}. The file may be corrupted or not a valid EPUB format.");
+                throw new RuntimeException(
+                    "Failed to read EPUB file: {$filePath}. "
+                    . "The file may be corrupted or not a valid EPUB format."
+                );
             }
         } catch (\Throwable $e) {
             // Provide more specific error messages
@@ -317,7 +323,7 @@ class EpubParserService
      *
      * @return bool True if valid EPUB
      */
-    public function isValidEpub(string $filePath): bool
+    public function isValidEpub(string $filePath, string $originalName = ''): bool
     {
         if (!file_exists($filePath)) {
             return false;
@@ -331,8 +337,10 @@ class EpubParserService
             return false;
         }
 
-        // Check file extension
-        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        // Check file extension using original filename when available
+        // (PHP stores uploads at temp paths like /tmp/phpXXXXXX with no extension)
+        $nameToCheck = $originalName !== '' ? $originalName : $filePath;
+        $extension = strtolower(pathinfo($nameToCheck, PATHINFO_EXTENSION));
         if ($extension !== 'epub') {
             return false;
         }

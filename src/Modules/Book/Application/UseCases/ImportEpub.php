@@ -111,7 +111,8 @@ class ImportEpub
         if (!extension_loaded('zip')) {
             return [
                 'success' => false,
-                'message' => 'EPUB import requires the PHP ZIP extension to be installed. Please install php-zip to enable EPUB support.',
+                'message' => 'EPUB import requires the PHP ZIP extension. '
+                    . 'Please install php-zip to enable EPUB support.',
                 'bookId' => null,
                 'chapterCount' => 0,
                 'textIds' => [],
@@ -119,7 +120,8 @@ class ImportEpub
         }
 
         // Validate EPUB file
-        if (!$this->epubParser->isValidEpub($filePath)) {
+        $originalName = isset($uploadedFile['name']) ? (string) $uploadedFile['name'] : '';
+        if (!$this->epubParser->isValidEpub($filePath, $originalName)) {
             return [
                 'success' => false,
                 'message' => 'Invalid EPUB file. Please ensure the file is a valid EPUB format.',

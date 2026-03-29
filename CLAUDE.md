@@ -118,7 +118,7 @@ npm run typecheck                                    # TypeScript type checking
 **After every PHP file change**, always run these checks and fix any issues before committing:
 
 1. `./vendor/bin/psalm --threads=1` — Psalm static analysis must pass with 0 errors (multi-thread crashes due to amphp bug; always use `--threads=1`)
-2. `./vendor/bin/phpcs --standard=PSR12 [changed files]` — PHP CodeSniffer must have 0 errors (warnings are acceptable)
+2. `./vendor/bin/phpcs --standard=PSR12 [changed files]` — PHP CodeSniffer must have 0 errors and 0 warnings
 3. `composer test:no-coverage` — PHPUnit tests must all pass (run after any important PHP change)
 
 ### Asset Building

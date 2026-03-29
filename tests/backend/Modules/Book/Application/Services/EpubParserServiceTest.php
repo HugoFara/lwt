@@ -176,6 +176,49 @@ class EpubParserServiceTest extends TestCase
     }
 
     // =========================================================================
+    // Bug reproduction: GitHub issue #231
+    // =========================================================================
+
+    #[Test]
+    public function isValidEpubFailsForTempUploadPathWithoutExtension(): void
+    {
+        if (!extension_loaded('zip')) {
+            $this->markTestSkipped('Zip extension not available');
+        }
+
+        // Build a minimal valid EPUB (ZIP with mimetype + container.xml)
+        $tempFile = tempnam(sys_get_temp_dir(), 'php');
+        $zip = new \ZipArchive();
+        $zip->open($tempFile, \ZipArchive::OVERWRITE);
+        $zip->addFromString('mimetype', 'application/epub+zip');
+        $zip->addFromString(
+            'META-INF/container.xml',
+            '<?xml version="1.0"?><container/>'
+        );
+        $zip->close();
+
+        try {
+            // Temp path has NO .epub extension (like /tmp/phpXXXXXX).
+            // Passing the original filename allows the extension check
+            // to pass (GitHub issue #231).
+            $result = $this->service->isValidEpub(
+                $tempFile,
+                'book.epub'
+            );
+            $this->assertTrue(
+                $result,
+                'isValidEpub() should accept valid EPUB at temp path '
+                . 'when original filename is provided (GitHub issue '
+                . '#231). Path: ' . $tempFile
+            );
+        } finally {
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+        }
+    }
+
+    // =========================================================================
     // HTML cleaning tests
     // =========================================================================
 
