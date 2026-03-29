@@ -13,6 +13,15 @@ ones are marked like "v1.0.0-fork".
   EPUB uploads always failed with "Invalid EPUB file" because the extension check
   validated the PHP temp path (`/tmp/phpXXXXXX`) instead of the original filename.
   The validation now uses the uploaded filename for the extension check.
+* **Glosbe translation blocked by mixed content and CSP**: The Glosbe JSONP
+  translation API was called over plain HTTP, which browsers block on HTTPS pages.
+  Upgraded to HTTPS and added `glosbe.com` to the `script-src-elem` CSP directive.
+* **Anki export missing sentences**: Words whose sentences lacked `{word}` markup
+  were silently excluded from Anki exports. The export now also includes sentences
+  that contain the word without markup, and auto-wraps the markup for highlighting.
+  Empty translations and sentences are also filtered out.
+* **License file not found in page headers**: `PageLayoutHelper` still referenced
+  the old `UNLICENSE.md` filename after the license file was renamed to `LICENSE`.
 
 ## [3.0.1-fork] - 2026-03-15
 
