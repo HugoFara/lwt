@@ -1,5 +1,4 @@
 import { defineConfig, type PluginOption, build } from 'vite';
-import legacy from '@vitejs/plugin-legacy';
 import purgecss from 'vite-plugin-purgecss';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -31,13 +30,7 @@ function buildServiceWorker(): PluginOption {
               inlineDynamicImports: true,
             },
           },
-          minify: 'terser',
-          terserOptions: {
-            compress: {
-              drop_console: false, // Keep console for SW debugging
-              drop_debugger: true,
-            },
-          },
+          minify: 'esbuild',
         },
         resolve: {
           alias: {
@@ -55,6 +48,10 @@ function buildServiceWorker(): PluginOption {
 export default defineConfig({
   root: resolve(__dirname, 'src/frontend'),
   publicDir: false,
+
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
 
   build: {
     outDir: resolve(__dirname, 'assets'),
@@ -78,21 +75,10 @@ export default defineConfig({
         },
       },
     },
-    // Enable minification for better compression
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
     chunkSizeWarningLimit: 400,
   },
 
   plugins: [
-    legacy({
-      targets: ['defaults', 'not IE 11']
-    }),
     // Build service worker for PWA support
     buildServiceWorker(),
     // PurgeCSS to remove unused CSS (especially from Bulma)

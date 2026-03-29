@@ -7,6 +7,14 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Changed
+
+* **Removed `@vitejs/plugin-legacy`**: The legacy Vite plugin generated ~1.2 MB
+  of `nomodule` bundles and polyfills that were never served (ViteHelper only
+  emits `<script type="module">` tags). Removing it cuts JS build output by
+  roughly 70%. Also switched from Terser to esbuild for minification (Vite's
+  built-in default), which speeds up the build.
+
 ### Added
 
 * **Reading area width and text size controls**
