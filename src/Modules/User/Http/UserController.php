@@ -93,7 +93,7 @@ class UserController extends BaseController
      *
      * GET /login
      *
-     * @return void
+     * @return ResponseInterface|null
      */
     public function loginForm(): mixed
     {
@@ -121,7 +121,7 @@ class UserController extends BaseController
      *
      * POST /login
      *
-     * @return void
+     * @return ResponseInterface
      */
     public function login(): ResponseInterface
     {
@@ -163,7 +163,7 @@ class UserController extends BaseController
      *
      * GET /register
      *
-     * @return void
+     * @return ResponseInterface|null
      */
     public function registerForm(): mixed
     {
@@ -188,6 +188,8 @@ class UserController extends BaseController
         $this->render('Register', false);
         require __DIR__ . '/../Views/register.php';
         $this->endRender();
+
+        return null;
     }
 
     /**
@@ -195,7 +197,7 @@ class UserController extends BaseController
      *
      * POST /register
      *
-     * @return void
+     * @return ResponseInterface
      */
     public function register(): ResponseInterface
     {
@@ -266,7 +268,7 @@ class UserController extends BaseController
      *
      * GET /logout
      *
-     * @return void
+     * @return ResponseInterface
      */
     public function logout(): ResponseInterface
     {
@@ -293,7 +295,7 @@ class UserController extends BaseController
      *
      * GET /profile
      *
-     * @return void
+     * @return ResponseInterface|null
      */
     public function profileForm(): mixed
     {
@@ -319,6 +321,8 @@ class UserController extends BaseController
         $this->render('Profile', true);
         require __DIR__ . '/../Views/profile.php';
         $this->endRender();
+
+        return null;
     }
 
     /**
@@ -326,7 +330,7 @@ class UserController extends BaseController
      *
      * POST /profile
      *
-     * @return void
+     * @return ResponseInterface
      */
     public function updateProfile(): ResponseInterface
     {
@@ -368,7 +372,7 @@ class UserController extends BaseController
      *
      * POST /profile/password
      *
-     * @return void
+     * @return ResponseInterface
      */
     public function changePassword(): ResponseInterface
     {
@@ -461,7 +465,7 @@ class UserController extends BaseController
      *
      * @param array<string, string> $params Route parameters
      *
-     * @return void
+     * @return ResponseInterface
      */
     public function savePreferences(array $params = []): ResponseInterface
     {
@@ -489,7 +493,7 @@ class UserController extends BaseController
      *
      * GET /verify-email?token=...
      *
-     * @return void
+     * @return ResponseInterface
      */
     public function verifyEmail(): ResponseInterface
     {
@@ -516,7 +520,7 @@ class UserController extends BaseController
      *
      * POST /email/resend-verification
      *
-     * @return void
+     * @return ResponseInterface
      */
     public function resendVerification(): ResponseInterface
     {
