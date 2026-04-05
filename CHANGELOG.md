@@ -7,10 +7,14 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
-## [3.1.0-fork] - 2026-04-05
-
 ### Added
 
+* **Internationalization (i18n) infrastructure** (#223): Added a translation
+  layer for both PHP and TypeScript. PHP views can use `__('common.save')`,
+  TypeScript can use `t('common.save')` or Alpine's `$t('common.save')`.
+  Translations are stored as per-namespace JSON files under `locale/`, loaded
+  lazily, with automatic English fallback. A new `app_language` user setting
+  controls the active locale. The HTML `lang` attribute is now dynamic.
 * **Activity tracking with streaks and calendar heatmap** (#227): New
   `activity_log` table tracks daily terms created, terms reviewed, and texts
   read. A backfill migration populates historical data from existing word

@@ -23,6 +23,7 @@ use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
+use Lwt\Shared\I18n\Translator;
 use Lwt\Shared\UI\Assets\ViteHelper;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Modules\User\Application\UserFacade;
@@ -686,8 +687,11 @@ HTML;
         $favicon = UrlUtilities::url('/favicon.ico');
         $icon180 = UrlUtilities::url('/assets/images/lwt_icon_180.png');
 
+        $htmlLang = self::getActiveLocale();
+
         echo '<!DOCTYPE html>';
-        echo '<html lang="en"' . self::buildDataThemeAttr() . '>';
+        echo '<html lang="' . htmlspecialchars($htmlLang, ENT_QUOTES, 'UTF-8')
+            . '"' . self::buildDataThemeAttr() . '>';
         echo '<head>';
         echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
         echo '<!--' . "\n";
@@ -708,6 +712,8 @@ HTML;
                 . htmlspecialchars(implode(',', $modules), ENT_QUOTES, 'UTF-8')
                 . '">';
         }
+
+        echo self::buildI18nScript($modules);
 
         if (ViteHelper::shouldUse()) {
             echo '<!-- Critical CSS for fast first paint -->';
@@ -762,6 +768,61 @@ HTML;
     }
 
     /**
+     * Get the active locale code from the Translator service.
+     *
+     * @return string Locale code (e.g. "en", "es")
+     */
+    private static function getActiveLocale(): string
+    {
+        $container = Container::getInstance();
+        if ($container->has(Translator::class)) {
+            return $container->getTyped(Translator::class)->getLocale();
+        }
+        return 'en';
+    }
+
+    /**
+     * Build a JSON script tag containing translations for the frontend.
+     *
+     * Collects translations for the "common" namespace plus any
+     * namespaces matching the page's required modules.
+     *
+     * @param string[] $modules Module names from getRequiredModules()
+     *
+     * @return string HTML script tag, or empty string if translator unavailable
+     */
+    private static function buildI18nScript(array $modules): string
+    {
+        $container = Container::getInstance();
+        if (!$container->has(Translator::class)) {
+            return '';
+        }
+
+        $translator = $container->getTyped(Translator::class);
+
+        // Always include "common" namespace
+        $prefixed = [];
+        foreach ($translator->getNamespaceTranslations('common') as $k => $v) {
+            $prefixed['common.' . $k] = $v;
+        }
+
+        // Add module-specific namespaces
+        foreach ($modules as $mod) {
+            foreach ($translator->getNamespaceTranslations($mod) as $k => $v) {
+                $prefixed[$mod . '.' . $k] = $v;
+            }
+        }
+
+        if ($prefixed === []) {
+            return '';
+        }
+
+        return '<script type="application/json" id="lwt-i18n">'
+            . json_encode($prefixed, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG)
+            . '</script>';
+    }
+
+    /**
      * Render the page footer (closing body and html tags).
      *
      * @return void
@@ -784,8 +845,10 @@ HTML;
     {
         self::sendNoCacheHeaders();
 
+        $htmlLang = self::getActiveLocale();
         echo '<!DOCTYPE html>';
-        echo '<html lang="en"' . self::buildDataThemeAttr() . '>';
+        echo '<html lang="' . htmlspecialchars($htmlLang, ENT_QUOTES, 'UTF-8')
+            . '"' . self::buildDataThemeAttr() . '>';
         echo '<head>';
         echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
         echo '<meta name="viewport" content="width=device-width, initial-scale=1">';

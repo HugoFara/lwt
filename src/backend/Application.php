@@ -36,6 +36,7 @@ use Lwt\Modules\User\UserServiceProvider;
 use Lwt\Modules\Home\HomeServiceProvider;
 use Lwt\Modules\Dictionary\DictionaryServiceProvider;
 use Lwt\Modules\Activity\ActivityServiceProvider;
+use Lwt\Shared\I18n\TranslatorServiceProvider;
 use Lwt\Modules\Book\BookServiceProvider;
 use Lwt\Modules\Admin\Application\DTO\DatabaseConnectionDTO;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\AutocompleteConnection;
@@ -155,6 +156,7 @@ class Application
         // Core service providers
         $this->providers = [
             new CoreServiceProvider(),
+            new TranslatorServiceProvider(),
             new ControllerServiceProvider(),
             new RepositoryServiceProvider(),
             // Module service providers
@@ -256,7 +258,9 @@ class Application
 
         // Single-user mode: show debug info by default (no security concern)
         $multiUser = getenv('MULTI_USER_ENABLED');
-        $multiUserVal = ($multiUser !== false && $multiUser !== '') ? $multiUser : ($_ENV['MULTI_USER_ENABLED'] ?? 'false');
+        $multiUserVal = ($multiUser !== false && $multiUser !== '')
+            ? $multiUser
+            : ($_ENV['MULTI_USER_ENABLED'] ?? 'false');
         return !in_array(strtolower($multiUserVal), ['true', '1', 'yes'], true);
     }
 

@@ -54,6 +54,9 @@ import '@shared/components/navbar_streak';
 import '@shared/components/theme_toggle';
 import '@shared/components/footer';
 
+// Shared i18n
+import { initI18n, t } from '@shared/i18n/translator';
+
 // Shared accessibility
 import { initAriaLive } from '@shared/accessibility/aria_live';
 
@@ -115,11 +118,19 @@ const loaders = requestedModules
 
 // Wait for all dynamic modules to load, then initialize Alpine
 Promise.all(loaders).then(() => {
+  // Initialize i18n translations from server-injected JSON
+  initI18n();
+
   // Initialize ARIA live regions for screen reader announcements
   initAriaLive();
 
   // Initialize Alpine.js globally
   window.Alpine = Alpine;
+
+  // Register Alpine.js magic for translations: this.$t('common.save')
+  Alpine.magic('t', () => (key: string, params?: Record<string, string | number>) => {
+    return t(key, params);
+  });
 
   // Register Alpine.js magic method for inline Markdown parsing
   // Note: Returns plain text since x-html is not CSP-compatible

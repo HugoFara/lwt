@@ -12,6 +12,9 @@ export * from './api/client';
 export * from './stores/app_data';
 export * from './stores/lwt_state';
 
+// I18n
+export { t, initI18n } from './i18n/translator';
+
 // Utils
 export * from './utils/cookies';
 export * from './utils/html_utils';

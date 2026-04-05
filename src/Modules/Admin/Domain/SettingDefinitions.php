@@ -140,6 +140,11 @@ final class SettingDefinitions
             "dft" => '', "num" => 0, "scope" => self::SCOPE_USER
         ],
 
+        // User preferences: language/locale
+        'app_language' => [
+            "dft" => 'en', "num" => 0, "scope" => self::SCOPE_USER
+        ],
+
         // Admin settings: feed limits
         'set-max-articles-with-text' => [
             "dft" => '100', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_ADMIN

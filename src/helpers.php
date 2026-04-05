@@ -19,6 +19,8 @@
 declare(strict_types=1);
 
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
+use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Shared\I18n\Translator;
 
 if (!function_exists('url')) {
     /**
@@ -38,6 +40,25 @@ if (!function_exists('url')) {
     function url(string $path = '/'): string
     {
         return UrlUtilities::url($path);
+    }
+}
+
+if (!function_exists('__')) {
+    /**
+     * Translate a key using the i18n translator.
+     *
+     * @param string                    $key    Dot-notated translation key (e.g. "common.save")
+     * @param array<string, string|int> $params Interpolation parameters
+     *
+     * @return string Translated string, or the raw key if translator is unavailable
+     */
+    function __(string $key, array $params = []): string
+    {
+        $container = Container::getInstance();
+        if ($container->has(Translator::class)) {
+            return $container->getTyped(Translator::class)->translate($key, $params);
+        }
+        return $key;
     }
 }
 

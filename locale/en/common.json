@@ -1,0 +1,21 @@
+{
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "close": "Close",
+    "search": "Search",
+    "loading": "Loading…",
+    "error": "Error",
+    "success": "Success",
+    "confirm_delete": "Are you sure you want to delete this?",
+    "yes": "Yes",
+    "no": "No",
+    "items_count": "{count} items",
+    "no_results": "No results found",
+    "open": "Open",
+    "import": "Import",
+    "export": "Export"
+}
