@@ -34,6 +34,14 @@ ones are marked like "v1.0.0-fork".
   `/feeds/edit`, `/dictionaries`, `/dictionaries/import`, and the
   `/api.php/v1/*` prefix.
 
+## [3.0.3-fork] - 2026-04-05
+
+### Fixed
+
+* **Version number not updated since 3.0.0**: `ApplicationInfo::VERSION` was
+  never bumped for the 3.0.1 and 3.0.2 releases, causing the app to display
+  "3.0.0-fork" in the UI. Now correctly shows "3.0.3-fork".
+
 ## [3.0.2-fork] - 2026-04-05
 
 ### Changed
