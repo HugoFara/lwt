@@ -175,6 +175,13 @@ class IconHelper
         // Placeholder
         'placeholder' => 'circle',
         'empty' => '',
+
+        // Renamed icons (Lucide v0.x → v1.x renames)
+        'alert-triangle' => 'triangle-alert',
+        'check-circle' => 'circle-check',
+        'check-square' => 'square-check-big',
+        'more-horizontal' => 'ellipsis',
+        'package-import' => 'package-open',
     ];
 
     /**
