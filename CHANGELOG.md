@@ -7,6 +7,8 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.1.0-fork] - 2026-04-05
+
 ### Added
 
 * **Activity tracking with streaks and calendar heatmap** (#227): New
@@ -22,7 +24,6 @@ ones are marked like "v1.0.0-fork".
 
 * **Renamed `dev` branch to `develop`**: All CI workflows and documentation
   updated to reference the new branch name.
-
 * **Upgraded dev tooling to latest major versions**:
   * PHPUnit 10 → 11: migrated all test annotations (`@dataProvider`, `@covers`,
     `@group`, `@runTestsInSeparateProcesses`) to PHP 8 attributes. Replaced the
@@ -56,6 +57,12 @@ ones are marked like "v1.0.0-fork".
   added 5 missing ones. Added a Vite plugin to clean stale hashed bundles
   between builds.
 
+### Fixed
+
+* **Version number not updated since 3.0.0**: `ApplicationInfo::VERSION` was
+  never bumped for the 3.0.1 and 3.0.2 releases, causing the app to display
+  "3.0.0-fork" in the UI.
+
 ### Removed
 
 * **Dead route `/text/set-mode`**: This endpoint (and its view, controller
@@ -74,14 +81,6 @@ ones are marked like "v1.0.0-fork".
   `/text/edit`, `/word/new`, `/word/show`, `/vocabulary/term/status`,
   `/feeds/edit`, `/dictionaries`, `/dictionaries/import`, and the
   `/api.php/v1/*` prefix.
-
-## [3.0.3-fork] - 2026-04-05
-
-### Fixed
-
-* **Version number not updated since 3.0.0**: `ApplicationInfo::VERSION` was
-  never bumped for the 3.0.1 and 3.0.2 releases, causing the app to display
-  "3.0.0-fork" in the UI. Now correctly shows "3.0.3-fork".
 
 ## [3.0.2-fork] - 2026-04-05
 
