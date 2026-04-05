@@ -7,6 +7,8 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.0.2-fork] - 2026-04-05
+
 ### Changed
 
 * **Removed `@vitejs/plugin-legacy`**: The legacy Vite plugin generated ~1.2 MB

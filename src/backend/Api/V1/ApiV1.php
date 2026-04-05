@@ -45,8 +45,8 @@ use Lwt\Modules\Text\Http\WhisperApiHandler;
  */
 class ApiV1
 {
-    private const VERSION = "3.0.1";
-    private const RELEASE_DATE = "2026-03-15";
+    private const VERSION = "3.0.2";
+    private const RELEASE_DATE = "2026-04-05";
 
     /**
      * Endpoints that do not require authentication.

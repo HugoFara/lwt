@@ -10,6 +10,41 @@ other versions come from the canonical LWT ("official" branch on Git).
 For git tags, official releases are marked like "v1.0.0", while unofficial
 ones are marked like "v1.0.0-fork".
 
+## [3.0.2-fork] - 2026-04-05
+
+### Changed
+
+* **Removed `@vitejs/plugin-legacy`**: The legacy Vite plugin generated ~1.2 MB
+  of `nomodule` bundles and polyfills that were never served (ViteHelper only
+  emits `<script type="module">` tags). Removing it cuts JS build output by
+  roughly 70%. Also switched from Terser to esbuild for minification (Vite's
+  built-in default), which speeds up the build.
+
+### Added
+
+* **Reading area width and text size controls**
+  ([#225](https://github.com/HugoFara/lwt/issues/225)): The text reading
+  toolbar now has a "Display" dropdown with controls for adjusting reading area
+  width (40–100% slider) and text size (+/- buttons). Both settings persist
+  across sessions as user preferences. The dropdown also groups the multi-word
+  expressions toggle, translations toggle, and print link.
+
+### Fixed
+
+* **EPUB import failing** ([#231](https://github.com/HugoFara/lwt/issues/231)):
+  EPUB uploads always failed with "Invalid EPUB file" because the extension check
+  validated the PHP temp path (`/tmp/phpXXXXXX`) instead of the original filename.
+  The validation now uses the uploaded filename for the extension check.
+* **Glosbe translation blocked by mixed content and CSP**: The Glosbe JSONP
+  translation API was called over plain HTTP, which browsers block on HTTPS pages.
+  Upgraded to HTTPS and added `glosbe.com` to the `script-src-elem` CSP directive.
+* **Anki export missing sentences**: Words whose sentences lacked `{word}` markup
+  were silently excluded from Anki exports. The export now also includes sentences
+  that contain the word without markup, and auto-wraps the markup for highlighting.
+  Empty translations and sentences are also filtered out.
+* **License file not found in page headers**: `PageLayoutHelper` still referenced
+  the old `UNLICENSE.md` filename after the license file was renamed to `LICENSE`.
+
 ## [3.0.1-fork] - 2026-03-15
 
 ### Fixed
