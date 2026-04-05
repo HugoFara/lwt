@@ -7,7 +7,15 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Added
+
+* **PHP 8.5 support**: All dependencies now support PHP 8.5. Added PHP 8.5 to
+  the CI test matrix.
+
 ### Changed
+
+* **Renamed `dev` branch to `develop`**: All CI workflows and documentation
+  updated to reference the new branch name.
 
 * **Upgraded dev tooling to latest major versions**:
   * PHPUnit 10 → 11: migrated all test annotations (`@dataProvider`, `@covers`,
