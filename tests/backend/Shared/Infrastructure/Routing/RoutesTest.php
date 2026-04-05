@@ -145,7 +145,6 @@ class RoutesTest extends TestCase
             'text print' => ['/text/1/print', "{$textPrintController}@printAnnotated"],
             'text print edit' => ['/text/1/print/edit', "{$textPrintController}@editAnnotation"],
             'text print-plain' => ['/text/print-plain', "{$textPrintController}@printPlain"],
-            'text set-mode' => ['/text/set-mode', "{$textController}@setMode"],
             'text check' => ['/text/check', "{$textController}@check"],
             'text archived' => ['/text/archived', "{$textController}@archived"],
         ];

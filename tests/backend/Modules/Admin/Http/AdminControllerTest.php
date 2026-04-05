@@ -7,7 +7,6 @@ namespace Lwt\Tests\Modules\Admin\Http;
 use Lwt\Modules\Admin\Http\AdminController;
 use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Admin\Application\Services\TtsService;
-use Lwt\Shared\Infrastructure\Http\RedirectResponse;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -94,7 +93,7 @@ class AdminControllerTest extends TestCase
 
         $expectedMethods = [
             'backup', 'wizard', 'statistics', 'settings',
-            'installDemo', 'serverData', 'saveSetting',
+            'installDemo', 'serverData',
         ];
 
         foreach ($expectedMethods as $methodName) {
@@ -113,7 +112,7 @@ class AdminControllerTest extends TestCase
     #[Test]
     public function publicMethodsAcceptArrayParams(): void
     {
-        $methods = ['backup', 'wizard', 'statistics', 'settings', 'installDemo', 'serverData', 'saveSetting'];
+        $methods = ['backup', 'wizard', 'statistics', 'settings', 'installDemo', 'serverData'];
 
         foreach ($methods as $methodName) {
             $method = new \ReflectionMethod(AdminController::class, $methodName);
@@ -121,97 +120,6 @@ class AdminControllerTest extends TestCase
             $this->assertCount(1, $params, "Method $methodName should have 1 parameter");
             $this->assertSame('params', $params[0]->getName(), "Parameter of $methodName should be named 'params'");
         }
-    }
-
-    // =========================================================================
-    // saveSetting tests
-    // =========================================================================
-
-    #[Test]
-    public function saveSettingWithEmptyKeyDoesNotCallFacade(): void
-    {
-        // When key is empty string (default from param()), facade should not be called
-        $_REQUEST = ['k' => '', 'v' => 'somevalue', 'u' => ''];
-
-        $this->facade->expects($this->never())
-            ->method('saveAndClearSession');
-
-        $result = $this->controller->saveSetting([]);
-
-        $this->assertNull($result);
-
-        $_REQUEST = [];
-    }
-
-    #[Test]
-    public function saveSettingWithKeyCallsFacade(): void
-    {
-        $_REQUEST = ['k' => 'currentlanguage', 'v' => '5', 'u' => ''];
-
-        $this->facade->expects($this->once())
-            ->method('saveAndClearSession')
-            ->with('currentlanguage', '5');
-
-        $result = $this->controller->saveSetting([]);
-
-        $this->assertNull($result);
-
-        $_REQUEST = [];
-    }
-
-    #[Test]
-    public function saveSettingWithUrlReturnsRedirectResponse(): void
-    {
-        $_REQUEST = ['k' => 'theme', 'v' => 'dark', 'u' => '/settings'];
-
-        $this->facade->expects($this->once())
-            ->method('saveAndClearSession')
-            ->with('theme', 'dark');
-
-        $result = $this->controller->saveSetting([]);
-
-        $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertSame('/settings', $result->getUrl());
-        $this->assertSame(302, $result->getStatusCode());
-
-        $_REQUEST = [];
-    }
-
-    #[Test]
-    public function saveSettingWithUrlButNoKeyStillRedirects(): void
-    {
-        $_REQUEST = ['k' => '', 'v' => '', 'u' => '/home'];
-
-        $this->facade->expects($this->never())
-            ->method('saveAndClearSession');
-
-        $result = $this->controller->saveSetting([]);
-
-        $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertSame('/home', $result->getUrl());
-
-        $_REQUEST = [];
-    }
-
-    #[Test]
-    public function saveSettingReturnsNullWhenNoKeyAndNoUrl(): void
-    {
-        $_REQUEST = ['k' => '', 'v' => '', 'u' => ''];
-
-        $result = $this->controller->saveSetting([]);
-
-        $this->assertNull($result);
-
-        $_REQUEST = [];
-    }
-
-    #[Test]
-    public function saveSettingReturnTypeIsNullableRedirectResponse(): void
-    {
-        $method = new \ReflectionMethod(AdminController::class, 'saveSetting');
-        $returnType = $method->getReturnType();
-
-        $this->assertTrue($returnType->allowsNull());
     }
 
     // =========================================================================

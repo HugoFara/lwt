@@ -110,13 +110,6 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
-    // Set text mode
-    $router->registerWithMiddleware(
-        '/text/set-mode',
-        'Lwt\\Modules\\Text\\Http\\TextController@setMode',
-        AUTH_MIDDLEWARE
-    );
-
     // Check text
     $router->registerWithMiddleware('/text/check', 'Lwt\\Modules\\Text\\Http\\TextController@check', AUTH_MIDDLEWARE);
 
@@ -561,13 +554,6 @@ function registerRoutes(Router $router): void
         ADMIN_MIDDLEWARE
     );
 
-    // Save setting and redirect (Admin module)
-    $router->registerWithMiddleware(
-        '/admin/save-setting',
-        'Lwt\\Modules\\Admin\\Http\\AdminController@saveSetting',
-        ADMIN_MIDDLEWARE
-    );
-
     // User Management (Admin module)
     $router->get('/admin/users', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@index', ADMIN_MIDDLEWARE);
     $router->post('/admin/users', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@index', ADMIN_MIDDLEWARE);
@@ -662,4 +648,20 @@ function registerRoutes(Router $router): void
         'Lwt\\Modules\\Dictionary\\Http\\TranslationController@glosbe',
         AUTH_MIDDLEWARE
     );
+
+    // ==================== DEPRECATED ROUTES ====================
+    // These legacy routes still work but emit Deprecation headers.
+    // They will be removed in the next major version.
+
+    $router->deprecate('/text/read', '/text/{text}/read');
+    $router->deprecate('/text/display', '/text/{text}/display');
+    $router->deprecate('/text/print-plain', '/text/{text}/print-plain');
+    $router->deprecate('/text/edit', '/texts');
+    $router->deprecate('/word/new', '/words/new');
+    $router->deprecate('/word/show', '/word/{wid}');
+    $router->deprecate('/vocabulary/term/status', '/vocabulary/term/{wid}/status');
+    $router->deprecate('/feeds/edit', '/feeds/{id}/edit');
+    $router->deprecate('/dictionaries', '/languages/{id}/dictionaries');
+    $router->deprecate('/dictionaries/import', '/languages/{id}/dictionaries/import');
+    $router->deprecatePrefix('/api.php/v1', '/api/v1');
 }

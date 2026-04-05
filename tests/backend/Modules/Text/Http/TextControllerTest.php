@@ -133,7 +133,7 @@ class TextControllerTest extends TestCase
 
         $expectedMethods = [
             'read', 'new', 'editSingle', 'delete', 'archive',
-            'unarchive', 'edit', 'display', 'setMode', 'check',
+            'unarchive', 'edit', 'display', 'check',
             'archived', 'archivedEdit', 'deleteArchived',
         ];
 
@@ -154,7 +154,7 @@ class TextControllerTest extends TestCase
     public function subControllersHaveExpectedMethods(): void
     {
         // TextReadController
-        $readMethods = ['read', 'display', 'setMode', 'check', 'getTextIdFromRequest', 'renderReadPage'];
+        $readMethods = ['read', 'display', 'check', 'getTextIdFromRequest', 'renderReadPage'];
         $readReflection = new \ReflectionClass(TextReadController::class);
         foreach ($readMethods as $method) {
             $this->assertTrue($readReflection->hasMethod($method), "TextReadController should have: $method");
@@ -709,16 +709,6 @@ class TextControllerTest extends TestCase
 
         $this->assertCount(1, $params);
         $this->assertSame('params', $params[0]->getName());
-    }
-
-    #[Test]
-    public function setModeReturnsVoid(): void
-    {
-        $method = new \ReflectionMethod(TextController::class, 'setMode');
-        $returnType = $method->getReturnType();
-
-        $this->assertNotNull($returnType);
-        $this->assertSame('void', $returnType->getName());
     }
 
     #[Test]

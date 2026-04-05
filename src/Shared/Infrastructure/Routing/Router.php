@@ -72,6 +72,23 @@ class Router
     private array $prefixMiddleware = [];
 
     /**
+     * Deprecated routes with their successor URL patterns.
+     *
+     * Structure: ['path' => 'successor URL pattern']
+     * e.g., ['/text/read' => '/text/{text}/read']
+     *
+     * @var array<string, string>
+     */
+    private array $deprecatedRoutes = [];
+
+    /**
+     * Deprecated prefix routes with their successor URL patterns.
+     *
+     * @var array<string, string>
+     */
+    private array $deprecatedPrefixes = [];
+
+    /**
      * The dependency injection container.
      *
      * @var Container|null
@@ -290,6 +307,36 @@ class Router
     }
 
     /**
+     * Mark a route as deprecated.
+     *
+     * Deprecated routes still work but emit a Deprecation HTTP header
+     * and a Link header pointing to the successor URL.
+     *
+     * @param string $path      The deprecated URL path
+     * @param string $successor The preferred replacement URL pattern
+     *                          (e.g., '/text/{text}/read')
+     *
+     * @return void
+     */
+    public function deprecate(string $path, string $successor): void
+    {
+        $this->deprecatedRoutes[$path] = $successor;
+    }
+
+    /**
+     * Mark a prefix route as deprecated.
+     *
+     * @param string $prefix    The deprecated URL prefix
+     * @param string $successor The preferred replacement URL prefix
+     *
+     * @return void
+     */
+    public function deprecatePrefix(string $prefix, string $successor): void
+    {
+        $this->deprecatedPrefixes[$prefix] = $successor;
+    }
+
+    /**
      * Resolve the current request to a handler.
      *
      * @return array<string, mixed> Resolution array with type and handler info
@@ -304,7 +351,9 @@ class Router
      *     routeParams?: array<string, mixed>,
      *     file?: string,
      *     mime?: string,
-     *     middleware?: array<MiddlewareInterface|string>
+     *     middleware?: array<MiddlewareInterface|string>,
+     *     deprecated?: true,
+     *     successor?: string
      * }
      */
     public function resolve(): array
@@ -350,26 +399,39 @@ class Router
         // Try exact match first
         if (isset($this->routes[$path])) {
             $methodRoutes = $this->routes[$path];
+            $deprecation = isset($this->deprecatedRoutes[$path])
+                ? $this->deprecatedRoutes[$path]
+                : null;
 
             // Check specific method first, then wildcard
             if (isset($methodRoutes[$requestMethod])) {
                 $middleware = $this->middleware[$path][$requestMethod] ?? [];
                 /** @psalm-suppress InvalidReturnStatement - Dynamic route resolution */
-                return [
+                $result = [
                     'type' => 'handler',
                     'handler' => $methodRoutes[$requestMethod],
                     'params' => $_GET,
                     'middleware' => $middleware,
                 ];
+                if ($deprecation !== null) {
+                    $result['deprecated'] = true;
+                    $result['successor'] = $deprecation;
+                }
+                return $result;
             } elseif (isset($methodRoutes['*'])) {
                 $middleware = $this->middleware[$path]['*'] ?? [];
                 /** @psalm-suppress InvalidReturnStatement - Dynamic route resolution */
-                return [
+                $result = [
                     'type' => 'handler',
                     'handler' => $methodRoutes['*'],
                     'params' => $_GET,
                     'middleware' => $middleware,
                 ];
+                if ($deprecation !== null) {
+                    $result['deprecated'] = true;
+                    $result['successor'] = $deprecation;
+                }
+                return $result;
             }
         }
 
@@ -428,12 +490,17 @@ class Router
                 if ($handler !== null && $matchedMethod !== null) {
                     $middleware = $this->prefixMiddleware[$prefix][$matchedMethod] ?? [];
                     /** @psalm-suppress InvalidReturnStatement - Dynamic route resolution */
-                    return [
+                    $result = [
                         'type' => 'handler',
                         'handler' => $handler,
                         'params' => $_GET,
                         'middleware' => $middleware,
                     ];
+                    if (isset($this->deprecatedPrefixes[$prefix])) {
+                        $result['deprecated'] = true;
+                        $result['successor'] = $this->deprecatedPrefixes[$prefix];
+                    }
+                    return $result;
                 }
             }
         }
@@ -710,6 +777,11 @@ class Router
                 break;
 
             case 'handler':
+                // Send deprecation headers for legacy routes
+                if (!empty($resolution['deprecated'])) {
+                    $this->sendDeprecationHeaders($resolution['successor'] ?? '');
+                }
+
                 // Execute middleware chain first
                 $middleware = $resolution['middleware'] ?? [];
                 if (!$this->executeMiddleware($middleware)) {
@@ -753,6 +825,25 @@ class Router
             }
         }
         return true;
+    }
+
+    /**
+     * Send HTTP headers indicating that this route is deprecated.
+     *
+     * Emits a standard Deprecation header (RFC 8594) and a Link header
+     * pointing to the successor URL pattern.
+     *
+     * @param string $successor The preferred replacement URL pattern
+     *
+     * @return void
+     */
+    private function sendDeprecationHeaders(string $successor): void
+    {
+        header('Deprecation: true');
+        header('Sunset: 2027-01-01T00:00:00Z');
+        if ($successor !== '') {
+            header('Link: <' . $successor . '>; rel="successor-version"');
+        }
     }
 
     /**

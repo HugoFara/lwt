@@ -69,11 +69,6 @@ class TextController extends BaseController
         return $this->readController->display($text);
     }
 
-    public function setMode(array $params): void
-    {
-        $this->readController->setMode($params);
-    }
-
     public function check(array $params): void
     {
         $this->readController->check($params);

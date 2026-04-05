@@ -7,6 +7,25 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Removed
+
+* **Dead route `/text/set-mode`**: This endpoint (and its view, controller
+  method, and frontend JS) was no longer reachable from any UI. The "Show All"
+  and "Learning Translations" toggles now save settings via the
+  `POST /api/v1/settings` API and reload the page.
+* **Dead route `/admin/save-setting`**: This legacy `?k=…&v=…&u=…` endpoint was
+  fully superseded by `POST /api/v1/settings`. No UI or frontend code referenced
+  it.
+
+### Deprecated
+
+* **Legacy query-parameter routes** now emit `Deprecation`, `Sunset`, and `Link`
+  HTTP headers. The routes still work but will be removed in the next major
+  version. Affected routes: `/text/read`, `/text/display`, `/text/print-plain`,
+  `/text/edit`, `/word/new`, `/word/show`, `/vocabulary/term/status`,
+  `/feeds/edit`, `/dictionaries`, `/dictionaries/import`, and the
+  `/api.php/v1/*` prefix.
+
 ## [3.0.2-fork] - 2026-04-05
 
 ### Changed

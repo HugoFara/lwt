@@ -32,7 +32,6 @@ use Lwt\Shared\Infrastructure\Container\Container;
  * Handles:
  * - Text reading interface (read)
  * - Text display/print modes (display)
- * - Text mode settings (setMode)
  * - Text checking (check)
  *
  * @since 3.0.0
@@ -196,39 +195,6 @@ class TextReadController extends BaseController
         PageLayoutHelper::renderPageEnd();
 
         return null;
-    }
-
-    /**
-     * Set text mode.
-     *
-     * @param array $params Route parameters
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedVariable Variables are used in included view files
-     */
-    public function setMode(array $params): void
-    {
-        $textId = $this->param('text');
-        if ($textId === '') {
-            return;
-        }
-
-        $showAll = $this->paramInt('mode', 0);
-        $showLearning = $this->paramInt('showLearning', 0);
-
-        Settings::save('showallwords', $showAll);
-        $oldShowLearning = Settings::getZeroOrOne('showlearningtranslations', 1);
-        Settings::save('showlearningtranslations', $showLearning);
-
-        PageLayoutHelper::renderPageStart("Text Display Mode changed", false);
-
-        $waitingIconPath = null;
-        flush();
-
-        include self::MODULE_VIEWS . '/set_mode_result.php';
-
-        PageLayoutHelper::renderPageEnd();
     }
 
     /**

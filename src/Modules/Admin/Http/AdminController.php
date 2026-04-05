@@ -339,37 +339,4 @@ class AdminController extends BaseController
 
         $this->endRender();
     }
-
-    /**
-     * Save a setting and redirect to a URL.
-     *
-     * This endpoint replaces the legacy save_setting_redirect.php file.
-     *
-     * GET parameters:
-     * - k: Setting key
-     * - v: Setting value
-     * - u: Redirect URL (optional)
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return \Lwt\Shared\Infrastructure\Http\RedirectResponse|null
-     */
-    public function saveSetting(array $params): ?\Lwt\Shared\Infrastructure\Http\RedirectResponse
-    {
-        $key = $this->param('k');
-        $value = $this->param('v');
-        $url = $this->param('u');
-
-        // Save the setting if key is provided
-        if ($key !== '') {
-            $this->adminFacade->saveAndClearSession($key, $value);
-        }
-
-        // Redirect if URL is provided
-        if ($url !== '') {
-            return $this->redirect($url);
-        }
-
-        return null;
-    }
 }
