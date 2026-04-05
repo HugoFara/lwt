@@ -7,6 +7,14 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Changed
+
+* **Replaced legacy PNG/GIF icons with pure CSS in dark themes**: The Dark,
+  Dark_Muted, and Underline_Dark themes used a PNG sprite sheet for custom
+  checkbox/radio styling. Replaced with CSS borders and inline SVG. Also removed
+  36 unused image files (spinners, speaker icons, test result icons, etc.) that
+  had already been superseded by Lucide SVG icons.
+
 ### Removed
 
 * **Dead route `/text/set-mode`**: This endpoint (and its view, controller

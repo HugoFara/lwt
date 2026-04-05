@@ -110,12 +110,18 @@ input[type="checkbox"] + .wrap_checkbox > span {
   height: 17px;
   margin: -1px 4px 0 0;
   vertical-align: middle;
-  background: url(check_radio_sheet2.png) 1px top no-repeat;
+  border: 1.5px solid #888;
+  border-radius: 3px;
+  background-color: #333;
   cursor: pointer;
 }
 
 input[type="checkbox"]:checked + .wrap_checkbox > span {
-  background: url(check_radio_sheet2.png) -16px top no-repeat;
+  background-color: #555;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23f2f2f2' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3 8l3.5 3.5L13 5'/%3E%3C/svg%3E");
+  background-size: 13px;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 input[type="radio"] {
@@ -134,12 +140,14 @@ input[type="radio"] + .wrap_radio > span {
   height: 17px;
   margin: -5px 4px 0 0;
   vertical-align: middle;
-  background: url(check_radio_sheet2.png) -34px 1px no-repeat;
+  border: 1.5px solid #888;
+  border-radius: 50%;
+  background-color: #333;
   cursor: pointer;
 }
 
 input[type="radio"]:checked + .wrap_radio > span {
-  background: url(check_radio_sheet2.png) -51px 1px no-repeat;
+  box-shadow: inset 0 0 0 3px #333, inset 0 0 0 7px #f2f2f2;
 }
 
 /* Dark gradient controls */
