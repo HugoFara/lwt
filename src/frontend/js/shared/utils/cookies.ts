@@ -17,7 +17,7 @@
 export function getCookie(check_name: string): string | null {
   const a_all_cookies = document.cookie.split(';');
   let a_temp_cookie: string[];
-  let cookie_name = '';
+  let cookie_name: string;
   let cookie_value = '';
 
   for (let i = 0; i < a_all_cookies.length; i++) {

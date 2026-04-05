@@ -10,13 +10,12 @@
     "skipLibCheck": true,
     "allowJs": false,
     "declaration": false,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/frontend/js/*"],
-      "@shared/*": ["src/frontend/js/shared/*"],
-      "@modules/*": ["src/frontend/js/modules/*"],
-      "@css/*": ["src/frontend/css/base/*"],
-      "@themes/*": ["src/frontend/css/themes/*"]
+      "@/*": ["./src/frontend/js/*"],
+      "@shared/*": ["./src/frontend/js/shared/*"],
+      "@modules/*": ["./src/frontend/js/modules/*"],
+      "@css/*": ["./src/frontend/css/base/*"],
+      "@themes/*": ["./src/frontend/css/themes/*"]
     },
     "types": ["vite/client", "node"]
   },

@@ -81,9 +81,9 @@ export function generateWordTooltipContent(element: HTMLElement): string {
   const delimiter = getDelimiter();
   const re = new RegExp('([' + delimiter + '])(?! )', 'g');
 
-  let title = '';
   const dataText = getAttr(element, 'data_text');
 
+  let title;
   if (element.classList.contains('mwsty')) {
     title = "<p><b style='font-size:120%'>" + dataText + '</b></p>';
   } else {
