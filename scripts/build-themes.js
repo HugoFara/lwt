@@ -1,8 +1,10 @@
 /**
  * Theme CSS minifier and asset copier.
  *
- * This script processes theme folders from src/frontend/css/themes/ to assets/themes/.
+ * This script processes theme folders from src/frontend/css/themes/ to dist/themes/.
  * CSS files are minified, other files (images, etc.) are copied as-is.
+ * Also builds all base CSS files from src/frontend/css/base/ to dist/css/
+ * and copies the legacy pgm.js to dist/js/.
  *
  * Usage: node scripts/build-themes.js
  */
@@ -12,9 +14,11 @@ import { join, extname } from 'path';
 import { existsSync } from 'fs';
 
 const THEMES_SRC = 'src/frontend/css/themes';
-const THEMES_DEST = 'assets/themes';
-const BASE_CSS_SRC = 'src/frontend/css/base/styles.css';
-const BASE_CSS_DEST = 'assets/css/styles.css';
+const THEMES_DEST = 'dist/themes';
+const BASE_CSS_SRC = 'src/frontend/css/base';
+const BASE_CSS_DEST = 'dist/css';
+const LEGACY_JS_SRC = 'assets/js/pgm.js';
+const LEGACY_JS_DEST = 'dist/js/pgm.js';
 
 /**
  * Simple CSS minifier - removes comments, extra whitespace, and newlines.
@@ -68,34 +72,53 @@ async function processTheme(themeName) {
       const css = await readFile(srcPath, 'utf-8');
       const minified = minifyCSS(css);
       await writeFile(destPath, minified);
-      console.log(`  ✓ ${file} (minified)`);
     } else {
       // Copy other files as-is
       await copyFile(srcPath, destPath);
-      console.log(`  ✓ ${file} (copied)`);
     }
   }
 }
 
 /**
- * Build the base CSS file.
+ * Build all base CSS files from src/frontend/css/base/ to dist/css/.
  */
 async function buildBaseCSS() {
-  console.log('Building base CSS...');
-  const css = await readFile(BASE_CSS_SRC, 'utf-8');
-  const minified = minifyCSS(css);
-  await writeFile(BASE_CSS_DEST, minified);
-  console.log(`  ✓ ${BASE_CSS_SRC} -> ${BASE_CSS_DEST} (minified)\n`);
+  if (!existsSync(BASE_CSS_DEST)) {
+    await mkdir(BASE_CSS_DEST, { recursive: true });
+  }
+
+  const files = await readdir(BASE_CSS_SRC);
+  const cssFiles = files.filter(f => extname(f).toLowerCase() === '.css');
+
+  for (const file of cssFiles) {
+    const css = await readFile(join(BASE_CSS_SRC, file), 'utf-8');
+    await writeFile(join(BASE_CSS_DEST, file), minifyCSS(css));
+  }
+
+  console.log(`Built ${cssFiles.length} base CSS files: ${cssFiles.join(', ')}`);
+}
+
+/**
+ * Copy legacy pgm.js to dist/js/ for backward compatibility.
+ */
+async function copyLegacyJS() {
+  if (!existsSync(LEGACY_JS_SRC)) {
+    return;
+  }
+  const destDir = join(LEGACY_JS_DEST, '..');
+  if (!existsSync(destDir)) {
+    await mkdir(destDir, { recursive: true });
+  }
+  await copyFile(LEGACY_JS_SRC, LEGACY_JS_DEST);
 }
 
 /**
  * Main function - process all themes.
  */
 async function main() {
-  console.log('Building themes...\n');
-
-  // Build base CSS first
+  // Build base CSS and copy legacy JS
   await buildBaseCSS();
+  await copyLegacyJS();
 
   // Ensure destination directory exists
   if (!existsSync(THEMES_DEST)) {
@@ -107,12 +130,10 @@ async function main() {
   const themes = entries.filter(e => e.isDirectory()).map(e => e.name);
 
   for (const theme of themes) {
-    console.log(`Processing theme: ${theme}`);
     await processTheme(theme);
-    console.log('');
   }
 
-  console.log(`Done! Built ${themes.length} themes.`);
+  console.log(`Processed ${themes.length} themes: ${themes.join(', ')}`);
 }
 
 main().catch(err => {

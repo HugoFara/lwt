@@ -50,7 +50,7 @@ class PageLayoutHelper
     private static function buildDataThemeAttr(): string
     {
         $themeDir = Settings::getWithDefault('set-theme-dir');
-        $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/');
+        $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/' || $themeDir === 'dist/themes/Default/');
 
         if ($isAutoTheme) {
             return '';
@@ -138,7 +138,7 @@ class PageLayoutHelper
         $themeDir = Settings::getWithDefault('set-theme-dir');
         $themeJsonPath = $themeDir . 'theme.json';
         $themeMode = 'light';
-        $themeCounterpart = 'assets/themes/Dark/';
+        $themeCounterpart = 'dist/themes/Dark/';
         if ($themeDir !== '' && file_exists($themeJsonPath)) {
             $json = file_get_contents($themeJsonPath);
             if ($json !== false) {
@@ -148,11 +148,11 @@ class PageLayoutHelper
                     $themeMode = (isset($meta['mode']) && is_string($meta['mode']))
                         ? $meta['mode'] : 'light';
                     $themeCounterpart = (isset($meta['counterpart']) && is_string($meta['counterpart']))
-                        ? $meta['counterpart'] : 'assets/themes/Dark/';
+                        ? $meta['counterpart'] : 'dist/themes/Dark/';
                 }
             }
         }
-        $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/');
+        $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/' || $themeDir === 'dist/themes/Default/');
         $toggleIcon = $themeMode === 'dark' ? 'sun' : 'moon';
         $toggleTitle = $themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
         $toggleIconHtml = IconHelper::render($toggleIcon, ['alt' => $toggleTitle]);
@@ -637,7 +637,7 @@ HTML;
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
-            echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';
+            echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/dist/css/styles.css') . '" />';
         }
 
         echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
@@ -698,8 +698,8 @@ HTML;
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
-            echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';
-            $jsUrl = UrlUtilities::url('/assets/js/pgm.js');
+            echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/dist/css/styles.css') . '" />';
+            $jsUrl = UrlUtilities::url('/dist/js/pgm.js');
             echo '<script type="text/javascript" src="' . $jsUrl . '" charset="utf-8"></script>';
         }
 
@@ -771,7 +771,7 @@ HTML;
         echo '<head>';
         echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
         echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
-        echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';
+        echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/dist/css/styles.css') . '" />';
         echo '<link rel="shortcut icon" href="' . UrlUtilities::url('/favicon.ico') . '" type="image/x-icon"/>';
         echo '<!--' . "\n";
         echo file_get_contents("LICENSE");

@@ -211,10 +211,10 @@ class StringUtils
      * Get the path of a file using the theme directory.
      *
      * Maps legacy paths to new asset locations:
-     * - css/* -> assets/css/*
+     * - css/* -> dist/css/*
      * - icn/* -> assets/icons/*
      * - img/* -> assets/images/*
-     * - js/* -> assets/js/*
+     * - js/* -> dist/js/*
      *
      * @param string $filename Filename
      *
@@ -224,10 +224,10 @@ class StringUtils
     {
         // Legacy path mappings
         $mappings = [
-            'css/' => 'assets/css/',
+            'css/' => 'dist/css/',
             'icn/' => 'assets/icons/',
             'img/' => 'assets/images/',
-            'js/' => 'assets/js/',
+            'js/' => 'dist/js/',
             'sounds/' => 'assets/sounds/',
         ];
 

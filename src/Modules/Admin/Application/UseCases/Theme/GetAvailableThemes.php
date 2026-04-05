@@ -29,7 +29,7 @@ class GetAvailableThemes
     /**
      * Execute the use case.
      *
-     * Scans the assets/themes/ directory for theme directories.
+     * Scans the dist/themes/ directory for theme directories.
      * The Default theme is discovered via glob like all others
      * (it has a theme.json but no styles.css — the base CSS handles it).
      *
@@ -46,7 +46,7 @@ class GetAvailableThemes
     public function execute(): array
     {
         $themes = [];
-        $globResult = glob('assets/themes/*', GLOB_ONLYDIR);
+        $globResult = glob('dist/themes/*', GLOB_ONLYDIR);
         $themeDirs = $globResult === false ? [] : $globResult;
 
         // Ensure Default appears first by processing it separately
@@ -54,7 +54,7 @@ class GetAvailableThemes
         foreach ($themeDirs as $theme) {
             $metadata = $this->loadThemeMetadata($theme);
             $entry = array_merge(['path' => $theme . '/'], $metadata);
-            if ($theme === 'assets/themes/Default') {
+            if ($theme === 'dist/themes/Default') {
                 array_unshift($themes, $entry);
             } else {
                 $otherThemes[] = $entry;
@@ -64,11 +64,12 @@ class GetAvailableThemes
         // If Default wasn't found via glob (shouldn't happen), add it manually
         if (empty($themes)) {
             $themes[] = [
-                'path' => 'assets/themes/Default/',
+                'path' => 'dist/themes/Default/',
                 'name' => 'Default',
-                'description' => 'Standard theme with background color highlighting. Auto-detects dark mode from system preference.',
+                'description' => 'Standard theme with background color highlighting. '
+                    . 'Auto-detects dark mode from system preference.',
                 'mode' => 'light',
-                'counterpart' => 'assets/themes/Dark/',
+                'counterpart' => 'dist/themes/Dark/',
                 'highlighting' => 'Background color highlighting',
                 'wordBreaking' => 'Standard',
             ];
@@ -94,13 +95,13 @@ class GetAvailableThemes
     private function loadThemeMetadata(string $themePath): array
     {
         $jsonPath = $themePath . '/theme.json';
-        $fallbackName = str_replace(['assets/themes/', '_'], ['', ' '], $themePath);
+        $fallbackName = str_replace(['dist/themes/', '_'], ['', ' '], $themePath);
 
         $defaults = [
             'name' => $fallbackName,
             'description' => '',
             'mode' => 'light',
-            'counterpart' => 'assets/themes/Dark/',
+            'counterpart' => 'dist/themes/Dark/',
             'highlighting' => '',
             'wordBreaking' => ''
         ];

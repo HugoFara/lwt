@@ -60,7 +60,7 @@ export default defineConfig({
   },
 
   build: {
-    outDir: resolve(__dirname, 'assets'),
+    outDir: resolve(__dirname, 'dist'),
     emptyOutDir: false,
     manifest: true,
     target: 'es2022',

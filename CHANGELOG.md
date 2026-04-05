@@ -9,6 +9,11 @@ ones are marked like "v1.0.0-fork".
 
 ### Changed
 
+* **Separated build output from static assets**: Build output (Vite bundles,
+  theme CSS, base CSS) now goes to `dist/` instead of `assets/`. Static files
+  (images, sounds, manifest) stay in `assets/`. The `dist/` directory is fully
+  gitignored — cloning requires `npm run build:all`. Includes a DB migration to
+  update stored theme directory paths.
 * **Replaced legacy PNG/GIF icons with pure CSS in dark themes**: The Dark,
   Dark_Muted, and Underline_Dark themes used a PNG sprite sheet for custom
   checkbox/radio styling. Replaced with CSS borders and inline SVG. Also removed

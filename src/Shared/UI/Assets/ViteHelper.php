@@ -76,7 +76,7 @@ class ViteHelper
     public static function getManifest(): ?array
     {
         if (self::$manifest === null) {
-            $path = __DIR__ . '/../../../../assets/.vite/manifest.json';
+            $path = __DIR__ . '/../../../../dist/.vite/manifest.json';
             if (file_exists($path)) {
                 $content = file_get_contents($path);
                 if ($content !== false) {
@@ -130,7 +130,7 @@ HTML;
         if (isset($entryData['css']) && is_array($entryData['css'])) {
             /** @var mixed $cssFile */
             foreach ($entryData['css'] as $cssFile) {
-                $cssPath = UrlUtilities::url('/assets/' . htmlspecialchars((string) $cssFile));
+                $cssPath = UrlUtilities::url('/dist/' . htmlspecialchars((string) $cssFile));
                 if ($asyncCss) {
                     // CSP-compliant async CSS: use media="print" initially,
                     // JS in main.ts will switch to media="all" on load
@@ -145,7 +145,7 @@ HTML;
 
         // Load JS module
         if (isset($entryData['file']) && is_string($entryData['file'])) {
-            $jsPath = UrlUtilities::url('/assets/' . htmlspecialchars($entryData['file']));
+            $jsPath = UrlUtilities::url('/dist/' . htmlspecialchars($entryData['file']));
             $html .= '<script type="module" src="' . $jsPath . '"></script>' . "\n";
         }
 

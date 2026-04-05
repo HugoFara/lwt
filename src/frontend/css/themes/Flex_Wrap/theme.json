@@ -2,7 +2,7 @@
     "name": "Flex Wrap",
     "description": "Light theme with modified word breaking rules. Punctuation may wrap separately from words.",
     "mode": "light",
-    "counterpart": "assets/themes/Dark/",
+    "counterpart": "dist/themes/Dark/",
     "highlighting": "Background color highlighting",
     "wordBreaking": "Modified - punctuation can break separately"
 }

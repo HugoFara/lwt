@@ -1,8 +1,0 @@
-{
-    "name": "Dark Muted",
-    "description": "Dark theme where highlighted words remain white. Minimal visual distraction from word colors.",
-    "mode": "dark",
-    "counterpart": "assets/themes/Default/",
-    "highlighting": "White text on dark background",
-    "wordBreaking": "Standard"
-}

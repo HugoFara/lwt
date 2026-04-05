@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core;
 
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
@@ -29,29 +27,6 @@ use Lwt\Modules\Admin\Application\AdminFacade;
 use Lwt\Modules\Admin\Infrastructure\MySqlSettingsRepository;
 use Lwt\Modules\Admin\Infrastructure\MySqlBackupRepository;
 use PHPUnit\Framework\TestCase;
-
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/Shared/UI/Helpers/FormHelper.php';
-require_once __DIR__ . '/../../../src/Shared/UI/Helpers/SelectOptionsBuilder.php';
-require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Helpers/StatusHelper.php';
-require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextStatisticsService.php';
-require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/SentenceService.php';
-require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextNavigationService.php';
-require_once __DIR__ . '/../../../src/Modules/Language/Application/Services/TextParsingService.php';
-require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Database/Restore.php';
-require_once __DIR__ . '/../../../src/Modules/Vocabulary/Application/Services/ExportService.php';
-require_once __DIR__ . '/../../../src/Modules/Admin/Application/Services/MediaService.php';
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Dictionary/DictionaryAdapter.php';
-// LanguageFacade loaded via autoloader
 
 /**
  * Integration tests for core functionality.
@@ -183,16 +158,15 @@ class IntegrationTest extends TestCase
         $this->assertStringContainsString('file.png', $result);
 
         // Test legacy path mappings
-        $this->assertEquals('/assets/css/styles.css', StringUtils::getFilePath('css/styles.css'));
+        $this->assertEquals('/dist/css/styles.css', StringUtils::getFilePath('css/styles.css'));
         $this->assertEquals('/assets/icons/example.svg', StringUtils::getFilePath('icn/example.svg'));
         $this->assertEquals(
             '/assets/images/apple-touch-icon.png',
             StringUtils::getFilePath('img/apple-touch-icon.png')
         );
-        $this->assertEquals('/assets/js/pgm.js', StringUtils::getFilePath('js/pgm.js'));
+        $this->assertEquals('/dist/js/pgm.js', StringUtils::getFilePath('js/pgm.js'));
 
         // Test paths that already have assets/ prefix - should not double-prefix
-        $this->assertEquals('/assets/css/styles.css', StringUtils::getFilePath('assets/css/styles.css'));
         $this->assertEquals('/assets/sounds/click.mp3', StringUtils::getFilePath('assets/sounds/click.mp3'));
     }
 
@@ -732,7 +706,6 @@ class IntegrationTest extends TestCase
         Connection::query("DELETE FROM texts WHERE TxLgID = $lang_id");
         Connection::query("DELETE FROM languages WHERE LgID = $lang_id");
     }
-
 
     public function testMediaPathsSearchExtended(): void
     {
