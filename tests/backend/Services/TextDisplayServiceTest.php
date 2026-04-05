@@ -11,6 +11,7 @@ use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Text\Application\Services\TextDisplayService;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -26,6 +27,7 @@ require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextDisp
  *
  * Tests data retrieval for text display functionality.
  */
+#[Group('integration')]
 class TextDisplayServiceTest extends TestCase
 {
     private static bool $dbConnected = false;

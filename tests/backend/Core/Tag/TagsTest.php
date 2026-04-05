@@ -13,6 +13,7 @@ use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Tags\Application\TagsFacade;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -27,6 +28,7 @@ require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_boot
  *
  * Tests tag creation, retrieval, assignment to words/texts, and list manipulation
  */
+#[Group('integration')]
 class TagsTest extends TestCase
 {
     private static $dbConnection;

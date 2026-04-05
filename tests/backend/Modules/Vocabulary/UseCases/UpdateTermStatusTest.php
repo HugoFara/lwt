@@ -12,6 +12,7 @@ use Lwt\Modules\Vocabulary\Domain\TermRepositoryInterface;
 use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the UpdateTermStatus use case.
@@ -111,10 +112,7 @@ class UpdateTermStatusTest extends TestCase
 
         $this->useCase->execute(42, 10); // Invalid status
     }
-
-    /**
-     * @dataProvider validStatusProvider
-     */
+    #[DataProvider('validStatusProvider')]
     public function testExecuteAcceptsValidStatuses(int $status): void
     {
         $this->repository->method('updateStatus')->willReturn(true);

@@ -27,6 +27,7 @@ use Lwt\Modules\User\UserServiceProvider;
 use Lwt\Modules\Dictionary\DictionaryServiceProvider;
 use Lwt\Modules\Book\BookServiceProvider;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
@@ -85,10 +86,7 @@ class ApiV1RoutingTest extends TestCase
     }
 
     // ===== Endpoints class tests =====
-
-    /**
-     * @dataProvider validEndpointsProvider
-     */
+    #[DataProvider('validEndpointsProvider')]
     public function testResolveValidEndpoints(string $method, string $uri, string $expectedEndpoint): void
     {
         $result = Endpoints::resolve($method, $uri);

@@ -8,6 +8,7 @@ use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Language\Application\Services\TextParsingService;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 use ReflectionMethod;
 
 /**
@@ -264,10 +265,7 @@ class SentenceServiceTest extends TestCase
     // =========================================================================
     // formatSentence() Tests (requires database)
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatSentenceReturnsArrayWithTwoElements(): void
     {
         // formatSentence requires database access (looks up sentence by ID)
@@ -284,10 +282,7 @@ class SentenceServiceTest extends TestCase
     // =========================================================================
     // getSentenceText() Tests (requires database)
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetSentenceTextReturnsString(): void
     {
         // getSentenceText requires database access

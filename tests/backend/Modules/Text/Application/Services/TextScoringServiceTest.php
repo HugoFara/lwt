@@ -23,14 +23,15 @@ use Lwt\Modules\Text\Application\Services\TextScoringService;
 use Lwt\Modules\Text\Domain\TextScore;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for TextScoringService and TextScore value object.
  *
- * @covers \Lwt\Modules\Text\Application\Services\TextScoringService
- * @covers \Lwt\Modules\Text\Domain\TextScore
  * @since  3.0.0
  */
+#[CoversClass(TextScoringService::class)]
+#[CoversClass(TextScore::class)]
 class TextScoringServiceTest extends TestCase
 {
     // =========================================================================

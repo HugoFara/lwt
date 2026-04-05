@@ -6,12 +6,13 @@ namespace Lwt\Tests\Shared\Infrastructure\Exception;
 
 use Lwt\Shared\Infrastructure\Exception\LwtException;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Tests for the base LwtException class.
  *
- * @covers \Lwt\Shared\Infrastructure\Exception\LwtException
  */
+#[CoversClass(LwtException::class)]
 class LwtExceptionTest extends TestCase
 {
     public function testConstructorWithMessage(): void

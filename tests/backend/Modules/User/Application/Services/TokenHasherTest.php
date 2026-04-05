@@ -6,12 +6,13 @@ namespace Lwt\Tests\Modules\User\Application\Services;
 
 use Lwt\Modules\User\Application\Services\TokenHasher;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for the TokenHasher service.
  *
- * @covers \Lwt\Modules\User\Application\Services\TokenHasher
  */
+#[CoversClass(TokenHasher::class)]
 class TokenHasherTest extends TestCase
 {
     private TokenHasher $hasher;

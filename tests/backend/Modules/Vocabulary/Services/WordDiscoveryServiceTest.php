@@ -13,6 +13,7 @@ use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../../.env');
@@ -443,10 +444,7 @@ class WordDiscoveryServiceTest extends TestCase
     }
 
     // ===== Status Value Tests =====
-
-    /**
-     * @dataProvider statusValueProvider
-     */
+    #[DataProvider('statusValueProvider')]
     public function testValidStatusValues(int $status, string $description): void
     {
         // Document valid status values

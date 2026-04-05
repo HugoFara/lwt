@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Backend\Modules\Vocabulary\Application\Services;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Lwt\Modules\Vocabulary\Application\Services\WordFamilyService;
 use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 
@@ -101,10 +102,7 @@ class WordFamilyServiceTest extends TestCase
 
         $this->assertSame(0, $result);
     }
-
-    /**
-     * @dataProvider validStatusProvider
-     */
+    #[DataProvider('validStatusProvider')]
     public function testUpdateWordFamilyStatusAcceptsValidStatus(int $status): void
     {
         $result = $this->service->updateWordFamilyStatus(1, 'test', $status);
@@ -151,10 +149,7 @@ class WordFamilyServiceTest extends TestCase
 
         $this->assertSame(0, $result);
     }
-
-    /**
-     * @dataProvider validStatusProvider
-     */
+    #[DataProvider('validStatusProvider')]
     public function testBulkUpdateTermStatusAcceptsValidStatus(int $status): void
     {
         $result = $this->service->bulkUpdateTermStatus([1], $status);

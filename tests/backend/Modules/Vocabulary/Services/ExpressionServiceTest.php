@@ -6,14 +6,16 @@ namespace Tests\Modules\Vocabulary\Services;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Language\Application\Services\TextParsingService;
 
 /**
  * Tests for ExpressionService.
  *
- * @covers \Lwt\Modules\Vocabulary\Application\Services\ExpressionService
  */
+#[CoversClass(ExpressionService::class)]
 class ExpressionServiceTest extends TestCase
 {
     private ExpressionService $service;
@@ -182,10 +184,7 @@ class ExpressionServiceTest extends TestCase
     // =========================================================================
     // Mode Parameter Tests (for insertExpressions)
     // =========================================================================
-
-    /**
-     * @dataProvider modeParameterProvider
-     */
+    #[DataProvider('modeParameterProvider')]
     public function testInsertExpressionsModeValidValues(int $mode, string $description): void
     {
         // Document valid mode values
@@ -290,10 +289,7 @@ class ExpressionServiceTest extends TestCase
     // =========================================================================
     // Hex Parameter Tests
     // =========================================================================
-
-    /**
-     * @dataProvider hexParameterProvider
-     */
+    #[DataProvider('hexParameterProvider')]
     public function testHexParameterFormats(string $hex, string $description): void
     {
         // Document valid hex formats used in the service

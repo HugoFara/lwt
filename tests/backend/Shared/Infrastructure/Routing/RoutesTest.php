@@ -6,6 +6,7 @@ namespace Tests\Shared\Infrastructure\Routing;
 
 use Lwt\Shared\Infrastructure\Routing\Router;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Integration tests for all route definitions
@@ -97,10 +98,7 @@ class RoutesTest extends TestCase
         $this->assertEquals('handler', $result['type']);
         $this->assertEquals('Lwt\\Modules\\Home\\Http\\HomeController@index', $result['handler']);
     }
-
-    /**
-     * @dataProvider indexPhpWithPathInfoProvider
-     */
+    #[DataProvider('indexPhpWithPathInfoProvider')]
     public function testIndexPhpWithPathInfoRedirect(string $path, string $expectedRedirect): void
     {
         $result = $this->simulateRequest($path);
@@ -121,10 +119,7 @@ class RoutesTest extends TestCase
     }
 
     // ==================== TEXT ROUTES TESTS ====================
-
-    /**
-     * @dataProvider textRoutesProvider
-     */
+    #[DataProvider('textRoutesProvider')]
     public function testTextRoutes(string $path, string $expectedHandler): void
     {
         $result = $this->simulateRequest($path);
@@ -162,10 +157,7 @@ class RoutesTest extends TestCase
     }
 
     // ==================== WORD ROUTES TESTS ====================
-
-    /**
-     * @dataProvider wordRoutesProvider
-     */
+    #[DataProvider('wordRoutesProvider')]
     public function testWordRoutes(string $path, string $expectedHandler): void
     {
         $result = $this->simulateRequest($path);
@@ -197,10 +189,7 @@ class RoutesTest extends TestCase
     }
 
     // ==================== TEST ROUTES TESTS ====================
-
-    /**
-     * @dataProvider reviewTestRoutesProvider
-     */
+    #[DataProvider('reviewTestRoutesProvider')]
     public function testReviewTestRoutes(string $path, string $expectedHandler): void
     {
         $result = $this->simulateRequest($path);
@@ -217,10 +206,7 @@ class RoutesTest extends TestCase
     }
 
     // ==================== LANGUAGE ROUTES TESTS ====================
-
-    /**
-     * @dataProvider languageRoutesProvider
-     */
+    #[DataProvider('languageRoutesProvider')]
     public function testLanguageRoutes(string $path, string $expectedHandler): void
     {
         $result = $this->simulateRequest($path);
@@ -237,10 +223,7 @@ class RoutesTest extends TestCase
     }
 
     // ==================== TAG ROUTES TESTS ====================
-
-    /**
-     * @dataProvider tagRoutesProvider
-     */
+    #[DataProvider('tagRoutesProvider')]
     public function testTagRoutes(string $path, string $expectedHandler): void
     {
         $result = $this->simulateRequest($path);
@@ -258,10 +241,7 @@ class RoutesTest extends TestCase
     }
 
     // ==================== FEED ROUTES TESTS ====================
-
-    /**
-     * @dataProvider feedRoutesProvider
-     */
+    #[DataProvider('feedRoutesProvider')]
     public function testFeedRoutes(string $path, string $expectedHandler): void
     {
         $result = $this->simulateRequest($path);
@@ -280,10 +260,7 @@ class RoutesTest extends TestCase
     }
 
     // ==================== ADMIN ROUTES TESTS ====================
-
-    /**
-     * @dataProvider adminRoutesProvider
-     */
+    #[DataProvider('adminRoutesProvider')]
     public function testAdminRoutes(string $path, string $expectedHandler): void
     {
         $result = $this->simulateRequest($path);
@@ -305,10 +282,7 @@ class RoutesTest extends TestCase
     }
 
     // ==================== WORDPRESS ROUTES TESTS ====================
-
-    /**
-     * @dataProvider wordpressRoutesProvider
-     */
+    #[DataProvider('wordpressRoutesProvider')]
     public function testWordpressRoutes(string $path, string $expectedHandler): void
     {
         $result = $this->simulateRequest($path);
@@ -326,10 +300,7 @@ class RoutesTest extends TestCase
     }
 
     // ==================== API ROUTES TESTS ====================
-
-    /**
-     * @dataProvider apiRoutesProvider
-     */
+    #[DataProvider('apiRoutesProvider')]
     public function testApiRoutes(string $path, string $expectedHandler): void
     {
         $result = $this->simulateRequest($path);

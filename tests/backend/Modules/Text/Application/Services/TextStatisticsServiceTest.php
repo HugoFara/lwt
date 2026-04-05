@@ -24,13 +24,14 @@ namespace Tests\Modules\Text\Application\Services;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for TextStatisticsService.
  *
- * @covers \Lwt\Modules\Text\Application\Services\TextStatisticsService
  * @since  3.0.0
  */
+#[CoversClass(TextStatisticsService::class)]
 class TextStatisticsServiceTest extends TestCase
 {
     // =========================================================================

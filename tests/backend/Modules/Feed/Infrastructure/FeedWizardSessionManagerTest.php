@@ -6,14 +6,15 @@ namespace Lwt\Tests\Modules\Feed\Infrastructure;
 
 use Lwt\Modules\Feed\Infrastructure\FeedWizardSessionManager;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for FeedWizardSessionManager.
  *
  * Tests session state management for the Feed wizard workflow.
  *
- * @covers \Lwt\Modules\Feed\Infrastructure\FeedWizardSessionManager
  */
+#[CoversClass(FeedWizardSessionManager::class)]
 class FeedWizardSessionManagerTest extends TestCase
 {
     private FeedWizardSessionManager $manager;

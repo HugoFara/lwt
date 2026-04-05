@@ -21,13 +21,14 @@ namespace Tests\Modules\Text\Application\Services;
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for AnnotationService.
  *
- * @covers \Lwt\Modules\Text\Application\Services\AnnotationService
  * @since  3.0.0
  */
+#[CoversClass(AnnotationService::class)]
 class AnnotationServiceTest extends TestCase
 {
     private AnnotationService $service;

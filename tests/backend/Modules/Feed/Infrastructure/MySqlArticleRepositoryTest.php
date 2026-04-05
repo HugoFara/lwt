@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Tests\Modules\Feed\Infrastructure;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Lwt\Modules\Feed\Infrastructure\MySqlArticleRepository;
 use Lwt\Modules\Feed\Domain\Article;
 
 /**
  * Tests for MySqlArticleRepository.
  *
- * @covers \Lwt\Modules\Feed\Infrastructure\MySqlArticleRepository
  */
+#[CoversClass(MySqlArticleRepository::class)]
 class MySqlArticleRepositoryTest extends TestCase
 {
     private MySqlArticleRepository $repository;

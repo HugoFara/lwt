@@ -8,6 +8,7 @@ use Lwt\Modules\Language\Http\LanguageApiHandler;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Unit tests for LanguageApiHandler.
@@ -173,10 +174,7 @@ class LanguageApiHandlerTest extends TestCase
     // =========================================================================
     // formatReadingConfiguration tests (thin wrapper)
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatReadingConfigurationDelegatesToGetReadingConfiguration(): void
     {
         // This test requires database access with full schema
@@ -197,10 +195,7 @@ class LanguageApiHandlerTest extends TestCase
     // =========================================================================
     // getReadingConfiguration tests (structure validation)
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetReadingConfigurationReturnsExpectedStructure(): void
     {
         // This test requires database access with full schema
@@ -216,10 +211,7 @@ class LanguageApiHandlerTest extends TestCase
         $this->assertArrayHasKey('abbreviation', $result);
         $this->assertArrayHasKey('reading_mode', $result);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetReadingConfigurationReturnsEmptyForNonexistentLanguage(): void
     {
         // This test requires database access with full schema
@@ -236,10 +228,7 @@ class LanguageApiHandlerTest extends TestCase
     // =========================================================================
     // getSimilarTerms tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetSimilarTermsReturnsExpectedStructure(): void
     {
         try {
@@ -252,10 +241,7 @@ class LanguageApiHandlerTest extends TestCase
         $this->assertArrayHasKey('similar_terms', $result);
         $this->assertIsString($result['similar_terms']);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatSimilarTermsDelegatesToGetSimilarTerms(): void
     {
         try {
@@ -271,10 +257,7 @@ class LanguageApiHandlerTest extends TestCase
     // =========================================================================
     // getSentencesWithTerm tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetSentencesWithTermReturnsArray(): void
     {
         try {
@@ -285,10 +268,7 @@ class LanguageApiHandlerTest extends TestCase
 
         $this->assertIsArray($result);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetSentencesWithTermWithWordId(): void
     {
         try {
@@ -299,10 +279,7 @@ class LanguageApiHandlerTest extends TestCase
 
         $this->assertIsArray($result);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatSentencesWithRegisteredTermDelegates(): void
     {
         try {
@@ -313,10 +290,7 @@ class LanguageApiHandlerTest extends TestCase
 
         $this->assertIsArray($result);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatSentencesWithNewTermDelegates(): void
     {
         try {
@@ -327,10 +301,7 @@ class LanguageApiHandlerTest extends TestCase
 
         $this->assertIsArray($result);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatSentencesWithNewTermAdvancedSearch(): void
     {
         try {
@@ -589,10 +560,7 @@ class LanguageApiHandlerTest extends TestCase
     // =========================================================================
     // formatSetDefault tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatSetDefaultReturnsSuccess(): void
     {
         try {

@@ -9,6 +9,7 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Unit tests for TermTranslationApiHandler.
@@ -190,10 +191,7 @@ class TermTranslationApiHandlerTest extends TestCase
     // =========================================================================
     // getTermTags tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetTermTagsReturnsExpectedStructure(): void
     {
         try {
@@ -207,10 +205,7 @@ class TermTranslationApiHandlerTest extends TestCase
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetTermTagsReturnsEmptyArrayForNonExistentTerm(): void
     {
         try {
@@ -226,10 +221,7 @@ class TermTranslationApiHandlerTest extends TestCase
     // =========================================================================
     // setTermTags tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testSetTermTagsReturnsSuccess(): void
     {
         try {
@@ -247,10 +239,7 @@ class TermTranslationApiHandlerTest extends TestCase
     // =========================================================================
     // addNewTermTranslation tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testAddNewTermTranslationRequiresDatabase(): void
     {
         try {
@@ -285,10 +274,7 @@ class TermTranslationApiHandlerTest extends TestCase
     // =========================================================================
     // editTermTranslation tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testEditTermTranslationReturnsString(): void
     {
         try {
@@ -305,10 +291,7 @@ class TermTranslationApiHandlerTest extends TestCase
     // =========================================================================
     // checkUpdateTranslation tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testCheckUpdateTranslationReturnsErrorForNonExistentWord(): void
     {
         try {
@@ -327,10 +310,7 @@ class TermTranslationApiHandlerTest extends TestCase
     // =========================================================================
     // formatUpdateTranslation tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatUpdateTranslationReturnsErrorForNonExistent(): void
     {
         try {
@@ -344,10 +324,7 @@ class TermTranslationApiHandlerTest extends TestCase
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatUpdateTranslationTrimsInput(): void
     {
         try {
@@ -364,10 +341,7 @@ class TermTranslationApiHandlerTest extends TestCase
     // =========================================================================
     // formatAddTranslation tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatAddTranslationTrimsInput(): void
     {
         try {
@@ -451,10 +425,7 @@ class TermTranslationApiHandlerTest extends TestCase
     // =========================================================================
     // Integration tests for complete flows
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testCompleteTranslationWorkflow(): void
     {
         try {
@@ -471,10 +442,7 @@ class TermTranslationApiHandlerTest extends TestCase
             $this->markTestSkipped('Database schema not compatible: ' . $e->getMessage());
         }
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testDictionaryAndSimilarTermsWorkflow(): void
     {
         $this->findSimilarTerms->method('getFormattedTerms')

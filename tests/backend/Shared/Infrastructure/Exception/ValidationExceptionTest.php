@@ -6,12 +6,13 @@ namespace Lwt\Tests\Shared\Infrastructure\Exception;
 
 use Lwt\Shared\Infrastructure\Exception\ValidationException;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Tests for the ValidationException class.
  *
- * @covers \Lwt\Shared\Infrastructure\Exception\ValidationException
  */
+#[CoversClass(ValidationException::class)]
 class ValidationExceptionTest extends TestCase
 {
     public function testConstructorDefaults(): void

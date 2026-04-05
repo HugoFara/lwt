@@ -6,12 +6,13 @@ namespace Lwt\Tests\Modules\User\Application\Services;
 
 use Lwt\Modules\User\Application\Services\PasswordHasher;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for the PasswordHasher service.
  *
- * @covers \Lwt\Modules\User\Application\Services\PasswordHasher
  */
+#[CoversClass(PasswordHasher::class)]
 class PasswordHasherTest extends TestCase
 {
     private PasswordHasher $hasher;

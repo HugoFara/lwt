@@ -8,6 +8,7 @@ use Lwt\Modules\Language\Domain\Parser\ExternalParserConfig;
 use Lwt\Modules\Language\Domain\Parser\ParserConfig;
 use Lwt\Modules\Language\Infrastructure\Parser\ExternalParser;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 use RuntimeException;
 
 /**
@@ -153,10 +154,7 @@ class ExternalParserTest extends TestCase
 
         $this->assertTrue($result->isEmpty());
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testParseWithCatAsEchoLineFormat(): void
     {
         // Skip on Windows where cat may not be available
@@ -183,10 +181,7 @@ class ExternalParserTest extends TestCase
         $this->assertFalse($result->isEmpty());
         $this->assertGreaterThan(0, $result->getTokenCount());
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testParseWithCatCommandStdinMode(): void
     {
         // Skip on Windows
@@ -216,10 +211,7 @@ class ExternalParserTest extends TestCase
         $this->assertEquals('word2', $tokens[1]->getText());
         $this->assertEquals('word3', $tokens[2]->getText());
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testParseWithFileInputMode(): void
     {
         // Skip on Windows

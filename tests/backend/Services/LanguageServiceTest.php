@@ -12,6 +12,7 @@ use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -28,6 +29,7 @@ require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstr
  * Tests language CRUD operations, text reparsing,
  * and related data count functionality.
  */
+#[Group('integration')]
 class LanguageServiceTest extends TestCase
 {
     private static bool $dbConnected = false;

@@ -11,6 +11,7 @@ use Lwt\Modules\Feed\Domain\Feed;
 use Lwt\Modules\Feed\Domain\FeedRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for the LoadFeed use case.
@@ -18,8 +19,8 @@ use PHPUnit\Framework\MockObject\MockObject;
  * Tests feed loading/refreshing including RSS parsing, article insertion,
  * duplicate handling, and timestamp updates.
  *
- * @covers \Lwt\Modules\Feed\Application\UseCases\LoadFeed
  */
+#[CoversClass(LoadFeed::class)]
 class LoadFeedUseCaseTest extends TestCase
 {
     /** @var FeedRepositoryInterface&MockObject */

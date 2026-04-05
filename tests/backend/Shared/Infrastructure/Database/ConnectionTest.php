@@ -18,13 +18,14 @@ namespace Tests\Shared\Infrastructure\Database;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for Connection static helper methods.
  *
- * @covers \Lwt\Shared\Infrastructure\Database\Connection
  * @since  3.0.0
  */
+#[CoversClass(Connection::class)]
 class ConnectionTest extends TestCase
 {
     // =========================================================================

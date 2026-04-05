@@ -9,16 +9,17 @@ use Lwt\Modules\User\Application\UseCases\ValidateSession;
 use Lwt\Modules\User\Domain\User;
 use Lwt\Modules\User\Domain\UserRepositoryInterface;
 use Lwt\Shared\Infrastructure\Globals;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for the ValidateSession use case.
- *
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
 class ValidateSessionTest extends TestCase
 {
     /** @var UserRepositoryInterface&MockObject */

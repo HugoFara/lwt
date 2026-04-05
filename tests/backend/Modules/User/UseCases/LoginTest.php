@@ -11,6 +11,8 @@ use Lwt\Modules\User\Application\Services\PasswordHasher;
 use Lwt\Modules\User\Application\UseCases\Login;
 use Lwt\Modules\User\Domain\UserRepositoryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -18,10 +20,9 @@ use PHPUnit\Framework\TestCase;
  *
  * Note: Session handling is tested indirectly as it depends on PHP session functions.
  * The core authentication logic is tested thoroughly here.
- *
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
 class LoginTest extends TestCase
 {
     /** @var UserRepositoryInterface&MockObject */

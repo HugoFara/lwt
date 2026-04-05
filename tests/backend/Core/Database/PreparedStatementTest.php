@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoad
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -25,6 +26,7 @@ use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 /**
  * Tests for PreparedStatement class and prepared statement functionality.
  */
+#[Group('integration')]
 class PreparedStatementTest extends TestCase
 {
     private static bool $dbConnected = false;

@@ -8,6 +8,7 @@ use Lwt\Shared\Infrastructure\Http\WebPageExtractor;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Testable subclass that overrides fetchPage() and exposes protected methods.
@@ -88,8 +89,8 @@ class TestableWebPageExtractor extends WebPageExtractor
 /**
  * Unit tests for WebPageExtractor.
  *
- * @covers \Lwt\Shared\Infrastructure\Http\WebPageExtractor
  */
+#[CoversClass(WebPageExtractor::class)]
 class WebPageExtractorTest extends TestCase
 {
     private TestableWebPageExtractor $extractor;

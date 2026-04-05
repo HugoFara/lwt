@@ -13,6 +13,8 @@ use Lwt\Modules\Text\Domain\Text;
 use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the ImportText use case.
@@ -20,8 +22,8 @@ use PHPUnit\Framework\MockObject\MockObject;
  * Tests the text import pipeline including text validation,
  * creation, and long text splitting.
  *
- * @covers \Lwt\Modules\Text\Application\UseCases\ImportText
  */
+#[CoversClass(ImportText::class)]
 class ImportTextUseCaseTest extends TestCase
 {
     /** @var TextRepositoryInterface&MockObject */
@@ -80,10 +82,7 @@ class ImportTextUseCaseTest extends TestCase
     // ================================
     // DATA PROVIDER FOR BOUNDARY TESTS
     // ================================
-
-    /**
-     * @dataProvider textLengthProvider
-     */
+    #[DataProvider('textLengthProvider')]
     public function testValidateTextLengthWithVariousLengths(int $length, bool $expected): void
     {
         $text = str_repeat('x', $length);

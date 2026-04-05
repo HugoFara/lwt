@@ -24,6 +24,7 @@ use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
@@ -37,8 +38,8 @@ require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_boot
  *
  * Tests text operations including CRUD, filtering, pagination, and text processing.
  *
- * @covers \Lwt\Modules\Text\Application\TextFacade
  */
+#[CoversClass(TextFacade::class)]
 class TextFacadeTest extends TestCase
 {
     private static bool $dbConnected = false;

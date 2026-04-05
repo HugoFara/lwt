@@ -9,6 +9,8 @@ use Lwt\Modules\Text\Application\UseCases\ListTexts;
 use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the ListTexts use case.
@@ -16,8 +18,8 @@ use PHPUnit\Framework\TestCase;
  * Tests pure logic methods (getPagination) thoroughly and verifies
  * repository delegation for getTextsForLanguage.
  *
- * @covers \Lwt\Modules\Text\Application\UseCases\ListTexts
  */
+#[CoversClass(ListTexts::class)]
 class ListTextsTest extends TestCase
 {
     /** @var TextRepositoryInterface&MockObject */
@@ -189,10 +191,7 @@ class ListTextsTest extends TestCase
 
         $this->assertEquals(2, $result['pages']);
     }
-
-    /**
-     * @dataProvider paginationProvider
-     */
+    #[DataProvider('paginationProvider')]
     public function testGetPaginationWithVariousInputs(
         int $totalCount,
         int $currentPage,

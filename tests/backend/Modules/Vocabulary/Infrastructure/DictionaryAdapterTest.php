@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Tests\Modules\Vocabulary\Infrastructure;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 
 /**
  * Tests for DictionaryAdapter.
  *
- * @covers \Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter
  */
+#[CoversClass(DictionaryAdapter::class)]
 class DictionaryAdapterTest extends TestCase
 {
     private DictionaryAdapter $adapter;
@@ -438,10 +440,7 @@ class DictionaryAdapterTest extends TestCase
         // Should still return something (graceful handling)
         $this->assertIsString($result);
     }
-
-    /**
-     * @dataProvider urlEncodingProvider
-     */
+    #[DataProvider('urlEncodingProvider')]
     public function testCreateDictLinkUrlEncoding(string $term, string $expectedEncoded): void
     {
         $url = 'https://example.com/q=';

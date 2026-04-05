@@ -8,6 +8,8 @@ use Lwt\Modules\Vocabulary\Http\WordListApiHandler;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Unit tests for WordListApiHandler.
@@ -251,10 +253,7 @@ class WordListApiHandlerTest extends TestCase
 
         $this->assertTrue($result['success']);
     }
-
-    /**
-     * @dataProvider statusActionProvider
-     */
+    #[DataProvider('statusActionProvider')]
     public function testBulkActionStatusActions(string $action, int $expectedStatus): void
     {
         $this->listService->expects($this->once())
@@ -390,10 +389,7 @@ class WordListApiHandlerTest extends TestCase
         $this->assertFalse($result['success']);
         $this->assertEquals('Invalid field', $result['error']);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testInlineEditReturnsErrorForNonExistentTerm(): void
     {
         try {
@@ -437,10 +433,7 @@ class WordListApiHandlerTest extends TestCase
     // =========================================================================
     // getFilterOptions tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetFilterOptionsReturnsExpectedStructure(): void
     {
         try {
@@ -457,10 +450,7 @@ class WordListApiHandlerTest extends TestCase
             $this->markTestSkipped('Database not available: ' . $e->getMessage());
         }
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetFilterOptionsStatusesHaveCorrectFormat(): void
     {
         try {
@@ -475,10 +465,7 @@ class WordListApiHandlerTest extends TestCase
             $this->markTestSkipped('Database not available: ' . $e->getMessage());
         }
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetFilterOptionsSortsHaveCorrectFormat(): void
     {
         try {
@@ -528,10 +515,7 @@ class WordListApiHandlerTest extends TestCase
     // =========================================================================
     // selectImportedTerms tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testSelectImportedTermsReturnsArray(): void
     {
         try {
@@ -547,10 +531,7 @@ class WordListApiHandlerTest extends TestCase
     // =========================================================================
     // importedTermsList tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testImportedTermsListReturnsExpectedStructure(): void
     {
         try {

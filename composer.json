@@ -40,7 +40,7 @@
     },
     "require-dev": {
         "vimeo/psalm": "^6.15",
-        "phpunit/phpunit": "^10.5",
+        "phpunit/phpunit": "^11.5",
         "league/commonmark": "^2.7",
         "phpdocumentor/shim": "*",
         "squizlabs/php_codesniffer": "^4.0"
@@ -64,7 +64,7 @@
         "test:integration": [
             "@test:setup-db",
             "@test:cleanup-db",
-            "vendor/bin/phpunit --no-coverage --testsuite integration"
+            "vendor/bin/phpunit --no-coverage --group integration"
         ],
         "psalm": "vendor/bin/psalm",
         "phpcs": "vendor/bin/phpcs",

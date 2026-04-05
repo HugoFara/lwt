@@ -6,14 +6,15 @@ namespace Lwt\Tests\Shared\Infrastructure\Http;
 
 use Lwt\Shared\Infrastructure\Http\FlashMessageService;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for FlashMessageService.
  *
  * Tests flash message storage, retrieval, and clearing functionality.
  *
- * @covers \Lwt\Shared\Infrastructure\Http\FlashMessageService
  */
+#[CoversClass(FlashMessageService::class)]
 class FlashMessageServiceTest extends TestCase
 {
     private FlashMessageService $service;

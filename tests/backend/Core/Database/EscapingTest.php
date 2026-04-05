@@ -11,6 +11,7 @@ use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Escaping;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
@@ -53,10 +54,7 @@ class EscapingTest extends TestCase
     }
 
     // ===== prepareTextdata tests =====
-
-    /**
-     * @dataProvider providerPrepareTextdata
-     */
+    #[DataProvider('providerPrepareTextdata')]
     public function testPrepareTextdata(string $input, string $expected): void
     {
         $result = Escaping::prepareTextdata($input);

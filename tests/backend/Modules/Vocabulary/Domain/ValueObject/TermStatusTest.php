@@ -7,6 +7,7 @@ namespace Lwt\Tests\Modules\Vocabulary\Domain\ValueObject;
 use InvalidArgumentException;
 use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for TermStatus value object.
@@ -23,10 +24,7 @@ class TermStatusTest extends TestCase
         $this->assertInstanceOf(TermStatus::class, $status);
         $this->assertEquals(1, $status->toInt());
     }
-
-    /**
-     * @dataProvider validStatusProvider
-     */
+    #[DataProvider('validStatusProvider')]
     public function testFromIntAcceptsAllValidStatuses(int $value): void
     {
         $status = TermStatus::fromInt($value);
@@ -45,10 +43,7 @@ class TermStatusTest extends TestCase
             'well-known (99)' => [99],
         ];
     }
-
-    /**
-     * @dataProvider invalidStatusProvider
-     */
+    #[DataProvider('invalidStatusProvider')]
     public function testFromIntRejectsInvalidStatuses(int $value): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -193,10 +188,7 @@ class TermStatusTest extends TestCase
     {
         $this->assertTrue(TermStatus::wellKnown()->isKnown());
     }
-
-    /**
-     * @dataProvider notKnownStatusProvider
-     */
+    #[DataProvider('notKnownStatusProvider')]
     public function testIsKnownReturnsFalseForLearningStages(int $value): void
     {
         $status = TermStatus::fromInt($value);
@@ -215,10 +207,7 @@ class TermStatusTest extends TestCase
     }
 
     // ===== isLearning Tests =====
-
-    /**
-     * @dataProvider learningStatusProvider
-     */
+    #[DataProvider('learningStatusProvider')]
     public function testIsLearningReturnsTrueForLearningStages(int $value): void
     {
         $status = TermStatus::fromInt($value);
@@ -261,10 +250,7 @@ class TermStatusTest extends TestCase
     {
         $this->assertTrue(TermStatus::wellKnown()->isSpecial());
     }
-
-    /**
-     * @dataProvider normalStatusProvider
-     */
+    #[DataProvider('normalStatusProvider')]
     public function testIsSpecialReturnsFalseForNormalStatuses(int $value): void
     {
         $status = TermStatus::fromInt($value);
@@ -288,10 +274,7 @@ class TermStatusTest extends TestCase
     {
         $this->assertTrue(TermStatus::ignored()->isIgnored());
     }
-
-    /**
-     * @dataProvider nonIgnoredStatusProvider
-     */
+    #[DataProvider('nonIgnoredStatusProvider')]
     public function testIsIgnoredReturnsFalseForOtherStatuses(int $value): void
     {
         $status = TermStatus::fromInt($value);
@@ -311,10 +294,7 @@ class TermStatusTest extends TestCase
     }
 
     // ===== needsReview Tests =====
-
-    /**
-     * @dataProvider learningStatusProvider
-     */
+    #[DataProvider('learningStatusProvider')]
     public function testNeedsReviewReturnsTrueForLearningStages(int $value): void
     {
         $status = TermStatus::fromInt($value);
@@ -360,10 +340,7 @@ class TermStatusTest extends TestCase
     }
 
     // ===== label Tests =====
-
-    /**
-     * @dataProvider labelProvider
-     */
+    #[DataProvider('labelProvider')]
     public function testLabelReturnsCorrectString(int $value, string $expectedLabel): void
     {
         $status = TermStatus::fromInt($value);

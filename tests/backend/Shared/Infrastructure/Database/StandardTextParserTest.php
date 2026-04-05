@@ -18,13 +18,14 @@ namespace Tests\Backend\Shared\Infrastructure\Database;
 use Lwt\Shared\Infrastructure\Database\StandardTextParser;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for StandardTextParser static methods.
  *
- * @covers \Lwt\Shared\Infrastructure\Database\StandardTextParser
  * @since  3.0.0
  */
+#[CoversClass(StandardTextParser::class)]
 class StandardTextParserTest extends TestCase
 {
     // =========================================================================

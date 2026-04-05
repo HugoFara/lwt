@@ -14,6 +14,7 @@ use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
@@ -29,8 +30,8 @@ require_once __DIR__ . '/../../../../src/Modules/User/Infrastructure/MySqlUserRe
 /**
  * Tests for the MySqlUserRepository class.
  *
- * @covers \Lwt\Modules\User\Infrastructure\MySqlUserRepository
  */
+#[CoversClass(MySqlUserRepository::class)]
 class UserRepositoryTest extends TestCase
 {
     private static bool $dbConnected = false;
