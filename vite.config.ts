@@ -26,11 +26,6 @@ function buildServiceWorker(): PluginOption {
             name: 'sw',
             fileName: () => 'sw.js',
           },
-          rollupOptions: {
-            output: {
-              inlineDynamicImports: true,
-            },
-          },
           minify: 'esbuild',
           target: 'es2022',
         },
@@ -72,13 +67,10 @@ export default defineConfig({
         entryFileNames: 'js/vite/[name].[hash].js',
         chunkFileNames: 'js/vite/chunks/[name].[hash].js',
         assetFileNames: 'css/vite/[name].[hash][extname]',
-        manualChunks: {
-          // Vendor chunks - loaded on demand
-          'alpine': ['@alpinejs/csp'],
-          'chart': ['chart.js'],
-          'tagify': ['@yaireo/tagify'],
-          // Note: lucide icons are tree-shaken (only ~90 icons imported)
-          // so no separate chunk needed
+        manualChunks(id) {
+          if (id.includes('@alpinejs/csp')) return 'alpine';
+          if (id.includes('chart.js')) return 'chart';
+          if (id.includes('@yaireo/tagify')) return 'tagify';
         },
       },
     },
