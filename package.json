@@ -65,7 +65,7 @@
     "bulma": "^1.0.4",
     "chart.js": "^4.5.1",
     "dexie": "^4.2.1",
-    "lucide": "^0.577.0"
+    "lucide": "^1.7.0"
   },
   "overrides": {
     "react": "18.3.1",

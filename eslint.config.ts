@@ -11,6 +11,7 @@ export default defineConfig([
     ignores: [
       "node_modules/**",
       "vendor/**",
+      "dist/**",
       "assets/**",
       "coverage/**",
       "coverage-report/**",
