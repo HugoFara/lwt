@@ -7,6 +7,7 @@ namespace Lwt\Tests\Modules\Language\UseCases;
 use Lwt\Modules\Language\Application\UseCases\DeleteLanguage;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for the DeleteLanguage use case.
@@ -16,8 +17,8 @@ use PHPUnit\Framework\TestCase;
  * This file tests method signatures, return type structure, and
  * verifiable logic paths using mocked QueryBuilder where possible.
  *
- * @covers \Lwt\Modules\Language\Application\UseCases\DeleteLanguage
  */
+#[CoversClass(DeleteLanguage::class)]
 class DeleteLanguageTest extends TestCase
 {
     private DeleteLanguage $useCase;

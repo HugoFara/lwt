@@ -12,6 +12,7 @@ export * from './api/settings_api';
 import './pages/backup_manager';
 import './pages/settings_form';
 import './pages/statistics_charts';
+import '@modules/activity';
 import './pages/table_management';
 import './pages/tts_settings';
 import './pages/server_data';

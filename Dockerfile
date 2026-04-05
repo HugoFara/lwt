@@ -90,7 +90,7 @@ WORKDIR /var/www/html${APP_BASE_PATH}
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Copy pre-built frontend assets from the builder stage
-COPY --from=frontend-builder /build/assets/ assets/
+COPY --from=frontend-builder /build/dist/ dist/
 COPY --from=frontend-builder /build/sw.js sw.js
 
 # Set proper ownership for Apache (www-data user)

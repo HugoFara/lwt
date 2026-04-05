@@ -6,12 +6,13 @@ namespace Lwt\Tests\Shared\Infrastructure\Exception;
 
 use Lwt\Shared\Infrastructure\Exception\DatabaseException;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Tests for the DatabaseException class.
  *
- * @covers \Lwt\Shared\Infrastructure\Exception\DatabaseException
  */
+#[CoversClass(DatabaseException::class)]
 class DatabaseExceptionTest extends TestCase
 {
     public function testConstructorWithMessage(): void

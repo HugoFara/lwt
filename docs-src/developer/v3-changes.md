@@ -32,17 +32,16 @@ This change improves code organization, testability, and sets the foundation for
 
 #### Assets Reorganization
 
-Static assets have been consolidated into the `assets/` directory:
+Static assets live in `assets/`, build output in `dist/`:
 
 | Old Location | New Location |
 |-------------|--------------|
 | `icn/` | `assets/icons/` |
 | `img/` | `assets/images/` |
-| `css/` | `assets/css/` |
-| `js/` | `assets/js/` |
-| `themes/` | `assets/themes/` |
+| `css/` | `dist/css/` |
+| `js/` | `dist/js/` |
+| `themes/` | `dist/themes/` |
 | `sounds/` | `assets/sounds/` |
-| `iui/` | `assets/vendor/iui/` |
 
 #### PHP Source Reorganization
 

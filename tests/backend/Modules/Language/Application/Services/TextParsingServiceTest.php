@@ -6,12 +6,13 @@ namespace Lwt\Tests\Modules\Language\Application\Services;
 
 use Lwt\Modules\Language\Application\Services\TextParsingService;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for the TextParsingService.
  *
- * @covers \Lwt\Modules\Language\Application\Services\TextParsingService
  */
+#[CoversClass(TextParsingService::class)]
 class TextParsingServiceTest extends TestCase
 {
     private TextParsingService $service;

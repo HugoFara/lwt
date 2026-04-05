@@ -11,6 +11,7 @@ use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Shared\Domain\ValueObjects\UserId;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for UserApiHandler.
@@ -215,10 +216,7 @@ class UserApiHandlerTest extends TestCase
         $this->assertFalse($result['success']);
         $this->assertEquals('Invalid email format', $result['error']);
     }
-
-    /**
-     * @dataProvider invalidUsernameProvider
-     */
+    #[DataProvider('invalidUsernameProvider')]
     public function testFormatRegisterReturnsErrorForInvalidUsername(string $username): void
     {
         $result = $this->handler->formatRegister([
@@ -242,10 +240,7 @@ class UserApiHandlerTest extends TestCase
             'too long' => [str_repeat('a', 51)],
         ];
     }
-
-    /**
-     * @dataProvider validUsernameProvider
-     */
+    #[DataProvider('validUsernameProvider')]
     public function testFormatRegisterAcceptsValidUsername(string $username): void
     {
         $user = $this->createMockUser(1, $username, 'test@example.com');

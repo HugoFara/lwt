@@ -150,7 +150,12 @@ class ImportArticlesTest extends TestCase
 
         $this->textCreation->method('sourceUriExists')->willReturn(false);
         $this->textCreation->expects($this->once())->method('createText')->with(
-            5, 'My Article', 'Some text content', '', 'https://example.com/a1', 'my_tag'
+            5,
+            'My Article',
+            'Some text content',
+            '',
+            'https://example.com/a1',
+            'my_tag'
         )->willReturn(100);
         $this->textCreation->method('archiveOldTexts')->willReturn(['archived' => 0]);
 
@@ -561,8 +566,14 @@ class ImportArticlesTest extends TestCase
     {
         $feed = $this->createFeed(1, 1);
         $article = Article::reconstitute(
-            10, 1, 'My Title', 'https://example.com/link',
-            'My Description', '2026-01-01', 'https://example.com/audio.mp3', 'Inline text'
+            10,
+            1,
+            'My Title',
+            'https://example.com/link',
+            'My Description',
+            '2026-01-01',
+            'https://example.com/audio.mp3',
+            'Inline text'
         );
 
         $this->articleRepository->method('findByIds')->willReturn([$article]);

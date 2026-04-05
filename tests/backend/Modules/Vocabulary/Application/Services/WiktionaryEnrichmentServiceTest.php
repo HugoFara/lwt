@@ -87,8 +87,11 @@ class WiktionaryEnrichmentServiceTest extends TestCase
     #[Test]
     public function parseKaikkiResponsePrefersNonFormOf(): void
     {
-        $verbLine = '{"word":"casa","pos":"verb","lang":"Spanish","senses":[{"glosses":["inflection of casar:"],"form_of":[{"word":"casar"}],"tags":["form-of"]}]}';
-        $nounLine = '{"word":"casa","pos":"noun","lang":"Spanish","senses":[{"glosses":["house"]}]}';
+        $verbLine = '{"word":"casa","pos":"verb","lang":"Spanish",'
+            . '"senses":[{"glosses":["inflection of casar:"],'
+            . '"form_of":[{"word":"casar"}],"tags":["form-of"]}]}';
+        $nounLine = '{"word":"casa","pos":"noun","lang":"Spanish",'
+            . '"senses":[{"glosses":["house"]}]}';
         $jsonl = $verbLine . "\n" . $nounLine;
 
         $result = $this->service->parseKaikkiResponse($jsonl);
@@ -98,7 +101,9 @@ class WiktionaryEnrichmentServiceTest extends TestCase
     #[Test]
     public function parseKaikkiResponseFallsBackToFormOf(): void
     {
-        $jsonl = '{"word":"casas","pos":"noun","lang":"Spanish","senses":[{"glosses":["plural of casa"],"form_of":[{"word":"casa"}],"tags":["form-of"]}]}';
+        $jsonl = '{"word":"casas","pos":"noun","lang":"Spanish",'
+            . '"senses":[{"glosses":["plural of casa"],'
+            . '"form_of":[{"word":"casa"}],"tags":["form-of"]}]}';
 
         $result = $this->service->parseKaikkiResponse($jsonl);
         $this->assertSame('plural of casa', $result);

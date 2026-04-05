@@ -6,6 +6,8 @@ namespace Lwt\Tests\Modules\Vocabulary\Services;
 
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the ExportService class.
@@ -13,8 +15,8 @@ use PHPUnit\Framework\TestCase;
  * Tests export functionality including text normalization, term masking,
  * and various export formats (Anki, TSV, Flexible).
  *
- * @covers \Lwt\Modules\Vocabulary\Application\Services\ExportService
  */
+#[CoversClass(ExportService::class)]
 class ExportServiceTest extends TestCase
 {
     private ExportService $exportService;
@@ -301,10 +303,7 @@ class ExportServiceTest extends TestCase
     // ====================================
     // Whitespace Normalization Data Provider Tests
     // ====================================
-
-    /**
-     * @dataProvider whitespaceInputProvider
-     */
+    #[DataProvider('whitespaceInputProvider')]
     public function testReplaceTabNewlineWithVariousInputs(string $input, string $expected): void
     {
         $result = ExportService::replaceTabNewline($input);
@@ -326,10 +325,7 @@ class ExportServiceTest extends TestCase
             'mixed_whitespace' => ["a \t\n b  c", 'a b c'],
         ];
     }
-
-    /**
-     * @dataProvider termMaskingProvider
-     */
+    #[DataProvider('termMaskingProvider')]
     public function testMaskTermInSentenceWithVariousTerms(
         string $sentence,
         string $regex,
@@ -1013,10 +1009,7 @@ class ExportServiceTest extends TestCase
     // ====================================
     // Parameterized Method Signature Tests
     // ====================================
-
-    /**
-     * @dataProvider parameterizedMethodProvider
-     */
+    #[DataProvider('parameterizedMethodProvider')]
     public function testMethodAcceptsParamsArray(string $methodName): void
     {
         $method = new \ReflectionMethod(ExportService::class, $methodName);
@@ -1155,10 +1148,7 @@ class ExportServiceTest extends TestCase
     // ====================================
     // Data Provider for Complex Scenarios
     // ====================================
-
-    /**
-     * @dataProvider complexMaskingProvider
-     */
+    #[DataProvider('complexMaskingProvider')]
     public function testMaskTermWithComplexPatterns(
         string $sentence,
         string $regex,

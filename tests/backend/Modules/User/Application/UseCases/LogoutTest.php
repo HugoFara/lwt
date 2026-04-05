@@ -6,15 +6,16 @@ namespace Lwt\Tests\Modules\User\Application\UseCases;
 
 use Lwt\Modules\User\Application\UseCases\Logout;
 use Lwt\Shared\Infrastructure\Globals;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for the Logout use case.
- *
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
 class LogoutTest extends TestCase
 {
     private Logout $useCase;

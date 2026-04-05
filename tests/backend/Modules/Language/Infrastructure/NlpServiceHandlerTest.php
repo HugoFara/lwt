@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Tests\Backend\Modules\Language\Infrastructure;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Lwt\Modules\Language\Infrastructure\NlpServiceHandler;
 
 /**
  * Tests for NlpServiceHandler.
  *
- * @covers \Lwt\Modules\Language\Infrastructure\NlpServiceHandler
  */
+#[CoversClass(NlpServiceHandler::class)]
 class NlpServiceHandlerTest extends TestCase
 {
     private NlpServiceHandler $handler;

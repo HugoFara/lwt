@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Controllers;
 
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Modules\Text\Http\TextController;
 use Lwt\Modules\Text\Http\TextReadController;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
@@ -15,18 +13,6 @@ use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
-// LanguageFacade loaded via autoloader
-require_once __DIR__ . '/../../../src/Modules/Admin/Application/Services/MediaService.php';
-require_once __DIR__ . '/../../../src/Shared/Http/BaseController.php';
-require_once __DIR__ . '/../../../src/Modules/Text/Http/TextController.php';
-require_once __DIR__ . '/../../../src/Modules/Text/Application/TextFacade.php';
 
 /**
  * Unit tests for the TextController::read() method and related functionality.

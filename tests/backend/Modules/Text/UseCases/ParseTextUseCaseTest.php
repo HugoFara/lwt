@@ -6,6 +6,8 @@ namespace Lwt\Tests\Modules\Text\UseCases;
 
 use Lwt\Modules\Text\Application\UseCases\ParseText;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the ParseText use case.
@@ -13,8 +15,8 @@ use PHPUnit\Framework\TestCase;
  * Tests text parsing preview and validation including sentence/word counts,
  * text length validation, and term sentence linking.
  *
- * @covers \Lwt\Modules\Text\Application\UseCases\ParseText
  */
+#[CoversClass(ParseText::class)]
 class ParseTextUseCaseTest extends TestCase
 {
     private ParseText $parseText;
@@ -61,10 +63,7 @@ class ParseTextUseCaseTest extends TestCase
         $text = str_repeat('a', 65000) . 'b';
         $this->assertFalse($this->parseText->validateTextLength($text));
     }
-
-    /**
-     * @dataProvider textLengthProvider
-     */
+    #[DataProvider('textLengthProvider')]
     public function testValidateTextLengthWithVariousLengths(int $length, bool $expected): void
     {
         $text = str_repeat('x', $length);
@@ -239,10 +238,7 @@ class ParseTextUseCaseTest extends TestCase
         $this->assertIsInt($info['words']); // str_word_count doesn't count Cyrillic as words
         $this->assertTrue($info['valid']);
     }
-
-    /**
-     * @dataProvider textLengthInfoProvider
-     */
+    #[DataProvider('textLengthInfoProvider')]
     public function testGetTextLengthInfoWithVariousTexts(
         string $text,
         int $expectedChars,

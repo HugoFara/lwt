@@ -6,12 +6,14 @@ namespace Lwt\Tests\Modules\Text\Application\UseCases;
 
 use Lwt\Modules\Text\Application\UseCases\BuildTextFilters;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for BuildTextFilters use case.
  *
- * @covers \Lwt\Modules\Text\Application\UseCases\BuildTextFilters
  */
+#[CoversClass(BuildTextFilters::class)]
 class BuildTextFiltersTest extends TestCase
 {
     private BuildTextFilters $filters;
@@ -242,10 +244,7 @@ class BuildTextFiltersTest extends TestCase
         $this->assertArrayHasKey('clause', $result);
         $this->assertArrayHasKey('params', $result);
     }
-
-    /**
-     * @dataProvider queryModeProvider
-     */
+    #[DataProvider('queryModeProvider')]
     public function testAllQueryModesReturnValidStructure(string $mode): void
     {
         $result = $this->filters->buildQueryWhereClause('test', $mode, '');
@@ -348,10 +347,7 @@ class BuildTextFiltersTest extends TestCase
     // =========================================================================
     // Data Provider Tests
     // =========================================================================
-
-    /**
-     * @dataProvider tagCombinationProvider
-     */
+    #[DataProvider('tagCombinationProvider')]
     public function testTagHavingClauseVariousCombinations(
         string|int $tag1,
         string|int $tag2,

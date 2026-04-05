@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Tests\Modules\Feed\Domain;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Lwt\Modules\Feed\Domain\FeedOptions;
 
 /**
  * Tests for FeedOptions value object.
  *
- * @covers \Lwt\Modules\Feed\Domain\FeedOptions
  */
+#[CoversClass(FeedOptions::class)]
 class FeedOptionsTest extends TestCase
 {
     // =========================================================================

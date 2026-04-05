@@ -93,7 +93,7 @@ describe('api/settings.ts', () => {
   describe('SettingsApi.getThemePath', () => {
     it('calls apiGet with path parameter', async () => {
       const mockResponse = {
-        data: { theme_path: '/assets/themes/dark/styles.css' },
+        data: { theme_path: '/dist/themes/dark/styles.css' },
         error: undefined,
       };
       vi.mocked(apiClient.apiGet).mockResolvedValue(mockResponse);
@@ -103,12 +103,12 @@ describe('api/settings.ts', () => {
       expect(apiClient.apiGet).toHaveBeenCalledWith('/settings/theme-path', {
         path: 'styles.css',
       });
-      expect(result.data?.theme_path).toBe('/assets/themes/dark/styles.css');
+      expect(result.data?.theme_path).toBe('/dist/themes/dark/styles.css');
     });
 
     it('handles relative path', async () => {
       const mockResponse = {
-        data: { theme_path: '/assets/themes/default/images/logo.png' },
+        data: { theme_path: '/dist/themes/default/images/logo.png' },
         error: undefined,
       };
       vi.mocked(apiClient.apiGet).mockResolvedValue(mockResponse);
@@ -134,7 +134,7 @@ describe('api/settings.ts', () => {
 
     it('handles empty path', async () => {
       const mockResponse = {
-        data: { theme_path: '/assets/themes/default/' },
+        data: { theme_path: '/dist/themes/default/' },
         error: undefined,
       };
       vi.mocked(apiClient.apiGet).mockResolvedValue(mockResponse);

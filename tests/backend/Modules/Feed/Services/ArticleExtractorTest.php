@@ -6,6 +6,8 @@ namespace Lwt\Tests\Modules\Feed\Services;
 
 use Lwt\Modules\Feed\Application\Services\ArticleExtractor;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the ArticleExtractor service.
@@ -13,8 +15,8 @@ use PHPUnit\Framework\TestCase;
  * Tests article content extraction including charset detection,
  * HTML parsing, XPath extraction, and content cleaning.
  *
- * @covers \Lwt\Modules\Feed\Application\Services\ArticleExtractor
  */
+#[CoversClass(ArticleExtractor::class)]
 class ArticleExtractorTest extends TestCase
 {
     private ArticleExtractor $extractor;
@@ -80,10 +82,7 @@ class ArticleExtractorTest extends TestCase
     // ============================
     // WINDOWS CHARSET MAPPING TESTS
     // ============================
-
-    /**
-     * @dataProvider windowsCharsetProvider
-     */
+    #[DataProvider('windowsCharsetProvider')]
     public function testMapWindowsCharset(string $input, string $expected): void
     {
         $result = $this->extractor->mapWindowsCharset($input);

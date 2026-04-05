@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Entity;
 
-require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Domain/Term.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Domain/Text.php';
-require_once __DIR__ . '/../../../../src/Modules/Dictionary/Infrastructure/Translation/GoogleTranslateClient.php';
-
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Lwt\Modules\Dictionary\Infrastructure\Translation\GoogleTranslateClient;

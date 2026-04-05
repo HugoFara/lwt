@@ -59,8 +59,16 @@ class GetNextTermTest extends TestCase
         int $daysOld = 3
     ): ReviewWord {
         return new ReviewWord(
-            $id, $text, $textLc, $translation,
-            $romanization, $sentence, $langId, $status, $score, $daysOld
+            $id,
+            $text,
+            $textLc,
+            $translation,
+            $romanization,
+            $sentence,
+            $langId,
+            $status,
+            $score,
+            $daysOld
         );
     }
 
@@ -134,7 +142,10 @@ class GetNextTermTest extends TestCase
     public function executeInSentenceModeCallsRepositoryForSentence(): void
     {
         $word = $this->makeWord(
-            id: 10, text: 'Katze', textLc: 'katze', translation: 'cat'
+            id: 10,
+            text: 'Katze',
+            textLc: 'katze',
+            translation: 'cat'
         );
         $config = ReviewConfiguration::fromLanguage(1, 1, false);
 
@@ -162,7 +173,10 @@ class GetNextTermTest extends TestCase
     public function executeWithNoSentenceFoundFallsBackToWordBraces(): void
     {
         $word = $this->makeWord(
-            id: 5, text: 'perro', textLc: 'perro', translation: 'dog'
+            id: 5,
+            text: 'perro',
+            textLc: 'perro',
+            translation: 'dog'
         );
         $config = ReviewConfiguration::fromLanguage(1, 1, false);
 
@@ -188,7 +202,10 @@ class GetNextTermTest extends TestCase
     public function executeType1ShowsTermAndTranslationSolution(): void
     {
         $word = $this->makeWord(
-            id: 7, text: 'chat', textLc: 'chat', translation: 'cat'
+            id: 7,
+            text: 'chat',
+            textLc: 'chat',
+            translation: 'cat'
         );
         // Type 1: term -> translation
         $config = ReviewConfiguration::fromLanguage(1, 1, false);
@@ -219,7 +236,10 @@ class GetNextTermTest extends TestCase
     public function executeType2HidesTermWithPlaceholder(): void
     {
         $word = $this->makeWord(
-            id: 8, text: 'Hund', textLc: 'hund', translation: 'dog'
+            id: 8,
+            text: 'Hund',
+            textLc: 'hund',
+            translation: 'dog'
         );
         // Type 2: translation -> term
         $config = ReviewConfiguration::fromLanguage(1, 2, false);
@@ -249,7 +269,10 @@ class GetNextTermTest extends TestCase
     public function executeType3HidesTermAndShowsWordAsSolution(): void
     {
         $word = $this->makeWord(
-            id: 9, text: 'libro', textLc: 'libro', translation: 'book'
+            id: 9,
+            text: 'libro',
+            textLc: 'libro',
+            translation: 'book'
         );
         $config = ReviewConfiguration::fromLanguage(1, 3, false);
 
@@ -276,7 +299,10 @@ class GetNextTermTest extends TestCase
     public function executeType4MapsToBaseType1(): void
     {
         $word = $this->makeWord(
-            id: 11, text: 'agua', textLc: 'agua', translation: 'water'
+            id: 11,
+            text: 'agua',
+            textLc: 'agua',
+            translation: 'water'
         );
         // Type 4 = word mode, base type 1
         $config = ReviewConfiguration::fromLanguage(1, 4);
@@ -297,7 +323,10 @@ class GetNextTermTest extends TestCase
     public function executeType5MapsToBaseType2(): void
     {
         $word = $this->makeWord(
-            id: 12, text: 'fuego', textLc: 'fuego', translation: 'fire'
+            id: 12,
+            text: 'fuego',
+            textLc: 'fuego',
+            translation: 'fire'
         );
         // Type 5 = word mode, base type 2
         $config = ReviewConfiguration::fromLanguage(1, 5);
@@ -362,7 +391,9 @@ class GetNextTermTest extends TestCase
     public function executeType1EscapesHtmlInWordText(): void
     {
         $word = $this->makeWord(
-            id: 50, text: '<script>', textLc: '<script>',
+            id: 50,
+            text: '<script>',
+            textLc: '<script>',
             translation: 'injection'
         );
         $config = ReviewConfiguration::fromLanguage(1, 1, true);
@@ -405,7 +436,10 @@ class GetNextTermTest extends TestCase
     public function executeCleansBracesFromDisplayHtml(): void
     {
         $word = $this->makeWord(
-            id: 60, text: 'test', textLc: 'test', translation: 'prueba'
+            id: 60,
+            text: 'test',
+            textLc: 'test',
+            translation: 'prueba'
         );
         $config = ReviewConfiguration::fromLanguage(1, 1, false);
 

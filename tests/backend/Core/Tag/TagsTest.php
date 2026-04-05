@@ -4,29 +4,21 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Tag;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Http/UrlUtilities.php';
-
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Modules\Tags\Application\TagsFacade;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 
 /**
  * Comprehensive tests for TagsFacade
  *
  * Tests tag creation, retrieval, assignment to words/texts, and list manipulation
  */
+#[Group('integration')]
 class TagsTest extends TestCase
 {
     private static $dbConnection;

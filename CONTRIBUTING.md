@@ -77,23 +77,23 @@ Themes are stored at `src/frontend/css/themes/`. Each theme is a folder containi
 
 You can include images in your theme:
 
-* Use images from `assets/css/images/` with path `../../../assets/css/images/theimage.png`
+* Use images from `assets/images/` with path `../../../assets/images/theimage.png`
 * Add your own files to your theme folder and reference with `./myimage.png`
 
 ### Theme Fallback System
 
-When LWT looks for a file in `assets/themes/{{Theme}}/`, it checks if the file exists. If not, it falls back to `assets/css/`. This means your themes **only need to override files you want to change** - you don't need to copy all files from `src/frontend/css/base/`.
+When LWT looks for a file in `dist/themes/{{Theme}}/`, it checks if the file exists. If not, it falls back to `dist/css/`. This means your themes **only need to override files you want to change** - you don't need to copy all files from `src/frontend/css/base/`.
 
 ### Existing Themes
 
 | Theme | Mode | Description |
 |-------|------|-------------|
 | Default | Light | Standard theme with background color highlighting |
-| Default_Mod | Light | Modified word breaking rules |
-| Lingocracy | Light | Subtle underline highlighting |
-| Lingocracy_Dark | Dark | Dark version of Lingocracy |
-| Night_Mode | Dark | Black background, easy on the eyes |
-| White_Night | Dark | Dark theme with white highlighted text |
+| Dark | Dark | Dark theme, easy on the eyes for nighttime reading |
+| Dark Muted | Dark | Dark theme with white highlighted text |
+| Flex Wrap | Light | Modified word breaking rules |
+| Underline | Light | Subtle underline highlighting |
+| Underline Dark | Dark | Dark version of Underline |
 
 ## Frontend Development (JavaScript/TypeScript)
 

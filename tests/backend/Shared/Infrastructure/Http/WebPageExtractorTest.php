@@ -8,88 +8,13 @@ use Lwt\Shared\Infrastructure\Http\WebPageExtractor;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-
-/**
- * Testable subclass that overrides fetchPage() and exposes protected methods.
- */
-class TestableWebPageExtractor extends WebPageExtractor
-{
-    private ?string $mockHtml = null;
-
-    public function setMockHtml(?string $html): void
-    {
-        $this->mockHtml = $html;
-    }
-
-    protected function fetchPage(string $url): ?string
-    {
-        return $this->mockHtml;
-    }
-
-    // Expose protected methods for direct testing
-    public function testLooksLikeBinary(string $content): bool
-    {
-        return $this->looksLikeBinary($content);
-    }
-
-    public function testIsPlainText(string $content): bool
-    {
-        return $this->isPlainText($content);
-    }
-
-    public function testTitleFromUrl(string $url): string
-    {
-        return $this->titleFromUrl($url);
-    }
-
-    public function testDetectCharset(string $html): ?string
-    {
-        return $this->detectCharset($html);
-    }
-
-    public function testNormalizeCharset(string $html): string
-    {
-        return $this->normalizeCharset($html);
-    }
-
-    public function testStripGutenbergBoilerplate(string $text): string
-    {
-        return $this->stripGutenbergBoilerplate($text);
-    }
-
-    public function testUnwrapHardLineBreaks(string $text): string
-    {
-        return $this->unwrapHardLineBreaks($text);
-    }
-
-    public function testCleanText(string $text): string
-    {
-        return $this->cleanText($text);
-    }
-
-    /**
-     * Expose extractTitle via a DOM built from HTML.
-     */
-    public function testExtractTitle(string $html): string
-    {
-        $dom = new \DOMDocument();
-        $previousValue = libxml_use_internal_errors(true);
-        $dom->loadHTML(
-            '<?xml encoding="UTF-8">' . $html,
-            LIBXML_NONET | LIBXML_NOERROR
-        );
-        libxml_clear_errors();
-        libxml_use_internal_errors($previousValue);
-
-        return $this->extractTitle($dom);
-    }
-}
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for WebPageExtractor.
  *
- * @covers \Lwt\Shared\Infrastructure\Http\WebPageExtractor
  */
+#[CoversClass(WebPageExtractor::class)]
 class WebPageExtractorTest extends TestCase
 {
     private TestableWebPageExtractor $extractor;
@@ -250,7 +175,9 @@ class WebPageExtractorTest extends TestCase
     #[Test]
     public function stripGutenbergBoilerplateStripsStartMarker(): void
     {
-        $text = "Project Gutenberg license info\n*** START OF THE PROJECT GUTENBERG EBOOK TITLE ***\nActual content here.";
+        $text = "Project Gutenberg license info\n"
+            . "*** START OF THE PROJECT GUTENBERG EBOOK TITLE ***\n"
+            . "Actual content here.";
         $result = $this->extractor->testStripGutenbergBoilerplate($text);
         $this->assertSame('Actual content here.', $result);
     }
@@ -266,7 +193,11 @@ class WebPageExtractorTest extends TestCase
     #[Test]
     public function stripGutenbergBoilerplateStripsBothMarkers(): void
     {
-        $text = "Header preamble\n*** START OF THE PROJECT GUTENBERG EBOOK MOBY DICK ***\nCall me Ishmael.\n*** END OF THE PROJECT GUTENBERG EBOOK MOBY DICK ***\nFooter license";
+        $text = "Header preamble\n"
+            . "*** START OF THE PROJECT GUTENBERG EBOOK MOBY DICK ***\n"
+            . "Call me Ishmael.\n"
+            . "*** END OF THE PROJECT GUTENBERG EBOOK MOBY DICK ***\n"
+            . "Footer license";
         $result = $this->extractor->testStripGutenbergBoilerplate($text);
         $this->assertSame('Call me Ishmael.', $result);
     }
@@ -296,10 +227,13 @@ class WebPageExtractorTest extends TestCase
     #[Test]
     public function unwrapHardLineBreaksTreatsBlankLinesAsParagraphSeparators(): void
     {
-        $text = "First paragraph line one\nfirst paragraph line two.\n\nSecond paragraph line one\nsecond paragraph line two.";
+        $text = "First paragraph line one\nfirst paragraph line two."
+            . "\n\nSecond paragraph line one\nsecond paragraph line two.";
         $result = $this->extractor->testUnwrapHardLineBreaks($text);
+        $expected = "First paragraph line one first paragraph line two."
+            . "\n\nSecond paragraph line one second paragraph line two.";
         $this->assertSame(
-            "First paragraph line one first paragraph line two.\n\nSecond paragraph line one second paragraph line two.",
+            $expected,
             $result
         );
     }
@@ -536,7 +470,10 @@ class WebPageExtractorTest extends TestCase
     #[Test]
     public function extractFromUrlTrimsWhitespaceFromUrl(): void
     {
-        $this->extractor->setMockHtml('<html><head><title>T</title></head><body><p>' . str_repeat('Content. ', 20) . '</p></body></html>');
+        $body = '<p>' . str_repeat('Content. ', 20) . '</p>';
+        $html = '<html><head><title>T</title></head>'
+            . '<body>' . $body . '</body></html>';
+        $this->extractor->setMockHtml($html);
         $result = $this->extractor->extractFromUrl('  http://example.com/page  ');
 
         $this->assertArrayHasKey('sourceUri', $result);

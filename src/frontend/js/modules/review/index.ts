@@ -18,6 +18,9 @@ export * from './components/review_view';
 // Utils
 export * from './utils/elapsed_timer';
 
+// Shared utilities needed by review pages
+import '@shared/components/sorttable';
+
 // Side-effect imports (pages)
 import './pages/review_mode';
 import './pages/review_header';

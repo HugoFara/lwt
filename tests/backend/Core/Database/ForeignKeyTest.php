@@ -4,21 +4,13 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Database;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 
 /**
  * Tests for inter-table foreign key constraints.
@@ -29,6 +21,7 @@ require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_boot
  * 3. SET NULL works for word_occurrences.Ti2WoID when words are deleted
  * 4. FK constraints prevent orphaned references
  */
+#[Group('integration')]
 class ForeignKeyTest extends TestCase
 {
     private static bool $dbConnected = false;

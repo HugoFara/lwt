@@ -23,6 +23,7 @@ use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
+use Lwt\Modules\Activity\Infrastructure\MySqlActivityRepository;
 
 /**
  * Service for basic CRUD operations on words/terms.
@@ -38,15 +39,20 @@ use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 class WordCrudService
 {
     private MySqlTermRepository $repository;
+    private MySqlActivityRepository $activityRepository;
 
     /**
      * Constructor.
      *
-     * @param MySqlTermRepository|null $repository Term repository
+     * @param MySqlTermRepository|null     $repository         Term repository
+     * @param MySqlActivityRepository|null $activityRepository Activity repository
      */
-    public function __construct(?MySqlTermRepository $repository = null)
-    {
+    public function __construct(
+        ?MySqlTermRepository $repository = null,
+        ?MySqlActivityRepository $activityRepository = null
+    ) {
         $this->repository = $repository ?? new MySqlTermRepository();
+        $this->activityRepository = $activityRepository ?? new MySqlActivityRepository();
     }
 
     /**
@@ -101,6 +107,8 @@ class WordCrudService
                 . ")";
 
             $wid = (int) Connection::preparedInsert($sql, $bindings);
+
+            $this->activityRepository->incrementTermsCreated();
 
             return [
                 'id' => $wid,

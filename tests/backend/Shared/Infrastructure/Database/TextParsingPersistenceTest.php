@@ -18,13 +18,14 @@ namespace Tests\Backend\Shared\Infrastructure\Database;
 use Lwt\Shared\Infrastructure\Database\TextParsingPersistence;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for TextParsingPersistence static methods.
  *
- * @covers \Lwt\Shared\Infrastructure\Database\TextParsingPersistence
  * @since  3.0.0
  */
+#[CoversClass(TextParsingPersistence::class)]
 class TextParsingPersistenceTest extends TestCase
 {
     // =========================================================================

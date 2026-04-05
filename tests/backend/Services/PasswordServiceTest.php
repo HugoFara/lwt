@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Services;
 
-require_once __DIR__ . '/../../../src/Modules/User/Application/Services/PasswordService.php';
-
 use Lwt\Modules\User\Application\Services\PasswordService;
 use PHPUnit\Framework\TestCase;
 

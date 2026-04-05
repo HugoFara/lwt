@@ -25,6 +25,7 @@ use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\Infrastructure\Http\RedirectResponse;
 use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Modules\Activity\Infrastructure\MySqlActivityRepository;
 
 /**
  * Controller for text reading and display interface.
@@ -109,6 +110,8 @@ class TextReadController extends BaseController
         if ($headerData === null) {
             return $this->redirect('/text/edit');
         }
+
+        (new MySqlActivityRepository())->incrementTextsRead();
 
         $title = (string) $headerData['TxTitle'];
         $langId = (int) $headerData['TxLgID'];

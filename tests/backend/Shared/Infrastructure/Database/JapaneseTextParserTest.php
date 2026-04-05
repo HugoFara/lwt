@@ -18,13 +18,14 @@ namespace Tests\Backend\Shared\Infrastructure\Database;
 use Lwt\Shared\Infrastructure\Database\JapaneseTextParser;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for JapaneseTextParser static methods.
  *
- * @covers \Lwt\Shared\Infrastructure\Database\JapaneseTextParser
  * @since  3.0.0
  */
+#[CoversClass(JapaneseTextParser::class)]
 class JapaneseTextParserTest extends TestCase
 {
     // =========================================================================

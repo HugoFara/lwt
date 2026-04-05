@@ -224,7 +224,7 @@ npm run build:all          # Production build
 | Branch | Purpose |
 | --- | --- |
 | `main` | Stable releases |
-| `dev` | Development and testing |
+| `develop` | Development and testing |
 | `official` | Tracks official LWT releases |
 
 ## Alternatives

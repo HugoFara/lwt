@@ -9,6 +9,7 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\Services\SimilarityCalculator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the FindSimilarTerms use case.
@@ -130,10 +131,7 @@ class FindSimilarTermsTest extends TestCase
         $this->assertIsFloat($similarity);
         $this->assertGreaterThan(0.0, $similarity);
     }
-
-    /**
-     * @dataProvider phoneticWeightProvider
-     */
+    #[DataProvider('phoneticWeightProvider')]
     public function testPhoneticWeightAffectsSimilarity(float $weight): void
     {
         $calculator = new SimilarityCalculator();

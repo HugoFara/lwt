@@ -57,8 +57,14 @@ class LoadFeedTest extends TestCase
         string $options = ''
     ): Feed {
         return Feed::reconstitute(
-            $id, 1, 'Test Feed', $sourceUri,
-            '', '', 0, $options
+            $id,
+            1,
+            'Test Feed',
+            $sourceUri,
+            '',
+            '',
+            0,
+            $options
         );
     }
 

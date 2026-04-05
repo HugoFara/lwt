@@ -8,6 +8,7 @@ use Lwt\Modules\Language\Http\LanguageApiHandler;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Unit tests for LanguageApiHandler.
@@ -173,10 +174,7 @@ class LanguageApiHandlerTest extends TestCase
     // =========================================================================
     // formatReadingConfiguration tests (thin wrapper)
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatReadingConfigurationDelegatesToGetReadingConfiguration(): void
     {
         // This test requires database access with full schema
@@ -197,10 +195,7 @@ class LanguageApiHandlerTest extends TestCase
     // =========================================================================
     // getReadingConfiguration tests (structure validation)
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetReadingConfigurationReturnsExpectedStructure(): void
     {
         // This test requires database access with full schema
@@ -216,10 +211,7 @@ class LanguageApiHandlerTest extends TestCase
         $this->assertArrayHasKey('abbreviation', $result);
         $this->assertArrayHasKey('reading_mode', $result);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetReadingConfigurationReturnsEmptyForNonexistentLanguage(): void
     {
         // This test requires database access with full schema
@@ -236,10 +228,7 @@ class LanguageApiHandlerTest extends TestCase
     // =========================================================================
     // getSimilarTerms tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetSimilarTermsReturnsExpectedStructure(): void
     {
         try {
@@ -252,10 +241,7 @@ class LanguageApiHandlerTest extends TestCase
         $this->assertArrayHasKey('similar_terms', $result);
         $this->assertIsString($result['similar_terms']);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatSimilarTermsDelegatesToGetSimilarTerms(): void
     {
         try {
@@ -271,10 +257,7 @@ class LanguageApiHandlerTest extends TestCase
     // =========================================================================
     // getSentencesWithTerm tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetSentencesWithTermReturnsArray(): void
     {
         try {
@@ -285,10 +268,7 @@ class LanguageApiHandlerTest extends TestCase
 
         $this->assertIsArray($result);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetSentencesWithTermWithWordId(): void
     {
         try {
@@ -299,10 +279,7 @@ class LanguageApiHandlerTest extends TestCase
 
         $this->assertIsArray($result);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatSentencesWithRegisteredTermDelegates(): void
     {
         try {
@@ -313,10 +290,7 @@ class LanguageApiHandlerTest extends TestCase
 
         $this->assertIsArray($result);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatSentencesWithNewTermDelegates(): void
     {
         try {
@@ -327,10 +301,7 @@ class LanguageApiHandlerTest extends TestCase
 
         $this->assertIsArray($result);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatSentencesWithNewTermAdvancedSearch(): void
     {
         try {
@@ -589,10 +560,7 @@ class LanguageApiHandlerTest extends TestCase
     // =========================================================================
     // formatSetDefault tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testFormatSetDefaultReturnsSuccess(): void
     {
         try {
@@ -671,9 +639,27 @@ class LanguageApiHandlerTest extends TestCase
     public function testFormatUpdateReturnsErrorForEmptyName(): void
     {
         $language = \Lwt\Modules\Language\Domain\Language::reconstitute(
-            1, 'English', '', '', '', false, false, false,
-            null, null, '', 100, '', '.!?', '', 'a-z',
-            false, false, false, '', true
+            1,
+            'English',
+            '',
+            '',
+            '',
+            false,
+            false,
+            false,
+            null,
+            null,
+            '',
+            100,
+            '',
+            '.!?',
+            '',
+            'a-z',
+            false,
+            false,
+            false,
+            '',
+            true
         );
 
         $this->languageFacade->method('getById')
@@ -689,9 +675,27 @@ class LanguageApiHandlerTest extends TestCase
     public function testFormatUpdateReturnsErrorForDuplicateName(): void
     {
         $language = \Lwt\Modules\Language\Domain\Language::reconstitute(
-            1, 'English', '', '', '', false, false, false,
-            null, null, '', 100, '', '.!?', '', 'a-z',
-            false, false, false, '', true
+            1,
+            'English',
+            '',
+            '',
+            '',
+            false,
+            false,
+            false,
+            null,
+            null,
+            '',
+            100,
+            '',
+            '.!?',
+            '',
+            'a-z',
+            false,
+            false,
+            false,
+            '',
+            true
         );
 
         $this->languageFacade->method('getById')
@@ -711,9 +715,27 @@ class LanguageApiHandlerTest extends TestCase
     public function testFormatUpdateReturnsSuccessOnValidData(): void
     {
         $language = \Lwt\Modules\Language\Domain\Language::reconstitute(
-            1, 'English', '', '', '', false, false, false,
-            null, null, '', 100, '', '.!?', '', 'a-z',
-            false, false, false, '', true
+            1,
+            'English',
+            '',
+            '',
+            '',
+            false,
+            false,
+            false,
+            null,
+            null,
+            '',
+            100,
+            '',
+            '.!?',
+            '',
+            'a-z',
+            false,
+            false,
+            false,
+            '',
+            true
         );
 
         $this->languageFacade->method('getById')
@@ -737,9 +759,27 @@ class LanguageApiHandlerTest extends TestCase
     public function testFormatUpdateMissingNameKey(): void
     {
         $language = \Lwt\Modules\Language\Domain\Language::reconstitute(
-            1, 'English', '', '', '', false, false, false,
-            null, null, '', 100, '', '.!?', '', 'a-z',
-            false, false, false, '', true
+            1,
+            'English',
+            '',
+            '',
+            '',
+            false,
+            false,
+            false,
+            null,
+            null,
+            '',
+            100,
+            '',
+            '.!?',
+            '',
+            'a-z',
+            false,
+            false,
+            false,
+            '',
+            true
         );
 
         $this->languageFacade->method('getById')
@@ -755,9 +795,27 @@ class LanguageApiHandlerTest extends TestCase
     public function testFormatUpdateNameIsNotString(): void
     {
         $language = \Lwt\Modules\Language\Domain\Language::reconstitute(
-            1, 'English', '', '', '', false, false, false,
-            null, null, '', 100, '', '.!?', '', 'a-z',
-            false, false, false, '', true
+            1,
+            'English',
+            '',
+            '',
+            '',
+            false,
+            false,
+            false,
+            null,
+            null,
+            '',
+            100,
+            '',
+            '.!?',
+            '',
+            'a-z',
+            false,
+            false,
+            false,
+            '',
+            true
         );
 
         $this->languageFacade->method('getById')
@@ -977,9 +1035,27 @@ class LanguageApiHandlerTest extends TestCase
     public function testRouteGetLanguageByIdReturnsData(): void
     {
         $language = \Lwt\Modules\Language\Domain\Language::reconstitute(
-            1, 'English', '', '', '', false, false, false,
-            null, null, '', 100, '', '.!?', '', 'a-z',
-            false, false, false, '', true
+            1,
+            'English',
+            '',
+            '',
+            '',
+            false,
+            false,
+            false,
+            null,
+            null,
+            '',
+            100,
+            '',
+            '.!?',
+            '',
+            'a-z',
+            false,
+            false,
+            false,
+            '',
+            true
         );
 
         $this->languageFacade->method('getById')
@@ -1083,9 +1159,27 @@ class LanguageApiHandlerTest extends TestCase
     public function testRoutePutUpdatesLanguage(): void
     {
         $language = \Lwt\Modules\Language\Domain\Language::reconstitute(
-            1, 'English', '', '', '', false, false, false,
-            null, null, '', 100, '', '.!?', '', 'a-z',
-            false, false, false, '', true
+            1,
+            'English',
+            '',
+            '',
+            '',
+            false,
+            false,
+            false,
+            null,
+            null,
+            '',
+            100,
+            '',
+            '.!?',
+            '',
+            'a-z',
+            false,
+            false,
+            false,
+            '',
+            true
         );
 
         $this->languageFacade->method('getById')->willReturn($language);

@@ -6,6 +6,7 @@ namespace Lwt\Tests\Core\Database;
 
 use Lwt\Shared\Infrastructure\Database\SqlValidator;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the SqlValidator class.
@@ -348,10 +349,7 @@ class SqlValidatorTest extends TestCase
     }
 
     // ===== All allowed tables =====
-
-    /**
-     * @dataProvider provideAllowedTables
-     */
+    #[DataProvider('provideAllowedTables')]
     public function testAllAllowedTables(string $table): void
     {
         $sql = "DROP TABLE IF EXISTS $table";

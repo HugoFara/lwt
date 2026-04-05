@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Controllers;
 
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Modules\Text\Http\TextPrintController;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
@@ -13,16 +11,6 @@ use Lwt\Modules\Text\Application\Services\TextPrintService;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/Shared/Http/BaseController.php';
-require_once __DIR__ . '/../../../src/Modules/Text/Http/TextPrintController.php';
-require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/TextPrintService.php';
 
 /**
  * Unit tests for the TextPrintController class.

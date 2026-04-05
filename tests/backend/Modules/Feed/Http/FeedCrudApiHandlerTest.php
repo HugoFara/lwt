@@ -8,12 +8,13 @@ use Lwt\Modules\Feed\Http\FeedCrudApiHandler;
 use Lwt\Modules\Feed\Application\FeedFacade;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for FeedCrudApiHandler.
  *
- * @covers \Lwt\Modules\Feed\Http\FeedCrudApiHandler
  */
+#[CoversClass(FeedCrudApiHandler::class)]
 class FeedCrudApiHandlerTest extends TestCase
 {
     /** @var FeedFacade&MockObject */

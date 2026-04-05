@@ -7,6 +7,8 @@ namespace Lwt\Tests\Modules\Text\UseCases;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Text\Application\UseCases\DeleteText;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the DeleteText use case.
@@ -16,8 +18,8 @@ use PHPUnit\Framework\TestCase;
  * method signatures, return type contracts, and pure logic (e.g. the
  * empty-array guard in deleteMultiple/deleteArchivedTexts).
  *
- * @covers \Lwt\Modules\Text\Application\UseCases\DeleteText
  */
+#[CoversClass(DeleteText::class)]
 class DeleteTextTest extends TestCase
 {
     private DeleteText $useCase;
@@ -154,10 +156,7 @@ class DeleteTextTest extends TestCase
     // =========================================================================
     // Data Provider: Empty Input Variants
     // =========================================================================
-
-    /**
-     * @dataProvider emptyArrayProvider
-     */
+    #[DataProvider('emptyArrayProvider')]
     public function testDeleteMultipleHandlesVariousEmptyInputs(array $input): void
     {
         $result = $this->useCase->deleteMultiple($input);
@@ -166,10 +165,7 @@ class DeleteTextTest extends TestCase
         $this->assertArrayHasKey('count', $result);
         $this->assertEquals(0, $result['count']);
     }
-
-    /**
-     * @dataProvider emptyArrayProvider
-     */
+    #[DataProvider('emptyArrayProvider')]
     public function testDeleteArchivedTextsHandlesVariousEmptyInputs(array $input): void
     {
         $result = $this->useCase->deleteArchivedTexts($input);

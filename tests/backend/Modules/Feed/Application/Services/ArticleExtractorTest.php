@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Tests\Modules\Feed\Application\Services;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Lwt\Modules\Feed\Application\Services\ArticleExtractor;
 
 /**
  * Tests for ArticleExtractor service.
  *
- * @covers \Lwt\Modules\Feed\Application\Services\ArticleExtractor
  */
+#[CoversClass(ArticleExtractor::class)]
 class ArticleExtractorTest extends TestCase
 {
     private ArticleExtractor $extractor;
@@ -117,7 +118,9 @@ class ArticleExtractorTest extends TestCase
         $method = new \ReflectionMethod(ArticleExtractor::class, 'detectCharsetFromMeta');
         $method->setAccessible(true);
 
-        $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body>Test</body></html>';
+        $html = '<html><head><meta http-equiv="Content-Type" '
+            . 'content="text/html; charset=UTF-8">'
+            . '</head><body>Test</body></html>';
         $result = $method->invoke($this->extractor, $html);
 
         $this->assertSame('UTF-8', $result);

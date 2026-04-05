@@ -13,6 +13,7 @@ use Lwt\Modules\Feed\Domain\FeedRepositoryInterface;
 use Lwt\Modules\Feed\Domain\TextCreationInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for the ImportArticles use case.
@@ -20,8 +21,8 @@ use PHPUnit\Framework\MockObject\MockObject;
  * Tests the feed import pipeline including article extraction,
  * text creation, deduplication, and archival.
  *
- * @covers \Lwt\Modules\Feed\Application\UseCases\ImportArticles
  */
+#[CoversClass(ImportArticles::class)]
 class ImportArticlesUseCaseTest extends TestCase
 {
     /** @var ArticleRepositoryInterface&MockObject */

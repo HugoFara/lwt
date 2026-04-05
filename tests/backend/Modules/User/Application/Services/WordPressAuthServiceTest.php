@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Modules\User\Application\Services;
 
-require_once __DIR__ . '/../../../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\User\Application\Services\WordPressAuthService;
@@ -13,13 +11,6 @@ use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 
 /**
  * Unit tests for the WordPressAuthService class.

@@ -24,6 +24,10 @@ export { HighlightService, getHighlightService, initHighlightService } from './s
 export { initFeedWizardStore, getFeedWizardStore } from './stores/feed_wizard_store';
 export { initFeedManagerStore, getFeedManagerStore } from './stores/feed_manager_store';
 
+// Shared utilities needed by feed pages
+import '@shared/components/sorttable';
+import '@shared/forms/bulk_actions';
+
 // Components (side effects — register Alpine.data)
 import './components/feed_form_component';
 import './components/feed_multi_load_component';

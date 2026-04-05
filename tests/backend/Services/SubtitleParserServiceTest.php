@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Services;
 
-require_once __DIR__ . '/../../../src/Modules/Text/Application/Services/SubtitleParserService.php';
-
 use Lwt\Modules\Text\Application\Services\SubtitleParserService;
 use PHPUnit\Framework\TestCase;
 

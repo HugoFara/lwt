@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="tests/bootstrap.php" colors="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="tests/bootstrap.php" colors="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd">
   <php>
     <ini name="error_log" value="/dev/null"/>
   </php>
   <testsuites>
     <testsuite name="LWT Test Suite">
       <directory>tests/</directory>
-    </testsuite>
-    <testsuite name="integration">
-      <file>tests/backend/Core/Database/ForeignKeyTest.php</file>
-      <file>tests/backend/Core/Database/PreparedStatementTest.php</file>
-      <file>tests/backend/Core/Tag/TagsTest.php</file>
-      <file>tests/backend/Services/LanguageServiceTest.php</file>
-      <file>tests/backend/Services/TextDisplayServiceTest.php</file>
     </testsuite>
   </testsuites>
   <coverage>

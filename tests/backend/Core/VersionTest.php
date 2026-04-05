@@ -4,14 +4,9 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core;
 
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Globals.php';
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/ApplicationInfo.php';
-
 use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Shared\Infrastructure\Globals;
 use PHPUnit\Framework\TestCase;
-
-Globals::initialize();
 
 /**
  * Tests for ApplicationInfo class

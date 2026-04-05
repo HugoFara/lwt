@@ -8,6 +8,8 @@ use Lwt\Modules\Vocabulary\Http\WordListApiHandler;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Unit tests for WordListApiHandler.
@@ -251,10 +253,7 @@ class WordListApiHandlerTest extends TestCase
 
         $this->assertTrue($result['success']);
     }
-
-    /**
-     * @dataProvider statusActionProvider
-     */
+    #[DataProvider('statusActionProvider')]
     public function testBulkActionStatusActions(string $action, int $expectedStatus): void
     {
         $this->listService->expects($this->once())
@@ -390,10 +389,7 @@ class WordListApiHandlerTest extends TestCase
         $this->assertFalse($result['success']);
         $this->assertEquals('Invalid field', $result['error']);
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testInlineEditReturnsErrorForNonExistentTerm(): void
     {
         try {
@@ -401,7 +397,7 @@ class WordListApiHandlerTest extends TestCase
 
             $this->assertFalse($result['success']);
             $this->assertEquals('Term not found', $result['error']);
-        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException|\RuntimeException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException | \RuntimeException $e) {
             $this->markTestSkipped('Database not available: ' . $e->getMessage());
         }
     }
@@ -437,10 +433,7 @@ class WordListApiHandlerTest extends TestCase
     // =========================================================================
     // getFilterOptions tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetFilterOptionsReturnsExpectedStructure(): void
     {
         try {
@@ -453,14 +446,11 @@ class WordListApiHandlerTest extends TestCase
             $this->assertArrayHasKey('tags', $result);
             $this->assertArrayHasKey('statuses', $result);
             $this->assertArrayHasKey('sorts', $result);
-        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException|\RuntimeException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException | \RuntimeException $e) {
             $this->markTestSkipped('Database not available: ' . $e->getMessage());
         }
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetFilterOptionsStatusesHaveCorrectFormat(): void
     {
         try {
@@ -471,14 +461,11 @@ class WordListApiHandlerTest extends TestCase
             $firstStatus = $result['statuses'][0];
             $this->assertArrayHasKey('value', $firstStatus);
             $this->assertArrayHasKey('label', $firstStatus);
-        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException|\RuntimeException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException | \RuntimeException $e) {
             $this->markTestSkipped('Database not available: ' . $e->getMessage());
         }
     }
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testGetFilterOptionsSortsHaveCorrectFormat(): void
     {
         try {
@@ -489,7 +476,7 @@ class WordListApiHandlerTest extends TestCase
             $firstSort = $result['sorts'][0];
             $this->assertArrayHasKey('value', $firstSort);
             $this->assertArrayHasKey('label', $firstSort);
-        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException|\RuntimeException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException | \RuntimeException $e) {
             $this->markTestSkipped('Database not available: ' . $e->getMessage());
         }
     }
@@ -528,10 +515,7 @@ class WordListApiHandlerTest extends TestCase
     // =========================================================================
     // selectImportedTerms tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testSelectImportedTermsReturnsArray(): void
     {
         try {
@@ -539,7 +523,7 @@ class WordListApiHandlerTest extends TestCase
             $result = $handler->selectImportedTerms('2000-01-01 00:00:00', 0, 10);
 
             $this->assertIsArray($result);
-        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException|\RuntimeException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException | \RuntimeException $e) {
             $this->markTestSkipped('Database not available: ' . $e->getMessage());
         }
     }
@@ -547,10 +531,7 @@ class WordListApiHandlerTest extends TestCase
     // =========================================================================
     // importedTermsList tests
     // =========================================================================
-
-    /**
-     * @group integration
-     */
+    #[Group('integration')]
     public function testImportedTermsListReturnsExpectedStructure(): void
     {
         try {
@@ -562,7 +543,7 @@ class WordListApiHandlerTest extends TestCase
             $this->assertArrayHasKey('terms', $result);
             $this->assertArrayHasKey('current_page', $result['navigation']);
             $this->assertArrayHasKey('total_pages', $result['navigation']);
-        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException|\RuntimeException $e) {
+        } catch (\Lwt\Shared\Infrastructure\Exception\DatabaseException | \RuntimeException $e) {
             $this->markTestSkipped('Database not available: ' . $e->getMessage());
         }
     }

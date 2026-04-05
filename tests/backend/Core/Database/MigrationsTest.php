@@ -4,21 +4,13 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Database;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Migrations;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the Database\Migrations class.
@@ -54,10 +46,7 @@ class MigrationsTest extends TestCase
     }
 
     // ===== prefixQuery() tests =====
-
-    /**
-     * @dataProvider providerPrefixQueryInsert
-     */
+    #[DataProvider('providerPrefixQueryInsert')]
     public function testPrefixQueryInsert(string $sql, string $prefix, string $expected): void
     {
         $result = Migrations::prefixQuery($sql, $prefix);
@@ -84,10 +73,7 @@ class MigrationsTest extends TestCase
             ],
         ];
     }
-
-    /**
-     * @dataProvider providerPrefixQueryCreateTable
-     */
+    #[DataProvider('providerPrefixQueryCreateTable')]
     public function testPrefixQueryCreateTable(string $sql, string $prefix, string $expected): void
     {
         $result = Migrations::prefixQuery($sql, $prefix);
@@ -124,10 +110,7 @@ class MigrationsTest extends TestCase
             ],
         ];
     }
-
-    /**
-     * @dataProvider providerPrefixQueryAlterTable
-     */
+    #[DataProvider('providerPrefixQueryAlterTable')]
     public function testPrefixQueryAlterTable(string $sql, string $prefix, string $expected): void
     {
         $result = Migrations::prefixQuery($sql, $prefix);
@@ -154,10 +137,7 @@ class MigrationsTest extends TestCase
             ],
         ];
     }
-
-    /**
-     * @dataProvider providerPrefixQueryDropTable
-     */
+    #[DataProvider('providerPrefixQueryDropTable')]
     public function testPrefixQueryDropTable(string $sql, string $prefix, string $expected): void
     {
         $result = Migrations::prefixQuery($sql, $prefix);

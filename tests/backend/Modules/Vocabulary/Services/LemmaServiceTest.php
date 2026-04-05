@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Backend\Modules\Vocabulary\Services;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Lwt\Modules\Vocabulary\Application\Services\LemmaService;
 use Lwt\Modules\Vocabulary\Domain\LemmatizerInterface;
 use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
@@ -453,8 +455,8 @@ class LemmaServiceTest extends TestCase
     /**
      * Test updateWordFamilyStatus with all valid status values.
      *
-     * @dataProvider validStatusProvider
      */
+    #[DataProvider('validStatusProvider')]
     public function testUpdateWordFamilyStatusAcceptsValidStatus(int $status): void
     {
         // Just ensure no exception is thrown for valid statuses
@@ -479,8 +481,8 @@ class LemmaServiceTest extends TestCase
     /**
      * Test bulkUpdateTermStatus with all valid status values.
      *
-     * @dataProvider validStatusProvider
      */
+    #[DataProvider('validStatusProvider')]
     public function testBulkUpdateTermStatusAcceptsValidStatus(int $status): void
     {
         $result = $this->service->bulkUpdateTermStatus([1], $status);
@@ -619,8 +621,8 @@ class LemmaServiceTest extends TestCase
     /**
      * Test linkTextItemsByLemmaSql returns integer.
      *
-     * @group integration
      */
+    #[Group('integration')]
     public function testLinkTextItemsByLemmaSqlReturnsInteger(): void
     {
         try {
@@ -634,8 +636,8 @@ class LemmaServiceTest extends TestCase
     /**
      * Test linkTextItemsByLemmaSql with text ID.
      *
-     * @group integration
      */
+    #[Group('integration')]
     public function testLinkTextItemsByLemmaSqlWithTextId(): void
     {
         try {

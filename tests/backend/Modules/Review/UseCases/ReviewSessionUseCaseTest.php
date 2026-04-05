@@ -14,6 +14,8 @@ use Lwt\Modules\Review\Domain\ReviewWord;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for Review Session use cases.
@@ -21,10 +23,10 @@ use PHPUnit\Framework\MockObject\MockObject;
  * Tests StartReviewSession, GetNextTerm, and SubmitAnswer use cases
  * which form the core review/testing workflow.
  *
- * @covers \Lwt\Modules\Review\Application\UseCases\StartReviewSession
- * @covers \Lwt\Modules\Review\Application\UseCases\GetNextTerm
- * @covers \Lwt\Modules\Review\Application\UseCases\SubmitAnswer
  */
+#[CoversClass(StartReviewSession::class)]
+#[CoversClass(GetNextTerm::class)]
+#[CoversClass(SubmitAnswer::class)]
 class ReviewSessionUseCaseTest extends TestCase
 {
     /** @var ReviewRepositoryInterface&MockObject */
@@ -377,10 +379,7 @@ class ReviewSessionUseCaseTest extends TestCase
         $this->assertFalse($result['success']);
         $this->assertStringContainsString('Invalid', $result['error']);
     }
-
-    /**
-     * @dataProvider validStatusProvider
-     */
+    #[DataProvider('validStatusProvider')]
     public function testSubmitAnswerAcceptsValidStatuses(int $status): void
     {
         $this->repository

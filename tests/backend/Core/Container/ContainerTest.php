@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Container;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Container/ContainerInterface.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Container/ContainerException.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Container/NotFoundException.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Container/Container.php';
-
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ContainerException;
 use Lwt\Shared\Infrastructure\Container\NotFoundException;
+use Lwt\Tests\Core\Container\Fixtures\TestAbstractClass;
+use Lwt\Tests\Core\Container\Fixtures\TestCallableService;
+use Lwt\Tests\Core\Container\Fixtures\TestDependency;
+use Lwt\Tests\Core\Container\Fixtures\TestServiceWithDefaults;
+use Lwt\Tests\Core\Container\Fixtures\TestServiceWithDeps;
+use Lwt\Tests\Core\Container\Fixtures\TestServiceWithNullable;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -320,48 +321,5 @@ class ContainerTest extends TestCase
         $result = $this->container->get('service');
 
         $this->assertEquals(['key' => 'value'], $result);
-    }
-}
-
-// Test helper classes
-
-class TestDependency
-{
-    public string $value = 'dependency';
-}
-
-class TestServiceWithDeps
-{
-    public function __construct(
-        public TestDependency $dependency
-    ) {
-    }
-}
-
-class TestServiceWithDefaults
-{
-    public function __construct(
-        public string $value = 'default'
-    ) {
-    }
-}
-
-class TestServiceWithNullable
-{
-    public function __construct(
-        public ?string $value = null
-    ) {
-    }
-}
-
-abstract class TestAbstractClass
-{
-}
-
-class TestCallableService
-{
-    public function doSomething(string $value): string
-    {
-        return $value;
     }
 }

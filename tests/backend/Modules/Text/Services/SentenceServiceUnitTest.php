@@ -48,7 +48,9 @@ class SentenceServiceUnitTest extends TestCase
         $ref = new ReflectionMethod(SentenceService::class, $methodName);
         $file = file_get_contents($ref->getFileName());
         $lines = explode("\n", $file);
-        return implode("\n", array_slice($lines, $ref->getStartLine() - 1, $ref->getEndLine() - $ref->getStartLine() + 1));
+        $start = $ref->getStartLine() - 1;
+        $length = $ref->getEndLine() - $start;
+        return implode("\n", array_slice($lines, $start, $length));
     }
 
     // =========================================================================
@@ -660,7 +662,11 @@ class SentenceServiceUnitTest extends TestCase
     #[Test]
     public function convertZwsToSpacingHandlesUnicode(): void
     {
-        $result = $this->invokePrivate('convertZwsToSpacing', "Bonjour\u{200B}le\u{200B}monde", 'a-zA-ZA-z\x{00C0}-\x{00FF}');
+        $result = $this->invokePrivate(
+            'convertZwsToSpacing',
+            "Bonjour\u{200B}le\u{200B}monde",
+            'a-zA-ZA-z\x{00C0}-\x{00FF}'
+        );
         $this->assertStringContainsString('Bonjour', $result);
         $this->assertStringContainsString('monde', $result);
     }

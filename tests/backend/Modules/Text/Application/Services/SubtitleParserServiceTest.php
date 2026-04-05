@@ -21,13 +21,14 @@ namespace Tests\Modules\Text\Application\Services;
 use Lwt\Modules\Text\Application\Services\SubtitleParserService;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for SubtitleParserService.
  *
- * @covers \Lwt\Modules\Text\Application\Services\SubtitleParserService
  * @since  3.0.0
  */
+#[CoversClass(SubtitleParserService::class)]
 class SubtitleParserServiceTest extends TestCase
 {
     private SubtitleParserService $parser;

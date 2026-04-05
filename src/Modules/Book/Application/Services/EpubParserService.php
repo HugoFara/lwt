@@ -154,7 +154,7 @@ class EpubParserService
                 $ebookChapters = $epubModule->getChapters();
 
                 foreach ($ebookChapters as $chapter) {
-                    $content = $this->cleanHtmlContent($chapter->content());
+                    $content = $this->cleanHtmlContent($chapter->getContent());
 
                     // Skip empty chapters
                     if (trim($content) === '') {
@@ -163,7 +163,7 @@ class EpubParserService
 
                     $chapters[] = [
                         'num' => $chapterNum,
-                        'title' => $chapter->label() ?: "Chapter {$chapterNum}",
+                        'title' => $chapter->getLabel() ?: "Chapter {$chapterNum}",
                         'content' => $content,
                     ];
                     $chapterNum++;

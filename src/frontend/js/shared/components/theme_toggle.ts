@@ -31,8 +31,8 @@ function themeToggleData(): ThemeToggleData {
         this.updateIconForMode(el, isDark ? 'dark' : 'light');
         // Set counterpart dynamically
         el.dataset.themeCounterpart = isDark
-          ? 'assets/themes/Default/'   // go to forced light
-          : 'assets/themes/Dark/';     // go to dark
+          ? 'dist/themes/Default/'   // go to forced light
+          : 'dist/themes/Dark/';     // go to dark
       }
     },
 

@@ -8,14 +8,15 @@ use Lwt\Modules\Feed\Http\FeedLoadApiHandler;
 use Lwt\Modules\Feed\Application\FeedFacade;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for FeedLoadApiHandler.
  *
  * Tests feed loading, parsing, detection, and delegation to FeedFacade.
  *
- * @covers \Lwt\Modules\Feed\Http\FeedLoadApiHandler
  */
+#[CoversClass(FeedLoadApiHandler::class)]
 class FeedLoadApiHandlerTest extends TestCase
 {
     /** @var FeedFacade&MockObject */

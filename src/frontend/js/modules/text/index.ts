@@ -27,6 +27,11 @@ export * from './pages/reading/annotation_interactions';
 export * from './pages/reading/text_annotations';
 export * from './pages/reading/text_styles';
 
+// Shared utilities needed by text pages
+import '@shared/forms/bulk_actions';
+import '@shared/components/searchable_select';
+import '@/media';
+
 // Side-effect imports (pages)
 import './pages/text_list';
 import './pages/texts_grouped_app';

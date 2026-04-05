@@ -516,10 +516,10 @@ class Router
      * Resolve static asset requests
      *
      * Maps legacy paths to new asset locations:
-     * - /css/* -> /assets/css/*
+     * - /css/* -> /dist/css/*
      * - /img/* -> /assets/images/*
-     * - /js/* -> /assets/js/*
-     * - /assets/* -> /assets/* (direct access)
+     * - /js/* -> /dist/js/*
+     * - /assets/* and /dist/* -> direct access
      * - /docs/* -> /docs/* (documentation)
      * - /favicon.ico -> /favicon.ico
      *
@@ -531,9 +531,9 @@ class Router
     {
         // Path mappings from legacy to new structure
         $mappings = [
-            '/css/' => '/assets/css/',
+            '/css/' => '/dist/css/',
             '/img/' => '/assets/images/',
-            '/js/' => '/assets/js/',
+            '/js/' => '/dist/js/',
             '/sounds/' => '/assets/sounds/',
         ];
 
@@ -556,7 +556,7 @@ class Router
         }
 
         // Direct static asset paths
-        $directPaths = ['/assets/', '/docs/', '/media/'];
+        $directPaths = ['/assets/', '/dist/', '/docs/', '/media/'];
         foreach ($directPaths as $prefix) {
             if (str_starts_with($path, $prefix)) {
                 $filePath = $this->basePath . $path;
@@ -1126,7 +1126,7 @@ class Router
     private function handle404(string $path)
     {
         http_response_code(404);
-        $cssUrl = UrlUtilities::url('/assets/css/standalone.css');
+        $cssUrl = UrlUtilities::url('/dist/css/standalone.css');
         $homeUrl = UrlUtilities::url('/');
         ?>
         <!DOCTYPE html>
@@ -1158,7 +1158,7 @@ class Router
     private function handle500(string $message)
     {
         http_response_code(500);
-        $cssUrl = UrlUtilities::url('/assets/css/standalone.css');
+        $cssUrl = UrlUtilities::url('/dist/css/standalone.css');
         ?>
         <!DOCTYPE html>
         <html>

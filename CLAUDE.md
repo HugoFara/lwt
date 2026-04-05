@@ -344,12 +344,24 @@ This project uses `@alpinejs/csp` (aliased in `vite.config.ts`), which **cannot 
 
 Migration files in `db/migrations/` with format `YYYYMMDD_HHMMSS_description.sql`. The `_migrations` table tracks applied migrations.
 
+## Version Bumping
+
+The version must be updated in these files before tagging a release:
+
+| File | What to update |
+| --- | --- |
+| `src/Shared/Infrastructure/ApplicationInfo.php` | `VERSION` constant (e.g. `'3.0.2-fork'`) and `RELEASE_DATE` |
+| `package.json` | `version` field (without `-fork` suffix, e.g. `"3.0.2"`) |
+| `CHANGELOG.md` | Move `[Unreleased]` items to a new version section with the release date |
+
+`ApplicationInfo.php` is the **authoritative** version — it's what the app displays. Always update it.
+
 ## Contributing Workflow
 
 Branches:
 
 - `main` - Stable releases
-- `dev` - Development branch
+- `develop` - Development branch
 
 Before committing:
 

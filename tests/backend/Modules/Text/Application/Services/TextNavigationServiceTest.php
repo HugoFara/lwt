@@ -23,13 +23,14 @@ namespace Tests\Modules\Text\Application\Services;
 use Lwt\Modules\Text\Application\Services\TextNavigationService;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for TextNavigationService.
  *
- * @covers \Lwt\Modules\Text\Application\Services\TextNavigationService
  * @since  3.0.0
  */
+#[CoversClass(TextNavigationService::class)]
 class TextNavigationServiceTest extends TestCase
 {
     private TextNavigationService $service;

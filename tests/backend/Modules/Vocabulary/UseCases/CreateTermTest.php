@@ -14,6 +14,7 @@ use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the CreateTerm use case.
@@ -459,10 +460,7 @@ class CreateTermTest extends TestCase
         $this->assertGreaterThanOrEqual(0.0, $term->random());
         $this->assertLessThanOrEqual(1.0, $term->random());
     }
-
-    /**
-     * @dataProvider wordCountProvider
-     */
+    #[DataProvider('wordCountProvider')]
     public function testExecuteCalculatesWordCountCorrectly(string $text, int $expectedCount): void
     {
         $this->repository->method('termExists')->willReturn(false);

@@ -6,14 +6,15 @@ namespace Lwt\Tests\Modules\User\Infrastructure;
 
 use Lwt\Modules\User\Infrastructure\AuthFormDataManager;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for AuthFormDataManager.
  *
  * Tests form field persistence for authentication forms.
  *
- * @covers \Lwt\Modules\User\Infrastructure\AuthFormDataManager
  */
+#[CoversClass(AuthFormDataManager::class)]
 class AuthFormDataManagerTest extends TestCase
 {
     private AuthFormDataManager $manager;

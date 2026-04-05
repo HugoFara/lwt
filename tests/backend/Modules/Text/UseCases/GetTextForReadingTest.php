@@ -9,6 +9,8 @@ use Lwt\Modules\Text\Application\UseCases\GetTextForReading;
 use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Unit tests for the GetTextForReading use case.
@@ -16,8 +18,8 @@ use PHPUnit\Framework\TestCase;
  * Tests repository-delegated methods (getNavigation) via mocking
  * and verifies method signatures for DB-dependent methods.
  *
- * @covers \Lwt\Modules\Text\Application\UseCases\GetTextForReading
  */
+#[CoversClass(GetTextForReading::class)]
 class GetTextForReadingTest extends TestCase
 {
     /** @var TextRepositoryInterface&MockObject */
@@ -221,10 +223,7 @@ class GetTextForReadingTest extends TestCase
         $this->assertEquals(3, $result['previous']);
         $this->assertEquals(7, $result['next']);
     }
-
-    /**
-     * @dataProvider navigationProvider
-     */
+    #[DataProvider('navigationProvider')]
     public function testGetNavigationWithVariousScenarios(
         int $textId,
         int $languageId,

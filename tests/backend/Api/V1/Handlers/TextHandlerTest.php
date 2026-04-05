@@ -4,21 +4,12 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Api\V1\Handlers;
 
-require_once __DIR__ . '/../../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Modules\Text\Http\TextApiHandler;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-
-require_once __DIR__ . '/../../../../../src/backend/Api/V1/ApiV1.php';
-require_once __DIR__ . '/../../../../../src/Modules/Text/Http/TextApiHandler.php';
 
 /**
  * Unit tests for the TextHandler class.

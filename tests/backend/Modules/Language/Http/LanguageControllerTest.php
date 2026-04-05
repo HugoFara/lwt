@@ -6,6 +6,7 @@ namespace Tests\Modules\Language\Http;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Lwt\Modules\Language\Http\LanguageController;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
@@ -15,8 +16,8 @@ use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 /**
  * Tests for LanguageController.
  *
- * @covers \Lwt\Modules\Language\Http\LanguageController
  */
+#[CoversClass(LanguageController::class)]
 class LanguageControllerTest extends TestCase
 {
     private LanguageController $controller;

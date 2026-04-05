@@ -50,7 +50,7 @@ class PageLayoutHelper
     private static function buildDataThemeAttr(): string
     {
         $themeDir = Settings::getWithDefault('set-theme-dir');
-        $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/');
+        $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/' || $themeDir === 'dist/themes/Default/');
 
         if ($isAutoTheme) {
             return '';
@@ -114,7 +114,6 @@ class PageLayoutHelper
         $textsIcon = IconHelper::render('book-text', ['alt' => 'Texts']);
         $termsIcon = IconHelper::render('spell-check', ['alt' => 'Terms']);
         $languagesIcon = IconHelper::render('languages', ['alt' => 'Languages']);
-        $statsIcon = IconHelper::render('bar-chart-2', ['alt' => 'Statistics']);
         $settingsIcon = IconHelper::render('settings', ['alt' => 'Settings']);
 
         $isTexts = in_array($currentPage, ['texts', 'archived', 'text-tags', 'text-check', 'long-import', 'feeds']);
@@ -138,7 +137,7 @@ class PageLayoutHelper
         $themeDir = Settings::getWithDefault('set-theme-dir');
         $themeJsonPath = $themeDir . 'theme.json';
         $themeMode = 'light';
-        $themeCounterpart = 'assets/themes/Dark/';
+        $themeCounterpart = 'dist/themes/Dark/';
         if ($themeDir !== '' && file_exists($themeJsonPath)) {
             $json = file_get_contents($themeJsonPath);
             if ($json !== false) {
@@ -148,11 +147,11 @@ class PageLayoutHelper
                     $themeMode = (isset($meta['mode']) && is_string($meta['mode']))
                         ? $meta['mode'] : 'light';
                     $themeCounterpart = (isset($meta['counterpart']) && is_string($meta['counterpart']))
-                        ? $meta['counterpart'] : 'assets/themes/Dark/';
+                        ? $meta['counterpart'] : 'dist/themes/Dark/';
                 }
             }
         }
-        $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/');
+        $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/' || $themeDir === 'dist/themes/Default/');
         $toggleIcon = $themeMode === 'dark' ? 'sun' : 'moon';
         $toggleTitle = $themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
         $toggleIconHtml = IconHelper::render($toggleIcon, ['alt' => $toggleTitle]);
@@ -270,9 +269,10 @@ LANG;
 
             {$langSelectorHtml}
 
-            <a class="navbar-item" href="{$base}/admin/statistics">
-                {$statsIcon}
-                <span class="ml-1">Statistics</span>
+            <a class="navbar-item" href="{$base}/admin/statistics" title="Statistics"
+               x-data="navbarStreak">
+                <span class="icon has-text-warning"><i data-lucide="flame"></i></span>
+                <span class="is-size-7 has-text-weight-semibold" x-show="streak > 0" x-text="streak" x-cloak></span>
             </a>
         </div>
 
@@ -523,8 +523,7 @@ HTML;
      * Determine which frontend feature modules the current page needs.
      *
      * Maps the request URI to the set of dynamically-loaded JS modules
-     * that should be imported. Pages that only use statically-bundled
-     * modules (home, auth, tags, dictionary) return an empty array.
+     * that should be imported.
      *
      * @return string[] Module names (e.g. ['vocabulary', 'text'])
      */
@@ -575,9 +574,19 @@ HTML;
             return ['vocabulary', 'language'];
         }
 
+        // Dictionary pages (under /languages/.../dictionaries)
+        if (preg_match('#^/languages/\d+/dictionaries#', $path)) {
+            return ['dictionary', 'language'];
+        }
+
         // Language pages
         if (str_starts_with($path, '/language')) {
             return ['language'];
+        }
+
+        // Tag pages
+        if (str_starts_with($path, '/tags')) {
+            return ['tags'];
         }
 
         // Admin pages
@@ -590,9 +599,18 @@ HTML;
             return ['admin'];
         }
 
-        // Home page — everything is in the main bundle
+        // Auth pages
+        if (
+            str_starts_with($path, '/login')
+            || str_starts_with($path, '/register')
+            || str_starts_with($path, '/reset-password')
+        ) {
+            return ['auth'];
+        }
+
+        // Home page
         if ($path === '/') {
-            return [];
+            return ['home'];
         }
 
         // Unknown routes — load all modules as safe fallback
@@ -637,7 +655,7 @@ HTML;
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
-            echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';
+            echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/dist/css/styles.css') . '" />';
         }
 
         echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
@@ -698,8 +716,8 @@ HTML;
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
-            echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';
-            $jsUrl = UrlUtilities::url('/assets/js/pgm.js');
+            echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/dist/css/styles.css') . '" />';
+            $jsUrl = UrlUtilities::url('/dist/js/pgm.js');
             echo '<script type="text/javascript" src="' . $jsUrl . '" charset="utf-8"></script>';
         }
 
@@ -771,7 +789,7 @@ HTML;
         echo '<head>';
         echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
         echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
-        echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/assets/css/styles.css') . '" />';
+        echo '<link rel="stylesheet" type="text/css" href="' . UrlUtilities::url('/dist/css/styles.css') . '" />';
         echo '<link rel="shortcut icon" href="' . UrlUtilities::url('/favicon.ico') . '" type="image/x-icon"/>';
         echo '<!--' . "\n";
         echo file_get_contents("LICENSE");

@@ -12,21 +12,7 @@
 
 import { onDomReady } from '@shared/utils/dom_ready';
 import type { Chart as ChartType } from 'chart.js';
-
-// Chart.js module reference (loaded dynamically)
-let Chart: typeof ChartType | null = null;
-
-/**
- * Dynamically load Chart.js only when needed.
- */
-async function loadChartJs(): Promise<typeof ChartType> {
-  if (Chart) return Chart;
-
-  const chartModule = await import('chart.js');
-  Chart = chartModule.Chart;
-  Chart.register(...chartModule.registerables);
-  return Chart;
-}
+import { loadChartJs } from '@shared/utils/chart_loader';
 
 /**
  * Status colors matching LWT's existing barchart CSS styles.
