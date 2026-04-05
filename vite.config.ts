@@ -2,6 +2,7 @@ import { defineConfig, type PluginOption, build } from 'vite';
 import purgecss from 'vite-plugin-purgecss';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { copyFileSync, rmSync } from 'fs';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
@@ -17,8 +18,8 @@ function buildServiceWorker(): PluginOption {
       await build({
         configFile: false,
         build: {
-          outDir: resolve(__dirname),
-          emptyOutDir: false,
+          outDir: resolve(__dirname, 'sw-dist'),
+          emptyOutDir: true,
           lib: {
             entry: resolve(__dirname, 'src/frontend/js/sw.ts'),
             formats: ['iife'],
@@ -31,6 +32,7 @@ function buildServiceWorker(): PluginOption {
             },
           },
           minify: 'esbuild',
+          target: 'es2022',
         },
         resolve: {
           alias: {
@@ -40,6 +42,10 @@ function buildServiceWorker(): PluginOption {
           },
         },
       });
+      // Move built SW to project root (required for service worker scope)
+      const swDist = resolve(__dirname, 'sw-dist');
+      copyFileSync(resolve(swDist, 'sw.js'), resolve(__dirname, 'sw.js'));
+      rmSync(swDist, { recursive: true });
       console.log('Service worker built successfully');
     },
   };
@@ -57,6 +63,7 @@ export default defineConfig({
     outDir: resolve(__dirname, 'assets'),
     emptyOutDir: false,
     manifest: true,
+    target: 'es2022',
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'src/frontend/js/main.ts'),
