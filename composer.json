@@ -33,10 +33,10 @@
         "ext-mysqli": "*",
         "ext-dom": "*",
         "ext-zip": "*",
-        "phpmailer/phpmailer": "^6.9",
-        "league/oauth2-google": "^4.1",
+        "phpmailer/phpmailer": "^7.0",
+        "league/oauth2-google": "^5.0",
         "thenetworg/oauth2-azure": "^2.2",
-        "kiwilan/php-ebook": "^2.0"
+        "kiwilan/php-ebook": "^3.0"
     },
     "require-dev": {
         "vimeo/psalm": "^6.15",
