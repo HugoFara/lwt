@@ -42,7 +42,6 @@ Static assets live in `assets/`, build output in `dist/`:
 | `js/` | `dist/js/` |
 | `themes/` | `dist/themes/` |
 | `sounds/` | `assets/sounds/` |
-| `iui/` | `assets/vendor/iui/` |
 
 #### PHP Source Reorganization
 

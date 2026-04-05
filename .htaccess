@@ -18,7 +18,6 @@
     # Legacy asset redirects (for backward compatibility, can remove in future)
     RedirectMatch 301 ^/icn/(.*)$ /assets/icons/$1
     RedirectMatch 301 ^/img/(.*)$ /assets/images/$1
-    RedirectMatch 301 ^/iui/(.*)$ /assets/vendor/iui/$1
     RedirectMatch 301 ^/css/(.*)$ /dist/css/$1
     RedirectMatch 301 ^/js/(.*)$ /dist/js/$1
     RedirectMatch 301 ^/themes/(.*)$ /dist/themes/$1
