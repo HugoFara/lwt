@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core;
 
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Shared\Infrastructure\ApplicationInfo;
-use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Utilities\ErrorHandler;
@@ -25,13 +22,6 @@ use Lwt\Modules\Language\Application\Services\TextParsingService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use PHPUnit\Framework\TestCase;
 
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
-
 /**
  * @return string[]
  *
@@ -39,7 +29,7 @@ require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstr
  */
 function userLogging(): array
 {
-    $config = EnvLoader::getDatabaseConfig();
+    $config = \Lwt\Shared\Infrastructure\Bootstrap\EnvLoader::getDatabaseConfig();
     $db_schema = __DIR__ . "../../db/schema/baseline.sql";
     $dbname = "test_" . $config['dbname'];
     $userid = $config['userid'];
@@ -58,7 +48,6 @@ function userLogging(): array
     }
     return array($userid, $passwd, $server, $dbname);
 }
-
 
 class DatabaseConnectTest extends TestCase
 {

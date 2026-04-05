@@ -7,8 +7,6 @@ namespace Lwt\Tests\Core\Http;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Http/InputValidator.php';
-
 /**
  * Unit tests for the InputValidator class.
  *

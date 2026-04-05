@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Utils;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/SqlFileParser.php';
-
 use Lwt\Shared\Infrastructure\Database\SqlFileParser;
 use PHPUnit\Framework\TestCase;
 

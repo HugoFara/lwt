@@ -4,40 +4,15 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Text;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
-use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
-use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/Shared/UI/Helpers/FormHelper.php';
-require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Helpers/StatusHelper.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/TextStatisticsService.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/SentenceService.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/TextNavigationService.php';
-require_once __DIR__ . '/../../../../src/Modules/Language/Application/Services/TextParsingService.php';
-require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/Restore.php';
-require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExportService.php';
-// LanguageFacade loaded via autoloader
-
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Text\Application\Services\TextStatisticsService;
 use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
-
 
 /**
  * Unit tests for text processing functions.

@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Api\V1;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Api\V1\ApiV1;
-use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\CoreServiceProvider;
 use Lwt\Shared\Infrastructure\Container\ControllerServiceProvider;
 use Lwt\Shared\Infrastructure\Container\RepositoryServiceProvider;
-use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Modules\Text\TextServiceProvider;
 use Lwt\Modules\Language\LanguageServiceProvider;
 use Lwt\Modules\Feed\FeedServiceProvider;
@@ -25,12 +21,6 @@ use Lwt\Modules\User\UserServiceProvider;
 use Lwt\Modules\Dictionary\DictionaryServiceProvider;
 use Lwt\Modules\Book\BookServiceProvider;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-
-require_once __DIR__ . '/../../../../src/backend/Api/V1/ApiV1.php';
 
 /**
  * Unit tests for the ApiV1 class.

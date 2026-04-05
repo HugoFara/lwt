@@ -77,7 +77,10 @@ class UpdateFeedTest extends TestCase
     public function executeUpdatesFeedAndSaves(): void
     {
         $existingFeed = $this->makeFeed(
-            1, 1, 'Old Name', 'https://old.com/rss'
+            1,
+            1,
+            'Old Name',
+            'https://old.com/rss'
         );
 
         $this->feedRepository
@@ -116,8 +119,14 @@ class UpdateFeedTest extends TestCase
     public function executeWithDefaultOptionalParameters(): void
     {
         $existingFeed = $this->makeFeed(
-            5, 1, 'Feed', 'https://example.com/rss',
-            '//old-section', '//old-filter', 1000, 'tag=old'
+            5,
+            1,
+            'Feed',
+            'https://example.com/rss',
+            '//old-section',
+            '//old-filter',
+            1000,
+            'tag=old'
         );
 
         $this->feedRepository
@@ -179,7 +188,10 @@ class UpdateFeedTest extends TestCase
     public function executeWithEmptyNameThrowsException(): void
     {
         $existingFeed = $this->makeFeed(
-            1, 1, 'Old Name', 'https://old.com/rss'
+            1,
+            1,
+            'Old Name',
+            'https://old.com/rss'
         );
 
         $this->feedRepository
@@ -207,7 +219,10 @@ class UpdateFeedTest extends TestCase
     public function executeWithEmptyUriThrowsException(): void
     {
         $existingFeed = $this->makeFeed(
-            1, 1, 'Old Name', 'https://old.com/rss'
+            1,
+            1,
+            'Old Name',
+            'https://old.com/rss'
         );
 
         $this->feedRepository
@@ -235,7 +250,10 @@ class UpdateFeedTest extends TestCase
     public function executeWithInvalidLanguageIdThrowsException(): void
     {
         $existingFeed = $this->makeFeed(
-            1, 1, 'Old Name', 'https://old.com/rss'
+            1,
+            1,
+            'Old Name',
+            'https://old.com/rss'
         );
 
         $this->feedRepository
@@ -263,7 +281,10 @@ class UpdateFeedTest extends TestCase
     public function executeWithNameExceedingMaxLengthThrowsException(): void
     {
         $existingFeed = $this->makeFeed(
-            1, 1, 'Old Name', 'https://old.com/rss'
+            1,
+            1,
+            'Old Name',
+            'https://old.com/rss'
         );
 
         $this->feedRepository
@@ -291,7 +312,10 @@ class UpdateFeedTest extends TestCase
     public function executeWithUriExceedingMaxLengthThrowsException(): void
     {
         $existingFeed = $this->makeFeed(
-            1, 1, 'Old Name', 'https://old.com/rss'
+            1,
+            1,
+            'Old Name',
+            'https://old.com/rss'
         );
 
         $this->feedRepository
@@ -323,8 +347,13 @@ class UpdateFeedTest extends TestCase
     public function executeReturnsSameFeedObjectAfterUpdate(): void
     {
         $existingFeed = $this->makeFeed(
-            10, 1, 'Original', 'https://original.com/rss',
-            '', '', 5000
+            10,
+            1,
+            'Original',
+            'https://original.com/rss',
+            '',
+            '',
+            5000
         );
 
         $this->feedRepository

@@ -4,18 +4,14 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Api\V1;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Api\V1\ApiV1;
 use Lwt\Api\V1\Response;
 use Lwt\Api\V1\Endpoints;
-use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\CoreServiceProvider;
 use Lwt\Shared\Infrastructure\Container\ControllerServiceProvider;
 use Lwt\Shared\Infrastructure\Container\RepositoryServiceProvider;
-use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Modules\Text\TextServiceProvider;
 use Lwt\Modules\Language\LanguageServiceProvider;
 use Lwt\Modules\Feed\FeedServiceProvider;
@@ -28,9 +24,6 @@ use Lwt\Modules\Dictionary\DictionaryServiceProvider;
 use Lwt\Modules\Book\BookServiceProvider;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../.env');
 
 /**
  * Tests for ApiV1 routing functionality.

@@ -57,8 +57,16 @@ class GetTableWordsTest extends TestCase
         int $daysOld = 3
     ): ReviewWord {
         return new ReviewWord(
-            $id, $text, $textLc, $translation,
-            $romanization, $sentence, $langId, $status, $score, $daysOld
+            $id,
+            $text,
+            $textLc,
+            $translation,
+            $romanization,
+            $sentence,
+            $langId,
+            $status,
+            $score,
+            $daysOld
         );
     }
 

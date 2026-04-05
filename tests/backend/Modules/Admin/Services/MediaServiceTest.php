@@ -722,11 +722,17 @@ class MediaServiceTest extends TestCase
     public function testRenderVideoPlayerParsesPeerTubeWatchUrl(): void
     {
         ob_start();
-        $this->service->renderVideoPlayer('https://peertube.example.com/videos/watch/a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+        $url = 'https://peertube.example.com/videos/watch/'
+            . 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+        $this->service->renderVideoPlayer($url);
         $output = ob_get_clean();
 
         $this->assertStringContainsString('iframe', $output);
-        $this->assertStringContainsString('peertube.example.com/videos/embed/a1b2c3d4-e5f6-7890-abcd-ef1234567890', $output);
+        $embedId = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+        $this->assertStringContainsString(
+            'peertube.example.com/videos/embed/' . $embedId,
+            $output
+        );
     }
 
     public function testRenderVideoPlayerParsesPeerTubeShortUrl(): void

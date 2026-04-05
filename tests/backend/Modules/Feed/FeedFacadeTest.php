@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Modules\Feed;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
@@ -20,13 +18,6 @@ use Lwt\Modules\Feed\Domain\FeedRepositoryInterface;
 use Lwt\Modules\Feed\Domain\TextCreationInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 
 /**
  * Unit tests for the FeedFacade class.

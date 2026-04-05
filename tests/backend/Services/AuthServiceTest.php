@@ -4,13 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Services;
 
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Globals.php';
-require_once __DIR__ . '/../../../src/Shared/Domain/ValueObjects/UserId.php';
-require_once __DIR__ . '/../../../src/Modules/User/Domain/User.php';
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Exception/AuthException.php';
-require_once __DIR__ . '/../../../src/Modules/User/Application/Services/PasswordService.php';
-require_once __DIR__ . '/../../../src/Modules/User/Application/Services/AuthService.php';
-
 use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Shared\Infrastructure\Globals;

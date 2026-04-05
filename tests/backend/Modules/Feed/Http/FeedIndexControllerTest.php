@@ -256,7 +256,12 @@ class FeedIndexControllerTest extends TestCase
             });
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn([
-                ['TxTitle' => 'Article 1', 'TxText' => 'Content', 'TxAudioURI' => '', 'TxSourceURI' => 'http://example.com/1']
+                [
+                    'TxTitle' => 'Article 1',
+                    'TxText' => 'Content',
+                    'TxAudioURI' => '',
+                    'TxSourceURI' => 'http://example.com/1',
+                ]
             ]);
         $this->feedFacade->expects($this->once())
             ->method('createTextFromFeed');
@@ -425,8 +430,18 @@ class FeedIndexControllerTest extends TestCase
         }
 
         $texts = [
-            ['TxTitle' => 'Article One', 'TxText' => 'Content 1', 'TxAudioURI' => '', 'TxSourceURI' => 'http://example.com/1'],
-            ['TxTitle' => 'Article Two', 'TxText' => 'Content 2', 'TxAudioURI' => '', 'TxSourceURI' => 'http://example.com/2'],
+            [
+                'TxTitle' => 'Article One',
+                'TxText' => 'Content 1',
+                'TxAudioURI' => '',
+                'TxSourceURI' => 'http://example.com/1',
+            ],
+            [
+                'TxTitle' => 'Article Two',
+                'TxText' => 'Content 2',
+                'TxAudioURI' => '',
+                'TxSourceURI' => 'http://example.com/2',
+            ],
         ];
 
         $row = [

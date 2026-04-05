@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Shared\Infrastructure\Bootstrap;
 
-require_once __DIR__ . '/../../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use PHPUnit\Framework\TestCase;
 

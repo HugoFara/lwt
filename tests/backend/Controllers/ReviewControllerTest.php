@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Controllers;
 
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Modules\Review\Http\ReviewController;
 use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
@@ -15,16 +13,6 @@ use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Modules\Review\Application\Services\ReviewService;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/Shared/Http/BaseController.php';
-require_once __DIR__ . '/../../../src/Modules/Review/Http/ReviewController.php';
-require_once __DIR__ . '/../../../src/Modules/Review/Application/Services/ReviewService.php';
 
 /**
  * Unit tests for the ReviewController class.

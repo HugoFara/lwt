@@ -207,5 +207,4 @@ class SecurityHeadersTest extends TestCase
         // the class doesn't throw and can be called again
         $this->assertTrue(true); // Reset completes without error
     }
-
 }

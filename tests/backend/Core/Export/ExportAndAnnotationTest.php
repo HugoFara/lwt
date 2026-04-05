@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Export;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Configuration;
@@ -15,23 +13,6 @@ use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/TextStatisticsService.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/SentenceService.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/AnnotationService.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/TextNavigationService.php';
-require_once __DIR__ . '/../../../../src/Modules/Language/Application/Services/TextParsingService.php';
-require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/UseCases/FindSimilarTerms.php';
-require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/Restore.php';
-require_once __DIR__ . '/../../../../src/Modules/Vocabulary/Application/Services/ExportService.php';
-// LanguageFacade loaded via autoloader
 
 /**
  * Unit tests for export and annotation functions.

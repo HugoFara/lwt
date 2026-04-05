@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Repository;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Modules\Text\Domain\Text;
 use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use Lwt\Modules\Text\Domain\ValueObject\TextId;
@@ -18,18 +16,6 @@ use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Domain/Text.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Database/PreparedStatement.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Repository/RepositoryInterface.php';
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Repository/AbstractRepository.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Infrastructure/MySqlTextRepository.php';
 
 /**
  * Tests for the MySqlTextRepository class.

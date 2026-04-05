@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Api\V1;
 
-require_once __DIR__ . '/../../../../src/backend/Api/V1/Response.php';
-require_once __DIR__ . '/../../../../src/backend/Api/V1/Endpoints.php';
-
 use Lwt\Api\V1\Endpoints;
 use PHPUnit\Framework\TestCase;
 

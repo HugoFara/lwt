@@ -4,14 +4,9 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Text;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Globals.php';
-require_once __DIR__ . '/../../../../src/Modules/Text/Application/Services/AnnotationService.php';
-
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Text\Application\Services\AnnotationService;
 use PHPUnit\Framework\TestCase;
-
-Globals::initialize();
 
 /**
  * Tests for annotation_management.php functions

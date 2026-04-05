@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Controllers;
 
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-require_once __DIR__ . '/../../../src/Shared/Http/BaseController.php';
-
 use Lwt\Shared\Http\BaseController;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
@@ -14,13 +11,6 @@ use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 
 /**
  * Unit tests for the BaseController class.
@@ -265,58 +255,5 @@ class BaseControllerTest extends TestCase
         $this->assertIsInt($ids[1]);
         $this->assertIsInt($ids[2]);
         $this->assertEquals(0, $ids[3]); // intval('invalid') = 0
-    }
-}
-
-/**
- * Concrete implementation of BaseController for testing.
- *
- * Exposes protected methods for testing purposes.
- */
-class TestableController extends BaseController
-{
-    public function testParam(string $key, string $default = ''): string
-    {
-        return $this->param($key, $default);
-    }
-
-    public function testGet(string $key, string $default = ''): string
-    {
-        return $this->get($key, $default);
-    }
-
-    public function testPost(string $key, string $default = ''): string
-    {
-        return $this->post($key, $default);
-    }
-
-    public function testIsPost(): bool
-    {
-        return $this->isPost();
-    }
-
-    public function testIsGet(): bool
-    {
-        return $this->isGet();
-    }
-
-    public function testQuery(string $sql): \mysqli_result|bool
-    {
-        return $this->query($sql);
-    }
-
-    public function testExecute(string $sql): int
-    {
-        return $this->execute($sql);
-    }
-
-    public function testGetValue(string $sql): mixed
-    {
-        return $this->getValue($sql);
-    }
-
-    public function testGetMarkedIds(string|array $marked): array
-    {
-        return $this->getMarkedIds($marked);
     }
 }

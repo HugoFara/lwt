@@ -4,21 +4,12 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Database;
 
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
-
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\TextParsing;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
-
-// Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../.env');
-$config = EnvLoader::getDatabaseConfig();
-Globals::setDatabaseName("test_" . $config['dbname']);
-
-require_once __DIR__ . '/../../../../src/Shared/Infrastructure/Bootstrap/db_bootstrap.php';
 
 /**
  * Unit tests for the Database\TextParsing class.
@@ -920,7 +911,9 @@ class TextParsingTest extends TestCase
 
         // Create a test text with multiple sentences
         $sql = "INSERT INTO $texts (TxLgID, TxTitle, TxText, TxAudioURI)
-                VALUES (" . self::$testLanguageId . ", 'Multi Sentence Test', 'Sentence one. Sentence two. Sentence three.', '')";
+                VALUES (" . self::$testLanguageId .
+                ", 'Multi Sentence Test', " .
+                "'Sentence one. Sentence two. Sentence three.', '')";
         Connection::query($sql);
         $textId = mysqli_insert_id(Globals::getDbConnection());
 
