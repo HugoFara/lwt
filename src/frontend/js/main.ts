@@ -50,6 +50,7 @@ import '@shared/api/client';
 // Shared components (used on every page)
 import '@shared/components/modal';
 import '@shared/components/navbar';
+import '@shared/components/navbar_streak';
 import '@shared/components/theme_toggle';
 import '@shared/components/footer';
 

@@ -92,7 +92,7 @@ class ActivityFacade
     /**
      * Get calendar heatmap data for the last 365 days.
      *
-     * @return array<string, array{total: int}>
+     * @return array<string, array{total: int, created: int, reviewed: int, read: int}>
      */
     public function getCalendarHeatmapData(): array
     {

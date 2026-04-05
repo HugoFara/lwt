@@ -9,6 +9,12 @@ ones are marked like "v1.0.0-fork".
 
 ### Added
 
+* **Activity tracking with streaks and calendar heatmap** (#227): New
+  `activity_log` table tracks daily terms created, terms reviewed, and texts
+  read. A backfill migration populates historical data from existing word
+  timestamps. The home page now shows current streak, best streak, today's
+  activity summary, and a GitHub-style calendar heatmap of the last 12 months.
+  New API endpoints at `/api/v1/activity/{dashboard,streak,calendar,today}`.
 * **PHP 8.5 support**: All dependencies now support PHP 8.5. Added PHP 8.5 to
   the CI test matrix.
 

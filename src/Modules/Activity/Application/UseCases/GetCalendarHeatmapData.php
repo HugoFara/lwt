@@ -43,7 +43,8 @@ class GetCalendarHeatmapData
     /**
      * Execute the use case.
      *
-     * @return array<string, array{total: int}> Date (Y-m-d) => total activity
+     * @return array<string, array{total: int, created: int, reviewed: int, read: int}>
+     *         Date (Y-m-d) => activity breakdown
      */
     public function execute(): array
     {
@@ -57,7 +58,12 @@ class GetCalendarHeatmapData
         foreach ($rows as $row) {
             $total = $row['terms_created'] + $row['terms_reviewed'] + $row['texts_read'];
             if ($total > 0) {
-                $result[$row['date']] = ['total' => $total];
+                $result[$row['date']] = [
+                    'total' => $total,
+                    'created' => $row['terms_created'],
+                    'reviewed' => $row['terms_reviewed'],
+                    'read' => $row['texts_read'],
+                ];
             }
         }
 

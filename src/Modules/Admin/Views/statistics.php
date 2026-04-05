@@ -86,7 +86,59 @@ $frequencyChartTotals = [
 ];
 
 ?>
-<div class="container" x-data="statisticsApp()">
+<div class="container">
+
+    <!-- Activity & Streak Section -->
+    <section class="box mb-4" x-data="streakDisplay">
+        <h2 class="title is-4 mb-4">
+            <span class="icon-text">
+                <span class="icon has-text-warning">
+                    <?php echo IconHelper::render('flame', ['class' => 'icon']); ?>
+                </span>
+                <span>Your Activity</span>
+            </span>
+        </h2>
+
+        <!-- Streak stats row -->
+        <div class="columns is-mobile is-multiline mb-3">
+            <div class="column is-4-desktop is-6-mobile">
+                <div class="box has-background-light has-text-centered py-3">
+                    <p class="heading">Current Streak</p>
+                    <p class="title is-5" x-text="streakLabel(currentStreak)">--</p>
+                </div>
+            </div>
+            <div class="column is-4-desktop is-6-mobile">
+                <div class="box has-background-light has-text-centered py-3">
+                    <p class="heading">Best Streak</p>
+                    <p class="title is-5" x-text="streakLabel(bestStreak)">--</p>
+                </div>
+            </div>
+            <div class="column is-4-desktop is-12-mobile">
+                <div class="box has-background-light has-text-centered py-3">
+                    <p class="heading">Today</p>
+                    <p class="is-size-6">
+                        <span class="has-text-weight-semibold" x-text="todayCreated"></span> created,
+                        <span class="has-text-weight-semibold" x-text="todayReviewed"></span> reviewed,
+                        <span class="has-text-weight-semibold" x-text="todayTextsRead"></span> read
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar heatmap -->
+        <div x-data="calendarHeatmap">
+            <div style="overflow-x: auto;">
+                <p class="heading mb-2">Activity (Last 12 Months)</p>
+                <div x-show="loading" class="has-text-centered py-3">
+                    <span class="has-text-grey-light is-size-7">Loading activity...</span>
+                </div>
+                <div x-show="error" class="has-text-danger is-size-7" x-text="error"></div>
+                <div x-ref="svgContainer" style="min-width: 720px;"></div>
+            </div>
+        </div>
+    </section>
+
+<div x-data="statisticsApp()">
     <!-- Hidden data elements for Chart.js initialization -->
     <script type="application/json" id="statistics-intensity-data">
     <?php echo json_encode(['languages' => $intensityChartData]); ?>
@@ -154,6 +206,7 @@ $frequencyChartTotals = [
             </a>
         </div>
     </div>
+</div>
 </div>
 
 <style>

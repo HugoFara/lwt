@@ -114,7 +114,6 @@ class PageLayoutHelper
         $textsIcon = IconHelper::render('book-text', ['alt' => 'Texts']);
         $termsIcon = IconHelper::render('spell-check', ['alt' => 'Terms']);
         $languagesIcon = IconHelper::render('languages', ['alt' => 'Languages']);
-        $statsIcon = IconHelper::render('bar-chart-2', ['alt' => 'Statistics']);
         $settingsIcon = IconHelper::render('settings', ['alt' => 'Settings']);
 
         $isTexts = in_array($currentPage, ['texts', 'archived', 'text-tags', 'text-check', 'long-import', 'feeds']);
@@ -270,9 +269,10 @@ LANG;
 
             {$langSelectorHtml}
 
-            <a class="navbar-item" href="{$base}/admin/statistics">
-                {$statsIcon}
-                <span class="ml-1">Statistics</span>
+            <a class="navbar-item" href="{$base}/admin/statistics" title="Statistics"
+               x-data="navbarStreak">
+                <span class="icon has-text-warning"><i data-lucide="flame"></i></span>
+                <span class="is-size-7 has-text-weight-semibold" x-show="streak > 0" x-text="streak" x-cloak></span>
             </a>
         </div>
 
