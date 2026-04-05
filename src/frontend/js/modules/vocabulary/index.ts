@@ -41,6 +41,10 @@ export * from './services/word_dom_updates';
 export * from './services/word_status_ajax';
 export * from './services/word_actions';
 
+// Shared utilities needed by vocabulary pages
+import '@shared/forms/bulk_actions';
+import '@shared/forms/word_form_auto';
+
 // Side-effect imports (pages)
 import './pages/word_list_app';
 import './pages/bulk_translate';

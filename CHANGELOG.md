@@ -42,6 +42,13 @@ ones are marked like "v1.0.0-fork".
   checkbox/radio styling. Replaced with CSS borders and inline SVG. Also removed
   36 unused image files (spinners, speaker icons, test result icons, etc.) that
   had already been superseded by Lucide SVG icons.
+* **Optimized Vite build chunks**: Reduced the main entry bundle from 228 KB to
+  180 KB (gzip: 68→56 KB) by moving page-specific modules (home, media, auth,
+  tags, dictionary, sorttable, searchable-select, bulk-actions, word-form-auto)
+  to dynamic imports loaded on demand. Tree-shook chart.js (203→179 KB) by
+  registering only used components. Pruned 50 unused Lucide icons (143→97) and
+  added 5 missing ones. Added a Vite plugin to clean stale hashed bundles
+  between builds.
 
 ### Removed
 

@@ -12,6 +12,7 @@
 
 import { selectToggle, multiActionGo, allActionGo } from '@shared/forms/bulk_actions';
 import { lwtFormCheck } from '@shared/forms/unloadformcheck';
+import '@shared/components/sorttable';
 
 /**
  * Get the base URL from a data attribute or default.

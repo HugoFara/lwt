@@ -47,13 +47,11 @@ import '@shared/offline/offline-indicator';
 // Shared API client
 import '@shared/api/client';
 
-// Shared components
+// Shared components (used on every page)
 import '@shared/components/modal';
-import '@shared/components/sorttable';
 import '@shared/components/navbar';
 import '@shared/components/theme_toggle';
 import '@shared/components/footer';
-import '@shared/components/searchable_select';
 
 // Shared accessibility
 import { initAriaLive } from '@shared/accessibility/aria_live';
@@ -61,35 +59,10 @@ import { initAriaLive } from '@shared/accessibility/aria_live';
 // Shared icons
 import '@shared/icons/lucide_icons';
 
-// Shared forms
-import '@shared/forms/bulk_actions';
+// Shared forms (used on most pages)
 import '@shared/forms/unloadformcheck';
 import '@shared/forms/form_validation';
 import '@shared/forms/form_initialization';
-import '@shared/forms/word_form_auto';
-
-// =============================================================================
-// SMALL MODULES (always loaded — kept in main bundle)
-// =============================================================================
-
-// Tags
-import '@modules/tags/pages/tag_list';
-
-// Auth
-import '@modules/auth';
-
-// Dictionary
-import '@modules/dictionary/pages/dictionary_import';
-
-// Media
-import './media/media_selection';
-import './media/html5_audio_player';
-import './media/audio_player_alpine';
-
-// Home
-import './home/home_app';
-import './home/library_search';
-import './home/gutenberg_suggestions';
 
 // =============================================================================
 // ASYNC CSS LOADING (CSP-compliant)
@@ -124,6 +97,10 @@ const moduleMap: Record<string, () => Promise<unknown>> = {
   feed: () => import('@modules/feed'),
   language: () => import('@modules/language'),
   admin: () => import('@modules/admin'),
+  home: () => import('./home'),
+  tags: () => import('@modules/tags/pages/tag_list'),
+  auth: () => import('@modules/auth'),
+  dictionary: () => import('@modules/dictionary/pages/dictionary_import'),
 };
 
 // Read which modules the current page needs from the server-emitted meta tag

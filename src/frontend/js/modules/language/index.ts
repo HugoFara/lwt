@@ -18,6 +18,9 @@ export * from './stores/language_form_store';
 export * from './components/language_list_component';
 export * from './components/language_wizard_modal';
 
+// Shared utilities needed by language pages
+import '@shared/components/searchable_select';
+
 // Side-effect imports (pages)
 import './pages/language_list';
 import './pages/language_form';

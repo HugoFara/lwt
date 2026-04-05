@@ -2,9 +2,34 @@ import { defineConfig, type PluginOption, build } from 'vite';
 import purgecss from 'vite-plugin-purgecss';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { copyFileSync, rmSync } from 'fs';
+import { copyFileSync, rmSync, existsSync } from 'fs';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
+
+/**
+ * Plugin to clean stale Vite-generated files before each build.
+ * We keep emptyOutDir false because dist/ also contains theme CSS
+ * built by a separate script; this plugin only removes Vite's own
+ * output subdirectories.
+ */
+function cleanViteOutput(): PluginOption {
+  return {
+    name: 'clean-vite-output',
+    apply: 'build',
+    buildStart() {
+      const dirs = [
+        resolve(__dirname, 'dist/js/vite'),
+        resolve(__dirname, 'dist/css/vite'),
+        resolve(__dirname, 'dist/.vite'),
+      ];
+      for (const dir of dirs) {
+        if (existsSync(dir)) {
+          rmSync(dir, { recursive: true });
+        }
+      }
+    },
+  };
+}
 
 /**
  * Plugin to build the service worker separately.
@@ -78,6 +103,8 @@ export default defineConfig({
   },
 
   plugins: [
+    // Clean stale hashed bundles from previous builds
+    cleanViteOutput(),
     // Build service worker for PWA support
     buildServiceWorker(),
     // PurgeCSS to remove unused CSS (especially from Bulma)

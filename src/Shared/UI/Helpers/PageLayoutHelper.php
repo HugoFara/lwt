@@ -523,8 +523,7 @@ HTML;
      * Determine which frontend feature modules the current page needs.
      *
      * Maps the request URI to the set of dynamically-loaded JS modules
-     * that should be imported. Pages that only use statically-bundled
-     * modules (home, auth, tags, dictionary) return an empty array.
+     * that should be imported.
      *
      * @return string[] Module names (e.g. ['vocabulary', 'text'])
      */
@@ -575,9 +574,19 @@ HTML;
             return ['vocabulary', 'language'];
         }
 
+        // Dictionary pages (under /languages/.../dictionaries)
+        if (preg_match('#^/languages/\d+/dictionaries#', $path)) {
+            return ['dictionary', 'language'];
+        }
+
         // Language pages
         if (str_starts_with($path, '/language')) {
             return ['language'];
+        }
+
+        // Tag pages
+        if (str_starts_with($path, '/tags')) {
+            return ['tags'];
         }
 
         // Admin pages
@@ -590,9 +599,18 @@ HTML;
             return ['admin'];
         }
 
-        // Home page — everything is in the main bundle
+        // Auth pages
+        if (
+            str_starts_with($path, '/login')
+            || str_starts_with($path, '/register')
+            || str_starts_with($path, '/reset-password')
+        ) {
+            return ['auth'];
+        }
+
+        // Home page
         if ($path === '/') {
-            return [];
+            return ['home'];
         }
 
         // Unknown routes — load all modules as safe fallback
