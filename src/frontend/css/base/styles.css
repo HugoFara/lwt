@@ -2411,8 +2411,29 @@ Navigation Bar Styles (Alpine.js + Bulma)
   }
 }
 
-/* Desktop dropdown positioning */
+/* Desktop navbar layout and dropdown positioning */
 @media screen and (min-width: 1024px) {
+  .navbar-menu {
+    display: flex;
+    flex-grow: 1;
+    flex-shrink: 0;
+    align-items: stretch;
+  }
+
+  .navbar-start {
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-start;
+    margin-inline-end: auto;
+  }
+
+  .navbar-end {
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
+    margin-inline-start: auto;
+  }
+
   .navbar-item.has-dropdown:hover .navbar-dropdown,
   .navbar-item.has-dropdown.is-active .navbar-dropdown {
     display: block;
