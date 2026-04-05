@@ -9,6 +9,21 @@ ones are marked like "v1.0.0-fork".
 
 ### Changed
 
+* **Upgraded dev tooling to latest major versions**:
+  * PHPUnit 10 → 11: migrated all test annotations (`@dataProvider`, `@covers`,
+    `@group`, `@runTestsInSeparateProcesses`) to PHP 8 attributes. Replaced the
+    duplicate integration testsuite in `phpunit.xml` with `#[Group('integration')]`.
+  * ESLint 9 → 10, TypeScript 5 → 6: removed deprecated `baseUrl` from
+    `tsconfig.json`, fixed two new `no-useless-assignment` lint errors.
+  * Vite 6 → 8 (Rolldown bundler): converted `manualChunks` from object to
+    function, removed redundant `inlineDynamicImports`.
+  * Also bumped `@eslint/css` 0.14 → 1, `@eslint/js` 9 → 10,
+    `@eslint/markdown` 7 → 8, `@types/node` 24 → 25, `jsdom` 27 → 29,
+    `globals` 16 → 17.
+* **Cleaned up all PHPCS violations in the test suite**: removed 80+ redundant
+  `require_once` / bootstrap side-effect blocks (already handled by
+  `tests/bootstrap.php`), extracted inline helper classes to separate files,
+  fixed line-length warnings. Result: 0 errors, 0 warnings across all tests.
 * **Separated build output from static assets**: Build output (Vite bundles,
   theme CSS, base CSS) now goes to `dist/` instead of `assets/`. Static files
   (images, sounds, manifest) stay in `assets/`. The `dist/` directory is fully
