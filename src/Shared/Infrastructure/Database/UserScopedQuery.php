@@ -65,6 +65,7 @@ class UserScopedQuery
         'news_feeds' => 'NfUsID',
         'settings' => 'StUsID',
         'local_dictionaries' => 'LdUsID',
+        'activity_log' => 'AlUsID',
     ];
 
     /**

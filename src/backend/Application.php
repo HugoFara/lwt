@@ -35,6 +35,7 @@ use Lwt\Modules\Admin\AdminServiceProvider;
 use Lwt\Modules\User\UserServiceProvider;
 use Lwt\Modules\Home\HomeServiceProvider;
 use Lwt\Modules\Dictionary\DictionaryServiceProvider;
+use Lwt\Modules\Activity\ActivityServiceProvider;
 use Lwt\Modules\Book\BookServiceProvider;
 use Lwt\Modules\Admin\Application\DTO\DatabaseConnectionDTO;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\AutocompleteConnection;
@@ -168,6 +169,7 @@ class Application
             new HomeServiceProvider(),
             new DictionaryServiceProvider(),
             new BookServiceProvider(),
+            new ActivityServiceProvider(),
         ];
 
         // Register phase: all providers register their bindings

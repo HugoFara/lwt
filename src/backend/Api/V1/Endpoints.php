@@ -96,6 +96,11 @@ class Endpoints
         'local-dictionaries/preview' => ['POST'],
         'local-dictionaries/import-curated' => ['POST'],
         'local-dictionaries/entries' => ['GET', 'POST', 'PUT', 'DELETE'],
+        'activity' => ['GET'],
+        'activity/streak' => ['GET'],
+        'activity/calendar' => ['GET'],
+        'activity/today' => ['GET'],
+        'activity/dashboard' => ['GET'],
         'version' => ['GET'],
 
         // TTS endpoints (Piper TTS via NLP microservice)

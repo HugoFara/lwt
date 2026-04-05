@@ -28,6 +28,7 @@ use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Review\Domain\ReviewWord;
 use Lwt\Modules\Text\Application\Services\SentenceService;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
+use Lwt\Modules\Activity\Infrastructure\MySqlActivityRepository;
 
 /**
  * MySQL implementation of ReviewRepositoryInterface.
@@ -39,15 +40,20 @@ use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 class MySqlReviewRepository implements ReviewRepositoryInterface
 {
     private SentenceService $sentenceService;
+    private MySqlActivityRepository $activityRepository;
 
     /**
      * Constructor.
      *
-     * @param SentenceService|null $sentenceService Sentence service (optional)
+     * @param SentenceService|null        $sentenceService    Sentence service (optional)
+     * @param MySqlActivityRepository|null $activityRepository Activity repository (optional)
      */
-    public function __construct(?SentenceService $sentenceService = null)
-    {
+    public function __construct(
+        ?SentenceService $sentenceService = null,
+        ?MySqlActivityRepository $activityRepository = null
+    ) {
         $this->sentenceService = $sentenceService ?? new SentenceService();
+        $this->activityRepository = $activityRepository ?? new MySqlActivityRepository();
     }
 
     /**
@@ -215,6 +221,8 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             WHERE WoID = ?",
             [$newStatus, $wordId]
         );
+
+        $this->activityRepository->incrementTermsReviewed();
 
         $newScore = (int) QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)

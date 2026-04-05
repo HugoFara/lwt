@@ -34,6 +34,7 @@ use Lwt\Modules\Feed\Http\FeedApiHandler;
 use Lwt\Modules\Book\Http\BookApiHandler;
 use Lwt\Modules\Dictionary\Http\DictionaryApiHandler;
 use Lwt\Modules\Text\Http\YouTubeApiHandler;
+use Lwt\Modules\Activity\Http\ActivityApiHandler;
 use Lwt\Modules\Language\Infrastructure\NlpServiceHandler;
 use Lwt\Modules\Text\Http\WhisperApiHandler;
 
@@ -83,6 +84,7 @@ class ApiV1
         'youtube'            => YouTubeApiHandler::class,
         'tts'                => NlpServiceHandler::class,
         'whisper'            => WhisperApiHandler::class,
+        'activity'           => ActivityApiHandler::class,
     ];
 
     private Container $container;
