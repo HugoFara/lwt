@@ -31,6 +31,7 @@ ones are marked like "v1.0.0-fork".
   only shown to admins, and can be disabled entirely via a new
   `set-check-for-updates` admin setting in the settings page.
 * **Navbar**: Merged the admin dropdown into the user dropdown to save space.
+* **Per-user statistics**: Moved the statistics page from `/admin/statistics` to `/profile/statistics` since it shows per-user learning data. The old URL redirects to the new one.
 * **Cleaner setting definition keys**: `SettingDefinitions` entries now use
   `default` (string) and `numeric` (bool) instead of the cryptic `dft` (string)
   and `num` (int 0/1). The legacy keys are still accepted on read for

@@ -208,62 +208,6 @@ class AdminFacadeTest extends TestCase
         }
     }
 
-    // ===== Statistics tests =====
-
-    public function testGetIntensityStatisticsReturnsArray(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = $this->facade->getIntensityStatistics();
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('languages', $result);
-        $this->assertArrayHasKey('totals', $result);
-    }
-
-    public function testGetIntensityStatisticsLanguagesIsArray(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = $this->facade->getIntensityStatistics();
-        $this->assertIsArray($result['languages']);
-    }
-
-    public function testGetIntensityStatisticsTotalsIsArray(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = $this->facade->getIntensityStatistics();
-        $this->assertIsArray($result['totals']);
-    }
-
-    public function testGetFrequencyStatisticsReturnsArray(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = $this->facade->getFrequencyStatistics();
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('languages', $result);
-        $this->assertArrayHasKey('totals', $result);
-    }
-
-    public function testGetFrequencyStatisticsLanguagesIsArray(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = $this->facade->getFrequencyStatistics();
-        $this->assertIsArray($result['languages']);
-    }
-
     // ===== Demo tests =====
 
     public function testGetLanguageCountReturnsInteger(): void
@@ -565,38 +509,6 @@ class AdminFacadeTest extends TestCase
             $this->assertIsArray($theme);
             $this->assertArrayHasKey('name', $theme);
             $this->assertArrayHasKey('path', $theme);
-        }
-    }
-
-    // ===== Statistics structure validation =====
-
-    public function testIntensityStatisticsHasValidTotalsStructure(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $stats = $this->facade->getIntensityStatistics();
-
-        // Totals should contain expected keys
-        if (!empty($stats['totals'])) {
-            $totals = $stats['totals'];
-            $this->assertIsArray($totals);
-        }
-    }
-
-    public function testFrequencyStatisticsHasValidTotalsStructure(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $stats = $this->facade->getFrequencyStatistics();
-
-        // Totals should contain expected keys
-        if (!empty($stats['totals'])) {
-            $totals = $stats['totals'];
-            $this->assertIsArray($totals);
         }
     }
 

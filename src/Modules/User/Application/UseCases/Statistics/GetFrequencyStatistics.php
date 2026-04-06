@@ -6,7 +6,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Modules\Admin\Application\UseCases\Statistics
+ * @package  Lwt\Modules\User\Application\UseCases\Statistics
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
@@ -15,7 +15,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Modules\Admin\Application\UseCases\Statistics;
+namespace Lwt\Modules\User\Application\UseCases\Statistics;
 
 use Lwt\Modules\Admin\Infrastructure\MySqlStatisticsRepository;
 

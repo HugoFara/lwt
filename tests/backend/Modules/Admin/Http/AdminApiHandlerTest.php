@@ -84,7 +84,6 @@ class AdminApiHandlerTest extends TestCase
             'routeGet', 'routePost', 'routePut', 'routeDelete',
             'saveSetting', 'getThemePath', 'formatSaveSetting',
             'formatThemePath', 'getTextsStatistics', 'formatTextsStatistics',
-            'getIntensityStatistics', 'getFrequencyStatistics',
             'getServerData', 'getMediaFiles', 'formatMediaFiles',
         ];
 
@@ -518,38 +517,6 @@ class AdminApiHandlerTest extends TestCase
         $this->assertSame(100, $result['5']['unknown']);
         $this->assertSame(100, $result['5']['unknownPercent']);
         $this->assertSame(0, $result['5']['saved']);
-    }
-
-    // =========================================================================
-    // getIntensityStatistics / getFrequencyStatistics delegate tests
-    // =========================================================================
-
-    #[Test]
-    public function getIntensityStatisticsDelegatesToFacade(): void
-    {
-        $expected = ['languages' => ['en'], 'totals' => [100]];
-
-        $this->facade->expects($this->once())
-            ->method('getIntensityStatistics')
-            ->willReturn($expected);
-
-        $result = $this->handler->getIntensityStatistics();
-
-        $this->assertSame($expected, $result);
-    }
-
-    #[Test]
-    public function getFrequencyStatisticsDelegatesToFacade(): void
-    {
-        $expected = ['languages' => ['fr'], 'totals' => [50]];
-
-        $this->facade->expects($this->once())
-            ->method('getFrequencyStatistics')
-            ->willReturn($expected);
-
-        $result = $this->handler->getFrequencyStatistics();
-
-        $this->assertSame($expected, $result);
     }
 
     // =========================================================================

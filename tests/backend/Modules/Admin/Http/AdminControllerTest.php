@@ -92,7 +92,7 @@ class AdminControllerTest extends TestCase
         $reflection = new \ReflectionClass(AdminController::class);
 
         $expectedMethods = [
-            'backup', 'wizard', 'statistics', 'settings',
+            'backup', 'wizard', 'settings',
             'installDemo', 'serverData',
         ];
 
@@ -112,7 +112,7 @@ class AdminControllerTest extends TestCase
     #[Test]
     public function publicMethodsAcceptArrayParams(): void
     {
-        $methods = ['backup', 'wizard', 'statistics', 'settings', 'installDemo', 'serverData'];
+        $methods = ['backup', 'wizard', 'settings', 'installDemo', 'serverData'];
 
         foreach ($methods as $methodName) {
             $method = new \ReflectionMethod(AdminController::class, $methodName);
@@ -436,30 +436,6 @@ class AdminControllerTest extends TestCase
         ob_end_clean();
 
         $_REQUEST = [];
-    }
-
-    // =========================================================================
-    // statistics method tests
-    // =========================================================================
-
-    #[Test]
-    public function statisticsCallsFacadeMethods(): void
-    {
-        $this->facade->expects($this->once())
-            ->method('getIntensityStatistics')
-            ->willReturn(['languages' => [], 'totals' => []]);
-
-        $this->facade->expects($this->once())
-            ->method('getFrequencyStatistics')
-            ->willReturn(['languages' => [], 'totals' => []]);
-
-        ob_start();
-        try {
-            $this->controller->statistics([]);
-        } catch (\Throwable $e) {
-            // View include may fail
-        }
-        ob_end_clean();
     }
 
     // =========================================================================

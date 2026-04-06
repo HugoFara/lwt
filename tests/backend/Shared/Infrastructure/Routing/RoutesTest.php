@@ -274,10 +274,17 @@ class RoutesTest extends TestCase
         return [
             'admin backup' => ['/admin/backup', 'Lwt\\Modules\\Admin\\Http\\AdminController@backup'],
             'admin wizard' => ['/admin/wizard', 'Lwt\\Modules\\Admin\\Http\\AdminController@wizard'],
-            'admin statistics' => ['/admin/statistics', 'Lwt\\Modules\\Admin\\Http\\AdminController@statistics'],
+            'admin statistics (redirect)' => [
+                '/admin/statistics',
+                'Lwt\\Modules\\User\\Http\\StatisticsController@redirectFromAdmin'
+            ],
             'admin install-demo' => ['/admin/install-demo', 'Lwt\\Modules\\Admin\\Http\\AdminController@installDemo'],
             'admin settings' => ['/admin/settings', 'Lwt\\Modules\\Admin\\Http\\AdminController@settings'],
             'admin server-data' => ['/admin/server-data', 'Lwt\\Modules\\Admin\\Http\\AdminController@serverData'],
+            'profile statistics' => [
+                '/profile/statistics',
+                'Lwt\\Modules\\User\\Http\\StatisticsController@show'
+            ],
         ];
     }
 

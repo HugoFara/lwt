@@ -32,8 +32,6 @@ use Lwt\Modules\Admin\Application\UseCases\Settings\GetSetting;
 use Lwt\Modules\Admin\Application\UseCases\Settings\ResetAllSettings;
 use Lwt\Modules\Admin\Application\UseCases\Settings\SaveAllSettings;
 use Lwt\Modules\Admin\Application\UseCases\Settings\SaveSetting;
-use Lwt\Modules\Admin\Application\UseCases\Statistics\GetFrequencyStatistics;
-use Lwt\Modules\Admin\Application\UseCases\Statistics\GetIntensityStatistics;
 use Lwt\Modules\Admin\Application\UseCases\Theme\GetAvailableThemes;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\AutocompleteConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\LoadConnection;
@@ -64,10 +62,6 @@ class AdminFacade
     private DownloadBackup $downloadBackup;
     private DownloadOfficialBackup $downloadOfficialBackup;
     private EmptyDatabase $emptyDatabase;
-
-    // Statistics use cases
-    private GetIntensityStatistics $getIntensityStatistics;
-    private GetFrequencyStatistics $getFrequencyStatistics;
 
     // Demo use cases
     private InstallDemo $installDemo;
@@ -108,10 +102,6 @@ class AdminFacade
         $this->downloadBackup = new DownloadBackup($backupRepository);
         $this->downloadOfficialBackup = new DownloadOfficialBackup($backupRepository);
         $this->emptyDatabase = new EmptyDatabase($backupRepository);
-
-        // Initialize Statistics use cases
-        $this->getIntensityStatistics = new GetIntensityStatistics();
-        $this->getFrequencyStatistics = new GetFrequencyStatistics();
 
         // Initialize Demo use cases
         $this->installDemo = new InstallDemo();
@@ -245,30 +235,6 @@ class AdminFacade
     public function getDatabaseName(): string
     {
         return Globals::getDatabaseName();
-    }
-
-    // =========================================================================
-    // Statistics Operations
-    // =========================================================================
-
-    /**
-     * Get intensity statistics.
-     *
-     * @return array{languages: array, totals: array} Statistics data
-     */
-    public function getIntensityStatistics(): array
-    {
-        return $this->getIntensityStatistics->execute();
-    }
-
-    /**
-     * Get frequency statistics.
-     *
-     * @return array{languages: array, totals: array} Statistics data
-     */
-    public function getFrequencyStatistics(): array
-    {
-        return $this->getFrequencyStatistics->execute();
     }
 
     // =========================================================================

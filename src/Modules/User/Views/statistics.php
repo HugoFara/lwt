@@ -21,7 +21,7 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Views\Admin;
+namespace Lwt\Modules\User\Views;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 

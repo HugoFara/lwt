@@ -312,30 +312,6 @@ class AdminApiHandler implements ApiRoutableInterface
     }
 
     // =========================================================================
-    // Module Statistics (from AdminFacade)
-    // =========================================================================
-
-    /**
-     * Get intensity statistics.
-     *
-     * @return array{languages: array, totals: array}
-     */
-    public function getIntensityStatistics(): array
-    {
-        return $this->adminFacade->getIntensityStatistics();
-    }
-
-    /**
-     * Get frequency statistics.
-     *
-     * @return array{languages: array, totals: array}
-     */
-    public function getFrequencyStatistics(): array
-    {
-        return $this->adminFacade->getFrequencyStatistics();
-    }
-
-    // =========================================================================
     // Server Data
     // =========================================================================
 

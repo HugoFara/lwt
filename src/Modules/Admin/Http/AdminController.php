@@ -31,7 +31,6 @@ use Lwt\Modules\Admin\Application\Services\TtsService;
  * Handles:
  * - Backup and restore
  * - Database wizard
- * - Statistics
  * - Settings
  * - Install demo
  * - Server data
@@ -213,29 +212,6 @@ class AdminController extends BaseController
 
         // The wizard view is standalone (includes its own HTML structure)
         include $this->viewPath . 'wizard.php';
-    }
-
-    /**
-     * Statistics page.
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedVariable Variables are used in included view files
-     * @psalm-suppress UnresolvableInclude View path is constructed at runtime
-     */
-    public function statistics(array $params): void
-    {
-        $intensityStats = $this->adminFacade->getIntensityStatistics();
-        $frequencyStats = $this->adminFacade->getFrequencyStatistics();
-
-        // Render page
-        $this->render('Statistics', true);
-
-        include $this->viewPath . 'statistics.php';
-
-        $this->endRender();
     }
 
     /**

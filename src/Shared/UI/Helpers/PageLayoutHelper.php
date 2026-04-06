@@ -279,7 +279,7 @@ LANG;
 
             {$langSelectorHtml}
 
-            <a class="navbar-item" href="{$base}/admin/statistics" title="{$statisticsTitle}"
+            <a class="navbar-item" href="{$base}/profile/statistics" title="{$statisticsTitle}"
                x-data="navbarStreak">
                 <span class="icon has-text-warning"><i data-lucide="flame"></i></span>
                 <span class="is-size-7 has-text-weight-semibold" x-show="streak > 0" x-text="streak" x-cloak></span>

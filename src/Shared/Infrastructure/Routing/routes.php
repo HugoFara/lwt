@@ -526,10 +526,10 @@ function registerRoutes(Router $router): void
         ADMIN_MIDDLEWARE
     );
 
-    // Statistics (Admin module) - allow regular users to see statistics
+    // Statistics (User module) - legacy /admin/statistics redirects to /profile/statistics
     $router->registerWithMiddleware(
         '/admin/statistics',
-        'Lwt\\Modules\\Admin\\Http\\AdminController@statistics',
+        'Lwt\\Modules\\User\\Http\\StatisticsController@redirectFromAdmin',
         AUTH_MIDDLEWARE
     );
 
@@ -572,6 +572,11 @@ function registerRoutes(Router $router): void
     $router->post('/profile/password', 'Lwt\\Modules\\User\\Http\\UserController@changePassword', AUTH_MIDDLEWARE);
     $router->get('/profile/preferences', 'Lwt\\Modules\\User\\Http\\UserController@preferencesForm', AUTH_MIDDLEWARE);
     $router->post('/profile/preferences', 'Lwt\\Modules\\User\\Http\\UserController@savePreferences', AUTH_MIDDLEWARE);
+    $router->get(
+        '/profile/statistics',
+        'Lwt\\Modules\\User\\Http\\StatisticsController@show',
+        AUTH_MIDDLEWARE
+    );
 
     // ==================== AUTHENTICATION ROUTES (PUBLIC) ====================
     // All auth routes use UserController from the User module

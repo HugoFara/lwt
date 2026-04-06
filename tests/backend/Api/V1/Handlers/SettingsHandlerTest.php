@@ -33,8 +33,6 @@ class SettingsHandlerTest extends TestCase
         }
         // Create mock AdminFacade for testing
         $mockFacade = $this->createMock(AdminFacade::class);
-        $mockFacade->method('getIntensityStatistics')->willReturn(['languages' => [], 'totals' => []]);
-        $mockFacade->method('getFrequencyStatistics')->willReturn(['languages' => [], 'totals' => []]);
         $mockFacade->method('getServerData')->willReturn([]);
 
         $this->handler = new AdminApiHandler($mockFacade);

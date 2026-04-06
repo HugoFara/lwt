@@ -62,23 +62,6 @@ namespace Lwt\Views\Admin;
                         </div>
                     </div>
 
-                    <!-- Statistics -->
-                    <div class="column is-half">
-                        <div class="box">
-                            <h2 class="title is-5">
-                                <span class="icon-text">
-                                    <span class="icon"><i data-lucide="bar-chart-3"></i></span>
-                                    <span>Statistics</span>
-                                </span>
-                            </h2>
-                            <p class="mb-3">View vocabulary and reading statistics.</p>
-                            <a href="/admin/statistics" class="button is-primary is-outlined">
-                                <span class="icon"><i data-lucide="arrow-right"></i></span>
-                                <span>View Statistics</span>
-                            </a>
-                        </div>
-                    </div>
-
                     <!-- Database Wizard -->
                     <div class="column is-half">
                         <div class="box">
